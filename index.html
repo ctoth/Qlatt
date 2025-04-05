@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rule-Based Klatt TTS</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: sans-serif;
+        line-height: 1.6;
+        padding: 1em;
+        max-width: 900px;
+        margin: auto;
+      }
+      button {
+        padding: 8px 15px;
+        margin: 5px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      input[type="text"] {
+        padding: 8px;
+        margin-right: 5px;
+        min-width: 300px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      #status {
+        margin-top: 15px;
+        font-style: italic;
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 5px;
+        min-height: 1.6em;
+      }
+      hr {
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+      }
+      h1,
+      h2 {
+        margin-top: 1.5em;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Rule-Based Klatt TTS Demo</h1>
+
+    <button id="initButton">Initialize Audio</button>
+    <div id="status">Status: Waiting for initialization...</div>
+
+    <hr />
+    <h2>Text-to-Speech Input</h2>
+    <div class="input-group">
+      <label for="textInput">Enter English Text:</label>
+      <input
+        type="text"
+        id="textInput"
+        value="Hello world. This is a test of rule based speech synthesis."
+      />
+      <button id="speakTextButton" disabled>Speak Text</button>
+    </div>
+
+    <!-- Optional Manual Controls Section Can Go Here -->
+    <!--
+    <hr>
+    <h2>Manual Controls</h2>
+    ... sliders etc ...
+    -->
+
+    <!-- Load Modules -->
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

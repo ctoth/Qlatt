@@ -1,0 +1,27 @@
+{
+  "name": "klatt-tts-rule-based",
+  "version": "1.0.0",
+  "description": "Rule-based TTS frontend for Web Audio Klatt Synthesizer",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "tts",
+    "klatt",
+    "webaudio",
+    "speech synthesis",
+    "rule-based"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "cmu-pronouncing-dictionary": "^3.0.0"
+  }
+}

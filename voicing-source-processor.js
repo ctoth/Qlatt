@@ -8,41 +8,75 @@ class VoicingSourceProcessor extends AudioWorkletProcessor {
         ];
     }
 
-    constructor() {
-        super();
+    constructor(options) {
+        super(options);
         this.samplesUntilPulse = 0;
-        this.lastF0 = 0; // To detect changes
+        // No need for lastF0 here anymore
+        this._logCounter = 0; // Counter for throttling logs
+        // Access sampleRate directly - it's globally available in the worklet scope
+        this._logInterval = Math.floor(sampleRate / 10); // Log ~10 times per second
+        console.log(`[VoicingSource] Initialized. Log interval: ${this._logInterval} samples. Sample Rate: ${sampleRate}`);
     }
 
     process(inputs, outputs, parameters) {
         const output = outputs[0]; // Single output channel
+        if (!output || !output[0]) return true; // Stop if output is not available
         const outputChannel = output[0];
         const f0Values = parameters.f0;
-        const ampValues = parameters.amp;
+        const ampValues = parameters.amp; // Linear amp 0-1
         const blockLength = outputChannel.length; // Usually 128 samples
+        let generatedPulse = false; // Track if any pulse was generated in this block
+
+        // --- Logging ---
+        const shouldLog = this._logCounter === 0;
+        let logF0 = 0, logAmp = 0;
+        if (shouldLog) {
+            logF0 = f0Values.length > 1 ? f0Values[0] : f0Values[0]; // Log first value in block
+            logAmp = ampValues.length > 1 ? ampValues[0] : ampValues[0];
+        }
+        // ---
 
         for (let i = 0; i < blockLength; ++i) {
             const f0 = f0Values.length > 1 ? f0Values[i] : f0Values[0];
             const amp = ampValues.length > 1 ? ampValues[i] : ampValues[0];
             let pulse = 0.0;
 
-            if (f0 > 0 && amp > 0) {
-                 // Update samplesUntilPulse only if F0 changed significantly to avoid phase jumps
-                 // Or simpler: always recalculate based on current f0 for responsiveness
-
+            // Check if voicing should be active for this sample
+            if (f0 > 0 && amp > 1e-6 && sampleRate > 0) {
+                // Check if it's time to generate a pulse
                 if (this.samplesUntilPulse <= 0) {
-                    pulse = amp; // Generate impulse
-                    const periodSamples = sampleRate / f0; // sampleRate is a global variable in AudioWorkletGlobalScope
-                    this.samplesUntilPulse += periodSamples; // Reset counter for next pulse
+                    pulse = amp; // Generate impulse scaled by linear amp
+                    generatedPulse = true;
+
+                    // Calculate the period for the *next* pulse based on current f0
+                    const periodSamples = sampleRate / f0;
+                    // Add the period to the current counter value.
+                    // This correctly schedules the next pulse, preserving phase
+                    // even if the counter was slightly negative.
+                    this.samplesUntilPulse += Math.max(1, periodSamples);
+                    // console.log(`   -> Pulse generated! Next in ${this.samplesUntilPulse.toFixed(1)} samples.`);
                 }
-                this.samplesUntilPulse -= 1;
             } else {
-                // Reset phase/counter when F0 or amp is zero
+                // If inactive (f0 or amp is zero), reset the counter/phase.
+                // This ensures it starts immediately when parameters become active again.
                 this.samplesUntilPulse = 0;
-                this.lastF0 = 0;
+                // console.log(`[VoicingSource DEBUG] Resetting samplesUntilPulse due to F0/Amp=0`);
             }
+
+            // Decrement the counter for *every* sample processed.
+            this.samplesUntilPulse -= 1;
+
             outputChannel[i] = pulse;
         }
+
+        // --- Logging ---
+        if (shouldLog) {
+            // Use the potentially updated samplesUntilPulse value for logging
+            console.log(`[VoicingSource] F0: ${logF0.toFixed(1)}, Amp: ${logAmp.toFixed(3)}, Pulse Generated in Block: ${generatedPulse}, SamplesUntilNextPulse: ${this.samplesUntilPulse.toFixed(1)}`);
+        }
+        this._logCounter = (this._logCounter + blockLength) % this._logInterval;
+        // ---
+
         return true; // Keep processor alive
     }
 }

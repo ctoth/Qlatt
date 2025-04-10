@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "keywords": [
     "tts",
@@ -19,7 +20,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vite": "^5.2.11"
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
     "cmu-pronouncing-dictionary": "^3.0.0"

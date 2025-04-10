@@ -1,16 +1,18 @@
 // Helper Functions
-function dbToLinear(db) {
+export function dbToLinear(db) {
   if (db <= -70) return 0.0;
   return 10.0 ** (db / 20.0);
 }
-function bwToQ(F, BW) {
+export function bwToQ(F, BW) {
   // Ensure F and BW are positive for Q calculation
   if (F <= 0 || BW <= 0) return 0.707; // Default Q for invalid input
   return F / BW;
 }
-// Reference level for scaling dB source amplitudes to worklet's 0-1 range
-const SOURCE_AMP_REFERENCE_DB = 65.0; // dB level that maps approximately to linear 1.0 for worklet params
-const SOURCE_AMP_SCALE_FACTOR = 1.0 / dbToLinear(SOURCE_AMP_REFERENCE_DB);
+// *** REMOVE OLD SCALING FACTOR ***
+// const SOURCE_AMP_REFERENCE_DB = 65.0;
+// const SOURCE_AMP_SCALE_FACTOR = 1.0 / dbToLinear(SOURCE_AMP_REFERENCE_DB);
+// *** NEW: Define Max dB for linear scaling 0-1 ***
+const SOURCE_AMP_MAX_DB = 70.0; // dB value that maps to linear 1.0 for worklets
 
 // --- Main Synth Class ---
 export class KlattSynth {
@@ -21,9 +23,11 @@ export class KlattSynth {
     this.isInitialized = false;
     this.isRunning = false;
     this._currentConnections = null; // Track current connection state ('cascade', 'parallel', null)
+    this._debugLog("KlattSynth instance created.");
   }
 
   async initialize() {
+    console.log("[KlattSynth] Initializing..."); // Keep top-level log
     if (this.isInitialized) return;
     console.log("Initializing KlattSynth...");
     // Load Worklet modules
@@ -33,17 +37,23 @@ export class KlattSynth {
         this.ctx.audioWorklet.addModule("noise-source-processor.js"),
         this.ctx.audioWorklet.addModule("radiation-processor.js"),
       ]);
-      console.log("Worklets loaded.");
+      this._debugLog("Worklets loaded successfully.");
     } catch (error) {
-      console.error("Error loading AudioWorklet modules:", error);
+      console.error("[KlattSynth] Error loading AudioWorklet modules:", error);
       throw error; // Re-throw to indicate failure
     }
 
     this._createNodes();
+    this._debugLog("Audio nodes created.");
     this._applyAllParams(this.ctx.currentTime); // Set initial node parameters
     this._connectCascadeParallel(); // Default connection
     this.isInitialized = true;
-    console.log("KlattSynth Initialized");
+    this._debugLog("KlattSynth Initialized successfully.");
+    console.log("KlattSynth Initialized"); // Keep top-level log
+  }
+  _debugLog(...args) {
+    // Simple internal logger helper
+    console.log("[KlattSynth DEBUG]", ...args);
   }
 
   _getDefaultParams() {
@@ -78,7 +88,7 @@ export class KlattSynth {
       A5: 0,
       A6: 0,
       AB: 0,
-      SW: 0,
+      SW: 1, // 0: Cascade/Parallel, 1: All Parallel
       FGP: 0,
       BGP: 100,
       FGZ: 1500,
@@ -109,12 +119,12 @@ export class KlattSynth {
     N.rgsFilter.type = "lowpass";
 
     // === Gain Controls for Sources ===
-    N.avsInGain = ctx.createGain(); // Controls AVS input level
-    N.fricationGain = ctx.createGain(); // Intermediate GainNode for Frication path
-    N.aspirationGain = ctx.createGain(); // Intermediate GainNode for Aspiration path
+    N.avsInGain = ctx.createGain(); N.avsInGain.gain.value = 0.0;
+    N.fricationGain = ctx.createGain(); N.fricationGain.gain.value = 0.0;
+    N.aspirationGain = ctx.createGain(); N.aspirationGain.gain.value = 0.0;
 
-    // Summing node for laryngeal sources (Voice + Aspiration) before cascade
-    N.laryngealSourceSum = ctx.createGain();
+    // *** Initialize Summing Node Gains to 1.0 ***
+    N.laryngealSourceSum = ctx.createGain(); N.laryngealSourceSum.gain.value = 1.0;
 
     // === Vocal Tract Filters ===
     // Cascade Path
@@ -143,15 +153,15 @@ export class KlattSynth {
       N.r6CascFilter,
     ];
 
-    // Parallel Path Gains
-    N.anParGain = ctx.createGain();
-    N.a1ParGain = ctx.createGain();
-    N.a2ParGain = ctx.createGain();
-    N.a3ParGain = ctx.createGain();
-    N.a4ParGain = ctx.createGain();
-    N.a5ParGain = ctx.createGain();
-    N.a6ParGain = ctx.createGain();
-    N.abParGain = ctx.createGain();
+    // === Parallel Path Gains === (Initialize to 0)
+    N.anParGain = ctx.createGain(); N.anParGain.gain.value = 0.0;
+    N.a1ParGain = ctx.createGain(); N.a1ParGain.gain.value = 0.0;
+    N.a2ParGain = ctx.createGain(); N.a2ParGain.gain.value = 0.0;
+    N.a3ParGain = ctx.createGain(); N.a3ParGain.gain.value = 0.0;
+    N.a4ParGain = ctx.createGain(); N.a4ParGain.gain.value = 0.0;
+    N.a5ParGain = ctx.createGain(); N.a5ParGain.gain.value = 0.0;
+    N.a6ParGain = ctx.createGain(); N.a6ParGain.gain.value = 0.0;
+    N.abParGain = ctx.createGain(); N.abParGain.gain.value = 0.0;
     this.parallelGains = [
       N.a1ParGain,
       N.a2ParGain,
@@ -186,19 +196,27 @@ export class KlattSynth {
     ];
 
     // Summing nodes
-    N.parallelSum = ctx.createGain();
-    N.parallelInputMix = ctx.createGain(); // Mixes sources for parallel path input
-    N.finalSum = ctx.createGain(); // Sums cascade and parallel outputs
+    N.parallelSum = ctx.createGain(); N.parallelSum.gain.value = 1.0;
+    N.parallelInputMix = ctx.createGain(); N.parallelInputMix.gain.value = 1.0; // Mixes sources for parallel path input
+    N.finalSum = ctx.createGain(); N.finalSum.gain.value = 1.0; // Sums cascade and parallel outputs
 
     // === Final Stages ===
     N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
     N.outputGain = ctx.createGain();
+    N.outputGain.gain.value = dbToLinear(this.params.GO); // Init with GO
 
-    console.log("Audio nodes created.");
+    // *** Ensure Summing Nodes have Gain = 1.0 ***
+    N.laryngealSourceSum.gain.value = 1.0;
+    N.parallelSum.gain.value = 1.0;
+    N.finalSum.gain.value = 1.0;
+    N.parallelInputMix.gain.value = 1.0; // Input mixer should also likely be 1
+
+    this._debugLog("Audio nodes created, summing gains set to 1.");
+    // console.log("Audio nodes created."); // Moved log to initialize
   }
 
   _applyAllParams(time) {
-    console.log("Applying all default/initial parameters...");
+    this._debugLog(`Applying all parameters at time ${time.toFixed(3)}...`);
     if (!this.nodes.voicingSource) {
       console.error("Nodes not created yet in _applyAllParams");
       return;
@@ -208,14 +226,16 @@ export class KlattSynth {
       try {
         this.setParam(pName, this.params[pName], time, true);
       } catch (e) {
-        console.error(`Error applying initial param ${pName}: ${e}`);
+        console.error(`[KlattSynth] Error applying initial param ${pName}: ${e}`);
       }
     });
-    console.log("Initial parameters applied.");
+    this._debugLog("Initial parameters applied.");
   }
 
   // --- setParam method (UPDATED Worklet Param Scaling) ---
   setParam(name, value, time, applyImmediately = false) {
+    const T = time !== undefined ? time : this.ctx.currentTime;
+    this._debugLog(`setParam: ${name}=${value.toFixed ? value.toFixed(2) : value} at ${T.toFixed(3)} (immediate=${applyImmediately})`);
     if (!this.isInitialized || !this.nodes.voicingSource) {
       this.params[name] = value; // Store value if not ready
       return;
@@ -227,12 +247,12 @@ export class KlattSynth {
     // Validate value type
     if (typeof value !== "number" || !isFinite(value)) {
       console.error(
-        `Invalid value type/content for parameter ${name}: ${value} (type: ${typeof value}). Skipping update.`
+        `[KlattSynth] Invalid value type/content for parameter ${name}: ${value} (type: ${typeof value}). Skipping update.`
       );
       return;
     }
 
-    const T = time !== undefined ? time : ctx.currentTime;
+    // const T = time !== undefined ? time : ctx.currentTime; // Moved up
     const scheduleMethod = applyImmediately
       ? "setValueAtTime"
       : "linearRampToValueAtTime";
@@ -247,7 +267,10 @@ export class KlattSynth {
         const linearValue = dbToLinear(dbValue);
         // Clamp linear gain for safety (adjust max if needed)
         const clampedLinearValue = Math.max(0, Math.min(linearValue, 100));
+        this._debugLog(`  Scheduling GainNode ${gainNode.constructor.name}: ${dbValue}dB -> ${clampedLinearValue.toFixed(4)} linear`);
         gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
+      } else {
+        this._debugLog(`  Skipping GainNode schedule for ${gainNode?.constructor?.name} (invalid value: ${dbValue})`);
       }
     };
 
@@ -270,61 +293,78 @@ export class KlattSynth {
         let targetQ = Math.max(0.0001, qVal); // Ensure Q > 0
         filterNode.Q[scheduleMethod](targetQ, rampEndTime);
 
-        if (filterNode.gain) filterNode.gain.setValueAtTime(gainVal, T);
+        if (filterNode.gain) filterNode.gain.setValueAtTime(gainVal, T); // Gain is usually 0 for peaking/notch
+        this._debugLog(`  Scheduling Filter ${filterNode.constructor.name}: type=${type}, F=${targetFreq.toFixed(1)}, Q=${targetQ.toFixed(3)}`);
       } catch (e) {
         console.error(
-          `Error scheduling filter ${name}: F=${freq}, Q=${qVal}`,
+          `[KlattSynth] Error scheduling filter ${name}: F=${freq}, Q=${qVal}`,
           e
         );
       }
     };
 
-    // *** UPDATED Helper: Schedule AudioWorklet param (expects dB, scales to 0-1) ***
-    const scheduleWorkletParam = (workletNode, paramName, dbValue) => {
-      if (
-        workletNode &&
-        workletNode.parameters.has(paramName) &&
-        typeof dbValue === "number"
-      ) {
-        const linearValue = dbToLinear(dbValue);
-        const scaledValue = Math.max(
-          0,
-          Math.min(linearValue * SOURCE_AMP_SCALE_FACTOR, 1.0)
-        ); // Scale and clamp 0-1
-        try {
-          workletNode.parameters
-            .get(paramName)
-            [scheduleMethod](scaledValue, rampEndTime);
-        } catch (e) {
-          console.error(
-            `Error scheduling worklet param ${paramName} with scaled value ${scaledValue} (from ${dbValue}dB)`,
-            e
-          );
-        }
-      }
-    };
+        // *** REVISED Helper: Schedule AudioWorklet param (Corrected Linear dB Map 0-1) ***
+        const scheduleWorkletParam = (workletNode, paramName, dbValue) => {
+            if (workletNode && workletNode.parameters.has(paramName) && typeof dbValue === 'number') {
+                // Linear map: Let minDb (e.g., 0dB) map near 0, maxDb (e.g., 70dB) map to 1.0
+                const MIN_DB_MAP = 0.0; // dB value that maps to linear 0
+                // Ensure SOURCE_AMP_MAX_DB is defined globally (e.g., 70.0)
+                const dbRange = SOURCE_AMP_MAX_DB - MIN_DB_MAP;
+
+                let scaledValue;
+                if (dbValue <= MIN_DB_MAP) {
+                    scaledValue = 0.0; // Silence if at or below min dB
+                } else if (dbRange <= 0) {
+                    scaledValue = 1.0; // Avoid division by zero if max <= min
+                } else {
+                    // Linearly interpolate between 0 and 1 based on position in dB range
+                    scaledValue = (dbValue - MIN_DB_MAP) / dbRange;
+                }
+
+                // Clamp the result strictly between 0 and 1
+                scaledValue = Math.max(0.0, Math.min(scaledValue, 1.0));
+
+                // *** Optional Logging ***
+                // this._debugLog(`  Scheduling Worklet ${paramName}: ${scaledValue.toFixed(4)} (from ${dbValue}dB, Range=[${MIN_DB_MAP}, ${SOURCE_AMP_MAX_DB}]) at ${rampEndTime.toFixed(3)}`);
+
+                try {
+                    workletNode.parameters.get(paramName)[scheduleMethod](scaledValue, rampEndTime);
+                } catch(e) {
+                    console.error(`[KlattSynth] Error scheduling worklet param ${paramName} with value ${scaledValue} (from ${dbValue}dB)`, e);
+                }
+            } else {
+                // this._debugLog(`  Skipping Worklet schedule for ${workletNode?.constructor?.name} param '${paramName}' (invalid node/param/value: ${dbValue})`);
+            }
+        };
 
     // --- Parameter Mapping Switch ---
     try {
       switch (name) {
-        case "F0":
+        case "F0": {
+          const f0Val = Math.max(1, value);
+          this._debugLog(`  Scheduling VoicingSource F0: ${f0Val.toFixed(1)} Hz`);
           N.voicingSource.parameters
             .get("f0")
-            [scheduleMethod](Math.max(1, value), rampEndTime);
-          break; // Clamp F0 min to 1Hz
+            [scheduleMethod](f0Val, rampEndTime);
+          break;
+        }
         case "AV":
+          this._debugLog(`  Scheduling VoicingSource Amp (AV): ${value} dB`);
           scheduleWorkletParam(N.voicingSource, "amp", value);
-          break; // Use helper
+          break;
         case "AF":
-          scheduleWorkletParam(N.noiseSource, "fricationGain", value); // Use helper
-          scheduleGain(N.fricationGain, value); // Also schedule intermediate GainNode
+          this._debugLog(`  Scheduling Frication Gain (AF): ${value} dB`);
+          scheduleWorkletParam(N.noiseSource, "fricationGain", value);
+          // scheduleGain(N.fricationGain, value); // FricationGain node is not used in cascade/parallel path
           break;
         case "AH":
-          scheduleWorkletParam(N.noiseSource, "aspirationGain", value); // Use helper
-          scheduleGain(N.aspirationGain, value); // Also schedule intermediate GainNode
+          this._debugLog(`  Scheduling Aspiration Gain (AH): ${value} dB`);
+          scheduleWorkletParam(N.noiseSource, "aspirationGain", value);
+          // scheduleGain(N.aspirationGain, value); // AspirationGain node is not used in cascade/parallel path
           break;
         case "AVS":
-          scheduleGain(N.avsInGain, value); // AVS only controls input GainNode
+          this._debugLog(`  Scheduling Voiced Aspiration Gain (AVS): ${value} dB`);
+          scheduleGain(N.avsInGain, value); // This GainNode IS used
           break;
 
         case "FGP":
@@ -435,35 +475,51 @@ export class KlattSynth {
           break;
         case "A6":
           scheduleGain(N.a6ParGain, value);
+          // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
           break;
         case "AB":
           scheduleGain(N.abParGain, value);
+          // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
           break;
         case "GO":
+          this._debugLog(`  Scheduling Output Gain (GO): ${value} dB`);
           scheduleGain(N.outputGain, value);
           break;
 
         case "NFC":
-          if (P.SW === 0 && oldValue !== value) this._reconnectGraph();
+          this._debugLog(`  Setting NFC: ${value} (SW=${P.SW})`);
+          if (P.SW === 0 && oldValue !== value) {
+             this._debugLog(`    NFC changed with SW=0, triggering reconnect.`);
+             this._reconnectGraph();
+          }
           break;
         case "SW":
-          if (oldValue !== value) this._reconnectGraph();
+           this._debugLog(`  Setting SW: ${value}`);
+          if (oldValue !== value) {
+             this._debugLog(`    SW changed, triggering reconnect.`);
+             this._reconnectGraph();
+          }
           break;
         // Ignore SR - cannot change dynamically
         case "SR":
+           this._debugLog(`  Ignoring SR update.`);
           break;
         default:
-          // console.warn(`Parameter ${name} not handled in setParam switch.`);
+          // console.warn(`[KlattSynth] Parameter ${name} not explicitly handled in setParam switch.`);
           break;
       }
     } catch (error) {
-      console.error(`Error setting parameter ${name} to ${value}:`, error);
+      console.error(`[KlattSynth] Error setting parameter ${name} to ${value}:`, error);
     }
   }
 
   _reconnectGraph() {
-    console.log("Reconnecting graph...");
+    this._debugLog(`Reconnecting graph (SW=${this.params.SW}, NFC=${this.params.NFC})...`);
+    // console.log("Reconnecting graph..."); // Alternative log
     this._disconnectAll();
+    this._currentConnections = null; // Reset connection state before reconnecting
+    // *** Check Summing Node Gains BEFORE Connecting ***
+    // this._debugLog(`Gains before connect: LaryngealSum=${this.nodes.laryngealSourceSum.gain.value}, ParallelSum=${this.nodes.parallelSum.gain.value}, FinalSum=${this.nodes.finalSum.gain.value}, ParallelInputMix=${this.nodes.parallelInputMix.gain.value}`);
     if (this.params.SW === 0) {
       this._connectCascadeParallel();
     } else {
@@ -472,14 +528,16 @@ export class KlattSynth {
     if (this.isRunning) {
       try {
         this.nodes.outputGain.connect(this.ctx.destination);
-        console.log("Reconnected output gain.");
+        this._debugLog("Reconnected output gain to destination.");
       } catch (e) {
-        console.error("Error reconnecting output gain:", e);
+        console.error("[KlattSynth] Error reconnecting output gain:", e);
       }
     }
+     this._debugLog("Graph reconnection finished.");
   }
 
   _disconnectAll() {
+    this._debugLog("Disconnecting all nodes...");
     // console.log("Disconnecting all nodes..."); // Can be noisy
     Object.values(this.nodes).forEach((node) => {
       try {
@@ -493,11 +551,15 @@ export class KlattSynth {
     } catch (e) {
       /* ignore */
     }
+    this._debugLog("Finished disconnecting nodes.");
   }
 
   _connectCascadeParallel() {
-    if (this._currentConnections === "cascade") return;
-    console.log("Connecting Cascade/Parallel Graph (SW=0)");
+    if (this._currentConnections === "cascade") {
+       this._debugLog("Skipping connection: Already in Cascade/Parallel state.");
+       return;
+    }
+    this._debugLog("Connecting Cascade/Parallel Graph (SW=0)...");
     const N = this.nodes;
     const NFC = Math.max(4, Math.min(6, Math.round(this.params.NFC))); // Ensure NFC is 4, 5, or 6
 
@@ -548,15 +610,19 @@ export class KlattSynth {
       // Final Stage
       N.finalSum.connect(N.radiation).connect(N.outputGain);
       this._currentConnections = "cascade";
+      this._debugLog("Cascade/Parallel graph connected successfully.");
     } catch (error) {
-      console.error("Error during _connectCascadeParallel:", error);
+      console.error("[KlattSynth] Error during _connectCascadeParallel:", error);
       this._currentConnections = null; // Mark as uncertain state
     }
   }
 
   _connectAllParallel() {
-    if (this._currentConnections === "parallel") return;
-    console.log("Connecting All-Parallel Graph (SW=1)");
+     if (this._currentConnections === "parallel") {
+       this._debugLog("Skipping connection: Already in All-Parallel state.");
+       return;
+    }
+    this._debugLog("Connecting All-Parallel Graph (SW=1)...");
     const N = this.nodes;
 
     try {
@@ -594,52 +660,72 @@ export class KlattSynth {
       // Final Stage
       N.parallelSum.connect(N.radiation).connect(N.outputGain);
       this._currentConnections = "parallel";
+      this._debugLog("All-Parallel graph connected successfully.");
     } catch (error) {
-      console.error("Error during _connectAllParallel:", error);
+      console.error("[KlattSynth] Error during _connectAllParallel:", error);
       this._currentConnections = null; // Mark as uncertain state
     }
   }
 
   start() {
+    this._debugLog("start() called.");
     if (!this.isInitialized) {
-      console.error("Not initialized.");
+      console.error("[KlattSynth] Cannot start: Not initialized.");
       return;
     }
     if (!this.isRunning) {
+      this._debugLog("Synth is not running, attempting to start...");
       try {
         this._reconnectGraph(); // Ensure connections are up-to-date
         if (this._currentConnections !== null) {
           // Only connect if graph setup succeeded
+          this._debugLog("Connecting outputGain to destination.");
           this.nodes.outputGain.connect(this.ctx.destination);
-          if (this.ctx.state === "suspended") this.ctx.resume();
+          if (this.ctx.state === "suspended") {
+            this._debugLog("AudioContext is suspended, resuming...");
+            this.ctx.resume(); // No need to await here
+          }
           this.isRunning = true;
-          console.log("KlattSynth Started");
+          this._debugLog("KlattSynth Started successfully.");
+          console.log("KlattSynth Started"); // Keep top-level log
         } else {
           console.error(
-            "Cannot start synth, graph connection failed previously."
+            "[KlattSynth] Cannot start synth, graph connection failed previously or is in unknown state."
           );
         }
       } catch (error) {
-        console.error("Error starting synth:", error);
+        console.error("[KlattSynth] Error starting synth:", error);
       }
+    } else {
+       this._debugLog("Synth is already running.");
     }
   }
 
   stop() {
+     this._debugLog("stop() called.");
     if (this.isRunning) {
+      this._debugLog("Synth is running, attempting to stop...");
       try {
         this.nodes.outputGain.disconnect(this.ctx.destination);
-      } catch (e) {}
+      } catch (e) {
+         this._debugLog("Error disconnecting outputGain:", e);
+      }
       this.cancelScheduledValues();
       this.isRunning = false;
-      console.log("KlattSynth Stopped");
+      this._debugLog("KlattSynth Stopped successfully.");
+      console.log("KlattSynth Stopped"); // Keep top-level log
+    } else {
+       this._debugLog("Synth is not running, stop() has no effect.");
     }
   }
 
   cancelScheduledValues() {
-    if (!this.isInitialized || !this.ctx) return;
+    if (!this.isInitialized || !this.ctx) {
+       this._debugLog("Cannot cancel schedules: Synth not initialized or context missing.");
+       return;
+    }
     const T = this.ctx.currentTime;
-    // console.log("Cancelling scheduled parameter values from time", T);
+    this._debugLog(`Cancelling scheduled parameter values from time ${T.toFixed(3)}...`);
     Object.values(this.nodes).forEach((node) => {
       try {
         if (node instanceof GainNode) {
@@ -660,17 +746,19 @@ export class KlattSynth {
           });
         }
       } catch (e) {
-        console.warn("Error cancelling schedule for node:", e);
+        console.warn("[KlattSynth] Error cancelling schedule for node:", e);
       }
     });
+     this._debugLog("Finished cancelling schedules.");
   }
 
   setTrack(track) {
+     this._debugLog("setTrack() called.");
     if (!this.isInitialized || !track) {
-      console.warn("Set track called before init or track is null.");
+      console.warn("[KlattSynth] Set track called before init or track is null/empty.");
       return;
     }
-    console.log(`Setting track with ${track.length} events.`);
+     this._debugLog(`Setting track with ${track.length} events.`);
     const startTime = this.ctx.currentTime;
     this.cancelScheduledValues(); // Cancel previous before setting new
 
@@ -678,39 +766,51 @@ export class KlattSynth {
     const firstEventTime = track[0]?.time || 0;
     const initialState =
       track.find((e) => e.time === firstEventTime)?.params ||
-      this._getDefaultParams();
+      this._getDefaultParams(); // Get defaults if first event has no params
 
+    this._debugLog(`Resetting params to defaults at ${startTime.toFixed(3)}.`);
     // Reset all parameters to their defaults *at the start time*
-    this._applyAllParams(startTime);
+    this._applyAllParams(startTime); // This already logs internally
+
+    this._debugLog(`Applying initial track state immediately at ${startTime.toFixed(3)}.`);
     // Immediately set the initial state of the track *at the start time*
     Object.keys(initialState).forEach((pName) => {
       if (
         typeof initialState[pName] === "number" &&
         isFinite(initialState[pName])
       ) {
+        // setParam logs internally
         this.setParam(pName, initialState[pName], startTime, true); // Use setValueAtTime
+      } else {
+         this._debugLog(`  Skipping initial param ${pName}: invalid value ${initialState[pName]}`);
       }
     });
 
+    this._debugLog("Scheduling subsequent track events...");
     // Schedule the rest of the track events using ramps
     track.forEach((event) => {
       // Skip events at or before the initial time we already set
-      if (event.time <= firstEventTime) return;
+      if (event.time <= firstEventTime) {
+         this._debugLog(`  Skipping event at time ${event.time.toFixed(3)} (already applied initial state).`);
+         return;
+      }
 
       const eventTime = startTime + event.time; // Schedule relative to current time
+      this._debugLog(`  Processing event at time ${event.time.toFixed(3)} -> schedule time ${eventTime.toFixed(3)}`);
       if (event.params) {
         Object.keys(event.params).forEach((pName) => {
           const value = event.params[pName];
           if (typeof value === "number" && isFinite(value)) {
             this.setParam(pName, value, eventTime, false); // Use linearRamp
           } else {
-            // console.warn(`Track event at ${event.time.toFixed(3)}s has invalid value for ${pName}:`, value);
+             this._debugLog(`    Skipping param ${pName}: invalid value ${value}`);
           }
         });
       } else {
-        // console.warn(`Track event at ${event.time.toFixed(3)}s is missing 'params' object.`);
+         this._debugLog(`    Event at ${event.time.toFixed(3)}s is missing 'params' object.`);
       }
     });
-    console.log("Track scheduled.");
+    this._debugLog("Track scheduling finished.");
+    console.log("Track scheduled."); // Keep top-level log
   }
 }

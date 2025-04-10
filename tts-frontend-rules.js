@@ -769,9 +769,9 @@ export const PHONEME_TARGETS = {
     B1: 300,
     B2: 120,
     B3: 250,
-    AF: 70,
-    AH: 50,
-    A3: 30,
+    AF: 70, // Frication burst
+    AH: 50, // Aspiration
+    A3: 30, // Higher formants active
     A4: 45,
     A5: 57,
     A6: 63,
@@ -888,6 +888,11 @@ export const PHONEME_TARGETS = {
     voiced: true,
     postalveolar: true,
   },
+  // *** ADD AFFRICATE CH *** (Model as stop release + fricative-like spectrum)
+  'CH': { F1: 300, F2: 1840, F3: 2750, B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000, AV: 0, AF: 68, AH: 0, AVS: 0, FNP:0, FNZ:0, A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0, dur: 70, type: 'affricate', voiceless: true, postalveolar: true },
+  // Need voiced affricate 'JH' (as in 'judge') too? Often T+ZH or D+ZH.
+  // Add basic JH based on ZH
+  'JH': { F1: 260, F2: 1800, F3: 2820, B1: 60, B2: 80, B3: 270, B4: 300, B5: 250, B6: 1000, AV: 47, AF: 58, AH: 0, AVS: 47, FNP:0, FNZ:0, A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0, dur: 65, type: 'affricate', voiced: true, postalveolar: true },
   // --- Silence ---
   SIL: {
     F1: 500,
@@ -917,11 +922,8 @@ export function fillDefaultParams(target) {
         filled[key] = target[key];
       }
     }
-    // Ensure source amps are explicitly set (defaulting to 0 if not in target)
-    filled.AV = target.AV || 0;
-    filled.AF = target.AF || 0;
-    filled.AH = target.AH || 0;
-    filled.AVS = target.AVS || 0;
+    // Source amps (AV, AF, AH, AVS) are handled by the loop above.
+    // If not present in the target, they retain their value from BASE_PARAMS (usually 0).
   } else {
     // Fallback to complete silence if no target provided
     Object.assign(filled, PHONEME_TARGETS["SIL"]); // Copy SIL params

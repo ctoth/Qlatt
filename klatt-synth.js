@@ -449,10 +449,13 @@ export class KlattSynth {
           scheduleGain(N.avsInGain, value); // This GainNode IS used
           break;
 
-        case "FGP":
+        case "FGP": // FGP is currently unused in filter scheduling
         case "BGP":
-          scheduleFilter(N.rgpFilter, "lowpass", P.BGP / 2, bwToQ(50, P.BGP));
-          break; // Use BW/2 as cutoff
+          // scheduleFilter(N.rgpFilter, "lowpass", P.BGP / 2, bwToQ(50, P.BGP)); // OLD
+          const rgpCutoff = Math.max(1, P.BGP); // Ensure cutoff > 0
+          scheduleFilter(N.rgpFilter, "lowpass", rgpCutoff, 0.707); // Use BGP as cutoff, Q=0.707
+          this._debugLog(`  Scheduling RgpFilter: Lowpass, F=${rgpCutoff.toFixed(1)}, Q=0.707 (using BGP as cutoff)`);
+          break;
         case "FGZ":
         case "BGZ":
           scheduleFilter(N.rgzFilter, "notch", P.FGZ, bwToQ(P.FGZ, P.BGZ));

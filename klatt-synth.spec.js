@@ -6,9 +6,18 @@ describe('KlattSynth', () => {
   let audioContext;
   let klattSynth;
 
-  beforeEach(() => {
+  beforeEach(async () => { // Make async if initialize is called here
     audioContext = new AudioContext();
     klattSynth = new KlattSynth(audioContext);
+    // Spy on internal debug log to reduce noise
+    vi.spyOn(klattSynth, '_debugLog').mockImplementation(() => {});
+    // Spy on console methods used by KlattSynth (optional, if needed)
+    // vi.spyOn(console, 'log').mockImplementation(() => {});
+    // vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // NOTE: If initialize() is called within beforeEach, it needs to be awaited
+    // await klattSynth.initialize(); // Example if init was here
   });
 
   afterEach(() => {

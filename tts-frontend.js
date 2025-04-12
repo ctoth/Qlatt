@@ -325,6 +325,17 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
           debugLog(`    -> Release Phoneme Params: ${JSON.stringify(ph.params)}`);
       }
   });
+  // *** START DETAILED LOGGING BEFORE FINAL LOOP ***
+  debugLog("Parameter sequence details before final loop:");
+  parameterSequence.forEach((ph, index) => {
+    debugLog(`  [${index}] Phoneme: ${ph.phoneme}, Stress: ${ph.stress}, Duration: ${ph.duration}, Type: ${ph.type}, Voiceless: ${ph.voiceless}`);
+    if (ph.params) {
+      debugLog(`      Params: AV=${ph.params.AV?.toFixed(1)}, AF=${ph.params.AF?.toFixed(1)}, AH=${ph.params.AH?.toFixed(1)}, F0=${ph.params.F0?.toFixed(1)}`);
+    } else {
+      debugLog(`      Params: undefined`);
+    }
+  });
+  // *** END DETAILED LOGGING BEFORE FINAL LOOP ***
   // *** END ADDED LOGGING ***
 
   // --- Generate F0 ---

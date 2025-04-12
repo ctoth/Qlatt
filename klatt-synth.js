@@ -209,7 +209,7 @@ export class KlattSynth {
 
     // Summing nodes
     N.parallelSum = ctx.createGain();
-    N.parallelSum.gain.value = 1.0;
+    N.parallelSum.gain.value = 0.5; // REDUCED gain for parallel path output
     N.parallelInputMix = ctx.createGain();
     N.parallelInputMix.gain.value = 1.0; // Mixes sources for parallel path input
     N.finalSum = ctx.createGain();
@@ -637,10 +637,13 @@ export class KlattSynth {
     // console.log("Reconnecting graph..."); // Alternative log
     this._disconnectAll();
     this._currentConnections = null; // Reset connection state before reconnecting
-    // *** Check Summing Node Gains BEFORE Connecting ***
+
+    // *** ADDED: Verify Summing Node Gains BEFORE Connecting ***
     this._debugLog(
-      `Gains before connect: LaryngealSum=${this.nodes.laryngealSourceSum.gain.value}, ParallelSum=${this.nodes.parallelSum.gain.value}, FinalSum=${this.nodes.finalSum.gain.value}, ParallelInputMix=${this.nodes.parallelInputMix.gain.value}`
+      `Gains before connect: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
     );
+    // *** END ADDED ***
+
     if (this.params.SW === 0) {
       this._connectCascadeParallel();
     } else {
@@ -814,6 +817,13 @@ export class KlattSynth {
         this._reconnectGraph(); // Ensure connections are up-to-date
         if (this._currentConnections !== null) {
           // Only connect if graph setup succeeded
+
+          // *** ADDED: Verify Summing Node Gains BEFORE Connecting Output ***
+          this._debugLog(
+            `Gains before connecting output: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
+          );
+          // *** END ADDED ***
+
           this._debugLog("Connecting outputGain to destination.");
           this.nodes.outputGain.connect(this.ctx.destination);
           if (this.ctx.state === "suspended") {

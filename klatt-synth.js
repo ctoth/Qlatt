@@ -461,8 +461,11 @@ export class KlattSynth {
           scheduleFilter(N.rgzFilter, "notch", P.FGZ, bwToQ(P.FGZ, P.BGZ));
           break;
         case "BGS":
-          scheduleFilter(N.rgsFilter, "lowpass", P.BGS / 2, bwToQ(50, P.BGS));
-          break; // Use BW/2 as cutoff
+          // scheduleFilter(N.rgsFilter, "lowpass", P.BGS / 2, bwToQ(50, P.BGS)); // OLD
+          const rgsCutoff = Math.max(1, P.BGS); // Ensure cutoff > 0
+          scheduleFilter(N.rgsFilter, "lowpass", rgsCutoff, 0.707); // Use BGS as cutoff, Q=0.707
+          this._debugLog(`  Scheduling RgsFilter: Lowpass, F=${rgsCutoff.toFixed(1)}, Q=0.707 (using BGS as cutoff)`);
+          break;
 
         case "FNP":
         case "BNP": {

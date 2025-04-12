@@ -913,26 +913,39 @@ export const PHONEME_TARGETS = {
 
 // --- Rule Functions ---
 export function fillDefaultParams(target) {
-  const filled = { ...BASE_PARAMS }; // Start with base defaults
-  if (target) {
-    // Override with specifics from the target phoneme object
-    for (const key in target) {
-      if (target.hasOwnProperty(key) && BASE_PARAMS.hasOwnProperty(key)) {
-        // Only copy known Klatt params
-        filled[key] = target[key];
-      }
+  // Start with the target's parameters, or an empty object if no target
+  const filled = target ? { ...target } : {};
+
+  // Fill in any missing parameters from BASE_PARAMS
+  for (const key in BASE_PARAMS) {
+    if (!filled.hasOwnProperty(key)) { // If the key wasn't in the target
+      filled[key] = BASE_PARAMS[key]; // Add the default value
     }
-    // Source amps (AV, AF, AH, AVS) are handled by the loop above.
-    // If not present in the target, they retain their value from BASE_PARAMS (usually 0).
-  } else {
-    // Fallback to complete silence if no target provided
-    Object.assign(filled, PHONEME_TARGETS["SIL"]); // Copy SIL params
+    // Ensure the value is a valid number, otherwise use default (handles potential undefined/null in target)
+    else if (typeof filled[key] !== 'number' || !isFinite(filled[key])) {
+        console.warn(`[fillDefaultParams] Invalid value '${filled[key]}' for key '${key}' in target. Using default: ${BASE_PARAMS[key]}`);
+        filled[key] = BASE_PARAMS[key];
+    }
+  }
+
+  // Ensure all BASE_PARAMS keys are present (handles cases where target might have extra keys)
+  // This loop might be slightly redundant now but ensures completeness.
+  for (const key in BASE_PARAMS) {
+      if (!filled.hasOwnProperty(key)) {
+          filled[key] = BASE_PARAMS[key];
+      }
+  }
+
+
+  // If no target was provided initially, ensure it looks like silence
+  if (!target) {
     filled.AV = 0;
     filled.AF = 0;
     filled.AH = 0;
     filled.AVS = 0;
-    filled.F0 = 0; // Ensure silence
+    filled.F0 = 0;
   }
+
   return filled;
 }
 export function rule_K_Context(phonemeList) {

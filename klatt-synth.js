@@ -363,36 +363,39 @@ export class KlattSynth {
       }
     };
 
-    // *** REVISED Helper: Schedule AudioWorklet param (Corrected Linear dB Map 0-1) ***
+    // *** REVISED Helper: Schedule AudioWorklet param (Using dbToLinear + Scaling Factor) ***
     const scheduleWorkletParam = (workletNode, paramName, dbValue) => {
       if (
         workletNode &&
+        workletNode.parameters && // Check if parameters map exists before .has()
         workletNode.parameters.has(paramName) &&
-        typeof dbValue === "number"
+        typeof dbValue === "number" && // Check for number type first
+        isFinite(dbValue) // Then check for finite
       ) {
-        // Linear map: Let minDb (e.g., 0dB) map near 0, maxDb (e.g., 70dB) map to 1.0
-        const MIN_DB_MAP = 0.0; // dB value that maps to linear 0
-        // Ensure SOURCE_AMP_MAX_DB is defined globally (e.g., 70.0)
-        const dbRange = SOURCE_AMP_MAX_DB - MIN_DB_MAP;
+        // Define the dB level that maps to linear 1.0
+        const REFERENCE_DB = SOURCE_AMP_MAX_DB; // Use the globally defined 80.0 dB
 
-        let scaledValue;
-        if (dbValue <= MIN_DB_MAP) {
-          scaledValue = 0.0; // Silence if at or below min dB
-        } else if (dbRange <= 0) {
-          scaledValue = 1.0; // Avoid division by zero if max <= min
-        } else {
-          // Linearly interpolate between 0 and 1 based on position in dB range
-          scaledValue = (dbValue - MIN_DB_MAP) / dbRange;
+        // Calculate the linear value corresponding to the reference dB
+        const referenceLinear = dbToLinear(REFERENCE_DB);
+        if (referenceLinear <= 1e-9) { // Check against small threshold
+             console.error(`[KlattSynth] Invalid referenceLinear (${referenceLinear.toFixed(4)}) from REFERENCE_DB (${REFERENCE_DB}). Cannot scale worklet param ${paramName}.`);
+             return; // Avoid division by zero or near-zero
         }
+
+        // Calculate the scaling factor
+        const scaleFactor = 1.0 / referenceLinear;
+
+        // Convert the input dB value to linear and apply the scaling factor
+        // dbToLinear handles <= -70dB returning 0 correctly.
+        let scaledValue = dbToLinear(dbValue) * scaleFactor;
 
         // Clamp the result strictly between 0 and 1
         scaledValue = Math.max(0.0, Math.min(scaledValue, 1.0));
 
-        // *** Optional Logging ***
         this._debugLog(
           `  Scheduling Worklet ${paramName}: ${scaledValue.toFixed(
             4
-          )} (from ${dbValue}dB, Range=[${MIN_DB_MAP}, ${SOURCE_AMP_MAX_DB}]) at ${rampEndTime.toFixed(
+          )} (from ${dbValue}dB, Ref=${REFERENCE_DB}dB) at ${rampEndTime.toFixed(
             3
           )}`
         );
@@ -408,8 +411,16 @@ export class KlattSynth {
           );
         }
       } else {
+         // Add more specific logging for why it's skipped
+         let reason = "unknown";
+         if (!workletNode) reason = "invalid node";
+         else if (!workletNode.parameters) reason = "node has no parameters map"; // Check if parameters map exists
+         else if (!workletNode.parameters.has(paramName)) reason = `node missing param '${paramName}'`;
+         else if (typeof dbValue !== 'number') reason = `invalid value type (${typeof dbValue})`;
+         else if (!isFinite(dbValue)) reason = `non-finite value (${dbValue})`;
+
         this._debugLog(
-          `  Skipping Worklet schedule for ${workletNode?.constructor?.name} param '${paramName}' (invalid node/param/value: ${dbValue})`
+          `  Skipping Worklet schedule for ${workletNode?.constructor?.name} param '${paramName}'. Reason: ${reason}. Value: ${dbValue}`
         );
       }
     };

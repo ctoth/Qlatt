@@ -684,6 +684,11 @@ export class KlattSynth {
       N.noiseSource.connect(N.aspirationGain, 1).connect(N.laryngealSourceSum); // Aspiration -> LaryngealSum
       N.noiseSource.connect(N.fricationGain, 0).connect(N.parallelInputMix); // Frication -> Parallel Input
 
+      // *** ADDED: Connect Laryngeal Source to Parallel Input Mixer as well ***
+      N.laryngealSourceSum.connect(N.parallelInputMix);
+      this._debugLog("    Connected laryngealSourceSum to parallelInputMix.");
+      // *** END ADDED ***
+
       // Cascade Path
       let lastCascadeNode = N.laryngealSourceSum;
       lastCascadeNode.connect(N.rnpCascFilter);

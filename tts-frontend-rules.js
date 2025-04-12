@@ -913,32 +913,27 @@ export const PHONEME_TARGETS = {
 
 // --- Rule Functions ---
 export function fillDefaultParams(target) {
-  // Start with the target's parameters, or an empty object if no target
-  const filled = target ? { ...target } : {};
+  const filled = { ...BASE_PARAMS }; // Start with base defaults
 
-  // Fill in any missing parameters from BASE_PARAMS
-  for (const key in BASE_PARAMS) {
-    if (!filled.hasOwnProperty(key)) { // If the key wasn't in the target
-      filled[key] = BASE_PARAMS[key]; // Add the default value
-    }
-    // Ensure the value is a valid number, otherwise use default (handles potential undefined/null in target)
-    else if (typeof filled[key] !== 'number' || !isFinite(filled[key])) {
-        console.warn(`[fillDefaultParams] Invalid value '${filled[key]}' for key '${key}' in target. Using default: ${BASE_PARAMS[key]}`);
-        filled[key] = BASE_PARAMS[key];
-    }
-  }
-
-  // Ensure all BASE_PARAMS keys are present (handles cases where target might have extra keys)
-  // This loop might be slightly redundant now but ensures completeness.
-  for (const key in BASE_PARAMS) {
-      if (!filled.hasOwnProperty(key)) {
-          filled[key] = BASE_PARAMS[key];
+  if (target) {
+    // Override defaults with valid numeric values from the target
+    for (const key in target) {
+      // Only process keys that are also defined in BASE_PARAMS (i.e., valid Klatt params)
+      if (BASE_PARAMS.hasOwnProperty(key) && target.hasOwnProperty(key)) {
+        const targetValue = target[key];
+        // Check if the target value is a valid number
+        if (typeof targetValue === 'number' && isFinite(targetValue)) {
+          filled[key] = targetValue; // Use the valid target value
+        } else {
+          // Log a warning if the target has an invalid value for a known Klatt param
+          // Keep the default value from BASE_PARAMS in this case.
+          console.warn(`[fillDefaultParams] Invalid value '${targetValue}' for key '${key}' in target. Using default: ${filled[key]}`);
+        }
       }
-  }
-
-
-  // If no target was provided initially, ensure it looks like silence
-  if (!target) {
+      // Ignore keys in target that are not in BASE_PARAMS (e.g., 'type', 'voiced')
+    }
+  } else {
+    // If no target provided, ensure it's silent (mostly redundant as BASE_PARAMS defaults are 0, but safe)
     filled.AV = 0;
     filled.AF = 0;
     filled.AH = 0;

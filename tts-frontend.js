@@ -270,8 +270,11 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         ph.phoneme = "SIL";
         debugLog(`    No target found for ${targetKeyBase}, using SIL.`);
       }
-      ph.params = fillDefaultParams(baseTarget);
+      // *** ADDED DETAILED LOGGING FOR AF ***
+      debugLog(`    Base target for ${targetKeyBase}: AF=${baseTarget?.AF}, AH=${baseTarget?.AH}`);
+      ph.params = fillDefaultParams(baseTarget); // <--- FILLING PARAMS HERE
       ph.duration = baseTarget.dur || 30;
+      // *** LOG PARAMS AFTER FILLING ***
       debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}, AVS=${ph.params.AVS}), Duration=${ph.duration}`);
 
       // Add flags from the found target

@@ -15,11 +15,10 @@ describe('TTS to Klatt Integration', () => {
   beforeEach(async () => {
     audioContext = new AudioContext();
     klattSynth = new KlattSynth(audioContext);
-    // Spy on internal debug log BEFORE initialize
-    vi.spyOn(klattSynth, '_debugLog').mockImplementation(() => {});
     await klattSynth.initialize();
 
     // Spy on console methods to reduce test noise (keep if desired)
+    // vi.spyOn(console, 'log').mockImplementation(() => {}); // Keep console spies if desired
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {}); // Also spy error

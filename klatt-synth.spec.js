@@ -9,10 +9,8 @@ describe('KlattSynth', () => {
   beforeEach(async () => { // Make async if initialize is called here
     audioContext = new AudioContext();
     klattSynth = new KlattSynth(audioContext);
-    // Spy on internal debug log to reduce noise
-    vi.spyOn(klattSynth, '_debugLog').mockImplementation(() => {});
     // Spy on console methods used by KlattSynth (optional, if needed)
-    // vi.spyOn(console, 'log').mockImplementation(() => {});
+    // vi.spyOn(console, 'log').mockImplementation(() => {}); // Keep console spies if desired
     // vi.spyOn(console, 'warn').mockImplementation(() => {});
     // vi.spyOn(console, 'error').mockImplementation(() => {});
 

@@ -335,7 +335,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       debugLog(`      Params: undefined`);
     }
   });
-  // *** END DETAILED LOGGING BEFORE FINAL LOOP ***
   // *** END ADDED LOGGING ***
 
   // --- Generate F0 ---
@@ -368,9 +367,15 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
-    const phDuration = Math.max(20, ph.duration || 100) / 1000.0;
+    // const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Original calculation
+    const phDuration = (ph.duration || 30) / 1000.0; // Simplified duration - TEMPORARY DEBUGGING
+    if (phDuration <= 0) {
+        console.warn(`[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(4)}s) for ${ph.phoneme}. Original duration: ${ph.duration}ms. Skipping.`);
+        debugLog(`    WARN: Skipping track event for ${ph.phoneme} due to zero or negative calculated duration.`);
+        continue; // Explicitly skip if duration is bad
+    }
     const targetTime = currentTime + phDuration;
-    debugLog(`  Processing phoneme ${i}: ${ph.phoneme}${ph.stress ?? ''}, duration=${phDuration.toFixed(3)}s, targetTime=${targetTime.toFixed(3)}s`);
+    debugLog(`  Processing phoneme ${i}: ${ph.phoneme}${ph.stress ?? ''}, duration=${phDuration.toFixed(3)}s (original: ${ph.duration}ms), targetTime=${targetTime.toFixed(3)}s`);
 
     // Use the params object directly from the sequence (already filled and potentially modified by rules)
     const finalParams = ph.params ? { ...ph.params } : fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure we have a params object, copy it
@@ -396,10 +401,8 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
       debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
       currentTime = targetTime;
-    } else {
-       console.warn(`[TTS Frontend] Skipping track event for ${ph.phoneme} due to zero or negative duration.`);
-       debugLog(`    WARN: Skipping track event for ${ph.phoneme} due to zero or negative duration.`);
     }
+    // Removed the 'else' block as the non-positive duration case is handled by the 'continue' above
   }
   // Add final silence
   const finalTime = currentTime + 0.1;

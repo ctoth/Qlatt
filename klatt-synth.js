@@ -346,14 +346,21 @@ export class KlattSynth {
         targetFreq = Math.min(targetFreq, ctx.sampleRate / 2 - 1); // Ensure below Nyquist
         filterNode.frequency[scheduleMethod](targetFreq, rampEndTime);
 
+        // --- MODIFICATION START ---
+        const MAX_Q = 25.0; // Define a maximum Q value
         let targetQ = Math.max(0.0001, qVal); // Ensure Q > 0
+        targetQ = Math.min(targetQ, MAX_Q); // Clamp Q to the maximum value
+        // --- MODIFICATION END ---
+
         filterNode.Q[scheduleMethod](targetQ, rampEndTime);
 
         if (filterNode.gain) filterNode.gain.setValueAtTime(gainVal, T); // Gain is usually 0 for peaking/notch
         this._debugLog(
+          // --- MODIFIED LOG ---
           `  Scheduling Filter ${
             filterNode.constructor.name
-          }: type=${type}, F=${targetFreq.toFixed(1)}, Q=${targetQ.toFixed(3)}`
+          }: type=${type}, F=${targetFreq.toFixed(1)}, Q=${targetQ.toFixed(3)} (Input Q: ${qVal.toFixed(3)}, Clamped to ${MAX_Q})`
+          // --- END MODIFIED LOG ---
         );
       } catch (e) {
         console.error(

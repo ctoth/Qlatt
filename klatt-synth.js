@@ -95,7 +95,7 @@ export class KlattSynth {
       BGZ: 6000,
       BGS: 200,
       NFC: 5,
-      GO: 47,
+      GO: 35, // Reduced default output gain from 47
       SR: this.ctx.sampleRate, // Use context's sample rate
     };
   }
@@ -555,28 +555,36 @@ export class KlattSynth {
         }
 
         case "AN":
+          this._debugLog(`  Scheduling Parallel Gain AN: ${value} dB`); // ADD LOG
           scheduleGain(N.anParGain, value);
           break;
         case "A1":
+          this._debugLog(`  Scheduling Parallel Gain A1: ${value} dB`); // ADD LOG
           scheduleGain(N.a1ParGain, value);
           break;
         case "A2":
+          this._debugLog(`  Scheduling Parallel Gain A2: ${value} dB`); // ADD LOG
           scheduleGain(N.a2ParGain, value);
           break;
         case "A3":
+          this._debugLog(`  Scheduling Parallel Gain A3: ${value} dB`); // ADD LOG
           scheduleGain(N.a3ParGain, value);
           break;
         case "A4":
+          this._debugLog(`  Scheduling Parallel Gain A4: ${value} dB`); // ADD LOG
           scheduleGain(N.a4ParGain, value);
           break;
         case "A5":
+          this._debugLog(`  Scheduling Parallel Gain A5: ${value} dB`); // ADD LOG
           scheduleGain(N.a5ParGain, value);
           break;
         case "A6":
+          this._debugLog(`  Scheduling Parallel Gain A6: ${value} dB`); // ADD LOG
           scheduleGain(N.a6ParGain, value);
           // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
           break;
         case "AB":
+          this._debugLog(`  Scheduling Parallel Gain AB: ${value} dB`); // ADD LOG
           scheduleGain(N.abParGain, value);
           // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
           break;

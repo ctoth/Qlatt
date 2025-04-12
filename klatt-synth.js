@@ -252,11 +252,11 @@ export class KlattSynth {
 
     // *** Ensure Summing Nodes have Gain = 1.0 ***
     N.laryngealSourceSum.gain.value = 1.0;
-    N.parallelSum.gain.value = 1.0;
+    // N.parallelSum.gain.value = 1.0; // REMOVE THIS LINE - Keep the 0.5 set earlier
     N.finalSum.gain.value = 1.0;
     N.parallelInputMix.gain.value = 1.0; // Input mixer should also likely be 1
 
-    this._debugLog("Audio nodes created, summing gains set to 1.");
+    this._debugLog("Audio nodes created, summing gains set (ParallelSum=0.5)."); // Update log message
   }
 
   _applyAllParams(time) {

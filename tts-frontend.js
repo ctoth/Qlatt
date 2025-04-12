@@ -370,18 +370,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     }
     finalParams.F0 = calculatedF0; // Set F0 on the copied params
 
-    // Ensure all required BASE_PARAMS keys exist, filling with defaults ONLY if missing or invalid
-    for (const key in BASE_PARAMS) {
-        if (!finalParams.hasOwnProperty(key)) { // Only add if truly missing
-             debugLog(`    WARN: Missing param '${key}' for ${ph.phoneme}. Adding default: ${BASE_PARAMS[key]}`);
-             finalParams[key] = BASE_PARAMS[key];
-        } else if (typeof finalParams[key] !== 'number' || !isFinite(finalParams[key])) { // Separately check for invalid existing values
-             debugLog(`    WARN: Invalid existing param '${key}' (${finalParams[key]}) for ${ph.phoneme}. Replacing with default: ${BASE_PARAMS[key]}`);
-             finalParams[key] = BASE_PARAMS[key];
-        }
-        // Otherwise, keep the existing valid value (e.g., AF=65 from P_REL)
-    }
-
+    // *** REMOVED Safety Check Loop - Assuming ph.params is already valid after fillDefaultParams and rules ***
 
     debugLog(`    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${finalParams.AV}, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${finalParams.AVS}, GO=${finalParams.GO})`);
 

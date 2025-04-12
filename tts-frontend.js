@@ -325,17 +325,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
           debugLog(`    -> Release Phoneme Params: ${JSON.stringify(ph.params)}`);
       }
   });
-  // *** START DETAILED LOGGING BEFORE FINAL LOOP ***
-  debugLog("Parameter sequence details before final loop:");
-  parameterSequence.forEach((ph, index) => {
-    debugLog(`  [${index}] Phoneme: ${ph.phoneme}, Stress: ${ph.stress}, Duration: ${ph.duration}, Type: ${ph.type}, Voiceless: ${ph.voiceless}`);
-    if (ph.params) {
-      debugLog(`      Params: AV=${ph.params.AV?.toFixed(1)}, AF=${ph.params.AF?.toFixed(1)}, AH=${ph.params.AH?.toFixed(1)}, F0=${ph.params.F0?.toFixed(1)}`);
-    } else {
-      debugLog(`      Params: undefined`);
-    }
-  });
-  // *** END ADDED LOGGING ***
+  // *** REMOVED DETAILED LOGGING BLOCK ***
 
   // --- Generate F0 ---
   debugLog("Generating F0 contour...");
@@ -367,14 +357,31 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
-    // const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Original calculation
-    const phDuration = (ph.duration || 30) / 1000.0; // Simplified duration - TEMPORARY DEBUGGING
+    const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Restore original calculation
+
+    // *** ADDED: Specific logging for P_REL inside loop ***
+    if (ph.phoneme === 'P_REL') {
+        debugLog(`    INSIDE LOOP CHECK for P_REL:`);
+        debugLog(`      ph.duration (ms): ${ph.duration}`);
+        debugLog(`      Calculated phDuration (s): ${phDuration.toFixed(4)}`);
+    }
+    // *** END ADDED LOGGING ***
+
     if (phDuration <= 0) {
         console.warn(`[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(4)}s) for ${ph.phoneme}. Original duration: ${ph.duration}ms. Skipping.`);
         debugLog(`    WARN: Skipping track event for ${ph.phoneme} due to zero or negative calculated duration.`);
         continue; // Explicitly skip if duration is bad
     }
     const targetTime = currentTime + phDuration;
+
+    // *** ADDED: Specific logging for P_REL inside loop ***
+     if (ph.phoneme === 'P_REL') {
+        debugLog(`      targetTime: ${targetTime.toFixed(4)}`);
+        debugLog(`      currentTime: ${currentTime.toFixed(4)}`);
+        debugLog(`      Condition (targetTime > currentTime): ${targetTime > currentTime}`);
+     }
+    // *** END ADDED LOGGING ***
+
     debugLog(`  Processing phoneme ${i}: ${ph.phoneme}${ph.stress ?? ''}, duration=${phDuration.toFixed(3)}s (original: ${ph.duration}ms), targetTime=${targetTime.toFixed(3)}s`);
 
     // Use the params object directly from the sequence (already filled and potentially modified by rules)

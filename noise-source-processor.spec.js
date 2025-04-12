@@ -5,10 +5,15 @@ const mockRegisterProcessor = vi.fn();
 vi.stubGlobal("registerProcessor", mockRegisterProcessor);
 vi.stubGlobal("sampleRate", 44100); // Standard sample rate
 
-// Mock the base class AudioWorkletProcessor if necessary,
-// but NoiseSourceProcessor doesn't seem to call super methods in process()
-// class MockAudioWorkletProcessor {}
-// vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+// Mock the base class AudioWorkletProcessor
+class MockAudioWorkletProcessor {
+  constructor(options) {
+    // Basic constructor to accept options like the real one
+  }
+  // No need to mock 'process' or other methods unless the processor's
+  // constructor or other methods call super.method()
+}
+vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
 
 // Dynamically import the processor AFTER setting up mocks
 let NoiseSourceProcessor;

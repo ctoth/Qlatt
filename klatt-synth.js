@@ -133,21 +133,21 @@ export class KlattSynth {
     // === Vocal Tract Filters ===
     // Cascade Path
     N.rnpCascFilter = ctx.createBiquadFilter();
-    N.rnpCascFilter.type = "peaking";
+    N.rnpCascFilter.type = "bandpass"; // Was "peaking"
     N.rnzCascFilter = ctx.createBiquadFilter();
-    N.rnzCascFilter.type = "notch";
+    N.rnzCascFilter.type = "notch"; // Keep notch
     N.r1CascFilter = ctx.createBiquadFilter();
-    N.r1CascFilter.type = "peaking";
+    N.r1CascFilter.type = "bandpass"; // Was "peaking"
     N.r2CascFilter = ctx.createBiquadFilter();
-    N.r2CascFilter.type = "peaking";
+    N.r2CascFilter.type = "bandpass"; // Was "peaking"
     N.r3CascFilter = ctx.createBiquadFilter();
-    N.r3CascFilter.type = "peaking";
+    N.r3CascFilter.type = "bandpass"; // Was "peaking"
     N.r4CascFilter = ctx.createBiquadFilter();
-    N.r4CascFilter.type = "peaking";
+    N.r4CascFilter.type = "bandpass"; // Was "peaking"
     N.r5CascFilter = ctx.createBiquadFilter();
-    N.r5CascFilter.type = "peaking";
+    N.r5CascFilter.type = "bandpass"; // Was "peaking"
     N.r6CascFilter = ctx.createBiquadFilter();
-    N.r6CascFilter.type = "peaking";
+    N.r6CascFilter.type = "bandpass"; // Was "peaking"
     this.cascadeFilters = [
       N.r1CascFilter,
       N.r2CascFilter,
@@ -185,19 +185,19 @@ export class KlattSynth {
 
     // Parallel Path Filters
     N.rnpParFilter = ctx.createBiquadFilter();
-    N.rnpParFilter.type = "peaking";
+    N.rnpParFilter.type = "bandpass"; // Was "peaking"
     N.r1ParFilter = ctx.createBiquadFilter();
-    N.r1ParFilter.type = "peaking";
+    N.r1ParFilter.type = "bandpass"; // Was "peaking"
     N.r2ParFilter = ctx.createBiquadFilter();
-    N.r2ParFilter.type = "peaking";
+    N.r2ParFilter.type = "bandpass"; // Was "peaking"
     N.r3ParFilter = ctx.createBiquadFilter();
-    N.r3ParFilter.type = "peaking";
+    N.r3ParFilter.type = "bandpass"; // Was "peaking"
     N.r4ParFilter = ctx.createBiquadFilter();
-    N.r4ParFilter.type = "peaking";
+    N.r4ParFilter.type = "bandpass"; // Was "peaking"
     N.r5ParFilter = ctx.createBiquadFilter();
-    N.r5ParFilter.type = "peaking";
+    N.r5ParFilter.type = "bandpass"; // Was "peaking"
     N.r6ParFilter = ctx.createBiquadFilter();
-    N.r6ParFilter.type = "peaking";
+    N.r6ParFilter.type = "bandpass"; // Was "peaking"
     this.parallelFilters = [
       N.r1ParFilter,
       N.r2ParFilter,
@@ -483,8 +483,8 @@ export class KlattSynth {
           const f = P.FNP,
             bw = P.BNP,
             q = bwToQ(f, bw);
-          scheduleFilter(N.rnpCascFilter, "peaking", f, q);
-          scheduleFilter(N.rnpParFilter, "peaking", f, q);
+          scheduleFilter(N.rnpCascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.rnpParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "FNZ":
@@ -504,8 +504,8 @@ export class KlattSynth {
           const f = P.F1,
             bw = P.B1,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r1CascFilter, "peaking", f, q);
-          scheduleFilter(N.r1ParFilter, "peaking", f, q);
+          scheduleFilter(N.r1CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r1ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "F2":
@@ -513,8 +513,8 @@ export class KlattSynth {
           const f = P.F2,
             bw = P.B2,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r2CascFilter, "peaking", f, q);
-          scheduleFilter(N.r2ParFilter, "peaking", f, q);
+          scheduleFilter(N.r2CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r2ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "F3":
@@ -522,8 +522,8 @@ export class KlattSynth {
           const f = P.F3,
             bw = P.B3,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r3CascFilter, "peaking", f, q);
-          scheduleFilter(N.r3ParFilter, "peaking", f, q);
+          scheduleFilter(N.r3CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r3ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "F4":
@@ -531,8 +531,8 @@ export class KlattSynth {
           const f = P.F4,
             bw = P.B4,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r4CascFilter, "peaking", f, q);
-          scheduleFilter(N.r4ParFilter, "peaking", f, q);
+          scheduleFilter(N.r4CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r4ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "F5":
@@ -540,8 +540,8 @@ export class KlattSynth {
           const f = P.F5,
             bw = P.B5,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r5CascFilter, "peaking", f, q);
-          scheduleFilter(N.r5ParFilter, "peaking", f, q);
+          scheduleFilter(N.r5CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r5ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
         case "F6":
@@ -549,8 +549,8 @@ export class KlattSynth {
           const f = P.F6,
             bw = P.B6,
             q = bwToQ(f, bw);
-          scheduleFilter(N.r6CascFilter, "peaking", f, q);
-          scheduleFilter(N.r6ParFilter, "peaking", f, q);
+          scheduleFilter(N.r6CascFilter, "bandpass", f, q); // Was "peaking"
+          scheduleFilter(N.r6ParFilter, "bandpass", f, q); // Was "peaking"
           break;
         }
 

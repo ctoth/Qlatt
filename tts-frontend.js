@@ -335,62 +335,45 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     return f0Contour[f0Contour.length - 1].f0;
   }
 
-  // Get the set of valid Klatt parameter keys from BASE_PARAMS
-  const validKlattParamKeys = Object.keys(BASE_PARAMS);
-
   // Start silent
-  let initialSilentParams = fillDefaultParams(PHONEME_TARGETS["SIL"]);
-  let filteredInitialParams = {};
-  validKlattParamKeys.forEach((key) => {
-    filteredInitialParams[key] = initialSilentParams[key];
-  });
-  klattTrack.push({ time: 0, params: filteredInitialParams });
+  klattTrack.push({ time: 0, params: fillDefaultParams(PHONEME_TARGETS["SIL"]) }); // Use filled SIL params directly
   debugLog(`  Added initial silence event at t=0.000`);
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
-    const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Use duration from rules
+    const phDuration = Math.max(20, ph.duration || 100) / 1000.0;
     const targetTime = currentTime + phDuration;
     debugLog(`  Processing phoneme ${i}: ${ph.phoneme}${ph.stress ?? ''}, duration=${phDuration.toFixed(3)}s, targetTime=${targetTime.toFixed(3)}s`);
-    const targetParams = ph.params || fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure params exist
 
-    // Determine F0
-    debugLog(`    Current Params (AV=${targetParams.AV}, AF=${targetParams.AF}, AH=${targetParams.AH}, AVS=${targetParams.AVS})`);
-    const isTargetVoiced = targetParams.AV > 0 || targetParams.AVS > 0;
+    // Use the params object directly from the sequence (already filled and potentially modified by rules)
+    const finalParams = ph.params ? { ...ph.params } : fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure we have a params object, copy it
+
+    // Determine and set F0
+    const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
     let calculatedF0 = isTargetVoiced ? getF0AtTime(targetTime) : 0;
     if (ph.phoneme === 'SIL') calculatedF0 = 0;
-    // *** Clamp calculated F0 to prevent sending 0 when voicing should be on ***
     if (isTargetVoiced && calculatedF0 < 1) {
          debugLog(`    WARN: Calculated F0 near zero (${calculatedF0.toFixed(1)}) for voiced phoneme ${ph.phoneme} at ${targetTime.toFixed(3)}s. Clamping to baseF0/2.`);
-         calculatedF0 = baseF0 / 2; // Use a low default if contour gives 0 for voiced segment
+         calculatedF0 = baseF0 / 2;
     }
-    targetParams.F0 = calculatedF0; // Add calculated F0 directly to the params object
+    finalParams.F0 = calculatedF0; // Set F0 on the copied params
 
-    // *** Logging for release phonemes ***
-    if (ph.type === 'stop_release') {
-        debugLog(`    Inspecting params for ${ph.phoneme}: AF=${targetParams.AF}, AH=${targetParams.AH}, AB=${targetParams.AB}`);
+    // Ensure all required BASE_PARAMS keys exist, filling with defaults if somehow missing
+    // (This is a safety net, shouldn't be strictly necessary if fillDefaultParams worked)
+    for (const key in BASE_PARAMS) {
+        if (!finalParams.hasOwnProperty(key) || typeof finalParams[key] !== 'number' || !isFinite(finalParams[key])) {
+             debugLog(`    WARN: Missing or invalid param '${key}' for ${ph.phoneme}. Using default: ${BASE_PARAMS[key]}`);
+             finalParams[key] = BASE_PARAMS[key];
+        }
     }
 
-    // *** REMOVED FILTERING STEP - Assuming ph.params is already valid ***
-    debugLog(`    Final Params (F0=${targetParams.F0.toFixed(1)}, AV=${targetParams.AV}, AF=${targetParams.AF}, AH=${targetParams.AH}, AVS=${targetParams.AVS}, GO=${targetParams.GO})`);
+    debugLog(`    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${finalParams.AV}, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${finalParams.AVS}, GO=${finalParams.GO})`);
 
     if (targetTime > currentTime) {
-      // Ensure all base keys exist before pushing (minimal safety check)
-      const finalParamsToSend = {};
-       validKlattParamKeys.forEach(key => {
-           const valueToAssign = (typeof targetParams[key] === 'number' && isFinite(targetParams[key])) ? targetParams[key] : BASE_PARAMS[key];
-           finalParamsToSend[key] = valueToAssign;
-           // *** ADDED LOGGING INSIDE LOOP ***
-           if (key === 'AF' && ph.type === 'stop_release') {
-               debugLog(`      Assigning finalParamsToSend.AF = ${valueToAssign} (Source value: ${targetParams[key]}, Type: ${typeof targetParams[key]}, IsFinite: ${isFinite(targetParams[key])})`);
-           }
-           // *** END ADDED LOGGING ***
-       });
+      klattTrack.push({ time: targetTime, params: finalParams }); // Add the final params object
 
-      klattTrack.push({ time: targetTime, params: finalParamsToSend }); // Add potentially modified params
-
-      // Log Event Details (Log ALL events now)
-      console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Phoneme=${ph.phoneme}, AV=${finalParamsToSend.AV.toFixed(1)}, AF=${finalParamsToSend.AF.toFixed(1)}, AH=${finalParamsToSend.AH.toFixed(1)}, F0=${finalParamsToSend.F0.toFixed(1)}, F1=${finalParamsToSend.F1.toFixed(0)}`);
+      // Log Event Details
+      console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
       debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
       currentTime = targetTime;
     } else {
@@ -398,13 +381,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
        debugLog(`    WARN: Skipping track event for ${ph.phoneme} due to zero or negative duration.`);
     }
   }
-  const finalTime = currentTime + 0.1; // Add final silence buffer
-  let finalSilentParams = fillDefaultParams(PHONEME_TARGETS["SIL"]);
-  let filteredFinalParams = {};
-  validKlattParamKeys.forEach((key) => {
-    filteredFinalParams[key] = finalSilentParams[key];
-  });
-  klattTrack.push({ time: finalTime, params: filteredFinalParams });
+  // Add final silence
+  const finalTime = currentTime + 0.1;
+  klattTrack.push({ time: finalTime, params: fillDefaultParams(PHONEME_TARGETS["SIL"]) });
   debugLog(`  Added final silence event at t=${finalTime.toFixed(3)}`);
 
   console.log( // Keep top-level log

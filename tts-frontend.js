@@ -243,7 +243,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     }
 
     return {
-      phoneme: ph.phoneme, // Use potentially updated phoneme (e.g., SIL fallback)
+      phoneme: targetKeyBase, // *** Use the potentially modified targetKeyBase ***
       stress: ph.stress,
       params: filledParams, // Use the filled params
       duration: baseTarget.dur || 100,

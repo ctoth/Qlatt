@@ -22,26 +22,39 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     super(options); // Pass options to super
     // State for modulation if implemented
     this._logCounter = 0; // Counter for throttling logs
-    this._logInterval = Math.floor(sampleRate / 10); // Log ~10 times per second
-    console.log(`[NoiseSource] Initialized. Log interval: ${this._logInterval} samples.`);
+    // Ensure sampleRate is defined globally or passed via options
+    const effectiveSampleRate = typeof sampleRate !== 'undefined' ? sampleRate : options?.processorOptions?.sampleRate || 44100; // Default if undefined
+    this._logInterval = Math.floor(effectiveSampleRate / 10); // Log ~10 times per second
+    // console.log(`[NoiseSource] Initialized. Sample Rate: ${effectiveSampleRate}, Log interval: ${this._logInterval} samples.`);
   }
 
   process(inputs, outputs, parameters) {
-    if (!outputs || !outputs[0] || !outputs[0][0] || !outputs[1] || !outputs[1][0]) {
-        // console.log("[NoiseSource] Missing output buffers.");
-        return true; // Keep alive but do nothing
+    // Check if primary outputs and their first channels exist and have length
+    const fricOutputAvailable = outputs && outputs[0] && outputs[0][0] && outputs[0][0].length > 0;
+    const aspOutputAvailable = outputs && outputs[1] && outputs[1][0] && outputs[1][0].length > 0;
+
+    if (!fricOutputAvailable && !aspOutputAvailable) {
+      // console.log("[NoiseSource] Both output buffers missing or invalid.");
+      return true; // Keep alive but do nothing if no valid outputs
     }
-    const fricOutput = outputs[0][0]; // Output 0: Frication Noise
-    const aspOutput = outputs[1][0]; // Output 1: Aspiration Noise
 
-    const fricGainValues = parameters.fricationGain; // Linear gain 0-1
-    const aspGainValues = parameters.aspirationGain;   // Linear gain 0-1
+    // Determine block length from the first available valid output
+    const blockLength = fricOutputAvailable ? outputs[0][0].length : outputs[1][0].length;
 
-    const blockLength = fricOutput.length;
+    // Get references, using null if unavailable
+    const fricOutput = fricOutputAvailable ? outputs[0][0] : null; // Output 0: Frication Noise
+    const aspOutput = aspOutputAvailable ? outputs[1][0] : null; // Output 1: Aspiration Noise
+
+    // Ensure parameters exist before accessing them
+    const fricGainValues = parameters.fricationGain || [0]; // Default to k-rate 0 if missing
+    const aspGainValues = parameters.aspirationGain || [0];   // Default to k-rate 0 if missing
+
     let fricActive = false; // Track if output was non-zero
     let aspActive = false;  // Track if output was non-zero
 
     // --- Logging ---
+    // Use a smaller interval for testing if needed, or disable
+    // this._logInterval = 128; // Log every block during tests?
     const shouldLog = this._logCounter === 0;
     let logFricGain = 0, logAspGain = 0;
     if (shouldLog) {
@@ -60,22 +73,41 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
 
       // --- Optional Modulation could be added here ---
 
-      fricOutput[i] = noise * fricGain;
-      aspOutput[i] = noise * aspGain;
-
-      if (fricGain > 0) fricActive = true;
-      if (aspGain > 0) aspActive = true;
+      // Only write to output if it's available
+      if (fricOutput) {
+        fricOutput[i] = noise * fricGain;
+        if (fricGain > 0) fricActive = true;
+      }
+      if (aspOutput) {
+        aspOutput[i] = noise * aspGain;
+        if (aspGain > 0) aspActive = true;
+      }
     }
 
     // --- Logging ---
-    if (shouldLog) {
-        console.log(`[NoiseSource] FricGain: ${logFricGain.toFixed(3)}, AspGain: ${logAspGain.toFixed(3)}, FricActive: ${fricActive}, AspActive: ${aspActive}`);
+    if (shouldLog && (fricActive || aspActive)) { // Only log if something happened or gains were > 0
+        // console.log(`[NoiseSource] FricGain: ${logFricGain.toFixed(3)}, AspGain: ${logAspGain.toFixed(3)}, FricActive: ${fricActive}, AspActive: ${aspActive}`);
     }
+     // Always advance counter regardless of logging
     this._logCounter = (this._logCounter + blockLength) % this._logInterval;
     // ---
 
-    return true;
+    return true; // Keep processor alive
   }
 }
 
-registerProcessor("noise-source-processor", NoiseSourceProcessor);
+// Export the class for testing purposes if using ES modules
+// If this script is meant to be loaded directly by addModule, registerProcessor is sufficient.
+// For Vitest/Jest, we often need an export.
+export default NoiseSourceProcessor;
+
+// Conditional registration: only run registerProcessor in the actual AudioWorkletGlobalScope
+// This prevents errors during testing where registerProcessor might be mocked or undefined.
+if (typeof registerProcessor === 'function' && globalThis.AudioWorkletGlobalScope) {
+    try {
+        registerProcessor("noise-source-processor", NoiseSourceProcessor);
+    } catch (error) {
+        console.error("Failed to register NoiseSourceProcessor:", error);
+        // Potentially re-registering?
+    }
+}

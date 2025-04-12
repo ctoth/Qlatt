@@ -256,42 +256,34 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   // --- Apply Rules ---
   debugLog("Applying rule: insertStopReleases...");
   parameterSequence = insertStopReleases(parameterSequence);
-  // --- REVISED Refill step ---
-  debugLog("Applying rule: Refill params/durations/flags for releases...");
-  parameterSequence = parameterSequence.map((ph) => {
-    if (!ph.params) { // Only for inserted releases
-      debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
-      let targetKeyBase = ph.phoneme;
-      let baseTarget = PHONEME_TARGETS[targetKeyBase];
+  // --- Simplified Refill Step ---
+  debugLog("Applying rule: Refill params/durations for releases...");
+  for (let i = 0; i < parameterSequence.length; i++) {
+      const ph = parameterSequence[i];
+      if (!ph.params) { // Only process phonemes inserted by rules (like releases)
+          debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
+          let baseTarget = PHONEME_TARGETS[ph.phoneme]; // Directly use phoneme name
 
-      if (!baseTarget) {
-        console.warn(`[TTS Frontend] No target found for inserted release ${ph.phoneme}. Using SIL.`);
-        baseTarget = PHONEME_TARGETS["SIL"];
-        ph.phoneme = "SIL";
-        debugLog(`    No target found for ${targetKeyBase}, using SIL.`);
+          if (!baseTarget) {
+              console.warn(`[TTS Frontend] No target found for inserted phoneme ${ph.phoneme}. Using SIL.`);
+              baseTarget = PHONEME_TARGETS["SIL"];
+              // Consider if we should change ph.phoneme to SIL here? Maybe not needed if params are SIL.
+          }
+
+          // Use the refined fillDefaultParams
+          ph.params = fillDefaultParams(baseTarget);
+          ph.duration = baseTarget?.dur || 30; // Use optional chaining
+
+          // Add minimal type flag if needed by later rules (currently none seem to need it after this point)
+          if (baseTarget?.type) {
+              ph.type = baseTarget.type;
+          }
+
+          debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}`);
       }
-      // *** ADDED DETAILED LOGGING FOR AF ***
-      debugLog(`    Base target for ${targetKeyBase}: AF=${baseTarget?.AF}, AH=${baseTarget?.AH}`);
-      ph.params = fillDefaultParams(baseTarget); // <--- FILLING PARAMS HERE
-      ph.duration = baseTarget.dur || 30;
-      // *** LOG PARAMS AFTER FILLING ***
-      debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}, AVS=${ph.params.AVS}), Duration=${ph.duration}`);
-
-      // Add flags from the found target
-      if (baseTarget) {
-          if (baseTarget.type) ph.type = baseTarget.type;
-          if (baseTarget.hasOwnProperty('voiceless')) ph.voiceless = baseTarget.voiceless;
-          if (baseTarget.hasOwnProperty('voiced')) ph.voiced = baseTarget.voiced;
-          // No need to copy other flags here as releases aren't usually context for other rules
-      }
-    }
-    // Ensure all phonemes have params (maybe redundant now?)
-    // ph.params = ph.params || fillDefaultParams(PHONEME_TARGETS["SIL"]); // Removed redundant line
-
-    return ph;
-  });
-  debugLog("Finished refilling params and flags for releases.");
-  // --- End REVISED Refill step ---
+  }
+  debugLog("Finished refilling params for releases.");
+  // --- End Simplified Refill Step ---
 
   debugLog("Applying rule: rule_K_Context...");
   parameterSequence = rule_K_Context(parameterSequence);

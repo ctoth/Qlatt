@@ -3,7 +3,7 @@
 class VoicingSourceProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
         return [
-            { name: 'f0', defaultValue: 100, minValue: 1, maxValue: 500, automationRate: 'a-rate' },
+            { name: 'f0', defaultValue: 100, /* minValue: 1, */ maxValue: 500, automationRate: 'a-rate' }, // Allow F0=0
             { name: 'amp', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'a-rate' } // Linear amplitude
         ];
     }

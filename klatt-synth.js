@@ -418,13 +418,14 @@ export class KlattSynth {
     try {
       switch (name) {
         case "F0": {
-          const f0Val = Math.max(1, value);
+          // Allow F0 to be 0 to signal silence to the worklet
+          // The check for finite number happens earlier in setParam
           this._debugLog(
-            `  Scheduling VoicingSource F0: ${f0Val.toFixed(1)} Hz`
+            `  Scheduling VoicingSource F0: ${value.toFixed(1)} Hz`
           );
           N.voicingSource.parameters
             .get("f0")
-            [scheduleMethod](f0Val, rampEndTime);
+            [scheduleMethod](value, rampEndTime);
           break;
         }
         case "AV":

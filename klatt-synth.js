@@ -11,8 +11,8 @@ export function bwToQ(F, BW) {
 // *** REMOVE OLD SCALING FACTOR ***
 // const SOURCE_AMP_REFERENCE_DB = 65.0;
 // const SOURCE_AMP_SCALE_FACTOR = 1.0 / dbToLinear(SOURCE_AMP_REFERENCE_DB);
-// *** NEW: Define Max dB for linear scaling 0-1 ***
-const SOURCE_AMP_MAX_DB = 70.0; // dB value that maps to linear 1.0 for worklets
+// *** NEW: Define Max dB for linear scaling 0-1 (Aligned with Table I Max) ***
+const SOURCE_AMP_MAX_DB = 80.0; // dB value that maps to linear 1.0 for worklets
 
 // --- Main Synth Class ---
 export class KlattSynth {
@@ -88,7 +88,7 @@ export class KlattSynth {
       A5: 0,
       A6: 0,
       AB: 0,
-      SW: 1, // 0: Cascade/Parallel, 1: All Parallel
+      SW: 0, // 0: Cascade/Parallel (Paper Default), 1: All Parallel
       FGP: 0,
       BGP: 100,
       FGZ: 1500,
@@ -204,6 +204,14 @@ export class KlattSynth {
     N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
     N.outputGain = ctx.createGain();
     N.outputGain.gain.value = dbToLinear(this.params.GO); // Init with GO
+
+    // Parallel Path Differentiator Filters (for preemphasis in all-parallel mode)
+    N.r2DiffPar = ctx.createBiquadFilter(); N.r2DiffPar.type = 'highpass'; N.r2DiffPar.frequency.value = 1; N.r2DiffPar.Q.value = 0.707;
+    N.r3DiffPar = ctx.createBiquadFilter(); N.r3DiffPar.type = 'highpass'; N.r3DiffPar.frequency.value = 1; N.r3DiffPar.Q.value = 0.707;
+    N.r4DiffPar = ctx.createBiquadFilter(); N.r4DiffPar.type = 'highpass'; N.r4DiffPar.frequency.value = 1; N.r4DiffPar.Q.value = 0.707;
+    N.r5DiffPar = ctx.createBiquadFilter(); N.r5DiffPar.type = 'highpass'; N.r5DiffPar.frequency.value = 1; N.r5DiffPar.Q.value = 0.707;
+    N.r6DiffPar = ctx.createBiquadFilter(); N.r6DiffPar.type = 'highpass'; N.r6DiffPar.frequency.value = 1; N.r6DiffPar.Q.value = 0.707;
+    this.parallelDiffFilters = [null, N.r2DiffPar, N.r3DiffPar, N.r4DiffPar, N.r5DiffPar, N.r6DiffPar]; // Index matches R number
 
     // *** Ensure Summing Nodes have Gain = 1.0 ***
     N.laryngealSourceSum.gain.value = 1.0;
@@ -647,15 +655,15 @@ export class KlattSynth {
         .connect(N.r1ParFilter)
         .connect(N.a1ParGain)
         .connect(N.parallelSum); // A1 active here
-      for (let i = 1; i < 6; i++) {
-        // R2-R6
-        if (!this.parallelFilters[i] || !this.parallelGains[i]) continue; // Safety check
+      for (let i = 1; i < 6; i++) { // R2-R6 with preemphasis
+        if (!this.parallelFilters[i] || !this.parallelGains[i] || !this.parallelDiffFilters[i]) continue; // Safety check
         N.parallelInputMix
+          .connect(this.parallelDiffFilters[i]) // Insert differentiator
           .connect(this.parallelFilters[i])
           .connect(this.parallelGains[i])
           .connect(N.parallelSum);
       }
-      N.parallelInputMix.connect(N.abParGain).connect(N.parallelSum); // Bypass path
+      N.parallelInputMix.connect(N.abParGain).connect(N.parallelSum); // Bypass path (no preemphasis)
 
       // Final Stage
       N.parallelSum.connect(N.radiation).connect(N.outputGain);

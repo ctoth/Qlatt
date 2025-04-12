@@ -36,7 +36,7 @@ export const BASE_PARAMS = {
   BGS: 200,
   NFC: 5,
   GO: 47,
-  // SR should not be here, it's a synth property
+  // SR removed - determined by AudioContext
 };
 
 export const PHONEME_TARGETS = {

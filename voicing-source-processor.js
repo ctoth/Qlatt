@@ -49,12 +49,20 @@ class VoicingSourceProcessor extends AudioWorkletProcessor {
                     pulse = amp; // Generate impulse scaled by linear amp
                     generatedPulse = true;
 
-                    // Calculate the period for the *next* pulse based on current f0
-                    const periodSamples = sampleRate / f0;
+                    // --- MODIFICATION START ---
+                    // Define a minimum F0 for calculating the next pulse period
+                    // to avoid excessively large periods during ramp onset from silence.
+                    const MIN_F0_FOR_PERIOD_HZ = 20.0;
+                    const f0ForPeriod = Math.max(f0, MIN_F0_FOR_PERIOD_HZ);
+
+                    // Calculate the period for the *next* pulse based on clamped f0
+                    const periodSamples = sampleRate / f0ForPeriod;
+                    // --- MODIFICATION END ---
+
                     // Add the period to the current counter value.
                     // This correctly schedules the next pulse, preserving phase.
                     this.samplesUntilPulse += Math.max(1, periodSamples);
-                    // console.log(`   -> Pulse generated! Next in ${this.samplesUntilPulse.toFixed(1)} samples (f0=${f0.toFixed(1)}).`);
+                    // console.log(`   -> Pulse generated! Next in ${this.samplesUntilPulse.toFixed(1)} samples (f0=${f0.toFixed(1)}, f0ForPeriod=${f0ForPeriod.toFixed(1)}).`);
                 }
             } else {
                 // If inactive (f0=0, amp=0, or f0 too low), reset the counter/phase.

@@ -47,12 +47,17 @@ describe("NoiseSourceProcessor", () => {
     vi.resetModules(); // Important to re-import the processor cleanly
     vi.stubGlobal("registerProcessor", mockRegisterProcessor);
     vi.stubGlobal("sampleRate", 44100);
+    // Ensure the AudioWorkletProcessor mock is stubbed *before* the import
+    vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+
 
     // Import the processor class for this test run
     const module = await import("./noise-source-processor.js?t=" + Date.now()); // Cache bust import
     NoiseSourceProcessor = module.default; // Assuming it exports default
 
     // Re-create processor and buffers for isolation
+    // Pass processorOptions including sampleRate to the constructor
+    const processorOptions = { processorOptions: { sampleRate: 44100 } };
     processor = new NoiseSourceProcessor();
 
     // Prepare mock outputs [outputIndex][channelIndex][sampleIndex]

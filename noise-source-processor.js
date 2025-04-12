@@ -101,9 +101,9 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
 // For Vitest/Jest, we often need an export.
 export default NoiseSourceProcessor;
 
-// Conditional registration: only run registerProcessor in the actual AudioWorkletGlobalScope
-// This prevents errors during testing where registerProcessor might be mocked or undefined.
-if (typeof registerProcessor === 'function' && globalThis.AudioWorkletGlobalScope) {
+// Conditional registration: only run registerProcessor if it's available (i.e., in a Worklet scope or mocked).
+// This prevents errors during testing or if run outside a worklet.
+if (typeof registerProcessor === 'function') {
     try {
         registerProcessor("noise-source-processor", NoiseSourceProcessor);
     } catch (error) {

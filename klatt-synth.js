@@ -11,8 +11,8 @@ export function bwToQ(F, BW) {
 // *** REMOVE OLD SCALING FACTOR ***
 // const SOURCE_AMP_REFERENCE_DB = 65.0;
 // const SOURCE_AMP_SCALE_FACTOR = 1.0 / dbToLinear(SOURCE_AMP_REFERENCE_DB);
-// *** NEW: Define Max dB for linear scaling 0-1 (Aligned with Table I Max) ***
-const SOURCE_AMP_MAX_DB = 80.0; // dB value that maps to linear 1.0 for worklets
+// *** NEW: Define Max dB for linear scaling 0-1 (Adjusted Reference) ***
+const SOURCE_AMP_MAX_DB = 70.0; // dB value that maps to linear 1.0 for worklets
 
 // --- Main Synth Class ---
 export class KlattSynth {

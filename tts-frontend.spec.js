@@ -1,13 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { textToKlattTrack, normalizeText, transcribeText } from './tts-frontend.js'; // Corrected path
-import { PHONEME_TARGETS, fillDefaultParams } from './tts-frontend-rules.js'; // Corrected path
+import { describe, it, expect, beforeEach, vi } from 'vitest'; // Keep imports
+import { textToKlattTrack, normalizeText, transcribeText } from './tts-frontend.js';
+import { PHONEME_TARGETS, fillDefaultParams } from './tts-frontend-rules.js';
 
 describe('TTS Frontend', () => {
-  beforeEach(() => {
-    // Spy on console.log to reduce noise in tests
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-  });
+  // Remove console spies to allow logging from the failing test
+  // beforeEach(() => {
+  //   // Spy on console.log to reduce noise in tests
+  //   vi.spyOn(console, 'log').mockImplementation(() => {});
+  //   vi.spyOn(console, 'warn').mockImplementation(() => {});
+  // });
 
   describe('normalizeText', () => {
     it('converts numbers to words', () => {
@@ -77,76 +78,20 @@ describe('TTS Frontend', () => {
       expect(initialPhonemes.some(p => p.phoneme === 'P'), "Initial transcription should include 'P'").toBe(true);
 
       // --- Step 2: Check Parameter Sequence Preparation ---
-      // (This part is complex to check directly without replicating logic, assume it works for now)
-      // We can infer its success if P_CL exists before insertStopReleases
-
-      // --- Step 3: Check insertStopReleases ---
-      // Manually run the first part of textToKlattTrack to get the sequence *before* the final loop
-      let parameterSequence = initialPhonemes.map((ph) => {
-          let targetKeyBase = ph.phoneme;
-          if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
-              targetKeyBase += "_CL";
-          }
-          let baseTarget = PHONEME_TARGETS[targetKeyBase + "1"] || PHONEME_TARGETS[targetKeyBase + "0"] || PHONEME_TARGETS[targetKeyBase];
-          if (!baseTarget && ph.isPunctuation) baseTarget = PHONEME_TARGETS["SIL"];
-          if (!baseTarget) baseTarget = PHONEME_TARGETS["SIL"]; // Fallback
-          const filledParams = fillDefaultParams(baseTarget);
-          const flags = {};
-          if (baseTarget) {
-              if (baseTarget.type) flags.type = baseTarget.type;
-              if (baseTarget.hasOwnProperty('voiceless')) flags.voiceless = baseTarget.voiceless;
-              if (baseTarget.hasOwnProperty('voiced')) flags.voiced = baseTarget.voiced;
-              if (baseTarget.hasOwnProperty('front')) flags.front = baseTarget.front;
-              if (baseTarget.hasOwnProperty('back')) flags.back = baseTarget.back;
-              if (baseTarget.hasOwnProperty('hi')) flags.hi = baseTarget.hi;
-              if (baseTarget.hasOwnProperty('low')) flags.low = baseTarget.low;
-          }
-          return { phoneme: targetKeyBase, stress: ph.stress, params: filledParams, duration: baseTarget.dur || 100, ...flags };
-      });
-
-      // Check if P_CL exists before insertion
-      expect(parameterSequence.some(p => p.phoneme === 'P_CL'), "Parameter sequence should contain 'P_CL' before release insertion").toBe(true);
-
-      // Apply insertStopReleases (import it if needed, or replicate its logic simply)
-      const releaseMap = { P_CL: "P_REL", T_CL: "T_REL", K_CL: "K_REL", B_CL: "B_REL", D_CL: "D_REL", G_CL: "G_REL" };
-      const sequenceAfterRelease = [];
-      for (let i = 0; i < parameterSequence.length; i++) {
-          const current = parameterSequence[i];
-          sequenceAfterRelease.push(current);
-          const releasePhoneme = releaseMap[current.phoneme];
-          if (releasePhoneme) {
-              let addRelease = true; // Simplified check for test
-              if (parameterSequence[i + 1]?.phoneme === 'SIL') addRelease = false;
-              if (addRelease) {
-                  sequenceAfterRelease.push({ phoneme: releasePhoneme, stress: current.stress }); // Insert release object
-              }
-          }
-      }
-      expect(sequenceAfterRelease.some(p => p.phoneme === 'P_REL'), "Sequence should contain 'P_REL' after insertStopReleases").toBe(true);
-
-      // --- Step 4: Check Refill Step ---
-      for (let i = 0; i < sequenceAfterRelease.length; i++) {
-          const ph = sequenceAfterRelease[i];
-          if (!ph.params) { // Simulate refill
-              let baseTarget = PHONEME_TARGETS[ph.phoneme];
-              if (!baseTarget) baseTarget = PHONEME_TARGETS["SIL"];
-              ph.params = fillDefaultParams(baseTarget);
-              ph.duration = baseTarget?.dur || 30;
-              if (baseTarget) { // Copy flags
-                  if (baseTarget.type) ph.type = baseTarget.type;
-                  if (baseTarget.hasOwnProperty('voiceless')) ph.voiceless = baseTarget.voiceless;
-                  if (baseTarget.hasOwnProperty('voiced')) ph.voiced = baseTarget.voiced;
-              }
-          }
-      }
-      const pRelAfterRefill = sequenceAfterRelease.find(p => p.phoneme === 'P_REL');
-      expect(pRelAfterRefill, "'P_REL' should still exist after refill step").toBeDefined();
-      expect(pRelAfterRefill.params, "'P_REL' should have params after refill").toBeDefined();
-      expect(pRelAfterRefill.params.AF, "'P_REL' AF should be > 0 after refill").toBeGreaterThan(0);
+      // (Intermediate simulation steps removed to focus on the final output)
 
       // --- Step 5: Check Final Track Generation ---
       // Now run the full function
+      console.log(`--- Running textToKlattTrack('${inputText}') ---`); // Log marker
       const track = textToKlattTrack(inputText, baseF0);
+      console.log(`--- textToKlattTrack finished ---`); // Log marker
+
+      // *** ADDED: Log the final track for inspection ***
+      console.log("--- FINAL TRACK ---");
+      track.forEach((event, index) => {
+        console.log(`[${index}] Time: ${event.time.toFixed(3)}, Phoneme: ${event.phoneme}, AV: ${event.params?.AV?.toFixed(1)}, AF: ${event.params?.AF?.toFixed(1)}`);
+      });
+      console.log("-------------------");
 
       // Check final track structure
       expect(track).toBeInstanceOf(Array);

@@ -58,7 +58,7 @@ describe("NoiseSourceProcessor", () => {
     // Re-create processor and buffers for isolation
     // Pass processorOptions including sampleRate to the constructor
     const processorOptions = { processorOptions: { sampleRate: 44100 } };
-    processor = new NoiseSourceProcessor();
+    processor = new NoiseSourceProcessor(processorOptions); // Pass options
 
     // Prepare mock outputs [outputIndex][channelIndex][sampleIndex]
     outputs = [

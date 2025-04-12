@@ -310,6 +310,15 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Finished applying rules.");
   debugLog("Parameter sequence after rules:", parameterSequence.map(p => `${p.phoneme}${p.stress ?? ''}(${p.duration}ms)`).join(' '));
 
+  // *** ADDED LOGGING: Inspect sequence before final loop ***
+  debugLog("Inspecting parameterSequence before final track generation:");
+  parameterSequence.forEach((ph, index) => {
+      debugLog(`  [${index}] ${ph.phoneme}${ph.stress ?? ''}: Duration=${ph.duration}, AV=${ph.params?.AV?.toFixed(1)}, AF=${ph.params?.AF?.toFixed(1)}, AH=${ph.params?.AH?.toFixed(1)}, F0=${ph.params?.F0?.toFixed(1)}`);
+      if (ph.phoneme.endsWith('_REL')) {
+          debugLog(`    -> Release Phoneme Params: ${JSON.stringify(ph.params)}`);
+      }
+  });
+  // *** END ADDED LOGGING ***
 
   // --- Generate F0 ---
   debugLog("Generating F0 contour...");

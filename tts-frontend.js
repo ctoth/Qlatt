@@ -274,12 +274,24 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
           ph.params = fillDefaultParams(baseTarget);
           ph.duration = baseTarget?.dur || 30; // Use optional chaining
 
-          // Add minimal type flag if needed by later rules (currently none seem to need it after this point)
-          if (baseTarget?.type) {
-              ph.type = baseTarget.type;
+          // Add minimal type flag and other relevant flags
+          if (baseTarget) {
+              if (baseTarget.type) ph.type = baseTarget.type;
+              // Copy other flags that might be relevant, similar to initial mapping
+              if (baseTarget.hasOwnProperty('voiceless')) ph.voiceless = baseTarget.voiceless;
+              if (baseTarget.hasOwnProperty('voiced')) ph.voiced = baseTarget.voiced;
+              // Add other flags from PHONEME_TARGETS if needed by future rules
+              if (baseTarget.hasOwnProperty('front')) ph.front = baseTarget.front;
+              if (baseTarget.hasOwnProperty('back')) ph.back = baseTarget.back;
+              if (baseTarget.hasOwnProperty('hi')) ph.hi = baseTarget.hi;
+              if (baseTarget.hasOwnProperty('low')) ph.low = baseTarget.low;
+              if (baseTarget.hasOwnProperty('bilabial')) ph.bilabial = baseTarget.bilabial;
+              if (baseTarget.hasOwnProperty('alveolar')) ph.alveolar = baseTarget.alveolar;
+              // etc. for other place/manner features if necessary
           }
 
-          debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}`);
+
+          debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}, Type=${ph.type}, Voiceless=${ph.voiceless}`);
       }
   }
   debugLog("Finished refilling params for releases.");

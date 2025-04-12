@@ -367,7 +367,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     debugLog(`    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${finalParams.AV}, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${finalParams.AVS}, GO=${finalParams.GO})`);
 
     if (targetTime > currentTime) {
-      klattTrack.push({ time: targetTime, params: finalParams }); // Add the final params object
+      klattTrack.push({ time: targetTime, phoneme: ph.phoneme, params: finalParams }); // Add phoneme name to track event
 
       // Log Event Details
       console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
@@ -380,7 +380,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   }
   // Add final silence
   const finalTime = currentTime + 0.1;
-  klattTrack.push({ time: finalTime, params: fillDefaultParams(PHONEME_TARGETS["SIL"]) });
+  klattTrack.push({ time: finalTime, phoneme: 'SIL', params: fillDefaultParams(PHONEME_TARGETS["SIL"]) });
   debugLog(`  Added final silence event at t=${finalTime.toFixed(3)}`);
 
   console.log( // Keep top-level log

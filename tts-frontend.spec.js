@@ -76,7 +76,12 @@ describe('TTS Frontend', () => {
       
       // Find events with non-zero AF (frication segments)
       const fricEvents = track.filter(event => event.params.AF > 0);
-      expect(fricEvents.length).toBeGreaterThan(0);
+      // expect(fricEvents.length).toBeGreaterThan(0); // Original failing assertion
+
+      // More specific check: Find the P_REL event and check its AF
+      const pRelEvent = track.find(event => event.phoneme === 'P_REL'); // Check phoneme property added to track event
+      expect(pRelEvent, "P_REL event should exist in track").toBeDefined();
+      expect(pRelEvent.params.AF, "P_REL event AF should be > 0").toBeGreaterThan(0);
     });
 
     it('generates F0 contours with appropriate values', () => {

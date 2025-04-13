@@ -72,23 +72,22 @@ function numberToWords(num) {
   return String(num);
 }
 
-// --- Phonetic Transcription --- (MODIFIED: Return word info)
+// --- Phonetic Transcription --- (MODIFIED: Return flat phoneme list with word info)
 export function transcribeText(text) {
   const words = text.split(" ");
-  const wordPhonemeList = []; // Array of { word: '...', phonemes: [...] }
+  const flatPhonemeList = []; // Flat array of { phoneme: '...', stress: ..., word: '...' }
   const punctuation = [",", ".", "?", "!"];
 
   for (const word of words) {
     if (!word) continue; // Skip empty strings resulting from multiple spaces
 
-    const currentWordData = { word: word, phonemes: [] };
-
     if (punctuation.includes(word)) {
-      currentWordData.phonemes.push({
+      flatPhonemeList.push({
         phoneme: "SIL",
         stress: null,
         isPunctuation: true,
         symbol: word,
+        word: word // Associate punctuation with itself as the 'word'
       });
     } else {
       const lowerWord = word.toLowerCase();
@@ -103,31 +102,29 @@ export function transcribeText(text) {
         for (const phoneWithStress of phones) {
           const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
           if (match) {
-            currentWordData.phonemes.push({
+            flatPhonemeList.push({
               phoneme: match[1],
               stress: match[2] ? parseInt(match[2]) : null,
+              word: word // Add the original word to each phoneme
             });
           } else if (phoneWithStress === "SIL") {
             // Handle SIL within a pronunciation if needed (though unlikely in CMU)
-            currentWordData.phonemes.push({ phoneme: "SIL", stress: null });
+            flatPhonemeList.push({ phoneme: "SIL", stress: null, word: word });
           }
         }
       } else {
-        console.warn(`Word "${word}" not found. Skipping.`);
+        console.warn(`Word "${word}" not found. Representing as SIL.`);
         // Represent unknown word as silence associated with the word
-        currentWordData.phonemes.push({ phoneme: "SIL", stress: null, duration: 50 });
+        flatPhonemeList.push({ phoneme: "SIL", stress: null, duration: 50, word: word });
       }
     }
-    // Only add if phonemes were generated (handles empty words/skips)
-    if (currentWordData.phonemes.length > 0) {
-        wordPhonemeList.push(currentWordData);
-    }
   }
-  return wordPhonemeList; // Return the list of word objects
+  return flatPhonemeList; // Return the flat list of phoneme objects
 }
 
-// --- Stop Release Rule --- (Keep as is)
-function insertStopReleases(phonemeList) {
+
+// --- Stop Release Rule --- (MODIFIED: Operates on flat list)
+function insertStopReleases(phonemeList) { // Now receives the flat list
   /* ... */
   const newList = [];
   const releaseMap = {
@@ -176,26 +173,25 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Input Text:", inputText);
   const normalized = normalizeText(inputText);
   debugLog("Normalized Text:", normalized);
-  // Transcribe returns list of { word: '...', phonemes: [...] }
-  const wordPhonemeList = transcribeText(normalized);
+  // Transcribe returns a flat list of phoneme objects with word info
+  let parameterSequence = transcribeText(normalized);
   debugLog(
-    "Initial Word/Phonemes:",
-    wordPhonemeList.map(wp => `${wp.word}(${wp.phonemes.map(p => p.phoneme + (p.stress ?? '')).join(' ')})`).join(' | ')
+    "Initial Phonemes:",
+    parameterSequence.map(p => `${p.phoneme}${p.stress ?? ''}(${p.word})`).join(' ')
   );
 
-  // --- Prepare Parameter Sequence (Flatten word list, add word info) ---
-  debugLog("Preparing initial parameter sequence...");
-  let parameterSequence = [];
-  wordPhonemeList.forEach(wordData => {
-    wordData.phonemes.forEach(ph => {
-      let targetKeyBase = ph.phoneme;
-      let isStopClosure = false;
-      // debugLog(`  Processing phoneme: ${ph.phoneme}${ph.stress ?? ''} for word: ${wordData.word}`); // Can be noisy
-      if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
-        targetKeyBase += "_CL";
-        isStopClosure = true;
-      }
-      // } // Misplaced brace removed from here
+  // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
+  debugLog("Preparing initial parameter sequence (mapping to targets)...");
+  parameterSequence = parameterSequence.map(ph => {
+    let targetKeyBase = ph.phoneme;
+    let isStopClosure = false;
+    // debugLog(`  Processing phoneme: ${ph.phoneme}${ph.stress ?? ''} from word: ${ph.word}`); // Can be noisy
+
+    // Map P, T, K, B, D, G to their closure versions initially
+    if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
+      targetKeyBase += "_CL";
+      isStopClosure = true;
+    }
 
     // Determine lookup key: Vowels use stress, Consonants ignore stress for lookup
     let baseTarget;
@@ -225,55 +221,52 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     // Handle punctuation and final fallback
     if (!baseTarget && ph.isPunctuation) {
       baseTarget = PHONEME_TARGETS["SIL"];
-      ph.phoneme = "SIL";
-      debugLog(`    Phoneme is punctuation, using SIL target.`);
+      targetKeyBase = "SIL"; // Update the base key
+      debugLog(`    Phoneme is punctuation ('${ph.symbol}'), using SIL target.`);
     } else if (!baseTarget) {
       console.warn(
-        `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}). Using SIL.`
+        `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
       );
       baseTarget = PHONEME_TARGETS["SIL"];
-      ph.phoneme = "SIL"; // Update the phoneme name too
+      targetKeyBase = "SIL"; // Update the base key
       debugLog(`    No target found, falling back to SIL.`);
     } else {
-       debugLog(`    Found target: ${baseTarget.type || 'unknown type'}, dur: ${baseTarget.dur}`);
+       debugLog(`    Found target for ${targetKeyBase}: ${baseTarget.type || 'unknown type'}, dur: ${baseTarget.dur}`);
     }
 
     const filledParams = fillDefaultParams(baseTarget);
-    debugLog(`    Filled Params (AV=${filledParams.AV}, AF=${filledParams.AF}, AH=${filledParams.AH}, AVS=${filledParams.AVS})`);
+    // debugLog(`    Filled Params (AV=${filledParams.AV}, AF=${filledParams.AF}, AH=${filledParams.AH}, AVS=${filledParams.AVS})`);
 
-    // *** ADDED: Copy essential flags from baseTarget ***
+    // Copy essential flags from baseTarget
     const flags = {};
     if (baseTarget) {
         if (baseTarget.type) flags.type = baseTarget.type;
         if (baseTarget.hasOwnProperty('voiceless')) flags.voiceless = baseTarget.voiceless;
         if (baseTarget.hasOwnProperty('voiced')) flags.voiced = baseTarget.voiced;
-        // Add other flags needed by rules later? (e.g., front, back, hi, low for K_Context?)
         if (baseTarget.hasOwnProperty('front')) flags.front = baseTarget.front;
         if (baseTarget.hasOwnProperty('back')) flags.back = baseTarget.back;
         if (baseTarget.hasOwnProperty('hi')) flags.hi = baseTarget.hi;
         if (baseTarget.hasOwnProperty('low')) flags.low = baseTarget.low;
+        // Add other flags as needed by rules
     }
 
-    // Create the object for the parameter sequence
-    const phonemeData = {
-      phoneme: targetKeyBase, // *** Use the potentially modified targetKeyBase ***
+    // Return the enriched phoneme data object for the sequence
+    return {
+      phoneme: targetKeyBase, // Use the potentially modified targetKeyBase (e.g., P_CL, SIL)
       stress: ph.stress,
-      params: filledParams, // Use the filled params
-      duration: baseTarget.dur || 100,
+      params: filledParams,
+      duration: baseTarget?.dur || (targetKeyBase === 'SIL' ? 100 : 50), // Default duration, use optional chaining
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
-      ...flags, // Add the copied flags
-      word: wordData.word // *** ADD WORD INFO ***
+      ...flags,
+      word: ph.word // Keep the word info
     };
-    parameterSequence.push(phonemeData); // Push the data for this phoneme
+  });
 
-    }); // End of inner forEach (looping through phonemes 'ph')
-  }); // End of outer forEach (looping through words 'wordData')
+  debugLog("Initial parameter sequence prepared after mapping.");
 
-  debugLog("Initial parameter sequence prepared.");
-
-  // --- Apply Rules (Rules now operate on the flattened parameterSequence) ---
+  // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
   debugLog("Applying rule: insertStopReleases...");
-  parameterSequence = insertStopReleases(parameterSequence);
+  parameterSequence = insertStopReleases(parameterSequence); // Operates on the flat list
   // --- Simplified Refill Step ---
   debugLog("Applying rule: Refill params/durations for releases...");
   for (let i = 0; i < parameterSequence.length; i++) {

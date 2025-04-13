@@ -155,7 +155,52 @@ describe('TTS Frontend', () => {
         });
       });
     });
-  });
+
+    // *** NEW TESTS START HERE ***
+    it('generates correct parallel amplitude parameters (A*) for fricatives', () => {
+        const track = textToKlattTrack('ship'); // Contains SH
+        const shEvent = track.find(e => e.phoneme === 'SH');
+        expect(shEvent, "'SH' event should exist").toBeDefined();
+        if (!shEvent) return; // Guard for TS/Linter
+
+        const shTargets = PHONEME_TARGETS.SH;
+        expect(shEvent.params.A3, "SH A3").toBeCloseTo(shTargets.A3);
+        expect(shEvent.params.A4, "SH A4").toBeCloseTo(shTargets.A4);
+        expect(shEvent.params.A5, "SH A5").toBeCloseTo(shTargets.A5);
+        expect(shEvent.params.A6, "SH A6").toBeCloseTo(shTargets.A6);
+
+        // Check others are default (0)
+        expect(shEvent.params.A1, "SH A1").toBeCloseTo(0);
+        expect(shEvent.params.A2, "SH A2").toBeCloseTo(0);
+        expect(shEvent.params.AN, "SH AN").toBeCloseTo(0);
+        expect(shEvent.params.AB, "SH AB").toBeCloseTo(0);
+    });
+
+    it('generates correct parameters for stop releases (e.g., P_REL)', () => {
+        const track = textToKlattTrack('pat'); // Contains P -> P_CL + P_REL
+        const pRelEvent = track.find(e => e.phoneme === 'P_REL');
+        expect(pRelEvent, "'P_REL' event should exist").toBeDefined();
+         if (!pRelEvent) return; // Guard
+
+        const pRelTargets = PHONEME_TARGETS.P_REL;
+        expect(pRelEvent.params.AF, "P_REL AF").toBeCloseTo(pRelTargets.AF);
+        expect(pRelEvent.params.AH, "P_REL AH").toBeCloseTo(pRelTargets.AH);
+        expect(pRelEvent.params.AB, "P_REL AB").toBeCloseTo(pRelTargets.AB);
+        expect(pRelEvent.params.AV, "P_REL AV").toBeCloseTo(0); // Voiceless release
+        expect(pRelEvent.params.AVS, "P_REL AVS").toBeCloseTo(0); // Voiceless release
+
+        // Check other parallel gains are default (0)
+        expect(pRelEvent.params.A1, "P_REL A1").toBeCloseTo(0);
+        expect(pRelEvent.params.A2, "P_REL A2").toBeCloseTo(0);
+        expect(pRelEvent.params.A3, "P_REL A3").toBeCloseTo(0);
+        expect(pRelEvent.params.A4, "P_REL A4").toBeCloseTo(0);
+        expect(pRelEvent.params.A5, "P_REL A5").toBeCloseTo(0);
+        expect(pRelEvent.params.A6, "P_REL A6").toBeCloseTo(0);
+        expect(pRelEvent.params.AN, "P_REL AN").toBeCloseTo(0);
+    });
+    // *** NEW TESTS END HERE ***
+
+  }); // End of describe('textToKlattTrack')
 
   describe('Parameter Filling', () => {
     it('fills missing parameters with defaults', () => {

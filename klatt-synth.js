@@ -976,22 +976,51 @@ export class KlattSynth {
       // Let's cancel *after* scheduling the ramp down, cancelling from T + RAMP_DOWN_TIME.
       // Modify cancelScheduledValues to accept a time argument.
 
-      // *** Let's simplify: Just disconnect and set flag for now. ***
-      // *** The ramps should ensure silence even if later schedules exist ***
-      // this.cancelScheduledValues(T + RAMP_DOWN_TIME); // Requires modifying cancelScheduledValues
+      // Cancel scheduled values *after* the ramp down completes
+      this.cancelScheduledValues(T + RAMP_DOWN_TIME);
+      this._debugLog(`Scheduled cancellation of future events after ${T + RAMP_DOWN_TIME}`);
 
-      this.isRunning = false;
-      this._debugLog("KlattSynth Stop sequence initiated (gain ramps scheduled, output disconnected).");
+      // Schedule disconnection slightly after the ramp completes
+      // Note: This relies on setTimeout accuracy, which isn't guaranteed,
+      // but it's better than immediate disconnection.
+      // A more robust solution might involve an OfflineAudioContext or ScriptProcessorNode
+      // to detect actual silence, but that's much more complex.
+      const disconnectDelayMs = RAMP_DOWN_TIME * 1000 + 5; // 5ms buffer after ramp
+      this._debugLog(`Scheduling disconnection in ${disconnectDelayMs.toFixed(0)}ms.`);
+      setTimeout(() => {
+          if (!this.isRunning) { // Check if still supposed to be stopped
+              try {
+                  this._debugLog("Disconnecting outputGain from destination (delayed).");
+                  this.nodes.outputGain.disconnect(this.ctx.destination);
+              } catch (e) {
+                  this._debugLog("Error disconnecting outputGain (delayed):", e);
+              }
+          } else {
+              this._debugLog("Skipping delayed disconnection because synth was restarted.");
+          }
+      }, disconnectDelayMs);
+
+
+      this.isRunning = false; // Set state immediately
+      this._debugLog("KlattSynth Stop sequence initiated (gain ramps scheduled, cancellation scheduled, delayed disconnect scheduled).");
       console.log("KlattSynth Stopped"); // Keep top-level log
     } else {
       this._debugLog("Synth is not running, stop() has no effect.");
     }
   }
 
-  cancelScheduledValues() {
+  // Modified to accept an optional time argument
+  cancelScheduledValues(cancelTime) {
     if (!this.isInitialized || !this.ctx) {
       this._debugLog(
         "Cannot cancel schedules: Synth not initialized or context missing."
+      );
+      return;
+    }
+    // Use provided cancelTime or default to current time
+    const T = typeof cancelTime === 'number' && isFinite(cancelTime) ? cancelTime : this.ctx.currentTime;
+    this._debugLog(
+      `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
       );
       return;
     }
@@ -1000,12 +1029,16 @@ export class KlattSynth {
       `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
     );
     Object.values(this.nodes).forEach((node) => {
+      // Check if node and its properties exist before cancelling
       try {
-        if (node instanceof GainNode) {
+        if (node instanceof GainNode && node.gain) {
           node.gain.cancelScheduledValues(T);
+          // Hold current value *at the cancellation time*
+          // Note: .value gives the *current* value, not necessarily the value at time T.
+          // For simplicity, we set the current value at time T. A more precise
+          // approach would involve calculating the value at time T based on ramps.
           node.gain.setValueAtTime(node.gain.value, T);
-        } // Hold current value
-        else if (node instanceof BiquadFilterNode) {
+        } else if (node instanceof BiquadFilterNode && node.frequency && node.Q && node.gain) {
           node.frequency.cancelScheduledValues(T);
           node.frequency.setValueAtTime(node.frequency.value, T);
           node.Q.cancelScheduledValues(T);
@@ -1014,11 +1047,14 @@ export class KlattSynth {
           node.gain.setValueAtTime(node.gain.value, T);
         } else if (node instanceof AudioWorkletNode && node.parameters) {
           node.parameters.forEach((param) => {
-            param.cancelScheduledValues(T);
-            param.setValueAtTime(param.value, T);
+            if (param) { // Check if param exists
+              param.cancelScheduledValues(T);
+              param.setValueAtTime(param.value, T);
+            }
           });
         }
       } catch (e) {
+        // Log error but continue trying other nodes
         console.warn("[KlattSynth] Error cancelling schedule for node:", e);
       }
     });

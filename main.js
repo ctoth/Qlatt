@@ -194,6 +194,8 @@ function stopStatusUpdates() {
 // --- Event Listeners ---
 initButton.addEventListener("click", initAudio);
 speakTextButton.addEventListener("click", () => {
+    // Ensure updates are stopped before starting a new speech synthesis
+    stopStatusUpdates();
     speakText(); // Call the original function
     startStatusUpdates(); // Start updating the display
 });
@@ -201,4 +203,5 @@ speakTextButton.addEventListener("click", () => {
 
 // --- Initial State ---
 speakTextButton.disabled = true;
+if (synthStateDisplay) synthStateDisplay.textContent = "Synth State: Uninitialized"; // Initial display text
 // Disable manual buttons initially if keeping them

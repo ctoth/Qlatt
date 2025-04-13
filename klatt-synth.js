@@ -1103,5 +1103,74 @@ export class KlattSynth {
     });
     this._debugLog("Track scheduling finished.");
     console.log("Track scheduled."); // Keep top-level log
+
+    // Store track and start time for getCurrentState
+    this._currentTrack = track;
+    this._trackStartTime = startTime;
   }
-}
+
+  // --- NEW: Get Current State ---
+  getCurrentState() {
+    if (!this.isInitialized || !this.isRunning || !this._currentTrack || this._currentTrack.length === 0) {
+      return {
+        currentTime: this.ctx?.currentTime ?? 0,
+        currentPhoneme: 'N/A',
+        currentWord: 'N/A',
+        currentParams: {},
+        status: this.isRunning ? 'Running (No Track)' : (this.isInitialized ? 'Idle' : 'Uninitialized')
+      };
+    }
+
+    const elapsedTrackTime = this.ctx.currentTime - this._trackStartTime;
+    let currentEventIndex = -1;
+
+    // Find the event *currently active* based on elapsed time
+    for (let i = 0; i < this._currentTrack.length; i++) {
+      if (elapsedTrackTime >= this._currentTrack[i].time) {
+        currentEventIndex = i;
+      } else {
+        break; // Found the first event whose time is *after* current time
+      }
+    }
+
+    // If time is before the first event (unlikely but possible), use the first event's state
+    if (currentEventIndex === -1 && this._currentTrack.length > 0) {
+        currentEventIndex = 0;
+    }
+
+    const currentEvent = this._currentTrack[currentEventIndex];
+
+    if (!currentEvent) {
+        return { // Should not happen if track has events, but safeguard
+            currentTime: this.ctx.currentTime,
+            currentPhoneme: 'Error (No Event Found)',
+            currentWord: 'Error',
+            currentParams: {},
+            status: 'Error'
+        };
+    }
+
+    // Report the *target* parameters for the current segment
+    // Getting instantaneous AudioParam values is complex, this is an approximation
+    const reportedParams = {
+        F0: currentEvent.params.F0,
+        AV: currentEvent.params.AV,
+        AF: currentEvent.params.AF,
+        AH: currentEvent.params.AH,
+        AVS: currentEvent.params.AVS,
+        GO: currentEvent.params.GO,
+        // Add other key params if needed
+    };
+
+    return {
+      currentTime: this.ctx.currentTime,
+      elapsedTrackTime: elapsedTrackTime,
+      currentPhoneme: currentEvent.phoneme || 'SIL', // Use SIL if undefined
+      currentWord: currentEvent.word || '---', // Use placeholder if undefined
+      currentParams: reportedParams,
+      status: 'Speaking'
+    };
+  }
+  // --- END NEW ---
+
+} // End of KlattSynth class

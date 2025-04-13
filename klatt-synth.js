@@ -303,12 +303,6 @@ export class KlattSynth {
 
       // Calculate 'r' based on bandwidth and sample rate
       const r = Math.exp(-Math.PI * formantBw / this.ctx.sampleRate);
-          this._debugLog(`  Muting Parallel Gain for F=${formantFreq} due to invalid params or gain <= 0 dB.`);
-          return;
-      }
-
-      // Calculate 'r' based on bandwidth and sample rate
-      const r = Math.exp(-Math.PI * formantBw / this.ctx.sampleRate);
 
       // Calculate the linear gain required at the filter input ('a' coefficient in Klatt.ts Resonator)
       // to achieve the desired peak gain. Peak gain of resonator = a / (1 - r)

@@ -111,6 +111,11 @@ function speakText() {
       });
       // --- END ADDED LOGGING ---
 
+      // *** ADDED: Store track globally for inspection ***
+      window.lastKlattTrack = klattTrack;
+      console.log("[Main UI] Full Klatt track stored in 'window.lastKlattTrack'. Inspect it in the console after execution.");
+      // *** END ADDED ***
+
       currentTrackDuration = klattTrack[klattTrack.length - 1]?.time || 0; // Get estimated duration
       debugLog(`Estimated track duration: ${currentTrackDuration.toFixed(3)}s`);
 

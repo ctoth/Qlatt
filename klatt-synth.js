@@ -278,6 +278,45 @@ export class KlattSynth {
     this._debugLog("Initial parameters applied.");
   }
 
+  // Helper: Schedule Parallel Resonator Gain (Peak Gain Adjustment)
+  _schedulePeakGain(filterNode, gainNode, targetDb, formantFreq, formantBw, scheduleMethod, rampEndTime) {
+      const targetPeakLinear = dbToLinear(targetDb);
+      if (!filterNode || !gainNode || targetPeakLinear <= 0 || formantFreq <= 0 || formantBw <= 0) {
+          // Mute the gain node if parameters are invalid or target gain is zero/negative dB
+          gainNode.gain[scheduleMethod](0.0, rampEndTime);
+          this._debugLog(`  Muting Parallel Gain for F=${formantFreq} due to invalid params or gain <= 0 dB.`);
+          return;
+      }
+
+      // Calculate 'r' based on bandwidth and sample rate
+      const r = Math.exp(-Math.PI * formantBw / this.ctx.sampleRate);
+
+      // Calculate the linear gain required at the filter input ('a' coefficient in Klatt.ts Resonator)
+      // to achieve the desired peak gain. Peak gain of resonator = a / (1 - r)
+      const requiredA = targetPeakLinear * (1 - r);
+
+      // Calculate the DC gain of the filter with this 'a' coefficient
+      // DC gain = a / (1 - b - c) = a / (1 - 2*r*cos(w) + r*r)
+      // We don't actually need the DC gain here, but the concept is that
+      // BiquadFilterNode's gain parameter acts *after* the filtering,
+      // while Klatt's 'a' acts *before*. We assume the BiquadFilterNode
+      // itself is normalized somehow (e.g., peak gain of 1 for Q scaling)
+      // and we apply the final scaling via the GainNode.
+
+      // For a BiquadFilterNode type 'bandpass', the peak gain is related to Q.
+      // Gain at center frequency is approximately 1.0 (0 dB) for standard implementations.
+      // Therefore, we can apply the targetPeakLinear directly to the GainNode.
+      // This simplifies things compared to calculating 'a'.
+
+      const clampedLinearValue = Math.max(0, Math.min(targetPeakLinear, 100)); // Clamp for safety
+
+      this._debugLog(
+          `  Scheduling Parallel Peak Gain: F=${formantFreq}, BW=${formantBw}, Target=${targetDb}dB -> Linear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
+      );
+      gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
+  }
+
+
   // --- setParam method (UPDATED Worklet Param Scaling) ---
   setParam(name, value, time, applyImmediately = false) {
     const T = time !== undefined ? time : this.ctx.currentTime;
@@ -468,23 +507,24 @@ export class KlattSynth {
           break;
 
         case "FGP": // FGP is currently unused in filter scheduling
-        case "BGP":
-          // scheduleFilter(N.rgpFilter, "lowpass", P.BGP / 2, bwToQ(50, P.BGP)); // OLD
-          const rgpCutoff = Math.max(1, P.BGP); // Ensure cutoff > 0
-          scheduleFilter(N.rgpFilter, "lowpass", rgpCutoff, 0.707); // Use BGP as cutoff, Q=0.707
-          this._debugLog(`  Scheduling RgpFilter: Lowpass, F=${rgpCutoff.toFixed(1)}, Q=0.707 (using BGP as cutoff)`);
+        case "BGP": {
+          const cutoff = Math.max(1, P.BGP); // Ensure cutoff > 0, use BGP as cutoff freq
+          const q = 0.707; // Standard Q for simple lowpass
+          scheduleFilter(N.rgpFilter, "lowpass", cutoff, q);
+          this._debugLog(`  Scheduling RgpFilter: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGP as cutoff)`);
           break;
+        }
         case "FGZ":
         case "BGZ":
           scheduleFilter(N.rgzFilter, "notch", P.FGZ, bwToQ(P.FGZ, P.BGZ));
           break;
-        case "BGS":
-          // scheduleFilter(N.rgsFilter, "lowpass", P.BGS / 2, bwToQ(50, P.BGS)); // OLD
-          const rgsCutoff = Math.max(1, P.BGS); // Ensure cutoff > 0
-          scheduleFilter(N.rgsFilter, "lowpass", rgsCutoff, 0.707); // Use BGS as cutoff, Q=0.707
-          this._debugLog(`  Scheduling RgsFilter: Lowpass, F=${rgsCutoff.toFixed(1)}, Q=0.707 (using BGS as cutoff)`);
+        case "BGS": {
+          const cutoff = Math.max(1, P.BGS); // Ensure cutoff > 0, use BGS as cutoff freq
+          const q = 0.707; // Standard Q for simple lowpass
+          scheduleFilter(N.rgsFilter, "lowpass", cutoff, q);
+          this._debugLog(`  Scheduling RgsFilter: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGS as cutoff)`);
           break;
-
+        }
         case "FNP":
         case "BNP": {
           const f = P.FNP,
@@ -561,40 +601,35 @@ export class KlattSynth {
           break;
         }
 
+        // --- Parallel Amplitude Parameters (Use Peak Gain Scheduling) ---
         case "AN":
-          this._debugLog(`  Scheduling Parallel Gain AN: ${value} dB`); // ADD LOG
-          scheduleGain(N.anParGain, value);
+          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, P.FNP, P.BNP, scheduleMethod, rampEndTime);
           break;
         case "A1":
-          this._debugLog(`  Scheduling Parallel Gain A1: ${value} dB`); // ADD LOG
-          scheduleGain(N.a1ParGain, value);
+          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, P.F1, P.B1, scheduleMethod, rampEndTime);
           break;
         case "A2":
-          this._debugLog(`  Scheduling Parallel Gain A2: ${value} dB`); // ADD LOG
-          scheduleGain(N.a2ParGain, value);
+          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, P.F2, P.B2, scheduleMethod, rampEndTime);
           break;
         case "A3":
-          this._debugLog(`  Scheduling Parallel Gain A3: ${value} dB`); // ADD LOG
-          scheduleGain(N.a3ParGain, value);
+          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, P.F3, P.B3, scheduleMethod, rampEndTime);
           break;
         case "A4":
-          this._debugLog(`  Scheduling Parallel Gain A4: ${value} dB`); // ADD LOG
-          scheduleGain(N.a4ParGain, value);
+          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, P.F4, P.B4, scheduleMethod, rampEndTime);
           break;
         case "A5":
-          this._debugLog(`  Scheduling Parallel Gain A5: ${value} dB`); // ADD LOG
-          scheduleGain(N.a5ParGain, value);
+          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, P.F5, P.B5, scheduleMethod, rampEndTime);
           break;
         case "A6":
-          this._debugLog(`  Scheduling Parallel Gain A6: ${value} dB`); // ADD LOG
-          scheduleGain(N.a6ParGain, value);
-          // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
+          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, P.F6, P.B6, scheduleMethod, rampEndTime);
           break;
         case "AB":
-          this._debugLog(`  Scheduling Parallel Gain AB: ${value} dB`); // ADD LOG
+          // Bypass path doesn't have a filter, schedule gain directly
+          this._debugLog(`  Scheduling Parallel Bypass Gain AB: ${value} dB`);
           scheduleGain(N.abParGain, value);
-          // console.log(`Check: N.parallelSum.gain.value = ${N.parallelSum.gain.value}`);
           break;
+        // --- End Parallel Amplitude Parameters ---
+
         case "GO":
           this._debugLog(`  Scheduling Output Gain (GO): ${value} dB`);
           scheduleGain(N.outputGain, value);
@@ -685,59 +720,75 @@ export class KlattSynth {
     }
     this._debugLog("Connecting Cascade/Parallel Graph (SW=0)...");
     const N = this.nodes;
-    const NFC = Math.max(4, Math.min(6, Math.round(this.params.NFC))); // Ensure NFC is 4, 5, or 6
+    const P = this.params;
+    const NFC = Math.max(4, Math.min(6, Math.round(P.NFC))); // Ensure NFC is 4, 5, or 6
 
     try {
-      // Voicing Source Path -> LaryngealSum
-      N.voicingSource
-        .connect(N.rgpFilter)
-        .connect(N.rgzFilter)
-        .connect(N.laryngealSourceSum);
-      N.voicingSource
-        .connect(N.avsInGain)
-        .connect(N.rgsFilter)
-        .connect(N.laryngealSourceSum); // AVS path also to sum
+      // --- Source Connections ---
+      // Voicing (AV) -> RGP -> RGZ -> LaryngealSum
+      N.voicingSource.connect(N.rgpFilter).connect(N.rgzFilter).connect(N.laryngealSourceSum);
+      // Voicing (AVS) -> AVS Gain -> RGS -> LaryngealSum
+      N.voicingSource.connect(N.avsInGain).connect(N.rgsFilter).connect(N.laryngealSourceSum);
+      // Aspiration Noise (AH) -> LaryngealSum
+      N.noiseSource.connect(N.laryngealSourceSum, 1); // Output 1 is aspiration
 
-      // Noise Source Path
-      N.noiseSource.connect(N.aspirationGain, 1).connect(N.laryngealSourceSum); // Aspiration -> LaryngealSum
-      N.noiseSource.connect(N.fricationGain, 0).connect(N.parallelInputMix); // Frication -> Parallel Input
-
-      // *** ADDED: Connect Laryngeal Source to Parallel Input Mixer as well ***
-      N.laryngealSourceSum.connect(N.parallelInputMix);
-      this._debugLog("    Connected laryngealSourceSum to parallelInputMix.");
-      // *** END ADDED ***
-
-      // Cascade Path
+      // --- Cascade Path ---
+      // LaryngealSum -> R1C..R[NFC]C -> RNZ -> RNP -> FinalSum
       let lastCascadeNode = N.laryngealSourceSum;
-      lastCascadeNode.connect(N.rnpCascFilter);
-      lastCascadeNode = N.rnpCascFilter;
+      this._debugLog(`    Cascade Path (NFC=${NFC}): LaryngealSum ->`);
+      // Connect R1C to R[NFC]C
+      for (let i = 0; i < NFC; i++) {
+          if (!this.cascadeFilters[i]) continue;
+          lastCascadeNode.connect(this.cascadeFilters[i]);
+          lastCascadeNode = this.cascadeFilters[i];
+          this._debugLog(`      -> R${i+1}C`);
+      }
+      // Connect Nasal Antiresonator (Zero)
       lastCascadeNode.connect(N.rnzCascFilter);
       lastCascadeNode = N.rnzCascFilter;
-      for (let i = 0; i < NFC; i++) {
-        if (!this.cascadeFilters[i]) continue; // Safety check
-        lastCascadeNode.connect(this.cascadeFilters[i]);
-        lastCascadeNode = this.cascadeFilters[i];
-      }
-      lastCascadeNode.connect(N.finalSum); // Cascade output -> Final Sum
+      this._debugLog(`      -> RNZ_Casc`);
+      // Connect Nasal Resonator (Pole)
+      lastCascadeNode.connect(N.rnpCascFilter);
+      lastCascadeNode = N.rnpCascFilter;
+      this._debugLog(`      -> RNP_Casc`);
+      // Connect Cascade Output to Final Sum
+      lastCascadeNode.connect(N.finalSum);
+      this._debugLog(`      -> FinalSum`);
 
-      // Parallel Path
-      N.parallelInputMix
-        .connect(N.rnpParFilter)
-        .connect(N.anParGain)
-        .connect(N.parallelSum);
-      for (let i = 0; i < 6; i++) {
-        // All 6 parallel resonators
-        if (!this.parallelFilters[i] || !this.parallelGains[i]) continue; // Safety check
-        N.parallelInputMix
-          .connect(this.parallelFilters[i])
-          .connect(this.parallelGains[i])
-          .connect(N.parallelSum);
-      }
-      N.parallelInputMix.connect(N.abParGain).connect(N.parallelSum); // Bypass path
-      N.parallelSum.connect(N.finalSum); // Parallel output -> Final Sum
+      // --- Parallel Path ---
+      this._debugLog(`    Parallel Path:`);
+      // LaryngealSum -> R1P -> A1 Gain -> ParallelSum
+      N.laryngealSourceSum.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
+      this._debugLog(`      LaryngealSum -> R1P -> A1 -> ParallelSum`);
+      // LaryngealSum -> RNP_Par -> AN Gain -> ParallelSum
+      N.laryngealSourceSum.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
+      this._debugLog(`      LaryngealSum -> RNP_Par -> AN -> ParallelSum`);
 
-      // Final Stage
+      // Create Differenced Source + Frication for R2-R6 and Bypass
+      // LaryngealSum -> Differentiator -> Sum
+      N.laryngealSourceSum.connect(N.parallelDiffFilterSW0).connect(N.parallelDiffPlusFricSW0);
+      this._debugLog(`      LaryngealSum -> DiffSW0 -> DiffPlusFricSW0`);
+      // Frication Noise -> Sum
+      N.noiseSource.connect(N.parallelDiffPlusFricSW0, 0); // Output 0 is frication
+      this._debugLog(`      FricationNoise -> DiffPlusFricSW0`);
+
+      // Connect Differenced+Frication source to R2-R6 and Bypass
+      for (let i = 1; i < 6; i++) { // R2 to R6
+          if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
+          N.parallelDiffPlusFricSW0.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
+          this._debugLog(`      DiffPlusFricSW0 -> R${i+1}P -> A${i+1} -> ParallelSum`);
+      }
+      // Bypass Path
+      N.parallelDiffPlusFricSW0.connect(N.abParGain).connect(N.parallelSum);
+      this._debugLog(`      DiffPlusFricSW0 -> AB -> ParallelSum`);
+
+      // Connect Parallel Output to Final Sum
+      N.parallelSum.connect(N.finalSum);
+      this._debugLog(`      ParallelSum -> FinalSum`);
+
+      // --- Final Stage ---
       N.finalSum.connect(N.radiation).connect(N.outputGain);
+      this._debugLog(`    Final Stage: FinalSum -> Radiation -> OutputGain`);
       this._currentConnections = "cascade";
       this._debugLog("Cascade/Parallel graph connected successfully.");
     } catch (error) {

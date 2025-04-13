@@ -1027,7 +1027,6 @@ export class KlattSynth {
     // this._debugLog(
     //   `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
     // );
-    );
     Object.values(this.nodes).forEach((node) => {
       // Check if node and its properties exist before cancelling
       try {

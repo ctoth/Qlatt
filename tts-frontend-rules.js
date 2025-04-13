@@ -944,41 +944,46 @@ export function fillDefaultParams(target) {
   return filled;
 }
 export function rule_K_Context(phonemeList) {
-  /* ... same ... */
   for (let i = 0; i < phonemeList.length; i++) {
     if (!phonemeList[i].params) continue; // Ensure params exist
-    if (phonemeList[i].phoneme === "K_CL" && phonemeList[i + 1]?.phoneme) {
-      const nextPhKey =
-        phonemeList[i + 1].phoneme +
-        (phonemeList[i + 1].stress !== null ? phonemeList[i + 1].stress : "0");
-      const nextTargets =
-        PHONEME_TARGETS[nextPhKey] ||
-        PHONEME_TARGETS[phonemeList[i + 1].phoneme + "1"] ||
-        PHONEME_TARGETS[phonemeList[i + 1].phoneme + "0"];
-      if (nextTargets && nextTargets.type === "vowel") {
-        // *** CORRECTED LOGIC ***
-        if (nextTargets.back) {
-          phonemeList[i].params.F2 = 1200; // Back vowel context
-        } else if (nextTargets.front) {
-          phonemeList[i].params.F2 = 1900; // Front vowel context
-        } else if (nextTargets.hi) {
-           // Handle 'hi' vowels that are neither front nor back (if any exist)
-           // Or apply fronting as a secondary effect for 'hi' if desired
-           phonemeList[i].params.F2 = 1900; // Defaulting 'hi' (non-front/back) to fronted F2
-        } else {
-          phonemeList[i].params.F2 = 1500; // Default for other contexts (e.g., central non-hi)
+
+    // --- Apply context to K_CL ---
+    if (phonemeList[i].phoneme === "K_CL" && phonemeList[i + 1]) {
+      const nextPh = phonemeList[i + 1]; // Get the next phoneme object directly
+
+      // Use the flags copied onto the phoneme object during parameter sequence preparation
+      if (nextPh.type === "vowel") {
+        let targetF2 = 1500; // Default F2
+        if (nextPh.back) {
+          targetF2 = 1200; // Back vowel context
+        } else if (nextPh.front) {
+          targetF2 = 1900; // Front vowel context
+        } else if (nextPh.hi) {
+          // Default 'hi' (non-front/back) to fronted F2
+          targetF2 = 1900;
         }
+        // console.log(`[rule_K_Context DEBUG] Setting K_CL F2 at index ${i} to ${targetF2} based on next vowel ${nextPh.phoneme} (front:${nextPh.front}, back:${nextPh.back}, hi:${nextPh.hi})`);
+        phonemeList[i].params.F2 = targetF2;
+      } else {
+        // If next phoneme is not a vowel, reset to default? Or keep previous? Let's default.
+        phonemeList[i].params.F2 = 1500;
       }
     }
-    // Add context for K_REL too? If K_REL exists...
+
+    // --- Copy context-adjusted F2 from K_CL to K_REL ---
     if (
       phonemeList[i].phoneme === "K_REL" &&
-      phonemeList[i - 1]?.phoneme === "K_CL"
+      phonemeList[i - 1]?.phoneme === "K_CL" &&
+      phonemeList[i - 1]?.params // Check if previous params exist
     ) {
       // Copy the context-adjusted F2 from the preceding K_CL
-      const prevF2 = phonemeList[i - 1].params.F2 || 1500;
+      const prevF2 = phonemeList[i - 1].params.F2 || 1500; // Default if somehow missing
       console.log(`[rule_K_Context] Copying F2=${prevF2} from K_CL to K_REL at index ${i}.`);
-      phonemeList[i].params.F2 = prevF2;
+      if (phonemeList[i].params) { // Ensure K_REL params exist before assigning
+          phonemeList[i].params.F2 = prevF2;
+      } else {
+          console.warn(`[rule_K_Context] K_REL at index ${i} missing params object, cannot copy F2.`);
+      }
     }
   }
   return phonemeList;

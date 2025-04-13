@@ -88,4 +88,11 @@ class RadiationProcessor extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("radiation-processor", RadiationProcessor);
+// Conditional registration: only run registerProcessor if it's available
+if (typeof registerProcessor === 'function') {
+    try {
+        registerProcessor("radiation-processor", RadiationProcessor);
+    } catch (error) {
+        console.error("Failed to register RadiationProcessor:", error);
+    }
+}

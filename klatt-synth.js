@@ -4,8 +4,10 @@ export function dbToLinear(db) {
   return 10.0 ** (db / 20.0);
 }
 export function bwToQ(F, BW) {
-  // Ensure F and BW are valid positive numbers for Q calculation
-  if (isNaN(F) || isNaN(BW) || F <= 0 || BW <= 0) return 0.707; // Handle NaN and non-positive, return Default Q
+  // Ensure F and BW are valid finite positive numbers for Q calculation
+  if (isNaN(F) || isNaN(BW) || !isFinite(F) || !isFinite(BW) || F <= 0 || BW <= 0) {
+      return 0.707; // Handle NaN, Infinity, and non-positive, return Default Q
+  }
   return F / BW;
 }
 // *** REMOVE OLD SCALING FACTOR ***

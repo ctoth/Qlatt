@@ -92,4 +92,11 @@ class VoicingSourceProcessor extends AudioWorkletProcessor {
     }
 }
 
-registerProcessor('voicing-source-processor', VoicingSourceProcessor);
+// Conditional registration: only run registerProcessor if it's available
+if (typeof registerProcessor === 'function') {
+    try {
+        registerProcessor('voicing-source-processor', VoicingSourceProcessor);
+    } catch (error) {
+        console.error("Failed to register VoicingSourceProcessor:", error);
+    }
+}

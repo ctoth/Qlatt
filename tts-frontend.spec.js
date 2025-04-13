@@ -308,9 +308,11 @@ describe('TTS Frontend', () => {
 
         if (kClKey && kClCoo) {
             // Expect F2 to be higher before front vowel
+            // Check specific values instead of just greater than
+            expect(kClKey.params.F2, "F2 for K before front vowel (key)").toBeCloseTo(1900);
+            expect(kClCoo.params.F2, "F2 for K before back vowel (coo)").toBeCloseTo(1200);
+            // The original assertion is still valid if the specific values are correct:
             expect(kClKey.params.F2).toBeGreaterThan(kClCoo.params.F2);
-            expect(kClKey.params.F2).toBeCloseTo(1900); // Front context F2
-            expect(kClCoo.params.F2).toBeCloseTo(1200); // Back context F2
         }
     });
 

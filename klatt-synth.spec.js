@@ -90,10 +90,10 @@ describe('KlattSynth', () => {
       klattSynth.setParam('SW', 0);
       klattSynth._reconnectGraph();
       
-      // Check that laryngealSourceSum is connected to the cascade path
+      // Check that laryngealSourceSum is connected to the start of the cascade formant path (e.g., R1C)
       const laryngealConnections = klattSynth.nodes.laryngealSourceSum.getConnections();
-      expect(laryngealConnections.some(conn => conn.destination === klattSynth.nodes.rnpCascFilter)).toBe(true);
-      
+      expect(laryngealConnections.some(conn => conn.destination === klattSynth.nodes.r1CascFilter)).toBe(true); // Check connection to R1C
+
       // Check that finalSum is connected to radiation
       const finalSumConnections = klattSynth.nodes.finalSum.getConnections();
       expect(finalSumConnections.some(conn => conn.destination === klattSynth.nodes.radiation)).toBe(true);

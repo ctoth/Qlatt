@@ -53,7 +53,6 @@ export class KlattSynth {
     this._connectCascadeParallel(); // Default connection
     this.isInitialized = true;
     this._debugLog("KlattSynth Initialized successfully.");
-    console.log("KlattSynth Initialized"); // Keep top-level log
   }
   _debugLog(...args) {
     // Simple internal logger helper

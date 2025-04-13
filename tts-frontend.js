@@ -373,6 +373,10 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   klattTrack.push({ time: 0, params: fillDefaultParams(PHONEME_TARGETS["SIL"]) }); // Use filled SIL params directly
   debugLog(`  Added initial silence event at t=0.000`);
 
+  // --- ADDED: Log initial track state ---
+  console.log("[TTS Frontend] Klatt Track after initial silence:", JSON.stringify(klattTrack, null, 2));
+  // --- END ADDED LOGGING ---
+
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
     const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Restore original calculation
@@ -445,6 +449,11 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       klattTrack.length
     } events, duration: ${finalTime.toFixed(3)}s`
   );
+
+  // --- ADDED: Log final track state ---
+  console.log("[TTS Frontend] Final Klatt Track before return:", JSON.stringify(klattTrack, null, 2));
+  // --- END ADDED LOGGING ---
+
   debugLog("--- textToKlattTrack End ---");
   return klattTrack;
 }

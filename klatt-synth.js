@@ -209,7 +209,7 @@ export class KlattSynth {
 
     // Summing nodes
     N.parallelSum = ctx.createGain();
-    N.parallelSum.gain.value = 0.5; // REDUCED gain for parallel path output
+    N.parallelSum.gain.value = 0.2; // FURTHER REDUCED gain for parallel path output (was 0.5)
     N.parallelInputMix = ctx.createGain();
     N.parallelInputMix.gain.value = 1.0; // Mixes sources for parallel path input
     N.finalSum = ctx.createGain();
@@ -850,14 +850,51 @@ export class KlattSynth {
     this._debugLog("stop() called.");
     if (this.isRunning) {
       this._debugLog("Synth is running, attempting to stop...");
+      const T = this.ctx.currentTime;
+      const RAMP_DOWN_TIME = 0.01; // 10ms ramp down
+      const SILENCE_DB = -70.0; // Target dB for silence
+
+      this._debugLog(`Ramping down gains to ${SILENCE_DB}dB over ${RAMP_DOWN_TIME}s...`);
+
+      // Schedule ramps to silence for source amplitudes and parallel gains
+      // Use applyImmediately=false to use the default ramp
+      this.setParam("AV", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("AF", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("AH", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("AVS", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("AN", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A1", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A2", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A3", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A4", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A5", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("A6", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      this.setParam("AB", SILENCE_DB, T + RAMP_DOWN_TIME, false);
+      // Optionally ramp down F0 as well, though worklet should handle amp=0
+      // this.setParam('F0', 0, T + RAMP_DOWN_TIME, false);
+
+      // Disconnect output immediately (ramps continue in background)
       try {
+        this._debugLog("Disconnecting outputGain from destination.");
         this.nodes.outputGain.disconnect(this.ctx.destination);
       } catch (e) {
         this._debugLog("Error disconnecting outputGain:", e);
       }
-      this.cancelScheduledValues();
+
+      // Cancel any *other* scheduled values beyond the ramp-down time
+      // Note: cancelScheduledValues currently holds the *last* value,
+      // which might conflict slightly with the ramp-down.
+      // A more sophisticated cancel might be needed, but let's try this first.
+      // We could cancel *before* scheduling the ramp down, but that might cause a pop.
+      // Let's cancel *after* scheduling the ramp down, cancelling from T + RAMP_DOWN_TIME.
+      // Modify cancelScheduledValues to accept a time argument.
+
+      // *** Let's simplify: Just disconnect and set flag for now. ***
+      // *** The ramps should ensure silence even if later schedules exist ***
+      // this.cancelScheduledValues(T + RAMP_DOWN_TIME); // Requires modifying cancelScheduledValues
+
       this.isRunning = false;
-      this._debugLog("KlattSynth Stopped successfully.");
+      this._debugLog("KlattSynth Stop sequence initiated (gain ramps scheduled, output disconnected).");
       console.log("KlattSynth Stopped"); // Keep top-level log
     } else {
       this._debugLog("Synth is not running, stop() has no effect.");

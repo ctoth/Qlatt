@@ -216,7 +216,7 @@ export class KlattSynth {
     N.parallelInputMix = ctx.createGain();
     N.parallelInputMix.gain.value = 1.0; // Mixes sources for parallel path input
     N.finalSum = ctx.createGain();
-    N.finalSum.gain.value = 1.0; // Sums cascade and parallel outputs
+    N.finalSum.gain.value = 0.5; // REDUCED gain before radiation (was 1.0)
 
     // === Final Stages ===
     N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
@@ -267,10 +267,10 @@ export class KlattSynth {
     // *** Ensure Summing Nodes have Gain = 1.0 (Except ParallelSum) ***
     N.laryngealSourceSum.gain.value = 1.0;
     // N.parallelSum.gain.value = 1.0; // REMOVE THIS LINE - Keep the 0.5 set earlier
-    N.finalSum.gain.value = 1.0;
+    // N.finalSum.gain.value = 1.0; // REMOVE THIS LINE - Keep the 0.5 set earlier
     N.parallelInputMix.gain.value = 1.0; // Input mixer should also likely be 1
 
-    this._debugLog("Audio nodes created, summing gains set (ParallelSum=0.5)."); // Update log message
+    this._debugLog("Audio nodes created, summing gains set (ParallelSum=0.5, FinalSum=0.5)."); // Update log message
   }
 
   _applyAllParams(time) {
@@ -708,11 +708,11 @@ export class KlattSynth {
     this._disconnectAll();
     this._currentConnections = null; // Reset connection state before reconnecting
 
-    // *** ADDED: Verify Summing Node Gains BEFORE Connecting ***
-    this._debugLog(
-      `Gains before connect: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
-    );
-    // *** END ADDED ***
+   // *** ADDED: Verify Summing Node Gains BEFORE Connecting ***
+   this._debugLog(
+     `Gains before connect: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
+   );
+   // *** END ADDED ***
 
     if (this.params.SW === 0) {
       this._connectCascadeParallel();
@@ -904,11 +904,11 @@ export class KlattSynth {
         if (this._currentConnections !== null) {
           // Only connect if graph setup succeeded
 
-          // *** ADDED: Verify Summing Node Gains BEFORE Connecting Output ***
-          this._debugLog(
-            `Gains before connecting output: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
-          );
-          // *** END ADDED ***
+         // *** ADDED: Verify Summing Node Gains BEFORE Connecting Output ***
+         this._debugLog(
+           `Gains before connecting output: LaryngealSum=${this.nodes.laryngealSourceSum?.gain.value?.toFixed(2)}, ParallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, FinalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}, ParallelInputMix=${this.nodes.parallelInputMix?.gain.value?.toFixed(2)}`
+         );
+         // *** END ADDED ***
 
           this._debugLog("Connecting outputGain to destination.");
           this.nodes.outputGain.connect(this.ctx.destination);

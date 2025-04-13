@@ -198,6 +198,187 @@ describe('TTS Frontend', () => {
         expect(pRelEvent.params.A6, "P_REL A6").toBeCloseTo(0);
         expect(pRelEvent.params.AN, "P_REL AN").toBeCloseTo(0);
     });
+
+    // --- Add More Tests Below ---
+
+    it('generates correct parameters for nasals (e.g., M)', () => {
+        const track = textToKlattTrack('man'); // Contains M, AE, N
+        const mEvent = track.find(e => e.phoneme === 'M');
+        expect(mEvent, "'M' event should exist").toBeDefined();
+        if (!mEvent) return;
+
+        const mTargets = PHONEME_TARGETS.M;
+        expect(mEvent.params.AV, "M AV").toBeGreaterThan(0);
+        expect(mEvent.params.AN, "M AN").toBeCloseTo(mTargets.AN);
+        expect(mEvent.params.FNP, "M FNP").toBeCloseTo(mTargets.FNP);
+        expect(mEvent.params.FNZ, "M FNZ").toBeCloseTo(mTargets.FNZ);
+        expect(mEvent.params.AF, "M AF").toBeCloseTo(0); // No frication
+        expect(mEvent.params.AH, "M AH").toBeCloseTo(0); // No aspiration
+    });
+
+    it('generates correct parameters for liquids/glides (e.g., L, R, W, Y)', () => {
+        const trackL = textToKlattTrack('lie');
+        const lEvent = trackL.find(e => e.phoneme === 'L');
+        expect(lEvent, "'L' event should exist").toBeDefined();
+        if (lEvent) expect(lEvent.params.AV, "L AV").toBeGreaterThan(0);
+
+        const trackR = textToKlattTrack('rye');
+        const rEvent = trackR.find(e => e.phoneme === 'R');
+        expect(rEvent, "'R' event should exist").toBeDefined();
+        if (rEvent) expect(rEvent.params.AV, "R AV").toBeGreaterThan(0);
+
+        const trackW = textToKlattTrack('why');
+        const wEvent = trackW.find(e => e.phoneme === 'W');
+        expect(wEvent, "'W' event should exist").toBeDefined();
+        if (wEvent) expect(wEvent.params.AV, "W AV").toBeGreaterThan(0);
+
+        const trackY = textToKlattTrack('yie'); // Using 'yie' as 'y' needs a vowel context
+        const yEvent = trackY.find(e => e.phoneme === 'Y');
+        expect(yEvent, "'Y' event should exist").toBeDefined();
+        if (yEvent) expect(yEvent.params.AV, "Y AV").toBeGreaterThan(0);
+    });
+
+     it('generates correct parameters for affricates (e.g., CH, JH)', () => {
+        const trackCh = textToKlattTrack('church');
+        const chEvent = trackCh.find(e => e.phoneme === 'CH');
+        expect(chEvent, "'CH' event should exist").toBeDefined();
+        if (chEvent) {
+            const chTargets = PHONEME_TARGETS.CH;
+            expect(chEvent.params.AV, "CH AV").toBeCloseTo(0); // Voiceless
+            expect(chEvent.params.AF, "CH AF").toBeCloseTo(chTargets.AF);
+            expect(chEvent.params.A3, "CH A3").toBeCloseTo(chTargets.A3); // Check some parallel gains
+            expect(chEvent.params.A6, "CH A6").toBeCloseTo(chTargets.A6);
+        }
+
+        const trackJh = textToKlattTrack('judge');
+        const jhEvent = trackJh.find(e => e.phoneme === 'JH');
+        expect(jhEvent, "'JH' event should exist").toBeDefined();
+        if (jhEvent) {
+            const jhTargets = PHONEME_TARGETS.JH;
+            expect(jhEvent.params.AV, "JH AV").toBeGreaterThan(0); // Voiced
+            expect(jhEvent.params.AF, "JH AF").toBeCloseTo(jhTargets.AF);
+            expect(jhEvent.params.AVS, "JH AVS").toBeGreaterThan(0); // Voiced source for frication
+            expect(jhEvent.params.A4, "JH A4").toBeCloseTo(jhTargets.A4); // Check some parallel gains
+            expect(jhEvent.params.A5, "JH A5").toBeCloseTo(jhTargets.A5);
+        }
+    });
+
+    it('applies vowel shortening rule correctly', () => {
+        const trackCat = textToKlattTrack('cat'); // AE before voiceless stop T
+        const trackCad = textToKlattTrack('cad'); // AE before voiced stop D
+
+        const aeCatEvent = trackCat.find(e => e.phoneme === 'AE');
+        const aeCadEvent = trackCad.find(e => e.phoneme === 'AE');
+
+        expect(aeCatEvent, "'AE' in 'cat' should exist").toBeDefined();
+        expect(aeCadEvent, "'AE' in 'cad' should exist").toBeDefined();
+
+        if (aeCatEvent && aeCadEvent) {
+            // Find the duration from the *next* event's time minus this event's time
+            const findDuration = (track, phoneme) => {
+                const index = track.findIndex(e => e.phoneme === phoneme);
+                if (index === -1 || index === 0) return -1; // Not found or first event
+                // Find the *previous* event to calculate duration correctly
+                const prevEvent = track[index - 1];
+                const currentEvent = track[index];
+                return currentEvent.time - prevEvent.time;
+            };
+            const durCat = findDuration(trackCat, 'T_CL'); // Duration of AE is time(T_CL) - time(AE_start)
+            const durCad = findDuration(trackCad, 'D_CL'); // Duration of AE is time(D_CL) - time(AE_start)
+
+            expect(durCat).toBeGreaterThan(0);
+            expect(durCad).toBeGreaterThan(0);
+            // Expect AE before T to be shorter than AE before D
+            expect(durCat).toBeLessThan(durCad);
+        }
+    });
+
+
+    it('applies K context rule correctly', () => {
+        const trackKey = textToKlattTrack('key'); // K before front vowel IY
+        const trackCoo = textToKlattTrack('coo'); // K before back vowel UW
+
+        const kClKey = trackKey.find(e => e.phoneme === 'K_CL');
+        const kClCoo = trackCoo.find(e => e.phoneme === 'K_CL');
+
+        expect(kClKey, "'K_CL' in 'key' should exist").toBeDefined();
+        expect(kClCoo, "'K_CL' in 'coo' should exist").toBeDefined();
+
+        if (kClKey && kClCoo) {
+            // Expect F2 to be higher before front vowel
+            expect(kClKey.params.F2).toBeGreaterThan(kClCoo.params.F2);
+            expect(kClKey.params.F2).toBeCloseTo(1900); // Front context F2
+            expect(kClCoo.params.F2).toBeCloseTo(1200); // Back context F2
+        }
+    });
+
+    it('handles empty input string', () => {
+        const track = textToKlattTrack('');
+        expect(track).toBeInstanceOf(Array);
+        // Should contain initial and final silence
+        expect(track.length).toBe(2);
+        expect(track[0].params.AV).toBe(0);
+        expect(track[1].params.AV).toBe(0);
+    });
+
+    it('handles input with only punctuation', () => {
+        const track = textToKlattTrack('? , !');
+        expect(track).toBeInstanceOf(Array);
+        // Should contain initial silence, punctuation silences, and final silence
+        expect(track.length).toBeGreaterThan(2);
+        track.forEach(event => {
+            expect(event.params.AV).toBe(0); // All should be silent
+        });
+        // Check if punctuation pauses were applied (longer than default SIL)
+        const commaPauseEventIndex = track.findIndex(e => e.phoneme === 'SIL' && e.time > 0 && e.time < track[track.length - 1].time); // Find a SIL event between start/end
+        expect(commaPauseEventIndex).toBeGreaterThan(0); // Ensure it's not the first event
+        const commaPauseDuration = track[commaPauseEventIndex].time - track[commaPauseEventIndex - 1].time;
+        // Check if duration is roughly 150ms (comma pause) + 300ms (question mark pause) etc.
+        // This is still a weak check, depends on exact rule implementation.
+        // A better check might be to verify the duration property if it were added to the track event.
+        expect(commaPauseDuration).toBeGreaterThan(0.1); // Check it's longer than default 100ms SIL
+    });
+
+
+    it('ensures voicing parameters (AV, AVS) are consistent', () => {
+        const track = textToKlattTrack('buzz'); // B, AH0, Z
+        const bEvents = track.filter(e => e.phoneme === 'B_CL' || e.phoneme === 'B_REL');
+        const zEvent = track.find(e => e.phoneme === 'Z');
+        const ahEvent = track.find(e => e.phoneme === 'AH'); // AH0
+
+        expect(bEvents.length).toBeGreaterThan(0); // Should have B_CL and maybe B_REL
+        expect(zEvent, "'Z' event should exist").toBeDefined();
+        expect(ahEvent, "'AH' event should exist").toBeDefined();
+
+        bEvents.forEach(bEvent => expect(bEvent.params.AV, `B event (${bEvent.phoneme}) AV`).toBeGreaterThan(0));
+        if (zEvent) expect(zEvent.params.AV, "Z AV").toBeGreaterThan(0);
+        if (zEvent) expect(zEvent.params.AVS, "Z AVS").toBeGreaterThan(0); // Voiced frication source
+        if (ahEvent) expect(ahEvent.params.AV, "AH AV").toBeGreaterThan(0); // Vowel is voiced
+    });
+
+
+    it('ensures noise parameters (AF, AH) are consistent', () => {
+        const track = textToKlattTrack('fast'); // F, AE1, S, T_CL, T_REL
+        const fEvent = track.find(e => e.phoneme === 'F');
+        const sEvent = track.find(e => e.phoneme === 'S');
+        const tRelEvent = track.find(e => e.phoneme === 'T_REL');
+        const aeEvent = track.find(e => e.phoneme === 'AE');
+
+        expect(fEvent, "'F' event should exist").toBeDefined();
+        expect(sEvent, "'S' event should exist").toBeDefined();
+        expect(tRelEvent, "'T_REL' event should exist").toBeDefined();
+        expect(aeEvent, "'AE' event should exist").toBeDefined();
+
+        if (fEvent) expect(fEvent.params.AF, "F AF").toBeGreaterThan(0);
+        if (fEvent) expect(fEvent.params.AH, "F AH").toBeCloseTo(0);
+        if (sEvent) expect(sEvent.params.AF, "S AF").toBeGreaterThan(0);
+        if (sEvent) expect(sEvent.params.AH, "S AH").toBeCloseTo(0);
+        if (tRelEvent) expect(tRelEvent.params.AF, "T_REL AF").toBeGreaterThan(0); // Frication burst
+        if (tRelEvent) expect(tRelEvent.params.AH, "T_REL AH").toBeGreaterThan(0); // Aspiration
+        if (aeEvent) expect(aeEvent.params.AF, "AE AF").toBeCloseTo(0); // Vowel has no noise
+        if (aeEvent) expect(aeEvent.params.AH, "AE AH").toBeCloseTo(0);
+    });
+
     // *** NEW TESTS END HERE ***
 
   }); // End of describe('textToKlattTrack')

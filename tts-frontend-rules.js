@@ -956,10 +956,12 @@ export function rule_K_Context(phonemeList) {
         PHONEME_TARGETS[phonemeList[i + 1].phoneme + "1"] ||
         PHONEME_TARGETS[phonemeList[i + 1].phoneme + "0"];
       if (nextTargets && nextTargets.type === "vowel") {
-        if (nextTargets.front || nextTargets.hi)
+        // *** REORDERED CONDITIONS: Check back first ***
+        if (nextTargets.back)
+          phonemeList[i].params.F2 = 1200;
+        else if (nextTargets.front || nextTargets.hi)
           phonemeList[i].params.F2 = 1900;
-        else if (nextTargets.back) phonemeList[i].params.F2 = 1200;
-        else phonemeList[i].params.F2 = 1500;
+        else phonemeList[i].params.F2 = 1500; // Default if not back/front/hi
       }
     }
     // Add context for K_REL too? If K_REL exists...

@@ -956,12 +956,18 @@ export function rule_K_Context(phonemeList) {
         PHONEME_TARGETS[phonemeList[i + 1].phoneme + "1"] ||
         PHONEME_TARGETS[phonemeList[i + 1].phoneme + "0"];
       if (nextTargets && nextTargets.type === "vowel") {
-        // *** REORDERED CONDITIONS: Check back first ***
-        if (nextTargets.back)
-          phonemeList[i].params.F2 = 1200;
-        else if (nextTargets.front || nextTargets.hi)
-          phonemeList[i].params.F2 = 1900;
-        else phonemeList[i].params.F2 = 1500; // Default if not back/front/hi
+        // *** CORRECTED LOGIC ***
+        if (nextTargets.back) {
+          phonemeList[i].params.F2 = 1200; // Back vowel context
+        } else if (nextTargets.front) {
+          phonemeList[i].params.F2 = 1900; // Front vowel context
+        } else if (nextTargets.hi) {
+           // Handle 'hi' vowels that are neither front nor back (if any exist)
+           // Or apply fronting as a secondary effect for 'hi' if desired
+           phonemeList[i].params.F2 = 1900; // Defaulting 'hi' (non-front/back) to fronted F2
+        } else {
+          phonemeList[i].params.F2 = 1500; // Default for other contexts (e.g., central non-hi)
+        }
       }
     }
     // Add context for K_REL too? If K_REL exists...

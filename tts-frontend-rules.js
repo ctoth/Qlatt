@@ -976,7 +976,9 @@ export function rule_K_Context(phonemeList) {
       phonemeList[i - 1]?.phoneme === "K_CL"
     ) {
       // Copy the context-adjusted F2 from the preceding K_CL
-      phonemeList[i].params.F2 = phonemeList[i - 1].params.F2 || 1500;
+      const prevF2 = phonemeList[i - 1].params.F2 || 1500;
+      console.log(`[rule_K_Context] Copying F2=${prevF2} from K_CL to K_REL at index ${i}.`);
+      phonemeList[i].params.F2 = prevF2;
     }
   }
   return phonemeList;

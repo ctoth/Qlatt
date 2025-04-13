@@ -13,9 +13,11 @@ describe('Klatt Synth Helper Functions', () => {
     });
 
     it('returns 0 for very low dB values', () => {
-      expect(dbToLinear(-70)).toBe(0);
+      expect(dbToLinear(-70)).toBe(0); // Boundary condition
+      expect(dbToLinear(-69.9)).toBeGreaterThan(0); // Just above boundary
       expect(dbToLinear(-80)).toBe(0);
       expect(dbToLinear(-Infinity)).toBe(0);
+      expect(dbToLinear(NaN)).toBe(0); // Handle NaN
     });
   });
 
@@ -24,13 +26,21 @@ describe('Klatt Synth Helper Functions', () => {
       expect(bwToQ(1000, 100)).toBeCloseTo(10);
       expect(bwToQ(500, 50)).toBeCloseTo(10);
       expect(bwToQ(1000, 200)).toBeCloseTo(5);
+      expect(bwToQ(100, 1000)).toBeCloseTo(0.1); // Low Q
+      expect(bwToQ(4000, 40)).toBeCloseTo(100); // High Q
     });
 
     it('handles edge cases gracefully', () => {
+      const defaultQ = 0.707;
       // Default Q for invalid inputs
-      expect(bwToQ(0, 100)).toBeCloseTo(0.707);
-      expect(bwToQ(100, 0)).toBeCloseTo(0.707);
-      expect(bwToQ(-100, 50)).toBeCloseTo(0.707);
+      expect(bwToQ(0, 100)).toBeCloseTo(defaultQ);
+      expect(bwToQ(100, 0)).toBeCloseTo(defaultQ);
+      expect(bwToQ(-100, 50)).toBeCloseTo(defaultQ);
+      expect(bwToQ(100, -50)).toBeCloseTo(defaultQ);
+      expect(bwToQ(NaN, 100)).toBeCloseTo(defaultQ);
+      expect(bwToQ(100, NaN)).toBeCloseTo(defaultQ);
+      expect(bwToQ(Infinity, 100)).toBeCloseTo(defaultQ);
+      expect(bwToQ(100, Infinity)).toBeCloseTo(defaultQ); // Infinite BW -> Q near 0, but function defaults
     });
   });
 });

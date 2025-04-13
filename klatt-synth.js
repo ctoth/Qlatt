@@ -25,6 +25,8 @@ export class KlattSynth {
     this.isInitialized = false;
     this.isRunning = false;
     this._currentConnections = null; // Track current connection state ('cascade', 'parallel', null)
+    this._currentTrack = null;       // Store the currently scheduled track
+    this._trackStartTime = 0;        // Store the AudioContext time when the track started
     this._debugLog("KlattSynth instance created.");
   }
 

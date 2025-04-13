@@ -12,8 +12,11 @@ const initButton = document.getElementById("initButton");
 const statusDiv = document.getElementById("status");
 const textInput = document.getElementById("textInput");
 const speakTextButton = document.getElementById("speakTextButton");
+const synthStateDisplay = document.getElementById("synthStateDisplay"); // Get the new display element
 
 // --- Debug Logger ---
+let animationFrameId = null; // ID for cancelling the animation frame loop
+
 function debugLog(...args) {
     console.log("[Main UI DEBUG]", ...args);
 }
@@ -120,15 +123,18 @@ function speakText() {
         ) {
           debugLog("Synth is running and status is 'Speaking', stopping now.");
           klattSynth.stop(); // Logs internally
+          stopStatusUpdates(); // Stop display updates
           statusDiv.textContent = "Status: Finished speaking.";
           speakTextButton.disabled = false;
           debugLog("Synth stopped, UI updated.");
         } else {
            debugLog("Auto-stop condition not met (synth not running or status changed), not stopping.");
+           stopStatusUpdates(); // Stop updates anyway if condition not met
            if (!speakTextButton.disabled) speakTextButton.disabled = false; // Ensure button is re-enabled if stop didn't happen
         }
       }, stopDelay);
     } catch (error) {
+      stopStatusUpdates(); // Stop updates on error
       console.error("[Main UI] Error speaking text:", error);
       statusDiv.textContent = `Error: ${error.message}`;
       debugLog(`Error during speakText: ${error.message}`);
@@ -141,9 +147,56 @@ function speakText() {
   }, 10); // Small delay
 }
 
+// --- NEW: Synth State Display Update ---
+function updateSynthStatusDisplay() {
+  if (!klattSynth || !klattSynth.isRunning) {
+    synthStateDisplay.textContent = `Synth State: ${klattSynth?.isRunning ? 'Running (No Track)' : (klattSynth?.isInitialized ? 'Idle' : 'Uninitialized')}`;
+    animationFrameId = null; // Stop the loop
+    return;
+  }
+
+  const state = klattSynth.getCurrentState();
+  const paramsText = Object.entries(state.currentParams)
+    .map(([key, value]) => `${key}:${value.toFixed(1)}`)
+    .join(' ');
+
+  synthStateDisplay.textContent =
+`Synth State: Speaking
+Time: ${state.currentTime.toFixed(3)}s (Track: ${state.elapsedTrackTime.toFixed(3)}s)
+Word: ${state.currentWord}
+Phoneme: ${state.currentPhoneme}
+Params: ${paramsText}`;
+
+  // Continue the loop
+  animationFrameId = requestAnimationFrame(updateSynthStatusDisplay);
+}
+
+// Function to start the display loop
+function startStatusUpdates() {
+    if (animationFrameId === null) { // Prevent multiple loops
+        debugLog("Starting synth status updates.");
+        updateSynthStatusDisplay(); // Start the loop
+    }
+}
+
+// Function to stop the display loop
+function stopStatusUpdates() {
+    if (animationFrameId !== null) {
+        debugLog("Stopping synth status updates.");
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        // Optionally clear the display or set to Idle
+        if (synthStateDisplay) synthStateDisplay.textContent = `Synth State: ${klattSynth?.isInitialized ? 'Idle' : 'Uninitialized'}`;
+    }
+}
+
+
 // --- Event Listeners ---
 initButton.addEventListener("click", initAudio);
-speakTextButton.addEventListener("click", speakText);
+speakTextButton.addEventListener("click", () => {
+    speakText(); // Call the original function
+    startStatusUpdates(); // Start updating the display
+});
 // Add listeners for manual buttons if keeping them
 
 // --- Initial State ---

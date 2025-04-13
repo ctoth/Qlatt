@@ -72,48 +72,58 @@ function numberToWords(num) {
   return String(num);
 }
 
-// --- Phonetic Transcription --- (Keep as is)
-export function transcribeText(text) { // Added export
-  /* ... */
+// --- Phonetic Transcription --- (MODIFIED: Return word info)
+export function transcribeText(text) {
   const words = text.split(" ");
-  const phonemeSequence = [];
+  const wordPhonemeList = []; // Array of { word: '...', phonemes: [...] }
   const punctuation = [",", ".", "?", "!"];
+
   for (const word of words) {
-    /* ... lookup logic ... */
+    if (!word) continue; // Skip empty strings resulting from multiple spaces
+
+    const currentWordData = { word: word, phonemes: [] };
+
     if (punctuation.includes(word)) {
-      phonemeSequence.push({
+      currentWordData.phonemes.push({
         phoneme: "SIL",
         stress: null,
         isPunctuation: true,
         symbol: word,
       });
-      continue;
-    }
-    if (!word) continue;
-    const lowerWord = word.toLowerCase();
-    let pronunciation = CMU_DICT[lowerWord];
-    if (!pronunciation && lowerWord.includes("(")) {
-      pronunciation = CMU_DICT[lowerWord.replace(/\(\d+\)$/, "")];
-    }
-    if (pronunciation) {
-      /* ... split and push phones/stress ... */
-      const phones = pronunciation.split(" ");
-      for (const phoneWithStress of phones) {
-        const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
-        if (match)
-          phonemeSequence.push({
-            phoneme: match[1],
-            stress: match[2] ? parseInt(match[2]) : null,
-          });
-        else if (phoneWithStress === "SIL")
-          phonemeSequence.push({ phoneme: "SIL", stress: null });
-      }
     } else {
-      console.warn(`Word "${word}" not found. Skipping.`);
-      phonemeSequence.push({ phoneme: "SIL", stress: null, duration: 50 });
+      const lowerWord = word.toLowerCase();
+      let pronunciation = CMU_DICT[lowerWord];
+      // Handle alternate pronunciations like "read(1)" -> "read"
+      if (!pronunciation && lowerWord.includes("(")) {
+        pronunciation = CMU_DICT[lowerWord.replace(/\(\d+\)$/, "")];
+      }
+
+      if (pronunciation) {
+        const phones = pronunciation.split(" ");
+        for (const phoneWithStress of phones) {
+          const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
+          if (match) {
+            currentWordData.phonemes.push({
+              phoneme: match[1],
+              stress: match[2] ? parseInt(match[2]) : null,
+            });
+          } else if (phoneWithStress === "SIL") {
+            // Handle SIL within a pronunciation if needed (though unlikely in CMU)
+            currentWordData.phonemes.push({ phoneme: "SIL", stress: null });
+          }
+        }
+      } else {
+        console.warn(`Word "${word}" not found. Skipping.`);
+        // Represent unknown word as silence associated with the word
+        currentWordData.phonemes.push({ phoneme: "SIL", stress: null, duration: 50 });
+      }
+    }
+    // Only add if phonemes were generated (handles empty words/skips)
+    if (currentWordData.phonemes.length > 0) {
+        wordPhonemeList.push(currentWordData);
     }
   }
-  return phonemeSequence;
+  return wordPhonemeList; // Return the list of word objects
 }
 
 // --- Stop Release Rule --- (Keep as is)
@@ -166,23 +176,25 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Input Text:", inputText);
   const normalized = normalizeText(inputText);
   debugLog("Normalized Text:", normalized);
-  let phonemeSequence = transcribeText(normalized);
+  // Transcribe returns list of { word: '...', phonemes: [...] }
+  const wordPhonemeList = transcribeText(normalized);
   debugLog(
-    "Initial Phonemes:",
-    phonemeSequence
-      .map((p) => p.phoneme + (p.stress !== null ? p.stress : ""))
-      .join(" ")
+    "Initial Word/Phonemes:",
+    wordPhonemeList.map(wp => `${wp.word}(${wp.phonemes.map(p => p.phoneme + (p.stress ?? '')).join(' ')})`).join(' | ')
   );
 
-  // --- Prepare Parameter Sequence (UPDATED Target Lookup Logic) ---
+  // --- Prepare Parameter Sequence (Flatten word list, add word info) ---
   debugLog("Preparing initial parameter sequence...");
-  let parameterSequence = phonemeSequence.map((ph) => {
-    let targetKeyBase = ph.phoneme;
-    let isStopClosure = false;
-    debugLog(`  Processing phoneme: ${ph.phoneme}${ph.stress ?? ''}`);
-    if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
-      targetKeyBase += "_CL";
-      isStopClosure = true;
+  let parameterSequence = [];
+  wordPhonemeList.forEach(wordData => {
+    wordData.phonemes.forEach(ph => {
+      let targetKeyBase = ph.phoneme;
+      let isStopClosure = false;
+      // debugLog(`  Processing phoneme: ${ph.phoneme}${ph.stress ?? ''} for word: ${wordData.word}`); // Can be noisy
+      if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
+        targetKeyBase += "_CL";
+        isStopClosure = true;
+      }
     }
 
     // Determine lookup key: Vowels use stress, Consonants ignore stress for lookup
@@ -248,12 +260,14 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       params: filledParams, // Use the filled params
       duration: baseTarget.dur || 100,
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
-      ...flags // Add the copied flags
-    };
-  });
+      ...flags, // Add the copied flags
+      word: wordData.word // *** ADD WORD INFO ***
+    });
+  }); // End of parameterSequence mapping
+
   debugLog("Initial parameter sequence prepared.");
 
-  // --- Apply Rules ---
+  // --- Apply Rules (Rules now operate on the flattened parameterSequence) ---
   debugLog("Applying rule: insertStopReleases...");
   parameterSequence = insertStopReleases(parameterSequence);
   // --- Simplified Refill Step ---
@@ -402,10 +416,16 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     debugLog(`    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${finalParams.AV}, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${finalParams.AVS}, GO=${finalParams.GO})`);
 
     if (targetTime > currentTime) {
-      klattTrack.push({ time: targetTime, phoneme: ph.phoneme, params: finalParams }); // Add phoneme name to track event
+      // *** ADD WORD and PHONEME to track event ***
+      klattTrack.push({
+          time: targetTime,
+          phoneme: ph.phoneme, // Keep original phoneme name (e.g., K_CL)
+          word: ph.word,      // Add the associated word
+          params: finalParams
+      });
 
-      // Log Event Details
-      console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
+      // Log Event Details (including word)
+      console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${ph.word}, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
       debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
       currentTime = targetTime;
     }

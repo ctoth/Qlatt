@@ -209,7 +209,7 @@ export class KlattSynth {
 
     // Summing nodes
     N.parallelSum = ctx.createGain();
-    N.parallelSum.gain.value = 0.2; // FURTHER REDUCED gain for parallel path output (was 0.5)
+    N.parallelSum.gain.value = 0.5; // INCREASED gain for parallel path output (was 0.2, originally 0.5)
     N.parallelInputMix = ctx.createGain();
     N.parallelInputMix.gain.value = 1.0; // Mixes sources for parallel path input
     N.finalSum = ctx.createGain();
@@ -290,11 +290,19 @@ export class KlattSynth {
   }
 
   // Helper: Schedule Parallel Resonator Gain (Peak Gain Adjustment)
-  _schedulePeakGain(filterNode, gainNode, targetDb, formantFreq, formantBw, scheduleMethod, rampEndTime) {
+  // Added formantIndex to determine if differencing compensation is needed
+  _schedulePeakGain(filterNode, gainNode, targetDb, formantFreq, formantBw, formantIndex, scheduleMethod, rampEndTime) {
       const targetPeakLinear = dbToLinear(targetDb);
-      if (!filterNode || !gainNode || targetPeakLinear <= 0 || formantFreq <= 0 || formantBw <= 0) {
+      // Check for formantIndex being valid (0-5 for F1-F6, -1 for Nasal)
+      if (!filterNode || !gainNode || targetPeakLinear <= 0 || formantFreq <= 0 || formantBw <= 0 || formantIndex === undefined || formantIndex < -1 || formantIndex > 5) {
           // Mute the gain node if parameters are invalid or target gain is zero/negative dB
           gainNode.gain[scheduleMethod](0.0, rampEndTime);
+          this._debugLog(`  Muting Parallel Gain for F${formantIndex+1}=${formantFreq} due to invalid params or gain <= 0 dB.`); // Updated log
+          return;
+      }
+
+      // Calculate 'r' based on bandwidth and sample rate
+      const r = Math.exp(-Math.PI * formantBw / this.ctx.sampleRate);
           this._debugLog(`  Muting Parallel Gain for F=${formantFreq} due to invalid params or gain <= 0 dB.`);
           return;
       }
@@ -316,13 +324,32 @@ export class KlattSynth {
 
       // For a BiquadFilterNode type 'bandpass', the peak gain is related to Q.
       // Gain at center frequency is approximately 1.0 (0 dB) for standard implementations.
-      // Therefore, we can apply the targetPeakLinear directly to the GainNode.
-      // This simplifies things compared to calculating 'a'.
+      // We apply the targetPeakLinear to the GainNode, but compensate for the
+      // differencing filter if needed (for F2-F6 in SW=0 mode).
 
-      const clampedLinearValue = Math.max(0, Math.min(targetPeakLinear, 100)); // Clamp for safety
+      let effectiveGain = targetPeakLinear;
+
+      // Compensate for differencing filter gain for F2-F6 (indices 1-5) in SW=0 mode
+      // Klatt.ts: const filterGain = (formant >= 2) ? peakGain / diffGain : peakGain;
+      if (this.params.SW === 0 && formantIndex >= 1 && formantIndex <= 5) { // Indices 1-5 correspond to F2-F6
+          const w = 2 * Math.PI * formantFreq / this.ctx.sampleRate;
+          // Gain of differentiator H(w) = 1 - e^(-jw) -> |H(w)| = sqrt(2 - 2cos(w))
+          // Use highpass filter approximation gain: |H(w)| = |(1 - e^-jw) / (1 - b*e^-jw)| where b is close to 1 for low cutoff
+          // For simplicity and matching Klatt.ts, use the ideal differentiator gain:
+          const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
+          if (diffGain > 1e-6) { // Avoid division by zero/small numbers
+              effectiveGain = targetPeakLinear / diffGain;
+              this._debugLog(`    Compensating Peak Gain for F${formantIndex+1} (Diff Gain=${diffGain.toFixed(3)}): ${targetPeakLinear.toFixed(4)} -> ${effectiveGain.toFixed(4)}`);
+          } else {
+              this._debugLog(`    Skipping Peak Gain compensation for F${formantIndex+1}: Differencing gain near zero (${diffGain.toFixed(3)}). Setting gain to 0.`);
+              effectiveGain = 0; // Mute if differencing gain is zero
+          }
+      }
+
+      const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
 
       this._debugLog(
-          `  Scheduling Parallel Peak Gain: F=${formantFreq}, BW=${formantBw}, Target=${targetDb}dB -> Linear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
+          `  Scheduling Parallel Peak Gain: F${formantIndex+1}=${formantFreq}, BW=${formantBw}, Target=${targetDb}dB -> EffectiveLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
       );
       gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
   }
@@ -613,26 +640,26 @@ export class KlattSynth {
         }
 
         // --- Parallel Amplitude Parameters (Use Peak Gain Scheduling) ---
-        case "AN":
-          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, P.FNP, P.BNP, scheduleMethod, rampEndTime);
+        case "AN": // Nasal formant index = -1 (or similar marker)
+          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, P.FNP, P.BNP, -1, scheduleMethod, rampEndTime);
           break;
-        case "A1":
-          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, P.F1, P.B1, scheduleMethod, rampEndTime);
+        case "A1": // Formant index = 0
+          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, P.F1, P.B1, 0, scheduleMethod, rampEndTime);
           break;
-        case "A2":
-          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, P.F2, P.B2, scheduleMethod, rampEndTime);
+        case "A2": // Formant index = 1
+          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, P.F2, P.B2, 1, scheduleMethod, rampEndTime);
           break;
-        case "A3":
-          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, P.F3, P.B3, scheduleMethod, rampEndTime);
+        case "A3": // Formant index = 2
+          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, P.F3, P.B3, 2, scheduleMethod, rampEndTime);
           break;
-        case "A4":
-          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, P.F4, P.B4, scheduleMethod, rampEndTime);
+        case "A4": // Formant index = 3
+          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, P.F4, P.B4, 3, scheduleMethod, rampEndTime);
           break;
-        case "A5":
-          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, P.F5, P.B5, scheduleMethod, rampEndTime);
+        case "A5": // Formant index = 4
+          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, P.F5, P.B5, 4, scheduleMethod, rampEndTime);
           break;
-        case "A6":
-          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, P.F6, P.B6, scheduleMethod, rampEndTime);
+        case "A6": // Formant index = 5
+          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, P.F6, P.B6, 5, scheduleMethod, rampEndTime);
           break;
         case "AB":
           // Bypass path doesn't have a filter, schedule gain directly

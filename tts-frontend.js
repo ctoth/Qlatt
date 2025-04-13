@@ -254,7 +254,8 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         if (baseTarget.hasOwnProperty('low')) flags.low = baseTarget.low;
     }
 
-    return {
+    // Create the object for the parameter sequence
+    const phonemeData = {
       phoneme: targetKeyBase, // *** Use the potentially modified targetKeyBase ***
       stress: ph.stress,
       params: filledParams, // Use the filled params
@@ -262,8 +263,11 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
       ...flags, // Add the copied flags
       word: wordData.word // *** ADD WORD INFO ***
-    });
-  }); // End of parameterSequence mapping
+    };
+    parameterSequence.push(phonemeData); // Push the data for this phoneme
+
+    }); // End of inner forEach (looping through phonemes 'ph')
+  }); // End of outer forEach (looping through words 'wordData')
 
   debugLog("Initial parameter sequence prepared.");
 

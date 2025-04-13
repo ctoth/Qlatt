@@ -1021,12 +1021,12 @@ export class KlattSynth {
     const T = typeof cancelTime === 'number' && isFinite(cancelTime) ? cancelTime : this.ctx.currentTime;
     this._debugLog(
       `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
-      );
-      return;
-    }
-    const T = this.ctx.currentTime;
-    this._debugLog(
-      `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
+    );
+    // Removed premature return here
+    // const T = this.ctx.currentTime; // T is already defined above
+    // this._debugLog(
+    //   `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
+    // );
     );
     Object.values(this.nodes).forEach((node) => {
       // Check if node and its properties exist before cancelling

@@ -195,7 +195,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         targetKeyBase += "_CL";
         isStopClosure = true;
       }
-    }
+      // } // Misplaced brace removed from here
 
     // Determine lookup key: Vowels use stress, Consonants ignore stress for lookup
     let baseTarget;

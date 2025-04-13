@@ -99,6 +99,18 @@ function speakText() {
       }
       debugLog(`Generated track with ${klattTrack.length} events.`);
 
+      // --- ADDED: Log the full track and key amplitudes ---
+      console.log("[Main UI] Generated Klatt Track (Full):", JSON.stringify(klattTrack, null, 2));
+      console.log("[Main UI] Generated Klatt Track (Amplitudes):");
+      klattTrack.forEach((event, index) => {
+          if (event.params) {
+              console.log(`  [${index}] t=${event.time.toFixed(3)}s, Ph=${event.phoneme}, Word=${event.word}: AV=${event.params.AV?.toFixed(1)}, AF=${event.params.AF?.toFixed(1)}, AH=${event.params.AH?.toFixed(1)}, AVS=${event.params.AVS?.toFixed(1)}, AN=${event.params.AN?.toFixed(1)}, A1=${event.params.A1?.toFixed(1)}, A2=${event.params.A2?.toFixed(1)}, A3=${event.params.A3?.toFixed(1)}, A4=${event.params.A4?.toFixed(1)}, A5=${event.params.A5?.toFixed(1)}, A6=${event.params.A6?.toFixed(1)}, AB=${event.params.AB?.toFixed(1)}, GO=${event.params.GO?.toFixed(1)}`);
+          } else {
+              console.log(`  [${index}] t=${event.time.toFixed(3)}s, Ph=${event.phoneme}, Word=${event.word}: No params object`);
+          }
+      });
+      // --- END ADDED LOGGING ---
+
       currentTrackDuration = klattTrack[klattTrack.length - 1]?.time || 0; // Get estimated duration
       debugLog(`Estimated track duration: ${currentTrackDuration.toFixed(3)}s`);
 

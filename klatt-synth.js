@@ -241,7 +241,7 @@ export class KlattSynth {
     N.r6DiffPar.type = "highpass";
     N.r6DiffPar.frequency.value = 1;
     N.r6DiffPar.Q.value = 0.707;
-    this.parallelDiffFilters = [
+    this.parallelDiffFilters = [ // Used only in SW=1 mode
       null,
       N.r2DiffPar,
       N.r3DiffPar,
@@ -250,7 +250,18 @@ export class KlattSynth {
       N.r6DiffPar,
     ]; // Index matches R number
 
-    // *** Ensure Summing Nodes have Gain = 1.0 ***
+    // Differencing filter for SW=0 parallel path (F2-F6 + Bypass)
+    N.parallelDiffFilterSW0 = ctx.createBiquadFilter();
+    N.parallelDiffFilterSW0.type = "highpass"; // Simple differentiator approximation
+    N.parallelDiffFilterSW0.frequency.value = 1; // Low cutoff
+    N.parallelDiffFilterSW0.Q.value = 0.707;
+
+    // Summing node for differenced voice + frication (SW=0)
+    N.parallelDiffPlusFricSW0 = ctx.createGain();
+    N.parallelDiffPlusFricSW0.gain.value = 1.0;
+
+
+    // *** Ensure Summing Nodes have Gain = 1.0 (Except ParallelSum) ***
     N.laryngealSourceSum.gain.value = 1.0;
     // N.parallelSum.gain.value = 1.0; // REMOVE THIS LINE - Keep the 0.5 set earlier
     N.finalSum.gain.value = 1.0;

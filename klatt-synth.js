@@ -960,13 +960,13 @@ export class KlattSynth {
       // Optionally ramp down F0 as well, though worklet should handle amp=0
       // this.setParam('F0', 0, T + RAMP_DOWN_TIME, false);
 
-      // Disconnect output immediately (ramps continue in background)
-      try {
-        this._debugLog("Disconnecting outputGain from destination.");
-        this.nodes.outputGain.disconnect(this.ctx.destination);
-      } catch (e) {
-        this._debugLog("Error disconnecting outputGain:", e);
-      }
+      // *** REMOVED immediate disconnection - Delayed disconnection handles this ***
+      // try {
+      //   this._debugLog("Disconnecting outputGain from destination.");
+      //   this.nodes.outputGain.disconnect(this.ctx.destination);
+      // } catch (e) {
+      //   this._debugLog("Error disconnecting outputGain:", e);
+      // }
 
       // Cancel any *other* scheduled values beyond the ramp-down time
       // Note: cancelScheduledValues currently holds the *last* value,

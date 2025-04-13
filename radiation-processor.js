@@ -31,8 +31,10 @@ class RadiationProcessor extends AudioWorkletProcessor {
     const inputChannel = input[0];
     const outputChannel = output[0];
     const blockLength = inputChannel.length;
-    let maxAbsInput = 0.0; // Track input level
-    let maxAbsOutput = 0.0; // Track output level
+    let maxAbsInput = 0.0; // Track input level for logging
+    let maxAbsOutput = 0.0; // Track output level for logging
+    let invalidInputDetected = false; // Flag for logging
+    let invalidOutputDetected = false; // Flag for logging
 
     // --- Logging ---
     const shouldLog = this._logCounter === 0;
@@ -40,11 +42,36 @@ class RadiationProcessor extends AudioWorkletProcessor {
 
     for (let i = 0; i < blockLength; ++i) {
       const currentInput = inputChannel[i];
-      outputChannel[i] = currentInput - this.lastInputSample;
-      this.lastInputSample = currentInput;
 
-      // Track max absolute values for logging
-      const absInput = Math.abs(currentInput);
+      // *** ADDED: Input Validation ***
+      if (!isFinite(currentInput)) {
+        if (!invalidInputDetected) { // Log only once per block
+            console.warn(`[Radiation] Invalid input detected: ${currentInput} at sample ${i}. Resetting state.`);
+            invalidInputDetected = true;
+        }
+        outputChannel[i] = 0.0; // Output silence
+        this.lastInputSample = 0.0; // Reset state
+        continue; // Skip normal processing for this sample
+      }
+      // *** END ADDED ***
+
+      outputChannel[i] = currentInput - this.lastInputSample;
+      this.lastInputSample = currentInput; // Update state *after* using it
+
+      // *** ADDED: Output Validation ***
+       if (!isFinite(outputChannel[i])) {
+           if (!invalidOutputDetected) { // Log only once per block
+               console.error(`[Radiation] Invalid output generated: ${outputChannel[i]} from input ${currentInput} and lastInput ${this.lastInputSample}. Resetting state.`);
+               invalidOutputDetected = true;
+           }
+           outputChannel[i] = 0.0; // Output silence
+           this.lastInputSample = 0.0; // Reset state
+       }
+      // *** END ADDED ***
+
+
+      // Track max absolute values for logging (only if output was valid)
+      const absInput = Math.abs(currentInput); // Input was already validated
       const absOutput = Math.abs(outputChannel[i]);
       if (absInput > maxAbsInput) maxAbsInput = absInput;
       if (absOutput > maxAbsOutput) maxAbsOutput = absOutput;

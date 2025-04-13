@@ -274,17 +274,17 @@ describe('TTS Frontend', () => {
         expect(aeCadEvent, "'AE' in 'cad' should exist").toBeDefined();
 
         if (aeCatEvent && aeCadEvent) {
-            // Find the duration from the *next* event's time minus this event's time
+            // *** REVISED findDuration to get duration OF the specified phoneme ***
             const findDuration = (track, phoneme) => {
                 const index = track.findIndex(e => e.phoneme === phoneme);
-                if (index === -1 || index === 0) return -1; // Not found or first event
-                // Find the *previous* event to calculate duration correctly
-                const prevEvent = track[index - 1];
+                if (index === -1 || index >= track.length - 1) return -1; // Not found or last event
                 const currentEvent = track[index];
-                return currentEvent.time - prevEvent.time;
+                const nextEvent = track[index + 1];
+                return nextEvent.time - currentEvent.time;
             };
-            const durCat = findDuration(trackCat, 'T_CL'); // Duration of AE is time(T_CL) - time(AE_start)
-            const durCad = findDuration(trackCad, 'D_CL'); // Duration of AE is time(D_CL) - time(AE_start)
+            // Find the duration of the AE vowel itself
+            const durCat = findDuration(trackCat, 'AE');
+            const durCad = findDuration(trackCad, 'AE');
 
             expect(durCat).toBeGreaterThan(0);
             expect(durCad).toBeGreaterThan(0);

@@ -12,8 +12,9 @@ class MockAudioWorkletProcessor {
 }
 vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
 
-// Dynamically import the processor AFTER setting up mocks
-let RadiationProcessor;
+// Statically import the processor AFTER setting up mocks
+import RadiationProcessor from "./radiation-processor.js";
+
 
 describe("RadiationProcessor", () => {
   let processor;
@@ -28,8 +29,7 @@ describe("RadiationProcessor", () => {
     vi.stubGlobal("currentFrame", 0);
     vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
 
-    const module = await import("./radiation-processor.js?t=" + Date.now());
-    RadiationProcessor = module.default; // Assuming default export
+    // RadiationProcessor is now imported statically above
 
     const processorOptions = { processorOptions: { sampleRate: 44100 } };
     processor = new RadiationProcessor(processorOptions);

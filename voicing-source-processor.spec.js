@@ -14,8 +14,9 @@ class MockAudioWorkletProcessor {
 }
 vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
 
-// Dynamically import the processor AFTER setting up mocks
-let VoicingSourceProcessor;
+// Statically import the processor AFTER setting up mocks
+import VoicingSourceProcessor from "./voicing-source-processor.js";
+
 
 // Helper function to create mock parameter arrays
 const createParamArray = (value, length) => {
@@ -45,8 +46,7 @@ describe("VoicingSourceProcessor", () => {
     vi.stubGlobal("currentFrame", 0);
     vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
 
-    const module = await import("./voicing-source-processor.js?t=" + Date.now());
-    VoicingSourceProcessor = module.default; // Assuming default export
+    // VoicingSourceProcessor is now imported statically above
 
     // Pass processorOptions including sampleRate to the constructor
     const processorOptions = { processorOptions: { sampleRate: 44100 } };

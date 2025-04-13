@@ -1,11 +1,11 @@
 // Helper Functions
 export function dbToLinear(db) {
-  if (db <= -70) return 0.0;
+  if (isNaN(db) || db <= -70) return 0.0; // Handle NaN
   return 10.0 ** (db / 20.0);
 }
 export function bwToQ(F, BW) {
-  // Ensure F and BW are positive for Q calculation
-  if (F <= 0 || BW <= 0) return 0.707; // Default Q for invalid input
+  // Ensure F and BW are valid positive numbers for Q calculation
+  if (isNaN(F) || isNaN(BW) || F <= 0 || BW <= 0) return 0.707; // Handle NaN and non-positive, return Default Q
   return F / BW;
 }
 // *** REMOVE OLD SCALING FACTOR ***

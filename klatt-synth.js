@@ -423,12 +423,6 @@ export class KlattSynth {
         targetQ = Math.min(targetQ, MAX_Q); // Clamp Q to the maximum value
         // --- MODIFICATION END ---
 
-        // --- MODIFICATION START ---
-        const MAX_Q = 18.0; // Lowered max Q further (was 25.0)
-        let targetQ = Math.max(0.0001, qVal); // Ensure Q > 0
-        targetQ = Math.min(targetQ, MAX_Q); // Clamp Q to the maximum value
-        // --- MODIFICATION END ---
-
         filterNode.Q[scheduleMethod](targetQ, rampEndTime);
 
         if (filterNode.gain) filterNode.gain.setValueAtTime(gainVal, T); // Gain is usually 0 for peaking/notch

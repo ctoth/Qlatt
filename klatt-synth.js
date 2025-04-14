@@ -220,6 +220,7 @@ export class KlattSynth {
 
     // === Final Stages ===
     N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
+    N.finalLpFilter = ctx.createBiquadFilter(); // Add final smoothing filter
     N.outputGain = ctx.createGain();
     N.outputGain.gain.value = dbToLinear(this.params.GO); // Init with GO
 
@@ -262,6 +263,12 @@ export class KlattSynth {
     // Summing node for differenced voice + frication (SW=0)
     N.parallelDiffPlusFricSW0 = ctx.createGain();
     N.parallelDiffPlusFricSW0.gain.value = 1.0;
+
+
+    // Configure final LP filter (matches reference outputLpFilter)
+    N.finalLpFilter.type = "lowpass";
+    N.finalLpFilter.frequency.value = ctx.sampleRate / 2.1; // Just below Nyquist
+    N.finalLpFilter.Q.value = 0.707; // Non-resonant
 
 
     // *** Ensure Summing Nodes have Gain = 1.0 (Except ParallelSum) ***
@@ -822,8 +829,8 @@ export class KlattSynth {
       this._debugLog(`      ParallelSum -> FinalSum`);
 
       // --- Final Stage ---
-      N.finalSum.connect(N.radiation).connect(N.outputGain);
-      this._debugLog(`    Final Stage: FinalSum -> Radiation -> OutputGain`);
+      N.finalSum.connect(N.radiation).connect(N.finalLpFilter).connect(N.outputGain);
+      this._debugLog(`    Final Stage: FinalSum -> Radiation -> FinalLP -> OutputGain`);
       this._currentConnections = "cascade";
       this._debugLog("Cascade/Parallel graph connected successfully.");
     } catch (error) {
@@ -882,7 +889,7 @@ export class KlattSynth {
       N.parallelInputMix.connect(N.abParGain).connect(N.parallelSum); // Bypass path (no preemphasis)
 
       // Final Stage
-      N.parallelSum.connect(N.radiation).connect(N.outputGain);
+      N.parallelSum.connect(N.radiation).connect(N.finalLpFilter).connect(N.outputGain);
       this._currentConnections = "parallel";
       this._debugLog("All-Parallel graph connected successfully.");
     } catch (error) {

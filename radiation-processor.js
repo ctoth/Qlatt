@@ -34,6 +34,7 @@ class RadiationProcessor extends AudioWorkletProcessor {
     let maxAbsInput = 0.0; // Track input level for logging
     let maxAbsOutput = 0.0; // Track output level for logging
     let invalidInputDetected = false; // Flag for logging
+    let invalidInputDetected = false; // Flag for logging
     let invalidOutputDetected = false; // Flag for logging
 
     // --- Logging ---

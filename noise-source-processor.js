@@ -25,7 +25,34 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     // Ensure sampleRate is defined globally or passed via options
     const effectiveSampleRate = typeof sampleRate !== 'undefined' ? sampleRate : options?.processorOptions?.sampleRate || 44100; // Default if undefined
     this._logInterval = Math.floor(effectiveSampleRate / 10); // Log ~10 times per second
-    // console.log(`[NoiseSource] Initialized. Sample Rate: ${effectiveSampleRate}, Log interval: ${this._logInterval} samples.`);
+
+    // --- LP Filter Setup (matches Klatt.ts LpNoiseSource) ---
+    this.y1Fric = 0; // Filter state for frication output
+    this.y1Asp = 0;  // Filter state for aspiration output
+
+    const oldB = 0.75;
+    const oldSampleRate = 10000;
+    const f = 1000; // Frequency where gain is matched
+    const g = (1 - oldB) / Math.sqrt(1 - 2 * oldB * Math.cos(2 * Math.PI * f / oldSampleRate) + oldB ** 2);
+    const extraGain = 2.5 * (effectiveSampleRate / 10000) ** 0.33; // Amplitude compensation
+
+    const w = 2 * Math.PI * f / effectiveSampleRate;
+    const cosW = Math.cos(w);
+    const gSq = g * g;
+    const q = (1 - gSq * cosW) / (1 - gSq);
+    const sqrtTerm = Math.sqrt(q * q - 1);
+
+    if (!isFinite(g) || !isFinite(extraGain) || !isFinite(q) || !isFinite(sqrtTerm)) {
+        console.error("[NoiseSource] Invalid filter parameters calculated. Using passthrough.", {g, extraGain, q, sqrtTerm});
+        this.filterB = 0; // Effectively passthrough if calculation fails
+        this.filterA = 1 * extraGain; // Apply gain correction even if filter fails
+    } else {
+        this.filterB = q - sqrtTerm;
+        this.filterA = (1 - this.filterB) * extraGain;
+    }
+    // --- End LP Filter Setup ---
+
+    console.log(`[NoiseSource] Initialized with LP Filter. Sample Rate: ${effectiveSampleRate}, Log interval: ${this._logInterval} samples. Filter Coeffs: a=${this.filterA.toFixed(4)}, b=${this.filterB.toFixed(4)}`);
   }
 
   process(inputs, outputs, parameters) {
@@ -71,15 +98,28 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
 
       let noise = Math.random() * 2.0 - 1.0; // Simple uniform noise
 
+      // --- Apply LP Filter ---
+      // y = a * x + b * y1
+      // Note: We currently use the *same* noise input for both filters.
+      // The second part of the fix is to use separate noise inputs.
+      const filteredNoiseFric = this.filterA * noise + this.filterB * this.y1Fric;
+      this.y1Fric = filteredNoiseFric; // Update state for next sample
+
+      const filteredNoiseAsp = this.filterA * noise + this.filterB * this.y1Asp;
+      this.y1Asp = filteredNoiseAsp;   // Update state for next sample
+      // --- End Apply LP Filter ---
+
+
       // --- Optional Modulation could be added here ---
+
 
       // Only write to output if it's available
       if (fricOutput) {
-        fricOutput[i] = noise * fricGain;
+        fricOutput[i] = filteredNoiseFric * fricGain;
         if (fricGain > 0) fricActive = true;
       }
       if (aspOutput) {
-        aspOutput[i] = noise * aspGain;
+        aspOutput[i] = filteredNoiseAsp * aspGain;
         if (aspGain > 0) aspActive = true;
       }
     }

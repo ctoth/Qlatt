@@ -91,7 +91,7 @@ export class KlattSynth {
       A5: 0,
       A6: 0,
       AB: 0,
-      SW: 0, // 0: Cascade/Parallel (Paper Default), 1: All Parallel
+      SW: 1, // 0: Cascade/Parallel, 1: All Parallel (NEW DEFAULT)
       FGP: 0,
       BGP: 100,
       FGZ: 1500,
@@ -124,10 +124,10 @@ export class KlattSynth {
     // === Gain Controls for Sources ===
     N.avsInGain = ctx.createGain();
     N.avsInGain.gain.value = 0.0;
-    N.fricationGain = ctx.createGain();
-    N.fricationGain.gain.value = 0.0;
-    N.aspirationGain = ctx.createGain();
-    N.aspirationGain.gain.value = 0.0;
+    // N.fricationGain = ctx.createGain(); // REMOVED - Unused
+    // N.fricationGain.gain.value = 0.0;
+    // N.aspirationGain = ctx.createGain(); // REMOVED - Unused
+    // N.aspirationGain.gain.value = 0.0;
 
     // *** Initialize Summing Node Gains to 1.0 ***
     N.laryngealSourceSum = ctx.createGain();
@@ -860,8 +860,13 @@ export class KlattSynth {
         .connect(N.avsInGain)
         .connect(N.rgsFilter)
         .connect(N.parallelInputMix);
-      N.noiseSource.connect(N.aspirationGain, 1).connect(N.parallelInputMix);
-      N.noiseSource.connect(N.fricationGain, 0).connect(N.parallelInputMix);
+      // N.noiseSource.connect(N.aspirationGain, 1).connect(N.parallelInputMix); // BUG: Connects via unscheduled gain
+      // N.noiseSource.connect(N.fricationGain, 0).connect(N.parallelInputMix); // BUG: Connects via unscheduled gain
+      // Connect noise source outputs DIRECTLY (scaling is done inside worklet via AF/AH)
+      N.noiseSource.connect(N.parallelInputMix, 1); // Output 1 (Aspiration) -> Mixer
+      N.noiseSource.connect(N.parallelInputMix, 0); // Output 0 (Frication) -> Mixer
+      this._debugLog("    NoiseSource outputs (Asp=1, Fric=0) connected directly to ParallelInputMix.");
+
 
       // Parallel Path (All sources mixed first)
       N.parallelInputMix

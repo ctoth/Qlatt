@@ -23,7 +23,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     // State for modulation if implemented
     this._logCounter = 0; // Counter for throttling logs
     // Ensure sampleRate is defined globally or passed via options
-    const effectiveSampleRate = typeof sampleRate !== 'undefined' ? sampleRate : options?.processorOptions?.sampleRate || 44100; // Default if undefined
+    const effectiveSampleRate = typeof sampleRate !== 'undefined' ? sampleRate : options?.processorOptions?.sampleRate || 48000; // Default if undefined (Updated to 48000)
     this._logInterval = Math.floor(effectiveSampleRate / 10); // Log ~10 times per second
 
     // --- LP Filter Setup (matches Klatt.ts LpNoiseSource) ---
@@ -96,16 +96,17 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
       const aspGain =
         aspGainValues.length > 1 ? aspGainValues[i] : aspGainValues[0];
 
-      let noise = Math.random() * 2.0 - 1.0; // Simple uniform noise
+      // Generate separate random numbers for each channel
+      let noiseFric = Math.random() * 2.0 - 1.0;
+      let noiseAsp = Math.random() * 2.0 - 1.0;
 
       // --- Apply LP Filter ---
       // y = a * x + b * y1
-      // Note: We currently use the *same* noise input for both filters.
-      // The second part of the fix is to use separate noise inputs.
-      const filteredNoiseFric = this.filterA * noise + this.filterB * this.y1Fric;
+      // Use separate noise inputs for each filter instance
+      const filteredNoiseFric = this.filterA * noiseFric + this.filterB * this.y1Fric;
       this.y1Fric = filteredNoiseFric; // Update state for next sample
 
-      const filteredNoiseAsp = this.filterA * noise + this.filterB * this.y1Asp;
+      const filteredNoiseAsp = this.filterA * noiseAsp + this.filterB * this.y1Asp;
       this.y1Asp = filteredNoiseAsp;   // Update state for next sample
       // --- End Apply LP Filter ---
 

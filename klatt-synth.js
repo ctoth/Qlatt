@@ -1001,6 +1001,8 @@ export class KlattSynth {
     } catch (error) {
       console.error(
         "[KlattSynth] Error during _connectAllParallel (alternating signs):",
+        error // Include the error object in the log
+      );
       this._currentConnections = null; // Mark as uncertain state
     }
   }

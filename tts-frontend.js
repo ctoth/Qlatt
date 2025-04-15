@@ -463,7 +463,12 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
     // Determine and set F0
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
-    let calculatedF0 = isTargetVoiced ? getF0AtTime(targetTime) : 0;
+    // *** ADDED LOGGING: Log voicing check and getF0AtTime result ***
+    const f0FromContour = getF0AtTime(targetTime);
+    debugLog(`    Check Voicing for ${ph.phoneme}: AV=${finalParams.AV?.toFixed(1)}, AVS=${finalParams.AVS?.toFixed(1)} -> isTargetVoiced=${isTargetVoiced}`);
+    debugLog(`    getF0AtTime(${targetTime.toFixed(3)}) returned: ${f0FromContour?.toFixed(1)}`);
+    // *** END ADDED LOGGING ***
+    let calculatedF0 = isTargetVoiced ? f0FromContour : 0; // Use the logged value
     if (ph.phoneme === "SIL") calculatedF0 = 0;
     if (isTargetVoiced && calculatedF0 < 1) {
       debugLog(

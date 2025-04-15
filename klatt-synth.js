@@ -117,6 +117,8 @@ export class KlattSynth {
     // === Source Shaping Filters ===
     N.rgpFilter = ctx.createBiquadFilter();
     N.rgpFilter.type = "lowpass";
+    N.rgpFilterAVS = ctx.createBiquadFilter(); // NEW: Second RGP for AVS path
+    N.rgpFilterAVS.type = "lowpass";
     N.rgzFilter = ctx.createBiquadFilter();
     N.rgzFilter.type = "notch";
     N.rgsFilter = ctx.createBiquadFilter();
@@ -301,6 +303,12 @@ export class KlattSynth {
         );
       }
     });
+    // Ensure the AVS RGP filter also gets initial params
+    try {
+        this.setParam('BGP', this.params['BGP'], time, true); // Trigger update for rgpFilterAVS
+    } catch (e) {
+        console.error(`[KlattSynth] Error applying initial BGP to rgpFilterAVS: ${e}`);
+    }
     this._debugLog("Initial parameters applied.");
   }
 
@@ -537,8 +545,17 @@ export class KlattSynth {
           break;
         }
         case "AV":
-          this._debugLog(`  Scheduling VoicingSource Amp (AV): ${value} dB`);
-          scheduleWorkletParam(N.voicingSource, "amp", value);
+          // Schedule the base amplitude in dB for the worklet
+          this._debugLog(`  Scheduling VoicingSource Base Amp (AV): ${value} dB`);
+          // Ensure the parameter name matches the worklet's descriptor
+          if (N.voicingSource.parameters.has('baseAmpDb')) {
+              N.voicingSource.parameters.get('baseAmpDb')[scheduleMethod](value, rampEndTime);
+              this._debugLog(`    Worklet baseAmpDb scheduled to ${value.toFixed(2)} dB at ${rampEndTime.toFixed(3)}`);
+          } else {
+              console.error("[KlattSynth] VoicingSource worklet missing 'baseAmpDb' parameter!");
+          }
+          // Remove the old scheduleWorkletParam call for 'amp'
+          // scheduleWorkletParam(N.voicingSource, "amp", value);
           break;
         case "AF":
           this._debugLog(`  Scheduling Frication Gain (AF): ${value} dB`);
@@ -561,8 +578,10 @@ export class KlattSynth {
         case "BGP": {
           const cutoff = Math.max(1, P.BGP); // Ensure cutoff > 0, use BGP as cutoff freq
           const q = 0.707; // Standard Q for simple lowpass
+          // Schedule BOTH RGP filters
           scheduleFilter(N.rgpFilter, "lowpass", cutoff, q);
-          this._debugLog(`  Scheduling RgpFilter: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGP as cutoff)`);
+          scheduleFilter(N.rgpFilterAVS, "lowpass", cutoff, q); // Schedule the AVS path RGP too
+          this._debugLog(`  Scheduling RgpFilter & RgpFilterAVS: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGP as cutoff)`);
           break;
         }
         case "FGZ":
@@ -776,12 +795,17 @@ export class KlattSynth {
 
     try {
       // --- Source Connections (Following FORTRAN Logic) ---
-      // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum
+      // --- Source Connections (Following FORTRAN Logic + Corrections) ---
+      // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum (Normal Path)
       N.voicingSource.connect(N.rgpFilter).connect(N.rgzFilter).connect(N.voicedSourceSum);
       this._debugLog(`    AV -> RGP -> RGZ -> voicedSourceSum`);
-      // Voicing (AVS) -> AVS Gain -> RGS -> voicedSourceSum
-      N.voicingSource.connect(N.avsInGain).connect(N.rgsFilter).connect(N.voicedSourceSum);
-      this._debugLog(`    AVS -> avsInGain -> RGS -> voicedSourceSum`);
+
+      // Voicing (AVS) -> AVS Gain -> RGS -> RGP_AVS -> voicedSourceSum (Sinusoidal Path - Corrected)
+      N.voicingSource.connect(N.avsInGain)
+                     .connect(N.rgsFilter)
+                     .connect(N.rgpFilterAVS) // Add second RGP filter stage
+                     .connect(N.voicedSourceSum);
+      this._debugLog(`    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`);
 
       // Differentiate the summed voiced source
       N.voicedSourceSum.connect(N.radiationDiff);
@@ -905,13 +929,17 @@ export class KlattSynth {
     const N = this.nodes;
 
     try {
-      // --- Source Connections (Following FORTRAN Logic) ---
-      // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum
+      // --- Source Connections (Following FORTRAN Logic + Corrections) ---
+      // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum (Normal Path)
       N.voicingSource.connect(N.rgpFilter).connect(N.rgzFilter).connect(N.voicedSourceSum);
       this._debugLog(`    AV -> RGP -> RGZ -> voicedSourceSum`);
-      // Voicing (AVS) -> AVS Gain -> RGS -> voicedSourceSum
-      N.voicingSource.connect(N.avsInGain).connect(N.rgsFilter).connect(N.voicedSourceSum);
-      this._debugLog(`    AVS -> avsInGain -> RGS -> voicedSourceSum`);
+
+      // Voicing (AVS) -> AVS Gain -> RGS -> RGP_AVS -> voicedSourceSum (Sinusoidal Path - Corrected)
+      N.voicingSource.connect(N.avsInGain)
+                     .connect(N.rgsFilter)
+                     .connect(N.rgpFilterAVS) // Add second RGP filter stage
+                     .connect(N.voicedSourceSum);
+      this._debugLog(`    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`);
 
       // Differentiate the summed voiced source
       N.voicedSourceSum.connect(N.radiationDiff);
@@ -1157,8 +1185,22 @@ export class KlattSynth {
           node.frequency.setValueAtTime(node.frequency.value, T);
           node.Q.cancelScheduledValues(T);
           node.Q.setValueAtTime(node.Q.value, T);
-          node.gain.cancelScheduledValues(T);
-          node.gain.setValueAtTime(node.gain.value, T);
+          // Also cancel/hold for the AVS RGP filter
+          if (node === N.rgpFilter && N.rgpFilterAVS) {
+              N.rgpFilterAVS.frequency.cancelScheduledValues(T);
+              N.rgpFilterAVS.frequency.setValueAtTime(N.rgpFilterAVS.frequency.value, T);
+              N.rgpFilterAVS.Q.cancelScheduledValues(T);
+              N.rgpFilterAVS.Q.setValueAtTime(N.rgpFilterAVS.Q.value, T);
+          }
+          // Gain is usually not automated for filters, but cancel anyway
+          if (node.gain) {
+              node.gain.cancelScheduledValues(T);
+              node.gain.setValueAtTime(node.gain.value, T);
+              if (node === N.rgpFilter && N.rgpFilterAVS?.gain) {
+                  N.rgpFilterAVS.gain.cancelScheduledValues(T);
+                  N.rgpFilterAVS.gain.setValueAtTime(N.rgpFilterAVS.gain.value, T);
+              }
+          }
         } else if (node instanceof AudioWorkletNode && node.parameters) {
           node.parameters.forEach((param) => {
             if (param) { // Check if param exists

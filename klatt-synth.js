@@ -149,6 +149,11 @@ export class KlattSynth {
 
     N.parallelFricAspMix = ctx.createGain(); // Sums twice-diff voice + fric + asp (for parallel R2-R6/Bypass)
     N.parallelFricAspMix.gain.value = 1.0;
+
+    N.uglot1Diff = ctx.createBiquadFilter(); // Calculates UGLOT1 = Diff(DiffVoice+Asp) for RNP in SW=1
+    N.uglot1Diff.type = "highpass";
+    N.uglot1Diff.frequency.value = 1; // Approximates differentiator
+    N.uglot1Diff.Q.value = 0.707;
     // *** END NEW ***
 
 
@@ -796,16 +801,16 @@ export class KlattSynth {
       this._debugLog(`      -> finalSum`);
 
       // --- Parallel Path ---
-      this._debugLog(`    Parallel Path:`);
-      // Differentiated Voice (radiationDiff output) -> R1P -> A1 Gain -> parallelSum
-      N.radiationDiff.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
-      this._debugLog(`      radiationDiff -> R1P -> A1 -> parallelSum`);
-      // Differentiated Voice (radiationDiff output) -> RNP_Par -> AN Gain -> parallelSum
-      N.radiationDiff.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
-      this._debugLog(`      radiationDiff -> RNP_Par -> AN -> parallelSum`);
+      this._debugLog(`    Parallel Path (SW=0):`);
+      // R1P and RNP receive NO voice input in SW=0 per FORTRAN lines 425, 430
+      // Connect gain nodes directly to parallelSum, but they receive no signal from voice path.
+      N.a1ParGain.connect(N.parallelSum);
+      this._debugLog(`      (No Voice Input) -> A1 -> parallelSum`);
+      N.anParGain.connect(N.parallelSum);
+      this._debugLog(`      (No Voice Input) -> AN -> parallelSum`);
 
       // Create Input for R2-R6/Bypass: Twice-Differentiated Voice + Frication
-      // Differentiated Voice -> Further Differentiator (parallelVoiceDiff1) -> Mixer
+      // Differentiated Voice (radiationDiff) -> Further Differentiator (parallelVoiceDiff1) -> Mixer
       N.radiationDiff.connect(N.parallelVoiceDiff1).connect(N.parallelFricAspMix);
       this._debugLog(`      radiationDiff -> parallelVoiceDiff1 -> parallelFricAspMix`);
       // Frication Noise -> Mixer
@@ -863,16 +868,16 @@ export class KlattSynth {
       this._debugLog(`    voicedSourceSum -> radiationDiff`);
 
       // --- Parallel Path ---
-      this._debugLog(`    Parallel Path:`);
-      // Differentiated Voice (radiationDiff output) -> R1P -> A1 Gain -> parallelSum
-      N.radiationDiff.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
-      this._debugLog(`      radiationDiff -> R1P -> A1 -> parallelSum`);
-      // Differentiated Voice (radiationDiff output) -> RNP_Par -> AN Gain -> parallelSum
-      N.radiationDiff.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
-      this._debugLog(`      radiationDiff -> RNP_Par -> AN -> parallelSum`);
+      this._debugLog(`    Parallel Path (SW=1):`);
+      // R1P Input: UGLOT = DiffVoice+Asp (cascadeInputSum)
+      N.cascadeInputSum.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
+      this._debugLog(`      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum`);
+      // RNP Input: UGLOT1 = Diff(UGLOT)
+      N.cascadeInputSum.connect(N.uglot1Diff).connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
+      this._debugLog(`      cascadeInputSum (UGLOT) -> uglut1Diff -> RNP_Par -> AN -> parallelSum`);
 
       // Create Input for R2-R6/Bypass: Twice-Differentiated Voice + Frication + Aspiration
-      // Differentiated Voice -> Further Differentiator (parallelVoiceDiff1) -> Mixer
+      // Differentiated Voice (radiationDiff) -> Further Differentiator (parallelVoiceDiff1) -> Mixer
       N.radiationDiff.connect(N.parallelVoiceDiff1).connect(N.parallelFricAspMix);
       this._debugLog(`      radiationDiff -> parallelVoiceDiff1 -> parallelFricAspMix`);
       // Frication Noise -> Mixer

@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the global scope expected by AudioWorkletProcessor
 const mockRegisterProcessor = vi.fn();
@@ -10,11 +10,10 @@ vi.stubGlobal("currentFrame", 0); // Mock global currentFrame
 class MockAudioWorkletProcessor {
   constructor(options) {}
 }
-vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+vi.stubGlobal("AudioWorkletProcessor", MockAudioWorkletProcessor);
 
 // Statically import the processor AFTER setting up mocks
 import RadiationProcessor from "./radiation-processor.js";
-
 
 describe("RadiationProcessor", () => {
   let processor;
@@ -27,7 +26,7 @@ describe("RadiationProcessor", () => {
     vi.stubGlobal("registerProcessor", mockRegisterProcessor);
     vi.stubGlobal("sampleRate", 44100);
     vi.stubGlobal("currentFrame", 0);
-    vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+    vi.stubGlobal("AudioWorkletProcessor", MockAudioWorkletProcessor);
 
     // RadiationProcessor is now imported statically above
 
@@ -84,13 +83,13 @@ describe("RadiationProcessor", () => {
     expect(alive).toBe(true);
 
     // Expected output: 0 - (-0.1) = 0.1, 0.1 - 0 = 0.1, 0.2 - 0.1 = 0.1, ...
-    outputs[0][0].forEach(sample => {
-        expect(sample).toBeCloseTo(0.1);
+    outputs[0][0].forEach((sample) => {
+      expect(sample).toBeCloseTo(0.1);
     });
     expect(processor.lastInputSample).toBeCloseTo((BLOCK_LENGTH - 1) * 0.1); // Check final state
   });
 
-   it("should handle a step input correctly", () => {
+  it("should handle a step input correctly", () => {
     // Input: 0 for first half, 1 for second half
     const halfBlock = BLOCK_LENGTH / 2;
     for (let i = 0; i < halfBlock; i++) inputs[0][0][i] = 0.0;
@@ -104,9 +103,11 @@ describe("RadiationProcessor", () => {
     // Then a pulse of 1.0 at the step (1.0 - 0.0)
     // Then 0 for the rest (1.0 - 1.0)
     expect(outputs[0][0][0]).toBeCloseTo(0.0); // 0 - 0
-    for (let i = 1; i < halfBlock; i++) expect(outputs[0][0][i]).toBeCloseTo(0.0); // 0 - 0
+    for (let i = 1; i < halfBlock; i++)
+      expect(outputs[0][0][i]).toBeCloseTo(0.0); // 0 - 0
     expect(outputs[0][0][halfBlock]).toBeCloseTo(1.0); // 1 - 0 (the step)
-    for (let i = halfBlock + 1; i < BLOCK_LENGTH; i++) expect(outputs[0][0][i]).toBeCloseTo(0.0); // 1 - 1
+    for (let i = halfBlock + 1; i < BLOCK_LENGTH; i++)
+      expect(outputs[0][0][i]).toBeCloseTo(0.0); // 1 - 1
 
     expect(processor.lastInputSample).toBeCloseTo(1.0); // Final state
   });
@@ -135,7 +136,7 @@ describe("RadiationProcessor", () => {
     expect(processor.lastInputSample).toBe(0.0); // State should reset
   });
 
-   it("should handle empty input channel gracefully", () => {
+  it("should handle empty input channel gracefully", () => {
     processor.lastInputSample = 0.5; // Set some state
     const alive = processor.process([[]], outputs, {}); // Empty input channel array
     expect(alive).toBe(true);
@@ -143,7 +144,7 @@ describe("RadiationProcessor", () => {
     expect(processor.lastInputSample).toBe(0.0); // State should reset
   });
 
-   it("should handle missing output gracefully", () => {
+  it("should handle missing output gracefully", () => {
     inputs[0][0].fill(0.1);
     processor.lastInputSample = 0.0;
     // We expect it not to throw and return true
@@ -185,5 +186,4 @@ describe("RadiationProcessor", () => {
 
     expect(processor.lastInputSample).toBeCloseTo(0.3);
   });
-
 });

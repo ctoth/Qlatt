@@ -1,18 +1,14 @@
-
 import { dictionary as CMU_DICT } from "cmu-pronouncing-dictionary";
 import {
-  BASE_PARAMS,
   PHONEME_TARGETS,
   fillDefaultParams,
   rule_GenerateF0Contour,
   rule_K_Context,
   rule_StressDuration,
   rule_VowelShortening,
-} from "./tts-frontend-rules.js"; // Import BASE_PARAMS too
+} from "./tts-frontend-rules.js";
 
-// --- Text Normalization & numberToWords --- (Keep as is)
-export function normalizeText(text) { // Added export
-  /* ... */
+export function normalizeText(text) {
   let normalized = text.toLowerCase();
   normalized = normalized.replace(/(\d+)/g, (match) =>
     numberToWords(parseInt(match))
@@ -87,7 +83,7 @@ export function transcribeText(text) {
         stress: null,
         isPunctuation: true,
         symbol: word,
-        word: word // Associate punctuation with itself as the 'word'
+        word: word, // Associate punctuation with itself as the 'word'
       });
     } else {
       const lowerWord = word.toLowerCase();
@@ -105,7 +101,7 @@ export function transcribeText(text) {
             flatPhonemeList.push({
               phoneme: match[1],
               stress: match[2] ? parseInt(match[2]) : null,
-              word: word // Add the original word to each phoneme
+              word: word, // Add the original word to each phoneme
             });
           } else if (phoneWithStress === "SIL") {
             // Handle SIL within a pronunciation if needed (though unlikely in CMU)
@@ -115,16 +111,21 @@ export function transcribeText(text) {
       } else {
         console.warn(`Word "${word}" not found. Representing as SIL.`);
         // Represent unknown word as silence associated with the word
-        flatPhonemeList.push({ phoneme: "SIL", stress: null, duration: 50, word: word });
+        flatPhonemeList.push({
+          phoneme: "SIL",
+          stress: null,
+          duration: 50,
+          word: word,
+        });
       }
     }
   }
   return flatPhonemeList; // Return the flat list of phoneme objects
 }
 
-
 // --- Stop Release Rule --- (MODIFIED: Operates on flat list)
-function insertStopReleases(phonemeList) { // Now receives the flat list
+function insertStopReleases(phonemeList) {
+  // Now receives the flat list
   /* ... */
   const newList = [];
   const releaseMap = {
@@ -164,7 +165,7 @@ function insertStopReleases(phonemeList) { // Now receives the flat list
 
 // --- Debug Logger ---
 function debugLog(...args) {
-    console.log("[TTS Frontend DEBUG]", ...args);
+  console.log("[TTS Frontend DEBUG]", ...args);
 }
 
 // --- Main Pipeline ---
@@ -177,12 +178,14 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   let parameterSequence = transcribeText(normalized);
   debugLog(
     "Initial Phonemes:",
-    parameterSequence.map(p => `${p.phoneme}${p.stress ?? ''}(${p.word})`).join(' ')
+    parameterSequence
+      .map((p) => `${p.phoneme}${p.stress ?? ""}(${p.word})`)
+      .join(" ")
   );
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
   debugLog("Preparing initial parameter sequence (mapping to targets)...");
-  parameterSequence = parameterSequence.map(ph => {
+  parameterSequence = parameterSequence.map((ph) => {
     let targetKeyBase = ph.phoneme;
     let isStopClosure = false;
     // debugLog(`  Processing phoneme: ${ph.phoneme}${ph.stress ?? ''} from word: ${ph.word}`); // Can be noisy
@@ -222,7 +225,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     if (!baseTarget && ph.isPunctuation) {
       baseTarget = PHONEME_TARGETS["SIL"];
       targetKeyBase = "SIL"; // Update the base key
-      debugLog(`    Phoneme is punctuation ('${ph.symbol}'), using SIL target.`);
+      debugLog(
+        `    Phoneme is punctuation ('${ph.symbol}'), using SIL target.`
+      );
     } else if (!baseTarget) {
       console.warn(
         `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
@@ -231,7 +236,11 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       targetKeyBase = "SIL"; // Update the base key
       debugLog(`    No target found, falling back to SIL.`);
     } else {
-       debugLog(`    Found target for ${targetKeyBase}: ${baseTarget.type || 'unknown type'}, dur: ${baseTarget.dur}`);
+      debugLog(
+        `    Found target for ${targetKeyBase}: ${
+          baseTarget.type || "unknown type"
+        }, dur: ${baseTarget.dur}`
+      );
     }
 
     const filledParams = fillDefaultParams(baseTarget);
@@ -240,14 +249,15 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     // Copy essential flags from baseTarget
     const flags = {};
     if (baseTarget) {
-        if (baseTarget.type) flags.type = baseTarget.type;
-        if (baseTarget.hasOwnProperty('voiceless')) flags.voiceless = baseTarget.voiceless;
-        if (baseTarget.hasOwnProperty('voiced')) flags.voiced = baseTarget.voiced;
-        if (baseTarget.hasOwnProperty('front')) flags.front = baseTarget.front;
-        if (baseTarget.hasOwnProperty('back')) flags.back = baseTarget.back;
-        if (baseTarget.hasOwnProperty('hi')) flags.hi = baseTarget.hi;
-        if (baseTarget.hasOwnProperty('low')) flags.low = baseTarget.low;
-        // Add other flags as needed by rules
+      if (baseTarget.type) flags.type = baseTarget.type;
+      if (baseTarget.hasOwnProperty("voiceless"))
+        flags.voiceless = baseTarget.voiceless;
+      if (baseTarget.hasOwnProperty("voiced")) flags.voiced = baseTarget.voiced;
+      if (baseTarget.hasOwnProperty("front")) flags.front = baseTarget.front;
+      if (baseTarget.hasOwnProperty("back")) flags.back = baseTarget.back;
+      if (baseTarget.hasOwnProperty("hi")) flags.hi = baseTarget.hi;
+      if (baseTarget.hasOwnProperty("low")) flags.low = baseTarget.low;
+      // Add other flags as needed by rules
     }
 
     // Return the enriched phoneme data object for the sequence
@@ -255,10 +265,10 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       phoneme: targetKeyBase, // Use the potentially modified targetKeyBase (e.g., P_CL, SIL)
       stress: ph.stress,
       params: filledParams,
-      duration: baseTarget?.dur || (targetKeyBase === 'SIL' ? 100 : 50), // Default duration, use optional chaining
+      duration: baseTarget?.dur || (targetKeyBase === "SIL" ? 100 : 50), // Default duration, use optional chaining
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
       ...flags,
-      word: ph.word // Keep the word info
+      word: ph.word, // Keep the word info
     };
   });
 
@@ -270,40 +280,47 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   // --- Simplified Refill Step ---
   debugLog("Applying rule: Refill params/durations for releases...");
   for (let i = 0; i < parameterSequence.length; i++) {
-      const ph = parameterSequence[i];
-      if (!ph.params) { // Only process phonemes inserted by rules (like releases)
-          debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
-          let baseTarget = PHONEME_TARGETS[ph.phoneme]; // Directly use phoneme name
+    const ph = parameterSequence[i];
+    if (!ph.params) {
+      // Only process phonemes inserted by rules (like releases)
+      debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
+      let baseTarget = PHONEME_TARGETS[ph.phoneme]; // Directly use phoneme name
 
-          if (!baseTarget) {
-              console.warn(`[TTS Frontend] No target found for inserted phoneme ${ph.phoneme}. Using SIL.`);
-              baseTarget = PHONEME_TARGETS["SIL"];
-              // Consider if we should change ph.phoneme to SIL here? Maybe not needed if params are SIL.
-          }
-
-          // Use the refined fillDefaultParams
-          ph.params = fillDefaultParams(baseTarget);
-          ph.duration = baseTarget?.dur || 30; // Use optional chaining
-
-          // Add minimal type flag and other relevant flags
-          if (baseTarget) {
-              if (baseTarget.type) ph.type = baseTarget.type;
-              // Copy other flags that might be relevant, similar to initial mapping
-              if (baseTarget.hasOwnProperty('voiceless')) ph.voiceless = baseTarget.voiceless;
-              if (baseTarget.hasOwnProperty('voiced')) ph.voiced = baseTarget.voiced;
-              // Add other flags from PHONEME_TARGETS if needed by future rules
-              if (baseTarget.hasOwnProperty('front')) ph.front = baseTarget.front;
-              if (baseTarget.hasOwnProperty('back')) ph.back = baseTarget.back;
-              if (baseTarget.hasOwnProperty('hi')) ph.hi = baseTarget.hi;
-              if (baseTarget.hasOwnProperty('low')) ph.low = baseTarget.low;
-              if (baseTarget.hasOwnProperty('bilabial')) ph.bilabial = baseTarget.bilabial;
-              if (baseTarget.hasOwnProperty('alveolar')) ph.alveolar = baseTarget.alveolar;
-              // etc. for other place/manner features if necessary
-          }
-
-
-          debugLog(`    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}, Type=${ph.type}, Voiceless=${ph.voiceless}`);
+      if (!baseTarget) {
+        console.warn(
+          `[TTS Frontend] No target found for inserted phoneme ${ph.phoneme}. Using SIL.`
+        );
+        baseTarget = PHONEME_TARGETS["SIL"];
+        // Consider if we should change ph.phoneme to SIL here? Maybe not needed if params are SIL.
       }
+
+      // Use the refined fillDefaultParams
+      ph.params = fillDefaultParams(baseTarget);
+      ph.duration = baseTarget?.dur || 30; // Use optional chaining
+
+      // Add minimal type flag and other relevant flags
+      if (baseTarget) {
+        if (baseTarget.type) ph.type = baseTarget.type;
+        // Copy other flags that might be relevant, similar to initial mapping
+        if (baseTarget.hasOwnProperty("voiceless"))
+          ph.voiceless = baseTarget.voiceless;
+        if (baseTarget.hasOwnProperty("voiced")) ph.voiced = baseTarget.voiced;
+        // Add other flags from PHONEME_TARGETS if needed by future rules
+        if (baseTarget.hasOwnProperty("front")) ph.front = baseTarget.front;
+        if (baseTarget.hasOwnProperty("back")) ph.back = baseTarget.back;
+        if (baseTarget.hasOwnProperty("hi")) ph.hi = baseTarget.hi;
+        if (baseTarget.hasOwnProperty("low")) ph.low = baseTarget.low;
+        if (baseTarget.hasOwnProperty("bilabial"))
+          ph.bilabial = baseTarget.bilabial;
+        if (baseTarget.hasOwnProperty("alveolar"))
+          ph.alveolar = baseTarget.alveolar;
+        // etc. for other place/manner features if necessary
+      }
+
+      debugLog(
+        `    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}, Type=${ph.type}, Voiceless=${ph.voiceless}`
+      );
+    }
   }
   debugLog("Finished refilling params for releases.");
   // --- End Simplified Refill Step ---
@@ -318,7 +335,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       if (ph.punctuationSymbol === ",") ph.duration = 150;
       else if ([".", "?", "!"].includes(ph.punctuationSymbol))
         ph.duration = 300;
-      debugLog(`  Adjusted SIL duration for '${ph.punctuationSymbol}' from ${oldDur} to ${ph.duration}`);
+      debugLog(
+        `  Adjusted SIL duration for '${ph.punctuationSymbol}' from ${oldDur} to ${ph.duration}`
+      );
     }
   });
   debugLog("Applying rule: rule_StressDuration...");
@@ -326,22 +345,38 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Applying rule: rule_VowelShortening...");
   parameterSequence = rule_VowelShortening(parameterSequence);
   debugLog("Finished applying rules.");
-  debugLog("Parameter sequence after rules:", parameterSequence.map(p => `${p.phoneme}${p.stress ?? ''}(${p.duration}ms)`).join(' '));
+  debugLog(
+    "Parameter sequence after rules:",
+    parameterSequence
+      .map((p) => `${p.phoneme}${p.stress ?? ""}(${p.duration}ms)`)
+      .join(" ")
+  );
 
   // *** ADDED LOGGING: Inspect sequence before final loop ***
   debugLog("Inspecting parameterSequence before final track generation:");
   parameterSequence.forEach((ph, index) => {
-      debugLog(`  [${index}] ${ph.phoneme}${ph.stress ?? ''}: Duration=${ph.duration}, AV=${ph.params?.AV?.toFixed(1)}, AF=${ph.params?.AF?.toFixed(1)}, AH=${ph.params?.AH?.toFixed(1)}, F0=${ph.params?.F0?.toFixed(1)}`);
-      if (ph.phoneme.endsWith('_REL')) {
-          debugLog(`    -> Release Phoneme Params: ${JSON.stringify(ph.params)}`);
-      }
+    debugLog(
+      `  [${index}] ${ph.phoneme}${ph.stress ?? ""}: Duration=${
+        ph.duration
+      }, AV=${ph.params?.AV?.toFixed(1)}, AF=${ph.params?.AF?.toFixed(
+        1
+      )}, AH=${ph.params?.AH?.toFixed(1)}, F0=${ph.params?.F0?.toFixed(1)}`
+    );
+    if (ph.phoneme.endsWith("_REL")) {
+      debugLog(`    -> Release Phoneme Params: ${JSON.stringify(ph.params)}`);
+    }
   });
   // *** REMOVED DETAILED LOGGING BLOCK ***
 
   // --- Generate F0 ---
   debugLog("Generating F0 contour...");
   const f0Contour = rule_GenerateF0Contour(parameterSequence, baseF0);
-  debugLog("F0 Contour:", f0Contour.map(p => `(${p.time.toFixed(3)}s, ${p.f0.toFixed(1)}Hz)`).join(' '));
+  debugLog(
+    "F0 Contour:",
+    f0Contour
+      .map((p) => `(${p.time.toFixed(3)}s, ${p.f0.toFixed(1)}Hz)`)
+      .join(" ")
+  );
 
   // --- Generate Final Klatt Track (FILTER PARAMS) ---
   debugLog("Generating final Klatt track...");
@@ -363,11 +398,17 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   }
 
   // Start silent
-  klattTrack.push({ time: 0, params: fillDefaultParams(PHONEME_TARGETS["SIL"]) }); // Use filled SIL params directly
+  klattTrack.push({
+    time: 0,
+    params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
+  }); // Use filled SIL params directly
   debugLog(`  Added initial silence event at t=0.000`);
 
   // --- ADDED: Log initial track state ---
-  console.log("[TTS Frontend] Klatt Track after initial silence:", JSON.stringify(klattTrack, null, 2));
+  console.log(
+    "[TTS Frontend] Klatt Track after initial silence:",
+    JSON.stringify(klattTrack, null, 2)
+  );
   // --- END ADDED LOGGING ---
 
   for (let i = 0; i < parameterSequence.length; i++) {
@@ -375,58 +416,96 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Restore original calculation
 
     // *** ADDED: Specific logging for P_REL inside loop ***
-    if (ph.phoneme === 'P_REL') {
-        debugLog(`    INSIDE LOOP CHECK for P_REL:`);
-        debugLog(`      ph.duration (ms): ${ph.duration}`);
-        debugLog(`      Calculated phDuration (s): ${phDuration.toFixed(4)}`);
+    if (ph.phoneme === "P_REL") {
+      debugLog(`    INSIDE LOOP CHECK for P_REL:`);
+      debugLog(`      ph.duration (ms): ${ph.duration}`);
+      debugLog(`      Calculated phDuration (s): ${phDuration.toFixed(4)}`);
     }
     // *** END ADDED LOGGING ***
 
     if (phDuration <= 0) {
-        console.warn(`[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(4)}s) for ${ph.phoneme}. Original duration: ${ph.duration}ms. Skipping.`);
-        debugLog(`    WARN: Skipping track event for ${ph.phoneme} due to zero or negative calculated duration.`);
-        continue; // Explicitly skip if duration is bad
+      console.warn(
+        `[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(
+          4
+        )}s) for ${ph.phoneme}. Original duration: ${ph.duration}ms. Skipping.`
+      );
+      debugLog(
+        `    WARN: Skipping track event for ${ph.phoneme} due to zero or negative calculated duration.`
+      );
+      continue; // Explicitly skip if duration is bad
     }
     const targetTime = currentTime + phDuration;
 
     // *** ADDED: Specific logging for P_REL inside loop ***
-     if (ph.phoneme === 'P_REL') {
-        debugLog(`      targetTime: ${targetTime.toFixed(4)}`);
-        debugLog(`      currentTime: ${currentTime.toFixed(4)}`);
-        debugLog(`      Condition (targetTime > currentTime): ${targetTime > currentTime}`);
-     }
+    if (ph.phoneme === "P_REL") {
+      debugLog(`      targetTime: ${targetTime.toFixed(4)}`);
+      debugLog(`      currentTime: ${currentTime.toFixed(4)}`);
+      debugLog(
+        `      Condition (targetTime > currentTime): ${
+          targetTime > currentTime
+        }`
+      );
+    }
     // *** END ADDED LOGGING ***
 
-    debugLog(`  Processing phoneme ${i}: ${ph.phoneme}${ph.stress ?? ''}, duration=${phDuration.toFixed(3)}s (original: ${ph.duration}ms), targetTime=${targetTime.toFixed(3)}s`);
+    debugLog(
+      `  Processing phoneme ${i}: ${ph.phoneme}${
+        ph.stress ?? ""
+      }, duration=${phDuration.toFixed(3)}s (original: ${
+        ph.duration
+      }ms), targetTime=${targetTime.toFixed(3)}s`
+    );
 
     // Use the params object directly from the sequence (already filled and potentially modified by rules)
-    const finalParams = ph.params ? { ...ph.params } : fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure we have a params object, copy it
+    const finalParams = ph.params
+      ? { ...ph.params }
+      : fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure we have a params object, copy it
 
     // Determine and set F0
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
     let calculatedF0 = isTargetVoiced ? getF0AtTime(targetTime) : 0;
-    if (ph.phoneme === 'SIL') calculatedF0 = 0;
+    if (ph.phoneme === "SIL") calculatedF0 = 0;
     if (isTargetVoiced && calculatedF0 < 1) {
-         debugLog(`    WARN: Calculated F0 near zero (${calculatedF0.toFixed(1)}) for voiced phoneme ${ph.phoneme} at ${targetTime.toFixed(3)}s. Clamping to baseF0/2.`);
-         calculatedF0 = baseF0 / 2;
+      debugLog(
+        `    WARN: Calculated F0 near zero (${calculatedF0.toFixed(
+          1
+        )}) for voiced phoneme ${ph.phoneme} at ${targetTime.toFixed(
+          3
+        )}s. Clamping to baseF0/2.`
+      );
+      calculatedF0 = baseF0 / 2;
     }
     finalParams.F0 = calculatedF0; // Set F0 on the copied params
 
     // *** REMOVED Safety Check Loop - Assuming ph.params is already valid after fillDefaultParams and rules ***
 
-    debugLog(`    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${finalParams.AV}, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${finalParams.AVS}, GO=${finalParams.GO})`);
+    debugLog(
+      `    Final Params (F0=${finalParams.F0.toFixed(1)}, AV=${
+        finalParams.AV
+      }, AF=${finalParams.AF}, AH=${finalParams.AH}, AVS=${
+        finalParams.AVS
+      }, GO=${finalParams.GO})`
+    );
 
     if (targetTime > currentTime) {
       // *** ADD WORD and PHONEME to track event ***
       klattTrack.push({
-          time: targetTime,
-          phoneme: ph.phoneme, // Keep original phoneme name (e.g., K_CL)
-          word: ph.word,      // Add the associated word
-          params: finalParams
+        time: targetTime,
+        phoneme: ph.phoneme, // Keep original phoneme name (e.g., K_CL)
+        word: ph.word, // Add the associated word
+        params: finalParams,
       });
 
       // Log Event Details (including word)
-      console.log(`Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${ph.word}, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(1)}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(1)}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`);
+      console.log(
+        `Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${
+          ph.word
+        }, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(
+          1
+        )}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(
+          1
+        )}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`
+      );
       debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
       currentTime = targetTime;
     }
@@ -434,17 +513,25 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   }
   // Add final silence
   const finalTime = currentTime + 0.1;
-  klattTrack.push({ time: finalTime, phoneme: 'SIL', params: fillDefaultParams(PHONEME_TARGETS["SIL"]) });
+  klattTrack.push({
+    time: finalTime,
+    phoneme: "SIL",
+    params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
+  });
   debugLog(`  Added final silence event at t=${finalTime.toFixed(3)}`);
 
-  console.log( // Keep top-level log
+  console.log(
+    // Keep top-level log
     `Generated Klatt Track: ${
       klattTrack.length
     } events, duration: ${finalTime.toFixed(3)}s`
   );
 
   // --- ADDED: Log final track state ---
-  console.log("[TTS Frontend] Final Klatt Track before return:", JSON.stringify(klattTrack, null, 2));
+  console.log(
+    "[TTS Frontend] Final Klatt Track before return:",
+    JSON.stringify(klattTrack, null, 2)
+  );
   // --- END ADDED LOGGING ---
 
   debugLog("--- textToKlattTrack End ---");

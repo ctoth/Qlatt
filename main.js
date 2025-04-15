@@ -12,7 +12,16 @@ const initButton = document.getElementById("initButton");
 const statusDiv = document.getElementById("status");
 const textInput = document.getElementById("textInput");
 const speakTextButton = document.getElementById("speakTextButton");
-const synthStateDisplay = document.getElementById("synthStateDisplay"); // Get the new display element
+const synthStateDisplay = document.getElementById("synthStateDisplay");
+
+// Configuration Controls
+const baseF0Input = document.getElementById("baseF0Input");
+const transitionMsInput = document.getElementById("transitionMsInput");
+const swRadioCascade = document.getElementById("swRadioCascade");
+const swRadioParallel = document.getElementById("swRadioParallel");
+const nfcInput = document.getElementById("nfcInput");
+const goInput = document.getElementById("goInput");
+const configControls = [baseF0Input, transitionMsInput, swRadioCascade, swRadioParallel, nfcInput, goInput]; // Array for easy enabling
 
 // --- Debug Logger ---
 let animationFrameId = null; // ID for cancelling the animation frame loop
@@ -49,7 +58,12 @@ async function initAudio() {
     statusDiv.textContent = `Status: Ready (Sample Rate: ${audioContext.sampleRate} Hz)`;
     initButton.disabled = true;
     speakTextButton.disabled = false;
-    debugLog("UI enabled.");
+    // Enable configuration controls
+    configControls.forEach(control => control.disabled = false);
+    // Set initial NFC disabled state based on default SW=1
+    nfcInput.disabled = swRadioParallel.checked;
+    setupConfigListeners(); // Add listeners for config controls
+    debugLog("UI enabled, config controls enabled and listeners added.");
     // Enable manual buttons here if keeping them
   } catch (error) {
     console.error("[Main UI] Error initializing audio:", error);
@@ -62,6 +76,45 @@ async function initAudio() {
 // function setupManualControls() { /* ... */ }
 // function startManualSynth() { /* ... */ }
 // function stopManualSynth() { /* ... */ }
+
+// --- NEW: Configuration Control Listeners ---
+function setupConfigListeners() {
+    debugLog("Setting up config listeners...");
+
+    // SW Mode Change
+    const handleSwChange = () => {
+        const swValue = parseInt(document.querySelector('input[name="swMode"]:checked').value, 10);
+        debugLog(`SW mode changed to: ${swValue}`);
+        if (klattSynth && klattSynth.isInitialized) {
+            klattSynth.setParam('SW', swValue, audioContext.currentTime, true); // Apply immediately
+        }
+        // Enable/disable NFC input based on SW mode
+        nfcInput.disabled = (swValue === 1);
+        debugLog(`NFC input disabled: ${nfcInput.disabled}`);
+    };
+    swRadioCascade.addEventListener('change', handleSwChange);
+    swRadioParallel.addEventListener('change', handleSwChange);
+
+    // NFC Change
+    nfcInput.addEventListener('input', () => {
+        const nfcValue = parseInt(nfcInput.value, 10);
+        if (!isNaN(nfcValue) && klattSynth && klattSynth.isInitialized) {
+            debugLog(`NFC changed to: ${nfcValue}`);
+            klattSynth.setParam('NFC', nfcValue, audioContext.currentTime, true); // Apply immediately
+        }
+    });
+
+    // GO Change
+    goInput.addEventListener('input', () => {
+        const goValue = parseFloat(goInput.value); // GO is dB, can be float
+         if (!isNaN(goValue) && klattSynth && klattSynth.isInitialized) {
+            debugLog(`GO changed to: ${goValue} dB`);
+            klattSynth.setParam('GO', goValue, audioContext.currentTime, true); // Apply immediately
+        }
+    });
+    debugLog("Config listeners attached.");
+}
+
 
 // --- Text Mode Function ---
 function speakText() {
@@ -91,8 +144,14 @@ function speakText() {
       klattSynth.stop(); // Logs internally
       klattSynth._applyAllParams(audioContext.currentTime); // Reset synth state/params, logs internally
 
+      // Read TTS parameters from UI
+      const baseF0 = parseInt(baseF0Input.value, 10) || 110; // Default if parsing fails
+      const transitionMs = parseInt(transitionMsInput.value, 10) || 30; // Default if parsing fails
+      debugLog(`Using TTS params: BaseF0=${baseF0}, TransitionMs=${transitionMs}`);
+
       debugLog("Generating Klatt track...");
-      const klattTrack = textToKlattTrack(text); // Logs internally
+      // Pass TTS parameters to the track generation function
+      const klattTrack = textToKlattTrack(text, baseF0, transitionMs); // Pass UI values
       if (!klattTrack || klattTrack.length <= 1) {
          debugLog("Generated track is empty or invalid.");
          throw new Error("Generated track is empty or invalid.");

@@ -368,9 +368,20 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   });
   // *** REMOVED DETAILED LOGGING BLOCK ***
 
+  // *** ADDED LOGGING: Inspect sequence before F0 generation ***
+  debugLog("Inspecting parameterSequence before F0 generation:");
+  parameterSequence.forEach((ph, index) => {
+      debugLog(`  [${index}] ${ph.phoneme}: AV=${ph.params?.AV?.toFixed(1)}, AVS=${ph.params?.AVS?.toFixed(1)}, Stress=${ph.stress}`);
+  });
+  // *** END ADDED LOGGING ***
+
+
   // --- Generate F0 ---
   debugLog("Generating F0 contour...");
   const f0Contour = rule_GenerateF0Contour(parameterSequence, baseF0);
+  // *** ADDED LOGGING: Log the generated contour ***
+  debugLog("Generated F0 Contour (Raw):", JSON.stringify(f0Contour));
+  // *** END ADDED LOGGING ***
   debugLog(
     "F0 Contour:",
     f0Contour

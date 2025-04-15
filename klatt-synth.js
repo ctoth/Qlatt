@@ -139,20 +139,22 @@ export class KlattSynth {
     N.radiationDiff.frequency.value = 1; // Approximates differentiator
     N.radiationDiff.Q.value = 0.707;
 
-    N.cascadeInputSum = ctx.createGain(); // Sums differentiated voice + aspiration (SW=0 only)
+    N.cascadeInputSum = ctx.createGain(); // Sums differentiated voice + aspiration (Input to Cascade SW=0, R1P SW=1)
     N.cascadeInputSum.gain.value = 1.0;
 
-    N.parallelVoiceDiff1 = ctx.createBiquadFilter(); // Further differentiates voice for parallel R2-R6/Bypass
-    N.parallelVoiceDiff1.type = "highpass";
-    N.parallelVoiceDiff1.frequency.value = 1; // Approximates differentiator
-    N.parallelVoiceDiff1.Q.value = 0.707;
+    // N.parallelVoiceDiff1 = ctx.createBiquadFilter(); // REMOVED - No longer needed for parallel inputs
+    // N.parallelFricAspMix = ctx.createGain(); // REMOVED - Replaced by specific input nodes below
 
-    N.parallelFricAspMix = ctx.createGain(); // Sums twice-diff voice + fric + asp (for parallel R2-R6/Bypass)
-    N.parallelFricAspMix.gain.value = 1.0;
+    N.fricationInput = ctx.createGain(); // Holds only Frication noise (for R2-R6 SW=0, R5-R6/AB SW=1)
+    N.fricationInput.gain.value = 1.0;
 
-    N.uglot1Diff = ctx.createBiquadFilter(); // Calculates UGLOT1 = Diff(DiffVoice+Asp) for RNP in SW=1
+    N.uglot1Diff = ctx.createBiquadFilter(); // Calculates UGLOT1 = Diff(cascadeInputSum) for RNP/R2-R4 in SW=1
     N.uglot1Diff.type = "highpass";
     N.uglot1Diff.frequency.value = 1; // Approximates differentiator
+    N.uglot1Diff.Q.value = 0.707;
+
+    N.fricPlusUglot1Sum = ctx.createGain(); // Sums Frication + UGLOT1 (for R2-R4 SW=1)
+    N.fricPlusUglot1Sum.gain.value = 1.0;
     N.uglot1Diff.Q.value = 0.707;
     // *** END NEW ***
 
@@ -262,7 +264,8 @@ export class KlattSynth {
     // *** Ensure NEW Summing Nodes have Gain = 1.0 (Except ParallelSum) ***
     N.voicedSourceSum.gain.value = 1.0;
     N.cascadeInputSum.gain.value = 1.0;
-    N.parallelFricAspMix.gain.value = 1.0;
+    N.fricationInput.gain.value = 1.0; // Ensure gain is 1
+    N.fricPlusUglot1Sum.gain.value = 1.0; // Ensure gain is 1
     N.finalSum.gain.value = 1.0; // Ensure final sum (SW=0) is 1.0
     // N.parallelSum.gain.value = 0.5; // Keep the 0.5 set earlier
 
@@ -809,24 +812,19 @@ export class KlattSynth {
       N.anParGain.connect(N.parallelSum);
       this._debugLog(`      (No Voice Input) -> AN -> parallelSum`);
 
-      // Create Input for R2-R6/Bypass: Twice-Differentiated Voice + Frication
-      // Differentiated Voice (radiationDiff) -> Further Differentiator (parallelVoiceDiff1) -> Mixer
-      N.radiationDiff.connect(N.parallelVoiceDiff1).connect(N.parallelFricAspMix);
-      this._debugLog(`      radiationDiff -> parallelVoiceDiff1 -> parallelFricAspMix`);
-      // Frication Noise -> Mixer
-      N.noiseSource.connect(N.parallelFricAspMix, 0); // Output 0 is frication
-      this._debugLog(`      FricationNoise -> parallelFricAspMix`);
-      // NOTE: Aspiration does NOT go into parallelFricAspMix in SW=0
+      // Create Input for R2-R6/Bypass: Frication ONLY (SW=0)
+      N.noiseSource.connect(N.fricationInput, 0); // Output 0 is frication
+      this._debugLog(`      FricationNoise -> fricationInput`);
 
-      // Connect Mixer output to R2-R6 and Bypass
+      // Connect Frication Input to R2-R6 and Bypass
       for (let i = 1; i < 6; i++) { // R2 to R6
           if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
-          N.parallelFricAspMix.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
-          this._debugLog(`      parallelFricAspMix -> R${i+1}P -> A${i+1} -> parallelSum`);
+          N.fricationInput.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R${i+1}P -> A${i+1} -> parallelSum`);
       }
       // Bypass Path
-      N.parallelFricAspMix.connect(N.abParGain).connect(N.parallelSum);
-      this._debugLog(`      parallelFricAspMix -> AB -> parallelSum`);
+      N.fricationInput.connect(N.abParGain).connect(N.parallelSum);
+      this._debugLog(`      fricationInput -> AB -> parallelSum`);
 
       // Connect Parallel Output to Final Sum
       N.parallelSum.connect(N.finalSum);
@@ -872,30 +870,41 @@ export class KlattSynth {
       // R1P Input: UGLOT = DiffVoice+Asp (cascadeInputSum)
       N.cascadeInputSum.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
       this._debugLog(`      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum`);
-      // RNP Input: UGLOT1 = Diff(UGLOT)
-      N.cascadeInputSum.connect(N.uglot1Diff).connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
-      this._debugLog(`      cascadeInputSum (UGLOT) -> uglut1Diff -> RNP_Par -> AN -> parallelSum`);
 
-      // Create Input for R2-R6/Bypass: Twice-Differentiated Voice + Frication + Aspiration
-      // Differentiated Voice (radiationDiff) -> Further Differentiator (parallelVoiceDiff1) -> Mixer
-      N.radiationDiff.connect(N.parallelVoiceDiff1).connect(N.parallelFricAspMix);
-      this._debugLog(`      radiationDiff -> parallelVoiceDiff1 -> parallelFricAspMix`);
-      // Frication Noise -> Mixer
-      N.noiseSource.connect(N.parallelFricAspMix, 0); // Output 0 is frication
-      this._debugLog(`      FricationNoise -> parallelFricAspMix`);
-      // Aspiration Noise -> Mixer (Only in SW=1)
-      N.noiseSource.connect(N.parallelFricAspMix, 1); // Output 1 is aspiration
-      this._debugLog(`      AspirationNoise -> parallelFricAspMix`);
+      // Calculate UGLOT1 = Diff(UGLOT)
+      N.cascadeInputSum.connect(N.uglot1Diff);
+      this._debugLog(`      cascadeInputSum (UGLOT) -> uglut1Diff (UGLOT1)`);
 
-      // Connect Mixer output to R2-R6 and Bypass
-      for (let i = 1; i < 6; i++) { // R2 to R6
+      // RNP Input: UGLOT1
+      N.uglot1Diff.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
+      this._debugLog(`      uglut1Diff (UGLOT1) -> RNP_Par -> AN -> parallelSum`);
+
+      // Create Frication Input
+      N.noiseSource.connect(N.fricationInput, 0); // Output 0 is frication
+      this._debugLog(`      FricationNoise -> fricationInput`);
+
+      // Create Input for R2-R4: UFRIC + UGLOT1
+      N.fricationInput.connect(N.fricPlusUglot1Sum);
+      N.uglot1Diff.connect(N.fricPlusUglot1Sum);
+      this._debugLog(`      fricationInput + uglut1Diff -> fricPlusUglot1Sum`);
+
+      // Connect R2-R4 Input
+      for (let i = 1; i < 4; i++) { // R2 to R4 (indices 1, 2, 3)
           if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
-          N.parallelFricAspMix.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
-          this._debugLog(`      parallelFricAspMix -> R${i+1}P -> A${i+1} -> parallelSum`);
+          N.fricPlusUglot1Sum.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
+          this._debugLog(`      fricPlusUglot1Sum -> R${i+1}P -> A${i+1} -> parallelSum`);
       }
-      // Bypass Path
-      N.parallelFricAspMix.connect(N.abParGain).connect(N.parallelSum);
-      this._debugLog(`      parallelFricAspMix -> AB -> parallelSum`);
+
+      // Connect R5-R6 Input (Frication Only)
+      for (let i = 4; i < 6; i++) { // R5 to R6 (indices 4, 5)
+          if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
+          N.fricationInput.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R${i+1}P -> A${i+1} -> parallelSum`);
+      }
+
+      // Bypass Path Input (Frication Only)
+      N.fricationInput.connect(N.abParGain).connect(N.parallelSum);
+      this._debugLog(`      fricationInput -> AB -> parallelSum`);
 
       // --- Final Stage (Connect parallelSum directly to final output path) ---
       N.parallelSum.connect(N.finalLpFilter).connect(N.outputGain);

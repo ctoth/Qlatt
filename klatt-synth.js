@@ -396,7 +396,7 @@ export class KlattSynth {
     const scheduleMethod = applyImmediately
       ? "setValueAtTime"
       : "linearRampToValueAtTime";
-    const rampEndTime = applyImmediately ? T : T + 0.005; // 5ms ramp default
+    const rampEndTime = applyImmediately ? T : T + 0.001; // 1ms ramp default
 
     const oldValue = P[name];
     P[name] = value; // Update internal state

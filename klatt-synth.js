@@ -16,6 +16,20 @@ export function bwToQ(F, BW) {
 // *** NEW: Define Max dB for linear scaling 0-1 (Adjusted Reference) ***
 const SOURCE_AMP_MAX_DB = 65.0; // TRY THIS: Reduce reference level
 
+// Base dB offsets for parallel formants/bypass (from PARCOE.FOR NDBSCA)
+// Indices: 0=A1, 1=A2, 2=A3, 3=A4, 4=A5, 5=A6, 6=AN, 7=AB, 8=AV, 9=AH, 10=AF, 11=AVS
+const PARALLEL_AMP_BASE_DB_OFFSET = {
+    AN: -58, // Index 6 in NDBSCA
+    A1: -58, // Index 0
+    A2: -65, // Index 1
+    A3: -73, // Index 2
+    A4: -78, // Index 3
+    A5: -79, // Index 4
+    A6: -80, // Index 5
+    AB: -84  // Index 7
+};
+
+
 // --- Main Synth Class ---
 export class KlattSynth {
   constructor(audioContext) {
@@ -313,14 +327,16 @@ export class KlattSynth {
   }
 
   // Helper: Schedule Parallel Resonator Gain (Peak Gain Adjustment)
-  // Added formantIndex to determine if differencing compensation is needed
-  _schedulePeakGain(filterNode, gainNode, targetDb, formantFreq, formantBw, formantIndex, scheduleMethod, rampEndTime) {
-      const targetPeakLinear = dbToLinear(targetDb);
+  // Receives originalTargetDb (for logging) and correctedTargetDb (with base offset applied).
+  _schedulePeakGain(filterNode, gainNode, originalTargetDb, correctedTargetDb, formantFreq, formantBw, formantIndex, scheduleMethod, rampEndTime) {
+      const targetPeakLinear = dbToLinear(correctedTargetDb);
+      const paramName = formantIndex === -1 ? 'AN' : `A${formantIndex + 1}`; // Determine name for logging
+
       // Check for formantIndex being valid (0-5 for F1-F6, -1 for Nasal)
       if (!filterNode || !gainNode || targetPeakLinear <= 0 || formantFreq <= 0 || formantBw <= 0 || formantIndex === undefined || formantIndex < -1 || formantIndex > 5) {
           // Mute the gain node if parameters are invalid or target gain is zero/negative dB
           gainNode.gain[scheduleMethod](0.0, rampEndTime);
-          this._debugLog(`  Muting Parallel Gain for F${formantIndex+1}=${formantFreq} due to invalid params or gain <= 0 dB.`); // Updated log
+          this._debugLog(`  Muting Parallel Gain for ${paramName}=${formantFreq}Hz due to invalid params or corrected gain <= -70 dB (Original Target: ${originalTargetDb.toFixed(1)}dB).`);
           return;
       }
 
@@ -368,9 +384,10 @@ export class KlattSynth {
       }
 
       const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
+      const diffGain = (formantIndex >= 1 && formantIndex <= 5) ? Math.sqrt(Math.max(0, 2 - 2 * Math.cos(2 * Math.PI * formantFreq / this.ctx.sampleRate))) : null; // Recalculate for logging
 
       this._debugLog(
-          `  Scheduling Parallel Peak Gain: F${formantIndex+1}=${formantFreq}, BW=${formantBw}, Target=${targetDb}dB -> EffectiveLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
+          `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(1)}dB, CorrectedTarget=${correctedTargetDb.toFixed(1)}dB -> EffectiveLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)}, DiffGainComp=${diffGain ? diffGain.toFixed(3) : 'N/A'})`
       );
       gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
   }
@@ -671,33 +688,65 @@ export class KlattSynth {
           break;
         }
 
-        // --- Parallel Amplitude Parameters (Use Peak Gain Scheduling) ---
-        case "AN": // Nasal formant index = -1 (or similar marker)
-          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, P.FNP, P.BNP, -1, scheduleMethod, rampEndTime);
+        // --- Parallel Amplitude Parameters (Apply Base Offset before Peak Gain Scheduling) ---
+        case "AN": { // Nasal formant index = -1
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.AN || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling AN: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, correctedDb, P.FNP, P.BNP, -1, scheduleMethod, rampEndTime);
           break;
-        case "A1": // Formant index = 0
-          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, P.F1, P.B1, 0, scheduleMethod, rampEndTime);
+        }
+        case "A1": { // Formant index = 0
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A1 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A1: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, correctedDb, P.F1, P.B1, 0, scheduleMethod, rampEndTime);
           break;
-        case "A2": // Formant index = 1
-          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, P.F2, P.B2, 1, scheduleMethod, rampEndTime);
+        }
+        case "A2": { // Formant index = 1
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A2 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A2: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, correctedDb, P.F2, P.B2, 1, scheduleMethod, rampEndTime);
           break;
-        case "A3": // Formant index = 2
-          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, P.F3, P.B3, 2, scheduleMethod, rampEndTime);
+        }
+        case "A3": { // Formant index = 2
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A3 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A3: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, correctedDb, P.F3, P.B3, 2, scheduleMethod, rampEndTime);
           break;
-        case "A4": // Formant index = 3
-          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, P.F4, P.B4, 3, scheduleMethod, rampEndTime);
+        }
+        case "A4": { // Formant index = 3
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A4 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A4: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, correctedDb, P.F4, P.B4, 3, scheduleMethod, rampEndTime);
           break;
-        case "A5": // Formant index = 4
-          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, P.F5, P.B5, 4, scheduleMethod, rampEndTime);
+        }
+        case "A5": { // Formant index = 4
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A5 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A5: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, correctedDb, P.F5, P.B5, 4, scheduleMethod, rampEndTime);
           break;
-        case "A6": // Formant index = 5
-          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, P.F6, P.B6, 5, scheduleMethod, rampEndTime);
+        }
+        case "A6": { // Formant index = 5
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A6 || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling A6: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, correctedDb, P.F6, P.B6, 5, scheduleMethod, rampEndTime);
           break;
-        case "AB":
-          // Bypass path doesn't have a filter, schedule gain directly
-          this._debugLog(`  Scheduling Parallel Bypass Gain AB: ${value} dB`);
-          scheduleGain(N.abParGain, value);
+        }
+        case "AB": {
+          // Bypass path doesn't have a filter, schedule gain directly after applying offset
+          const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.AB || 0;
+          const correctedDb = value + baseOffsetDb;
+          this._debugLog(`  Scheduling Parallel Bypass Gain AB: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          // Use the generic scheduleGain helper with the *corrected* dB value
+          scheduleGain(N.abParGain, correctedDb);
           break;
+        }
         // --- End Parallel Amplitude Parameters ---
 
         case "GO":

@@ -713,7 +713,7 @@ export class KlattSynth {
 
    // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting ***
    this._debugLog(
-     `Gains before connect: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, parallelFricAspMix=${this.nodes.parallelFricAspMix?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
+     `Gains before connect: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(2)}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
    );
    // *** END ADDED ***
 
@@ -932,7 +932,7 @@ export class KlattSynth {
 
          // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting Output ***
          this._debugLog(
-           `Gains before connecting output: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, parallelFricAspMix=${this.nodes.parallelFricAspMix?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
+           `Gains before connecting output: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(2)}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
          );
          // *** END ADDED ***
 

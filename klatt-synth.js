@@ -389,6 +389,10 @@ export class KlattSynth {
       this._debugLog(
           `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(1)}dB, CorrectedTarget=${correctedTargetDb.toFixed(1)}dB -> EffectiveLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)}, DiffGainComp=${diffGain ? diffGain.toFixed(3) : 'N/A'})`
       );
+      // Add detailed log just before scheduling
+      this._debugLog(
+          `    --> Final Gain Check for ${paramName}: clampedLinearValue=${clampedLinearValue.toFixed(5)}, effectiveGain=${effectiveGain.toFixed(5)}, targetPeakLinear=${targetPeakLinear.toFixed(5)}`
+      );
       gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
   }
 

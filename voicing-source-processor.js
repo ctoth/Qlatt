@@ -101,9 +101,6 @@ class VoicingSourceProcessor extends AudioWorkletProcessor {
             // Ensure counter doesn't go excessively negative if inactive for long
             this.samplesUntilPulse = Math.max(-1, this.samplesUntilPulse - 1);
 
-            // 3. Decrement counter (always)
-            this.samplesUntilPulse -= 1;
-
             // 4. Assign output
             outputChannel[i] = outputSample;
 

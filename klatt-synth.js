@@ -561,8 +561,15 @@ export class KlattSynth {
             `  Scheduling VoicingSource F0: ${value.toFixed(1)} Hz`
           );
           N.voicingSource.parameters
-            .get("f0")
-            [scheduleMethod](value, rampEndTime);
+            .get("f0");
+          // *** ADDED F0 LOGGING ***
+          if (f0Param) {
+              this._debugLog(`    Scheduling F0 Param: Method=${scheduleMethod}, Value=${value.toFixed(2)}, EndTime=${rampEndTime.toFixed(3)}`);
+              f0Param[scheduleMethod](value, rampEndTime);
+          } else {
+              console.error("[KlattSynth] Could not get 'f0' AudioParam from voicingSource!");
+          }
+          // *** END ADDED F0 LOGGING ***
           break;
         }
         case "AV":

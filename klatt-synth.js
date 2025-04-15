@@ -39,7 +39,8 @@ export class KlattSynth {
       await Promise.all([
         this.ctx.audioWorklet.addModule("voicing-source-processor.js"),
         this.ctx.audioWorklet.addModule("noise-source-processor.js"),
-        this.ctx.audioWorklet.addModule("radiation-processor.js"),
+        // REMOVED: No longer loading radiation-processor
+        // this.ctx.audioWorklet.addModule("radiation-processor.js"),
       ]);
       this._debugLog("Worklets loaded successfully.");
     } catch (error) {
@@ -133,6 +134,12 @@ export class KlattSynth {
     N.laryngealSourceSum = ctx.createGain();
     N.laryngealSourceSum.gain.value = 1.0;
 
+    // *** NEW: Early Radiation Differentiator ***
+    N.earlyRadiationDiff = ctx.createBiquadFilter();
+    N.earlyRadiationDiff.type = "highpass";
+    N.earlyRadiationDiff.frequency.value = 1; // Very low cutoff approximates differentiator
+    N.earlyRadiationDiff.Q.value = 0.707; // Standard Q
+
     // === Vocal Tract Filters ===
     // Cascade Path
     N.rnpCascFilter = ctx.createBiquadFilter();
@@ -219,7 +226,7 @@ export class KlattSynth {
     N.finalSum.gain.value = 0.5; // REDUCED gain before radiation (was 1.0)
 
     // === Final Stages ===
-    N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
+    // REMOVED: N.radiation = new AudioWorkletNode(ctx, "radiation-processor");
     N.finalLpFilter = ctx.createBiquadFilter(); // Add final smoothing filter
     N.outputGain = ctx.createGain();
     N.outputGain.gain.value = dbToLinear(this.params.GO); // Init with GO
@@ -335,6 +342,9 @@ export class KlattSynth {
 
       // Compensate for differencing filter gain for F2-F6 (indices 1-5) in SW=0 mode
       // Klatt.ts: const filterGain = (formant >= 2) ? peakGain / diffGain : peakGain;
+      // NOTE: With early radiation, the input to the parallel path is already differentiated.
+      // The parallelDiffFilterSW0 applies a *second* differentiation for R2-R6.
+      // We need to compensate for this *second* differentiation.
       if (this.params.SW === 0 && formantIndex >= 1 && formantIndex <= 5) { // Indices 1-5 correspond to F2-F6
           const w = 2 * Math.PI * formantFreq / this.ctx.sampleRate;
           // Gain of differentiator H(w) = 1 - e^(-jw) -> |H(w)| = sqrt(2 - 2cos(w))
@@ -349,6 +359,10 @@ export class KlattSynth {
               effectiveGain = 0; // Mute if differencing gain is zero
           }
       }
+      // NOTE: For SW=1, the parallelDiffFilters[i] also apply a second differentiation
+      // to the already-differentiated source. Compensation might be needed here too,
+      // but the original FORTRAN didn't explicitly scale parallel gains based on SW.
+      // Let's leave SW=1 compensation out for now unless testing shows it's necessary.
 
       const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
 
@@ -772,12 +786,17 @@ export class KlattSynth {
       // Voicing (AVS) -> AVS Gain -> RGS -> LaryngealSum
       N.voicingSource.connect(N.avsInGain).connect(N.rgsFilter).connect(N.laryngealSourceSum);
       // Aspiration Noise (AH) -> LaryngealSum
-      N.noiseSource.connect(N.laryngealSourceSum, 1); // Output 1 is aspiration
+      N.noiseSource.connect(N.laryngealSourceSum, 1); // Aspiration
 
-      // --- Cascade Path ---
-      // LaryngealSum -> R1C..R[NFC]C -> RNZ -> RNP -> FinalSum
-      let lastCascadeNode = N.laryngealSourceSum;
-      this._debugLog(`    Cascade Path (NFC=${NFC}): LaryngealSum ->`);
+      // *** NEW: Insert Early Differentiator ***
+      N.laryngealSourceSum.connect(N.earlyRadiationDiff);
+      this._debugLog(`    Source -> LaryngealSum -> EarlyRadiationDiff`);
+      const differentiatedSource = N.earlyRadiationDiff; // Use this as the source for tract
+
+      // --- Cascade Path (Input is now differentiatedSource) ---
+      // differentiatedSource -> R1C..R[NFC]C -> RNZ -> RNP -> FinalSum
+      let lastCascadeNode = differentiatedSource; // Start from the differentiator
+      this._debugLog(`    Cascade Path (NFC=${NFC}): EarlyRadiationDiff ->`);
       // Connect R1C to R[NFC]C
       for (let i = 0; i < NFC; i++) {
           if (!this.cascadeFilters[i]) continue;
@@ -797,19 +816,22 @@ export class KlattSynth {
       lastCascadeNode.connect(N.finalSum);
       this._debugLog(`      -> FinalSum`);
 
-      // --- Parallel Path ---
+      // --- Parallel Path (Inputs also come from differentiatedSource or noise) ---
       this._debugLog(`    Parallel Path:`);
-      // LaryngealSum -> R1P -> A1 Gain -> ParallelSum
-      N.laryngealSourceSum.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
-      this._debugLog(`      LaryngealSum -> R1P -> A1 -> ParallelSum`);
-      // LaryngealSum -> RNP_Par -> AN Gain -> ParallelSum
-      N.laryngealSourceSum.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
-      this._debugLog(`      LaryngealSum -> RNP_Par -> AN -> ParallelSum`);
+      // differentiatedSource -> R1P -> A1 Gain -> ParallelSum
+      differentiatedSource.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
+      this._debugLog(`      EarlyRadiationDiff -> R1P -> A1 -> ParallelSum`);
+      // differentiatedSource -> RNP_Par -> AN Gain -> ParallelSum
+      differentiatedSource.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
+      this._debugLog(`      EarlyRadiationDiff -> RNP_Par -> AN -> ParallelSum`);
 
       // Create Differenced Source + Frication for R2-R6 and Bypass
-      // LaryngealSum -> Differentiator -> Sum
-      N.laryngealSourceSum.connect(N.parallelDiffFilterSW0).connect(N.parallelDiffPlusFricSW0);
-      this._debugLog(`      LaryngealSum -> DiffSW0 -> DiffPlusFricSW0`);
+      // differentiatedSource -> Differentiator -> Sum
+      // NOTE: We are differentiating an *already differentiated* source here for R2-R6.
+      // This matches the FORTRAN logic where UGLOT (already differentiated) is differenced again
+      // implicitly by UGLOT1 = UGLOT - UGLOTL before feeding R2-R4/RNP.
+      differentiatedSource.connect(N.parallelDiffFilterSW0).connect(N.parallelDiffPlusFricSW0);
+      this._debugLog(`      EarlyRadiationDiff -> DiffSW0 -> DiffPlusFricSW0`);
       // Frication Noise -> Sum
       N.noiseSource.connect(N.parallelDiffPlusFricSW0, 0); // Output 0 is frication
       this._debugLog(`      FricationNoise -> DiffPlusFricSW0`);
@@ -828,9 +850,9 @@ export class KlattSynth {
       N.parallelSum.connect(N.finalSum);
       this._debugLog(`      ParallelSum -> FinalSum`);
 
-      // --- Final Stage ---
-      N.finalSum.connect(N.radiation).connect(N.finalLpFilter).connect(N.outputGain);
-      this._debugLog(`    Final Stage: FinalSum -> Radiation -> FinalLP -> OutputGain`);
+      // --- Final Stage (Connect finalSum directly to finalLpFilter) ---
+      N.finalSum.connect(N.finalLpFilter).connect(N.outputGain);
+      this._debugLog(`    Final Stage: FinalSum -> FinalLP -> OutputGain`);
       this._currentConnections = "cascade";
       this._debugLog("Cascade/Parallel graph connected successfully.");
     } catch (error) {
@@ -867,34 +889,40 @@ export class KlattSynth {
       N.noiseSource.connect(N.parallelInputMix, 0); // Output 0 (Frication) -> Mixer
       this._debugLog("    NoiseSource outputs (Asp=1, Fric=0) connected directly to ParallelInputMix.");
 
+      // *** NEW: Insert Early Differentiator ***
+      N.parallelInputMix.connect(N.earlyRadiationDiff);
+      this._debugLog(`    Sources -> ParallelInputMix -> EarlyRadiationDiff`);
+      const differentiatedSource = N.earlyRadiationDiff; // Use this as the source for parallel filters
 
-      // Parallel Path (All sources mixed first)
-      N.parallelInputMix
+      // Parallel Path (All sources mixed first, then differentiated)
+      differentiatedSource // Use differentiated source
         .connect(N.rnpParFilter)
         .connect(N.anParGain)
         .connect(N.parallelSum);
-      N.parallelInputMix
+      differentiatedSource // Use differentiated source
         .connect(N.r1ParFilter)
         .connect(N.a1ParGain)
         .connect(N.parallelSum); // A1 active here
       for (let i = 1; i < 6; i++) {
-        // R2-R6 with preemphasis
+        // R2-R6 with preemphasis applied to the *already differentiated* source
         if (
           !this.parallelFilters[i] ||
           !this.parallelGains[i] ||
           !this.parallelDiffFilters[i]
         )
           continue; // Safety check
-        N.parallelInputMix
-          .connect(this.parallelDiffFilters[i]) // Insert differentiator
+        differentiatedSource // Use differentiated source
+          .connect(this.parallelDiffFilters[i]) // Insert differentiator (now differentiating *again*)
           .connect(this.parallelFilters[i])
           .connect(this.parallelGains[i])
           .connect(N.parallelSum);
       }
-      N.parallelInputMix.connect(N.abParGain).connect(N.parallelSum); // Bypass path (no preemphasis)
+      differentiatedSource // Use differentiated source
+        .connect(N.abParGain)
+        .connect(N.parallelSum); // Bypass path (gets differentiated source)
 
-      // Final Stage
-      N.parallelSum.connect(N.radiation).connect(N.finalLpFilter).connect(N.outputGain);
+      // Final Stage (Connect parallelSum directly to finalLpFilter)
+      N.parallelSum.connect(N.finalLpFilter).connect(N.outputGain);
       this._currentConnections = "parallel";
       this._debugLog("All-Parallel graph connected successfully.");
     } catch (error) {

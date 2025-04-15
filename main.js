@@ -13,6 +13,7 @@ const statusDiv = document.getElementById("status");
 const textInput = document.getElementById("textInput");
 const speakTextButton = document.getElementById("speakTextButton");
 const synthStateDisplay = document.getElementById("synthStateDisplay");
+const trackDisplay = document.getElementById("trackDisplay"); // Get the new track display element
 
 // Configuration Controls
 const baseF0Input = document.getElementById("baseF0Input");
@@ -70,6 +71,8 @@ async function initAudio() {
     statusDiv.textContent = `Error initializing audio: ${error.message}`;
     debugLog("Initialization failed.");
   }
+  // Clear track display on init failure too
+  if (trackDisplay) trackDisplay.textContent = "Initialization failed.";
 }
 
 // --- Manual Mode Functions (Optional) ---
@@ -135,6 +138,8 @@ function speakText() {
   speakTextButton.disabled = true;
   statusDiv.textContent = `Status: Processing text: "${text}"...`;
   debugLog(`Processing text: "${text}"`);
+  // Clear previous track display
+  if (trackDisplay) trackDisplay.textContent = "Generating track...";
 
   // Use setTimeout to allow UI update before potentially blocking text processing
   setTimeout(() => {
@@ -173,6 +178,13 @@ function speakText() {
       // *** ADDED: Store track globally for inspection ***
       window.lastKlattTrack = klattTrack;
       console.log("[Main UI] Full Klatt track stored in 'window.lastKlattTrack'. Inspect it in the console after execution.");
+      // *** END ADDED ***
+
+      // *** ADDED: Display track in the UI ***
+      if (trackDisplay) {
+          trackDisplay.textContent = JSON.stringify(klattTrack, null, 2); // Pretty print JSON
+          debugLog("Displayed generated track in UI.");
+      }
       // *** END ADDED ***
 
       currentTrackDuration = klattTrack[klattTrack.length - 1]?.time || 0; // Get estimated duration
@@ -218,6 +230,8 @@ function speakText() {
          debugLog("Ensuring synth is stopped due to error.");
          klattSynth.stop(); // Ensure stopped on error
       }
+      // Clear track display on error
+      if (trackDisplay) trackDisplay.textContent = `Error generating track: ${error.message}`;
       speakTextButton.disabled = false; // Re-enable button on error
     }
   }, 10); // Small delay

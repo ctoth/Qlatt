@@ -212,6 +212,18 @@ export class KlattSynth {
       N.a6ParGain,
     ];
 
+    // *** NEW: Inverting Gain Nodes for Parallel Path ***
+    N.invertGainR2 = ctx.createGain();
+    N.invertGainR2.gain.value = -1.0;
+    N.invertGainR4 = ctx.createGain();
+    N.invertGainR4.gain.value = -1.0;
+    N.invertGainR6 = ctx.createGain();
+    N.invertGainR6.gain.value = -1.0;
+    N.invertGainAB = ctx.createGain();
+    N.invertGainAB.gain.value = -1.0;
+    // *** END NEW ***
+
+
     // Parallel Path Filters
     N.rnpParFilter = ctx.createBiquadFilter();
     N.rnpParFilter.type = "bandpass"; // Was "peaking"
@@ -238,7 +250,8 @@ export class KlattSynth {
 
     // Summing nodes
     N.parallelSum = ctx.createGain();
-    N.parallelSum.gain.value = 0.5; // Gain for parallel path output
+    // *** CHANGE: Set parallelSum gain to 1.0 for direct summation ***
+    N.parallelSum.gain.value = 1.0; // Was 0.5
     // N.parallelInputMix = ctx.createGain(); // REMOVED - Replaced by specific summing nodes
     N.finalSum = ctx.createGain(); // Sums Cascade and Parallel outputs (SW=0 only)
     N.finalSum.gain.value = 1.0; // Set to 1.0, final scaling by GO
@@ -267,9 +280,9 @@ export class KlattSynth {
     N.fricationInput.gain.value = 1.0; // Ensure gain is 1
     N.fricPlusUglot1Sum.gain.value = 1.0; // Ensure gain is 1
     N.finalSum.gain.value = 1.0; // Ensure final sum (SW=0) is 1.0
-    // N.parallelSum.gain.value = 0.5; // Keep the 0.5 set earlier
+    N.parallelSum.gain.value = 1.0; // Confirm it's 1.0
 
-    this._debugLog("Audio nodes created, summing gains set (ParallelSum=0.5).");
+    this._debugLog("Audio nodes created, summing gains set to 1.0.");
   }
 
   _applyAllParams(time) {
@@ -803,28 +816,67 @@ export class KlattSynth {
       lastCascadeNode.connect(N.finalSum);
       this._debugLog(`      -> finalSum`);
 
-      // --- Parallel Path ---
-      this._debugLog(`    Parallel Path (SW=0):`);
+      // --- Parallel Path (SW=0 with Alternating Signs) ---
+      this._debugLog(`    Parallel Path (SW=0, Alternating Signs):`);
+
       // R1P and RNP receive NO voice input in SW=0 per FORTRAN lines 425, 430
       // Connect gain nodes directly to parallelSum, but they receive no signal from voice path.
-      N.a1ParGain.connect(N.parallelSum);
-      this._debugLog(`      (No Voice Input) -> A1 -> parallelSum`);
-      N.anParGain.connect(N.parallelSum);
-      this._debugLog(`      (No Voice Input) -> AN -> parallelSum`);
+      // R1P (+)
+      N.a1ParGain.connect(N.parallelSum); // Connect the gain node, even if input is 0
+      this._debugLog(`      (No Voice Input) -> A1 -> parallelSum (+)`);
+      // RNP (+) (Nasal)
+      N.anParGain.connect(N.parallelSum); // Connect the gain node
+      this._debugLog(`      (No Voice Input) -> AN -> parallelSum (+)`);
 
       // Create Input for R2-R6/Bypass: Frication ONLY (SW=0)
       N.noiseSource.connect(N.fricationInput, 0); // Output 0 is frication
       this._debugLog(`      FricationNoise -> fricationInput`);
 
-      // Connect Frication Input to R2-R6 and Bypass
-      for (let i = 1; i < 6; i++) { // R2 to R6
-          if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
-          N.fricationInput.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R${i+1}P -> A${i+1} -> parallelSum`);
+      // Connect Frication Input to R2-R6 and Bypass with alternating signs
+      // R2P (-)
+      if (this.parallelFilters[1] && this.parallelGains[1]) {
+          N.fricationInput.connect(this.parallelFilters[1]) // R2 Filter
+                          .connect(this.parallelGains[1])   // A2 Gain
+                          .connect(N.invertGainR2)          // Invert
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R2P -> A2 -> Invert -> parallelSum (-)`);
       }
-      // Bypass Path
-      N.fricationInput.connect(N.abParGain).connect(N.parallelSum);
-      this._debugLog(`      fricationInput -> AB -> parallelSum`);
+      // R3P (+)
+      if (this.parallelFilters[2] && this.parallelGains[2]) {
+          N.fricationInput.connect(this.parallelFilters[2]) // R3 Filter
+                          .connect(this.parallelGains[2])   // A3 Gain
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R3P -> A3 -> parallelSum (+)`);
+      }
+      // R4P (-)
+      if (this.parallelFilters[3] && this.parallelGains[3]) {
+          N.fricationInput.connect(this.parallelFilters[3]) // R4 Filter
+                          .connect(this.parallelGains[3])   // A4 Gain
+                          .connect(N.invertGainR4)          // Invert
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R4P -> A4 -> Invert -> parallelSum (-)`);
+      }
+      // R5P (+)
+      if (this.parallelFilters[4] && this.parallelGains[4]) {
+          N.fricationInput.connect(this.parallelFilters[4]) // R5 Filter
+                          .connect(this.parallelGains[4])   // A5 Gain
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
+      }
+      // R6P (-)
+      if (this.parallelFilters[5] && this.parallelGains[5]) {
+          N.fricationInput.connect(this.parallelFilters[5]) // R6 Filter
+                          .connect(this.parallelGains[5])   // A6 Gain
+                          .connect(N.invertGainR6)          // Invert
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`);
+      }
+
+      // Bypass Path AB (-)
+      N.fricationInput.connect(N.abParGain) // AB Gain
+                      .connect(N.invertGainAB) // Invert
+                      .connect(N.parallelSum);
+      this._debugLog(`      fricationInput -> AB -> Invert -> parallelSum (-)`);
 
       // Connect Parallel Output to Final Sum
       N.parallelSum.connect(N.finalSum);
@@ -834,10 +886,10 @@ export class KlattSynth {
       N.finalSum.connect(N.finalLpFilter).connect(N.outputGain);
       this._debugLog(`    Final Stage: finalSum -> finalLpFilter -> outputGain`);
       this._currentConnections = "cascade";
-      this._debugLog("Cascade/Parallel graph connected successfully.");
+      this._debugLog("Cascade/Parallel graph connected successfully (with alternating signs).");
     } catch (error) {
       console.error(
-        "[KlattSynth] Error during _connectCascadeParallel:",
+        "[KlattSynth] Error during _connectCascadeParallel (alternating signs):",
         error
       );
       this._currentConnections = null; // Mark as uncertain state
@@ -865,19 +917,24 @@ export class KlattSynth {
       N.voicedSourceSum.connect(N.radiationDiff);
       this._debugLog(`    voicedSourceSum -> radiationDiff`);
 
-      // --- Parallel Path ---
-      this._debugLog(`    Parallel Path (SW=1):`);
-      // R1P Input: UGLOT = DiffVoice+Asp (cascadeInputSum)
-      N.cascadeInputSum.connect(N.r1ParFilter).connect(N.a1ParGain).connect(N.parallelSum);
-      this._debugLog(`      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum`);
+      // --- Parallel Path (SW=1 with Alternating Signs) ---
+      this._debugLog(`    Parallel Path (SW=1, Alternating Signs):`);
+
+      // R1P Input: UGLOT = DiffVoice+Asp (cascadeInputSum) (+)
+      N.cascadeInputSum.connect(N.r1ParFilter) // R1 Filter
+                       .connect(N.a1ParGain)   // A1 Gain
+                       .connect(N.parallelSum);
+      this._debugLog(`      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum (+)`);
 
       // Calculate UGLOT1 = Diff(UGLOT)
       N.cascadeInputSum.connect(N.uglot1Diff);
       this._debugLog(`      cascadeInputSum (UGLOT) -> uglut1Diff (UGLOT1)`);
 
-      // RNP Input: UGLOT1
-      N.uglot1Diff.connect(N.rnpParFilter).connect(N.anParGain).connect(N.parallelSum);
-      this._debugLog(`      uglut1Diff (UGLOT1) -> RNP_Par -> AN -> parallelSum`);
+      // RNP Input: UGLOT1 (+) (Nasal)
+      N.uglot1Diff.connect(N.rnpParFilter) // RNP Filter
+                  .connect(N.anParGain)   // AN Gain
+                  .connect(N.parallelSum);
+      this._debugLog(`      uglut1Diff (UGLOT1) -> RNP_Par -> AN -> parallelSum (+)`);
 
       // Create Frication Input
       N.noiseSource.connect(N.fricationInput, 0); // Output 0 is frication
@@ -888,31 +945,62 @@ export class KlattSynth {
       N.uglot1Diff.connect(N.fricPlusUglot1Sum);
       this._debugLog(`      fricationInput + uglut1Diff -> fricPlusUglot1Sum`);
 
-      // Connect R2-R4 Input
-      for (let i = 1; i < 4; i++) { // R2 to R4 (indices 1, 2, 3)
-          if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
-          N.fricPlusUglot1Sum.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
-          this._debugLog(`      fricPlusUglot1Sum -> R${i+1}P -> A${i+1} -> parallelSum`);
+      // Connect R2-R4 Input with alternating signs
+      // R2P (-)
+      if (this.parallelFilters[1] && this.parallelGains[1]) {
+          N.fricPlusUglot1Sum.connect(this.parallelFilters[1]) // R2 Filter
+                             .connect(this.parallelGains[1])   // A2 Gain
+                             .connect(N.invertGainR2)          // Invert
+                             .connect(N.parallelSum);
+          this._debugLog(`      fricPlusUglot1Sum -> R2P -> A2 -> Invert -> parallelSum (-)`);
+      }
+      // R3P (+)
+      if (this.parallelFilters[2] && this.parallelGains[2]) {
+          N.fricPlusUglot1Sum.connect(this.parallelFilters[2]) // R3 Filter
+                             .connect(this.parallelGains[2])   // A3 Gain
+                             .connect(N.parallelSum);
+          this._debugLog(`      fricPlusUglot1Sum -> R3P -> A3 -> parallelSum (+)`);
+      }
+      // R4P (-)
+      if (this.parallelFilters[3] && this.parallelGains[3]) {
+          N.fricPlusUglot1Sum.connect(this.parallelFilters[3]) // R4 Filter
+                             .connect(this.parallelGains[3])   // A4 Gain
+                             .connect(N.invertGainR4)          // Invert
+                             .connect(N.parallelSum);
+          this._debugLog(`      fricPlusUglot1Sum -> R4P -> A4 -> Invert -> parallelSum (-)`);
       }
 
-      // Connect R5-R6 Input (Frication Only)
-      for (let i = 4; i < 6; i++) { // R5 to R6 (indices 4, 5)
-          if (!this.parallelFilters[i] || !this.parallelGains[i]) continue;
-          N.fricationInput.connect(this.parallelFilters[i]).connect(this.parallelGains[i]).connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R${i+1}P -> A${i+1} -> parallelSum`);
+      // Connect R5-R6 Input (Frication Only) with alternating signs
+      // R5P (+)
+      if (this.parallelFilters[4] && this.parallelGains[4]) {
+          N.fricationInput.connect(this.parallelFilters[4]) // R5 Filter
+                          .connect(this.parallelGains[4])   // A5 Gain
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
+      }
+      // R6P (-)
+      if (this.parallelFilters[5] && this.parallelGains[5]) {
+          N.fricationInput.connect(this.parallelFilters[5]) // R6 Filter
+                          .connect(this.parallelGains[5])   // A6 Gain
+                          .connect(N.invertGainR6)          // Invert
+                          .connect(N.parallelSum);
+          this._debugLog(`      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`);
       }
 
-      // Bypass Path Input (Frication Only)
-      N.fricationInput.connect(N.abParGain).connect(N.parallelSum);
-      this._debugLog(`      fricationInput -> AB -> parallelSum`);
+      // Bypass Path AB Input (Frication Only) (-)
+      N.fricationInput.connect(N.abParGain) // AB Gain
+                      .connect(N.invertGainAB) // Invert
+                      .connect(N.parallelSum);
+      this._debugLog(`      fricationInput -> AB -> Invert -> parallelSum (-)`);
 
       // --- Final Stage (Connect parallelSum directly to final output path) ---
       N.parallelSum.connect(N.finalLpFilter).connect(N.outputGain);
       this._debugLog(`    Final Stage: parallelSum -> finalLpFilter -> outputGain`);
       this._currentConnections = "parallel";
-      this._debugLog("All-Parallel graph connected successfully.");
+      this._debugLog("All-Parallel graph connected successfully (with alternating signs).");
     } catch (error) {
-      console.error("[KlattSynth] Error during _connectAllParallel:", error);
+      console.error(
+        "[KlattSynth] Error during _connectAllParallel (alternating signs):",
       this._currentConnections = null; // Mark as uncertain state
     }
   }

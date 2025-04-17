@@ -51,10 +51,8 @@ export class KlattSynth {
     // Load Worklet modules
     try {
       await Promise.all([
-        this.ctx.audioWorklet.addModule("voicing-source-processor.js"),
-        this.ctx.audioWorklet.addModule("noise-source-processor.js"),
-        // REMOVED: No longer loading radiation-processor
-        // this.ctx.audioWorklet.addModule("radiation-processor.js"),
+        this.ctx.audioWorklet.addModule("/voicing-source-processor.js"),
+        this.ctx.audioWorklet.addModule("/noise-source-processor.js"),
       ]);
       this._debugLog("Worklets loaded successfully.");
     } catch (error) {

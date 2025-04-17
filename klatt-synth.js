@@ -558,8 +558,7 @@ export class KlattSynth {
           this._debugLog(
             `  Scheduling VoicingSource F0: ${value.toFixed(1)} Hz`
           );
-          N.voicingSource.parameters
-            .get("f0");
+          const f0Param = N.voicingSource.parameters.get("f0");
           // *** ADDED F0 LOGGING ***
           if (f0Param) {
               this._debugLog(`    Scheduling F0 Param: Method=${scheduleMethod}, Value=${value.toFixed(2)}, EndTime=${rampEndTime.toFixed(3)}`);
@@ -868,6 +867,12 @@ export class KlattSynth {
       // Differentiate the summed voiced source
       N.voicedSourceSum.connect(N.radiationDiff);
       this._debugLog(`    voicedSourceSum -> radiationDiff`);
+
+      // Feed UGLOT (= DiffVoice + Asp) into cascadeInputSum for parallel path
+      N.radiationDiff.connect(N.cascadeInputSum);
+      N.noiseSource.connect(N.cascadeInputSum, 1); // Output 1 = Aspiration
+      this._debugLog(`    radiationDiff -> cascadeInputSum`);
+      this._debugLog(`    AspirationNoise -> cascadeInputSum`);
 
       // Create Cascade Input: Differentiated Voice + Aspiration
       N.radiationDiff.connect(N.cascadeInputSum);

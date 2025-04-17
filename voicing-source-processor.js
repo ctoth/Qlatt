@@ -49,7 +49,7 @@ class VoicingSourceProcessor extends AudioWorkletProcessor {
     const f0Values = parameters.f0;
     const baseAmpDbValues = parameters.baseAmpDb; // Use the new parameter name
     const blockLength = outputChannel.length;
-    console.log(`Block Length: ${blockLength}`);
+    // console.log(`Block Length: ${blockLength}`); // REMOVED: Too noisy
     for (let i = 0; i < blockLength; ++i) {
       const f0 = f0Values.length > 1 ? f0Values[i] : f0Values[0];
       const baseAmpDb =

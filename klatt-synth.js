@@ -355,41 +355,20 @@ export class KlattSynth {
 
       // For a BiquadFilterNode type 'bandpass', the peak gain is related to Q.
       // Gain at center frequency is approximately 1.0 (0 dB) for standard implementations.
-      // We apply the targetPeakLinear to the GainNode, but compensate for the
-      // differencing filter if needed (for F2-F6 in SW=0 mode).
 
-      let effectiveGain = targetPeakLinear;
-
-      // Compensate for the gain introduced by the *second* differentiation stage (parallelVoiceDiff1)
-      // This applies to F2-F6 (indices 1-5) in *both* SW=0 and SW=1 modes, as the input
-      // to these parallel filters always comes from parallelFricAspMix, which includes
-      // the output of parallelVoiceDiff1.
-      if (formantIndex >= 1 && formantIndex <= 5) { // Indices 1-5 correspond to F2-F6
-          const w = 2 * Math.PI * formantFreq / this.ctx.sampleRate;
-          // Gain of ideal differentiator H(w) = 1 - e^(-jw) -> |H(w)| = sqrt(Math.max(0, 2 - 2cos(w)))
-          const diffGain = Math.sqrt(Math.max(0, 2 - 2 * Math.cos(w))); // Ensure non-negative under sqrt
-
-          if (diffGain > 1e-6) { // Avoid division by zero/small numbers
-              effectiveGain = targetPeakLinear / diffGain;
-              this._debugLog(`    Compensating Peak Gain for F${formantIndex+1} (SW=${this.params.SW}, 2nd Diff Gain=${diffGain.toFixed(3)}): ${targetPeakLinear.toFixed(4)} -> ${effectiveGain.toFixed(4)}`);
-          } else {
-              this._debugLog(`    Skipping Peak Gain compensation for F${formantIndex+1}: 2nd Differencing gain near zero (${diffGain.toFixed(3)}). Setting gain to 0.`);
-              effectiveGain = 0; // Mute if differencing gain is zero
-          }
-      } else {
-          // No compensation needed for F1 (index 0) or Nasal (index -1)
-          this._debugLog(`    No Peak Gain compensation needed for F${formantIndex+1} (SW=${this.params.SW}).`);
-      }
+      // *** REMOVED Peak Gain Compensation Logic ***
+      // The target amplitudes (A1-A6, AN, AB) likely already account for radiation effects,
+      // so we apply the gain directly without compensating for internal differentiators.
+      const effectiveGain = targetPeakLinear; // Use the calculated linear gain directly
 
       const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
-      const diffGain = (formantIndex >= 1 && formantIndex <= 5) ? Math.sqrt(Math.max(0, 2 - 2 * Math.cos(2 * Math.PI * formantFreq / this.ctx.sampleRate))) : null; // Recalculate for logging
 
       this._debugLog(
-          `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(1)}dB, CorrectedTarget=${correctedTargetDb.toFixed(1)}dB -> EffectiveLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)}, DiffGainComp=${diffGain ? diffGain.toFixed(3) : 'N/A'})`
+          `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(1)}dB, CorrectedTarget=${correctedTargetDb.toFixed(1)}dB -> TargetLinear=${targetPeakLinear.toFixed(4)}, ClampedLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
       );
       // Add detailed log just before scheduling
       this._debugLog(
-          `    --> Final Gain Check for ${paramName}: clampedLinearValue=${clampedLinearValue.toFixed(5)}, effectiveGain=${effectiveGain.toFixed(5)}, targetPeakLinear=${targetPeakLinear.toFixed(5)}`
+          `    --> Final Gain Check for ${paramName}: clampedLinearValue=${clampedLinearValue.toFixed(5)}, targetPeakLinear=${targetPeakLinear.toFixed(5)}`
       );
       gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
   }
@@ -596,7 +575,9 @@ export class KlattSynth {
           this._debugLog(
             `  Scheduling Voiced Aspiration Gain (AVS): ${value} dB`
           );
-          scheduleGain(N.avsInGain, value); // This GainNode IS used
+          // Scale AVS like worklet params (dB -> linear 0-1)
+          scheduleWorkletParam(N.avsInGain, "gain", value); // Use the same scaling logic
+          // scheduleGain(N.avsInGain, value); // OLD: Direct dB->Linear mapping
           break;
 
         case "FGP": // FGP is currently unused in filter scheduling

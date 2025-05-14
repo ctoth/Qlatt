@@ -519,16 +519,16 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         params: finalParams,
       });
 
-      // Log Event Details (including word)
-      console.log(
-        `Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${
-          ph.word
-        }, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(
-          1
-        )}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(
-          1
-        )}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`
-      );
+      // Log Event Details (including word) - Removed for cleaner test output
+      // console.log(
+      //   `Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${
+      //     ph.word
+      //   }, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(
+      //     1
+      //   )}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(
+      //     1
+      //   )}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`
+      // );
       debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
       currentTime = targetTime;
     }

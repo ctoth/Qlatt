@@ -141,3 +141,5 @@ if (typeof registerProcessor === "function") {
     console.error("Failed to register VoicingSourceProcessor:", error);
   }
 }
+
+export default VoicingSourceProcessor;

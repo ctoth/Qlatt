@@ -948,25 +948,33 @@ export function rule_K_Context(phonemeList) {
     if (!phonemeList[i].params) continue; // Ensure params exist
 
     // --- Apply context to K_CL ---
-    if (phonemeList[i].phoneme === "K_CL" && phonemeList[i + 1]) {
-      const nextPh = phonemeList[i + 1]; // Get the next phoneme object directly
-
-      // Use the flags copied onto the phoneme object during parameter sequence preparation
-      if (nextPh.type === "vowel") {
-        let targetF2 = 1500; // Default F2
-        if (nextPh.back) {
-          targetF2 = 1200; // Back vowel context
-        } else if (nextPh.front) {
-          targetF2 = 1900; // Front vowel context
-        } else if (nextPh.hi) {
-          // Default 'hi' (non-front/back) to fronted F2
-          targetF2 = 1900;
+    if (phonemeList[i].phoneme === "K_CL") {
+      let nextVowelCandidate = null;
+      // Check if K_CL is followed by K_REL, then look at the phoneme after K_REL
+      if (phonemeList[i + 1]?.phoneme === "K_REL") {
+        if (phonemeList[i + 2]) {
+          nextVowelCandidate = phonemeList[i + 2];
         }
-        // console.log(`[rule_K_Context DEBUG] Setting K_CL F2 at index ${i} to ${targetF2} based on next vowel ${nextPh.phoneme} (front:${nextPh.front}, back:${nextPh.back}, hi:${nextPh.hi})`);
+      } else if (phonemeList[i + 1]) {
+        // If K_CL is not followed by K_REL, then the immediately following phoneme is the candidate
+        nextVowelCandidate = phonemeList[i + 1];
+      }
+
+      if (nextVowelCandidate && nextVowelCandidate.type === "vowel") {
+        let targetF2 = 1500; // Default F2
+        if (nextVowelCandidate.back) {
+          targetF2 = 1200; // Back vowel context
+        } else if (nextVowelCandidate.front) {
+          targetF2 = 1900; // Front vowel context
+        } else if (nextVowelCandidate.hi) { // Fallback for high vowels not explicitly front/back
+          targetF2 = 1900; // Default to fronted for high vowels
+        }
         phonemeList[i].params.F2 = targetF2;
+        // console.log(`[rule_K_Context DEBUG] K_CL at index ${i} (word: ${phonemeList[i].word}) F2 set to ${targetF2} based on vowel ${nextVowelCandidate.phoneme} (front:${nextVowelCandidate.front}, back:${nextVowelCandidate.back}, hi:${nextVowelCandidate.hi})`);
       } else {
-        // If next phoneme is not a vowel, reset to default? Or keep previous? Let's default.
+        // Default F2 if no suitable vowel found or K_CL is at/near end of utterance
         phonemeList[i].params.F2 = 1500;
+        // console.log(`[rule_K_Context DEBUG] K_CL at index ${i} (word: ${phonemeList[i].word}) F2 set to default 1500 (nextVowelCandidate: ${nextVowelCandidate?.phoneme})`);
       }
     }
 

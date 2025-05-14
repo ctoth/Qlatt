@@ -37,7 +37,7 @@ describe('KlattSynth', () => {
       
       await klattSynth.initialize();
       
-      expect(spy).toHaveBeenCalledTimes(3);
+      expect(spy).toHaveBeenCalledTimes(2); // Expect 2 worklets: voicing and noise
       expect(klattSynth.isInitialized).toBe(true);
       expect(klattSynth.nodes).toBeDefined();
       expect(klattSynth.nodes.voicingSource).toBeDefined();
@@ -90,26 +90,27 @@ describe('KlattSynth', () => {
       klattSynth.setParam('SW', 0);
       klattSynth._reconnectGraph();
       
-      // Check that laryngealSourceSum is connected to the start of the cascade formant path (e.g., R1C)
-      const laryngealConnections = klattSynth.nodes.laryngealSourceSum.getConnections();
-      expect(laryngealConnections.some(conn => conn.destination === klattSynth.nodes.r1CascFilter)).toBe(true); // Check connection to R1C
+      // Check that voicedSourceSum (formerly laryngealSourceSum) output (via radiationDiff and cascadeInputSum)
+      // is connected to the start of the cascade formant path (R1C)
+      const cascadeInputSumConnections = klattSynth.nodes.cascadeInputSum.getConnections();
+      expect(cascadeInputSumConnections.some(conn => conn.destination === klattSynth.nodes.r1CascFilter)).toBe(true);
 
-      // Check that finalSum is connected to radiation
+      // Check that finalSum is connected to finalLpFilter (radiation node removed)
       const finalSumConnections = klattSynth.nodes.finalSum.getConnections();
-      expect(finalSumConnections.some(conn => conn.destination === klattSynth.nodes.radiation)).toBe(true);
+      expect(finalSumConnections.some(conn => conn.destination === klattSynth.nodes.finalLpFilter)).toBe(true);
     });
 
     it('connects nodes in all-parallel mode when SW=1', () => {
       klattSynth.setParam('SW', 1);
       klattSynth._reconnectGraph();
       
-      // Check that voicingSource is connected to parallelInputMix (via filters)
-      const rgzConnections = klattSynth.nodes.rgzFilter.getConnections();
-      expect(rgzConnections.some(conn => conn.destination === klattSynth.nodes.parallelInputMix)).toBe(true);
+      // In SW=1, cascadeInputSum (derived from voicedSourceSum -> radiationDiff) should connect to R1P (r1ParFilter)
+      const cascadeInputSumConnections = klattSynth.nodes.cascadeInputSum.getConnections();
+      expect(cascadeInputSumConnections.some(conn => conn.destination === klattSynth.nodes.r1ParFilter)).toBe(true);
       
-      // Check that parallelSum is connected to radiation
+      // Check that parallelSum is connected to finalLpFilter (radiation node removed)
       const parallelSumConnections = klattSynth.nodes.parallelSum.getConnections();
-      expect(parallelSumConnections.some(conn => conn.destination === klattSynth.nodes.radiation)).toBe(true);
+      expect(parallelSumConnections.some(conn => conn.destination === klattSynth.nodes.finalLpFilter)).toBe(true);
     });
   });
 
@@ -150,6 +151,12 @@ describe('KlattSynth', () => {
   describe('Start/Stop Control', () => {
     beforeEach(async () => {
       await klattSynth.initialize();
+      vi.useFakeTimers(); // Use fake timers for stop() test
+    });
+
+    afterEach(() => {
+      vi.runOnlyPendingTimers(); // Run any pending timers
+      vi.useRealTimers(); // Restore real timers
     });
 
     it('connects output to destination when start() is called', () => {
@@ -168,6 +175,9 @@ describe('KlattSynth', () => {
       
       klattSynth.stop();
       
+      // Advance timers to trigger the setTimeout in stop()
+      vi.advanceTimersByTime(100); // Advance by more than RAMP_DOWN_TIME + buffer
+
       expect(disconnectSpy).toHaveBeenCalledWith(audioContext.destination);
       expect(klattSynth.isRunning).toBe(false);
     });

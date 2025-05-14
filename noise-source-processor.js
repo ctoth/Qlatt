@@ -96,17 +96,16 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
       const aspGain =
         aspGainValues.length > 1 ? aspGainValues[i] : aspGainValues[0];
 
-      // Generate separate random numbers for each channel
-      let noiseFric = Math.random() * 2.0 - 1.0;
-      let noiseAsp = Math.random() * 2.0 - 1.0;
+      // Generate a single random number for both paths
+      const baseNoise = Math.random() * 2.0 - 1.0;
 
       // --- Apply LP Filter ---
       // y = a * x + b * y1
-      // Use separate noise inputs for each filter instance
-      const filteredNoiseFric = this.filterA * noiseFric + this.filterB * this.y1Fric;
+      // Use the same baseNoise for both filter inputs
+      const filteredNoiseFric = this.filterA * baseNoise + this.filterB * this.y1Fric;
       this.y1Fric = filteredNoiseFric; // Update state for next sample
 
-      const filteredNoiseAsp = this.filterA * noiseAsp + this.filterB * this.y1Asp;
+      const filteredNoiseAsp = this.filterA * baseNoise + this.filterB * this.y1Asp;
       this.y1Asp = filteredNoiseAsp;   // Update state for next sample
       // --- End Apply LP Filter ---
 

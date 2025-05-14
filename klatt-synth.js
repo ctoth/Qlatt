@@ -1517,22 +1517,22 @@ export class KlattSynth {
           node.Q.cancelScheduledValues(T);
           node.Q.setValueAtTime(node.Q.value, T);
           // Also cancel/hold for the AVS RGP filter
-          if (node === N.rgpFilter && N.rgpFilterAVS) {
-            N.rgpFilterAVS.frequency.cancelScheduledValues(T);
-            N.rgpFilterAVS.frequency.setValueAtTime(
-              N.rgpFilterAVS.frequency.value,
+          if (node === this.nodes.rgpFilter && this.nodes.rgpFilterAVS) {
+            this.nodes.rgpFilterAVS.frequency.cancelScheduledValues(T);
+            this.nodes.rgpFilterAVS.frequency.setValueAtTime(
+              this.nodes.rgpFilterAVS.frequency.value,
               T
             );
-            N.rgpFilterAVS.Q.cancelScheduledValues(T);
-            N.rgpFilterAVS.Q.setValueAtTime(N.rgpFilterAVS.Q.value, T);
+            this.nodes.rgpFilterAVS.Q.cancelScheduledValues(T);
+            this.nodes.rgpFilterAVS.Q.setValueAtTime(this.nodes.rgpFilterAVS.Q.value, T);
           }
           // Gain is usually not automated for filters, but cancel anyway
           if (node.gain) {
             node.gain.cancelScheduledValues(T);
             node.gain.setValueAtTime(node.gain.value, T);
-            if (node === N.rgpFilter && N.rgpFilterAVS?.gain) {
-              N.rgpFilterAVS.gain.cancelScheduledValues(T);
-              N.rgpFilterAVS.gain.setValueAtTime(N.rgpFilterAVS.gain.value, T);
+            if (node === this.nodes.rgpFilter && this.nodes.rgpFilterAVS?.gain) {
+              this.nodes.rgpFilterAVS.gain.cancelScheduledValues(T);
+              this.nodes.rgpFilterAVS.gain.setValueAtTime(this.nodes.rgpFilterAVS.gain.value, T);
             }
           }
         } else if (node instanceof AudioWorkletNode && node.parameters) {

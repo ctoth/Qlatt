@@ -40,6 +40,8 @@ describe("NoiseSourceProcessor", () => {
   let processor;
   const BLOCK_LENGTH = 128; // Standard AudioWorklet block size
   let outputs;
+  let extraGain; // To store calculated extraGain for assertions
+  let extraGain; // To store calculated extraGain
   let parameters;
 
   beforeEach(async () => {
@@ -57,8 +59,19 @@ describe("NoiseSourceProcessor", () => {
 
     // Re-create processor and buffers for isolation
     // Pass processorOptions including sampleRate to the constructor
-    const processorOptions = { processorOptions: { sampleRate: 44100 } };
+    const currentSampleRate = 44100;
+    vi.stubGlobal("sampleRate", currentSampleRate);
+    const processorOptions = { processorOptions: { sampleRate: currentSampleRate } };
     processor = new NoiseSourceProcessor(processorOptions); // Pass options
+
+    // Calculate extraGain based on the processor's internal logic for assertions
+    const oldB = 0.75;
+    const oldSampleRate = 10000;
+    const f = 1000;
+    const g = (1 - oldB) / Math.sqrt(1 - 2 * oldB * Math.cos(2 * Math.PI * f / oldSampleRate) + oldB ** 2);
+    extraGain = 2.5 * (currentSampleRate / 10000) ** 0.33;
+    // If processor.filterA and processor.filterB were public, we could use them directly
+    // For now, we recalculate extraGain as the dominant factor for DC gain.
 
     // Prepare mock outputs [outputIndex][channelIndex][sampleIndex]
     outputs = [
@@ -108,11 +121,11 @@ describe("NoiseSourceProcessor", () => {
 
     processor.process([], outputs, parameters);
 
-    // Check frication output: should not be all zero, values should be within [-0.5, 0.5]
+    // Check frication output: should not be all zero, values should be within [-0.5 * extraGain, 0.5 * extraGain]
     expect(outputs[0][0].some((sample) => sample !== 0)).toBe(true);
     outputs[0][0].forEach(sample => {
-        expect(sample).toBeGreaterThanOrEqual(-0.5);
-        expect(sample).toBeLessThanOrEqual(0.5);
+        expect(sample).toBeGreaterThanOrEqual(-0.5 * extraGain);
+        expect(sample).toBeLessThanOrEqual(0.5 * extraGain);
     });
 
     // Check aspiration output: should still be all zero
@@ -128,11 +141,11 @@ describe("NoiseSourceProcessor", () => {
     // Check frication output: should be all zero
     expect(outputs[0][0].every((sample) => sample === 0)).toBe(true);
 
-    // Check aspiration output: should not be all zero, values should be within [-0.5, 0.5]
+    // Check aspiration output: should not be all zero, values should be within [-0.5 * extraGain, 0.5 * extraGain]
     expect(outputs[1][0].some((sample) => sample !== 0)).toBe(true);
      outputs[1][0].forEach(sample => {
-        expect(sample).toBeGreaterThanOrEqual(-0.5);
-        expect(sample).toBeLessThanOrEqual(0.5);
+        expect(sample).toBeGreaterThanOrEqual(-0.5 * extraGain);
+        expect(sample).toBeLessThanOrEqual(0.5 * extraGain);
     });
   });
 
@@ -150,9 +163,9 @@ describe("NoiseSourceProcessor", () => {
     // Check that the noise signal is identical for each sample
     for (let i = 0; i < BLOCK_LENGTH; i++) {
       expect(outputs[0][0][i]).toBeCloseTo(outputs[1][0][i]);
-       // Check bounds based on gain
-       expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-gainValue);
-       expect(outputs[0][0][i]).toBeLessThanOrEqual(gainValue);
+       // Check bounds based on gain * extraGain
+       expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-gainValue * extraGain);
+       expect(outputs[0][0][i]).toBeLessThanOrEqual(gainValue * extraGain);
     }
   });
 
@@ -177,11 +190,11 @@ describe("NoiseSourceProcessor", () => {
          // If aspOutput is near zero, fricOutput should also be near zero
          expect(outputs[0][0][i]).toBeCloseTo(0);
       }
-       // Check bounds for each
-       expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-fricGain);
-       expect(outputs[0][0][i]).toBeLessThanOrEqual(fricGain);
-       expect(outputs[1][0][i]).toBeGreaterThanOrEqual(-aspGain);
-       expect(outputs[1][0][i]).toBeLessThanOrEqual(aspGain);
+       // Check bounds for each, including extraGain
+       expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-fricGain * extraGain);
+       expect(outputs[0][0][i]).toBeLessThanOrEqual(fricGain * extraGain);
+       expect(outputs[1][0][i]).toBeGreaterThanOrEqual(-aspGain * extraGain);
+       expect(outputs[1][0][i]).toBeLessThanOrEqual(aspGain * extraGain);
     }
   });
 
@@ -220,11 +233,11 @@ describe("NoiseSourceProcessor", () => {
              expect(outputs[0][0][i]).toBeCloseTo(0);
         }
 
-        // Check bounds based on instantaneous gain
-        expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-fricGainRamp[i]);
-        expect(outputs[0][0][i]).toBeLessThanOrEqual(fricGainRamp[i]);
-        expect(outputs[1][0][i]).toBeGreaterThanOrEqual(-aspGainRamp[i]);
-        expect(outputs[1][0][i]).toBeLessThanOrEqual(aspGainRamp[i]);
+        // Check bounds based on instantaneous gain * extraGain
+        expect(outputs[0][0][i]).toBeGreaterThanOrEqual(-fricGainRamp[i] * extraGain);
+        expect(outputs[0][0][i]).toBeLessThanOrEqual(fricGainRamp[i] * extraGain);
+        expect(outputs[1][0][i]).toBeGreaterThanOrEqual(-aspGainRamp[i] * extraGain);
+        expect(outputs[1][0][i]).toBeLessThanOrEqual(aspGainRamp[i] * extraGain);
     }
   });
 

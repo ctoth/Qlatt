@@ -5,8 +5,15 @@ export function dbToLinear(db) {
 }
 export function bwToQ(F, BW) {
   // Ensure F and BW are valid finite positive numbers for Q calculation
-  if (isNaN(F) || isNaN(BW) || !isFinite(F) || !isFinite(BW) || F <= 0 || BW <= 0) {
-      return 0.707; // Handle NaN, Infinity, and non-positive, return Default Q
+  if (
+    isNaN(F) ||
+    isNaN(BW) ||
+    !isFinite(F) ||
+    !isFinite(BW) ||
+    F <= 0 ||
+    BW <= 0
+  ) {
+    return 0.707; // Handle NaN, Infinity, and non-positive, return Default Q
   }
   return F / BW;
 }
@@ -19,16 +26,15 @@ const SOURCE_AMP_MAX_DB = 65.0; // TRY THIS: Reduce reference level
 // Base dB offsets for parallel formants/bypass (from PARCOE.FOR NDBSCA)
 // Indices: 0=A1, 1=A2, 2=A3, 3=A4, 4=A5, 5=A6, 6=AN, 7=AB, 8=AV, 9=AH, 10=AF, 11=AVS
 const PARALLEL_AMP_BASE_DB_OFFSET = {
-    AN: -58, // Index 6 in NDBSCA
-    A1: -58, // Index 0
-    A2: -65, // Index 1
-    A3: -73, // Index 2
-    A4: -78, // Index 3
-    A5: -79, // Index 4
-    A6: -80, // Index 5
-    AB: -84  // Index 7
+  AN: -58, // Index 6 in NDBSCA
+  A1: -58, // Index 0
+  A2: -65, // Index 1
+  A3: -73, // Index 2
+  A4: -78, // Index 3
+  A5: -79, // Index 4
+  A6: -80, // Index 5
+  AB: -84, // Index 7
 };
-
 
 // --- Main Synth Class ---
 export class KlattSynth {
@@ -39,15 +45,14 @@ export class KlattSynth {
     this.isInitialized = false;
     this.isRunning = false;
     this._currentConnections = null; // Track current connection state ('cascade', 'parallel', null)
-    this._currentTrack = null;       // Store the currently scheduled track
-    this._trackStartTime = 0;        // Store the AudioContext time when the track started
+    this._currentTrack = null; // Store the currently scheduled track
+    this._trackStartTime = 0; // Store the AudioContext time when the track started
     this._debugLog("KlattSynth instance created.");
   }
 
   async initialize() {
-    console.log("[KlattSynth] Initializing..."); // Keep top-level log
     if (this.isInitialized) return;
-    console.log("Initializing KlattSynth...");
+    debugLog("Initializing KlattSynth...");
     // Load Worklet modules
     try {
       await Promise.all([
@@ -67,9 +72,11 @@ export class KlattSynth {
     this.isInitialized = true;
     this._debugLog("KlattSynth Initialized successfully.");
   }
+
   _debugLog(...args) {
+    return;
     // Simple internal logger helper
-    console.log("[KlattSynth DEBUG]", ...args);
+    // console.debug("[KlattSynth DEBUG]", ...args);
   }
 
   _getDefaultParams() {
@@ -104,7 +111,7 @@ export class KlattSynth {
       A5: 0,
       A6: 0,
       AB: 0,
-      SW: 1, // 0: Cascade/Parallel, 1: All Parallel (NEW DEFAULT)
+      SW: 0, // 0: Cascade/Parallel, 1: All Parallel
       FGP: 0,
       BGP: 100,
       FGZ: 1500,
@@ -172,7 +179,6 @@ export class KlattSynth {
     N.uglot1Diff.Q.value = 0.707;
     // *** END NEW ***
 
-
     // === Vocal Tract Filters ===
     // Cascade Path
     N.rnpCascFilter = ctx.createBiquadFilter();
@@ -237,7 +243,6 @@ export class KlattSynth {
     N.invertGainAB.gain.value = -1.0;
     // *** END NEW ***
 
-
     // Parallel Path Filters
     N.rnpParFilter = ctx.createBiquadFilter();
     N.rnpParFilter.type = "bandpass"; // Was "peaking"
@@ -281,12 +286,10 @@ export class KlattSynth {
     // N.parallelDiffFilterSW0 = ...
     // N.parallelDiffPlusFricSW0 = ...
 
-
     // Configure final LP filter (matches reference outputLpFilter)
     N.finalLpFilter.type = "lowpass";
     N.finalLpFilter.frequency.value = ctx.sampleRate / 2.1; // Just below Nyquist
     N.finalLpFilter.Q.value = 0.707; // Non-resonant
-
 
     // *** Ensure NEW Summing Nodes have Gain = 1.0 (Except ParallelSum) ***
     N.voicedSourceSum.gain.value = 1.0;
@@ -317,62 +320,94 @@ export class KlattSynth {
     });
     // Ensure the AVS RGP filter also gets initial params
     try {
-        this.setParam('BGP', this.params['BGP'], time, true); // Trigger update for rgpFilterAVS
+      this.setParam("BGP", this.params["BGP"], time, true); // Trigger update for rgpFilterAVS
     } catch (e) {
-        console.error(`[KlattSynth] Error applying initial BGP to rgpFilterAVS: ${e}`);
+      console.error(
+        `[KlattSynth] Error applying initial BGP to rgpFilterAVS: ${e}`
+      );
     }
     this._debugLog("Initial parameters applied.");
   }
 
   // Helper: Schedule Parallel Resonator Gain (Peak Gain Adjustment)
   // Receives originalTargetDb (for logging) and correctedTargetDb (with base offset applied).
-  _schedulePeakGain(filterNode, gainNode, originalTargetDb, correctedTargetDb, formantFreq, formantBw, formantIndex, scheduleMethod, rampEndTime) {
-      const targetPeakLinear = dbToLinear(correctedTargetDb);
-      const paramName = formantIndex === -1 ? 'AN' : `A${formantIndex + 1}`; // Determine name for logging
+  _schedulePeakGain(
+    filterNode,
+    gainNode,
+    originalTargetDb,
+    correctedTargetDb,
+    formantFreq,
+    formantBw,
+    formantIndex,
+    scheduleMethod,
+    rampEndTime
+  ) {
+    const targetPeakLinear = dbToLinear(correctedTargetDb);
+    const paramName = formantIndex === -1 ? "AN" : `A${formantIndex + 1}`; // Determine name for logging
 
-      // Check for formantIndex being valid (0-5 for F1-F6, -1 for Nasal)
-      if (!filterNode || !gainNode || targetPeakLinear <= 0 || formantFreq <= 0 || formantBw <= 0 || formantIndex === undefined || formantIndex < -1 || formantIndex > 5) {
-          // Mute the gain node if parameters are invalid or target gain is zero/negative dB
-          gainNode.gain[scheduleMethod](0.0, rampEndTime);
-          this._debugLog(`  Muting Parallel Gain for ${paramName}=${formantFreq}Hz due to invalid params or corrected gain <= -70 dB (Original Target: ${originalTargetDb.toFixed(1)}dB).`);
-          return;
-      }
-
-      // Calculate 'r' based on bandwidth and sample rate
-      const r = Math.exp(-Math.PI * formantBw / this.ctx.sampleRate);
-
-      // Calculate the linear gain required at the filter input ('a' coefficient in Klatt.ts Resonator)
-      // to achieve the desired peak gain. Peak gain of resonator = a / (1 - r)
-      const requiredA = targetPeakLinear * (1 - r);
-
-      // Calculate the DC gain of the filter with this 'a' coefficient
-      // DC gain = a / (1 - b - c) = a / (1 - 2*r*cos(w) + r*r)
-      // We don't actually need the DC gain here, but the concept is that
-      // BiquadFilterNode's gain parameter acts *after* the filtering,
-      // while Klatt's 'a' acts *before*. We assume the BiquadFilterNode
-      // itself is normalized somehow (e.g., peak gain of 1 for Q scaling)
-      // and we apply the final scaling via the GainNode.
-
-      // For a BiquadFilterNode type 'bandpass', the peak gain is related to Q.
-      // Gain at center frequency is approximately 1.0 (0 dB) for standard implementations.
-
-      // *** REMOVED Peak Gain Compensation Logic ***
-      // The target amplitudes (A1-A6, AN, AB) likely already account for radiation effects,
-      // so we apply the gain directly without compensating for internal differentiators.
-      const effectiveGain = targetPeakLinear; // Use the calculated linear gain directly
-
-      const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
-
+    // Check for formantIndex being valid (0-5 for F1-F6, -1 for Nasal)
+    if (
+      !filterNode ||
+      !gainNode ||
+      targetPeakLinear <= 0 ||
+      formantFreq <= 0 ||
+      formantBw <= 0 ||
+      formantIndex === undefined ||
+      formantIndex < -1 ||
+      formantIndex > 5
+    ) {
+      // Mute the gain node if parameters are invalid or target gain is zero/negative dB
+      gainNode.gain[scheduleMethod](0.0, rampEndTime);
       this._debugLog(
-          `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(1)}dB, CorrectedTarget=${correctedTargetDb.toFixed(1)}dB -> TargetLinear=${targetPeakLinear.toFixed(4)}, ClampedLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
+        `  Muting Parallel Gain for ${paramName}=${formantFreq}Hz due to invalid params or corrected gain <= -70 dB (Original Target: ${originalTargetDb.toFixed(
+          1
+        )}dB).`
       );
-      // Add detailed log just before scheduling
-      this._debugLog(
-          `    --> Final Gain Check for ${paramName}: clampedLinearValue=${clampedLinearValue.toFixed(5)}, targetPeakLinear=${targetPeakLinear.toFixed(5)}`
-      );
-      gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
+      return;
+    }
+
+    // Calculate 'r' based on bandwidth and sample rate
+    const r = Math.exp((-Math.PI * formantBw) / this.ctx.sampleRate);
+
+    // Calculate the linear gain required at the filter input ('a' coefficient in Klatt.ts Resonator)
+    // to achieve the desired peak gain. Peak gain of resonator = a / (1 - r)
+    const requiredA = targetPeakLinear * (1 - r);
+
+    // Calculate the DC gain of the filter with this 'a' coefficient
+    // DC gain = a / (1 - b - c) = a / (1 - 2*r*cos(w) + r*r)
+    // We don't actually need the DC gain here, but the concept is that
+    // BiquadFilterNode's gain parameter acts *after* the filtering,
+    // while Klatt's 'a' acts *before*. We assume the BiquadFilterNode
+    // itself is normalized somehow (e.g., peak gain of 1 for Q scaling)
+    // and we apply the final scaling via the GainNode.
+
+    // For a BiquadFilterNode type 'bandpass', the peak gain is related to Q.
+    // Gain at center frequency is approximately 1.0 (0 dB) for standard implementations.
+
+    // *** REMOVED Peak Gain Compensation Logic ***
+    // The target amplitudes (A1-A6, AN, AB) likely already account for radiation effects,
+    // so we apply the gain directly without compensating for internal differentiators.
+    const effectiveGain = targetPeakLinear; // Use the calculated linear gain directly
+
+    const clampedLinearValue = Math.max(0, Math.min(effectiveGain, 100)); // Clamp final value for safety
+
+    this._debugLog(
+      `  Scheduling Parallel Peak Gain ${paramName}: F=${formantFreq}, BW=${formantBw}, OrigTarget=${originalTargetDb.toFixed(
+        1
+      )}dB, CorrectedTarget=${correctedTargetDb.toFixed(
+        1
+      )}dB -> TargetLinear=${targetPeakLinear.toFixed(
+        4
+      )}, ClampedLinear=${clampedLinearValue.toFixed(4)} (r=${r.toFixed(3)})`
+    );
+    // Add detailed log just before scheduling
+    this._debugLog(
+      `    --> Final Gain Check for ${paramName}: clampedLinearValue=${clampedLinearValue.toFixed(
+        5
+      )}, targetPeakLinear=${targetPeakLinear.toFixed(5)}`
+    );
+    gainNode.gain[scheduleMethod](clampedLinearValue, rampEndTime);
   }
-
 
   // --- setParam method (UPDATED Worklet Param Scaling) ---
   setParam(name, value, time, applyImmediately = false) {
@@ -455,7 +490,9 @@ export class KlattSynth {
           // --- MODIFIED LOG ---
           `  Scheduling Filter ${
             filterNode.constructor.name
-          }: type=${type}, F=${targetFreq.toFixed(1)}, Q=${targetQ.toFixed(3)} (Input Q: ${qVal.toFixed(3)}, Clamped to ${MAX_Q})`
+          }: type=${type}, F=${targetFreq.toFixed(1)}, Q=${targetQ.toFixed(
+            3
+          )} (Input Q: ${qVal.toFixed(3)}, Clamped to ${MAX_Q})`
           // --- END MODIFIED LOG ---
         );
       } catch (e) {
@@ -480,9 +517,14 @@ export class KlattSynth {
 
         // Calculate the linear value corresponding to the reference dB
         const referenceLinear = dbToLinear(REFERENCE_DB);
-        if (referenceLinear <= 1e-9) { // Check against small threshold
-             console.error(`[KlattSynth] Invalid referenceLinear (${referenceLinear.toFixed(4)}) from REFERENCE_DB (${REFERENCE_DB}). Cannot scale worklet param ${paramName}.`);
-             return; // Avoid division by zero or near-zero
+        if (referenceLinear <= 1e-9) {
+          // Check against small threshold
+          console.error(
+            `[KlattSynth] Invalid referenceLinear (${referenceLinear.toFixed(
+              4
+            )}) from REFERENCE_DB (${REFERENCE_DB}). Cannot scale worklet param ${paramName}.`
+          );
+          return; // Avoid division by zero or near-zero
         }
 
         // Calculate the scaling factor
@@ -514,13 +556,16 @@ export class KlattSynth {
           );
         }
       } else {
-         // Add more specific logging for why it's skipped
-         let reason = "unknown";
-         if (!workletNode) reason = "invalid node";
-         else if (!workletNode.parameters) reason = "node has no parameters map"; // Check if parameters map exists
-         else if (!workletNode.parameters.has(paramName)) reason = `node missing param '${paramName}'`;
-         else if (typeof dbValue !== 'number') reason = `invalid value type (${typeof dbValue})`;
-         else if (!isFinite(dbValue)) reason = `non-finite value (${dbValue})`;
+        // Add more specific logging for why it's skipped
+        let reason = "unknown";
+        if (!workletNode) reason = "invalid node";
+        else if (!workletNode.parameters) reason = "node has no parameters map";
+        // Check if parameters map exists
+        else if (!workletNode.parameters.has(paramName))
+          reason = `node missing param '${paramName}'`;
+        else if (typeof dbValue !== "number")
+          reason = `invalid value type (${typeof dbValue})`;
+        else if (!isFinite(dbValue)) reason = `non-finite value (${dbValue})`;
 
         this._debugLog(
           `  Skipping Worklet schedule for ${workletNode?.constructor?.name} param '${paramName}'. Reason: ${reason}. Value: ${dbValue}`
@@ -540,23 +585,39 @@ export class KlattSynth {
           const f0Param = N.voicingSource.parameters.get("f0");
           // *** ADDED F0 LOGGING ***
           if (f0Param) {
-              this._debugLog(`    Scheduling F0 Param: Method=${scheduleMethod}, Value=${value.toFixed(2)}, EndTime=${rampEndTime.toFixed(3)}`);
-              f0Param[scheduleMethod](value, rampEndTime);
+            this._debugLog(
+              `    Scheduling F0 Param: Method=${scheduleMethod}, Value=${value.toFixed(
+                2
+              )}, EndTime=${rampEndTime.toFixed(3)}`
+            );
+            f0Param[scheduleMethod](value, rampEndTime);
           } else {
-              console.error("[KlattSynth] Could not get 'f0' AudioParam from voicingSource!");
+            console.error(
+              "[KlattSynth] Could not get 'f0' AudioParam from voicingSource!"
+            );
           }
           // *** END ADDED F0 LOGGING ***
           break;
         }
         case "AV":
           // Schedule the base amplitude in dB for the worklet
-          this._debugLog(`  Scheduling VoicingSource Base Amp (AV): ${value} dB`);
+          this._debugLog(
+            `  Scheduling VoicingSource Base Amp (AV): ${value} dB`
+          );
           // Ensure the parameter name matches the worklet's descriptor
-          if (N.voicingSource.parameters.has('baseAmpDb')) {
-              N.voicingSource.parameters.get('baseAmpDb')[scheduleMethod](value, rampEndTime);
-              this._debugLog(`    Worklet baseAmpDb scheduled to ${value.toFixed(2)} dB at ${rampEndTime.toFixed(3)}`);
+          if (N.voicingSource.parameters.has("baseAmpDb")) {
+            N.voicingSource.parameters
+              .get("baseAmpDb")
+              [scheduleMethod](value, rampEndTime);
+            this._debugLog(
+              `    Worklet baseAmpDb scheduled to ${value.toFixed(
+                2
+              )} dB at ${rampEndTime.toFixed(3)}`
+            );
           } else {
-              console.error("[KlattSynth] VoicingSource worklet missing 'baseAmpDb' parameter!");
+            console.error(
+              "[KlattSynth] VoicingSource worklet missing 'baseAmpDb' parameter!"
+            );
           }
           // Remove the old scheduleWorkletParam call for 'amp'
           // scheduleWorkletParam(N.voicingSource, "amp", value);
@@ -587,7 +648,11 @@ export class KlattSynth {
           // Schedule BOTH RGP filters
           scheduleFilter(N.rgpFilter, "lowpass", cutoff, q);
           scheduleFilter(N.rgpFilterAVS, "lowpass", cutoff, q); // Schedule the AVS path RGP too
-          this._debugLog(`  Scheduling RgpFilter & RgpFilterAVS: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGP as cutoff)`);
+          this._debugLog(
+            `  Scheduling RgpFilter & RgpFilterAVS: Lowpass, F=${cutoff.toFixed(
+              1
+            )}, Q=${q.toFixed(3)} (using BGP as cutoff)`
+          );
           break;
         }
         case "FGZ":
@@ -598,7 +663,11 @@ export class KlattSynth {
           const cutoff = Math.max(1, P.BGS); // Ensure cutoff > 0, use BGS as cutoff freq
           const q = 0.707; // Standard Q for simple lowpass
           scheduleFilter(N.rgsFilter, "lowpass", cutoff, q);
-          this._debugLog(`  Scheduling RgsFilter: Lowpass, F=${cutoff.toFixed(1)}, Q=${q.toFixed(3)} (using BGS as cutoff)`);
+          this._debugLog(
+            `  Scheduling RgsFilter: Lowpass, F=${cutoff.toFixed(
+              1
+            )}, Q=${q.toFixed(3)} (using BGS as cutoff)`
+          );
           break;
         }
         case "FNP":
@@ -678,60 +747,185 @@ export class KlattSynth {
         }
 
         // --- Parallel Amplitude Parameters (Apply Base Offset before Peak Gain Scheduling) ---
-        case "AN": { // Nasal formant index = -1
+        case "AN": {
+          // Nasal formant index = -1
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.AN || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling AN: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.rnpParFilter, N.anParGain, value, correctedDb, P.FNP, P.BNP, -1, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling AN: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.rnpParFilter,
+            N.anParGain,
+            value,
+            correctedDb,
+            P.FNP,
+            P.BNP,
+            -1,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A1": { // Formant index = 0
+        case "A1": {
+          // Formant index = 0
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A1 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A1: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r1ParFilter, N.a1ParGain, value, correctedDb, P.F1, P.B1, 0, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A1: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r1ParFilter,
+            N.a1ParGain,
+            value,
+            correctedDb,
+            P.F1,
+            P.B1,
+            0,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A2": { // Formant index = 1
+        case "A2": {
+          // Formant index = 1
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A2 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A2: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r2ParFilter, N.a2ParGain, value, correctedDb, P.F2, P.B2, 1, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A2: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r2ParFilter,
+            N.a2ParGain,
+            value,
+            correctedDb,
+            P.F2,
+            P.B2,
+            1,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A3": { // Formant index = 2
+        case "A3": {
+          // Formant index = 2
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A3 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A3: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r3ParFilter, N.a3ParGain, value, correctedDb, P.F3, P.B3, 2, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A3: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r3ParFilter,
+            N.a3ParGain,
+            value,
+            correctedDb,
+            P.F3,
+            P.B3,
+            2,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A4": { // Formant index = 3
+        case "A4": {
+          // Formant index = 3
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A4 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A4: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r4ParFilter, N.a4ParGain, value, correctedDb, P.F4, P.B4, 3, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A4: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r4ParFilter,
+            N.a4ParGain,
+            value,
+            correctedDb,
+            P.F4,
+            P.B4,
+            3,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A5": { // Formant index = 4
+        case "A5": {
+          // Formant index = 4
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A5 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A5: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r5ParFilter, N.a5ParGain, value, correctedDb, P.F5, P.B5, 4, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A5: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r5ParFilter,
+            N.a5ParGain,
+            value,
+            correctedDb,
+            P.F5,
+            P.B5,
+            4,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
-        case "A6": { // Formant index = 5
+        case "A6": {
+          // Formant index = 5
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.A6 || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling A6: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
-          this._schedulePeakGain(N.r6ParFilter, N.a6ParGain, value, correctedDb, P.F6, P.B6, 5, scheduleMethod, rampEndTime);
+          this._debugLog(
+            `  Scheduling A6: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
+          this._schedulePeakGain(
+            N.r6ParFilter,
+            N.a6ParGain,
+            value,
+            correctedDb,
+            P.F6,
+            P.B6,
+            5,
+            scheduleMethod,
+            rampEndTime
+          );
           break;
         }
         case "AB": {
           // Bypass path doesn't have a filter, schedule gain directly after applying offset
           const baseOffsetDb = PARALLEL_AMP_BASE_DB_OFFSET.AB || 0;
           const correctedDb = value + baseOffsetDb;
-          this._debugLog(`  Scheduling Parallel Bypass Gain AB: Orig=${value.toFixed(1)}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(1)}dB`);
+          this._debugLog(
+            `  Scheduling Parallel Bypass Gain AB: Orig=${value.toFixed(
+              1
+            )}dB, Offset=${baseOffsetDb}dB, Corrected=${correctedDb.toFixed(
+              1
+            )}dB`
+          );
           // Use the generic scheduleGain helper with the *corrected* dB value
           scheduleGain(N.abParGain, correctedDb);
           break;
@@ -762,7 +956,9 @@ export class KlattSynth {
           this._debugLog(`  Ignoring SR update.`);
           break;
         default:
-          // console.warn(`[KlattSynth] Parameter ${name} not explicitly handled in setParam switch.`);
+          console.warn(
+            `[KlattSynth] Parameter ${name} not explicitly handled in setParam switch.`
+          );
           break;
       }
     } catch (error) {
@@ -781,11 +977,21 @@ export class KlattSynth {
     this._disconnectAll();
     this._currentConnections = null; // Reset connection state before reconnecting
 
-   // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting ***
-   this._debugLog(
-     `Gains before connect: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(2)}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
-   );
-   // *** END ADDED ***
+    // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting ***
+    this._debugLog(
+      `Gains before connect: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(
+        2
+      )}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(
+        2
+      )}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(
+        2
+      )}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(
+        2
+      )}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(
+        2
+      )}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
+    );
+    // *** END ADDED ***
 
     if (this.params.SW === 0) {
       this._connectCascadeParallel();
@@ -835,15 +1041,21 @@ export class KlattSynth {
       // --- Source Connections (Following FORTRAN Logic) ---
       // --- Source Connections (Following FORTRAN Logic + Corrections) ---
       // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum (Normal Path)
-      N.voicingSource.connect(N.rgpFilter).connect(N.rgzFilter).connect(N.voicedSourceSum);
+      N.voicingSource
+        .connect(N.rgpFilter)
+        .connect(N.rgzFilter)
+        .connect(N.voicedSourceSum);
       this._debugLog(`    AV -> RGP -> RGZ -> voicedSourceSum`);
 
       // Voicing (AVS) -> AVS Gain -> RGS -> RGP_AVS -> voicedSourceSum (Sinusoidal Path - Corrected)
-      N.voicingSource.connect(N.avsInGain)
-                     .connect(N.rgsFilter)
-                     .connect(N.rgpFilterAVS) // Add second RGP filter stage
-                     .connect(N.voicedSourceSum);
-      this._debugLog(`    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`);
+      N.voicingSource
+        .connect(N.avsInGain)
+        .connect(N.rgsFilter)
+        .connect(N.rgpFilterAVS) // Add second RGP filter stage
+        .connect(N.voicedSourceSum);
+      this._debugLog(
+        `    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`
+      );
 
       // Differentiate the summed voiced source
       N.voicedSourceSum.connect(N.radiationDiff);
@@ -867,10 +1079,10 @@ export class KlattSynth {
       this._debugLog(`    Cascade Path (NFC=${NFC}): cascadeInputSum ->`);
       // Connect R1C to R[NFC]C
       for (let i = 0; i < NFC; i++) {
-          if (!this.cascadeFilters[i]) continue;
-          lastCascadeNode.connect(this.cascadeFilters[i]);
-          lastCascadeNode = this.cascadeFilters[i];
-          this._debugLog(`      -> R${i+1}C`);
+        if (!this.cascadeFilters[i]) continue;
+        lastCascadeNode.connect(this.cascadeFilters[i]);
+        lastCascadeNode = this.cascadeFilters[i];
+        this._debugLog(`      -> R${i + 1}C`);
       }
       // Connect Nasal Antiresonator (Zero)
       lastCascadeNode.connect(N.rnzCascFilter);
@@ -903,47 +1115,59 @@ export class KlattSynth {
       // Connect Frication Input to R2-R6 and Bypass with alternating signs
       // R2P (-)
       if (this.parallelFilters[1] && this.parallelGains[1]) {
-          N.fricationInput.connect(this.parallelFilters[1]) // R2 Filter
-                          .connect(this.parallelGains[1])   // A2 Gain
-                          .connect(N.invertGainR2)          // Invert
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R2P -> A2 -> Invert -> parallelSum (-)`);
+        N.fricationInput
+          .connect(this.parallelFilters[1]) // R2 Filter
+          .connect(this.parallelGains[1]) // A2 Gain
+          .connect(N.invertGainR2) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricationInput -> R2P -> A2 -> Invert -> parallelSum (-)`
+        );
       }
       // R3P (+)
       if (this.parallelFilters[2] && this.parallelGains[2]) {
-          N.fricationInput.connect(this.parallelFilters[2]) // R3 Filter
-                          .connect(this.parallelGains[2])   // A3 Gain
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R3P -> A3 -> parallelSum (+)`);
+        N.fricationInput
+          .connect(this.parallelFilters[2]) // R3 Filter
+          .connect(this.parallelGains[2]) // A3 Gain
+          .connect(N.parallelSum);
+        this._debugLog(`      fricationInput -> R3P -> A3 -> parallelSum (+)`);
       }
       // R4P (-)
       if (this.parallelFilters[3] && this.parallelGains[3]) {
-          N.fricationInput.connect(this.parallelFilters[3]) // R4 Filter
-                          .connect(this.parallelGains[3])   // A4 Gain
-                          .connect(N.invertGainR4)          // Invert
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R4P -> A4 -> Invert -> parallelSum (-)`);
+        N.fricationInput
+          .connect(this.parallelFilters[3]) // R4 Filter
+          .connect(this.parallelGains[3]) // A4 Gain
+          .connect(N.invertGainR4) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricationInput -> R4P -> A4 -> Invert -> parallelSum (-)`
+        );
       }
       // R5P (+)
       if (this.parallelFilters[4] && this.parallelGains[4]) {
-          N.fricationInput.connect(this.parallelFilters[4]) // R5 Filter
-                          .connect(this.parallelGains[4])   // A5 Gain
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
+        N.fricationInput
+          .connect(this.parallelFilters[4]) // R5 Filter
+          .connect(this.parallelGains[4]) // A5 Gain
+          .connect(N.parallelSum);
+        this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
       }
       // R6P (-)
       if (this.parallelFilters[5] && this.parallelGains[5]) {
-          N.fricationInput.connect(this.parallelFilters[5]) // R6 Filter
-                          .connect(this.parallelGains[5])   // A6 Gain
-                          .connect(N.invertGainR6)          // Invert
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`);
+        N.fricationInput
+          .connect(this.parallelFilters[5]) // R6 Filter
+          .connect(this.parallelGains[5]) // A6 Gain
+          .connect(N.invertGainR6) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`
+        );
       }
 
       // Bypass Path AB (-)
-      N.fricationInput.connect(N.abParGain) // AB Gain
-                      .connect(N.invertGainAB) // Invert
-                      .connect(N.parallelSum);
+      N.fricationInput
+        .connect(N.abParGain) // AB Gain
+        .connect(N.invertGainAB) // Invert
+        .connect(N.parallelSum);
       this._debugLog(`      fricationInput -> AB -> Invert -> parallelSum (-)`);
 
       // Connect Parallel Output to Final Sum
@@ -952,9 +1176,13 @@ export class KlattSynth {
 
       // --- Final Stage ---
       N.finalSum.connect(N.finalLpFilter).connect(N.outputGain);
-      this._debugLog(`    Final Stage: finalSum -> finalLpFilter -> outputGain`);
+      this._debugLog(
+        `    Final Stage: finalSum -> finalLpFilter -> outputGain`
+      );
       this._currentConnections = "cascade";
-      this._debugLog("Cascade/Parallel graph connected successfully (with alternating signs).");
+      this._debugLog(
+        "Cascade/Parallel graph connected successfully (with alternating signs)."
+      );
     } catch (error) {
       console.error(
         "[KlattSynth] Error during _connectCascadeParallel (alternating signs):",
@@ -975,15 +1203,21 @@ export class KlattSynth {
     try {
       // --- Source Connections (Following FORTRAN Logic + Corrections) ---
       // Voicing (AV) -> RGP -> RGZ -> voicedSourceSum (Normal Path)
-      N.voicingSource.connect(N.rgpFilter).connect(N.rgzFilter).connect(N.voicedSourceSum);
+      N.voicingSource
+        .connect(N.rgpFilter)
+        .connect(N.rgzFilter)
+        .connect(N.voicedSourceSum);
       this._debugLog(`    AV -> RGP -> RGZ -> voicedSourceSum`);
 
       // Voicing (AVS) -> AVS Gain -> RGS -> RGP_AVS -> voicedSourceSum (Sinusoidal Path - Corrected)
-      N.voicingSource.connect(N.avsInGain)
-                     .connect(N.rgsFilter)
-                     .connect(N.rgpFilterAVS) // Add second RGP filter stage
-                     .connect(N.voicedSourceSum);
-      this._debugLog(`    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`);
+      N.voicingSource
+        .connect(N.avsInGain)
+        .connect(N.rgsFilter)
+        .connect(N.rgpFilterAVS) // Add second RGP filter stage
+        .connect(N.voicedSourceSum);
+      this._debugLog(
+        `    AVS -> avsInGain -> RGS -> RGP_AVS -> voicedSourceSum`
+      );
 
       // Differentiate the summed voiced source
       N.voicedSourceSum.connect(N.radiationDiff);
@@ -993,20 +1227,26 @@ export class KlattSynth {
       this._debugLog(`    Parallel Path (SW=1, Alternating Signs):`);
 
       // R1P Input: UGLOT = DiffVoice+Asp (cascadeInputSum) (+)
-      N.cascadeInputSum.connect(N.r1ParFilter) // R1 Filter
-                       .connect(N.a1ParGain)   // A1 Gain
-                       .connect(N.parallelSum);
-      this._debugLog(`      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum (+)`);
+      N.cascadeInputSum
+        .connect(N.r1ParFilter) // R1 Filter
+        .connect(N.a1ParGain) // A1 Gain
+        .connect(N.parallelSum);
+      this._debugLog(
+        `      cascadeInputSum (UGLOT) -> R1P -> A1 -> parallelSum (+)`
+      );
 
       // Calculate UGLOT1 = Diff(UGLOT)
       N.cascadeInputSum.connect(N.uglot1Diff);
       this._debugLog(`      cascadeInputSum (UGLOT) -> uglut1Diff (UGLOT1)`);
 
       // RNP Input: UGLOT1 (+) (Nasal)
-      N.uglot1Diff.connect(N.rnpParFilter) // RNP Filter
-                  .connect(N.anParGain)   // AN Gain
-                  .connect(N.parallelSum);
-      this._debugLog(`      uglut1Diff (UGLOT1) -> RNP_Par -> AN -> parallelSum (+)`);
+      N.uglot1Diff
+        .connect(N.rnpParFilter) // RNP Filter
+        .connect(N.anParGain) // AN Gain
+        .connect(N.parallelSum);
+      this._debugLog(
+        `      uglut1Diff (UGLOT1) -> RNP_Par -> AN -> parallelSum (+)`
+      );
 
       // Create Frication Input
       N.noiseSource.connect(N.fricationInput, 0); // Output 0 is frication
@@ -1020,56 +1260,74 @@ export class KlattSynth {
       // Connect R2-R4 Input with alternating signs
       // R2P (-)
       if (this.parallelFilters[1] && this.parallelGains[1]) {
-          N.fricPlusUglot1Sum.connect(this.parallelFilters[1]) // R2 Filter
-                             .connect(this.parallelGains[1])   // A2 Gain
-                             .connect(N.invertGainR2)          // Invert
-                             .connect(N.parallelSum);
-          this._debugLog(`      fricPlusUglot1Sum -> R2P -> A2 -> Invert -> parallelSum (-)`);
+        N.fricPlusUglot1Sum
+          .connect(this.parallelFilters[1]) // R2 Filter
+          .connect(this.parallelGains[1]) // A2 Gain
+          .connect(N.invertGainR2) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricPlusUglot1Sum -> R2P -> A2 -> Invert -> parallelSum (-)`
+        );
       }
       // R3P (+)
       if (this.parallelFilters[2] && this.parallelGains[2]) {
-          N.fricPlusUglot1Sum.connect(this.parallelFilters[2]) // R3 Filter
-                             .connect(this.parallelGains[2])   // A3 Gain
-                             .connect(N.parallelSum);
-          this._debugLog(`      fricPlusUglot1Sum -> R3P -> A3 -> parallelSum (+)`);
+        N.fricPlusUglot1Sum
+          .connect(this.parallelFilters[2]) // R3 Filter
+          .connect(this.parallelGains[2]) // A3 Gain
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricPlusUglot1Sum -> R3P -> A3 -> parallelSum (+)`
+        );
       }
       // R4P (-)
       if (this.parallelFilters[3] && this.parallelGains[3]) {
-          N.fricPlusUglot1Sum.connect(this.parallelFilters[3]) // R4 Filter
-                             .connect(this.parallelGains[3])   // A4 Gain
-                             .connect(N.invertGainR4)          // Invert
-                             .connect(N.parallelSum);
-          this._debugLog(`      fricPlusUglot1Sum -> R4P -> A4 -> Invert -> parallelSum (-)`);
+        N.fricPlusUglot1Sum
+          .connect(this.parallelFilters[3]) // R4 Filter
+          .connect(this.parallelGains[3]) // A4 Gain
+          .connect(N.invertGainR4) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricPlusUglot1Sum -> R4P -> A4 -> Invert -> parallelSum (-)`
+        );
       }
 
       // Connect R5-R6 Input (Frication Only) with alternating signs
       // R5P (+)
       if (this.parallelFilters[4] && this.parallelGains[4]) {
-          N.fricationInput.connect(this.parallelFilters[4]) // R5 Filter
-                          .connect(this.parallelGains[4])   // A5 Gain
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
+        N.fricationInput
+          .connect(this.parallelFilters[4]) // R5 Filter
+          .connect(this.parallelGains[4]) // A5 Gain
+          .connect(N.parallelSum);
+        this._debugLog(`      fricationInput -> R5P -> A5 -> parallelSum (+)`);
       }
       // R6P (-)
       if (this.parallelFilters[5] && this.parallelGains[5]) {
-          N.fricationInput.connect(this.parallelFilters[5]) // R6 Filter
-                          .connect(this.parallelGains[5])   // A6 Gain
-                          .connect(N.invertGainR6)          // Invert
-                          .connect(N.parallelSum);
-          this._debugLog(`      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`);
+        N.fricationInput
+          .connect(this.parallelFilters[5]) // R6 Filter
+          .connect(this.parallelGains[5]) // A6 Gain
+          .connect(N.invertGainR6) // Invert
+          .connect(N.parallelSum);
+        this._debugLog(
+          `      fricationInput -> R6P -> A6 -> Invert -> parallelSum (-)`
+        );
       }
 
       // Bypass Path AB Input (Frication Only) (-)
-      N.fricationInput.connect(N.abParGain) // AB Gain
-                      .connect(N.invertGainAB) // Invert
-                      .connect(N.parallelSum);
+      N.fricationInput
+        .connect(N.abParGain) // AB Gain
+        .connect(N.invertGainAB) // Invert
+        .connect(N.parallelSum);
       this._debugLog(`      fricationInput -> AB -> Invert -> parallelSum (-)`);
 
       // --- Final Stage (Connect parallelSum directly to final output path) ---
       N.parallelSum.connect(N.finalLpFilter).connect(N.outputGain);
-      this._debugLog(`    Final Stage: parallelSum -> finalLpFilter -> outputGain`);
+      this._debugLog(
+        `    Final Stage: parallelSum -> finalLpFilter -> outputGain`
+      );
       this._currentConnections = "parallel";
-      this._debugLog("All-Parallel graph connected successfully (with alternating signs).");
+      this._debugLog(
+        "All-Parallel graph connected successfully (with alternating signs)."
+      );
     } catch (error) {
       console.error(
         "[KlattSynth] Error during _connectAllParallel (alternating signs):",
@@ -1092,11 +1350,21 @@ export class KlattSynth {
         if (this._currentConnections !== null) {
           // Only connect if graph setup succeeded
 
-         // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting Output ***
-         this._debugLog(
-           `Gains before connecting output: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(2)}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(2)}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(2)}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(2)}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(2)}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
-         );
-         // *** END ADDED ***
+          // *** ADDED: Verify NEW Summing Node Gains BEFORE Connecting Output ***
+          this._debugLog(
+            `Gains before connecting output: voicedSum=${this.nodes.voicedSourceSum?.gain.value?.toFixed(
+              2
+            )}, cascadeInSum=${this.nodes.cascadeInputSum?.gain.value?.toFixed(
+              2
+            )}, fricIn=${this.nodes.fricationInput?.gain.value?.toFixed(
+              2
+            )}, fric+U1=${this.nodes.fricPlusUglot1Sum?.gain.value?.toFixed(
+              2
+            )}, parallelSum=${this.nodes.parallelSum?.gain.value?.toFixed(
+              2
+            )}, finalSum=${this.nodes.finalSum?.gain.value?.toFixed(2)}`
+          );
+          // *** END ADDED ***
 
           this._debugLog("Connecting outputGain to destination.");
           this.nodes.outputGain.connect(this.ctx.destination);
@@ -1128,7 +1396,9 @@ export class KlattSynth {
       const RAMP_DOWN_TIME = 0.01; // 10ms ramp down
       const SILENCE_DB = -70.0; // Target dB for silence
 
-      this._debugLog(`Ramping down gains to ${SILENCE_DB}dB over ${RAMP_DOWN_TIME}s...`);
+      this._debugLog(
+        `Ramping down gains to ${SILENCE_DB}dB over ${RAMP_DOWN_TIME}s...`
+      );
 
       // Schedule ramps to silence for source amplitudes and parallel gains
       // Use applyImmediately=false to use the default ramp
@@ -1165,7 +1435,9 @@ export class KlattSynth {
 
       // Cancel scheduled values *after* the ramp down completes
       this.cancelScheduledValues(T + RAMP_DOWN_TIME);
-      this._debugLog(`Scheduled cancellation of future events after ${T + RAMP_DOWN_TIME}`);
+      this._debugLog(
+        `Scheduled cancellation of future events after ${T + RAMP_DOWN_TIME}`
+      );
 
       // Schedule disconnection slightly after the ramp completes
       // Note: This relies on setTimeout accuracy, which isn't guaranteed,
@@ -1173,24 +1445,31 @@ export class KlattSynth {
       // A more robust solution might involve an OfflineAudioContext or ScriptProcessorNode
       // to detect actual silence, but that's much more complex.
       const disconnectDelayMs = RAMP_DOWN_TIME * 1000 + 5; // 5ms buffer after ramp
-      this._debugLog(`Scheduling disconnection in ${disconnectDelayMs.toFixed(0)}ms.`);
+      this._debugLog(
+        `Scheduling disconnection in ${disconnectDelayMs.toFixed(0)}ms.`
+      );
       setTimeout(() => {
-          if (!this.isRunning) { // Check if still supposed to be stopped
-              try {
-                  this._debugLog("Disconnecting outputGain from destination (delayed).");
-                  this.nodes.outputGain.disconnect(this.ctx.destination);
-              } catch (e) {
-                  this._debugLog("Error disconnecting outputGain (delayed):", e);
-              }
-          } else {
-              this._debugLog("Skipping delayed disconnection because synth was restarted.");
+        if (!this.isRunning) {
+          // Check if still supposed to be stopped
+          try {
+            this._debugLog(
+              "Disconnecting outputGain from destination (delayed)."
+            );
+            this.nodes.outputGain.disconnect(this.ctx.destination);
+          } catch (e) {
+            this._debugLog("Error disconnecting outputGain (delayed):", e);
           }
+        } else {
+          this._debugLog(
+            "Skipping delayed disconnection because synth was restarted."
+          );
+        }
       }, disconnectDelayMs);
 
-
       this.isRunning = false; // Set state immediately
-      this._debugLog("KlattSynth Stop sequence initiated (gain ramps scheduled, cancellation scheduled, delayed disconnect scheduled).");
-      console.log("KlattSynth Stopped"); // Keep top-level log
+      this._debugLog(
+        "KlattSynth Stop sequence initiated (gain ramps scheduled, cancellation scheduled, delayed disconnect scheduled)."
+      );
     } else {
       this._debugLog("Synth is not running, stop() has no effect.");
     }
@@ -1205,7 +1484,10 @@ export class KlattSynth {
       return;
     }
     // Use provided cancelTime or default to current time
-    const T = typeof cancelTime === 'number' && isFinite(cancelTime) ? cancelTime : this.ctx.currentTime;
+    const T =
+      typeof cancelTime === "number" && isFinite(cancelTime)
+        ? cancelTime
+        : this.ctx.currentTime;
     this._debugLog(
       `Cancelling scheduled parameter values from time ${T.toFixed(3)}...`
     );
@@ -1224,30 +1506,39 @@ export class KlattSynth {
           // For simplicity, we set the current value at time T. A more precise
           // approach would involve calculating the value at time T based on ramps.
           node.gain.setValueAtTime(node.gain.value, T);
-        } else if (node instanceof BiquadFilterNode && node.frequency && node.Q && node.gain) {
+        } else if (
+          node instanceof BiquadFilterNode &&
+          node.frequency &&
+          node.Q &&
+          node.gain
+        ) {
           node.frequency.cancelScheduledValues(T);
           node.frequency.setValueAtTime(node.frequency.value, T);
           node.Q.cancelScheduledValues(T);
           node.Q.setValueAtTime(node.Q.value, T);
           // Also cancel/hold for the AVS RGP filter
           if (node === N.rgpFilter && N.rgpFilterAVS) {
-              N.rgpFilterAVS.frequency.cancelScheduledValues(T);
-              N.rgpFilterAVS.frequency.setValueAtTime(N.rgpFilterAVS.frequency.value, T);
-              N.rgpFilterAVS.Q.cancelScheduledValues(T);
-              N.rgpFilterAVS.Q.setValueAtTime(N.rgpFilterAVS.Q.value, T);
+            N.rgpFilterAVS.frequency.cancelScheduledValues(T);
+            N.rgpFilterAVS.frequency.setValueAtTime(
+              N.rgpFilterAVS.frequency.value,
+              T
+            );
+            N.rgpFilterAVS.Q.cancelScheduledValues(T);
+            N.rgpFilterAVS.Q.setValueAtTime(N.rgpFilterAVS.Q.value, T);
           }
           // Gain is usually not automated for filters, but cancel anyway
           if (node.gain) {
-              node.gain.cancelScheduledValues(T);
-              node.gain.setValueAtTime(node.gain.value, T);
-              if (node === N.rgpFilter && N.rgpFilterAVS?.gain) {
-                  N.rgpFilterAVS.gain.cancelScheduledValues(T);
-                  N.rgpFilterAVS.gain.setValueAtTime(N.rgpFilterAVS.gain.value, T);
-              }
+            node.gain.cancelScheduledValues(T);
+            node.gain.setValueAtTime(node.gain.value, T);
+            if (node === N.rgpFilter && N.rgpFilterAVS?.gain) {
+              N.rgpFilterAVS.gain.cancelScheduledValues(T);
+              N.rgpFilterAVS.gain.setValueAtTime(N.rgpFilterAVS.gain.value, T);
+            }
           }
         } else if (node instanceof AudioWorkletNode && node.parameters) {
           node.parameters.forEach((param) => {
-            if (param) { // Check if param exists
+            if (param) {
+              // Check if param exists
               param.cancelScheduledValues(T);
               param.setValueAtTime(param.value, T);
             }
@@ -1338,7 +1629,6 @@ export class KlattSynth {
       }
     });
     this._debugLog("Track scheduling finished.");
-    console.log("Track scheduled."); // Keep top-level log
 
     // Store track and start time for getCurrentState
     this._currentTrack = track;
@@ -1347,13 +1637,22 @@ export class KlattSynth {
 
   // --- NEW: Get Current State ---
   getCurrentState() {
-    if (!this.isInitialized || !this.isRunning || !this._currentTrack || this._currentTrack.length === 0) {
+    if (
+      !this.isInitialized ||
+      !this.isRunning ||
+      !this._currentTrack ||
+      this._currentTrack.length === 0
+    ) {
       return {
         currentTime: this.ctx?.currentTime ?? 0,
-        currentPhoneme: 'N/A',
-        currentWord: 'N/A',
+        currentPhoneme: "N/A",
+        currentWord: "N/A",
         currentParams: {},
-        status: this.isRunning ? 'Running (No Track)' : (this.isInitialized ? 'Idle' : 'Uninitialized')
+        status: this.isRunning
+          ? "Running (No Track)"
+          : this.isInitialized
+          ? "Idle"
+          : "Uninitialized",
       };
     }
 
@@ -1371,42 +1670,42 @@ export class KlattSynth {
 
     // If time is before the first event (unlikely but possible), use the first event's state
     if (currentEventIndex === -1 && this._currentTrack.length > 0) {
-        currentEventIndex = 0;
+      currentEventIndex = 0;
     }
 
     const currentEvent = this._currentTrack[currentEventIndex];
 
     if (!currentEvent) {
-        return { // Should not happen if track has events, but safeguard
-            currentTime: this.ctx.currentTime,
-            currentPhoneme: 'Error (No Event Found)',
-            currentWord: 'Error',
-            currentParams: {},
-            status: 'Error'
-        };
+      return {
+        // Should not happen if track has events, but safeguard
+        currentTime: this.ctx.currentTime,
+        currentPhoneme: "Error (No Event Found)",
+        currentWord: "Error",
+        currentParams: {},
+        status: "Error",
+      };
     }
 
     // Report the *target* parameters for the current segment
     // Getting instantaneous AudioParam values is complex, this is an approximation
     const reportedParams = {
-        F0: currentEvent.params.F0,
-        AV: currentEvent.params.AV,
-        AF: currentEvent.params.AF,
-        AH: currentEvent.params.AH,
-        AVS: currentEvent.params.AVS,
-        GO: currentEvent.params.GO,
-        // Add other key params if needed
+      F0: currentEvent.params.F0,
+      AV: currentEvent.params.AV,
+      AF: currentEvent.params.AF,
+      AH: currentEvent.params.AH,
+      AVS: currentEvent.params.AVS,
+      GO: currentEvent.params.GO,
+      // Add other key params if needed
     };
 
     return {
       currentTime: this.ctx.currentTime,
       elapsedTrackTime: elapsedTrackTime,
-      currentPhoneme: currentEvent.phoneme || 'SIL', // Use SIL if undefined
-      currentWord: currentEvent.word || '---', // Use placeholder if undefined
+      currentPhoneme: currentEvent.phoneme || "SIL", // Use SIL if undefined
+      currentWord: currentEvent.word || "---", // Use placeholder if undefined
       currentParams: reportedParams,
-      status: 'Speaking'
+      status: "Speaking",
     };
   }
   // --- END NEW ---
-
 } // End of KlattSynth class

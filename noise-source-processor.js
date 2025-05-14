@@ -1,5 +1,5 @@
 class NoiseSourceProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  static get parameterDe  scriptors() {
     return [
       {
         name: "fricationGain",

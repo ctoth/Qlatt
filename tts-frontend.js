@@ -164,8 +164,10 @@ function insertStopReleases(phonemeList) {
 }
 
 // --- Debug Logger ---
+
 function debugLog(...args) {
-  console.log("[TTS Frontend DEBUG]", ...args);
+  return;
+  // console.log("[TTS Frontend DEBUG]", ...args);
 }
 
 // --- Main Pipeline ---
@@ -371,10 +373,13 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   // *** ADDED LOGGING: Inspect sequence before F0 generation ***
   debugLog("Inspecting parameterSequence before F0 generation:");
   parameterSequence.forEach((ph, index) => {
-      debugLog(`  [${index}] ${ph.phoneme}: AV=${ph.params?.AV?.toFixed(1)}, AVS=${ph.params?.AVS?.toFixed(1)}, Stress=${ph.stress}`);
+    debugLog(
+      `  [${index}] ${ph.phoneme}: AV=${ph.params?.AV?.toFixed(
+        1
+      )}, AVS=${ph.params?.AVS?.toFixed(1)}, Stress=${ph.stress}`
+    );
   });
   // *** END ADDED LOGGING ***
-
 
   // --- Generate F0 ---
   debugLog("Generating F0 contour...");
@@ -413,14 +418,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     time: 0,
     params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
   }); // Use filled SIL params directly
-  debugLog(`  Added initial silence event at t=0.000`);
-
-  // --- ADDED: Log initial track state ---
-  console.log(
-    "[TTS Frontend] Klatt Track after initial silence:",
-    JSON.stringify(klattTrack, null, 2)
-  );
-  // --- END ADDED LOGGING ---
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
@@ -476,8 +473,18 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
     // *** ADDED LOGGING: Log voicing check and getF0AtTime result ***
     const f0FromContour = getF0AtTime(targetTime);
-    debugLog(`    Check Voicing for ${ph.phoneme}: AV=${finalParams.AV?.toFixed(1)}, AVS=${finalParams.AVS?.toFixed(1)} -> isTargetVoiced=${isTargetVoiced}`);
-    debugLog(`    getF0AtTime(${targetTime.toFixed(3)}) returned: ${f0FromContour?.toFixed(1)}`);
+    debugLog(
+      `    Check Voicing for ${ph.phoneme}: AV=${finalParams.AV?.toFixed(
+        1
+      )}, AVS=${finalParams.AVS?.toFixed(
+        1
+      )} -> isTargetVoiced=${isTargetVoiced}`
+    );
+    debugLog(
+      `    getF0AtTime(${targetTime.toFixed(
+        3
+      )}) returned: ${f0FromContour?.toFixed(1)}`
+    );
     // *** END ADDED LOGGING ***
     let calculatedF0 = isTargetVoiced ? f0FromContour : 0; // Use the logged value
     if (ph.phoneme === "SIL") calculatedF0 = 0;
@@ -535,21 +542,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
   });
   debugLog(`  Added final silence event at t=${finalTime.toFixed(3)}`);
-
-  console.log(
-    // Keep top-level log
-    `Generated Klatt Track: ${
-      klattTrack.length
-    } events, duration: ${finalTime.toFixed(3)}s`
-  );
-
-  // --- ADDED: Log final track state ---
-  console.log(
-    "[TTS Frontend] Final Klatt Track before return:",
-    JSON.stringify(klattTrack, null, 2)
-  );
-  // --- END ADDED LOGGING ---
-
   debugLog("--- textToKlattTrack End ---");
   return klattTrack;
 }

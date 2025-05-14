@@ -41,7 +41,6 @@ describe("NoiseSourceProcessor", () => {
   const BLOCK_LENGTH = 128; // Standard AudioWorklet block size
   let outputs;
   let extraGain; // To store calculated extraGain for assertions
-  let extraGain; // To store calculated extraGain
   let parameters;
 
   beforeEach(async () => {

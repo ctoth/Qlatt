@@ -47,7 +47,7 @@ describe("VoicingSourceProcessor", () => {
   let parameters;
 
   beforeEach(async () => {
-    // vi.resetModules(); // Removed: May interfere with dynamic import and mock stability
+    vi.resetModules(); // Ensure clean import for each test
     vi.stubGlobal("registerProcessor", mockRegisterProcessor);
     vi.stubGlobal("sampleRate", 44100);
     vi.stubGlobal("currentFrame", 0);

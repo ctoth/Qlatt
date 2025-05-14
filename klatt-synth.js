@@ -52,7 +52,7 @@ export class KlattSynth {
 
   async initialize() {
     if (this.isInitialized) return;
-    debugLog("Initializing KlattSynth...");
+    this._debugLog("Initializing KlattSynth...");
     // Load Worklet modules
     try {
       await Promise.all([

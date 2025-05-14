@@ -12,11 +12,18 @@ class MockAudioWorkletProcessor {
     // Basic constructor to accept options like the real one
   }
 }
-vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+// vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor); // Will be stubbed in beforeEach
 
 // Statically import the processor AFTER setting up mocks
-import VoicingSourceProcessor from "./voicing-source-processor.js";
+// import VoicingSourceProcessor from "./voicing-source-processor.js"; // Will be imported dynamically
 
+let VoicingSourceProcessor;
+
+// Helper function (copied from voicing-source-processor.js for test assertions)
+function dbToLinearWorklet(db) {
+  if (isNaN(db) || db <= -70) return 0.0;
+  return 10.0 ** (db / 20.0);
+}
 
 // Helper function to create mock parameter arrays
 const createParamArray = (value, length) => {
@@ -44,9 +51,12 @@ describe("VoicingSourceProcessor", () => {
     vi.stubGlobal("registerProcessor", mockRegisterProcessor);
     vi.stubGlobal("sampleRate", 44100);
     vi.stubGlobal("currentFrame", 0);
-    vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor);
+    vi.stubGlobal('AudioWorkletProcessor', MockAudioWorkletProcessor); // Stub before import
 
-    // VoicingSourceProcessor is now imported statically above
+    // Dynamically import the processor for this test run
+    const module = await import("./voicing-source-processor.js?t=" + Date.now()); // Cache bust
+    VoicingSourceProcessor = module.default;
+
 
     // Pass processorOptions including sampleRate to the constructor
     const processorOptions = { processorOptions: { sampleRate: 44100 } };
@@ -55,7 +65,7 @@ describe("VoicingSourceProcessor", () => {
     outputs = [[new Float32Array(BLOCK_LENGTH)]];
     parameters = {
       f0: createParamArray(0, BLOCK_LENGTH),
-      amp: createParamArray(0, BLOCK_LENGTH),
+      baseAmpDb: createParamArray(-70, BLOCK_LENGTH), // Use baseAmpDb and default to silent
     };
   });
 
@@ -74,13 +84,13 @@ describe("VoicingSourceProcessor", () => {
     const descriptors = VoicingSourceProcessor.parameterDescriptors;
     expect(descriptors).toEqual([
       { name: "f0", defaultValue: 100, maxValue: 500, automationRate: "a-rate" },
-      { name: "amp", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" },
+      { name: "baseAmpDb", defaultValue: -70, minValue: -70, maxValue: 80, automationRate: "a-rate" },
     ]);
   });
 
-  it("should produce zero output when amp is zero", () => {
+  it("should produce zero output when baseAmpDb is -70 (or less)", () => {
     parameters.f0 = createParamArray(100, BLOCK_LENGTH);
-    parameters.amp = createParamArray(0, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(-70, BLOCK_LENGTH);
     const alive = processor.process([], outputs, parameters);
     expect(alive).toBe(true);
     expect(outputs[0][0].every((sample) => sample === 0)).toBe(true);
@@ -88,7 +98,7 @@ describe("VoicingSourceProcessor", () => {
 
   it("should produce zero output when f0 is zero", () => {
     parameters.f0 = createParamArray(0, BLOCK_LENGTH);
-    parameters.amp = createParamArray(0.8, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB, but F0 is 0
     const alive = processor.process([], outputs, parameters);
     expect(alive).toBe(true);
     expect(outputs[0][0].every((sample) => sample === 0)).toBe(true);
@@ -96,7 +106,7 @@ describe("VoicingSourceProcessor", () => {
 
    it("should produce zero output when f0 is below MIN_F0_HZ (e.g., 0.5 Hz)", () => {
     parameters.f0 = createParamArray(0.5, BLOCK_LENGTH);
-    parameters.amp = createParamArray(0.8, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB, but F0 is too low
     const alive = processor.process([], outputs, parameters);
     expect(alive).toBe(true);
     expect(outputs[0][0].every((sample) => sample === 0)).toBe(true);
@@ -104,23 +114,23 @@ describe("VoicingSourceProcessor", () => {
     expect(processor.samplesUntilPulse).toBe(0);
   });
 
-  it("should produce pulses when f0 and amp are positive", () => {
-    parameters.f0 = createParamArray(100, BLOCK_LENGTH);
-    parameters.amp = createParamArray(0.7, BLOCK_LENGTH);
+  it("should produce pulses when f0 is positive and baseAmpDb is above -70dB", () => {
+    parameters.f0 = createParamArray(100, BLOCK_LENGTH); // f0 = referenceF0, so f0Factor = 1
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB = linear 1.0
     const alive = processor.process([], outputs, parameters);
     expect(alive).toBe(true);
     // Check if *any* pulse was generated
     expect(outputs[0][0].some((sample) => sample !== 0)).toBe(true);
-    // Check pulse amplitude
+    // Check pulse amplitude (abs because pulses can be negative)
     const pulses = outputs[0][0].filter(sample => sample !== 0);
-    pulses.forEach(pulse => expect(pulse).toBeCloseTo(0.7));
+    pulses.forEach(pulse => expect(Math.abs(pulse)).toBeCloseTo(1.0)); // Expected linear amp is 1.0
   });
 
   it("should produce pulses with correct spacing for constant f0", () => {
     const testF0 = 110.25; // Choose a non-integer period
     const expectedPeriodSamples = 44100 / testF0;
     parameters.f0 = createParamArray(testF0, BLOCK_LENGTH);
-    parameters.amp = createParamArray(1.0, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB for amplitude
 
     // Process multiple blocks to observe spacing
     let allOutputs = [];
@@ -150,7 +160,7 @@ describe("VoicingSourceProcessor", () => {
   it("should handle a-rate f0 changes and maintain phase", () => {
     const f0Ramp = Array.from({ length: BLOCK_LENGTH }, (_, i) => 100 + (100 * i) / (BLOCK_LENGTH - 1)); // Ramp 100Hz to 200Hz
     parameters.f0 = createParamArray(f0Ramp, BLOCK_LENGTH);
-    parameters.amp = createParamArray(1.0, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB for amplitude
 
     // Process one block
     const alive = processor.process([], outputs, parameters);
@@ -165,10 +175,11 @@ describe("VoicingSourceProcessor", () => {
     // A basic check is that pulses exist.
   });
 
-   it("should handle a-rate amp changes", () => {
-    const ampRamp = Array.from({ length: BLOCK_LENGTH }, (_, i) => 0.1 + (0.8 * i) / (BLOCK_LENGTH - 1)); // Ramp 0.1 to 0.9
-    parameters.f0 = createParamArray(100, BLOCK_LENGTH);
-    parameters.amp = createParamArray(ampRamp, BLOCK_LENGTH);
+   it("should handle a-rate baseAmpDb changes", () => {
+    // Ramp from -20dB (linear 0.1) to 0dB (linear 1.0)
+    const baseAmpDbRamp = Array.from({ length: BLOCK_LENGTH }, (_, i) => -20 + (20 * i) / (BLOCK_LENGTH - 1));
+    parameters.f0 = createParamArray(100, BLOCK_LENGTH); // f0 = referenceF0
+    parameters.baseAmpDb = createParamArray(baseAmpDbRamp, BLOCK_LENGTH);
 
     const alive = processor.process([], outputs, parameters);
     expect(alive).toBe(true);
@@ -176,9 +187,11 @@ describe("VoicingSourceProcessor", () => {
     // Check that pulses are generated and their amplitude roughly follows the ramp
     let pulseCount = 0;
     outputs[0][0].forEach((sample, i) => {
-        if (sample > 0) {
+        if (sample !== 0) { // Check non-zero for positive or negative pulses
             pulseCount++;
-            expect(sample).toBeCloseTo(ampRamp[i], 1); // Check amplitude matches ramp value at that index
+            const expectedLinearAmp = dbToLinearWorklet(baseAmpDbRamp[i]);
+            // processor.referenceF0 is 100, current f0 is 100, so f0Factor is 1.0
+            expect(Math.abs(sample)).toBeCloseTo(expectedLinearAmp, 1);
         }
     });
     expect(pulseCount).toBeGreaterThan(0);
@@ -187,7 +200,7 @@ describe("VoicingSourceProcessor", () => {
   it("should reset phase when f0 ramps up from 0", () => {
     // Block 1: Silent
     parameters.f0 = createParamArray(0, BLOCK_LENGTH);
-    parameters.amp = createParamArray(1.0, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB
     processor.process([], outputs, parameters);
     expect(outputs[0][0].every(s => s === 0)).toBe(true);
     expect(processor.samplesUntilPulse).toBe(0); // Should be reset
@@ -208,7 +221,7 @@ describe("VoicingSourceProcessor", () => {
     const expectedPeriodSamples = 44100 / 20.0; // Period based on 20Hz
 
     parameters.f0 = createParamArray(lowF0, BLOCK_LENGTH);
-    parameters.amp = createParamArray(1.0, BLOCK_LENGTH);
+    parameters.baseAmpDb = createParamArray(0, BLOCK_LENGTH); // 0dB for amplitude
 
     // Process enough blocks to get multiple pulses
     let allOutputs = [];

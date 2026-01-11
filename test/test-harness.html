@@ -151,8 +151,12 @@
       const diagnosticsEl = document.getElementById("diagnostics");
       const telemetry = new Map();
       const telemetryMax = new Map();
+      const meters = new Map();
+      const meterValues = new Map();
+      const meterMax = new Map();
       let lastRun = null;
       let telemetryTimer = null;
+      let meterTimer = null;
       let lastDiagnostics = "";
 
       const controlSpec = [
@@ -244,6 +248,7 @@
         lastRun = { phrase, baseF0, track };
         telemetry.clear();
         telemetryMax.clear();
+        meterMax.clear();
         updateDiagnostics();
         console.log("[QLATT] Track summary", summarizeTrack(track));
         const parallelSummary = summarizeParallel(track);
@@ -260,6 +265,7 @@
       (async () => {
         synth.setTelemetryHandler(handleTelemetry);
         await synth.initialize();
+        attachMeters();
         bindControls();
       })();
 
@@ -276,6 +282,9 @@
         lastDiagnostics = "";
         lastRun = null;
         telemetry.clear();
+        telemetryMax.clear();
+        meterValues.clear();
+        meterMax.clear();
       });
 
       function summarizeTrack(track) {
@@ -297,6 +306,8 @@
         let swOn = 0;
         let swOff = 0;
         let parallelEvents = 0;
+        let swOnSeconds = 0;
+        let swTotalSeconds = 0;
         for (const event of track) {
           const params = event.params;
           if (!params) continue;
@@ -312,7 +323,18 @@
             (params.AF ?? 0) > 0;
           if (hasParallel) parallelEvents += 1;
         }
-        return { swOn, swOff, parallelEvents };
+        for (let i = 0; i < track.length - 1; i += 1) {
+          const params = track[i]?.params;
+          const duration = track[i + 1].time - track[i].time;
+          if (!Number.isFinite(duration) || duration <= 0) continue;
+          if (params && Number.isFinite(params.SW)) {
+            swTotalSeconds += duration;
+            if (params.SW === 1) swOnSeconds += duration;
+          }
+        }
+        const swOnShare =
+          swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0;
+        return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare };
       }
 
       function formatLevel(value) {
@@ -353,6 +375,27 @@
         );
       }
 
+      function formatMeters(map) {
+        if (!map || map.size === 0) return ["(no meters yet)"];
+        const entries = Array.from(map.entries()).sort(([a], [b]) =>
+          a.localeCompare(b)
+        );
+        return entries.map(
+          ([node, data]) => {
+            const max = meterMax.get(node);
+            let suffix = "";
+            if (max) {
+              suffix = ` | max rms=${formatLevel(max.rms)} peak=${formatLevel(
+                max.peak
+              )}`;
+            }
+            return `${node}: rms=${formatLevel(data.rms)} peak=${formatLevel(
+              data.peak
+            )}${suffix}`;
+          }
+        );
+      }
+
       function updateDiagnostics() {
         if (!lastRun) return;
         lastDiagnostics = buildDiagnostics({
@@ -360,6 +403,7 @@
           baseF0: lastRun.baseF0,
           track: lastRun.track,
           telemetry,
+          meters: meterValues,
         });
         diagnosticsEl.value = lastDiagnostics;
       }
@@ -388,7 +432,7 @@
         }, 250);
       }
 
-      function buildDiagnostics({ phrase, baseF0, track, telemetry }) {
+      function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
         const summary = summarizeTrack(track);
         const parallelSummary = summarizeParallel(track);
         const lines = [];
@@ -400,6 +444,9 @@
         lines.push(`F0 range: ${summary.f0Min.toFixed(1)} - ${summary.f0Max.toFixed(1)} Hz`);
         lines.push(
           `SW=1 events: ${parallelSummary.swOn} | parallel events: ${parallelSummary.parallelEvents}`
+        );
+        lines.push(
+          `SW=1 time: ${parallelSummary.swOnSeconds.toFixed(3)}s (${parallelSummary.swOnShare.toFixed(1)}%)`
         );
         lines.push("");
         lines.push("First events:");
@@ -418,7 +465,63 @@
         lines.push("");
         lines.push("Telemetry (latest block):");
         lines.push(...formatTelemetry(telemetry));
+        lines.push("");
+        lines.push("Meters (RMS/peak):");
+        lines.push(...formatMeters(meters || meterValues));
         return lines.join("\n");
+      }
+
+      function attachMeters() {
+        const nodes = synth.nodes;
+        if (!nodes?.outputSum || meters.size > 0) return;
+        const targets = [
+          { name: "cascade-out", node: nodes.cascadeOutGain },
+          { name: "parallel-out", node: nodes.parallelOutGain },
+          { name: "output-sum", node: nodes.outputSum },
+        ];
+        for (const target of targets) {
+          if (!target.node) continue;
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 2048;
+          target.node.connect(analyser);
+          meters.set(target.name, analyser);
+        }
+        startMeterLoop();
+      }
+
+      function startMeterLoop() {
+        if (meterTimer) return;
+        meterTimer = setInterval(() => {
+          for (const [name, analyser] of meters.entries()) {
+            const data = readMeter(analyser);
+            meterValues.set(name, data);
+            const prev = meterMax.get(name);
+            if (!prev) {
+              meterMax.set(name, { ...data });
+            } else {
+              meterMax.set(name, {
+                rms: Math.max(prev.rms, data.rms),
+                peak: Math.max(prev.peak, data.peak),
+              });
+            }
+          }
+          updateDiagnostics();
+        }, 200);
+      }
+
+      function readMeter(analyser) {
+        const buffer = new Float32Array(analyser.fftSize);
+        analyser.getFloatTimeDomainData(buffer);
+        let sum = 0;
+        let peak = 0;
+        for (let i = 0; i < buffer.length; i += 1) {
+          const v = buffer[i];
+          sum += v * v;
+          const av = Math.abs(v);
+          if (av > peak) peak = av;
+        }
+        const rms = Math.sqrt(sum / buffer.length);
+        return { rms, peak };
       }
     </script>
   </body>

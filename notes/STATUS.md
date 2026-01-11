@@ -21,3 +21,5 @@
 - Blend control: `src/klatt-synth.js` uses `parallelMix` (default 0.6) when `SW=1`.
 - Coarticulation: `src/tts-frontend.js` now inserts a steady-time event and blends formants toward the next segment near boundaries.
 - Prosody: `src/tts-frontend-rules.js` now resets declination per punctuation phrase, adds an initial boost, and uses phrase-local fall for F0.
+- Diagnostics: `test/test-harness.html` adds per-path meters (cascade/parallel/output) with max RMS/peak and SW time share.
+- Fix: `src/klatt-synth.js` no longer overwrites `parallelMix` when automating SW, so parallel output is audible when SW=1.

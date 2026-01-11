@@ -415,7 +415,7 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);
 
-    this._setParallelMix(mix, atTime);
+    this._setParallelMix(mix, atTime, false);
 
     const formants = [
       ["F1", "B1"],
@@ -489,9 +489,11 @@ export class KlattSynth {
     }
   }
 
-  _setParallelMix(value, atTime) {
+  _setParallelMix(value, atTime, updateParam = true) {
     const mix = Math.max(0, Math.min(1, Number(value)));
-    this.params.parallelMix = mix;
+    if (updateParam) {
+      this.params.parallelMix = mix;
+    }
     this.nodes.parallelOutGain.gain.setValueAtTime(mix, atTime);
     this.nodes.cascadeOutGain.gain.setValueAtTime(1 - mix, atTime);
   }

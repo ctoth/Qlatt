@@ -399,13 +399,50 @@ export class KlattSynth {
     const fricDb = params.AF ?? -70;
     const goDb = params.GO ?? 47;
 
-    const voiceGain = this._dbToLinear(voiceDb);
+    const ndbScale = {
+      A1: -58,
+      A2: -65,
+      A3: -73,
+      A4: -78,
+      A5: -79,
+      A6: -80,
+      AN: -58,
+      AB: -84,
+      AV: -72,
+      AH: -102,
+      AF: -72,
+      AVS: -44,
+    };
+    const f1 = params.F1 ?? this.params.F1;
+    const f2 = params.F2 ?? this.params.F2;
+    const f3 = params.F3 ?? this.params.F3;
+    const f4 = params.F4 ?? this.params.F4;
+    const delF1 = Number.isFinite(f1) && f1 > 0 ? f1 / 500 : 1;
+    const delF2 = Number.isFinite(f2) && f2 > 0 ? f2 / 1500 : 1;
+    let a2Cor = delF1 * delF1;
+    const a2Skrt = delF2 * delF2;
+    const a3Cor = a2Cor * a2Skrt;
+    a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
+    const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    const proximity = (delta) => {
+      if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
+      const index = Math.floor(delta / 50) - 1;
+      return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))] ?? 0;
+    };
+    const n12Cor = proximity(f2 - f1);
+    const n23Cor = proximity(f3 - f2 - 50);
+    const n34Cor = proximity(f4 - f3 - 150);
+
+    const voiceGain = this._dbToLinear(voiceDb + ndbScale.AV);
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
-    const voiceParGain = this._dbToLinear(voiceParDb) * parallelScale;
-    const aspGain = this._dbToLinear(aspDb);
-    const fricGain = this._dbToLinear(fricDb) * parallelScale;
+    const voiceParGain =
+      this._dbToLinear(voiceParDb + ndbScale.AVS) * 10 * parallelScale;
+    const aspGain = this._dbToLinear(aspDb + ndbScale.AH);
+    const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
+    const fricGain =
+      this._dbToLinear(fricDbAdjusted + ndbScale.AF) * parallelScale;
     const baseBoost = Number.isFinite(this.params.masterGain)
       ? this.params.masterGain
       : 1.0;
@@ -466,16 +503,30 @@ export class KlattSynth {
       );
     });
 
-    const parallelGains = [params.A1, params.A2, params.A3, params.A4, params.A5, params.A6];
+    const parallelLinear = [
+      this._dbToLinear((params.A1 ?? -70) + n12Cor + ndbScale.A1),
+      this._dbToLinear((params.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2) *
+        a2Cor,
+      this._dbToLinear((params.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3) *
+        a3Cor,
+      this._dbToLinear((params.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4) * a3Cor,
+      this._dbToLinear((params.A5 ?? -70) + ndbScale.A5) * a3Cor,
+      this._dbToLinear((params.A6 ?? -70) + ndbScale.A6) * a3Cor,
+    ];
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
-      if (Number.isFinite(parallelGains[i])) {
-        this._setParallelFormantGain(i, parallelGains[i], atTime);
-      }
+      const sign = i >= 1 ? (i % 2 === 1 ? -1 : 1) : 1;
+      const linear = parallelLinear[i] * parallelScale;
+      this._scheduleAudioParam(
+        this.nodes.parallelFormantGains[i].gain,
+        sign * linear,
+        atTime,
+        ramp
+      );
     }
     if (Number.isFinite(params.AB)) {
       this._scheduleAudioParam(
         this.nodes.parallelBypassGain.gain,
-        this._dbToLinear(params.AB) * parallelScale,
+        this._dbToLinear(params.AB + ndbScale.AB) * parallelScale,
         atTime,
         ramp
       );
@@ -483,7 +534,7 @@ export class KlattSynth {
     if (Number.isFinite(params.AN)) {
       this._scheduleAudioParam(
         this.nodes.parallelNasalGain.gain,
-        this._dbToLinear(params.AN) * parallelScale,
+        this._dbToLinear(params.AN + ndbScale.AN) * parallelScale,
         atTime,
         ramp
       );

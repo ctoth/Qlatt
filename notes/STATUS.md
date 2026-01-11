@@ -26,3 +26,4 @@
 - Fix: `src/klatt-synth.js` scales parallel branch gains (`parallelGainScale`, default 0.003) and ramps SW mix to reduce clicks.
 - Diagnostics: spike capture added (peak > 1.0) with time/node/phoneme tags in the harness.
 - Fix: parallel branch now takes voicing from `rgp` (pre-AV), preventing cascade gain from overdriving parallel resonators.
+- Fix: applied Klatt 1980 amplitude calibration (NDBSCA offsets + proximity corrections + A2/A3 scaling) for parallel formants, voicing, aspiration, and frication gains.

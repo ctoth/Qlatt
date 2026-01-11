@@ -154,10 +154,15 @@
       const meters = new Map();
       const meterValues = new Map();
       const meterMax = new Map();
+      const spikeEvents = [];
+      const lastSpikeAt = new Map();
       let lastRun = null;
+      let runStartTime = 0;
       let telemetryTimer = null;
       let meterTimer = null;
       let lastDiagnostics = "";
+      const spikeThreshold = 1.0;
+      const spikeCooldown = 0.2;
 
       const controlSpec = [
         { id: "f0", label: "F0 (Hz)", min: 50, max: 300, step: 1 },
@@ -168,6 +173,7 @@
         { id: "fricationCutoff", label: "Frication Cutoff", min: 500, max: 9000, step: 10 },
         { id: "masterGain", label: "Output Boost", min: 0, max: 5, step: 0.05 },
         { id: "parallelMix", label: "Parallel Mix", min: 0, max: 1, step: 0.01 },
+        { id: "parallelGainScale", label: "Parallel Gain Scale", min: 0, max: 0.01, step: 0.0001, format: "fixed4" },
         { id: "parallelVoiceGain", label: "Parallel Voice", min: 0, max: 1, step: 0.01 },
         { id: "parallelFricationGain", label: "Parallel Frication", min: 0, max: 1, step: 0.01 },
         { id: "AB", label: "Bypass (AB dB)", min: -70, max: 70, step: 1 },
@@ -210,16 +216,21 @@
         }
       }
 
+      function formatValue(spec, value) {
+        if (spec.format === "fixed4") return Number(value).toFixed(4);
+        return Number(value).toFixed(2);
+      }
+
       function bindControls() {
         for (const spec of controlSpec) {
           const input = document.getElementById(spec.id);
           const value = document.getElementById(`${spec.id}-value`);
           const initial = synth.params[spec.id];
           input.value = initial;
-          value.textContent = Number(initial).toFixed(2);
+          value.textContent = formatValue(spec, initial);
           input.addEventListener("input", () => {
             const v = Number(input.value);
-            value.textContent = v.toFixed(2);
+            value.textContent = formatValue(spec, v);
             synth.setParam(spec.id, v);
           });
         }
@@ -243,9 +254,13 @@
         const baseF0 = Number(document.getElementById("baseF0").value) || 110;
         if (!phrase) return;
         const track = textToKlattTrack(phrase, baseF0);
-        synth.scheduleTrack(track, ctx.currentTime + 0.05);
+        const startTime = ctx.currentTime + 0.05;
+        synth.scheduleTrack(track, startTime);
         status.textContent = `Status: speaking "${phrase}"`;
         lastRun = { phrase, baseF0, track };
+        runStartTime = startTime;
+        spikeEvents.length = 0;
+        lastSpikeAt.clear();
         telemetry.clear();
         telemetryMax.clear();
         meterMax.clear();
@@ -281,6 +296,9 @@
         diagnosticsEl.value = "";
         lastDiagnostics = "";
         lastRun = null;
+        runStartTime = 0;
+        spikeEvents.length = 0;
+        lastSpikeAt.clear();
         telemetry.clear();
         telemetryMax.clear();
         meterValues.clear();
@@ -335,6 +353,32 @@
         const swOnShare =
           swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0;
         return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare };
+      }
+
+      function findEventAtTime(track, time) {
+        if (!track || track.length === 0) return null;
+        let current = track[0];
+        for (const event of track) {
+          if (event.time > time) break;
+          current = event;
+        }
+        return current;
+      }
+
+      function formatSpikePeak(value) {
+        if (!Number.isFinite(value)) return "NaN";
+        if (Math.abs(value) >= 10) return Number(value).toExponential(2);
+        return Number(value).toFixed(3);
+      }
+
+      function formatSpikes(list) {
+        if (!list || list.length === 0) return ["(none)"];
+        return list.map(
+          (spike, index) =>
+            `${index}. t=${spike.time.toFixed(3)}s node=${spike.node} peak=${formatSpikePeak(
+              spike.peak
+            )} phoneme=${spike.phoneme || ""}`
+        );
       }
 
       function formatLevel(value) {
@@ -468,6 +512,9 @@
         lines.push("");
         lines.push("Meters (RMS/peak):");
         lines.push(...formatMeters(meters || meterValues));
+        lines.push("");
+        lines.push(`Spikes (peak > ${spikeThreshold}):`);
+        lines.push(...formatSpikes(spikeEvents));
         return lines.join("\n");
       }
 
@@ -504,9 +551,32 @@
                 peak: Math.max(prev.peak, data.peak),
               });
             }
+            recordSpike(name, data);
           }
           updateDiagnostics();
         }, 200);
+      }
+
+      function recordSpike(name, data) {
+        if (!lastRun || !runStartTime || !data || !Number.isFinite(data.peak)) return;
+        if (data.peak <= spikeThreshold) return;
+        const now = ctx.currentTime;
+        const lastAt = lastSpikeAt.get(name) ?? -Infinity;
+        if (now - lastAt < spikeCooldown) return;
+        const relTime = now - runStartTime;
+        const trackEnd = lastRun.track?.length
+          ? lastRun.track[lastRun.track.length - 1].time
+          : 0;
+        if (relTime < -0.1 || relTime > trackEnd + 0.5) return;
+        lastSpikeAt.set(name, now);
+        const event = findEventAtTime(lastRun.track, relTime);
+        spikeEvents.push({
+          time: Math.max(0, relTime),
+          node: name,
+          peak: data.peak,
+          phoneme: event?.phoneme ?? "",
+        });
+        if (spikeEvents.length > 6) spikeEvents.shift();
       }
 
       function readMeter(analyser) {

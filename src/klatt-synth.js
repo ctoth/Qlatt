@@ -42,7 +42,7 @@ export class KlattSynth {
       FNP: 270,
       BNP: 100,
       parallelMix: 0.6,
-      parallelGainScale: 0.0001,
+      parallelGainScale: 0.003,
       parallelVoiceGain: 0.0,
       parallelFricationGain: 0.0,
       parallelBypassGain: 0.0,

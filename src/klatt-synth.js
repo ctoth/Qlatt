@@ -41,7 +41,7 @@ export class KlattSynth {
       BNZ: 100,
       FNP: 270,
       BNP: 100,
-      parallelMix: 0,
+      parallelMix: 0.6,
       parallelVoiceGain: 0.0,
       parallelFricationGain: 0.0,
       parallelBypassGain: 0.0,
@@ -401,7 +401,7 @@ export class KlattSynth {
       this._dbToLinear(goDb) * baseBoost * outputScale
     );
 
-    const mix = params.SW === 1 ? 1 : 0;
+    const mix = params.SW === 1 ? this.params.parallelMix : 0;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {

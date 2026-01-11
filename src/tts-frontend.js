@@ -384,7 +384,7 @@ function debugLog(...args) {
 }
 
 // --- Main Pipeline ---
-export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
+export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {  
   debugLog("--- textToKlattTrack Start ---");
   debugLog("Input Text:", inputText);
   const normalized = normalizeText(inputText);
@@ -559,6 +559,14 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = rule_StressDuration(parameterSequence); // Note: This rule also ensures min duration
   debugLog("Applying rule: rule_VowelShortening...");
   parameterSequence = rule_VowelShortening(parameterSequence);
+  parameterSequence.forEach((ph) => {
+    if (!ph?.params) return;
+    const useParallel =
+      ph.type === "fricative" ||
+      ph.type === "affricate" ||
+      ph.type === "stop_release";
+    ph.params.SW = useParallel ? 1 : 0;
+  });
   debugLog("Finished applying rules.");
   debugLog(
     "Parameter sequence after rules:",
@@ -611,6 +619,23 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Generating final Klatt track...");
   const klattTrack = [];
   let currentTime = 0;
+  const transitionSec = Math.max(0, transitionMs) / 1000.0;
+  const blendFactor = 0.35;
+  const smoothTypes = new Set(["vowel", "nasal", "liquid", "glide"]);
+  const blendKeys = ["F1", "F2", "F3", "B1", "B2", "B3"];
+
+  function blendParams(baseParams, nextParams) {
+    if (!nextParams) return { ...baseParams };
+    const blended = { ...baseParams };
+    for (const key of blendKeys) {
+      const a = baseParams[key];
+      const b = nextParams[key];
+      if (Number.isFinite(a) && Number.isFinite(b)) {
+        blended[key] = a + (b - a) * blendFactor;
+      }
+    }
+    return blended;
+  }
   function getF0AtTime(time) {
     /* ... (same interpolation) ... */
     if (!f0Contour || f0Contour.length === 0) return 0;
@@ -635,6 +660,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
     const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Restore original calculation
+    const segmentStart = currentTime;
 
     // *** ADDED: Specific logging for P_REL inside loop ***
     if (ph.phoneme === "P_REL") {
@@ -655,7 +681,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       );
       continue; // Explicitly skip if duration is bad
     }
-    const targetTime = currentTime + phDuration;
+    const targetTime = segmentStart + phDuration;
 
     // *** ADDED: Specific logging for P_REL inside loop ***
     if (ph.phoneme === "P_REL") {
@@ -723,13 +749,38 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       }, GO=${finalParams.GO})`
     );
 
-    if (targetTime > currentTime) {
+    if (targetTime > segmentStart) {
+      const nextPh = parameterSequence[i + 1];
+      const canSmooth =
+        transitionSec > 0 &&
+        smoothTypes.has(ph.type) &&
+        smoothTypes.has(nextPh?.type);
+      const steadyTime = canSmooth
+        ? Math.max(segmentStart + 0.02, targetTime - transitionSec)
+        : null;
+
+      if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
+        const steadyParams = { ...finalParams };
+        const steadyF0 = isTargetVoiced ? getF0AtTime(steadyTime) : 0;
+        steadyParams.F0 = ph.phoneme === "SIL" ? 0 : steadyF0;
+        klattTrack.push({
+          time: steadyTime,
+          phoneme: ph.phoneme,
+          word: ph.word,
+          params: steadyParams,
+        });
+      }
+
+      const endParams = canSmooth
+        ? blendParams(finalParams, nextPh?.params)
+        : finalParams;
+
       // *** ADD WORD and PHONEME to track event ***
       klattTrack.push({
         time: targetTime,
         phoneme: ph.phoneme, // Keep original phoneme name (e.g., K_CL)
         word: ph.word, // Add the associated word
-        params: finalParams,
+        params: endParams,
       });
 
       // Log Event Details (including word) - Removed for cleaner test output

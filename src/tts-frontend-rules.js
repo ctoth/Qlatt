@@ -1060,6 +1060,28 @@ export function rule_GenerateF0Contour(
     phonemeList.reduce((sum, ph) => sum + Math.max(20, ph.duration || 100), 0) /
     1000.0;
   if (totalDuration === 0) return [{ time: 0, f0: 0 }];
+  const phraseIndexByPhoneme = [];
+  const phrases = [];
+  let phraseStartTime = 0;
+  let phraseIndex = 0;
+  let runningTime = 0;
+  for (let i = 0; i < phonemeList.length; i++) {
+    const phDuration = Math.max(20, phonemeList[i].duration || 100) / 1000.0;
+    const endTime = runningTime + phDuration;
+    phraseIndexByPhoneme.push(phraseIndex);
+    if (
+      phonemeList[i].phoneme === "SIL" &&
+      phonemeList[i].punctuationSymbol
+    ) {
+      phrases.push({ startTime: phraseStartTime, endTime });
+      phraseStartTime = endTime;
+      phraseIndex += 1;
+    }
+    runningTime = endTime;
+  }
+  if (!phrases.length || phrases[phrases.length - 1].endTime < runningTime) {
+    phrases.push({ startTime: phraseStartTime, endTime: runningTime });
+  }
   let finalRise = false;
   for (let i = phonemeList.length - 1; i >= 0; i--) {
     if (
@@ -1076,16 +1098,24 @@ export function rule_GenerateF0Contour(
     const ph = phonemeList[i];
     const phDuration = Math.max(20, ph.duration || 100) / 1000.0;
     const endTime = currentTime + phDuration;
-    let targetF0 =
-      baseF0 * (1.0 - (fallRate / baseF0) * (endTime / totalDuration));
+    const phrase = phrases[phraseIndexByPhoneme[i]] || {
+      startTime: 0,
+      endTime: totalDuration,
+    };
+    const phraseSpan = Math.max(0.05, phrase.endTime - phrase.startTime);
+    const position = Math.min(
+      1,
+      Math.max(0, (endTime - phrase.startTime) / phraseSpan)
+    );
+    let targetF0 = baseF0 - fallRate * position;
+    const initialBoost = 0.08;
+    targetF0 *= 1 + initialBoost * Math.exp(-3 * position);
     let peakTime = -1,
       peakF0 = -1;
     if (ph.stress === 1 && ph.type === "vowel") {
-      peakTime = currentTime + phDuration * 0.4;
-      peakF0 = currentF0 * stressRise;
+      peakTime = currentTime + phDuration * 0.45;
+      peakF0 = targetF0 * stressRise;
       f0Contour.push({ time: peakTime, f0: peakF0 });
-      targetF0 =
-        baseF0 * (1.0 - (fallRate / baseF0) * (endTime / totalDuration));
     }
     const f0Factor = ph.params?.F0_Factor || 1.0;
     targetF0 *= f0Factor;
@@ -1100,9 +1130,10 @@ export function rule_GenerateF0Contour(
     targetF0 = Math.max(targetF0, baseF0 * 0.6);
     const isVoicedTarget = ph.params?.AV > 0 || ph.params?.AVS > 0;
     f0Contour.push({ time: endTime, f0: isVoicedTarget ? targetF0 : 0 });
-    currentF0 = isVoicedTarget
-      ? targetF0
-      : baseF0 * (1.0 - (fallRate / baseF0) * (endTime / totalDuration));
+    currentF0 = isVoicedTarget ? targetF0 : baseF0 - fallRate * position;
+    if (ph.phoneme === "SIL" && ph.punctuationSymbol) {
+      currentF0 = baseF0;
+    }
     currentTime = endTime;
   }
   const cleanedContour = [];

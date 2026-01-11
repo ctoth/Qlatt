@@ -25,3 +25,4 @@
 - Fix: `src/klatt-synth.js` no longer overwrites `parallelMix` when automating SW, so parallel output is audible when SW=1.
 - Fix: `src/klatt-synth.js` scales parallel branch gains (`parallelGainScale`, default 0.003) and ramps SW mix to reduce clicks.
 - Diagnostics: spike capture added (peak > 1.0) with time/node/phoneme tags in the harness.
+- Fix: parallel branch now takes voicing from `rgp` (pre-AV), preventing cascade gain from overdriving parallel resonators.

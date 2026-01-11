@@ -211,10 +211,10 @@ export class KlattSynth {
 
   _connectGraph() {
     const N = this.nodes;
-    N.lfSource.connect(N.rgp).connect(N.voiceGain).connect(N.mixer);
+    N.lfSource.connect(N.rgp);
+    N.rgp.connect(N.voiceGain).connect(N.mixer);
     N.noiseSource.connect(N.rgs).connect(N.noiseGain).connect(N.mixer);
     N.mixer.connect(N.nz).connect(N.np);
-    N.mixer.connect(N.diff);
     let current = N.np;
     for (const resonator of N.cascade) {
       current.connect(resonator);
@@ -223,7 +223,8 @@ export class KlattSynth {
 
     current.connect(N.cascadeOutGain).connect(N.outputSum);
 
-    N.mixer.connect(N.parallelSourceGain);
+    N.rgp.connect(N.parallelSourceGain);
+    N.rgp.connect(N.diff);
     N.diff.connect(N.parallelDiffGain).connect(N.parallelDiffSum);
     N.fricationSource.connect(N.parallelFricGain).connect(N.parallelDiffSum);
 

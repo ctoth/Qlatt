@@ -1,0 +1,4 @@
+.aider*
+node_modules/
+target/
+out/

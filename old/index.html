@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rule-Based Klatt TTS</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: sans-serif;
+        line-height: 1.6;
+        padding: 1em;
+        max-width: 900px;
+        margin: auto;
+      }
+      button {
+        padding: 8px 15px;
+        margin: 5px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      input[type="text"] {
+        padding: 8px;
+        margin-right: 5px;
+        min-width: 300px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+       input[type="number"] {
+         padding: 8px;
+         margin-right: 5px;
+         width: 80px; /* Specific width for number inputs */
+         font-size: 1em;
+         border: 1px solid #ccc;
+         border-radius: 4px;
+      }
+      #status {
+        margin-top: 15px;
+        font-style: italic;
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 5px;
+        min-height: 1.6em;
+      }
+      hr {
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+      }
+      h1,
+      h2 {
+        margin-top: 1.5em;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        min-width: 150px; /* Align labels */
+        vertical-align: middle;
+      }
+      .input-group {
+        margin-bottom: 15px;
+        display: flex; /* Use flexbox for alignment */
+        align-items: center; /* Vertically align items */
+        flex-wrap: wrap; /* Allow wrapping */
+      }
+      .input-group label {
+         margin-right: 10px; /* Space between label and input */
+      }
+      .input-group input, .input-group select, .input-group .radio-group {
+         flex-grow: 1; /* Allow inputs to take space */
+         min-width: 100px; /* Prevent inputs from becoming too small */
+      }
+       .radio-group label { /* Style labels within radio group */
+           font-weight: normal;
+           min-width: auto;
+           margin-right: 5px;
+       }
+       .radio-group input[type="radio"] {
+           margin-right: 15px;
+       }
+       input:disabled, select:disabled {
+           opacity: 0.5;
+           cursor: not-allowed;
+       }
+    </style>
+  </head>
+  <body>
+    <h1>Rule-Based Klatt TTS Demo</h1>
+
+    <button id="initButton">Initialize Audio</button>
+    <div id="status">Status: Waiting for initialization...</div>
+    <div id="synthStateDisplay" style="margin-top: 10px; font-family: monospace; white-space: pre; border: 1px solid #ccc; padding: 5px; min-height: 5em;">
+      Synth State: Idle
+    </div>
+
+    <hr />
+    <h2>Text-to-Speech Input</h2>
+    <div class="input-group">
+      <label for="textInput">Enter English Text:</label>
+      <input
+        type="text"
+        id="textInput"
+        value="Hello world. This is a test of rule based speech synthesis."
+      />
+      <button id="speakTextButton" disabled>Speak Text</button>
+    </div>
+
+    <hr>
+    <h2>Generated Klatt Track</h2>
+    <div id="trackDisplayContainer" style="margin-top: 10px;">
+        <pre id="trackDisplay" style="font-family: monospace; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #ccc; padding: 10px; max-height: 300px; overflow-y: auto; background-color: #f9f9f9;">
+Track data will appear here after synthesis.
+        </pre>
+    </div>
+
+    <hr>
+    <h2>Synthesizer Configuration</h2>
+
+    <div class="input-group">
+        <label for="baseF0Input">Base F0 (Hz):</label>
+        <input type="number" id="baseF0Input" value="110" min="40" max="500" step="1" disabled>
+        <span>(Affects next synthesis)</span>
+    </div>
+
+    <div class="input-group">
+        <label for="transitionMsInput">Transition Time (ms):</label>
+        <input type="number" id="transitionMsInput" value="30" min="5" max="100" step="1" disabled>
+        <span>(Affects next synthesis)</span>
+    </div>
+
+    <div class="input-group">
+        <label>Synth Mode (SW):</label>
+        <div class="radio-group">
+            <input type="radio" id="swRadioCascade" name="swMode" value="0" disabled>
+            <label for="swRadioCascade">Cascade/Parallel (SW=0)</label>
+            <input type="radio" id="swRadioParallel" name="swMode" value="1" checked disabled> <!-- Default to All Parallel -->
+            <label for="swRadioParallel">All Parallel (SW=1)</label>
+        </div>
+         <span>(Updates synth immediately)</span>
+    </div>
+
+     <div class="input-group">
+        <label for="nfcInput">Cascade Formants (NFC):</label>
+        <input type="number" id="nfcInput" value="5" min="4" max="6" step="1" disabled>
+         <span>(Updates synth immediately, only used if SW=0)</span>
+    </div>
+
+     <div class="input-group">
+        <label for="goInput">Output Gain (GO dB):</label>
+        <input type="number" id="goInput" value="35" min="-20" max="60" step="1" disabled>
+         <span>(Updates synth immediately)</span>
+    </div>
+
+
+    <!-- Optional Manual Controls Section Can Go Here -->
+    <!--
+    <hr>
+    <h2>Manual Controls</h2>
+    ... sliders etc ...
+    -->
+
+    <!-- Load Modules -->
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

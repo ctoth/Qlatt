@@ -42,6 +42,7 @@ export class KlattSynth {
       FNP: 270,
       BNP: 100,
       parallelMix: 0.6,
+      parallelGainScale: 0.0001,
       parallelVoiceGain: 0.0,
       parallelFricationGain: 0.0,
       parallelBypassGain: 0.0,
@@ -259,15 +260,21 @@ export class KlattSynth {
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
     this.nodes.noiseGain.gain.setValueAtTime(p.noiseGain, atTime);
     this.nodes.masterGain.gain.setValueAtTime(p.masterGain, atTime);
+    const parallelScale = Number.isFinite(p.parallelGainScale)
+      ? p.parallelGainScale
+      : 1.0;
     this.nodes.parallelSourceGain.gain.setValueAtTime(p.parallelVoiceGain, atTime);
     this.nodes.parallelDiffGain.gain.setValueAtTime(p.parallelVoiceGain, atTime);
     this.nodes.parallelFricGain.gain.setValueAtTime(p.parallelFricationGain, atTime);
     const bypassGain = Number.isFinite(p.AB)
-      ? this._dbToLinear(p.AB)
+      ? this._dbToLinear(p.AB) * parallelScale
       : p.parallelBypassGain;
     this.nodes.parallelBypassGain.gain.setValueAtTime(bypassGain, atTime);
     const nasalDb = Number.isFinite(p.parallelNasalGain) ? p.parallelNasalGain : p.AN;
-    this.nodes.parallelNasalGain.gain.setValueAtTime(this._dbToLinear(nasalDb), atTime);
+    this.nodes.parallelNasalGain.gain.setValueAtTime(
+      this._dbToLinear(nasalDb) * parallelScale,
+      atTime
+    );
 
     this._setAudioParam(this.nodes.noiseSource.parameters.get("gain"), 1.0, atTime);
     this._setAudioParam(this.nodes.noiseSource.parameters.get("cutoff"), p.noiseCutoff, atTime);
@@ -318,7 +325,10 @@ export class KlattSynth {
   }
 
   _setParallelFormantGain(index, dbValue, atTime) {
-    const linear = this._dbToLinear(dbValue);
+    const scale = Number.isFinite(this.params.parallelGainScale)
+      ? this.params.parallelGainScale
+      : 1.0;
+    const linear = this._dbToLinear(dbValue) * scale;
     const sign = index >= 1 ? (index % 2 === 1 ? -1 : 1) : 1;
     this.nodes.parallelFormantGains[index].gain.setValueAtTime(sign * linear, atTime);
   }
@@ -389,9 +399,12 @@ export class KlattSynth {
     const goDb = params.GO ?? 47;
 
     const voiceGain = this._dbToLinear(voiceDb);
-    const voiceParGain = this._dbToLinear(voiceParDb);
+    const parallelScale = Number.isFinite(this.params.parallelGainScale)
+      ? this.params.parallelGainScale
+      : 1.0;
+    const voiceParGain = this._dbToLinear(voiceParDb) * parallelScale;
     const aspGain = this._dbToLinear(aspDb);
-    const fricGain = this._dbToLinear(fricDb);
+    const fricGain = this._dbToLinear(fricDb) * parallelScale;
     const baseBoost = Number.isFinite(this.params.masterGain)
       ? this.params.masterGain
       : 1.0;
@@ -415,7 +428,7 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);
 
-    this._setParallelMix(mix, atTime, false);
+    this._setParallelMix(mix, atTime, false, ramp);
 
     const formants = [
       ["F1", "B1"],
@@ -459,10 +472,20 @@ export class KlattSynth {
       }
     }
     if (Number.isFinite(params.AB)) {
-      this._scheduleAudioParam(this.nodes.parallelBypassGain.gain, this._dbToLinear(params.AB), atTime, ramp);
+      this._scheduleAudioParam(
+        this.nodes.parallelBypassGain.gain,
+        this._dbToLinear(params.AB) * parallelScale,
+        atTime,
+        ramp
+      );
     }
     if (Number.isFinite(params.AN)) {
-      this._scheduleAudioParam(this.nodes.parallelNasalGain.gain, this._dbToLinear(params.AN), atTime, ramp);
+      this._scheduleAudioParam(
+        this.nodes.parallelNasalGain.gain,
+        this._dbToLinear(params.AN) * parallelScale,
+        atTime,
+        ramp
+      );
     }
 
     this._scheduleAudioParam(this.nodes.nz.parameters.get("frequency"), params.FNZ, atTime, ramp);
@@ -489,13 +512,18 @@ export class KlattSynth {
     }
   }
 
-  _setParallelMix(value, atTime, updateParam = true) {
+  _setParallelMix(value, atTime, updateParam = true, ramp = false) {
     const mix = Math.max(0, Math.min(1, Number(value)));
     if (updateParam) {
       this.params.parallelMix = mix;
     }
-    this.nodes.parallelOutGain.gain.setValueAtTime(mix, atTime);
-    this.nodes.cascadeOutGain.gain.setValueAtTime(1 - mix, atTime);
+    if (ramp) {
+      this.nodes.parallelOutGain.gain.linearRampToValueAtTime(mix, atTime);
+      this.nodes.cascadeOutGain.gain.linearRampToValueAtTime(1 - mix, atTime);
+    } else {
+      this.nodes.parallelOutGain.gain.setValueAtTime(mix, atTime);
+      this.nodes.cascadeOutGain.gain.setValueAtTime(1 - mix, atTime);
+    }
   }
 
   setTelemetryHandler(handler) {
@@ -578,7 +606,10 @@ export class KlattSynth {
         this._setAudioParam(this.nodes.parallelNasal.parameters.get("bandwidth"), value, atTime);
         break;
       case "parallelMix":
-        this._setParallelMix(value, atTime);
+        this._setParallelMix(value, atTime, true, true);
+        break;
+      case "parallelGainScale":
+        this.params.parallelGainScale = value;
         break;
       case "parallelVoiceGain":
         this.nodes.parallelSourceGain.gain.setValueAtTime(value, atTime);

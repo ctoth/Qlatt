@@ -7,9 +7,13 @@
     "dev": "node scripts/dev-server.js",
     "build:dict": "node scripts/build-cmudict.js",
     "build:wasm": "bash build.sh",
-    "build:wasm:ps": "pwsh -File build.ps1"
+    "build:wasm:ps": "pwsh -File build.ps1",
+    "test:golden": "node scripts/run-golden.mjs"
   },
   "dependencies": {
     "cmu-pronouncing-dictionary": "^3.0.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.10.1"
   }
 }

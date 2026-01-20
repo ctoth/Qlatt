@@ -14,6 +14,23 @@ struct Biquad {
     bypass: bool,
 }
 
+#[derive(Clone, Copy)]
+enum LfMode {
+    Legacy = 0,
+    LfLm = 1,
+    LfCalm = 2,
+}
+
+impl LfMode {
+    fn from_u32(value: u32) -> Self {
+        match value {
+            1 => Self::LfLm,
+            2 => Self::LfCalm,
+            _ => Self::Legacy,
+        }
+    }
+}
+
 impl Biquad {
     fn new() -> Self {
         Self {
@@ -113,6 +130,7 @@ pub struct LfSource {
     voiced: bool,
     glottal: Biquad,
     tilt: LpPole,
+    mode: LfMode,
 }
 
 impl LfSource {
@@ -124,7 +142,12 @@ impl LfSource {
             voiced: false,
             glottal: Biquad::new(),
             tilt: LpPole::new(),
+            mode: LfMode::Legacy,
         }
+    }
+
+    fn set_mode(&mut self, mode: LfMode) {
+        self.mode = mode;
     }
 
     fn start_period(&mut self, f0: f32, rd: f32) {
@@ -171,7 +194,14 @@ impl LfSource {
         let a2 = f32::exp(-2.0 * PI * bg / self.sample_rate);
         let ag = 1.0;
 
-        self.glottal.set_coeffs(0.0, -ag, ag, a1, a2);
+        // LF_LM uses a causal z^-1 numerator. LF_CALM is non-causal; we fall
+        // back to the causal form in real-time and verify CALM offline.
+        let (b0, b1, b2) = match self.mode {
+            LfMode::LfCalm => (0.0, -ag, ag),
+            _ => (0.0, -ag, ag),
+        };
+
+        self.glottal.set_coeffs(b0, b1, b2, a1, a2);
 
         let fa = 1.0 / (2.0 * PI * ta);
         let pole = f32::exp(-2.0 * PI * fa / self.sample_rate);
@@ -190,7 +220,7 @@ impl LfSource {
         let len = output.len();
 
         for i in 0..len {
-            if self.pos_in_period >= self.period_len {
+            if !self.voiced || self.pos_in_period >= self.period_len {
                 let f0_value = if f0_len > 1 { f0[i] } else { f0[0] };
                 let rd_value = if rd_len > 1 { rd[i] } else { rd[0] };
                 self.start_period(f0_value, rd_value);
@@ -224,6 +254,16 @@ fn clamp(value: f32, min: f32, max: f32) -> f32 {
 #[no_mangle]
 pub extern "C" fn lf_source_new(sample_rate: f32) -> *mut LfSource {
     Box::into_raw(Box::new(LfSource::new(sample_rate)))
+}
+
+#[no_mangle]
+pub extern "C" fn lf_source_set_mode(ptr: *mut LfSource, mode: u32) {
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        (*ptr).set_mode(LfMode::from_u32(mode));
+    }
 }
 
 #[no_mangle]

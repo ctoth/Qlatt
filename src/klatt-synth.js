@@ -35,6 +35,7 @@ export class KlattSynth {
       noiseCutoff: 1000,
       fricationCutoff: 3000,
       masterGain: 1.0,
+      outputGain: 1.0, // Global output gain (can boost if needed)
       rgpFrequency: 0,
       rgpBandwidth: 0,
       rgsFrequency: 1000,
@@ -193,6 +194,7 @@ export class KlattSynth {
     N.cascadeOutGain = ctx.createGain();
     N.outputSum = ctx.createGain();
     N.masterGain = ctx.createGain();
+    N.outputGain = ctx.createGain();
 
     this._attachTelemetry(N.lfSource);
     this._attachTelemetry(N.noiseSource);
@@ -244,7 +246,7 @@ export class KlattSynth {
     N.parallelDiffSum.connect(N.parallelBypassGain).connect(N.parallelSum);
     N.parallelSum.connect(N.parallelOutGain).connect(N.outputSum);
 
-    N.outputSum.connect(N.masterGain).connect(this.ctx.destination);
+    N.outputSum.connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
   }
 
   _applyAllParams(atTime) {
@@ -266,6 +268,7 @@ export class KlattSynth {
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
     this.nodes.noiseGain.gain.setValueAtTime(p.noiseGain, atTime);
     this.nodes.masterGain.gain.setValueAtTime(p.masterGain, atTime);
+    this.nodes.outputGain.gain.setValueAtTime(p.outputGain, atTime);
     const parallelScale = Number.isFinite(p.parallelGainScale)
       ? p.parallelGainScale
       : 1.0;
@@ -427,9 +430,8 @@ export class KlattSynth {
       AN: -58,
       AB: -84,
       AV: -72,
-      // AH was -102, but that's 30dB too aggressive compared to AV/AF.
-      // With AH=55 and scale=-102, aspGain=0.004 (nearly silent).
-      // Changed to -72 to match AV/AF scaling.
+      // AH was -102 in Klatt 80, but we use -72 to match AV/AF scaling.
+      // Input AH values are now scaled to Klatt 80 levels (40 vs 55).
       AH: -72,
       AF: -72,
       AVS: -44,

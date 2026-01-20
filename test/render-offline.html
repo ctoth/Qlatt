@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QLATT Offline Renderer</title>
+  </head>
+  <body>
+    <script type="module">
+      import { KlattSynth } from "../src/klatt-synth.js";
+      import { textToKlattTrack } from "../src/tts-frontend.js";
+
+      function summarizeTrack(track) {
+        const totalTime = track.length ? track[track.length - 1].time : 0;
+        const voiced = track.filter(
+          (event) => (event.params?.AV ?? 0) > 0 || (event.params?.AVS ?? 0) > 0
+        );
+        const f0Values = track
+          .map((event) => event.params?.F0 ?? 0)
+          .filter((v) => v > 0);
+        const f0Min = f0Values.length ? Math.min(...f0Values) : 0;
+        const f0Max = f0Values.length ? Math.max(...f0Values) : 0;
+        return {
+          events: track.length,
+          totalTime,
+          voicedEvents: voiced.length,
+          f0Min,
+          f0Max,
+        };
+      }
+
+      async function renderOffline({
+        phrase,
+        baseF0 = 110,
+        sampleRate = 22050,
+        leadTime = 0.05,
+        tailTime = 0.2,
+      }) {
+        const track = textToKlattTrack(phrase, baseF0);
+        const totalTime =
+          (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
+        const length = Math.max(1, Math.ceil(totalTime * sampleRate));
+
+        const ctx = new OfflineAudioContext(1, length, sampleRate);
+        const synth = new KlattSynth(ctx);
+        await synth.initialize();
+        synth.scheduleTrack(track, leadTime);
+        const buffer = await ctx.startRendering();
+        const channel = buffer.getChannelData(0);
+
+        let rms = 0;
+        let peak = 0;
+        const samples = new Array(channel.length);
+        for (let i = 0; i < channel.length; i += 1) {
+          const v = channel[i];
+          samples[i] = v;
+          rms += v * v;
+          const av = Math.abs(v);
+          if (av > peak) peak = av;
+        }
+        rms = channel.length ? Math.sqrt(rms / channel.length) : 0;
+
+        return {
+          phrase,
+          baseF0,
+          sampleRate,
+          leadTime,
+          tailTime,
+          length,
+          metrics: { rms, peak },
+          trackSummary: summarizeTrack(track),
+          samples,
+        };
+      }
+
+      window.renderOffline = renderOffline;
+    </script>
+  </body>
+</html>

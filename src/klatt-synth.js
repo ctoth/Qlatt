@@ -20,6 +20,7 @@ export class KlattSynth {
 
     this._createNodes();
     this._connectGraph();
+    await this._awaitWorkletReady();
     this._applyAllParams(this.ctx.currentTime);
     this.isInitialized = true;
   }
@@ -28,6 +29,7 @@ export class KlattSynth {
     return {
       f0: 110,
       rd: 1.0,
+      lfMode: 0,
       voiceGain: 1.0,
       noiseGain: 0.0,
       noiseCutoff: 1000,
@@ -42,7 +44,7 @@ export class KlattSynth {
       FNP: 270,
       BNP: 100,
       parallelMix: 0.6,
-      parallelGainScale: 0.003,
+      parallelGainScale: 1.0,
       parallelVoiceGain: 0.0,
       parallelFricationGain: 0.0,
       parallelBypassGain: 0.0,
@@ -247,6 +249,7 @@ export class KlattSynth {
     const p = this.params;
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
+    this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), p.rgpFrequency, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), p.rgsFrequency, atTime);
@@ -308,7 +311,7 @@ export class KlattSynth {
 
     const parallelGains = [p.A1, p.A2, p.A3, p.A4, p.A5, p.A6];
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
-      this._setParallelFormantGain(i, parallelGains[i], atTime);
+      this._setParallelFormantGain(i, parallelGains[i], atTime, formants[i].f);
     }
 
     this._setParallelMix(p.parallelMix, atTime);
@@ -325,18 +328,31 @@ export class KlattSynth {
     return 2 ** (clamped / 6);
   }
 
-  _setParallelFormantGain(index, dbValue, atTime) {
+  _setParallelFormantGain(index, dbValue, atTime, freq) {
     const scale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
     const linear = this._dbToLinear(dbValue) * scale;
     const sign = index >= 1 ? (index % 2 === 1 ? -1 : 1) : 1;
-    this.nodes.parallelFormantGains[index].gain.setValueAtTime(sign * linear, atTime);
+    let compensated = linear;
+    if (index >= 1 && Number.isFinite(freq) && freq > 0) {
+      const w = (2 * Math.PI * freq) / this.ctx.sampleRate;
+      const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
+      if (diffGain > 0) {
+        compensated = linear / diffGain;
+      }
+    }
+    this.nodes.parallelFormantGains[index].gain.setValueAtTime(
+      sign * compensated,
+      atTime
+    );
   }
 
   _scheduleAudioParam(param, value, atTime, ramp) {
     if (!param || !Number.isFinite(value)) return;
-    if (ramp) {
+    const automationRate = param.automationRate;
+    const allowRamp = !automationRate || automationRate === "a-rate";
+    if (ramp && allowRamp) {
       param.linearRampToValueAtTime(value, atTime);
     } else {
       param.setValueAtTime(value, atTime);
@@ -446,17 +462,22 @@ export class KlattSynth {
     const baseBoost = Number.isFinite(this.params.masterGain)
       ? this.params.masterGain
       : 1.0;
-    const outputScale = 1e-4;
+    // Match Klatt80 PLSTEP scaling: GETAMP(GO + NDBSCA(AF) + 44).
+    const outputScale = this._dbToLinear(ndbScale.AF + 44);
     const masterGain = Math.min(
       5.0,
       this._dbToLinear(goDb) * baseBoost * outputScale
     );
 
-    const mix = params.SW === 1 ? this.params.parallelMix : 0;
+    const mix = this.params.parallelMix;
+    const allParallel = params.SW === 1;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
+    }
+    if (Number.isFinite(params.lfMode)) {
+      this._scheduleAudioParam(this.nodes.lfSource.parameters.get("lfMode"), params.lfMode, atTime, ramp);
     }
 
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
@@ -466,7 +487,7 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);
 
-    this._setParallelMix(mix, atTime, false, ramp);
+    this._setParallelMix(mix, atTime, false, ramp, allParallel);
 
     const formants = [
       ["F1", "B1"],
@@ -515,7 +536,17 @@ export class KlattSynth {
     ];
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
       const sign = i >= 1 ? (i % 2 === 1 ? -1 : 1) : 1;
-      const linear = parallelLinear[i] * parallelScale;
+      let linear = parallelLinear[i] * parallelScale;
+      if (i >= 1) {
+        const freq = params[`F${i + 1}`] ?? this.params[`F${i + 1}`];
+        if (Number.isFinite(freq) && freq > 0) {
+          const w = (2 * Math.PI * freq) / this.ctx.sampleRate;
+          const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
+          if (diffGain > 0) {
+            linear /= diffGain;
+          }
+        }
+      }
       this._scheduleAudioParam(
         this.nodes.parallelFormantGains[i].gain,
         sign * linear,
@@ -564,17 +595,24 @@ export class KlattSynth {
     }
   }
 
-  _setParallelMix(value, atTime, updateParam = true, ramp = false) {
+  _setParallelMix(value, atTime, updateParam = true, ramp = false, allParallel = false) {
     const mix = Math.max(0, Math.min(1, Number(value)));
     if (updateParam) {
       this.params.parallelMix = mix;
     }
+    const parallelGain = allParallel ? 1 : mix;
     if (ramp) {
-      this.nodes.parallelOutGain.gain.linearRampToValueAtTime(mix, atTime);
-      this.nodes.cascadeOutGain.gain.linearRampToValueAtTime(1 - mix, atTime);
+      this.nodes.parallelOutGain.gain.linearRampToValueAtTime(
+        parallelGain,
+        atTime
+      );
+      this.nodes.cascadeOutGain.gain.linearRampToValueAtTime(
+        allParallel ? 0 : 1,
+        atTime
+      );
     } else {
-      this.nodes.parallelOutGain.gain.setValueAtTime(mix, atTime);
-      this.nodes.cascadeOutGain.gain.setValueAtTime(1 - mix, atTime);
+      this.nodes.parallelOutGain.gain.setValueAtTime(parallelGain, atTime);
+      this.nodes.cascadeOutGain.gain.setValueAtTime(allParallel ? 0 : 1, atTime);
     }
   }
 
@@ -584,11 +622,49 @@ export class KlattSynth {
 
   _attachTelemetry(node) {
     if (!this.telemetryHandler || !node?.port) return;
-    node.port.onmessage = (event) => {
+    node.port.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || data.type !== "metrics") return;
       this.telemetryHandler(data);
-    };
+    });
+    if (typeof node.port.start === "function") {
+      node.port.start();
+    }
+  }
+
+  async _awaitWorkletReady(timeoutMs = 2000) {
+    if (this._readyPromise) return this._readyPromise;
+    const nodes = Object.values(this.nodes).filter((node) => node?.port);
+    this._readyPromise = Promise.all(
+      nodes.map((node) => this._waitForNodeReady(node, timeoutMs))
+    );
+    return this._readyPromise;
+  }
+
+  _waitForNodeReady(node, timeoutMs) {
+    return new Promise((resolve) => {
+      let done = false;
+      const handler = (event) => {
+        const data = event?.data;
+        if (!data || data.type !== "ready") return;
+        done = true;
+        node.port.removeEventListener("message", handler);
+        resolve();
+      };
+      node.port.addEventListener("message", handler);
+      if (typeof node.port.start === "function") {
+        node.port.start();
+      }
+      node.port.postMessage({ type: "ping" });
+      if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
+        setTimeout(() => {
+          if (done) return;
+          node.port.removeEventListener("message", handler);
+          console.warn(`[KlattSynth] worklet ready timeout: ${node?.port?.name ?? "node"}`);
+          resolve();
+        }, timeoutMs);
+      }
+    });
   }
 
   async _loadWasmBytes(workletBase) {
@@ -615,6 +691,9 @@ export class KlattSynth {
         break;
       case "rd":
         this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), value, atTime);
+        break;
+      case "lfMode":
+        this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), value, atTime);
         break;
       case "voiceGain":
         this.nodes.voiceGain.gain.setValueAtTime(value, atTime);

@@ -4,6 +4,7 @@ use core::f32::consts::PI;
 pub struct AntiResonator {
     x1: f32,
     x2: f32,
+    a0: f32,
     b1: f32,
     b2: f32,
     gain: f32,
@@ -15,6 +16,7 @@ impl AntiResonator {
         Self {
             x1: 0.0,
             x2: 0.0,
+            a0: 1.0,
             b1: 0.0,
             b2: 0.0,
             gain: 1.0,
@@ -34,14 +36,25 @@ impl AntiResonator {
             self.bypass = true;
             self.x1 = 0.0;
             self.x2 = 0.0;
+            self.a0 = 1.0;
             return;
         }
 
         let c = -f32::exp(-2.0 * PI * bw / sample_rate);
         let b = 2.0 * f32::exp(-PI * bw / sample_rate) * f32::cos(2.0 * PI * freq / sample_rate);
+        let a = 1.0 - b - c;
+        if a == 0.0 {
+            self.bypass = true;
+            self.x1 = 0.0;
+            self.x2 = 0.0;
+            self.a0 = 1.0;
+            return;
+        }
+        let a0 = 1.0 / a;
 
-        self.b1 = -b;
-        self.b2 = -c;
+        self.a0 = a0;
+        self.b1 = -a0 * b;
+        self.b2 = -a0 * c;
         self.bypass = false;
     }
 
@@ -60,7 +73,7 @@ impl AntiResonator {
         }
 
         for (i, x) in input.iter().enumerate() {
-            let y = x + self.b1 * self.x1 + self.b2 * self.x2;
+            let y = self.a0 * x + self.b1 * self.x1 + self.b2 * self.x2;
             self.x2 = self.x1;
             self.x1 = *x;
             output[i] = y * self.gain;

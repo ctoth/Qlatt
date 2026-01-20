@@ -225,8 +225,10 @@ export class KlattSynth {
 
     current.connect(N.cascadeOutGain).connect(N.outputSum);
 
-    N.rgp.connect(N.parallelSourceGain);
-    N.rgp.connect(N.diff);
+    // Parallel branch gets the mixed signal (voice + aspiration) from mixer,
+    // not just rgp. This allows /h/ (AH aspiration) to work with SW=1.
+    N.mixer.connect(N.parallelSourceGain);
+    N.mixer.connect(N.diff);
     N.diff.connect(N.parallelDiffGain).connect(N.parallelDiffSum);
     N.fricationSource.connect(N.parallelFricGain).connect(N.parallelDiffSum);
 
@@ -425,7 +427,10 @@ export class KlattSynth {
       AN: -58,
       AB: -84,
       AV: -72,
-      AH: -102,
+      // AH was -102, but that's 30dB too aggressive compared to AV/AF.
+      // With AH=55 and scale=-102, aspGain=0.004 (nearly silent).
+      // Changed to -72 to match AV/AF scaling.
+      AH: -72,
       AF: -72,
       AVS: -44,
     };
@@ -481,8 +486,13 @@ export class KlattSynth {
     }
 
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelSourceGain.gain, voiceParGain, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelDiffGain.gain, voiceParGain, atTime, ramp);
+    // When SW=1 (parallel mode), use full gain for parallel source input.
+    // This matches Klatt 80 architecture where A1-A6 control formant amplitudes,
+    // not a pre-formant voice-amplitude gate. Without this, aspiration-driven
+    // phonemes like /h/ (which have AVS=0) get attenuated to near-zero.
+    const parallelSrcGain = allParallel ? 1.0 : voiceParGain;
+    this._scheduleAudioParam(this.nodes.parallelSourceGain.gain, parallelSrcGain, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.parallelDiffGain.gain, parallelSrcGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.noiseGain.gain, aspGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);

@@ -559,6 +559,14 @@ export const PHONEME_TARGETS = {
     AF: 0,
     AH: 55,
     AVS: 0,
+    // Parallel formant gains for SW=1 mode. Without these, parallel output is near-zero.
+    // /h/ is broad-band aspiration, so emphasize mid-to-high formants.
+    A1: 30,
+    A2: 35,
+    A3: 40,
+    A4: 45,
+    A5: 50,
+    A6: 50,
     dur: 80,
     type: "fricative",
     voiceless: true,

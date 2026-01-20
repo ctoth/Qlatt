@@ -471,7 +471,8 @@
           AN: -58,
           AB: -84,
           AV: -72,
-          AH: -102,
+          // AH changed from -102 to -72 to match AV/AF (see klatt-synth.js)
+          AH: -72,
           AF: -72,
           AVS: -44,
         };
@@ -1011,7 +1012,7 @@
         track.slice(0, 8).forEach((e, index) => {
           const sw = Number.isFinite(e.params?.SW) ? e.params.SW.toFixed(0) : "n/a";
           lines.push(
-            `${index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
+            `${index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AH=${(e.params?.AH ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
           );
         });
         lines.push("");
@@ -1019,7 +1020,7 @@
         track.slice(-6).forEach((e, index) => {
           const sw = Number.isFinite(e.params?.SW) ? e.params.SW.toFixed(0) : "n/a";
           lines.push(
-            `${track.length - 6 + index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
+            `${track.length - 6 + index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AH=${(e.params?.AH ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
           );
         });
         lines.push("");

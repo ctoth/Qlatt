@@ -6,6 +6,12 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
     this.nodeId = options?.processorOptions?.nodeId || "diff";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.port.onmessage = (event) => {
+      if (event?.data?.type === "ping") {
+        this.port.postMessage({ type: "ready", node: this.nodeId });
+      }
+    };
+    this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
   process(inputs, outputs, parameters) {
@@ -28,11 +34,11 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
       }
       this.prev[ch] = prev;
     }
-    this._reportMetrics(output[0]);
+    this._reportMetrics(output[0], input[0]);
     return true;
   }
 
-  _reportMetrics(buffer) {
+  _reportMetrics(buffer, inputBuffer) {
     if (!this.debug || !buffer) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -46,7 +52,20 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    this.port.postMessage({ type: "metrics", node: this.nodeId, rms, peak });
+    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    if (inputBuffer) {
+      let inSum = 0;
+      let inPeak = 0;
+      for (let i = 0; i < inputBuffer.length; i += 1) {
+        const v = inputBuffer[i];
+        inSum += v * v;
+        const av = Math.abs(v);
+        if (av > inPeak) inPeak = av;
+      }
+      payload.inRms = Math.sqrt(inSum / inputBuffer.length);
+      payload.inPeak = inPeak;
+    }
+    this.port.postMessage(payload);
   }
 }
 

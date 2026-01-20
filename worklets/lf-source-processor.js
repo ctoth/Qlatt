@@ -10,6 +10,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     return [
       { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
       { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" },
+      { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" },
     ];
   }
 
@@ -23,10 +24,16 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this.ready = false;
     this.lastF0 = 0;
     this.lastRd = 0;
+    this.lastMode = 0;
     this.debug = Boolean(options?.processorOptions?.debug);
     this.nodeId = options?.processorOptions?.nodeId || "lf-source";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.port.onmessage = (event) => {
+      if (event?.data?.type === "ping") {
+        this.port.postMessage({ type: "ready", node: this.nodeId });
+      }
+    };
 
     const wasmBytes = options?.processorOptions?.wasmBytes;
     initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
@@ -36,6 +43,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       this.f0Buffer = new WasmBuffer(this.wasm);
       this.rdBuffer = new WasmBuffer(this.wasm);
       this.ready = true;
+      this.port.postMessage({ type: "ready", node: this.nodeId });
     });
   }
 
@@ -54,6 +62,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
 
     const f0Values = parameters.f0;
     const rdValues = parameters.rd;
+    const modeValues = parameters.lfMode;
     const f0Len = f0Values.length;
     const rdLen = rdValues.length;
 
@@ -70,6 +79,13 @@ class LfSourceProcessor extends AudioWorkletProcessor {
         rdSum += rdValues[i];
       }
       this.lastRd = rdSum / rdLen;
+    }
+    if (modeValues && modeValues.length) {
+      const mode = Math.round(modeValues[0]);
+      if (mode !== this.lastMode && this.wasm?.lf_source_set_mode) {
+        this.wasm.lf_source_set_mode(this.state, mode);
+      }
+      this.lastMode = mode;
     }
 
     this.outputBuffer.ensure(blockSize);
@@ -115,6 +131,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       peak,
       f0: this.lastF0,
       rd: this.lastRd,
+      lfMode: this.lastMode,
     });
   }
 }

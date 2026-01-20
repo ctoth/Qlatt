@@ -15,6 +15,12 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     this.nodeId = options?.processorOptions?.nodeId || "noise";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.port.onmessage = (event) => {
+      if (event?.data?.type === "ping") {
+        this.port.postMessage({ type: "ready", node: this.nodeId });
+      }
+    };
+    this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
   _updateFilter(cutoff) {
@@ -37,19 +43,27 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
       this._updateFilter(cutoff);
     }
 
+    let gainSum = 0;
+    let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
       const gain = gainValues.length > 1 ? gainValues[i] : gainValues[0];
+      gainSum += gain;
+      if (gain > gainPeak) gainPeak = gain;
       const white = Math.random() * 2 - 1;
       const y = (1 - this.alpha) * white + this.alpha * this.y1;
       this.y1 = y;
       outputChannel[i] = y * gain;
     }
 
-    this._reportMetrics(outputChannel);
+    this._reportMetrics(outputChannel, {
+      gainAvg: gainSum / blockSize,
+      gainPeak,
+      cutoff: this._lastCutoff,
+    });
     return true;
   }
 
-  _reportMetrics(buffer) {
+  _reportMetrics(buffer, params) {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -63,7 +77,13 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    this.port.postMessage({ type: "metrics", node: this.nodeId, rms, peak });
+    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    if (params) {
+      payload.gainAvg = params.gainAvg;
+      payload.gainPeak = params.gainPeak;
+      payload.cutoff = params.cutoff;
+    }
+    this.port.postMessage(payload);
   }
 }
 

@@ -25,6 +25,11 @@ class ResonatorProcessor extends AudioWorkletProcessor {
     this.nodeId = options?.processorOptions?.nodeId || "resonator";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this.port.onmessage = (event) => {
+      if (event?.data?.type === "ping") {
+        this.port.postMessage({ type: "ready", node: this.nodeId });
+      }
+    };
 
     const wasmBytes = options?.processorOptions?.wasmBytes;
     initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
@@ -33,6 +38,7 @@ class ResonatorProcessor extends AudioWorkletProcessor {
       this.inputBuffer = new WasmBuffer(this.wasm);
       this.outputBuffer = new WasmBuffer(this.wasm);
       this.ready = true;
+      this.port.postMessage({ type: "ready", node: this.nodeId });
     });
   }
 
@@ -74,11 +80,11 @@ class ResonatorProcessor extends AudioWorkletProcessor {
 
     this.outputBuffer.refresh();
     outputChannel.set(this.outputBuffer.view);
-    this._reportMetrics(outputChannel);
+    this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
     return true;
   }
 
-  _reportMetrics(buffer) {
+  _reportMetrics(buffer, inputBuffer, params) {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -92,7 +98,25 @@ class ResonatorProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    this.port.postMessage({ type: "metrics", node: this.nodeId, rms, peak });
+    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    if (inputBuffer) {
+      let inSum = 0;
+      let inPeak = 0;
+      for (let i = 0; i < inputBuffer.length; i += 1) {
+        const v = inputBuffer[i];
+        inSum += v * v;
+        const av = Math.abs(v);
+        if (av > inPeak) inPeak = av;
+      }
+      payload.inRms = Math.sqrt(inSum / inputBuffer.length);
+      payload.inPeak = inPeak;
+    }
+    if (params) {
+      payload.freq = params.freq;
+      payload.bw = params.bw;
+      payload.gain = params.gain;
+    }
+    this.port.postMessage(payload);
   }
 }
 

@@ -27,10 +27,10 @@ export class KlattSynth {
 
   _defaultParams() {
     return {
-      f0: 110,
+      f0: 0,
       rd: 1.0,
       lfMode: 0,
-      voiceGain: 1.0,
+      voiceGain: 0.0,
       noiseGain: 0.0,
       noiseCutoff: 1000,
       fricationCutoff: 3000,
@@ -39,10 +39,10 @@ export class KlattSynth {
       rgpBandwidth: 0,
       rgsFrequency: 1000,
       rgsBandwidth: 1500,
-      FNZ: 270,
-      BNZ: 100,
-      FNP: 270,
-      BNP: 100,
+      FNZ: 0,
+      BNZ: 0,
+      FNP: 0,
+      BNP: 0,
       parallelMix: 0.6,
       parallelGainScale: 1.0,
       parallelVoiceGain: 0.0,

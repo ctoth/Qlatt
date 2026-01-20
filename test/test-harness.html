@@ -461,7 +461,6 @@
           masterGain: null,
           mix: null,
         };
-        const outputScale = dbToLinear(ndbScale.AF + 44);
         const ndbScale = {
           A1: -58,
           A2: -65,
@@ -476,6 +475,7 @@
           AF: -72,
           AVS: -44,
         };
+        const outputScale = dbToLinear(ndbScale.AF + 44);
         const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
         const proximity = (delta) => {
           if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;

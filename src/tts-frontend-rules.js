@@ -189,11 +189,11 @@ export const PHONEME_TARGETS = {
   },
   ER1: {
     F1: 470,
-    F2: 1270,
-    F3: 1540,
+    F2: 1200,
+    F3: 1800,  // Raised from 1540 - less extreme r-coloring for clarity
     B1: 100,
-    B2: 60,
-    B3: 110,
+    B2: 80,
+    B3: 150,   // Wider bandwidth for smoother transitions
     AV: 63,
     dur: 160,
     type: "vowel",
@@ -389,11 +389,11 @@ export const PHONEME_TARGETS = {
   },
   ER0: {
     F1: 490,
-    F2: 1300,
-    F3: 1600,
+    F2: 1250,
+    F3: 1850,  // Raised from 1600 to match ER1 adjustment
     B1: 110,
-    B2: 70,
-    B3: 130,
+    B2: 80,
+    B3: 150,   // Wider bandwidth for smoother transitions
     AV: 58,
     dur: 70,
     type: "vowel",
@@ -631,10 +631,10 @@ export const PHONEME_TARGETS = {
   L: {
     F1: 310,
     F2: 1050,
-    F3: 2880,
+    F3: 2600,  // Lowered from 2880 to Klatt 80 baseline
     B1: 50,
     B2: 100,
-    B3: 280,
+    B3: 200,   // Tighter bandwidth
     AV: 59,
     dur: 80,
     type: "liquid",
@@ -644,10 +644,10 @@ export const PHONEME_TARGETS = {
   R: {
     F1: 310,
     F2: 1060,
-    F3: 1380,
+    F3: 1700,  // Raised from 1380 for less extreme r-coloring
     B1: 70,
     B2: 100,
-    B3: 120,
+    B3: 150,   // Wider for smoother transitions
     AV: 59,
     dur: 90,
     type: "liquid",
@@ -864,50 +864,27 @@ export const PHONEME_TARGETS = {
   },
   // --- Affricates ---
   CH: {
-    F1: 300,
-    F2: 1840,
-    F3: 2750,
-    B1: 200,
-    B2: 100,
-    B3: 300,
-    AV: 0,
-    AF: 18,
-    AH: 0,
-    AVS: 0,
-    A3: 57,
-    A4: 48,
-    A5: 48,
-    A6: 46,
+    F1: 300, F2: 1840, F3: 2750,
+    B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000,
+    AV: 0, AF: 18, AH: 0, AVS: 0,
+    FNP: 0, FNZ: 0,
+    A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0,
     dur: 70,
     type: "affricate",
     voiceless: true,
     postalveolar: true,
   },
   JH: {
-    F1: 260,
-    F2: 1800,
-    F3: 2820,
-    B1: 60,
-    B2: 80,
-    B3: 270,
-    AV: 47,
-    AF: 8,
-    AH: 0,
-    AVS: 47,
-    A3: 44,
-    A4: 60,
-    A5: 53,
-    A6: 53,
+    F1: 260, F2: 1800, F3: 2820,
+    B1: 60, B2: 80, B3: 270, B4: 300, B5: 250, B6: 1000,
+    AV: 47, AF: 8, AH: 0, AVS: 47,
+    FNP: 0, FNZ: 0,
+    A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0,
     dur: 65,
     type: "affricate",
     voiced: true,
     postalveolar: true,
   },
-  // *** ADD AFFRICATE CH *** (Model as stop release + fricative-like spectrum)
-  'CH': { F1: 300, F2: 1840, F3: 2750, B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000, AV: 0, AF: 18, AH: 0, AVS: 0, FNP:0, FNZ:0, A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0, dur: 70, type: 'affricate', voiceless: true, postalveolar: true },
-  // Need voiced affricate 'JH' (as in 'judge') too? Often T+ZH or D+ZH.
-  // Add basic JH based on ZH
-  'JH': { F1: 260, F2: 1800, F3: 2820, B1: 60, B2: 80, B3: 270, B4: 300, B5: 250, B6: 1000, AV: 47, AF: 8, AH: 0, AVS: 47, FNP:0, FNZ:0, A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0, dur: 65, type: 'affricate', voiced: true, postalveolar: true },
   // --- Silence ---
   SIL: {
     F1: 500,
@@ -1060,6 +1037,43 @@ export function rule_StressDuration(phonemeList) {
   } // Ensure min duration
   return phonemeList;
 }
+export function rule_PreBoundaryLengthening(phonemeList) {
+  // Pre-boundary lengthening: final phoneme of phrase gets 1.4x, final phoneme of word gets 1.1x
+  const PHRASE_FINAL_FACTOR = 1.4;
+  const WORD_FINAL_FACTOR = 1.1;
+
+  for (let i = 0; i < phonemeList.length; i++) {
+    const current = phonemeList[i];
+    const next = phonemeList[i + 1];
+
+    // Skip silence phonemes - they shouldn't be lengthened
+    if (current.phoneme === "SIL") continue;
+
+    // Check if this is the last non-SIL phoneme (phrase-final at end of utterance)
+    const isLastNonSilent = !next || next.phoneme === "SIL";
+
+    // Check if next is a SIL with punctuation (phrase boundary)
+    const isBeforePhraseBreak = next?.phoneme === "SIL" && next?.punctuationSymbol;
+
+    // Phrase-final: before punctuation silence or at end of utterance
+    if (isBeforePhraseBreak || (!next && current.phoneme !== "SIL")) {
+      current.duration = Math.round(current.duration * PHRASE_FINAL_FACTOR);
+      continue; // Don't also apply word-final
+    }
+
+    // Word-final: different word than next phoneme, but not phrase-final
+    // Need to check if current word differs from next word
+    if (next && current.word && next.word && current.word !== next.word) {
+      // Only apply if next is not SIL (already handled above)
+      if (next.phoneme !== "SIL") {
+        current.duration = Math.round(current.duration * WORD_FINAL_FACTOR);
+      }
+    }
+  }
+
+  return phonemeList;
+}
+
 export function rule_GenerateF0Contour(
   phonemeList,
   baseF0 = 110,

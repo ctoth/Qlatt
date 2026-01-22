@@ -4,6 +4,7 @@ import {
   fillDefaultParams,
   rule_GenerateF0Contour,
   rule_K_Context,
+  rule_PreBoundaryLengthening,
   rule_StressDuration,
   rule_VowelShortening,
 } from "./tts-frontend-rules.js";
@@ -370,6 +371,9 @@ function insertStopReleases(phonemeList) {
       }
       if (addRelease) {
         newList.push({ phoneme: releasePhoneme, stress: current.stress });
+      } else if (phonemeList[i + 1]?.phoneme === "SIL") {
+        // Add weak release for word-final stops (before silence) for clarity
+        newList.push({ phoneme: releasePhoneme, stress: current.stress, weak: true });
       }
     }
   }
@@ -513,6 +517,13 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       ph.params = fillDefaultParams(baseTarget);
       ph.duration = baseTarget?.dur || 30; // Use optional chaining
 
+      // Reduce amplitude for weak releases (word-final stops)
+      if (ph.weak) {
+        ph.params.AF = Math.max(0, (ph.params.AF || 0) - 10); // Reduce frication by 10 dB
+        ph.params.AH = Math.max(0, (ph.params.AH || 0) - 10); // Reduce aspiration by 10 dB
+        ph.duration = Math.max(15, ph.duration * 0.5); // Shorter duration
+      }
+
       // Add minimal type flag and other relevant flags
       if (baseTarget) {
         if (baseTarget.type) ph.type = baseTarget.type;
@@ -559,6 +570,8 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = rule_StressDuration(parameterSequence); // Note: This rule also ensures min duration
   debugLog("Applying rule: rule_VowelShortening...");
   parameterSequence = rule_VowelShortening(parameterSequence);
+  debugLog("Applying rule: rule_PreBoundaryLengthening...");
+  parameterSequence = rule_PreBoundaryLengthening(parameterSequence);
   parameterSequence.forEach((ph) => {
     if (!ph?.params) return;
     const useParallel =

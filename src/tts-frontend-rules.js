@@ -149,9 +149,9 @@ export const PHONEME_TARGETS = {
     diph: ["AO1", "UH1"],
   },
   UH1: {
-    F1: 350,
-    F2: 1250,
-    F3: 2200,
+    F1: 440,
+    F2: 1020,
+    F3: 2240,
     B1: 65,
     B2: 110,
     B3: 140,
@@ -821,6 +821,10 @@ export const PHONEME_TARGETS = {
     AV: 40,
     AF: 0,
     AVS: 40,
+    A1: 60,  // F1 parallel amplitude for voiced bilabial release (strong low-freq)
+    A2: 52,  // F2 parallel amplitude for voiced bilabial release (lower locus)
+    A3: 45,  // F3 parallel amplitude
+    A4: 40,  // F4 parallel amplitude
     AB: 63,
     dur: 20,
     type: "stop_release",
@@ -836,6 +840,8 @@ export const PHONEME_TARGETS = {
     AV: 40,
     AF: 0,
     AVS: 40,
+    A1: 58,  // F1 parallel amplitude for voiced alveolar release
+    A2: 56,  // F2 parallel amplitude for voiced alveolar release
     A3: 47,
     A4: 60,
     A5: 62,
@@ -854,6 +860,8 @@ export const PHONEME_TARGETS = {
     AV: 40,
     AF: 0,
     AVS: 40,
+    A1: 58,  // F1 parallel amplitude for voiced velar release
+    A2: 55,  // F2 parallel amplitude for voiced velar release
     A3: 53,
     A4: 43,
     A5: 45,

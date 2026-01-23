@@ -25,3 +25,12 @@ Note: User must click once manually first to "unlock" audio (browser security po
 - Peterson & Barney (1952) - Canonical vowel formants
 - Klatt (1980) - Klatt synthesizer specification
 - Research reports in `reports/` directory
+
+## Reference Implementations (Local)
+
+- `~/src/klatt80/` - Original Klatt 80 FORTRAN code
+  - `PARCOE.FOR` - Parameter coefficient calculation (A2COR, PLSTEP burst mechanism)
+  - `COEWAV.FOR` - Waveform generation
+- `~/src/klatt-syn/` - TypeScript Klatt implementation by chdh
+  - Does NOT implement A2COR correction (uses dB directly)
+  - Clean modern implementation for comparison

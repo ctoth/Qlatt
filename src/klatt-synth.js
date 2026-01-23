@@ -440,12 +440,8 @@ export class KlattSynth {
     const f2 = params.F2 ?? this.params.F2;
     const f3 = params.F3 ?? this.params.F3;
     const f4 = params.F4 ?? this.params.F4;
-    const delF1 = Number.isFinite(f1) && f1 > 0 ? f1 / 500 : 1;
-    const delF2 = Number.isFinite(f2) && f2 > 0 ? f2 / 1500 : 1;
-    let a2Cor = delF1 * delF1;
-    const a2Skrt = delF2 * delF2;
-    const a3Cor = a2Cor * a2Skrt;
-    a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
+    // Note: Klatt 80 A2COR/A3COR corrections removed - we use A1-A6 dB values directly
+    // like klatt-syn, to avoid muting issues when F1 is low (e.g., stop releases).
     const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     const proximity = (delta) => {
       if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
@@ -538,13 +534,11 @@ export class KlattSynth {
 
     const parallelLinear = [
       this._dbToLinear((params.A1 ?? -70) + n12Cor + ndbScale.A1),
-      this._dbToLinear((params.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2) *
-        a2Cor,
-      this._dbToLinear((params.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3) *
-        a3Cor,
-      this._dbToLinear((params.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4) * a3Cor,
-      this._dbToLinear((params.A5 ?? -70) + ndbScale.A5) * a3Cor,
-      this._dbToLinear((params.A6 ?? -70) + ndbScale.A6) * a3Cor,
+      this._dbToLinear((params.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2),
+      this._dbToLinear((params.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3),
+      this._dbToLinear((params.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4),
+      this._dbToLinear((params.A5 ?? -70) + ndbScale.A5),
+      this._dbToLinear((params.A6 ?? -70) + ndbScale.A6),
     ];
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
       const sign = i >= 1 ? (i % 2 === 1 ? -1 : 1) : 1;

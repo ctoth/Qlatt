@@ -819,7 +819,7 @@ export const PHONEME_TARGETS = {
     B2: 110,
     B3: 130,
     AV: 40,
-    AF: 15,
+    AF: 50,
     AVS: 40,
     A1: 60,  // F1 parallel amplitude for voiced bilabial release (strong low-freq)
     A2: 52,  // F2 parallel amplitude for voiced bilabial release (lower locus)
@@ -838,7 +838,7 @@ export const PHONEME_TARGETS = {
     B2: 100,
     B3: 170,
     AV: 40,
-    AF: 15,
+    AF: 50,
     AVS: 40,
     A1: 58,  // F1 parallel amplitude for voiced alveolar release
     A2: 56,  // F2 parallel amplitude for voiced alveolar release
@@ -858,7 +858,7 @@ export const PHONEME_TARGETS = {
     B2: 150,
     B3: 280,
     AV: 40,
-    AF: 15,
+    AF: 50,
     AVS: 40,
     A1: 58,  // F1 parallel amplitude for voiced velar release
     A2: 55,  // F2 parallel amplitude for voiced velar release

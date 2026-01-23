@@ -4,6 +4,9 @@ export class KlattSynth {
     this.nodes = {};
     this.params = this._defaultParams();
     this.isInitialized = false;
+    // PLSTEP burst state tracking (Klatt 80 plosive release transient)
+    this._lastAF = 0;
+    this._lastAH = 0;
   }
 
   async initialize() {
@@ -196,6 +199,14 @@ export class KlattSynth {
     N.masterGain = ctx.createGain();
     N.outputGain = ctx.createGain();
 
+    // PLSTEP burst transient: ConstantSource + Gain for DC step injection
+    // This implements Klatt 80's plosive release burst mechanism
+    N.plstepSource = ctx.createConstantSource();
+    N.plstepSource.offset.value = 1.0; // Constant DC at 1.0
+    N.plstepGain = ctx.createGain();
+    N.plstepGain.gain.value = 0; // Initially silent
+    N.plstepSource.start(); // Must start ConstantSourceNode
+
     this._attachTelemetry(N.lfSource);
     this._attachTelemetry(N.noiseSource);
     this._attachTelemetry(N.fricationSource);
@@ -245,6 +256,10 @@ export class KlattSynth {
 
     N.parallelDiffSum.connect(N.parallelBypassGain).connect(N.parallelSum);
     N.parallelSum.connect(N.parallelOutGain).connect(N.outputSum);
+
+    // PLSTEP: Connect burst transient source to output
+    // The gain-controlled DC step is added directly to outputSum
+    N.plstepSource.connect(N.plstepGain).connect(N.outputSum);
 
     N.outputSum.connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
   }
@@ -394,6 +409,7 @@ export class KlattSynth {
       this.nodes.parallelNasalGain.gain,
       this.nodes.parallelOutGain.gain,
       this.nodes.cascadeOutGain.gain,
+      this.nodes.plstepGain.gain, // PLSTEP burst transient
     ];
 
     for (const node of this.nodes.cascade) {
@@ -589,16 +605,87 @@ export class KlattSynth {
     if (!track || track.length === 0) return;
     this._cancelScheduledValues(startTime);
     const baseTime = startTime;
+
+    // Reset PLSTEP tracking at start of utterance
+    this._lastAF = 0;
+    this._lastAH = 0;
+
     const first = track[0];
     if (first?.params) {
       this._applyKlattParams(first.params, baseTime, false);
+      this._lastAF = first.params.AF ?? 0;
+      this._lastAH = first.params.AH ?? 0;
     }
     for (let i = 1; i < track.length; i += 1) {
       const event = track[i];
       if (!event?.params) continue;
       const t = baseTime + event.time;
+
+      // PLSTEP: Detect plosive release burst
+      // Klatt 80 uses: IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 + NDBSCA(AF) + 44)
+      // Our AF values are scaled differently (typical burst AF is 15-20, not 50-55).
+      // Detect burst when: previous AF was near-zero AND current AF is significant,
+      // OR when AH (aspiration) jumps significantly (for aspirated releases).
+      const currentAF = event.params.AF ?? 0;
+      const currentAH = event.params.AH ?? 0;
+      const afDelta = currentAF - this._lastAF;
+      const ahDelta = currentAH - (this._lastAH ?? 0);
+      // Trigger burst if either AF or AH increases by 10+ dB from near-zero
+      const isBurst = (this._lastAF <= 5 && afDelta >= 10) ||
+                      ((this._lastAH ?? 0) <= 5 && ahDelta >= 15);
+      if (isBurst) {
+        this._scheduleBurstTransient(t, event.params);
+      }
+      this._lastAF = currentAF;
+      this._lastAH = currentAH;
+
       this._applyKlattParams(event.params, t, true);
     }
+  }
+
+  /**
+   * Schedule a burst transient for plosive releases (PLSTEP mechanism from Klatt 80).
+   * Injects a DC step directly into the output that decays rapidly, creating the
+   * characteristic acoustic burst at stop consonant release.
+   *
+   * From Klatt 80 FORTRAN:
+   *   PLSTEP = GETAMP(G0 + NDBSCA(AF) + 44)  -- amplitude calculation
+   *   STEP = -PLSTEP                          -- negative step (rarefaction)
+   *   ULIPS = (ULIPSV + ULIPSF + STEP) * 170  -- added to output
+   *   STEP = 0.995 * STEP                     -- exponential decay
+   *
+   * @param {number} atTime - When to trigger the burst
+   * @param {Object} params - Current frame parameters (for G0/gain context)
+   */
+  _scheduleBurstTransient(atTime, params) {
+    // Calculate PLSTEP amplitude: GETAMP(G0 + NDBSCA(AF) + 44)
+    // ndbScale.AF = -72, so effective offset is -72 + 44 = -28
+    const goDb = params.GO ?? 47;
+    const burstDb = goDb - 28; // G0 + (-72 + 44) = G0 - 28
+    const burstAmplitude = this._dbToLinear(burstDb);
+
+    // The original Klatt uses decay factor 0.995 per sample.
+    // At 44100 Hz sample rate, time to decay to ~1% is:
+    //   0.995^n = 0.01 => n = ln(0.01)/ln(0.995) ~ 920 samples ~ 21ms
+    // We'll use a slightly shorter decay for a punchier burst
+    const burstDuration = 0.010; // 10ms decay time
+
+    // Schedule the PLSTEP as a negative DC step that decays to zero
+    // Negative creates rarefaction (matches original Klatt 80)
+    const plstepGain = this.nodes.plstepGain.gain;
+
+    // Cancel any previous burst scheduling at this time
+    plstepGain.cancelScheduledValues(atTime);
+
+    // Set initial negative burst amplitude
+    plstepGain.setValueAtTime(-burstAmplitude, atTime);
+
+    // Exponential decay back to zero
+    // Note: exponentialRampToValueAtTime can't reach exactly 0,
+    // so we use a very small value and then set to 0
+    const decayEnd = atTime + burstDuration;
+    plstepGain.exponentialRampToValueAtTime(-0.0001, decayEnd);
+    plstepGain.setValueAtTime(0, decayEnd + 0.001);
   }
 
   _setParallelMix(value, atTime, updateParam = true, ramp = false, allParallel = false) {

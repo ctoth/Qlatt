@@ -229,14 +229,17 @@ export class KlattSynth {
     N.lfSource.connect(N.rgp);
     N.rgp.connect(N.voiceGain).connect(N.mixer);
     N.noiseSource.connect(N.rgs).connect(N.noiseGain).connect(N.mixer);
-    N.mixer.connect(N.nz).connect(N.np);
-    let current = N.np;
-    for (const resonator of N.cascade) {
-      current.connect(resonator);
-      current = resonator;
+    // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
+    // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
+    let current = N.mixer;
+    for (let i = N.cascade.length - 1; i >= 0; i--) {
+      current.connect(N.cascade[i]);
+      current = N.cascade[i];
     }
+    // Nasal zero and pole come after F1
+    current.connect(N.nz).connect(N.np);
 
-    current.connect(N.cascadeOutGain).connect(N.outputSum);
+    N.np.connect(N.cascadeOutGain).connect(N.outputSum);
 
     // Parallel branch gets the mixed signal (voice + aspiration) from mixer,
     // not just rgp. This allows /h/ (AH aspiration) to work with SW=1.

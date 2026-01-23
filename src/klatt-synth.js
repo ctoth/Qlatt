@@ -668,16 +668,12 @@ export class KlattSynth {
    * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
   _scheduleBurstTransient(atTime, params, triggerParam = 'AF', triggerDelta = 0) {
-    // Calculate PLSTEP amplitude - scaled down to prevent clipping
+    // Calculate PLSTEP amplitude per Klatt 80
     // Original Klatt 80 calculation: GETAMP(G0 + NDBSCA(AF) + 44)
     // With ndbScale.AF = -72, that's G0 + (-72 + 44) = G0 - 28
-    // But that gives linear amplitude ~9 which causes severe clipping (peaks 8.7+).
-    // We use a larger offset (G0 - 50) to keep bursts audible but under unity.
     const goDb = params.GO ?? 47;
-    const burstDb = goDb - 50; // Reduced from -28 to prevent clipping
-    const rawAmplitude = this._dbToLinear(burstDb);
-    // Hard cap at 0.5 to ensure no clipping even with high GO values
-    const burstAmplitude = Math.min(rawAmplitude, 0.5);
+    const burstDb = goDb - 28; // Klatt 80: G0 + ndbScale.AF + 44 = G0 + (-72) + 44 = G0 - 28
+    const burstAmplitude = this._dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst
     if (this.telemetryHandler) {

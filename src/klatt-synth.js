@@ -634,7 +634,10 @@ export class KlattSynth {
       const isBurst = (this._lastAF <= 5 && afDelta >= 10) ||
                       ((this._lastAH ?? 0) <= 5 && ahDelta >= 15);
       if (isBurst) {
-        this._scheduleBurstTransient(t, event.params);
+        // Determine which parameter triggered the burst
+        const triggerParam = (this._lastAF <= 5 && afDelta >= 10) ? 'AF' : 'AH';
+        const triggerDelta = triggerParam === 'AF' ? afDelta : ahDelta;
+        this._scheduleBurstTransient(t, event.params, triggerParam, triggerDelta);
       }
       this._lastAF = currentAF;
       this._lastAH = currentAH;
@@ -656,13 +659,28 @@ export class KlattSynth {
    *
    * @param {number} atTime - When to trigger the burst
    * @param {Object} params - Current frame parameters (for G0/gain context)
+   * @param {string} [triggerParam] - Which parameter triggered the burst ('AF' or 'AH')
+   * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
-  _scheduleBurstTransient(atTime, params) {
+  _scheduleBurstTransient(atTime, params, triggerParam = 'AF', triggerDelta = 0) {
     // Calculate PLSTEP amplitude: GETAMP(G0 + NDBSCA(AF) + 44)
     // ndbScale.AF = -72, so effective offset is -72 + 44 = -28
     const goDb = params.GO ?? 47;
     const burstDb = goDb - 28; // G0 + (-72 + 44) = G0 - 28
     const burstAmplitude = this._dbToLinear(burstDb);
+
+    // Emit telemetry for PLSTEP burst
+    if (this.telemetryHandler) {
+      this.telemetryHandler({
+        type: 'plstep',
+        nodeId: 'plstep',
+        time: atTime,
+        amplitudeLinear: burstAmplitude,
+        amplitudeDb: burstDb,
+        trigger: triggerParam,
+        delta: triggerDelta,
+      });
+    }
 
     // The original Klatt uses decay factor 0.995 per sample.
     // At 44100 Hz sample rate, time to decay to ~1% is:

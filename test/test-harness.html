@@ -286,13 +286,15 @@
         if (!phrase) return;
         const track = textToKlattTrack(phrase, baseF0);
         const startTime = ctx.currentTime + 0.05;
-        synth.scheduleTrack(track, startTime);
-        status.textContent = `Status: speaking "${phrase}"`;
+        // Clear PLSTEP events BEFORE scheduleTrack (which emits them synchronously)
+        plstepEvents.length = 0;
+        spikeEvents.length = 0;
+        lastSpikeAt.clear();
+        // Set run context BEFORE scheduleTrack so telemetry handler can use it
         lastRun = { phrase, baseF0, track };
         runStartTime = startTime;
-        spikeEvents.length = 0;
-        plstepEvents.length = 0;
-        lastSpikeAt.clear();
+        synth.scheduleTrack(track, startTime);
+        status.textContent = `Status: speaking "${phrase}"`;
         telemetry.clear();
         telemetryMax.clear();
         meterMax.clear();

@@ -291,6 +291,7 @@
         lastRun = { phrase, baseF0, track };
         runStartTime = startTime;
         spikeEvents.length = 0;
+        plstepEvents.length = 0;
         lastSpikeAt.clear();
         telemetry.clear();
         telemetryMax.clear();
@@ -334,6 +335,7 @@
         lastRun = null;
         runStartTime = 0;
         spikeEvents.length = 0;
+        plstepEvents.length = 0;
         lastSpikeAt.clear();
         telemetry.clear();
         telemetryMax.clear();
@@ -719,6 +721,20 @@
         );
       }
 
+      function formatPlstepEvents(list) {
+        if (!list || list.length === 0) return ["(none)"];
+        return list.map(
+          (evt, index) => {
+            const time = Number.isFinite(evt.time) ? evt.time.toFixed(3) : "n/a";
+            const amp = Number.isFinite(evt.amplitudeLinear) ? evt.amplitudeLinear.toFixed(2) : "n/a";
+            const db = Number.isFinite(evt.amplitudeDb) ? evt.amplitudeDb.toFixed(0) : "n/a";
+            const trigger = evt.trigger || "?";
+            const delta = Number.isFinite(evt.delta) ? evt.delta.toFixed(0) : "n/a";
+            return `plstep: burst @${time}s amp=${amp} (${db}dB) trigger=${trigger} delta=${delta}`;
+          }
+        );
+      }
+
       function formatLevel(value) {
         if (!Number.isFinite(value)) return "n/a";
         if (value === 0) return "0";
@@ -867,7 +883,29 @@
         diagnosticsEl.value = lastDiagnostics;
       }
 
+      // Store PLSTEP burst events for diagnostics display
+      const plstepEvents = [];
+
       function handleTelemetry(data) {
+        // Handle PLSTEP burst events specially
+        if (data?.type === 'plstep') {
+          const { relTime, event, inWindow } = getRunContext();
+          if (inWindow || !lastRun) {
+            plstepEvents.push({
+              time: data.time,
+              relTime,
+              amplitudeLinear: data.amplitudeLinear,
+              amplitudeDb: data.amplitudeDb,
+              trigger: data.trigger,
+              delta: data.delta,
+              phoneme: event?.phoneme ?? '',
+            });
+            // Keep only last 10 PLSTEP events
+            if (plstepEvents.length > 10) plstepEvents.shift();
+            updateDiagnostics();
+          }
+          return;
+        }
         if (!data?.node) return;
         const { relTime, event, inWindow } = getRunContext();
         telemetry.set(data.node, {
@@ -1032,6 +1070,9 @@
         lines.push("");
         lines.push("Meters (RMS/peak):");
         lines.push(...formatMeters(meters || meterValues));
+        lines.push("");
+        lines.push("PLSTEP bursts (plosive release transients):");
+        lines.push(...formatPlstepEvents(plstepEvents));
         lines.push("");
         lines.push(`Spikes (peak > ${spikeThreshold}):`);
         lines.push(...formatSpikes(spikeEvents));

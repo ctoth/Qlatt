@@ -500,11 +500,13 @@ export class KlattSynth {
     }
 
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
-    // When SW=1 (parallel mode), use full gain for parallel source input.
-    // This matches Klatt 80 architecture where A1-A6 control formant amplitudes,
-    // not a pre-formant voice-amplitude gate. Without this, aspiration-driven
-    // phonemes like /h/ (which have AVS=0) get attenuated to near-zero.
-    const parallelSrcGain = allParallel ? 1.0 : voiceParGain;
+    // Klatt 80 mutual exclusion: when cascade branch is active (SW=0),
+    // ZERO out voicing input to parallel branch. From COEWAV.FOR line 425:
+    //   "ZERO OUT VOICING INPUT TO PARALLEL BRANCH IF CASCADE BRANCH HAS BEEN USED"
+    //   UGLOT=0, UGLOTL=0, IF(NXSW.NE.1) UGLOT1=0
+    // Only frication goes through parallel in cascade mode.
+    // When SW=1 (parallel mode), voice goes through parallel at full gain.
+    const parallelSrcGain = allParallel ? 1.0 : 0;
     this._scheduleAudioParam(this.nodes.parallelSourceGain.gain, parallelSrcGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.parallelDiffGain.gain, parallelSrcGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.noiseGain.gain, aspGain, atTime, ramp);

@@ -54,7 +54,7 @@ export class KlattSynth {
       BNZ: 100,
       FNP: 250,
       BNP: 100,
-      parallelMix: 0.6,
+      parallelMix: 1.0,
       parallelGainScale: 1.0,
       parallelVoiceGain: 0.0,
       parallelFricationGain: 0.0,
@@ -831,7 +831,10 @@ export class KlattSynth {
     if (updateParam) {
       this.params.parallelMix = mix;
     }
-    const parallelGain = allParallel ? 1 : mix;
+    // Klatt 80 sums cascade and parallel outputs (ULIPSV + ULIPSF).
+    // SW=1 disables cascade entirely; SW=0 keeps both branches active.
+    // See COEWAV.FOR lines 430-450 and ULIPS sum.
+    const parallelGain = 1;
     const cascadeGain = allParallel ? 0 : 1;
     // CRITICAL: Always use setValueAtTime for cascade/parallel output gains.
     // These are controlled by SW (source switch) which must transition

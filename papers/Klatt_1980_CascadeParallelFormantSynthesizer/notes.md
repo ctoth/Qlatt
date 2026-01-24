@@ -217,6 +217,17 @@ PLSTEP = GETAMP(G0 + NDBSCA[11] + 44)
 ```
 This adds a step excitation at plosive release.
 
+#### Cascade/Parallel Routing Details (COEWAV)
+- **UGLOT** is the radiated glottal flow (voicing + AVS) after RGZ and first-difference radiation.
+- **Aspiration** noise is added to UGLOT before any tract routing (AASPIR*NOISE).
+- **Cascade branch** (when SW=0): UGLOT goes through F6→F1, then nasal zero then nasal pole. Output is ULIPSV.
+- **Parallel branch**:
+  - F1 is excited by UGLOT (direct voicing) when SW=1.
+  - UGLOT1 = first-difference of UGLOT; if SW!=1, UGLOT1 is forced to 0.
+  - F2–F4 are excited by (UGLOT1 + UFRIC), F5–F6 by UFRIC only.
+  - Alternating signs: ULIPSF = Y1P - Y2P + Y3P - Y4P + Y5P - Y6P + YN - AB*UFRIC.
+- **Mutual exclusion**: when cascade branch is used, UGLOT and UGLOTL are zeroed to prevent any voicing from entering the parallel branch.
+
 #### Parallel Branch Amplitude Correction (A2COR)
 ```
 DELF1 = F1/500

@@ -22,11 +22,14 @@ const specState = {
 };
 let lastRun = null;
 let runStartTime = 0;
+let sessionId = 0; // Incremented each play for session isolation (P1)
 let telemetryTimer = null;
 let meterTimer = null;
 let lastDiagnostics = "";
 const spikeThreshold = 1.0;
 const spikeCooldown = 0.2;
+const playHistory = []; // P7: Track recent plays for warmup analysis
+const MAX_PLAY_HISTORY = 5;
 
 const controlSpec = [
   { id: "f0", label: "F0 (Hz)", min: 50, max: 300, step: 1 },
@@ -129,12 +132,15 @@ async function speak() {
   if (!phrase) return;
   const track = textToKlattTrack(phrase, baseF0);
   const startTime = ctx.currentTime + 0.05;
+  // P1: Session isolation - increment sessionId to detect stale telemetry
+  sessionId += 1;
+  const currentSessionId = sessionId;
   // Clear PLSTEP events BEFORE scheduleTrack (which emits them synchronously)
   plstepEvents.length = 0;
   spikeEvents.length = 0;
   lastSpikeAt.clear();
   // Set run context BEFORE scheduleTrack so telemetry handler can use it
-  lastRun = { phrase, baseF0, track };
+  lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
   runStartTime = startTime;
   synth.scheduleTrack(track, startTime);
   status.textContent = `Status: speaking "${phrase}"`;
@@ -157,6 +163,21 @@ async function speak() {
   setTimeout(() => {
     updateDiagnostics();
     navigator.clipboard.writeText(diagnosticsEl.value).catch(() => {});
+    // P7: Record play history for warmup tracking
+    const outputMax = meterMax.get("output-sum");
+    if (outputMax) {
+      playHistory.push({
+        sessionId: currentSessionId,
+        phrase,
+        maxRms: outputMax.rms ?? 0,
+        maxPeak: outputMax.peak ?? 0,
+        timestamp: Date.now(),
+      });
+      // Keep only last N plays
+      while (playHistory.length > MAX_PLAY_HISTORY) {
+        playHistory.shift();
+      }
+    }
   }, Math.max(0, trackDuration * 1000 + 300));
 }
 
@@ -192,6 +213,7 @@ document.getElementById("clearDiagBtn").addEventListener("click", () => {
   telemetryMax.clear();
   meterValues.clear();
   meterMax.clear();
+  playHistory.length = 0; // P7: Clear play history
 });
 
 function summarizeTrack(track) {
@@ -572,16 +594,23 @@ function formatSpikes(list) {
   );
 }
 
-function formatPlstepEvents(list) {
+function formatPlstepEvents(list, trackDuration = 0) {
   if (!list || list.length === 0) return ["(none)"];
   return list.map(
     (evt, index) => {
-      const time = Number.isFinite(evt.time) ? evt.time.toFixed(3) : "n/a";
+      // P1: Use relative time (scheduled time - start time), not absolute ctx.currentTime
+      const relTime = Number.isFinite(evt.scheduledRelTime) ? evt.scheduledRelTime : evt.relTime;
+      const time = Number.isFinite(relTime) ? relTime.toFixed(3) : "n/a";
       const amp = Number.isFinite(evt.amplitudeLinear) ? evt.amplitudeLinear.toFixed(2) : "n/a";
       const db = Number.isFinite(evt.amplitudeDb) ? evt.amplitudeDb.toFixed(0) : "n/a";
       const trigger = evt.trigger || "?";
       const delta = Number.isFinite(evt.delta) ? evt.delta.toFixed(0) : "n/a";
-      return `plstep: burst @${time}s amp=${amp} (${db}dB) trigger=${trigger} delta=${delta}`;
+      // P9: Timing integrity flag - warn if time exceeds track duration
+      let warning = "";
+      if (Number.isFinite(relTime) && trackDuration > 0 && relTime > trackDuration + 0.1) {
+        warning = " ⚠STALE";
+      }
+      return `plstep: burst @${time}s amp=${amp} (${db}dB) trigger=${trigger} Δ=${delta}${warning}`;
     }
   );
 }
@@ -592,6 +621,265 @@ function formatLevel(value) {
   const abs = Math.abs(value);
   if (abs < 1e-6) return value.toExponential(2);
   return value.toFixed(6);
+}
+
+// P2: Gain derivation - show how Klatt parameters become linear gains
+function formatGainDerivation(track, synthParams) {
+  if (!track || track.length === 0) return [];
+  // Find focus event: first SW=1 event (parallel mode), or first voiced event
+  let focusEvent = null;
+  let focusIndex = -1;
+  for (let i = 0; i < track.length; i += 1) {
+    const event = track[i];
+    if (event?.params?.SW === 1) {
+      focusEvent = event;
+      focusIndex = i;
+      break;
+    }
+  }
+  if (!focusEvent) {
+    // Fallback: first event with AV or AVS > 0
+    for (let i = 0; i < track.length; i += 1) {
+      const event = track[i];
+      if ((event?.params?.AV ?? 0) > 0 || (event?.params?.AVS ?? 0) > 0) {
+        focusEvent = event;
+        focusIndex = i;
+        break;
+      }
+    }
+  }
+  if (!focusEvent) return [];
+
+  const p = focusEvent.params;
+  const ndbScale = {
+    AV: -72, AVS: -44, AH: -87, AF: -72,
+    A1: -58, A2: -65, A3: -73, A4: -78, A5: -79, A6: -80,
+    AN: -58, AB: -84,
+  };
+
+  const dbToLinear = (db) => {
+    if (!Number.isFinite(db) || db <= -72) return 0;
+    return 2 ** (Math.min(96, db) / 6);
+  };
+
+  const lines = [];
+  const phoneme = focusEvent.phoneme || `event ${focusIndex}`;
+  const time = focusEvent.time?.toFixed(3) ?? "?";
+  const sw = p.SW ?? 0;
+  lines.push(`Focus: ${phoneme} @${time}s (SW=${sw})`);
+
+  // Voice gain: AV + ndb(AV) -> linear
+  const av = p.AV ?? -70;
+  const voiceCalc = av + ndbScale.AV;
+  const voiceGain = dbToLinear(voiceCalc);
+  lines.push(`  voiceGain: AV=${av.toFixed(0)} + ndb(-72) = ${voiceCalc.toFixed(0)}dB → ${voiceGain.toFixed(4)}`);
+
+  // Aspiration gain: AH + ndb(AH) -> linear
+  const ah = p.AH ?? -70;
+  const aspCalc = ah + ndbScale.AH;
+  const aspGain = dbToLinear(aspCalc);
+  lines.push(`  aspGain:   AH=${ah.toFixed(0)} + ndb(-87) = ${aspCalc.toFixed(0)}dB → ${aspGain.toFixed(4)}`);
+
+  // Frication gain: max(AF,AH) + ndb(AF) -> linear (when SW=1)
+  const af = p.AF ?? -70;
+  const fricSrc = sw === 1 ? Math.max(af, ah) : af;
+  const fricCalc = fricSrc + ndbScale.AF;
+  const fricGain = dbToLinear(fricCalc);
+  if (sw === 1) {
+    lines.push(`  fricGain:  max(AF=${af.toFixed(0)},AH=${ah.toFixed(0)}) + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
+  } else {
+    lines.push(`  fricGain:  AF=${af.toFixed(0)} + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
+  }
+
+  // Parallel source gain: SW=1 → 1.0, otherwise 0
+  const parallelSrcGain = sw === 1 ? 1.0 : 0;
+  lines.push(`  parallelSrcGain: SW=${sw} → ${parallelSrcGain.toFixed(3)}`);
+
+  // AVS (parallel voice) gain: AVS + ndb(AVS) -> linear * 10
+  const avs = p.AVS ?? -70;
+  const avsCalc = avs + ndbScale.AVS;
+  const avsGain = dbToLinear(avsCalc) * 10;
+  lines.push(`  avsGain:   AVS=${avs.toFixed(0)} + ndb(-44) = ${avsCalc.toFixed(0)}dB → ${avsGain.toFixed(4)} (*10)`);
+
+  // If SW=1, show parallel formant gains
+  if (sw === 1) {
+    const parallelScale = synthParams.parallelGainScale ?? 1.0;
+    for (let i = 1; i <= 6; i += 1) {
+      const aKey = `A${i}`;
+      const aVal = p[aKey] ?? -70;
+      const aCalc = aVal + ndbScale[aKey];
+      const aGain = dbToLinear(aCalc) * parallelScale;
+      if (aVal > -70) {
+        lines.push(`  A${i}Gain:   A${i}=${aVal.toFixed(0)} + ndb(${ndbScale[aKey]}) = ${aCalc.toFixed(0)}dB → ${aGain.toFixed(4)}`);
+      }
+    }
+  }
+
+  return lines;
+}
+
+// P7: Play history for warmup tracking
+function formatPlayHistory() {
+  if (playHistory.length === 0) return ["(none)"];
+  return playHistory.map((entry, index) => {
+    const marker = index === playHistory.length - 1 ? " ← current" : "";
+    const warmup = index === 0 && playHistory.length > 1 ? " (cold start)" : "";
+    return `  Play ${index + 1}: ${formatLevel(entry.maxRms)}${warmup}${marker}`;
+  });
+}
+
+// P4: Formant automation check with expected vs observed warnings
+function formatFormantCheck(nodeName, observedRange, trackRange, label) {
+  const lines = [];
+  const obsMin = Number.isFinite(observedRange?.freqMin) ? observedRange.freqMin.toFixed(1) : "n/a";
+  const obsMax = Number.isFinite(observedRange?.freqMax) ? observedRange.freqMax.toFixed(1) : "n/a";
+  const expMin = Number.isFinite(trackRange?.min) ? trackRange.min.toFixed(1) : "n/a";
+  const expMax = Number.isFinite(trackRange?.max) ? trackRange.max.toFixed(1) : "n/a";
+
+  let status = "✓";
+  const warnings = [];
+
+  // Check for mismatches
+  if (Number.isFinite(observedRange?.freqMin) && Number.isFinite(trackRange?.min)) {
+    const tolerance = 50; // Hz tolerance
+    if (observedRange.freqMin > trackRange.min + tolerance) {
+      warnings.push(`low end higher than expected`);
+    }
+    if (observedRange.freqMin < trackRange.min - tolerance) {
+      warnings.push(`low end lower than expected`);
+    }
+  }
+  if (Number.isFinite(observedRange?.freqMax) && Number.isFinite(trackRange?.max)) {
+    const tolerance = 50;
+    if (observedRange.freqMax > trackRange.max + tolerance) {
+      warnings.push(`high end higher than expected`);
+    }
+    if (observedRange.freqMax < trackRange.max - tolerance) {
+      warnings.push(`high end lower than expected`);
+    }
+  }
+  if (!Number.isFinite(observedRange?.freqMin) && Number.isFinite(trackRange?.min)) {
+    warnings.push(`no telemetry received`);
+  }
+
+  if (warnings.length > 0) {
+    status = "⚠";
+  }
+
+  const warningStr = warnings.length > 0 ? ` (${warnings.join(", ")})` : "";
+  lines.push(`${nodeName}: expected ${label} ${expMin}-${expMax} Hz, observed ${obsMin}-${obsMax} Hz ${status}${warningStr}`);
+  return lines;
+}
+
+// P6: Filter bypass indicator
+function formatBypassCheck(nodeName, range, defaultFreq, defaultBw) {
+  const freqMin = Number.isFinite(range?.freqMin) ? range.freqMin : null;
+  const freqMax = Number.isFinite(range?.freqMax) ? range.freqMax : null;
+  const bwMin = Number.isFinite(range?.bwMin) ? range.bwMin : null;
+  const bwMax = Number.isFinite(range?.bwMax) ? range.bwMax : null;
+
+  // Detect bypass: bw=0 or very low frequency suggests bypass mode
+  const isBypass = (bwMin !== null && bwMin <= 0) || (freqMin !== null && freqMin <= 0);
+  const status = isBypass ? "[BYPASS]" : "[ACTIVE]";
+
+  const freqStr = freqMin !== null && freqMax !== null
+    ? `f=[${freqMin.toFixed(0)}-${freqMax.toFixed(0)}]`
+    : `f=default(${defaultFreq})`;
+  const bwStr = bwMin !== null && bwMax !== null
+    ? `bw=[${bwMin.toFixed(0)}-${bwMax.toFixed(0)}]`
+    : `bw=default(${defaultBw})`;
+
+  return `${nodeName}: ${freqStr} ${bwStr} ${status}`;
+}
+
+// P5: Enhanced event display with A1-A6 for SW=1 events
+function formatEventLine(index, event) {
+  const e = event;
+  const sw = Number.isFinite(e.params?.SW) ? e.params.SW.toFixed(0) : "n/a";
+  let line = `${index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(0)} AVS=${(e.params?.AVS ?? 0).toFixed(0)} AH=${(e.params?.AH ?? 0).toFixed(0)} AF=${(e.params?.AF ?? 0).toFixed(0)} SW=${sw}`;
+
+  // P5: Show A1-A6 values when SW=1 (parallel mode)
+  if (e.params?.SW === 1) {
+    const a1 = e.params?.A1 ?? -70;
+    const a2 = e.params?.A2 ?? -70;
+    const a3 = e.params?.A3 ?? -70;
+    const a4 = e.params?.A4 ?? -70;
+    const a5 = e.params?.A5 ?? -70;
+    const a6 = e.params?.A6 ?? -70;
+    const ab = e.params?.AB ?? -70;
+    // Only show non-default values (> -70) to keep output readable
+    const aVals = [];
+    if (a1 > -70) aVals.push(`A1=${a1.toFixed(0)}`);
+    if (a2 > -70) aVals.push(`A2=${a2.toFixed(0)}`);
+    if (a3 > -70) aVals.push(`A3=${a3.toFixed(0)}`);
+    if (a4 > -70) aVals.push(`A4=${a4.toFixed(0)}`);
+    if (a5 > -70) aVals.push(`A5=${a5.toFixed(0)}`);
+    if (a6 > -70) aVals.push(`A6=${a6.toFixed(0)}`);
+    if (ab > -70) aVals.push(`AB=${ab.toFixed(0)}`);
+    if (aVals.length > 0) {
+      line += ` | ${aVals.join(" ")}`;
+    }
+  }
+  return line;
+}
+
+// P3: Signal flow snapshot at peak moment
+function formatSignalFlow() {
+  const lines = [];
+  const fmt = (v) => Number.isFinite(v) ? v.toFixed(4) : "n/a";
+  const fmtCtx = (max) => {
+    if (!max) return "";
+    const time = Number.isFinite(max.rmsTime) ? `@${max.rmsTime.toFixed(3)}s` : "";
+    const phoneme = max.rmsPhoneme ? ` ${max.rmsPhoneme}` : "";
+    return `${time}${phoneme}`;
+  };
+
+  // Source nodes
+  const lfSource = telemetryMax.get("lf-source");
+  const noise = telemetryMax.get("noise");
+  const frication = telemetryMax.get("frication");
+  const rgp = telemetryMax.get("rgp");
+
+  lines.push("Sources (max rms):");
+  lines.push(`  lf-source: ${fmt(lfSource?.rms)} ${fmtCtx(lfSource)}`);
+  lines.push(`  noise:     ${fmt(noise?.rms)} ${fmtCtx(noise)}`);
+  lines.push(`  frication: ${fmt(frication?.rms)} ${fmtCtx(frication)}`);
+  lines.push(`  rgp:       ${fmt(rgp?.rms)} ${fmtCtx(rgp)}`);
+
+  // Cascade chain
+  lines.push("Cascade chain (max rms):");
+  for (let i = 6; i >= 1; i--) {
+    const cascade = telemetryMax.get(`cascade-${i}`);
+    lines.push(`  cascade-${i}: ${fmt(cascade?.rms)} ${fmtCtx(cascade)}`);
+  }
+  const nz = telemetryMax.get("nz");
+  const np = telemetryMax.get("np");
+  lines.push(`  nz: ${fmt(nz?.rms)}`);
+  lines.push(`  np: ${fmt(np?.rms)}`);
+
+  // Parallel branch
+  lines.push("Parallel branch (max rms):");
+  for (let i = 1; i <= 6; i++) {
+    const pf = telemetryMax.get(`parallel-formant-${i}`);
+    if (pf?.rms > 0) {
+      lines.push(`  parallel-formant-${i}: ${fmt(pf?.rms)}`);
+    }
+  }
+  const parallelNasal = telemetryMax.get("parallel-nasal");
+  if (parallelNasal?.rms > 0) {
+    lines.push(`  parallel-nasal: ${fmt(parallelNasal?.rms)}`);
+  }
+
+  // Output stage
+  lines.push("Output stage (max rms):");
+  const cascadeOut = meterMax.get("cascade-out");
+  const parallelOut = meterMax.get("parallel-out");
+  const outputSum = meterMax.get("output-sum");
+  lines.push(`  cascade-out:  ${fmt(cascadeOut?.rms)} ${fmtCtx(cascadeOut)}`);
+  lines.push(`  parallel-out: ${fmt(parallelOut?.rms)} ${fmtCtx(parallelOut)}`);
+  lines.push(`  output-sum:   ${fmt(outputSum?.rms)} ${fmtCtx(outputSum)}`);
+
+  return lines;
 }
 
 function formatRange(range, digits = 1) {
@@ -740,16 +1028,26 @@ const plstepEvents = [];
 function handleTelemetry(data) {
   // Handle PLSTEP burst events specially
   if (data?.type === 'plstep') {
-    const { relTime, event, inWindow } = getRunContext();
+    // P1: Calculate proper scheduled relative time using runStartTime
+    // data.time is the absolute scheduled time from klatt-synth
+    // Proper relative time = scheduled time - session start time
+    const scheduledRelTime = Number.isFinite(data.time) && runStartTime > 0
+      ? data.time - runStartTime
+      : null;
+    const { relTime, event, inWindow, trackEnd } = getRunContext();
+    // P1: Session isolation - only accept events with valid timing
+    // Allow events during window OR if we're just starting (cold start)
     if (inWindow || !lastRun) {
       plstepEvents.push({
-        time: data.time,
-        relTime,
+        time: data.time, // Keep absolute time for debugging
+        relTime, // Current ctx.currentTime relative to start
+        scheduledRelTime, // P1: Proper scheduled time relative to start
         amplitudeLinear: data.amplitudeLinear,
         amplitudeDb: data.amplitudeDb,
         trigger: data.trigger,
         delta: data.delta,
         phoneme: event?.phoneme ?? '',
+        sessionId: lastRun?.sessionId ?? sessionId, // P1: Track session
       });
       // Keep only last 10 PLSTEP events
       if (plstepEvents.length > 10) plstepEvents.shift();
@@ -849,6 +1147,12 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   const cascade2Range = telemetryMax.get("cascade-2");
   const cascade3Range = telemetryMax.get("cascade-3");
   const lines = [];
+  // P1: Session header with start time for isolation tracking
+  const sessionStartStr = lastRun?.startTime
+    ? `Session #${lastRun.sessionId ?? sessionId} started at ${lastRun.startTime.toFixed(3)}s`
+    : `Session #${sessionId}`;
+  lines.push(sessionStartStr);
+  lines.push("");
   lines.push(`Phrase: ${phrase}`);
   lines.push(`Base F0: ${baseF0}`);
   lines.push(`Events: ${summary.events}`);
@@ -885,32 +1189,27 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
     lines.push(...(derived.warnings.length ? derived.warnings : ["(none)"]));
     lines.push("");
   }
+  // P4: Formant automation check with expected vs observed warnings
   lines.push("Formant automation check:");
-  lines.push(
-    `cascade-1 f=[${Number.isFinite(cascade1Range?.freqMin) ? cascade1Range.freqMin.toFixed(1) : "n/a"}-${Number.isFinite(cascade1Range?.freqMax) ? cascade1Range.freqMax.toFixed(1) : "n/a"}] vs track ${formatRange(f1Range)}`
-  );
-  lines.push(
-    `cascade-2 f=[${Number.isFinite(cascade2Range?.freqMin) ? cascade2Range.freqMin.toFixed(1) : "n/a"}-${Number.isFinite(cascade2Range?.freqMax) ? cascade2Range.freqMax.toFixed(1) : "n/a"}] vs track ${formatRange(f2Range)}`
-  );
-  lines.push(
-    `cascade-3 f=[${Number.isFinite(cascade3Range?.freqMin) ? cascade3Range.freqMin.toFixed(1) : "n/a"}-${Number.isFinite(cascade3Range?.freqMax) ? cascade3Range.freqMax.toFixed(1) : "n/a"}] vs track ${formatRange(f3Range)}`
-  );
+  lines.push(...formatFormantCheck("cascade-1", cascade1Range, f1Range, "F1"));
+  lines.push(...formatFormantCheck("cascade-2", cascade2Range, f2Range, "F2"));
+  lines.push(...formatFormantCheck("cascade-3", cascade3Range, f3Range, "F3"));
+  // P6: Check NZ/NP bypass status
+  const nzRange = telemetryMax.get("nz");
+  const npRange = telemetryMax.get("np");
+  lines.push(formatBypassCheck("nz", nzRange, synth.params.FNZ, synth.params.BNZ));
+  lines.push(formatBypassCheck("np", npRange, synth.params.FNP, synth.params.BNP));
   lines.push("");
   lines.push("");
+  // P5: Enhanced event display with A1-A6 for SW=1 events
   lines.push("First events:");
   track.slice(0, 8).forEach((e, index) => {
-    const sw = Number.isFinite(e.params?.SW) ? e.params.SW.toFixed(0) : "n/a";
-    lines.push(
-      `${index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AH=${(e.params?.AH ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
-    );
+    lines.push(formatEventLine(index, e));
   });
   lines.push("");
   lines.push("Last events:");
   track.slice(-6).forEach((e, index) => {
-    const sw = Number.isFinite(e.params?.SW) ? e.params.SW.toFixed(0) : "n/a";
-    lines.push(
-      `${track.length - 6 + index}. t=${e.time.toFixed(3)} ${e.phoneme ?? ""} F0=${(e.params?.F0 ?? 0).toFixed(1)} AV=${(e.params?.AV ?? 0).toFixed(1)} AVS=${(e.params?.AVS ?? 0).toFixed(1)} AH=${(e.params?.AH ?? 0).toFixed(1)} AF=${(e.params?.AF ?? 0).toFixed(1)} SW=${sw}`
-    );
+    lines.push(formatEventLine(track.length - 6 + index, e));
   });
   lines.push("");
   lines.push("Voicing issues:");
@@ -922,11 +1221,29 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   lines.push("Meters (RMS/peak):");
   lines.push(...formatMeters(meters || meterValues));
   lines.push("");
+  // P3: Signal flow snapshot at peak
+  lines.push("Signal flow (max rms through chain):");
+  lines.push(...formatSignalFlow());
+  lines.push("");
   lines.push("PLSTEP bursts (plosive release transients):");
-  lines.push(...formatPlstepEvents(plstepEvents));
+  // P9: Pass trackDuration for timing integrity check
+  lines.push(...formatPlstepEvents(plstepEvents, summary.totalTime));
   lines.push("");
   lines.push(`Spikes (peak > ${spikeThreshold}):`);
   lines.push(...formatSpikes(spikeEvents));
+  // P2: Gain derivation for focus event (first SW=1 event)
+  const gainDerivation = formatGainDerivation(track, synth.params);
+  if (gainDerivation.length > 0) {
+    lines.push("");
+    lines.push("Gain derivation (focus event):");
+    lines.push(...gainDerivation);
+  }
+  // P7: Play history for warmup tracking
+  if (playHistory.length > 0) {
+    lines.push("");
+    lines.push("Play history (output-sum max rms):");
+    lines.push(...formatPlayHistory());
+  }
   return lines.join("\n");
 }
 

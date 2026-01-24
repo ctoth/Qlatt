@@ -294,12 +294,14 @@ export class KlattSynth {
     this.nodes.parallelDiffGain.gain.setValueAtTime(p.parallelVoiceGain, atTime);
     this.nodes.parallelFricGain.gain.setValueAtTime(p.parallelFricationGain, atTime);
     const bypassGain = Number.isFinite(p.AB)
-      ? this._dbToLinear(p.AB) * parallelScale
+      // Apply ndbScale.AB (-84) for safe Klatt parameter conversion
+      ? this._dbToLinear(p.AB + (-84)) * parallelScale
       : p.parallelBypassGain;
     this.nodes.parallelBypassGain.gain.setValueAtTime(bypassGain, atTime);
     const nasalDb = Number.isFinite(p.parallelNasalGain) ? p.parallelNasalGain : p.AN;
     this.nodes.parallelNasalGain.gain.setValueAtTime(
-      this._dbToLinear(nasalDb) * parallelScale,
+      // Apply ndbScale.AN (-58) for safe Klatt parameter conversion
+      this._dbToLinear(nasalDb + (-58)) * parallelScale,
       atTime
     );
 
@@ -857,7 +859,8 @@ export class KlattSynth {
         break;
       case "parallelNasalGain":
       case "AN":
-        this.nodes.parallelNasalGain.gain.setValueAtTime(this._dbToLinear(value), atTime);
+        // Apply ndbScale.AN (-58) to convert Klatt parameter to safe linear
+        this.nodes.parallelNasalGain.gain.setValueAtTime(this._dbToLinear(value + (-58)), atTime);
         break;
       case "A1":
       case "A2":
@@ -872,8 +875,8 @@ export class KlattSynth {
         break;
       }
       case "AB":
-        this.nodes.parallelBypassGain.gain.setValueAtTime(this._dbToLinear(value), atTime);
-        break;
+        // Apply ndbScale.AB (-84) to convert Klatt parameter to safe linear
+        this.nodes.parallelBypassGain.gain.setValueAtTime(this._dbToLinear(value + (-84)), atTime);
         break;
       default:
         {

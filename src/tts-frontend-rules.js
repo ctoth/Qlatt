@@ -14,7 +14,7 @@ export const BASE_PARAMS = {
   AV: 0,
   AF: 0,
   AH: 0,
-  AVS: 0,
+  AVS: -70,
   F0: 0,
   lfMode: 1,
   // Klatt 80 defaults: when FNZ=FNP and BNZ=BNP, zero/pole cancel → passthrough
@@ -414,7 +414,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 15,
     AH: 0,
-    AVS: 0,
+    AVS: -70,
     A5: 52,
     A6: 55,
     dur: 100,
@@ -450,7 +450,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 13,
     AH: 0,
-    AVS: 0,
+    AVS: -70,
     A3: 57,
     A4: 48,
     A5: 48,
@@ -490,7 +490,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 8,
     AH: 0,
-    AVS: 0,
+    AVS: -70,
     AB: 57,
     dur: 90,
     type: "fricative",
@@ -524,7 +524,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 2,
     AH: 0,
-    AVS: 0,
+    AVS: -70,
     A5: 28,
     A6: 48,
     dur: 80,
@@ -560,7 +560,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 0,
     AH: 40,
-    AVS: 0,
+    AVS: -70,
     // Parallel formant gains for SW=1 mode. Without these, parallel output is near-zero.
     // /h/ is broad-band aspiration, so emphasize mid-to-high formants.
     A1: 30,
@@ -730,7 +730,7 @@ export const PHONEME_TARGETS = {
     B2: 110,
     B3: 130,
     AV: 20,
-    AVS: 0,
+    AVS: -70,
     dur: 45,
     type: "stop_closure",
     voiced: true,
@@ -744,7 +744,7 @@ export const PHONEME_TARGETS = {
     B2: 100,
     B3: 170,
     AV: 20,
-    AVS: 0,
+    AVS: -70,
     dur: 35,
     type: "stop_closure",
     voiced: true,
@@ -758,7 +758,7 @@ export const PHONEME_TARGETS = {
     B2: 150,
     B3: 280,
     AV: 20,
-    AVS: 0,
+    AVS: -70,
     dur: 55,
     type: "stop_closure",
     voiced: true,
@@ -830,7 +830,7 @@ export const PHONEME_TARGETS = {
     B3: 130,
     AV: 47,   // Voicing onset (was 40)
     AF: 52,   // Burst component (was 50)
-    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
+    AVS: -70,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 needed for voicing resonance
     A1: 60,
     A2: 0,    // Table III: A2=0 for all plosive bursts
@@ -849,7 +849,7 @@ export const PHONEME_TARGETS = {
     B3: 170,
     AV: 47,   // Voicing onset (was 40)
     AF: 50,   // Burst component
-    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
+    AVS: -70,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 for voicing, A3-A6 for dental burst
     A1: 58,
     A2: 0,    // Table III: A2=0 for all plosive bursts
@@ -871,7 +871,7 @@ export const PHONEME_TARGETS = {
     B3: 280,
     AV: 47,   // Voicing onset (was 40)
     AF: 50,   // Burst component
-    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
+    AVS: -70,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 for voicing, A3-A6 for velar burst
     A1: 58,
     A2: 0,    // Table III: A2=0 for all plosive bursts
@@ -946,7 +946,7 @@ export const PHONEME_TARGETS = {
   CH: {
     F1: 300, F2: 1840, F3: 2750,
     B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000,
-    AV: 0, AF: 18, AH: 0, AVS: 0,
+    AV: 0, AF: 18, AH: 0, AVS: -70,
     // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0,
     dur: 70,
@@ -976,7 +976,7 @@ export const PHONEME_TARGETS = {
     AV: 0,
     AF: 0,
     AH: 0,
-    AVS: 0,
+    AVS: -70,
     F0: 0,
     dur: 100,
     type: "silence",
@@ -1005,11 +1005,11 @@ export function fillDefaultParams(target) {
       // Ignore keys in target that are not in BASE_PARAMS (e.g., 'type', 'voiced')
     }
   } else {
-    // If no target provided, ensure it's silent (mostly redundant as BASE_PARAMS defaults are 0, but safe)
+    // If no target provided, ensure it's silent
     filled.AV = 0;
     filled.AF = 0;
     filled.AH = 0;
-    filled.AVS = 0;
+    filled.AVS = -70;
     filled.F0 = 0;
   }
 

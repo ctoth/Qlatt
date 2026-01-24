@@ -460,6 +460,7 @@ export class KlattSynth {
     const f4 = params.F4 ?? this.params.F4;
     // Note: Klatt 80 A2COR/A3COR corrections removed - we use A1-A6 dB values directly
     // like klatt-syn, to avoid muting issues when F1 is low (e.g., stop releases).
+    // See reports/16bit-issue6-a2cor.md for detailed analysis.
     const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     const proximity = (delta) => {
       if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;

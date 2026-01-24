@@ -309,6 +309,12 @@
         }
         console.log("[QLATT] First events", track.slice(0, 6));
         startSpectrogram(track);
+        // Auto-copy diagnostics to clipboard after audio finishes
+        const trackDuration = track.length ? track[track.length - 1].time : 0;
+        setTimeout(() => {
+          updateDiagnostics();
+          navigator.clipboard.writeText(diagnosticsEl.value).catch(() => {});
+        }, Math.max(0, trackDuration * 1000 + 300));
       }
 
       renderControls();

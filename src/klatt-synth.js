@@ -41,9 +41,12 @@ export class KlattSynth {
       masterGain: 1.0,
       outputGain: 1.0, // Global output gain (can boost if needed)
       rgpFrequency: 0,
-      rgpBandwidth: 0,
+      rgpBandwidth: 100,
       rgsFrequency: 0,
       rgsBandwidth: 200,
+      FGP: 0,
+      BGP: 100,
+      BGS: 200,
       // Klatt 80 defaults: FNZ=FNP=250, BNZ=BNP=100
       // When zero and pole match, they cancel → signal passes through
       // Setting to 0 creates degenerate coefficients that block signal!
@@ -310,16 +313,20 @@ export class KlattSynth {
 
   _applyAllParams(atTime) {
     const p = this.params;
+    const gpFreq = Number.isFinite(p.FGP) ? p.FGP : p.rgpFrequency;
+    const gpBw = Number.isFinite(p.BGP) ? p.BGP : p.rgpBandwidth;
+    const gsFreq = Number.isFinite(p.rgsFrequency) ? p.rgsFrequency : 0;
+    const gsBw = Number.isFinite(p.BGS) ? p.BGS : p.rgsBandwidth;
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
     this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), p.f0, atTime);
-    this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), p.rgpFrequency, atTime);
-    this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
-    this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), p.rgsFrequency, atTime);
-    this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), p.rgsBandwidth, atTime);
-    this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), p.rgpFrequency, atTime);
-    this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
+    this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), gpFreq, atTime);
+    this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime);
+    this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), gsFreq, atTime);
+    this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), gsBw, atTime);
+    this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), gpFreq, atTime);
+    this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), gpBw, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("frequency"), p.FNZ, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("bandwidth"), p.BNZ, atTime);
     this._setAudioParam(this.nodes.np.parameters.get("frequency"), p.FNP, atTime);
@@ -541,6 +548,9 @@ export class KlattSynth {
 
     const mix = this.params.parallelMix;
     const allParallel = params.SW === 1;
+    const gpFreq = Number.isFinite(params.FGP) ? params.FGP : this.params.FGP;
+    const gpBw = Number.isFinite(params.BGP) ? params.BGP : this.params.BGP;
+    const gsBw = Number.isFinite(params.BGS) ? params.BGS : this.params.BGS;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
@@ -550,6 +560,12 @@ export class KlattSynth {
     if (Number.isFinite(params.lfMode)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("lfMode"), params.lfMode, atTime, ramp);
     }
+    this._scheduleAudioParam(this.nodes.rgp.parameters.get("frequency"), gpFreq, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), gpFreq, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), gpBw, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgs.parameters.get("frequency"), 0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgs.parameters.get("bandwidth"), gsBw, atTime, ramp);
 
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.avsGain.gain, voiceParGain, atTime, ramp);
@@ -936,10 +952,21 @@ export class KlattSynth {
         this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), value, atTime);
         this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), value, atTime);
         break;
+      case "FGP":
+        this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), value, atTime);
+        this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), value, atTime);
+        break;
+      case "BGP":
+        this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), value, atTime);
+        this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), value, atTime);
+        break;
       case "rgsFrequency":
         this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), value, atTime);
         break;
       case "rgsBandwidth":
+        this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), value, atTime);
+        break;
+      case "BGS":
         this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), value, atTime);
         break;
       case "noiseCutoff":

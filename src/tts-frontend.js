@@ -500,6 +500,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       stress: ph.stress,
       params: filledParams,
       duration: baseTarget?.dur || (targetKeyBase === "SIL" ? 100 : 50), // Default duration, use optional chaining
+      inherentDuration: baseTarget?.dur, // Preserve inherent duration for incompressibility
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
       ...flags,
       word: ph.word, // Keep the word info
@@ -532,6 +533,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       // Use the refined fillDefaultParams
       ph.params = fillDefaultParams(baseTarget);
       ph.duration = baseTarget?.dur || 30; // Use optional chaining
+      ph.inherentDuration = baseTarget?.dur;
 
       // Reduce amplitude for weak releases (word-final stops)
       if (ph.weak) {

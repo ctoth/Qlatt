@@ -1084,19 +1084,17 @@ export function rule_VowelShortening(phonemeList) {
         PHONEME_TARGETS[next.phoneme];
       if (nextTargetInfo) {
         if (nextTargetInfo.type?.includes("stop") && nextTargetInfo.voiceless)
-          current.duration = Math.round(current.duration * SHORTENING_FACTOR);
+          applyDurationScale(current, SHORTENING_FACTOR);
         else if (
           nextTargetInfo.type === "fricative" &&
           nextTargetInfo.voiceless
         )
-          current.duration = Math.round(current.duration * FRIC_SHORTENING);
+          applyDurationScale(current, FRIC_SHORTENING);
         else if (next.phoneme === "SIL")
-          current.duration = Math.round(
-            current.duration * PREPAUSAL_LENGTHENING
-          );
+          applyDurationScale(current, PREPAUSAL_LENGTHENING);
       }
     } else {
-      current.duration = Math.round(current.duration * PREPAUSAL_LENGTHENING);
+      applyDurationScale(current, PREPAUSAL_LENGTHENING);
     }
   }
   return phonemeList;
@@ -1109,14 +1107,11 @@ export function rule_StressDuration(phonemeList) {
     const ph = phonemeList[i];
     if (ph.type === "vowel") {
       if (ph.stress === 1)
-        ph.duration = Math.round(ph.duration * STRESS_FACTOR);
+        applyDurationScale(ph, STRESS_FACTOR);
       else if (ph.stress === 0)
-        ph.duration = Math.round(ph.duration * UNSTRESSED_FACTOR);
+        applyDurationScale(ph, UNSTRESSED_FACTOR);
     }
-    // Stop releases/aspiration use MITalk durations (5-25ms) - allow shorter minimum
-    // Other phonemes need 20ms minimum for audibility
-    const minDuration = (ph.type === "stop_release" || ph.type === "stop_aspiration") ? 5 : 20;
-    ph.duration = Math.max(minDuration, ph.duration || 20);
+    applyDurationFloor(ph);
   }
   return phonemeList;
 }
@@ -1140,7 +1135,7 @@ export function rule_PreBoundaryLengthening(phonemeList) {
 
     // Phrase-final: before punctuation silence or at end of utterance
     if (isBeforePhraseBreak || (!next && current.phoneme !== "SIL")) {
-      current.duration = Math.round(current.duration * PHRASE_FINAL_FACTOR);
+      applyDurationScale(current, PHRASE_FINAL_FACTOR);
       continue; // Don't also apply word-final
     }
 
@@ -1149,12 +1144,40 @@ export function rule_PreBoundaryLengthening(phonemeList) {
     if (next && current.word && next.word && current.word !== next.word) {
       // Only apply if next is not SIL (already handled above)
       if (next.phoneme !== "SIL") {
-        current.duration = Math.round(current.duration * WORD_FINAL_FACTOR);
+        applyDurationScale(current, WORD_FINAL_FACTOR);
       }
     }
   }
 
   return phonemeList;
+}
+
+// Duration scaling with incompressibility floor (Klatt 1976, Eq. 1)
+// Df = K * (Di - Dmin) + Dmin
+// Notes: papers/Klatt_1976_SegmentalDuration/notes.md
+function applyDurationScale(ph, scale) {
+  if (!ph || !Number.isFinite(scale)) return;
+  const di = Number.isFinite(ph.duration) ? ph.duration : 0;
+  if (di <= 0) return;
+  const dinh = Number.isFinite(ph.inherentDuration) ? ph.inherentDuration : di;
+  const dmin = getIncompressibleMin(ph, dinh);
+  const df = scale * (di - dmin) + dmin;
+  ph.duration = Math.round(Math.max(dmin, df));
+}
+
+function applyDurationFloor(ph) {
+  if (!ph || !Number.isFinite(ph.duration)) return;
+  const dinh = Number.isFinite(ph.inherentDuration) ? ph.inherentDuration : ph.duration;
+  const dmin = getIncompressibleMin(ph, dinh);
+  ph.duration = Math.round(Math.max(dmin, ph.duration));
+}
+
+function getIncompressibleMin(ph, inherent) {
+  if (!Number.isFinite(inherent) || inherent <= 0) return 0;
+  const type = ph.type || "";
+  // Klatt 1976: Dmin ≈ 0.42–0.45 of inherent for vowels; ~0.6 for some consonants
+  const ratio = type === "vowel" ? 0.42 : 0.6;
+  return inherent * ratio;
 }
 
 export function rule_GenerateF0Contour(
@@ -1169,7 +1192,7 @@ export function rule_GenerateF0Contour(
   let currentTime = 0;
   let currentF0 = baseF0;
   const totalDuration =
-    phonemeList.reduce((sum, ph) => sum + Math.max(20, ph.duration || 100), 0) /
+    phonemeList.reduce((sum, ph) => sum + Math.max(1, ph.duration || ph.inherentDuration || 0), 0) /
     1000.0;
   if (totalDuration === 0) return [{ time: 0, f0: 0 }];
   const phraseIndexByPhoneme = [];
@@ -1178,7 +1201,7 @@ export function rule_GenerateF0Contour(
   let phraseIndex = 0;
   let runningTime = 0;
   for (let i = 0; i < phonemeList.length; i++) {
-    const phDuration = Math.max(20, phonemeList[i].duration || 100) / 1000.0;
+    const phDuration = Math.max(1, phonemeList[i].duration || phonemeList[i].inherentDuration || 0) / 1000.0;
     const endTime = runningTime + phDuration;
     phraseIndexByPhoneme.push(phraseIndex);
     if (

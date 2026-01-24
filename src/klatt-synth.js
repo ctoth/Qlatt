@@ -547,8 +547,8 @@ export class KlattSynth {
     // TO the value BY atTime, meaning the transition happens BEFORE the event.
     // SW transitions must be instantaneous at the event boundary.
     // This applies to ALL gains that feed the parallel branch, not just voice.
+    const parallelSrcGain = allParallel ? 1.0 : 0;
     if (!ramp) {
-      const parallelSrcGain = allParallel ? 1.0 : 0;
       this.nodes.parallelSourceGain.gain.setValueAtTime(parallelSrcGain, atTime);
       this.nodes.parallelDiffGain.gain.setValueAtTime(parallelSrcGain, atTime);
     }

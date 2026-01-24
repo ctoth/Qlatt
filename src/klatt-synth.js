@@ -352,21 +352,16 @@ export class KlattSynth {
   }
 
   _setParallelFormantGain(index, dbValue, atTime, freq) {
+    // Klatt 80 applies parallel formant gains directly to first-differenced signal
+    // without compensation. The low-frequency attenuation is intentional -
+    // it prevents F2-F6 energy from polluting the F1 region.
     const scale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
     const linear = this._dbToLinear(dbValue) * scale;
     const sign = index >= 1 ? (index % 2 === 1 ? -1 : 1) : 1;
-    let compensated = linear;
-    if (index >= 1 && Number.isFinite(freq) && freq > 0) {
-      const w = (2 * Math.PI * freq) / this.ctx.sampleRate;
-      const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
-      if (diffGain > 0) {
-        compensated = linear / diffGain;
-      }
-    }
     this.nodes.parallelFormantGains[index].gain.setValueAtTime(
-      sign * compensated,
+      sign * linear,
       atTime
     );
   }

@@ -472,8 +472,11 @@ export class KlattSynth {
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
+    // Klatt 80 uses 10*GETAMP(NDBAVS) to compensate for filter cascade attenuation
+    // In normalized float, that causes 200x amplification at max AVS. Remove it.
+    // If too quiet, adjust ndbScale.AVS from -44 to -24 instead.
     const voiceParGain =
-      this._dbToLinear(voiceParDb + ndbScale.AVS) * 10 * parallelScale;
+      this._dbToLinear(voiceParDb + ndbScale.AVS) * parallelScale;
     const aspGain = this._dbToLinear(aspDb + ndbScale.AH);
     const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
     const fricGain =

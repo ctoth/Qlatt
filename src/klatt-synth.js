@@ -561,19 +561,12 @@ export class KlattSynth {
       this._dbToLinear((params.A5 ?? -70) + ndbScale.A5),
       this._dbToLinear((params.A6 ?? -70) + ndbScale.A6),
     ];
+    // Klatt 80 applies A2PAR/A3PAR/A4PAR directly to first-differenced signal
+    // without compensation. The differentiator's spectral shaping is intentional -
+    // it prevents F2-F6 energy from polluting the F1 region.
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
       const sign = i >= 1 ? (i % 2 === 1 ? -1 : 1) : 1;
-      let linear = parallelLinear[i] * parallelScale;
-      if (i >= 1) {
-        const freq = params[`F${i + 1}`] ?? this.params[`F${i + 1}`];
-        if (Number.isFinite(freq) && freq > 0) {
-          const w = (2 * Math.PI * freq) / this.ctx.sampleRate;
-          const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
-          if (diffGain > 0) {
-            linear /= diffGain;
-          }
-        }
-      }
+      const linear = parallelLinear[i] * parallelScale;
       this._scheduleAudioParam(
         this.nodes.parallelFormantGains[i].gain,
         sign * linear,

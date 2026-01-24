@@ -127,6 +127,7 @@ export class KlattSynth {
         wasmBytes: wasm?.resonator,
         debug: telemetry,
         nodeId: "rgp",
+        bypassAtZero: true,
         reportInterval,
       },
     });
@@ -153,6 +154,7 @@ export class KlattSynth {
         wasmBytes: wasm?.resonator,
         debug: telemetry,
         nodeId: "rgp-avs",
+        bypassAtZero: true,
         reportInterval,
       },
     });

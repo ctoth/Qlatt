@@ -23,6 +23,7 @@ class ResonatorProcessor extends AudioWorkletProcessor {
     this.ready = false;
     this.debug = Boolean(options?.processorOptions?.debug);
     this.nodeId = options?.processorOptions?.nodeId || "resonator";
+    this.bypassAtZero = Boolean(options?.processorOptions?.bypassAtZero);
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event) => {
@@ -69,14 +70,21 @@ class ResonatorProcessor extends AudioWorkletProcessor {
       this.inputBuffer.view.fill(0);
     }
 
-    this.wasm.resonator_set_params(this.state, freq, bw, sampleRate);
-    this.wasm.resonator_set_gain(this.state, gain);
-    this.wasm.resonator_process(
-      this.state,
-      this.inputBuffer.ptr,
-      this.outputBuffer.ptr,
-      blockSize
-    );
+    if (this.bypassAtZero && freq <= 0) {
+      const scale = Number.isFinite(gain) ? gain : 1;
+      for (let i = 0; i < blockSize; i += 1) {
+        this.outputBuffer.view[i] = (this.inputBuffer.view[i] || 0) * scale;
+      }
+    } else {
+      this.wasm.resonator_set_params(this.state, freq, bw, sampleRate);
+      this.wasm.resonator_set_gain(this.state, gain);
+      this.wasm.resonator_process(
+        this.state,
+        this.inputBuffer.ptr,
+        this.outputBuffer.ptr,
+        blockSize
+      );
+    }
 
     this.outputBuffer.refresh();
     outputChannel.set(this.outputBuffer.view);

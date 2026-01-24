@@ -463,8 +463,7 @@ export class KlattSynth {
     }
   }
 
-  _applyKlattParams(params, atTime, mode = "set") {
-    const ramp = mode === "ramp";
+  _applyKlattParams(params, atTime, ramp = false) {
     const voiceDb = params.AV ?? -70;
     const voiceParDb = params.AVS ?? -70;
     const aspDb = params.AH ?? -70;
@@ -673,16 +672,30 @@ export class KlattSynth {
     this._lastAF = 0;
     this._lastAH = 0;
 
+    const ndbScale = { AH: -87, AF: -72 };
     for (let i = 0; i < track.length; i += 1) {
       const event = track[i];
       if (!event?.params) continue;
       const t = baseTime + event.time;
-      this._applyKlattParams(event.params, t, "set");
+      this._applyKlattParams(event.params, t, false);
 
       const next = track[i + 1];
       if (next?.params) {
         const nextTime = baseTime + next.time;
-        this._applyKlattParams(next.params, nextTime, "ramp");
+        const parallelScale = Number.isFinite(this.params.parallelGainScale)
+          ? this.params.parallelGainScale
+          : 1.0;
+        const nextAspDb = next.params.AH ?? -70;
+        const nextFricDb = next.params.AF ?? -70;
+        const nextFricDbAdjusted = next.params.SW === 1
+          ? Math.max(nextFricDb, nextAspDb)
+          : nextFricDb;
+        const nextAspGain = this._dbToLinear(nextAspDb + ndbScale.AH);
+        const nextFricGain = this._dbToLinear(nextFricDbAdjusted + ndbScale.AF) * parallelScale;
+
+        // Only ramp aspiration/frication (Klatt80 linear interpolation within frame)
+        this._scheduleAudioParam(this.nodes.noiseGain.gain, nextAspGain, nextTime, true);
+        this._scheduleAudioParam(this.nodes.parallelFricGain.gain, nextFricGain, nextTime, true);
       }
 
       if (i === 0) {

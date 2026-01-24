@@ -689,9 +689,12 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
-    // Stop releases/aspiration use MITalk durations (5-25ms) - allow shorter minimum
-    const minDuration = (ph.type === "stop_release" || ph.type === "stop_aspiration") ? 5 : 20;
-    const phDuration = Math.max(minDuration, ph.duration || 100) / 1000.0;
+    // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
+    const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
+    const minDuration = isStopRelease ? 5 : 20;
+    const targetDur = isStopRelease ? PHONEME_TARGETS[ph.phoneme]?.dur : null;
+    const phDurationMs = Number.isFinite(targetDur) ? targetDur : (ph.duration || 100);
+    const phDuration = Math.max(minDuration, phDurationMs) / 1000.0;
     const segmentStart = currentTime;
 
     // *** ADDED: Specific logging for P_REL inside loop ***

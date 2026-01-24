@@ -41,8 +41,8 @@ export class KlattSynth {
       outputGain: 1.0, // Global output gain (can boost if needed)
       rgpFrequency: 0,
       rgpBandwidth: 0,
-      rgsFrequency: 1000,
-      rgsBandwidth: 1500,
+      rgsFrequency: 0,
+      rgsBandwidth: 200,
       // Klatt 80 defaults: FNZ=FNP=250, BNZ=BNP=100
       // When zero and pole match, they cancel → signal passes through
       // Setting to 0 creates degenerate coefficients that block signal!
@@ -64,6 +64,7 @@ export class KlattSynth {
       A5: -70,
       A6: -70,
       AB: -70,
+      AVS: -70,
       F1: 700,
       F2: 1200,
       F3: 2600,
@@ -133,6 +134,14 @@ export class KlattSynth {
         reportInterval,
       },
     });
+    N.rgpAvs = new AudioWorkletNode(ctx, "resonator-processor", {
+      processorOptions: {
+        wasmBytes: wasm?.resonator,
+        debug: telemetry,
+        nodeId: "rgp-avs",
+        reportInterval,
+      },
+    });
     N.diff = new AudioWorkletNode(ctx, "differentiator-processor", {
       processorOptions: {
         debug: telemetry,
@@ -186,6 +195,7 @@ export class KlattSynth {
     );
 
     N.voiceGain = ctx.createGain();
+    N.avsGain = ctx.createGain();
     N.noiseGain = ctx.createGain();
     N.mixer = ctx.createGain();
     N.parallelSourceGain = ctx.createGain();
@@ -215,6 +225,7 @@ export class KlattSynth {
     this._attachTelemetry(N.fricationSource);
     this._attachTelemetry(N.rgp);
     this._attachTelemetry(N.rgs);
+    this._attachTelemetry(N.rgpAvs);
     this._attachTelemetry(N.nz);
     this._attachTelemetry(N.diff);
     this._attachTelemetry(N.np);
@@ -231,7 +242,8 @@ export class KlattSynth {
     const N = this.nodes;
     N.lfSource.connect(N.rgp);
     N.rgp.connect(N.voiceGain).connect(N.mixer);
-    N.noiseSource.connect(N.rgs).connect(N.noiseGain).connect(N.mixer);
+    N.lfSource.connect(N.rgs).connect(N.rgpAvs).connect(N.avsGain).connect(N.mixer);
+    N.noiseSource.connect(N.noiseGain).connect(N.mixer);
     // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
     // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
     let current = N.mixer;
@@ -291,6 +303,8 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), p.rgsFrequency, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), p.rgsBandwidth, atTime);
+    this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), p.rgpFrequency, atTime);
+    this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("frequency"), p.FNZ, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("bandwidth"), p.BNZ, atTime);
     this._setAudioParam(this.nodes.np.parameters.get("frequency"), p.FNP, atTime);
@@ -299,6 +313,8 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.parallelNasal.parameters.get("bandwidth"), p.BNP, atTime);
 
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
+    const avsGain = this._dbToLinear((p.AVS ?? -70) + (-44)) * 10;
+    this.nodes.avsGain.gain.setValueAtTime(avsGain, atTime);
     this.nodes.noiseGain.gain.setValueAtTime(p.noiseGain, atTime);
     this.nodes.masterGain.gain.setValueAtTime(p.masterGain, atTime);
     this.nodes.outputGain.gain.setValueAtTime(p.outputGain, atTime);
@@ -408,6 +424,8 @@ export class KlattSynth {
       this.nodes.rgp.parameters.get("bandwidth"),
       this.nodes.rgs.parameters.get("frequency"),
       this.nodes.rgs.parameters.get("bandwidth"),
+      this.nodes.rgpAvs.parameters.get("frequency"),
+      this.nodes.rgpAvs.parameters.get("bandwidth"),
       this.nodes.nz.parameters.get("frequency"),
       this.nodes.nz.parameters.get("bandwidth"),
       this.nodes.np.parameters.get("frequency"),
@@ -415,6 +433,7 @@ export class KlattSynth {
       this.nodes.parallelNasal.parameters.get("frequency"),
       this.nodes.parallelNasal.parameters.get("bandwidth"),
       this.nodes.voiceGain.gain,
+      this.nodes.avsGain.gain,
       this.nodes.noiseGain.gain,
       this.nodes.masterGain.gain,
       this.nodes.parallelSourceGain.gain,
@@ -490,11 +509,9 @@ export class KlattSynth {
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
-    // Klatt 80 uses 10*GETAMP(NDBAVS) to compensate for filter cascade attenuation
-    // In normalized float, that causes 200x amplification at max AVS. Remove it.
-    // If too quiet, adjust ndbScale.AVS from -44 to -24 instead.
-    const voiceParGain =
-      this._dbToLinear(voiceParDb + ndbScale.AVS) * parallelScale;
+    // Klatt 80 uses 10*GETAMP(NDBAVS) to compensate for filter cascade attenuation.
+    // We preserve that scaling here to match the original behavior.
+    const voiceParGain = this._dbToLinear(voiceParDb + ndbScale.AVS) * 10;
     const aspGain = this._dbToLinear(aspDb + ndbScale.AH);
     const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
     const fricGain =
@@ -518,6 +535,7 @@ export class KlattSynth {
     }
 
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.avsGain.gain, voiceParGain, atTime, ramp);
     // Klatt 80 mutual exclusion: when cascade branch is active (SW=0),
     // ZERO out voicing input to parallel branch. From COEWAV.FOR line 425:
     //   "ZERO OUT VOICING INPUT TO PARALLEL BRANCH IF CASCADE BRANCH HAS BEEN USED"
@@ -855,6 +873,9 @@ export class KlattSynth {
       case "voiceGain":
         this.nodes.voiceGain.gain.setValueAtTime(value, atTime);
         break;
+      case "AVS":
+        this.nodes.avsGain.gain.setValueAtTime(this._dbToLinear(value + (-44)) * 10, atTime);
+        break;
       case "noiseGain":
         this.nodes.noiseGain.gain.setValueAtTime(value, atTime);
         break;
@@ -863,9 +884,11 @@ export class KlattSynth {
         break;
       case "rgpFrequency":
         this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), value, atTime);
+        this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), value, atTime);
         break;
       case "rgpBandwidth":
         this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), value, atTime);
+        this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), value, atTime);
         break;
       case "rgsFrequency":
         this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), value, atTime);

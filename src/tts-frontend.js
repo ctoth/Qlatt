@@ -796,41 +796,29 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         ? Math.max(segmentStart + 0.02, targetTime - transitionSec)
         : null;
 
+      klattTrack.push({
+        time: segmentStart,
+        phoneme: ph.phoneme,
+        word: ph.word,
+        params: finalParams,
+      });
+
       if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
-        const steadyParams = { ...finalParams };
-        const steadyF0 = isTargetVoiced ? getF0AtTime(steadyTime) : 0;
-        steadyParams.F0 = ph.phoneme === "SIL" ? 0 : steadyF0;
+        const transitionParams = blendParams(finalParams, nextPh?.params);
+        const transitionF0 = isTargetVoiced ? getF0AtTime(steadyTime) : 0;
+        transitionParams.F0 = ph.phoneme === "SIL" ? 0 : transitionF0;
         klattTrack.push({
           time: steadyTime,
           phoneme: ph.phoneme,
           word: ph.word,
-          params: steadyParams,
+          params: transitionParams,
         });
       }
 
-      const endParams = canSmooth
-        ? blendParams(finalParams, nextPh?.params)
-        : finalParams;
-
-      // *** ADD WORD and PHONEME to track event ***
-      klattTrack.push({
-        time: targetTime,
-        phoneme: ph.phoneme, // Keep original phoneme name (e.g., K_CL)
-        word: ph.word, // Add the associated word
-        params: endParams,
-      });
-
-      // Log Event Details (including word) - Removed for cleaner test output
-      // console.log(
-      //   `Track Event ${i + 1}: Time=${targetTime.toFixed(3)}s, Word=${
-      //     ph.word
-      //   }, Phoneme=${ph.phoneme}, AV=${finalParams.AV.toFixed(
-      //     1
-      //   )}, AF=${finalParams.AF.toFixed(1)}, AH=${finalParams.AH.toFixed(
-      //     1
-      //   )}, F0=${finalParams.F0.toFixed(1)}, F1=${finalParams.F1.toFixed(0)}`
-      // );
-      debugLog(`    Added track event at t=${targetTime.toFixed(3)}`);
+      debugLog(`    Added track event at t=${segmentStart.toFixed(3)}`);
+      if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
+        debugLog(`    Added transition event at t=${steadyTime.toFixed(3)}`);
+      }
       currentTime = targetTime;
     }
     // Removed the 'else' block as the non-positive duration case is handled by the 'continue' above

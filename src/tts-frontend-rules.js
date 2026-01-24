@@ -830,7 +830,7 @@ export const PHONEME_TARGETS = {
     B3: 130,
     AV: 47,   // Voicing onset (was 40)
     AF: 52,   // Burst component (was 50)
-    AVS: 47,  // Match AV
+    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 needed for voicing resonance
     A1: 60,
     A2: 0,    // Table III: A2=0 for all plosive bursts
@@ -849,7 +849,7 @@ export const PHONEME_TARGETS = {
     B3: 170,
     AV: 47,   // Voicing onset (was 40)
     AF: 50,   // Burst component
-    AVS: 47,  // Match AV
+    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 for voicing, A3-A6 for dental burst
     A1: 58,
     A2: 0,    // Table III: A2=0 for all plosive bursts
@@ -871,7 +871,7 @@ export const PHONEME_TARGETS = {
     B3: 280,
     AV: 47,   // Voicing onset (was 40)
     AF: 50,   // Burst component
-    AVS: 47,  // Match AV
+    AVS: 0,   // Stops use AV only (Table III does not specify AVS)
     // Table III: A2=0 for burst, A1 for voicing, A3-A6 for velar burst
     A1: 58,
     A2: 0,    // Table III: A2=0 for all plosive bursts

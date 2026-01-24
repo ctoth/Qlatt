@@ -1300,7 +1300,7 @@ function startMeterLoop() {
       recordSpike(name, data);
     }
     updateDiagnostics();
-  }, 200);
+  }, 20);
 }
 
 function recordSpike(name, data) {

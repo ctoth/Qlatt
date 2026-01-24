@@ -1010,6 +1010,18 @@ function formatMeters(map) {
   );
 }
 
+function formatSwWindowMeters() {
+  if (!swWindowMax || swWindowMax.size === 0) return ["(no SW-window maxima)"];
+  const entries = Array.from(swWindowMax.entries()).sort(([a], [b]) =>
+    a.localeCompare(b)
+  );
+  return entries.map(([key, data]) => {
+    const rmsCtx = data.rmsTime != null ? `@${data.rmsTime.toFixed(3)}s ${data.rmsPhoneme ?? ""}` : "";
+    const peakCtx = data.peakTime != null ? `@${data.peakTime.toFixed(3)}s ${data.peakPhoneme ?? ""}` : "";
+    return `${key}: rms=${formatLevel(data.rms)} ${rmsCtx} | peak=${formatLevel(data.peak)} ${peakCtx}`;
+  });
+}
+
 function updateDiagnostics() {
   if (!lastRun) return;
   lastDiagnostics = buildDiagnostics({
@@ -1221,6 +1233,9 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   lines.push("Meters (RMS/peak):");
   lines.push(...formatMeters(meters || meterValues));
   lines.push("");
+  lines.push("Meters by SW window:");
+  lines.push(...formatSwWindowMeters());
+  lines.push("");
   // P3: Signal flow snapshot at peak
   lines.push("Signal flow (max rms through chain):");
   lines.push(...formatSignalFlow());
@@ -1298,9 +1313,39 @@ function startMeterLoop() {
       }
       meterMax.set(name, next);
       recordSpike(name, data);
+      recordSwWindowMax(name, data, relTime, event);
     }
     updateDiagnostics();
   }, 20);
+}
+
+const swWindowMax = new Map();
+const swWindowMaxTime = new Map();
+
+function recordSwWindowMax(name, data, relTime, event) {
+  if (!lastRun || !runStartTime || !data || !Number.isFinite(data.rms)) return;
+  const sw = event?.params?.SW;
+  if (sw !== 0 && sw !== 1) return;
+  if (!Number.isFinite(relTime)) return;
+  const trackEnd = lastRun.track?.length
+    ? lastRun.track[lastRun.track.length - 1].time
+    : 0;
+  if (relTime < -0.1 || relTime > trackEnd + 0.5) return;
+
+  const key = `${name}:SW=${sw}`;
+  const prev = swWindowMax.get(key) || { rms: 0, peak: 0 };
+  const next = { ...prev };
+  if (data.rms > (prev.rms ?? 0)) {
+    next.rms = data.rms;
+    next.rmsTime = relTime;
+    next.rmsPhoneme = event?.phoneme ?? "";
+  }
+  if (data.peak > (prev.peak ?? 0)) {
+    next.peak = data.peak;
+    next.peakTime = relTime;
+    next.peakPhoneme = event?.phoneme ?? "";
+  }
+  swWindowMax.set(key, next);
 }
 
 function recordSpike(name, data) {

@@ -36,6 +36,8 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     }
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
+    const modInput = inputs[0];
+    const modChannel = modInput && modInput[0] ? modInput[0] : null;
     const gainValues = parameters.gain;
     const cutoff = parameters.cutoff[0];
 
@@ -47,12 +49,13 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
       const gain = gainValues.length > 1 ? gainValues[i] : gainValues[0];
+      const mod = modChannel ? modChannel[i] : 1;
       gainSum += gain;
       if (gain > gainPeak) gainPeak = gain;
       const white = Math.random() * 2 - 1;
       const y = (1 - this.alpha) * white + this.alpha * this.y1;
       this.y1 = y;
-      outputChannel[i] = y * gain;
+      outputChannel[i] = y * gain * mod;
     }
 
     this._reportMetrics(outputChannel, {

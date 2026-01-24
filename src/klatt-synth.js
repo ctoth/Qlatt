@@ -18,6 +18,7 @@ export class KlattSynth {
       this.ctx.audioWorklet.addModule(workletBase + "antiresonator-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "lf-source-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "noise-source-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "glottal-mod-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "differentiator-processor.js"),
     ]);
 
@@ -99,7 +100,7 @@ export class KlattSynth {
       },
     });
     N.noiseSource = new AudioWorkletNode(ctx, "noise-source-processor", {
-      numberOfInputs: 0,
+      numberOfInputs: 1,
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
@@ -109,7 +110,7 @@ export class KlattSynth {
       },
     });
     N.fricationSource = new AudioWorkletNode(ctx, "noise-source-processor", {
-      numberOfInputs: 0,
+      numberOfInputs: 1,
       numberOfOutputs: 1,
       outputChannelCount: [1],
       processorOptions: {
@@ -131,6 +132,16 @@ export class KlattSynth {
         wasmBytes: wasm?.resonator,
         debug: telemetry,
         nodeId: "rgs",
+        reportInterval,
+      },
+    });
+    N.glottalMod = new AudioWorkletNode(ctx, "glottal-mod-processor", {
+      numberOfInputs: 0,
+      numberOfOutputs: 1,
+      outputChannelCount: [1],
+      processorOptions: {
+        debug: telemetry,
+        nodeId: "glottal-mod",
         reportInterval,
       },
     });
@@ -226,6 +237,7 @@ export class KlattSynth {
     this._attachTelemetry(N.rgp);
     this._attachTelemetry(N.rgs);
     this._attachTelemetry(N.rgpAvs);
+    this._attachTelemetry(N.glottalMod);
     this._attachTelemetry(N.nz);
     this._attachTelemetry(N.diff);
     this._attachTelemetry(N.np);
@@ -243,6 +255,8 @@ export class KlattSynth {
     N.lfSource.connect(N.rgp);
     N.rgp.connect(N.voiceGain).connect(N.mixer);
     N.lfSource.connect(N.rgs).connect(N.rgpAvs).connect(N.avsGain).connect(N.mixer);
+    N.glottalMod.connect(N.noiseSource);
+    N.glottalMod.connect(N.fricationSource);
     N.noiseSource.connect(N.noiseGain).connect(N.mixer);
     // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
     // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
@@ -299,6 +313,7 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
+    this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), p.rgpFrequency, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), p.rgpBandwidth, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), p.rgsFrequency, atTime);
@@ -420,6 +435,7 @@ export class KlattSynth {
     const params = [
       this.nodes.lfSource.parameters.get("f0"),
       this.nodes.lfSource.parameters.get("rd"),
+      this.nodes.glottalMod.parameters.get("f0"),
       this.nodes.rgp.parameters.get("frequency"),
       this.nodes.rgp.parameters.get("bandwidth"),
       this.nodes.rgs.parameters.get("frequency"),
@@ -527,6 +543,7 @@ export class KlattSynth {
     const allParallel = params.SW === 1;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
     }
@@ -891,6 +908,7 @@ export class KlattSynth {
     switch (name) {
       case "f0":
         this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), value, atTime);
+        this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), value, atTime);
         break;
       case "rd":
         this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), value, atTime);

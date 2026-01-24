@@ -251,16 +251,28 @@ export class KlattSynth {
     N.diff.connect(N.parallelDiffGain).connect(N.parallelDiffSum);
     N.fricationSource.connect(N.parallelFricGain).connect(N.parallelDiffSum);
 
-    N.parallelSourceGain.connect(N.parallelNasal).connect(N.parallelNasalGain).connect(N.parallelSum);
+    // Parallel routing (Klatt 80):
+    // - F1 uses UGLOT (voicing + aspiration)
+    // - Nasal uses UGLOT1 (first-differenced UGLOT)
+    // - F2-F4 use UGLOT1 + UFRIC
+    // - F5-F6 and bypass use UFRIC only
     N.parallelSourceGain.connect(N.parallelFormants[0]);
     N.parallelFormants[0].connect(N.parallelFormantGains[0]).connect(N.parallelSum);
 
-    for (let i = 1; i < N.parallelFormants.length; i += 1) {
+    N.parallelDiffGain.connect(N.parallelNasal);
+    N.parallelNasal.connect(N.parallelNasalGain).connect(N.parallelSum);
+
+    for (let i = 1; i <= 3; i += 1) {
       N.parallelDiffSum.connect(N.parallelFormants[i]);
       N.parallelFormants[i].connect(N.parallelFormantGains[i]).connect(N.parallelSum);
     }
 
-    N.parallelDiffSum.connect(N.parallelBypassGain).connect(N.parallelSum);
+    for (let i = 4; i < N.parallelFormants.length; i += 1) {
+      N.parallelFricGain.connect(N.parallelFormants[i]);
+      N.parallelFormants[i].connect(N.parallelFormantGains[i]).connect(N.parallelSum);
+    }
+
+    N.parallelFricGain.connect(N.parallelBypassGain).connect(N.parallelSum);
     N.parallelSum.connect(N.parallelOutGain).connect(N.outputSum);
 
     // PLSTEP: Connect burst transient source to output

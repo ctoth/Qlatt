@@ -668,11 +668,11 @@ export class KlattSynth {
    * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
   _scheduleBurstTransient(atTime, params, triggerParam = 'AF', triggerDelta = 0) {
-    // Calculate PLSTEP amplitude per Klatt 80
-    // Original Klatt 80 calculation: GETAMP(G0 + NDBSCA(AF) + 44)
-    // With ndbScale.AF = -72, that's G0 + (-72 + 44) = G0 - 28
+    // Calculate PLSTEP amplitude
+    // Klatt 80 uses 16-bit integer space; we use normalized float
+    // G0-28 gives ~9.0 linear (clips), G0-50 gives ~0.7 (safe)
     const goDb = params.GO ?? 47;
-    const burstDb = goDb - 28; // Klatt 80: G0 + ndbScale.AF + 44 = G0 + (-72) + 44 = G0 - 28
+    const burstDb = goDb - 50;
     const burstAmplitude = this._dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst

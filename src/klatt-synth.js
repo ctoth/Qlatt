@@ -463,7 +463,8 @@ export class KlattSynth {
     }
   }
 
-  _applyKlattParams(params, atTime, ramp) {
+  _applyKlattParams(params, atTime, mode = "set") {
+    const ramp = mode === "ramp";
     const voiceDb = params.AV ?? -70;
     const voiceParDb = params.AVS ?? -70;
     const aspDb = params.AH ?? -70;
@@ -546,16 +547,24 @@ export class KlattSynth {
     // TO the value BY atTime, meaning the transition happens BEFORE the event.
     // SW transitions must be instantaneous at the event boundary.
     // This applies to ALL gains that feed the parallel branch, not just voice.
-    const parallelSrcGain = allParallel ? 1.0 : 0;
-    this.nodes.parallelSourceGain.gain.setValueAtTime(parallelSrcGain, atTime);
-    this.nodes.parallelDiffGain.gain.setValueAtTime(parallelSrcGain, atTime);
+    if (!ramp) {
+      const parallelSrcGain = allParallel ? 1.0 : 0;
+      this.nodes.parallelSourceGain.gain.setValueAtTime(parallelSrcGain, atTime);
+      this.nodes.parallelDiffGain.gain.setValueAtTime(parallelSrcGain, atTime);
+    }
     this._scheduleAudioParam(this.nodes.noiseGain.gain, aspGain, atTime, ramp);
     // parallelFricGain: frication goes to parallel in all modes, but must also
     // use setValueAtTime to prevent early ramping before event boundary
-    this.nodes.parallelFricGain.gain.setValueAtTime(fricGain, atTime);
+    if (ramp) {
+      this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, true);
+    } else {
+      this.nodes.parallelFricGain.gain.setValueAtTime(fricGain, atTime);
+    }
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);
 
-    this._setParallelMix(mix, atTime, false, ramp, allParallel);
+    if (!ramp) {
+      this._setParallelMix(mix, atTime, false, ramp, allParallel);
+    }
 
     // Emit telemetry for source gains (debugging signal levels)
     if (this.telemetryHandler) {
@@ -664,16 +673,23 @@ export class KlattSynth {
     this._lastAF = 0;
     this._lastAH = 0;
 
-    const first = track[0];
-    if (first?.params) {
-      this._applyKlattParams(first.params, baseTime, false);
-      this._lastAF = first.params.AF ?? 0;
-      this._lastAH = first.params.AH ?? 0;
-    }
-    for (let i = 1; i < track.length; i += 1) {
+    for (let i = 0; i < track.length; i += 1) {
       const event = track[i];
       if (!event?.params) continue;
       const t = baseTime + event.time;
+      this._applyKlattParams(event.params, t, "set");
+
+      const next = track[i + 1];
+      if (next?.params) {
+        const nextTime = baseTime + next.time;
+        this._applyKlattParams(next.params, nextTime, "ramp");
+      }
+
+      if (i === 0) {
+        this._lastAF = event.params.AF ?? 0;
+        this._lastAH = event.params.AH ?? 0;
+        continue;
+      }
 
       // PLSTEP: Detect plosive release burst
       // Klatt 80 uses: IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 + NDBSCA(AF) + 44)
@@ -697,7 +713,6 @@ export class KlattSynth {
       this._lastAF = currentAF;
       this._lastAH = currentAH;
 
-      this._applyKlattParams(event.params, t, true);
     }
   }
 

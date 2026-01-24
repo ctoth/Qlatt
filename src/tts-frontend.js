@@ -337,10 +337,9 @@ export function transcribeText(text) {
   return flatPhonemeList; // Return the flat list of phoneme objects
 }
 
-// --- Stop Release Rule --- (MODIFIED: Operates on flat list)
+// --- Stop Release Rule --- (Operates on flat list)
 function insertStopReleases(phonemeList) {
   // Now receives the flat list
-  /* ... */
   const newList = [];
   const releaseMap = {
     P_CL: "P_REL",
@@ -349,6 +348,12 @@ function insertStopReleases(phonemeList) {
     B_CL: "B_REL",
     D_CL: "D_REL",
     G_CL: "G_REL",
+  };
+  // Voiceless stops have separate aspiration phase following burst
+  const aspirationMap = {
+    P_REL: "P_ASP",
+    T_REL: "T_ASP",
+    K_REL: "K_ASP",
   };
   for (let i = 0; i < phonemeList.length; i++) {
     const current = phonemeList[i];
@@ -371,9 +376,19 @@ function insertStopReleases(phonemeList) {
       }
       if (addRelease) {
         newList.push({ phoneme: releasePhoneme, stress: current.stress });
+        // Voiceless stops: add aspiration phase after burst
+        const aspirationPhoneme = aspirationMap[releasePhoneme];
+        if (aspirationPhoneme) {
+          newList.push({ phoneme: aspirationPhoneme, stress: current.stress });
+        }
       } else if (phonemeList[i + 1]?.phoneme === "SIL") {
         // Add weak release for word-final stops (before silence) for clarity
         newList.push({ phoneme: releasePhoneme, stress: current.stress, weak: true });
+        // Also add weak aspiration for voiceless stops
+        const aspirationPhoneme = aspirationMap[releasePhoneme];
+        if (aspirationPhoneme) {
+          newList.push({ phoneme: aspirationPhoneme, stress: current.stress, weak: true });
+        }
       }
     }
   }
@@ -503,6 +518,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     if (!ph.params) {
       // Only process phonemes inserted by rules (like releases)
       debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
+
       let baseTarget = PHONEME_TARGETS[ph.phoneme]; // Directly use phoneme name
 
       if (!baseTarget) {
@@ -577,7 +593,8 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     const useParallel =
       ph.type === "fricative" ||
       ph.type === "affricate" ||
-      ph.type === "stop_release";
+      ph.type === "stop_release" ||
+      ph.type === "stop_aspiration";
     ph.params.SW = useParallel ? 1 : 0;
   });
   debugLog("Finished applying rules.");
@@ -672,7 +689,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
   for (let i = 0; i < parameterSequence.length; i++) {
     const ph = parameterSequence[i];
-    const phDuration = Math.max(20, ph.duration || 100) / 1000.0; // Restore original calculation
+    // Stop releases/aspiration use MITalk durations (5-25ms) - allow shorter minimum
+    const minDuration = (ph.type === "stop_release" || ph.type === "stop_aspiration") ? 5 : 20;
+    const phDuration = Math.max(minDuration, ph.duration || 100) / 1000.0;
     const segmentStart = currentTime;
 
     // *** ADDED: Specific logging for P_REL inside loop ***

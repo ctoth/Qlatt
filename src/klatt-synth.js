@@ -43,10 +43,13 @@ export class KlattSynth {
       rgpBandwidth: 0,
       rgsFrequency: 1000,
       rgsBandwidth: 1500,
-      FNZ: 0,
-      BNZ: 0,
-      FNP: 0,
-      BNP: 0,
+      // Klatt 80 defaults: FNZ=FNP=250, BNZ=BNP=100
+      // When zero and pole match, they cancel → signal passes through
+      // Setting to 0 creates degenerate coefficients that block signal!
+      FNZ: 250,
+      BNZ: 100,
+      FNP: 250,
+      BNP: 100,
       parallelMix: 0.6,
       parallelGainScale: 1.0,
       parallelVoiceGain: 0.0,
@@ -509,14 +512,37 @@ export class KlattSynth {
     //   UGLOT=0, UGLOTL=0, IF(NXSW.NE.1) UGLOT1=0
     // Only frication goes through parallel in cascade mode.
     // When SW=1 (parallel mode), voice goes through parallel at full gain.
+    // CRITICAL: Use setValueAtTime, NOT ramp! linearRampToValueAtTime ramps
+    // TO the value BY atTime, meaning the transition happens BEFORE the event.
+    // SW transitions must be instantaneous at the event boundary.
+    // This applies to ALL gains that feed the parallel branch, not just voice.
     const parallelSrcGain = allParallel ? 1.0 : 0;
-    this._scheduleAudioParam(this.nodes.parallelSourceGain.gain, parallelSrcGain, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelDiffGain.gain, parallelSrcGain, atTime, ramp);
+    this.nodes.parallelSourceGain.gain.setValueAtTime(parallelSrcGain, atTime);
+    this.nodes.parallelDiffGain.gain.setValueAtTime(parallelSrcGain, atTime);
     this._scheduleAudioParam(this.nodes.noiseGain.gain, aspGain, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.parallelFricGain.gain, fricGain, atTime, ramp);
+    // parallelFricGain: frication goes to parallel in all modes, but must also
+    // use setValueAtTime to prevent early ramping before event boundary
+    this.nodes.parallelFricGain.gain.setValueAtTime(fricGain, atTime);
     this._scheduleAudioParam(this.nodes.masterGain.gain, masterGain, atTime, ramp);
 
     this._setParallelMix(mix, atTime, false, ramp, allParallel);
+
+    // Emit telemetry for source gains (debugging signal levels)
+    if (this.telemetryHandler) {
+      this.telemetryHandler({
+        type: "source-gains",
+        node: "source-routing",
+        atTime,
+        voiceGain,
+        aspGain,
+        fricGain,
+        masterGain,
+        parallelSrcGain,
+        voiceDb: params.AV ?? -70,
+        aspDb: params.AH ?? -70,
+        fricDb: params.AF ?? -70,
+      });
+    }
 
     const formants = [
       ["F1", "B1"],
@@ -628,12 +654,13 @@ export class KlattSynth {
       const currentAH = event.params.AH ?? 0;
       const afDelta = currentAF - this._lastAF;
       const ahDelta = currentAH - (this._lastAH ?? 0);
-      // Trigger burst if either AF or AH increases by 10+ dB from near-zero
-      const isBurst = (this._lastAF <= 5 && afDelta >= 10) ||
-                      ((this._lastAH ?? 0) <= 5 && ahDelta >= 15);
+      // MITalk PLSTEP rule: trigger burst on 50 dB AF increase (we use 49 as threshold)
+      // This matches Klatt 80: IF (NNAF - NAFLAS >= 49) PLSTEP = ...
+      const isBurst = (this._lastAF <= 5 && afDelta >= 49) ||
+                      ((this._lastAH ?? 0) <= 5 && ahDelta >= 49);
       if (isBurst) {
         // Determine which parameter triggered the burst
-        const triggerParam = (this._lastAF <= 5 && afDelta >= 10) ? 'AF' : 'AH';
+        const triggerParam = (this._lastAF <= 5 && afDelta >= 49) ? 'AF' : 'AH';
         const triggerDelta = triggerParam === 'AF' ? afDelta : ahDelta;
         this._scheduleBurstTransient(t, event.params, triggerParam, triggerDelta);
       }
@@ -712,18 +739,25 @@ export class KlattSynth {
       this.params.parallelMix = mix;
     }
     const parallelGain = allParallel ? 1 : mix;
-    if (ramp) {
-      this.nodes.parallelOutGain.gain.linearRampToValueAtTime(
-        parallelGain,
-        atTime
-      );
-      this.nodes.cascadeOutGain.gain.linearRampToValueAtTime(
-        allParallel ? 0 : 1,
-        atTime
-      );
-    } else {
-      this.nodes.parallelOutGain.gain.setValueAtTime(parallelGain, atTime);
-      this.nodes.cascadeOutGain.gain.setValueAtTime(allParallel ? 0 : 1, atTime);
+    const cascadeGain = allParallel ? 0 : 1;
+    // CRITICAL: Always use setValueAtTime for cascade/parallel output gains.
+    // These are controlled by SW (source switch) which must transition
+    // instantaneously at the event boundary. Using linearRampToValueAtTime
+    // causes the transition to happen BEFORE the event (ramps TO value BY time),
+    // which breaks mutual exclusion timing.
+    this.nodes.parallelOutGain.gain.setValueAtTime(parallelGain, atTime);
+    this.nodes.cascadeOutGain.gain.setValueAtTime(cascadeGain, atTime);
+    // Emit telemetry for gain scheduling (debugging branch routing)
+    if (this.telemetryHandler) {
+      this.telemetryHandler({
+        type: "gain-schedule",
+        node: "branch-routing",
+        atTime,
+        allParallel,
+        parallelOutGain: parallelGain,
+        cascadeOutGain: cascadeGain,
+        mix,
+      });
     }
   }
 

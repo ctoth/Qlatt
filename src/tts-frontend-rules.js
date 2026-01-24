@@ -17,10 +17,12 @@ export const BASE_PARAMS = {
   AVS: 0,
   F0: 0,
   lfMode: 1,
-  FNZ: 0,
-  FNP: 0,
-  BNP: 0,
-  BNZ: 0,
+  // Klatt 80 defaults: when FNZ=FNP and BNZ=BNP, zero/pole cancel → passthrough
+  // Non-nasal sounds need this so cascade signal flows through NZ/NP unchanged
+  FNZ: 250,
+  FNP: 250,
+  BNP: 100,
+  BNZ: 100,
   AN: 0,
   A1: 0,
   A2: 0,
@@ -763,6 +765,8 @@ export const PHONEME_TARGETS = {
     velar: true,
   },
   // --- Stop Releases ---
+  // Klatt 80 Table III values, MITalk Table C-7 durations
+  // Voiceless stops: burst only (aspiration is separate phase)
   P_REL: {
     F1: 400,
     F2: 1100,
@@ -770,12 +774,13 @@ export const PHONEME_TARGETS = {
     B1: 300,
     B2: 150,
     B3: 220,
-    AF: 15,
-    AH: 30,
-    AB: 63,
-    dur: 50,
+    AF: 55,   // Raised for audible burst (was 15)
+    AH: 52,   // Aspiration component (was 30)
+    AB: 63,   // Labials use bypass (Table III)
+    dur: 5,   // MITalk Table C-7: PP = 5ms burst
     type: "stop_release",
     voiceless: true,
+    bilabial: true,
   },
   T_REL: {
     F1: 400,
@@ -784,15 +789,17 @@ export const PHONEME_TARGETS = {
     B1: 300,
     B2: 120,
     B3: 250,
-    AF: 20, // Frication burst
-    AH: 35, // Aspiration
-    A3: 30, // Higher formants active
+    AF: 58,   // Alveolars have strongest burst (was 20)
+    AH: 55,   // Aspiration (was 35)
+    A3: 30,   // Table III values
     A4: 45,
     A5: 57,
     A6: 63,
-    dur: 50,
+    AB: 0,    // Alveolars don't use bypass
+    dur: 15,  // MITalk Table C-7: TT = 15ms burst
     type: "stop_release",
     voiceless: true,
+    alveolar: true,
   },
   K_REL: {
     F1: 300,
@@ -801,16 +808,19 @@ export const PHONEME_TARGETS = {
     B1: 250,
     B2: 160,
     B3: 330,
-    AF: 18,
-    AH: 33,
-    A3: 53,
+    AF: 55,   // Raised for audible burst (was 18)
+    AH: 53,   // Aspiration (was 33)
+    A3: 53,   // Table III values
     A4: 43,
     A5: 45,
     A6: 45,
-    dur: 60,
+    AB: 0,    // Velars don't use bypass
+    dur: 25,  // MITalk Table C-7: KK = 25ms burst
     type: "stop_release",
     voiceless: true,
+    velar: true,
   },
+  // Voiced stops: Table III A2=0 for burst spectrum, A1 for voicing F1
   B_REL: {
     F1: 200,
     F2: 1100,
@@ -818,17 +828,17 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 110,
     B3: 130,
-    AV: 40,
-    AF: 50,
-    AVS: 40,
-    A1: 60,  // F1 parallel amplitude for voiced bilabial release (strong low-freq)
-    A2: 52,  // F2 parallel amplitude for voiced bilabial release (lower locus)
-    A3: 45,  // F3 parallel amplitude
-    A4: 40,  // F4 parallel amplitude
-    AB: 63,
-    dur: 20,
+    AV: 47,   // Voicing onset (was 40)
+    AF: 52,   // Burst component (was 50)
+    AVS: 47,  // Match AV
+    // Table III: A2=0 for burst, A1 needed for voicing resonance
+    A1: 60,
+    A2: 0,    // Table III: A2=0 for all plosive bursts
+    AB: 63,   // Labials: flat burst via bypass
+    dur: 5,   // MITalk Table C-7: BB = 5ms burst
     type: "stop_release",
     voiced: true,
+    bilabial: true,
   },
   D_REL: {
     F1: 200,
@@ -837,18 +847,20 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 100,
     B3: 170,
-    AV: 40,
-    AF: 50,
-    AVS: 40,
-    A1: 58,  // F1 parallel amplitude for voiced alveolar release
-    A2: 56,  // F2 parallel amplitude for voiced alveolar release
-    A3: 47,
+    AV: 47,   // Voicing onset (was 40)
+    AF: 50,   // Burst component
+    AVS: 47,  // Match AV
+    // Table III: A2=0 for burst, A1 for voicing, A3-A6 for dental burst
+    A1: 58,
+    A2: 0,    // Table III: A2=0 for all plosive bursts
+    A3: 47,   // Table III voiced dental values
     A4: 60,
     A5: 62,
     A6: 60,
-    dur: 20,
+    dur: 10,  // MITalk Table C-7: DD = 10ms burst
     type: "stop_release",
     voiced: true,
+    alveolar: true,
   },
   G_REL: {
     F1: 200,
@@ -857,25 +869,85 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 150,
     B3: 280,
-    AV: 40,
-    AF: 50,
-    AVS: 40,
-    A1: 58,  // F1 parallel amplitude for voiced velar release
-    A2: 55,  // F2 parallel amplitude for voiced velar release
-    A3: 53,
+    AV: 47,   // Voicing onset (was 40)
+    AF: 50,   // Burst component
+    AVS: 47,  // Match AV
+    // Table III: A2=0 for burst, A1 for voicing, A3-A6 for velar burst
+    A1: 58,
+    A2: 0,    // Table III: A2=0 for all plosive bursts
+    A3: 53,   // Table III voiced velar values
     A4: 43,
     A5: 45,
     A6: 45,
-    dur: 25,
+    dur: 20,  // MITalk Table C-7: GG = 20ms burst
     type: "stop_release",
     voiced: true,
+    velar: true,
+  },
+  // --- Stop Aspiration Phases ---
+  // Voiceless stops have distinct burst (frication) and aspiration phases.
+  // Aspiration follows burst - breathy noise shaped by vocal tract.
+  // Durations from Zue 1976 VOT minus burst duration.
+  P_ASP: {
+    F1: 400,
+    F2: 1100,
+    F3: 2150,
+    B1: 200,
+    B2: 150,
+    B3: 220,
+    AV: 0,
+    AF: 0,
+    AH: 52,   // Aspiration only
+    AB: 63,   // Labials use bypass
+    dur: 53,  // Zue: /p/ VOT ~58ms, minus 5ms burst = 53ms aspiration
+    type: "stop_aspiration",
+    voiceless: true,
+    bilabial: true,
+  },
+  T_ASP: {
+    F1: 400,
+    F2: 1600,
+    F3: 2600,
+    B1: 200,
+    B2: 120,
+    B3: 250,
+    AV: 0,
+    AF: 0,
+    AH: 55,   // Aspiration only
+    A3: 30,   // Maintain formant structure
+    A4: 45,
+    A5: 57,
+    A6: 63,
+    dur: 56,  // Zue: /t/ VOT ~71ms, minus 15ms burst = 56ms aspiration
+    type: "stop_aspiration",
+    voiceless: true,
+    alveolar: true,
+  },
+  K_ASP: {
+    F1: 300,
+    F2: 1990,
+    F3: 2850,
+    B1: 200,
+    B2: 160,
+    B3: 330,
+    AV: 0,
+    AF: 0,
+    AH: 53,   // Aspiration only
+    A3: 53,   // Maintain formant structure
+    A4: 43,
+    A5: 45,
+    A6: 45,
+    dur: 48,  // Zue: /k/ VOT ~73ms, minus 25ms burst = 48ms aspiration
+    type: "stop_aspiration",
+    voiceless: true,
+    velar: true,
   },
   // --- Affricates ---
   CH: {
     F1: 300, F2: 1840, F3: 2750,
     B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000,
     AV: 0, AF: 18, AH: 0, AVS: 0,
-    FNP: 0, FNZ: 0,
+    // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0,
     dur: 70,
     type: "affricate",
@@ -886,7 +958,7 @@ export const PHONEME_TARGETS = {
     F1: 260, F2: 1800, F3: 2820,
     B1: 60, B2: 80, B3: 270, B4: 300, B5: 250, B6: 1000,
     AV: 47, AF: 8, AH: 0, AVS: 47,
-    FNP: 0, FNZ: 0,
+    // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0,
     dur: 65,
     type: "affricate",
@@ -1041,8 +1113,11 @@ export function rule_StressDuration(phonemeList) {
       else if (ph.stress === 0)
         ph.duration = Math.round(ph.duration * UNSTRESSED_FACTOR);
     }
-    ph.duration = Math.max(20, ph.duration || 20);
-  } // Ensure min duration
+    // Stop releases/aspiration use MITalk durations (5-25ms) - allow shorter minimum
+    // Other phonemes need 20ms minimum for audibility
+    const minDuration = (ph.type === "stop_release" || ph.type === "stop_aspiration") ? 5 : 20;
+    ph.duration = Math.max(minDuration, ph.duration || 20);
+  }
   return phonemeList;
 }
 export function rule_PreBoundaryLengthening(phonemeList) {

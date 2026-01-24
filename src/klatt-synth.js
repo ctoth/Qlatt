@@ -11,14 +11,14 @@ export class KlattSynth {
 
   async initialize() {
     if (this.isInitialized) return;
-    const workletBase = new URL("../worklets/", import.meta.url);
+    const workletBase = "/worklets/";
     await this._loadWasmBytes(workletBase);
     await Promise.all([
-      this.ctx.audioWorklet.addModule(new URL("resonator-processor.js", workletBase)),
-      this.ctx.audioWorklet.addModule(new URL("antiresonator-processor.js", workletBase)),
-      this.ctx.audioWorklet.addModule(new URL("lf-source-processor.js", workletBase)),
-      this.ctx.audioWorklet.addModule(new URL("noise-source-processor.js", workletBase)),
-      this.ctx.audioWorklet.addModule(new URL("differentiator-processor.js", workletBase)),
+      this.ctx.audioWorklet.addModule(workletBase + "resonator-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "antiresonator-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "lf-source-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "noise-source-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "differentiator-processor.js"),
     ]);
 
     this._createNodes();
@@ -815,7 +815,7 @@ export class KlattSynth {
   async _loadWasmBytes(workletBase) {
     if (this.wasmBytes) return;
     const load = async (file) => {
-      const response = await fetch(new URL(file, workletBase));
+      const response = await fetch(workletBase + file);
       return response.arrayBuffer();
     };
     const [resonator, antiresonator, lfSource] = await Promise.all([

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev-server.js",
+    "dev": "vite",
     "build:dict": "node scripts/build-cmudict.js",
     "build:wasm": "bash build.sh",
     "build:wasm:ps": "pwsh -File build.ps1",
@@ -14,6 +14,7 @@
     "cmu-pronouncing-dictionary": "^3.0.0"
   },
   "devDependencies": {
-    "puppeteer-core": "^23.10.1"
+    "puppeteer-core": "^23.10.1",
+    "vite": "^7.3.1"
   }
 }

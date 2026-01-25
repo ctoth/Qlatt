@@ -22,40 +22,72 @@ const b = JSON.parse(fs.readFileSync(path.resolve(bPath), "utf8"));
 const aSamples = a.samples ?? [];
 const bSamples = b.samples ?? [];
 const normalize = (args.get("normalize") ?? "0") === "1";
-const len = Math.min(aSamples.length, bSamples.length);
+const maxShift = Number(args.get("max-shift") ?? 0);
+const shiftArg = args.get("shift");
+const fixedShift = shiftArg !== undefined ? Number(shiftArg) : null;
 
-let rmsA = 0;
-let rmsB = 0;
-for (let i = 0; i < len; i += 1) {
-  const va = aSamples[i];
-  const vb = bSamples[i];
-  rmsA += va * va;
-  rmsB += vb * vb;
+const shifts = [];
+if (Number.isFinite(fixedShift)) {
+  shifts.push(fixedShift);
+} else if (Number.isFinite(maxShift) && maxShift > 0) {
+  for (let s = -maxShift; s <= maxShift; s += 1) shifts.push(s);
+} else {
+  shifts.push(0);
 }
-rmsA = len ? Math.sqrt(rmsA / len) : 0;
-rmsB = len ? Math.sqrt(rmsB / len) : 0;
 
-const scaleA = normalize && rmsA > 0 ? 1 / rmsA : 1;
-const scaleB = normalize && rmsB > 0 ? 1 / rmsB : 1;
+let best = null;
+for (const shift of shifts) {
+  const aStart = Math.max(0, shift);
+  const bStart = Math.max(0, -shift);
+  const len = Math.min(aSamples.length - aStart, bSamples.length - bStart);
+  if (len <= 0) continue;
+  let rmsA = 0;
+  let rmsB = 0;
+  for (let i = 0; i < len; i += 1) {
+    const va = aSamples[aStart + i];
+    const vb = bSamples[bStart + i];
+    rmsA += va * va;
+    rmsB += vb * vb;
+  }
+  rmsA = Math.sqrt(rmsA / len);
+  rmsB = Math.sqrt(rmsB / len);
 
-let rmsErr = 0;
-let maxDelta = 0;
-for (let i = 0; i < len; i += 1) {
-  const va = aSamples[i] * scaleA;
-  const vb = bSamples[i] * scaleB;
-  const delta = va - vb;
-  rmsErr += delta * delta;
-  const ad = Math.abs(delta);
-  if (ad > maxDelta) maxDelta = ad;
+  const scaleA = normalize && rmsA > 0 ? 1 / rmsA : 1;
+  const scaleB = normalize && rmsB > 0 ? 1 / rmsB : 1;
+
+  let rmsErr = 0;
+  let maxDelta = 0;
+  for (let i = 0; i < len; i += 1) {
+    const va = aSamples[aStart + i] * scaleA;
+    const vb = bSamples[bStart + i] * scaleB;
+    const delta = va - vb;
+    rmsErr += delta * delta;
+    const ad = Math.abs(delta);
+    if (ad > maxDelta) maxDelta = ad;
+  }
+  rmsErr = Math.sqrt(rmsErr / len);
+
+  const candidate = {
+    shift,
+    len,
+    rmsA,
+    rmsB,
+    rmsError: rmsErr,
+    maxDelta,
+  };
+  if (!best || candidate.rmsError < best.rmsError) {
+    best = candidate;
+  }
 }
-rmsErr = len ? Math.sqrt(rmsErr / len) : 0;
 
 const result = {
   lengthMismatch: aSamples.length - bSamples.length,
-  rmsA,
-  rmsB,
-  rmsError: rmsErr,
-  maxDelta,
+  rmsA: best?.rmsA ?? 0,
+  rmsB: best?.rmsB ?? 0,
+  rmsError: best?.rmsError ?? 0,
+  maxDelta: best?.maxDelta ?? 0,
+  shift: best?.shift ?? 0,
+  overlapLength: best?.len ?? 0,
   sampleRateA: a.sampleRate,
   sampleRateB: b.sampleRate,
 };

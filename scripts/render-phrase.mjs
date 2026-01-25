@@ -108,7 +108,9 @@ async function createServer(root) {
   const server = http.createServer((req, res) => {
     const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
     const safePath = urlPath === "/" ? "/test/render-offline.html" : urlPath;
-    const filePath = path.resolve(root, `.${safePath}`);
+    const filePath = safePath.startsWith("/worklets/")
+      ? path.resolve(root, "public", safePath.slice(1))
+      : path.resolve(root, `.${safePath}`);
     if (!filePath.startsWith(root)) {
       res.writeHead(403);
       res.end("Forbidden");

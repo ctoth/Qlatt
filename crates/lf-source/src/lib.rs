@@ -197,7 +197,14 @@ impl LfSource {
         let a1 = -2.0 * f32::exp(-PI * bg / self.sample_rate)
             * f32::cos(2.0 * PI * fg / self.sample_rate);
         let a2 = f32::exp(-2.0 * PI * bg / self.sample_rate);
-        let ag = 1.0;
+        let sin_term = (PI * (1.0 - alpha_m)).sin();
+        if !sin_term.is_finite() || sin_term.abs() < 1e-6 {
+            self.voiced = false;
+            return;
+        }
+        // Perrotin et al. (2021) Eq. C4/D2: normalize by sin(pi*(1-alpha_m)).
+        let e_amp = 1.0;
+        let ag = e_amp / sin_term;
 
         // LF_LM uses a causal z^-1 numerator. LF_CALM is non-causal; we fall
         // back to the causal form in real-time and verify CALM offline.

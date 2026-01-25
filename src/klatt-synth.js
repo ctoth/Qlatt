@@ -693,24 +693,24 @@ export class KlattSynth {
     const gsBw = params.BGS;
     const gzFreq = params.FGZ;
     const gzBw = params.BGZ;
-    const sourceMode = params.sourceMode ?? params.SRC;
+    // Voice quality params: fall back to synth.params (slider values) if not in track
+    const sourceMode = params.sourceMode ?? params.SRC ?? this.params.sourceMode;
+    const rd = params.Rd ?? this.params.rd;
+    const lfMode = params.lfMode ?? this.params.lfMode;
+    const openPhaseRatio = params.openPhaseRatio ?? this.params.openPhaseRatio;
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime, ramp);
     this._scheduleAudioParam(
       this.nodes.impulseSource.parameters.get("openPhaseRatio"),
-      params.openPhaseRatio ?? 0.7,
+      openPhaseRatio,
       atTime,
       ramp
     );
     this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0, atTime, ramp);
-    if (Number.isFinite(params.Rd)) {
-      this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
-    }
-    if (Number.isFinite(params.lfMode)) {
-      this._scheduleAudioParam(this.nodes.lfSource.parameters.get("lfMode"), params.lfMode, atTime, ramp);
-    }
+    this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), rd, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.lfSource.parameters.get("lfMode"), lfMode, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgp.parameters.get("frequency"), gpFreq, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgz.parameters.get("frequency"), gzFreq, atTime, ramp);

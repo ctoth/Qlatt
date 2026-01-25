@@ -668,20 +668,24 @@ export class KlattSynth {
     const n23Cor = proximity(f3 - f2 - 50);
     const n34Cor = proximity(f4 - f3 - 150);
 
-    const voiceGain = this._dbToLinear(voiceDb + ndbScale.AV);
+    // PARCOE.FOR lines 117-135: G0 is added to each source amplitude before GETAMP conversion
+    // Formula: NDBAV = NNG0 + NNAV + NDBSCA(9), then IMPULS = GETAMP(NDBAV)
+    const voiceGain = this._dbToLinear(goDb + voiceDb + ndbScale.AV);
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
     // Klatt 80 uses 10*GETAMP(NDBAVS) to compensate for filter cascade attenuation.
     // We preserve that scaling here to match the original behavior.
-    const voiceParGain = this._dbToLinear(voiceParDb + ndbScale.AVS) * 10;
-    const aspGain = this._dbToLinear(aspDb + ndbScale.AH);
+    // PARCOE.FOR line 134-135: NDBAVS = NNG0 + NNAVS + NDBSCA(12), SINAMP = 10*GETAMP(NDBAVS)
+    const voiceParGain = this._dbToLinear(goDb + voiceParDb + ndbScale.AVS) * 10;
+    // PARCOE.FOR line 121-122: NDBAH = NNG0 + NNAH + NDBSCA(10), AHH = GETAMP(NDBAH)
+    const aspGain = this._dbToLinear(goDb + aspDb + ndbScale.AH);
     const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
+    // PARCOE.FOR line 126-127: NDBAF = NNG0 + NNAF + NDBSCA(11), AFF = GETAMP(NDBAF)
     const fricGain =
-      this._dbToLinear(fricDbAdjusted + ndbScale.AF) * parallelScale;
-    // Master gain: simple user-controllable scaling
-    // G0 is already incorporated in individual source amplitudes (voiceGain, aspGain, etc.)
-    // No G0-based scaling here - that would double its effect
+      this._dbToLinear(goDb + fricDbAdjusted + ndbScale.AF) * parallelScale;
+    // Master gain: simple user-controllable scaling (WebAudio addition, not in Klatt 80)
+    // G0 is now correctly incorporated in individual source amplitudes above
     const masterGain = Number.isFinite(this.params.masterGain)
       ? this.params.masterGain
       : 1.0;

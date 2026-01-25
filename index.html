@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QLATT - Klatt Formant Synthesizer</title>
+    <link rel="stylesheet" href="/test/test-harness.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>QLATT Synth Harness</h1>
+          <div class="sub">LF source → diff → cascade resonators</div>
+        </div>
+        <div class="row">
+          <button id="startBtn">Start Audio</button>
+          <button id="stopBtn">Stop Audio</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="row" style="margin-bottom: 16px;">
+          <label for="phrase">Phrase</label>
+          <input id="phrase" type="text" value="hello world" style="flex: 1; min-width: 220px;" />
+          <label for="baseF0">Base F0</label>
+          <input id="baseF0" type="number" value="110" min="60" max="220" step="1" style="width: 80px;" />
+          <button id="speakBtn">Speak</button>
+        </div>
+        <div class="grid" id="controls"></div>
+      </section>
+      <section class="panel" style="margin-top: 18px;">
+        <div class="row" style="margin-bottom: 10px;">
+          <strong>Diagnostics</strong>
+          <button id="copyDiagBtn">Copy diagnostics</button>
+          <button id="clearDiagBtn">Clear</button>
+        </div>
+        <textarea id="diagnostics" rows="8" style="width: 100%; font-family: Consolas, 'Courier New', monospace;" readonly></textarea>
+      </section>
+      <section class="panel spectrogram" style="margin-top: 18px;">
+        <div class="row" style="margin-bottom: 10px;">
+          <strong>Spectrogram</strong>
+          <button id="clearSpecBtn">Clear</button>
+        </div>
+        <canvas id="spectrogram" width="900" height="240"></canvas>
+      </section>
+      <p class="status" id="status">Status: idle</p>
+    </main>
+
+    <script type="module" src="/test/test-harness.js"></script>
+  </body>
+</html>

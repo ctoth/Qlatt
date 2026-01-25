@@ -34,6 +34,8 @@ const tailTime = Number(args.get("tail-time") ?? payload.tailTime ?? 0.2);
 const agcRmsLevel = Number(args.get("agc-rms") ?? 0.18);
 const applyAgc = (args.get("agc") ?? "1") === "1";
 const agcMode = args.get("agc-mode") ?? "utterance";
+const sourceMode = Number(args.get("source-mode"));
+const openPhaseRatio = Number(args.get("open-phase-ratio"));
 const outJson = path.resolve(
   args.get("out-json") ?? path.join(repoRoot, "test", "golden", "qlatt-track.json")
 );
@@ -156,6 +158,8 @@ const result = await page.evaluate(async (opts) => {
   agcRmsLevel,
   applyAgc,
   agcMode,
+  sourceMode: Number.isFinite(sourceMode) ? sourceMode : undefined,
+  openPhaseRatio: Number.isFinite(openPhaseRatio) ? openPhaseRatio : undefined,
 });
 
 await browser.close();

@@ -40,6 +40,8 @@
         agcRmsLevel,
         applyAgc = false,
         agcMode = "utterance",
+        sourceMode,
+        openPhaseRatio,
       }) {
         const resolvedTrack = Array.isArray(track)
           ? track
@@ -53,6 +55,12 @@
         const ctx = new OfflineAudioContext(1, length, sampleRate);
         const synth = new KlattSynth(ctx);
         await synth.initialize();
+        if (Number.isFinite(sourceMode)) {
+          synth.setParam("sourceMode", Number(sourceMode), ctx.currentTime);
+        }
+        if (Number.isFinite(openPhaseRatio)) {
+          synth.setParam("openPhaseRatio", Number(openPhaseRatio), ctx.currentTime);
+        }
         synth.scheduleTrack(resolvedTrack, leadTime);
         const buffer = await ctx.startRendering();
         const channel = buffer.getChannelData(0);

@@ -1137,42 +1137,42 @@ function handleTelemetry(data) {
     phoneme: event?.phoneme ?? "",
   });
   const prev = telemetryMax.get(data.node) || { rms: 0, peak: 0 };
-  const next = { ...prev };
+  const nextMax = { ...prev };
   if (
     inWindow &&
     Number.isFinite(data.rms) &&
     data.rms > (prev.rms ?? 0)
   ) {
-    next.rms = data.rms;
-    next.rmsTime = relTime;
-    next.rmsPhoneme = event?.phoneme ?? "";
+    nextMax.rms = data.rms;
+    nextMax.rmsTime = relTime;
+    nextMax.rmsPhoneme = event?.phoneme ?? "";
   }
   if (
     inWindow &&
     Number.isFinite(data.peak) &&
     data.peak > (prev.peak ?? 0)
   ) {
-    next.peak = data.peak;
-    next.peakTime = relTime;
-    next.peakPhoneme = event?.phoneme ?? "";
+    nextMax.peak = data.peak;
+    nextMax.peakTime = relTime;
+    nextMax.peakPhoneme = event?.phoneme ?? "";
   }
   if (inWindow && Number.isFinite(data.freq)) {
-    if (!Number.isFinite(next.freqMin) || data.freq < next.freqMin) {
-      next.freqMin = data.freq;
+    if (!Number.isFinite(nextMax.freqMin) || data.freq < nextMax.freqMin) {
+      nextMax.freqMin = data.freq;
     }
-    if (!Number.isFinite(next.freqMax) || data.freq > next.freqMax) {
-      next.freqMax = data.freq;
+    if (!Number.isFinite(nextMax.freqMax) || data.freq > nextMax.freqMax) {
+      nextMax.freqMax = data.freq;
     }
   }
   if (inWindow && Number.isFinite(data.bw)) {
-    if (!Number.isFinite(next.bwMin) || data.bw < next.bwMin) {
-      next.bwMin = data.bw;
+    if (!Number.isFinite(nextMax.bwMin) || data.bw < nextMax.bwMin) {
+      nextMax.bwMin = data.bw;
     }
-    if (!Number.isFinite(next.bwMax) || data.bw > next.bwMax) {
-      next.bwMax = data.bw;
+    if (!Number.isFinite(nextMax.bwMax) || data.bw > nextMax.bwMax) {
+      nextMax.bwMax = data.bw;
     }
   }
-  telemetryMax.set(data.node, next);
+  telemetryMax.set(data.node, nextMax);
   if (!lastRun) return;
   if (telemetryTimer) return;
   telemetryTimer = setTimeout(() => {
@@ -1342,26 +1342,26 @@ function startMeterLoop() {
         phoneme: event?.phoneme ?? "",
       });
       const prev = meterMax.get(name) || { rms: 0, peak: 0 };
-      const next = { ...prev };
+      const nextMax = { ...prev };
       if (
         inWindow &&
         Number.isFinite(data.rms) &&
         data.rms > (prev.rms ?? 0)
       ) {
-        next.rms = data.rms;
-        next.rmsTime = relTime;
-        next.rmsPhoneme = event?.phoneme ?? "";
+        nextMax.rms = data.rms;
+        nextMax.rmsTime = relTime;
+        nextMax.rmsPhoneme = event?.phoneme ?? "";
       }
       if (
         inWindow &&
         Number.isFinite(data.peak) &&
         data.peak > (prev.peak ?? 0)
       ) {
-        next.peak = data.peak;
-        next.peakTime = relTime;
-        next.peakPhoneme = event?.phoneme ?? "";
+        nextMax.peak = data.peak;
+        nextMax.peakTime = relTime;
+        nextMax.peakPhoneme = event?.phoneme ?? "";
       }
-      meterMax.set(name, next);
+      meterMax.set(name, nextMax);
       recordSpike(name, data);
       recordSwWindowMax(name, data, relTime, event);
     }
@@ -1392,18 +1392,18 @@ function recordSwWindowMax(name, data, relTime, event) {
 
   const key = `${name}:SW=${sw}`;
   const prev = swWindowMax.get(key) || { rms: 0, peak: 0 };
-  const next = { ...prev };
+  const nextMax = { ...prev };
   if (data.rms > (prev.rms ?? 0)) {
-    next.rms = data.rms;
-    next.rmsTime = relTime;
-    next.rmsPhoneme = event?.phoneme ?? "";
+    nextMax.rms = data.rms;
+    nextMax.rmsTime = relTime;
+    nextMax.rmsPhoneme = event?.phoneme ?? "";
   }
   if (data.peak > (prev.peak ?? 0)) {
-    next.peak = data.peak;
-    next.peakTime = relTime;
-    next.peakPhoneme = event?.phoneme ?? "";
+    nextMax.peak = data.peak;
+    nextMax.peakTime = relTime;
+    nextMax.peakPhoneme = event?.phoneme ?? "";
   }
-  swWindowMax.set(key, next);
+  swWindowMax.set(key, nextMax);
 }
 
 function recordSpike(name, data) {

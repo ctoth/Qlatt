@@ -864,6 +864,13 @@ export class KlattSynth {
     this._lastAF = 0;
     this._lastAH = 0;
 
+    // Warmup fix: Apply first event's formants IMMEDIATELY (not at baseTime) to prime resonators.
+    // Without this, first play after init has stale/default formant values that bleed
+    // into the start of playback.
+    if (track[0]?.params) {
+      this._applyKlattParams(track[0].params, this.ctx.currentTime, false);
+    }
+
     const ndbScale = { AH: -87, AF: -72 };
     for (let i = 0; i < track.length; i += 1) {
       const event = track[i];

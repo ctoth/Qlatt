@@ -949,11 +949,12 @@ export class KlattSynth {
    * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
   _scheduleBurstTransient(atTime, params, triggerParam = 'AF', triggerDelta = 0) {
-    // Calculate PLSTEP amplitude
-    // Klatt 80 uses 16-bit integer space; we use normalized float
-    // G0-28 gives ~9.0 linear (clips), G0-50 gives ~0.7 (safe)
+    // Calculate PLSTEP amplitude per PARCOE.FOR line 131:
+    // PLSTEP = GETAMP(NNG0 + NDBSCA(11) + 44)
+    // where NDBSCA(11) = -72 (AF scale factor)
+    // Formula: GETAMP(G0 - 72 + 44) = GETAMP(G0 - 28)
     const goDb = params.GO ?? 47;
-    const burstDb = goDb - 50;
+    const burstDb = goDb - 28;
     const burstAmplitude = this._dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst

@@ -132,15 +132,28 @@ pub extern "C" fn antiresonator_process(
         return;
     }
     unsafe {
-        let input = core::slice::from_raw_parts(input_ptr, len);
-        let output = core::slice::from_raw_parts_mut(output_ptr, len);
-        (*ptr).process(input, output);
+        let ar = &mut *ptr;
+        if ar.bypass {
+            for i in 0..len {
+                let x = *input_ptr.add(i);
+                *output_ptr.add(i) = x * ar.gain;
+            }
+            return;
+        }
+
+        for i in 0..len {
+            let x = *input_ptr.add(i);
+            let y = ar.a0 * x + ar.b1 * ar.x1 + ar.b2 * ar.x2;
+            ar.x2 = ar.x1;
+            ar.x1 = x;
+            *output_ptr.add(i) = y * ar.gain;
+        }
     }
 }
 
 #[no_mangle]
 pub extern "C" fn alloc_f32(len: usize) -> *mut f32 {
-    let mut buf = Vec::<f32>::with_capacity(len);
+    let mut buf = vec![0.0f32; len];
     let ptr = buf.as_mut_ptr();
     core::mem::forget(buf);
     ptr

@@ -337,7 +337,7 @@ pub extern "C" fn lf_source_process(
 
 #[no_mangle]
 pub extern "C" fn alloc_f32(len: usize) -> *mut f32 {
-    let mut buf = Vec::<f32>::with_capacity(len);
+    let mut buf = vec![0.0f32; len];
     let ptr = buf.as_mut_ptr();
     core::mem::forget(buf);
     ptr

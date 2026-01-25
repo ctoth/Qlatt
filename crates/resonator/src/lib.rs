@@ -118,15 +118,28 @@ pub extern "C" fn resonator_process(
         return;
     }
     unsafe {
-        let input = core::slice::from_raw_parts(input_ptr, len);
-        let output = core::slice::from_raw_parts_mut(output_ptr, len);
-        (*ptr).process(input, output);
+        let res = &mut *ptr;
+        if res.bypass {
+            for i in 0..len {
+                let x = *input_ptr.add(i);
+                *output_ptr.add(i) = x * res.gain;
+            }
+            return;
+        }
+
+        for i in 0..len {
+            let x = *input_ptr.add(i);
+            let y = res.b0 * x + res.a1 * res.y1 + res.a2 * res.y2;
+            res.y2 = res.y1;
+            res.y1 = y;
+            *output_ptr.add(i) = y * res.gain;
+        }
     }
 }
 
 #[no_mangle]
 pub extern "C" fn alloc_f32(len: usize) -> *mut f32 {
-    let mut buf = Vec::<f32>::with_capacity(len);
+    let mut buf = vec![0.0f32; len];
     let ptr = buf.as_mut_ptr();
     core::mem::forget(buf);
     ptr

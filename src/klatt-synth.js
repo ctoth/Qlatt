@@ -54,13 +54,10 @@ export class KlattSynth {
       BGS: 200,
       FGZ: 1500,
       BGZ: 6000,
-      // Klatt 80 defaults: FNZ=FNP=250, BNZ=BNP=100
-      // When zero and pole match, they cancel → signal passes through
-      // Setting to 0 creates degenerate coefficients that block signal!
-      FNZ: 250,
-      BNZ: 100,
-      FNP: 250,
-      BNP: 100,
+      FNZ: 0,
+      BNZ: 0,
+      FNP: 0,
+      BNP: 0,
       parallelMix: 1.0,
       parallelGainScale: 1.0,
       parallelVoiceGain: 0.0,
@@ -153,6 +150,7 @@ export class KlattSynth {
         wasmBytes: wasm?.antiresonator,
         debug: telemetry,
         nodeId: "rgz",
+        bypassAtZero: true,
         reportInterval,
       },
     });
@@ -188,6 +186,7 @@ export class KlattSynth {
         wasmBytes: wasm?.antiresonator,
         debug: telemetry,
         nodeId: "rgz-avs",
+        bypassAtZero: true,
         reportInterval,
       },
     });
@@ -217,6 +216,7 @@ export class KlattSynth {
         wasmBytes: wasm?.antiresonator,
         debug: telemetry,
         nodeId: "nz",
+        bypassAtZero: true,
         reportInterval,
       },
     });
@@ -225,6 +225,7 @@ export class KlattSynth {
         wasmBytes: wasm?.resonator,
         debug: telemetry,
         nodeId: "np",
+        bypassAtZero: true,
         reportInterval,
       },
     });
@@ -243,6 +244,7 @@ export class KlattSynth {
         wasmBytes: wasm?.resonator,
         debug: telemetry,
         nodeId: "parallel-nasal",
+        bypassAtZero: true,
         reportInterval,
       },
     });

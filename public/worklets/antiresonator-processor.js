@@ -23,6 +23,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     this.ready = false;
     this.debug = Boolean(options?.processorOptions?.debug);
     this.nodeId = options?.processorOptions?.nodeId || "antiresonator";
+    this.bypassAtZero = Boolean(options?.processorOptions?.bypassAtZero);
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event) => {
@@ -60,6 +61,17 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     const freq = parameters.frequency[0];
     const bw = parameters.bandwidth[0];
     const gain = parameters.gain[0];
+    const bypass = this.bypassAtZero && (!Number.isFinite(freq) || !Number.isFinite(bw) || freq <= 0 || bw <= 0);
+
+    if (bypass) {
+      if (inputChannel) {
+        outputChannel.set(inputChannel);
+      } else {
+        outputChannel.fill(0);
+      }
+      this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
+      return true;
+    }
 
     this.inputBuffer.ensure(blockSize);
     this.outputBuffer.ensure(blockSize);

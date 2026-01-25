@@ -35,16 +35,22 @@
         sampleRate = 22050,
         leadTime = 0.05,
         tailTime = 0.2,
+        track,
+        includeTrack = false,
       }) {
-        const track = textToKlattTrack(phrase, baseF0);
+        const resolvedTrack = Array.isArray(track)
+          ? track
+          : textToKlattTrack(phrase, baseF0);
         const totalTime =
-          (track.length ? track[track.length - 1].time : 0) + leadTime + tailTime;
+          (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
+          leadTime +
+          tailTime;
         const length = Math.max(1, Math.ceil(totalTime * sampleRate));
 
         const ctx = new OfflineAudioContext(1, length, sampleRate);
         const synth = new KlattSynth(ctx);
         await synth.initialize();
-        synth.scheduleTrack(track, leadTime);
+        synth.scheduleTrack(resolvedTrack, leadTime);
         const buffer = await ctx.startRendering();
         const channel = buffer.getChannelData(0);
 
@@ -68,7 +74,8 @@
           tailTime,
           length,
           metrics: { rms, peak },
-          trackSummary: summarizeTrack(track),
+          trackSummary: summarizeTrack(resolvedTrack),
+          track: includeTrack ? resolvedTrack : undefined,
           samples,
         };
       }

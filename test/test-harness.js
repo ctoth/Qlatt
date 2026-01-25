@@ -139,6 +139,8 @@ async function speak() {
   plstepEvents.length = 0;
   spikeEvents.length = 0;
   lastSpikeAt.clear();
+  swWindowMax.clear();
+  swWindowMaxTime.clear();
   // Set run context BEFORE scheduleTrack so telemetry handler can use it
   lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
   runStartTime = startTime;
@@ -213,6 +215,8 @@ document.getElementById("clearDiagBtn").addEventListener("click", () => {
   telemetryMax.clear();
   meterValues.clear();
   meterMax.clear();
+  swWindowMax.clear();
+  swWindowMaxTime.clear();
   playHistory.length = 0; // P7: Clear play history
 });
 

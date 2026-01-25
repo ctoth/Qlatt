@@ -71,6 +71,28 @@
         let agcScale = 1;
         const target = Number.isFinite(agcRmsLevel) ? agcRmsLevel : NaN;
         if (applyAgc && Number.isFinite(target) && target > 0) {
+          const applyAgcScale = (start, end, desired) => {
+            let sum = 0;
+            let maxAbs = 0;
+            const length = end - start;
+            if (length <= 0) return;
+            for (let j = start; j < end; j += 1) {
+              const v = samples[j];
+              sum += v * v;
+              const av = Math.abs(v);
+              if (av > maxAbs) maxAbs = av;
+            }
+            const currentRms = length ? Math.sqrt(sum / length) : 0;
+            if (currentRms <= 0) return;
+            let scale = desired / currentRms;
+            if (scale * maxAbs >= 1 && maxAbs > 0) {
+              scale = 0.99 / maxAbs;
+            }
+            for (let j = start; j < end; j += 1) {
+              samples[j] *= scale;
+            }
+          };
+
           if (agcMode === "frame" && resolvedTrack.length > 0) {
             const sr = sampleRate;
             for (let i = 0; i < resolvedTrack.length; i += 1) {
@@ -82,17 +104,7 @@
               );
               if (end <= start || start >= samples.length) continue;
               const sliceEnd = Math.min(end, samples.length);
-              let frameRms = 0;
-              for (let j = start; j < sliceEnd; j += 1) {
-                const v = samples[j];
-                frameRms += v * v;
-              }
-              frameRms = (sliceEnd - start) ? Math.sqrt(frameRms / (sliceEnd - start)) : 0;
-              if (frameRms <= 0) continue;
-              const frameScale = target / frameRms;
-              for (let j = start; j < sliceEnd; j += 1) {
-                samples[j] *= frameScale;
-              }
+              applyAgcScale(start, sliceEnd, target);
             }
             rms = 0;
             peak = 0;
@@ -105,7 +117,15 @@
             rms = samples.length ? Math.sqrt(rms / samples.length) : 0;
             agcScale = NaN;
           } else if (rms > 0) {
+            let maxAbs = 0;
+            for (let i = 0; i < samples.length; i += 1) {
+              const av = Math.abs(samples[i]);
+              if (av > maxAbs) maxAbs = av;
+            }
             agcScale = target / rms;
+            if (agcScale * maxAbs >= 1 && maxAbs > 0) {
+              agcScale = 0.99 / maxAbs;
+            }
             rms = 0;
             peak = 0;
             for (let i = 0; i < samples.length; i += 1) {

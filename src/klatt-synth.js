@@ -260,8 +260,10 @@ export class KlattSynth {
     N.sourceSum = ctx.createGain();
     N.lfSourceGain = ctx.createGain();
     N.impulseGain = ctx.createGain();
+    N.sourceBypassGain = ctx.createGain();
     N.sourceDirectGain = ctx.createGain();
     N.sourceDiffGain = ctx.createGain();
+    N.avsBypassGain = ctx.createGain();
     N.avsDirectGain = ctx.createGain();
     N.avsDiffGain = ctx.createGain();
     N.voiceGain = ctx.createGain();
@@ -323,10 +325,12 @@ export class KlattSynth {
     N.sourceSum.connect(N.rgs).connect(N.rgpAvs);
 
     N.voiceGain.connect(N.mixer);
+    N.sourceSum.connect(N.sourceBypassGain).connect(N.voiceGain);
     N.rgp.connect(N.sourceDirectGain).connect(N.voiceGain);
     N.rgp.connect(N.rgz).connect(N.radiationDiff).connect(N.sourceDiffGain).connect(N.voiceGain);
 
     N.avsGain.connect(N.parallelMixer);
+    N.sourceSum.connect(N.avsBypassGain).connect(N.avsGain);
     N.rgpAvs.connect(N.avsDirectGain).connect(N.avsGain);
     N.rgpAvs.connect(N.rgzAvs).connect(N.radiationDiffAvs).connect(N.avsDiffGain).connect(N.avsGain);
     N.glottalMod.connect(N.noiseSource);
@@ -482,15 +486,22 @@ export class KlattSynth {
   }
 
   _applySourceMode(mode, atTime) {
-    const useLf = Number(mode) === 1;
+    const modeValue = Number(mode);
+    const useLf = modeValue === 1;
+    const useBypass = modeValue === 2;
     const lfGain = useLf ? 1 : 0;
     const impulseGain = useLf ? 0 : 1;
+    const bypassGain = useBypass ? 1 : 0;
+    const directGain = useBypass ? 0 : (useLf ? 1 : 0);
+    const diffGain = useBypass ? 0 : (useLf ? 0 : 1);
     this.nodes.lfSourceGain.gain.setValueAtTime(lfGain, atTime);
     this.nodes.impulseGain.gain.setValueAtTime(impulseGain, atTime);
-    this.nodes.sourceDirectGain.gain.setValueAtTime(lfGain, atTime);
-    this.nodes.sourceDiffGain.gain.setValueAtTime(impulseGain, atTime);
-    this.nodes.avsDirectGain.gain.setValueAtTime(lfGain, atTime);
-    this.nodes.avsDiffGain.gain.setValueAtTime(impulseGain, atTime);
+    this.nodes.sourceBypassGain.gain.setValueAtTime(bypassGain, atTime);
+    this.nodes.sourceDirectGain.gain.setValueAtTime(directGain, atTime);
+    this.nodes.sourceDiffGain.gain.setValueAtTime(diffGain, atTime);
+    this.nodes.avsBypassGain.gain.setValueAtTime(bypassGain, atTime);
+    this.nodes.avsDirectGain.gain.setValueAtTime(directGain, atTime);
+    this.nodes.avsDiffGain.gain.setValueAtTime(diffGain, atTime);
   }
 
   _setAudioParam(param, value, atTime) {
@@ -562,8 +573,10 @@ export class KlattSynth {
       this.nodes.parallelNasal.parameters.get("bandwidth"),
       this.nodes.lfSourceGain.gain,
       this.nodes.impulseGain.gain,
+      this.nodes.sourceBypassGain.gain,
       this.nodes.sourceDirectGain.gain,
       this.nodes.sourceDiffGain.gain,
+      this.nodes.avsBypassGain.gain,
       this.nodes.avsDirectGain.gain,
       this.nodes.avsDiffGain.gain,
       this.nodes.voiceGain.gain,

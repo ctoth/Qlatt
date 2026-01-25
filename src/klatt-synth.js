@@ -18,6 +18,7 @@ export class KlattSynth {
     await Promise.all([
       this.ctx.audioWorklet.addModule(workletBase + "resonator-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "antiresonator-processor.js"),
+      this.ctx.audioWorklet.addModule(workletBase + "impulse-train-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "lf-source-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "noise-source-processor.js"),
       this.ctx.audioWorklet.addModule(workletBase + "glottal-mod-processor.js"),
@@ -36,6 +37,7 @@ export class KlattSynth {
       f0: 0,
       rd: 1.0,
       lfMode: 0,
+      sourceMode: 0, // 0 = impulse (classic Klatt), 1 = LF source
       voiceGain: 0.0,
       noiseGain: 0.0,
       noiseCutoff: 1000,
@@ -49,6 +51,8 @@ export class KlattSynth {
       FGP: 0,
       BGP: 100,
       BGS: 200,
+      FGZ: 1500,
+      BGZ: 6000,
       // Klatt 80 defaults: FNZ=FNP=250, BNZ=BNP=100
       // When zero and pole match, they cancel → signal passes through
       // Setting to 0 creates degenerate coefficients that block signal!
@@ -104,6 +108,16 @@ export class KlattSynth {
         reportInterval,
       },
     });
+    N.impulseSource = new AudioWorkletNode(ctx, "impulse-train-processor", {
+      numberOfInputs: 0,
+      numberOfOutputs: 1,
+      outputChannelCount: [1],
+      processorOptions: {
+        debug: telemetry,
+        nodeId: "impulse",
+        reportInterval,
+      },
+    });
     N.noiseSource = new AudioWorkletNode(ctx, "noise-source-processor", {
       numberOfInputs: 1,
       numberOfOutputs: 1,
@@ -130,6 +144,14 @@ export class KlattSynth {
         debug: telemetry,
         nodeId: "rgp",
         bypassAtZero: true,
+        reportInterval,
+      },
+    });
+    N.rgz = new AudioWorkletNode(ctx, "antiresonator-processor", {
+      processorOptions: {
+        wasmBytes: wasm?.antiresonator,
+        debug: telemetry,
+        nodeId: "rgz",
         reportInterval,
       },
     });
@@ -160,10 +182,32 @@ export class KlattSynth {
         reportInterval,
       },
     });
+    N.rgzAvs = new AudioWorkletNode(ctx, "antiresonator-processor", {
+      processorOptions: {
+        wasmBytes: wasm?.antiresonator,
+        debug: telemetry,
+        nodeId: "rgz-avs",
+        reportInterval,
+      },
+    });
     N.diff = new AudioWorkletNode(ctx, "differentiator-processor", {
       processorOptions: {
         debug: telemetry,
         nodeId: "diff",
+        reportInterval,
+      },
+    });
+    N.radiationDiff = new AudioWorkletNode(ctx, "differentiator-processor", {
+      processorOptions: {
+        debug: telemetry,
+        nodeId: "radiation-diff",
+        reportInterval,
+      },
+    });
+    N.radiationDiffAvs = new AudioWorkletNode(ctx, "differentiator-processor", {
+      processorOptions: {
+        debug: telemetry,
+        nodeId: "radiation-diff-avs",
         reportInterval,
       },
     });
@@ -212,6 +256,13 @@ export class KlattSynth {
       })
     );
 
+    N.sourceSum = ctx.createGain();
+    N.lfSourceGain = ctx.createGain();
+    N.impulseGain = ctx.createGain();
+    N.sourceDirectGain = ctx.createGain();
+    N.sourceDiffGain = ctx.createGain();
+    N.avsDirectGain = ctx.createGain();
+    N.avsDiffGain = ctx.createGain();
     N.voiceGain = ctx.createGain();
     N.avsGain = ctx.createGain();
     N.noiseGain = ctx.createGain();
@@ -239,14 +290,19 @@ export class KlattSynth {
     N.plstepSource.start(); // Must start ConstantSourceNode
 
     this._attachTelemetry(N.lfSource);
+    this._attachTelemetry(N.impulseSource);
     this._attachTelemetry(N.noiseSource);
     this._attachTelemetry(N.fricationSource);
     this._attachTelemetry(N.rgp);
+    this._attachTelemetry(N.rgz);
     this._attachTelemetry(N.rgs);
     this._attachTelemetry(N.rgpAvs);
+    this._attachTelemetry(N.rgzAvs);
     this._attachTelemetry(N.glottalMod);
     this._attachTelemetry(N.nz);
     this._attachTelemetry(N.diff);
+    this._attachTelemetry(N.radiationDiff);
+    this._attachTelemetry(N.radiationDiffAvs);
     this._attachTelemetry(N.np);
     this._attachTelemetry(N.parallelNasal);
     for (const node of N.cascade) {
@@ -259,14 +315,24 @@ export class KlattSynth {
 
   _connectGraph() {
     const N = this.nodes;
-    N.lfSource.connect(N.rgp);
-    N.rgp.connect(N.voiceGain).connect(N.mixer);
-    N.lfSource.connect(N.rgs).connect(N.rgpAvs).connect(N.avsGain).connect(N.mixer);
+    N.lfSource.connect(N.lfSourceGain).connect(N.sourceSum);
+    N.impulseSource.connect(N.impulseGain).connect(N.sourceSum);
+    N.sourceSum.connect(N.rgp);
+    N.sourceSum.connect(N.rgs).connect(N.rgpAvs);
+
+    N.voiceGain.connect(N.mixer);
+    N.rgp.connect(N.sourceDirectGain).connect(N.voiceGain);
+    N.rgp.connect(N.rgz).connect(N.radiationDiff).connect(N.sourceDiffGain).connect(N.voiceGain);
+
+    N.avsGain.connect(N.mixer);
+    N.rgpAvs.connect(N.avsDirectGain).connect(N.avsGain);
+    N.rgpAvs.connect(N.rgzAvs).connect(N.radiationDiffAvs).connect(N.avsDiffGain).connect(N.avsGain);
     N.glottalMod.connect(N.noiseSource);
     N.glottalMod.connect(N.fricationSource);
     N.noiseSource.connect(N.noiseGain).connect(N.mixer);
     // Klatt 1980: UGLOT is the radiated glottal flow (after first difference).
-    // Our LF source already emits a differentiated LF waveform, so mixer = UGLOT.
+    // When sourceMode = impulse (classic), we apply RGZ + radiationDiff.
+    // When sourceMode = LF, we bypass radiationDiff because LF source is pre-differentiated.
     // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
     // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
     let current = N.mixer;
@@ -323,16 +389,24 @@ export class KlattSynth {
     const gpBw = Number.isFinite(p.BGP) ? p.BGP : p.rgpBandwidth;
     const gsFreq = Number.isFinite(p.rgsFrequency) ? p.rgsFrequency : 0;
     const gsBw = Number.isFinite(p.BGS) ? p.BGS : p.rgsBandwidth;
+    const gzFreq = Number.isFinite(p.FGZ) ? p.FGZ : 0;
+    const gzBw = Number.isFinite(p.BGZ) ? p.BGZ : 0;
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
+    this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), p.f0, atTime);
+    this._setAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
     this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("frequency"), gpFreq, atTime);
     this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime);
+    this._setAudioParam(this.nodes.rgz.parameters.get("frequency"), gzFreq, atTime);
+    this._setAudioParam(this.nodes.rgz.parameters.get("bandwidth"), gzBw, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), gsFreq, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), gsBw, atTime);
     this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), gpFreq, atTime);
     this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), gpBw, atTime);
+    this._setAudioParam(this.nodes.rgzAvs.parameters.get("frequency"), gzFreq, atTime);
+    this._setAudioParam(this.nodes.rgzAvs.parameters.get("bandwidth"), gzBw, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("frequency"), p.FNZ, atTime);
     this._setAudioParam(this.nodes.nz.parameters.get("bandwidth"), p.BNZ, atTime);
     this._setAudioParam(this.nodes.np.parameters.get("frequency"), p.FNP, atTime);
@@ -340,6 +414,7 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.parallelNasal.parameters.get("frequency"), p.FNP, atTime);
     this._setAudioParam(this.nodes.parallelNasal.parameters.get("bandwidth"), p.BNP, atTime);
 
+    this._applySourceMode(p.sourceMode, atTime);
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
     const avsGain = this._dbToLinear((p.AVS ?? -70) + (-44)) * 10;
     this.nodes.avsGain.gain.setValueAtTime(avsGain, atTime);
@@ -401,6 +476,18 @@ export class KlattSynth {
     this._setParallelMix(p.parallelMix, atTime);
   }
 
+  _applySourceMode(mode, atTime) {
+    const useLf = Number(mode) === 1;
+    const lfGain = useLf ? 1 : 0;
+    const impulseGain = useLf ? 0 : 1;
+    this.nodes.lfSourceGain.gain.setValueAtTime(lfGain, atTime);
+    this.nodes.impulseGain.gain.setValueAtTime(impulseGain, atTime);
+    this.nodes.sourceDirectGain.gain.setValueAtTime(lfGain, atTime);
+    this.nodes.sourceDiffGain.gain.setValueAtTime(impulseGain, atTime);
+    this.nodes.avsDirectGain.gain.setValueAtTime(lfGain, atTime);
+    this.nodes.avsDiffGain.gain.setValueAtTime(impulseGain, atTime);
+  }
+
   _setAudioParam(param, value, atTime) {
     if (!param || !Number.isFinite(value)) return;
     param.setValueAtTime(value, atTime);
@@ -448,19 +535,31 @@ export class KlattSynth {
     const params = [
       this.nodes.lfSource.parameters.get("f0"),
       this.nodes.lfSource.parameters.get("rd"),
+      this.nodes.impulseSource.parameters.get("f0"),
+      this.nodes.impulseSource.parameters.get("gain"),
       this.nodes.glottalMod.parameters.get("f0"),
       this.nodes.rgp.parameters.get("frequency"),
       this.nodes.rgp.parameters.get("bandwidth"),
+      this.nodes.rgz.parameters.get("frequency"),
+      this.nodes.rgz.parameters.get("bandwidth"),
       this.nodes.rgs.parameters.get("frequency"),
       this.nodes.rgs.parameters.get("bandwidth"),
       this.nodes.rgpAvs.parameters.get("frequency"),
       this.nodes.rgpAvs.parameters.get("bandwidth"),
+      this.nodes.rgzAvs.parameters.get("frequency"),
+      this.nodes.rgzAvs.parameters.get("bandwidth"),
       this.nodes.nz.parameters.get("frequency"),
       this.nodes.nz.parameters.get("bandwidth"),
       this.nodes.np.parameters.get("frequency"),
       this.nodes.np.parameters.get("bandwidth"),
       this.nodes.parallelNasal.parameters.get("frequency"),
       this.nodes.parallelNasal.parameters.get("bandwidth"),
+      this.nodes.lfSourceGain.gain,
+      this.nodes.impulseGain.gain,
+      this.nodes.sourceDirectGain.gain,
+      this.nodes.sourceDiffGain.gain,
+      this.nodes.avsDirectGain.gain,
+      this.nodes.avsDiffGain.gain,
       this.nodes.voiceGain.gain,
       this.nodes.avsGain.gain,
       this.nodes.noiseGain.gain,
@@ -557,8 +656,15 @@ export class KlattSynth {
     const gpFreq = Number.isFinite(params.FGP) ? params.FGP : this.params.FGP;
     const gpBw = Number.isFinite(params.BGP) ? params.BGP : this.params.BGP;
     const gsBw = Number.isFinite(params.BGS) ? params.BGS : this.params.BGS;
+    const gzFreq = Number.isFinite(params.FGZ) ? params.FGZ : this.params.FGZ;
+    const gzBw = Number.isFinite(params.BGZ) ? params.BGZ : this.params.BGZ;
+    const sourceMode = Number.isFinite(params.sourceMode)
+      ? params.sourceMode
+      : (Number.isFinite(params.SRC) ? params.SRC : this.params.sourceMode);
 
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
@@ -568,11 +674,16 @@ export class KlattSynth {
     }
     this._scheduleAudioParam(this.nodes.rgp.parameters.get("frequency"), gpFreq, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgz.parameters.get("frequency"), gzFreq, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgz.parameters.get("bandwidth"), gzBw, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), gpFreq, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), gpBw, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgzAvs.parameters.get("frequency"), gzFreq, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.rgzAvs.parameters.get("bandwidth"), gzBw, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgs.parameters.get("frequency"), 0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.rgs.parameters.get("bandwidth"), gsBw, atTime, ramp);
 
+    this._applySourceMode(sourceMode, atTime);
     this._scheduleAudioParam(this.nodes.voiceGain.gain, voiceGain, atTime, ramp);
     this._scheduleAudioParam(this.nodes.avsGain.gain, voiceParGain, atTime, ramp);
     // Klatt 80 mutual exclusion: when cascade branch is active (SW=0),
@@ -615,6 +726,7 @@ export class KlattSynth {
         fricGain,
         masterGain,
         parallelSrcGain,
+        sourceMode,
         voiceDb: params.AV ?? -70,
         aspDb: params.AH ?? -70,
         fricDb: params.AF ?? -70,
@@ -935,6 +1047,7 @@ export class KlattSynth {
     switch (name) {
       case "f0":
         this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), value, atTime);
+        this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), value, atTime);
         this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), value, atTime);
         break;
       case "rd":
@@ -971,6 +1084,14 @@ export class KlattSynth {
         this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), value, atTime);
         this._setAudioParam(this.nodes.rgpAvs.parameters.get("bandwidth"), value, atTime);
         break;
+      case "FGZ":
+        this._setAudioParam(this.nodes.rgz.parameters.get("frequency"), value, atTime);
+        this._setAudioParam(this.nodes.rgzAvs.parameters.get("frequency"), value, atTime);
+        break;
+      case "BGZ":
+        this._setAudioParam(this.nodes.rgz.parameters.get("bandwidth"), value, atTime);
+        this._setAudioParam(this.nodes.rgzAvs.parameters.get("bandwidth"), value, atTime);
+        break;
       case "rgsFrequency":
         this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), value, atTime);
         break;
@@ -1002,6 +1123,11 @@ export class KlattSynth {
         break;
       case "parallelMix":
         this._setParallelMix(value, atTime, true, true);
+        break;
+      case "sourceMode":
+      case "SRC":
+        this.params.sourceMode = value;
+        this._applySourceMode(value, atTime);
         break;
       case "parallelGainScale":
         this.params.parallelGainScale = value;

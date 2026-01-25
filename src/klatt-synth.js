@@ -633,6 +633,9 @@ export class KlattSynth {
     const fricDb = params.AF ?? -70;
     const goDb = params.GO ?? 47;
 
+    // Source amplitude scale factors (PARCOE.FOR NDBSCA)
+    // AV, AH, AF, AVS are offset by -47 to compensate for G0 default of 47
+    // This keeps default output level while making G0 functional as overall gain control
     const ndbScale = {
       A1: -58,
       A2: -65,
@@ -642,14 +645,14 @@ export class KlattSynth {
       A6: -80,
       AN: -58,
       AB: -84,
-      AV: -72,
+      AV: -119,   // -72 - 47: compensates for G0 addition
       // AH: Klatt 80 uses -102 (aspiration 30 dB quieter than voicing).
       // Our input AH values are ~15 dB lower than Klatt 80 (max ~40 vs ~55),
       // so we use -87 to maintain the same output amplitude relationship.
-      // Math: G0 + 40 - 87 = G0 - 47 matches G0 + 55 - 102 = G0 - 47
-      AH: -87,
-      AF: -72,
-      AVS: -44,
+      // After G0 compensation: -87 - 47 = -134
+      AH: -134,   // -87 - 47: compensates for G0 addition
+      AF: -119,   // -72 - 47: compensates for G0 addition
+      AVS: -91,   // -44 - 47: compensates for G0 addition
     };
     const f1 = params.F1;
     const f2 = params.F2;

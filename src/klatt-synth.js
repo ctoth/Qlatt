@@ -38,6 +38,7 @@ export class KlattSynth {
       rd: 1.0,
       lfMode: 0,
       sourceMode: 0, // 0 = impulse (classic Klatt), 1 = LF source
+      openPhaseRatio: 0.7,
       voiceGain: 0.0,
       noiseGain: 0.0,
       noiseCutoff: 1000,
@@ -267,6 +268,7 @@ export class KlattSynth {
     N.avsGain = ctx.createGain();
     N.noiseGain = ctx.createGain();
     N.mixer = ctx.createGain();
+    N.parallelMixer = ctx.createGain();
     N.parallelSourceGain = ctx.createGain();
     N.parallelDiffGain = ctx.createGain();
     N.parallelFricGain = ctx.createGain();
@@ -324,12 +326,14 @@ export class KlattSynth {
     N.rgp.connect(N.sourceDirectGain).connect(N.voiceGain);
     N.rgp.connect(N.rgz).connect(N.radiationDiff).connect(N.sourceDiffGain).connect(N.voiceGain);
 
-    N.avsGain.connect(N.mixer);
+    N.avsGain.connect(N.parallelMixer);
     N.rgpAvs.connect(N.avsDirectGain).connect(N.avsGain);
     N.rgpAvs.connect(N.rgzAvs).connect(N.radiationDiffAvs).connect(N.avsDiffGain).connect(N.avsGain);
     N.glottalMod.connect(N.noiseSource);
     N.glottalMod.connect(N.fricationSource);
-    N.noiseSource.connect(N.noiseGain).connect(N.mixer);
+    N.noiseSource.connect(N.noiseGain);
+    N.noiseGain.connect(N.mixer);
+    N.noiseGain.connect(N.parallelMixer);
     // Klatt 1980: UGLOT is the radiated glottal flow (after first difference).
     // When sourceMode = impulse (classic), we apply RGZ + radiationDiff.
     // When sourceMode = LF, we bypass radiationDiff because LF source is pre-differentiated.
@@ -347,8 +351,8 @@ export class KlattSynth {
 
     // Parallel branch uses radiated glottal source (UGLOT) for F1,
     // and first-diff of UGLOT (UGLOT1) for F2-F4.
-    N.mixer.connect(N.parallelSourceGain);
-    N.mixer.connect(N.diff);
+    N.parallelMixer.connect(N.parallelSourceGain);
+    N.parallelMixer.connect(N.diff);
     N.diff.connect(N.parallelDiffGain).connect(N.parallelDiffSum);
     N.fricationSource.connect(N.parallelFricGain).connect(N.parallelDiffSum);
 
@@ -394,6 +398,7 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime);
+    this._setAudioParam(this.nodes.impulseSource.parameters.get("openPhaseRatio"), p.openPhaseRatio, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), p.rd, atTime);
     this._setAudioParam(this.nodes.lfSource.parameters.get("lfMode"), p.lfMode, atTime);
     this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), p.f0, atTime);
@@ -537,6 +542,7 @@ export class KlattSynth {
       this.nodes.lfSource.parameters.get("rd"),
       this.nodes.impulseSource.parameters.get("f0"),
       this.nodes.impulseSource.parameters.get("gain"),
+      this.nodes.impulseSource.parameters.get("openPhaseRatio"),
       this.nodes.glottalMod.parameters.get("f0"),
       this.nodes.rgp.parameters.get("frequency"),
       this.nodes.rgp.parameters.get("bandwidth"),
@@ -665,6 +671,12 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime, ramp);
+    this._scheduleAudioParam(
+      this.nodes.impulseSource.parameters.get("openPhaseRatio"),
+      params.openPhaseRatio ?? this.params.openPhaseRatio,
+      atTime,
+      ramp
+    );
     this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
@@ -1049,6 +1061,9 @@ export class KlattSynth {
         this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), value, atTime);
         this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), value, atTime);
         this._setAudioParam(this.nodes.glottalMod.parameters.get("f0"), value, atTime);
+        break;
+      case "openPhaseRatio":
+        this._setAudioParam(this.nodes.impulseSource.parameters.get("openPhaseRatio"), value, atTime);
         break;
       case "rd":
         this._setAudioParam(this.nodes.lfSource.parameters.get("rd"), value, atTime);

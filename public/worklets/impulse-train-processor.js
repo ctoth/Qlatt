@@ -3,12 +3,21 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     return [
       { name: "f0", defaultValue: 0, minValue: 0, maxValue: 2000, automationRate: "a-rate" },
       { name: "gain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "a-rate" },
+      { name: "openPhaseRatio", defaultValue: 0.7, minValue: 0, maxValue: 1, automationRate: "k-rate" },
     ];
   }
 
   constructor(options) {
     super(options);
     this.phase = 0;
+    this.periodLength = 0;
+    this.openPhaseLength = 0;
+    this.positionInPeriod = 0;
+    this.a = 0;
+    this.b = 0;
+    this.c = 0;
+    this.y1 = 0;
+    this.y2 = 0;
     this.debug = Boolean(options?.processorOptions?.debug);
     this.nodeId = options?.processorOptions?.nodeId || "impulse";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
@@ -28,6 +37,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     const blockSize = outputChannel.length;
     const f0Values = parameters.f0;
     const gainValues = parameters.gain;
+    const openPhaseRatio = parameters.openPhaseRatio[0];
     const sr = sampleRate || 48000;
 
     let gainSum = 0;
@@ -43,14 +53,34 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
         continue;
       }
 
-      const phaseInc = f0 / sr;
-      this.phase += phaseInc;
-      if (this.phase >= 1) {
-        this.phase -= Math.floor(this.phase);
-        outputChannel[i] = gain;
-      } else {
-        outputChannel[i] = 0;
+      const periodLength = Math.max(1, Math.round(sr / f0));
+      if (periodLength !== this.periodLength) {
+        this.periodLength = periodLength;
+        this.openPhaseLength = Math.max(
+          0,
+          Math.round(this.periodLength * Math.max(0, Math.min(1, openPhaseRatio)))
+        );
+        this.positionInPeriod = 0;
+        this._setImpulseResonator(sr);
       }
+
+      if (this.openPhaseLength <= 0) {
+        outputChannel[i] = 0;
+        continue;
+      }
+
+      const pulse = (this.positionInPeriod === 1)
+        ? 1
+        : (this.positionInPeriod === 2) ? -1 : 0;
+      this.positionInPeriod += 1;
+      if (this.positionInPeriod >= this.periodLength) {
+        this.positionInPeriod = 0;
+      }
+
+      const y = this.a * pulse + this.b * this.y1 + this.c * this.y2;
+      this.y2 = this.y1;
+      this.y1 = y;
+      outputChannel[i] = y * gain;
     }
 
     this._reportMetrics(outputChannel, {
@@ -58,6 +88,25 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
       gainPeak,
     });
     return true;
+  }
+
+  _setImpulseResonator(sr) {
+    const bw = this.openPhaseLength > 0 ? sr / this.openPhaseLength : 0;
+    if (!Number.isFinite(bw) || bw <= 0) {
+      this.a = 0;
+      this.b = 0;
+      this.c = 0;
+      this.y1 = 0;
+      this.y2 = 0;
+      return;
+    }
+    const r = Math.exp(-Math.PI * bw / sr);
+    const w = 0;
+    this.c = -(r ** 2);
+    this.b = 2 * r * Math.cos(w);
+    this.a = 1; // match KlattSyn adjustImpulseGain(1)
+    this.y1 = 0;
+    this.y2 = 0;
   }
 
   _reportMetrics(buffer, params) {

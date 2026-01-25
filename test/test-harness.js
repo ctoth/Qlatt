@@ -217,10 +217,6 @@ function applyUrlParams() {
     }
   }
 
-  // Auto-speak if requested
-  if (params.has('autoSpeak') && params.get('autoSpeak') !== 'false') {
-    setTimeout(() => speak(), 100);
-  }
 }
 
 (async () => {

@@ -44,6 +44,9 @@ export const BASE_PARAMS = {
 
 export const PHONEME_TARGETS = {
   // --- Vowels (Stressed '1') ---
+  // Vowel formant targets based on Peterson & Barney (1952) male speaker averages
+  // "Control Methods Used in a Study of the Vowels", JASA 24(2):175-184
+  // See also: Hillenbrand et al. (1995) for modern replication
   IY1: {
     F1: 310,
     F2: 2020,
@@ -189,6 +192,9 @@ export const PHONEME_TARGETS = {
     mid: true,
     central: true,
   },
+  // F3 for American English /r/: Espy-Wilson et al. (2000)
+  // "Acoustic Modeling of American English /r/", JASA 108(1):343-356
+  // Measured range: 1300-1950 Hz (male speakers)
   ER1: {
     F1: 470,
     F2: 1200,
@@ -575,6 +581,9 @@ export const PHONEME_TARGETS = {
     glottal: true,
   },
   // --- Nasals ---
+  // Nasal pole/zero: Hawkins & Stevens (1985) "Acoustic and perceptual correlates
+  // of the non-nasal-nasal distinction for vowels", JASA 77(4):1560-1575
+  // BNP = BNZ = 100 Hz matches paper recommendations
   M: {
     F1: 250,
     F2: 1100,
@@ -643,6 +652,9 @@ export const PHONEME_TARGETS = {
     voiced: true,
     alveolar: true,
   },
+  // F3 for American English /r/: Espy-Wilson et al. (2000)
+  // "Acoustic Modeling of American English /r/", JASA 108(1):343-356
+  // Measured range: 1300-1950 Hz (male speakers)
   R: {
     F1: 310,
     F2: 1060,

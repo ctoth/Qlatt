@@ -162,6 +162,9 @@ export class KlattSynth {
         reportInterval,
       },
     });
+    // Aspiration modulation: COEWAV.FOR lines 113-115, 155-156
+    // 50% square wave modulation synchronized to glottal cycle
+    // Klatt 1980 p.977-978: "The degree of amplitude modulation is fixed at 50%"
     N.glottalMod = new AudioWorkletNode(ctx, "glottal-mod-processor", {
       numberOfInputs: 0,
       numberOfOutputs: 1,
@@ -633,7 +636,7 @@ export class KlattSynth {
     const fricDb = params.AF ?? -70;
     const goDb = params.GO ?? 47;
 
-    // Source amplitude scale factors (PARCOE.FOR NDBSCA)
+    // Source amplitude scale factors (PARCOE.FOR lines 51-53: NDBSCA)
     // AV, AH, AF, AVS are offset by -47 to compensate for G0 default of 47
     // This keeps default output level while making G0 functional as overall gain control
     const ndbScale = {

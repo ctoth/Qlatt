@@ -39,6 +39,7 @@
         includeTrack = false,
         agcRmsLevel,
         applyAgc = false,
+        agcMode = "utterance",
       }) {
         const resolvedTrack = Array.isArray(track)
           ? track
@@ -69,18 +70,53 @@
         rms = channel.length ? Math.sqrt(rms / channel.length) : 0;
         let agcScale = 1;
         const target = Number.isFinite(agcRmsLevel) ? agcRmsLevel : NaN;
-        if (applyAgc && Number.isFinite(target) && target > 0 && rms > 0) {
-          agcScale = target / rms;
-          rms = 0;
-          peak = 0;
-          for (let i = 0; i < samples.length; i += 1) {
-            const v = samples[i] * agcScale;
-            samples[i] = v;
-            rms += v * v;
-            const av = Math.abs(v);
-            if (av > peak) peak = av;
+        if (applyAgc && Number.isFinite(target) && target > 0) {
+          if (agcMode === "frame" && resolvedTrack.length > 0) {
+            const sr = sampleRate;
+            for (let i = 0; i < resolvedTrack.length; i += 1) {
+              const event = resolvedTrack[i];
+              const next = resolvedTrack[i + 1];
+              const start = Math.floor((leadTime + event.time) * sr);
+              const end = Math.floor(
+                (leadTime + (next?.time ?? event.time + 0.005)) * sr
+              );
+              if (end <= start || start >= samples.length) continue;
+              const sliceEnd = Math.min(end, samples.length);
+              let frameRms = 0;
+              for (let j = start; j < sliceEnd; j += 1) {
+                const v = samples[j];
+                frameRms += v * v;
+              }
+              frameRms = (sliceEnd - start) ? Math.sqrt(frameRms / (sliceEnd - start)) : 0;
+              if (frameRms <= 0) continue;
+              const frameScale = target / frameRms;
+              for (let j = start; j < sliceEnd; j += 1) {
+                samples[j] *= frameScale;
+              }
+            }
+            rms = 0;
+            peak = 0;
+            for (let i = 0; i < samples.length; i += 1) {
+              const v = samples[i];
+              rms += v * v;
+              const av = Math.abs(v);
+              if (av > peak) peak = av;
+            }
+            rms = samples.length ? Math.sqrt(rms / samples.length) : 0;
+            agcScale = NaN;
+          } else if (rms > 0) {
+            agcScale = target / rms;
+            rms = 0;
+            peak = 0;
+            for (let i = 0; i < samples.length; i += 1) {
+              const v = samples[i] * agcScale;
+              samples[i] = v;
+              rms += v * v;
+              const av = Math.abs(v);
+              if (av > peak) peak = av;
+            }
+            rms = samples.length ? Math.sqrt(rms / samples.length) : 0;
           }
-          rms = samples.length ? Math.sqrt(rms / samples.length) : 0;
         }
 
         return {
@@ -91,7 +127,7 @@
           tailTime,
           length,
           metrics: { rms, peak },
-          agc: applyAgc ? { target, scale: agcScale } : undefined,
+          agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,
           trackSummary: summarizeTrack(resolvedTrack),
           track: includeTrack ? resolvedTrack : undefined,
           samples,

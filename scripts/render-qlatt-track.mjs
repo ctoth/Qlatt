@@ -33,6 +33,7 @@ const leadTime = Number(args.get("lead-time") ?? payload.leadTime ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? payload.tailTime ?? 0.2);
 const agcRmsLevel = Number(args.get("agc-rms") ?? 0.18);
 const applyAgc = (args.get("agc") ?? "1") === "1";
+const agcMode = args.get("agc-mode") ?? "utterance";
 const outJson = path.resolve(
   args.get("out-json") ?? path.join(repoRoot, "test", "golden", "qlatt-track.json")
 );
@@ -154,6 +155,7 @@ const result = await page.evaluate(async (opts) => {
   track,
   agcRmsLevel,
   applyAgc,
+  agcMode,
 });
 
 await browser.close();

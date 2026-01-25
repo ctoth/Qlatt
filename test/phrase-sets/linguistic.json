@@ -1,0 +1,26 @@
+{
+  "name": "linguistic-baseline",
+  "baseF0": 110,
+  "phrases": [
+    "The quick brown fox jumps over the lazy dog.",
+    "She sells seashells by the seashore.",
+    "Thin thieves thought that they thrilled.",
+    "Ship shape, sheep shop, and cheap chips.",
+    "Sip zip, sip ship, sip sip.",
+    "A zoo can be fun on a sunny day.",
+    "He had your dark suit in greasy wash water all year.",
+    "Say oh, ee, and oo again.",
+    "Bob bought a big blue balloon.",
+    "Pat tapped a pot and picked a paper cup.",
+    "Gag, gang, and gunk go together.",
+    "Layer, lawyer, royal, rural.",
+    "Nina mumbled many minimal numbers.",
+    "Fresh frost forms on five fields.",
+    "Vera vapes very vivid violets.",
+    "Zesty zest is easy to spot.",
+    "Shy sharks shimmer in shallow shoals.",
+    "They bathed the smooth leather.",
+    "S, f, sh, th, z, v, zh, dh.",
+    "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty."
+  ]
+}

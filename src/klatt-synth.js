@@ -746,6 +746,8 @@ export class KlattSynth {
       // Our AF values are scaled differently (typical burst AF is 15-20, not 50-55).
       // Detect burst when: previous AF was near-zero AND current AF is significant,
       // OR when AH (aspiration) jumps significantly (for aspirated releases).
+      const isStopRelease = typeof event.phoneme === "string" &&
+        (event.phoneme.endsWith("_REL") || event.phoneme.endsWith("_ASP"));
       const currentAF = event.params.AF ?? 0;
       const currentAH = event.params.AH ?? 0;
       const afDelta = currentAF - this._lastAF;
@@ -754,7 +756,7 @@ export class KlattSynth {
       // This matches Klatt 80: IF (NNAF - NAFLAS >= 49) PLSTEP = ...
       const isBurst = (this._lastAF <= 5 && afDelta >= 49) ||
                       ((this._lastAH ?? 0) <= 5 && ahDelta >= 49);
-      if (isBurst) {
+      if (isStopRelease && isBurst) {
         // Determine which parameter triggered the burst
         const triggerParam = (this._lastAF <= 5 && afDelta >= 49) ? 'AF' : 'AH';
         const triggerDelta = triggerParam === 'AF' ? afDelta : ahDelta;

@@ -29,6 +29,7 @@ const goldenPath = args.get("golden")
   ? path.resolve(args.get("golden"))
   : path.join(repoRoot, "test", "golden", "phrase-hello-world.json");
 const writeGolden = args.get("write-golden") === "1";
+const includeTrack = (args.get("include-track") ?? "0") === "1";
 const leadTime = Number(args.get("lead-time") ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? 0.2);
 
@@ -160,6 +161,7 @@ const payload = await page.evaluate(async (opts) => {
   sampleRate,
   leadTime,
   tailTime,
+  includeTrack,
 });
 
 await browser.close();

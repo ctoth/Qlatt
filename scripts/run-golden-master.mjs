@@ -102,6 +102,8 @@ for (const phrase of phrases) {
     trackWav,
     "--write-golden",
     "1",
+    "--include-track",
+    "1",
   ]);
 
   run(nodeBin, [

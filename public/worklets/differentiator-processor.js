@@ -4,7 +4,7 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
     this.prev = [];
     this.debug = Boolean(options?.processorOptions?.debug);
     this.nodeId = options?.processorOptions?.nodeId || "diff";
-    // Klatt80 uses SR=10kHz; scale first-difference so UGLOT1 amplitude
+    // Klatt80 uses SR=10kHz; scale first-difference so UGLOT amplitude
     // matches the 10kHz reference when running at higher sample rates.
     this.scale = sampleRate / 10000;
     this.reportInterval = options?.processorOptions?.reportInterval || 50;

@@ -165,13 +165,6 @@ export class KlattSynth {
         reportInterval,
       },
     });
-    N.radiationDiff = new AudioWorkletNode(ctx, "differentiator-processor", {
-      processorOptions: {
-        debug: telemetry,
-        nodeId: "radiation-diff",
-        reportInterval,
-      },
-    });
     N.nz = new AudioWorkletNode(ctx, "antiresonator-processor", {
       processorOptions: {
         wasmBytes: wasm?.antiresonator,
@@ -252,7 +245,6 @@ export class KlattSynth {
     this._attachTelemetry(N.glottalMod);
     this._attachTelemetry(N.nz);
     this._attachTelemetry(N.diff);
-    this._attachTelemetry(N.radiationDiff);
     this._attachTelemetry(N.np);
     this._attachTelemetry(N.parallelNasal);
     for (const node of N.cascade) {
@@ -271,12 +263,11 @@ export class KlattSynth {
     N.glottalMod.connect(N.noiseSource);
     N.glottalMod.connect(N.fricationSource);
     N.noiseSource.connect(N.noiseGain).connect(N.mixer);
-    // Radiation characteristic: first difference of glottal volume velocity (UGLOT).
-    // Klatt80 computes UGLOT = UGLOT2 - UGLOTX and sends it to the cascade branch.
-    N.mixer.connect(N.radiationDiff);
+    // Klatt 1980: UGLOT is the radiated glottal flow (after first difference).
+    // Our LF source already emits a differentiated LF waveform, so mixer = UGLOT.
     // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
     // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
-    let current = N.radiationDiff;
+    let current = N.mixer;
     for (let i = N.cascade.length - 1; i >= 0; i--) {
       current.connect(N.cascade[i]);
       current = N.cascade[i];
@@ -288,8 +279,8 @@ export class KlattSynth {
 
     // Parallel branch uses radiated glottal source (UGLOT) for F1,
     // and first-diff of UGLOT (UGLOT1) for F2-F4.
-    N.radiationDiff.connect(N.parallelSourceGain);
-    N.radiationDiff.connect(N.diff);
+    N.mixer.connect(N.parallelSourceGain);
+    N.mixer.connect(N.diff);
     N.diff.connect(N.parallelDiffGain).connect(N.parallelDiffSum);
     N.fricationSource.connect(N.parallelFricGain).connect(N.parallelDiffSum);
 

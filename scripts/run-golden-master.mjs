@@ -25,7 +25,7 @@ const baseF0 = Number(args.get("base-f0") ?? 110);
 const sampleRate = Number(args.get("sample-rate") ?? 10000);
 const normalize = (args.get("normalize") ?? "1") === "1";
 const maxShift = Number(args.get("max-shift") ?? 128);
-const qlattSourceMode = Number(args.get("qlatt-source-mode") ?? 2);
+const qlattSourceMode = Number(args.get("qlatt-source-mode") ?? 1);
 const qlattAgc = (args.get("qlatt-agc") ?? "0") === "1";
 const qlattLeadTime = Number(args.get("qlatt-lead-time") ?? 0);
 const qlattTailTime = Number(args.get("qlatt-tail-time") ?? 0.005);

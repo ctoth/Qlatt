@@ -214,6 +214,11 @@ $$
 - Real-time factor ~0.001-0.01
 - Pulse train placed at GOIs (not GCIs)
 
+### Implementation Gotchas
+
+- **Amplitude normalization:** Use $A_g = E / \sin(\pi(1-\alpha_m))$ (Eq. C4/D2). Omitting the $\sin$ term causes large level swings as $\alpha_m$ changes.
+- **CALM is anti-causal:** True LFCALM requires reverse-time filtering over a period or buffered block. A sample-by-sample forward filter produces LFLM behavior instead.
+
 ### Edge Cases Mentioned
 
 - High Rd values (>1.84): spectral tilt filter response overlaps next period

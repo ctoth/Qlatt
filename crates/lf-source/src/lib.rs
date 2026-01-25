@@ -233,8 +233,20 @@ impl LfSource {
 
         for i in 0..len {
             if !self.voiced || self.pos_in_period >= self.period_len {
-                let f0_value = if f0_len > 1 { f0[i] } else { f0[0] };
-                let rd_value = if rd_len > 1 { rd[i] } else { rd[0] };
+                let f0_value = if f0_len == 0 {
+                    0.0
+                } else if f0_len > 1 {
+                    f0[i % f0_len]
+                } else {
+                    f0[0]
+                };
+                let rd_value = if rd_len == 0 {
+                    0.0
+                } else if rd_len > 1 {
+                    rd[i % rd_len]
+                } else {
+                    rd[0]
+                };
                 self.start_period(f0_value, rd_value);
             }
 

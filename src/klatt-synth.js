@@ -651,10 +651,10 @@ export class KlattSynth {
       AF: -72,
       AVS: -44,
     };
-    const f1 = params.F1 ?? this.params.F1;
-    const f2 = params.F2 ?? this.params.F2;
-    const f3 = params.F3 ?? this.params.F3;
-    const f4 = params.F4 ?? this.params.F4;
+    const f1 = params.F1;
+    const f2 = params.F2;
+    const f3 = params.F3;
+    const f4 = params.F4;
     // Note: Klatt 80 A2COR/A3COR corrections removed - we use A1-A6 dB values directly
     // like klatt-syn, to avoid muting issues when F1 is low (e.g., stop releases).
     // See reports/16bit-issue6-a2cor.md for detailed analysis.
@@ -688,25 +688,23 @@ export class KlattSynth {
 
     const mix = this.params.parallelMix;
     const allParallel = params.SW === 1;
-    const gpFreq = Number.isFinite(params.FGP) ? params.FGP : this.params.FGP;
-    const gpBw = Number.isFinite(params.BGP) ? params.BGP : this.params.BGP;
-    const gsBw = Number.isFinite(params.BGS) ? params.BGS : this.params.BGS;
-    const gzFreq = Number.isFinite(params.FGZ) ? params.FGZ : this.params.FGZ;
-    const gzBw = Number.isFinite(params.BGZ) ? params.BGZ : this.params.BGZ;
-    const sourceMode = Number.isFinite(params.sourceMode)
-      ? params.sourceMode
-      : (Number.isFinite(params.SRC) ? params.SRC : this.params.sourceMode);
+    const gpFreq = params.FGP;
+    const gpBw = params.BGP;
+    const gsBw = params.BGS;
+    const gzFreq = params.FGZ;
+    const gzBw = params.BGZ;
+    const sourceMode = params.sourceMode ?? params.SRC;
 
-    this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
-    this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.lfSource.parameters.get("f0"), params.F0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("f0"), params.F0, atTime, ramp);
     this._scheduleAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime, ramp);
     this._scheduleAudioParam(
       this.nodes.impulseSource.parameters.get("openPhaseRatio"),
-      params.openPhaseRatio ?? this.params.openPhaseRatio,
+      params.openPhaseRatio ?? 0.7,
       atTime,
       ramp
     );
-    this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0 ?? this.params.f0, atTime, ramp);
+    this._scheduleAudioParam(this.nodes.glottalMod.parameters.get("f0"), params.F0, atTime, ramp);
     if (Number.isFinite(params.Rd)) {
       this._scheduleAudioParam(this.nodes.lfSource.parameters.get("rd"), params.Rd, atTime, ramp);
     }

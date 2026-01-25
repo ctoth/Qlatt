@@ -11,7 +11,9 @@ export class KlattSynth {
 
   async initialize() {
     if (this.isInitialized) return;
-    const workletBase = import.meta.env.BASE_URL + "worklets/";
+    const baseUrl =
+      (import.meta?.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : "/";
+    const workletBase = `${baseUrl}worklets/`;
     await this._loadWasmBytes(workletBase);
     await Promise.all([
       this.ctx.audioWorklet.addModule(workletBase + "resonator-processor.js"),

@@ -54,12 +54,21 @@ const mParms = {
   glottalSourceType,
 };
 
-const frameKeys = new Set(Object.keys(demoFrameParms));
-const paramMap = [
-  "F0", "AV", "AVS", "AH", "AF", "F1", "F2", "F3", "F4", "F5", "F6",
-  "B1", "B2", "B3", "B4", "B5", "B6", "A1", "A2", "A3", "A4", "A5", "A6",
-  "AB", "AN", "FNP", "BNP", "FNZ", "BNZ", "SW", "FGP", "BGP", "BGS",
-];
+const toDb = (lin) => (lin > 0 ? 20 * Math.log10(lin) : -99);
+const ndbScale = {
+  A1: -58,
+  A2: -65,
+  A3: -73,
+  A4: -78,
+  A5: -79,
+  A6: -80,
+  AN: -58,
+  AB: -84,
+  AV: -72,
+  AH: -87,
+  AF: -72,
+  AVS: -44,
+};
 
 const frames = [];
 for (let i = 0; i < track.length; i += 1) {
@@ -69,13 +78,60 @@ for (let i = 0; i < track.length; i += 1) {
   const duration = Number.isFinite(next?.time)
     ? Math.max(0.001, next.time - event.time)
     : lastDuration;
-  const frame = { ...demoFrameParms, duration };
-  for (const key of paramMap) {
-    if (!Number.isFinite(event.params[key])) continue;
-    if (frameKeys.has(key)) {
-      frame[key] = event.params[key];
-    }
-  }
+  const p = event.params;
+  const fricDbAdjusted = (p.SW === 1) ? Math.max(p.AF ?? -70, p.AH ?? -70) : (p.AF ?? -70);
+  const voiceLin = Math.pow(10, ((p.AV ?? -70) + ndbScale.AV) / 20);
+  const avsLin = Math.pow(10, ((p.AVS ?? -70) + ndbScale.AVS) / 20) * 10;
+  const aspLin = Math.pow(10, ((p.AH ?? -70) + ndbScale.AH) / 20);
+  const fricLin = Math.pow(10, ((fricDbAdjusted ?? -70) + ndbScale.AF) / 20);
+  const bypassLin = Math.pow(10, ((p.AB ?? -70) + ndbScale.AB) / 20);
+
+  const oralFormantFreq = [
+    p.F1 ?? demoFrameParms.oralFormantFreq[0],
+    p.F2 ?? demoFrameParms.oralFormantFreq[1],
+    p.F3 ?? demoFrameParms.oralFormantFreq[2],
+    p.F4 ?? demoFrameParms.oralFormantFreq[3],
+    p.F5 ?? demoFrameParms.oralFormantFreq[4],
+    p.F6 ?? demoFrameParms.oralFormantFreq[5],
+  ];
+  const oralFormantBw = [
+    p.B1 ?? demoFrameParms.oralFormantBw[0],
+    p.B2 ?? demoFrameParms.oralFormantBw[1],
+    p.B3 ?? demoFrameParms.oralFormantBw[2],
+    p.B4 ?? demoFrameParms.oralFormantBw[3],
+    p.B5 ?? demoFrameParms.oralFormantBw[4],
+    p.B6 ?? demoFrameParms.oralFormantBw[5],
+  ];
+  const oralFormantDb = [
+    (p.A1 ?? -70) + ndbScale.A1,
+    (p.A2 ?? -70) + ndbScale.A2,
+    (p.A3 ?? -70) + ndbScale.A3,
+    (p.A4 ?? -70) + ndbScale.A4,
+    (p.A5 ?? -70) + ndbScale.A5,
+    (p.A6 ?? -70) + ndbScale.A6,
+  ];
+
+  const frame = {
+    ...demoFrameParms,
+    duration,
+    f0: p.F0 ?? 0,
+    oralFormantFreq,
+    oralFormantBw,
+    oralFormantDb,
+    nasalFormantFreq: p.FNP ?? demoFrameParms.nasalFormantFreq,
+    nasalFormantBw: p.BNP ?? demoFrameParms.nasalFormantBw,
+    nasalAntiformantFreq: p.FNZ ?? demoFrameParms.nasalAntiformantFreq,
+    nasalAntiformantBw: p.BNZ ?? demoFrameParms.nasalAntiformantBw,
+    nasalFormantDb: (p.AN ?? -70) + ndbScale.AN,
+    cascadeEnabled: p.SW === 1 ? false : true,
+    parallelEnabled: true,
+    cascadeVoicingDb: toDb(voiceLin),
+    parallelVoicingDb: toDb(avsLin),
+    cascadeAspirationDb: toDb(aspLin),
+    parallelAspirationDb: toDb(aspLin),
+    fricationDb: toDb(fricLin),
+    parallelBypassDb: toDb(bypassLin),
+  };
   frames.push(frame);
 }
 

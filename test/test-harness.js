@@ -567,6 +567,16 @@ function findEventAtTime(track, time) {
   return current;
 }
 
+function findEventIndexAtTime(track, time) {
+  if (!track || track.length === 0) return -1;
+  let index = 0;
+  for (let i = 0; i < track.length; i += 1) {
+    if (track[i].time > time) break;
+    index = i;
+  }
+  return index;
+}
+
 function getRunContext(now = ctx.currentTime) {
   if (!lastRun || !runStartTime) {
     return { relTime: null, event: null, inWindow: false, trackEnd: 0 };
@@ -1335,6 +1345,14 @@ function recordSwWindowMax(name, data, relTime, event) {
     ? lastRun.track[lastRun.track.length - 1].time
     : 0;
   if (relTime < -0.1 || relTime > trackEnd + 0.5) return;
+  const eventIndex = findEventIndexAtTime(lastRun.track, Math.max(0, relTime));
+  if (eventIndex < 0) return;
+  const current = lastRun.track[eventIndex];
+  const next = lastRun.track[eventIndex + 1];
+  const guard = 0.05; // Avoid analyzer window bleed across SW boundaries.
+  const eventStart = current?.time ?? 0;
+  const eventEnd = next?.time ?? (eventStart + 0.5);
+  if (relTime < eventStart + guard || relTime > eventEnd - guard) return;
 
   const key = `${name}:SW=${sw}`;
   const prev = swWindowMax.get(key) || { rms: 0, peak: 0 };

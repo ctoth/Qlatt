@@ -184,12 +184,52 @@ async function speak() {
 }
 
 renderControls();
+
+function applyUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  // Apply phrase
+  if (params.has('phrase')) {
+    document.getElementById('phrase').value = params.get('phrase');
+  }
+
+  // Apply baseF0
+  if (params.has('baseF0')) {
+    const val = Number(params.get('baseF0'));
+    if (Number.isFinite(val)) {
+      document.getElementById('baseF0').value = val;
+    }
+  }
+
+  // Apply slider controls
+  for (const spec of controlSpec) {
+    if (params.has(spec.id)) {
+      const val = Number(params.get(spec.id));
+      if (Number.isFinite(val) && val >= spec.min && val <= spec.max) {
+        const input = document.getElementById(spec.id);
+        const valueEl = document.getElementById(`${spec.id}-value`);
+        if (input) {
+          input.value = val;
+          if (valueEl) valueEl.textContent = formatValue(spec, val);
+          synth.setParam(spec.id, val);
+        }
+      }
+    }
+  }
+
+  // Auto-speak if requested
+  if (params.has('autoSpeak') && params.get('autoSpeak') !== 'false') {
+    setTimeout(() => speak(), 100);
+  }
+}
+
 (async () => {
   synth.setTelemetryHandler(handleTelemetry);
   await synth.initialize();
   attachMeters();
   attachSpectrogram();
   bindControls();
+  applyUrlParams();
 })();
 
 document.getElementById("startBtn").addEventListener("click", start);

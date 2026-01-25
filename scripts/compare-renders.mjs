@@ -21,24 +21,33 @@ const b = JSON.parse(fs.readFileSync(path.resolve(bPath), "utf8"));
 
 const aSamples = a.samples ?? [];
 const bSamples = b.samples ?? [];
+const normalize = (args.get("normalize") ?? "0") === "1";
 const len = Math.min(aSamples.length, bSamples.length);
 
 let rmsA = 0;
 let rmsB = 0;
-let rmsErr = 0;
-let maxDelta = 0;
 for (let i = 0; i < len; i += 1) {
   const va = aSamples[i];
   const vb = bSamples[i];
   rmsA += va * va;
   rmsB += vb * vb;
+}
+rmsA = len ? Math.sqrt(rmsA / len) : 0;
+rmsB = len ? Math.sqrt(rmsB / len) : 0;
+
+const scaleA = normalize && rmsA > 0 ? 1 / rmsA : 1;
+const scaleB = normalize && rmsB > 0 ? 1 / rmsB : 1;
+
+let rmsErr = 0;
+let maxDelta = 0;
+for (let i = 0; i < len; i += 1) {
+  const va = aSamples[i] * scaleA;
+  const vb = bSamples[i] * scaleB;
   const delta = va - vb;
   rmsErr += delta * delta;
   const ad = Math.abs(delta);
   if (ad > maxDelta) maxDelta = ad;
 }
-rmsA = len ? Math.sqrt(rmsA / len) : 0;
-rmsB = len ? Math.sqrt(rmsB / len) : 0;
 rmsErr = len ? Math.sqrt(rmsErr / len) : 0;
 
 const result = {

@@ -30,6 +30,7 @@ if (!Array.isArray(track)) {
 const sampleRate = Number(args.get("sample-rate") ?? payload.sampleRate ?? 10000);
 const lastDuration = Number(args.get("last-duration") ?? 0.005);
 const glottalType = (args.get("glottal") ?? "natural").toLowerCase();
+const disableAgc = (args.get("no-agc") ?? "0") === "1";
 const klattRoot =
   args.get("klatt-syn-root") ?? path.join(os.homedir(), "src", "klatt-syn");
 const outJson = path.resolve(
@@ -131,6 +132,7 @@ for (let i = 0; i < track.length; i += 1) {
     parallelAspirationDb: toDb(aspLin),
     fricationDb: toDb(fricLin),
     parallelBypassDb: toDb(bypassLin),
+    ...(disableAgc ? { gainDb: 0, agcRmsLevel: NaN } : null),
   };
   frames.push(frame);
 }

@@ -36,6 +36,7 @@ const applyAgc = (args.get("agc") ?? "1") === "1";
 const agcMode = args.get("agc-mode") ?? "utterance";
 const sourceMode = Number(args.get("source-mode"));
 const openPhaseRatio = Number(args.get("open-phase-ratio"));
+const includeTelemetry = (args.get("include-telemetry") ?? "0") === "1";
 const outJson = path.resolve(
   args.get("out-json") ?? path.join(repoRoot, "test", "golden", "qlatt-track.json")
 );
@@ -160,6 +161,7 @@ const result = await page.evaluate(async (opts) => {
   agcMode,
   sourceMode: Number.isFinite(sourceMode) ? sourceMode : undefined,
   openPhaseRatio: Number.isFinite(openPhaseRatio) ? openPhaseRatio : undefined,
+  includeTelemetry,
 });
 
 await browser.close();

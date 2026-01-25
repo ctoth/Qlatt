@@ -37,6 +37,7 @@
         tailTime = 0.2,
         track,
         includeTrack = false,
+        includeTelemetry = false,
         agcRmsLevel,
         applyAgc = false,
         agcMode = "utterance",
@@ -54,6 +55,38 @@
 
         const ctx = new OfflineAudioContext(1, length, sampleRate);
         const synth = new KlattSynth(ctx);
+        const telemetry = includeTelemetry ? { nodes: {}, events: {} } : null;
+        if (includeTelemetry) {
+          synth.setTelemetryHandler((data) => {
+            if (!data || !data.type) return;
+            if (data.type === "metrics") {
+              const nodeId = data.node || "unknown";
+              const entry = telemetry.nodes[nodeId] || {
+                maxRms: 0,
+                maxPeak: 0,
+                maxInRms: 0,
+                maxInPeak: 0,
+                count: 0,
+              };
+              if (Number.isFinite(data.rms)) {
+                entry.maxRms = Math.max(entry.maxRms, data.rms);
+              }
+              if (Number.isFinite(data.peak)) {
+                entry.maxPeak = Math.max(entry.maxPeak, data.peak);
+              }
+              if (Number.isFinite(data.inRms)) {
+                entry.maxInRms = Math.max(entry.maxInRms, data.inRms);
+              }
+              if (Number.isFinite(data.inPeak)) {
+                entry.maxInPeak = Math.max(entry.maxInPeak, data.inPeak);
+              }
+              entry.count += 1;
+              telemetry.nodes[nodeId] = entry;
+              return;
+            }
+            telemetry.events[data.type] = (telemetry.events[data.type] || 0) + 1;
+          });
+        }
         await synth.initialize();
         if (Number.isFinite(sourceMode)) {
           synth.setParam("sourceMode", Number(sourceMode), ctx.currentTime);
@@ -158,6 +191,7 @@
           agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,
           trackSummary: summarizeTrack(resolvedTrack),
           track: includeTrack ? resolvedTrack : undefined,
+          telemetry: includeTelemetry ? telemetry : undefined,
           samples,
         };
       }

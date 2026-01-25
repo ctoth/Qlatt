@@ -30,6 +30,7 @@ const spikeThreshold = 1.0;
 const spikeCooldown = 0.2;
 const playHistory = []; // P7: Track recent plays for warmup analysis
 const MAX_PLAY_HISTORY = 5;
+let klattPlayback = null;
 
 const controlSpec = [
   { id: "f0", label: "F0 (Hz)", min: 50, max: 300, step: 1 },
@@ -122,6 +123,59 @@ async function start() {
 async function stop() {
   await ctx.suspend();
   status.textContent = "Status: suspended";
+}
+
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+}
+
+async function playKlattSyn() {
+  await synth.initialize();
+  await ctx.resume();
+  const phrase = document.getElementById("phrase").value.trim();
+  if (!phrase) return;
+  const slug = slugify(phrase);
+  const url = `./golden/linguistic-master/${slug}/klatt-syn.json`;
+  status.textContent = `Status: loading klatt-syn "${phrase}"`;
+  let payload;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      status.textContent = `Status: klatt-syn not found for "${phrase}"`;
+      return;
+    }
+    payload = await res.json();
+  } catch (err) {
+    status.textContent = `Status: failed to load klatt-syn "${phrase}"`;
+    console.error(err);
+    return;
+  }
+
+  const samples = payload.samples;
+  const sampleRate = payload.sampleRate || ctx.sampleRate;
+  if (!Array.isArray(samples) || samples.length === 0) {
+    status.textContent = `Status: klatt-syn data missing samples`;
+    return;
+  }
+  if (klattPlayback) {
+    try {
+      klattPlayback.stop();
+    } catch {}
+    klattPlayback.disconnect();
+    klattPlayback = null;
+  }
+  const buffer = ctx.createBuffer(1, samples.length, sampleRate);
+  buffer.getChannelData(0).set(samples);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start();
+  klattPlayback = source;
+  status.textContent = `Status: playing klatt-syn "${phrase}"`;
 }
 
 async function speak() {
@@ -231,6 +285,7 @@ function applyUrlParams() {
 document.getElementById("startBtn").addEventListener("click", start);
 document.getElementById("stopBtn").addEventListener("click", stop);
 document.getElementById("speakBtn").addEventListener("click", speak);
+document.getElementById("playKlattBtn").addEventListener("click", playKlattSyn);
 document.getElementById("copyDiagBtn").addEventListener("click", async () => {
   if (!lastRun) return;
   updateDiagnostics();

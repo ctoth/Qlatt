@@ -284,6 +284,14 @@ export class KlattSynth {
     N.parallelOutGain = ctx.createGain();
     N.cascadeOutGain = ctx.createGain();
     N.outputSum = ctx.createGain();
+    N.outputLp = new AudioWorkletNode(ctx, "resonator-processor", {
+      processorOptions: {
+        wasmBytes: wasm?.resonator,
+        debug: telemetry,
+        nodeId: "output-lp",
+        reportInterval,
+      },
+    });
     N.masterGain = ctx.createGain();
     N.outputGain = ctx.createGain();
 
@@ -310,6 +318,7 @@ export class KlattSynth {
     this._attachTelemetry(N.radiationDiff);
     this._attachTelemetry(N.radiationDiffAvs);
     this._attachTelemetry(N.np);
+    this._attachTelemetry(N.outputLp);
     this._attachTelemetry(N.parallelNasal);
     for (const node of N.cascade) {
       this._attachTelemetry(node);
@@ -343,17 +352,17 @@ export class KlattSynth {
     // Klatt 1980: UGLOT is the radiated glottal flow (after first difference).
     // When sourceMode = impulse (classic), we apply RGZ + radiationDiff.
     // When sourceMode = LF, we bypass radiationDiff because LF source is pre-differentiated.
-    // Klatt 80 cascade order: F6 -> F5 -> F4 -> F3 -> F2 -> F1 -> NZ -> NP -> output
-    // N.cascade array is [F1, F2, F3, F4, F5, F6], so connect in reverse
+    // Klatt-syn cascade order: nasal antiformant -> nasal formant -> F1..F6 -> output
     let current = N.mixer;
-    for (let i = N.cascade.length - 1; i >= 0; i--) {
+    current.connect(N.nz);
+    current = N.nz;
+    current.connect(N.np);
+    current = N.np;
+    for (let i = 0; i < N.cascade.length; i++) {
       current.connect(N.cascade[i]);
       current = N.cascade[i];
     }
-    // Nasal zero and pole come after F1
-    current.connect(N.nz).connect(N.np);
-
-    N.np.connect(N.cascadeOutGain).connect(N.outputSum);
+    current.connect(N.cascadeOutGain).connect(N.outputSum);
 
     // Parallel branch uses radiated glottal source (UGLOT) for F1,
     // and first-diff of UGLOT (UGLOT1) for F2-F4.
@@ -370,7 +379,7 @@ export class KlattSynth {
     N.parallelSourceGain.connect(N.parallelFormants[0]);
     N.parallelFormants[0].connect(N.parallelFormantGains[0]).connect(N.parallelSum);
 
-    N.parallelDiffGain.connect(N.parallelNasal);
+    N.parallelSourceGain.connect(N.parallelNasal);
     N.parallelNasal.connect(N.parallelNasalGain).connect(N.parallelSum);
 
     for (let i = 1; i <= 3; i += 1) {
@@ -390,7 +399,7 @@ export class KlattSynth {
     // The gain-controlled DC step is added directly to outputSum
     N.plstepSource.connect(N.plstepGain).connect(N.outputSum);
 
-    N.outputSum.connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
+    N.outputSum.connect(N.outputLp).connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
   }
 
   _applyAllParams(atTime) {
@@ -401,6 +410,7 @@ export class KlattSynth {
     const gsBw = Number.isFinite(p.BGS) ? p.BGS : p.rgsBandwidth;
     const gzFreq = Number.isFinite(p.FGZ) ? p.FGZ : 0;
     const gzBw = Number.isFinite(p.BGZ) ? p.BGZ : 0;
+    const outputLpBw = this.ctx.sampleRate / 2;
     this._setAudioParam(this.nodes.lfSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("f0"), p.f0, atTime);
     this._setAudioParam(this.nodes.impulseSource.parameters.get("gain"), 1.0, atTime);
@@ -412,6 +422,8 @@ export class KlattSynth {
     this._setAudioParam(this.nodes.rgp.parameters.get("bandwidth"), gpBw, atTime);
     this._setAudioParam(this.nodes.rgz.parameters.get("frequency"), gzFreq, atTime);
     this._setAudioParam(this.nodes.rgz.parameters.get("bandwidth"), gzBw, atTime);
+    this._setAudioParam(this.nodes.outputLp.parameters.get("frequency"), 0, atTime);
+    this._setAudioParam(this.nodes.outputLp.parameters.get("bandwidth"), outputLpBw, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("frequency"), gsFreq, atTime);
     this._setAudioParam(this.nodes.rgs.parameters.get("bandwidth"), gsBw, atTime);
     this._setAudioParam(this.nodes.rgpAvs.parameters.get("frequency"), gpFreq, atTime);
@@ -567,6 +579,8 @@ export class KlattSynth {
       this.nodes.rgpAvs.parameters.get("bandwidth"),
       this.nodes.rgzAvs.parameters.get("frequency"),
       this.nodes.rgzAvs.parameters.get("bandwidth"),
+      this.nodes.outputLp.parameters.get("frequency"),
+      this.nodes.outputLp.parameters.get("bandwidth"),
       this.nodes.nz.parameters.get("frequency"),
       this.nodes.nz.parameters.get("bandwidth"),
       this.nodes.np.parameters.get("frequency"),

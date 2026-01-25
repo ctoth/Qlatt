@@ -970,12 +970,9 @@ export class KlattSynth {
       });
     }
 
-    // The original Klatt uses decay factor 0.995 per sample at 10kHz.
-    // Time to decay to ~1%: 0.995^n = 0.01 => n = ln(0.01)/ln(0.995) ~ 920 samples
-    // At 10kHz: 920/10000 = 0.092s... but Klatt 80 comment says ~21ms.
-    // Actually: at 10kHz, 920 samples = 92ms, but practical burst is shorter.
-    // Klatt 80 PARCOE.FOR: STEP decays 0.995/sample. At 10kHz, ~21ms to audibly fade.
-    const burstDuration = 0.021; // 21ms decay time (Klatt 80 spec)
+    // COEWAV.FOR line 252: STEP=.995*STEP
+    // At 10kHz: 0.995^919 = 0.01 → 919 samples = 92ms decay to 1%
+    const burstDuration = 0.092;
 
     // Schedule the PLSTEP as a negative DC step that decays to zero
     // Negative creates rarefaction (matches original Klatt 80)

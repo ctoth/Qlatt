@@ -147,7 +147,12 @@ impl LfSource {
     }
 
     fn set_mode(&mut self, mode: LfMode) {
-        self.mode = mode;
+        // CALM is anti-causal and cannot be implemented sample-by-sample.
+        // Map to the causal LFLM form for real-time rendering.
+        self.mode = match mode {
+            LfMode::LfCalm => LfMode::LfLm,
+            _ => mode,
+        };
     }
 
     fn start_period(&mut self, f0: f32, rd: f32) {

@@ -37,6 +37,8 @@
         tailTime = 0.2,
         track,
         includeTrack = false,
+        agcRmsLevel,
+        applyAgc = false,
       }) {
         const resolvedTrack = Array.isArray(track)
           ? track
@@ -65,6 +67,21 @@
           if (av > peak) peak = av;
         }
         rms = channel.length ? Math.sqrt(rms / channel.length) : 0;
+        let agcScale = 1;
+        const target = Number.isFinite(agcRmsLevel) ? agcRmsLevel : NaN;
+        if (applyAgc && Number.isFinite(target) && target > 0 && rms > 0) {
+          agcScale = target / rms;
+          rms = 0;
+          peak = 0;
+          for (let i = 0; i < samples.length; i += 1) {
+            const v = samples[i] * agcScale;
+            samples[i] = v;
+            rms += v * v;
+            const av = Math.abs(v);
+            if (av > peak) peak = av;
+          }
+          rms = samples.length ? Math.sqrt(rms / samples.length) : 0;
+        }
 
         return {
           phrase,
@@ -74,6 +91,7 @@
           tailTime,
           length,
           metrics: { rms, peak },
+          agc: applyAgc ? { target, scale: agcScale } : undefined,
           trackSummary: summarizeTrack(resolvedTrack),
           track: includeTrack ? resolvedTrack : undefined,
           samples,

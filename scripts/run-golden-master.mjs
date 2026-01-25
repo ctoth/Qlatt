@@ -92,10 +92,16 @@ for (const phrase of phrases) {
     String(baseF0),
     "--sample-rate",
     String(sampleRate),
+    "--lead-time",
+    String(qlattLeadTime),
+    "--tail-time",
+    String(qlattTailTime),
     "--out-json",
     trackPath,
     "--out-wav",
     trackWav,
+    "--write-golden",
+    "1",
   ]);
 
   run(nodeBin, [

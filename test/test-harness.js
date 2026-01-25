@@ -1348,10 +1348,10 @@ function recordSwWindowMax(name, data, relTime, event) {
   const eventIndex = findEventIndexAtTime(lastRun.track, Math.max(0, relTime));
   if (eventIndex < 0) return;
   const current = lastRun.track[eventIndex];
-  const next = lastRun.track[eventIndex + 1];
+  const nextEvent = lastRun.track[eventIndex + 1];
   const guard = 0.05; // Avoid analyzer window bleed across SW boundaries.
   const eventStart = current?.time ?? 0;
-  const eventEnd = next?.time ?? (eventStart + 0.5);
+  const eventEnd = nextEvent?.time ?? (eventStart + 0.5);
   if (relTime < eventStart + guard || relTime > eventEnd - guard) return;
 
   const key = `${name}:SW=${sw}`;

@@ -8,21 +8,27 @@
 // ndbCor correction values for proximity calculation
 export const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
-// ndbScale values WITH G0 compensation (from semantics.yaml)
-// These are the floor values for dB parameters before dbToLinear conversion
+// ndbScale values (from klatt-synth.js _applyKlattParams)
+// Source amplitude scale factors (PARCOE.FOR lines 51-53: NDBSCA)
+// AV, AH, AF, AVS are offset by -47 to compensate for G0 default of 47
+// This keeps default output level while making G0 functional as overall gain control
 export const ndbScale: Record<string, number> = {
-  AV: -119,   // -72 base + -47 G0 compensation
-  AVS: -91,   // -44 base + -47 G0 compensation
-  AH: -134,   // -72 base + -62 G0 compensation (different for aspiration)
-  AF: -119,   // -72 base + -47 G0 compensation
-  A1: -72,
-  A2: -72,
-  A3: -72,
-  A4: -72,
-  A5: -72,
-  A6: -72,
-  AB: -72,
-  AN: -72,
+  AV: -119,   // -72 - 47: compensates for G0 addition
+  AVS: -91,   // -44 - 47: compensates for G0 addition
+  // AH: Klatt 80 uses -102 (aspiration 30 dB quieter than voicing).
+  // Our input AH values are ~15 dB lower than Klatt 80 (max ~40 vs ~55),
+  // so we use -87 to maintain the same output amplitude relationship.
+  // After G0 compensation: -87 - 47 = -134
+  AH: -134,   // -87 - 47: compensates for G0 addition
+  AF: -119,   // -72 - 47: compensates for G0 addition
+  A1: -58,
+  A2: -65,
+  A3: -73,
+  A4: -78,
+  A5: -79,
+  A6: -80,
+  AB: -84,
+  AN: -58,
 };
 
 /**

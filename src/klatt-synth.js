@@ -1,3 +1,5 @@
+import { dbToLinear, proximity, ndbScale, ndbCor } from './klatt-functions.js';
+
 export class KlattSynth {
   constructor(audioContext) {
     this.ctx = audioContext;
@@ -442,7 +444,7 @@ export class KlattSynth {
 
     this._applySourceMode(p.sourceMode, atTime);
     this.nodes.voiceGain.gain.setValueAtTime(p.voiceGain, atTime);
-    const avsGain = this._dbToLinear((p.AVS ?? -70) + (-44)) * 10;
+    const avsGain = dbToLinear((p.AVS ?? -70) + (-44)) * 10;
     this.nodes.avsGain.gain.setValueAtTime(avsGain, atTime);
     this.nodes.noiseGain.gain.setValueAtTime(p.noiseGain, atTime);
     this.nodes.masterGain.gain.setValueAtTime(p.masterGain, atTime);
@@ -455,13 +457,13 @@ export class KlattSynth {
     this.nodes.parallelFricGain.gain.setValueAtTime(p.parallelFricationGain, atTime);
     const bypassGain = Number.isFinite(p.AB)
       // Apply ndbScale.AB (-84) for safe Klatt parameter conversion
-      ? -this._dbToLinear(p.AB + (-84)) * parallelScale
+      ? -dbToLinear(p.AB + (-84)) * parallelScale
       : p.parallelBypassGain;
     this.nodes.parallelBypassGain.gain.setValueAtTime(bypassGain, atTime);
     const nasalDb = Number.isFinite(p.parallelNasalGain) ? p.parallelNasalGain : p.AN;
     this.nodes.parallelNasalGain.gain.setValueAtTime(
       // Apply ndbScale.AN (-58) for safe Klatt parameter conversion
-      this._dbToLinear(nasalDb + (-58)) * parallelScale,
+      dbToLinear(nasalDb + (-58)) * parallelScale,
       atTime
     );
 
@@ -526,12 +528,6 @@ export class KlattSynth {
     param.setValueAtTime(value, atTime);
   }
 
-  _dbToLinear(db) {
-    if (!Number.isFinite(db) || db <= -72) return 0;
-    const clamped = Math.min(96, db);
-    return 2 ** (clamped / 6);
-  }
-
   _setParallelFormantGain(index, dbValue, atTime, freq) {
     // Klatt 80 applies parallel formant gains directly to first-differenced signal
     // without compensation. The low-frequency attenuation is intentional -
@@ -539,7 +535,7 @@ export class KlattSynth {
     const scale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
-    const linear = this._dbToLinear(dbValue) * scale;
+    const linear = dbToLinear(dbValue) * scale;
     const sign = index >= 1 ? (index % 2 === 1 ? -1 : 1) : 1;
     this.nodes.parallelFormantGains[index].gain.setValueAtTime(
       sign * linear,
@@ -636,60 +632,31 @@ export class KlattSynth {
     const fricDb = params.AF ?? -70;
     const goDb = params.GO ?? 47;
 
-    // Source amplitude scale factors (PARCOE.FOR lines 51-53: NDBSCA)
-    // AV, AH, AF, AVS are offset by -47 to compensate for G0 default of 47
-    // This keeps default output level while making G0 functional as overall gain control
-    const ndbScale = {
-      A1: -58,
-      A2: -65,
-      A3: -73,
-      A4: -78,
-      A5: -79,
-      A6: -80,
-      AN: -58,
-      AB: -84,
-      AV: -119,   // -72 - 47: compensates for G0 addition
-      // AH: Klatt 80 uses -102 (aspiration 30 dB quieter than voicing).
-      // Our input AH values are ~15 dB lower than Klatt 80 (max ~40 vs ~55),
-      // so we use -87 to maintain the same output amplitude relationship.
-      // After G0 compensation: -87 - 47 = -134
-      AH: -134,   // -87 - 47: compensates for G0 addition
-      AF: -119,   // -72 - 47: compensates for G0 addition
-      AVS: -91,   // -44 - 47: compensates for G0 addition
-    };
+    // Formant proximity corrections (uses imported proximity function and ndbScale)
     const f1 = params.F1;
     const f2 = params.F2;
     const f3 = params.F3;
     const f4 = params.F4;
-    // Note: Klatt 80 A2COR/A3COR corrections removed - we use A1-A6 dB values directly
-    // like klatt-syn, to avoid muting issues when F1 is low (e.g., stop releases).
-    // See reports/16bit-issue6-a2cor.md for detailed analysis.
-    const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-    const proximity = (delta) => {
-      if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-      const index = Math.floor(delta / 50) - 1;
-      return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))] ?? 0;
-    };
     const n12Cor = proximity(f2 - f1);
     const n23Cor = proximity(f3 - f2 - 50);
     const n34Cor = proximity(f4 - f3 - 150);
 
     // PARCOE.FOR lines 117-135: G0 is added to each source amplitude before GETAMP conversion
     // Formula: NDBAV = NNG0 + NNAV + NDBSCA(9), then IMPULS = GETAMP(NDBAV)
-    const voiceGain = this._dbToLinear(goDb + voiceDb + ndbScale.AV);
+    const voiceGain = dbToLinear(goDb + voiceDb + ndbScale.AV);
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;
     // Klatt 80 uses 10*GETAMP(NDBAVS) to compensate for filter cascade attenuation.
     // We preserve that scaling here to match the original behavior.
     // PARCOE.FOR line 134-135: NDBAVS = NNG0 + NNAVS + NDBSCA(12), SINAMP = 10*GETAMP(NDBAVS)
-    const voiceParGain = this._dbToLinear(goDb + voiceParDb + ndbScale.AVS) * 10;
+    const voiceParGain = dbToLinear(goDb + voiceParDb + ndbScale.AVS) * 10;
     // PARCOE.FOR line 121-122: NDBAH = NNG0 + NNAH + NDBSCA(10), AHH = GETAMP(NDBAH)
-    const aspGain = this._dbToLinear(goDb + aspDb + ndbScale.AH);
+    const aspGain = dbToLinear(goDb + aspDb + ndbScale.AH);
     const fricDbAdjusted = params.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
     // PARCOE.FOR line 126-127: NDBAF = NNG0 + NNAF + NDBSCA(11), AFF = GETAMP(NDBAF)
     const fricGain =
-      this._dbToLinear(goDb + fricDbAdjusted + ndbScale.AF) * parallelScale;
+      dbToLinear(goDb + fricDbAdjusted + ndbScale.AF) * parallelScale;
     // Master gain: simple user-controllable scaling (WebAudio addition, not in Klatt 80)
     // G0 is now correctly incorporated in individual source amplitudes above
     const masterGain = Number.isFinite(this.params.masterGain)
@@ -818,12 +785,12 @@ export class KlattSynth {
     });
 
     const parallelLinear = [
-      this._dbToLinear((params.A1 ?? -70) + n12Cor + ndbScale.A1),
-      this._dbToLinear((params.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2),
-      this._dbToLinear((params.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3),
-      this._dbToLinear((params.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4),
-      this._dbToLinear((params.A5 ?? -70) + ndbScale.A5),
-      this._dbToLinear((params.A6 ?? -70) + ndbScale.A6),
+      dbToLinear((params.A1 ?? -70) + n12Cor + ndbScale.A1),
+      dbToLinear((params.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2),
+      dbToLinear((params.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3),
+      dbToLinear((params.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4),
+      dbToLinear((params.A5 ?? -70) + ndbScale.A5),
+      dbToLinear((params.A6 ?? -70) + ndbScale.A6),
     ];
     // Klatt 80 applies A2PAR/A3PAR/A4PAR directly to first-differenced signal
     // without compensation. The differentiator's spectral shaping is intentional -
@@ -841,7 +808,7 @@ export class KlattSynth {
     if (Number.isFinite(params.AB)) {
       this._scheduleAudioParam(
         this.nodes.parallelBypassGain.gain,
-        -this._dbToLinear(params.AB + ndbScale.AB) * parallelScale,
+        -dbToLinear(params.AB + ndbScale.AB) * parallelScale,
         atTime,
         ramp
       );
@@ -849,7 +816,7 @@ export class KlattSynth {
     if (Number.isFinite(params.AN)) {
       this._scheduleAudioParam(
         this.nodes.parallelNasalGain.gain,
-        this._dbToLinear(params.AN + ndbScale.AN) * parallelScale,
+        dbToLinear(params.AN + ndbScale.AN) * parallelScale,
         atTime,
         ramp
       );
@@ -879,7 +846,6 @@ export class KlattSynth {
       this._applyKlattParams(track[0].params, this.ctx.currentTime, false);
     }
 
-    const ndbScale = { AH: -87, AF: -72 };
     for (let i = 0; i < track.length; i += 1) {
       const event = track[i];
       if (!event?.params) continue;
@@ -892,13 +858,14 @@ export class KlattSynth {
         const parallelScale = Number.isFinite(this.params.parallelGainScale)
           ? this.params.parallelGainScale
           : 1.0;
+        const nextGoDb = next.params.GO ?? 47;
         const nextAspDb = next.params.AH ?? -70;
         const nextFricDb = next.params.AF ?? -70;
         const nextFricDbAdjusted = next.params.SW === 1
           ? Math.max(nextFricDb, nextAspDb)
           : nextFricDb;
-        const nextAspGain = this._dbToLinear(nextAspDb + ndbScale.AH);
-        const nextFricGain = this._dbToLinear(nextFricDbAdjusted + ndbScale.AF) * parallelScale;
+        const nextAspGain = dbToLinear(nextGoDb + nextAspDb + ndbScale.AH);
+        const nextFricGain = dbToLinear(nextGoDb + nextFricDbAdjusted + ndbScale.AF) * parallelScale;
 
         // Only ramp aspiration/frication (Klatt80 linear interpolation within frame)
         this._scheduleAudioParam(this.nodes.noiseGain.gain, nextAspGain, nextTime, true);
@@ -968,7 +935,7 @@ export class KlattSynth {
     // burstDb = G0 + ndbScale.AF + 44 = G0 + (-119) + 44 = G0 - 75
     const goDb = params.GO ?? 47;
     const burstDb = goDb - 75;  // Was goDb - 28, corrected for ndbScale compensation
-    const burstAmplitude = this._dbToLinear(burstDb);
+    const burstAmplitude = dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst
     if (this.telemetryHandler) {
@@ -1124,7 +1091,7 @@ export class KlattSynth {
         this.nodes.voiceGain.gain.setValueAtTime(value, atTime);
         break;
       case "AVS":
-        this.nodes.avsGain.gain.setValueAtTime(this._dbToLinear(value + (-44)) * 10, atTime);
+        this.nodes.avsGain.gain.setValueAtTime(dbToLinear(value + (-44)) * 10, atTime);
         break;
       case "noiseGain":
         this.nodes.noiseGain.gain.setValueAtTime(value, atTime);
@@ -1209,7 +1176,7 @@ export class KlattSynth {
       case "parallelNasalGain":
       case "AN":
         // Apply ndbScale.AN (-58) to convert Klatt parameter to safe linear
-        this.nodes.parallelNasalGain.gain.setValueAtTime(this._dbToLinear(value + (-58)), atTime);
+        this.nodes.parallelNasalGain.gain.setValueAtTime(dbToLinear(value + (-58)), atTime);
         break;
       case "A1":
       case "A2":
@@ -1225,7 +1192,7 @@ export class KlattSynth {
       }
       case "AB":
         // Apply ndbScale.AB (-84) to convert Klatt parameter to safe linear
-        this.nodes.parallelBypassGain.gain.setValueAtTime(-this._dbToLinear(value + (-84)), atTime);
+        this.nodes.parallelBypassGain.gain.setValueAtTime(-dbToLinear(value + (-84)), atTime);
         break;
       default:
         {

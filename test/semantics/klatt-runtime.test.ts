@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createKlattRuntime, BaconGraph } from '../../src/klatt-runtime.js';
+import {
+  createKlattRuntime,
+  BaconGraph,
+  Registry,
+} from '../../src/klatt-runtime.js';
 import type { SemanticsDocument } from '../../src/semantics/types.js';
 
 // Mock AudioContext for testing
@@ -31,7 +35,7 @@ describe('Klatt Runtime', () => {
     ctx = new MockAudioContext();
   });
 
-  it('creates runtime with minimal graph', () => {
+  it('creates runtime with minimal graph', async () => {
     const semantics: SemanticsDocument = {
       name: 'test',
       params: {
@@ -46,7 +50,7 @@ describe('Klatt Runtime', () => {
       },
     };
 
-    const runtime = createKlattRuntime({
+    const runtime = await createKlattRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -56,7 +60,7 @@ describe('Klatt Runtime', () => {
     expect(runtime.getNode('output')).toBeDefined();
   });
 
-  it('evaluates semantics and applies realized values', () => {
+  it('evaluates semantics and applies realized values', async () => {
     const semantics: SemanticsDocument = {
       name: 'test',
       params: {
@@ -74,7 +78,7 @@ describe('Klatt Runtime', () => {
       },
     };
 
-    const runtime = createKlattRuntime({
+    const runtime = await createKlattRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -84,7 +88,7 @@ describe('Klatt Runtime', () => {
     expect(values.volumeLinear).toBe(1); // dbToLinear(0) = 2^0 = 1
   });
 
-  it('updates when inputs change', () => {
+  it('updates when inputs change', async () => {
     const semantics: SemanticsDocument = {
       name: 'test',
       params: {
@@ -102,7 +106,7 @@ describe('Klatt Runtime', () => {
       },
     };
 
-    const runtime = createKlattRuntime({
+    const runtime = await createKlattRuntime({
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
@@ -115,5 +119,93 @@ describe('Klatt Runtime', () => {
     // -72 dB = cutoff to 0
     runtime.setInputs({ volumeDb: -72 });
     expect(runtime.getRealizedValues().volumeLinear).toBe(0);
+  });
+});
+
+describe('registry-based type mappings', () => {
+  const mockRegistry: Registry = {
+    version: '1.0',
+    primitives: {
+      'gain': { category: 'webaudio', inputs: 1, outputs: 1 },
+      'constant-source': { category: 'webaudio', inputs: 0, outputs: 1 },
+      'resonator': {
+        category: 'wasm-worklet',
+        worklet: 'resonator-processor.js',
+        wasm: 'resonator.wasm',
+        inputs: 1,
+        outputs: 1,
+      },
+      'antiresonator': {
+        category: 'wasm-worklet',
+        worklet: 'antiresonator-processor.js',
+        wasm: 'antiresonator.wasm',
+        inputs: 1,
+        outputs: 1,
+      },
+      'lf-source': {
+        category: 'wasm-worklet',
+        worklet: 'lf-source-processor.js',
+        wasm: 'lf-source.wasm',
+        inputs: 0,
+        outputs: 1,
+      },
+      'impulse-train': {
+        category: 'js-worklet',
+        worklet: 'impulse-train-processor.js',
+        inputs: 0,
+        outputs: 1,
+      },
+      'noise-source': {
+        category: 'js-worklet',
+        worklet: 'noise-source-processor.js',
+        inputs: 1,
+        outputs: 1,
+      },
+      'differentiator': {
+        category: 'js-worklet',
+        worklet: 'differentiator-processor.js',
+        inputs: 1,
+        outputs: 1,
+      },
+      'glottal-mod': {
+        category: 'js-worklet',
+        worklet: 'glottal-mod-processor.js',
+        inputs: 1,
+        outputs: 1,
+      },
+    },
+  };
+
+  it('registry contains all expected node types', () => {
+    const expected = [
+      'resonator', 'antiresonator', 'lf-source',
+      'impulse-train', 'noise-source', 'differentiator', 'glottal-mod'
+    ];
+    for (const type of expected) {
+      expect(mockRegistry.primitives[type]).toBeDefined();
+    }
+  });
+
+  it('WASM types have wasm property', () => {
+    expect(mockRegistry.primitives['resonator'].wasm).toBe('resonator.wasm');
+    expect(mockRegistry.primitives['antiresonator'].wasm).toBe('antiresonator.wasm');
+    expect(mockRegistry.primitives['lf-source'].wasm).toBe('lf-source.wasm');
+  });
+
+  it('worklet types have worklet property', () => {
+    expect(mockRegistry.primitives['resonator'].worklet).toBe('resonator-processor.js');
+    expect(mockRegistry.primitives['antiresonator'].worklet).toBe('antiresonator-processor.js');
+    expect(mockRegistry.primitives['lf-source'].worklet).toBe('lf-source-processor.js');
+    expect(mockRegistry.primitives['impulse-train'].worklet).toBe('impulse-train-processor.js');
+    expect(mockRegistry.primitives['noise-source'].worklet).toBe('noise-source-processor.js');
+    expect(mockRegistry.primitives['differentiator'].worklet).toBe('differentiator-processor.js');
+    expect(mockRegistry.primitives['glottal-mod'].worklet).toBe('glottal-mod-processor.js');
+  });
+
+  it('categorizes primitives correctly', () => {
+    expect(mockRegistry.primitives['gain'].category).toBe('webaudio');
+    expect(mockRegistry.primitives['constant-source'].category).toBe('webaudio');
+    expect(mockRegistry.primitives['resonator'].category).toBe('wasm-worklet');
+    expect(mockRegistry.primitives['impulse-train'].category).toBe('js-worklet');
   });
 });

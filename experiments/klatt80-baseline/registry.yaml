@@ -1,0 +1,177 @@
+# Klatt 80 Synthesizer Primitive Registry
+# Defines all node types available for the Klatt audio graph
+#
+# Each primitive defines:
+#   - description: What the node does
+#   - category: webaudio | wasm-worklet | js-worklet
+#   - worklet: path to processor JS (for worklet types)
+#   - wasm: path to WASM module (for wasm-worklet types)
+#   - parameters: configurable params with type, default, unit, description
+#   - inputs: number of audio inputs
+#   - outputs: number of audio outputs
+
+version: "1.0"
+
+primitives:
+  # ===========================================================================
+  # WebAudio Native Nodes
+  # ===========================================================================
+
+  gain:
+    description: "WebAudio GainNode - multiplies input signal by gain parameter"
+    category: "webaudio"
+    parameters:
+      gain:
+        type: float
+        default: 1.0
+        description: "Multiplication factor (linear scale)"
+    inputs: 1
+    outputs: 1
+
+  constant-source:
+    description: "WebAudio ConstantSourceNode - outputs constant value"
+    category: "webaudio"
+    parameters:
+      offset:
+        type: float
+        default: 1.0
+        description: "Constant output value"
+    inputs: 0
+    outputs: 1
+
+  # ===========================================================================
+  # WASM-backed AudioWorklet Nodes
+  # ===========================================================================
+
+  resonator:
+    description: "Two-pole resonator (formant filter) - implements second-order IIR bandpass"
+    category: "wasm-worklet"
+    worklet: "resonator-processor.js"
+    wasm: "resonator.wasm"
+    options:
+      bypassAtZero:
+        type: boolean
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    parameters:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Center frequency of the resonance"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
+  antiresonator:
+    description: "Two-zero antiresonator (zero filter) - implements second-order IIR notch for nasal zeros"
+    category: "wasm-worklet"
+    worklet: "antiresonator-processor.js"
+    wasm: "antiresonator.wasm"
+    options:
+      bypassAtZero:
+        type: boolean
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    parameters:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Zero frequency"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
+  lf-source:
+    description: "LF model glottal source with Rd voice quality control - generates glottal flow derivative"
+    category: "wasm-worklet"
+    worklet: "lf-source-processor.js"
+    wasm: "lf-source.wasm"
+    parameters:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      rd:
+        type: float
+        default: 1.0
+        description: "Voice quality parameter (0.3=pressed to 2.7=breathy)"
+      lfMode:
+        type: int
+        default: 1
+        description: "LF model mode selection"
+    inputs: 0
+    outputs: 1
+
+  # ===========================================================================
+  # JavaScript AudioWorklet Nodes
+  # ===========================================================================
+
+  impulse-train:
+    description: "Classic Klatt impulse train source - generates periodic impulses at F0"
+    category: "js-worklet"
+    worklet: "impulse-train-processor.js"
+    parameters:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      gain:
+        type: float
+        default: 1.0
+        description: "Impulse amplitude"
+      openPhaseRatio:
+        type: float
+        default: 0.7
+        description: "Open phase ratio (OQ) for impulse shaping"
+    inputs: 0
+    outputs: 1
+
+  noise-source:
+    description: "Filtered noise generator for aspiration and frication"
+    category: "js-worklet"
+    worklet: "noise-source-processor.js"
+    parameters:
+      gain:
+        type: float
+        default: 1.0
+        description: "Noise amplitude"
+      cutoff:
+        type: float
+        unit: "Hz"
+        default: 4000
+        description: "Lowpass filter cutoff frequency"
+    inputs: 1    # Accepts modulation input for glottal sync
+    outputs: 1
+
+  differentiator:
+    description: "First-difference filter for radiation characteristic - y[n] = x[n] - x[n-1]"
+    category: "js-worklet"
+    worklet: "differentiator-processor.js"
+    parameters: {}
+    inputs: 1
+    outputs: 1
+
+  glottal-mod:
+    description: "Amplitude modulation synchronized to glottal cycle - 50% duty cycle square wave"
+    category: "js-worklet"
+    worklet: "glottal-mod-processor.js"
+    parameters:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency for synchronization"
+    inputs: 1
+    outputs: 1

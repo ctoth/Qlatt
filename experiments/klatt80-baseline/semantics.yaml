@@ -184,6 +184,123 @@ params:
     default: 0
     description: 0=cascade, 1=parallel
 
+  # Voice source selection
+  sourceMode:
+    description: "Voice source selection (0=impulse, 1=LF, 2=bypass)"
+    type: integer
+    default: 1
+    range: [0, 2]
+
+  # Parallel branch scaling
+  parallelScale:
+    description: "Scaling factor for parallel branch gains"
+    type: float
+    default: 1.0
+
+  # Sample rate
+  sampleRate:
+    description: "Audio sample rate in Hz"
+    type: integer
+    default: 44100
+
+  # LF model parameters
+  Rd:
+    description: "LF model voice quality parameter"
+    type: float
+    default: 1.0
+    range: [0.3, 2.7]
+
+  lfMode:
+    description: "LF model mode selection"
+    type: integer
+    default: 1
+    range: [0, 2]
+
+  openPhaseRatio:
+    description: "Impulse source open phase ratio"
+    type: float
+    default: 0.7
+    range: [0.3, 0.9]
+
+  noiseCutoff:
+    description: "Noise source lowpass cutoff"
+    type: float
+    default: 4000
+    unit: Hz
+
+  fricationCutoff:
+    description: "Frication source cutoff"
+    type: float
+    default: 4000
+    unit: Hz
+
+  # Glottal resonator parameters
+  FGP:
+    description: "Glottal pole frequency"
+    type: float
+    default: 0
+    unit: Hz
+
+  BGP:
+    description: "Glottal pole bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  FGZ:
+    description: "Glottal zero frequency"
+    type: float
+    default: 1500
+    unit: Hz
+
+  BGZ:
+    description: "Glottal zero bandwidth"
+    type: float
+    default: 6000
+    unit: Hz
+
+  BGS:
+    description: "Glottal source bandwidth"
+    type: float
+    default: 200
+    unit: Hz
+
+  # Nasal resonator parameters
+  FNZ:
+    description: "Nasal zero frequency"
+    type: float
+    default: 270
+    unit: Hz
+
+  BNZ:
+    description: "Nasal zero bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  FNP:
+    description: "Nasal pole frequency"
+    type: float
+    default: 270
+    unit: Hz
+
+  BNP:
+    description: "Nasal pole bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  # Output gain parameters
+  masterGain:
+    description: "Master output gain"
+    type: float
+    default: 1.0
+
+  outputGain:
+    description: "Final output gain"
+    type: float
+    default: 1.0
+
 # Constants - values that don't change
 constants:
   # ndbScale offsets for G0 compensation
@@ -291,3 +408,66 @@ realize:
   parallelGain:
     expr: "SW == 1 ? 1 : 0"
     deps: [SW]
+
+  # Source mode switching
+  lfSourceSwitch:
+    expr: "sourceMode == 1 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  impulseSourceSwitch:
+    expr: "sourceMode != 1 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  sourceBypassSwitch:
+    expr: "sourceMode == 2 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  sourceDirectSwitch:
+    expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 1.0 : 0.0)"
+    deps: [sourceMode]
+
+  sourceDiffSwitch:
+    expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 0.0 : 1.0)"
+    deps: [sourceMode]
+
+  # Parallel scaled gains (NO proximity corrections - match current graph behavior)
+  a1GainScaled:
+    expr: "dbToLinear(A1 + ndbScale.A1) * parallelScale"
+    deps: [A1, parallelScale]
+
+  a2GainScaled:
+    expr: "-dbToLinear(A2 + ndbScale.A2) * parallelScale"
+    deps: [A2, parallelScale]
+
+  a3GainScaled:
+    expr: "dbToLinear(A3 + ndbScale.A3) * parallelScale"
+    deps: [A3, parallelScale]
+
+  a4GainScaled:
+    expr: "-dbToLinear(A4 + ndbScale.A4) * parallelScale"
+    deps: [A4, parallelScale]
+
+  a5GainScaled:
+    expr: "dbToLinear(A5 + ndbScale.A5) * parallelScale"
+    deps: [A5, parallelScale]
+
+  a6GainScaled:
+    expr: "-dbToLinear(A6 + ndbScale.A6) * parallelScale"
+    deps: [A6, parallelScale]
+
+  anGainScaled:
+    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
+    deps: [AN, parallelScale]
+
+  abGainScaled:
+    expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"
+    deps: [AB, parallelScale]
+
+  fricGainScaled:
+    expr: "dbToLinear(G0 + AF + ndbScale.AF) * parallelScale"
+    deps: [G0, AF, parallelScale]
+
+  # System constant
+  nyquistFrequency:
+    expr: "sampleRate / 2"
+    deps: [sampleRate]

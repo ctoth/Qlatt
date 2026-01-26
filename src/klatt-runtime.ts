@@ -222,6 +222,12 @@ export interface KlattRuntime {
   // Get an audio node by ID
   getNode(id: string): AudioNode | undefined;
 
+  // Get all node IDs
+  getAllNodeIds(): string[];
+
+  // Get the AudioContext
+  getAudioContext(): AudioContext;
+
   // Connect to destination
   connectToDestination(): void;
 
@@ -466,6 +472,14 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
     getNode(id: string): AudioNode | undefined {
       return nodes.get(id);
+    },
+
+    getAllNodeIds(): string[] {
+      return Array.from(nodes.keys());
+    },
+
+    getAudioContext(): AudioContext {
+      return audioContext;
     },
 
     connectToDestination(): void {

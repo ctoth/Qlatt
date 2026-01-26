@@ -1,8 +1,16 @@
 import { KlattSynth } from "../src/klatt-synth.js";
+import { createKlattRuntime } from "../src/klatt-runtime.ts";
+import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend.js";
+import yaml from "js-yaml";
 
 const ctx = new AudioContext();
 const synth = new KlattSynth(ctx);
+let newRuntime = null;
+let newInterpreter = null;
+let newRuntimeGraph = null;
+let newRuntimeSemantics = null;
+let newRuntimeRegistry = null;
 const status = document.getElementById("status");
 const controls = document.getElementById("controls");
 const diagnosticsEl = document.getElementById("diagnostics");
@@ -194,12 +202,22 @@ async function playKlattSyn() {
 }
 
 async function speak() {
-  await synth.initialize();
   await ctx.resume();
   const phrase = document.getElementById("phrase").value.trim();
   const baseF0 = Number(document.getElementById("baseF0").value) || 110;
   if (!phrase) return;
   const track = textToKlattTrack(phrase, baseF0);
+
+  // Check which runtime to use
+  const runtime = getSelectedRuntime();
+  if (runtime === "new") {
+    console.log("[QLATT] Using new klatt-runtime");
+    await speakWithNewRuntime(track);
+    return;
+  }
+
+  // Legacy runtime path
+  await synth.initialize();
   const startTime = ctx.currentTime + 0.05;
   // P1: Session isolation - increment sessionId to detect stale telemetry
   sessionId += 1;
@@ -253,6 +271,113 @@ async function speak() {
 }
 
 renderControls();
+
+function getSelectedRuntime() {
+  const selected = document.querySelector('input[name="runtime"]:checked');
+  return selected ? selected.value : "legacy";
+}
+
+async function loadNewRuntimeConfig() {
+  if (newRuntimeGraph && newRuntimeSemantics && newRuntimeRegistry) {
+    return; // Already loaded
+  }
+  status.textContent = "Status: loading new runtime config...";
+  try {
+    const [graphRes, semanticsRes, registryRes] = await Promise.all([
+      fetch("/experiments/klatt80-baseline/graph.yaml"),
+      fetch("/experiments/klatt80-baseline/semantics.yaml"),
+      fetch("/experiments/klatt80-baseline/registry.yaml"),
+    ]);
+    if (!graphRes.ok || !semanticsRes.ok || !registryRes.ok) {
+      throw new Error("Failed to fetch YAML config files");
+    }
+    const [graphText, semanticsText, registryText] = await Promise.all([
+      graphRes.text(),
+      semanticsRes.text(),
+      registryRes.text(),
+    ]);
+    newRuntimeGraph = yaml.load(graphText);
+    newRuntimeSemantics = yaml.load(semanticsText);
+    newRuntimeRegistry = yaml.load(registryText);
+    status.textContent = "Status: new runtime config loaded";
+    console.log("[QLATT] New runtime config loaded", {
+      graph: newRuntimeGraph?.name,
+      semantics: newRuntimeSemantics?.name,
+      primitives: Object.keys(newRuntimeRegistry?.primitives ?? {}).length,
+    });
+  } catch (err) {
+    status.textContent = "Status: failed to load new runtime config";
+    console.error("[QLATT] Failed to load new runtime config:", err);
+    throw err;
+  }
+}
+
+async function initializeNewRuntime() {
+  if (newRuntime) return newRuntime;
+  await loadNewRuntimeConfig();
+  status.textContent = "Status: initializing new runtime...";
+  try {
+    newRuntime = await createKlattRuntime({
+      audioContext: ctx,
+      graph: newRuntimeGraph,
+      semantics: newRuntimeSemantics,
+      registry: newRuntimeRegistry,
+      workletBasePath: "/worklets/",
+      logger: (msg) => console.log(msg),
+    });
+    newRuntime.connectToDestination();
+    status.textContent = "Status: new runtime initialized";
+    console.log("[QLATT] New runtime initialized");
+    return newRuntime;
+  } catch (err) {
+    status.textContent = "Status: failed to initialize new runtime";
+    console.error("[QLATT] Failed to initialize new runtime:", err);
+    throw err;
+  }
+}
+
+async function speakWithNewRuntime(track) {
+  const runtime = await initializeNewRuntime();
+  status.textContent = "Status: speaking with new runtime...";
+
+  if (!track || track.length === 0) {
+    status.textContent = "Status: new runtime - no track to play";
+    return;
+  }
+
+  // Create interpreter if needed
+  if (!newInterpreter) {
+    console.log("[QLATT] Creating interpreter");
+    newInterpreter = createKlattInterpreter({
+      audioContext: ctx,
+      runtime: runtime,
+      graph: newRuntimeGraph,
+      semantics: newRuntimeSemantics,
+      logger: (msg) => console.log(msg),
+      telemetryHandler: (event) => {
+        console.log("[QLATT] Interpreter telemetry:", event);
+      },
+    });
+  }
+
+  // Schedule track for playback
+  const startTime = ctx.currentTime + 0.05;
+  console.log("[QLATT] New runtime: scheduling track", {
+    frames: track.length,
+    startTime,
+    duration: track[track.length - 1]?.time ?? 0,
+  });
+
+  newInterpreter.scheduleTrack(track, startTime);
+
+  const trackDuration = newInterpreter.getTrackDuration();
+  status.textContent = `Status: new runtime - playing (${trackDuration.toFixed(2)}s)`;
+
+  // Update status when done
+  setTimeout(() => {
+    status.textContent = "Status: new runtime - playback complete";
+  }, (trackDuration + 0.2) * 1000);
+}
 
 function applyUrlParams() {
   const params = new URLSearchParams(window.location.search);

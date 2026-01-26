@@ -733,7 +733,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 800,
     F3: 2400,
-    B1: 80,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 100,
     B3: 150,
     AV: 0,
@@ -746,7 +746,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 1800,
     F3: 2700,
-    B1: 80,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 100,
     B3: 150,
     AV: 0,
@@ -759,7 +759,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 1500,
     F3: 2800,
-    B1: 80,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 100,
     B3: 150,
     AV: 0,
@@ -772,7 +772,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 800,
     F3: 2400,
-    B1: 60,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 110,
     B3: 130,
     AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)
@@ -786,7 +786,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 1800,
     F3: 2700,
-    B1: 60,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 100,
     B3: 170,
     AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)
@@ -800,7 +800,7 @@ export const PHONEME_TARGETS = {
     F1: 200,
     F2: 1500,
     F3: 2800,
-    B1: 60,
+    B1: 300,  // Klatt 1980: wide B1 during sealed closure
     B2: 150,
     B3: 280,
     AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)

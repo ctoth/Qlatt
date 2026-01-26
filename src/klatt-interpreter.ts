@@ -123,6 +123,17 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   }
   log(`Loaded ${paramDefaults.size} param defaults from semantics`);
 
+  // Build static context once at init time (constants + functions + defaults)
+  // This avoids rebuilding these every frame
+  const staticContext: Record<string, unknown> = { ...constants };
+  Object.assign(staticContext, standardFunctions);
+  for (const [name, value] of paramDefaults) {
+    staticContext[name] = value;
+  }
+  staticContext['proximity'] = proximityFn;
+  staticContext['sampleRate'] = audioContext.sampleRate;
+  log(`Built staticContext with ${Object.keys(staticContext).length} entries`);
+
   // Build binding map: semantics output name -> list of AudioParams
   // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
   const bindings = new Map<string, BindingList>();
@@ -217,30 +228,14 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   /**
    * Build evaluation context from frame params
-   * Fully data-driven: defaults from semantics, then track params overlay
+   * Uses prototype chain from staticContext to avoid copying constants/functions/defaults every frame
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
-    // Start with constants
-    const ctx: Record<string, unknown> = { ...constants };
+    // Use prototype chain from staticContext (no copy of static parts)
+    const ctx = Object.create(staticContext) as Record<string, unknown>;
 
-    // Add standard functions
-    Object.assign(ctx, standardFunctions);
-
-    // Apply all defaults from semantics
-    for (const [name, value] of paramDefaults) {
-      ctx[name] = value;
-    }
-
-    // Overlay track params (these override defaults)
-    for (const [key, value] of Object.entries(params)) {
-      ctx[key] = value;
-    }
-
-    // Add proximity function (imported from klatt-functions)
-    ctx['proximity'] = proximityFn;
-
-    // Add computed values
-    ctx['sampleRate'] = audioContext.sampleRate;
+    // Overlay track params (these override defaults via own properties)
+    Object.assign(ctx, params);
 
     // Compute proximity corrections (using defaults-then-overlay values)
     const f1 = ctx['F1'] as number;

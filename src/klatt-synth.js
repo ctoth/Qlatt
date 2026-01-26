@@ -958,9 +958,16 @@ export class KlattSynth {
     // Calculate PLSTEP amplitude per PARCOE.FOR line 131:
     // PLSTEP = GETAMP(NNG0 + NDBSCA(11) + 44)
     // where NDBSCA(11) = -72 (AF scale factor)
-    // Formula: GETAMP(G0 - 72 + 44) = GETAMP(G0 - 28)
+    //
+    // In Klatt 80, voicing amplitude is GETAMP(G0+AV-72)*F0, scaled by F0.
+    // Our implementation doesn't scale by F0, instead using ndbScale.AV = -119
+    // which compensates: G0 + AV + (-119) ≈ G0 + AV - 72 - 47 (subtracts ~40dB for F0≈100).
+    //
+    // PLSTEP's "+44" similarly compensates for F0 scaling in original Klatt 80.
+    // In our system, we must use the same ndbScale offset as other source amplitudes:
+    // burstDb = G0 + ndbScale.AF + 44 = G0 + (-119) + 44 = G0 - 75
     const goDb = params.GO ?? 47;
-    const burstDb = goDb - 28;
+    const burstDb = goDb - 75;  // Was goDb - 28, corrected for ndbScale compensation
     const burstAmplitude = this._dbToLinear(burstDb);
 
     // Emit telemetry for PLSTEP burst

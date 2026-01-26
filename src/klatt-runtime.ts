@@ -265,6 +265,13 @@ export interface KlattRuntimeOptions {
   logger?: (msg: string) => void;             // Optional logging callback
 }
 
+// Binding information for interpreter use
+export interface BindingInfo {
+  nodeId: string;
+  paramName: string;
+  bindName: string;
+}
+
 // Runtime instance
 export interface KlattRuntime {
   // Get current realized values
@@ -287,6 +294,10 @@ export interface KlattRuntime {
 
   // Disconnect all
   disconnect(): void;
+
+  // Get binding map (semantic name -> list of node/param targets)
+  // Allows interpreter to reuse binding discovery
+  getBindingMap(): Map<string, BindingInfo[]>;
 }
 
 /**
@@ -451,11 +462,27 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     }
   }
 
+  // Build binding map (semantic name -> node/param targets)
+  // This is exposed via getBindingMap() for interpreter to reuse
+  const bindingMap = new Map<string, BindingInfo[]>();
+  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
+    if (!nodeDef.params) continue;
+    for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
+      if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
+        const bindName = (paramSpec as { bind: string }).bind;
+        const existing = bindingMap.get(bindName) ?? [];
+        existing.push({ nodeId, paramName, bindName });
+        bindingMap.set(bindName, existing);
+      }
+    }
+  }
+
   // Initialize
   log('Evaluating semantics');
   evaluate();
   createNodes();
   log(`Created nodes: ${Array.from(nodes.keys()).join(', ')}`);
+  log(`Built ${bindingMap.size} unique bindings`);
   connectNodes();
   log(`Total connections: ${graph.connections?.length ?? 0}`);
 
@@ -510,6 +537,10 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       for (const node of nodes.values()) {
         node.disconnect();
       }
+    },
+
+    getBindingMap(): Map<string, BindingInfo[]> {
+      return bindingMap;
     },
   };
 }

@@ -517,12 +517,14 @@ export const PHONEME_TARGETS = {
     AH: 0,
     AVS: -70,
     // Parallel formant amplitudes for spectral shaping
-    // Jongman (2000): peak ~7.7 kHz; Shadle (1985): diffuse with two broad peaks
-    A3: 20,   // Mild mid-frequency content
-    A4: 25,   // Building toward high-frequency peak
-    A5: 30,   // Slightly above TH (28) for broader spectrum
-    A6: 50,   // Peak emphasis near 7.7 kHz (above TH's 48)
-    AB: 57,   // Bypass for diffuse component
+    // Shadle (1985): /f/ has "two broad peaks" - needs mid-freq content
+    // Jongman (2000): spectral peak ~7.7 kHz, -17 dB normalized amplitude
+    // Behrens & Blumstein (1988): spectral shape is primary cue for fricative place
+    A3: 40,   // Shadle 1985: mid-freq content for broad peaks
+    A4: 45,   // Transition to high frequencies
+    A5: 48,   // Jongman 2000: spectral peak ~7.7 kHz for labiodentals
+    A6: 55,   // Highest frequency emphasis near peak
+    AB: 55,   // Reduced to let formants compete with bypass
     dur: 90,
     type: "fricative",
     voiceless: true,
@@ -540,12 +542,14 @@ export const PHONEME_TARGETS = {
     AH: 0,
     AVS: 47,
     // Parallel formant amplitudes for spectral shaping (voiced counterpart of F)
-    // Values reduced ~10 dB from F due to voicing reducing frication energy
-    A3: 15,
-    A4: 20,
-    A5: 25,
-    A6: 45,
-    AB: 57,   // Bypass for diffuse component
+    // Shadle (1985): same spectral shape as F
+    // Jongman (2000): spectral peak ~7.7 kHz for labiodentals
+    // Behrens & Blumstein (1988): spectral shape is primary cue for fricative place
+    A3: 40,   // Same spectral shape as F
+    A4: 45,
+    A5: 48,
+    A6: 55,
+    AB: 55,   // Reduced to let formants compete with bypass
     dur: 80,
     type: "fricative",
     voiced: true,

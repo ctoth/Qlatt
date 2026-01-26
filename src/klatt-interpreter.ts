@@ -14,7 +14,7 @@
 
 import { createTopologicalEvaluator } from './semantics/topological-evaluator.js';
 import type { SemanticsDocument, ParamValue } from './semantics/types.js';
-import type { KlattRuntime, BaconGraph } from './klatt-runtime.js';
+import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
 import { dbToLinear, proximity as proximityFn, min, max, pow } from './klatt-functions.js';
 
 // =============================================================================
@@ -57,6 +57,9 @@ export interface KlattInterpreterOptions {
   semantics: SemanticsDocument;
   logger?: (msg: string) => void;
   telemetryHandler?: (event: TelemetryEvent) => void;
+  // Optional: binding map from runtime (avoids duplicate graph traversal)
+  // If not provided, interpreter builds bindings locally (backward compatible)
+  bindingMap?: Map<string, BindingInfo[]>;
 }
 
 export interface TelemetryEvent {
@@ -155,31 +158,27 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
-  // Walk graph nodes to build bindings
-  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
-    if (!nodeDef.params) continue;
+  // Build bindings: use provided bindingMap if available (from runtime), otherwise walk graph
+  // Either way, we need to resolve AudioParams from runtime nodes
+  const sourceBindingMap = options.bindingMap ?? runtime.getBindingMap();
 
-    const audioNode = runtime.getNode(nodeId);
-    if (!audioNode) {
-      log(`  Warning: No audio node for ${nodeId} (type: ${nodeDef.type})`);
-      continue;
-    }
-
-    for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
-      if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
-        const bindName = (paramSpec as { bind: string }).bind;
-        const param = getAudioParam(audioNode, paramName);
-        if (param) {
-          // Append to binding list (don't overwrite!)
-          const existing = bindings.get(bindName) ?? [];
-          existing.push({
-            param,
-            nodeId,
-            paramName,
-            ramp: rampParams.has(bindName),
-          });
-          bindings.set(bindName, existing);
-        }
+  for (const [bindName, bindingInfoList] of sourceBindingMap) {
+    for (const { nodeId, paramName } of bindingInfoList) {
+      const audioNode = runtime.getNode(nodeId);
+      if (!audioNode) {
+        log(`  Warning: No audio node for ${nodeId}`);
+        continue;
+      }
+      const param = getAudioParam(audioNode, paramName);
+      if (param) {
+        const existing = bindings.get(bindName) ?? [];
+        existing.push({
+          param,
+          nodeId,
+          paramName,
+          ramp: rampParams.has(bindName),
+        });
+        bindings.set(bindName, existing);
       }
     }
   }
@@ -200,9 +199,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // Flatten binding lists at init time to avoid repeated Map lookups and null checks
   type FlatBinding = { name: string; param: AudioParam; ramp: boolean };
 
-  // Flatten realized bindings
+  // Flatten realized bindings, EXCLUDING ramp params to prevent double-write
+  // Ramp params are handled separately: setValueAtTime at frame 0, linearRampToValueAtTime for i>0
   const realizedBindingsList: FlatBinding[] = [];
   for (const name of realizedBindings) {
+    if (rampParams.has(name)) continue;  // Skip ramp params - handled by rampBindingsList
     const bindingList = bindings.get(name);
     if (bindingList) {
       for (const binding of bindingList) {
@@ -273,13 +274,13 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   /**
    * Build evaluation context from frame params
-   * Uses prototype chain from staticContext to avoid copying constants/functions/defaults every frame
+   * Copies staticContext to ensure all properties are own properties (required by evaluator)
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
-    // Use prototype chain from staticContext (no copy of static parts)
-    const ctx = Object.create(staticContext) as Record<string, unknown>;
+    // Copy staticContext - evaluator's { ...inputs } only copies own properties
+    const ctx: Record<string, unknown> = { ...staticContext };
 
-    // Overlay track params (these override defaults via own properties)
+    // Overlay track params (these override defaults)
     Object.assign(ctx, params);
 
     // Compute proximity corrections (using defaults-then-overlay values)
@@ -359,12 +360,22 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         }
       }
 
-      // Add ramp entries (for frames after the first)
-      if (i > 0) {
+      // Ramp params: setValueAtTime at frame 0, linearRampToValueAtTime thereafter
+      // This prevents double-write that would collapse ramps to steps
+      if (i === 0) {
+        // Frame 0: set initial value for ramp params
         for (const { name, param } of rampBindingsList) {
           const value = realized[name];
           if (typeof value === 'number') {
-            schedule.push({ time: t, param, value, ramp: true });
+            schedule.push({ time: t, param, value, ramp: false });  // setValueAtTime
+          }
+        }
+      } else {
+        // Frames 1+: ramp to new value
+        for (const { name, param } of rampBindingsList) {
+          const value = realized[name];
+          if (typeof value === 'number') {
+            schedule.push({ time: t, param, value, ramp: true });  // linearRampToValueAtTime
           }
         }
       }

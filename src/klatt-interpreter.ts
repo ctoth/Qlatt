@@ -190,6 +190,42 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
+  // Flatten binding lists at init time to avoid repeated Map lookups and null checks
+  type FlatBinding = { name: string; param: AudioParam; ramp: boolean };
+
+  // Flatten realized bindings
+  const realizedBindingsList: FlatBinding[] = [];
+  for (const name of realizedBindings) {
+    const bindingList = bindings.get(name);
+    if (bindingList) {
+      for (const binding of bindingList) {
+        realizedBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
+      }
+    }
+  }
+
+  // Flatten passthrough bindings
+  const passthroughBindingsList: FlatBinding[] = [];
+  for (const name of passthroughBindings) {
+    const bindingList = bindings.get(name);
+    if (bindingList) {
+      for (const binding of bindingList) {
+        passthroughBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
+      }
+    }
+  }
+
+  // Flatten ramp bindings
+  const rampBindingsList: FlatBinding[] = [];
+  for (const name of rampParams) {
+    const bindingList = bindings.get(name);
+    if (bindingList) {
+      for (const binding of bindingList) {
+        rampBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
+      }
+    }
+  }
+
   // Count total bindings
   let totalBindings = 0;
   for (const list of bindings.values()) {
@@ -291,9 +327,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Apply pre-evaluated realized values to all bound params
    * Internal function that skips semantics evaluation
    *
-   * Uses partitioned binding sets to ensure each param is written exactly once:
-   * - realizedBindings: params with realize rules -> use realized values
-   * - passthroughBindings: params without realize rules -> use raw track values
+   * Uses flattened binding lists to ensure each param is written exactly once:
+   * - realizedBindingsList: params with realize rules -> use realized values
+   * - passthroughBindingsList: params without realize rules -> use raw track values
    */
   function applyRealized(
     realized: Record<string, ParamValue>,
@@ -301,29 +337,19 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     atTime: number,
     ramp: boolean
   ): void {
-    // Apply realized values to params that have realize rules
-    for (const name of realizedBindings) {
+    // Realized bindings - one flat loop, no null checks
+    for (const { name, param, ramp: bindingRamp } of realizedBindingsList) {
       const value = realized[name];
       if (typeof value === 'number') {
-        const bindingList = bindings.get(name);
-        if (bindingList) {
-          for (const binding of bindingList) {
-            scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
-          }
-        }
+        scheduleParam(param, value, atTime, ramp && bindingRamp);
       }
     }
 
-    // Apply raw values to passthrough params (no realize rule)
-    for (const name of passthroughBindings) {
+    // Passthrough bindings - one flat loop, no null checks
+    for (const { name, param, ramp: bindingRamp } of passthroughBindingsList) {
       const value = params[name];
       if (typeof value === 'number') {
-        const bindingList = bindings.get(name);
-        if (bindingList) {
-          for (const binding of bindingList) {
-            scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
-          }
-        }
+        scheduleParam(param, value, atTime, ramp && bindingRamp);
       }
     }
   }
@@ -342,17 +368,12 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Internal function that skips semantics evaluation
    */
   function scheduleRampsFromRealized(realized: Record<string, ParamValue>, atTime: number): void {
-    // Iterate ALL ramp params instead of hardcoding names
-    for (const paramName of rampParams) {
-      const value = realized[paramName];
+    // Ramp bindings - one flat loop, no null checks
+    for (const { name, param } of rampBindingsList) {
+      const value = realized[name];
       if (typeof value === 'number') {
-        const bindingList = bindings.get(paramName);
-        if (bindingList) {
-          for (const binding of bindingList) {
-            binding.param.linearRampToValueAtTime(value, atTime);
-            scheduledParams.add(binding.param);
-          }
-        }
+        param.linearRampToValueAtTime(value, atTime);
+        scheduledParams.add(param);
       }
     }
   }

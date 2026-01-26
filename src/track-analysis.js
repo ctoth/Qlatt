@@ -1,6 +1,8 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
+import { dbToLinear, proximity, ndbScale, ndbCor } from './klatt-functions.js';
+
 // Klatt 80 Table III expected values for stop releases
 export const KLATT80_EXPECTED = {
   P_REL: { AF: 55, AH: 52, AB: 63, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0, dur: 5, label: '[p] labial burst' },
@@ -240,11 +242,8 @@ export function formatPlstepEventsRelative(list, runStart) {
   });
 }
 
-// Gain analysis helpers
-export function dbToLinear(db) {
-  if (!Number.isFinite(db) || db <= -72) return 0;
-  return 2 ** (Math.min(96, db) / 6);
-}
+// Re-export dbToLinear from klatt-functions for backwards compatibility
+export { dbToLinear } from './klatt-functions.js';
 
 export function updateRange(range, value) {
   if (!Number.isFinite(value)) return range;
@@ -254,17 +253,11 @@ export function updateRange(range, value) {
   return range;
 }
 
-const NDB_SCALE = { A1: -58, A2: -65, A3: -73, A4: -78, A5: -79, A6: -80, AN: -58, AB: -84, AV: -72, AH: -72, AF: -72, AVS: -44 };
-const NDB_COR = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
 export function analyzeTrackGains(track, synthParams, sampleRate = 48000) {
   if (!track || track.length === 0) return null;
   const ranges = { voiceGain: null, aspGain: null, fricGain: null, parallelVoiceGain: null, parallelBypassGain: null, parallelFormantGain: null, parallelNasalGain: null, masterGain: null, mix: null };
-  const outputScale = dbToLinear(NDB_SCALE.AF + 44);
-  const proximity = (delta) => {
-    if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-    return NDB_COR[Math.max(0, Math.min(Math.floor(delta / 50) - 1, 9))] ?? 0;
-  };
+  const outputScale = dbToLinear(ndbScale.AF + 44);
   const parallelScale = synthParams.parallelGainScale ?? 1.0;
   const baseBoost = synthParams.masterGain ?? 1.0;
   const state = { ...(track[0]?.params ?? {}) };
@@ -280,22 +273,22 @@ export function analyzeTrackGains(track, synthParams, sampleRate = 48000) {
     const mix = state.SW === 1 ? 1 : synthParams.parallelMix;
     const fricDbAdj = state.SW === 1 ? Math.max(state.AF ?? -70, state.AH ?? -70) : (state.AF ?? -70);
 
-    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear((state.AV ?? -70) + NDB_SCALE.AV));
-    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear((state.AH ?? -70) + NDB_SCALE.AH));
-    ranges.fricGain = updateRange(ranges.fricGain, dbToLinear(fricDbAdj + NDB_SCALE.AF) * parallelScale);
-    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear((state.AVS ?? -70) + NDB_SCALE.AVS) * 10);
-    ranges.parallelBypassGain = updateRange(ranges.parallelBypassGain, dbToLinear((state.AB ?? -70) + NDB_SCALE.AB) * parallelScale);
-    ranges.parallelNasalGain = updateRange(ranges.parallelNasalGain, dbToLinear((state.AN ?? -70) + NDB_SCALE.AN) * parallelScale);
+    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear((state.AV ?? -70) + ndbScale.AV));
+    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear((state.AH ?? -70) + ndbScale.AH));
+    ranges.fricGain = updateRange(ranges.fricGain, dbToLinear(fricDbAdj + ndbScale.AF) * parallelScale);
+    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear((state.AVS ?? -70) + ndbScale.AVS) * 10);
+    ranges.parallelBypassGain = updateRange(ranges.parallelBypassGain, dbToLinear((state.AB ?? -70) + ndbScale.AB) * parallelScale);
+    ranges.parallelNasalGain = updateRange(ranges.parallelNasalGain, dbToLinear((state.AN ?? -70) + ndbScale.AN) * parallelScale);
     ranges.masterGain = updateRange(ranges.masterGain, Math.min(5.0, dbToLinear(state.GO ?? 47) * baseBoost * outputScale));
     ranges.mix = updateRange(ranges.mix, mix);
 
     const parallelLinear = [
-      dbToLinear((state.A1 ?? -70) + n12Cor + NDB_SCALE.A1),
-      dbToLinear((state.A2 ?? -70) + n12Cor * 2 + n23Cor + NDB_SCALE.A2) * a2Cor,
-      dbToLinear((state.A3 ?? -70) + n23Cor * 2 + n34Cor + NDB_SCALE.A3) * a3Cor,
-      dbToLinear((state.A4 ?? -70) + n34Cor * 2 + NDB_SCALE.A4) * a3Cor,
-      dbToLinear((state.A5 ?? -70) + NDB_SCALE.A5) * a3Cor,
-      dbToLinear((state.A6 ?? -70) + NDB_SCALE.A6) * a3Cor,
+      dbToLinear((state.A1 ?? -70) + n12Cor + ndbScale.A1),
+      dbToLinear((state.A2 ?? -70) + n12Cor * 2 + n23Cor + ndbScale.A2) * a2Cor,
+      dbToLinear((state.A3 ?? -70) + n23Cor * 2 + n34Cor + ndbScale.A3) * a3Cor,
+      dbToLinear((state.A4 ?? -70) + n34Cor * 2 + ndbScale.A4) * a3Cor,
+      dbToLinear((state.A5 ?? -70) + ndbScale.A5) * a3Cor,
+      dbToLinear((state.A6 ?? -70) + ndbScale.A6) * a3Cor,
     ];
     const freqs = [f1, f2, f3, f4, f5, f6];
     for (let idx = 0; idx < parallelLinear.length; idx++) {

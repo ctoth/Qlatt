@@ -6,6 +6,7 @@
  */
 
 import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator.js';
+import { dbToLinear, min, max, pow } from './klatt-functions.js';
 
 // =============================================================================
 // Registry Types
@@ -13,9 +14,19 @@ import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator.js';
 
 export interface RegistryPrimitive {
   description?: string;
-  category: 'webaudio' | 'wasm-worklet' | 'js-worklet';
-  worklet?: string;  // e.g., "resonator-processor.js"
-  wasm?: string;     // e.g., "resonator.wasm"
+  // Bacon format: use native/worklet/wasm to determine category
+  native?: string;    // e.g., "GainNode" - maps to webaudio
+  worklet?: string;   // e.g., "resonator-processor.js"
+  wasm?: string;      // e.g., "resonator.wasm" - if present with worklet, it's wasm-worklet
+  // Legacy format support
+  category?: 'webaudio' | 'wasm-worklet' | 'js-worklet';
+  params?: Record<string, {
+    type: string;
+    default?: number;
+    unit?: string;
+    description?: string;
+  }>;
+  // Legacy alias
   parameters?: Record<string, {
     type: string;
     default?: number;
@@ -32,8 +43,30 @@ export interface RegistryPrimitive {
 }
 
 export interface Registry {
-  version: string;
+  bacon?: string;   // Bacon format version
+  version?: string; // Legacy format version
   primitives: Record<string, RegistryPrimitive>;
+}
+
+/**
+ * Infer category from bacon-style fields
+ */
+function getPrimitiveCategory(primitive: RegistryPrimitive): 'webaudio' | 'wasm-worklet' | 'js-worklet' | null {
+  // Explicit category takes precedence (legacy support)
+  if (primitive.category) {
+    return primitive.category;
+  }
+  // Bacon format: infer from fields
+  if (primitive.native) {
+    return 'webaudio';
+  }
+  if (primitive.worklet && primitive.wasm) {
+    return 'wasm-worklet';
+  }
+  if (primitive.worklet) {
+    return 'js-worklet';
+  }
+  return null;
 }
 
 // =============================================================================
@@ -189,16 +222,37 @@ export interface BaconGraph {
   name?: string;
   nodes: Record<string, BaconNode>;
   connections?: BaconConnection[];
+  outputs?: PortRef[];
 }
 
 export interface BaconNode {
   type: string;
   params?: Record<string, ParamValueSpec>;
+  options?: Record<string, unknown>;
 }
 
 export type ParamValueSpec = number | string | boolean | { bind: string } | { expr: string };
 
-export type BaconConnection = [string, string] | { from: string; to: string };
+// Port reference can be a string (node ID) or object with node/port
+export type PortRef = string | { node: string; port?: number | string };
+
+export type BaconConnection = [string, string] | { from: PortRef; to: PortRef };
+
+/**
+ * Extract node ID from a port reference
+ */
+function getNodeId(ref: PortRef): string {
+  return typeof ref === 'string' ? ref : ref.node;
+}
+
+/**
+ * Extract port index from a port reference (undefined means default port)
+ */
+function getPortIndex(ref: PortRef): number | undefined {
+  if (typeof ref === 'string') return undefined;
+  if (typeof ref.port === 'number') return ref.port;
+  return undefined;
+}
 
 // Runtime options
 export interface KlattRuntimeOptions {
@@ -236,62 +290,6 @@ export interface KlattRuntime {
 }
 
 /**
- * Default registry for backward compatibility (when no registry is provided)
- */
-const DEFAULT_REGISTRY: Registry = {
-  version: '1.0',
-  primitives: {
-    'gain': { category: 'webaudio', inputs: 1, outputs: 1 },
-    'constant-source': { category: 'webaudio', inputs: 0, outputs: 1 },
-    'resonator': {
-      category: 'wasm-worklet',
-      worklet: 'resonator-processor.js',
-      wasm: 'resonator.wasm',
-      inputs: 1,
-      outputs: 1,
-    },
-    'antiresonator': {
-      category: 'wasm-worklet',
-      worklet: 'antiresonator-processor.js',
-      wasm: 'antiresonator.wasm',
-      inputs: 1,
-      outputs: 1,
-    },
-    'lf-source': {
-      category: 'wasm-worklet',
-      worklet: 'lf-source-processor.js',
-      wasm: 'lf-source.wasm',
-      inputs: 0,
-      outputs: 1,
-    },
-    'impulse-train': {
-      category: 'js-worklet',
-      worklet: 'impulse-train-processor.js',
-      inputs: 0,
-      outputs: 1,
-    },
-    'noise-source': {
-      category: 'js-worklet',
-      worklet: 'noise-source-processor.js',
-      inputs: 1,
-      outputs: 1,
-    },
-    'differentiator': {
-      category: 'js-worklet',
-      worklet: 'differentiator-processor.js',
-      inputs: 1,
-      outputs: 1,
-    },
-    'glottal-mod': {
-      category: 'js-worklet',
-      worklet: 'glottal-mod-processor.js',
-      inputs: 1,
-      outputs: 1,
-    },
-  },
-};
-
-/**
  * Create a Klatt runtime instance (async to support worklet loading)
  */
 export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<KlattRuntime> {
@@ -299,10 +297,14 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     audioContext,
     semantics,
     graph,
-    registry = DEFAULT_REGISTRY,
+    registry,
     workletBasePath = '/worklets/',
     logger = () => {},
   } = options;
+
+  if (!registry) {
+    throw new Error('Registry is required for createKlattRuntime');
+  }
 
   // Create prefixed logger
   const log = (msg: string) => logger(`[klatt-runtime] ${msg}`);
@@ -314,7 +316,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Determine which WASM modules are needed based on graph nodes and registry
   const needsWasm = Object.values(graph.nodes).some(n => {
     const primitive = registry.primitives[n.type];
-    return primitive?.category === 'wasm-worklet' && primitive.wasm;
+    return primitive && getPrimitiveCategory(primitive) === 'wasm-worklet' && primitive.wasm;
   });
 
   // Load WASM if not provided and needed
@@ -339,8 +341,11 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   const jmespathResolver = createJmespathResolver();
   const topoEvaluator = createTopologicalEvaluator();
 
-  // Register standard functions
-  registerStandardFunctions(celEvaluator);
+  // Register standard functions with CEL evaluator (using imported functions)
+  celEvaluator.registerFunction('dbToLinear', dbToLinear);
+  celEvaluator.registerFunction('min', min);
+  celEvaluator.registerFunction('max', max);
+  celEvaluator.registerFunction('pow', pow);
 
   // Current input values
   let currentInputs: Record<string, ParamValue> = {};
@@ -368,17 +373,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     };
   }
 
-  // Standard functions available in expressions
-  const standardFunctions: Record<string, (...args: number[]) => number> = {
-    // dbToLinear: Klatt's 2^(db/6) formula
-    dbToLinear: (db: number) => {
-      if (!Number.isFinite(db) || db <= -72) return 0;
-      return Math.pow(2, Math.min(96, db) / 6);
-    },
-    min: (a: number, b: number) => Math.min(a, b),
-    max: (a: number, b: number) => Math.max(a, b),
-    pow: (base: number, exp: number) => Math.pow(base, exp),
-  };
+  // Standard functions available in expressions (imported from klatt-functions.ts)
+  const standardFunctions = { dbToLinear, min, max, pow };
 
   // Evaluate semantics
   function evaluate(): void {
@@ -396,7 +392,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   function createNodes(): void {
     log('Creating audio nodes');
     for (const [id, nodeDef] of Object.entries(graph.nodes)) {
-      const node = createAudioNode(audioContext, nodeDef.type, id, registry, wasmModules, log);
+      const node = createAudioNode(audioContext, nodeDef.type, id, nodeDef, registry, wasmModules, log);
       if (node) {
         nodes.set(id, node);
       }
@@ -428,16 +424,27 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
     log('Connecting audio graph');
     for (const conn of graph.connections) {
-      const [fromId, toId] = Array.isArray(conn)
+      // Extract from/to refs
+      const [fromRef, toRef]: [PortRef, PortRef] = Array.isArray(conn)
         ? conn
         : [conn.from, conn.to];
+
+      const fromId = getNodeId(fromRef);
+      const toId = getNodeId(toRef);
+      const toPort = getPortIndex(toRef);
 
       const fromNode = nodes.get(fromId);
       const toNode = nodes.get(toId);
 
       if (fromNode && toNode) {
-        fromNode.connect(toNode);
-        log(`  Connected ${fromId} -> ${toId}`);
+        if (toPort !== undefined) {
+          // Connect to specific input port
+          fromNode.connect(toNode, 0, toPort);
+          log(`  Connected ${fromId} -> ${toId}[${toPort}]`);
+        } else {
+          fromNode.connect(toNode);
+          log(`  Connected ${fromId} -> ${toId}`);
+        }
       } else {
         log(`  Warning: Could not connect ${fromId} -> ${toId} (missing node)`);
       }
@@ -448,7 +455,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log('Evaluating semantics');
   evaluate();
   createNodes();
+  log(`Created nodes: ${Array.from(nodes.keys()).join(', ')}`);
   connectNodes();
+  log(`Total connections: ${graph.connections?.length ?? 0}`);
 
   // Wait for worklets to be ready before applying values
   await awaitWorkletReady(nodes, 2000, log);
@@ -484,10 +493,16 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
     connectToDestination(): void {
       // Find output node(s) and connect
-      // For now, assume 'output' or 'masterGain' exists
-      const output = nodes.get('output') ?? nodes.get('masterGain');
-      if (output) {
-        output.connect(audioContext.destination);
+      // Try graph-specified outputs first, then common names
+      const outputNodeId = graph.outputs?.[0];
+      const outputNode = outputNodeId
+        ? nodes.get(typeof outputNodeId === 'string' ? outputNodeId : outputNodeId.node)
+        : nodes.get('outputGain') ?? nodes.get('output') ?? nodes.get('masterGain');
+      if (outputNode) {
+        log(`Connecting ${outputNodeId ?? 'fallback'} to destination`);
+        outputNode.connect(audioContext.destination);
+      } else {
+        log('Warning: No output node found to connect to destination');
       }
     },
 
@@ -499,27 +514,12 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   };
 }
 
-// Helper: Register standard Klatt functions
-function registerStandardFunctions(cel: CelEvaluator): void {
-  // dbToLinear: Klatt's 2^(db/6) formula
-  cel.registerFunction('dbToLinear', (db: number) => {
-    if (!Number.isFinite(db) || db <= -72) return 0;
-    return Math.pow(2, Math.min(96, db) / 6);
-  });
-
-  // min/max
-  cel.registerFunction('min', (a: number, b: number) => Math.min(a, b));
-  cel.registerFunction('max', (a: number, b: number) => Math.max(a, b));
-
-  // pow
-  cel.registerFunction('pow', (base: number, exp: number) => Math.pow(base, exp));
-}
-
 // Helper: Create audio node by type (registry-driven)
 function createAudioNode(
   ctx: AudioContext,
   type: string,
   id: string,
+  nodeDef: BaconNode,
   registry: Registry,
   wasmModules: Record<string, ArrayBuffer> | undefined,
   log: (msg: string) => void
@@ -531,20 +531,24 @@ function createAudioNode(
     return null;
   }
 
-  log(`  Creating node '${id}' of type '${type}' (${primitive.category})`);
+  const category = getPrimitiveCategory(primitive);
+  log(`  Creating node '${id}' of type '${type}' (${category})`);
 
-  switch (primitive.category) {
+  // Merge node options with processor options
+  const nodeOptions = nodeDef.options ?? {};
+
+  switch (category) {
     case 'webaudio':
       return createNativeNode(ctx, type, id, log);
 
     case 'wasm-worklet':
-      return createWasmWorkletNode(ctx, type, id, primitive, wasmModules, log);
+      return createWasmWorkletNode(ctx, type, id, primitive, nodeOptions, wasmModules, log);
 
     case 'js-worklet':
-      return createJsWorkletNode(ctx, type, id, primitive, log);
+      return createJsWorkletNode(ctx, type, id, primitive, nodeOptions, log);
 
     default:
-      log(`Warning: Unknown category '${primitive.category}' for type '${type}'`);
+      log(`Warning: Unknown category '${category}' for type '${type}'`);
       return null;
   }
 }
@@ -576,6 +580,7 @@ function createWasmWorkletNode(
   type: string,
   id: string,
   primitive: RegistryPrimitive,
+  nodeOptions: Record<string, unknown>,
   wasmModules: Record<string, ArrayBuffer> | undefined,
   log: (msg: string) => void
 ): AudioWorkletNode | null {
@@ -595,6 +600,7 @@ function createWasmWorkletNode(
     processorOptions: {
       wasmBytes,
       nodeId: id,
+      ...nodeOptions,  // Pass node options to processor
     },
   });
 }
@@ -605,6 +611,7 @@ function createJsWorkletNode(
   type: string,
   id: string,
   primitive: RegistryPrimitive,
+  nodeOptions: Record<string, unknown>,
   log: (msg: string) => void
 ): AudioWorkletNode {
   const processorName = primitive.worklet!.replace('.js', '');
@@ -615,6 +622,7 @@ function createJsWorkletNode(
     outputChannelCount: [1],
     processorOptions: {
       nodeId: id,
+      ...nodeOptions,  // Pass node options to processor
     },
   });
 }

@@ -3,6 +3,9 @@ members = [
   "crates/resonator",
   "crates/antiresonator",
   "crates/lf-source",
+  "crates/signal-switch",
+  "crates/edge-detector",
+  "crates/decay-envelope",
 ]
 resolver = "2"
 

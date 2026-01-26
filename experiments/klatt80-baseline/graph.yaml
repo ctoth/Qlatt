@@ -51,19 +51,44 @@ nodes:
     params:
       f0: { bind: F0 }
 
-  # LIMITATION: PLSTEP burst mechanism cannot be expressed
-  # PLSTEP is an event-driven DC step injection triggered by:
+  # ---------------------------------------------------------------------------
+  # PLSTEP BURST MECHANISM
+  # ---------------------------------------------------------------------------
+  # Klatt 80 PLSTEP: DC step injection triggered by AF or AH rise >= 49 dB
+  # Creates transient rarefaction pulse at stop/fricative onsets
+  #
+  # From PARCOE.FOR:
   #   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
-  # This requires:
-  #   1. Detecting parameter transitions (AF delta >= 49)
-  #   2. Scheduling a DC step at that instant
-  #   3. Exponential decay (0.995 per sample at 10kHz = 92ms)
-  # Bacon IR has no concept of parameter history or event detection.
-  # We include the nodes but cannot express the trigger logic.
-  plstepSource:
-    type: constant-source
+  #   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  # Decay: 0.995 per sample at 10kHz (~92ms time constant)
+
+  # Edge detector for AF (frication amplitude)
+  afEdgeDetector:
+    type: edge-detector
     params:
-      offset: 1.0
+      threshold: 49.0  # Klatt 80 threshold
+      input: { bind: AF }  # Monitor frication amplitude
+
+  # Edge detector for AH (aspiration amplitude)
+  ahEdgeDetector:
+    type: edge-detector
+    params:
+      threshold: 49.0  # Klatt 80 threshold
+      input: { bind: AH }  # Monitor aspiration amplitude
+
+  # Sum triggers (OR gate - either AF or AH trigger fires the envelope)
+  plstepTriggerSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Decay envelope - exponential decay starting at -amplitude (rarefaction)
+  plstepEnvelope:
+    type: decay-envelope
+    params:
+      trigger: 0  # Driven by audio connection from trigger sum
+      amplitude: { bind: plstepAmplitude }  # From semantics: dbToLinear(G0 - 75)
+      decay: 0  # Auto-calculate from sample rate
 
   # ---------------------------------------------------------------------------
   # SOURCE ROUTING/MIXING
@@ -411,29 +436,17 @@ nodes:
   # OUTPUT MIXING
   # ---------------------------------------------------------------------------
 
-  # Cascade/parallel mutual exclusion based on SW
-  cascadeOutGain:
-    type: gain
+  # Cascade/parallel branch selector (replaces gain-based switching)
+  # SW=0 selects cascade (input0), SW=1 selects parallel (input1)
+  outputSwitch:
+    type: signal-switch
     params:
-      gain: { bind: cascadeGain }
-
-  parallelOutGain:
-    type: gain
-    params:
-      gain: 1.0
+      selector: { bind: SW }
 
   outputSum:
     type: gain
     params:
       gain: 1.0
-
-  # PLSTEP burst gain (cannot trigger, but can include in topology)
-  plstepGain:
-    type: gain
-    params:
-      # LIMITATION: Cannot express event-driven burst scheduling
-      # _scheduleBurstTransient sets this to -burstAmplitude then decays
-      gain: 0
 
   # Output lowpass filter
   outputLp:
@@ -507,6 +520,11 @@ connections:
   # ---------------------------------------------------------------------------
   # Cascade branch: NZ -> NP -> F1 -> F2 -> F3 -> F4 -> F5 -> F6
   # ---------------------------------------------------------------------------
+  # NOTE: This matches Figure 6's conceptual diagram from Klatt 1980.
+  # COEWAV.FOR processes in reverse order (F6->F5->F4->F3->F2->F1->NZ->NP)
+  # "to minimize transients" (line 175), but the transfer function is
+  # mathematically equivalent since cascaded filters commute.
+  # ---------------------------------------------------------------------------
   - [mixer, nz]
   - [nz, np]
   - [np, cascadeF1]
@@ -515,8 +533,7 @@ connections:
   - [cascadeF3, cascadeF4]
   - [cascadeF4, cascadeF5]
   - [cascadeF5, cascadeF6]
-  - [cascadeF6, cascadeOutGain]
-  - [cascadeOutGain, outputSum]
+  - [cascadeF6, outputSwitch, 0]  # input0 = cascade branch
 
   # ---------------------------------------------------------------------------
   # Parallel branch routing
@@ -565,14 +582,16 @@ connections:
   - [parallelBypassGain, parallelSum]
 
   # Parallel output
-  - [parallelSum, parallelOutGain]
-  - [parallelOutGain, outputSum]
+  - [parallelSum, outputSwitch, 1]  # input1 = parallel branch
+  - [outputSwitch, outputSum]
 
   # ---------------------------------------------------------------------------
-  # PLSTEP burst (topology only - trigger logic not expressible)
+  # PLSTEP burst - edge detection triggers decay envelope
   # ---------------------------------------------------------------------------
-  - [plstepSource, plstepGain]
-  - [plstepGain, outputSum]
+  - [afEdgeDetector, plstepTriggerSum]
+  - [ahEdgeDetector, plstepTriggerSum]
+  - [plstepTriggerSum, plstepEnvelope]  # Connect sum output to trigger input
+  - [plstepEnvelope, outputSum]
 
   # ---------------------------------------------------------------------------
   # Output chain

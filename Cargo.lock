@@ -7,9 +7,21 @@ name = "antiresonator"
 version = "0.1.0"
 
 [[package]]
+name = "decay-envelope"
+version = "0.1.0"
+
+[[package]]
+name = "edge-detector"
+version = "0.1.0"
+
+[[package]]
 name = "lf-source"
 version = "0.1.0"
 
 [[package]]
 name = "resonator"
+version = "0.1.0"
+
+[[package]]
+name = "signal-switch"
 version = "0.1.0"

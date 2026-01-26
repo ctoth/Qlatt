@@ -401,9 +401,7 @@ realize:
     deps: [AB]
 
   # Mode switching
-  cascadeGain:
-    expr: "SW == 0 ? 1 : 0"
-    deps: [SW]
+  # NOTE: cascadeGain removed - outputSwitch now uses SW directly
 
   parallelGain:
     expr: "SW == 1 ? 1 : 0"
@@ -471,3 +469,12 @@ realize:
   nyquistFrequency:
     expr: "sampleRate / 2"
     deps: [sampleRate]
+
+  # PLSTEP burst amplitude
+  # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
+  # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)
+  # The -75 = -28 + -47 (the G0 offset in GETAMP is -47 from dbToLinear threshold)
+  plstepAmplitude:
+    expr: "dbToLinear(G0 - 75)"
+    deps: [G0]
+    description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"

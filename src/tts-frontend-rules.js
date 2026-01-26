@@ -833,6 +833,7 @@ export const PHONEME_TARGETS = {
     AF: 55,   // Raised for audible burst (was 15)
     AH: 52,   // Aspiration component (was 30)
     AB: 63,   // Labials use bypass (Table III)
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 5,   // MITalk Table C-7: PP = 5ms burst
     type: "stop_release",
     voiceless: true,
@@ -855,6 +856,7 @@ export const PHONEME_TARGETS = {
     A5: 57,
     A6: 63,
     AB: 0,    // Alveolars don't use bypass
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 15,  // MITalk Table C-7: TT = 15ms burst
     type: "stop_release",
     voiceless: true,
@@ -878,6 +880,7 @@ export const PHONEME_TARGETS = {
     A5: 45,
     A6: 45,
     AB: 0,    // Velars don't use bypass
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 25,  // MITalk Table C-7: KK = 25ms burst
     type: "stop_release",
     voiceless: true,
@@ -901,6 +904,7 @@ export const PHONEME_TARGETS = {
     A1: 60,
     A2: 0,    // Table III: A2=0 for all plosive bursts
     AB: 63,   // Labials: flat burst via bypass
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 5,   // MITalk Table C-7: BB = 5ms burst
     type: "stop_release",
     voiced: true,
@@ -925,6 +929,7 @@ export const PHONEME_TARGETS = {
     A4: 60,
     A5: 62,
     A6: 60,
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 10,  // MITalk Table C-7: DD = 10ms burst
     type: "stop_release",
     voiced: true,
@@ -949,6 +954,7 @@ export const PHONEME_TARGETS = {
     A4: 43,
     A5: 45,
     A6: 45,
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 20,  // MITalk Table C-7: GG = 20ms burst
     type: "stop_release",
     voiced: true,
@@ -1019,6 +1025,7 @@ export const PHONEME_TARGETS = {
     AV: 0, AF: 18, AH: 0, AVS: -70,
     // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0,
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 70,
     type: "affricate",
     voiceless: true,
@@ -1030,6 +1037,7 @@ export const PHONEME_TARGETS = {
     AV: 47, AF: 8, AH: 0, AVS: 47,
     // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0,
+    SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
     dur: 65,
     type: "affricate",
     voiced: true,

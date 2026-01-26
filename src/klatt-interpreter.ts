@@ -42,6 +42,14 @@ interface Binding {
 // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
 type BindingList = Binding[];
 
+// Schedule entry for pre-compiled parameter automation
+type ScheduleEntry = {
+  time: number;
+  param: AudioParam;
+  value: number;
+  ramp: boolean;  // true = linearRampToValueAtTime, false = setValueAtTime
+};
+
 export interface KlattInterpreterOptions {
   audioContext: AudioContext;
   runtime: KlattRuntime;
@@ -407,6 +415,65 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   }
 
   /**
+   * Compile entire track into a flat schedule of parameter changes.
+   * All semantics evaluation happens here - no logic in executeSchedule.
+   */
+  function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
+    const schedule: ScheduleEntry[] = [];
+
+    for (let i = 0; i < track.length; i++) {
+      const frame = track[i];
+      if (!frame?.params) continue;
+
+      const t = baseTime + frame.time;
+      const realized = evaluateSemantics(frame.params);
+
+      // Add step entries for realized bindings
+      for (const { name, param, ramp: bindingRamp } of realizedBindingsList) {
+        const value = realized[name];
+        if (typeof value === 'number') {
+          schedule.push({ time: t, param, value, ramp: false });
+        }
+      }
+
+      // Add step entries for passthrough bindings
+      for (const { name, param, ramp: bindingRamp } of passthroughBindingsList) {
+        const value = frame.params[name];
+        if (typeof value === 'number') {
+          schedule.push({ time: t, param, value, ramp: false });
+        }
+      }
+
+      // Add ramp entries (for frames after the first)
+      if (i > 0) {
+        for (const { name, param } of rampBindingsList) {
+          const value = realized[name];
+          if (typeof value === 'number') {
+            schedule.push({ time: t, param, value, ramp: true });
+          }
+        }
+      }
+    }
+
+    return schedule;
+  }
+
+  /**
+   * Execute a pre-compiled schedule.
+   * Pure AudioParam writes, no evaluation logic.
+   */
+  function executeSchedule(schedule: ScheduleEntry[]): void {
+    for (const { time, param, value, ramp } of schedule) {
+      if (ramp) {
+        param.linearRampToValueAtTime(value, time);
+      } else {
+        param.setValueAtTime(value, time);
+      }
+      scheduledParams.add(param);
+    }
+  }
+
+  /**
    * Schedule entire track for playback
    */
   function scheduleTrack(track: KlattFrame[], startTime: number): void {
@@ -418,40 +485,23 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Cancel any previous scheduling
     cancelScheduled();
 
-    const baseTime = startTime;
-    log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
-
     // Warmup: Apply first frame IMMEDIATELY to prime resonators
-    if (track[0]?.params) {
-      log('Warmup: applying first frame at currentTime');
+    if (track.length > 0 && track[0]?.params) {
       applyFrame(track[0].params, audioContext.currentTime, false);
     }
 
-    // Schedule all frames - evaluate semantics once per frame
-    for (let i = 0; i < track.length; i++) {
-      const event = track[i];
-      if (!event?.params) continue;
+    const baseTime = startTime ?? audioContext.currentTime;
+    trackDuration = track[track.length - 1]?.time ?? 0;
 
-      const t = baseTime + event.time;
+    log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
 
-      // Evaluate semantics once for this frame
-      const realized = evaluateSemantics(event.params);
+    // Compile entire schedule (all semantics evaluation happens here)
+    const schedule = compileSchedule(track, baseTime);
 
-      // Apply the realized values
-      applyRealized(realized, event.params, t, false);
+    // Execute schedule (pure AudioParam writes, no logic)
+    executeSchedule(schedule);
 
-      // Schedule ramps TO this frame (from previous frame's values)
-      // Ramps target the current frame's realized values
-      if (i > 0) {
-        scheduleRampsFromRealized(realized, t);
-      }
-    }
-
-    // Record track duration
-    const lastFrame = track[track.length - 1];
-    trackDuration = lastFrame ? lastFrame.time : 0;
-
-    log(`Track scheduled: ${trackDuration.toFixed(3)}s duration`);
+    log(`Track scheduled: ${trackDuration.toFixed(3)}s duration, ${schedule.length} entries`);
   }
 
   return {

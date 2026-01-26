@@ -568,6 +568,7 @@ export const PHONEME_TARGETS = {
     AVS: -70,
     A5: 28,
     A6: 48,
+    AB: 48,  // Klatt 1980: bypass for broadband frication noise
     dur: 80,
     type: "fricative",
     voiceless: true,
@@ -586,6 +587,7 @@ export const PHONEME_TARGETS = {
     AVS: 47,
     A5: 28,
     A6: 48,
+    AB: 48,  // Klatt 1980: bypass for broadband frication noise
     dur: 70,
     type: "fricative",
     voiced: true,

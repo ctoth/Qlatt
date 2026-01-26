@@ -590,8 +590,16 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = rule_VowelShortening(parameterSequence);
   debugLog("Applying rule: rule_PreBoundaryLengthening...");
   parameterSequence = rule_PreBoundaryLengthening(parameterSequence);
+  // Set SW (source selection): parallel (SW=1) for most fricatives/stops, cascade (SW=0) for vowels/sonorants
+  // Klatt 80 COEWAV.FOR: aspiration routes through cascade (SW=0), so HH uses cascade per explicit target
   parameterSequence.forEach((ph) => {
     if (!ph?.params) return;
+    // Respect explicit SW in phoneme definition (e.g., HH uses cascade per Klatt 80)
+    const target = PHONEME_TARGETS[ph.phoneme];
+    if (target && target.SW !== undefined) {
+      ph.params.SW = target.SW;
+      return;
+    }
     const useParallel =
       ph.type === "fricative" ||
       ph.type === "affricate" ||

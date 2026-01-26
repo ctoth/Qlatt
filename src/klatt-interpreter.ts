@@ -177,14 +177,16 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
-  // Derive direct params from graph bindings (replaces hardcoded list)
-  // These params are passed through without semantics transformation
-  const directParams = new Set<string>();
-  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
-    for (const paramSpec of Object.values(nodeDef.params ?? {})) {
-      if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
-        directParams.add((paramSpec as { bind: string }).bind);
-      }
+  // Partition bindings into realized (has realize rule) vs passthrough (no rule)
+  // This ensures each binding is written exactly once with the correct value
+  const realizedNames = new Set(Object.keys(semantics.realize || {}));
+  const realizedBindings = new Set<string>();
+  const passthroughBindings = new Set<string>();
+  for (const name of bindings.keys()) {
+    if (realizedNames.has(name)) {
+      realizedBindings.add(name);
+    } else {
+      passthroughBindings.add(name);
     }
   }
 
@@ -193,7 +195,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   for (const list of bindings.values()) {
     totalBindings += list.length;
   }
-  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets), ${directParams.size} direct params`);
+  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets), ${realizedBindings.size} realized, ${passthroughBindings.size} passthrough`);
 
   // Track duration for getTrackDuration()
   let trackDuration = 0;
@@ -288,6 +290,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   /**
    * Apply pre-evaluated realized values to all bound params
    * Internal function that skips semantics evaluation
+   *
+   * Uses partitioned binding sets to ensure each param is written exactly once:
+   * - realizedBindings: params with realize rules -> use realized values
+   * - passthroughBindings: params without realize rules -> use raw track values
    */
   function applyRealized(
     realized: Record<string, ParamValue>,
@@ -295,25 +301,27 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     atTime: number,
     ramp: boolean
   ): void {
-    // Apply to all bindings (each semantic name may have multiple targets)
-    for (const [name, bindingList] of bindings) {
+    // Apply realized values to params that have realize rules
+    for (const name of realizedBindings) {
       const value = realized[name];
       if (typeof value === 'number') {
-        for (const binding of bindingList) {
-          scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
+        const bindingList = bindings.get(name);
+        if (bindingList) {
+          for (const binding of bindingList) {
+            scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
+          }
         }
       }
     }
 
-    // Also apply direct params (derived from graph bindings)
-    // These are passed through without semantics transformation
-    for (const paramName of directParams) {
-      const value = params[paramName];
+    // Apply raw values to passthrough params (no realize rule)
+    for (const name of passthroughBindings) {
+      const value = params[name];
       if (typeof value === 'number') {
-        const bindingList = bindings.get(paramName);
+        const bindingList = bindings.get(name);
         if (bindingList) {
           for (const binding of bindingList) {
-            scheduleParam(binding.param, value, atTime, false);
+            scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
           }
         }
       }

@@ -1,6 +1,8 @@
 bacon: "0.1"
 name: klatt80-synth
 meta:
+  primitives: ./registry.yaml
+  semantics: ./semantics.yaml
   description: |
     Klatt 80 formant synthesizer topology.
     This is a PARTIAL representation - see LIMITATIONS below.
@@ -533,7 +535,7 @@ connections:
   - [cascadeF3, cascadeF4]
   - [cascadeF4, cascadeF5]
   - [cascadeF5, cascadeF6]
-  - [cascadeF6, outputSwitch, 0]  # input0 = cascade branch
+  - { from: cascadeF6, to: { node: outputSwitch, port: 0 } }  # input0 = cascade branch
 
   # ---------------------------------------------------------------------------
   # Parallel branch routing
@@ -582,7 +584,7 @@ connections:
   - [parallelBypassGain, parallelSum]
 
   # Parallel output
-  - [parallelSum, outputSwitch, 1]  # input1 = parallel branch
+  - { from: parallelSum, to: { node: outputSwitch, port: 1 } }  # input1 = parallel branch
   - [outputSwitch, outputSum]
 
   # ---------------------------------------------------------------------------

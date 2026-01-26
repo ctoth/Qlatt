@@ -410,6 +410,19 @@ export const PHONEME_TARGETS = {
     rhotic: true,
   },
   // --- Fricatives ---
+  // Fricative amplitude hierarchy: Jongman et al. (2000) JASA 108(3):1252-1263
+  // Normalized amplitude relative to vowel:
+  //   Sibilants: /s,z/ = -10 dB, /sh,zh/ = -9 dB
+  //   Non-sibilants: /f,v/ = -17 dB, /th,dh/ = -18 dB
+  // Sibilants are 10-15 dB louder than non-sibilants
+  // Spectral peaks: /f,v/ ~7.7kHz, /th,dh/ ~7.5kHz, /s,z/ ~6.8kHz, /sh,zh/ ~3.8kHz
+  //
+  // Shadle (1985) MIT PhD Thesis - Three-class fricative model:
+  //   Class 1 (sibilants /s,sh/): Obstacle-generated (teeth), highest amplitude
+  //   Class 3 (non-sibilants /f,th/): Surface-generated, lowest amplitude
+  // /sh/ is loudest fricative (~6 dB above /s/) due to longer front cavity
+  //
+  // AF values adjusted per research: non-sibilants -12 dB, SH/ZH +6 dB vs S/Z
   S: {
     F1: 320,
     F2: 1390,
@@ -446,6 +459,8 @@ export const PHONEME_TARGETS = {
     voiced: true,
     alveolar: true,
   },
+  // AF per Jongman (2000): sibilants 10-15 dB louder than non-sibilants
+  // SH/ZH +6 dB vs S/Z per Shadle (1985)
   SH: {
     F1: 300,
     F2: 1840,
@@ -454,7 +469,7 @@ export const PHONEME_TARGETS = {
     B2: 100,
     B3: 300,
     AV: 0,
-    AF: 60,
+    AF: 66,  // +6 dB vs S per Shadle (1985)
     AH: 0,
     AVS: -70,
     A3: 57,
@@ -474,7 +489,7 @@ export const PHONEME_TARGETS = {
     B2: 80,
     B3: 270,
     AV: 47,
-    AF: 50,
+    AF: 56,  // +6 dB vs Z per Shadle (1985)
     AH: 0,
     AVS: 47,
     A3: 44,
@@ -486,6 +501,7 @@ export const PHONEME_TARGETS = {
     voiced: true,
     postalveolar: true,
   },
+  // Non-sibilants: 12 dB below sibilants per Jongman (2000)
   F: {
     F1: 340,
     F2: 1100,
@@ -494,7 +510,7 @@ export const PHONEME_TARGETS = {
     B2: 120,
     B3: 150,
     AV: 0,
-    AF: 60,
+    AF: 48,  // -12 dB vs S per Jongman (2000)
     AH: 0,
     AVS: -70,
     AB: 57,
@@ -511,7 +527,7 @@ export const PHONEME_TARGETS = {
     B2: 90,
     B3: 120,
     AV: 47,
-    AF: 50,
+    AF: 38,  // -12 dB vs Z per Jongman (2000)
     AH: 0,
     AVS: 47,
     AB: 57,
@@ -528,7 +544,7 @@ export const PHONEME_TARGETS = {
     B2: 90,
     B3: 200,
     AV: 0,
-    AF: 60,
+    AF: 48,  // -12 dB vs S per Jongman (2000)
     AH: 0,
     AVS: -70,
     A5: 28,
@@ -546,7 +562,7 @@ export const PHONEME_TARGETS = {
     B2: 80,
     B3: 170,
     AV: 47,
-    AF: 50,
+    AF: 38,  // -12 dB vs Z per Jongman (2000)
     AH: 0,
     AVS: 47,
     A5: 28,
@@ -777,8 +793,18 @@ export const PHONEME_TARGETS = {
     velar: true,
   },
   // --- Stop Releases ---
-  // Klatt 80 Table III values, MITalk Table C-7 durations
+  // Burst spectral shapes based on Blumstein & Stevens (1979) acoustic invariance:
+  //   - Labials: Diffuse-falling/flat spectrum via bypass (AB)
+  //   - Alveolars: Diffuse-rising spectrum (A3 < A4 < A5 < A6)
+  //   - Velars: Compact midfrequency peak (A3 dominant)
+  // Amplitude values from Klatt (1980) Table III
+  // Durations from Allen et al. (1987) MITalk Table C-7
+  // Zue (1976): labial bursts 12 dB weaker than alveolar/velar
+  //
   // Voiceless stops: burst only (aspiration is separate phase)
+  //
+  // Labials: flat burst via bypass - no spectral peak (Zue 1976)
+  // Blumstein & Stevens (1979): "diffuse-falling" template
   P_REL: {
     F1: 400,
     F2: 1100,
@@ -794,6 +820,9 @@ export const PHONEME_TARGETS = {
     voiceless: true,
     bilabial: true,
   },
+  // Alveolars: diffuse-rising spectrum - energy increases with frequency
+  // Blumstein & Stevens (1979): peak above 2200 Hz
+  // Zue (1976): burst peak ~3500-4000 Hz
   T_REL: {
     F1: 400,
     F2: 1600,
@@ -803,7 +832,7 @@ export const PHONEME_TARGETS = {
     B3: 250,
     AF: 58,   // Alveolars have strongest burst (was 20)
     AH: 55,   // Aspiration (was 35)
-    A3: 30,   // Table III values
+    A3: 30,   // Table III: rising pattern A3 < A4 < A5 < A6
     A4: 45,
     A5: 57,
     A6: 63,
@@ -813,6 +842,10 @@ export const PHONEME_TARGETS = {
     voiceless: true,
     alveolar: true,
   },
+  // Velars: compact spectrum - prominent midfrequency peak
+  // Blumstein & Stevens (1979): single peak in 1200-3500 Hz range
+  // Zue (1976): vowel-dependent (front: ~2700 Hz, back: ~1200-1800 Hz)
+  // F2 adjusted by rule_K_Context based on following vowel
   K_REL: {
     F1: 300,
     F2: 1990,
@@ -822,7 +855,7 @@ export const PHONEME_TARGETS = {
     B3: 330,
     AF: 55,   // Raised for audible burst (was 18)
     AH: 53,   // Aspiration (was 33)
-    A3: 53,   // Table III values
+    A3: 53,   // Table III: compact pattern with A3 dominant
     A4: 43,
     A5: 45,
     A6: 45,
@@ -833,6 +866,9 @@ export const PHONEME_TARGETS = {
     velar: true,
   },
   // Voiced stops: Table III A2=0 for burst spectrum, A1 for voicing F1
+  // Same spectral templates as voiceless counterparts
+  //
+  // Labials: flat burst via bypass (Blumstein & Stevens 1979: diffuse-falling)
   B_REL: {
     F1: 200,
     F2: 1100,
@@ -852,6 +888,8 @@ export const PHONEME_TARGETS = {
     voiced: true,
     bilabial: true,
   },
+  // Alveolars: diffuse-rising spectrum (Blumstein & Stevens 1979)
+  // Zue (1976): /d/ burst ~200-300 Hz lower than /t/
   D_REL: {
     F1: 200,
     F2: 1600,
@@ -874,6 +912,8 @@ export const PHONEME_TARGETS = {
     voiced: true,
     alveolar: true,
   },
+  // Velars: compact spectrum (Blumstein & Stevens 1979)
+  // F2 adjusted by rule_K_Context based on following vowel
   G_REL: {
     F1: 200,
     F2: 1990,

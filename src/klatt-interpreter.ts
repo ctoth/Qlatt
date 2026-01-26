@@ -311,90 +311,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     return result.values;
   }
 
-  /**
-   * Apply a single value to an AudioParam
-   */
-  function scheduleParam(
-    param: AudioParam,
-    value: number,
-    atTime: number,
-    ramp: boolean
-  ): void {
-    if (!Number.isFinite(value)) return;
-
-    scheduledParams.add(param);
-
-    if (ramp) {
-      param.linearRampToValueAtTime(value, atTime);
-    } else {
-      param.setValueAtTime(value, atTime);
-    }
-  }
-
-  /**
-   * Apply pre-evaluated realized values to all bound params
-   * Internal function that skips semantics evaluation
-   *
-   * Uses flattened binding lists to ensure each param is written exactly once:
-   * - realizedBindingsList: params with realize rules -> use realized values
-   * - passthroughBindingsList: params without realize rules -> use raw track values
-   */
-  function applyRealized(
-    realized: Record<string, ParamValue>,
-    params: Record<string, number>,
-    atTime: number,
-    ramp: boolean
-  ): void {
-    // Realized bindings - one flat loop, no null checks
-    for (const { name, param, ramp: bindingRamp } of realizedBindingsList) {
-      const value = realized[name];
-      if (typeof value === 'number') {
-        scheduleParam(param, value, atTime, ramp && bindingRamp);
-      }
-    }
-
-    // Passthrough bindings - one flat loop, no null checks
-    for (const { name, param, ramp: bindingRamp } of passthroughBindingsList) {
-      const value = params[name];
-      if (typeof value === 'number') {
-        scheduleParam(param, value, atTime, ramp && bindingRamp);
-      }
-    }
-  }
-
-  /**
-   * Apply a frame's realized values to all bound params
-   * Evaluates semantics and applies values
-   */
-  function applyFrame(params: Record<string, number>, atTime: number, ramp: boolean): void {
-    const realized = evaluateSemantics(params);
-    applyRealized(realized, params, atTime, ramp);
-  }
-
-  /**
-   * Schedule ramps from pre-evaluated realized values
-   * Internal function that skips semantics evaluation
-   */
-  function scheduleRampsFromRealized(realized: Record<string, ParamValue>, atTime: number): void {
-    // Ramp bindings - one flat loop, no null checks
-    for (const { name, param } of rampBindingsList) {
-      const value = realized[name];
-      if (typeof value === 'number') {
-        param.linearRampToValueAtTime(value, atTime);
-        scheduledParams.add(param);
-      }
-    }
-  }
-
-  /**
-   * Schedule ramps for aspiration/frication to next frame
-   * Iterates over all params marked with ramp: true in semantics.yaml
-   */
-  function scheduleRamps(nextParams: Record<string, number>, nextTime: number): void {
-    const realized = evaluateSemantics(nextParams);
-    scheduleRampsFromRealized(realized, nextTime);
-  }
-
   // NOTE: PLSTEP burst detection/scheduling removed - now handled automatically
   // by edge-detector + decay-envelope chain in the audio graph.
 
@@ -429,7 +345,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const realized = evaluateSemantics(frame.params);
 
       // Add step entries for realized bindings
-      for (const { name, param, ramp: bindingRamp } of realizedBindingsList) {
+      for (const { name, param } of realizedBindingsList) {
         const value = realized[name];
         if (typeof value === 'number') {
           schedule.push({ time: t, param, value, ramp: false });
@@ -437,7 +353,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       }
 
       // Add step entries for passthrough bindings
-      for (const { name, param, ramp: bindingRamp } of passthroughBindingsList) {
+      for (const { name, param } of passthroughBindingsList) {
         const value = frame.params[name];
         if (typeof value === 'number') {
           schedule.push({ time: t, param, value, ramp: false });
@@ -484,11 +400,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
     // Cancel any previous scheduling
     cancelScheduled();
-
-    // Warmup: Apply first frame IMMEDIATELY to prime resonators
-    if (track.length > 0 && track[0]?.params) {
-      applyFrame(track[0].params, audioContext.currentTime, false);
-    }
 
     const baseTime = startTime ?? audioContext.currentTime;
     trackDuration = track[track.length - 1]?.time ?? 0;

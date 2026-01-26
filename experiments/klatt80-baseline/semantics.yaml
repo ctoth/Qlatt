@@ -1,0 +1,293 @@
+# Klatt 80 Synthesizer Semantics
+# Defines parameter conversions and realizations per Klatt (1980)
+
+name: klatt80
+version: "1.0"
+
+# Input parameters - what the TTS frontend provides
+params:
+  # Fundamental frequency
+  F0:
+    type: float
+    range: [50, 500]
+    default: 120
+    unit: Hz
+
+  # Formant frequencies
+  F1:
+    type: float
+    range: [200, 1000]
+    default: 500
+    unit: Hz
+  F2:
+    type: float
+    range: [500, 3000]
+    default: 1500
+    unit: Hz
+  F3:
+    type: float
+    range: [1500, 4000]
+    default: 2500
+    unit: Hz
+  F4:
+    type: float
+    range: [2500, 5000]
+    default: 3500
+    unit: Hz
+  F5:
+    type: float
+    range: [3500, 6000]
+    default: 4500
+    unit: Hz
+  F6:
+    type: float
+    range: [4000, 7000]
+    default: 5500
+    unit: Hz
+
+  # Formant bandwidths
+  B1:
+    type: float
+    range: [40, 1000]
+    default: 60
+    unit: Hz
+  B2:
+    type: float
+    range: [40, 1000]
+    default: 90
+    unit: Hz
+  B3:
+    type: float
+    range: [40, 1000]
+    default: 150
+    unit: Hz
+  B4:
+    type: float
+    range: [100, 1000]
+    default: 200
+    unit: Hz
+  B5:
+    type: float
+    range: [100, 1000]
+    default: 200
+    unit: Hz
+  B6:
+    type: float
+    range: [100, 1000]
+    default: 500
+    unit: Hz
+
+  # Source amplitudes (dB)
+  G0:
+    type: float
+    range: [0, 80]
+    default: 60
+    unit: dB
+    description: Overall gain
+  AV:
+    type: float
+    range: [0, 80]
+    default: 60
+    unit: dB
+    description: Voicing amplitude
+  AH:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Aspiration amplitude
+  AF:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Frication amplitude
+  AVS:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Parallel voicing amplitude
+
+  # Parallel formant amplitudes (dB)
+  A1:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A2:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A3:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A4:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A5:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A6:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+
+  # Nasal and bypass
+  AN:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  AB:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+
+  # Nasal formant
+  FN:
+    type: float
+    range: [200, 500]
+    default: 280
+    unit: Hz
+  BN:
+    type: float
+    range: [40, 500]
+    default: 90
+    unit: Hz
+
+  # Nasal zero (antiformant)
+  FZ:
+    type: float
+    range: [200, 800]
+    default: 280
+    unit: Hz
+  BZ:
+    type: float
+    range: [40, 500]
+    default: 90
+    unit: Hz
+
+  # Synthesis mode switch
+  SW:
+    type: int
+    range: [0, 1]
+    default: 0
+    description: 0=cascade, 1=parallel
+
+# Constants - values that don't change
+constants:
+  # ndbScale offsets for G0 compensation
+  ndbScale:
+    AV: -119   # -72 - 47
+    AH: -134   # -87 - 47
+    AF: -119   # -72 - 47
+    AVS: -91   # -44 - 47
+    A1: -58
+    A2: -65
+    A3: -73
+    A4: -78
+    A5: -79
+    A6: -80
+    AN: -58
+    AB: -84
+
+  # Proximity correction lookup (for close formants)
+  ndbCor: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+  # Parallel formant sign alternation
+  parallelSign: [1, -1, 1, -1, 1, -1]
+
+# Functions - reusable computations
+functions:
+  dbToLinear:
+    params: [db]
+    expr: "db <= -72 ? 0 : pow(2, min(96, db) / 6)"
+
+  proximity:
+    params: [delta]
+    expr: "delta < 50 ? 0 : (delta >= 550 ? 0 : ndbCor[int((delta - 50) / 50)])"
+
+# Realize rules - convert input params to realized values
+realize:
+  # Formant proximity corrections
+  n12Cor:
+    expr: "proximity(F2 - F1)"
+    deps: [F1, F2]
+
+  n23Cor:
+    expr: "proximity(F3 - F2 - 50)"
+    deps: [F2, F3]
+
+  n34Cor:
+    expr: "proximity(F4 - F3 - 150)"
+    deps: [F3, F4]
+
+  # Source gains (linear)
+  voiceGain:
+    expr: "dbToLinear(G0 + AV + ndbScale.AV)"
+    deps: [G0, AV]
+
+  aspGain:
+    expr: "dbToLinear(G0 + AH + ndbScale.AH)"
+    deps: [G0, AH]
+
+  fricGain:
+    expr: "dbToLinear(G0 + AF + ndbScale.AF)"
+    deps: [G0, AF]
+
+  avsGain:
+    expr: "dbToLinear(G0 + AVS + ndbScale.AVS) * 10"
+    deps: [G0, AVS]
+
+  # Parallel formant gains with corrections
+  a1Linear:
+    expr: "dbToLinear(A1 + n12Cor + ndbScale.A1)"
+    deps: [A1, n12Cor]
+
+  a2Linear:
+    expr: "-dbToLinear(A2 + n12Cor * 2 + n23Cor + ndbScale.A2)"
+    deps: [A2, n12Cor, n23Cor]
+
+  a3Linear:
+    expr: "dbToLinear(A3 + n23Cor * 2 + n34Cor + ndbScale.A3)"
+    deps: [A3, n23Cor, n34Cor]
+
+  a4Linear:
+    expr: "-dbToLinear(A4 + n34Cor * 2 + ndbScale.A4)"
+    deps: [A4, n34Cor]
+
+  a5Linear:
+    expr: "dbToLinear(A5 + ndbScale.A5)"
+    deps: [A5]
+
+  a6Linear:
+    expr: "-dbToLinear(A6 + ndbScale.A6)"
+    deps: [A6]
+
+  # Nasal and bypass gains
+  anLinear:
+    expr: "dbToLinear(AN + ndbScale.AN)"
+    deps: [AN]
+
+  abLinear:
+    expr: "dbToLinear(AB + ndbScale.AB)"
+    deps: [AB]
+
+  # Mode switching
+  cascadeGain:
+    expr: "SW == 0 ? 1 : 0"
+    deps: [SW]
+
+  parallelGain:
+    expr: "SW == 1 ? 1 : 0"
+    deps: [SW]

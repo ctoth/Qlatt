@@ -1,0 +1,5 @@
+This paper describes the Delta System architecture for multi-language text-to-speech synthesis, which separates language-universal components (timing templates, coarticulation patterns, voice filters) from language-specific components (phoneme inventories, formant targets, duration rules) to enable scalable TTS development across 9 languages with shared code infrastructure.
+
+Key contributions include a phone-and-transition segmentation model based on F2 patterns, the acoustic nucleus concept for syllable-based timing, and a universal parameter alignment template that positions formants at phone edges, voicing amplitude at nucleus boundaries, and F0 values relative to intonational phrases using the Pierrehumbert model.
+
+This work is essential for speech synthesis because it demonstrates how to build maintainable multi-language TTS systems by identifying genuinely universal phonetic principles (transition durations, coarticulation rules, nucleus duration trading relationships) rather than duplicating code for each language variation.

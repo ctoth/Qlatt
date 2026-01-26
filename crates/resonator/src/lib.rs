@@ -137,20 +137,5 @@ pub extern "C" fn resonator_process(
     }
 }
 
-#[no_mangle]
-pub extern "C" fn alloc_f32(len: usize) -> *mut f32 {
-    let mut buf = vec![0.0f32; len];
-    let ptr = buf.as_mut_ptr();
-    core::mem::forget(buf);
-    ptr
-}
-
-#[no_mangle]
-pub extern "C" fn dealloc_f32(ptr: *mut f32, len: usize) {
-    if ptr.is_null() {
-        return;
-    }
-    unsafe {
-        let _ = Vec::from_raw_parts(ptr, 0, len);
-    }
-}
+// Re-export WASM memory allocation functions
+klatt_wasm_common::export_alloc_fns!();

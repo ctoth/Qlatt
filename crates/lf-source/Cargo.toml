@@ -5,3 +5,6 @@ edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
+
+[dependencies]
+klatt-wasm-common = { path = "../klatt-wasm-common" }

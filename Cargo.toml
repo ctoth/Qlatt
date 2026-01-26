@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "crates/klatt-wasm-common",
   "crates/resonator",
   "crates/antiresonator",
   "crates/lf-source",

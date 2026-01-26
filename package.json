@@ -10,13 +10,21 @@
     "build:dict": "node scripts/build-cmudict.js",
     "build:wasm": "bash build.sh",
     "build:wasm:ps": "pwsh -File build.ps1",
-    "test:golden": "node scripts/run-golden.mjs"
+    "test:golden": "node scripts/run-golden.mjs",
+    "test:semantics": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "cmu-pronouncing-dictionary": "^3.0.0"
+    "cel-js": "^0.8.2",
+    "cmu-pronouncing-dictionary": "^3.0.0",
+    "jmespath": "^0.16.0",
+    "toposort": "^2.0.2"
   },
   "devDependencies": {
+    "@types/jmespath": "^0.15.2",
     "puppeteer-core": "^23.10.1",
-    "vite": "^7.3.1"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
   }
 }

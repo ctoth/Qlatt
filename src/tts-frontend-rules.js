@@ -591,25 +591,22 @@ export const PHONEME_TARGETS = {
     voiced: true,
     dental: true,
   },
+  // /h/ aspiration: Klatt 80 COEWAV.FOR lines 160-178 routes AH→UGLOT→cascade
+  // Klatt 1980 paper Table: "AH...Sent to cascade branch"
+  // B1 widened per Klatt 1980 "B1 to ~300 Hz for aspiration"; Stevens 1998: ~280 Hz
   HH: {
-    F1: 600,
-    F2: 1400,
+    F1: 500,
+    F2: 1500,
     F3: 2500,
     B1: 300,
-    B2: 300,
-    B3: 300,
+    B2: 90,
+    B3: 150,
     AV: 0,
+    AH: 40,     // Aspiration source - routed through cascade per Klatt 80
     AF: 0,
-    AH: 40,
     AVS: -70,
-    // Parallel formant gains for SW=1 mode. Without these, parallel output is near-zero.
-    // /h/ is broad-band aspiration, so emphasize mid-to-high formants.
-    A1: 30,
-    A2: 35,
-    A3: 40,
-    A4: 45,
-    A5: 50,
-    A6: 50,
+    SW: 0,      // CASCADE MODE - Klatt 80 COEWAV.FOR lines 160-178: aspiration→UGLOT→cascade
+    // A1-A6 removed - cascade branch naturally filters aspiration through formants
     dur: 80,
     type: "fricative",
     voiceless: true,

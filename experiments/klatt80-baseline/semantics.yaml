@@ -324,16 +324,6 @@ constants:
   # Parallel formant sign alternation
   parallelSign: [1, -1, 1, -1, 1, -1]
 
-# Functions - reusable computations
-functions:
-  dbToLinear:
-    params: [db]
-    expr: "db <= -72 ? 0 : pow(2, min(96, db) / 6)"
-
-  proximity:
-    params: [delta]
-    expr: "delta < 50 ? 0 : (delta >= 550 ? 0 : ndbCor[int((delta - 50) / 50)])"
-
 # Realize rules - convert input params to realized values
 realize:
   # Formant proximity corrections

@@ -104,7 +104,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     graph,
     semantics,
     logger = () => {},
-    telemetryHandler,
   } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);

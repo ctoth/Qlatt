@@ -13,7 +13,11 @@
     "test:golden": "node scripts/run-golden.mjs"
   },
   "dependencies": {
-    "cmu-pronouncing-dictionary": "^3.0.0"
+    "cel-js": "^0.8.2",
+    "cmu-pronouncing-dictionary": "^3.0.0",
+    "jmespath": "^0.16.0",
+    "js-yaml": "^4.1.1",
+    "toposort": "^2.0.2"
   },
   "devDependencies": {
     "puppeteer-core": "^23.10.1",

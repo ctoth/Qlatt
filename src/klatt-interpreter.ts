@@ -132,7 +132,16 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // Build binding map: semantics output name -> list of AudioParams
   // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
   const bindings = new Map<string, BindingList>();
-  const rampParams = new Set(['aspGain', 'fricGain', 'fricGainScaled']);
+
+  // Derive ramp params from semantics (replaces hardcoded set)
+  const rampParams = new Set<string>();
+  if (semantics.realize) {
+    for (const [name, rule] of Object.entries(semantics.realize)) {
+      if (typeof rule === 'object' && rule !== null && (rule as { ramp?: boolean }).ramp === true) {
+        rampParams.add(name);
+      }
+    }
+  }
 
   // Walk graph nodes to build bindings
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
@@ -163,12 +172,23 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
+  // Derive direct params from graph bindings (replaces hardcoded list)
+  // These params are passed through without semantics transformation
+  const directParams = new Set<string>();
+  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
+    for (const paramSpec of Object.values(nodeDef.params ?? {})) {
+      if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
+        directParams.add((paramSpec as { bind: string }).bind);
+      }
+    }
+  }
+
   // Count total bindings
   let totalBindings = 0;
   for (const list of bindings.values()) {
     totalBindings += list.length;
   }
-  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets)`);
+  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets), ${directParams.size} direct params`);
 
   // Track duration for getTrackDuration()
   let trackDuration = 0;
@@ -289,16 +309,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       }
     }
 
-    // Also apply raw formant params directly (F1-F6, B1-B6)
+    // Also apply direct params (derived from graph bindings)
     // These are passed through without semantics transformation
-    const directParams = [
-      'F0', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6',
-      'B1', 'B2', 'B3', 'B4', 'B5', 'B6',
-      'FNZ', 'BNZ', 'FNP', 'BNP',
-      'FGP', 'BGP', 'FGZ', 'BGZ', 'BGS',
-      'Rd', 'lfMode', 'openPhaseRatio',
-    ];
-
     for (const paramName of directParams) {
       const value = params[paramName];
       if (typeof value === 'number') {

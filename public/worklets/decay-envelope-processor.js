@@ -55,6 +55,9 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     this.nodeId = options?.processorOptions?.nodeId || "decay-envelope";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    // Track last trigger audio sample for cross-block edge detection
+    // (WASM also tracks this internally, but JS tracking enables metrics)
+    this.lastTriggerAudio = 0;
 
     this.port.onmessage = (event) => {
       if (event?.data?.type === "ping") {
@@ -97,7 +100,32 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       return true;
     }
 
-    const trigger = parameters.trigger;
+    // Trigger can come from audio input OR parameter
+    // Audio input takes precedence if connected
+    const inputChannel = inputs[0]?.[0];
+    let trigger;
+    let audioTriggerDetected = false;
+    if (inputChannel && inputChannel.length > 0) {
+      // Use audio input as trigger (from edge-detector)
+      trigger = inputChannel;
+
+      // Detect rising edge in JS for metrics (WASM also does this internally)
+      // Check first sample against last sample of previous block
+      if (inputChannel[0] > 0.5 && this.lastTriggerAudio <= 0.5) {
+        audioTriggerDetected = true;
+      }
+      // Check remaining samples within this block
+      for (let i = 1; i < inputChannel.length && !audioTriggerDetected; i++) {
+        if (inputChannel[i] > 0.5 && inputChannel[i - 1] <= 0.5) {
+          audioTriggerDetected = true;
+        }
+      }
+      // Update lastTriggerAudio with the last sample of this block
+      this.lastTriggerAudio = inputChannel[inputChannel.length - 1];
+    } else {
+      // Fall back to parameter
+      trigger = parameters.trigger;
+    }
     const amplitude = parameters.amplitude;
     const decayParam = parameters.decay[0];
 
@@ -136,7 +164,12 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     this.outputBuffer.refresh();
     outputChannel.set(this.outputBuffer.view);
 
-    this._reportMetrics(outputChannel, { decayValue, trigger: trigger[0], amplitude: amplitude[0] });
+    this._reportMetrics(outputChannel, {
+      decayValue,
+      trigger: trigger[0],
+      amplitude: amplitude[0],
+      audioTriggerDetected,
+    });
     return true;
   }
 
@@ -166,6 +199,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       decay: params.decayValue,
       trigger: params.trigger,
       amplitude: params.amplitude,
+      audioTriggerDetected: params.audioTriggerDetected,
     });
   }
 }

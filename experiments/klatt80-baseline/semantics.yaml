@@ -1,8 +1,8 @@
 # Klatt 80 Synthesizer Semantics
 # Defines parameter conversions and realizations per Klatt (1980)
 
+bacon: "0.1"
 name: klatt80
-version: "1.0"
 
 # Input parameters - what the TTS frontend provides
 params:
@@ -357,10 +357,12 @@ realize:
   aspGain:
     expr: "dbToLinear(G0 + AH + ndbScale.AH)"
     deps: [G0, AH]
+    ramp: true
 
   fricGain:
     expr: "dbToLinear(G0 + AF + ndbScale.AF)"
     deps: [G0, AF]
+    ramp: true
 
   avsGain:
     expr: "dbToLinear(G0 + AVS + ndbScale.AVS) * 10"
@@ -464,6 +466,7 @@ realize:
   fricGainScaled:
     expr: "dbToLinear(G0 + AF + ndbScale.AF) * parallelScale"
     deps: [G0, AF, parallelScale]
+    ramp: true
 
   # System constant
   nyquistFrequency:

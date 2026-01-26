@@ -90,17 +90,8 @@ const standardFunctions: Record<string, (...args: number[]) => number> = {
   pow: (base: number, exp: number): number => Math.pow(base, exp),
 };
 
-// =============================================================================
-// Proximity Correction (A2COR/A3COR)
-// =============================================================================
-
-const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-
-function proximity(delta: number): number {
-  if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-  const index = Math.floor(delta / 50) - 1;
-  return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))] ?? 0;
-}
+// NOTE: Proximity correction function is defined inside the factory to access
+// ndbCor from semantics.constants (avoiding duplication with semantics.yaml)
 
 // =============================================================================
 // Interpreter Factory
@@ -127,6 +118,25 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     for (const [key, value] of Object.entries(semantics.constants)) {
       constants[key] = value;
     }
+  }
+
+  // Build param defaults map from semantics.params at init time
+  const paramDefaults = new Map<string, number>();
+  if (semantics.params) {
+    for (const [name, def] of Object.entries(semantics.params)) {
+      if (typeof def === 'object' && def !== null && 'default' in def) {
+        paramDefaults.set(name, def.default as number);
+      }
+    }
+  }
+  log(`Loaded ${paramDefaults.size} param defaults from semantics`);
+
+  // Proximity correction function (uses ndbCor from semantics.constants)
+  function proximity(delta: number): number {
+    if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
+    const ndbCor = constants['ndbCor'] as number[];
+    const index = Math.floor(delta / 50) - 1;
+    return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))];
   }
 
   // Build binding map: semantics output name -> list of AudioParams
@@ -223,6 +233,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   /**
    * Build evaluation context from frame params
+   * Fully data-driven: defaults from semantics, then track params overlay
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
     // Start with constants
@@ -231,7 +242,12 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Add standard functions
     Object.assign(ctx, standardFunctions);
 
-    // Add frame params
+    // Apply all defaults from semantics
+    for (const [name, value] of paramDefaults) {
+      ctx[name] = value;
+    }
+
+    // Overlay track params (these override defaults)
     for (const [key, value] of Object.entries(params)) {
       ctx[key] = value;
     }
@@ -239,19 +255,17 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Add proximity function
     ctx['proximity'] = proximity;
 
-    // Compute proximity corrections inline (since semantic expressions reference them)
-    const f1 = params.F1 ?? 500;
-    const f2 = params.F2 ?? 1500;
-    const f3 = params.F3 ?? 2500;
-    const f4 = params.F4 ?? 3500;
+    // Add computed values
+    ctx['sampleRate'] = audioContext.sampleRate;
+
+    // Compute proximity corrections (using defaults-then-overlay values)
+    const f1 = ctx['F1'] as number;
+    const f2 = ctx['F2'] as number;
+    const f3 = ctx['F3'] as number;
+    const f4 = ctx['F4'] as number;
     ctx['n12Cor'] = proximity(f2 - f1);
     ctx['n23Cor'] = proximity(f3 - f2 - 50);
     ctx['n34Cor'] = proximity(f4 - f3 - 150);
-
-    // Default values for optional params
-    ctx['G0'] = params.GO ?? params.G0 ?? 47;
-    ctx['parallelScale'] = params.parallelScale ?? 1.0;
-    ctx['sampleRate'] = audioContext.sampleRate;
 
     return ctx;
   }
@@ -327,30 +341,21 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   /**
    * Schedule ramps for aspiration/frication to next frame
+   * Iterates over all params marked with ramp: true in semantics.yaml
    */
   function scheduleRamps(nextParams: Record<string, number>, nextTime: number): void {
     const realized = evaluateSemantics(nextParams);
 
-    // Ramp aspiration
-    const aspGain = realized['aspGain'];
-    if (typeof aspGain === 'number') {
-      const bindingList = bindings.get('aspGain');
-      if (bindingList) {
-        for (const binding of bindingList) {
-          binding.param.linearRampToValueAtTime(aspGain, nextTime);
-          scheduledParams.add(binding.param);
-        }
-      }
-    }
-
-    // Ramp frication
-    const fricGain = realized['fricGain'] ?? realized['fricGainScaled'];
-    if (typeof fricGain === 'number') {
-      const bindingList = bindings.get('fricGain') ?? bindings.get('fricGainScaled');
-      if (bindingList) {
-        for (const binding of bindingList) {
-          binding.param.linearRampToValueAtTime(fricGain, nextTime);
-          scheduledParams.add(binding.param);
+    // Iterate ALL ramp params instead of hardcoding names
+    for (const paramName of rampParams) {
+      const value = realized[paramName];
+      if (typeof value === 'number') {
+        const bindingList = bindings.get(paramName);
+        if (bindingList) {
+          for (const binding of bindingList) {
+            binding.param.linearRampToValueAtTime(value, nextTime);
+            scheduledParams.add(binding.param);
+          }
         }
       }
     }

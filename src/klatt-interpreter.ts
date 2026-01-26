@@ -38,6 +38,9 @@ interface Binding {
   ramp: boolean;  // true for aspiration/frication
 }
 
+// Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
+type BindingList = Binding[];
+
 export interface KlattInterpreterOptions {
   audioContext: AudioContext;
   runtime: KlattRuntime;
@@ -126,18 +129,18 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
-  // Build binding map: semantics output name -> AudioParam
-  const bindings = new Map<string, Binding>();
+  // Build binding map: semantics output name -> list of AudioParams
+  // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
+  const bindings = new Map<string, BindingList>();
   const rampParams = new Set(['aspGain', 'fricGain', 'fricGainScaled']);
 
   // Walk graph nodes to build bindings
-  log('Building binding map');
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     if (!nodeDef.params) continue;
 
     const audioNode = runtime.getNode(nodeId);
     if (!audioNode) {
-      log(`  Warning: No audio node for ${nodeId}`);
+      log(`  Warning: No audio node for ${nodeId} (type: ${nodeDef.type})`);
       continue;
     }
 
@@ -146,22 +149,28 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         const bindName = (paramSpec as { bind: string }).bind;
         const param = getAudioParam(audioNode, paramName);
         if (param) {
-          bindings.set(bindName, {
+          // Append to binding list (don't overwrite!)
+          const existing = bindings.get(bindName) ?? [];
+          existing.push({
             param,
             nodeId,
             paramName,
             ramp: rampParams.has(bindName),
           });
-          log(`  Bound ${bindName} -> ${nodeId}.${paramName}`);
+          bindings.set(bindName, existing);
         }
       }
     }
   }
-  log(`Built ${bindings.size} bindings`);
 
-  // Track state for PLSTEP detection
-  let lastAF = 0;
-  let lastAH = 0;
+  // Count total bindings
+  let totalBindings = 0;
+  for (const list of bindings.values()) {
+    totalBindings += list.length;
+  }
+  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets)`);
+
+  // Track duration for getTrackDuration()
   let trackDuration = 0;
 
   // Store all scheduled params for cancellation
@@ -270,11 +279,13 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Evaluate semantics
     const realized = evaluateSemantics(params);
 
-    // Apply to all bindings
-    for (const [name, binding] of bindings) {
+    // Apply to all bindings (each semantic name may have multiple targets)
+    for (const [name, bindingList] of bindings) {
       const value = realized[name];
       if (typeof value === 'number') {
-        scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
+        for (const binding of bindingList) {
+          scheduleParam(binding.param, value, atTime, ramp && binding.ramp);
+        }
       }
     }
 
@@ -291,12 +302,15 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     for (const paramName of directParams) {
       const value = params[paramName];
       if (typeof value === 'number') {
-        const binding = bindings.get(paramName);
-        if (binding) {
-          scheduleParam(binding.param, value, atTime, false);
+        const bindingList = bindings.get(paramName);
+        if (bindingList) {
+          for (const binding of bindingList) {
+            scheduleParam(binding.param, value, atTime, false);
+          }
         }
       }
     }
+
   }
 
   /**
@@ -308,100 +322,30 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Ramp aspiration
     const aspGain = realized['aspGain'];
     if (typeof aspGain === 'number') {
-      const binding = bindings.get('aspGain');
-      if (binding) {
-        binding.param.linearRampToValueAtTime(aspGain, nextTime);
-        scheduledParams.add(binding.param);
+      const bindingList = bindings.get('aspGain');
+      if (bindingList) {
+        for (const binding of bindingList) {
+          binding.param.linearRampToValueAtTime(aspGain, nextTime);
+          scheduledParams.add(binding.param);
+        }
       }
     }
 
     // Ramp frication
     const fricGain = realized['fricGain'] ?? realized['fricGainScaled'];
     if (typeof fricGain === 'number') {
-      const binding = bindings.get('fricGain') ?? bindings.get('fricGainScaled');
-      if (binding) {
-        binding.param.linearRampToValueAtTime(fricGain, nextTime);
-        scheduledParams.add(binding.param);
+      const bindingList = bindings.get('fricGain') ?? bindings.get('fricGainScaled');
+      if (bindingList) {
+        for (const binding of bindingList) {
+          binding.param.linearRampToValueAtTime(fricGain, nextTime);
+          scheduledParams.add(binding.param);
+        }
       }
     }
   }
 
-  /**
-   * Schedule PLSTEP burst transient for plosive release
-   */
-  function scheduleBurstTransient(
-    atTime: number,
-    params: Record<string, number>,
-    triggerParam: string,
-    triggerDelta: number
-  ): void {
-    // Calculate burst amplitude per PARCOE.FOR
-    const goDb = params.GO ?? params.G0 ?? 47;
-    const burstDb = goDb - 75;  // Matches Klatt 80 with ndbScale compensation
-    const burstAmplitude = standardFunctions.dbToLinear(burstDb);
-
-    // Find plstepGain node
-    const plstepGain = bindings.get('plstepGain');
-    if (!plstepGain) {
-      log('  Warning: No plstepGain binding for burst transient');
-      return;
-    }
-
-    // Emit telemetry
-    if (telemetryHandler) {
-      telemetryHandler({
-        type: 'plstep',
-        nodeId: 'plstep',
-        time: atTime,
-        amplitudeLinear: burstAmplitude,
-        amplitudeDb: burstDb,
-        trigger: triggerParam,
-        delta: triggerDelta,
-      });
-    }
-
-    // COEWAV.FOR: STEP = 0.995 * STEP at 10kHz = 92ms decay
-    const burstDuration = 0.092;
-
-    // Cancel any previous burst at this time
-    plstepGain.param.cancelScheduledValues(atTime);
-
-    // Set initial negative burst (rarefaction)
-    plstepGain.param.setValueAtTime(-burstAmplitude, atTime);
-
-    // Exponential decay (can't reach exactly 0, use small value)
-    const decayEnd = atTime + burstDuration;
-    plstepGain.param.exponentialRampToValueAtTime(-0.0001, decayEnd);
-    plstepGain.param.setValueAtTime(0, decayEnd + 0.001);
-
-    scheduledParams.add(plstepGain.param);
-  }
-
-  /**
-   * Detect PLSTEP burst condition
-   */
-  function detectBurst(
-    event: KlattFrame,
-    currentAF: number,
-    currentAH: number
-  ): { isBurst: boolean; triggerParam: string; triggerDelta: number } {
-    const isStopRelease = typeof event.phoneme === 'string' &&
-      (event.phoneme.endsWith('_REL') || event.phoneme.endsWith('_ASP'));
-
-    const afDelta = currentAF - lastAF;
-    const ahDelta = currentAH - lastAH;
-
-    // Klatt 80 threshold: 49 dB jump
-    const isBurst = isStopRelease && (
-      (lastAF <= 5 && afDelta >= 49) ||
-      (lastAH <= 5 && ahDelta >= 49)
-    );
-
-    const triggerParam = (lastAF <= 5 && afDelta >= 49) ? 'AF' : 'AH';
-    const triggerDelta = triggerParam === 'AF' ? afDelta : ahDelta;
-
-    return { isBurst, triggerParam, triggerDelta };
-  }
+  // NOTE: PLSTEP burst detection/scheduling removed - now handled automatically
+  // by edge-detector + decay-envelope chain in the audio graph.
 
   /**
    * Cancel all scheduled parameter automation
@@ -431,10 +375,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Cancel any previous scheduling
     cancelScheduled();
 
-    // Reset PLSTEP tracking
-    lastAF = 0;
-    lastAH = 0;
-
     const baseTime = startTime;
     log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);
 
@@ -458,24 +398,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         const nextTime = baseTime + next.time;
         scheduleRamps(next.params, nextTime);
       }
-
-      // PLSTEP detection (skip first frame for delta calculation)
-      if (i === 0) {
-        lastAF = event.params.AF ?? 0;
-        lastAH = event.params.AH ?? 0;
-        continue;
-      }
-
-      const currentAF = event.params.AF ?? 0;
-      const currentAH = event.params.AH ?? 0;
-
-      const { isBurst, triggerParam, triggerDelta } = detectBurst(event, currentAF, currentAH);
-      if (isBurst) {
-        scheduleBurstTransient(t, event.params, triggerParam, triggerDelta);
-      }
-
-      lastAF = currentAF;
-      lastAH = currentAH;
     }
 
     // Record track duration

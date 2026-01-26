@@ -15,6 +15,7 @@
 import { createTopologicalEvaluator } from './semantics/topological-evaluator.js';
 import type { SemanticsDocument, ParamValue } from './semantics/types.js';
 import type { KlattRuntime, BaconGraph } from './klatt-runtime.js';
+import { dbToLinear, proximity as proximityFn, min, max, pow } from './klatt-functions.js';
 
 // =============================================================================
 // Types
@@ -76,22 +77,13 @@ export interface KlattInterpreter {
   getTrackDuration(): number;
 }
 
-// =============================================================================
-// Standard Functions for Semantics Evaluation
-// =============================================================================
-
+// Standard functions imported from klatt-functions.js
 const standardFunctions: Record<string, (...args: number[]) => number> = {
-  dbToLinear: (db: number): number => {
-    if (!Number.isFinite(db) || db <= -72) return 0;
-    return Math.pow(2, Math.min(96, db) / 6);
-  },
-  min: (a: number, b: number): number => Math.min(a, b),
-  max: (a: number, b: number): number => Math.max(a, b),
-  pow: (base: number, exp: number): number => Math.pow(base, exp),
+  dbToLinear,
+  min,
+  max,
+  pow,
 };
-
-// NOTE: Proximity correction function is defined inside the factory to access
-// ndbCor from semantics.constants (avoiding duplication with semantics.yaml)
 
 // =============================================================================
 // Interpreter Factory
@@ -130,14 +122,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
   log(`Loaded ${paramDefaults.size} param defaults from semantics`);
-
-  // Proximity correction function (uses ndbCor from semantics.constants)
-  function proximity(delta: number): number {
-    if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-    const ndbCor = constants['ndbCor'] as number[];
-    const index = Math.floor(delta / 50) - 1;
-    return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))];
-  }
 
   // Build binding map: semantics output name -> list of AudioParams
   // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
@@ -252,8 +236,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       ctx[key] = value;
     }
 
-    // Add proximity function
-    ctx['proximity'] = proximity;
+    // Add proximity function (imported from klatt-functions)
+    ctx['proximity'] = proximityFn;
 
     // Add computed values
     ctx['sampleRate'] = audioContext.sampleRate;
@@ -263,9 +247,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     const f2 = ctx['F2'] as number;
     const f3 = ctx['F3'] as number;
     const f4 = ctx['F4'] as number;
-    ctx['n12Cor'] = proximity(f2 - f1);
-    ctx['n23Cor'] = proximity(f3 - f2 - 50);
-    ctx['n34Cor'] = proximity(f4 - f3 - 150);
+    ctx['n12Cor'] = proximityFn(f2 - f1);
+    ctx['n23Cor'] = proximityFn(f3 - f2 - 50);
+    ctx['n34Cor'] = proximityFn(f4 - f3 - 150);
 
     return ctx;
   }

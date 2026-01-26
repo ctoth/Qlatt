@@ -2,6 +2,7 @@ import { KlattSynth } from "../src/klatt-synth.js";
 import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend.js";
+import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/klatt-functions.js";
 import yaml from "js-yaml";
 
 const ctx = new AudioContext();
@@ -544,12 +545,6 @@ function summarizeParallel(track) {
   return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare };
 }
 
-function dbToLinear(db) {
-  if (!Number.isFinite(db) || db <= -72) return 0;
-  const clamped = Math.min(96, db);
-  return 2 ** (clamped / 6);
-}
-
 function updateRange(range, value) {
   if (!Number.isFinite(value)) return range;
   if (!range) return { min: value, max: value };
@@ -571,28 +566,7 @@ function analyzeTrackGains(track, synthParams) {
     masterGain: null,
     mix: null,
   };
-  const ndbScale = {
-    A1: -58,
-    A2: -65,
-    A3: -73,
-    A4: -78,
-    A5: -79,
-    A6: -80,
-    AN: -58,
-    AB: -84,
-    AV: -72,
-    // AH changed from -102 to -72 to match AV/AF (see klatt-synth.js)
-    AH: -72,
-    AF: -72,
-    AVS: -44,
-  };
   const outputScale = dbToLinear(ndbScale.AF + 44);
-  const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-  const proximity = (delta) => {
-    if (!Number.isFinite(delta) || delta < 50 || delta >= 550) return 0;
-    const index = Math.floor(delta / 50) - 1;
-    return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))] ?? 0;
-  };
   const parallelScale = Number.isFinite(synthParams.parallelGainScale)
     ? synthParams.parallelGainScale
     : 1.0;
@@ -896,16 +870,6 @@ function formatGainDerivation(track, synthParams) {
   if (!focusEvent) return [];
 
   const p = focusEvent.params;
-  const ndbScale = {
-    AV: -72, AVS: -44, AH: -87, AF: -72,
-    A1: -58, A2: -65, A3: -73, A4: -78, A5: -79, A6: -80,
-    AN: -58, AB: -84,
-  };
-
-  const dbToLinear = (db) => {
-    if (!Number.isFinite(db) || db <= -72) return 0;
-    return 2 ** (Math.min(96, db) / 6);
-  };
 
   const lines = [];
   const phoneme = focusEvent.phoneme || `event ${focusIndex}`;

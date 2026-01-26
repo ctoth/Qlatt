@@ -291,12 +291,15 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   }
 
   /**
-   * Apply a frame's realized values to all bound params
+   * Apply pre-evaluated realized values to all bound params
+   * Internal function that skips semantics evaluation
    */
-  function applyFrame(params: Record<string, number>, atTime: number, ramp: boolean): void {
-    // Evaluate semantics
-    const realized = evaluateSemantics(params);
-
+  function applyRealized(
+    realized: Record<string, ParamValue>,
+    params: Record<string, number>,
+    atTime: number,
+    ramp: boolean
+  ): void {
     // Apply to all bindings (each semantic name may have multiple targets)
     for (const [name, bindingList] of bindings) {
       const value = realized[name];
@@ -320,7 +323,35 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         }
       }
     }
+  }
 
+  /**
+   * Apply a frame's realized values to all bound params
+   * Evaluates semantics and applies values
+   */
+  function applyFrame(params: Record<string, number>, atTime: number, ramp: boolean): void {
+    const realized = evaluateSemantics(params);
+    applyRealized(realized, params, atTime, ramp);
+  }
+
+  /**
+   * Schedule ramps from pre-evaluated realized values
+   * Internal function that skips semantics evaluation
+   */
+  function scheduleRampsFromRealized(realized: Record<string, ParamValue>, atTime: number): void {
+    // Iterate ALL ramp params instead of hardcoding names
+    for (const paramName of rampParams) {
+      const value = realized[paramName];
+      if (typeof value === 'number') {
+        const bindingList = bindings.get(paramName);
+        if (bindingList) {
+          for (const binding of bindingList) {
+            binding.param.linearRampToValueAtTime(value, atTime);
+            scheduledParams.add(binding.param);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -329,20 +360,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    */
   function scheduleRamps(nextParams: Record<string, number>, nextTime: number): void {
     const realized = evaluateSemantics(nextParams);
-
-    // Iterate ALL ramp params instead of hardcoding names
-    for (const paramName of rampParams) {
-      const value = realized[paramName];
-      if (typeof value === 'number') {
-        const bindingList = bindings.get(paramName);
-        if (bindingList) {
-          for (const binding of bindingList) {
-            binding.param.linearRampToValueAtTime(value, nextTime);
-            scheduledParams.add(binding.param);
-          }
-        }
-      }
-    }
+    scheduleRampsFromRealized(realized, nextTime);
   }
 
   // NOTE: PLSTEP burst detection/scheduling removed - now handled automatically
@@ -385,19 +403,23 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       applyFrame(track[0].params, audioContext.currentTime, false);
     }
 
-    // Schedule all frames
+    // Schedule all frames - evaluate semantics once per frame
     for (let i = 0; i < track.length; i++) {
       const event = track[i];
       if (!event?.params) continue;
 
       const t = baseTime + event.time;
-      applyFrame(event.params, t, false);
 
-      // Lookahead for ramps
-      const next = track[i + 1];
-      if (next?.params) {
-        const nextTime = baseTime + next.time;
-        scheduleRamps(next.params, nextTime);
+      // Evaluate semantics once for this frame
+      const realized = evaluateSemantics(event.params);
+
+      // Apply the realized values
+      applyRealized(realized, event.params, t, false);
+
+      // Schedule ramps TO this frame (from previous frame's values)
+      // Ramps target the current frame's realized values
+      if (i > 0) {
+        scheduleRampsFromRealized(realized, t);
       }
     }
 

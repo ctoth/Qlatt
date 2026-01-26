@@ -775,7 +775,7 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 110,
     B3: 130,
-    AV: 20,
+    AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)
     AVS: -70,
     dur: 45,
     type: "stop_closure",
@@ -789,7 +789,7 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 100,
     B3: 170,
-    AV: 20,
+    AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)
     AVS: -70,
     dur: 35,
     type: "stop_closure",
@@ -803,7 +803,7 @@ export const PHONEME_TARGETS = {
     B1: 60,
     B2: 150,
     B3: 280,
-    AV: 20,
+    AV: 47,   // Voice bar during voiced stop closure (Klatt 1980: ~47-50 dB)
     AVS: -70,
     dur: 55,
     type: "stop_closure",
@@ -1022,7 +1022,7 @@ export const PHONEME_TARGETS = {
   CH: {
     F1: 300, F2: 1840, F3: 2750,
     B1: 200, B2: 100, B3: 300, B4: 300, B5: 250, B6: 1000,
-    AV: 0, AF: 18, AH: 0, AVS: -70,
+    AV: 0, AF: 62, AH: 0, AVS: -70,  // Affricate - similar to SH (66) but slightly reduced
     // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 57, A4: 48, A5: 48, A6: 46, AB: 0,
     SW: 1,    // Parallel mode for burst spectral shaping via A3-A6
@@ -1034,7 +1034,7 @@ export const PHONEME_TARGETS = {
   JH: {
     F1: 260, F2: 1800, F3: 2820,
     B1: 60, B2: 80, B3: 270, B4: 300, B5: 250, B6: 1000,
-    AV: 47, AF: 8, AH: 0, AVS: 47,
+    AV: 47, AF: 52, AH: 0, AVS: 47,  // Affricate - similar to ZH (56) but slightly reduced
     // FNP/FNZ inherit from BASE_PARAMS (250/250) - zero/pole cancel for passthrough
     A2: 0, A3: 44, A4: 60, A5: 53, A6: 53, AB: 0,
     SW: 1,    // Parallel mode for burst spectral shaping via A3-A6

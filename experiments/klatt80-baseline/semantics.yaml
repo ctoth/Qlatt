@@ -393,11 +393,17 @@ realize:
     deps: [AB]
 
   # Mode switching
-  # NOTE: cascadeGain removed - outputSwitch now uses SW directly
+  # Cascade branch gain - off in parallel mode, on in cascade mode
+  cascadeGain:
+    expr: "SW == 1 ? 0 : 1"
+    deps: [SW]
+    description: "Gates cascade branch (off when SW=1 parallel mode)"
 
-  parallelGain:
+  # Parallel voicing gain - gates AVS path only, frication always flows through
+  parallelVoiceGain:
     expr: "SW == 1 ? 1 : 0"
     deps: [SW]
+    description: "Controls voicing into parallel (AVS path), frication always flows through"
 
   # Source mode switching
   lfSourceSwitch:

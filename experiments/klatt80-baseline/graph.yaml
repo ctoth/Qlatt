@@ -412,12 +412,12 @@ nodes:
   parallelSourceGain:
     type: gain
     params:
-      gain: { bind: parallelGain }
+      gain: { bind: parallelVoiceGain }
 
   parallelDiffGain:
     type: gain
     params:
-      gain: { bind: parallelGain }
+      gain: { bind: parallelVoiceGain }
 
   parallelFricGain:
     type: gain
@@ -438,12 +438,14 @@ nodes:
   # OUTPUT MIXING
   # ---------------------------------------------------------------------------
 
-  # Cascade/parallel branch selector (replaces gain-based switching)
-  # SW=0 selects cascade (input0), SW=1 selects parallel (input1)
-  outputSwitch:
-    type: signal-switch
+  # Cascade output gain - gates cascade branch based on SW
+  # SW=0 (cascade): cascadeGain=1, SW=1 (parallel): cascadeGain=0
+  # NOTE: Both cascade and parallel are SUMMED (per COEWAV.FOR line 251)
+  # Parallel voicing is gated by parallelVoiceGain, frication always flows through
+  cascadeOutGain:
+    type: gain
     params:
-      selector: { bind: SW }
+      gain: { bind: cascadeGain }
 
   outputSum:
     type: gain
@@ -535,7 +537,8 @@ connections:
   - [cascadeF3, cascadeF4]
   - [cascadeF4, cascadeF5]
   - [cascadeF5, cascadeF6]
-  - { from: cascadeF6, to: { node: outputSwitch, port: 0 } }  # input0 = cascade branch
+  - [cascadeF6, cascadeOutGain]
+  - [cascadeOutGain, outputSum]
 
   # ---------------------------------------------------------------------------
   # Parallel branch routing
@@ -583,9 +586,9 @@ connections:
   - [parallelFricGain, parallelBypassGain]
   - [parallelBypassGain, parallelSum]
 
-  # Parallel output
-  - { from: parallelSum, to: { node: outputSwitch, port: 1 } }  # input1 = parallel branch
-  - [outputSwitch, outputSum]
+  # Parallel output - summed with cascade (per COEWAV.FOR line 251: ULIPS=(ULIPSV+ULIPSF+STEP)*(170.))
+  # Parallel voicing gated by parallelVoiceGain, frication always flows through
+  - [parallelSum, outputSum]
 
   # ---------------------------------------------------------------------------
   # PLSTEP burst - edge detection triggers decay envelope

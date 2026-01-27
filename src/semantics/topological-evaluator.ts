@@ -8,7 +8,7 @@ import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, 
 import type { CelEvaluator } from './cel-evaluator.js';
 
 export interface TopologicalEvaluator {
-  evaluate(semantics: SemanticsDocument, inputs: Record<string, unknown>): EvaluationResult;
+  evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;
   getEvaluationOrder(semantics: SemanticsDocument): string[];
 }
 
@@ -41,9 +41,9 @@ function getAllNodes(realize: Record<string, RealizationRule | string>): string[
 
 export function createTopologicalEvaluator(celEvaluator: CelEvaluator): TopologicalEvaluator {
   return {
-    evaluate(semantics: SemanticsDocument, inputs: Record<string, unknown>): EvaluationResult {
+    evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult {
       const result: EvaluationResult = {
-        values: { ...inputs } as Record<string, ParamValue>,
+        values: { ...context.params } as Record<string, ParamValue>,
         errors: [],
       };
 
@@ -71,12 +71,12 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         const ruleObj = typeof rule === 'string' ? { expr: rule } : rule;
 
         try {
-          // Build evaluation context for CEL
-          const context: EvaluationContext = {
+          // Build evaluation context for CEL using caller-provided constants
+          const celContext: EvaluationContext = {
             params: result.values,
-            constants: semantics.constants ?? {},
+            constants: context.constants,
           };
-          const value = celEvaluator.evaluate(ruleObj.expr, context);
+          const value = celEvaluator.evaluate(ruleObj.expr, celContext);
           result.values[name] = value as ParamValue;
         } catch (e) {
           result.errors.push({

@@ -13,7 +13,7 @@ describe('Topological Evaluator', () => {
         c: { expr: 'b + 1', deps: ['b'] },
       },
     };
-    const result = evaluator.evaluate(semantics, { a: 1 });
+    const result = evaluator.evaluate(semantics, { params: { a: 1 }, constants: {} });
     expect(result.values).toEqual({ a: 1, b: 2, c: 3 });
   });
 
@@ -27,6 +27,6 @@ describe('Topological Evaluator', () => {
         b: { expr: 'a + 1', deps: ['a'] },
       },
     };
-    expect(() => evaluator.evaluate(semantics, {})).toThrow(/cycle/i);
+    expect(() => evaluator.evaluate(semantics, { params: {}, constants: {} })).toThrow(/cycle/i);
   });
 });

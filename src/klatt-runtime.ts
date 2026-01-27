@@ -384,14 +384,11 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     };
   }
 
-  // Standard functions available in expressions (imported from klatt-functions.ts)
-  const standardFunctions = { dbToLinear, min, max, pow };
-
   // Evaluate semantics
   function evaluate(): void {
-    // Merge standard functions into inputs so they're available in expressions
-    const inputsWithFunctions = { ...currentInputs, ...standardFunctions };
-    const result = topoEvaluator.evaluate(semantics, inputsWithFunctions);
+    // Build context - functions are registered with CEL evaluator separately
+    const context = buildContext();
+    const result = topoEvaluator.evaluate(semantics, context);
     realizedValues = result.values;
 
     if (result.errors.length > 0) {

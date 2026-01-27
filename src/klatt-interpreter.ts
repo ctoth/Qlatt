@@ -14,7 +14,7 @@
 
 import { createTopologicalEvaluator } from './semantics/topological-evaluator.js';
 import { createCelEvaluator } from './semantics/cel-evaluator.js';
-import type { SemanticsDocument, ParamValue } from './semantics/types.js';
+import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types.js';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
 import { dbToLinear, proximity as proximityFn, min, max, pow } from './klatt-functions.js';
 
@@ -307,7 +307,13 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Evaluate semantics and return realized values
    */
   function evaluateSemantics(params: Record<string, number>): Record<string, ParamValue> {
-    const context = buildContext(params);
+    const flatContext = buildContext(params);
+    // Build EvaluationContext for topological evaluator
+    // Functions are registered with CEL evaluator separately (lines 117-120)
+    const context: EvaluationContext = {
+      params: flatContext as Record<string, ParamValue>,
+      constants: semantics.constants ?? {},
+    };
     const result = evaluator.evaluate(semantics, context);
 
     if (result.errors.length > 0) {

@@ -17,6 +17,9 @@
 /// same `len` value to avoid memory leaks or undefined behavior.
 #[inline]
 pub fn alloc_f32(len: usize) -> *mut f32 {
+    if len == 0 {
+        return core::ptr::null_mut();
+    }
     let mut buf = vec![0.0f32; len];
     let ptr = buf.as_mut_ptr();
     core::mem::forget(buf);

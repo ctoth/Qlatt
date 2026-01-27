@@ -7,9 +7,14 @@ pub struct ImpulsiveSource {
     sample_rate: f32,
     period_len: usize,
     pos_in_period: usize,
-    // Simple one-pole LP filter state
-    lp_y1: f32,
-    lp_coeff: f32,
+    open_len: usize,
+    // Klatt/klsyn88: doublet impulse into a second-order resonator
+    // Reference: C:\Users\Q\src\klsyn\c\parwv.c (impulsive_source, setabc, pitch_synch_par_reset)
+    y1: f32,
+    y2: f32,
+    a: f32,
+    b: f32,
+    c: f32,
 }
 
 impl ImpulsiveSource {
@@ -18,41 +23,75 @@ impl ImpulsiveSource {
             sample_rate,
             period_len: (sample_rate / 100.0) as usize,
             pos_in_period: 0,
-            lp_y1: 0.0,
-            lp_coeff: 0.0,
+            open_len: 0,
+            y1: 0.0,
+            y2: 0.0,
+            a: 1.0,
+            b: 0.0,
+            c: 0.0,
         }
     }
 
     pub fn reset(&mut self) {
         self.pos_in_period = 0;
-        self.lp_y1 = 0.0;
+        self.y1 = 0.0;
+        self.y2 = 0.0;
     }
 
     pub fn process(&mut self, f0: f32, open_quotient: f32) -> f32 {
         // At period boundary, recalculate
         if self.pos_in_period == 0 {
-            self.period_len = ((self.sample_rate / f0.max(20.0)) as usize).max(1);
+            let f0_hz = f0.max(20.0);
+            self.period_len = ((self.sample_rate / f0_hz) as usize).max(1);
 
-            // LP filter coefficient based on open phase
-            let open_len = ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
-            let cutoff = self.sample_rate / (open_len.max(1) as f32);
-            // Simple one-pole: coeff = exp(-2*pi*fc/fs)
-            self.lp_coeff = (-2.0 * std::f32::consts::PI * cutoff / self.sample_rate).exp();
+            // klsyn88 enforces a minimum open phase of ~1.0 ms (at 4x oversampling).
+            // We approximate that constraint at the base sample rate.
+            let min_open = (self.sample_rate * 0.001) as usize;
+            let mut open_len =
+                ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
+            open_len = open_len.max(1).max(min_open);
+            if open_len >= self.period_len {
+                open_len = self.period_len.saturating_sub(1).max(1);
+            }
+            self.open_len = open_len;
+
+            // In klsyn88, the glottal resonator is set via:
+            //   temp = samrate / nopen; setabc(0, temp, &rgla, &rglb, &rglc)
+            // where nopen is measured at 4x oversampling. We approximate by scaling
+            // open_len to that domain before computing the effective bandwidth.
+            let nopen_4x = (self.open_len.saturating_mul(4)).max(1) as f32;
+            let bw = self.sample_rate / nopen_4x;
+
+            // setabc(f=0, bw): r = exp(-pi*bw/fs), c = -(r^2), b = 2r, a = 1-b-c
+            let r = (-std::f32::consts::PI * bw / self.sample_rate).exp();
+            let mut a = 1.0 - (2.0 * r) - (-(r * r));
+            let b = 2.0 * r;
+            let c = -(r * r);
+
+            // klsyn88 scales the input coefficient to stabilize gain at F1:
+            //   temp1 = nopen * .00833; rgla *= temp1 * temp1
+            // We apply the same scaling with the 4x-domain open length.
+            let temp1 = nopen_4x * 0.00833;
+            a *= temp1 * temp1;
+
+            self.a = a;
+            self.b = b;
+            self.c = c;
         }
 
-        // Generate doublet at samples 0, 1, 2
+        // Generate a doublet impulse (fixed-point magnitudes in klsyn88).
+        // We use normalized amplitudes here; downstream gains set the level.
         let impulse = match self.pos_in_period {
-            0 => 1.0,
-            1 => 0.0,
+            0 => 0.0,
+            1 => 1.0,
             2 => -1.0,
             _ => 0.0,
         };
 
-        // Apply LP filter
-        // Note: lp_y1 intentionally NOT reset at period boundary
-        // to maintain smooth filter response across glottal pulses
-        let output = impulse * (1.0 - self.lp_coeff) + self.lp_y1 * self.lp_coeff;
-        self.lp_y1 = output;
+        // Second-order resonator: y[n] = a*x[n] + b*y[n-1] + c*y[n-2]
+        let output = self.a * impulse + self.b * self.y1 + self.c * self.y2;
+        self.y2 = self.y1;
+        self.y1 = output;
 
         self.pos_in_period += 1;
         if self.pos_in_period >= self.period_len {

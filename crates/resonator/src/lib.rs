@@ -118,22 +118,9 @@ pub extern "C" fn resonator_process(
         return;
     }
     unsafe {
-        let res = &mut *ptr;
-        if res.bypass {
-            for i in 0..len {
-                let x = *input_ptr.add(i);
-                *output_ptr.add(i) = x * res.gain;
-            }
-            return;
-        }
-
-        for i in 0..len {
-            let x = *input_ptr.add(i);
-            let y = res.b0 * x + res.a1 * res.y1 + res.a2 * res.y2;
-            res.y2 = res.y1;
-            res.y1 = y;
-            *output_ptr.add(i) = y * res.gain;
-        }
+        let input = core::slice::from_raw_parts(input_ptr, len);
+        let output = core::slice::from_raw_parts_mut(output_ptr, len);
+        (*ptr).process(input, output);
     }
 }
 

@@ -120,20 +120,9 @@ pub extern "C" fn edge_detector_process(
         return;
     }
     unsafe {
-        let ed = &mut *ptr;
-        let thresh = if threshold.is_finite() && threshold > 0.0 {
-            threshold
-        } else {
-            ed.threshold
-        };
-
-        for i in 0..len {
-            let x = *input_ptr.add(i);
-            let delta = x - ed.prev_value;
-            let triggered = if delta >= thresh { 1.0 } else { 0.0 };
-            ed.prev_value = x;
-            *output_ptr.add(i) = triggered;
-        }
+        let input = core::slice::from_raw_parts(input_ptr, len);
+        let output = core::slice::from_raw_parts_mut(output_ptr, len);
+        (*ptr).process(input, output, threshold);
     }
 }
 

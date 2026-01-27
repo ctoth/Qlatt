@@ -72,7 +72,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     const wasmBytes = options?.processorOptions?.wasmBytes;
     initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
       this.wasm = instance.exports;
-      this.state = this.wasm.decay_envelope_new();
+      this.state = this.wasm.decay_envelope_new(sampleRate);
       this.triggerBuffer = new WasmBuffer(this.wasm);
       this.amplitudeBuffer = new WasmBuffer(this.wasm);
       this.decayBuffer = new WasmBuffer(this.wasm);

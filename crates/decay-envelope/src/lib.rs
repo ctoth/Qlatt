@@ -19,13 +19,16 @@ pub struct DecayEnvelope {
     value: f32,
     /// Previous trigger value for edge detection
     prev_trigger: f32,
+    /// Sample rate for computing decay coefficient when not provided
+    sample_rate: f32,
 }
 
 impl DecayEnvelope {
-    fn new() -> Self {
+    fn new(sample_rate: f32) -> Self {
         Self {
             value: 0.0,
             prev_trigger: 0.0,
+            sample_rate: if sample_rate > 0.0 { sample_rate } else { 10000.0 },
         }
     }
 
@@ -83,7 +86,7 @@ impl DecayEnvelope {
             };
 
             let d = if decay_len == 0 {
-                0.995 // Default Klatt 80 decay at 10kHz
+                decay_coefficient_for_sample_rate(self.sample_rate)
             } else if decay_len > 1 {
                 decay[i % decay_len]
             } else {
@@ -100,8 +103,8 @@ impl DecayEnvelope {
 // ============================================================================
 
 #[no_mangle]
-pub extern "C" fn decay_envelope_new() -> *mut DecayEnvelope {
-    Box::into_raw(Box::new(DecayEnvelope::new()))
+pub extern "C" fn decay_envelope_new(sample_rate: f32) -> *mut DecayEnvelope {
+    Box::into_raw(Box::new(DecayEnvelope::new(sample_rate)))
 }
 
 #[no_mangle]

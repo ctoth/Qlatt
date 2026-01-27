@@ -1,0 +1,614 @@
+# klsyn88 Synthesizer Semantics
+# Based on klatt80-baseline with klsyn88 extensions:
+# - ss (source select): 1=impulsive, 2=natural (LF), 3=triangular
+# - sk (skewness): source waveform skewness
+# - as (asymmetry): triangular source asymmetry
+# - dF1hz/dB1hz: pitch-synchronous F1/B1 modulation
+# - B1p-B6p: separate parallel branch bandwidths
+
+bacon: "0.1"
+name: klsyn88
+
+# Input parameters - what the TTS frontend provides
+params:
+  # Fundamental frequency
+  F0:
+    type: float
+    range: [0, 500]
+    default: 0
+    unit: Hz
+
+  # Formant frequencies
+  F1:
+    type: float
+    range: [200, 1000]
+    default: 500
+    unit: Hz
+  F2:
+    type: float
+    range: [500, 3000]
+    default: 1500
+    unit: Hz
+  F3:
+    type: float
+    range: [1500, 4000]
+    default: 2500
+    unit: Hz
+  F4:
+    type: float
+    range: [2500, 5000]
+    default: 3500
+    unit: Hz
+  F5:
+    type: float
+    range: [3500, 6000]
+    default: 4500
+    unit: Hz
+  F6:
+    type: float
+    range: [4000, 7000]
+    default: 5500
+    unit: Hz
+
+  # Formant bandwidths (cascade)
+  B1:
+    type: float
+    range: [40, 1000]
+    default: 60
+    unit: Hz
+  B2:
+    type: float
+    range: [40, 1000]
+    default: 90
+    unit: Hz
+  B3:
+    type: float
+    range: [40, 1000]
+    default: 150
+    unit: Hz
+  B4:
+    type: float
+    range: [100, 1000]
+    default: 200
+    unit: Hz
+  B5:
+    type: float
+    range: [100, 1000]
+    default: 200
+    unit: Hz
+  B6:
+    type: float
+    range: [100, 1000]
+    default: 500
+    unit: Hz
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Separate parallel branch bandwidths
+  # ---------------------------------------------------------------------------
+  B1p:
+    type: float
+    range: [30, 1000]
+    default: 80
+    unit: Hz
+    description: "Parallel F1 bandwidth"
+
+  B2p:
+    type: float
+    range: [40, 1000]
+    default: 200
+    unit: Hz
+    description: "Parallel F2 bandwidth"
+
+  B3p:
+    type: float
+    range: [60, 1000]
+    default: 350
+    unit: Hz
+    description: "Parallel F3 bandwidth"
+
+  B4p:
+    type: float
+    range: [100, 1000]
+    default: 500
+    unit: Hz
+    description: "Parallel F4 bandwidth"
+
+  B5p:
+    type: float
+    range: [100, 1500]
+    default: 600
+    unit: Hz
+    description: "Parallel F5 bandwidth"
+
+  B6p:
+    type: float
+    range: [100, 4000]
+    default: 800
+    unit: Hz
+    description: "Parallel F6 bandwidth"
+
+  # Source amplitudes (dB)
+  GO:
+    type: float
+    range: [0, 80]
+    default: 47
+    unit: dB
+    description: Overall gain (Klatt NNG0; frontend emits GO)
+  # Optional legacy/alternate spelling. We keep it for compatibility,
+  # but all realize rules use GO to match the frontend track params.
+  G0:
+    type: float
+    range: [0, 80]
+    default: 47
+    unit: dB
+    description: Overall gain (alternate spelling; see GO)
+  AV:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Voicing amplitude
+  AH:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Aspiration amplitude
+  AF:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Frication amplitude
+  AVS:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+    description: Parallel voicing amplitude
+
+  # Parallel formant amplitudes (dB)
+  A1:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A2:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A3:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A4:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A5:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  A6:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+
+  # Nasal and bypass
+  AN:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+  AB:
+    type: float
+    range: [0, 80]
+    default: 0
+    unit: dB
+
+  # Nasal formant
+  FN:
+    type: float
+    range: [200, 500]
+    default: 280
+    unit: Hz
+  BN:
+    type: float
+    range: [40, 500]
+    default: 90
+    unit: Hz
+
+  # Nasal zero (antiformant)
+  FZ:
+    type: float
+    range: [200, 800]
+    default: 280
+    unit: Hz
+  BZ:
+    type: float
+    range: [40, 500]
+    default: 90
+    unit: Hz
+
+  # Synthesis mode switch
+  SW:
+    type: int
+    range: [0, 1]
+    default: 0
+    description: 0=cascade, 1=parallel
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Source selection (replaces sourceMode)
+  # ---------------------------------------------------------------------------
+  ss:
+    type: int
+    range: [1, 3]
+    default: 2
+    description: "Source select: 1=impulsive, 2=natural (LF), 3=triangular"
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Skewness parameter
+  # ---------------------------------------------------------------------------
+  sk:
+    type: float
+    range: [0, 100]
+    default: 50
+    description: "Kskew (source skewness) - RESERVED: will be used when triangular-source adds skew param"
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Triangular asymmetry
+  # ---------------------------------------------------------------------------
+  as:
+    type: float
+    range: [0, 1]
+    default: 0.5
+    description: "Triangular asymmetry (0=all rising, 1=all falling, 0.5=symmetric)"
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Pitch-synchronous F1/B1 modulation
+  # ---------------------------------------------------------------------------
+  dF1hz:
+    type: float
+    range: [0, 500]
+    default: 0
+    unit: Hz
+    description: "F1 increment during glottal open phase"
+
+  dB1hz:
+    type: float
+    range: [0, 500]
+    default: 0
+    unit: Hz
+    description: "B1 increment during glottal open phase"
+
+  # Voice source selection (legacy - kept for backward compatibility)
+  sourceMode:
+    description: "Voice source selection (0=impulse, 1=LF, 2=bypass) - legacy, prefer ss"
+    type: integer
+    default: 0
+    range: [0, 2]
+
+  # Parallel branch scaling
+  parallelScale:
+    description: "Scaling factor for parallel branch gains"
+    type: float
+    default: 1.0
+
+  # Sample rate
+  sampleRate:
+    description: "Audio sample rate in Hz"
+    type: integer
+    default: 44100
+
+  # LF model parameters
+  Rd:
+    description: "LF model voice quality parameter"
+    type: float
+    default: 1.0
+    range: [0.3, 2.7]
+
+  lfMode:
+    description: "LF model mode selection"
+    type: integer
+    default: 0
+    range: [0, 2]
+
+  openPhaseRatio:
+    description: "Impulse source open phase ratio"
+    type: float
+    default: 0.7
+    range: [0.3, 0.9]
+
+  noiseCutoff:
+    description: "Noise source lowpass cutoff"
+    type: float
+    default: 4000
+    unit: Hz
+
+  fricationCutoff:
+    description: "Frication source cutoff"
+    type: float
+    default: 4000
+    unit: Hz
+
+  # Glottal resonator parameters
+  FGP:
+    description: "Glottal pole frequency"
+    type: float
+    default: 0
+    unit: Hz
+
+  BGP:
+    description: "Glottal pole bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  FGZ:
+    description: "Glottal zero frequency"
+    type: float
+    default: 1500
+    unit: Hz
+
+  BGZ:
+    description: "Glottal zero bandwidth"
+    type: float
+    default: 6000
+    unit: Hz
+
+  BGS:
+    description: "Glottal source bandwidth"
+    type: float
+    default: 200
+    unit: Hz
+
+  # Nasal resonator parameters
+  FNZ:
+    description: "Nasal zero frequency"
+    type: float
+    default: 270
+    unit: Hz
+
+  BNZ:
+    description: "Nasal zero bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  FNP:
+    description: "Nasal pole frequency"
+    type: float
+    default: 270
+    unit: Hz
+
+  BNP:
+    description: "Nasal pole bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  # Output gain parameters
+  masterGain:
+    description: "Master output gain"
+    type: float
+    default: 1.0
+
+  outputGain:
+    description: "Final output gain"
+    type: float
+    default: 1.0
+
+# Constants - values that don't change
+constants:
+  # ndbScale offsets for G0 compensation
+  ndbScale:
+    AV: -119   # -72 - 47
+    AH: -134   # -87 - 47
+    AF: -119   # -72 - 47
+    AVS: -91   # -44 - 47
+    A1: -58
+    A2: -65
+    A3: -73
+    A4: -78
+    A5: -79
+    A6: -80
+    AN: -58
+    AB: -84
+
+  # Proximity correction lookup (for close formants)
+  ndbCor: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+  # Parallel formant sign alternation
+  parallelSign: [1, -1, 1, -1, 1, -1]
+
+# Realize rules - convert input params to realized values
+realize:
+  # Formant proximity corrections
+  n12Cor:
+    expr: "proximity(F2 - F1)"
+    deps: [F1, F2]
+
+  n23Cor:
+    expr: "proximity(F3 - F2 - 50)"
+    deps: [F2, F3]
+
+  n34Cor:
+    expr: "proximity(F4 - F3 - 150)"
+    deps: [F3, F4]
+
+  # Source gains (linear)
+  voiceGain:
+    expr: "dbToLinear(GO + AV + ndbScale.AV)"
+    deps: [GO, AV]
+
+  aspGain:
+    expr: "dbToLinear(GO + AH + ndbScale.AH)"
+    deps: [GO, AH]
+    ramp: true
+
+  # Klatt 80 COEWAV/PARCOE behavior: when SW=1, frication uses max(AF, AH)
+  # to prevent aspiration from being masked by lower AF values.
+  fricDbAdjusted:
+    expr: "SW == 1 ? max(AF, AH) : AF"
+    deps: [SW, AF, AH]
+
+  fricGain:
+    expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF)"
+    deps: [GO, fricDbAdjusted]
+    ramp: true
+
+  avsGain:
+    expr: "dbToLinear(GO + AVS + ndbScale.AVS) * 10"
+    deps: [GO, AVS]
+
+  # Parallel formant gains with corrections and parallelScale
+  a1Linear:
+    expr: "dbToLinear(A1 + n12Cor + ndbScale.A1) * parallelScale"
+    deps: [A1, n12Cor, parallelScale]
+
+  a2Linear:
+    expr: "-dbToLinear(A2 + n12Cor * 2 + n23Cor + ndbScale.A2) * parallelScale"
+    deps: [A2, n12Cor, n23Cor, parallelScale]
+
+  a3Linear:
+    expr: "dbToLinear(A3 + n23Cor * 2 + n34Cor + ndbScale.A3) * parallelScale"
+    deps: [A3, n23Cor, n34Cor, parallelScale]
+
+  a4Linear:
+    expr: "-dbToLinear(A4 + n34Cor * 2 + ndbScale.A4) * parallelScale"
+    deps: [A4, n34Cor, parallelScale]
+
+  a5Linear:
+    expr: "dbToLinear(A5 + ndbScale.A5) * parallelScale"
+    deps: [A5, parallelScale]
+
+  a6Linear:
+    expr: "-dbToLinear(A6 + ndbScale.A6) * parallelScale"
+    deps: [A6, parallelScale]
+
+  # Nasal and bypass gains
+  anLinear:
+    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
+    deps: [AN, parallelScale]
+
+  abLinear:
+    expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"
+    deps: [AB, parallelScale]
+
+  # Mode switching
+  # Cascade branch gain - off in parallel mode, on in cascade mode
+  cascadeGain:
+    expr: "SW == 1 ? 0 : 1"
+    deps: [SW]
+    description: "Gates cascade branch (off when SW=1 parallel mode)"
+
+  # Parallel voicing gain - gates AVS path only, frication always flows through
+  parallelVoiceGain:
+    expr: "SW == 1 ? 1 : 0"
+    deps: [SW]
+    description: "Controls voicing into parallel (AVS path), frication always flows through"
+
+  # ---------------------------------------------------------------------------
+  # klsyn88 NEW: Source selection switching (ss parameter)
+  # ---------------------------------------------------------------------------
+  impulsiveSourceSwitch:
+    expr: "ss == 1 ? 1.0 : 0.0"
+    deps: [ss]
+    description: "Enable impulsive source when ss=1"
+
+  naturalSourceSwitch:
+    expr: "ss == 2 ? 1.0 : 0.0"
+    deps: [ss]
+    description: "Enable natural (LF) source when ss=2"
+
+  triangularSourceSwitch:
+    expr: "ss == 3 ? 1.0 : 0.0"
+    deps: [ss]
+    description: "Enable triangular source when ss=3"
+
+  # Legacy source mode switching (for backward compatibility)
+  lfSourceSwitch:
+    expr: "sourceMode == 1 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  impulseSourceSwitch:
+    expr: "sourceMode != 1 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  sourceBypassSwitch:
+    expr: "sourceMode == 2 ? 1.0 : 0.0"
+    deps: [sourceMode]
+
+  sourceDirectSwitch:
+    expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 1.0 : 0.0)"
+    deps: [sourceMode]
+
+  sourceDiffSwitch:
+    expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 0.0 : 1.0)"
+    deps: [sourceMode]
+
+  # Parallel scaled gains (NO proximity corrections - match current graph behavior)
+  a1GainScaled:
+    expr: "dbToLinear(A1 + ndbScale.A1) * parallelScale"
+    deps: [A1, parallelScale]
+
+  a2GainScaled:
+    expr: "-dbToLinear(A2 + ndbScale.A2) * parallelScale"
+    deps: [A2, parallelScale]
+
+  a3GainScaled:
+    expr: "dbToLinear(A3 + ndbScale.A3) * parallelScale"
+    deps: [A3, parallelScale]
+
+  a4GainScaled:
+    expr: "-dbToLinear(A4 + ndbScale.A4) * parallelScale"
+    deps: [A4, parallelScale]
+
+  a5GainScaled:
+    expr: "dbToLinear(A5 + ndbScale.A5) * parallelScale"
+    deps: [A5, parallelScale]
+
+  a6GainScaled:
+    expr: "-dbToLinear(A6 + ndbScale.A6) * parallelScale"
+    deps: [A6, parallelScale]
+
+  anGainScaled:
+    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
+    deps: [AN, parallelScale]
+
+  abGainScaled:
+    expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"
+    deps: [AB, parallelScale]
+
+  fricGainScaled:
+    expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF) * parallelScale"
+    deps: [GO, fricDbAdjusted, parallelScale]
+    ramp: true
+
+  # System constant
+  nyquistFrequency:
+    expr: "sampleRate / 2"
+    deps: [sampleRate]
+
+  # Output lowpass filter parameters (Klatt 80 sets near Nyquist)
+  outputLpFrequency:
+    expr: "sampleRate * 0.45"
+    deps: [sampleRate]
+
+  outputLpBandwidth:
+    expr: "sampleRate * 0.1"
+    deps: [sampleRate]
+
+  # PLSTEP burst amplitude
+  # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
+  # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)
+  # The -75 = -28 + -47 (the G0 offset in GETAMP is -47 from dbToLinear threshold)
+  plstepAmplitude:
+    expr: "dbToLinear(GO - 75)"
+    deps: [GO]
+    description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"

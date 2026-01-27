@@ -1,0 +1,348 @@
+# klsyn88 Synthesizer Primitive Registry
+# Based on klatt80-baseline with klsyn88 extensions:
+# - triangular-source: Triangular glottal waveform
+# - impulsive-source: Doublet impulse source
+# - square-source: Simple square wave source
+# - tilt-filter: Spectral tilt filter
+# - pitch-sync-resonator: F1 resonator with pitch-synchronous modulation
+#
+# Each primitive defines:
+#   - description: What the node does
+#   - native/worklet/wasm: implementation type
+#   - params: configurable params with type, default, unit, description
+#   - inputs: number of audio inputs
+#   - outputs: number of audio outputs
+
+bacon: "0.1"
+
+primitives:
+  # ===========================================================================
+  # WebAudio Native Nodes
+  # ===========================================================================
+
+  gain:
+    description: "WebAudio GainNode - multiplies input signal by gain parameter"
+    native: GainNode
+    params:
+      gain:
+        type: float
+        default: 1.0
+        description: "Multiplication factor (linear scale)"
+    inputs: 1
+    outputs: 1
+
+  constant-source:
+    description: "WebAudio ConstantSourceNode - outputs constant value"
+    native: ConstantSourceNode
+    params:
+      offset:
+        type: float
+        default: 1.0
+        description: "Constant output value"
+    inputs: 0
+    outputs: 1
+
+  # ===========================================================================
+  # WASM-backed AudioWorklet Nodes
+  # ===========================================================================
+
+  resonator:
+    description: "Two-pole resonator (formant filter) - implements second-order IIR bandpass"
+    worklet: "resonator-processor.js"
+    wasm: "resonator.wasm"
+    options:
+      bypassAtZero:
+        type: bool
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    params:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Center frequency of the resonance"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
+  antiresonator:
+    description: "Two-zero antiresonator (zero filter) - implements second-order IIR notch for nasal zeros"
+    worklet: "antiresonator-processor.js"
+    wasm: "antiresonator.wasm"
+    options:
+      bypassAtZero:
+        type: bool
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    params:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Zero frequency"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
+  lf-source:
+    description: "LF model glottal source with Rd voice quality control - generates glottal flow derivative"
+    worklet: "lf-source-processor.js"
+    wasm: "lf-source.wasm"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      rd:
+        type: float
+        default: 1.0
+        description: "Voice quality parameter (0.3=pressed to 2.7=breathy)"
+      lfMode:
+        type: int
+        default: 1
+        description: "LF model mode selection"
+    inputs: 0
+    outputs: 1
+
+  signal-switch:
+    description: "N-to-1 signal selector implementing Klatt 80 SW parameter - instantaneous switching between cascade/parallel branches"
+    worklet: "signal-switch-processor.js"
+    wasm: "signal-switch.wasm"
+    params:
+      selector:
+        type: float
+        default: 0
+        description: "Branch selector (0=cascade/input0, 1=parallel/input1)"
+    inputs: 2
+    outputs: 1
+
+  edge-detector:
+    description: "Klatt 80 PLSTEP trigger detector - fires single-sample pulse when input increases by >= threshold"
+    worklet: "edge-detector-processor.js"
+    wasm: "edge-detector.wasm"
+    params:
+      threshold:
+        type: float
+        unit: "dB"
+        default: 49.0
+        description: "Delta threshold to trigger (Klatt 80 uses 49 dB for AF/AH)"
+      input:
+        type: float
+        unit: "dB"
+        default: 0
+        description: "Input parameter value to monitor (typically AF or AH amplitude)"
+    inputs: 0
+    outputs: 1
+
+  decay-envelope:
+    description: "Klatt 80 PLSTEP exponential decay envelope - triggered burst with 0.995 per-sample decay at 10kHz"
+    worklet: "decay-envelope-processor.js"
+    wasm: "decay-envelope.wasm"
+    params:
+      trigger:
+        type: float
+        default: 0
+        rate: a
+        description: "Trigger input (rising edge >0.5 fires envelope)"
+      amplitude:
+        type: float
+        default: 1.0
+        rate: a
+        description: "Initial envelope amplitude when triggered (sets to -amplitude for rarefaction)"
+      decay:
+        type: float
+        default: 0
+        rate: k
+        description: "Per-sample decay coefficient (0=auto from sample rate, Klatt 80 uses 0.995 at 10kHz)"
+    inputs: 1
+    outputs: 1
+
+  # ===========================================================================
+  # klsyn88 NEW: Additional Source Types
+  # ===========================================================================
+
+  triangular-source:
+    description: "Triangular glottal waveform with asymmetry control - klsyn88 source type ss=3"
+    worklet: "triangular-source-processor.js"
+    wasm: "triangular-source.wasm"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      openQuotient:
+        type: float
+        default: 0.5
+        description: "Open quotient (0-1)"
+      asymmetry:
+        type: float
+        default: 0.5
+        description: "Waveform asymmetry (0=rising, 1=falling, 0.5=symmetric)"
+    inputs: 0
+    outputs: 1
+
+  impulsive-source:
+    description: "Doublet impulse glottal source with LP smoothing - klsyn88 source type ss=1"
+    worklet: "impulsive-source-processor.js"
+    wasm: "impulsive-source.wasm"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      openQuotient:
+        type: float
+        default: 0.5
+        description: "Open quotient (0-1)"
+    inputs: 0
+    outputs: 1
+
+  square-source:
+    description: "Simple square wave glottal source - backup source type"
+    worklet: "square-source-processor.js"
+    wasm: "square-source.wasm"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      openQuotient:
+        type: float
+        default: 0.5
+        description: "Open quotient / duty cycle"
+    inputs: 0
+    outputs: 1
+
+  # ===========================================================================
+  # klsyn88 NEW: Spectral Tilt Filter
+  # ===========================================================================
+
+  tilt-filter:
+    description: "Spectral tilt filter - applies frequency-dependent attenuation for voice quality control"
+    worklet: "tilt-filter-processor.js"
+    wasm: "tilt-filter.wasm"
+    params:
+      tilt:
+        type: float
+        unit: "dB/octave"
+        default: 0
+        description: "Spectral tilt in dB/octave"
+    inputs: 1
+    outputs: 1
+
+  # ===========================================================================
+  # klsyn88 NEW: Pitch-Synchronous Resonator
+  # ===========================================================================
+
+  pitch-sync-mod:
+    description: "F1 resonator with pitch-synchronous modulation - applies dF1/dB1 delta during glottal open phase"
+    worklet: "pitch-sync-mod-processor.js"
+    wasm: "pitch-sync-mod.wasm"
+    options:
+      bypassAtZero:
+        type: bool
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency for pitch synchronization"
+      openQuotient:
+        type: float
+        default: 0.5
+        description: "Open quotient (0-1)"
+      f1:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Base F1 frequency"
+      b1:
+        type: float
+        unit: "Hz"
+        default: 60
+        description: "Base F1 bandwidth"
+      dF1:
+        type: float
+        unit: "Hz"
+        default: 0
+        description: "F1 increment during glottal open phase"
+      dB1:
+        type: float
+        unit: "Hz"
+        default: 0
+        description: "B1 increment during glottal open phase"
+    inputs: 1
+    outputs: 1
+
+  # ===========================================================================
+  # JavaScript AudioWorklet Nodes
+  # ===========================================================================
+
+  impulse-train:
+    description: "Classic Klatt impulse train source - generates periodic impulses at F0"
+    worklet: "impulse-train-processor.js"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      gain:
+        type: float
+        default: 1.0
+        description: "Impulse amplitude"
+      openPhaseRatio:
+        type: float
+        default: 0.7
+        description: "Open phase ratio (OQ) for impulse shaping"
+    inputs: 0
+    outputs: 1
+
+  noise-source:
+    description: "Filtered noise generator for aspiration and frication"
+    worklet: "noise-source-processor.js"
+    params:
+      gain:
+        type: float
+        default: 1.0
+        description: "Noise amplitude"
+      cutoff:
+        type: float
+        unit: "Hz"
+        default: 4000
+        description: "Lowpass filter cutoff frequency"
+    inputs: 1
+    outputs: 1
+
+  differentiator:
+    description: "First-difference filter for radiation characteristic - y[n] = x[n] - x[n-1]"
+    worklet: "differentiator-processor.js"
+    params: {}
+    inputs: 1
+    outputs: 1
+
+  glottal-mod:
+    description: "Amplitude modulation synchronized to glottal cycle - 50% duty cycle square wave"
+    worklet: "glottal-mod-processor.js"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency for synchronization"
+    inputs: 1
+    outputs: 1

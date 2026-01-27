@@ -24,11 +24,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "impulsive-source"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "klatt-wasm-common"
 version = "0.1.0"
 
 [[package]]
 name = "lf-source"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "pitch-sync-mod"
 version = "0.1.0"
 dependencies = [
  "klatt-wasm-common",
@@ -43,6 +57,27 @@ dependencies = [
 
 [[package]]
 name = "signal-switch"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "square-source"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "tilt-filter"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
+name = "triangular-source"
 version = "0.1.0"
 dependencies = [
  "klatt-wasm-common",

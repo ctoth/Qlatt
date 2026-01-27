@@ -7,6 +7,11 @@ members = [
   "crates/signal-switch",
   "crates/edge-detector",
   "crates/decay-envelope",
+  "crates/square-source",
+  "crates/triangular-source",
+  "crates/impulsive-source",
+  "crates/tilt-filter",
+  "crates/pitch-sync-mod",
 ]
 resolver = "2"
 

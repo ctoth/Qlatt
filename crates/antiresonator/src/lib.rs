@@ -43,7 +43,7 @@ impl AntiResonator {
         let c = -f32::exp(-2.0 * PI * bw / sample_rate);
         let b = 2.0 * f32::exp(-PI * bw / sample_rate) * f32::cos(2.0 * PI * freq / sample_rate);
         let a = 1.0 - b - c;
-        if a == 0.0 {
+        if a.abs() < 1e-6 {
             self.bypass = true;
             self.x1 = 0.0;
             self.x2 = 0.0;

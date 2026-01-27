@@ -1,0 +1,12 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Voicing control in stop consonants has often been measured by means of voice onset time (VOT) and discussed in terms of interarticulator timing. However, control of voicing also involves details of laryngeal setting and management of sub- and supraglottal pressure levels, and many of these factors are known to undergo developmental change. Mechanical and aerodynamic conditions at the glottis may therefore vary considerably in normal populations as functions of age and/or sex. The current study collected oral airflow, intraoral pressure, and acoustic signals from normal English-speaking adults and children producing stop consonants and /h/ embedded in a short carrier utterance. Measures were made of stop VOTs, /h/ voicing and flow characteristics, and subglottal pressure during /p/ closures. Clear age and gender effects were observed for /h/: Fully voiced /h/ was most common in men, and /h/ voicing and flow data showed the highest variability among the 5-year-olds. For individual participants, distributional measures of VOT in /p t/ were correlated with distributional measures of voicing in /h/. The data indicate that one cannot assume comparable laryngeal conditions across speaker groups. This, in turn, implies that VOT acquisition in children cannot be interpreted purely in terms of developing interarticulator timing control, but must also reflect growing mastery over voicing itself. Further, differences in laryngeal structure and aerodynamic quantities may require men and women to adopt somewhat different strategies for achieving distinctive consonantal voicing contrasts.
+
+---
+
+## Our Interpretation
+
+This paper reveals that laryngeal physiology—not just articulatory timing—is critical for understanding how children develop voicing control in consonants, and shows that men and women have systematically different laryngeal conditions requiring different strategies for voicing. The research demonstrates that /h/ voicing patterns (quantified as "VOTh") directly correlate with stop consonant VOT variability across age and gender groups, suggesting that incomplete laryngeal maturation in children accounts for much of their higher consonant production variability beyond simple timing delays. For speech synthesis, this work establishes that gender-specific voice models must incorporate different voicing parameter ranges and strategies, and that breathiness in fricatives can be achieved through laryngeal adjustments independent of glottal opening extent.
+

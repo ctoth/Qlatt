@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The current study explores the role of the amplitude of the fricative noise in the perception of place of articulation in voiceless fricative consonants. The amplitude of the fricative noise in naturally produced fricative-vowel utterances was varied relative to the vowel and potential changes in perceptual responses were investigated. The amplitude of the fricative noise for [s] and [s with caron] was reduced such that the amplitude of the noise relative to the vowel was similar to [f] and [theta], and, conversely, the amplitude of the fricative noise of [f] and [theta] was increased such that the amplitude of the noise relative to the vowel was similar to [s] and [s with caron]. The fricative noise was presented to listeners in both its vowel context and in isolation. Results indicated that, when the spectral properties of the fricative noise and formant transitions are compatible, the perceptual effects of the amplitude manipulations are relatively small. In contrast to earlier results, the effects of the manipulation of the amplitude of the noise had a small effect on the overall identification of place of articulation, and, when effects emerged, they varied across the different fricative stimuli. Moreover, although decreasing the amplitude of [s] and [s with caron] resulted in an increase in [f] and [theta] responses, increasing the amplitude of [f] and [theta] did not result in an increase in [s] and [s with caron] responses. Implications of these findings for phonetic feature theories are considered.
+
+---
+
+## Our Interpretation
+
+This study investigates whether the overall amplitude (loudness) of fricative noise determines how listeners perceive place of articulation in voiceless fricatives [f], [theta], [s], and [s with caron]. The key finding is that when spectral properties and formant transitions are compatible, amplitude manipulations have minimal perceptual effect - spectral shape matters more than amplitude alone. For speech synthesis, this suggests that while fricative amplitude relative to the vowel affects perception somewhat, getting the spectral characteristics right is more important than amplitude matching for natural-sounding fricatives.

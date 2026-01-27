@@ -1,0 +1,15 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Singing voice is one of the most challenging musical instruments to model and imitate. Along several decades much research has been carried out to understand the mechanisms involved in singing voice production. In addition, from the very beginning of the sound synthesis techniques, singing has been one of the main targets to imitate and synthesize, and a large number of synthesizers have been created with that aim.
+
+The goal of this thesis is to build a singing voice synthesizer capable of reproducing the voice of a given singer, both in terms of expression and timbre, sounding natural and realistic, and whose inputs would be just the score and the lyrics of a song. This is a very difficult goal, and in this dissertation we discuss the key aspects of our proposed approach and identify the open issues that still need to be tackled.
+
+This dissertation substantially contributes to the field of singing voice synthesis: a) it critically discusses spectral processing techniques in the context of singing voice modeling, and provides significant improvements to the current state of the art; b) it applies the proposed techniques to other application contexts such as real-time voice transformations, museum installations or video games; c) it develops a five-core concept of synthesis based on performance sampling as a way to model the sonic space produced by a performer with an instrument, focusing on the specific case of the singing voice; d) it proposes and implements a complete framework for singing voice synthesis; e) it explores the sonic space of the singing voice and proposes a procedure to model and synthesize variations involved in the creation of the synthesizer's database and provide tools to automate its generation; g) it performs a qualitative evaluation of the synthesis results, comparing those to the state of the art and to real singer performances; h) it implements all the research results into an optimized software application for singing voice analysis, modeling, transformation and synthesis, including tools for database creation; i) a significant part of this research has been incorporated to a commercial singing voice software by Yamaha Corp.
+
+---
+
+## Our Interpretation
+
+This dissertation presents a comprehensive framework for high-quality singing voice synthesis that combines spectral voice models with performance sampling techniques. The research introduces novel algorithms including methods for detecting glottal closure instants (MFPA with 89% accuracy), spectral decomposition to separate voice source from vocal tract (EpR), and phase prediction from amplitude envelopes. The work is highly relevant to Klatt formant synthesis because it demonstrates the use of identical Klatt-based second-order resonator filters, applies precise phase relationships (19dB-to-pi conversion), and shows how careful management of acoustic properties and shape invariance at glottal closure improves perceived naturalness—validating that parametric formant synthesis can achieve near-natural sound quality when properly implemented with both spectral and temporal precision.

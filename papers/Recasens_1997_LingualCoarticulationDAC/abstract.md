@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The magnitude and temporal extent of consonantal and vocalic coarticulation are reported for VCV sequences with two vowels (/i/, /a/) and seven consonants (/p/, /n/, dark /l/, /s/, /ʃ/, /ɲ/, /k/). Different degrees of articulatory constraint, or DAC values, are assigned to the consonants and vowels based on knowledge of their articulatory properties, in particular, the degree of involvement of the tongue dorsum in closure or constriction formation. Mean results on dorsopalatal contact and F2 frequency for five speakers of the Catalan language are presented. Predictions based on the DAC value for consonants and vowels account satisfactorily for the C-to-V effects (e.g., those for /ʃa/ are more prominent that those for /pi/); moreover, vowel-dependent effects tend to be negatively correlated with the DAC value for the consonant (e.g., they are more prominent when the intervocalic consonant is /p/ than when it is dark /l/). V-to-C effects are also conditioned by the tongue-dorsum position for the consonantal gesture. Coarticulatory directionality trends reveal that the extent to which the vowel-dependent tongue-dorsum activity may be anticipated is closely linked to the mechanico-inertial constraints associated with the tongue dorsum during consonantal production; this observation explains the salience of the vowel-dependent anticipatory effects in VCV sequences favoring C-to-V anticipation and of the vowel-dependent carryover effects in VCV sequences giving special weight to C-to-V carryover.
+
+---
+
+## Our Interpretation
+
+This paper presents empirical data on how consonants and vowels coarticulate in connected speech through a model called Degree of Articulatory Constraint (DAC). The key finding is that the amount and timing of coarticulation depends on how constrained each sound's articulation is—sounds requiring tight tongue dorsum control show less vowel influence but stronger consonant effects on adjacent vowels. This work is crucial for speech synthesis because it explains which articulatory properties drive coarticulation patterns and provides predictive rules for how sounds influence each other temporally and in magnitude, directly applicable to modeling natural speech transitions in TTS systems.

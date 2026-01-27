@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Listeners can use variation in speech segment duration to interpret the structure of spoken utterances, but there is no systematic description of how speakers manipulate timing for communicative ends. Here I propose a functional approach to prosodic speech timing, with particular reference to English. The disparate findings regarding the production of timing effects are evaluated against the functional requirement that communicative durational variation should be perceivable and interpretable by the listener. In the resulting framework, prosodic structure is held to influence speech timing directly only at the heads and edges of prosodic domains, through large, consistent lengthening effects. As each such effect has a characteristic locus within its domain, speech timing cues are potentially disambiguated for the listener, even in the absence of other information. Diffuse timing effects – in particular, quasi-rhythmical compensatory processes implying a relationship between structure and timing throughout the utterance – are found to be weak and inconsistently observed. Furthermore, it is argued that articulatory and perceptual constraints make shortening processes less useful as structural cues, and they must be regarded as peripheral, at best, in a parsimonious and functionally-informed account.
+
+---
+
+## Our Interpretation
+
+This paper presents a functional framework for understanding how speech timing encodes prosodic structure in English, arguing that durational lengthening occurs at specific, well-defined locations (domain heads and edges) rather than throughout utterances as rhythmical accounts propose. The key contribution is demonstrating empirically that listeners exploit localized lengthening effects for word/phrase boundaries and stress perception, while compensatory shortening effects are too weak and inconsistent to serve communicative functions. For speech synthesis, this work provides critical guidance on which timing manipulations are perceptually salient and interpretable—namely, targeted lengthening at word onsets, phrase finals, stressed syllables, and accented words—and which timing effects are peripheral to linguistic communication.

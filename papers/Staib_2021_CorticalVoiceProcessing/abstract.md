@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+A subregion of the auditory cortex (AC) was proposed to selectively process voices. This selectivity of the temporal voice area (TVA) and its role in processing non-voice sounds however have remained elusive. For a better functional description of the TVA, we investigated its neural responses both to voice and non-voice sounds, and critically also to textural sound patterns (TSPs) that share basic features with natural sounds but that are perceptually very distant from voices. Listening to these TSPs, first, elicited activity in large subregions of the TVA, which was mainly driven by perpetual ratings of TSPs along a voice similarity scale. This similar TVA activity in response to TSPs might partially explain activation patterns typically observed during voice processing. Second, we reconstructed the TVA activity that is usually observed in voice processing with a linear combination of activation patterns from TSPs. An analysis of the reconstruction model weights demonstrated that the TVA similarly processes both natural voice and non-voice sounds as well as TSPs along their acoustic and perceptual features. The predominant factor in reconstructing the TVA pattern by TSPs were the perceptual voice similarity ratings. Third, a multi-voxel pattern analysis confirms that the TSPs contain sufficient sound information to explain TVA activity for voice processing. Altogether, rather than being restricted to higher-order voice processing only, the human "voice area" uses mechanisms to evaluate the perceptual and acoustic quality of non-voice sounds, and responds to the latter with a "voice-like" processing pattern when detecting some rudimentary perceptual similarity with voices.
+
+---
+
+## Our Interpretation
+
+The temporal voice area (TVA) of the auditory cortex, long thought to be specialized exclusively for processing human voices, responds to non-voice sounds based on perceptual similarity rather than purely acoustic features. By using artificially generated textural sound patterns that are acoustically varied but perceptually distinct from voices, the researchers show that the TVA encodes a more general representation of sound quality related to voice-likeness, suggesting the region serves a broader role in evaluating biologically relevant acoustic patterns across diverse sound categories.

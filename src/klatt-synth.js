@@ -1,4 +1,4 @@
-import { dbToLinear, proximity, ndbScale, ndbCor } from './klatt-functions.js';
+import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions.js';
 
 export class KlattSynth {
   constructor(audioContext) {

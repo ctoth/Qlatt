@@ -1,7 +1,8 @@
 /**
- * Klatt Math Functions - Single Source of Truth
+ * Builtin Functions - Single Source of Truth
  *
- * All Klatt-specific math functions consolidated here.
+ * Common synthesizer math functions (dB conversion, proximity correction, etc.)
+ * These are generic utilities used across different synthesizer implementations.
  * Other modules should import from this file.
  */
 

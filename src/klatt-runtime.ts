@@ -6,7 +6,7 @@
  */
 
 import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator.js';
-import { dbToLinear, min, max, pow } from './klatt-functions.js';
+import { dbToLinear, min, max, pow } from './builtin-functions.js';
 
 // =============================================================================
 // Registry Types

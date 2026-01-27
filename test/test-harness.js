@@ -2,7 +2,7 @@ import { KlattSynth } from "../src/klatt-synth.js";
 import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend.js";
-import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/klatt-functions.js";
+import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/builtin-functions.js";
 import yaml from "js-yaml";
 
 const ctx = new AudioContext();

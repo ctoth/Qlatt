@@ -16,7 +16,7 @@ import { createTopologicalEvaluator } from './semantics/topological-evaluator.js
 import { createCelEvaluator } from './semantics/cel-evaluator.js';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types.js';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
-import { dbToLinear, proximity as proximityFn, min, max, pow } from './klatt-functions.js';
+import { dbToLinear, proximity as proximityFn, min, max, pow } from './builtin-functions.js';
 
 // =============================================================================
 // Types
@@ -89,7 +89,7 @@ export interface KlattInterpreter {
   getTrackDuration(): number;
 }
 
-// Standard functions imported from klatt-functions.js
+// Standard functions imported from builtin-functions.js
 const standardFunctions: Record<string, (...args: number[]) => number> = {
   dbToLinear,
   min,

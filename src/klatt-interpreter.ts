@@ -13,6 +13,7 @@
  */
 
 import { createTopologicalEvaluator } from './semantics/topological-evaluator.js';
+import { createCelEvaluator } from './semantics/cel-evaluator.js';
 import type { SemanticsDocument, ParamValue } from './semantics/types.js';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
 import { dbToLinear, proximity as proximityFn, min, max, pow } from './klatt-functions.js';
@@ -111,8 +112,15 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
 
-  // Create topological evaluator for semantics
-  const evaluator = createTopologicalEvaluator();
+  // Create CEL evaluator and register standard functions
+  const celEvaluator = createCelEvaluator();
+  celEvaluator.registerFunction('dbToLinear', dbToLinear);
+  celEvaluator.registerFunction('min', min);
+  celEvaluator.registerFunction('max', max);
+  celEvaluator.registerFunction('pow', pow);
+
+  // Create topological evaluator for semantics (wired to CEL)
+  const evaluator = createTopologicalEvaluator(celEvaluator);
 
   // Extract constants from semantics
   const constants: Record<string, unknown> = {};

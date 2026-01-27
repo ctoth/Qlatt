@@ -350,7 +350,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Create evaluators
   const celEvaluator = createCelEvaluator();
   const jmespathResolver = createJmespathResolver();
-  const topoEvaluator = createTopologicalEvaluator();
+  const topoEvaluator = createTopologicalEvaluator(celEvaluator);
 
   // Register standard functions with CEL evaluator (using imported functions)
   celEvaluator.registerFunction('dbToLinear', dbToLinear);

@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator.js';
+import { createCelEvaluator } from '../../src/semantics/cel-evaluator.js';
 
 describe('Topological Evaluator', () => {
   it('evaluates in dependency order', () => {
-    const evaluator = createTopologicalEvaluator();
+    const celEvaluator = createCelEvaluator();
+    const evaluator = createTopologicalEvaluator(celEvaluator);
     const semantics = {
       name: 'test',
       realize: {
@@ -16,7 +18,8 @@ describe('Topological Evaluator', () => {
   });
 
   it('detects cycles', () => {
-    const evaluator = createTopologicalEvaluator();
+    const celEvaluator = createCelEvaluator();
+    const evaluator = createTopologicalEvaluator(celEvaluator);
     const semantics = {
       name: 'cyclic',
       realize: {

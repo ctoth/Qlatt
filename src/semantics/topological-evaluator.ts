@@ -4,19 +4,12 @@
  */
 
 import toposort from 'toposort';
-import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue } from './types.js';
+import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types.js';
+import type { CelEvaluator } from './cel-evaluator.js';
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, inputs: Record<string, unknown>): EvaluationResult;
   getEvaluationOrder(semantics: SemanticsDocument): string[];
-}
-
-/**
- * Simple expression evaluation using Function constructor
- */
-function evaluateSimple(expr: string, context: Record<string, unknown>): unknown {
-  const fn = new Function(...Object.keys(context), `return ${expr}`);
-  return fn(...Object.values(context));
 }
 
 /**
@@ -46,7 +39,7 @@ function getAllNodes(realize: Record<string, RealizationRule | string>): string[
   return Object.keys(realize);
 }
 
-export function createTopologicalEvaluator(): TopologicalEvaluator {
+export function createTopologicalEvaluator(celEvaluator: CelEvaluator): TopologicalEvaluator {
   return {
     evaluate(semantics: SemanticsDocument, inputs: Record<string, unknown>): EvaluationResult {
       const result: EvaluationResult = {
@@ -78,7 +71,12 @@ export function createTopologicalEvaluator(): TopologicalEvaluator {
         const ruleObj = typeof rule === 'string' ? { expr: rule } : rule;
 
         try {
-          const value = evaluateSimple(ruleObj.expr, result.values);
+          // Build evaluation context for CEL
+          const context: EvaluationContext = {
+            params: result.values,
+            constants: semantics.constants ?? {},
+          };
+          const value = celEvaluator.evaluate(ruleObj.expr, context);
           result.values[name] = value as ParamValue;
         } catch (e) {
           result.errors.push({

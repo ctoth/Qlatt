@@ -9,8 +9,8 @@ params:
   # Fundamental frequency
   F0:
     type: float
-    range: [50, 500]
-    default: 120
+    range: [0, 500]
+    default: 0
     unit: Hz
 
   # Formant frequencies
@@ -78,16 +78,24 @@ params:
     unit: Hz
 
   # Source amplitudes (dB)
+  GO:
+    type: float
+    range: [0, 80]
+    default: 47
+    unit: dB
+    description: Overall gain (Klatt NNG0; frontend emits GO)
+  # Optional legacy/alternate spelling. We keep it for compatibility,
+  # but all realize rules use GO to match the frontend track params.
   G0:
     type: float
     range: [0, 80]
-    default: 60
+    default: 47
     unit: dB
-    description: Overall gain
+    description: Overall gain (alternate spelling; see GO)
   AV:
     type: float
     range: [0, 80]
-    default: 60
+    default: 0
     unit: dB
     description: Voicing amplitude
   AH:
@@ -188,7 +196,7 @@ params:
   sourceMode:
     description: "Voice source selection (0=impulse, 1=LF, 2=bypass)"
     type: integer
-    default: 1
+    default: 0
     range: [0, 2]
 
   # Parallel branch scaling
@@ -213,7 +221,7 @@ params:
   lfMode:
     description: "LF model mode selection"
     type: integer
-    default: 1
+    default: 0
     range: [0, 2]
 
   openPhaseRatio:
@@ -341,22 +349,28 @@ realize:
 
   # Source gains (linear)
   voiceGain:
-    expr: "dbToLinear(G0 + AV + ndbScale.AV)"
-    deps: [G0, AV]
+    expr: "dbToLinear(GO + AV + ndbScale.AV)"
+    deps: [GO, AV]
 
   aspGain:
-    expr: "dbToLinear(G0 + AH + ndbScale.AH)"
-    deps: [G0, AH]
+    expr: "dbToLinear(GO + AH + ndbScale.AH)"
+    deps: [GO, AH]
     ramp: true
 
+  # Klatt 80 COEWAV/PARCOE behavior: when SW=1, frication uses max(AF, AH)
+  # to prevent aspiration from being masked by lower AF values.
+  fricDbAdjusted:
+    expr: "SW == 1 ? max(AF, AH) : AF"
+    deps: [SW, AF, AH]
+
   fricGain:
-    expr: "dbToLinear(G0 + AF + ndbScale.AF)"
-    deps: [G0, AF]
+    expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF)"
+    deps: [GO, fricDbAdjusted]
     ramp: true
 
   avsGain:
-    expr: "dbToLinear(G0 + AVS + ndbScale.AVS) * 10"
-    deps: [G0, AVS]
+    expr: "dbToLinear(GO + AVS + ndbScale.AVS) * 10"
+    deps: [GO, AVS]
 
   # Parallel formant gains with corrections and parallelScale
   a1Linear:
@@ -460,8 +474,8 @@ realize:
     deps: [AB, parallelScale]
 
   fricGainScaled:
-    expr: "dbToLinear(G0 + AF + ndbScale.AF) * parallelScale"
-    deps: [G0, AF, parallelScale]
+    expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF) * parallelScale"
+    deps: [GO, fricDbAdjusted, parallelScale]
     ramp: true
 
   # System constant
@@ -483,6 +497,6 @@ realize:
   # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)
   # The -75 = -28 + -47 (the G0 offset in GETAMP is -47 from dbToLinear threshold)
   plstepAmplitude:
-    expr: "dbToLinear(G0 - 75)"
-    deps: [G0]
+    expr: "dbToLinear(GO - 75)"
+    deps: [GO]
     description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"

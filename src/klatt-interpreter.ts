@@ -285,8 +285,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Copies staticContext to ensure all properties are own properties (required by evaluator)
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
-    // Copy staticContext - evaluator's { ...inputs } only copies own properties
-    const ctx: Record<string, unknown> = { ...staticContext };
+    // Deep copy staticContext to prevent mutation of nested objects (e.g., ndbScale)
+    const ctx: Record<string, unknown> = JSON.parse(JSON.stringify(staticContext));
 
     // Overlay track params (these override defaults)
     Object.assign(ctx, params);

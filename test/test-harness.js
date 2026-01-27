@@ -12,6 +12,8 @@ let newInterpreter = null;
 let newRuntimeGraph = null;
 let newRuntimeSemantics = null;
 let newRuntimeRegistry = null;
+let currentExperimentId = null; // Track which experiment config is loaded
+let experimentManifest = null;
 const status = document.getElementById("status");
 const controls = document.getElementById("controls");
 const diagnosticsEl = document.getElementById("diagnostics");
@@ -278,19 +280,71 @@ function getSelectedRuntime() {
   return selected ? selected.value : "legacy";
 }
 
-async function loadNewRuntimeConfig() {
-  if (newRuntimeGraph && newRuntimeSemantics && newRuntimeRegistry) {
-    return; // Already loaded
-  }
-  status.textContent = "Status: loading new runtime config...";
+function getSelectedExperiment() {
+  const select = document.getElementById("experimentSelect");
+  return select ? select.value : "klatt80-baseline";
+}
+
+async function loadExperimentManifest() {
+  const select = document.getElementById("experimentSelect");
   try {
+    const res = await fetch("/experiments/manifest.json");
+    if (!res.ok) throw new Error("Failed to fetch manifest");
+    experimentManifest = await res.json();
+    // Populate dropdown
+    select.innerHTML = "";
+    for (const exp of experimentManifest.experiments) {
+      const option = document.createElement("option");
+      option.value = exp.id;
+      option.textContent = exp.name;
+      option.title = exp.description;
+      select.appendChild(option);
+    }
+    // Default to first experiment
+    if (experimentManifest.experiments.length > 0) {
+      select.value = experimentManifest.experiments[0].id;
+    }
+    console.log("[QLATT] Experiment manifest loaded:", experimentManifest.experiments.map(e => e.id));
+  } catch (err) {
+    console.error("[QLATT] Failed to load experiment manifest:", err);
+    // Fallback to hardcoded default
+    select.innerHTML = '<option value="klatt80-baseline">klatt80-baseline</option>';
+  }
+}
+
+function onExperimentChange() {
+  const selected = getSelectedExperiment();
+  if (selected !== currentExperimentId) {
+    // Clear cached config so it reloads on next play
+    newRuntimeGraph = null;
+    newRuntimeSemantics = null;
+    newRuntimeRegistry = null;
+    // Also clear runtime and interpreter since they depend on config
+    if (newRuntime) {
+      newRuntime.disconnect();
+      newRuntime = null;
+    }
+    newInterpreter = null;
+    console.log("[QLATT] Experiment changed to:", selected);
+  }
+}
+
+async function loadNewRuntimeConfig() {
+  const experimentId = getSelectedExperiment();
+  // Check if already loaded for current experiment
+  if (newRuntimeGraph && newRuntimeSemantics && newRuntimeRegistry && currentExperimentId === experimentId) {
+    return; // Already loaded for this experiment
+  }
+  status.textContent = `Status: loading ${experimentId} config...`;
+  try {
+    const basePath = `/experiments/${experimentId}`;
     const [graphRes, semanticsRes, registryRes] = await Promise.all([
-      fetch("/experiments/klatt80-baseline/graph.yaml"),
-      fetch("/experiments/klatt80-baseline/semantics.yaml"),
-      fetch("/experiments/klatt80-baseline/registry.yaml"),
+      fetch(`${basePath}/graph.yaml`),
+      fetch(`${basePath}/semantics.yaml`),
+      fetch(`${basePath}/registry.yaml`),
     ]);
     if (!graphRes.ok || !semanticsRes.ok || !registryRes.ok) {
-      throw new Error("Failed to fetch YAML config files");
+      throw new Error(`Failed to fetch YAML config files for ${experimentId}`);
     }
     const [graphText, semanticsText, registryText] = await Promise.all([
       graphRes.text(),
@@ -300,15 +354,17 @@ async function loadNewRuntimeConfig() {
     newRuntimeGraph = yaml.load(graphText);
     newRuntimeSemantics = yaml.load(semanticsText);
     newRuntimeRegistry = yaml.load(registryText);
-    status.textContent = "Status: new runtime config loaded";
-    console.log("[QLATT] New runtime config loaded", {
+    currentExperimentId = experimentId;
+    status.textContent = `Status: ${experimentId} config loaded`;
+    console.log("[QLATT] Runtime config loaded", {
+      experiment: experimentId,
       graph: newRuntimeGraph?.name,
       semantics: newRuntimeSemantics?.name,
       primitives: Object.keys(newRuntimeRegistry?.primitives ?? {}).length,
     });
   } catch (err) {
-    status.textContent = "Status: failed to load new runtime config";
-    console.error("[QLATT] Failed to load new runtime config:", err);
+    status.textContent = `Status: failed to load ${experimentId} config`;
+    console.error("[QLATT] Failed to load runtime config:", err);
     throw err;
   }
 }
@@ -421,6 +477,12 @@ function applyUrlParams() {
   attachSpectrogram();
   bindControls();
   applyUrlParams();
+  await loadExperimentManifest();
+  // Listen for experiment changes
+  const experimentSelect = document.getElementById("experimentSelect");
+  if (experimentSelect) {
+    experimentSelect.addEventListener("change", onExperimentChange);
+  }
 })();
 
 document.getElementById("startBtn").addEventListener("click", start);

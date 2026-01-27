@@ -34,9 +34,15 @@
             <input type="radio" name="runtime" value="legacy" checked>
             klatt-synth.js (legacy)
           </label>
-          <label>
+          <label style="margin-right: 16px;">
             <input type="radio" name="runtime" value="new">
             klatt-runtime (new)
+          </label>
+          <label>
+            <span style="margin-left: 16px;">Experiment:</span>
+            <select id="experimentSelect" style="margin-left: 4px;">
+              <option value="klatt80-baseline">Loading...</option>
+            </select>
           </label>
         </fieldset>
         <div class="grid" id="controls"></div>

@@ -1,0 +1,16 @@
+{
+  "experiments": [
+    {
+      "id": "klatt80-baseline",
+      "name": "Klatt80 Baseline",
+      "description": "Klatt 1980 cascade/parallel formant synthesizer",
+      "path": "klatt80-baseline"
+    },
+    {
+      "id": "klsyn88",
+      "name": "klsyn88",
+      "description": "Extended Klatt with multiple source types (impulsive, LF, triangular) and pitch-sync modulation",
+      "path": "klsyn88"
+    }
+  ]
+}

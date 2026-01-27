@@ -265,9 +265,9 @@ params:
   # ---------------------------------------------------------------------------
   as:
     type: float
-    range: [0, 1]
-    default: 0.5
-    description: "Triangular asymmetry (0=all rising, 1=all falling, 0.5=symmetric)"
+    range: [0, 100]
+    default: 50
+    description: "Triangular asymmetry percent (0=fast rise, 100=fast fall, 50=symmetric)"
 
   # ---------------------------------------------------------------------------
   # klsyn88 NEW: Pitch-synchronous F1/B1 modulation

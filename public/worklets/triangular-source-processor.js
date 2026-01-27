@@ -5,7 +5,7 @@
  * Implements a simple triangular glottal pulse waveform with configurable:
  * - f0: Fundamental frequency (pitch)
  * - openQuotient: Fraction of period that glottis is open
- * - asymmetry: Balance between rise and fall phases
+ * - asymmetry: klsyn88-style asymmetry percent (0..100, 50=symmetric)
  */
 import { initWasmModule } from "./wasm-utils.js";
 
@@ -19,7 +19,7 @@ class TriangularSourceProcessor extends AudioWorkletProcessor {
     return [
       { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
       { name: "openQuotient", defaultValue: 0.5, minValue: 0.01, maxValue: 0.99, automationRate: "a-rate" },
-      { name: "asymmetry", defaultValue: 0.5, minValue: 0.01, maxValue: 0.99, automationRate: "a-rate" },
+      { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "a-rate" },
     ];
   }
 

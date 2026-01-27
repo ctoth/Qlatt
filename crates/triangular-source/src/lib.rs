@@ -8,12 +8,14 @@ pub struct TriangularSource {
     period_len: usize,
     pos_in_period: usize,
     open_len: usize,
-    first_half: usize,  // samples in rising phase
-    second_half: usize, // samples in falling phase
-    rise_slope: f32,
-    fall_slope: f32,
+    first_half: usize,  // samples in first (opening) segment
+    second_half: usize, // samples in second (closing) segment
+    slope1: f32,
+    slope2: f32,
     current_value: f32,
-    peak_value: f32,
+    max1: f32,
+    max2: f32,
+    afinal: f32,
 }
 
 impl TriangularSource {
@@ -25,10 +27,14 @@ impl TriangularSource {
             open_len: 0,
             first_half: 0,
             second_half: 0,
-            rise_slope: 0.0,
-            fall_slope: 0.0,
+            slope1: 0.0,
+            slope2: 0.0,
             current_value: 0.0,
-            peak_value: 1.0,
+            max1: 0.0,
+            max2: 0.0,
+            // klsyn88 uses Afinal = -7000 (fixed-point scale).
+            // We preserve the sign/shape but normalize magnitude.
+            afinal: -1.0,
         }
     }
 
@@ -40,34 +46,64 @@ impl TriangularSource {
     pub fn process(&mut self, f0: f32, open_quotient: f32, asymmetry: f32) -> f32 {
         // At period boundary, recalculate
         if self.pos_in_period == 0 {
-            self.period_len = ((self.sample_rate / f0.max(20.0)) as usize).max(1);
-            self.open_len = (((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize).max(1);
+            let f0_hz = f0.max(20.0);
+            self.period_len = ((self.sample_rate / f0_hz) as usize).max(1);
 
-            // Asymmetry: 0=short rise/long fall, 0.5=symmetric, 1=long rise/short fall
-            // (asymmetry is the fraction of open phase spent rising)
-            let asym = asymmetry.clamp(0.01, 0.99);
-            self.first_half = ((self.open_len as f32) * asym) as usize;
+            // Mirror klsyn88's minimum open-phase constraint (~1 ms).
+            let min_open = (self.sample_rate * 0.001) as usize;
+            let mut open_len =
+                ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
+            open_len = open_len.max(1).max(min_open);
+            if open_len >= self.period_len {
+                open_len = self.period_len.saturating_sub(1).max(1);
+            }
+            self.open_len = open_len;
+
+            // klsyn88 asymmetry is specified as a percent (0..100) with 50 symmetric:
+            //   assym = (nopen * (as - 50)) / 100
+            //   nfirsthalf = (nopen>>1) + assym
+            let asym_percent = asymmetry.clamp(0.0, 100.0);
+            let assym = ((self.open_len as f32) * (asym_percent - 50.0) / 100.0) as isize;
+            let mut first_half = (self.open_len / 2) as isize + assym;
+            if first_half >= self.open_len as isize {
+                first_half = self.open_len as isize - 1;
+            }
+            if first_half <= 0 {
+                first_half = 1;
+            }
+            self.first_half = first_half as usize;
             self.second_half = self.open_len - self.first_half;
 
-            // Calculate slopes
-            if self.first_half > 0 {
-                self.rise_slope = self.peak_value / (self.first_half as f32);
-            }
-            if self.second_half > 0 {
-                self.fall_slope = self.peak_value / (self.second_half as f32);
-            }
+            // klsyn88 pitch-synchronous reset:
+            //   Afinal = -7000
+            //   maxt2 = Afinal * 0.25
+            //   slopet2 = Afinal / nsecondhalf
+            //   vwave = -(Afinal * nsecondhalf) / nfirsthalf
+            //   maxt1 = vwave * 0.25
+            //   slopet1 = -vwave / nfirsthalf
+            self.max2 = self.afinal * 0.25;
+            self.slope2 = if self.second_half > 0 {
+                self.afinal / (self.second_half as f32)
+            } else {
+                0.0
+            };
 
-            self.current_value = 0.0;
+            let initial_vwave =
+                -(self.afinal * (self.second_half as f32)) / (self.first_half as f32);
+            self.max1 = initial_vwave * 0.25;
+            self.slope1 = -initial_vwave / (self.first_half as f32);
+
+            self.current_value = initial_vwave;
         }
 
         let output = if self.pos_in_period < self.first_half {
-            // Rising phase
-            self.current_value += self.rise_slope;
-            self.current_value.min(self.peak_value)
+            // First segment
+            self.current_value += self.slope1;
+            self.current_value.min(self.max1)
         } else if self.pos_in_period < self.open_len {
-            // Falling phase
-            self.current_value -= self.fall_slope;
-            self.current_value.max(0.0)
+            // Second segment
+            self.current_value += self.slope2;
+            self.current_value.max(self.max2)
         } else {
             // Closed phase
             0.0

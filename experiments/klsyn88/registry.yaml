@@ -186,8 +186,8 @@ primitives:
         description: "Open quotient (0-1)"
       asymmetry:
         type: float
-        default: 0.5
-        description: "Waveform asymmetry (0=rising, 1=falling, 0.5=symmetric)"
+        default: 50
+        description: "Waveform asymmetry percent (0=fast rise, 100=fast fall, 50=symmetric)"
     inputs: 0
     outputs: 1
 

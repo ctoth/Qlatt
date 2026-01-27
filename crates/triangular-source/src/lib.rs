@@ -151,3 +151,37 @@ pub unsafe extern "C" fn triangular_source_process(
         0.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 triangular_source reset in C:\Users\Q\src\klsyn\c\parwv.c
+    #[test]
+    fn asymmetry_is_percent_with_50_symmetric() {
+        let sr = 48_000.0;
+        let mut src = TriangularSource::new(sr);
+
+        let _ = src.process(120.0, 0.5, 50.0);
+        let half = src.open_len / 2;
+        let delta = src.first_half.abs_diff(half);
+        assert!(delta <= 1);
+        assert!(src.second_half > 0);
+    }
+
+    #[test]
+    fn waveform_crosses_toward_negative_by_end_of_open_phase() {
+        let sr = 48_000.0;
+        let mut src = TriangularSource::new(sr);
+
+        let mut min_val = f32::INFINITY;
+        let _ = src.process(100.0, 0.6, 50.0);
+        for _ in 1..src.open_len {
+            let y = src.process(100.0, 0.6, 50.0);
+            min_val = min_val.min(y);
+        }
+
+        // With negative afinal and klsyn88-style reset, we should trend negative.
+        assert!(min_val < 0.0);
+    }
+}

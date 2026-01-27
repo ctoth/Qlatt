@@ -134,3 +134,46 @@ pub unsafe extern "C" fn impulsive_source_process(
         0.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 pitch_synch_par_reset + setabc in C:\Users\Q\src\klsyn\c\parwv.c
+    #[test]
+    fn enforces_minimum_open_phase_and_sets_resonator_coeffs() {
+        let sr = 48_000.0;
+        let mut src = ImpulsiveSource::new(sr);
+
+        // Very small OQ would otherwise create a sub-1ms open phase.
+        let _ = src.process(100.0, 0.001);
+
+        let min_open = (sr * 0.001) as usize;
+        assert!(src.open_len >= min_open);
+        assert!(src.open_len < src.period_len);
+
+        // Coefficients should be finite and consistent with f=0 setabc structure.
+        assert!(src.a.is_finite() && src.b.is_finite() && src.c.is_finite());
+        assert!(src.b > 0.0);
+        assert!(src.c < 0.0);
+    }
+
+    #[test]
+    fn generates_doublet_excitation_shape() {
+        let sr = 48_000.0;
+        let mut src = ImpulsiveSource::new(sr);
+
+        // Ensure we're at a period boundary.
+        src.reset();
+
+        let y0 = src.process(120.0, 0.4);
+        let y1 = src.process(120.0, 0.4);
+        let y2 = src.process(120.0, 0.4);
+
+        // First sample is the 0 entry of the doublet.
+        assert!(y0.abs() < 1e-6);
+        // Subsequent samples should reflect the +/- excitation through the resonator.
+        assert!(y1.is_finite());
+        assert!(y2.is_finite());
+    }
+}

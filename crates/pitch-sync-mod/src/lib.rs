@@ -185,3 +185,40 @@ pub unsafe extern "C" fn pitch_sync_resonator_process(
         0.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 pitch-synchronous F1/B1 modulation in C:\Users\Q\src\klsyn\c\parwv.c
+    #[test]
+    fn enforces_minimum_open_phase() {
+        let sr = 48_000.0;
+        let mut r = PitchSyncResonator::new(sr);
+        let _ = r.process(0.0, 100.0, 0.001, 500.0, 80.0, 50.0, 10.0);
+
+        let min_open = (sr * 0.001) as usize;
+        assert!(r.open_len >= min_open);
+        assert!(r.open_len < r.period_len);
+    }
+
+    #[test]
+    fn applies_delta_during_open_phase_and_restores_after() {
+        let sr = 48_000.0;
+        let mut r = PitchSyncResonator::new(sr);
+
+        // First sample of period: delta should be applied.
+        let _ = r.process(1.0, 120.0, 0.4, 500.0, 80.0, 100.0, 20.0);
+        assert!((r.active_freq - 600.0).abs() < 1e-6);
+        assert!((r.active_bw - 100.0).abs() < 1e-6);
+
+        // Advance to (and through) the close boundary.
+        for _ in 1..=r.open_len {
+            let _ = r.process(1.0, 120.0, 0.4, 500.0, 80.0, 100.0, 20.0);
+        }
+
+        // After glottis closes, base values should be active again.
+        assert!((r.active_freq - 500.0).abs() < 1e-6);
+        assert!((r.active_bw - 80.0).abs() < 1e-6);
+    }
+}

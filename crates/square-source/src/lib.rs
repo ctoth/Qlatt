@@ -94,3 +94,30 @@ pub unsafe extern "C" fn square_source_process(
         0.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 square_source in C:\Users\Q\src\klsyn\c\parwv.c
+    #[test]
+    fn is_bipolar_and_respects_min_open_phase() {
+        let sr = 48_000.0;
+        let mut src = SquareSource::new(sr);
+
+        let first = src.process(100.0, 0.001);
+        let min_open = (sr * 0.001) as usize;
+        assert!(src.open_len >= min_open);
+        assert!(src.open_len < src.period_len);
+
+        // During open phase we output the open amplitude (negative).
+        assert!(first < 0.0);
+
+        // Advance beyond open phase and confirm closed amplitude (positive).
+        for _ in 0..src.open_len {
+            let _ = src.process(100.0, 0.001);
+        }
+        let closed = src.process(100.0, 0.001);
+        assert!(closed > 0.0);
+    }
+}

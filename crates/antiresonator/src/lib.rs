@@ -140,3 +140,39 @@ pub extern "C" fn antiresonator_process(
 
 // Re-export WASM memory allocation functions
 klatt_wasm_common::export_alloc_fns!();
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 setzeroabc in C:\Users\Q\src\klsyn\c\parwv.c
+    fn setzeroabc(freq: f32, bw: f32, sample_rate: f32) -> (f32, f32, f32) {
+        let r = (-PI * bw / sample_rate).exp();
+        let c = -(r * r);
+        let b = 2.0 * r * (2.0 * PI * freq / sample_rate).cos();
+        let mut a = 1.0 - b - c;
+        a = 1.0 / a;
+        let c_prime = -a * c;
+        let b_prime = -a * b;
+        (a, b_prime, c_prime)
+    }
+
+    #[test]
+    fn coefficients_match_klatt_setzeroabc() {
+        let mut z = AntiResonator::new();
+        let sr = 48_000.0;
+        let f = 300.0;
+        let bw = 90.0;
+        z.set_params(f, bw, sr);
+
+        let (a0, b1, b2) = setzeroabc(f, bw, sr);
+        // Antiresonator normalization can produce large coefficients when a is small,
+        // so use a relative tolerance.
+        let rel_tol = 1e-3;
+        let rel = |got: f32, exp: f32| (got - exp).abs() / exp.abs().max(1e-6);
+        assert!(rel(z.a0, a0) < rel_tol);
+        assert!(rel(z.b1, b1) < rel_tol);
+        assert!(rel(z.b2, b2) < rel_tol);
+        assert!(!z.bypass);
+    }
+}

@@ -126,3 +126,32 @@ pub extern "C" fn resonator_process(
 
 // Re-export WASM memory allocation functions
 klatt_wasm_common::export_alloc_fns!();
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reference: klsyn88 setabc in C:\Users\Q\src\klsyn\c\parwv.c
+    fn setabc(freq: f32, bw: f32, sample_rate: f32) -> (f32, f32, f32) {
+        let r = (-PI * bw / sample_rate).exp();
+        let c = -(r * r);
+        let b = 2.0 * r * (2.0 * PI * freq / sample_rate).cos();
+        let a = 1.0 - b - c;
+        (a, b, c)
+    }
+
+    #[test]
+    fn coefficients_match_klatt_setabc() {
+        let mut r = Resonator::new();
+        let sr = 48_000.0;
+        let f = 1_500.0;
+        let bw = 120.0;
+        r.set_params(f, bw, sr);
+
+        let (a, b, c) = setabc(f, bw, sr);
+        assert!((r.b0 - a).abs() < 1e-6);
+        assert!((r.a1 - b).abs() < 1e-6);
+        assert!((r.a2 - c).abs() < 1e-6);
+        assert!(!r.bypass);
+    }
+}

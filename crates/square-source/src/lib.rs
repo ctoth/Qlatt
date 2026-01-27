@@ -8,6 +8,8 @@ pub struct SquareSource {
     period_len: usize,
     pos_in_period: usize,
     open_len: usize,
+    open_amp: f32,
+    closed_amp: f32,
 }
 
 impl SquareSource {
@@ -17,6 +19,10 @@ impl SquareSource {
             period_len: (sample_rate / 100.0) as usize,
             pos_in_period: 0,
             open_len: 0,
+            // klsyn88 uses fixed bipolar values (-1750 during open, +1750 during closed).
+            // We keep the bipolar behavior but normalize amplitudes to +/-1.
+            open_amp: -1.0,
+            closed_amp: 1.0,
         }
     }
 
@@ -27,14 +33,24 @@ impl SquareSource {
     pub fn process(&mut self, f0: f32, open_quotient: f32) -> f32 {
         // At period boundary, recalculate
         if self.pos_in_period == 0 {
-            self.period_len = ((self.sample_rate / f0.max(20.0)) as usize).max(1);
-            self.open_len = (((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize).max(1);
+            let f0_hz = f0.max(20.0);
+            self.period_len = ((self.sample_rate / f0_hz) as usize).max(1);
+
+            // Mirror klsyn88's minimum open-phase constraint (~1 ms).
+            let min_open = (self.sample_rate * 0.001) as usize;
+            let mut open_len =
+                ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
+            open_len = open_len.max(1).max(min_open);
+            if open_len >= self.period_len {
+                open_len = self.period_len.saturating_sub(1).max(1);
+            }
+            self.open_len = open_len;
         }
 
         let output = if self.pos_in_period < self.open_len {
-            1.0
+            self.open_amp
         } else {
-            0.0
+            self.closed_amp
         };
 
         self.pos_in_period += 1;

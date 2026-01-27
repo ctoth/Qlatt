@@ -20,6 +20,15 @@ Note: User must click once manually first to "unlock" audio (browser security po
 - `src/tts-frontend-rules.js` - Phoneme targets, prosody rules
 - `src/klatt.js` - Klatt synthesizer core
 
+## WASM Primitives (crates/)
+
+- `resonator` - Two-pole resonator (formant filter)
+- `antiresonator` - Two-pole antiresonator (nasal zero)
+- `lf-source` - Liljencrants-Fant glottal source
+- `decay-envelope` - Exponential decay for PLSTEP bursts
+- `edge-detector` - Threshold crossing detector for PLSTEP trigger
+- `signal-switch` - N-to-1 signal selector (SW parameter, source selection)
+
 ## Key References
 
 - Peterson & Barney (1952) - Canonical vowel formants
@@ -34,3 +43,6 @@ Note: User must click once manually first to "unlock" audio (browser security po
 - `~/src/klatt-syn/` - TypeScript Klatt implementation by chdh
   - Does NOT implement A2COR correction (uses dB directly)
   - Clean modern implementation for comparison
+- `~/src/klsyn/` - klsyn88 Nim implementation
+  - Target for next synthesizer port
+  - Investigate for architecture and features beyond klatt80

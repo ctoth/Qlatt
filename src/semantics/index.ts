@@ -12,7 +12,3 @@ export * from './types.js';
 // export { createTopologicalEvaluator } from './topological-evaluator.js';
 
 export const VERSION = '0.1.0';
-
-// Add at the end:
-export { createKlattRuntime } from '../klatt-runtime.js';
-export type { KlattRuntime, KlattRuntimeOptions, BaconGraph, BaconNode } from '../klatt-runtime.js';

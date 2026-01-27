@@ -206,10 +206,10 @@ impl LfSource {
         let e_amp = 1.0;
         let ag = e_amp / sin_term;
 
-        // LF_LM uses a causal z^-1 numerator. LF_CALM is non-causal; we fall
-        // back to the causal form in real-time and verify CALM offline.
+        // LF_LM uses a causal z^-1 numerator; LF_CALM uses anti-causal z^+1.
+        // Per Perrotin et al. (2021): anti-causal requires swapped sign pattern.
         let (b0, b1, b2) = match self.mode {
-            LfMode::LfCalm => (0.0, -ag, ag),
+            LfMode::LfCalm => (0.0, ag, -ag),
             _ => (0.0, -ag, ag),
         };
 

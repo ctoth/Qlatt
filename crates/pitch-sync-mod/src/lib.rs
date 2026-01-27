@@ -75,9 +75,9 @@ impl PitchSyncResonator {
     }
 
     fn compute_coefficients(&mut self) {
-        // Basic validation - clamp to reasonable values (m1 fix)
-        let freq = self.active_freq.clamp(20.0, self.sample_rate * 0.45);
-        let bw = self.active_bw.clamp(10.0, 2000.0);
+        // Basic validation - clamp to reasonable values.
+        let freq = self.active_freq.clamp(20.0, self.sample_rate * 0.49);
+        let bw = self.active_bw.clamp(10.0, 4000.0);
 
         // Match existing resonator crate formula exactly
         // Reference: crates/resonator/src/lib.rs lines 42-44
@@ -105,9 +105,19 @@ impl PitchSyncResonator {
 
         // At period boundary, recalculate timing
         if self.pos_in_period == 0 {
-            self.period_len = ((self.sample_rate / f0.max(20.0)) as usize).max(1);
-            self.open_len = ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
-            self.open_len = self.open_len.max(1);
+            // klsyn88 enforces a minimum open phase of ~1 ms (at 4x oversampling).
+            // We approximate that at the base sample rate.
+            let f0_hz = if f0.is_finite() { f0.max(20.0) } else { 20.0 };
+            self.period_len = ((self.sample_rate / f0_hz) as usize).max(1);
+
+            let min_open = (self.sample_rate * 0.001) as usize;
+            let mut open_len =
+                ((self.period_len as f32) * open_quotient.clamp(0.01, 0.99)) as usize;
+            open_len = open_len.max(1).max(min_open);
+            if open_len >= self.period_len {
+                open_len = self.period_len.saturating_sub(1).max(1);
+            }
+            self.open_len = open_len;
 
             // At glottis open: apply delta
             self.active_freq = self.base_freq + self.delta_freq;

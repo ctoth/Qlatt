@@ -36,13 +36,11 @@ pub fn alloc_f32(len: usize) -> *mut f32 {
 /// - `ptr` must have been returned by `alloc_f32`
 /// - `len` must match the original allocation length
 /// - Must not be called twice on the same pointer
-pub fn dealloc_f32(ptr: *mut f32, len: usize) {
+pub unsafe fn dealloc_f32(ptr: *mut f32, len: usize) {
     if ptr.is_null() {
         return;
     }
-    unsafe {
-        let _ = Vec::from_raw_parts(ptr, 0, len);
-    }
+    let _ = Vec::from_raw_parts(ptr, 0, len);
 }
 
 /// Macro to re-export the alloc functions with #[no_mangle].
@@ -61,7 +59,7 @@ macro_rules! export_alloc_fns {
         }
 
         #[no_mangle]
-        pub extern "C" fn dealloc_f32(ptr: *mut f32, len: usize) {
+        pub unsafe extern "C" fn dealloc_f32(ptr: *mut f32, len: usize) {
             $crate::dealloc_f32(ptr, len)
         }
     };

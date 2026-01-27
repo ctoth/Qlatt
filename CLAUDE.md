@@ -107,6 +107,10 @@ Shared utilities in `crates/klatt-wasm-common/`.
 
 These are registered with the CEL evaluator for use in semantics expressions.
 
+## Documentation
+
+- `docs/parameter-scheduling.md` - How parameters flow from text to audio (track structure, ramp vs step, semantics)
+
 ## Key References
 
 - Klatt (1980) - Synthesizer specification (PARCOE.FOR, COEWAV.FOR)

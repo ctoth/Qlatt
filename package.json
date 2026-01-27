@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "build:dict": "node scripts/build-cmudict.js",
     "build:wasm": "bash build.sh",
     "build:wasm:ps": "pwsh -File build.ps1",

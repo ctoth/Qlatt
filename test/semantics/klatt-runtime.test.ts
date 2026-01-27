@@ -30,6 +30,27 @@ class MockAudioContext {
 
 describe('Klatt Runtime', () => {
   let ctx: MockAudioContext;
+  const minimalRegistry: Registry = {
+    bacon: '0.1',
+    primitives: {
+      gain: {
+        native: 'GainNode',
+        params: {
+          gain: { type: 'float', default: 1.0 },
+        },
+        inputs: 1,
+        outputs: 1,
+      },
+      'constant-source': {
+        native: 'ConstantSourceNode',
+        params: {
+          offset: { type: 'float', default: 1.0 },
+        },
+        inputs: 0,
+        outputs: 1,
+      },
+    },
+  };
 
   beforeEach(() => {
     ctx = new MockAudioContext();
@@ -54,6 +75,7 @@ describe('Klatt Runtime', () => {
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
+      registry: minimalRegistry,
     });
 
     expect(runtime).toBeDefined();
@@ -82,6 +104,7 @@ describe('Klatt Runtime', () => {
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
+      registry: minimalRegistry,
     });
 
     const values = runtime.getRealizedValues();
@@ -110,6 +133,7 @@ describe('Klatt Runtime', () => {
       audioContext: ctx as unknown as AudioContext,
       semantics,
       graph,
+      registry: minimalRegistry,
     });
 
     // 6 dB = 2x

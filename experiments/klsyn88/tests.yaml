@@ -1,0 +1,154 @@
+suite: klsyn88-semantics-and-schedule
+semantics: experiments/klsyn88/semantics.yaml
+graph: experiments/klsyn88/graph.yaml
+registry: experiments/klsyn88/registry.yaml
+defaultTol: 1e-6
+
+tests:
+  - name: ss selects natural LF source only
+    inputs:
+      ss: 2
+    assert:
+      approx:
+        naturalSourceSwitch: 1
+        impulsiveSourceSwitch: 0
+        triangularSourceSwitch: 0
+      expr:
+        - "impulsiveSourceSwitch + naturalSourceSwitch + triangularSourceSwitch == 1"
+
+  - name: ss selects impulsive source only
+    inputs:
+      ss: 1
+    assert:
+      approx:
+        naturalSourceSwitch: 0
+        impulsiveSourceSwitch: 1
+        triangularSourceSwitch: 0
+
+  - name: SW gates cascade in parallel mode
+    inputs:
+      SW: 1
+    assert:
+      approx:
+        cascadeGain: 0
+        parallelVoiceGain: 1
+
+  - name: fricDbAdjusted uses max(AF, AH) when SW=1
+    inputs:
+      SW: 1
+      AF: 10
+      AH: 30
+      GO: 47
+    assert:
+      approx:
+        fricDbAdjusted: 30
+
+  - name: fricDbAdjusted uses AF when SW=0
+    inputs:
+      SW: 0
+      AF: 12
+      AH: 35
+      GO: 47
+    assert:
+      approx:
+        fricDbAdjusted: 12
+
+  - name: parallel formant gains alternate sign
+    inputs:
+      A1: 40
+      A2: 40
+      A3: 40
+      A4: 40
+      parallelScale: 1
+    assert:
+      expr:
+        - "a1Linear > 0"
+        - "a2Linear < 0"
+        - "a3Linear > 0"
+        - "a4Linear < 0"
+
+  - name: aspGain and fricGain ramp after frame 0
+    frames:
+      - time: 0.0
+        params:
+          GO: 47
+          AH: 0
+          AF: 0
+          SW: 0
+      - time: 0.05
+        params:
+          GO: 47
+          AH: 30
+          AF: 30
+          SW: 0
+    assertSchedule:
+      stepAt:
+        - bind: aspGain
+          time: 0.0
+        - bind: fricGainScaled
+          time: 0.0
+      rampAt:
+        - bind: aspGain
+          time: 0.05
+        - bind: fricGainScaled
+          time: 0.05
+
+  - name: source switches stay mutually exclusive across a track
+    track:
+      - time: 0.0
+        phoneme: "VOWEL"
+        params: { ss: 1, GO: 47, AV: 40, SW: 0 }
+      - time: 0.1
+        phoneme: "VOWEL"
+        params: { ss: 2, GO: 47, AV: 40, SW: 0 }
+      - time: 0.2
+        phoneme: "VOWEL"
+        params: { ss: 3, GO: 47, AV: 40, SW: 0 }
+    assertAllExpr:
+      - "impulsiveSourceSwitch + naturalSourceSwitch + triangularSourceSwitch == 1"
+
+  - name: /s/ snapshot favors frication in parallel mode
+    track:
+      - time: 0.0
+        phoneme: "AA"
+        params: { ss: 2, GO: 47, AV: 45, AF: 0, AH: 0, SW: 0 }
+      - time: 0.1
+        phoneme: "S"
+        params: { ss: 2, GO: 47, AV: 0, AF: 60, AH: 10, SW: 1 }
+      - time: 0.2
+        phoneme: "AA"
+        params: { ss: 2, GO: 47, AV: 45, AF: 0, AH: 0, SW: 0 }
+    snapshot:
+      time: 0.1
+      assert:
+        approx:
+          cascadeGain: 0
+          parallelVoiceGain: 1
+        expr:
+          - "fricDbAdjusted == max(AF, AH)"
+          - "fricGainScaled > voiceGain"
+
+  - name: track fingerprint keeps key gates in valid ranges
+    track:
+      - time: 0.0
+        phoneme: "AA"
+        params: { ss: 2, GO: 47, AV: 45, AF: 0, AH: 0, SW: 0 }
+      - time: 0.1
+        phoneme: "S"
+        params: { ss: 2, GO: 47, AV: 0, AF: 60, AH: 10, SW: 1 }
+      - time: 0.2
+        phoneme: "M"
+        params: { ss: 2, GO: 47, AV: 40, AN: 40, FNP: 280, BNP: 90, SW: 0 }
+    fingerprint:
+      keys:
+        - cascadeGain
+        - parallelVoiceGain
+        - impulsiveSourceSwitch
+        - naturalSourceSwitch
+        - triangularSourceSwitch
+      assertRange:
+        cascadeGain: { min: 0, max: 1 }
+        parallelVoiceGain: { min: 0, max: 1 }
+        impulsiveSourceSwitch: { min: 0, max: 1 }
+        naturalSourceSwitch: { min: 0, max: 1 }
+        triangularSourceSwitch: { min: 0, max: 1 }

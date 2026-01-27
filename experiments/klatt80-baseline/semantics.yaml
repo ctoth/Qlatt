@@ -358,39 +358,39 @@ realize:
     expr: "dbToLinear(G0 + AVS + ndbScale.AVS) * 10"
     deps: [G0, AVS]
 
-  # Parallel formant gains with corrections
+  # Parallel formant gains with corrections and parallelScale
   a1Linear:
-    expr: "dbToLinear(A1 + n12Cor + ndbScale.A1)"
-    deps: [A1, n12Cor]
+    expr: "dbToLinear(A1 + n12Cor + ndbScale.A1) * parallelScale"
+    deps: [A1, n12Cor, parallelScale]
 
   a2Linear:
-    expr: "-dbToLinear(A2 + n12Cor * 2 + n23Cor + ndbScale.A2)"
-    deps: [A2, n12Cor, n23Cor]
+    expr: "-dbToLinear(A2 + n12Cor * 2 + n23Cor + ndbScale.A2) * parallelScale"
+    deps: [A2, n12Cor, n23Cor, parallelScale]
 
   a3Linear:
-    expr: "dbToLinear(A3 + n23Cor * 2 + n34Cor + ndbScale.A3)"
-    deps: [A3, n23Cor, n34Cor]
+    expr: "dbToLinear(A3 + n23Cor * 2 + n34Cor + ndbScale.A3) * parallelScale"
+    deps: [A3, n23Cor, n34Cor, parallelScale]
 
   a4Linear:
-    expr: "-dbToLinear(A4 + n34Cor * 2 + ndbScale.A4)"
-    deps: [A4, n34Cor]
+    expr: "-dbToLinear(A4 + n34Cor * 2 + ndbScale.A4) * parallelScale"
+    deps: [A4, n34Cor, parallelScale]
 
   a5Linear:
-    expr: "dbToLinear(A5 + ndbScale.A5)"
-    deps: [A5]
+    expr: "dbToLinear(A5 + ndbScale.A5) * parallelScale"
+    deps: [A5, parallelScale]
 
   a6Linear:
-    expr: "-dbToLinear(A6 + ndbScale.A6)"
-    deps: [A6]
+    expr: "-dbToLinear(A6 + ndbScale.A6) * parallelScale"
+    deps: [A6, parallelScale]
 
   # Nasal and bypass gains
   anLinear:
-    expr: "dbToLinear(AN + ndbScale.AN)"
-    deps: [AN]
+    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
+    deps: [AN, parallelScale]
 
   abLinear:
-    expr: "dbToLinear(AB + ndbScale.AB)"
-    deps: [AB]
+    expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"
+    deps: [AB, parallelScale]
 
   # Mode switching
   # Cascade branch gain - off in parallel mode, on in cascade mode

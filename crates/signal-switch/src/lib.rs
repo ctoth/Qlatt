@@ -105,7 +105,6 @@ pub extern "C" fn signal_switch_process_krate(
     }
 
     unsafe {
-        let _sw = &*ptr;
         // For k-rate, selector doesn't change within block
         if selector < 0.5 {
             // Copy input0 to output

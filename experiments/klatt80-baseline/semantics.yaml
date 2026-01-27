@@ -469,6 +469,15 @@ realize:
     expr: "sampleRate / 2"
     deps: [sampleRate]
 
+  # Output lowpass filter parameters (Klatt 80 sets near Nyquist)
+  outputLpFrequency:
+    expr: "sampleRate * 0.45"
+    deps: [sampleRate]
+
+  outputLpBandwidth:
+    expr: "sampleRate * 0.1"
+    deps: [sampleRate]
+
   # PLSTEP burst amplitude
   # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
   # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)

@@ -456,8 +456,8 @@ nodes:
   outputLp:
     type: resonator
     params:
-      frequency: 0
-      bandwidth: { bind: nyquistFrequency }
+      frequency: { bind: outputLpFrequency }
+      bandwidth: { bind: outputLpBandwidth }
 
   masterGain:
     type: gain

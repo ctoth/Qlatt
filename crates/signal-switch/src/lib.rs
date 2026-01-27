@@ -11,14 +11,11 @@
 
 /// Signal switch state (stateless - purely combinatorial)
 #[repr(C)]
-pub struct SignalSwitch {
-    // No state needed - selection is instantaneous per Klatt 80
-    _dummy: u8,
-}
+pub struct SignalSwitch;
 
 impl SignalSwitch {
     fn new() -> Self {
-        Self { _dummy: 0 }
+        Self
     }
 
     /// Select between two inputs based on selector value

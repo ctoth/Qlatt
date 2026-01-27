@@ -16,8 +16,12 @@ export function createCelEvaluator(): CelEvaluator {
 
   return {
     evaluate(expr: CelExpression, context: EvaluationContext): ParamValue {
-      // Merge params into context for variable access
-      const evalContext: Record<string, unknown> = { ...context.params };
+      // Merge params and constants into context for variable access
+      // This enables nested constant access like ndbScale.AV in expressions
+      const evalContext: Record<string, unknown> = {
+        ...context.params,
+        ...context.constants,
+      };
 
       // Evaluate with cel-js
       const result = evaluate(expr, evalContext, functions);

@@ -16,7 +16,7 @@ import { createTopologicalEvaluator } from './semantics/topological-evaluator.js
 import { createCelEvaluator } from './semantics/cel-evaluator.js';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types.js';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
-import { dbToLinear, proximity as proximityFn, min, max, pow } from './builtin-functions.js';
+import { dbToLinear, dbToLinearKlsyn, proximity as proximityFn, min, max, pow } from './builtin-functions.js';
 
 // =============================================================================
 // Types
@@ -92,6 +92,7 @@ export interface KlattInterpreter {
 // Standard functions imported from builtin-functions.js
 const standardFunctions: Record<string, (...args: number[]) => number> = {
   dbToLinear,
+  dbToLinearKlsyn,
   min,
   max,
   pow,
@@ -116,6 +117,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // Create CEL evaluator and register standard functions
   const celEvaluator = createCelEvaluator();
   celEvaluator.registerFunction('dbToLinear', dbToLinear);
+  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
   celEvaluator.registerFunction('min', min);
   celEvaluator.registerFunction('max', max);
   celEvaluator.registerFunction('pow', pow);

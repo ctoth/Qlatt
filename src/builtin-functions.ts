@@ -32,6 +32,28 @@ export const ndbScale: Record<string, number> = {
   AN: -58,
 };
 
+// klsyn88 amptable (parwvt.h): DBtoLIN(dB) = amptable[dB] * 0.001
+export const klsynAmpTable = [
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 6, 7,
+  8, 9, 10, 11, 13,
+  14, 16, 18, 20, 22,
+  25, 28, 32, 35, 40,
+  45, 51, 57, 64, 71,
+  80, 90, 101, 114, 128,
+  142, 159, 179, 202, 227,
+  256, 284, 318, 359, 405,
+  455, 512, 568, 638, 719,
+  811, 911, 1024, 1137, 1276,
+  1438, 1622, 1823, 2048, 2273,
+  2552, 2875, 3244, 3645, 4096,
+  4547, 5104, 5751, 6488, 7291,
+  8192, 9093, 10207, 11502, 12976,
+  14582, 16384, 18350, 20644, 23429,
+  26214, 29491, 32767,
+];
+
 /**
  * Convert dB to linear amplitude (Klatt convention)
  * Uses 6 dB per doubling (power ratio)
@@ -39,6 +61,15 @@ export const ndbScale: Record<string, number> = {
 export function dbToLinear(db: number): number {
   if (!Number.isFinite(db) || db <= -72) return 0;
   return Math.pow(2, Math.min(96, db) / 6);
+}
+
+/**
+ * Convert dB to linear amplitude (klsyn88 amptable)
+ */
+export function dbToLinearKlsyn(db: number): number {
+  if (!Number.isFinite(db) || db < 0) return 0;
+  const index = Math.max(0, Math.min(Math.floor(db), klsynAmpTable.length - 1));
+  return klsynAmpTable[index] * 0.001;
 }
 
 /**

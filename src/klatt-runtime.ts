@@ -6,7 +6,7 @@
  */
 
 import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator.js';
-import { dbToLinear, min, max, pow } from './builtin-functions.js';
+import { dbToLinear, dbToLinearKlsyn, min, max, pow } from './builtin-functions.js';
 
 // =============================================================================
 // Registry Types
@@ -358,6 +358,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Register standard functions with CEL evaluator (using imported functions)
   celEvaluator.registerFunction('dbToLinear', dbToLinear);
+  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
   celEvaluator.registerFunction('min', min);
   celEvaluator.registerFunction('max', max);
   celEvaluator.registerFunction('pow', pow);

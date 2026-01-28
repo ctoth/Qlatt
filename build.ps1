@@ -11,6 +11,7 @@ cargo build --release --target wasm32-unknown-unknown -p triangular-source
 cargo build --release --target wasm32-unknown-unknown -p square-source
 cargo build --release --target wasm32-unknown-unknown -p tilt-filter
 cargo build --release --target wasm32-unknown-unknown -p pitch-sync-mod
+cargo build --release --target wasm32-unknown-unknown -p oversampled-glottal-source
 
 $targetDir = "target/wasm32-unknown-unknown/release"
 $destDir = "public/worklets"
@@ -27,5 +28,6 @@ Copy-Item "$targetDir/triangular_source.wasm" "$destDir/triangular-source.wasm" 
 Copy-Item "$targetDir/square_source.wasm" "$destDir/square-source.wasm" -Force
 Copy-Item "$targetDir/tilt_filter.wasm" "$destDir/tilt-filter.wasm" -Force
 Copy-Item "$targetDir/pitch_sync_mod.wasm" "$destDir/pitch-sync-mod.wasm" -Force
+Copy-Item "$targetDir/oversampled_glottal_source.wasm" "$destDir/oversampled-glottal-source.wasm" -Force
 
 Write-Host "WASM artifacts copied to $destDir."

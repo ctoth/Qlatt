@@ -289,6 +289,58 @@ primitives:
     outputs: 1
 
   # ===========================================================================
+  # klsyn88 NEW: Oversampled Glottal Source (voice + noise outputs)
+  # ===========================================================================
+
+  oversampled-glottal-source:
+    description: "klsyn88 oversampled glottal source with integrated noise and tilt"
+    worklet: "oversampled-glottal-source-processor.js"
+    wasm: "oversampled-glottal-source.wasm"
+    params:
+      f0:
+        type: float
+        unit: "Hz"
+        default: 120
+        description: "Fundamental frequency"
+      av:
+        type: float
+        unit: "dB"
+        default: 60
+        description: "Voicing amplitude (AV)"
+      aturb:
+        type: float
+        unit: "dB"
+        default: 0
+        description: "Turbulence noise amplitude (Aturb)"
+      tilt:
+        type: float
+        unit: "dB"
+        default: 0
+        description: "Spectral tilt (TL)"
+      openQuotient:
+        type: float
+        default: 50
+        description: "Open quotient in percent (Kopen)"
+      skew:
+        type: float
+        default: 0
+        description: "Skewness (Kskew)"
+      asymmetry:
+        type: float
+        default: 50
+        description: "Triangular source asymmetry percent"
+      source:
+        type: float
+        default: 2
+        description: "Source type (1=impulse, 2=natural, 3=triangular, 4=square)"
+      seed:
+        type: float
+        default: 1
+        description: "Random seed (31-bit)"
+    inputs: 0
+    outputs: 2
+
+  # ===========================================================================
   # JavaScript AudioWorklet Nodes
   # ===========================================================================
 

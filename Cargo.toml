@@ -12,6 +12,7 @@ members = [
   "crates/impulsive-source",
   "crates/tilt-filter",
   "crates/pitch-sync-mod",
+  "crates/oversampled-glottal-source",
 ]
 resolver = "2"
 

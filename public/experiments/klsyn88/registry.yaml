@@ -263,8 +263,8 @@ primitives:
         description: "Fundamental frequency for pitch synchronization"
       openQuotient:
         type: float
-        default: 0.5
-        description: "Open quotient (0-1)"
+        default: 50
+        description: "Open quotient in percent (Kopen)"
       f1:
         type: float
         unit: "Hz"
@@ -285,6 +285,14 @@ primitives:
         unit: "Hz"
         default: 0
         description: "B1 increment during glottal open phase"
+      skew:
+        type: float
+        default: 0
+        description: "Skewness (Kskew)"
+      source:
+        type: float
+        default: 2
+        description: "Source type (1=impulse, 2=natural, 3=triangular, 4=square)"
     inputs: 1
     outputs: 1
 

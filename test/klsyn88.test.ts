@@ -224,14 +224,14 @@ describe('klsyn88 Primitives', () => {
 
       // First sample (impulse)
       let sample = exports.pitch_sync_resonator_process(
-        ptr, 1.0, 100, 0.5, 500, 80, 0, 0
+        ptr, 1.0, 100, 50, 500, 80, 0, 0, 0, 2
       );
       if (Math.abs(sample) > 0.001) hasOutput = true;
 
       // Subsequent samples (zeros in)
       for (let i = 0; i < 100; i++) {
         sample = exports.pitch_sync_resonator_process(
-          ptr, 0.0, 100, 0.5, 500, 80, 0, 0
+          ptr, 0.0, 100, 50, 500, 80, 0, 0, 0, 2
         );
         if (Math.abs(sample) > 0.001) hasOutput = true;
       }
@@ -249,7 +249,7 @@ describe('klsyn88 Primitives', () => {
       const samples1: number[] = [];
       for (let i = 0; i < 200; i++) {
         samples1.push(exports.pitch_sync_resonator_process(
-          ptr1, i === 0 ? 1.0 : 0.0, 100, 0.5, 500, 80, 0, 0
+          ptr1, i === 0 ? 1.0 : 0.0, 100, 50, 500, 80, 0, 0, 0, 2
         ));
       }
       exports.pitch_sync_resonator_free(ptr1);
@@ -259,7 +259,7 @@ describe('klsyn88 Primitives', () => {
       const samples2: number[] = [];
       for (let i = 0; i < 200; i++) {
         samples2.push(exports.pitch_sync_resonator_process(
-          ptr2, i === 0 ? 1.0 : 0.0, 100, 0.5, 500, 80, 100, 50 // dF1=100, dB1=50
+          ptr2, i === 0 ? 1.0 : 0.0, 100, 50, 500, 80, 100, 50, 0, 2 // dF1=100, dB1=50
         ));
       }
       exports.pitch_sync_resonator_free(ptr2);

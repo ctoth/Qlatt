@@ -14,11 +14,13 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
       { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
-      { name: "openQuotient", defaultValue: 0.5, minValue: 0.01, maxValue: 0.99, automationRate: "a-rate" },
+      { name: "openQuotient", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "k-rate" },
       { name: "f1", defaultValue: 500, minValue: 100, maxValue: 1500, automationRate: "a-rate" },
       { name: "b1", defaultValue: 80, minValue: 30, maxValue: 500, automationRate: "a-rate" },
       { name: "dF1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" },
       { name: "dB1", defaultValue: 0, minValue: 0, maxValue: 500, automationRate: "a-rate" },
+      { name: "skew", defaultValue: 0, minValue: 0, maxValue: 200, automationRate: "k-rate" },
+      { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" },
     ];
   }
 
@@ -74,6 +76,8 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
     const b1 = parameters.b1;
     const dF1 = parameters.dF1;
     const dB1 = parameters.dB1;
+    const skew = parameters.skew;
+    const source = parameters.source;
 
     for (let i = 0; i < blockSize; i++) {
       const f0Val = f0.length > 1 ? f0[i] : f0[0];
@@ -82,6 +86,8 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
       const b1Val = b1.length > 1 ? b1[i] : b1[0];
       const dF1Val = dF1.length > 1 ? dF1[i] : dF1[0];
       const dB1Val = dB1.length > 1 ? dB1[i] : dB1[0];
+      const skewVal = skew.length > 1 ? skew[i] : skew[0];
+      const sourceVal = source.length > 1 ? source[i] : source[0];
 
       outputChannel[i] = this.wasm.pitch_sync_resonator_process(
         this.state,
@@ -91,7 +97,9 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
         f1Val,
         b1Val,
         dF1Val,
-        dB1Val
+        dB1Val,
+        skewVal,
+        sourceVal
       );
     }
 

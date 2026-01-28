@@ -288,7 +288,7 @@ function getSelectedExperiment() {
 async function loadExperimentManifest() {
   const select = document.getElementById("experimentSelect");
   try {
-    const res = await fetch("/experiments/manifest.json");
+    const res = await fetch("./experiments/manifest.json");
     if (!res.ok) throw new Error("Failed to fetch manifest");
     experimentManifest = await res.json();
     // Populate dropdown
@@ -337,7 +337,7 @@ async function loadNewRuntimeConfig() {
   }
   status.textContent = `Status: loading ${experimentId} config...`;
   try {
-    const basePath = `/experiments/${experimentId}`;
+    const basePath = `./experiments/${experimentId}`;
     const [graphRes, semanticsRes, registryRes] = await Promise.all([
       fetch(`${basePath}/graph.yaml`),
       fetch(`${basePath}/semantics.yaml`),
@@ -379,7 +379,7 @@ async function initializeNewRuntime() {
       graph: newRuntimeGraph,
       semantics: newRuntimeSemantics,
       registry: newRuntimeRegistry,
-      workletBasePath: "/worklets/",
+      workletBasePath: "./worklets/",
       logger: (msg) => console.log(msg),
       telemetry: true,  // Enable worklet debug metrics
       telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler

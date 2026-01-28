@@ -4,23 +4,17 @@ meta:
   primitives: ./registry.yaml
   semantics: ./semantics.yaml
   description: |
-    Klatt 80 formant synthesizer topology.
-    This is a PARTIAL representation - see LIMITATIONS below.
-    Many Klatt 80 features cannot be expressed in Bacon IR 0.1.
-
-# =============================================================================
-# LIMITATIONS DOCUMENTED INLINE (search "LIMITATION:" for full list)
-# =============================================================================
+    Klatt 80 formant synthesizer topology per Klatt (1980).
+    Conditional routing (source selection, cascade/parallel switching)
+    is implemented via gain-gated paths with CEL expressions in semantics.yaml.
 
 nodes:
   # ---------------------------------------------------------------------------
   # SOURCE NODES
   # ---------------------------------------------------------------------------
+  # Source selection (impulse vs LF vs bypass) is implemented via gain gates.
+  # Semantics.yaml computes lfSourceSwitch/impulseSourceSwitch from sourceMode.
 
-  # LIMITATION: Source switching requires conditional routing
-  # Bacon IR has no way to express "use lfSource when sourceMode=1, else impulseSource"
-  # The implementation uses gain nodes as switches (gain=0 or 1)
-  # We can only express the static topology, not the switching logic
   lfSource:
     type: lf-source
     params:
@@ -95,11 +89,9 @@ nodes:
   # ---------------------------------------------------------------------------
   # SOURCE ROUTING/MIXING
   # ---------------------------------------------------------------------------
+  # Gain gates implement conditional switching based on sourceMode parameter.
+  # Values computed in semantics.yaml: lfSourceSwitch, impulseSourceSwitch, etc.
 
-  # LIMITATION: These gain nodes implement conditional switching
-  # Their gain values depend on sourceMode parameter (0=impulse, 1=LF, 2=bypass)
-  # Bacon IR can express bindings but not computed values like:
-  #   lfGain = (sourceMode === 1) ? 1 : 0
   lfSourceGain:
     type: gain
     params:
@@ -163,10 +155,8 @@ nodes:
   # ---------------------------------------------------------------------------
   # GLOTTAL SHAPING - PARALLEL PATH (RGP_AVS/RGZ_AVS)
   # ---------------------------------------------------------------------------
-  # LIMITATION: Dual glottal shaping paths
-  # Klatt 80 has separate rgp/rgz for cascade and rgpAvs/rgzAvs for parallel AVS path.
-  # Both use same FGP/BGP parameters but are distinct filter instances.
-  # Bacon IR can express this, but the rationale (separate filter states) is lost.
+  # Separate filter instances from cascade path (rgp/rgz) to maintain
+  # independent filter states. Both paths share FGP/BGP parameters.
 
   rgpAvs:
     type: resonator

@@ -381,8 +381,11 @@ async function initializeNewRuntime() {
       registry: newRuntimeRegistry,
       workletBasePath: "/worklets/",
       logger: (msg) => console.log(msg),
+      telemetry: true,  // Enable worklet debug metrics
+      telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler
     });
     newRuntime.connectToDestination();
+    attachTelemetryNewRuntime(newRuntime);  // Attach additional port listeners
     status.textContent = "Status: new runtime initialized";
     console.log("[QLATT] New runtime initialized");
     return newRuntime;
@@ -393,16 +396,72 @@ async function initializeNewRuntime() {
   }
 }
 
+// Attach telemetry port listeners to new runtime worklet nodes
+function attachTelemetryNewRuntime(runtime) {
+  const nodeIds = runtime.getAllNodeIds();
+  let attached = 0;
+  for (const nodeId of nodeIds) {
+    const node = runtime.getNode(nodeId);
+    // Check if it's an AudioWorkletNode with a port
+    if (!node || !('port' in node) || !node.port) continue;
+
+    node.port.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+      // Add node identifier for diagnostics display
+      if (data.type === 'metrics' && !data.node) {
+        data.node = nodeId;
+      }
+      handleTelemetry(data);
+    });
+
+    // Ensure port is started
+    if (typeof node.port.start === "function") {
+      try {
+        node.port.start();
+      } catch {
+        // Port may already be started
+      }
+    }
+    attached++;
+  }
+  console.log(`[QLATT] Attached telemetry to ${attached} new runtime nodes`);
+}
+
 async function speakWithNewRuntime(track) {
   const runtime = await initializeNewRuntime();
-  status.textContent = "Status: speaking with new runtime...";
+  attachMetersNewRuntime(runtime);  // Attach meters for new runtime
 
   if (!track || track.length === 0) {
     status.textContent = "Status: new runtime - no track to play";
     return;
   }
 
-  // Create interpreter if needed
+  const phrase = document.getElementById("phrase").value.trim();
+  const baseF0 = Number(document.getElementById("baseF0").value) || 110;
+
+  // Session setup (matching speak())
+  const startTime = ctx.currentTime + 0.05;
+  sessionId += 1;
+  const currentSessionId = sessionId;
+
+  // Clear state BEFORE scheduling (matching speak())
+  plstepEvents.length = 0;
+  spikeEvents.length = 0;
+  lastSpikeAt.clear();
+  swWindowMax.clear();
+  swWindowMaxTime.clear();
+  telemetry.clear();
+  telemetryMax.clear();
+  meterMax.clear();
+
+  // Set run context BEFORE scheduling so telemetry handler can use it
+  lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
+  runStartTime = startTime;
+
+  status.textContent = `Status: speaking "${phrase}" (new runtime)`;
+
+  // Create interpreter if needed (with telemetry handler that uses handleTelemetry)
   if (!newInterpreter) {
     console.log("[QLATT] Creating interpreter");
     newInterpreter = createKlattInterpreter({
@@ -412,28 +471,70 @@ async function speakWithNewRuntime(track) {
       semantics: newRuntimeSemantics,
       logger: (msg) => console.log(msg),
       telemetryHandler: (event) => {
-        console.log("[QLATT] Interpreter telemetry:", event);
+        // Route interpreter telemetry through handleTelemetry for PLSTEP events
+        handleTelemetry(event);
       },
     });
   }
 
-  // Schedule track for playback
-  const startTime = ctx.currentTime + 0.05;
+  // Connect spectrogram to new runtime output (if analyser exists)
+  if (specState.analyser) {
+    const outputNode = runtime.getNode("masterGain") ?? runtime.getNode("outputGain");
+    if (outputNode) {
+      try {
+        outputNode.connect(specState.analyser);
+      } catch {
+        // May already be connected
+      }
+    }
+  }
+
   console.log("[QLATT] New runtime: scheduling track", {
     frames: track.length,
     startTime,
     duration: track[track.length - 1]?.time ?? 0,
+    sessionId: currentSessionId,
   });
 
   newInterpreter.scheduleTrack(track, startTime);
 
   const trackDuration = newInterpreter.getTrackDuration();
-  status.textContent = `Status: new runtime - playing (${trackDuration.toFixed(2)}s)`;
+  console.log("[QLATT] Track summary", summarizeTrack(track));
+  const parallelSummary = summarizeParallel(track);
+  console.log("[QLATT] Parallel summary", parallelSummary);
+  if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {
+    console.warn(
+      "[QLATT] Parallel params present, but SW=0 (cascade-only path)."
+    );
+  }
+  console.log("[QLATT] First events", track.slice(0, 6));
 
-  // Update status when done
+  // Start spectrogram visualization (matching speak())
+  startSpectrogram(track);
+
+  // Update diagnostics display
+  updateDiagnostics();
+
+  // Auto-copy diagnostics to clipboard after audio finishes (matching speak())
   setTimeout(() => {
-    status.textContent = "Status: new runtime - playback complete";
-  }, (trackDuration + 0.2) * 1000);
+    updateDiagnostics();
+    navigator.clipboard.writeText(diagnosticsEl.value).catch(() => {});
+    // Record play history for warmup tracking
+    const outputMax = meterMax.get("output-sum");
+    if (outputMax) {
+      playHistory.push({
+        sessionId: currentSessionId,
+        phrase,
+        maxRms: outputMax.rms ?? 0,
+        maxPeak: outputMax.peak ?? 0,
+        timestamp: Date.now(),
+      });
+      // Keep only last N plays
+      while (playHistory.length > MAX_PLAY_HISTORY) {
+        playHistory.shift();
+      }
+    }
+  }, Math.max(0, trackDuration * 1000 + 300));
 }
 
 function applyUrlParams() {
@@ -1548,6 +1649,40 @@ function attachMeters() {
     target.node.connect(analyser);
     meters.set(target.name, analyser);
   }
+  startMeterLoop();
+}
+
+// Attach meters to new runtime output nodes
+function attachMetersNewRuntime(runtime) {
+  // Map from legacy meter names to new graph node IDs
+  const outputTargets = [
+    { name: "cascade-out", nodeId: "cascadeOutGain" },
+    { name: "output-sum", nodeId: "outputSum" },
+    // Note: new runtime may not have direct "parallel-out" equivalent at same point
+  ];
+
+  for (const target of outputTargets) {
+    const node = runtime.getNode(target.nodeId);
+    if (!node) {
+      console.warn(`[QLATT] Meter node ${target.nodeId} not found`);
+      continue;
+    }
+
+    // Don't duplicate if already attached
+    if (meters.has(target.name)) continue;
+
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+    try {
+      node.connect(analyser);
+      meters.set(target.name, analyser);
+      console.log(`[QLATT] Attached meter to ${target.nodeId} as ${target.name}`);
+    } catch (e) {
+      console.warn(`[QLATT] Failed to attach meter to ${target.nodeId}:`, e);
+    }
+  }
+
+  // Start meter loop if not already running
   startMeterLoop();
 }
 

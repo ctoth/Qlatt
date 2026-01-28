@@ -108,6 +108,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     graph,
     semantics,
     logger = () => {},
+    telemetryHandler,
   } = options;
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
@@ -351,12 +352,48 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
     const schedule: ScheduleEntry[] = [];
 
+    // PLSTEP detection state
+    let prevAF = -70;
+    let prevAH = -70;
+    const PLSTEP_THRESHOLD = 49;  // dB rise threshold for burst detection
+
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];
       if (!frame?.params) continue;
 
       const t = baseTime + frame.time;
       const realized = evaluateSemantics(frame.params);
+
+      // PLSTEP detection: check for AF/AH threshold crossing
+      // Emit telemetry event when frication or aspiration rises rapidly (plosive release)
+      if (telemetryHandler) {
+        const currentAF = frame.params.AF ?? -70;
+        const currentAH = frame.params.AH ?? -70;
+        const deltaAF = currentAF - prevAF;
+        const deltaAH = currentAH - prevAH;
+
+        if (deltaAF >= PLSTEP_THRESHOLD || deltaAH >= PLSTEP_THRESHOLD) {
+          const trigger = deltaAF >= deltaAH ? 'AF' : 'AH';
+          const delta = Math.max(deltaAF, deltaAH);
+          const goDb = frame.params.GO ?? 47;
+          const burstDb = goDb - 75;  // Klatt80 PLSTEP amplitude formula
+          const burstAmplitude = dbToLinear(burstDb);
+
+          telemetryHandler({
+            type: 'plstep',
+            nodeId: 'plstep',
+            time: t,
+            amplitudeLinear: burstAmplitude,
+            amplitudeDb: burstDb,
+            trigger,
+            delta,
+            phoneme: frame.phoneme ?? '',
+          });
+        }
+
+        prevAF = currentAF;
+        prevAH = currentAH;
+      }
 
       // Add step entries for realized bindings
       for (const { name, param } of realizedBindingsList) {

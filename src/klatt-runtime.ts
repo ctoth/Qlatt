@@ -263,6 +263,8 @@ export interface KlattRuntimeOptions {
   workletBasePath?: string;                   // Base path for worklet JS files, defaults to '/worklets/'
   wasmModules?: Record<string, ArrayBuffer>;  // Pre-loaded WASM modules (optional)
   logger?: (msg: string) => void;             // Optional logging callback
+  telemetry?: boolean;                        // Enable worklet debug metrics (default: false)
+  telemetryHandler?: (data: unknown) => void; // Callback for worklet telemetry messages
 }
 
 // Binding information for interpreter use
@@ -311,6 +313,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     registry,
     workletBasePath = '/worklets/',
     logger = () => {},
+    telemetry = false,
+    telemetryHandler,
   } = options;
 
   if (!registry) {
@@ -400,7 +404,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   function createNodes(): void {
     log('Creating audio nodes');
     for (const [id, nodeDef] of Object.entries(graph.nodes)) {
-      const node = createAudioNode(audioContext, nodeDef.type, id, nodeDef, registry, wasmModules, log);
+      const node = createAudioNode(audioContext, nodeDef.type, id, nodeDef, registry, wasmModules, log, telemetry);
       if (node) {
         nodes.set(id, node);
       }
@@ -489,6 +493,34 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   log('Applying realized values to nodes');
   applyValues();
 
+  // Attach telemetry port listeners if handler provided
+  if (telemetryHandler) {
+    let attached = 0;
+    for (const [nodeId, node] of nodes) {
+      // Check if it's an AudioWorkletNode with a port
+      const workletNode = node as AudioWorkletNode;
+      if (!workletNode.port) continue;
+
+      workletNode.port.addEventListener('message', (event: MessageEvent) => {
+        const data = event.data;
+        if (data && typeof data === 'object') {
+          telemetryHandler(data);
+        }
+      });
+
+      // Ensure port is started
+      if (typeof workletNode.port.start === 'function') {
+        try {
+          workletNode.port.start();
+        } catch {
+          // Port may already be started
+        }
+      }
+      attached++;
+    }
+    log(`Attached telemetry listeners to ${attached} worklet nodes`);
+  }
+
   log('Klatt runtime initialized successfully');
 
   return {
@@ -550,7 +582,8 @@ function createAudioNode(
   nodeDef: BaconNode,
   registry: Registry,
   wasmModules: Record<string, ArrayBuffer> | undefined,
-  log: (msg: string) => void
+  log: (msg: string) => void,
+  telemetry: boolean
 ): AudioNode | null {
   const primitive = registry.primitives[type];
 
@@ -570,10 +603,10 @@ function createAudioNode(
       return createNativeNode(ctx, type, id, log);
 
     case 'wasm-worklet':
-      return createWasmWorkletNode(ctx, type, id, primitive, nodeOptions, wasmModules, log);
+      return createWasmWorkletNode(ctx, type, id, primitive, nodeOptions, wasmModules, log, telemetry);
 
     case 'js-worklet':
-      return createJsWorkletNode(ctx, type, id, primitive, nodeOptions, log);
+      return createJsWorkletNode(ctx, type, id, primitive, nodeOptions, log, telemetry);
 
     default:
       log(`Warning: Unknown category '${category}' for type '${type}'`);
@@ -610,7 +643,8 @@ function createWasmWorkletNode(
   primitive: RegistryPrimitive,
   nodeOptions: Record<string, unknown>,
   wasmModules: Record<string, ArrayBuffer> | undefined,
-  log: (msg: string) => void
+  log: (msg: string) => void,
+  telemetry: boolean
 ): AudioWorkletNode | null {
   const processorName = primitive.worklet!.replace('.js', '');
   const wasmKey = primitive.wasm!.replace('.wasm', '');
@@ -628,7 +662,9 @@ function createWasmWorkletNode(
     processorOptions: {
       wasmBytes,
       nodeId: id,
-      ...nodeOptions,  // Pass node options to processor
+      debug: telemetry,      // Enable metrics emission when telemetry requested
+      reportInterval: 40,    // Match legacy synth interval
+      ...nodeOptions,        // Pass node options to processor
     },
   });
 }
@@ -640,7 +676,8 @@ function createJsWorkletNode(
   id: string,
   primitive: RegistryPrimitive,
   nodeOptions: Record<string, unknown>,
-  log: (msg: string) => void
+  log: (msg: string) => void,
+  telemetry: boolean
 ): AudioWorkletNode {
   const processorName = primitive.worklet!.replace('.js', '');
 
@@ -650,7 +687,9 @@ function createJsWorkletNode(
     outputChannelCount: [1],
     processorOptions: {
       nodeId: id,
-      ...nodeOptions,  // Pass node options to processor
+      debug: telemetry,      // Enable metrics emission when telemetry requested
+      reportInterval: 40,    // Match legacy synth interval
+      ...nodeOptions,        // Pass node options to processor
     },
   });
 }

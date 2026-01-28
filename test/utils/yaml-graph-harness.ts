@@ -14,6 +14,7 @@ import type {
 import type { BaconGraph, ParamValueSpec } from '../../src/klatt-runtime.js';
 import {
   dbToLinear,
+  dbToLinearKlsyn,
   proximity,
   min,
   max,
@@ -190,6 +191,7 @@ function createSemanticsHarness(
 } {
   const celEvaluator = createCelEvaluator();
   celEvaluator.registerFunction('dbToLinear', dbToLinear);
+  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
   celEvaluator.registerFunction('min', min);
   celEvaluator.registerFunction('max', max);
   celEvaluator.registerFunction('pow', pow);

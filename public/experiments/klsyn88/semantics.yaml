@@ -316,8 +316,15 @@ realize:
     expr: "(GO - 3) <= 0 ? 57 : (GO - 3)"
     deps: [GO]
 
+  # klsyn88 fixed-point to WebAudio float normalization:
+  # The C implementation (parwav.c) works in 16-bit fixed-point throughout,
+  # with glottal sources emitting values up to ±13,000,000 (DOUBLET constant).
+  # At output, parwv_truncate() clamps to [-32768, 32767] before writing PCM.
+  # Our WASM primitives emit the same raw klsyn88-scale values, but WebAudio
+  # expects [-1, 1] floats. Multiplying by 1/32768 here (where amp_gain0 is
+  # applied in C, just before truncation) normalizes to the correct output range.
   gain0Linear:
-    expr: "dbToLinearKlsyn(gain0Db)"
+    expr: "dbToLinearKlsyn(gain0Db) * 0.000030517578125"
     deps: [gain0Db]
 
   cascadePolarity:

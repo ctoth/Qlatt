@@ -1,7 +1,7 @@
 suite: klsyn88-semantics-and-schedule
-semantics: experiments/klsyn88/semantics.yaml
-graph: experiments/klsyn88/graph.yaml
-registry: experiments/klsyn88/registry.yaml
+semantics: public/experiments/klsyn88/semantics.yaml
+graph: public/experiments/klsyn88/graph.yaml
+registry: public/experiments/klsyn88/registry.yaml
 defaultTol: 1e-6
 
 tests:
@@ -26,6 +26,17 @@ tests:
     assert:
       approx:
         gain0Db: 37
+
+  - name: gain0Linear includes 32768 normalization for WebAudio
+    # klsyn88 fixed-point to float conversion: dbToLinearKlsyn(54) * (1/32768)
+    # At GO=57, gain0Db=54, amptable[54]=719, so:
+    # gain0Linear = 719 * 0.001 * 3.0517578125e-5 ≈ 2.1942e-5
+    inputs:
+      GO: 57
+    assert:
+      approx:
+        gain0Linear: 2.1942e-5
+      tol: 1e-8
 
   - name: cascadePolarity flips on even NFCASC
     inputs:

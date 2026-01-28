@@ -69,6 +69,29 @@ primitives:
     inputs: 1
     outputs: 1
 
+  fujisaki-resonator:
+    description: "Two-pole resonator with Fujisaki compensation when frequency drops"
+    worklet: "fujisaki-resonator-processor.js"
+    wasm: "fujisaki-resonator.wasm"
+    options:
+      bypassAtZero:
+        type: bool
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    params:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Center frequency of the resonance"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
   antiresonator:
     description: "Two-zero antiresonator (zero filter) - implements second-order IIR notch for nasal zeros"
     worklet: "antiresonator-processor.js"

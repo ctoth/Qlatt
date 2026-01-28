@@ -28,7 +28,109 @@ async function loadWasmModule(crateName: string): Promise<WebAssembly.Instance> 
   return instance;
 }
 
+function allocF32(exports: any, length: number) {
+  const ptr = exports.alloc_f32(length);
+  if (!ptr) throw new Error('alloc_f32 returned null');
+  const view = new Float32Array((exports.memory as WebAssembly.Memory).buffer, ptr, length);
+  return { ptr, view };
+}
+
+function deallocF32(exports: any, ptr: number, length: number) {
+  exports.dealloc_f32(ptr, length);
+}
+
 describe('klsyn88 Primitives', () => {
+  describe('oversampled-glottal-source', () => {
+    let wasm: WebAssembly.Instance;
+
+    beforeAll(async () => {
+      wasm = await loadWasmModule('oversampled-glottal-source');
+    });
+
+    it('should create and free source without crash', () => {
+      const exports = wasm.exports as any;
+      const ptr = exports.oversampled_glottal_source_new(11025);
+      expect(ptr).toBeGreaterThan(0);
+      exports.oversampled_glottal_source_free(ptr);
+    });
+
+    it('should generate voice and noise outputs', () => {
+      const exports = wasm.exports as any;
+      const state = exports.oversampled_glottal_source_new(11025);
+
+      const blockSize = 128;
+      const f0 = allocF32(exports, 1);
+      const av = allocF32(exports, 1);
+      const aturb = allocF32(exports, 1);
+      const tilt = allocF32(exports, 1);
+      const oq = allocF32(exports, 1);
+      const skew = allocF32(exports, 1);
+      const asym = allocF32(exports, 1);
+      const source = allocF32(exports, 1);
+      const seed = allocF32(exports, 1);
+      const voice = allocF32(exports, blockSize);
+      const noise = allocF32(exports, blockSize);
+
+      f0.view[0] = 100;
+      av.view[0] = 60;
+      aturb.view[0] = 20;
+      tilt.view[0] = 0;
+      oq.view[0] = 50;
+      skew.view[0] = 0;
+      asym.view[0] = 50;
+      source.view[0] = 2;
+      seed.view[0] = 1;
+
+      exports.oversampled_glottal_source_process(
+        state,
+        f0.ptr,
+        1,
+        av.ptr,
+        1,
+        aturb.ptr,
+        1,
+        tilt.ptr,
+        1,
+        oq.ptr,
+        1,
+        skew.ptr,
+        1,
+        asym.ptr,
+        1,
+        source.ptr,
+        1,
+        seed.ptr,
+        1,
+        voice.ptr,
+        noise.ptr,
+        blockSize
+      );
+
+      let voiceNonZero = false;
+      let noiseNonZero = false;
+      for (let i = 0; i < blockSize; i++) {
+        if (Math.abs(voice.view[i]) > 0.0001) voiceNonZero = true;
+        if (Math.abs(noise.view[i]) > 0.0001) noiseNonZero = true;
+      }
+
+      deallocF32(exports, f0.ptr, 1);
+      deallocF32(exports, av.ptr, 1);
+      deallocF32(exports, aturb.ptr, 1);
+      deallocF32(exports, tilt.ptr, 1);
+      deallocF32(exports, oq.ptr, 1);
+      deallocF32(exports, skew.ptr, 1);
+      deallocF32(exports, asym.ptr, 1);
+      deallocF32(exports, source.ptr, 1);
+      deallocF32(exports, seed.ptr, 1);
+      deallocF32(exports, voice.ptr, blockSize);
+      deallocF32(exports, noise.ptr, blockSize);
+      exports.oversampled_glottal_source_free(state);
+
+      expect(voiceNonZero).toBe(true);
+      expect(noiseNonZero).toBe(true);
+    });
+  });
+
   describe('triangular-source', () => {
     let wasm: WebAssembly.Instance;
 
@@ -271,6 +373,49 @@ describe('klsyn88 Primitives', () => {
       }
 
       expect(diffCount).toBeGreaterThan(10);
+    });
+  });
+
+  describe('fujisaki-resonator', () => {
+    let wasm: WebAssembly.Instance;
+
+    beforeAll(async () => {
+      wasm = await loadWasmModule('fujisaki-resonator');
+    });
+
+    it('should create and free resonator without crash', () => {
+      const exports = wasm.exports as any;
+      const ptr = exports.fujisaki_resonator_new();
+      expect(ptr).toBeGreaterThan(0);
+      exports.fujisaki_resonator_free(ptr);
+    });
+
+    it('should filter input signal', () => {
+      const exports = wasm.exports as any;
+      const ptr = exports.fujisaki_resonator_new();
+
+      const blockSize = 64;
+      const input = allocF32(exports, blockSize);
+      const output = allocF32(exports, blockSize);
+      input.view.fill(0);
+      input.view[0] = 1.0;
+
+      exports.fujisaki_resonator_set_params(ptr, 500, 80, 11025);
+      exports.fujisaki_resonator_process(ptr, input.ptr, output.ptr, blockSize);
+
+      let hasOutput = false;
+      for (let i = 0; i < blockSize; i++) {
+        if (Math.abs(output.view[i]) > 0.0001) {
+          hasOutput = true;
+          break;
+        }
+      }
+
+      deallocF32(exports, input.ptr, blockSize);
+      deallocF32(exports, output.ptr, blockSize);
+      exports.fujisaki_resonator_free(ptr);
+
+      expect(hasOutput).toBe(true);
     });
   });
 });

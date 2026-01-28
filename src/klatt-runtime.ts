@@ -443,16 +443,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
       const fromId = getNodeId(fromRef);
       const toId = getNodeId(toRef);
+      const fromPort = getPortIndex(fromRef);
       const toPort = getPortIndex(toRef);
 
       const fromNode = nodes.get(fromId);
       const toNode = nodes.get(toId);
 
       if (fromNode && toNode) {
-        if (toPort !== undefined) {
-          // Connect to specific input port
-          fromNode.connect(toNode, 0, toPort);
-          log(`  Connected ${fromId} -> ${toId}[${toPort}]`);
+        if (toPort !== undefined || fromPort !== undefined) {
+          const fromIndex = fromPort ?? 0;
+          const toIndex = toPort ?? 0;
+          fromNode.connect(toNode, fromIndex, toIndex);
+          log(`  Connected ${fromId}[${fromIndex}] -> ${toId}[${toIndex}]`);
         } else {
           fromNode.connect(toNode);
           log(`  Connected ${fromId} -> ${toId}`);
@@ -649,6 +651,7 @@ function createWasmWorkletNode(
   const processorName = primitive.worklet!.replace('.js', '');
   const wasmKey = primitive.wasm!.replace('.wasm', '');
   const wasmBytes = wasmModules?.[wasmKey];
+  const outputCount = primitive.outputs ?? 1;
 
   if (!wasmBytes) {
     log(`Error: WASM module '${wasmKey}' not loaded for node '${id}'`);
@@ -657,8 +660,8 @@ function createWasmWorkletNode(
 
   return new AudioWorkletNode(ctx, processorName, {
     numberOfInputs: primitive.inputs ?? 1,
-    numberOfOutputs: primitive.outputs ?? 1,
-    outputChannelCount: [1],
+    numberOfOutputs: outputCount,
+    outputChannelCount: Array.from({ length: outputCount }, () => 1),
     processorOptions: {
       wasmBytes,
       nodeId: id,
@@ -680,11 +683,12 @@ function createJsWorkletNode(
   telemetry: boolean
 ): AudioWorkletNode {
   const processorName = primitive.worklet!.replace('.js', '');
+  const outputCount = primitive.outputs ?? 1;
 
   return new AudioWorkletNode(ctx, processorName, {
     numberOfInputs: primitive.inputs ?? 1,
-    numberOfOutputs: primitive.outputs ?? 1,
-    outputChannelCount: [1],
+    numberOfOutputs: outputCount,
+    outputChannelCount: Array.from({ length: outputCount }, () => 1),
     processorOptions: {
       nodeId: id,
       debug: telemetry,      // Enable metrics emission when telemetry requested

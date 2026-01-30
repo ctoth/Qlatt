@@ -49,6 +49,7 @@ interface SyncMark {
 
 
 // Comparator: START < all FINITE < END
+// IMPORTANT: Ranks use ASCII codepoint order, NOT locale collation.
 
 function compareOrder(a: OrderKey, b: OrderKey): number {
 
@@ -58,7 +59,10 @@ function compareOrder(a: OrderKey, b: OrderKey): number {
 
   if (a.kind === 'FINITE' && b.kind === 'FINITE') {
 
-    return a.rank.localeCompare(b.rank);  // lexicographic
+    // ASCII codepoint comparison (deterministic across environments)
+    if (a.rank < b.rank) return -1;
+    if (a.rank > b.rank) return 1;
+    return 0;
 
   }
 
@@ -76,6 +80,8 @@ function compareOrder(a: OrderKey, b: OrderKey): number {
 
 **Finite ranks:** Use base-36 strings (`[0-9a-z]+`). Insertion between ranks uses the algorithm in §11.2.
 
+**Rank comparison:** FINITE ranks are compared by ASCII codepoint lexicographic order (JavaScript `<`/`>` on strings). Implementations MUST NOT use locale-dependent collation (`localeCompare`). This ensures deterministic ordering across all environments.
+
 
 
 ### 1.2 Sentinels
@@ -89,6 +95,11 @@ const START: SyncMark = { id: 'START', order: { kind: 'START' }, time: 0 };
 const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 ```
+
+**Sentinel time semantics:**
+- `START.time` is always `0` (before and after time computation)
+- `END.time` is `null` before time computation, and equals total utterance duration after
+- **Invariant:** After `COMPUTE TIMES` (pipeline step 11), all sync marks referenced by any token or point MUST have non-null `time`
 
 
 
@@ -199,6 +210,10 @@ interface PointToken {
 | `parallel` | interval | No | Mutable |
 
 | `point` | point | N/A | Mutable |
+
+**Base stream adjacency:**
+
+Base tokens form an ordered sequence. Adjacency is defined by list position (`$prev`/`$next`), NOT by shared sync mark IDs. Tokens may share a boundary sync mark or have distinct marks at the same order position. The **base coverage invariant** requires that in order-space, base tokens partition `[START, END]` with no gaps. In time-space (after `COMPUTE TIMES`), times must be monotonically non-decreasing.
 
 
 
@@ -672,11 +687,9 @@ def rebuild_span_boundaries(span_stream, child_stream):
 
         if not children:
 
-            # Empty span: collapse to a point
+            # Empty span: collapse sync_right to sync_left (deterministic)
 
-            # Find the boundary where children used to be
-
-            span.sync_left = span.sync_right  # or preserve last known
+            span.sync_right = span.sync_left
 
             warn(f"Span {span.id} has no children (empty)")
 
@@ -687,6 +700,8 @@ def rebuild_span_boundaries(span_stream, child_stream):
         span.sync_right = max(c.sync_right for c in children, key=order)
 
 ```
+
+**Empty span collapse policy:** When a span becomes empty, `sync_right` is set equal to `sync_left` (not the other way around). This preserves the span's left boundary position for provenance. Empty spans may be selected/matched; `$children()` returns `[]`.
 
 
 
@@ -962,6 +977,13 @@ type BaseSplicePatch = InsertAtBoundaryPatch | ReplaceRangePatch | DeleteTokensP
 
 ```
 
+**Range membership semantics:**
+
+A token `t` is "within range `[L, R]`" if and only if:
+- `L.order <= t.sync_left.order` AND `t.sync_right.order <= R.order`
+
+That is, the token must be **fully contained** within the range boundaries. Partially overlapping tokens are NOT within the range. Splices MUST NOT attempt to partially delete a token.
+
 
 
 ```typescript
@@ -1138,19 +1160,48 @@ interface DisassociatePatch {
 
 interface TokenSpec {
 
-  name: string | Expr;
+  name: string;                              // literal or "=expr" prefixed
 
-  features?: Record<string, Value | Expr>;
+  features?: Record<string, Value | string>; // literal or "=expr" prefixed
 
   scalars?: Record<string, { base?: number; floor?: number }>;
 
-  parent?: TokenId | Expr | 'inherit_left';  // default: inherit_left
+  parent?: TokenId | string | 'inherit_left';  // default: inherit_left
 
 }
 
 ```
 
 
+
+**Expression vs literal disambiguation:**
+
+Any string field in TokenSpec (or Effect values, or other polymorphic contexts) uses a prefix convention:
+- Strings starting with `=` are JSONata expressions (evaluated at runtime)
+- All other strings are literals
+
+Examples:
+```yaml
+# Literal phoneme name
+name: "dʒ"
+
+# Expression: concatenate stop name with suffix
+name: "=stop.name & '_rel'"
+
+# Literal feature value
+features: { place: "alveolar" }
+
+# Expression: copy feature from captured token
+features: { place: "=stop.f.place" }
+
+# Literal parent reference
+parent: "syllable_42"
+
+# Expression: compute parent
+parent: "=$parent(stop, 'syllable').id"
+```
+
+This convention enables unambiguous parsing, LSP support, and validation.
 
 **Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left.
 
@@ -1194,25 +1245,65 @@ Base stream mutations use the `BaseSplicePatch` discriminated union (§5.2):
 
 **Algorithm:**
 
+Overlapping base splices are NOT jointly applied. The algorithm selects non-overlapping winners first, then batches for efficiency.
+
 
 
 ```python
 
 def apply_base_splices(base_stream, patches):
 
-    """Apply all base splices as a single batched operation."""
+    """Apply base splices with overlap resolution."""
 
-    
 
-    # Group overlapping/adjacent patches
 
-    groups = group_overlapping_ranges(patches)
+    # Step 1: patches already sorted by (rule_index, match_index, patch_seq)
 
-    
+
+
+    # Step 2: Select non-overlapping winners
+
+    accepted = []
+
+    claimed_tokens = set()  # tokens already affected by accepted splice
+
+
+
+    for patch in patches:
+
+        patch_tokens = set(getattr(patch, 'delete_tokens', []))
+
+        overlap = patch_tokens & claimed_tokens
+
+
+
+        if overlap:
+
+            # Overlaps with already-accepted splice
+
+            emit_trace('patch_skipped', patch, reason='shadowed')
+
+            continue
+
+
+
+        # No overlap: accept this patch
+
+        accepted.append(patch)
+
+        claimed_tokens.update(patch_tokens)
+
+
+
+    # Step 3: Group non-overlapping, adjacent patches for batch efficiency
+
+    groups = group_adjacent_ranges(accepted)
+
+
 
     for group in groups:
 
-        # Merge into single splice operation
+        # Execute as batched operation
 
         merged_left = min(p.range_left for p in group)
 
@@ -1222,17 +1313,7 @@ def apply_base_splices(base_stream, patches):
 
         all_inserts = flatten_sorted(p.insert_tokens for p in group)
 
-        
-
-        # Execute splice
-
-        # 1. Remove deleted tokens
-
-        # 2. Compute sync marks needed for inserts
-
-        # 3. Insert new tokens partitioning [merged_left, merged_right]
-
-        execute_splice(base_stream, merged_left, merged_right, 
+        execute_splice(base_stream, merged_left, merged_right,
 
                        all_deletes, all_inserts)
 
@@ -1578,9 +1659,25 @@ interface Rule {
 
 }
 
+
+
+interface Effect {
+
+  target?: string;               // capture name; defaults to 'current'
+
+  field: string;                 // scalar field name
+
+  op: 'set' | 'mul' | 'add';
+
+  value: string;                 // literal or "=expr" prefixed
+
+  tag: string;                   // provenance tag
+
+}
+
 ```
 
-
+**Effect target defaulting:** If `target` is omitted, it defaults to `'current'`. For pattern rules, `target` may reference any capture name (e.g., `'v'`, `'stop'`).
 
 **Constraint evaluation timing:**
 
@@ -2252,13 +2349,13 @@ validation:
 
 **Splice overlap policy:**
 
-\- Adjacent splices are allowed and batched together
-
-\- Overlapping splices are resolved by sort order (rule_index, match_index, patch_seq)
-
-\- **Conflict:** Two splices that both delete the same token but specify different insertions → error
-
-\- **Not a conflict:** Two splices that affect adjacent/overlapping ranges but don't contradict
+- Adjacent (non-overlapping) splices are allowed and batched together for efficiency
+- **Overlapping splices are NOT jointly applied.** After sorting by `(rule_index, match_index, patch_seq)`:
+  - Earlier patches (lower sort key) take precedence
+  - Later patches that overlap an already-accepted patch are skipped (shadowed)
+  - Trace events (`patch_skipped`) are emitted with reason `'shadowed'`
+- **Conflict (optional strict mode):** Two splices that both delete the same token but specify different insertions may raise an error instead of shadowing
+- **Not a conflict:** Two splices that affect adjacent ranges without token overlap
 
 
 
@@ -4164,11 +4261,12 @@ Ranks use base-36 alphabet: `0123456789abcdefghijklmnopqrstuvwxyz`
 
 **Preconditions:**
 
-\- All FINITE ranks are non-empty strings
+- All FINITE ranks are non-empty strings
+- Empty string `""` is not a valid rank
+- The initial rank for the first token is typically `"i"` (midpoint of alphabet)
+- Ranks are compared by ASCII codepoint order (not locale collation)
 
-\- Empty string `""` is not a valid rank
-
-\- The initial rank for the first token is typically `"i"` (midpoint of alphabet)
+**Failure handling:** Rank generation MAY fail if there is no representable rank between two adjacent ranks. In that case, the engine MUST trigger a rebalance and retry.
 
 
 
@@ -4178,69 +4276,103 @@ ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 BASE = len(ALPHABET)  # 36
 
+MAX_RANK_LENGTH = 50
+
+
+
+class NoRankBetweenError(Exception):
+
+    """Raised when no rank can be generated between two adjacent ranks."""
+
+    pass
+
 
 
 def rank_between(a: str, b: str) -> str:
 
     """
 
-    Generate a rank string that sorts between a and b.
+    Generate a rank string that sorts between a and b (ASCII order).
 
-    Precondition: a < b (lexicographically), both non-empty
+    Precondition: a < b (ASCII codepoint comparison), both non-empty.
+
+    Raises NoRankBetweenError if no valid rank exists (requires rebalance).
 
     """
 
     assert a and b, "Ranks must be non-empty"
 
-    assert a < b, "a must be less than b"
+    assert a < b, "a must be less than b (ASCII order)"
 
-    
 
-    # Pad shorter string
-
-    max_len = max(len(a), len(b))
-
-    a_padded = a.ljust(max_len, ALPHABET[0])
-
-    b_padded = b.ljust(max_len, ALPHABET[-1])
-
-    
 
     result = []
 
-    for i in range(max_len):
+    i = 0
 
-        a_idx = ALPHABET.index(a_padded[i])
 
-        b_idx = ALPHABET.index(b_padded[i])
 
-        
+    # Process common prefix
 
-        if a_idx + 1 < b_idx:
+    while i < len(a) and i < len(b):
 
-            # Gap exists: insert midpoint
+        if a[i] == b[i]:
 
-            mid_idx = (a_idx + b_idx) // 2
+            result.append(a[i])
+
+            i += 1
+
+        elif ALPHABET.index(a[i]) + 1 < ALPHABET.index(b[i]):
+
+            # Gap between chars: pick midpoint
+
+            mid_idx = (ALPHABET.index(a[i]) + ALPHABET.index(b[i])) // 2
 
             return ''.join(result) + ALPHABET[mid_idx]
 
-        elif a_idx == b_idx:
+        else:
 
-            # Same char: continue to next position
+            # Adjacent chars: extend a with midpoint suffix
 
-            result.append(ALPHABET[a_idx])
+            result.append(a[i])
+
+            return ''.join(result) + ALPHABET[BASE // 2]
+
+
+
+    # One string is prefix of the other
+
+    if i < len(a):
+
+        # b is prefix of a - impossible if a < b
+
+        raise NoRankBetweenError(f"Invalid: b='{b}' is prefix of a='{a}'")
+
+
+
+    if i < len(b):
+
+        # a is prefix of b: insert between a and b[i]
+
+        b_idx = ALPHABET.index(b[i])
+
+        if b_idx > 0:
+
+            mid_idx = b_idx // 2
+
+            return ''.join(result) + ALPHABET[mid_idx]
 
         else:
 
-            # Adjacent (a_idx + 1 == b_idx): need to extend
+            # b[i] is '0', extend with midpoint
 
-            result.append(ALPHABET[a_idx])
+            return ''.join(result) + ALPHABET[0] + ALPHABET[BASE // 2]
 
-    
 
-    # Strings are equal or adjacent at all positions: extend with midpoint
 
-    return ''.join(result) + ALPHABET[BASE // 2]  # 'i'
+    # Strings are equal - impossible if a < b
+
+    raise NoRankBetweenError(f"Strings are equal: a='{a}', b='{b}'")
 
 
 
@@ -4250,7 +4382,7 @@ def rank_after(a: str) -> str:
 
     assert a, "Rank must be non-empty"
 
-    return a + ALPHABET[BASE // 2]
+    return a + ALPHABET[BASE // 2]  # e.g., "abc" -> "abci"
 
 
 
@@ -4260,13 +4392,19 @@ def rank_before(b: str) -> str:
 
     assert b, "Rank must be non-empty"
 
-    last_idx = ALPHABET.index(b[-1])
+    # Find rightmost char that is not '0'
 
-    if last_idx > 0:
+    for i in range(len(b) - 1, -1, -1):
 
-        return b[:-1] + ALPHABET[(last_idx - 1) // 2] if len(b) > 1 else ALPHABET[last_idx // 2]
+        idx = ALPHABET.index(b[i])
 
-    return b + ALPHABET[0]
+        if idx > 0:
+
+            return b[:i] + ALPHABET[idx // 2]
+
+    # All chars are '0': prepend with midpoint
+
+    return ALPHABET[0] + ALPHABET[BASE // 2]
 
 
 
@@ -4276,11 +4414,25 @@ def initial_rank() -> str:
 
     return ALPHABET[BASE // 2]  # 'i'
 
+
+
+def needs_rebalance(rank: str) -> bool:
+
+    """Check if rank is too long and needs rebalancing."""
+
+    return len(rank) > MAX_RANK_LENGTH
+
 ```
 
 
 
-**Rebalancing:** If ranks become too long (> 50 chars), trigger a rebalance pass that reassigns all ranks to evenly-spaced short strings. This is rare in practice.
+**Rebalancing:** If ranks become too long (> 50 chars) or `rank_between` raises `NoRankBetweenError`, the engine MUST trigger a rebalance pass that:
+
+1. Collects all sync marks in order
+2. Reassigns ranks as evenly-spaced short strings (e.g., "0i", "1", "1i", "2", ...)
+3. Retries the failed insertion
+
+This is rare in practice but must be handled for correctness.
 
 
 

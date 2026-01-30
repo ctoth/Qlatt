@@ -1,4 +1,4 @@
-\# Declarative TTS Frontend DSL v11
+# Declarative TTS Frontend DSL v11
 
 
 
@@ -10,15 +10,15 @@ A domain-specific language for phonological and phonetic rules in speech synthes
 
 
 
-\## Part 1: Core Data Model
+## Part 1: Core Data Model
 
 
 
-\### 1.1 Sync Marks
+### 1.1 Sync Marks
 
 
 
-A single \*\*global sync axis\*\* coordinates all streams. This follows the Delta model (Hertz 1991) where multiple linguistic representations share synchronization points.
+A single **global sync axis** coordinates all streams. This follows the Delta model (Hertz 1991) where multiple linguistic representations share synchronization points.
 
 
 
@@ -28,21 +28,21 @@ A single \*\*global sync axis\*\* coordinates all streams. This follows the Delt
 
 type OrderKey = 
 
-&nbsp; | { kind: 'START' }
+  | { kind: 'START' }
 
-&nbsp; | { kind: 'FINITE', rank: string }
+  | { kind: 'FINITE', rank: string }
 
-&nbsp; | { kind: 'END' };
+  | { kind: 'END' };
 
 
 
 interface SyncMark {
 
-&nbsp; id: string;           // STABLE unique ID (never reassigned)
+  id: string;           // STABLE unique ID (never reassigned)
 
-&nbsp; order: OrderKey;      // comparison key
+  order: OrderKey;      // comparison key
 
-&nbsp; time: number | null;  // concrete time in ms (after duration resolution)
+  time: number | null;  // concrete time in ms (after duration resolution)
 
 }
 
@@ -52,17 +52,17 @@ interface SyncMark {
 
 function compareOrder(a: OrderKey, b: OrderKey): number {
 
-&nbsp; const kindOrder = { START: 0, FINITE: 1, END: 2 };
+  const kindOrder = { START: 0, FINITE: 1, END: 2 };
 
-&nbsp; if (a.kind !== b.kind) return kindOrder\[a.kind] - kindOrder\[b.kind];
+  if (a.kind !== b.kind) return kindOrder[a.kind] - kindOrder[b.kind];
 
-&nbsp; if (a.kind === 'FINITE' \&\& b.kind === 'FINITE') {
+  if (a.kind === 'FINITE' && b.kind === 'FINITE') {
 
-&nbsp;   return a.rank.localeCompare(b.rank);  // lexicographic
+    return a.rank.localeCompare(b.rank);  // lexicographic
 
-&nbsp; }
+  }
 
-&nbsp; return 0;  // both START or both END
+  return 0;  // both START or both END
 
 }
 
@@ -70,15 +70,15 @@ function compareOrder(a: OrderKey, b: OrderKey): number {
 
 
 
-\*\*Sentinels:\*\* `START` and `END` are not literal rank strings. They compare as infinities, ensuring no insertion can ever sort before START or after END.
+**Sentinels:** `START` and `END` are not literal rank strings. They compare as infinities, ensuring no insertion can ever sort before START or after END.
 
 
 
-\*\*Finite ranks:\*\* Use base-36 strings (`\[0-9a-z]+`). Insertion between ranks uses the algorithm in §11.2.
+**Finite ranks:** Use base-36 strings (`[0-9a-z]+`). Insertion between ranks uses the algorithm in §11.2.
 
 
 
-\### 1.2 Sentinels
+### 1.2 Sentinels
 
 
 
@@ -96,17 +96,17 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 \- `END` always compares greater than any finite rank
 
-\- No insertion can produce a rank outside `\[START, END]`
+\- No insertion can produce a rank outside `[START, END]`
 
 \- Empty utterance: START and END only
 
 
 
-\*\*Interior marks:\*\* A sync mark may exist inside a base token interval. Time computed by interpolation (§5.11).
+**Interior marks:** A sync mark may exist inside a base token interval. Time computed by interpolation (§5.11).
 
 
 
-\### 1.3 Interval Tokens
+### 1.3 Interval Tokens
 
 
 
@@ -114,23 +114,23 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 interface IntervalToken {
 
-&nbsp; id: string;
+  id: string;
 
-&nbsp; stream: string;
+  stream: string;
 
-&nbsp; name: string;
+  name: string;
 
-&nbsp; sync\_left: SyncMarkId;
+  sync_left: SyncMarkId;
 
-&nbsp; sync\_right: SyncMarkId;
+  sync_right: SyncMarkId;
 
-&nbsp; features: Record<string, Value>;
+  features: Record<string, Value>;
 
-&nbsp; scalars: Record<string, ScalarState>;
+  scalars: Record<string, ScalarState>;
 
-&nbsp; parent: TokenId | null;
+  parent: TokenId | null;
 
-&nbsp; associations: Record<string, Set<TokenId>>;
+  associations: Record<string, Set<TokenId>>;
 
 }
 
@@ -138,11 +138,11 @@ interface IntervalToken {
 
 
 
-\*\*Invariant:\*\* `sync\_left.order < sync\_right.order`
+**Invariant:** `sync_left.order < sync_right.order`
 
 
 
-\### 1.4 Point Tokens
+### 1.4 Point Tokens
 
 
 
@@ -150,21 +150,21 @@ interface IntervalToken {
 
 interface PointToken {
 
-&nbsp; id: string;
+  id: string;
 
-&nbsp; stream: string;
+  stream: string;
 
-&nbsp; anchor\_left: SyncMarkId;
+  anchor_left: SyncMarkId;
 
-&nbsp; anchor\_right: SyncMarkId;
+  anchor_right: SyncMarkId;
 
-&nbsp; ratio: number;              // 0.0-1.0, validated
+  ratio: number;              // 0.0-1.0, validated
 
-&nbsp; value: number | null;
+  value: number | null;
 
-&nbsp; value\_expr: DeferredExpr | null;
+  value_expr: DeferredExpr | null;
 
-&nbsp; time: number | null;        // computed at resolution
+  time: number | null;        // computed at resolution
 
 }
 
@@ -172,19 +172,19 @@ interface PointToken {
 
 
 
-\*\*Constraints:\*\*
+**Constraints:**
 
 \- `0 <= ratio <= 1`
 
-\- If `anchor\_left == anchor\_right`, ratio normalized to 0
+\- If `anchor_left == anchor_right`, ratio normalized to 0
 
 
 
-\*\*Time:\*\* `time = anchor\_left.time + ratio × (anchor\_right.time - anchor\_left.time)`
+**Time:** `time = anchor_left.time + ratio × (anchor_right.time - anchor_left.time)`
 
 
 
-\### 1.5 Stream Types
+### 1.5 Stream Types
 
 
 
@@ -202,7 +202,7 @@ interface PointToken {
 
 
 
-\### 1.6 Scalar State
+### 1.6 Scalar State
 
 
 
@@ -210,13 +210,13 @@ interface PointToken {
 
 interface ScalarState {
 
-&nbsp; base: number;
+  base: number;
 
-&nbsp; floor: number | null;
+  floor: number | null;
 
-&nbsp; effects: ResolvedEffect\[];
+  effects: ResolvedEffect[];
 
-&nbsp; resolved: number | null;
+  resolved: number | null;
 
 }
 
@@ -224,17 +224,17 @@ interface ScalarState {
 
 interface ResolvedEffect {
 
-&nbsp; field: string;
+  field: string;
 
-&nbsp; op: 'set' | 'mul' | 'add';
+  op: 'set' | 'mul' | 'add';
 
-&nbsp; value: number;
+  value: number;
 
-&nbsp; tag: string;
+  tag: string;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; order: number;              // assigned at patch application time
+  order: number;              // assigned at patch application time
 
 }
 
@@ -242,11 +242,11 @@ interface ResolvedEffect {
 
 
 
-\*\*Effect ordering:\*\* `order` is assigned as a monotonic integer during patch application, in global application order. Within a single patch, effects are ordered by their position in the YAML list.
+**Effect ordering:** `order` is assigned as a monotonic integer during patch application, in global application order. Within a single patch, effects are ordered by their position in the YAML list.
 
 
 
-\### 1.7 Klatt Incompressibility
+### 1.7 Klatt Incompressibility
 
 
 
@@ -256,13 +256,13 @@ From Klatt (1976) Eq. 1:
 
 ```
 
-D\_f = K × (D\_i - D\_min) + D\_min
+D_f = K × (D_i - D_min) + D_min
 
 ```
 
 
 
-Only the compressible portion `(D\_i - D\_min)` scales. This prevents unnaturally short durations when multiple shortening rules stack. See Klatt (1976) Table II for `D\_min` values: vowels ~0.42-0.45 × inherent duration, consonants ~0.5-0.6.
+Only the compressible portion `(D_i - D_min)` scales. This prevents unnaturally short durations when multiple shortening rules stack. See Klatt (1976) Table II for `D_min` values: vowels ~0.42-0.45 × inherent duration, consonants ~0.5-0.6.
 
 
 
@@ -270,19 +270,19 @@ Only the compressible portion `(D\_i - D\_min)` scales. This prevents unnaturall
 
 
 
-\## Part 2: Expression Language (JSONata)
+## Part 2: Expression Language (JSONata)
 
 
 
-Expressions use \[JSONata](https://jsonata.org).
+Expressions use [JSONata](https://jsonata.org).
 
 
 
-\### 2.1 Evaluation Model
+### 2.1 Evaluation Model
 
 
 
-\*\*Data root model:\*\* The context is passed as the data root. Expressions access fields directly without `$` prefix.
+**Data root model:** The context is passed as the data root. Expressions access fields directly without `$` prefix.
 
 
 
@@ -292,9 +292,9 @@ Expressions use \[JSONata](https://jsonata.org).
 
 {
 
-&nbsp; "current": { "name": "æ", "f": {...}, "s": {...} },
+  "current": { "name": "æ", "f": {...}, "s": {...} },
 
-&nbsp; "params": { "stress\_factor": 1.3 }
+  "params": { "stress_factor": 1.3 }
 
 }
 
@@ -308,7 +308,7 @@ Expressions use \[JSONata](https://jsonata.org).
 
 
 
-\*\*Registered functions\*\* use `$` prefix:
+**Registered functions** use `$` prefix:
 
 
 
@@ -322,11 +322,11 @@ Expressions use \[JSONata](https://jsonata.org).
 
 
 
-\### 2.2 Expression Context
+### 2.2 Expression Context
 
 
 
-Expressions receive a \*\*TokenView\*\* facade, not the raw token model:
+Expressions receive a **TokenView** facade, not the raw token model:
 
 
 
@@ -334,19 +334,19 @@ Expressions receive a \*\*TokenView\*\* facade, not the raw token model:
 
 interface TokenView {
 
-&nbsp; id: string;
+  id: string;
 
-&nbsp; name: string;
+  name: string;
 
-&nbsp; f: Record<string, Value>;           // features (alias for features)
+  f: Record<string, Value>;           // features (alias for features)
 
-&nbsp; s: Record<string, number | null>;   // resolved scalar values
+  s: Record<string, number | null>;   // resolved scalar values
 
-&nbsp; sync\_left: SyncMarkId;
+  sync_left: SyncMarkId;
 
-&nbsp; sync\_right: SyncMarkId;
+  sync_right: SyncMarkId;
 
-&nbsp; parent: TokenId | null;
+  parent: TokenId | null;
 
 }
 
@@ -354,7 +354,7 @@ interface TokenView {
 
 
 
-\*\*Mapping from internal model:\*\*
+**Mapping from internal model:**
 
 \- `t.f` → `t.features`
 
@@ -364,15 +364,15 @@ interface TokenView {
 
 
 
-\*\*Select rules:\*\*
+**Select rules:**
 
 ```javascript
 
 {
 
-&nbsp; "current": TokenView,
+  "current": TokenView,
 
-&nbsp; "params": Record<string, Value>
+  "params": Record<string, Value>
 
 }
 
@@ -380,19 +380,19 @@ interface TokenView {
 
 
 
-\*\*Pattern rules:\*\*
+**Pattern rules:**
 
 ```javascript
 
 {
 
-&nbsp; "stop": TokenView,      // capture name
+  "stop": TokenView,      // capture name
 
-&nbsp; "son": TokenView,       // capture name
+  "son": TokenView,       // capture name
 
-&nbsp; "current": TokenView,   // current step being evaluated (in where clauses)
+  "current": TokenView,   // current step being evaluated (in where clauses)
 
-&nbsp; "params": Record<string, Value>
+  "params": Record<string, Value>
 
 }
 
@@ -400,7 +400,7 @@ interface TokenView {
 
 
 
-\### 2.3 Registered Functions
+### 2.3 Registered Functions
 
 
 
@@ -412,17 +412,17 @@ interface TokenView {
 
 | `$next(t)` | Token \\| null |
 
-| `$prev\_sibling(t)` | Token \\| null |
+| `$prev_sibling(t)` | Token \\| null |
 
-| `$next\_sibling(t)` | Token \\| null |
+| `$next_sibling(t)` | Token \\| null |
 
 | `$parent(t, stream)` | Token \\| null |
 
-| `$children(t, stream)` | Token\[] |
+| `$children(t, stream)` | Token[] |
 
-| `$assoc(t, name)` | Token\[] |
+| `$assoc(t, name)` | Token[] |
 
-| `$spanning(t, stream)` | Token\[] |
+| `$spanning(t, stream)` | Token[] |
 
 | `$index(t)` | number |
 
@@ -430,13 +430,13 @@ interface TokenView {
 
 | `$midpoint(t)` | Anchor |
 
-| `$at\_ratio(t, r)` | Anchor |
+| `$at_ratio(t, r)` | Anchor |
 
-| `$at\_sync(s)` | Anchor |
+| `$at_sync(s)` | Anchor |
 
 
 
-\### 2.4 Undefined Handling
+### 2.4 Undefined Handling
 
 
 
@@ -454,7 +454,7 @@ This is correct for sparse linguistic features.
 
 
 
-\### 2.5 Examples
+### 2.5 Examples
 
 
 
@@ -464,33 +464,33 @@ All expressions require explicit `current.` prefix in select rules. No syntactic
 
 ```yaml
 
-\# Feature check (select rule)
+# Feature check (select rule)
 
 where: "current.f.manner = 'vowel'"
 
 
 
-\# Parent navigation
+# Parent navigation
 
-value: "$parent(current, 'syllable').f.stress = 1 ? params.stress\_factor : 1"
+value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
 
 
 
-\# Pattern constraint (captures are in scope)
+# Pattern constraint (captures are in scope)
 
 constraint: "obs.f.voicing = 'voiceless'"
 
 
 
-\# Chained navigation
+# Chained navigation
 
-constraint: "$next(stop).f.manner in \['vowel', 'nasal'] and $parent(stop, 'word').f.pos = 'verb'"
+constraint: "$next(stop).f.manner in ['vowel', 'nasal'] and $parent(stop, 'word').f.pos = 'verb'"
 
 ```
 
 
 
-\*\*Rationale:\*\* One mental model. Data fields have no prefix, registered functions use `$`. No magic expansion.
+**Rationale:** One mental model. Data fields have no prefix, registered functions use `$`. No magic expansion.
 
 
 
@@ -498,11 +498,11 @@ constraint: "$next(stop).f.manner in \['vowel', 'nasal'] and $parent(stop, 'word
 
 
 
-\## Part 3: Stream Definitions
+## Part 3: Stream Definitions
 
 
 
-\### 3.1 Base Stream
+### 3.1 Base Stream
 
 
 
@@ -510,147 +510,147 @@ constraint: "$next(stop).f.manner in \['vowel', 'nasal'] and $parent(stop, 'word
 
 streams:
 
-&nbsp; phone:
+  phone:
 
-&nbsp;   type: base
+    type: base
 
-&nbsp;   
+    
 
-&nbsp;   features:
+    features:
 
-&nbsp;     place: \[labial, alveolar, palatal, velar, glottal]
+      place: [labial, alveolar, palatal, velar, glottal]
 
-&nbsp;     manner: \[stop, fricative, affricate, nasal, liquid, glide, vowel, silence, release, aspiration]
+      manner: [stop, fricative, affricate, nasal, liquid, glide, vowel, silence, release, aspiration]
 
-&nbsp;     voicing: \[voiced, voiceless]
+      voicing: [voiced, voiceless]
 
-&nbsp;     height: \[high, mid, low]
+      height: [high, mid, low]
 
-&nbsp;     backness: \[front, central, back]
+      backness: [front, central, back]
 
-&nbsp;   
+    
 
-&nbsp;   scalars:
+    scalars:
 
-&nbsp;     duration:
+      duration:
 
-&nbsp;       unit: ms
+        unit: ms
 
-&nbsp;       base\_field: dur
+        base_field: dur
 
-&nbsp;       floor\_field: dur\_min
+        floor_field: dur_min
 
-&nbsp;       resolution: klatt
+        resolution: klatt
 
-&nbsp;       max: 500
+        max: 500
 
-&nbsp;     F1: {unit: Hz, base\_field: F1, resolution: standard, min: 200, max: 1000}
+      F1: {unit: Hz, base_field: F1, resolution: standard, min: 200, max: 1000}
 
-&nbsp;     B1: {unit: Hz, base\_field: B1, resolution: standard, min: 30, max: 500}
+      B1: {unit: Hz, base_field: B1, resolution: standard, min: 30, max: 500}
 
-&nbsp;     F2: {unit: Hz, base\_field: F2, resolution: standard, min: 500, max: 3000}
+      F2: {unit: Hz, base_field: F2, resolution: standard, min: 500, max: 3000}
 
-&nbsp;     B2: {unit: Hz, base\_field: B2, resolution: standard, min: 50, max: 500}
+      B2: {unit: Hz, base_field: B2, resolution: standard, min: 50, max: 500}
 
-&nbsp;     F3: {unit: Hz, base\_field: F3, resolution: standard, min: 1500, max: 4000}
+      F3: {unit: Hz, base_field: F3, resolution: standard, min: 1500, max: 4000}
 
-&nbsp;     B3: {unit: Hz, base\_field: B3, resolution: standard, min: 100, max: 500}
+      B3: {unit: Hz, base_field: B3, resolution: standard, min: 100, max: 500}
 
-&nbsp;     AV: {unit: dB, base\_field: AV, resolution: standard, min: 0, max: 70}
+      AV: {unit: dB, base_field: AV, resolution: standard, min: 0, max: 70}
 
-&nbsp;     AH: {unit: dB, base\_field: AH, resolution: standard, min: 0, max: 70}
+      AH: {unit: dB, base_field: AH, resolution: standard, min: 0, max: 70}
 
-&nbsp;     AF: {unit: dB, base\_field: AF, resolution: standard, min: 0, max: 80}
+      AF: {unit: dB, base_field: AF, resolution: standard, min: 0, max: 80}
 
-&nbsp;   
+    
 
-&nbsp;   inventory:
+    inventory:
 
-&nbsp;     æ:
+      æ:
 
-&nbsp;       features: {height: low, backness: front, manner: vowel}
+        features: {height: low, backness: front, manner: vowel}
 
-&nbsp;       targets: {F1: 660, B1: 70, F2: 1720, B2: 100, F3: 2410, B3: 150,
+        targets: {F1: 660, B1: 70, F2: 1720, B2: 100, F3: 2410, B3: 150,
 
-&nbsp;                 dur: 240, dur\_min: 105, AV: 60, AH: 0, AF: 0}
+                  dur: 240, dur_min: 105, AV: 60, AH: 0, AF: 0}
 
-&nbsp;     # ... (abbreviated)
+      # ... (abbreviated)
 
 
 
-&nbsp; phrase:
+  phrase:
 
-&nbsp;   type: span
+    type: span
 
-&nbsp;   spans: word
+    spans: word
 
-&nbsp;   features:
+    features:
 
-&nbsp;     boundary: \[none, minor, major]
+      boundary: [none, minor, major]
 
 
 
-&nbsp; word:
+  word:
 
-&nbsp;   type: span
+    type: span
 
-&nbsp;   spans: syllable
+    spans: syllable
 
-&nbsp;   features:
+    features:
 
-&nbsp;     pos: \[noun, verb, adj, adv, func, punct]
+      pos: [noun, verb, adj, adv, func, punct]
 
 
 
-&nbsp; syllable:
+  syllable:
 
-&nbsp;   type: span
+    type: span
 
-&nbsp;   spans: phone
+    spans: phone
 
-&nbsp;   features:
+    features:
 
-&nbsp;     stress: \[0, 1, 2]
+      stress: [0, 1, 2]
 
-&nbsp;     boundary: \[none, minor, major]
+      boundary: [none, minor, major]
 
 
 
-&nbsp; tone:
+  tone:
 
-&nbsp;   type: parallel
+    type: parallel
 
-&nbsp;   features:
+    features:
 
-&nbsp;     pitch: \[H, L, M, HL, LH]
+      pitch: [H, L, M, HL, LH]
 
-&nbsp;     floating: \[true, false]
+      floating: [true, false]
 
 
 
-&nbsp; f0:
+  f0:
 
-&nbsp;   type: point
+    type: point
 
-&nbsp;   value\_type: number
+    value_type: number
 
-&nbsp;   unit: Hz
+    unit: Hz
 
 ```
 
 
 
-\### 3.2 Span Lifecycle
+### 3.2 Span Lifecycle
 
 
 
-\*\*Span tokens are stable.\*\* They are created by upstream processing (lexer, syllabifier) and persist throughout rule evaluation. The "rebuild" step (§5.9) only recomputes boundaries; it never creates or destroys span tokens.
+**Span tokens are stable.** They are created by upstream processing (lexer, syllabifier) and persist throughout rule evaluation. The "rebuild" step (§5.9) only recomputes boundaries; it never creates or destroys span tokens.
 
 
 
-\*\*Empty spans:\*\* If all children of a span are deleted (e.g., by coalescence), the span becomes empty:
+**Empty spans:** If all children of a span are deleted (e.g., by coalescence), the span becomes empty:
 
-\- Boundaries collapse: `sync\_left == sync\_right`
+\- Boundaries collapse: `sync_left == sync_right`
 
 \- The span persists for provenance and alignment
 
@@ -662,35 +662,35 @@ streams:
 
 ```python
 
-def rebuild\_span\_boundaries(span\_stream, child\_stream):
+def rebuild_span_boundaries(span_stream, child_stream):
 
-&nbsp;   """Update span boundaries from children. Spans must already exist."""
+    """Update span boundaries from children. Spans must already exist."""
 
-&nbsp;   for span in span\_stream.tokens:
+    for span in span_stream.tokens:
 
-&nbsp;       children = \[t for t in child\_stream.tokens if t.parent == span.id]
+        children = [t for t in child_stream.tokens if t.parent == span.id]
 
-&nbsp;       if not children:
+        if not children:
 
-&nbsp;           # Empty span: collapse to a point
+            # Empty span: collapse to a point
 
-&nbsp;           # Find the boundary where children used to be
+            # Find the boundary where children used to be
 
-&nbsp;           span.sync\_left = span.sync\_right  # or preserve last known
+            span.sync_left = span.sync_right  # or preserve last known
 
-&nbsp;           warn(f"Span {span.id} has no children (empty)")
+            warn(f"Span {span.id} has no children (empty)")
 
-&nbsp;           continue
+            continue
 
-&nbsp;       span.sync\_left = min(c.sync\_left for c in children, key=order)
+        span.sync_left = min(c.sync_left for c in children, key=order)
 
-&nbsp;       span.sync\_right = max(c.sync\_right for c in children, key=order)
+        span.sync_right = max(c.sync_right for c in children, key=order)
 
 ```
 
 
 
-\### 3.3 Topology
+### 3.3 Topology
 
 
 
@@ -698,11 +698,11 @@ def rebuild\_span\_boundaries(span\_stream, child\_stream):
 
 topology:
 
-&nbsp; hierarchy: \[phrase, word, syllable, phone]
+  hierarchy: [phrase, word, syllable, phone]
 
-&nbsp; parallel: \[tone]
+  parallel: [tone]
 
-&nbsp; point: \[f0]
+  point: [f0]
 
 ```
 
@@ -712,11 +712,11 @@ topology:
 
 
 
-\## Part 4: Pattern Matching
+## Part 4: Pattern Matching
 
 
 
-\### 4.1 Pattern Definition
+### 4.1 Pattern Definition
 
 
 
@@ -724,29 +724,29 @@ topology:
 
 patterns:
 
-&nbsp; stop\_before\_sonorant:
+  stop_before_sonorant:
 
-&nbsp;   stream: phone
+    stream: phone
 
-&nbsp;   scope: syllable
+    scope: syllable
 
-&nbsp;   max\_lookahead: 50
+    max_lookahead: 50
 
-&nbsp;   sequence:
+    sequence:
 
-&nbsp;     - capture: stop
+      - capture: stop
 
-&nbsp;       where: "current.f.manner = 'stop'"
+        where: "current.f.manner = 'stop'"
 
-&nbsp;     - capture: son
+      - capture: son
 
-&nbsp;       where: "current.f.manner in \['vowel', 'nasal', 'liquid', 'glide']"
+        where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
 
 ```
 
 
 
-\*\*max\_lookahead:\*\*
+**max_lookahead:**
 
 \- Unit: tokens in the stream
 
@@ -758,7 +758,7 @@ patterns:
 
 
 
-\### 4.2 Cross-Boundary Matching
+### 4.2 Cross-Boundary Matching
 
 
 
@@ -766,35 +766,35 @@ patterns:
 
 patterns:
 
-&nbsp; d\_j\_coalescence:
+  d_j_coalescence:
 
-&nbsp;   stream: phone
+    stream: phone
 
-&nbsp;   scope: phrase
+    scope: phrase
 
-&nbsp;   cross\_boundary: true
+    cross_boundary: true
 
-&nbsp;   sequence:
+    sequence:
 
-&nbsp;     - capture: d
+      - capture: d
 
-&nbsp;       where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
+        where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
 
-&nbsp;     - capture: j
+      - capture: j
 
-&nbsp;       where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
+        where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
 
-&nbsp;   constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
+    constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
 
 ```
 
 
 
-\### 4.3 Scope: utterance
+### 4.3 Scope: utterance
 
 
 
-The special scope `utterance` means `\[START, END]` with no parent constraint:
+The special scope `utterance` means `[START, END]` with no parent constraint:
 
 
 
@@ -802,23 +802,23 @@ The special scope `utterance` means `\[START, END]` with no parent constraint:
 
 patterns:
 
-&nbsp; utterance\_final:
+  utterance_final:
 
-&nbsp;   stream: phone
+    stream: phone
 
-&nbsp;   scope: utterance
+    scope: utterance
 
-&nbsp;   sequence:
+    sequence:
 
-&nbsp;     - capture: final
+      - capture: final
 
-&nbsp;       where: "$next(current) = null"
+        where: "$next(current) = null"
 
 ```
 
 
 
-\### 4.4 Capture Shape
+### 4.4 Capture Shape
 
 
 
@@ -830,9 +830,9 @@ patterns:
 
 | `optional: true` | Token \\| null | null |
 
-| `repeat: "\*"` | Token\[] | \[] |
+| `repeat: "\*"` | Token[] | [] |
 
-| `repeat: "+"` | Token\[] | Fails |
+| `repeat: "+"` | Token[] | Fails |
 
 
 
@@ -840,11 +840,11 @@ patterns:
 
 
 
-\## Part 5: Rule Evaluation
+## Part 5: Rule Evaluation
 
 
 
-\### 5.1 Pipeline
+### 5.1 Pipeline
 
 
 
@@ -878,7 +878,7 @@ patterns:
 
 
 
-\### 5.2 Patch Types
+### 5.2 Patch Types
 
 
 
@@ -892,21 +892,21 @@ Base stream mutations use one of three splice variants:
 
 interface InsertAtBoundaryPatch {
 
-&nbsp; type: 'insert\_at\_boundary';
+  type: 'insert_at_boundary';
 
-&nbsp; boundary: SyncMarkId;
+  boundary: SyncMarkId;
 
-&nbsp; side: 'before' | 'after';       // which direction to extend
+  side: 'before' | 'after';       // which direction to extend
 
-&nbsp; insert\_tokens: TokenSpec\[];
+  insert_tokens: TokenSpec[];
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -916,23 +916,23 @@ interface InsertAtBoundaryPatch {
 
 interface ReplaceRangePatch {
 
-&nbsp; type: 'replace\_range';
+  type: 'replace_range';
 
-&nbsp; range\_left: SyncMarkId;         // left boundary of affected region
+  range_left: SyncMarkId;         // left boundary of affected region
 
-&nbsp; range\_right: SyncMarkId;        // right boundary of affected region
+  range_right: SyncMarkId;        // right boundary of affected region
 
-&nbsp; delete\_tokens: TokenId\[];       // tokens to remove (must be within range)
+  delete_tokens: TokenId[];       // tokens to remove (must be within range)
 
-&nbsp; insert\_tokens: TokenSpec\[];     // tokens to insert (partition the range)
+  insert_tokens: TokenSpec[];     // tokens to insert (partition the range)
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -942,17 +942,17 @@ interface ReplaceRangePatch {
 
 interface DeleteTokensPatch {
 
-&nbsp; type: 'delete\_tokens';
+  type: 'delete_tokens';
 
-&nbsp; delete\_tokens: TokenId\[];
+  delete_tokens: TokenId[];
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -970,23 +970,23 @@ type BaseSplicePatch = InsertAtBoundaryPatch | ReplaceRangePatch | DeleteTokensP
 
 interface InsertIntervalPatch {
 
-&nbsp; type: 'insert\_interval';
+  type: 'insert_interval';
 
-&nbsp; stream: string;               // NOT base
+  stream: string;               // NOT base
 
-&nbsp; sync\_left: SyncMarkId;
+  sync_left: SyncMarkId;
 
-&nbsp; sync\_right: SyncMarkId;
+  sync_right: SyncMarkId;
 
-&nbsp; token: TokenSpec;
+  token: TokenSpec;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -996,27 +996,27 @@ interface InsertIntervalPatch {
 
 interface InsertPointPatch {
 
-&nbsp; type: 'insert\_point';
+  type: 'insert_point';
 
-&nbsp; stream: string;
+  stream: string;
 
-&nbsp; anchor\_left: SyncMarkId;
+  anchor_left: SyncMarkId;
 
-&nbsp; anchor\_right: SyncMarkId;
+  anchor_right: SyncMarkId;
 
-&nbsp; ratio: number;
+  ratio: number;
 
-&nbsp; value\_expr: DeferredExpr;
+  value_expr: DeferredExpr;
 
-&nbsp; context: CapturedContext;
+  context: CapturedContext;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -1026,19 +1026,19 @@ interface InsertPointPatch {
 
 interface ModifyPatch {
 
-&nbsp; type: 'modify';
+  type: 'modify';
 
-&nbsp; target: TokenId;
+  target: TokenId;
 
-&nbsp; effects: ResolvedEffect\[];
+  effects: ResolvedEffect[];
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -1048,19 +1048,19 @@ interface ModifyPatch {
 
 interface DeletePatch {
 
-&nbsp; type: 'delete';
+  type: 'delete';
 
-&nbsp; stream: string;               // NOT base
+  stream: string;               // NOT base
 
-&nbsp; target: TokenId;
+  target: TokenId;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -1070,21 +1070,21 @@ interface DeletePatch {
 
 interface AssociatePatch {
 
-&nbsp; type: 'associate';
+  type: 'associate';
 
-&nbsp; from: TokenId;
+  from: TokenId;
 
-&nbsp; to: TokenId;
+  to: TokenId;
 
-&nbsp; assoc\_name: string;
+  assoc_name: string;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -1094,21 +1094,21 @@ interface AssociatePatch {
 
 interface DisassociatePatch {
 
-&nbsp; type: 'disassociate';
+  type: 'disassociate';
 
-&nbsp; from: TokenId;
+  from: TokenId;
 
-&nbsp; to: TokenId;
+  to: TokenId;
 
-&nbsp; assoc\_name: string;
+  assoc_name: string;
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; rule\_index: number;
+  rule_index: number;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch\_seq: number;
+  patch_seq: number;
 
 }
 
@@ -1116,21 +1116,21 @@ interface DisassociatePatch {
 
 
 
-\*\*Association semantics:\*\*
+**Association semantics:**
 
 \- Associations are many-to-many: a token can have multiple associations of the same type
 
 \- Initial associations may be created by upstream processing or by rules
 
-\- `AssociatePatch` adds `to` to `from.associations\[assoc\_name]`
+\- `AssociatePatch` adds `to` to `from.associations[assoc_name]`
 
-\- `DisassociatePatch` removes `to` from `from.associations\[assoc\_name]`
+\- `DisassociatePatch` removes `to` from `from.associations[assoc_name]`
 
 \- Association GC (§5.7) removes references to deleted tokens
 
 
 
-\### 5.3 Token Specification
+### 5.3 Token Specification
 
 
 
@@ -1138,13 +1138,13 @@ interface DisassociatePatch {
 
 interface TokenSpec {
 
-&nbsp; name: string | Expr;
+  name: string | Expr;
 
-&nbsp; features?: Record<string, Value | Expr>;
+  features?: Record<string, Value | Expr>;
 
-&nbsp; scalars?: Record<string, { base?: number; floor?: number }>;
+  scalars?: Record<string, { base?: number; floor?: number }>;
 
-&nbsp; parent?: TokenId | Expr | 'inherit\_left';  // default: inherit\_left
+  parent?: TokenId | Expr | 'inherit_left';  // default: inherit_left
 
 }
 
@@ -1152,31 +1152,31 @@ interface TokenSpec {
 
 
 
-\*\*Parent inheritance:\*\* If `parent` is omitted or `'inherit\_left'`, the new token inherits the parent of the token immediately to its left.
+**Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left.
 
 
 
-\### 5.4 Patch Ordering
+### 5.4 Patch Ordering
 
 
 
-Sort key: `(rule\_index, match\_index, patch\_seq)`
+Sort key: `(rule_index, match_index, patch_seq)`
 
 
 
-\- `rule\_index`: position of rule in phase's rule list
+\- `rule_index`: position of rule in phase's rule list
 
-\- `match\_index`: which match of this rule (0, 1, 2, ...)
+\- `match_index`: which match of this rule (0, 1, 2, ...)
 
-\- `patch\_seq`: which patch from this match (for rules generating multiple patches)
-
-
-
-\*\*Rationale:\*\* Ordering is fully determined by rule list position and match order. No priority field needed. If a rule must run before others, place it earlier in the phase or in an earlier phase.
+\- `patch_seq`: which patch from this match (for rules generating multiple patches)
 
 
 
-\### 5.5 Base Stream Splice
+**Rationale:** Ordering is fully determined by rule list position and match order. No priority field needed. If a rule must run before others, place it earlier in the phase or in an earlier phase.
+
+
+
+### 5.5 Base Stream Splice
 
 
 
@@ -1192,59 +1192,59 @@ Base stream mutations use the `BaseSplicePatch` discriminated union (§5.2):
 
 
 
-\*\*Algorithm:\*\*
+**Algorithm:**
 
 
 
 ```python
 
-def apply\_base\_splices(base\_stream, patches):
+def apply_base_splices(base_stream, patches):
 
-&nbsp;   """Apply all base splices as a single batched operation."""
+    """Apply all base splices as a single batched operation."""
 
-&nbsp;   
+    
 
-&nbsp;   # Group overlapping/adjacent patches
+    # Group overlapping/adjacent patches
 
-&nbsp;   groups = group\_overlapping\_ranges(patches)
+    groups = group_overlapping_ranges(patches)
 
-&nbsp;   
+    
 
-&nbsp;   for group in groups:
+    for group in groups:
 
-&nbsp;       # Merge into single splice operation
+        # Merge into single splice operation
 
-&nbsp;       merged\_left = min(p.range\_left for p in group)
+        merged_left = min(p.range_left for p in group)
 
-&nbsp;       merged\_right = max(p.range\_right for p in group)
+        merged_right = max(p.range_right for p in group)
 
-&nbsp;       all\_deletes = union(p.delete\_tokens for p in group)
+        all_deletes = union(p.delete_tokens for p in group)
 
-&nbsp;       all\_inserts = flatten\_sorted(p.insert\_tokens for p in group)
+        all_inserts = flatten_sorted(p.insert_tokens for p in group)
 
-&nbsp;       
+        
 
-&nbsp;       # Execute splice
+        # Execute splice
 
-&nbsp;       # 1. Remove deleted tokens
+        # 1. Remove deleted tokens
 
-&nbsp;       # 2. Compute sync marks needed for inserts
+        # 2. Compute sync marks needed for inserts
 
-&nbsp;       # 3. Insert new tokens partitioning \[merged\_left, merged\_right]
+        # 3. Insert new tokens partitioning [merged_left, merged_right]
 
-&nbsp;       execute\_splice(base\_stream, merged\_left, merged\_right, 
+        execute_splice(base_stream, merged_left, merged_right, 
 
-&nbsp;                      all\_deletes, all\_inserts)
+                       all_deletes, all_inserts)
 
 ```
 
 
 
-\*\*Insert ordering:\*\* Within a group, inserts are ordered by `(patch.rule\_index, patch.match\_index, patch.patch\_seq, position\_in\_insert\_tokens)`.
+**Insert ordering:** Within a group, inserts are ordered by `(patch.rule_index, patch.match_index, patch.patch_seq, position_in_insert_tokens)`.
 
 
 
-\### 5.6 Insertion at END
+### 5.6 Insertion at END
 
 
 
@@ -1256,11 +1256,11 @@ To append a token at the end of the utterance:
 
 insert:
 
-&nbsp; range\_left: "last\_token.sync\_right"  # boundary before END
+  range_left: "last_token.sync_right"  # boundary before END
 
-&nbsp; range\_right: "END"
+  range_right: "END"
 
-&nbsp; insert\_tokens: \[...]
+  insert_tokens: [...]
 
 ```
 
@@ -1270,7 +1270,7 @@ The splice algorithm creates new sync mark(s) between the specified boundaries.
 
 
 
-\### 5.7 Interior Mark Policy
+### 5.7 Interior Mark Policy
 
 
 
@@ -1278,9 +1278,9 @@ When a base token is deleted:
 
 
 
-1\. \*\*Boundary marks survive\*\* if referenced by another token
+1\. **Boundary marks survive** if referenced by another token
 
-2\. \*\*Interior marks:\*\* Apply deletion policy
+2\. **Interior marks:** Apply deletion policy
 
 
 
@@ -1288,21 +1288,21 @@ When a base token is deleted:
 
 topology:
 
-&nbsp; interior\_mark\_policy: elastic  # or 'strict'
+  interior_mark_policy: elastic  # or 'strict'
 
 ```
 
 
 
-\*\*elastic (default):\*\* Interior marks persist. If the containing interval collapses to 0ms, the mark exists at that point. If a new token spans that region, the mark's time is interpolated within it.
+**elastic (default):** Interior marks persist. If the containing interval collapses to 0ms, the mark exists at that point. If a new token spans that region, the mark's time is interpolated within it.
 
 
 
-\*\*strict:\*\* Interior marks are deleted when their containing base token is deleted. Point tokens anchored to deleted marks are also deleted (with warning).
+**strict:** Interior marks are deleted when their containing base token is deleted. Point tokens anchored to deleted marks are also deleted (with warning).
 
 
 
-\### 5.8 Association GC
+### 5.8 Association GC
 
 
 
@@ -1310,7 +1310,7 @@ After patch application, scan all tokens and remove any TokenId from association
 
 
 
-\### 5.9 Span Boundary Rebuild
+### 5.9 Span Boundary Rebuild
 
 
 
@@ -1320,195 +1320,195 @@ After base splices, recompute span boundaries bottom-up through hierarchy:
 
 ```python
 
-for stream in reversed(topology.hierarchy\[:-1]):  # skip base
+for stream in reversed(topology.hierarchy[:-1]):  # skip base
 
-&nbsp;   rebuild\_span\_boundaries(stream, child\_stream\_of(stream))
+    rebuild_span_boundaries(stream, child_stream_of(stream))
 
 ```
 
 
 
-\### 5.10 Scalar Resolution
+### 5.10 Scalar Resolution
 
 
 
-\*\*Standard:\*\*
+**Standard:**
 
 ```python
 
-def resolve\_standard(base, effects, min\_val, max\_val):
+def resolve_standard(base, effects, min_val, max_val):
 
-&nbsp;   v = base
+    v = base
 
-&nbsp;   for e in sorted(effects, key=lambda x: x.order):
+    for e in sorted(effects, key=lambda x: x.order):
 
-&nbsp;       if e.op == 'set': v = e.value
+        if e.op == 'set': v = e.value
 
-&nbsp;       elif e.op == 'mul': v = v \* e.value
+        elif e.op == 'mul': v = v \* e.value
 
-&nbsp;       elif e.op == 'add': v = v + e.value
+        elif e.op == 'add': v = v + e.value
 
-&nbsp;   return clamp(v, min\_val, max\_val)
+    return clamp(v, min_val, max_val)
 
 ```
 
 
 
-\*\*Klatt:\*\*
+**Klatt:**
 
 ```python
 
-def resolve\_klatt(base, floor, effects, max\_val):
+def resolve_klatt(base, floor, effects, max_val):
 
-&nbsp;   d = base
+    d = base
 
-&nbsp;   for e in sorted(effects, key=lambda x: x.order):
+    for e in sorted(effects, key=lambda x: x.order):
 
-&nbsp;       if e.op == 'set': d = e.value
+        if e.op == 'set': d = e.value
 
-&nbsp;       elif e.op == 'mul': d = e.value \* (d - floor) + floor
+        elif e.op == 'mul': d = e.value \* (d - floor) + floor
 
-&nbsp;       elif e.op == 'add': d = d + e.value
+        elif e.op == 'add': d = d + e.value
 
-&nbsp;   return clamp(d, floor, max\_val)
-
-```
-
-
-
-\### 5.11 Time Computation
-
-
-
-```python
-
-def compute\_times(base\_stream, all\_sync\_marks):
-
-&nbsp;   # Step 1: Base boundaries get concrete times
-
-&nbsp;   time = 0
-
-&nbsp;   for token in base\_stream.tokens\_in\_order():
-
-&nbsp;       token.sync\_left.time = time
-
-&nbsp;       time += token.s.duration
-
-&nbsp;       token.sync\_right.time = time
-
-&nbsp;   
-
-&nbsp;   # Step 2: Interior marks by uniform distribution
-
-&nbsp;   for token in base\_stream.tokens\_in\_order():
-
-&nbsp;       left\_order = token.sync\_left.order
-
-&nbsp;       right\_order = token.sync\_right.order
-
-&nbsp;       left\_time = token.sync\_left.time
-
-&nbsp;       right\_time = token.sync\_right.time
-
-&nbsp;       
-
-&nbsp;       # Find interior marks (strictly between boundaries)
-
-&nbsp;       interior = \[m for m in all\_sync\_marks 
-
-&nbsp;                   if m.time is None 
-
-&nbsp;                   and compare\_order(left\_order, m.order) < 0
-
-&nbsp;                   and compare\_order(m.order, right\_order) < 0]
-
-&nbsp;       
-
-&nbsp;       if not interior:
-
-&nbsp;           continue
-
-&nbsp;       
-
-&nbsp;       # Edge case: zero duration token
-
-&nbsp;       if left\_time == right\_time:
-
-&nbsp;           for mark in interior:
-
-&nbsp;               mark.time = left\_time  # all interior marks collapse to boundary
-
-&nbsp;           continue
-
-&nbsp;       
-
-&nbsp;       # Sort by order, dedupe by ID (same rank shouldn't happen but be defensive)
-
-&nbsp;       interior.sort(key=lambda m: (m.order, m.id))
-
-&nbsp;       seen\_ids = set()
-
-&nbsp;       interior = \[m for m in interior if m.id not in seen\_ids and not seen\_ids.add(m.id)]
-
-&nbsp;       
-
-&nbsp;       # Distribute uniformly: k/(n+1) for k=1..n
-
-&nbsp;       n = len(interior)
-
-&nbsp;       for k, mark in enumerate(interior, start=1):
-
-&nbsp;           alpha = k / (n + 1)
-
-&nbsp;           mark.time = left\_time + alpha \* (right\_time - left\_time)
+    return clamp(d, floor, max_val)
 
 ```
 
 
 
-\### 5.12 Point Resolution
+### 5.11 Time Computation
 
 
 
 ```python
 
-def resolve\_points(point\_stream, context\_map):
+def compute_times(base_stream, all_sync_marks):
 
-&nbsp;   for pt in point\_stream.tokens:
+    # Step 1: Base boundaries get concrete times
 
-&nbsp;       # Compute time from anchors
+    time = 0
 
-&nbsp;       left\_t = pt.anchor\_left.time
+    for token in base_stream.tokens_in_order():
 
-&nbsp;       right\_t = pt.anchor\_right.time
+        token.sync_left.time = time
 
-&nbsp;       pt.time = left\_t + pt.ratio \* (right\_t - left\_t)
+        time += token.s.duration
 
-&nbsp;       
+        token.sync_right.time = time
 
-&nbsp;       # Evaluate deferred value
+    
 
-&nbsp;       if pt.value\_expr:
+    # Step 2: Interior marks by uniform distribution
 
-&nbsp;           ctx = context\_map\[pt.id]
+    for token in base_stream.tokens_in_order():
 
-&nbsp;           pt.value = jsonata\_evaluate(pt.value\_expr, ctx)
+        left_order = token.sync_left.order
+
+        right_order = token.sync_right.order
+
+        left_time = token.sync_left.time
+
+        right_time = token.sync_right.time
+
+        
+
+        # Find interior marks (strictly between boundaries)
+
+        interior = [m for m in all_sync_marks 
+
+                    if m.time is None 
+
+                    and compare_order(left_order, m.order) < 0
+
+                    and compare_order(m.order, right_order) < 0]
+
+        
+
+        if not interior:
+
+            continue
+
+        
+
+        # Edge case: zero duration token
+
+        if left_time == right_time:
+
+            for mark in interior:
+
+                mark.time = left_time  # all interior marks collapse to boundary
+
+            continue
+
+        
+
+        # Sort by order, dedupe by ID (same rank shouldn't happen but be defensive)
+
+        interior.sort(key=lambda m: (m.order, m.id))
+
+        seen_ids = set()
+
+        interior = [m for m in interior if m.id not in seen_ids and not seen_ids.add(m.id)]
+
+        
+
+        # Distribute uniformly: k/(n+1) for k=1..n
+
+        n = len(interior)
+
+        for k, mark in enumerate(interior, start=1):
+
+            alpha = k / (n + 1)
+
+            mark.time = left_time + alpha \* (right_time - left_time)
 
 ```
 
 
 
-\*\*Deferred expression restrictions:\*\*
+### 5.12 Point Resolution
 
 
 
-Deferred expressions (in `value\_expr`) may reference:
+```python
+
+def resolve_points(point_stream, context_map):
+
+    for pt in point_stream.tokens:
+
+        # Compute time from anchors
+
+        left_t = pt.anchor_left.time
+
+        right_t = pt.anchor_right.time
+
+        pt.time = left_t + pt.ratio \* (right_t - left_t)
+
+        
+
+        # Evaluate deferred value
+
+        if pt.value_expr:
+
+            ctx = context_map[pt.id]
+
+            pt.value = jsonata_evaluate(pt.value_expr, ctx)
+
+```
+
+
+
+**Deferred expression restrictions:**
+
+
+
+Deferred expressions (in `value_expr`) may reference:
 
 \- Token features (`current.f.\*`)
 
 \- Resolved scalar values (`current.s.\*`)
 
-\- Sync mark times (`current.sync\_left.time`)
+\- Sync mark times (`current.sync_left.time`)
 
 \- Navigation functions (`$parent`, `$next`, etc.)
 
@@ -1516,7 +1516,7 @@ Deferred expressions (in `value\_expr`) may reference:
 
 
 
-Deferred expressions may \*\*NOT\*\* reference:
+Deferred expressions may **NOT** reference:
 
 \- Other point token values (prevents circular dependencies)
 
@@ -1532,7 +1532,7 @@ Point resolution order within a stream is undefined. If a deferred expression at
 
 
 
-\## Part 6: Rule Definitions
+## Part 6: Rule Definitions
 
 
 
@@ -1540,7 +1540,7 @@ Every rule should cite the phonetic/phonological literature justifying it.
 
 
 
-\### 6.0 Rule Structure
+### 6.0 Rule Structure
 
 
 
@@ -1548,33 +1548,33 @@ Every rule should cite the phonetic/phonological literature justifying it.
 
 interface Rule {
 
-&nbsp; citation?: string;             // RECOMMENDED: literature reference
+  citation?: string;             // RECOMMENDED: literature reference
 
-&nbsp; 
+  
 
-&nbsp; // One of:
+  // One of:
 
-&nbsp; select?: SelectClause;          // for select rules
+  select?: SelectClause;          // for select rules
 
-&nbsp; match?: string;                 // pattern name for pattern rules
+  match?: string;                 // pattern name for pattern rules
 
-&nbsp; 
+  
 
-&nbsp; // Optional:
+  // Optional:
 
-&nbsp; constraint?: string;            // additional JSONata filter (post-match)
+  constraint?: string;            // additional JSONata filter (post-match)
 
-&nbsp; 
+  
 
-&nbsp; // Actions (one or more):
+  // Actions (one or more):
 
-&nbsp; apply?: Effect\[];               // modify scalars
+  apply?: Effect[];               // modify scalars
 
-&nbsp; splice?: SpliceSpec;            // base stream mutation
+  splice?: SpliceSpec;            // base stream mutation
 
-&nbsp; insert\_point?: PointSpec;       // point stream insertion
+  insert_point?: PointSpec;       // point stream insertion
 
-&nbsp; delete?: boolean;               // delete matched token (non-base only)
+  delete?: boolean;               // delete matched token (non-base only)
 
 }
 
@@ -1582,11 +1582,11 @@ interface Rule {
 
 
 
-\*\*Constraint evaluation timing:\*\*
+**Constraint evaluation timing:**
 
 
 
-For pattern rules, `constraint` evaluates \*\*after all captures bind\*\*. The pattern must fully match before the constraint is tested. This means:
+For pattern rules, `constraint` evaluates **after all captures bind**. The pattern must fully match before the constraint is tested. This means:
 
 \- Constraints can reference any capture by name
 
@@ -1600,7 +1600,7 @@ For select rules, `constraint` evaluates after `where` passes.
 
 
 
-\### 6.1 Select Rules
+### 6.1 Select Rules
 
 
 
@@ -1608,87 +1608,87 @@ For select rules, `constraint` evaluates after `where` passes.
 
 rules:
 
-&nbsp; # Klatt (1976) Table II: unstressed vowels 35-60% shorter
+  # Klatt (1976) Table II: unstressed vowels 35-60% shorter
 
-&nbsp; # Lehiste (1970): stress correlates with duration cross-linguistically
+  # Lehiste (1970): stress correlates with duration cross-linguistically
 
-&nbsp; stress\_lengthening:
+  stress_lengthening:
 
-&nbsp;   citation: "Klatt 1976 §III.B; Lehiste 1970 Ch.2"
+    citation: "Klatt 1976 §III.B; Lehiste 1970 Ch.2"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'vowel'"
+      where: "current.f.manner = 'vowel'"
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - field: duration
+      - field: duration
 
-&nbsp;       op: mul
+        op: mul
 
-&nbsp;       value: "$parent(current, 'syllable').f.stress = 1 ? params.stress\_factor : 1"
+        value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
 
-&nbsp;       tag: stress
-
-
-
-&nbsp; # Klatt (1976): phrase-final syllables 30% longer
-
-&nbsp; # Oller (1973): boundary lengthening in English
-
-&nbsp; phrase\_final\_lengthening:
-
-&nbsp;   citation: "Klatt 1976 §III.A; Oller 1973"
-
-&nbsp;   select:
-
-&nbsp;     stream: phone
-
-&nbsp;     where: "current.f.manner = 'vowel'"
-
-&nbsp;   apply:
-
-&nbsp;     - field: duration
-
-&nbsp;       op: mul
-
-&nbsp;       value: "$parent(current, 'syllable').f.boundary = 'major' ? 1.3 : 1"
-
-&nbsp;       tag: boundary
+        tag: stress
 
 
 
-&nbsp; # House \& Fairbanks (1953): vowels longer before voiced consonants
+  # Klatt (1976): phrase-final syllables 30% longer
 
-&nbsp; # Klatt (1976) Table II: 50-100ms difference phrase-finally
+  # Oller (1973): boundary lengthening in English
 
-&nbsp; pre\_voiced\_lengthening:
+  phrase_final_lengthening:
 
-&nbsp;   citation: "House \& Fairbanks 1953; Klatt 1976 §III.C"
+    citation: "Klatt 1976 §III.A; Oller 1973"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'vowel' and $next(current).f.voicing = 'voiced'"
+      where: "current.f.manner = 'vowel'"
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - field: duration
+      - field: duration
 
-&nbsp;       op: mul
+        op: mul
 
-&nbsp;       value: "params.pre\_voiced\_factor"
+        value: "$parent(current, 'syllable').f.boundary = 'major' ? 1.3 : 1"
 
-&nbsp;       tag: pre\_voiced
+        tag: boundary
+
+
+
+  # House \& Fairbanks (1953): vowels longer before voiced consonants
+
+  # Klatt (1976) Table II: 50-100ms difference phrase-finally
+
+  pre_voiced_lengthening:
+
+    citation: "House \& Fairbanks 1953; Klatt 1976 §III.C"
+
+    select:
+
+      stream: phone
+
+      where: "current.f.manner = 'vowel' and $next(current).f.voicing = 'voiced'"
+
+    apply:
+
+      - field: duration
+
+        op: mul
+
+        value: "params.pre_voiced_factor"
+
+        tag: pre_voiced
 
 ```
 
 
 
-\### 6.2 Pattern Rules with Splice
+### 6.2 Pattern Rules with Splice
 
 
 
@@ -1696,115 +1696,115 @@ rules:
 
 rules:
 
-&nbsp; # Ladefoged \& Maddieson (1996): stops have release bursts before sonorants
+  # Ladefoged \& Maddieson (1996): stops have release bursts before sonorants
 
-&nbsp; # Stevens (1998) Ch.8: acoustic cues require explicit release modeling
+  # Stevens (1998) Ch.8: acoustic cues require explicit release modeling
 
-&nbsp; insert\_release:
+  insert_release:
 
-&nbsp;   citation: "Ladefoged \& Maddieson 1996 §3.2; Stevens 1998 Ch.8"
+    citation: "Ladefoged \& Maddieson 1996 §3.2; Stevens 1998 Ch.8"
 
-&nbsp;   match: stop\_before\_sonorant
+    match: stop_before_sonorant
 
-&nbsp;   splice:
+    splice:
 
-&nbsp;     type: insert\_at\_boundary
+      type: insert_at_boundary
 
-&nbsp;     boundary: stop.sync\_right
+      boundary: stop.sync_right
 
-&nbsp;     side: after
+      side: after
 
-&nbsp;     insert:
+      insert:
 
-&nbsp;       - name: "stop.name \& '\_rel'"
+        - name: "stop.name \& '_rel'"
 
-&nbsp;         parent: "$parent(stop, 'syllable')"
-
-
-
-&nbsp; # Lisker \& Abramson (1964): VOT distinguishes voicing in stops
-
-&nbsp; # Aspiration 40-100ms for voiceless stops in English
-
-&nbsp; insert\_aspiration:
-
-&nbsp;   citation: "Lisker \& Abramson 1964; Klatt 1975"
-
-&nbsp;   match: voiceless\_stop\_before\_vowel
-
-&nbsp;   constraint: "$parent(stop, 'syllable').f.stress >= 1"
-
-&nbsp;   splice:
-
-&nbsp;     type: insert\_at\_boundary
-
-&nbsp;     boundary: stop.sync\_right
-
-&nbsp;     side: after
-
-&nbsp;     insert:
-
-&nbsp;       - name: "'asp'"
+          parent: "$parent(stop, 'syllable')"
 
 
 
-&nbsp; # Wells (1990): pre-fortis clipping in British English
+  # Lisker \& Abramson (1964): VOT distinguishes voicing in stops
 
-&nbsp; # Chen (1970): vowel shortening before voiceless obstruents
+  # Aspiration 40-100ms for voiceless stops in English
 
-&nbsp; fortis\_clipping:
+  insert_aspiration:
 
-&nbsp;   citation: "Wells 1990; Chen 1970"
+    citation: "Lisker \& Abramson 1964; Klatt 1975"
 
-&nbsp;   match: vowel\_before\_obstruent
+    match: voiceless_stop_before_vowel
 
-&nbsp;   constraint: "obs.f.voicing = 'voiceless'"
+    constraint: "$parent(stop, 'syllable').f.stress >= 1"
 
-&nbsp;   apply:
+    splice:
 
-&nbsp;     - target: v
+      type: insert_at_boundary
 
-&nbsp;       field: duration
+      boundary: stop.sync_right
 
-&nbsp;       op: mul
+      side: after
 
-&nbsp;       value: "params.clipping\_factor"
+      insert:
 
-&nbsp;       tag: fortis
+        - name: "'asp'"
 
 
 
-&nbsp; # Gimson (1980): /d/+/j/ → /dʒ/ in connected speech
+  # Wells (1990): pre-fortis clipping in British English
 
-&nbsp; # Cruttenden (2014) §10.3: yod coalescence
+  # Chen (1970): vowel shortening before voiceless obstruents
 
-&nbsp; d\_j\_coalescence:
+  fortis_clipping:
 
-&nbsp;   citation: "Gimson 1980; Cruttenden 2014 §10.3"
+    citation: "Wells 1990; Chen 1970"
 
-&nbsp;   match: d\_j\_coalescence
+    match: vowel_before_obstruent
 
-&nbsp;   splice:
+    constraint: "obs.f.voicing = 'voiceless'"
 
-&nbsp;     type: replace\_range
+    apply:
 
-&nbsp;     range\_left: d.sync\_left
+      - target: v
 
-&nbsp;     range\_right: j.sync\_right
+        field: duration
 
-&nbsp;     delete: \[d, j]
+        op: mul
 
-&nbsp;     insert:
+        value: "params.clipping_factor"
 
-&nbsp;       - name: "'dʒ'"
+        tag: fortis
 
-&nbsp;         parent: "$parent(d, 'syllable')"
+
+
+  # Gimson (1980): /d/+/j/ → /dʒ/ in connected speech
+
+  # Cruttenden (2014) §10.3: yod coalescence
+
+  d_j_coalescence:
+
+    citation: "Gimson 1980; Cruttenden 2014 §10.3"
+
+    match: d_j_coalescence
+
+    splice:
+
+      type: replace_range
+
+      range_left: d.sync_left
+
+      range_right: j.sync_right
+
+      delete: [d, j]
+
+      insert:
+
+        - name: "'dʒ'"
+
+          parent: "$parent(d, 'syllable')"
 
 ```
 
 
 
-\### 6.3 Point Insertion
+### 6.3 Point Insertion
 
 
 
@@ -1812,61 +1812,61 @@ rules:
 
 rules:
 
-&nbsp; # Pierrehumbert (1980): F0 targets at metrically strong syllables
+  # Pierrehumbert (1980): F0 targets at metrically strong syllables
 
-&nbsp; # 't Hart et al. (1990): pitch movements anchor to syllable nuclei
+  # 't Hart et al. (1990): pitch movements anchor to syllable nuclei
 
-&nbsp; f0\_targets:
+  f0_targets:
 
-&nbsp;   citation: "Pierrehumbert 1980; 't Hart et al. 1990"
+    citation: "Pierrehumbert 1980; 't Hart et al. 1990"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'vowel'"
+      where: "current.f.manner = 'vowel'"
 
-&nbsp;   insert\_point:
+    insert_point:
 
-&nbsp;     stream: f0
+      stream: f0
 
-&nbsp;     at: "$midpoint(current)"
+      at: "$midpoint(current)"
 
-&nbsp;     value: "params.base\_f0 \* (1.1 - params.declination \* $index(current) / $total('phone'))"
+      value: "params.base_f0 \* (1.1 - params.declination \* $index(current) / $total('phone'))"
 
-&nbsp;     tag: f0
+      tag: f0
 
 
 
-&nbsp; # Pierrehumbert (1980): H\* accent on stressed syllables
+  # Pierrehumbert (1980): H\* accent on stressed syllables
 
-&nbsp; # Ladd (2008): pitch accent alignment
+  # Ladd (2008): pitch accent alignment
 
-&nbsp; accent\_peak:
+  accent_peak:
 
-&nbsp;   citation: "Pierrehumbert 1980; Ladd 2008 Ch.3"
+    citation: "Pierrehumbert 1980; Ladd 2008 Ch.3"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: syllable
+      stream: syllable
 
-&nbsp;     where: "current.f.stress = 1"
+      where: "current.f.stress = 1"
 
-&nbsp;   insert\_point:
+    insert_point:
 
-&nbsp;     stream: f0
+      stream: f0
 
-&nbsp;     at: "$at\_ratio($children(current, 'phone')\[f.manner = 'vowel']\[0], 0.3)"
+      at: "$at_ratio($children(current, 'phone')[f.manner = 'vowel'][0], 0.3)"
 
-&nbsp;     value: "params.base\_f0 \* params.accent\_factor"
+      value: "params.base_f0 \* params.accent_factor"
 
-&nbsp;     tag: accent
+      tag: accent
 
 ```
 
 
 
-\### 6.4 Formant Rules
+### 6.4 Formant Rules
 
 
 
@@ -1874,59 +1874,59 @@ rules:
 
 rules:
 
-&nbsp; # Öhman (1966): VCV coarticulation model
+  # Öhman (1966): VCV coarticulation model
 
-&nbsp; # Stevens (1998) Ch.6: formant transitions reflect articulator timing
+  # Stevens (1998) Ch.6: formant transitions reflect articulator timing
 
-&nbsp; coarticulation:
+  coarticulation:
 
-&nbsp;   citation: "Öhman 1966; Stevens 1998 Ch.6"
+    citation: "Öhman 1966; Stevens 1998 Ch.6"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'vowel'"
+      where: "current.f.manner = 'vowel'"
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - field: F2
+      - field: F2
 
-&nbsp;       op: add
+        op: add
 
-&nbsp;       value: "($prev(current).s.F2 - current.s.F2) \* params.coartic\_strength"
+        value: "($prev(current).s.F2 - current.s.F2) \* params.coartic_strength"
 
-&nbsp;       tag: coartic
+        tag: coartic
 
 
 
-&nbsp; # Stevens \& House (1955): consonant locus equations
+  # Stevens \& House (1955): consonant locus equations
 
-&nbsp; # Sussman et al. (1991): locus equation parameters by place
+  # Sussman et al. (1991): locus equation parameters by place
 
-&nbsp; locus\_f2:
+  locus_f2:
 
-&nbsp;   citation: "Stevens \& House 1955; Sussman et al. 1991"
+    citation: "Stevens \& House 1955; Sussman et al. 1991"
 
-&nbsp;   match: consonant\_vowel
+    match: consonant_vowel
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - target: c
+      - target: c
 
-&nbsp;       field: F2
+        field: F2
 
-&nbsp;       op: set
+        op: set
 
-&nbsp;       value: "params.locus\[c.f.place] + params.slope\[c.f.place] \* v.s.F2"
+        value: "params.locus[c.f.place] + params.slope[c.f.place] \* v.s.F2"
 
-&nbsp;       tag: locus
+        tag: locus
 
 ```
 
 
 
-\### 6.5 Source Rules
+### 6.5 Source Rules
 
 
 
@@ -1934,59 +1934,59 @@ rules:
 
 rules:
 
-&nbsp; # Klatt (1980): source parameters for Klatt synthesizer
+  # Klatt (1980): source parameters for Klatt synthesizer
 
-&nbsp; # Stevens (1998) Ch.2: voice source characteristics
+  # Stevens (1998) Ch.2: voice source characteristics
 
-&nbsp; voice\_source:
+  voice_source:
 
-&nbsp;   citation: "Klatt 1980; Stevens 1998 Ch.2"
+    citation: "Klatt 1980; Stevens 1998 Ch.2"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner in \['vowel', 'nasal', 'liquid', 'glide']"
+      where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - field: AV
+      - field: AV
 
-&nbsp;       op: set
+        op: set
 
-&nbsp;       value: "60"
+        value: "60"
 
-&nbsp;       tag: voiced
+        tag: voiced
 
 
 
-&nbsp; # Stevens (1971): frication noise source levels
+  # Stevens (1971): frication noise source levels
 
-&nbsp; frication\_source:
+  frication_source:
 
-&nbsp;   citation: "Stevens 1971"
+    citation: "Stevens 1971"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'fricative'"
+      where: "current.f.manner = 'fricative'"
 
-&nbsp;   apply:
+    apply:
 
-&nbsp;     - field: AF
+      - field: AF
 
-&nbsp;       op: set
+        op: set
 
-&nbsp;       value: "f.voicing = 'voiced' ? 50 : 60"
+        value: "f.voicing = 'voiced' ? 50 : 60"
 
-&nbsp;       tag: frication
+        tag: frication
 
 ```
 
 
 
-\### 6.6 Deletion (Non-Base)
+### 6.6 Deletion (Non-Base)
 
 
 
@@ -1994,21 +1994,21 @@ rules:
 
 rules:
 
-&nbsp; # Autosegmental phonology: floating tones delete if unassociated
+  # Autosegmental phonology: floating tones delete if unassociated
 
-&nbsp; # Goldsmith (1976): tone deletion in African languages
+  # Goldsmith (1976): tone deletion in African languages
 
-&nbsp; delete\_floating\_tone:
+  delete_floating_tone:
 
-&nbsp;   citation: "Goldsmith 1976"
+    citation: "Goldsmith 1976"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: tone
+      stream: tone
 
-&nbsp;     where: "current.f.floating = true"
+      where: "current.f.floating = true"
 
-&nbsp;   delete: true
+    delete: true
 
 ```
 
@@ -2018,7 +2018,7 @@ rules:
 
 
 
-\## Part 7: Phases
+## Part 7: Phases
 
 
 
@@ -2030,69 +2030,69 @@ Each phase runs the full pipeline (§5.1). Span boundaries are recomputed in ste
 
 phases:
 
-&nbsp; - name: sandhi
+  - name: sandhi
 
-&nbsp;   rules: \[d\_j\_coalescence]
-
-
-
-&nbsp; - name: allophonic
-
-&nbsp;   rules: \[insert\_release]
+    rules: [d_j_coalescence]
 
 
 
-&nbsp; - name: duration
+  - name: allophonic
 
-&nbsp;   rules: \[stress\_lengthening, fortis\_clipping]
-
-&nbsp;   resolve\_scalars: \[duration]
-
-&nbsp;   compute\_times: true
+    rules: [insert_release]
 
 
 
-&nbsp; - name: formants
+  - name: duration
 
-&nbsp;   after: \[duration]
+    rules: [stress_lengthening, fortis_clipping]
 
-&nbsp;   rules: \[coarticulation]
+    resolve_scalars: [duration]
 
-&nbsp;   resolve\_scalars: \[F1, F2, F3, B1, B2, B3]
-
-
-
-&nbsp; - name: prosody
-
-&nbsp;   after: \[duration]
-
-&nbsp;   rules: \[f0\_targets]
-
-&nbsp;   resolve\_points: \[f0]
+    compute_times: true
 
 
 
-&nbsp; - name: source
+  - name: formants
 
-&nbsp;   rules: \[voice\_source, frication\_source]
+    after: [duration]
 
-&nbsp;   resolve\_scalars: \[AV, AH, AF]
+    rules: [coarticulation]
+
+    resolve_scalars: [F1, F2, F3, B1, B2, B3]
+
+
+
+  - name: prosody
+
+    after: [duration]
+
+    rules: [f0_targets]
+
+    resolve_points: [f0]
+
+
+
+  - name: source
+
+    rules: [voice_source, frication_source]
+
+    resolve_scalars: [AV, AH, AF]
 
 ```
 
 
 
-\*\*Phase flags:\*\*
+**Phase flags:**
 
 \- `rules`: list of rule names to execute (order matters)
 
 \- `after`: dependency on other phases
 
-\- `resolve\_scalars`: scalar fields to resolve this phase
+\- `resolve_scalars`: scalar fields to resolve this phase
 
-\- `compute\_times`: assign times to sync marks (requires duration resolved)
+\- `compute_times`: assign times to sync marks (requires duration resolved)
 
-\- `resolve\_points`: point streams to resolve (requires times computed)
+\- `resolve_points`: point streams to resolve (requires times computed)
 
 
 
@@ -2100,41 +2100,11 @@ phases:
 
 
 
-\## Part 8: Output
+## Part 8: Output
 
 
 
-\### 8.1 Scalar Interpolation
-
-
-
-```yaml
-
-interpolation:
-
-&nbsp; scalars:
-
-&nbsp;   F1:
-
-&nbsp;     method: linear
-
-&nbsp;     blend\_points:
-
-&nbsp;       - {position: 0.2, weights: {prev: 0.5, current: 0.5}}
-
-&nbsp;       - {position: 0.8, weights: {current: 0.5, next: 0.5}}
-
-&nbsp;   AV: {method: step}
-
-&nbsp;   AH: {method: step}
-
-&nbsp;   AF: {method: step}
-
-```
-
-
-
-\### 8.2 Point Interpolation
+### 8.1 Scalar Interpolation
 
 
 
@@ -2142,23 +2112,53 @@ interpolation:
 
 interpolation:
 
-&nbsp; points:
+  scalars:
 
-&nbsp;   f0:
+    F1:
 
-&nbsp;     method: monotone\_cubic
+      method: linear
 
-&nbsp;     extrapolation: hold
+      blend_points:
 
-&nbsp;     default: 0
+        - {position: 0.2, weights: {prev: 0.5, current: 0.5}}
 
-&nbsp;     duplicate\_policy: average
+        - {position: 0.8, weights: {current: 0.5, next: 0.5}}
+
+    AV: {method: step}
+
+    AH: {method: step}
+
+    AF: {method: step}
 
 ```
 
 
 
-\### 8.3 Output Mapping
+### 8.2 Point Interpolation
+
+
+
+```yaml
+
+interpolation:
+
+  points:
+
+    f0:
+
+      method: monotone_cubic
+
+      extrapolation: hold
+
+      default: 0
+
+      duplicate_policy: average
+
+```
+
+
+
+### 8.3 Output Mapping
 
 
 
@@ -2166,27 +2166,27 @@ interpolation:
 
 output:
 
-&nbsp; format: klatt\_frames
+  format: klatt_frames
 
-&nbsp; frame\_rate\_ms: 10
+  frame_rate_ms: 10
 
-&nbsp; 
+  
 
-&nbsp; mapping:
+  mapping:
 
-&nbsp;   F0: {source: point, stream: f0}
+    F0: {source: point, stream: f0}
 
-&nbsp;   F1: {source: scalar, field: F1}
+    F1: {source: scalar, field: F1}
 
-&nbsp;   # ...
+    # ...
 
-&nbsp; 
+  
 
-&nbsp; constants:
+  constants:
 
-&nbsp;   F4: 3500
+    F4: 3500
 
-&nbsp;   B4: 250
+    B4: 250
 
 ```
 
@@ -2196,7 +2196,7 @@ output:
 
 
 
-\## Part 9: Validation
+## Part 9: Validation
 
 
 
@@ -2204,61 +2204,61 @@ output:
 
 validation:
 
-&nbsp; errors:
+  errors:
 
-&nbsp;   - pattern\_missing\_stream
+    - pattern_missing_stream
 
-&nbsp;   - unknown\_stream\_reference
+    - unknown_stream_reference
 
-&nbsp;   - invalid\_jsonata\_syntax
+    - invalid_jsonata_syntax
 
-&nbsp;   - invalid\_feature\_value
+    - invalid_feature_value
 
-&nbsp;   - phase\_order\_violation
+    - phase_order_violation
 
-&nbsp;   - splice\_conflict             # two splices delete same token with different inserts
+    - splice_conflict             # two splices delete same token with different inserts
 
-&nbsp;   - invalid\_ratio               # not in \[0,1]
+    - invalid_ratio               # not in [0,1]
 
-&nbsp; 
+  
 
-&nbsp; warnings:
+  warnings:
 
-&nbsp;   - null\_target\_at\_runtime
+    - null_target_at_runtime
 
-&nbsp;   - deleted\_target\_at\_runtime
+    - deleted_target_at_runtime
 
-&nbsp;   - interior\_mark\_deleted        # strict policy applied
+    - interior_mark_deleted        # strict policy applied
 
-&nbsp;   - duration\_edit\_after\_times    # may need recompute
+    - duration_edit_after_times    # may need recompute
 
-&nbsp;   - missing\_citation             # rule without citation field
+    - missing_citation             # rule without citation field
 
-&nbsp;   - empty\_span                   # span with no children (collapsed)
+    - empty_span                   # span with no children (collapsed)
 
 
 
-&nbsp; invariants:
+  invariants:
 
-&nbsp;   - base\_coverage               # base partitions \[START, END]
+    - base_coverage               # base partitions [START, END]
 
-&nbsp;   - span\_boundary\_match         # spans match children (or empty)
+    - span_boundary_match         # spans match children (or empty)
 
-&nbsp;   - time\_monotonicity
+    - time_monotonicity
 
 ```
 
 
 
-\*\*Splice overlap policy:\*\*
+**Splice overlap policy:**
 
 \- Adjacent splices are allowed and batched together
 
-\- Overlapping splices are resolved by sort order (rule\_index, match\_index, patch\_seq)
+\- Overlapping splices are resolved by sort order (rule_index, match_index, patch_seq)
 
-\- \*\*Conflict:\*\* Two splices that both delete the same token but specify different insertions → error
+\- **Conflict:** Two splices that both delete the same token but specify different insertions → error
 
-\- \*\*Not a conflict:\*\* Two splices that affect adjacent/overlapping ranges but don't contradict
+\- **Not a conflict:** Two splices that affect adjacent/overlapping ranges but don't contradict
 
 
 
@@ -2266,7 +2266,7 @@ validation:
 
 
 
-\## Part 10: Tracing and Introspection
+## Part 10: Tracing and Introspection
 
 
 
@@ -2274,21 +2274,21 @@ Debugging phonological rules is notoriously difficult. This section specifies th
 
 
 
-\### 10.1 Design Principles
+### 10.1 Design Principles
 
 
 
-1\. \*\*Every decision must be traceable\*\* - Why did this rule fire? Why didn't it?
+1\. **Every decision must be traceable** - Why did this rule fire? Why didn't it?
 
-2\. \*\*Every value must have provenance\*\* - Where did this duration come from?
+2\. **Every value must have provenance** - Where did this duration come from?
 
-3\. \*\*State is always inspectable\*\* - What did the streams look like at any point?
+3\. **State is always inspectable** - What did the streams look like at any point?
 
-4\. \*\*Visualization is first-class\*\* - Multi-stream alignment must be visible
+4\. **Visualization is first-class** - Multi-stream alignment must be visible
 
 
 
-\### 10.2 Trace Events
+### 10.2 Trace Events
 
 
 
@@ -2300,51 +2300,51 @@ The engine emits structured trace events at each step:
 
 type TraceEvent =
 
-&nbsp; | PhaseStart
+  | PhaseStart
 
-&nbsp; | PhaseEnd
+  | PhaseEnd
 
-&nbsp; | SnapshotCreated
+  | SnapshotCreated
 
-&nbsp; | RuleEvaluationStart
+  | RuleEvaluationStart
 
-&nbsp; | MatchAttempt
+  | MatchAttempt
 
-&nbsp; | MatchSuccess
+  | MatchSuccess
 
-&nbsp; | MatchFailure
+  | MatchFailure
 
-&nbsp; | ExpressionEvaluation
+  | ExpressionEvaluation
 
-&nbsp; | PatchGenerated
+  | PatchGenerated
 
-&nbsp; | PatchApplied
+  | PatchApplied
 
-&nbsp; | PatchSkipped
+  | PatchSkipped
 
-&nbsp; | ScalarResolution
+  | ScalarResolution
 
-&nbsp; | TimeComputation
+  | TimeComputation
 
-&nbsp; | PointResolution
+  | PointResolution
 
-&nbsp; | Warning
+  | Warning
 
-&nbsp; | Error;
+  | Error;
 
 
 
 interface MatchAttempt {
 
-&nbsp; type: 'match\_attempt';
+  type: 'match_attempt';
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; pattern: string;
+  pattern: string;
 
-&nbsp; position: { stream: string; index: number; token\_id: string };
+  position: { stream: string; index: number; token_id: string };
 
-&nbsp; timestamp: number;
+  timestamp: number;
 
 }
 
@@ -2352,17 +2352,17 @@ interface MatchAttempt {
 
 interface MatchSuccess {
 
-&nbsp; type: 'match\_success';
+  type: 'match_success';
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; pattern: string;
+  pattern: string;
 
-&nbsp; captures: Record<string, TokenId | TokenId\[] | null>;
+  captures: Record<string, TokenId | TokenId[] | null>;
 
-&nbsp; span: { left: SyncMarkId; right: SyncMarkId };
+  span: { left: SyncMarkId; right: SyncMarkId };
 
-&nbsp; constraint\_result: boolean | null;  // null if no constraint
+  constraint_result: boolean | null;  // null if no constraint
 
 }
 
@@ -2370,21 +2370,21 @@ interface MatchSuccess {
 
 interface MatchFailure {
 
-&nbsp; type: 'match\_failure';
+  type: 'match_failure';
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; pattern: string;
+  pattern: string;
 
-&nbsp; step\_index: number;              // which step failed
+  step_index: number;              // which step failed
 
-&nbsp; step\_where: string;              // the where clause
+  step_where: string;              // the where clause
 
-&nbsp; token\_evaluated: TokenId;
+  token_evaluated: TokenId;
 
-&nbsp; evaluation\_result: any;          // what the where clause returned
+  evaluation_result: any;          // what the where clause returned
 
-&nbsp; reason: 'where\_false' | 'scope\_boundary' | 'end\_of\_stream' | 'constraint\_false';
+  reason: 'where_false' | 'scope_boundary' | 'end_of_stream' | 'constraint_false';
 
 }
 
@@ -2392,17 +2392,17 @@ interface MatchFailure {
 
 interface ExpressionEvaluation {
 
-&nbsp; type: 'expression\_eval';
+  type: 'expression_eval';
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; expression: string;
+  expression: string;
 
-&nbsp; context: Record<string, any>;    // the data root
+  context: Record<string, any>;    // the data root
 
-&nbsp; result: any;
+  result: any;
 
-&nbsp; duration\_us: number;             // for perf tracking
+  duration_us: number;             // for perf tracking
 
 }
 
@@ -2410,15 +2410,15 @@ interface ExpressionEvaluation {
 
 interface PatchGenerated {
 
-&nbsp; type: 'patch\_generated';
+  type: 'patch_generated';
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; match\_index: number;
+  match_index: number;
 
-&nbsp; patch: Patch;
+  patch: Patch;
 
-&nbsp; source\_tokens: TokenId\[];        // tokens that triggered this patch
+  source_tokens: TokenId[];        // tokens that triggered this patch
 
 }
 
@@ -2426,13 +2426,13 @@ interface PatchGenerated {
 
 interface PatchSkipped {
 
-&nbsp; type: 'patch\_skipped';
+  type: 'patch_skipped';
 
-&nbsp; patch: Patch;
+  patch: Patch;
 
-&nbsp; reason: 'target\_deleted' | 'target\_null' | 'conflict' | 'validation\_failed';
+  reason: 'target_deleted' | 'target_null' | 'conflict' | 'validation_failed';
 
-&nbsp; details: string;
+  details: string;
 
 }
 
@@ -2440,21 +2440,21 @@ interface PatchSkipped {
 
 interface ScalarResolution {
 
-&nbsp; type: 'scalar\_resolution';
+  type: 'scalar_resolution';
 
-&nbsp; token\_id: TokenId;
+  token_id: TokenId;
 
-&nbsp; field: string;
+  field: string;
 
-&nbsp; base: number;
+  base: number;
 
-&nbsp; floor: number | null;
+  floor: number | null;
 
-&nbsp; effects: ResolvedEffect\[];
+  effects: ResolvedEffect[];
 
-&nbsp; resolved: number;
+  resolved: number;
 
-&nbsp; computation\_steps: string\[];     // human-readable step-by-step
+  computation_steps: string[];     // human-readable step-by-step
 
 }
 
@@ -2462,7 +2462,7 @@ interface ScalarResolution {
 
 
 
-\### 10.3 Provenance Tracking
+### 10.3 Provenance Tracking
 
 
 
@@ -2474,17 +2474,17 @@ Every resolved value carries its provenance:
 
 interface Provenance {
 
-&nbsp; field: string;
+  field: string;
 
-&nbsp; token\_id: TokenId;
+  token_id: TokenId;
 
-&nbsp; base\_value: number;
+  base_value: number;
 
-&nbsp; base\_source: 'inventory' | 'override';
+  base_source: 'inventory' | 'override';
 
-&nbsp; effects: ProvenanceEffect\[];
+  effects: ProvenanceEffect[];
 
-&nbsp; final\_value: number;
+  final_value: number;
 
 }
 
@@ -2492,27 +2492,27 @@ interface Provenance {
 
 interface ProvenanceEffect {
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; citation: string;
+  citation: string;
 
-&nbsp; tag: string;
+  tag: string;
 
-&nbsp; op: 'set' | 'mul' | 'add';
+  op: 'set' | 'mul' | 'add';
 
-&nbsp; value: number;
+  value: number;
 
-&nbsp; value\_before: number;
+  value_before: number;
 
-&nbsp; value\_after: number;
+  value_after: number;
 
-&nbsp; match\_context: {
+  match_context: {
 
-&nbsp;   captures: Record<string, TokenId>;
+    captures: Record<string, TokenId>;
 
-&nbsp;   position: number;
+    position: number;
 
-&nbsp; };
+  };
 
 }
 
@@ -2520,7 +2520,7 @@ interface ProvenanceEffect {
 
 
 
-\*\*Query interface:\*\*
+**Query interface:**
 
 
 
@@ -2536,73 +2536,73 @@ engine.explain(tokenId, 'duration') → Provenance
 
 {
 
-&nbsp; field: 'duration',
+  field: 'duration',
 
-&nbsp; token\_id: 'phone\_42',
+  token_id: 'phone_42',
 
-&nbsp; base\_value: 240,
+  base_value: 240,
 
-&nbsp; base\_source: 'inventory',  // from æ entry
+  base_source: 'inventory',  // from æ entry
 
-&nbsp; effects: \[
+  effects: [
 
-&nbsp;   {
+    {
 
-&nbsp;     rule: 'stress\_lengthening',
+      rule: 'stress_lengthening',
 
-&nbsp;     citation: 'Klatt 1976 §III.B',
+      citation: 'Klatt 1976 §III.B',
 
-&nbsp;     tag: 'stress',
+      tag: 'stress',
 
-&nbsp;     op: 'mul',
+      op: 'mul',
 
-&nbsp;     value: 1.0,              // stress == 0, so no change
+      value: 1.0,              // stress == 0, so no change
 
-&nbsp;     value\_before: 240,
+      value_before: 240,
 
-&nbsp;     value\_after: 240
+      value_after: 240
 
-&nbsp;   },
+    },
 
-&nbsp;   {
+    {
 
-&nbsp;     rule: 'fortis\_clipping', 
+      rule: 'fortis_clipping', 
 
-&nbsp;     citation: 'Wells 1990; Chen 1970',
+      citation: 'Wells 1990; Chen 1970',
 
-&nbsp;     tag: 'fortis',
+      tag: 'fortis',
 
-&nbsp;     op: 'mul',
+      op: 'mul',
 
-&nbsp;     value: 0.6,
+      value: 0.6,
 
-&nbsp;     value\_before: 240,
+      value_before: 240,
 
-&nbsp;     value\_after: 186         // Klatt: 0.6 \* (240 - 105) + 105
+      value_after: 186         // Klatt: 0.6 \* (240 - 105) + 105
 
-&nbsp;   },
+    },
 
-&nbsp;   {
+    {
 
-&nbsp;     rule: 'phrase\_final\_lengthening',
+      rule: 'phrase_final_lengthening',
 
-&nbsp;     citation: 'Klatt 1976 §III.A',
+      citation: 'Klatt 1976 §III.A',
 
-&nbsp;     tag: 'boundary',
+      tag: 'boundary',
 
-&nbsp;     op: 'mul',
+      op: 'mul',
 
-&nbsp;     value: 1.0,              // not phrase-final
+      value: 1.0,              // not phrase-final
 
-&nbsp;     value\_before: 186,
+      value_before: 186,
 
-&nbsp;     value\_after: 186
+      value_after: 186
 
-&nbsp;   }
+    }
 
-&nbsp; ],
+  ],
 
-&nbsp; final\_value: 186
+  final_value: 186
 
 }
 
@@ -2610,7 +2610,7 @@ engine.explain(tokenId, 'duration') → Provenance
 
 
 
-\### 10.4 Snapshot Diffing
+### 10.4 Snapshot Diffing
 
 
 
@@ -2622,41 +2622,41 @@ Compare state between any two points:
 
 interface SnapshotDiff {
 
-&nbsp; phase\_from: string;
+  phase_from: string;
 
-&nbsp; phase\_to: string;
+  phase_to: string;
 
-&nbsp; 
+  
 
-&nbsp; tokens: {
+  tokens: {
 
-&nbsp;   added: TokenSummary\[];
+    added: TokenSummary[];
 
-&nbsp;   deleted: TokenSummary\[];
+    deleted: TokenSummary[];
 
-&nbsp;   modified: TokenModification\[];
+    modified: TokenModification[];
 
-&nbsp; };
+  };
 
-&nbsp; 
+  
 
-&nbsp; sync\_marks: {
+  sync_marks: {
 
-&nbsp;   added: SyncMarkId\[];
+    added: SyncMarkId[];
 
-&nbsp;   deleted: SyncMarkId\[];
+    deleted: SyncMarkId[];
 
-&nbsp; };
+  };
 
-&nbsp; 
+  
 
-&nbsp; associations: {
+  associations: {
 
-&nbsp;   added: AssociationEdge\[];
+    added: AssociationEdge[];
 
-&nbsp;   deleted: AssociationEdge\[];
+    deleted: AssociationEdge[];
 
-&nbsp; };
+  };
 
 }
 
@@ -2664,9 +2664,9 @@ interface SnapshotDiff {
 
 interface TokenModification {
 
-&nbsp; token\_id: TokenId;
+  token_id: TokenId;
 
-&nbsp; changes: FieldChange\[];
+  changes: FieldChange[];
 
 }
 
@@ -2674,13 +2674,13 @@ interface TokenModification {
 
 interface FieldChange {
 
-&nbsp; path: string;              // e.g., 's.duration', 'f.place', 'sync\_right'
+  path: string;              // e.g., 's.duration', 'f.place', 'sync_right'
 
-&nbsp; old\_value: any;
+  old_value: any;
 
-&nbsp; new\_value: any;
+  new_value: any;
 
-&nbsp; caused\_by: string\[];       // rule names
+  caused_by: string[];       // rule names
 
 }
 
@@ -2688,7 +2688,7 @@ interface FieldChange {
 
 
 
-\*\*Usage:\*\*
+**Usage:**
 
 
 
@@ -2702,7 +2702,7 @@ const diff = engine.diff('after:allophonic', 'after:duration');
 
 
 
-\### 10.5 Rule Coverage Report
+### 10.5 Rule Coverage Report
 
 
 
@@ -2714,55 +2714,55 @@ Track which rules fired and where:
 
 interface RuleCoverage {
 
-&nbsp; rule: string;
+  rule: string;
 
-&nbsp; citation: string;
+  citation: string;
 
-&nbsp; 
+  
 
-&nbsp; matches: {
+  matches: {
 
-&nbsp;   total: number;
+    total: number;
 
-&nbsp;   by\_position: Map<number, number>;  // index → count
+    by_position: Map<number, number>;  // index → count
 
-&nbsp; };
+  };
 
-&nbsp; 
+  
 
-&nbsp; non\_matches: {
+  non_matches: {
 
-&nbsp;   total\_attempts: number;
+    total_attempts: number;
 
-&nbsp;   failure\_reasons: Map<string, number>;  // reason → count
+    failure_reasons: Map<string, number>;  // reason → count
 
-&nbsp; };
+  };
 
-&nbsp; 
+  
 
-&nbsp; effects\_applied: number;
+  effects_applied: number;
 
-&nbsp; effects\_skipped: number;
+  effects_skipped: number;
 
-&nbsp; 
+  
 
-&nbsp; example\_matches: MatchSuccess\[];      // first N
+  example_matches: MatchSuccess[];      // first N
 
-&nbsp; example\_failures: MatchFailure\[];     // first N
+  example_failures: MatchFailure[];     // first N
 
 }
 
 
 
-// "Why didn't insert\_aspiration fire on this stop?"
+// "Why didn't insert_aspiration fire on this stop?"
 
-engine.whyNot('insert\_aspiration', tokenId) → MatchFailure\[]
+engine.whyNot('insert_aspiration', tokenId) → MatchFailure[]
 
 ```
 
 
 
-\### 10.6 Stream Visualization
+### 10.6 Stream Visualization
 
 
 
@@ -2774,13 +2774,13 @@ Multi-stream alignment view specification:
 
 interface StreamView {
 
-&nbsp; time\_range: \[number, number];
+  time_range: [number, number];
 
-&nbsp; streams: StreamLayer\[];
+  streams: StreamLayer[];
 
-&nbsp; sync\_marks: SyncMarkDisplay\[];
+  sync_marks: SyncMarkDisplay[];
 
-&nbsp; annotations: Annotation\[];
+  annotations: Annotation[];
 
 }
 
@@ -2788,13 +2788,13 @@ interface StreamView {
 
 interface StreamLayer {
 
-&nbsp; stream: string;
+  stream: string;
 
-&nbsp; tokens: TokenDisplay\[];
+  tokens: TokenDisplay[];
 
-&nbsp; y\_position: number;
+  y_position: number;
 
-&nbsp; height: number;
+  height: number;
 
 }
 
@@ -2802,21 +2802,21 @@ interface StreamLayer {
 
 interface TokenDisplay {
 
-&nbsp; token\_id: TokenId;
+  token_id: TokenId;
 
-&nbsp; name: string;
+  name: string;
 
-&nbsp; x\_start: number;           // pixels or time
+  x_start: number;           // pixels or time
 
-&nbsp; x\_end: number;
+  x_end: number;
 
-&nbsp; features: Record<string, string>;  // formatted for display
+  features: Record<string, string>;  // formatted for display
 
-&nbsp; scalars: Record<string, string>;
+  scalars: Record<string, string>;
 
-&nbsp; highlight: 'none' | 'selected' | 'matched' | 'modified' | 'inserted' | 'deleted';
+  highlight: 'none' | 'selected' | 'matched' | 'modified' | 'inserted' | 'deleted';
 
-&nbsp; provenance\_available: string\[];    // which fields have provenance
+  provenance_available: string[];    // which fields have provenance
 
 }
 
@@ -2824,17 +2824,17 @@ interface TokenDisplay {
 
 interface SyncMarkDisplay {
 
-&nbsp; id: SyncMarkId;
+  id: SyncMarkId;
 
-&nbsp; x: number;
+  x: number;
 
-&nbsp; time: number | null;
+  time: number | null;
 
-&nbsp; order: string;
+  order: string;
 
-&nbsp; references: TokenId\[];     // tokens using this mark
+  references: TokenId[];     // tokens using this mark
 
-&nbsp; is\_interior: boolean;
+  is_interior: boolean;
 
 }
 
@@ -2842,17 +2842,17 @@ interface SyncMarkDisplay {
 
 interface Annotation {
 
-&nbsp; type: 'rule\_match' | 'patch\_applied' | 'warning' | 'custom';
+  type: 'rule_match' | 'patch_applied' | 'warning' | 'custom';
 
-&nbsp; x\_start: number;
+  x_start: number;
 
-&nbsp; x\_end: number;
+  x_end: number;
 
-&nbsp; y\_stream: string;
+  y_stream: string;
 
-&nbsp; label: string;
+  label: string;
 
-&nbsp; details: any;
+  details: any;
 
 }
 
@@ -2860,7 +2860,7 @@ interface Annotation {
 
 
 
-\### 10.7 Interactive Debugger Protocol
+### 10.7 Interactive Debugger Protocol
 
 
 
@@ -2872,53 +2872,53 @@ For IDE/UI integration:
 
 interface DebuggerProtocol {
 
-&nbsp; // Breakpoints
+  // Breakpoints
 
-&nbsp; setBreakpoint(location: BreakpointLocation): BreakpointId;
+  setBreakpoint(location: BreakpointLocation): BreakpointId;
 
-&nbsp; removeBreakpoint(id: BreakpointId): void;
+  removeBreakpoint(id: BreakpointId): void;
 
-&nbsp; 
+  
 
-&nbsp; // Execution control
+  // Execution control
 
-&nbsp; run(): Promise<void>;
+  run(): Promise<void>;
 
-&nbsp; stepPhase(): Promise<PhaseResult>;
+  stepPhase(): Promise<PhaseResult>;
 
-&nbsp; stepRule(): Promise<RuleResult>;
+  stepRule(): Promise<RuleResult>;
 
-&nbsp; stepMatch(): Promise<MatchResult>;
+  stepMatch(): Promise<MatchResult>;
 
-&nbsp; pause(): void;
+  pause(): void;
 
-&nbsp; 
+  
 
-&nbsp; // State inspection
+  // State inspection
 
-&nbsp; getStreams(): StreamState\[];
+  getStreams(): StreamState[];
 
-&nbsp; getToken(id: TokenId): Token;
+  getToken(id: TokenId): Token;
 
-&nbsp; getSyncMark(id: SyncMarkId): SyncMark;
+  getSyncMark(id: SyncMarkId): SyncMark;
 
-&nbsp; explain(tokenId: TokenId, field: string): Provenance;
+  explain(tokenId: TokenId, field: string): Provenance;
 
-&nbsp; whyNot(rule: string, tokenId: TokenId): MatchFailure\[];
+  whyNot(rule: string, tokenId: TokenId): MatchFailure[];
 
-&nbsp; 
+  
 
-&nbsp; // Queries
+  // Queries
 
-&nbsp; query(jsonata: string): any;  // query current state
+  query(jsonata: string): any;  // query current state
 
-&nbsp; 
+  
 
-&nbsp; // Events
+  // Events
 
-&nbsp; onTraceEvent(callback: (event: TraceEvent) => void): void;
+  onTraceEvent(callback: (event: TraceEvent) => void): void;
 
-&nbsp; onBreakpoint(callback: (bp: BreakpointId) => void): void;
+  onBreakpoint(callback: (bp: BreakpointId) => void): void;
 
 }
 
@@ -2926,37 +2926,37 @@ interface DebuggerProtocol {
 
 type BreakpointLocation =
 
-&nbsp; | { type: 'phase'; phase: string; when: 'before' | 'after' }
+  | { type: 'phase'; phase: string; when: 'before' | 'after' }
 
-&nbsp; | { type: 'rule'; rule: string; when: 'before' | 'after' }
+  | { type: 'rule'; rule: string; when: 'before' | 'after' }
 
-&nbsp; | { type: 'match'; pattern: string; token?: TokenId }
+  | { type: 'match'; pattern: string; token?: TokenId }
 
-&nbsp; | { type: 'patch'; patch\_type: string }
+  | { type: 'patch'; patch_type: string }
 
-&nbsp; | { type: 'token\_modified'; token: TokenId; field?: string }
+  | { type: 'token_modified'; token: TokenId; field?: string }
 
-&nbsp; | { type: 'condition'; expr: string };  // break when expr is true
+  | { type: 'condition'; expr: string };  // break when expr is true
 
 ```
 
 
 
-\### 10.8 Trace Output Formats
+### 10.8 Trace Output Formats
 
 
 
-\*\*JSON Lines (streaming):\*\*
+**JSON Lines (streaming):**
 
 
 
 ```jsonl
 
-{"type":"phase\_start","phase":"duration","timestamp":1234567890}
+{"type":"phase_start","phase":"duration","timestamp":1234567890}
 
-{"type":"match\_success","rule":"stress\_lengthening","captures":{"current":"phone\_42"}}
+{"type":"match_success","rule":"stress_lengthening","captures":{"current":"phone_42"}}
 
-{"type":"expression\_eval","rule":"stress\_lengthening","expression":"$parent(current,'syllable').f.stress","result":1}
+{"type":"expression_eval","rule":"stress_lengthening","expression":"$parent(current,'syllable').f.stress","result":1}
 
 ...
 
@@ -2964,7 +2964,7 @@ type BreakpointLocation =
 
 
 
-\*\*HTML Report:\*\*
+**HTML Report:**
 
 
 
@@ -2982,23 +2982,23 @@ Self-contained HTML with:
 
 
 
-\*\*SQLite Database:\*\*
+**SQLite Database:**
 
 
 
 ```sql
 
-CREATE TABLE trace\_events (
+CREATE TABLE trace_events (
 
-&nbsp; id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
 
-&nbsp; timestamp\_us INTEGER,
+  timestamp_us INTEGER,
 
-&nbsp; phase TEXT,
+  phase TEXT,
 
-&nbsp; event\_type TEXT,
+  event_type TEXT,
 
-&nbsp; event\_json TEXT
+  event_json TEXT
 
 );
 
@@ -3006,17 +3006,17 @@ CREATE TABLE trace\_events (
 
 CREATE TABLE provenance (
 
-&nbsp; token\_id TEXT,
+  token_id TEXT,
 
-&nbsp; field TEXT,
+  field TEXT,
 
-&nbsp; base\_value REAL,
+  base_value REAL,
 
-&nbsp; final\_value REAL,
+  final_value REAL,
 
-&nbsp; effects\_json TEXT,
+  effects_json TEXT,
 
-&nbsp; PRIMARY KEY (token\_id, field)
+  PRIMARY KEY (token_id, field)
 
 );
 
@@ -3024,9 +3024,9 @@ CREATE TABLE provenance (
 
 CREATE TABLE snapshots (
 
-&nbsp; phase TEXT PRIMARY KEY,
+  phase TEXT PRIMARY KEY,
 
-&nbsp; state\_json TEXT  -- or msgpack for size
+  state_json TEXT  -- or msgpack for size
 
 );
 
@@ -3034,7 +3034,7 @@ CREATE TABLE snapshots (
 
 -- Query: all effects on duration fields
 
-SELECT p.token\_id, p.effects\_json 
+SELECT p.token_id, p.effects_json 
 
 FROM provenance p 
 
@@ -3044,7 +3044,7 @@ WHERE p.field = 'duration';
 
 
 
-\*\*Storage semantics (implementation-defined):\*\*
+**Storage semantics (implementation-defined):**
 
 
 
@@ -3064,7 +3064,7 @@ Implementations should document their choices.
 
 
 
-\### 10.9 Performance Profiling
+### 10.9 Performance Profiling
 
 
 
@@ -3072,75 +3072,75 @@ Implementations should document their choices.
 
 interface PerformanceReport {
 
-&nbsp; total\_time\_ms: number;
+  total_time_ms: number;
 
-&nbsp; 
+  
 
-&nbsp; by\_phase: {
+  by_phase: {
 
-&nbsp;   phase: string;
+    phase: string;
 
-&nbsp;   time\_ms: number;
+    time_ms: number;
 
-&nbsp;   breakdown: {
+    breakdown: {
 
-&nbsp;     snapshot: number;
+      snapshot: number;
 
-&nbsp;     matching: number;
+      matching: number;
 
-&nbsp;     patch\_generation: number;
+      patch_generation: number;
 
-&nbsp;     patch\_application: number;
+      patch_application: number;
 
-&nbsp;     resolution: number;
+      resolution: number;
 
-&nbsp;   };
+    };
 
-&nbsp; }\[];
+  }[];
 
-&nbsp; 
+  
 
-&nbsp; by\_rule: {
+  by_rule: {
 
-&nbsp;   rule: string;
+    rule: string;
 
-&nbsp;   time\_ms: number;
+    time_ms: number;
 
-&nbsp;   match\_attempts: number;
+    match_attempts: number;
 
-&nbsp;   match\_successes: number;
+    match_successes: number;
 
-&nbsp;   expressions\_evaluated: number;
+    expressions_evaluated: number;
 
-&nbsp;   avg\_expression\_time\_us: number;
+    avg_expression_time_us: number;
 
-&nbsp; }\[];
+  }[];
 
-&nbsp; 
+  
 
-&nbsp; hot\_expressions: {
+  hot_expressions: {
 
-&nbsp;   expression: string;
+    expression: string;
 
-&nbsp;   count: number;
+    count: number;
 
-&nbsp;   total\_time\_us: number;
+    total_time_us: number;
 
-&nbsp;   avg\_time\_us: number;
+    avg_time_us: number;
 
-&nbsp; }\[];
+  }[];
 
-&nbsp; 
+  
 
-&nbsp; memory: {
+  memory: {
 
-&nbsp;   peak\_tokens: number;
+    peak_tokens: number;
 
-&nbsp;   peak\_sync\_marks: number;
+    peak_sync_marks: number;
 
-&nbsp;   snapshot\_copies: number;
+    snapshot_copies: number;
 
-&nbsp; };
+  };
 
 }
 
@@ -3148,7 +3148,7 @@ interface PerformanceReport {
 
 
 
-\### 10.10 Configuration
+### 10.10 Configuration
 
 
 
@@ -3156,65 +3156,65 @@ interface PerformanceReport {
 
 debug:
 
-&nbsp; enabled: true
+  enabled: true
 
-&nbsp; 
+  
 
-&nbsp; trace:
+  trace:
 
-&nbsp;   events: \[match\_success, match\_failure, patch\_applied, scalar\_resolution]
+    events: [match_success, match_failure, patch_applied, scalar_resolution]
 
-&nbsp;   # or: all, none, errors\_only
+    # or: all, none, errors_only
 
-&nbsp;   
+    
 
-&nbsp;   include\_context: true      # include full expression context
+    include_context: true      # include full expression context
 
-&nbsp;   include\_snapshots: true    # store snapshots for diffing
+    include_snapshots: true    # store snapshots for diffing
 
-&nbsp;   max\_example\_failures: 10   # per rule
+    max_example_failures: 10   # per rule
 
-&nbsp;   
+    
 
-&nbsp; output:
+  output:
 
-&nbsp;   format: jsonl              # jsonl, html, sqlite
+    format: jsonl              # jsonl, html, sqlite
 
-&nbsp;   path: "./debug/trace.jsonl"
+    path: "./debug/trace.jsonl"
 
-&nbsp;   
+    
 
-&nbsp; breakpoints:
+  breakpoints:
 
-&nbsp;   - { type: phase, phase: duration, when: after }
+    - { type: phase, phase: duration, when: after }
 
-&nbsp;   - { type: condition, expr: "current.s.duration < 50" }
+    - { type: condition, expr: "current.s.duration < 50" }
 
-&nbsp;   
+    
 
-&nbsp; performance:
+  performance:
 
-&nbsp;   enabled: true
+    enabled: true
 
-&nbsp;   sample\_expressions: true   # profile JSONata evaluation
+    sample_expressions: true   # profile JSONata evaluation
 
 
 
-&nbsp; visualization:
+  visualization:
 
-&nbsp;   enabled: true
+    enabled: true
 
-&nbsp;   output: "./debug/timeline.html"
+    output: "./debug/timeline.html"
 
-&nbsp;   streams: \[phone, syllable, f0]
+    streams: [phone, syllable, f0]
 
-&nbsp;   time\_range: auto           # or \[0, 2000]
+    time_range: auto           # or [0, 2000]
 
 ```
 
 
 
-\### 10.11 Command Line Interface
+### 10.11 Command Line Interface
 
 
 
@@ -3226,51 +3226,51 @@ tts-dsl - Declarative TTS Frontend DSL
 
 USAGE:
 
-&nbsp;   tts-dsl <COMMAND> \[OPTIONS]
+    tts-dsl <COMMAND> [OPTIONS]
 
 
 
 COMMANDS:
 
-&nbsp;   run         Process input through the DSL pipeline
+    run         Process input through the DSL pipeline
 
-&nbsp;   validate    Check spec for errors without running
+    validate    Check spec for errors without running
 
-&nbsp;   explain     Show provenance for a token's field
+    explain     Show provenance for a token's field
 
-&nbsp;   why-not     Explain why a rule didn't fire on a token
+    why-not     Explain why a rule didn't fire on a token
 
-&nbsp;   diff        Compare state between phases
+    diff        Compare state between phases
 
-&nbsp;   visualize   Generate timeline visualization
+    visualize   Generate timeline visualization
 
-&nbsp;   profile     Performance profiling
+    profile     Performance profiling
 
-&nbsp;   debug       Interactive debugger
+    debug       Interactive debugger
 
-&nbsp;   lsp         Language Server Protocol mode
+    lsp         Language Server Protocol mode
 
-&nbsp;   completion  Generate shell completions
+    completion  Generate shell completions
 
 
 
 GLOBAL OPTIONS:
 
-&nbsp;   -s, --spec <FILE>       Spec file (default: tts.yaml)
+    -s, --spec <FILE>       Spec file (default: tts.yaml)
 
-&nbsp;   -v, --verbose           Increase verbosity (-v, -vv, -vvv)
+    -v, --verbose           Increase verbosity (-v, -vv, -vvv)
 
-&nbsp;   -q, --quiet             Suppress non-error output
+    -q, --quiet             Suppress non-error output
 
-&nbsp;   --color <WHEN>          Color output: auto, always, never
+    --color <WHEN>          Color output: auto, always, never
 
-&nbsp;   --config <FILE>         Config file for defaults
+    --config <FILE>         Config file for defaults
 
 ```
 
 
 
-\#### tts-dsl run
+#### tts-dsl run
 
 
 
@@ -3282,85 +3282,85 @@ Process input through the DSL pipeline
 
 USAGE:
 
-&nbsp;   tts-dsl run \[OPTIONS] <INPUT>
+    tts-dsl run [OPTIONS] <INPUT>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>     Input text, file path, or "-" for stdin
+    <INPUT>     Input text, file path, or "-" for stdin
 
 
 
 INPUT FORMATS:
 
-&nbsp;   --input-format <FMT>    Input format: text, phonemes, json
+    --input-format <FMT>    Input format: text, phonemes, json
 
-&nbsp;                           text     - Plain text (requires G2P)
+                            text     - Plain text (requires G2P)
 
-&nbsp;                           phonemes - Space-separated phonemes
+                            phonemes - Space-separated phonemes
 
-&nbsp;                           json     - Pre-structured token stream
+                            json     - Pre-structured token stream
 
 
 
 OUTPUT:
 
-&nbsp;   -o, --output <FILE>     Output file (default: stdout)
+    -o, --output <FILE>     Output file (default: stdout)
 
-&nbsp;   --output-format <FMT>   Output format:
+    --output-format <FMT>   Output format:
 
-&nbsp;                           klatt    - Klatt parameter frames (default)
+                            klatt    - Klatt parameter frames (default)
 
-&nbsp;                           json     - Full token state as JSON
+                            json     - Full token state as JSON
 
-&nbsp;                           praat    - Praat TextGrid
+                            praat    - Praat TextGrid
 
-&nbsp;                           ssml     - Annotated SSML
+                            ssml     - Annotated SSML
 
-&nbsp;                           wav      - Synthesized audio (requires backend)
+                            wav      - Synthesized audio (requires backend)
 
 
 
 TRACING:
 
-&nbsp;   --trace <FILE>          Write trace to file (jsonl, html, or sqlite by extension)
+    --trace <FILE>          Write trace to file (jsonl, html, or sqlite by extension)
 
-&nbsp;   --trace-events <LIST>   Events to trace: all, none, or comma-separated list
+    --trace-events <LIST>   Events to trace: all, none, or comma-separated list
 
-&nbsp;                           (match, patch, resolution, expression, error)
+                            (match, patch, resolution, expression, error)
 
-&nbsp;   --snapshots             Include full snapshots in trace (large!)
+    --snapshots             Include full snapshots in trace (large!)
 
 
 
 PHASES:
 
-&nbsp;   --stop-after <PHASE>    Stop after named phase
+    --stop-after <PHASE>    Stop after named phase
 
-&nbsp;   --skip <PHASES>         Skip comma-separated phases
+    --skip <PHASES>         Skip comma-separated phases
 
-&nbsp;   --only <PHASES>         Run only comma-separated phases
+    --only <PHASES>         Run only comma-separated phases
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl run "hello world"
+    tts-dsl run "hello world"
 
-&nbsp;   tts-dsl run -s en-us.yaml --output-format wav -o hello.wav "hello world"
+    tts-dsl run -s en-us.yaml --output-format wav -o hello.wav "hello world"
 
-&nbsp;   tts-dsl run --input-format phonemes "h ə l oʊ"
+    tts-dsl run --input-format phonemes "h ə l oʊ"
 
-&nbsp;   tts-dsl run --trace trace.html --trace-events all input.txt
+    tts-dsl run --trace trace.html --trace-events all input.txt
 
-&nbsp;   cat text.txt | tts-dsl run -
+    cat text.txt | tts-dsl run -
 
 ```
 
 
 
-\#### tts-dsl validate
+#### tts-dsl validate
 
 
 
@@ -3372,51 +3372,51 @@ Check spec for errors without running
 
 USAGE:
 
-&nbsp;   tts-dsl validate \[OPTIONS] \[SPEC]
+    tts-dsl validate [OPTIONS] [SPEC]
 
 
 
 ARGS:
 
-&nbsp;   \[SPEC]      Spec file (default: tts.yaml)
+    [SPEC]      Spec file (default: tts.yaml)
 
 
 
 OPTIONS:
 
-&nbsp;   --strict            Treat warnings as errors
+    --strict            Treat warnings as errors
 
-&nbsp;   --check-citations   Verify citation format
+    --check-citations   Verify citation format
 
-&nbsp;   --check-inventory   Verify all phonemes have targets
+    --check-inventory   Verify all phonemes have targets
 
-&nbsp;   --list-rules        List all rules with citations
+    --list-rules        List all rules with citations
 
-&nbsp;   --list-patterns     List all patterns with streams
+    --list-patterns     List all patterns with streams
 
-&nbsp;   --deps              Show phase dependencies as graph
+    --deps              Show phase dependencies as graph
 
 
 
 OUTPUT:
 
-&nbsp;   --format <FMT>      Output format: text, json, sarif (for CI)
+    --format <FMT>      Output format: text, json, sarif (for CI)
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl validate en-us.yaml
+    tts-dsl validate en-us.yaml
 
-&nbsp;   tts-dsl validate --strict --format sarif > results.sarif
+    tts-dsl validate --strict --format sarif > results.sarif
 
-&nbsp;   tts-dsl validate --list-rules
+    tts-dsl validate --list-rules
 
 ```
 
 
 
-\#### tts-dsl explain
+#### tts-dsl explain
 
 
 
@@ -3428,59 +3428,59 @@ Show provenance for a token's field value
 
 USAGE:
 
-&nbsp;   tts-dsl explain \[OPTIONS] <INPUT> --token <ID> --field <FIELD>
+    tts-dsl explain [OPTIONS] <INPUT> --token <ID> --field <FIELD>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file
+    <INPUT>             Input text or file
 
 
 
 OPTIONS:
 
-&nbsp;   --token <ID>        Token ID or selector:
+    --token <ID>        Token ID or selector:
 
-&nbsp;                       phone\_42      - by ID
+                        phone_42      - by ID
 
-&nbsp;                       phone:5       - phone stream index 5
+                        phone:5       - phone stream index 5
 
-&nbsp;                       "æ":first     - first token named æ
+                        "æ":first     - first token named æ
 
-&nbsp;                       syllable:2    - syllable index 2
+                        syllable:2    - syllable index 2
 
-&nbsp;   
+    
 
-&nbsp;   --field <FIELD>     Field to explain: duration, F1, F2, etc.
+    --field <FIELD>     Field to explain: duration, F1, F2, etc.
 
-&nbsp;   
+    
 
-&nbsp;   --phase <PHASE>     Show state after this phase (default: final)
+    --phase <PHASE>     Show state after this phase (default: final)
 
-&nbsp;   
+    
 
-&nbsp;   --format <FMT>      Output format: text, json, markdown
+    --format <FMT>      Output format: text, json, markdown
 
 
 
 OUTPUT:
 
-&nbsp;   Shows: base value, source, each effect with rule/citation/before/after
+    Shows: base value, source, each effect with rule/citation/before/after
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl explain "hello" --token phone:3 --field duration
+    tts-dsl explain "hello" --token phone:3 --field duration
 
-&nbsp;   tts-dsl explain "hello" --token "ɛ":first --field F1 --format json
+    tts-dsl explain "hello" --token "ɛ":first --field F1 --format json
 
 ```
 
 
 
-\#### tts-dsl why-not
+#### tts-dsl why-not
 
 
 
@@ -3492,47 +3492,47 @@ Explain why a rule didn't fire on a token
 
 USAGE:
 
-&nbsp;   tts-dsl why-not \[OPTIONS] <INPUT> --rule <RULE> --token <ID>
+    tts-dsl why-not [OPTIONS] <INPUT> --rule <RULE> --token <ID>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file
+    <INPUT>             Input text or file
 
 
 
 OPTIONS:
 
-&nbsp;   --rule <RULE>       Rule name
+    --rule <RULE>       Rule name
 
-&nbsp;   --token <ID>        Token ID or selector (see 'explain')
+    --token <ID>        Token ID or selector (see 'explain')
 
-&nbsp;   --phase <PHASE>     Evaluate at this phase (default: rule's phase)
+    --phase <PHASE>     Evaluate at this phase (default: rule's phase)
 
-&nbsp;   --all-failures      Show all match attempts, not just for this token
+    --all-failures      Show all match attempts, not just for this token
 
 
 
 OUTPUT:
 
-&nbsp;   Shows: which pattern step failed, the where clause, 
+    Shows: which pattern step failed, the where clause, 
 
-&nbsp;          actual token values, expected values
+           actual token values, expected values
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl why-not "did you" --rule insert\_aspiration --token phone:0
+    tts-dsl why-not "did you" --rule insert_aspiration --token phone:0
 
-&nbsp;   tts-dsl why-not input.txt --rule d\_j\_coalescence --all-failures
+    tts-dsl why-not input.txt --rule d_j_coalescence --all-failures
 
 ```
 
 
 
-\#### tts-dsl diff
+#### tts-dsl diff
 
 
 
@@ -3544,47 +3544,47 @@ Compare state between phases
 
 USAGE:
 
-&nbsp;   tts-dsl diff \[OPTIONS] <INPUT> --from <PHASE> --to <PHASE>
+    tts-dsl diff [OPTIONS] <INPUT> --from <PHASE> --to <PHASE>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file
+    <INPUT>             Input text or file
 
 
 
 OPTIONS:
 
-&nbsp;   --from <PHASE>      Start phase (or "init" for initial state)
+    --from <PHASE>      Start phase (or "init" for initial state)
 
-&nbsp;   --to <PHASE>        End phase (or "final" for end state)
+    --to <PHASE>        End phase (or "final" for end state)
 
-&nbsp;   --stream <STREAM>   Filter to specific stream
+    --stream <STREAM>   Filter to specific stream
 
-&nbsp;   --format <FMT>      Output format: text, json, patch
+    --format <FMT>      Output format: text, json, patch
 
 
 
 OUTPUT:
 
-&nbsp;   Shows: tokens added/deleted/modified, sync marks changed,
+    Shows: tokens added/deleted/modified, sync marks changed,
 
-&nbsp;          associations changed, with causing rules
+           associations changed, with causing rules
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl diff "hello" --from init --to sandhi
+    tts-dsl diff "hello" --from init --to sandhi
 
-&nbsp;   tts-dsl diff "hello" --from duration --to final --stream phone
+    tts-dsl diff "hello" --from duration --to final --stream phone
 
 ```
 
 
 
-\#### tts-dsl visualize
+#### tts-dsl visualize
 
 
 
@@ -3596,45 +3596,45 @@ Generate timeline visualization
 
 USAGE:
 
-&nbsp;   tts-dsl visualize \[OPTIONS] <INPUT> -o <OUTPUT>
+    tts-dsl visualize [OPTIONS] <INPUT> -o <OUTPUT>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file
+    <INPUT>             Input text or file
 
 
 
 OPTIONS:
 
-&nbsp;   -o, --output <FILE>     Output file (.html, .svg, .png)
+    -o, --output <FILE>     Output file (.html, .svg, .png)
 
-&nbsp;   --streams <LIST>        Streams to show (default: phone,syllable,f0)
+    --streams <LIST>        Streams to show (default: phone,syllable,f0)
 
-&nbsp;   --phase <PHASE>         Show state at phase (default: final)
+    --phase <PHASE>         Show state at phase (default: final)
 
-&nbsp;   --time-range <RANGE>    Time range in ms: "0-2000" or "auto"
+    --time-range <RANGE>    Time range in ms: "0-2000" or "auto"
 
-&nbsp;   --show-sync-marks       Draw sync mark lines
+    --show-sync-marks       Draw sync mark lines
 
-&nbsp;   --show-provenance       Color by rule that last modified
+    --show-provenance       Color by rule that last modified
 
-&nbsp;   --interactive           HTML with hover/click (html only)
+    --interactive           HTML with hover/click (html only)
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl visualize "hello world" -o timeline.html --interactive
+    tts-dsl visualize "hello world" -o timeline.html --interactive
 
-&nbsp;   tts-dsl visualize input.txt -o diagram.svg --streams phone,f0
+    tts-dsl visualize input.txt -o diagram.svg --streams phone,f0
 
 ```
 
 
 
-\#### tts-dsl profile
+#### tts-dsl profile
 
 
 
@@ -3646,55 +3646,55 @@ Performance profiling
 
 USAGE:
 
-&nbsp;   tts-dsl profile \[OPTIONS] <INPUT>
+    tts-dsl profile [OPTIONS] <INPUT>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file (or --corpus for batch)
+    <INPUT>             Input text or file (or --corpus for batch)
 
 
 
 OPTIONS:
 
-&nbsp;   --iterations <N>    Run N times and average (default: 10)
+    --iterations <N>    Run N times and average (default: 10)
 
-&nbsp;   --corpus <DIR>      Profile all .txt files in directory
+    --corpus <DIR>      Profile all .txt files in directory
 
-&nbsp;   --warmup <N>        Warmup iterations (default: 2)
+    --warmup <N>        Warmup iterations (default: 2)
 
-&nbsp;   --format <FMT>      Output format: text, json, flamegraph
+    --format <FMT>      Output format: text, json, flamegraph
 
-&nbsp;   --output <FILE>     Output file (default: stdout)
+    --output <FILE>     Output file (default: stdout)
 
 
 
 BREAKDOWN:
 
-&nbsp;   --by-phase          Time breakdown by phase
+    --by-phase          Time breakdown by phase
 
-&nbsp;   --by-rule           Time breakdown by rule
+    --by-rule           Time breakdown by rule
 
-&nbsp;   --expressions       Profile JSONata expressions
+    --expressions       Profile JSONata expressions
 
-&nbsp;   --memory            Track memory allocations
+    --memory            Track memory allocations
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl profile "hello world" --iterations 100
+    tts-dsl profile "hello world" --iterations 100
 
-&nbsp;   tts-dsl profile --corpus ./test-sentences/ --format json -o profile.json
+    tts-dsl profile --corpus ./test-sentences/ --format json -o profile.json
 
-&nbsp;   tts-dsl profile input.txt --expressions --format flamegraph -o profile.svg
+    tts-dsl profile input.txt --expressions --format flamegraph -o profile.svg
 
 ```
 
 
 
-\#### tts-dsl debug
+#### tts-dsl debug
 
 
 
@@ -3706,107 +3706,107 @@ Interactive debugger
 
 USAGE:
 
-&nbsp;   tts-dsl debug \[OPTIONS] <INPUT>
+    tts-dsl debug [OPTIONS] <INPUT>
 
 
 
 ARGS:
 
-&nbsp;   <INPUT>             Input text or file
+    <INPUT>             Input text or file
 
 
 
 OPTIONS:
 
-&nbsp;   --break <BP>        Initial breakpoint (can repeat):
+    --break <BP>        Initial breakpoint (can repeat):
 
-&nbsp;                       phase:sandhi:before
+                        phase:sandhi:before
 
-&nbsp;                       phase:duration:after
+                        phase:duration:after
 
-&nbsp;                       rule:stress\_lengthening
+                        rule:stress_lengthening
 
-&nbsp;                       token:phone\_5:modified
+                        token:phone_5:modified
 
-&nbsp;                       condition:"current.s.duration < 50"
+                        condition:"current.s.duration < 50"
 
-&nbsp;   
+    
 
-&nbsp;   --script <FILE>     Run debugger commands from file
+    --script <FILE>     Run debugger commands from file
 
-&nbsp;   --port <PORT>       DAP server mode on port (for IDE integration)
+    --port <PORT>       DAP server mode on port (for IDE integration)
 
 
 
 DEBUGGER COMMANDS:
 
-&nbsp;   break <location>    Set breakpoint
+    break <location>    Set breakpoint
 
-&nbsp;   delete <id>         Delete breakpoint
+    delete <id>         Delete breakpoint
 
-&nbsp;   list                List breakpoints
+    list                List breakpoints
 
-&nbsp;   
+    
 
-&nbsp;   run                 Run to next breakpoint
+    run                 Run to next breakpoint
 
-&nbsp;   step phase          Step one phase
+    step phase          Step one phase
 
-&nbsp;   step rule           Step one rule
+    step rule           Step one rule
 
-&nbsp;   step match          Step one match attempt
+    step match          Step one match attempt
 
-&nbsp;   continue            Continue execution
+    continue            Continue execution
 
-&nbsp;   
+    
 
-&nbsp;   state               Show current state summary
+    state               Show current state summary
 
-&nbsp;   tokens \[stream]     List tokens in stream
+    tokens [stream]     List tokens in stream
 
-&nbsp;   token <id>          Show token details
+    token <id>          Show token details
 
-&nbsp;   sync <id>           Show sync mark details
+    sync <id>           Show sync mark details
 
-&nbsp;   
+    
 
-&nbsp;   explain <id> <fld>  Show provenance
+    explain <id> <fld>  Show provenance
 
-&nbsp;   why-not <rule> <id> Explain match failure
+    why-not <rule> <id> Explain match failure
 
-&nbsp;   diff \[from] \[to]    Diff between phases
+    diff [from] [to]    Diff between phases
 
-&nbsp;   
+    
 
-&nbsp;   query <jsonata>     Query current state
+    query <jsonata>     Query current state
 
-&nbsp;   watch <expr>        Watch expression value
+    watch <expr>        Watch expression value
 
-&nbsp;   
+    
 
-&nbsp;   visualize           Open timeline in browser
+    visualize           Open timeline in browser
 
-&nbsp;   
+    
 
-&nbsp;   help \[command]      Show help
+    help [command]      Show help
 
-&nbsp;   quit                Exit debugger
+    quit                Exit debugger
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl debug "hello world"
+    tts-dsl debug "hello world"
 
-&nbsp;   tts-dsl debug input.txt --break phase:duration:after
+    tts-dsl debug input.txt --break phase:duration:after
 
-&nbsp;   tts-dsl debug input.txt --port 4711  # DAP mode for VS Code
+    tts-dsl debug input.txt --port 4711  # DAP mode for VS Code
 
 ```
 
 
 
-\#### tts-dsl lsp
+#### tts-dsl lsp
 
 
 
@@ -3818,47 +3818,47 @@ Language Server Protocol mode for editor integration
 
 USAGE:
 
-&nbsp;   tts-dsl lsp \[OPTIONS]
+    tts-dsl lsp [OPTIONS]
 
 
 
 OPTIONS:
 
-&nbsp;   --stdio             Communicate via stdin/stdout (default)
+    --stdio             Communicate via stdin/stdout (default)
 
-&nbsp;   --socket <PORT>     Communicate via TCP socket
+    --socket <PORT>     Communicate via TCP socket
 
-&nbsp;   --log <FILE>        Log LSP messages to file
+    --log <FILE>        Log LSP messages to file
 
 
 
 FEATURES:
 
-&nbsp;   - Syntax highlighting for .tts.yaml files
+    - Syntax highlighting for .tts.yaml files
 
-&nbsp;   - Diagnostics (errors, warnings)
+    - Diagnostics (errors, warnings)
 
-&nbsp;   - Hover: show rule citations, pattern definitions
+    - Hover: show rule citations, pattern definitions
 
-&nbsp;   - Go to definition: rule → pattern, stream → definition
+    - Go to definition: rule → pattern, stream → definition
 
-&nbsp;   - Completion: rule names, stream names, feature values
+    - Completion: rule names, stream names, feature values
 
-&nbsp;   - Code actions: add missing citation, fix feature typo
+    - Code actions: add missing citation, fix feature typo
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl lsp --stdio
+    tts-dsl lsp --stdio
 
-&nbsp;   tts-dsl lsp --socket 5007 --log lsp.log
+    tts-dsl lsp --socket 5007 --log lsp.log
 
 ```
 
 
 
-\#### tts-dsl completion
+#### tts-dsl completion
 
 
 
@@ -3870,27 +3870,27 @@ Generate shell completions
 
 USAGE:
 
-&nbsp;   tts-dsl completion <SHELL>
+    tts-dsl completion <SHELL>
 
 
 
 ARGS:
 
-&nbsp;   <SHELL>     Shell: bash, zsh, fish, powershell
+    <SHELL>     Shell: bash, zsh, fish, powershell
 
 
 
 EXAMPLES:
 
-&nbsp;   tts-dsl completion bash > /etc/bash\_completion.d/tts-dsl
+    tts-dsl completion bash > /etc/bash_completion.d/tts-dsl
 
-&nbsp;   tts-dsl completion zsh > ~/.zfunc/\_tts-dsl
+    tts-dsl completion zsh > ~/.zfunc/_tts-dsl
 
 ```
 
 
 
-\### 10.12 Exit Codes
+### 10.12 Exit Codes
 
 
 
@@ -3914,69 +3914,69 @@ EXAMPLES:
 
 
 
-\### 10.13 Environment Variables
+### 10.13 Environment Variables
 
 
 
 ```
 
-TTS\_DSL\_SPEC          Default spec file path
+TTS_DSL_SPEC          Default spec file path
 
-TTS\_DSL\_CONFIG        Config file path
+TTS_DSL_CONFIG        Config file path
 
-TTS\_DSL\_TRACE\_DIR     Directory for trace files
+TTS_DSL_TRACE_DIR     Directory for trace files
 
-TTS\_DSL\_COLOR         Color mode: auto, always, never
+TTS_DSL_COLOR         Color mode: auto, always, never
 
-TTS\_DSL\_PAGER         Pager for long output (default: less)
+TTS_DSL_PAGER         Pager for long output (default: less)
 
 ```
 
 
 
-\### 10.14 Config File
+### 10.14 Config File
 
 
 
 ```yaml
 
-\# ~/.config/tts-dsl/config.yaml
+# ~/.config/tts-dsl/config.yaml
 
 
 
 defaults:
 
-&nbsp; spec: ~/tts/en-us.yaml
+  spec: ~/tts/en-us.yaml
 
-&nbsp; output\_format: klatt
+  output_format: klatt
 
-&nbsp; 
+  
 
 trace:
 
-&nbsp; events: \[match, patch, error]
+  events: [match, patch, error]
 
-&nbsp; directory: ~/.local/share/tts-dsl/traces/
+  directory: ~/.local/share/tts-dsl/traces/
 
-&nbsp; 
+  
 
 debug:
 
-&nbsp; history\_file: ~/.local/share/tts-dsl/debug\_history
+  history_file: ~/.local/share/tts-dsl/debug_history
 
-&nbsp; 
+  
 
 profile:
 
-&nbsp; iterations: 10
+  iterations: 10
 
-&nbsp; warmup: 2
+  warmup: 2
 
 ```
 
 
 
-\### 10.15 Example Debug Session
+### 10.15 Example Debug Session
 
 
 
@@ -4012,23 +4012,23 @@ Hit breakpoint 1: after phase 'sandhi'
 
 Phase diff (init → sandhi):
 
-&nbsp; Tokens:
+  Tokens:
 
-&nbsp;   - deleted: phone\_3 (d)
+    - deleted: phone_3 (d)
 
-&nbsp;   - deleted: phone\_4 (j)  
+    - deleted: phone_4 (j)  
 
-&nbsp;   + inserted: phone\_3a (dʒ) \[rule: coalesce\_dj, citation: Cruttenden 2014 §10.3]
+    + inserted: phone_3a (dʒ) [rule: coalesce_dj, citation: Cruttenden 2014 §10.3]
 
-&nbsp; Sync marks:
+  Sync marks:
 
-&nbsp;   - deleted: s4
+    - deleted: s4
 
 
 
-(tts) explain phone\_3a duration
+(tts) explain phone_3a duration
 
-Token: phone\_3a (dʒ)
+Token: phone_3a (dʒ)
 
 Field: duration
 
@@ -4058,9 +4058,9 @@ Done. 5 scalars resolved.
 
 
 
-(tts) explain phone\_5 duration
+(tts) explain phone_5 duration
 
-Token: phone\_5 (i)
+Token: phone_5 (i)
 
 Field: duration
 
@@ -4074,19 +4074,19 @@ Floor: 42ms (Klatt 1976)
 
 Effects applied:
 
-&nbsp; 1. stress\_lengthening \[Klatt 1976 §III.B]
+  1. stress_lengthening [Klatt 1976 §III.B]
 
-&nbsp;    op: mul, value: 1.3 (stress=1)
+     op: mul, value: 1.3 (stress=1)
 
-&nbsp;    100ms → 117ms (Klatt: 1.3 \* (100-42) + 42 = 117)
+     100ms → 117ms (Klatt: 1.3 \* (100-42) + 42 = 117)
 
-&nbsp;    
+     
 
-&nbsp; 2. phrase\_final\_lengthening \[Klatt 1976 §III.A]
+  2. phrase_final_lengthening [Klatt 1976 §III.A]
 
-&nbsp;    op: mul, value: 1.3 (boundary=major)
+     op: mul, value: 1.3 (boundary=major)
 
-&nbsp;    117ms → 140ms (Klatt: 1.3 \* (117-42) + 42 = 140)
+     117ms → 140ms (Klatt: 1.3 \* (117-42) + 42 = 140)
 
 
 
@@ -4094,11 +4094,11 @@ Final: 140ms
 
 
 
-(tts) why-not insert\_aspiration phone\_1
+(tts) why-not insert_aspiration phone_1
 
-Rule: insert\_aspiration
+Rule: insert_aspiration
 
-Token: phone\_1 (d)
+Token: phone_1 (d)
 
 
 
@@ -4106,13 +4106,13 @@ Match attempted at position 0
 
 Step 0: capture 'stop' where "f.manner = 'stop' and f.voicing = 'voiceless'"
 
-&nbsp; f.manner = 'stop' → true
+  f.manner = 'stop' → true
 
-&nbsp; f.voicing = 'voiceless' → false (actual: 'voiced')
+  f.voicing = 'voiceless' → false (actual: 'voiced')
 
-&nbsp; 
+  
 
-Result: FAILED at step 0 (where\_false)
+Result: FAILED at step 0 (where_false)
 
 Reason: /d/ is voiced; rule requires voiceless stop
 
@@ -4136,11 +4136,11 @@ This tooling is what makes the difference between "interesting research project"
 
 
 
-\## Part 11: Implementation Notes
+## Part 11: Implementation Notes
 
 
 
-\### 11.1 Snapshot Strategy
+### 11.1 Snapshot Strategy
 
 
 
@@ -4154,7 +4154,7 @@ Use copy-on-write:
 
 
 
-\### 11.2 Rank Insertion Algorithm
+### 11.2 Rank Insertion Algorithm
 
 
 
@@ -4162,7 +4162,7 @@ Ranks use base-36 alphabet: `0123456789abcdefghijklmnopqrstuvwxyz`
 
 
 
-\*\*Preconditions:\*\*
+**Preconditions:**
 
 \- All FINITE ranks are non-empty strings
 
@@ -4180,111 +4180,111 @@ BASE = len(ALPHABET)  # 36
 
 
 
-def rank\_between(a: str, b: str) -> str:
+def rank_between(a: str, b: str) -> str:
 
-&nbsp;   """
+    """
 
-&nbsp;   Generate a rank string that sorts between a and b.
+    Generate a rank string that sorts between a and b.
 
-&nbsp;   Precondition: a < b (lexicographically), both non-empty
+    Precondition: a < b (lexicographically), both non-empty
 
-&nbsp;   """
+    """
 
-&nbsp;   assert a and b, "Ranks must be non-empty"
+    assert a and b, "Ranks must be non-empty"
 
-&nbsp;   assert a < b, "a must be less than b"
+    assert a < b, "a must be less than b"
 
-&nbsp;   
+    
 
-&nbsp;   # Pad shorter string
+    # Pad shorter string
 
-&nbsp;   max\_len = max(len(a), len(b))
+    max_len = max(len(a), len(b))
 
-&nbsp;   a\_padded = a.ljust(max\_len, ALPHABET\[0])
+    a_padded = a.ljust(max_len, ALPHABET[0])
 
-&nbsp;   b\_padded = b.ljust(max\_len, ALPHABET\[-1])
+    b_padded = b.ljust(max_len, ALPHABET[-1])
 
-&nbsp;   
+    
 
-&nbsp;   result = \[]
+    result = []
 
-&nbsp;   for i in range(max\_len):
+    for i in range(max_len):
 
-&nbsp;       a\_idx = ALPHABET.index(a\_padded\[i])
+        a_idx = ALPHABET.index(a_padded[i])
 
-&nbsp;       b\_idx = ALPHABET.index(b\_padded\[i])
+        b_idx = ALPHABET.index(b_padded[i])
 
-&nbsp;       
+        
 
-&nbsp;       if a\_idx + 1 < b\_idx:
+        if a_idx + 1 < b_idx:
 
-&nbsp;           # Gap exists: insert midpoint
+            # Gap exists: insert midpoint
 
-&nbsp;           mid\_idx = (a\_idx + b\_idx) // 2
+            mid_idx = (a_idx + b_idx) // 2
 
-&nbsp;           return ''.join(result) + ALPHABET\[mid\_idx]
+            return ''.join(result) + ALPHABET[mid_idx]
 
-&nbsp;       elif a\_idx == b\_idx:
+        elif a_idx == b_idx:
 
-&nbsp;           # Same char: continue to next position
+            # Same char: continue to next position
 
-&nbsp;           result.append(ALPHABET\[a\_idx])
+            result.append(ALPHABET[a_idx])
 
-&nbsp;       else:
+        else:
 
-&nbsp;           # Adjacent (a\_idx + 1 == b\_idx): need to extend
+            # Adjacent (a_idx + 1 == b_idx): need to extend
 
-&nbsp;           result.append(ALPHABET\[a\_idx])
+            result.append(ALPHABET[a_idx])
 
-&nbsp;   
+    
 
-&nbsp;   # Strings are equal or adjacent at all positions: extend with midpoint
+    # Strings are equal or adjacent at all positions: extend with midpoint
 
-&nbsp;   return ''.join(result) + ALPHABET\[BASE // 2]  # 'i'
-
-
-
-def rank\_after(a: str) -> str:
-
-&nbsp;   """Generate rank after a (toward END sentinel)."""
-
-&nbsp;   assert a, "Rank must be non-empty"
-
-&nbsp;   return a + ALPHABET\[BASE // 2]
+    return ''.join(result) + ALPHABET[BASE // 2]  # 'i'
 
 
 
-def rank\_before(b: str) -> str:
+def rank_after(a: str) -> str:
 
-&nbsp;   """Generate rank before b (toward START sentinel)."""
+    """Generate rank after a (toward END sentinel)."""
 
-&nbsp;   assert b, "Rank must be non-empty"
+    assert a, "Rank must be non-empty"
 
-&nbsp;   last\_idx = ALPHABET.index(b\[-1])
-
-&nbsp;   if last\_idx > 0:
-
-&nbsp;       return b\[:-1] + ALPHABET\[(last\_idx - 1) // 2] if len(b) > 1 else ALPHABET\[last\_idx // 2]
-
-&nbsp;   return b + ALPHABET\[0]
+    return a + ALPHABET[BASE // 2]
 
 
 
-def initial\_rank() -> str:
+def rank_before(b: str) -> str:
 
-&nbsp;   """Generate the first rank for an empty stream."""
+    """Generate rank before b (toward START sentinel)."""
 
-&nbsp;   return ALPHABET\[BASE // 2]  # 'i'
+    assert b, "Rank must be non-empty"
+
+    last_idx = ALPHABET.index(b[-1])
+
+    if last_idx > 0:
+
+        return b[:-1] + ALPHABET[(last_idx - 1) // 2] if len(b) > 1 else ALPHABET[last_idx // 2]
+
+    return b + ALPHABET[0]
+
+
+
+def initial_rank() -> str:
+
+    """Generate the first rank for an empty stream."""
+
+    return ALPHABET[BASE // 2]  # 'i'
 
 ```
 
 
 
-\*\*Rebalancing:\*\* If ranks become too long (> 50 chars), trigger a rebalance pass that reassigns all ranks to evenly-spaced short strings. This is rare in practice.
+**Rebalancing:** If ranks become too long (> 50 chars), trigger a rebalance pass that reassigns all ranks to evenly-spaced short strings. This is rare in practice.
 
 
 
-\### 11.3 JSONata Integration
+### 11.3 JSONata Integration
 
 
 
@@ -4298,7 +4298,7 @@ const expr = jsonata("$parent(current, 'syllable').f.stress = 1");
 
 expr.registerFunction('parent', (token, stream) => {
 
-&nbsp;   return engine.getParent(token, stream);
+    return engine.getParent(token, stream);
 
 });
 
@@ -4308,9 +4308,9 @@ expr.registerFunction('parent', (token, stream) => {
 
 const result = expr.evaluate({
 
-&nbsp;   current: currentToken,
+    current: currentToken,
 
-&nbsp;   params: parameters
+    params: parameters
 
 });
 
@@ -4322,197 +4322,197 @@ const result = expr.evaluate({
 
 
 
-\## Appendix A: Complete Example
+## Appendix A: Complete Example
 
 
 
 ```yaml
 
-include: \[streams.yaml]
+include: [streams.yaml]
 
 
 
 parameters:
 
-&nbsp; stress\_factor: 1.3      # Klatt 1976: stressed ~1.3x unstressed
+  stress_factor: 1.3      # Klatt 1976: stressed ~1.3x unstressed
 
-&nbsp; clipping\_factor: 0.6    # Chen 1970: ~60% before voiceless
+  clipping_factor: 0.6    # Chen 1970: ~60% before voiceless
 
-&nbsp; base\_f0: 110            # typical male fundamental
+  base_f0: 110            # typical male fundamental
 
 
 
 patterns:
 
-&nbsp; stop\_before\_sonorant:
+  stop_before_sonorant:
 
-&nbsp;   stream: phone
+    stream: phone
 
-&nbsp;   scope: syllable
+    scope: syllable
 
-&nbsp;   max\_lookahead: 20
+    max_lookahead: 20
 
-&nbsp;   sequence:
+    sequence:
 
-&nbsp;     - capture: stop
+      - capture: stop
 
-&nbsp;       where: "current.f.manner = 'stop'"
+        where: "current.f.manner = 'stop'"
 
-&nbsp;     - capture: son
+      - capture: son
 
-&nbsp;       where: "current.f.manner in \['vowel', 'nasal', 'liquid', 'glide']"
+        where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
 
 
 
-&nbsp; d\_j\_coalescence:
+  d_j_coalescence:
 
-&nbsp;   stream: phone
+    stream: phone
 
-&nbsp;   scope: phrase
+    scope: phrase
 
-&nbsp;   cross\_boundary: true
+    cross_boundary: true
 
-&nbsp;   sequence:
+    sequence:
 
-&nbsp;     - capture: d
+      - capture: d
 
-&nbsp;       where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
+        where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
 
-&nbsp;     - capture: j
+      - capture: j
 
-&nbsp;       where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
+        where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
 
-&nbsp;   constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
+    constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
 
 
 
 phases:
 
-&nbsp; - name: sandhi
+  - name: sandhi
 
-&nbsp;   rules: \[coalesce\_dj]
-
-
-
-&nbsp; - name: allophonic
-
-&nbsp;   rules: \[insert\_release]
+    rules: [coalesce_dj]
 
 
 
-&nbsp; - name: duration
+  - name: allophonic
 
-&nbsp;   rules: \[stress\_lengthening]
-
-&nbsp;   resolve\_scalars: \[duration]
-
-&nbsp;   compute\_times: true
+    rules: [insert_release]
 
 
 
-&nbsp; - name: prosody
+  - name: duration
 
-&nbsp;   rules: \[f0\_targets]
+    rules: [stress_lengthening]
 
-&nbsp;   resolve\_points: \[f0]
+    resolve_scalars: [duration]
+
+    compute_times: true
+
+
+
+  - name: prosody
+
+    rules: [f0_targets]
+
+    resolve_points: [f0]
 
 
 
 rules:
 
-&nbsp; # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
+  # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
 
-&nbsp; coalesce\_dj:
+  coalesce_dj:
 
-&nbsp;   citation: "Cruttenden 2014 §10.3"
+    citation: "Cruttenden 2014 §10.3"
 
-&nbsp;   match: d\_j\_coalescence
+    match: d_j_coalescence
 
-&nbsp;   splice:
+    splice:
 
-&nbsp;     type: replace\_range
+      type: replace_range
 
-&nbsp;     range\_left: d.sync\_left
+      range_left: d.sync_left
 
-&nbsp;     range\_right: j.sync\_right
+      range_right: j.sync_right
 
-&nbsp;     delete: \[d, j]
+      delete: [d, j]
 
-&nbsp;     insert:
+      insert:
 
-&nbsp;       - name: "'dʒ'"
+        - name: "'dʒ'"
 
-&nbsp;         parent: "$parent(d, 'syllable')"
-
-
-
-&nbsp; # Stevens 1998 Ch.8: stop release burst modeling
-
-&nbsp; insert\_release:
-
-&nbsp;   citation: "Stevens 1998 Ch.8"
-
-&nbsp;   match: stop\_before\_sonorant
-
-&nbsp;   splice:
-
-&nbsp;     type: insert\_at\_boundary
-
-&nbsp;     boundary: stop.sync\_right
-
-&nbsp;     side: after
-
-&nbsp;     insert:
-
-&nbsp;       - name: "stop.name \& '\_rel'"
+          parent: "$parent(d, 'syllable')"
 
 
 
-&nbsp; # Klatt 1976 §III.B: stressed vowels longer
+  # Stevens 1998 Ch.8: stop release burst modeling
 
-&nbsp; stress\_lengthening:
+  insert_release:
 
-&nbsp;   citation: "Klatt 1976 §III.B"
+    citation: "Stevens 1998 Ch.8"
 
-&nbsp;   select:
+    match: stop_before_sonorant
 
-&nbsp;     stream: phone
+    splice:
 
-&nbsp;     where: "current.f.manner = 'vowel'"
+      type: insert_at_boundary
 
-&nbsp;   apply:
+      boundary: stop.sync_right
 
-&nbsp;     - field: duration
+      side: after
 
-&nbsp;       op: mul
+      insert:
 
-&nbsp;       value: "$parent(current, 'syllable').f.stress = 1 ? params.stress\_factor : 1"
-
-&nbsp;       tag: stress
+        - name: "stop.name \& '_rel'"
 
 
 
-&nbsp; # Pierrehumbert 1980: F0 targets at vowel midpoints with declination
+  # Klatt 1976 §III.B: stressed vowels longer
 
-&nbsp; f0\_targets:
+  stress_lengthening:
 
-&nbsp;   citation: "Pierrehumbert 1980"
+    citation: "Klatt 1976 §III.B"
 
-&nbsp;   select:
+    select:
 
-&nbsp;     stream: phone
+      stream: phone
 
-&nbsp;     where: "current.f.manner = 'vowel'"
+      where: "current.f.manner = 'vowel'"
 
-&nbsp;   insert\_point:
+    apply:
 
-&nbsp;     stream: f0
+      - field: duration
 
-&nbsp;     at: "$midpoint(current)"
+        op: mul
 
-&nbsp;     value: "params.base\_f0 \* (1.1 - 0.2 \* $index(current) / $total('phone'))"
+        value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
 
-&nbsp;     tag: f0
+        tag: stress
+
+
+
+  # Pierrehumbert 1980: F0 targets at vowel midpoints with declination
+
+  f0_targets:
+
+    citation: "Pierrehumbert 1980"
+
+    select:
+
+      stream: phone
+
+      where: "current.f.manner = 'vowel'"
+
+    insert_point:
+
+      stream: f0
+
+      at: "$midpoint(current)"
+
+      value: "params.base_f0 \* (1.1 - 0.2 \* $index(current) / $total('phone'))"
+
+      tag: f0
 
 ```
 
@@ -4522,7 +4522,7 @@ rules:
 
 
 
-\## Appendix B: Glossary
+## Appendix B: Glossary
 
 
 
@@ -4552,129 +4552,129 @@ rules:
 
 
 
-\## Appendix C: References
+## Appendix C: References
 
 
 
-\### Duration and Timing
+### Duration and Timing
 
 
 
-\*\*Chen, M.\*\* (1970). Vowel length variation as a function of the voicing of the consonant environment. \*Phonetica\*, 22(3), 129-159.
+**Chen, M.** (1970). Vowel length variation as a function of the voicing of the consonant environment. \*Phonetica\*, 22(3), 129-159.
 
 
 
-\*\*House, A. S., \& Fairbanks, G.\*\* (1953). The influence of consonant environment upon the secondary acoustical characteristics of vowels. \*Journal of the Acoustical Society of America\*, 25(1), 105-113.
+**House, A. S., \& Fairbanks, G.** (1953). The influence of consonant environment upon the secondary acoustical characteristics of vowels. \*Journal of the Acoustical Society of America\*, 25(1), 105-113.
 
 
 
-\*\*Klatt, D. H.\*\* (1976). Linguistic uses of segmental duration in English: Acoustic and perceptual evidence. \*Journal of the Acoustical Society of America\*, 59(5), 1208-1221.
+**Klatt, D. H.** (1976). Linguistic uses of segmental duration in English: Acoustic and perceptual evidence. \*Journal of the Acoustical Society of America\*, 59(5), 1208-1221.
 
 
 
-\*\*Lehiste, I.\*\* (1970). \*Suprasegmentals\*. MIT Press.
+**Lehiste, I.** (1970). \*Suprasegmentals\*. MIT Press.
 
 
 
-\*\*Oller, D. K.\*\* (1973). The effect of position in utterance on speech segment duration in English. \*Journal of the Acoustical Society of America\*, 54(5), 1235-1247.
+**Oller, D. K.** (1973). The effect of position in utterance on speech segment duration in English. \*Journal of the Acoustical Society of America\*, 54(5), 1235-1247.
 
 
 
-\*\*Wells, J. C.\*\* (1990). \*Longman Pronunciation Dictionary\*. Longman.
+**Wells, J. C.** (1990). \*Longman Pronunciation Dictionary\*. Longman.
 
 
 
-\### Phonation and Voice Onset Time
+### Phonation and Voice Onset Time
 
 
 
-\*\*Klatt, D. H.\*\* (1975). Voice onset time, frication, and aspiration in word-initial consonant clusters. \*Journal of Speech and Hearing Research\*, 18(4), 686-706.
+**Klatt, D. H.** (1975). Voice onset time, frication, and aspiration in word-initial consonant clusters. \*Journal of Speech and Hearing Research\*, 18(4), 686-706.
 
 
 
-\*\*Klatt, D. H.\*\* (1980). Software for a cascade/parallel formant synthesizer. \*Journal of the Acoustical Society of America\*, 67(3), 971-995.
+**Klatt, D. H.** (1980). Software for a cascade/parallel formant synthesizer. \*Journal of the Acoustical Society of America\*, 67(3), 971-995.
 
 
 
-\*\*Lisker, L., \& Abramson, A. S.\*\* (1964). A cross-language study of voicing in initial stops: Acoustical measurements. \*Word\*, 20(3), 384-422.
+**Lisker, L., \& Abramson, A. S.** (1964). A cross-language study of voicing in initial stops: Acoustical measurements. \*Word\*, 20(3), 384-422.
 
 
 
-\*\*Stevens, K. N.\*\* (1971). Airflow and turbulence noise for fricative and stop consonants: Static considerations. \*Journal of the Acoustical Society of America\*, 50(4B), 1180-1192.
+**Stevens, K. N.** (1971). Airflow and turbulence noise for fricative and stop consonants: Static considerations. \*Journal of the Acoustical Society of America\*, 50(4B), 1180-1192.
 
 
 
-\### Formants and Coarticulation
+### Formants and Coarticulation
 
 
 
-\*\*Öhman, S. E. G.\*\* (1966). Coarticulation in VCV utterances: Spectrographic measurements. \*Journal of the Acoustical Society of America\*, 39(1), 151-168.
+**Öhman, S. E. G.** (1966). Coarticulation in VCV utterances: Spectrographic measurements. \*Journal of the Acoustical Society of America\*, 39(1), 151-168.
 
 
 
-\*\*Stevens, K. N.\*\* (1998). \*Acoustic Phonetics\*. MIT Press.
+**Stevens, K. N.** (1998). \*Acoustic Phonetics\*. MIT Press.
 
 
 
-\*\*Stevens, K. N., \& House, A. S.\*\* (1955). Development of a quantitative description of vowel articulation. \*Journal of the Acoustical Society of America\*, 27(3), 484-493.
+**Stevens, K. N., \& House, A. S.** (1955). Development of a quantitative description of vowel articulation. \*Journal of the Acoustical Society of America\*, 27(3), 484-493.
 
 
 
-\*\*Sussman, H. M., McCaffrey, H. A., \& Matthews, S. A.\*\* (1991). An investigation of locus equations as a source of relational invariance for stop place categorization. \*Journal of the Acoustical Society of America\*, 90(3), 1309-1325.
+**Sussman, H. M., McCaffrey, H. A., \& Matthews, S. A.** (1991). An investigation of locus equations as a source of relational invariance for stop place categorization. \*Journal of the Acoustical Society of America\*, 90(3), 1309-1325.
 
 
 
-\### Intonation and F0
+### Intonation and F0
 
 
 
-\*\*Cooper, W. E., \& Sorensen, J. M.\*\* (1981). \*Fundamental Frequency in Sentence Production\*. Springer-Verlag.
+**Cooper, W. E., \& Sorensen, J. M.** (1981). \*Fundamental Frequency in Sentence Production\*. Springer-Verlag.
 
 
 
-\*\*'t Hart, J., Collier, R., \& Cohen, A.\*\* (1990). \*A Perceptual Study of Intonation\*. Cambridge University Press.
+**'t Hart, J., Collier, R., \& Cohen, A.** (1990). \*A Perceptual Study of Intonation\*. Cambridge University Press.
 
 
 
-\*\*Ladd, D. R.\*\* (2008). \*Intonational Phonology\* (2nd ed.). Cambridge University Press.
+**Ladd, D. R.** (2008). \*Intonational Phonology\* (2nd ed.). Cambridge University Press.
 
 
 
-\*\*Lieberman, P.\*\* (1967). \*Intonation, Perception, and Language\*. MIT Press.
+**Lieberman, P.** (1967). \*Intonation, Perception, and Language\*. MIT Press.
 
 
 
-\*\*Pierrehumbert, J. B.\*\* (1980). \*The Phonology and Phonetics of English Intonation\*. PhD dissertation, MIT.
+**Pierrehumbert, J. B.** (1980). \*The Phonology and Phonetics of English Intonation\*. PhD dissertation, MIT.
 
 
 
-\### Phonological Theory
+### Phonological Theory
 
 
 
-\*\*Cruttenden, A.\*\* (2014). \*Gimson's Pronunciation of English\* (8th ed.). Routledge.
+**Cruttenden, A.** (2014). \*Gimson's Pronunciation of English\* (8th ed.). Routledge.
 
 
 
-\*\*Gimson, A. C.\*\* (1980). \*An Introduction to the Pronunciation of English\* (3rd ed.). Edward Arnold.
+**Gimson, A. C.** (1980). \*An Introduction to the Pronunciation of English\* (3rd ed.). Edward Arnold.
 
 
 
-\*\*Goldsmith, J.\*\* (1976). \*Autosegmental Phonology\*. PhD dissertation, MIT.
+**Goldsmith, J.** (1976). \*Autosegmental Phonology\*. PhD dissertation, MIT.
 
 
 
-\*\*Ladefoged, P., \& Maddieson, I.\*\* (1996). \*The Sounds of the World's Languages\*. Blackwell.
+**Ladefoged, P., \& Maddieson, I.** (1996). \*The Sounds of the World's Languages\*. Blackwell.
 
 
 
-\### Multi-Stream Architectures
+### Multi-Stream Architectures
 
 
 
-\*\*Hertz, S. R.\*\* (1982). From text to speech with SRS. \*Journal of the Acoustical Society of America\*, 72(4), 1155-1170.
+**Hertz, S. R.** (1982). From text to speech with SRS. \*Journal of the Acoustical Society of America\*, 72(4), 1155-1170.
 
 
 
-\*\*Hertz, S. R.\*\* (1991). Streams, phones, and transitions: Toward a new phonological and phonetic model of formant timing. \*Journal of Phonetics\*, 19(1), 91-109.
+**Hertz, S. R.** (1991). Streams, phones, and transitions: Toward a new phonological and phonetic model of formant timing. \*Journal of Phonetics\*, 19(1), 91-109.
 

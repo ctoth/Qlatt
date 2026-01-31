@@ -19,10 +19,9 @@ This section defines the **global** compilation phases. Later sections MUST stat
 1. **PARSE**            Parse YAML -> typed AST
 2. **VALIDATE**         Validate schema + static constraints (Part 9)
 3. **INITIALIZE**       Build initial global sync axis + base stream
-4. **APPLY PHASES**     Apply rule phases in order (Part 7), using the rule-evaluation pipeline (Part 5)
-5. **NORMALIZE**        Repair invariants after rewrites (Part 5.13)
-6. **RESOLVE TIMES**    Final resolve of any remaining scalars/times/points (re-run §5.11 if any mark time is null)
-7. **EMIT**             Emit outputs/traces (Part 8, Part 10)
+4. **APPLY PHASES**     For each phase in order (Part 7), run the rule-evaluation pipeline (Part 5), then normalize
+5. **FINAL RESOLVE**    If any mark time is null, run `RESOLVE SCALARS` then `COMPUTE TIMES`, then resolve points
+6. **EMIT**             Emit outputs/traces (Part 8, Part 10)
 
 ### 0.2 Determinism Contract
 
@@ -510,16 +509,12 @@ interface TokenView {
 
 | `$at_sync(s)` | Anchor |
 
-**Function semantics (selected):**
+**Function notes (selected):**
 
-- `$spanning(t, stream)` returns tokens in `stream` whose interval fully contains `t`.
-  - For interval `t`: `token.sync_left.order <= t.sync_left.order` and `t.sync_right.order <= token.sync_right.order`
-  - For point `t`: use `anchor_left/anchor_right` as the interval bounds
-  - Result is ordered by `(sync_left.order, sync_right.order, id)`
-
-- `$midpoint(t)` returns an `Anchor` at the midpoint of `t`.
-  - If `time` is resolved, midpoint is computed in **time**.
-  - If `time` is not resolved, midpoint is computed by **rank interpolation** between `sync_left` and `sync_right`, and `Anchor.time` remains `null`.
+| Function | Notes |
+|----------|-------|
+| `$spanning(t, stream)` | Returns interval tokens in `stream` that fully contain `t` (interval containment by order). Ordered by `(sync_left.order, sync_right.order, id)`. |
+| `$midpoint(t)` | Returns an `Anchor` at the midpoint; uses time if resolved, otherwise rank interpolation (time remains null). |
 
 
 
@@ -1267,9 +1262,9 @@ interface DisassociatePatch {
 
 interface TokenSpec {
 
-  name: string;                              // literal or "=expr" prefixed
+  name: string;
 
-  features?: Record<string, Value | string>; // literal or "=expr" prefixed
+  features?: Record<string, Value>;
 
   scalars?: Record<string, { base?: number; floor?: number }>;
 
@@ -1281,31 +1276,27 @@ interface TokenSpec {
 
 
 
-**Expression vs literal disambiguation:**
-
-Any string field in TokenSpec (or Effect values, or other polymorphic contexts) uses a prefix convention:
-- Strings starting with `=` are JSONata expressions (evaluated at runtime)
-- All other strings are literals
+**Expression syntax:** Any string field in TokenSpec (or Effect values, or other polymorphic contexts) is a JSONata expression evaluated at runtime. Use string literals explicitly (e.g., `"'dʒ'"`) if a literal string is required.
 
 Examples:
 ```yaml
 # Literal phoneme name
-name: "dʒ"
+name: "'dʒ'"
 
 # Expression: concatenate stop name with suffix
-name: "=stop.name & '_rel'"
+name: "stop.name & '_rel'"
 
 # Literal feature value
-features: { place: "alveolar" }
+features: { place: "'alveolar'" }
 
 # Expression: copy feature from captured token
-features: { place: "=stop.f.place" }
+features: { place: "stop.f.place" }
 
 # Literal parent reference
-parent: "syllable_42"
+parent: "'syllable_42'"
 
 # Expression: compute parent
-parent: "=$parent(stop, 'syllable').id"
+parent: "$parent(stop, 'syllable').id"
 ```
 
 This convention enables unambiguous parsing, LSP support, and validation.
@@ -1337,10 +1328,7 @@ Sort key: `(rule_index, match_index, patch_seq)`
 ### 5.5 Base Stream Splice
 
 
-
-Base stream mutations use the `BaseSplicePatch` discriminated union (§5.2):
-
-
+Base stream mutations use the `BaseSplicePatch` discriminated union (Section 5.2):
 
 \- `InsertAtBoundaryPatch`: point insertion at a sync mark
 
@@ -1349,93 +1337,16 @@ Base stream mutations use the `BaseSplicePatch` discriminated union (§5.2):
 \- `DeleteTokensPatch`: remove tokens with no replacement
 
 
+**Overlap rule (normative):**
 
-**Algorithm:**
+- Each patch has an **affected order-space interval**:
+  - `ReplaceRangePatch`: `[range_left, range_right]`
+  - `DeleteTokensPatch`: union of deleted token intervals
+  - `InsertAtBoundaryPatch`: the zero-length interval at `boundary`
+- Two patches **overlap** if their affected intervals intersect.
+- Overlaps are resolved by sort order (Part 5.4): earlier patches win; later overlapping patches are skipped (`patch_skipped`, reason `shadowed`).
 
-Overlapping base splices are NOT jointly applied. The algorithm selects non-overlapping winners first, then batches for efficiency.
-
-**Overlap definition:**
-
-- `ReplaceRangePatch` affects the closed interval `[range_left, range_right]`.
-- `DeleteTokensPatch` affects the union of its deleted token intervals.
-- `InsertAtBoundaryPatch` affects the zero-length interval at `boundary`. It overlaps any patch whose affected interval includes that boundary.
-
-
-
-```python
-
-def apply_base_splices(base_stream, patches):
-
-    """Apply base splices with overlap resolution."""
-
-
-
-    # Step 1: patches already sorted by (rule_index, match_index, patch_seq)
-
-
-
-    # Step 2: Select non-overlapping winners
-
-    accepted = []
-
-    claimed_intervals = []  # affected order-space intervals
-
-
-
-    for patch in patches:
-
-        patch_interval = affected_interval(patch)
-        overlap = any(intervals_overlap(patch_interval, i) for i in claimed_intervals)
-
-
-
-        if overlap:
-
-            # Overlaps with already-accepted splice
-
-            emit_trace('patch_skipped', patch, reason='shadowed')
-
-            continue
-
-
-
-        # No overlap: accept this patch
-
-        accepted.append(patch)
-
-        claimed_intervals.append(patch_interval)
-
-
-
-    # Step 3: Group non-overlapping, adjacent patches for batch efficiency
-
-    groups = group_adjacent_ranges(accepted)
-
-
-
-    for group in groups:
-
-        # Execute as batched operation
-
-        merged_left = min(p.range_left for p in group)
-
-        merged_right = max(p.range_right for p in group)
-
-        all_deletes = union(p.delete_tokens for p in group)
-
-        all_inserts = flatten_sorted(p.insert_tokens for p in group)
-
-        execute_splice(base_stream, merged_left, merged_right,
-
-                       all_deletes, all_inserts)
-
-```
-
-
-
-**Insert ordering:** Within a group, inserts are ordered by `(patch.rule_index, patch.match_index, patch.patch_seq, position_in_insert_tokens)`.
-
-
+**Batching:** After overlap resolution, adjacent non-overlapping patches MAY be batched for efficiency without changing results.
 
 ### 5.6 Insertion at END
 
@@ -1465,13 +1376,12 @@ The splice algorithm creates new sync mark(s) between the specified boundary and
 
 
 
-### 5.7 Interior Mark Policy
+### 5.7 Sync Mark GC and Interior Marks
 
-Sync marks are never deleted by rules. Deleting a base token may orphan marks; unreferenced marks are removed only during Sync Mark GC (Step 8) **if they are not interior to any base interval**.
+Sync marks are never deleted by rules. Sync Mark GC (Step 8) removes only marks that are **unreferenced and outside all base intervals**.
 
-- If a mark is referenced by any token or point, it persists even if the enclosing base token is deleted.
-- Unreferenced marks that are outside all base intervals (excluding START/END) are removed during Sync Mark GC.
-- Unreferenced marks that are strictly inside some base interval are retained for interpolation and may be removed only after final time resolution.
+- Marks referenced by any token or point always persist.
+- Unreferenced interior marks are retained for interpolation and may be removed only after final time resolution.
 - Interior marks that persist are timed by interpolation during `COMPUTE TIMES` (Section 5.11).
 
 ### 5.8 Association GC
@@ -1762,7 +1672,7 @@ interface Effect {
 
   op: 'set' | 'mul' | 'add';
 
-  value: string;                 // literal or "=expr" prefixed
+  value: string;                 // JSONata expression (use string literals explicitly)
 
   tag: string;                   // provenance tag
 
@@ -4879,5 +4789,6 @@ const result = expr.evaluate({
 ```
 
 ---
+
 
 

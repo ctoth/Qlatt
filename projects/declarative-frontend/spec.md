@@ -20,7 +20,7 @@ This section defines the **global** compilation phases. Later sections MUST stat
 2. **VALIDATE**         Validate schema + static constraints (Part 9)
 3. **INITIALIZE**       Build initial global sync axis + base stream
 4. **APPLY PHASES**     For each phase in order (Part 7), run the rule-evaluation pipeline (Part 5), then normalize
-5. **FINAL RESOLVE**    If any mark time is null, run `RESOLVE SCALARS` then `COMPUTE TIMES`, then resolve points
+5. **FINAL RESOLVE**    If any mark time is null, run `RESOLVE SCALARS` then `COMPUTE TIMES`, then resolve points (this reuses the §5.11 logic to finalize emitter times)
 6. **EMIT**             Emit outputs/traces (Part 8, Part 10)
 
 ### 0.2 Determinism Contract
@@ -209,7 +209,7 @@ interface IntervalToken {
 
 
 
-**Invariant:** `sync_left.order < sync_right.order`
+**Invariant:** `sync_left.order < sync_right.order` for non-span streams; span streams may use `==` for empty spans.
 
 
 
@@ -1308,6 +1308,7 @@ Base stream mutations use the `BaseSplicePatch` discriminated union (Section 5.2
   - `DeleteTokensPatch`: union of deleted token intervals
   - `InsertAtBoundaryPatch`: the zero-length interval at `boundary`
 - Two patches **overlap** if their affected intervals intersect.
+- For overlap testing, `InsertAtBoundaryPatch` uses the boundary point regardless of `side`; insertion at a range boundary overlaps that range.
 - Overlaps are resolved by sort order (Part 5.4): earlier patches win; later overlapping patches are skipped (`patch_skipped`, reason `shadowed`).
 
 **Batching:** After overlap resolution, adjacent non-overlapping patches MAY be batched for efficiency without changing results.
@@ -1823,7 +1824,7 @@ rules:
 
 
 
-Each phase runs the full pipeline (§5.1). Span boundaries are recomputed in step 9 of every phase.
+Each phase runs the full pipeline (§5.1). Span boundaries are recomputed in step 9 of every phase. The `after` list is a validation constraint only; phases still execute in the listed order.
 
 
 

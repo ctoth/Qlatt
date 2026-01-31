@@ -10,6 +10,34 @@ A domain-specific language for phonological and phonetic rules in speech synthes
 
 
 
+## Part 0: Compilation Contract
+
+### 0.1 Compilation Pipeline
+
+This section defines the **global** compilation phases. Later sections MUST state which phase they affect.
+
+1. **PARSE**            Parse YAML -> typed AST
+2. **VALIDATE**         Validate schema + static constraints (Part 9)
+3. **INITIALIZE**       Build initial global sync axis + base stream
+4. **APPLY PHASES**     Apply rule phases in order (Part 7), using the rule-evaluation pipeline (Part 5)
+5. **NORMALIZE**        Repair invariants after rewrites (Part 5.13)
+6. **RESOLVE TIMES**    Final resolve of any remaining scalars/times/points (may be a no-op if already resolved in phases)
+7. **EMIT**             Emit outputs/traces (Part 8, Part 10)
+
+### 0.2 Determinism Contract
+
+Implementations MUST produce identical results for the same inputs by adhering to the following:
+
+- **Phase order:** Phases execute in the order listed in `phases` (Part 7).
+- **Rule order:** Within a phase, rules execute in the listed order.
+- **Match order:** Each rule enumerates matches in a single left-to-right sweep over the snapshot, ordered by earliest involved sync mark (leftmost). Matches are collected, then patches are generated and applied later by the patch ordering and splice overlap policy (Part 5.4, Part 9).
+- **Select order:** For select rules, tokens are visited in stream order. Base streams use list order; non-base interval streams use `(sync_left.order, sync_right.order, id)` as a total tie-breaker; point streams use `(anchor_left.order, anchor_right.order, ratio, id)`.
+- **No fixpoint:** Rules are single-pass unless the spec explicitly adds a bounded repeat mechanism (not defined in v11).
+
+### 0.3 Normalization Contract
+
+Normalization is the **only** phase allowed to repair invariants after rewrites. Repairs are deterministic and bounded (Part 5.13).
+
 ## Part 1: Core Data Model
 
 
@@ -74,13 +102,46 @@ function compareOrder(a: OrderKey, b: OrderKey): number {
 
 
 
-**Sentinels:** `START` and `END` are not literal rank strings. They compare as infinities, ensuring no insertion can ever sort before START or after END.
+**Sentinels:** `START` and `END` are not literal rank strings. They compare as infinities and are never inserted between.
 
 
 
-**Finite ranks:** Use base-36 strings (`[0-9a-z]+`). Insertion between ranks uses the algorithm in §11.2.
+**Finite ranks (normative):**
 
-**Rank comparison:** FINITE ranks are compared by ASCII codepoint lexicographic order (JavaScript `<`/`>` on strings). Implementations MUST NOT use locale-dependent collation (`localeCompare`). This ensures deterministic ordering across all environments.
+
+
+- `rank` is a **fixed-length** string of `[0-9a-z]`, length `RANK_LEN` (default `12`).
+- `RANK_LEN` is a spec constant; all ranks must match it exactly.
+- FINITE ranks compare by ASCII lexicographic order (`<`/`>`). Implementations MUST NOT use locale collation.
+- Interpret `rank` as a base-36 integer in `[0, MAX]`, where `MAX = 36^RANK_LEN - 1`.
+- Define `rank_to_int(START) = 0` and `rank_to_int(END) = MAX` for interpolation and insertion.
+
+
+
+**Rank insertion (normative):**
+
+
+
+- To insert between two FINITE ranks `lo < hi`, compute `mid = floor((lo + hi) / 2)`.
+- If `mid == lo` or `mid == hi`, no representable midpoint exists: raise `E_RANK_NO_SPACE` and rebalance before retrying.
+- Insertion between `START` and the first FINITE uses `lo = 0`. Insertion between the last FINITE and `END` uses `hi = MAX`.
+
+
+
+**Rebalance (normative):**
+
+
+
+Given the ordered list of FINITE marks `m[1..n]`, reassign:
+
+
+
+- `rank_i = floor((i * MAX) / (n + 1))`, encoded in base-36 and padded to `RANK_LEN`.
+- IDs remain stable; only `order.rank` changes.
+
+
+
+**Reference implementation:** See Appendix D.2 (informative) for fixed-length rank utilities.
 
 
 
@@ -98,8 +159,8 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 **Sentinel time semantics:**
 - `START.time` is always `0` (before and after time computation)
-- `END.time` is `null` before time computation, and equals total utterance duration after
-- **Invariant:** After `COMPUTE TIMES` (pipeline step 11), all sync marks referenced by any token or point MUST have non-null `time`
+- `END.time` is `null` before any `compute_times`, and equals total utterance duration after the last `compute_times` (or final RESOLVE TIMES)
+- **Invariant:** After any phase that computes times, all sync marks referenced by any token or point MUST have non-null `time`
 
 
 
@@ -113,7 +174,7 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 
 
-**Interior marks:** A sync mark may exist inside a base token interval. Time computed by interpolation (§5.11).
+**Interior marks:** A sync mark may exist inside a base token interval. Time is computed by interpolation (§5.11).
 
 
 
@@ -449,6 +510,13 @@ interface TokenView {
 
 | `$at_sync(s)` | Anchor |
 
+**Function semantics (selected):**
+
+- `$spanning(t, stream)` returns tokens in `stream` whose interval fully contains `t`.
+  - For interval `t`: `token.sync_left.order <= t.sync_left.order` and `t.sync_right.order <= token.sync_right.order`
+  - For point `t`: use `anchor_left/anchor_right` as the interval bounds
+  - Result is ordered by `(sync_left.order, sync_right.order, id)`
+
 
 
 ### 2.4 Undefined Handling
@@ -721,6 +789,8 @@ topology:
 
 ```
 
+**Hierarchy order:** The `hierarchy` list is **root-to-leaf** (e.g., phrase → word → syllable → phone).
+
 
 
 ---
@@ -756,6 +826,54 @@ patterns:
       - capture: son
 
         where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
+
+  voiceless_stop_before_vowel:
+
+    stream: phone
+
+    scope: syllable
+
+    sequence:
+
+      - capture: stop
+
+        where: "current.f.manner = 'stop' and current.f.voicing = 'voiceless'"
+
+      - capture: v
+
+        where: "current.f.manner = 'vowel'"
+
+  vowel_before_obstruent:
+
+    stream: phone
+
+    scope: syllable
+
+    sequence:
+
+      - capture: v
+
+        where: "current.f.manner = 'vowel'"
+
+      - capture: obs
+
+        where: "current.f.manner in ['stop', 'fricative', 'affricate']"
+
+  consonant_vowel:
+
+    stream: phone
+
+    scope: syllable
+
+    sequence:
+
+      - capture: c
+
+        where: "current.f.manner in ['stop', 'fricative', 'affricate', 'nasal', 'liquid', 'glide']"
+
+      - capture: v
+
+        where: "current.f.manner = 'vowel'"
 
 ```
 
@@ -861,37 +979,22 @@ patterns:
 
 ### 5.1 Pipeline
 
-
-
-```
-
-1\. SNAPSHOT           Copy-on-write view of streams
-
-2\. MATCH + EVALUATE   Find matches, evaluate expressions
-
-3\. GENERATE PATCHES   Create patch objects
-
-4\. SORT PATCHES       Deterministic order
-
-5\. BATCH BASE SPLICES Group base edits by affected range
-
-6\. APPLY PATCHES      Execute as batched splice plans
-
-7\. ASSOCIATION GC     Remove deleted IDs from association sets
-
-8\. SYNC MARK GC       Remove unreferenced marks; apply interior mark policy
-
-9\. REBUILD SPANS      Recompute span boundaries
-
-10\. RESOLVE SCALARS   Collapse effect stacks
-
-11\. COMPUTE TIMES     Assign times to sync marks
-
-12\. RESOLVE POINTS    Evaluate deferred values, assign times
+This is the **per-phase** rule-evaluation pipeline used during Phase 4 (APPLY PHASES) and followed by Phase 5 (NORMALIZE) and Phase 6 (RESOLVE TIMES).
 
 ```
-
-
+1. SNAPSHOT           Copy-on-write view of streams
+2. MATCH + EVALUATE   Find matches, evaluate expressions
+3. GENERATE PATCHES   Create patch objects
+4. SORT PATCHES       Deterministic order
+5. BATCH BASE SPLICES Group base edits by affected range
+6. APPLY PATCHES      Execute as batched splice plans
+7. ASSOCIATION GC     Remove deleted IDs from association sets
+8. SYNC MARK GC       Remove unreferenced marks (marks are never deleted by rules)
+9. REBUILD SPANS      Recompute span boundaries
+10. RESOLVE SCALARS   Collapse effect stacks
+11. COMPUTE TIMES     Assign times to sync marks
+12. RESOLVE POINTS    Evaluate deferred values, assign times
+```
 
 ### 5.2 Patch Types
 
@@ -1148,7 +1251,7 @@ interface DisassociatePatch {
 
 \- `DisassociatePatch` removes `to` from `from.associations[assoc_name]`
 
-\- Association GC (§5.7) removes references to deleted tokens
+\- Association GC (§5.8) removes references to deleted tokens
 
 
 
@@ -1329,17 +1432,17 @@ def apply_base_splices(base_stream, patches):
 
 
 
-To append a token at the end of the utterance:
+To append a token at the end of the utterance, use boundary insertion:
 
 
 
 ```yaml
 
-insert:
+insert_at_boundary:
 
-  range_left: "last_token.sync_right"  # boundary before END
+  boundary: "last_token.sync_right"  # boundary before END
 
-  range_right: "END"
+  side: after
 
   insert_tokens: [...]
 
@@ -1347,41 +1450,17 @@ insert:
 
 
 
-The splice algorithm creates new sync mark(s) between the specified boundaries.
+The splice algorithm creates new sync mark(s) between the specified boundary and `END`.
 
 
 
 ### 5.7 Interior Mark Policy
 
+Sync marks are never deleted by rules. Deleting a base token may orphan marks; unreferenced marks are removed only during Sync Mark GC (Step 8).
 
-
-When a base token is deleted:
-
-
-
-1\. **Boundary marks survive** if referenced by another token
-
-2\. **Interior marks:** Apply deletion policy
-
-
-
-```yaml
-
-topology:
-
-  interior_mark_policy: elastic  # or 'strict'
-
-```
-
-
-
-**elastic (default):** Interior marks persist. If the containing interval collapses to 0ms, the mark exists at that point. If a new token spans that region, the mark's time is interpolated within it.
-
-
-
-**strict:** Interior marks are deleted when their containing base token is deleted. Point tokens anchored to deleted marks are also deleted (with warning).
-
-
+- If a mark is referenced by any token or point, it persists even if the enclosing base token is deleted.
+- Unreferenced marks (excluding START/END) are removed during Sync Mark GC.
+- Interior marks that persist are timed by interpolation during `COMPUTE TIMES` (Section 5.11).
 
 ### 5.8 Association GC
 
@@ -1459,93 +1538,76 @@ def resolve_klatt(base, floor, effects, max_val):
 
 ### 5.11 Time Computation
 
-
-
 ```python
+# Assumes: base stream is contiguous and scalar durations resolved.
+# Uses numeric rank values from the fixed-length base-36 encoding.
+
+# MAX = 36^RANK_LEN - 1
+RANK_LEN = 12
+MAX = 36 ** RANK_LEN - 1
+ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
+
+def parse_base36(s):
+    value = 0
+    for ch in s:
+        value = value * 36 + ALPHABET.index(ch)
+    return value
+def rank_to_int(order):
+    if order.kind == 'START':
+        return 0
+    if order.kind == 'END':
+        return MAX
+    return parse_base36(order.rank)
 
 def compute_times(base_stream, all_sync_marks):
-
-    # Step 1: Base boundaries get concrete times
-
+    # Step 1: Assign times to base boundary marks
     time = 0
-
     for token in base_stream.tokens_in_order():
-
         token.sync_left.time = time
-
         time += token.s.duration
-
         token.sync_right.time = time
 
-    
-
-    # Step 2: Interior marks by uniform distribution
-
+    # Step 2: Interior marks by rank-based interpolation
     for token in base_stream.tokens_in_order():
+        left = token.sync_left
+        right = token.sync_right
+        left_time = left.time
+        right_time = right.time
 
-        left_order = token.sync_left.order
-
-        right_order = token.sync_right.order
-
-        left_time = token.sync_left.time
-
-        right_time = token.sync_right.time
-
-        
-
-        # Find interior marks (strictly between boundaries)
-
-        interior = [m for m in all_sync_marks 
-
-                    if m.time is None 
-
-                    and compare_order(left_order, m.order) < 0
-
-                    and compare_order(m.order, right_order) < 0]
-
-        
+        interior = [m for m in all_sync_marks
+                    if m.time is None
+                    and compare_order(left.order, m.order) < 0
+                    and compare_order(m.order, right.order) < 0]
 
         if not interior:
-
             continue
 
-        
-
-        # Edge case: zero duration token
-
+        # Edge case: zero duration interval (should not occur after normalization)
         if left_time == right_time:
-
             for mark in interior:
-
-                mark.time = left_time  # all interior marks collapse to boundary
-
+                mark.time = left_time
             continue
 
-        
-
-        # Sort by order, dedupe by ID (same rank shouldn't happen but be defensive)
-
+        # Sort by order for deterministic assignment
         interior.sort(key=lambda m: (m.order, m.id))
 
-        seen_ids = set()
+        # Numeric rank interpolation
+        left_rank = rank_to_int(left.order)
+        right_rank = rank_to_int(right.order)
+        if right_rank == left_rank:
+            raise Exception('E_TIME_NO_BASE_SUPPORT')
 
-        interior = [m for m in interior if m.id not in seen_ids and not seen_ids.add(m.id)]
+        for mark in interior:
+            mark_rank = rank_to_int(mark.order)
+            frac = (mark_rank - left_rank) / (right_rank - left_rank)
+            mark.time = left_time + frac * (right_time - left_time)
 
-        
-
-        # Distribute uniformly: k/(n+1) for k=1..n
-
-        n = len(interior)
-
-        for k, mark in enumerate(interior, start=1):
-
-            alpha = k / (n + 1)
-
-            mark.time = left_time + alpha \* (right_time - left_time)
-
+# rank_to_int returns 0 for START, MAX for END, and base-36 value for FINITE.
 ```
 
+**Error case:** If any sync mark remains unassigned after scanning all base intervals, emit `E_TIME_NO_BASE_SUPPORT`.
 
+**Monotonicity:** After this step, sync mark times must be non-decreasing with order, and strictly increasing for base boundaries.
 
 ### 5.12 Point Resolution
 
@@ -1613,6 +1675,18 @@ Point resolution order within a stream is undefined. If a deferred expression at
 
 
 
+### 5.13 Normalization (Phase 5)
+
+Normalization restores invariants after rewrites. It is deterministic and limited to the following actions:
+
+- **Reorder stream lists** into total order (base: list order preserved; non-base: (sync_left.order, sync_right.order, id)).
+- **Rebuild spans** as specified in §5.9 (empty spans collapse to sync_left == sync_right).
+- **Validate base coverage**: base tokens must partition [START, END] in order-space with no gaps or overlaps. Violations raise E_BASE_NOT_CONTIGUOUS.
+- **Validate token shape**: interval tokens must satisfy sync_left.order < sync_right.order; violations raise E_TOKEN_BAD_INTERVAL.
+- **Validate mark references**: every token/point must reference existing marks; violations raise E_MARK_MISSING.
+
+Normalization MUST NOT invent new tokens or delete existing tokens (except for previously deleted tokens already removed by patches).
+
 ## Part 6: Rule Definitions
 
 
@@ -1657,6 +1731,10 @@ interface Rule {
 
   delete?: boolean;               // delete matched token (non-base only)
 
+  associate?: AssocSpec[];        // create associations
+
+  disassociate?: AssocSpec[];     // remove associations
+
 }
 
 
@@ -1672,6 +1750,17 @@ interface Effect {
   value: string;                 // literal or "=expr" prefixed
 
   tag: string;                   // provenance tag
+
+}
+
+
+interface AssocSpec {
+
+  from: string;                  // capture name
+
+  to: string;                    // capture name
+
+  assoc_name: string;            // association label
 
 }
 
@@ -2075,7 +2164,7 @@ rules:
 
         op: set
 
-        value: "f.voicing = 'voiced' ? 50 : 60"
+        value: "current.f.voicing = 'voiced' ? 50 : 60"
 
         tag: frication
 
@@ -2106,6 +2195,56 @@ rules:
       where: "current.f.floating = true"
 
     delete: true
+
+```
+
+
+
+---
+
+
+### 6.7 Association Rules
+
+
+
+```yaml
+
+rules:
+
+  # Associate a release with its following sonorant
+
+  link_release_target:
+
+    citation: "Stevens 1998 Ch.8"
+
+    match: stop_before_sonorant
+
+    associate:
+
+      - from: stop
+
+        to: son
+
+        assoc_name: release_target
+
+
+  # Remove association when a boundary condition holds
+
+  unlink_release_target:
+
+    citation: "Stevens 1998 Ch.8"
+
+    match: stop_before_sonorant
+
+    constraint: "$parent(stop, 'word').id != $parent(son, 'word').id"
+
+    disassociate:
+
+      - from: stop
+
+        to: son
+
+        assoc_name: release_target
 
 ```
 
@@ -2295,73 +2434,48 @@ output:
 
 ## Part 9: Validation
 
+### 9.1 Diagnostic Catalog
 
+| Code | Condition | Blame |
+|------|-----------|-------|
+| E_AXIS_ORDER_NOT_TOTAL | compareOrder is not a strict total order | sync mark list |
+| E_MARK_ID_DUP | duplicate sync mark ID | sync mark |
+| E_RANK_INVALID | FINITE rank not fixed-length [0-9a-z]{RANK_LEN} | sync mark |
+| E_RANK_NO_SPACE | no representable midpoint; rebalance required | insertion site |
+| E_MARK_MISSING | token/point references missing mark | token/point |
+| E_TOKEN_BAD_INTERVAL | interval token has sync_left.order >= sync_right.order | token |
+| E_BASE_NOT_CONTIGUOUS | base stream does not partition [START, END] | base stream |
+| E_TIME_NO_BASE_SUPPORT | sync mark cannot be enclosed by any base interval | sync mark |
+| E_INVALID_RATIO | point ratio not in [0,1] | point token |
+| E_JSONATA_INVALID | expression parse/eval error at compile time | rule |
+| E_PHASE_ORDER_VIOLATION | phases violate declared order constraints | phases |
+| E_SPLICE_CONFLICT | overlapping splices in strict mode | rule/patch |
 
-```yaml
+**Warnings:**
 
-validation:
+- W_NULL_TARGET_AT_RUNTIME
+- W_DELETED_TARGET_AT_RUNTIME
+- W_DURATION_EDIT_AFTER_TIMES
+- W_MISSING_CITATION
+- W_EMPTY_SPAN
 
-  errors:
+### 9.2 Invariants
 
-    - pattern_missing_stream
-
-    - unknown_stream_reference
-
-    - invalid_jsonata_syntax
-
-    - invalid_feature_value
-
-    - phase_order_violation
-
-    - splice_conflict             # two splices delete same token with different inserts
-
-    - invalid_ratio               # not in [0,1]
-
-  
-
-  warnings:
-
-    - null_target_at_runtime
-
-    - deleted_target_at_runtime
-
-    - interior_mark_deleted        # strict policy applied
-
-    - duration_edit_after_times    # may need recompute
-
-    - missing_citation             # rule without citation field
-
-    - empty_span                   # span with no children (collapsed)
-
-
-
-  invariants:
-
-    - base_coverage               # base partitions [START, END]
-
-    - span_boundary_match         # spans match children (or empty)
-
-    - time_monotonicity
-
-```
-
-
+- base_coverage (base partitions [START, END])
+- span_boundary_match (spans match children or are empty)
+- time_monotonicity (times non-decreasing in order)
 
 **Splice overlap policy:**
 
 - Adjacent (non-overlapping) splices are allowed and batched together for efficiency
-- **Overlapping splices are NOT jointly applied.** After sorting by `(rule_index, match_index, patch_seq)`:
+- **Overlapping splices are NOT jointly applied.** After sorting by (rule_index, match_index, patch_seq):
   - Earlier patches (lower sort key) take precedence
   - Later patches that overlap an already-accepted patch are skipped (shadowed)
-  - Trace events (`patch_skipped`) are emitted with reason `'shadowed'`
+  - Trace events (patch_skipped) are emitted with reason 'shadowed'
 - **Conflict (optional strict mode):** Two splices that both delete the same token but specify different insertions may raise an error instead of shadowing
 - **Not a conflict:** Two splices that affect adjacent ranges without token overlap
 
-
-
 ---
-
-
 
 ## Part 10: Tracing and Introspection
 
@@ -4119,7 +4233,7 @@ Phase diff (init → sandhi):
 
   Sync marks:
 
-    - deleted: s4
+    - removed (gc): s4
 
 
 
@@ -4230,247 +4344,6 @@ Generated: ./debug/timeline.html
 This tooling is what makes the difference between "interesting research project" and "system someone can actually debug."
 
 
-
-
-
-## Part 11: Implementation Notes
-
-
-
-### 11.1 Snapshot Strategy
-
-
-
-Use copy-on-write:
-
-\- Snapshot = immutable view (shared structure)
-
-\- Patch application creates new arrays only for affected streams
-
-\- Same semantics, no quadratic copying
-
-
-
-### 11.2 Rank Insertion Algorithm
-
-
-
-Ranks use base-36 alphabet: `0123456789abcdefghijklmnopqrstuvwxyz`
-
-
-
-**Preconditions:**
-
-- All FINITE ranks are non-empty strings
-- Empty string `""` is not a valid rank
-- The initial rank for the first token is typically `"i"` (midpoint of alphabet)
-- Ranks are compared by ASCII codepoint order (not locale collation)
-
-**Failure handling:** Rank generation MAY fail if there is no representable rank between two adjacent ranks. In that case, the engine MUST trigger a rebalance and retry.
-
-
-
-```python
-
-ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
-
-BASE = len(ALPHABET)  # 36
-
-MAX_RANK_LENGTH = 50
-
-
-
-class NoRankBetweenError(Exception):
-
-    """Raised when no rank can be generated between two adjacent ranks."""
-
-    pass
-
-
-
-def rank_between(a: str, b: str) -> str:
-
-    """
-
-    Generate a rank string that sorts between a and b (ASCII order).
-
-    Precondition: a < b (ASCII codepoint comparison), both non-empty.
-
-    Raises NoRankBetweenError if no valid rank exists (requires rebalance).
-
-    """
-
-    assert a and b, "Ranks must be non-empty"
-
-    assert a < b, "a must be less than b (ASCII order)"
-
-
-
-    result = []
-
-    i = 0
-
-
-
-    # Process common prefix
-
-    while i < len(a) and i < len(b):
-
-        if a[i] == b[i]:
-
-            result.append(a[i])
-
-            i += 1
-
-        elif ALPHABET.index(a[i]) + 1 < ALPHABET.index(b[i]):
-
-            # Gap between chars: pick midpoint
-
-            mid_idx = (ALPHABET.index(a[i]) + ALPHABET.index(b[i])) // 2
-
-            return ''.join(result) + ALPHABET[mid_idx]
-
-        else:
-
-            # Adjacent chars: extend a with midpoint suffix
-
-            result.append(a[i])
-
-            return ''.join(result) + ALPHABET[BASE // 2]
-
-
-
-    # One string is prefix of the other
-
-    if i < len(a):
-
-        # b is prefix of a - impossible if a < b
-
-        raise NoRankBetweenError(f"Invalid: b='{b}' is prefix of a='{a}'")
-
-
-
-    if i < len(b):
-
-        # a is prefix of b: insert between a and b[i]
-
-        b_idx = ALPHABET.index(b[i])
-
-        if b_idx > 0:
-
-            mid_idx = b_idx // 2
-
-            return ''.join(result) + ALPHABET[mid_idx]
-
-        else:
-
-            # b[i] is '0', extend with midpoint
-
-            return ''.join(result) + ALPHABET[0] + ALPHABET[BASE // 2]
-
-
-
-    # Strings are equal - impossible if a < b
-
-    raise NoRankBetweenError(f"Strings are equal: a='{a}', b='{b}'")
-
-
-
-def rank_after(a: str) -> str:
-
-    """Generate rank after a (toward END sentinel)."""
-
-    assert a, "Rank must be non-empty"
-
-    return a + ALPHABET[BASE // 2]  # e.g., "abc" -> "abci"
-
-
-
-def rank_before(b: str) -> str:
-
-    """Generate rank before b (toward START sentinel)."""
-
-    assert b, "Rank must be non-empty"
-
-    # Find rightmost char that is not '0'
-
-    for i in range(len(b) - 1, -1, -1):
-
-        idx = ALPHABET.index(b[i])
-
-        if idx > 0:
-
-            return b[:i] + ALPHABET[idx // 2]
-
-    # All chars are '0': prepend with midpoint
-
-    return ALPHABET[0] + ALPHABET[BASE // 2]
-
-
-
-def initial_rank() -> str:
-
-    """Generate the first rank for an empty stream."""
-
-    return ALPHABET[BASE // 2]  # 'i'
-
-
-
-def needs_rebalance(rank: str) -> bool:
-
-    """Check if rank is too long and needs rebalancing."""
-
-    return len(rank) > MAX_RANK_LENGTH
-
-```
-
-
-
-**Rebalancing:** If ranks become too long (> 50 chars) or `rank_between` raises `NoRankBetweenError`, the engine MUST trigger a rebalance pass that:
-
-1. Collects all sync marks in order
-2. Reassigns ranks as evenly-spaced short strings (e.g., "0i", "1", "1i", "2", ...)
-3. Retries the failed insertion
-
-This is rare in practice but must be handled for correctness.
-
-
-
-### 11.3 JSONata Integration
-
-
-
-```javascript
-
-const expr = jsonata("$parent(current, 'syllable').f.stress = 1");
-
-
-
-// Register navigation functions
-
-expr.registerFunction('parent', (token, stream) => {
-
-    return engine.getParent(token, stream);
-
-});
-
-
-
-// Evaluate with data root
-
-const result = expr.evaluate({
-
-    current: currentToken,
-
-    params: parameters
-
-});
-
-```
-
-
-
----
 
 
 
@@ -4682,9 +4555,9 @@ rules:
 
 |------|------------|
 
-| Sync mark | Coordination point with stable ID and LexoRank order |
+| Sync mark | Coordination point with stable ID and fixed-length rank order |
 
-| LexoRank | String-based ordering allowing arbitrary insertion |
+| Rank | Fixed-length base-36 ordering key for sync marks |
 
 | Interior mark | Sync mark inside a base interval (interpolated time) |
 
@@ -4829,4 +4702,167 @@ rules:
 
 
 **Hertz, S. R.** (1991). Streams, phones, and transitions: Toward a new phonological and phonetic model of formant timing. \*Journal of Phonetics\*, 19(1), 91-109.
+
+## Appendix D: Implementation Notes
+
+### D.1 Snapshot Strategy
+
+Use copy-on-write:
+
+- Snapshot = immutable view (shared structure)
+- Patch application creates new arrays only for affected streams
+- Same semantics, no quadratic copying
+
+### D.2 Rank Utilities (Informative)
+
+```typescript
+// order_rank.ts
+// Fixed-length base36 rank operations for SyncMark ordering.
+// Node 18+ / TS 5.x. No external deps.
+
+export const RANK_LEN = 12 as const;
+const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz" as const;
+const BASE = 36n;
+
+function assert(cond: unknown, msg: string): asserts cond {
+  if (!cond) throw new Error(msg);
+}
+
+function isRankChar(c: string): boolean {
+  return c.length === 1 && ((c >= "0" && c <= "9") || (c >= "a" && c <= "z"));
+}
+
+export function isRank(s: string): boolean {
+  return s.length === RANK_LEN && [...s].every(isRankChar);
+}
+
+export function rankToBigInt(rank: string): bigint {
+  assert(isRank(rank), `invalid rank: ${rank}`);
+  let x = 0n;
+  for (const ch of rank) {
+    const v = BigInt(ALPHABET.indexOf(ch));
+    assert(v >= 0n, `invalid rank char: ${ch}`);
+    x = x * BASE + v;
+  }
+  return x;
+}
+
+export function bigIntToRank(x: bigint): string {
+  assert(x >= 0n, "rank bigint must be non-negative");
+  const max = maxRankBigInt();
+  assert(x <= max, `rank bigint overflow: ${x} > ${max}`);
+
+  let n = x;
+  const chars: string[] = [];
+  for (let i = 0; i < RANK_LEN; i++) {
+    const rem = n % BASE;
+    n = n / BASE;
+    chars.push(ALPHABET[Number(rem)]);
+  }
+  // chars are least significant first
+  chars.reverse();
+  return chars.join("");
+}
+
+export function maxRankBigInt(): bigint {
+  // 36^RANK_LEN - 1
+  let p = 1n;
+  for (let i = 0; i < RANK_LEN; i++) p *= BASE;
+  return p - 1n;
+}
+
+export function compareRank(a: string, b: string): number {
+  assert(isRank(a) && isRank(b), "compareRank expects fixed-length ranks");
+  // Lex compare works because fixed-length and alphabet is ordered in ASCII for 0-9a-z.
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+export type OrderKey =
+  | { kind: "START" }
+  | { kind: "FINITE"; rank: string }
+  | { kind: "END" };
+
+export function compareOrder(a: OrderKey, b: OrderKey): number {
+  const kindOrder: Record<OrderKey["kind"], number> = { START: 0, FINITE: 1, END: 2 };
+  if (a.kind !== b.kind) return kindOrder[a.kind] - kindOrder[b.kind];
+  if (a.kind === "FINITE" && b.kind === "FINITE") return compareRank(a.rank, b.rank);
+  return 0;
+}
+
+/**
+ * Compute a rank strictly between lo and hi.
+ * lo=null means START boundary (numeric 0)
+ * hi=null means END boundary (numeric MAX)
+ *
+ * Throws if there is no representable midpoint (caller should rebalance and retry).
+ */
+export function rankBetween(lo: string | null, hi: string | null): string {
+  const loVal = lo === null ? 0n : rankToBigInt(lo);
+  const hiVal = hi === null ? maxRankBigInt() : rankToBigInt(hi);
+
+  assert(loVal < hiVal, `rankBetween requires lo < hi (got ${loVal} >= ${hiVal})`);
+
+  const mid = (loVal + hiVal) / 2n;
+  // Ensure strict interior
+  if (mid === loVal || mid === hiVal) {
+    throw new Error("E_RANK_NO_SPACE: no representable midpoint; rebalance required");
+  }
+  return bigIntToRank(mid);
+}
+
+/**
+ * Rebalance ranks for an ordered list of items into evenly-spaced ranks.
+ * Returns array of ranks in the same order.
+ */
+export function rebalanceRanks(count: number): string[] {
+  assert(Number.isInteger(count) && count >= 0, "count must be a non-negative integer");
+  const max = maxRankBigInt();
+  const out: string[] = [];
+  for (let i = 1; i <= count; i++) {
+    const v = (BigInt(i) * max) / BigInt(count + 1);
+    out.push(bigIntToRank(v));
+  }
+  // strictly increasing guaranteed when count << 36^RANK_LEN; if it fails, increase RANK_LEN
+  for (let i = 1; i < out.length; i++) {
+    assert(out[i - 1] < out[i], "rebalance produced non-increasing ranks; increase RANK_LEN");
+  }
+  return out;
+}
+
+/* ------------------------ self-test (node) ------------------------ */
+if (require.main === module) {
+  const a = bigIntToRank(1000n);
+  const b = bigIntToRank(2000n);
+  const m = rankBetween(a, b);
+  assert(a < m && m < b, "midpoint not between");
+
+  const rs = rebalanceRanks(5);
+  assert(rs.length === 5, "rebalance length mismatch");
+  for (let i = 1; i < rs.length; i++) assert(rs[i - 1] < rs[i], "rebalance not sorted");
+
+  console.log("order_rank.ts self-test: OK");
+}
+```
+
+### D.3 JSONata Integration
+
+```javascript
+const expr = jsonata("$parent(current, 'syllable').f.stress = 1");
+
+// Register navigation functions
+expr.registerFunction('parent', (token, stream) => {
+    return engine.getParent(token, stream);
+});
+
+// Evaluate with data root
+const result = expr.evaluate({
+    current: currentToken,
+    params: parameters
+});
+```
+
+---
+
 

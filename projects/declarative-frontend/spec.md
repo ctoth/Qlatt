@@ -943,7 +943,7 @@ patterns:
 
 ### 5.1 Pipeline
 
-This is the **per-phase** rule-evaluation pipeline used during Phase 4 (APPLY PHASES) and followed by Phase 5 (NORMALIZE) and Phase 6 (RESOLVE TIMES).
+This is the **per-phase** rule-evaluation pipeline used during APPLY PHASES (Part 0, Step 4). Global FINAL RESOLVE (Part 0, Step 5) reruns the relevant resolve steps as needed.
 
 ```
 1. SNAPSHOT           Copy-on-write view of streams
@@ -1050,6 +1050,31 @@ A token `t` is "within range `[L, R]`" if and only if:
 - `L.order <= t.sync_left.order` AND `t.sync_right.order <= R.order`
 
 That is, the token must be **fully contained** within the range boundaries. Partially overlapping tokens are NOT within the range. Splices MUST NOT attempt to partially delete a token.
+
+**SpliceSpec (rule YAML):**
+
+```typescript
+type SpliceSpec =
+  | {
+      type: 'insert_at_boundary';
+      boundary: SyncMarkId;
+      side: 'before' | 'after';
+      insert: TokenSpec[];
+    }
+  | {
+      type: 'replace_range';
+      range_left: SyncMarkId;
+      range_right: SyncMarkId;
+      delete: TokenId[];
+      insert: TokenSpec[];
+    }
+  | {
+      type: 'delete_tokens';
+      delete: TokenId[];
+    };
+```
+
+**SpliceSpec mapping:** `insert` maps to `insert_tokens`, and `delete` maps to `delete_tokens` in the generated patch objects.
 
 
 
@@ -1323,13 +1348,15 @@ To append a token at the end of the utterance, use boundary insertion:
 
 ```yaml
 
-insert_at_boundary:
+splice:
+
+  type: insert_at_boundary
 
   boundary: "last_token.sync_right"  # boundary before END
 
   side: after
 
-  insert_tokens: [...]
+  insert: [...]
 
 ```
 
@@ -1708,7 +1735,7 @@ rules:
       side: after
       insert:
         - name: "stop.name & '_rel'"
-          parent: "$parent(stop, 'syllable')"
+          parent: "$parent(stop, 'syllable').id"
 
   # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
   coalesce_dj:
@@ -1721,7 +1748,7 @@ rules:
       delete: [d, j]
       insert:
         - name: "'dʒ'"
-          parent: "$parent(d, 'syllable')"
+          parent: "$parent(d, 'syllable').id"
 ```
 ### 6.3 Point Insertion
 
@@ -1817,6 +1844,14 @@ rules:
       - from: stop
         to: son
         assoc_name: release_target
+
+  unlink_release_target:
+    citation: "Stevens 1998 Ch.8"
+    match: stop_before_sonorant
+    disassociate:
+      - from: stop
+        to: son
+        assoc_name: release_target
 ```
 
 ---
@@ -1846,7 +1881,7 @@ phases:
 
   - name: duration
 
-    rules: [stress_lengthening, fortis_clipping]
+    rules: [stress_lengthening]
 
     resolve_scalars: [duration]
 
@@ -1858,7 +1893,7 @@ phases:
 
     after: [duration]
 
-    rules: [coarticulation]
+    rules: [locus_f2]
 
     resolve_scalars: [F1, F2, F3, B1, B2, B3]
 
@@ -1876,7 +1911,7 @@ phases:
 
   - name: source
 
-    rules: [voice_source, frication_source]
+    rules: [frication_source]
 
     resolve_scalars: [AV, AH, AF]
 
@@ -2061,7 +2096,9 @@ Minimum trace event fields:
 
 Detailed trace formats and debugger protocols are documented in `projects/declarative-frontend/tracing.md` (informative).
 
----## Appendix A: Complete Example
+---
+
+## Appendix A: Complete Example
 
 
 
@@ -2181,7 +2218,7 @@ rules:
 
         - name: "'dʒ'"
 
-          parent: "$parent(d, 'syllable')"
+          parent: "$parent(d, 'syllable').id"
 
 
 
@@ -2204,6 +2241,7 @@ rules:
       insert:
 
         - name: "stop.name \& '_rel'"
+          parent: "$parent(stop, 'syllable').id"
 
 
 

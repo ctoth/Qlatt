@@ -29,7 +29,7 @@ Implementations MUST produce identical results for the same inputs by adhering t
 
 - **Phase order:** Phases execute in the order listed in `phases` (Part 7).
 - **Rule order:** Within a phase, rules execute in the listed order.
-- **Match order:** Each rule enumerates matches in a single left-to-right sweep over the snapshot, ordered by earliest involved sync mark (leftmost). Matches are collected, then patches are generated and applied later by the patch ordering and splice overlap policy (Part 5.4, Part 9).
+- **Match order:** Each rule enumerates matches in a single left-to-right sweep over the snapshot, ordered by earliest involved sync mark (leftmost). The *earliest involved sync mark* for a match is the minimum `sync_left.order` across all captured interval tokens in that match (i.e., the leftmost boundary of any capture). Matches are collected, then patches are generated and applied later by the patch ordering and splice overlap policy (Part 5.4, Part 9).
 - **Select order:** For select rules, tokens are visited in stream order. Base streams use list order; non-base interval streams use `(sync_left.order, sync_right.order, id)` as a total tie-breaker; point streams use `(anchor_left.order, anchor_right.order, ratio, id)`.
 - **No fixpoint:** Rules are single-pass unless the spec explicitly adds a bounded repeat mechanism (not defined in v11).
 
@@ -160,6 +160,8 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 - `START.time` is always `0` (before and after time computation)
 - `END.time` is `null` before any `compute_times`, and equals total utterance duration after the last `compute_times` (or final RESOLVE TIMES)
 - **Invariant:** After any phase that computes times, all sync marks referenced by any token or point MUST have non-null `time`
+
+**Sentinel boundary note (normative):** `START` and `END` are sentinel boundaries, not finite ranks. It is valid and expected for the first/last base token to use sentinel boundaries as `sync_left`/`sync_right`.
 
 
 
@@ -931,6 +933,8 @@ patterns:
 
 | `repeat: "+"` | Token[] | Fails |
 
+**Scope boundary behavior (normative):** Quantified captures (`repeat: "*"`, `repeat: "+"`) MUST NOT cross the scope boundary. When a repeat would extend past the scope boundary, matching stops at the boundary and the capture includes only tokens within scope. For `repeat: "+"`, if no tokens were captured before reaching the boundary, the match fails.
+
 
 
 ---
@@ -1292,6 +1296,7 @@ parent: "$parent(stop, 'syllable').id"
 This convention enables unambiguous parsing, LSP support, and validation.
 
 **Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left. If the insertion boundary is shared by two spans, `inherit_left` attaches to the left span (i.e., it extends that span after rebuild).
+**Left token for boundary insertions (normative):** For `insert_at_boundary`, the "left" token is the token whose `sync_right` equals the insertion boundary (i.e., the token immediately to the left in base stream order). This applies even when the boundary is shared by two adjacent tokens.
 
 
 
@@ -1364,7 +1369,8 @@ splice:
 
 The splice algorithm creates new sync mark(s) between the specified boundary and `END`.
 
-**Empty base stream:** If there are no base tokens, use `boundary: "START"` to insert the first token.
+**Empty base stream:** If there are no base tokens, use `boundary: "START"` to insert the first token. The first inserted token spans `[START, END]` (sentinel boundaries). If multiple tokens are inserted in a single operation, create fresh FINITE ranks between `START` and `END` to partition the range.
+**Sentinel boundary note (normative):** `START` and `END` are sentinel boundaries, not finite ranks. It is valid and expected for the first/last base token to use sentinel boundaries as `sync_left`/`sync_right`.
 
 
 
@@ -1525,6 +1531,8 @@ def compute_times(base_stream, all_sync_marks):
 **Monotonicity:** After this step, sync mark times must be non-decreasing with order, and strictly increasing for base boundaries.
 
 **END time:** `END.time` is set to the final accumulated time at the end of Step 1.
+
+**Zero-duration base intervals (normative):** If a base interval has `sync_left.time == sync_right.time`, all interior marks within that interval MUST be assigned the left boundary time. Implementations MAY emit a warning.
 
 ### 5.12 Point Resolution
 

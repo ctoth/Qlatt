@@ -140,7 +140,7 @@ Given the ordered list of FINITE marks `m[1..n]`, reassign:
 
 
 
-**Reference implementation:** See Appendix D.2 (informative) for fixed-length rank utilities.
+**Reference implementation:** See `projects/declarative-frontend/implementation-notes.md` (informative) for fixed-length rank utilities.
 
 
 
@@ -538,48 +538,13 @@ This is correct for sparse linguistic features.
 
 ### 2.5 Examples
 
-
-
-All expressions require explicit `current.` prefix in select rules. No syntactic sugar.
-
-
-
 ```yaml
-
 # Feature check (select rule)
-
 where: "current.f.manner = 'vowel'"
 
-
-
-# Parent navigation
-
+# Parent navigation with parameter
 value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
-
-
-
-# Pattern constraint (captures are in scope)
-
-constraint: "obs.f.voicing = 'voiceless'"
-
-
-
-# Chained navigation
-
-constraint: "$next(stop).f.manner in ['vowel', 'nasal'] and $parent(stop, 'word').f.pos = 'verb'"
-
 ```
-
-
-
-**Rationale:** One mental model. Data fields have no prefix, registered functions use `$`. No magic expansion.
-
-
-
----
-
-
-
 ## Part 3: Stream Definitions
 
 
@@ -1321,7 +1286,6 @@ Sort key: `(rule_index, match_index, patch_seq)`
 
 
 
-**Rationale:** Ordering is fully determined by rule list position and match order. No priority field needed. If a rule must run before others, place it earlier in the phase or in an earlier phase.
 
 
 
@@ -1713,390 +1677,101 @@ For select rules, `constraint` evaluates after `where` passes.
 
 ### 6.1 Select Rules
 
-
-
 ```yaml
-
 rules:
 
-  # Klatt (1976) Table II: unstressed vowels 35-60% shorter
-
-  # Lehiste (1970): stress correlates with duration cross-linguistically
-
+  # Klatt 1976 §III.B: stressed vowels longer
   stress_lengthening:
-
-    citation: "Klatt 1976 §III.B; Lehiste 1970 Ch.2"
-
+    citation: "Klatt 1976 §III.B"
     select:
-
       stream: phone
-
       where: "current.f.manner = 'vowel'"
-
     apply:
-
       - field: duration
-
         op: mul
-
-        value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
-
+        value: "params.stress_factor"
         tag: stress
-
-
-
-  # Klatt (1976): phrase-final syllables 30% longer
-
-  # Oller (1973): boundary lengthening in English
-
-  phrase_final_lengthening:
-
-    citation: "Klatt 1976 §III.A; Oller 1973"
-
-    select:
-
-      stream: phone
-
-      where: "current.f.manner = 'vowel'"
-
-    apply:
-
-      - field: duration
-
-        op: mul
-
-        value: "$parent(current, 'syllable').f.boundary = 'major' ? 1.3 : 1"
-
-        tag: boundary
-
-
-
-  # House \& Fairbanks (1953): vowels longer before voiced consonants
-
-  # Klatt (1976) Table II: 50-100ms difference phrase-finally
-
-  pre_voiced_lengthening:
-
-    citation: "House \& Fairbanks 1953; Klatt 1976 §III.C"
-
-    select:
-
-      stream: phone
-
-      where: "current.f.manner = 'vowel' and $next(current).f.voicing = 'voiced'"
-
-    apply:
-
-      - field: duration
-
-        op: mul
-
-        value: "params.pre_voiced_factor"
-
-        tag: pre_voiced
-
 ```
-
-
-
 ### 6.2 Pattern Rules with Splice
 
-
-
 ```yaml
-
 rules:
 
-  # Ladefoged \& Maddieson (1996): stops have release bursts before sonorants
-
-  # Stevens (1998) Ch.8: acoustic cues require explicit release modeling
-
+  # Stevens 1998 Ch.8: stop release burst modeling
   insert_release:
-
-    citation: "Ladefoged \& Maddieson 1996 §3.2; Stevens 1998 Ch.8"
-
+    citation: "Stevens 1998 Ch.8"
     match: stop_before_sonorant
-
     splice:
-
       type: insert_at_boundary
-
       boundary: stop.sync_right
-
       side: after
-
       insert:
-
-        - name: "stop.name \& '_rel'"
-
+        - name: "stop.name & '_rel'"
           parent: "$parent(stop, 'syllable')"
 
-
-
-  # Lisker \& Abramson (1964): VOT distinguishes voicing in stops
-
-  # Aspiration 40-100ms for voiceless stops in English
-
-  insert_aspiration:
-
-    citation: "Lisker \& Abramson 1964; Klatt 1975"
-
-    match: voiceless_stop_before_vowel
-
-    constraint: "$parent(stop, 'syllable').f.stress >= 1"
-
-    splice:
-
-      type: insert_at_boundary
-
-      boundary: stop.sync_right
-
-      side: after
-
-      insert:
-
-        - name: "'asp'"
-
-
-
-  # Wells (1990): pre-fortis clipping in British English
-
-  # Chen (1970): vowel shortening before voiceless obstruents
-
-  fortis_clipping:
-
-    citation: "Wells 1990; Chen 1970"
-
-    match: vowel_before_obstruent
-
-    constraint: "obs.f.voicing = 'voiceless'"
-
-    apply:
-
-      - target: v
-
-        field: duration
-
-        op: mul
-
-        value: "params.clipping_factor"
-
-        tag: fortis
-
-
-
-  # Gimson (1980): /d/+/j/ → /dʒ/ in connected speech
-
-  # Cruttenden (2014) §10.3: yod coalescence
-
-  d_j_coalescence:
-
-    citation: "Gimson 1980; Cruttenden 2014 §10.3"
-
+  # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
+  coalesce_dj:
+    citation: "Cruttenden 2014 §10.3"
     match: d_j_coalescence
-
     splice:
-
       type: replace_range
-
       range_left: d.sync_left
-
       range_right: j.sync_right
-
       delete: [d, j]
-
       insert:
-
         - name: "'dʒ'"
-
           parent: "$parent(d, 'syllable')"
-
 ```
-
-
-
 ### 6.3 Point Insertion
 
-
-
 ```yaml
-
 rules:
 
-  # Pierrehumbert (1980): F0 targets at metrically strong syllables
-
-  # 't Hart et al. (1990): pitch movements anchor to syllable nuclei
-
+  # Pierrehumbert 1980: F0 targets at vowel midpoints with declination
   f0_targets:
-
-    citation: "Pierrehumbert 1980; 't Hart et al. 1990"
-
+    citation: "Pierrehumbert 1980"
     select:
-
       stream: phone
-
       where: "current.f.manner = 'vowel'"
-
     insert_point:
-
       stream: f0
-
       at: "$midpoint(current)"
-
-      value: "params.base_f0 \* (1.1 - params.declination \* $index(current) / $total('phone'))"
-
+      value: "params.base_f0"
       tag: f0
-
-
-
-  # Pierrehumbert (1980): H\* accent on stressed syllables
-
-  # Ladd (2008): pitch accent alignment
-
-  accent_peak:
-
-    citation: "Pierrehumbert 1980; Ladd 2008 Ch.3"
-
-    select:
-
-      stream: syllable
-
-      where: "current.f.stress = 1"
-
-    insert_point:
-
-      stream: f0
-
-      at: "$at_ratio($children(current, 'phone')[f.manner = 'vowel'][0], 0.3)"
-
-      value: "params.base_f0 \* params.accent_factor"
-
-      tag: accent
-
 ```
-
-
-
 ### 6.4 Formant Rules
 
-
-
 ```yaml
-
 rules:
 
-  # Öhman (1966): VCV coarticulation model
-
-  # Stevens (1998) Ch.6: formant transitions reflect articulator timing
-
-  coarticulation:
-
-    citation: "Öhman 1966; Stevens 1998 Ch.6"
-
-    select:
-
-      stream: phone
-
-      where: "current.f.manner = 'vowel'"
-
-    apply:
-
-      - field: F2
-
-        op: add
-
-        value: "($prev(current).s.F2 - current.s.F2) \* params.coartic_strength"
-
-        tag: coartic
-
-
-
-  # Stevens \& House (1955): consonant locus equations
-
-  # Sussman et al. (1991): locus equation parameters by place
-
+  # Stevens & House 1955: consonant locus equations
   locus_f2:
-
-    citation: "Stevens \& House 1955; Sussman et al. 1991"
-
+    citation: "Stevens & House 1955"
     match: consonant_vowel
-
     apply:
-
       - target: c
-
         field: F2
-
         op: set
-
-        value: "params.locus[c.f.place] + params.slope[c.f.place] \* v.s.F2"
-
+        value: "params.locus[c.f.place] + params.slope[c.f.place] * v.s.F2"
         tag: locus
-
 ```
-
-
-
 ### 6.5 Source Rules
 
-
-
 ```yaml
-
 rules:
 
-  # Klatt (1980): source parameters for Klatt synthesizer
-
-  # Stevens (1998) Ch.2: voice source characteristics
-
-  voice_source:
-
-    citation: "Klatt 1980; Stevens 1998 Ch.2"
-
-    select:
-
-      stream: phone
-
-      where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
-
-    apply:
-
-      - field: AV
-
-        op: set
-
-        value: "60"
-
-        tag: voiced
-
-
-
-  # Stevens (1971): frication noise source levels
-
+  # Stevens 1971: frication noise source levels
   frication_source:
-
     citation: "Stevens 1971"
-
     select:
-
       stream: phone
-
       where: "current.f.manner = 'fricative'"
-
     apply:
-
       - field: AF
-
         op: set
-
         value: "current.f.voicing = 'voiced' ? 50 : 60"
-
         tag: frication
-
 ```
-
-
-
 ### 6.6 Deletion (Non-Base)
 
 
@@ -2130,55 +1805,20 @@ rules:
 
 ### 6.7 Association Rules
 
-
-
 ```yaml
-
 rules:
 
   # Associate a release with its following sonorant
-
   link_release_target:
-
     citation: "Stevens 1998 Ch.8"
-
     match: stop_before_sonorant
-
     associate:
-
       - from: stop
-
         to: son
-
         assoc_name: release_target
-
-
-  # Remove association when a boundary condition holds
-
-  unlink_release_target:
-
-    citation: "Stevens 1998 Ch.8"
-
-    match: stop_before_sonorant
-
-    constraint: "$parent(stop, 'word').id != $parent(son, 'word').id"
-
-    disassociate:
-
-      - from: stop
-
-        to: son
-
-        assoc_name: release_target
-
 ```
 
-
-
 ---
-
-
-
 ## Part 7: Phases
 
 
@@ -2404,966 +2044,23 @@ output:
 
 ## Part 10: Tracing and Introspection
 
+Implementations MUST provide tracing and introspection facilities sufficient to:
 
+- Explain rule application and scalar provenance
+- Diff state between phases
+- Inspect tokens, sync marks, and associations
+- Support debugging (breakpoints, stepping)
 
-Debugging phonological rules is notoriously difficult. This section specifies the introspection tooling required for the DSL to be usable in practice.
+Minimum trace event fields:
 
+- event category (match, patch, resolve, error)
+- phase and rule identifiers (if applicable)
+- affected token IDs and sync mark IDs
+- timestamp or order index for sequencing
 
+Detailed trace formats and debugger protocols are documented in `projects/declarative-frontend/tracing.md` (informative).
 
-### 10.1 Design Principles
-
-
-
-1\. **Every decision must be traceable** - Why did this rule fire? Why didn't it?
-
-2\. **Every value must have provenance** - Where did this duration come from?
-
-3\. **State is always inspectable** - What did the streams look like at any point?
-
-4\. **Visualization is first-class** - Multi-stream alignment must be visible
-
-
-
-### 10.2 Trace Events
-
-
-
-The engine emits structured trace events at each step:
-
-
-
-```typescript
-
-type TraceEvent =
-
-  | PhaseStart
-
-  | PhaseEnd
-
-  | SnapshotCreated
-
-  | RuleEvaluationStart
-
-  | MatchAttempt
-
-  | MatchSuccess
-
-  | MatchFailure
-
-  | ExpressionEvaluation
-
-  | PatchGenerated
-
-  | PatchApplied
-
-  | PatchSkipped
-
-  | ScalarResolution
-
-  | TimeComputation
-
-  | PointResolution
-
-  | Warning
-
-  | Error;
-
-
-
-interface MatchAttempt {
-
-  type: 'match_attempt';
-
-  rule: string;
-
-  pattern: string;
-
-  position: { stream: string; index: number; token_id: string };
-
-  timestamp: number;
-
-}
-
-
-
-interface MatchSuccess {
-
-  type: 'match_success';
-
-  rule: string;
-
-  pattern: string;
-
-  captures: Record<string, TokenId | TokenId[] | null>;
-
-  span: { left: SyncMarkId; right: SyncMarkId };
-
-  constraint_result: boolean | null;  // null if no constraint
-
-}
-
-
-
-interface MatchFailure {
-
-  type: 'match_failure';
-
-  rule: string;
-
-  pattern: string;
-
-  step_index: number;              // which step failed
-
-  step_where: string;              // the where clause
-
-  token_evaluated: TokenId;
-
-  evaluation_result: any;          // what the where clause returned
-
-  reason: 'where_false' | 'scope_boundary' | 'end_of_stream' | 'constraint_false';
-
-}
-
-
-
-interface ExpressionEvaluation {
-
-  type: 'expression_eval';
-
-  rule: string;
-
-  expression: string;
-
-  context: Record<string, any>;    // the data root
-
-  result: any;
-
-  duration_us: number;             // for perf tracking
-
-}
-
-
-
-interface PatchGenerated {
-
-  type: 'patch_generated';
-
-  rule: string;
-
-  match_index: number;
-
-  patch: Patch;
-
-  source_tokens: TokenId[];        // tokens that triggered this patch
-
-}
-
-
-
-interface PatchSkipped {
-
-  type: 'patch_skipped';
-
-  patch: Patch;
-
-  reason: 'target_deleted' | 'target_null' | 'conflict' | 'validation_failed';
-
-  details: string;
-
-}
-
-
-
-interface ScalarResolution {
-
-  type: 'scalar_resolution';
-
-  token_id: TokenId;
-
-  field: string;
-
-  base: number;
-
-  floor: number | null;
-
-  effects: ResolvedEffect[];
-
-  resolved: number;
-
-  computation_steps: string[];     // human-readable step-by-step
-
-}
-
-```
-
-
-
-### 10.3 Provenance Tracking
-
-
-
-Every resolved value carries its provenance:
-
-
-
-```typescript
-
-interface Provenance {
-
-  field: string;
-
-  token_id: TokenId;
-
-  base_value: number;
-
-  base_source: 'inventory' | 'override';
-
-  effects: ProvenanceEffect[];
-
-  final_value: number;
-
-}
-
-
-
-interface ProvenanceEffect {
-
-  rule: string;
-
-  citation: string;
-
-  tag: string;
-
-  op: 'set' | 'mul' | 'add';
-
-  value: number;
-
-  value_before: number;
-
-  value_after: number;
-
-  match_context: {
-
-    captures: Record<string, TokenId>;
-
-    position: number;
-
-  };
-
-}
-
-```
-
-
-
-**Query interface:**
-
-
-
-```typescript
-
-// "Why is this token's duration 152ms?"
-
-engine.explain(tokenId, 'duration') → Provenance
-
-
-
-// Returns:
-
-{
-
-  field: 'duration',
-
-  token_id: 'phone_42',
-
-  base_value: 240,
-
-  base_source: 'inventory',  // from æ entry
-
-  effects: [
-
-    {
-
-      rule: 'stress_lengthening',
-
-      citation: 'Klatt 1976 §III.B',
-
-      tag: 'stress',
-
-      op: 'mul',
-
-      value: 1.0,              // stress == 0, so no change
-
-      value_before: 240,
-
-      value_after: 240
-
-    },
-
-    {
-
-      rule: 'fortis_clipping', 
-
-      citation: 'Wells 1990; Chen 1970',
-
-      tag: 'fortis',
-
-      op: 'mul',
-
-      value: 0.6,
-
-      value_before: 240,
-
-      value_after: 186         // Klatt: 0.6 \* (240 - 105) + 105
-
-    },
-
-    {
-
-      rule: 'phrase_final_lengthening',
-
-      citation: 'Klatt 1976 §III.A',
-
-      tag: 'boundary',
-
-      op: 'mul',
-
-      value: 1.0,              // not phrase-final
-
-      value_before: 186,
-
-      value_after: 186
-
-    }
-
-  ],
-
-  final_value: 186
-
-}
-
-```
-
-
-
-### 10.4 Snapshot Diffing
-
-
-
-Compare state between any two points:
-
-
-
-```typescript
-
-interface SnapshotDiff {
-
-  phase_from: string;
-
-  phase_to: string;
-
-  
-
-  tokens: {
-
-    added: TokenSummary[];
-
-    deleted: TokenSummary[];
-
-    modified: TokenModification[];
-
-  };
-
-  
-
-  sync_marks: {
-
-    added: SyncMarkId[];
-
-    deleted: SyncMarkId[];
-
-  };
-
-  
-
-  associations: {
-
-    added: AssociationEdge[];
-
-    deleted: AssociationEdge[];
-
-  };
-
-}
-
-
-
-interface TokenModification {
-
-  token_id: TokenId;
-
-  changes: FieldChange[];
-
-}
-
-
-
-interface FieldChange {
-
-  path: string;              // e.g., 's.duration', 'f.place', 'sync_right'
-
-  old_value: any;
-
-  new_value: any;
-
-  caused_by: string[];       // rule names
-
-}
-
-```
-
-
-
-**Usage:**
-
-
-
-```typescript
-
-const diff = engine.diff('after:allophonic', 'after:duration');
-
-// Shows all changes made by duration phase
-
-```
-
-
-
-### 10.5 Rule Coverage Report
-
-
-
-Track which rules fired and where:
-
-
-
-```typescript
-
-interface RuleCoverage {
-
-  rule: string;
-
-  citation: string;
-
-  
-
-  matches: {
-
-    total: number;
-
-    by_position: Map<number, number>;  // index → count
-
-  };
-
-  
-
-  non_matches: {
-
-    total_attempts: number;
-
-    failure_reasons: Map<string, number>;  // reason → count
-
-  };
-
-  
-
-  effects_applied: number;
-
-  effects_skipped: number;
-
-  
-
-  example_matches: MatchSuccess[];      // first N
-
-  example_failures: MatchFailure[];     // first N
-
-}
-
-
-
-// "Why didn't insert_aspiration fire on this stop?"
-
-engine.whyNot('insert_aspiration', tokenId) → MatchFailure[]
-
-```
-
-
-
-### 10.6 Stream Visualization
-
-
-
-Multi-stream alignment view specification:
-
-
-
-```typescript
-
-interface StreamView {
-
-  time_range: [number, number];
-
-  streams: StreamLayer[];
-
-  sync_marks: SyncMarkDisplay[];
-
-  annotations: Annotation[];
-
-}
-
-
-
-interface StreamLayer {
-
-  stream: string;
-
-  tokens: TokenDisplay[];
-
-  y_position: number;
-
-  height: number;
-
-}
-
-
-
-interface TokenDisplay {
-
-  token_id: TokenId;
-
-  name: string;
-
-  x_start: number;           // pixels or time
-
-  x_end: number;
-
-  features: Record<string, string>;  // formatted for display
-
-  scalars: Record<string, string>;
-
-  highlight: 'none' | 'selected' | 'matched' | 'modified' | 'inserted' | 'deleted';
-
-  provenance_available: string[];    // which fields have provenance
-
-}
-
-
-
-interface SyncMarkDisplay {
-
-  id: SyncMarkId;
-
-  x: number;
-
-  time: number | null;
-
-  order: string;
-
-  references: TokenId[];     // tokens using this mark
-
-  is_interior: boolean;
-
-}
-
-
-
-interface Annotation {
-
-  type: 'rule_match' | 'patch_applied' | 'warning' | 'custom';
-
-  x_start: number;
-
-  x_end: number;
-
-  y_stream: string;
-
-  label: string;
-
-  details: any;
-
-}
-
-```
-
-
-
-### 10.7 Interactive Debugger Protocol
-
-
-
-For IDE/UI integration:
-
-
-
-```typescript
-
-interface DebuggerProtocol {
-
-  // Breakpoints
-
-  setBreakpoint(location: BreakpointLocation): BreakpointId;
-
-  removeBreakpoint(id: BreakpointId): void;
-
-  
-
-  // Execution control
-
-  run(): Promise<void>;
-
-  stepPhase(): Promise<PhaseResult>;
-
-  stepRule(): Promise<RuleResult>;
-
-  stepMatch(): Promise<MatchResult>;
-
-  pause(): void;
-
-  
-
-  // State inspection
-
-  getStreams(): StreamState[];
-
-  getToken(id: TokenId): Token;
-
-  getSyncMark(id: SyncMarkId): SyncMark;
-
-  explain(tokenId: TokenId, field: string): Provenance;
-
-  whyNot(rule: string, tokenId: TokenId): MatchFailure[];
-
-  
-
-  // Queries
-
-  query(jsonata: string): any;  // query current state
-
-  
-
-  // Events
-
-  onTraceEvent(callback: (event: TraceEvent) => void): void;
-
-  onBreakpoint(callback: (bp: BreakpointId) => void): void;
-
-}
-
-
-
-type BreakpointLocation =
-
-  | { type: 'phase'; phase: string; when: 'before' | 'after' }
-
-  | { type: 'rule'; rule: string; when: 'before' | 'after' }
-
-  | { type: 'match'; pattern: string; token?: TokenId }
-
-  | { type: 'patch'; patch_type: string }
-
-  | { type: 'token_modified'; token: TokenId; field?: string }
-
-  | { type: 'condition'; expr: string };  // break when expr is true
-
-```
-
-
-
-### 10.8 Trace Output Formats
-
-
-
-**JSON Lines (streaming):**
-
-
-
-```jsonl
-
-{"type":"phase_start","phase":"duration","timestamp":1234567890}
-
-{"type":"match_success","rule":"stress_lengthening","captures":{"current":"phone_42"}}
-
-{"type":"expression_eval","rule":"stress_lengthening","expression":"$parent(current,'syllable').f.stress","result":1}
-
-...
-
-```
-
-
-
-**HTML Report:**
-
-
-
-Self-contained HTML with:
-
-\- Collapsible phase sections
-
-\- Token timeline visualization
-
-\- Click-to-expand provenance
-
-\- Search/filter by rule, token, field
-
-\- Diff view between phases
-
-
-
-**SQLite Database:**
-
-
-
-```sql
-
-CREATE TABLE trace_events (
-
-  id INTEGER PRIMARY KEY,
-
-  timestamp_us INTEGER,
-
-  phase TEXT,
-
-  event_type TEXT,
-
-  event_json TEXT
-
-);
-
-
-
-CREATE TABLE provenance (
-
-  token_id TEXT,
-
-  field TEXT,
-
-  base_value REAL,
-
-  final_value REAL,
-
-  effects_json TEXT,
-
-  PRIMARY KEY (token_id, field)
-
-);
-
-
-
-CREATE TABLE snapshots (
-
-  phase TEXT PRIMARY KEY,
-
-  state_json TEXT  -- or msgpack for size
-
-);
-
-
-
--- Query: all effects on duration fields
-
-SELECT p.token_id, p.effects_json 
-
-FROM provenance p 
-
-WHERE p.field = 'duration';
-
-```
-
-
-
-**Storage semantics (implementation-defined):**
-
-
-
-The following are not specified and left to implementation:
-
-\- Maximum trace size / rotation policy
-
-\- Buffering vs streaming behavior
-
-\- Behavior when disk fills (fail, truncate, or drop events)
-
-\- Memory limits for in-memory traces during interactive debugging
-
-
-
-Implementations should document their choices.
-
-
-
-### 10.9 Performance Profiling
-
-
-
-```typescript
-
-interface PerformanceReport {
-
-  total_time_ms: number;
-
-  
-
-  by_phase: {
-
-    phase: string;
-
-    time_ms: number;
-
-    breakdown: {
-
-      snapshot: number;
-
-      matching: number;
-
-      patch_generation: number;
-
-      patch_application: number;
-
-      resolution: number;
-
-    };
-
-  }[];
-
-  
-
-  by_rule: {
-
-    rule: string;
-
-    time_ms: number;
-
-    match_attempts: number;
-
-    match_successes: number;
-
-    expressions_evaluated: number;
-
-    avg_expression_time_us: number;
-
-  }[];
-
-  
-
-  hot_expressions: {
-
-    expression: string;
-
-    count: number;
-
-    total_time_us: number;
-
-    avg_time_us: number;
-
-  }[];
-
-  
-
-  memory: {
-
-    peak_tokens: number;
-
-    peak_sync_marks: number;
-
-    snapshot_copies: number;
-
-  };
-
-}
-
-```
-
-
-
-### 10.10 Configuration
-
-
-
-```yaml
-
-debug:
-
-  enabled: true
-
-  
-
-  trace:
-
-    events: [match_success, match_failure, patch_applied, scalar_resolution]
-
-    # or: all, none, errors_only
-
-    
-
-    include_context: true      # include full expression context
-
-    include_snapshots: true    # store snapshots for diffing
-
-    max_example_failures: 10   # per rule
-
-    
-
-  output:
-
-    format: jsonl              # jsonl, html, sqlite
-
-    path: "./debug/trace.jsonl"
-
-    
-
-  breakpoints:
-
-    - { type: phase, phase: duration, when: after }
-
-    - { type: condition, expr: "current.s.duration < 50" }
-
-    
-
-  performance:
-
-    enabled: true
-
-    sample_expressions: true   # profile JSONata evaluation
-
-
-
-  visualization:
-
-    enabled: true
-
-    output: "./debug/timeline.html"
-
-    streams: [phone, syllable, f0]
-
-    time_range: auto           # or [0, 2000]
-
-```
-
-
-
-### 10.11 Command Line Interface
-
-The implementation MUST provide a CLI that supports:
-
-- Running a spec against input text or a file
-- Validating a spec and emitting diagnostics
-- Diffing states between phases
-- Producing visualizations of streams
-- Profiling performance by phase/rule
-- Interactive debugging with breakpoints
-- LSP mode for editor integration
-
-The reference CLI and detailed usage live in `projects/declarative-frontend/cli.md` (informative).
-## Appendix A: Complete Example
+---## Appendix A: Complete Example
 
 
 
@@ -3719,167 +2416,8 @@ rules:
 
 **Hertz, S. R.** (1991). Streams, phones, and transitions: Toward a new phonological and phonetic model of formant timing. \*Journal of Phonetics\*, 19(1), 91-109.
 
-## Appendix D: Implementation Notes
 
-### D.1 Snapshot Strategy
 
-Use copy-on-write:
-
-- Snapshot = immutable view (shared structure)
-- Patch application creates new arrays only for affected streams
-- Same semantics, no quadratic copying
-
-### D.2 Rank Utilities (Informative)
-
-```typescript
-// order_rank.ts
-// Fixed-length base36 rank operations for SyncMark ordering.
-// Node 18+ / TS 5.x. No external deps.
-
-export const RANK_LEN = 12 as const;
-const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz" as const;
-const BASE = 36n;
-
-function assert(cond: unknown, msg: string): asserts cond {
-  if (!cond) throw new Error(msg);
-}
-
-function isRankChar(c: string): boolean {
-  return c.length === 1 && ((c >= "0" && c <= "9") || (c >= "a" && c <= "z"));
-}
-
-export function isRank(s: string): boolean {
-  return s.length === RANK_LEN && [...s].every(isRankChar);
-}
-
-export function rankToBigInt(rank: string): bigint {
-  assert(isRank(rank), `invalid rank: ${rank}`);
-  let x = 0n;
-  for (const ch of rank) {
-    const v = BigInt(ALPHABET.indexOf(ch));
-    assert(v >= 0n, `invalid rank char: ${ch}`);
-    x = x * BASE + v;
-  }
-  return x;
-}
-
-export function bigIntToRank(x: bigint): string {
-  assert(x >= 0n, "rank bigint must be non-negative");
-  const max = maxRankBigInt();
-  assert(x <= max, `rank bigint overflow: ${x} > ${max}`);
-
-  let n = x;
-  const chars: string[] = [];
-  for (let i = 0; i < RANK_LEN; i++) {
-    const rem = n % BASE;
-    n = n / BASE;
-    chars.push(ALPHABET[Number(rem)]);
-  }
-  // chars are least significant first
-  chars.reverse();
-  return chars.join("");
-}
-
-export function maxRankBigInt(): bigint {
-  // 36^RANK_LEN - 1
-  let p = 1n;
-  for (let i = 0; i < RANK_LEN; i++) p *= BASE;
-  return p - 1n;
-}
-
-export function compareRank(a: string, b: string): number {
-  assert(isRank(a) && isRank(b), "compareRank expects fixed-length ranks");
-  // Lex compare works because fixed-length and alphabet is ordered in ASCII for 0-9a-z.
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
-
-export type OrderKey =
-  | { kind: "START" }
-  | { kind: "FINITE"; rank: string }
-  | { kind: "END" };
-
-export function compareOrder(a: OrderKey, b: OrderKey): number {
-  const kindOrder: Record<OrderKey["kind"], number> = { START: 0, FINITE: 1, END: 2 };
-  if (a.kind !== b.kind) return kindOrder[a.kind] - kindOrder[b.kind];
-  if (a.kind === "FINITE" && b.kind === "FINITE") return compareRank(a.rank, b.rank);
-  return 0;
-}
-
-/**
- * Compute a rank strictly between lo and hi.
- * lo=null means START boundary (numeric 0)
- * hi=null means END boundary (numeric MAX)
- *
- * Throws if there is no representable midpoint (caller should rebalance and retry).
- */
-export function rankBetween(lo: string | null, hi: string | null): string {
-  const loVal = lo === null ? 0n : rankToBigInt(lo);
-  const hiVal = hi === null ? maxRankBigInt() : rankToBigInt(hi);
-
-  assert(loVal < hiVal, `rankBetween requires lo < hi (got ${loVal} >= ${hiVal})`);
-
-  const mid = (loVal + hiVal) / 2n;
-  // Ensure strict interior
-  if (mid === loVal || mid === hiVal) {
-    throw new Error("E_RANK_NO_SPACE: no representable midpoint; rebalance required");
-  }
-  return bigIntToRank(mid);
-}
-
-/**
- * Rebalance ranks for an ordered list of items into evenly-spaced ranks.
- * Returns array of ranks in the same order.
- */
-export function rebalanceRanks(count: number): string[] {
-  assert(Number.isInteger(count) && count >= 0, "count must be a non-negative integer");
-  const max = maxRankBigInt();
-  const out: string[] = [];
-  for (let i = 1; i <= count; i++) {
-    const v = (BigInt(i) * max) / BigInt(count + 1);
-    out.push(bigIntToRank(v));
-  }
-  // strictly increasing guaranteed when count << 36^RANK_LEN; if it fails, increase RANK_LEN
-  for (let i = 1; i < out.length; i++) {
-    assert(out[i - 1] < out[i], "rebalance produced non-increasing ranks; increase RANK_LEN");
-  }
-  return out;
-}
-
-/* ------------------------ self-test (node) ------------------------ */
-if (require.main === module) {
-  const a = bigIntToRank(1000n);
-  const b = bigIntToRank(2000n);
-  const m = rankBetween(a, b);
-  assert(a < m && m < b, "midpoint not between");
-
-  const rs = rebalanceRanks(5);
-  assert(rs.length === 5, "rebalance length mismatch");
-  for (let i = 1; i < rs.length; i++) assert(rs[i - 1] < rs[i], "rebalance not sorted");
-
-  console.log("order_rank.ts self-test: OK");
-}
-```
-
-### D.3 JSONata Integration
-
-```javascript
-const expr = jsonata("$parent(current, 'syllable').f.stress = 1");
-
-// Register navigation functions
-expr.registerFunction('parent', (token, stream) => {
-    return engine.getParent(token, stream);
-});
-
-// Evaluate with data root
-const result = expr.evaluate({
-    current: currentToken,
-    params: parameters
-});
-```
-
----
 
 
 

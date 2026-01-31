@@ -21,7 +21,7 @@ This section defines the **global** compilation phases. Later sections MUST stat
 3. **INITIALIZE**       Build initial global sync axis + base stream
 4. **APPLY PHASES**     Apply rule phases in order (Part 7), using the rule-evaluation pipeline (Part 5)
 5. **NORMALIZE**        Repair invariants after rewrites (Part 5.13)
-6. **RESOLVE TIMES**    Final resolve of any remaining scalars/times/points (may be a no-op if already resolved in phases)
+6. **RESOLVE TIMES**    Final resolve of any remaining scalars/times/points (re-run §5.11 if any mark time is null)
 7. **EMIT**             Emit outputs/traces (Part 8, Part 10)
 
 ### 0.2 Determinism Contract
@@ -122,7 +122,7 @@ function compareOrder(a: OrderKey, b: OrderKey): number {
 
 
 
-- To insert between two FINITE ranks `lo < hi`, compute `mid = floor((lo + hi) / 2)`.
+- To insert between two FINITE ranks `lo < hi`, decode to integers `lo_int`, `hi_int`, then compute `mid = floor((lo_int + hi_int) / 2)`.
 - If `mid == lo` or `mid == hi`, no representable midpoint exists: raise `E_RANK_NO_SPACE` and rebalance before retrying.
 - Insertion between `START` and the first FINITE uses `lo = 0`. Insertion between the last FINITE and `END` uses `hi = MAX`.
 
@@ -516,6 +516,10 @@ interface TokenView {
   - For interval `t`: `token.sync_left.order <= t.sync_left.order` and `t.sync_right.order <= token.sync_right.order`
   - For point `t`: use `anchor_left/anchor_right` as the interval bounds
   - Result is ordered by `(sync_left.order, sync_right.order, id)`
+
+- `$midpoint(t)` returns an `Anchor` at the midpoint of `t`.
+  - If `time` is resolved, midpoint is computed in **time**.
+  - If `time` is not resolved, midpoint is computed by **rank interpolation** between `sync_left` and `sync_right`, and `Anchor.time` remains `null`.
 
 
 
@@ -989,7 +993,7 @@ This is the **per-phase** rule-evaluation pipeline used during Phase 4 (APPLY PH
 5. BATCH BASE SPLICES Group base edits by affected range
 6. APPLY PATCHES      Execute as batched splice plans
 7. ASSOCIATION GC     Remove deleted IDs from association sets
-8. SYNC MARK GC       Remove unreferenced marks (marks are never deleted by rules)
+8. SYNC MARK GC       Remove unreferenced marks that are outside any base interval (interior marks are retained for interpolation)
 9. REBUILD SPANS      Recompute span boundaries
 10. RESOLVE SCALARS   Collapse effect stacks
 11. COMPUTE TIMES     Assign times to sync marks
@@ -1306,7 +1310,7 @@ parent: "=$parent(stop, 'syllable').id"
 
 This convention enables unambiguous parsing, LSP support, and validation.
 
-**Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left.
+**Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left. If the insertion boundary is shared by two spans, `inherit_left` attaches to the left span (i.e., it extends that span after rebuild).
 
 
 
@@ -1350,6 +1354,12 @@ Base stream mutations use the `BaseSplicePatch` discriminated union (§5.2):
 
 Overlapping base splices are NOT jointly applied. The algorithm selects non-overlapping winners first, then batches for efficiency.
 
+**Overlap definition:**
+
+- `ReplaceRangePatch` affects the closed interval `[range_left, range_right]`.
+- `DeleteTokensPatch` affects the union of its deleted token intervals.
+- `InsertAtBoundaryPatch` affects the zero-length interval at `boundary`. It overlaps any patch whose affected interval includes that boundary.
+
 
 
 ```python
@@ -1368,15 +1378,14 @@ def apply_base_splices(base_stream, patches):
 
     accepted = []
 
-    claimed_tokens = set()  # tokens already affected by accepted splice
+    claimed_intervals = []  # affected order-space intervals
 
 
 
     for patch in patches:
 
-        patch_tokens = set(getattr(patch, 'delete_tokens', []))
-
-        overlap = patch_tokens & claimed_tokens
+        patch_interval = affected_interval(patch)
+        overlap = any(intervals_overlap(patch_interval, i) for i in claimed_intervals)
 
 
 
@@ -1394,7 +1403,7 @@ def apply_base_splices(base_stream, patches):
 
         accepted.append(patch)
 
-        claimed_tokens.update(patch_tokens)
+        claimed_intervals.append(patch_interval)
 
 
 
@@ -1452,14 +1461,17 @@ insert_at_boundary:
 
 The splice algorithm creates new sync mark(s) between the specified boundary and `END`.
 
+**Empty base stream:** If there are no base tokens, use `boundary: "START"` to insert the first token.
+
 
 
 ### 5.7 Interior Mark Policy
 
-Sync marks are never deleted by rules. Deleting a base token may orphan marks; unreferenced marks are removed only during Sync Mark GC (Step 8).
+Sync marks are never deleted by rules. Deleting a base token may orphan marks; unreferenced marks are removed only during Sync Mark GC (Step 8) **if they are not interior to any base interval**.
 
 - If a mark is referenced by any token or point, it persists even if the enclosing base token is deleted.
-- Unreferenced marks (excluding START/END) are removed during Sync Mark GC.
+- Unreferenced marks that are outside all base intervals (excluding START/END) are removed during Sync Mark GC.
+- Unreferenced marks that are strictly inside some base interval are retained for interpolation and may be removed only after final time resolution.
 - Interior marks that persist are timed by interpolation during `COMPUTE TIMES` (Section 5.11).
 
 ### 5.8 Association GC
@@ -1566,6 +1578,7 @@ def compute_times(base_stream, all_sync_marks):
         token.sync_left.time = time
         time += token.s.duration
         token.sync_right.time = time
+    END.time = time
 
     # Step 2: Interior marks by rank-based interpolation
     for token in base_stream.tokens_in_order():
@@ -1608,6 +1621,8 @@ def compute_times(base_stream, all_sync_marks):
 **Error case:** If any sync mark remains unassigned after scanning all base intervals, emit `E_TIME_NO_BASE_SUPPORT`.
 
 **Monotonicity:** After this step, sync mark times must be non-decreasing with order, and strictly increasing for base boundaries.
+
+**END time:** `END.time` is set to the final accumulated time at the end of Step 1.
 
 ### 5.12 Point Resolution
 
@@ -1682,7 +1697,7 @@ Normalization restores invariants after rewrites. It is deterministic and limite
 - **Reorder stream lists** into total order (base: list order preserved; non-base: (sync_left.order, sync_right.order, id)).
 - **Rebuild spans** as specified in §5.9 (empty spans collapse to sync_left == sync_right).
 - **Validate base coverage**: base tokens must partition [START, END] in order-space with no gaps or overlaps. Violations raise E_BASE_NOT_CONTIGUOUS.
-- **Validate token shape**: interval tokens must satisfy sync_left.order < sync_right.order; violations raise E_TOKEN_BAD_INTERVAL.
+- **Validate token shape**: interval tokens must satisfy sync_left.order < sync_right.order (span streams may use ==); violations raise E_TOKEN_BAD_INTERVAL.
 - **Validate mark references**: every token/point must reference existing marks; violations raise E_MARK_MISSING.
 
 Normalization MUST NOT invent new tokens or delete existing tokens (except for previously deleted tokens already removed by patches).
@@ -2443,7 +2458,7 @@ output:
 | E_RANK_INVALID | FINITE rank not fixed-length [0-9a-z]{RANK_LEN} | sync mark |
 | E_RANK_NO_SPACE | no representable midpoint; rebalance required | insertion site |
 | E_MARK_MISSING | token/point references missing mark | token/point |
-| E_TOKEN_BAD_INTERVAL | interval token has sync_left.order >= sync_right.order | token |
+| E_TOKEN_BAD_INTERVAL | interval token has sync_left.order >= sync_right.order (span streams may use ==) | token |
 | E_BASE_NOT_CONTIGUOUS | base stream does not partition [START, END] | base stream |
 | E_TIME_NO_BASE_SUPPORT | sync mark cannot be enclosed by any base interval | sync mark |
 | E_INVALID_RATIO | point ratio not in [0,1] | point token |

@@ -11,6 +11,18 @@
       "name": "klsyn88",
       "description": "Extended Klatt with multiple source types (impulsive, LF, triangular) and pitch-sync modulation",
       "path": "klsyn88"
+    },
+    {
+      "id": "test-inherit",
+      "name": "Inherit Test",
+      "extends": "klatt80-baseline",
+      "description": "Test fixture for experiment inheritance"
+    },
+    {
+      "id": "stevens91",
+      "name": "Stevens 1991 HL Parameters",
+      "extends": "klatt80-baseline",
+      "description": "Aerodynamic model with ag/ac/ps quasi-articulatory control"
     }
   ]
 }

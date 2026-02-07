@@ -1,0 +1,40 @@
+# Stevens 1991 Higher-Level Parameters — Semantics Overrides
+#
+# New params: ag, ac, ps (quasi-articulatory control)
+# Overridden realize rules: voiceGain and aspGain set to 0.0
+# (aerodynamic model drives these via audio-rate AudioParam connections)
+#
+# Stevens & Bickley (1991) "Constraints among parameters simplify
+#   control of Klatt formant synthesizer" JASA 88(3), 1208-1218
+# Stevens (1998) "Acoustic Phonetics" MIT Press
+
+params:
+  ag:
+    type: float
+    range: [0, 0.5]
+    default: 0.05
+    unit: "cm2"
+    description: "Glottal area — modal ~0.05, breathy ~0.15 — Stevens (1998) Ch. 2"
+  ac:
+    type: float
+    range: [0, 5]
+    default: 3.0
+    unit: "cm2"
+    description: "Constriction area — open vowel ~3.0, closed ~0.0 — Stevens (1998) Ch. 7"
+  ps:
+    type: float
+    range: [0, 20]
+    default: 8
+    unit: "cm H2O"
+    description: "Subglottal pressure — Stevens (1998) Ch. 2"
+
+realize:
+  voiceGain:
+    expr: "0.0"
+    deps: []
+    description: "Set to 0 — aerodynamic model output[0] drives voiceGain.gain additively"
+  aspGain:
+    expr: "0.0"
+    deps: []
+    ramp: true
+    description: "Set to 0 — aerodynamic model output[1] drives noiseGain.gain additively"

@@ -1,0 +1,30 @@
+# Stevens 1991 Higher-Level Parameters Experiment
+# Extends klatt80-baseline with aerodynamic model
+#
+# Stevens & Bickley (1991) "Constraints among parameters simplify
+#   control of Klatt formant synthesizer" JASA 88(3), 1208-1218
+# Stevens (1998) "Acoustic Phonetics" MIT Press
+
+primitives:
+  aerodynamic-model:
+    description: "Stevens (1991) aerodynamic model - derives voicing, aspiration, B1 from glottal/constriction areas"
+    worklet: "aerodynamic-model-processor.js"
+    wasm: "aerodynamic-model.wasm"
+    params:
+      ag:
+        type: float
+        default: 0.05
+        unit: "cm2"
+        description: "Glottal area — Stevens (1998) Ch. 2"
+      ac:
+        type: float
+        default: 0
+        unit: "cm2"
+        description: "Constriction area — Stevens (1998) Ch. 7"
+      ps:
+        type: float
+        default: 8
+        unit: "cm H2O"
+        description: "Subglottal pressure — Stevens (1998) Ch. 2"
+    inputs: 0
+    outputs: 3

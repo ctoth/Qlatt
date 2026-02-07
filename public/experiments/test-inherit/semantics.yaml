@@ -1,0 +1,3 @@
+# Test fixture: inherits klatt80-baseline, overrides AV default to 50
+params:
+  AV: { type: float, default: 50, range: [0, 80] }

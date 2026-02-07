@@ -14,6 +14,7 @@ members = [
   "crates/pitch-sync-mod",
   "crates/oversampled-glottal-source",
   "crates/fujisaki-resonator",
+  "crates/aerodynamic-model",
 ]
 resolver = "2"
 

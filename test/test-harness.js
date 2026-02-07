@@ -329,6 +329,54 @@ function onExperimentChange() {
   }
 }
 
+/**
+ * Fetch a YAML file, returning null if the file doesn't exist (404).
+ * Used for experiment inheritance where child experiments may omit configs.
+ */
+function fetchYamlOrNull(url) {
+  return fetch(url).then(r => r.ok ? r.text().then(yaml.load) : null).catch(() => null);
+}
+
+/**
+ * Merge parent and child registry configs. Child primitives override parent primitives
+ * by name; parent primitives not in child are preserved.
+ */
+function mergeRegistry(parent, child) {
+  if (!child) return parent;
+  return { ...parent, primitives: { ...parent.primitives, ...(child.primitives || {}) } };
+}
+
+/**
+ * Merge parent and child semantics configs.
+ * - params: shallow merge, child wins
+ * - constants: deep merge, child wins
+ * - realize: shallow merge, child wins
+ */
+function mergeSemantics(parent, child) {
+  if (!child) return parent;
+  return {
+    params: { ...parent.params, ...(child.params || {}) },
+    constants: deepMerge(parent.constants || {}, child.constants || {}),
+    realize: { ...parent.realize, ...(child.realize || {}) },
+  };
+}
+
+/**
+ * Recursively merge source into target. Source values win.
+ * Arrays are replaced wholesale, not merged.
+ */
+function deepMerge(target, source) {
+  const result = { ...target };
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      result[key] = deepMerge(result[key] || {}, source[key]);
+    } else {
+      result[key] = source[key];
+    }
+  }
+  return result;
+}
+
 async function loadNewRuntimeConfig() {
   const experimentId = getSelectedExperiment();
   // Check if already loaded for current experiment
@@ -337,27 +385,41 @@ async function loadNewRuntimeConfig() {
   }
   status.textContent = `Status: loading ${experimentId} config...`;
   try {
+    // Find this experiment's manifest entry
+    const manifest = experimentManifest?.experiments?.find(e => e.id === experimentId);
     const basePath = `./experiments/${experimentId}`;
-    const [graphRes, semanticsRes, registryRes] = await Promise.all([
-      fetch(`${basePath}/graph.yaml`),
-      fetch(`${basePath}/semantics.yaml`),
-      fetch(`${basePath}/registry.yaml`),
+
+    // Load child configs (some may be absent for inheriting experiments)
+    const [childGraph, childSemantics, childRegistry] = await Promise.all([
+      fetchYamlOrNull(`${basePath}/graph.yaml`),
+      fetchYamlOrNull(`${basePath}/semantics.yaml`),
+      fetchYamlOrNull(`${basePath}/registry.yaml`),
     ]);
-    if (!graphRes.ok || !semanticsRes.ok || !registryRes.ok) {
-      throw new Error(`Failed to fetch YAML config files for ${experimentId}`);
+
+    if (manifest && manifest.extends) {
+      // Load parent configs
+      const parentBase = `./experiments/${manifest.extends}`;
+      const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
+        fetch(`${parentBase}/graph.yaml`).then(r => r.text()).then(yaml.load),
+        fetch(`${parentBase}/semantics.yaml`).then(r => r.text()).then(yaml.load),
+        fetch(`${parentBase}/registry.yaml`).then(r => r.text()).then(yaml.load),
+      ]);
+
+      // Merge: child overrides parent
+      newRuntimeRegistry = mergeRegistry(parentRegistry, childRegistry);
+      newRuntimeSemantics = mergeSemantics(parentSemantics, childSemantics);
+      newRuntimeGraph = childGraph || parentGraph;  // graph: full replacement or inherit
+    } else {
+      newRuntimeGraph = childGraph;
+      newRuntimeSemantics = childSemantics;
+      newRuntimeRegistry = childRegistry;
     }
-    const [graphText, semanticsText, registryText] = await Promise.all([
-      graphRes.text(),
-      semanticsRes.text(),
-      registryRes.text(),
-    ]);
-    newRuntimeGraph = yaml.load(graphText);
-    newRuntimeSemantics = yaml.load(semanticsText);
-    newRuntimeRegistry = yaml.load(registryText);
+
     currentExperimentId = experimentId;
     status.textContent = `Status: ${experimentId} config loaded`;
     console.log("[QLATT] Runtime config loaded", {
       experiment: experimentId,
+      extends: manifest?.extends || null,
       graph: newRuntimeGraph?.name,
       semantics: newRuntimeSemantics?.name,
       primitives: Object.keys(newRuntimeRegistry?.primitives ?? {}).length,

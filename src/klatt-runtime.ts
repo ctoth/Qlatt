@@ -234,7 +234,9 @@ export interface BaconNode {
 export type ParamValueSpec = number | string | boolean | { bind: string } | { expr: string };
 
 // Port reference can be a string (node ID) or object with node/port
-export type PortRef = string | { node: string; port?: number | string };
+// Optional 'param' field enables audioNode.connect(audioParam) connections
+// — used by Stevens (1991) aerodynamic model to drive gain/bandwidth AudioParams
+export type PortRef = string | { node: string; port?: number | string; param?: string };
 
 export type BaconConnection = [string, string] | { from: PortRef; to: PortRef };
 
@@ -450,7 +452,41 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       const fromNode = nodes.get(fromId);
       const toNode = nodes.get(toId);
 
-      if (fromNode && toNode) {
+      // Check if target specifies an AudioParam connection
+      // — Stevens & Bickley (1991): aerodynamic model outputs connect to
+      //   gain/bandwidth AudioParams additively (WebAudio additive semantics)
+      const toParamName = typeof toRef === 'object' && toRef !== null ? toRef.param : undefined;
+
+      if (toParamName) {
+        // AudioParam connection: audioNode.connect(audioParam)
+        if (!fromNode) {
+          log(`  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing source node)`);
+        } else if (!toNode) {
+          log(`  Warning: Could not connect ${fromId} -> ${toId}.${toParamName} (missing target node)`);
+        } else {
+          const fromIndex = fromPort ?? 0;
+
+          // AudioWorkletNode: use .parameters.get(paramName)
+          if (toNode instanceof AudioWorkletNode) {
+            const audioParam = toNode.parameters.get(toParamName);
+            if (audioParam) {
+              fromNode.connect(audioParam, fromIndex);
+              log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
+            } else {
+              log(`  Warning: AudioParam '${toParamName}' not found on AudioWorkletNode '${toId}'`);
+            }
+          } else {
+            // Native nodes (GainNode, etc.): access as property
+            const audioParam = (toNode as any)[toParamName];
+            if (audioParam instanceof AudioParam) {
+              fromNode.connect(audioParam, fromIndex);
+              log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);
+            } else {
+              log(`  Warning: AudioParam '${toParamName}' not found on native node '${toId}'`);
+            }
+          }
+        }
+      } else if (fromNode && toNode) {
         if (toPort !== undefined || fromPort !== undefined) {
           const fromIndex = fromPort ?? 0;
           const toIndex = toPort ?? 0;

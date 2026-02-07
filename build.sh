@@ -17,6 +17,7 @@ cargo build --release --target wasm32-unknown-unknown -p tilt-filter
 cargo build --release --target wasm32-unknown-unknown -p pitch-sync-mod
 cargo build --release --target wasm32-unknown-unknown -p oversampled-glottal-source
 cargo build --release --target wasm32-unknown-unknown -p fujisaki-resonator
+cargo build --release --target wasm32-unknown-unknown -p aerodynamic-model
 
 mkdir -p "${dest_dir}"
 cp "${target_dir}/resonator.wasm" "${dest_dir}/resonator.wasm"
@@ -32,5 +33,6 @@ cp "${target_dir}/tilt_filter.wasm" "${dest_dir}/tilt-filter.wasm"
 cp "${target_dir}/pitch_sync_mod.wasm" "${dest_dir}/pitch-sync-mod.wasm"
 cp "${target_dir}/oversampled_glottal_source.wasm" "${dest_dir}/oversampled-glottal-source.wasm"
 cp "${target_dir}/fujisaki_resonator.wasm" "${dest_dir}/fujisaki-resonator.wasm"
+cp "${target_dir}/aerodynamic_model.wasm" "${dest_dir}/aerodynamic-model.wasm"
 
 echo "WASM artifacts copied to ${dest_dir}."

@@ -3,7 +3,7 @@
  *
  * Citations:
  * - Stevens & Bickley (1991) "Constraints among parameters simplify control
- *   of Klatt formant synthesizer" JASA 88(3), 1208-1218
+ *   of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
  * - Stevens (1998) "Acoustic Phonetics" MIT Press
  *
  * Outputs:

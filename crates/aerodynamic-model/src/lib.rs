@@ -10,7 +10,7 @@ export_alloc_fns!();
 //
 // Citations:
 // - Stevens & Bickley (1991) "Constraints among parameters simplify control
-//   of Klatt formant synthesizer" JASA 88(3), 1208-1218
+//   of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
 // - Stevens (1998) "Acoustic Phonetics" MIT Press
 // ============================================================================
 
@@ -53,7 +53,7 @@ const EPSILON: f32 = 1e-6;
 ///
 /// Citations:
 /// - Stevens & Bickley (1991) "Constraints among parameters simplify control
-///   of Klatt formant synthesizer" JASA 88(3), 1208-1218
+///   of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
 /// - Stevens (1998) "Acoustic Phonetics" MIT Press -- Ch. 2, 3, 7, 8
 #[repr(C)]
 pub struct AerodynamicModel {

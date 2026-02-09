@@ -24,6 +24,11 @@ primitives:
     worklet: "aerodynamic-model-processor.js"
     wasm: "aerodynamic-model.wasm"
     params:
+      enable:
+        type: float
+        default: 0
+        unit: "unitless"
+        description: "Enable aerodynamic outputs (0=off/compatibility, 1=on)"
       ag:
         type: float
         default: 0.05

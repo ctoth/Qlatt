@@ -26,6 +26,7 @@ const wasmUrl =
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
+      { name: "enable", defaultValue: 0.0, minValue: 0, maxValue: 1, automationRate: "k-rate" },
       { name: "ag", defaultValue: 0.05, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
       { name: "ac", defaultValue: 0.4, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
       { name: "an", defaultValue: 0.0, minValue: 0, maxValue: 1.0, automationRate: "k-rate" },
@@ -54,6 +55,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     this.oqBuffer = null;
     this.tlBuffer = null;
     this.paramBuffers = {
+      enable: new WasmBuffer(null),
       ag: new WasmBuffer(null),
       ac: new WasmBuffer(null),
       an: new WasmBuffer(null),
@@ -148,6 +150,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
       return true;
     }
 
+    const enableLen = this._fillParamBuffer(this.paramBuffers.enable, parameters.enable, blockSize);
     const agLen = this._fillParamBuffer(this.paramBuffers.ag, parameters.ag, blockSize);
     const acLen = this._fillParamBuffer(this.paramBuffers.ac, parameters.ac, blockSize);
     const anLen = this._fillParamBuffer(this.paramBuffers.an, parameters.an, blockSize);
@@ -166,6 +169,8 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
 
     this.wasm.aerodynamic_model_process(
       this.state,
+      this.paramBuffers.enable.ptr,
+      enableLen,
       this.paramBuffers.ag.ptr,
       agLen,
       this.paramBuffers.ac.ptr,

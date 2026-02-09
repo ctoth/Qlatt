@@ -67,31 +67,41 @@ params:
     default: 0.0
     unit: "fraction of Ps"
     description: "HL pm: active pressure manipulation as fraction of Ps"
+  useHlFormants:
+    type: integer
+    range: [0, 1]
+    default: 0
+    description: "0=use track F0/F1-F4 (default), 1=use HL f0/f1-f4 mapping"
+  useAerodynamicModel:
+    type: integer
+    range: [0, 1]
+    default: 0
+    description: "0=legacy Klatt gains, 1=drive source gains from aerodynamic model"
 
 realize:
   # Map HL natural frequencies to KL formants.
-  # F1 includes a small ag-dependent shift (paper: large ag raises F1).
+  # Keep track compatibility by default; HL mapping is opt-in via useHlFormants.
   F0:
-    expr: "f0"
-    deps: [f0]
+    expr: "useHlFormants == 1 ? f0 : F0"
+    deps: [useHlFormants, f0]
 
   f1ShiftFromAg:
-    expr: "ag > 0.1 ? (ag - 0.1) * 600 : 0"
-    deps: [ag]
+    expr: "useHlFormants == 1 && ag > 0.1 ? (ag - 0.1) * 600 : 0"
+    deps: [useHlFormants, ag]
     description: "Approximation of F1 shift with large glottal opening"
 
   F1:
-    expr: "f1 + f1ShiftFromAg"
-    deps: [f1, f1ShiftFromAg]
+    expr: "useHlFormants == 1 ? (f1 + f1ShiftFromAg) : F1"
+    deps: [useHlFormants, f1, f1ShiftFromAg]
   F2:
-    expr: "f2"
-    deps: [f2]
+    expr: "useHlFormants == 1 ? f2 : F2"
+    deps: [useHlFormants, f2]
   F3:
-    expr: "f3"
-    deps: [f3]
+    expr: "useHlFormants == 1 ? f3 : F3"
+    deps: [useHlFormants, f3]
   F4:
-    expr: "f4"
-    deps: [f4]
+    expr: "useHlFormants == 1 ? f4 : F4"
+    deps: [useHlFormants, f4]
 
   # OQ/TL proxies from ag for topology parameters that expect these effects.
   OQ:
@@ -103,23 +113,24 @@ realize:
     deps: [OQ]
     description: "Approximate high-frequency tilt proxy from OQ"
 
-  # Let aerodynamic-model outputs drive these additively via AudioParam wiring.
+  # Keep baseline gains unless aerodynamic model is explicitly enabled.
+  # (Model outputs are additively connected to AudioParams in graph.yaml.)
   voiceGain:
-    expr: "0.0"
-    deps: []
-    description: "Driven by aerodynamic-model output[0]"
+    expr: "useAerodynamicModel == 1 ? 0.0 : dbToLinear(GO + AV + ndbScale.AV)"
+    deps: [useAerodynamicModel, GO, AV]
+    description: "Baseline voice gain (or 0 when aerodynamic model is enabled)"
   aspGain:
-    expr: "0.0"
-    deps: []
+    expr: "useAerodynamicModel == 1 ? 0.0 : dbToLinear(GO + AH + ndbScale.AH)"
+    deps: [useAerodynamicModel, GO, AH]
     ramp: true
-    description: "Driven by aerodynamic-model output[1]"
+    description: "Baseline aspiration gain (or 0 when aerodynamic model is enabled)"
   fricGain:
-    expr: "0.0"
-    deps: []
+    expr: "useAerodynamicModel == 1 ? 0.0 : dbToLinear(GO + fricDbAdjusted + ndbScale.AF)"
+    deps: [useAerodynamicModel, GO, fricDbAdjusted]
     ramp: true
-    description: "Driven by aerodynamic-model output[2]"
+    description: "Baseline frication gain (or 0 when aerodynamic model is enabled)"
   fricGainScaled:
-    expr: "0.0"
-    deps: []
+    expr: "useAerodynamicModel == 1 ? 0.0 : dbToLinear(GO + fricDbAdjusted + ndbScale.AF) * parallelScale"
+    deps: [useAerodynamicModel, GO, fricDbAdjusted, parallelScale]
     ramp: true
-    description: "Driven by aerodynamic-model output[2]"
+    description: "Baseline scaled frication gain (or 0 when aerodynamic model is enabled)"

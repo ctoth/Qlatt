@@ -87,6 +87,7 @@ impl AerodynamicModel {
     /// Process a block of samples.
     ///
     /// Inputs (AudioParam slices):
+    /// - `enable`: model enable flag (0..1); 0 hard-disables all outputs
     /// - `ag`: glottal area (cm2)
     /// - `ac`: oral constriction area (cm2)
     /// - `an`: velopharyngeal area (cm2)
@@ -105,6 +106,7 @@ impl AerodynamicModel {
     /// - `tl_out`: spectral tilt proxy (dB/oct)
     pub fn process(
         &mut self,
+        enable: &[f32],
         ag: &[f32],
         ac: &[f32],
         an: &[f32],
@@ -123,6 +125,7 @@ impl AerodynamicModel {
         let len = voicing_out.len();
 
         for i in 0..len {
+            let enable_val = Self::read_param(enable, i, 0.0).clamp(0.0, 1.0);
             let ag_val = Self::read_param(ag, i, 0.05).clamp(0.0, 0.4);
             let ac_val = Self::read_param(ac, i, 0.4).clamp(0.0, 0.4);
             let an_val = Self::read_param(an, i, 0.0).clamp(0.0, 1.0);
@@ -202,14 +205,14 @@ impl AerodynamicModel {
             let oq_ratio = (0.45 + 0.35 * (ag_val / 0.3).clamp(0.0, 1.0) + 0.2 * (1.0 - av_pressure)).clamp(0.35, 0.9);
             let tl_db = ((oq_ratio - 0.45) * 70.0).clamp(0.0, 30.0);
 
-            voicing_out[i] = av_linear.clamp(0.0, 1.0);
-            aspiration_out[i] = ah_linear.clamp(0.0, 1.0);
-            frication_out[i] = af_linear.clamp(0.0, 1.0);
-            b1_out[i] = b1;
-            fnp_out[i] = fnp;
-            fnz_out[i] = fnz;
-            oq_out[i] = oq_ratio;
-            tl_out[i] = tl_db;
+            voicing_out[i] = av_linear.clamp(0.0, 1.0) * enable_val;
+            aspiration_out[i] = ah_linear.clamp(0.0, 1.0) * enable_val;
+            frication_out[i] = af_linear.clamp(0.0, 1.0) * enable_val;
+            b1_out[i] = b1 * enable_val;
+            fnp_out[i] = fnp * enable_val;
+            fnz_out[i] = fnz * enable_val;
+            oq_out[i] = oq_ratio * enable_val;
+            tl_out[i] = tl_db * enable_val;
         }
     }
 }
@@ -240,6 +243,8 @@ pub unsafe extern "C" fn aerodynamic_model_reset(ptr: *mut AerodynamicModel) {
 #[no_mangle]
 pub unsafe extern "C" fn aerodynamic_model_process(
     ptr: *mut AerodynamicModel,
+    enable_ptr: *const f32,
+    enable_len: usize,
     ag_ptr: *const f32,
     ag_len: usize,
     ac_ptr: *const f32,
@@ -276,6 +281,11 @@ pub unsafe extern "C" fn aerodynamic_model_process(
         return;
     }
 
+    let enable = if enable_ptr.is_null() || enable_len == 0 {
+        &[][..]
+    } else {
+        core::slice::from_raw_parts(enable_ptr, enable_len)
+    };
     let ag = if ag_ptr.is_null() || ag_len == 0 { &[][..] } else { core::slice::from_raw_parts(ag_ptr, ag_len) };
     let ac = if ac_ptr.is_null() || ac_len == 0 { &[][..] } else { core::slice::from_raw_parts(ac_ptr, ac_len) };
     let an = if an_ptr.is_null() || an_len == 0 { &[][..] } else { core::slice::from_raw_parts(an_ptr, an_len) };
@@ -294,6 +304,7 @@ pub unsafe extern "C" fn aerodynamic_model_process(
 
     if let Some(model) = ptr.as_mut() {
         model.process(
+            enable,
             ag,
             ac,
             an,
@@ -334,6 +345,7 @@ mod tests {
         let mut tl = vec![0.0; n];
 
         model.process(
+            &[1.0],
             &[0.05],
             &[0.4],
             &[0.0],
@@ -372,6 +384,7 @@ mod tests {
 
         for _ in 0..20 {
             model.process(
+                &[1.0],
                 &[0.05],
                 &[0.0],
                 &[0.0],
@@ -407,6 +420,7 @@ mod tests {
         let mut tl = vec![0.0; n];
 
         model.process(
+            &[1.0],
             &[0.05],
             &[0.0],
             &[0.0],
@@ -425,6 +439,7 @@ mod tests {
         let sep_closed = fnz[n - 1] - fnp[n - 1];
 
         model.process(
+            &[1.0],
             &[0.05],
             &[0.0],
             &[0.8],
@@ -459,6 +474,7 @@ mod tests {
         let mut tl = vec![0.0; n];
 
         model.process(
+            &[1.0],
             &[0.1],
             &[0.05],
             &[0.0],
@@ -477,6 +493,7 @@ mod tests {
         let af_full = af[n - 1];
 
         model.process(
+            &[1.0],
             &[0.1],
             &[0.05],
             &[0.0],
@@ -511,6 +528,7 @@ mod tests {
         let mut tl = vec![0.0; n];
 
         model.process(
+            &[1.0],
             &[0.05],
             &[0.1],
             &[0.0],
@@ -529,6 +547,7 @@ mod tests {
         let av_passive = av[n - 1];
 
         model.process(
+            &[1.0],
             &[0.05],
             &[0.1],
             &[0.0],
@@ -547,5 +566,46 @@ mod tests {
         let av_active = av[n - 1];
 
         assert!(av_active < av_passive, "positive pm should lower transglottal pressure and AV");
+    }
+
+    #[test]
+    fn disabled_model_outputs_are_zero() {
+        let mut model = AerodynamicModel::new(44_100.0);
+        let n = 32;
+        let mut av = vec![0.0; n];
+        let mut ah = vec![0.0; n];
+        let mut af = vec![0.0; n];
+        let mut b1 = vec![0.0; n];
+        let mut fnp = vec![0.0; n];
+        let mut fnz = vec![0.0; n];
+        let mut oq = vec![0.0; n];
+        let mut tl = vec![0.0; n];
+
+        model.process(
+            &[0.0],
+            &[0.05],
+            &[0.2],
+            &[0.5],
+            &[0.0],
+            &[0.1],
+            &[PS_DEFAULT],
+            &mut av,
+            &mut ah,
+            &mut af,
+            &mut b1,
+            &mut fnp,
+            &mut fnz,
+            &mut oq,
+            &mut tl,
+        );
+
+        assert_eq!(av[n - 1], 0.0);
+        assert_eq!(ah[n - 1], 0.0);
+        assert_eq!(af[n - 1], 0.0);
+        assert_eq!(b1[n - 1], 0.0);
+        assert_eq!(fnp[n - 1], 0.0);
+        assert_eq!(fnz[n - 1], 0.0);
+        assert_eq!(oq[n - 1], 0.0);
+        assert_eq!(tl[n - 1], 0.0);
     }
 }

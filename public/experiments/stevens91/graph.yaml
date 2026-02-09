@@ -32,7 +32,7 @@ nodes:
     params:
       f0: { bind: F0 }
       gain: 1.0
-      openPhaseRatio: 0.0
+      openPhaseRatio: { bind: openPhaseRatio }
 
   noiseSource:
     type: noise-source
@@ -61,6 +61,7 @@ nodes:
   aeroModel:
     type: aerodynamic-model
     params:
+      enable: { bind: useAerodynamicModel }
       ag: { bind: ag }
       ac: { bind: ac }
       an: { bind: an }
@@ -71,9 +72,8 @@ nodes:
   # ---------------------------------------------------------------------------
   # PLSTEP BURST MECHANISM
   # ---------------------------------------------------------------------------
-  # PLSTEP burst: DC step injection triggered by rapid AF/AH rises.
-  # In this experiment AF/AH are derived as linear amplitudes and fed
-  # to edge-detector AudioParams.
+  # Klatt 80 PLSTEP: DC step injection triggered by AF or AH rise >= 49 dB.
+  # Keep baseline trigger behavior for track compatibility.
   # Creates transient rarefaction pulse at stop/fricative onsets
   #
   # From PARCOE.FOR:
@@ -85,15 +85,15 @@ nodes:
   afEdgeDetector:
     type: edge-detector
     params:
-      threshold: 0.15
-      input: 0
+      threshold: 49.0
+      input: { bind: AF }
 
   # Edge detector for AH (aspiration amplitude)
   ahEdgeDetector:
     type: edge-detector
     params:
-      threshold: 0.08
-      input: 0
+      threshold: 49.0
+      input: { bind: AH }
 
   # Sum triggers (OR gate - either AF or AH trigger fires the envelope)
   plstepTriggerSum:
@@ -221,14 +221,12 @@ nodes:
   # ---------------------------------------------------------------------------
   # VOICE/ASPIRATION GAIN NODES
   # ---------------------------------------------------------------------------
-  # Modification: voiceGain and noiseGain intrinsic values set to 0.0
-  # Aerodynamic model outputs drive these via AudioParam connections
-  # (WebAudio additive semantics: output adds to intrinsic value)
+  # Baseline gains come from semantics; aerodynamic model may drive additively.
 
   voiceGain:
     type: gain
     params:
-      gain: 0.0
+      gain: { bind: voiceGain }
 
   avsGain:
     type: gain
@@ -238,7 +236,7 @@ nodes:
   noiseGain:
     type: gain
     params:
-      gain: 0.0
+      gain: { bind: aspGain }
 
   # ---------------------------------------------------------------------------
   # PARALLEL VOICE PATH GAINS
@@ -285,13 +283,13 @@ nodes:
   # ---------------------------------------------------------------------------
   # CASCADE FORMANT RESONATORS (F1-F6)
   # ---------------------------------------------------------------------------
-  # Modification: cascadeF1 bandwidth set to 0.0 (driven by aeroModel output[2])
+  # Baseline B1 from semantics; aerodynamic model may additively adjust.
 
   cascadeF1:
     type: resonator
     params:
       frequency: { bind: F1 }
-      bandwidth: 0.0
+      bandwidth: { bind: B1 }
 
   cascadeF2:
     type: resonator
@@ -326,7 +324,7 @@ nodes:
   # ---------------------------------------------------------------------------
   # PARALLEL FORMANT RESONATORS (F1-F6)
   # ---------------------------------------------------------------------------
-  # Modification: parallelF1 bandwidth set to 0.0 (driven by aeroModel output[2])
+  # Baseline B1 from semantics; aerodynamic model may additively adjust.
 
   parallelF1:
     type: resonator
@@ -334,7 +332,7 @@ nodes:
       bypassAtZero: true
     params:
       frequency: { bind: F1 }
-      bandwidth: 0.0
+      bandwidth: { bind: B1 }
 
   parallelF2:
     type: resonator
@@ -446,7 +444,7 @@ nodes:
   parallelFricGain:
     type: gain
     params:
-      gain: 0.0
+      gain: { bind: fricGainScaled }
 
   parallelDiffSum:
     type: gain
@@ -640,10 +638,6 @@ connections:
     to: { node: noiseGain, param: gain }
   - from: { node: aeroModel, port: 2 }
     to: { node: parallelFricGain, param: gain }
-  - from: { node: aeroModel, port: 1 }
-    to: { node: ahEdgeDetector, param: input }
-  - from: { node: aeroModel, port: 2 }
-    to: { node: afEdgeDetector, param: input }
   - from: { node: aeroModel, port: 3 }
     to: { node: cascadeF1, param: bandwidth }
   - from: { node: aeroModel, port: 3 }

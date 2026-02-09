@@ -171,3 +171,22 @@ Focus on:
 - Remez et al. (1981) - Sinewave speech
 - McGurk & MacDonald (1976) - Audio-visual integration
 - Eimas et al. (1971) - Infant categorical perception
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Blumstein_Stevens_1979_AcousticInvariance**
+- **Elovitz_1976_NRL_LTS**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Hawkins_Stevens_1985_NasalVowelCorrelates**
+- **Hertz_1985_DeltaRuleSystem**
+- **Hillenbrand_1995_VowelAcoustics**
+- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+- **Klatt_1979_SpeechPerceptionLexicalAccess**
+
+### New Leads (Not Yet in Collection)
+- **Cutting, J.E. & Eimas, P.D. (1975)** - Phonetic feature analyzers and the processing of speech in infants. Establishes foundations for phonetic feature-based perception that the motor theory extends.
+- **Liberman, A.M., Cooper, F.S., Shankweiler, D.P., & Studdert-Kennedy, M. (1967)** - Perception of the speech code. The original Motor Theory paper that established the fundamental framework Liberman & Mattingly revise.
+- **Repp, B.H., Liberman, A.M., Eccardt, T., & Pesetsky, D. (1978)** - Perceptual integration of acoustic cues for stop, fricative and affricate manner. Demonstrates how listeners integrate multiple acoustic cues in ways the motor theory accounts for.

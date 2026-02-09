@@ -313,3 +313,17 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 - Wallbott & Scherer (1986) - Cues and channels in emotion recognition
 - Ladd et al. (1985) - F0 range and speaker affect
 - Murray, I. R. & Arnott (1993) - Simulation of emotion in synthetic speech
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Murray & Arnott (1993)** - "Toward a simulation of emotion in synthetic speech: A review of the literature on human vocal emotion" - Directly relevant review for implementing emotional speech synthesis.
+- **Scherer (1986)** - "Vocal affect expression: A review and a model for future research" - The theoretical foundation (component process model) that this paper tests; provides predictions for acoustic parameter changes.
+- **Ladd et al. (1985)** - "Evidence for the independent function of intonation contour type, voice quality, and F0 range in signaling speaker affect" - Key empirical work on which acoustic parameters independently signal emotion.
+- **Scherer, Banse, Wallbott & Goldbeck (1991)** - "Vocal cues in emotion encoding and decoding" - Earlier work by same authors with related methodology; useful for understanding the research program.
+- **Hammarberg et al. (1980)** - "Perceptual and acoustic correlates of abnormal voice qualities" - Source of the Hammarberg index (spectral slope measure) used in this study; important for understanding spectral energy measures.

@@ -217,3 +217,16 @@ function tobiToF0Target(label, pitchRange, register) {
 - Beckman & Ayers (1997) - Guidelines for ToBI labelling
 - Ladd (2008) - Intonational Phonology
 - Dilley & Heffner (2013) - "Bulging" interpolation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Pierrehumbert_1980_EnglishIntonation**
+
+### New Leads (Not Yet in Collection)
+- **Beckman & Ayers-Elam (1997)** - "Guidelines for ToBI Labeling" - The official ToBI labeling guidelines document that provides practical annotation conventions. Critical for implementing ToBI-based prosody generation.
+- **Beckman, Hirschberg & Shattuck-Hufnagel (2005)** - "The Original ToBI System and the Evolution of the ToBI Framework" - Comprehensive overview of ToBI's development and how it has been extended to different languages.
+- **Pierrehumbert & Beckman (1988)** - *Japanese Tone Structure* - Extends the AM framework to Japanese, demonstrating cross-linguistic applicability of the prosodic hierarchy (IP > ip > AP).
+- **Hirst & Di Cristo (1998)** - *Intonation Systems: A Survey of Twenty Languages* - Comparative survey of intonation across languages, useful for understanding cross-linguistic prosodic variation in TTS.

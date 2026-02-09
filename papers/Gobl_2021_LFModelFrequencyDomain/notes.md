@@ -286,3 +286,18 @@ Output: Sampled LF pulse (N samples)
 - [36] Doval et al. 2003 - Voice source as causal/anticausal filter (similar treatment)
 - [12] Kawahara et al. 2015 - Alternative anti-aliasing approach (time-domain)
 - [15] Carlson et al. 1989 - Voice source rules for TTS (practical application)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Doval_2003_VoiceSourceCALM**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1997_VoiceSourceConnectedSpeech**
+- **Gobl_2003_VoiceQualityEmotion**
+- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+
+### New Leads (Not Yet in Collection)
+- **[12] Kawahara et al. 2015** - Direct competitor approach to aliasing-free glottal source implementation using anti-aliasing functions; important for understanding alternative solutions
+- **[17] Fant 1995** - Frequency domain analysis of the LF model with transformations; directly relevant background work that this paper extends

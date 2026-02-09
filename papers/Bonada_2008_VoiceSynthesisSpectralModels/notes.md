@@ -347,3 +347,13 @@ Where $A$ = phase excursion (~$\pi$), $W$ = formant bandwidth, $v$ = formant mov
 - **WBVPM:** Wide-Band Voice Pulse Modeling - single-period analysis
 - **Shape Invariance:** Waveform shape at pulse onsets independent of pitch
 - **princarg:** Principal argument function mapping phase to $[-\pi, \pi]$
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1986_GlottalFlowModelsInteraction**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Sun_2006_VocalTractGlottalSource**
+- **Yegnanarayana_1998_VocalTractExtraction**

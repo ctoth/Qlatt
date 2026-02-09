@@ -245,3 +245,16 @@ Both lower F3 by ~200-300 Hz compared to supralingual-only model.
 - Fant (1960) - Double-Helmholtz resonator equations
 - Maeda (1982) - VTCALCS vocal tract simulation
 - Dang & Honda (1997) - Piriform fossa acoustic effects
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Maeda_1982_VowelNasalizationCues**
+
+### New Leads (Not Yet in Collection)
+- **Stevens, K. N. (1999). Acoustic Phonetics** - Foundational acoustic theory for understanding formant cavity affiliations and provides the baseline tube model for /r/ that this paper builds upon and critiques.
+- **Alwan, A., Narayanan, S., and Haker, K. (1997). Toward articulatory–acoustic models for liquid approximants** - Critical source of the MRI data used in this study; essential for understanding how sublingual space affects formant frequencies.
+- **Delattre, P., and Freeman, D. (1968). A dialect study of American Rs by x-ray motion picture** - Historical reference establishing the retroflex vs bunched articulation distinction and documenting acoustic variability across /r/ production types.

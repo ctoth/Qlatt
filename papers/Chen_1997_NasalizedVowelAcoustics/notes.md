@@ -297,3 +297,21 @@ For nasalized vowels compared to oral:
 - Hawkins & Stevens (1985) - Perceptual correlates of nasalization
 - Dang & Honda (1995, 1996) - Paranasal sinus acoustics
 - House & Stevens (1956) - Analog nasalization studies
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Feng_1996_NasalVowelTarget**
+- **Hawkins_Stevens_1985_NasalVowelCorrelates**
+- **Hillenbrand_1995_VowelAcoustics**
+- **House_Stevens_1956_NasalizationVowels**
+- **Klatt_1990_VoiceQualityVariations**
+- **Maeda_1982_VowelNasalizationCues**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **Stevens, K. N. (in press). Acoustic Phonetics** - Theoretical framework for how velopharyngeal coupling affects vocal tract acoustics; directly cited for predictions in this paper.
+- **Maeda, S. (1993). Acoustics of vowel nasalization and articulatory shifts in French nasal vowels** - Comprehensive treatment of French nasal vowel acoustics; provides complementary analysis methodology.

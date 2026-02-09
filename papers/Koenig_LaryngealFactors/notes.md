@@ -194,3 +194,18 @@ One female speaker (AF6) produced /h/ with minimal flow increase but clear breat
 - Hanson (1997) - Glottal characteristics of female speakers
 - Fant (1995) - LF model revisited (breathiness parameters)
 - Stevens (1977) - Physics of laryngeal behavior
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Holmberg_1988_GlottalAirflowPressure**
+- **Klatt_1990_VoiceQualityVariations**
+- **Stevens_1989_QuantalNatureSpeech**
+
+### New Leads (Not Yet in Collection)
+- **Titze (1988)** - Fundamental physics and physiology of phonation threshold pressure (Pth), critical for understanding gender and age differences in voicing control
+- **Fant (1993, 1995)** - Voice source modeling and the LF model, essential for understanding how laryngeal factors affect glottal source characteristics and voice quality
+- **Hanson (1997)** - Quantitative acoustic measures of female voice quality and breathiness, directly applicable to understanding gender-specific synthesis strategies
+- **Stevens (1977, 1988)** - Physics of laryngeal behavior and vocal fold vibration modes, theoretical foundation for understanding how anatomical differences affect acoustic output

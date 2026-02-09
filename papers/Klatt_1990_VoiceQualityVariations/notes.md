@@ -423,3 +423,35 @@ Ug(t) = at² - bt³   (open phase)
 - **Created**: 2026-01-23
 - **Source PDF**: Klatt-1990-JAS000820.pdf
 - **Relevance to Qlatt**: High - documents KLSYN88 synthesizer which is reference implementation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Blumstein_Stevens_1979_AcousticInvariance**
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Crystal_House_1988_StopConsonantDuration**
+- **Doval_2003_VoiceSourceCALM**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Hanson_1995_GlottalCharacteristicsFemale**
+- **Hillenbrand_1995_VowelAcoustics**
+- **Holmberg_1988_GlottalAirflowPressure**
+- **House_Stevens_1956_NasalizationVowels**
+- **Hunnicutt_1976_PhonologicalRules**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Maeda_1982_VowelNasalizationCues**
+- **Peterson_Barney_1952_VowelControl**
+- **Pierrehumbert_1980_EnglishIntonation**
+- **Shadle_1985_FricativeAcoustics**
+- **Stevens_1971_AirflowTurbulenceNoise**
+- **Stevens_1989_QuantalNatureSpeech**
+
+### New Leads (Not Yet in Collection)
+- Essential reference for the original cascade/parallel architecture that forms the foundation of KLSYN88
+- Directly relevant to understanding voice quality variations and parametric voice source modeling
+- Foundational theoretical work on source-filter model and vocal tract acoustics underlying formant synthesis
+- Establishes acoustic stability regions and perceptual constraints that inform synthesis targets
+- **Laver, J. (1980). The Phonetic Description of Voice Quality.** Cambridge University Press.
+- Comprehensive framework for voice quality taxonomy and perceptual evaluation methodology

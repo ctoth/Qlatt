@@ -558,3 +558,14 @@ Conversion from volume velocity to pressure at lips:
 6. Holmes, J.N.: **Formant Synthesisers: Cascade or Parallel?**, Speech Communication 2(4), 1983, pp. 251-273
 7. Holmes, W.J., Holmes, J.N., Judd, M.W.: **Extension of the Bandwidth of the JSRU Parallel-Formant Synthesizer**, ICASSP 1990
 8. Teixeira, A.J.: Internal Research, Universidade de Aveiro, 1995 ← *Portuguese vowel data source*
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Holmes_1983_FormantSynthesizersCascadeParallel**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1990_VoiceQualityVariations**

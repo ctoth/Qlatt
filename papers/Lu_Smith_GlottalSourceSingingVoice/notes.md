@@ -211,3 +211,18 @@ Gaussian Noise → Amplitude Modulation → Spectral Shaping → Noise Residual
 - Childers & Hu 1994 - Glottal excited linear prediction
 - Hermes 1991 - Perception of synthetic breathy vowels
 - Strik 1998 - Automatic LF parameterization
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Cummings_1995_GlottalExcitationEmotionalSpeech**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1997_VoiceSourceConnectedSpeech**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **Fant 1995 [12]** - LF-model revisited. Contains the prediction equations for deriving Ra, Rg, Rk from Rd. Critical for implementation.
+- **Hermes 1991 [14]** - Perception of breathy vowels. Explains why pitch-synchronous noise integrates perceptually while stationary noise segregates.
+- **Strik 1998 [24]** - Automatic LF parameterization. Useful for analysis/copy-synthesis applications and validating LF implementations.

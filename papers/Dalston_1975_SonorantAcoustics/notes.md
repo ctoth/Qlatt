@@ -189,3 +189,17 @@ Key acoustic cues that distinguish sonorants:
 - Fant (1960) - *Acoustic Theory of Speech Production* - for /l/ identification cues
 - Lisker (1957) - "Minimal cues for separating /w,j,r,l/ in intervocalic position"
 - Mattingly (1968) - "Synthesis by rule of General American English"
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Fant_1960_AcousticTheorySpeechProduction**
+
+### New Leads (Not Yet in Collection)
+- **O'Connor et al. (1957)** - Seminal work on acoustic cues for perception of initial sonorants; provides synthetic speech validation of spectrographic findings
+- **Liberman et al. (1959, 1956)** - Critical research on role of temporal cues and formant transitions in speech perception and synthesis
+- **Peterson (1961)** - Parameters of vowel quality, relevant for understanding formant relationships and normalization across speakers
+- **Koenigsknecht (1968)** - Child speech development and discrimination of spectral vs. temporal cues; directly relevant to developmental aspects

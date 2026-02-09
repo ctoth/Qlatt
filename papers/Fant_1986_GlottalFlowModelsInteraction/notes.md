@@ -142,3 +142,20 @@ Adding constant glottal shunt (1/5 peak area):
 - **Ananthapadmanabha (1984)** - Five-parameter model predecessor
 - **Rothenberg (1985)** - F0/F1 coincidence theory for soprano singing
 - **Fant (1979)** - Earlier glottal source model (baseline)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1985_LFModelGlottalFlow**
+
+### New Leads (Not Yet in Collection)
+- *Critical*: This is THE primary LF model paper. Contains full mathematical specification and parameter definitions. Essential for implementing or validating an LF source.
+- *Important*: Detailed analysis of source-filter interaction. Useful if trying to model more realistic voice source behavior beyond basic LF.
+- **Ananthapadmanabha & Fant (1982)** - "Calculation of true glottal flow and its components"
+- *Useful*: Foundation for understanding how to decompose glottal flow. Published in Speech Communication journal (more accessible than QPSR).
+- **Fant (1979)** - "Glottal source and excitation analysis"
+- *Background*: The earlier model that LF improves upon. Useful for understanding the evolution of glottal source modeling.
+- **Ananthapadmanabha (1984)** - "Acoustic analysis of voice source dynamics"
+- *Background*: Five-parameter predecessor to LF model. May contain useful analysis techniques.

@@ -340,3 +340,21 @@ $$T_a = \frac{\sqrt{10^{TL/10} - 1}}{2\pi \times 3000}$$
 **KLGLOTT88 cannot vary the bandwidth because αm is fixed at 2/3.** This is a fundamental limitation compared to LF model.
 
 **H1-H2 is NOT a reliable estimator of Oq** without knowing αm. Multiple (Oq, αm) pairs produce identical H1-H2 values.
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Doval_2003_VoiceSourceCALM**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1988_LFFrequencyDomainInterpretation**
+- **Hanson_1995_GlottalCharacteristicsFemale**
+- **Holmberg_1988_GlottalAirflowPressure**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **[15] Fant (1995)** - LF model revisited with transformations and frequency domain analysis; theoretical foundation for spectral methods.
+- **[34] Hanson (1997)** - Glottal characteristics and acoustic correlates including H1-H2 relationship to open quotient; widely cited in prosody/voice quality work.

@@ -290,3 +290,16 @@ Finding: In natural speech, ~79% of accents are H*, ~15% are L+H*. This uneven d
 - Available from: http://www.cstr.ed.ac.uk/projects/festival
 - CART F0 generation: Also in Festival
 - Derived F0 contours and labellings: http://www.cstr.ed.ac.uk/projects/intonation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Pierrehumbert_1980_EnglishIntonation**
+
+### New Leads (Not Yet in Collection)
+- **Ladd, D. R. (1996)** - Comprehensive review of intonational phonology covering declination, pitch range, and linguistic representations; directly relevant to Tilt's positioning within intonation theory.
+- **Taylor, P. A. (1995)** - Taylor's prior RFC (rise/fall/connection) model that preceded Tilt; necessary for understanding the development and improvements of the Tilt representation.
+- **Dusterhoff, K. and Black, A. (1997)** - Application of Tilt model to TTS using CART for F0 generation; demonstrates practical synthesis use of Tilt parameters.
+- **Fujisaki, H. and Ohno, S. (1997)** - Alternative phonetic intonation model with similar amplitude/duration parametrization; important comparison point for model design choices.

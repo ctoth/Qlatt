@@ -221,3 +221,16 @@ Where:
 
 ### Coverage Analysis
 - van Santen 1997 - "Combinatorial issues in TTS" (Eurospeech) **[KEY companion paper]**
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1987_MITalk_TTS**
+- **Klatt_1987_TTS_Review**
+
+### New Leads (Not Yet in Collection)
+- **Fujisaki (Ref 3)**: Seminal work on F0 contour modeling via the Fujisaki model; essential for understanding intonation generation discussed throughout this paper.
+- **van Santen 1992, 1993 (Refs 15-16)**: Van Santen's own prior work on contextual duration effects and sums-of-products models—key methodological framework central to this paper's arguments.
+- **Macchi 1989 (Ref 8)**: Dynamic time warping for duration rules; directly addresses the non-uniform temporal modification problem van Santen raises as an open issue.

@@ -175,3 +175,20 @@ Linguistic Space
 - Crystal & House (1988a,b) - Segmental durations in connected speech (JASA 83)
 - Campbell (1992) - Syllable-based segmental duration
 - Hertz (1991) - Streams, phones and transitions (J. Phonetics 19)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1987_MITalk_TTS**
+- **Crystal_House_1988_StopConsonantDuration**
+- **Hertz_1991_StreamsPhonesTransitions**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1987_TTS_Review**
+- **Stevens_1991_HL_Parameters**
+
+### New Leads (Not Yet in Collection)
+- **[12] van Santen (1992)** - Detailed study of contextual effects on vowel duration. Full-length version of this ACL paper with expanded results and analysis.
+- **[11] van Santen & Olive (1990)** - Earlier analysis of contextual effects on segmental duration. Establishes the problem space and sparsity challenges that motivate sums-of-products approach.
+- **[19] Krantz et al. (1971)** - Foundations of Measurement. Provides mathematical basis for ordinal patterns and why sums-of-products models work well for this domain.

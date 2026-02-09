@@ -164,3 +164,16 @@ For $\sqrt{\lambda_1} > 1000$:
 - **Moore et al. 1997** [4]: Loudness model used for excitation patterns
 - **Childers & Lee 1991** [7]: Voice quality factors - source of R-parameter sets
 - **Karlsson & Liljencrants 1996** [8]: Diverse voice qualities - source of R-parameter sets
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **Veldhuis 1998** [2] - Precursor to this perceptual study, examining spectral consequences of glottal parameter variations
+- **Moore et al. 1997** [4] - The auditory model (5-stage loudness prediction model) that provides the theoretical basis for excitation pattern computation in this work
+- **Karlsson & Liljencrants 1996** [8] - Provides the diverse voice quality parameter sets that demonstrate the 1D trajectory property in perceptual space

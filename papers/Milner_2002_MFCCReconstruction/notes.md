@@ -188,3 +188,16 @@ However, the paper reinforces understanding of:
 - Kleijn & Paliwal (1995) - "Speech coding and synthesis" - comprehensive reference
 - Chasan et al (2000) - "Speech reconstruction from mel frequency cepstral coefficients and pitch" - predecessor work
 - McAuley & Quatiery (1986) - Sinusoidal speech representation - alternative reconstruction model
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Kleijn & Paliwal (1995)** - "Speech coding and synthesis" - Comprehensive textbook on speech codecs and synthesis methods. Fundamental reference for source-filter model, LPC analysis, and excitation coding schemes.
+- **McAuley & Quatiery (1986)** - Sinusoidal speech representation - Alternative to source-filter model for analysis/synthesis. Important for understanding different approaches to speech reconstruction.
+- **Chasan et al (2000)** - Direct predecessor to this paper, also reconstructs speech from MFCCs but using sinusoidal model instead of source-filter. Good comparison point.
+- **ETSI ES 201 108 (2000)** - ETSI Aurora standard for distributed speech recognition front-end. Defines the MFCC computation procedure used in this paper (and widely in ASR systems).

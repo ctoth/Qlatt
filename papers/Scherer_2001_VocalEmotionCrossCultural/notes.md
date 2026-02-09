@@ -169,3 +169,16 @@ The paper cites Banse & Scherer (1996) for emotion-specific vocal profiles:
 > "Changes in parameters such as loudness and fundamental frequency, which are among the most attention-getting vocal cues, may be quite similar in intense joy, fear, and anger (due to high arousal), possibly explaining the patterns of confusion." (p. 89)
 
 > "Although anger is often badly recognized from the face, it reaches the highest accuracy percentage in the present study." (p. 89)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Banse_1996_VocalEmotionAcousticProfiles**
+
+### New Leads (Not Yet in Collection)
+- **Williams & Stevens (1972)** - Emotions and speech: Some acoustical correlates. Foundational work establishing systematic relationships between emotional expression and acoustic parameters; essential for understanding the physical basis of emotional prosody.
+- **Scherer (1986)** - Vocal affect expression: A review and a model for future research. Comprehensive theoretical model linking physiological emotion changes to acoustic parameter modifications; provides the explanatory framework for emotion-specific synthesis design.
+- **Ekman (1982)** - Emotion in the human face. Seminal reference on cross-cultural emotion recognition; establishes the broader context for understanding universality versus cultural specificity in emotional expression across modalities.
+- **Murray & Arnott (1993)** - Toward a simulation of emotion in synthetic speech: A review of the literature on human vocal emotion. Direct application to speech synthesis; reviews methods for embedding emotional expression in synthesized speech with parameter recommendations.

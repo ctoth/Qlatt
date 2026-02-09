@@ -199,3 +199,17 @@ This is relatively vowel-independent.
 > "At the 50 per cent level, the required reduction is approximately eight db, and is relatively independent of the vowel." (p. 228)
 
 > "On the basis of the physical and perceptual studies reported, it seems reasonable to conclude that the act of coupling the nasal cavity to the vocal tract during vowel production results in: (1) a differential reduction in the amplitude of the first formant of various vowels, with a concomitant increase in formant bandwidth and an upward shift in the center frequency of the formant; (2) a reduction in the overall level of the vowel" (p. 230)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **STEVENS, K. N., KASOWSKI, S. and FANT, C. G. M. (1953)** - Describes the electrical vocal tract analog methodology used throughout this paper; essential for understanding the experimental apparatus and acoustic modeling approach.
+- **FANT, C. G. M. (1952)** - Transmission properties of the vocal tract with acoustic specification; foundational work on formant theory and vocal tract acoustics directly applicable to synthesizer design.
+- **DUNN, H. K. (1950)** - Calculation of vowel resonances and electrical vocal tract design; relevant for understanding how to model vowel acoustics electronically for synthesis.
+- **DELATTRE, P. C. (1951)** - Physiological interpretation of sound spectrograms; important for understanding how nasalization appears in spectrographic analysis and formant measurement.
+- **HOUSE, A. S. and STEVENS, K. N. (1955)** - Auditory testing of simplified vowel articulation description; relevant for validating that synthetic nasalized vowels sound natural to listeners.

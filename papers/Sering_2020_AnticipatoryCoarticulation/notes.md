@@ -182,3 +182,16 @@ This combination encourages trajectories that are both acoustically accurate and
 Forward model updated after each resynthesis with:
 - 1 new sample (just synthesized)
 - 10 old samples (replay buffer to prevent catastrophic forgetting)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- [1] Öhman (1966)** - Foundational work on coarticulation in VCV utterances, provides the measurement methodology used in this paper.
+- [4] Birkholz (2013)** - Key reference on modeling consonant-vowel coarticulation in articulatory synthesis, directly relevant to understanding coarticulation mechanisms in synthesizers.
+- [11] Delattre (1951)** - Classic formant acoustics work relating tongue position to formant frequencies, foundational for interpreting formant shift results.
+- [8] Guenther (2016)** - Comprehensive reference on neural control of speech, provides theoretical grounding for understanding articulation and motor control.

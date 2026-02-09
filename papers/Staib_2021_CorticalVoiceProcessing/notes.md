@@ -191,3 +191,17 @@ For loudness: 20th, 50th, 80th percentiles; range 20-80th; mean/SD of rising/fal
 - **The Decoding Toolbox v3.96** - MVPA classification
 - **Praat** - Sound intensity scaling
 - **Prevalence-Permutation toolbox** - Statistical testing for information-like measures
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Belin_2017_SoundOfTrustworthiness**
+
+### New Leads (Not Yet in Collection)
+- **Belin et al., 2000** - Foundational work establishing the temporal voice area (TVA) as a voice-selective region in human auditory cortex; essential reference for understanding the classical voice selectivity hypothesis that this paper challenges.
+- **Agus et al., 2017** - Recent evidence on voice selectivity in TVA despite matched low-level acoustic cues; directly relevant to the debate about whether TVA specialization is truly voice-specific.
+- **McDermott et al., 2011** - The Gaussian Sound Synthesis Toolbox used to generate textural sound patterns (TSPs); critical for understanding the experimental methodology of creating synthetic stimuli.
+- **Norman-Haignere and McDermott, 2018** - Demonstrates hierarchical acoustic processing across auditory cortex with primary areas driven by acoustics and higher areas by more abstract representations; supports the paper's findings about hierarchical processing levels.
+- **Theunissen and Elie, 2014** - Review of neural processing of natural sounds; provides context for understanding how basic acoustic features vs. higher-order properties are encoded across auditory cortex.

@@ -748,3 +748,21 @@ SIL and glottal segments have no inherent targets - inherit from context.
 > "Glottal segments (including SIL) have no inherent 'articulatory' targets" (p. 201)
 
 > "Substantial learning effects occur with synthetic speech... performance increased from 55 percent to 90 percent correct after the presentation of only 200 synthetic sentences." (p. 156)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Elovitz_1976_NRL_LTS**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1988_LFFrequencyDomainInterpretation**
+- **Fujimura_1962_NasalConsonantAnalysis**
+- **House_Stevens_1956_NasalizationVowels**
+- **Hunnicutt_1976_PhonologicalRules**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1979_SpeechPerceptionLexicalAccess**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Rabiner_1968_SynthesisByRule**
+- **Stevens_1971_AirflowTurbulenceNoise**

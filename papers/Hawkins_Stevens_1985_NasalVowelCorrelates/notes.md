@@ -217,3 +217,19 @@ With at least 100 Hz separation between the zero and each pole (FNP and F1).
 - Klatt (1980) - Cascade/parallel formant synthesizer (synthesis method)
 - Stevens et al. (1985) - Acoustical and perceptual correlates of nasal vowels (companion paper)
 - Fujimura (1960, 1961) - Spectra/analysis of nasalized vowels
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **House_Stevens_1956_NasalizationVowels**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1982_KlattalkTTS**
+- **Maeda_1982_VowelNasalizationCues**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **Delattre (1954, 1968)** - Early pattern-playback synthesis studies showing that pole-zero pairs can modify vowel spectra; precursor to modern Klatt-based nasal synthesis.

@@ -227,3 +227,17 @@ Upper bound precision: 0.798 (combining both methods optimally)
 - Ng & Lee (1996). Integrating multiple knowledge sources to disambiguate word senses
 - Ratnaparkhi (1998). Maximum Entropy Models for Natural Language Ambiguity Resolution
 - Yarowsky (1994). Decision lists for lexical ambiguity resolution
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Miller_1998_PronunciationModelingSpeechSynthesis**
+
+### New Leads (Not Yet in Collection)
+- **Agirre & Rigau (1996)** - Conceptual Density method: Original knowledge-based WSD approach that inspired the Specification Marks method used in this paper; foundational for taxonomy-based word sense resolution.
+- **Berger et al. (1996)** - Maximum Entropy approach: Theoretical foundation for the corpus-based ML classification method; essential for understanding probability distribution models in NLP.
+- **Miller (1995)** - WordNet: The primary lexical knowledge resource used throughout the paper; critical reference for understanding semantic networks and word sense inventories.
+- **Lesk (1986)** - Automated sense disambiguation: One of the earliest knowledge-based approaches; provides important baseline comparison for dictionary-based WSD methods.
+- **Ratnaparkhi (1998)** - Maximum Entropy Models: Detailed exposition of ME parameter estimation and practical implementation; directly relevant to the ME-based method developed in this paper.

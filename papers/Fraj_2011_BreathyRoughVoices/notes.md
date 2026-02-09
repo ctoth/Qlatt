@@ -234,3 +234,16 @@ Pulsatile noise >> constant aspiration for natural breathiness:
 - Schoentgen (2003a) - Shaping function models of phonatory excitation
 - Schoentgen (2003b) - Spectral models of additive and modulation noise
 - Titze (2006) - Myoelastic aerodynamic theory of phonation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+
+### New Leads (Not Yet in Collection)
+- **Schoentgen, J. (2001, 2003a, 2003b)** - Multiple papers on stochastic jitter models, shaping function models, and spectral models of noise in phonatory signals; directly addresses the theoretical framework for this jitter/noise synthesis approach.
+- **Titze, I. (2006)** - Myoelastic aerodynamic theory of phonation; provides the physiological foundation for understanding how aerodynamic conditions generate jitter and noise at the glottis.
+- **Story, B. H., Titze, I. R., and Hoffman, E. A. (1996)** - Vocal tract area functions from MRI; critical for the vocal tract modeling component (40-45 cylindrical sections) used in their synthesis pipeline.
+- **Yiu et al. (2002)** - Perception of synthesized voice quality in connected speech; demonstrates that listeners evaluate synthetic voice quality similarly to natural speech, validating the relevance of their dysphonia synthesis corpus.

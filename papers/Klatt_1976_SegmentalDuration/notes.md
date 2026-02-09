@@ -243,3 +243,17 @@ Key quantitative findings:
 - Umeda (1975a) - Vowel duration in connected discourse
 - Lehiste (1975a) - Factors affecting syllable duration
 - Lindblom & Rapp (1973) - Swedish recursive shortening rules
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Stevens_1971_AirflowTurbulenceNoise**
+
+### New Leads (Not Yet in Collection)
+- **Peterson & Lehiste (1960)** - Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.
+- **House & Fairbanks (1953)** - The Influence of Consonantal Environment on Vowel Characteristics: Establishes the postvocalic consonant voicing effect on vowel duration.
+- **Fry (1958)** - Experiments in the Perception of Stress: Demonstrates that duration changes perception of stress patterns in English.
+- **Oller (1973)** - The Effect of Position in Utterance on Speech Segment Duration: Provides complementary empirical data on positional effects that validate the rule framework.
+- **Umeda (1975a)** - Vowel Duration in American English: Contemporary alternative vowel duration modeling approach with continuous discourse validation.

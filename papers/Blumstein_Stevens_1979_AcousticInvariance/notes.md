@@ -173,3 +173,18 @@ COMPACT (Velar):
 - Stevens & Blumstein (1978) - Invariant cues for place of articulation
 - Halle, Hughes & Radley (1957) - Acoustic properties of stop consonants
 - Fant (1960) - Acoustic Theory of Speech Production
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Klatt_1976_SegmentalDuration**
+- **Sundberg_1972_SingingFormant**
+- **Zue_1976_StopConsonantAcoustics**
+
+### New Leads (Not Yet in Collection)
+- **Stevens & Blumstein (1978) - "Invariant cues for place of articulation in stop consonants"**: The companion perceptual study that provides the theoretical basis for this paper's templates. Critical for understanding how burst spectra relate to perception.
+- **Jakobson, Fant, & Halle (1963) - Preliminaries to Speech Analysis**: Classic work on distinctive features including the diffuse/compact distinction that underlies this paper's template approach.

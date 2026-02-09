@@ -295,3 +295,17 @@ Key insight: Tenseness and loudness can be varied **independently** in both mode
 - [13] Klatt D. and Klatt L. "Analysis, synthesis, and perception of voice quality variations." JASA, 87(2):820-857, 1990. **(Klatt voice quality)**
 - [5] Bozkurt B. & Dutoit T. "Mixed-phase speech modeling using differential phase spectrums." VOQUAL'03 **(Causal/anticausal separation)**
 - [17] Veldhuis R. "A computationally efficient alternative for the LF model" JASA 103:566-571, 1998. **(R++ model)**
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Fant_1985_LFModelGlottalFlow**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **[9] Fant 1995** - LF-model revisited with frequency domain analysis; essential for spectral tilt and phase understanding
+- **[11] Henrich et al. 2001** - Spectral correlates of open quotient and asymmetry; bridges time-domain and spectral domains
+- **[5] Bozkurt & Dutoit 2003** - Mixed-phase speech modeling using differential phase spectrums; contemporary approach to phase separation

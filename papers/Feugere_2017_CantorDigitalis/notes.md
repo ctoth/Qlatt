@@ -380,3 +380,21 @@ F6 = 2×F4, A6 = -15 dB, B6 = 150 Hz (constant)
 - Henrich et al. (2005) - "Glottal open quotient in singing" - Oq measurements
 - Sundberg papers on singing formant and formant tuning
 - LF model paper: Fant, Liljencrants, Lin (1985)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Doval_2003_VoiceSourceCALM**
+- **Doval_2006_SpectrumGlottalFlowModels**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Hanson_1995_GlottalCharacteristicsFemale**
+- **Henrich_2005_GlottalOpenQuotientSinging**
+- **Holmes_1983_FormantSynthesizersCascadeParallel**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Peterson_Barney_1952_VowelControl**
+
+### New Leads (Not Yet in Collection)
+- **Sundberg 2001** (Reference 31) - Singing formant; directly applicable to soprano and higher voice formant clustering techniques described in the paper

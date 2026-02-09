@@ -388,3 +388,17 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 - Beckman & Pierrehumbert (1986) - Japanese intonation
 - Pierrehumbert & Hirschberg (1990) - Meaning of intonational contours
 - ToBI labeling conventions (derived from this work)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Liberman, M.Y. (1975). The Intonational System of English.** — Foundational work on metrical grids and intonational representations that Pierrehumbert extends; essential for understanding the theoretical framework.
+- **Goldsmith, J. (1976). Autosegmental Phonology.** — Provides the autosegmental framework upon which Pierrehumbert's tone notation system is based, including the starred/unstarred convention for alignment.
+- **Bruce, G. (1977). Swedish Word Accents in Sentence Perspective.** — Cross-linguistic comparison showing how tone-based prosodic systems work in other languages, validates universality of Pierrehumbert's framework.
+- **Klatt, D.H. (1975). Vowel Lengthening is Syntactically Determined.** — Early work connecting speech acoustics to linguistic structure; important for understanding F0 contour implementation in synthesis.
+- **Lehiste, I., and G.E. Peterson (1961). Some Basic Considerations in the Analysis of Intonation.** — Classic foundational work on intonation measurement and acoustic analysis that Pierrehumbert builds upon.

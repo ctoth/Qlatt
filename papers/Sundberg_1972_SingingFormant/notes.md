@@ -195,3 +195,16 @@ The singing formant is specific to trained operatic singing - not present in nor
 - Lindblom & Sundberg (1971): "Acoustical Consequences of Lip, Tongue, Jaw and Larynx Movement" - formant perturbation theory
 - Sundberg (1970a): "The Level of the 'Singing Formant' and the Source Spectra of Professional Bass Singers" - more detail on singing formant
 - Ingard (1953): "On the Theory and Design of Acoustic Resonators" - Helmholtz resonator theory
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Fant, G. (1970): Acoustic Theory of Speech Production** - Foundational work on vocal tract acoustics and formant theory; directly cited for understanding how pharynx lengthening affects formant frequencies and for defining the tube models used in Sundberg's experiments.
+- **Ingård, U. (1953): "On the Theory and Design of Acoustic Resonators"** - Critical theoretical foundation for the Helmholtz resonator equation used to calculate larynx tube resonance frequency; provides the effective length correction formula essential to the singing formant model.
+- **Lindblom, B. and Sundberg, J. (1971): "Acoustical Consequences of Lip, Tongue, Jaw and Larynx Movement"** - Companion work establishing baseline coarticulation effects; essential for understanding which articulatory changes are responsible for individual formant shifts versus those produced by larynx lowering.
+- **Troke, R. W. (1968): "Tube-Cavity Resonance"** - Provides the fundamental acoustic theory treating the larynx tube and sinus Morgagni as a coupled resonator system; foundational for understanding how the lowered larynx creates a separate Helmholtz resonator.

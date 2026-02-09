@@ -347,3 +347,18 @@ Ebden, P., & Sproat, R. (2015). The Kestrel TTS text normalization system.
 Natural Language Engineering, FirstView, 1–21.
 https://doi.org/10.1017/S1351324914000175
 ```
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1987_MITalk_TTS**
+- **Klatt_1987_TTS_Review**
+
+### New Leads (Not Yet in Collection)
+- **Sproat (1996, 1997)** - Bell Labs multilingual text-to-speech system: The foundational architecture that Kestrel improves upon; essential for understanding the evolution from single-phase to two-phase normalization.
+- **Sproat et al. (2001)** - Normalization of non-standard words: Establishes the taxonomy of semiotic classes (currency, dates, times, etc.) that Kestrel implements; critical reference for NSW classification.
+- **Tai, Skut, Sproat (2011)** - Thrax grammar compiler: The tool used to write Kestrel's grammars; essential for understanding grammar syntax and compilation to WFSTs.
+- **Allauzen, Riley, Schalkwyk (2011)** - Look-ahead filters for WFST composition: Key performance optimization that enables Kestrel to run efficiently on mobile devices; important for understanding non-determinism mitigation.
+- **Roark & Sproat (2014)** - Hippocratic abbreviation expansion: Demonstrates semi-supervised learning approach to complement hand-built rules, representing the future direction of text normalization away from pure rule-based systems.

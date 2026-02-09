@@ -206,3 +206,21 @@ Random Noise → HP Filter → Amplitude Modulation
 - Klatt & Klatt (1990) - Voice quality variations (already have)
 - Rosenberg (1971) - Effect of glottal pulse shape on vowel quality
 - Holmes (1973) - Influence of glottal waveform on parallel synthesizer
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1987_TTS_Review**
+- **Klatt_1990_VoiceQualityVariations**
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Rabiner_1968_SynthesisByRule**
+
+### New Leads (Not Yet in Collection)
+- **Flanagan (1972)** - Fundamental speech analysis and synthesis theory establishing source-filter model principles
+- **Holmes (1973)** - Original work on glottal waveform influence on parallel formant synthesizer naturalness
+- **Isshiki et al. (1978)** - Turbulent noise characteristics in dysphonia, directly cited for breathiness modeling approach

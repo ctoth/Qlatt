@@ -224,3 +224,18 @@ The statistical disambiguation approach could be directly applied to English hom
 - **HomoFast eSpeak**: https://github.com/MahtaFetrat/HomoFast-eSpeak-Persian
 - **Benchmark Code**: https://github.com/MahtaFetrat/Persian-G2P-Tools-Benchmark
 - **SentenceBench**: https://huggingface.co/datasets/MahtaFetrat/SentenceBench
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Hanson_1995_GlottalCharacteristicsFemale**
+- **Harrington_2011_HighBackVowelFronting**
+
+### New Leads (Not Yet in Collection)
+- **Rezáčková et al. (2024a,b)** - T5 transformer-based G2P for multilingual conversion with cross-word context modeling; directly relevant to neural approach validation in Qlatt
+- **Yarowsky (1997)** - Foundational work on data-driven decision lists for homograph disambiguation using log-likelihood ranking; classical rule-based approach worth studying
+- **Nicolis and Klimkov (2021)** - BERT/ALBERT contextual embeddings for homograph disambiguation; bridges neural and contextual understanding
+- **Rahmati and Sameti (2024)** - GE2PE model for Persian G2P with transformer architecture; the baseline model that Qharabagh enhances
+- **Ren et al. (2020)** - FastSpeech 2 for fast, high-quality end-to-end TTS; relevant for understanding latency-speed tradeoffs in synthesis pipelines

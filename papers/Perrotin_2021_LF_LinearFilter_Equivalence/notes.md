@@ -306,3 +306,22 @@ $$
 - Klatt & Klatt (1990) - KLGLOTT88 model and voice quality analysis
 - Gobl & Ni Chasaide (2003) - Voice quality in emotion communication
 - Fant (1995) - "The LF-model revisited" - Rd parameter derivation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Doval_2003_VoiceSourceCALM**
+- **Doval_2006_SpectrumGlottalFlowModels**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Gobl_2003_VoiceQualityEmotion**
+- **Holmes_1983_FormantSynthesizersCascadeParallel**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **Feugère et al. (2017)** - "Cantor Digitalis: Chironomic parametric synthesis of singing" - Implements LFLM model in real-time musical context, demonstrates practical application of the linear-filter glottal models.
+- **Fant (1995)** - "The LF-model revisited: Transformations and frequency domain analysis" - Derives the Rd parameter transformation equations that unify time-domain and spectral interpretations of the LF model.

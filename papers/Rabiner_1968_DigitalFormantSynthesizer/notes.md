@@ -188,3 +188,17 @@ Where $f_s$ = sampling frequency
 - Holmes, Mattingly & Shearme (1964) - Speech Synthesis by Rule (parallel synthesizer)
 - Rabiner (1968) - Speech Synthesis by Rule: An Acoustic Domain Approach (companion paper)
 - Gold & Rabiner (to be published) - Analysis of Digital and Analog Formant Synthesizers
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Rabiner_1968_SynthesisByRule**
+- **Strong_1967_MachineAidedFormantDetermination**
+
+### New Leads (Not Yet in Collection)
+- **Flanagan 1957** - Foundational work on terminal-analog synthesizer design principles
+- **Flanagan 1965** - Comprehensive speech analysis, synthesis and perception reference
+- **Gold & Rabiner (in press)** - Comparative analysis of digital versus analog formant synthesizer architectures

@@ -264,3 +264,18 @@ Parameters:
 - **Halle, Hughes & Radley (1957)** - Acoustic properties of stop consonants
 - **Fant (1973)** - Speech Sounds and Features
 - **Fant et al. (1972)** - Subglottal formants during aspiration
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Stevens_1971_AirflowTurbulenceNoise**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **Stevens K. N., Blumstein S. E. (1975)** - "Dynamic Aspects of Consonant Production and Perception: A Study of Retroflex Stop Consonants" - Foundational work on how stop place of articulation is distinguished through acoustic cues; directly relevant for stop consonant synthesis rules and burst spectrum design.
+- **Klatt D. H. (1975)** - "Voice Onset Time, Frication, and Aspiration in Word-Initial Consonant Clusters" - Critical for understanding VOT timing, aspiration duration, and the interaction of voicing cues with stop consonant production parameters.
+- **Fant G. (1973)** - "Speech Sounds and Features" - Provides the foundational acoustic-phonetic framework and source-filter theory underlying all formant-based synthesis approaches.
+- **Peterson G., Lehiste I. (1960)** - "Duration of Syllable Nuclei in English" - Establishes empirical duration data for vowels that complements stop consonant timing rules for comprehensive duration modeling in speech synthesis.

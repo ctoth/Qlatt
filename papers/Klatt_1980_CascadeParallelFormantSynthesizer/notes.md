@@ -373,3 +373,18 @@ A3COR = A2COR * A2SKRT
 |-------|-----|-----|-----|------|------|-----|-----|-----|
 | [m] | 270 | 450 | 480 | 1270 | 2130 | 40 | 200 | 200 |
 | [n] | 270 | 450 | 480 | 1340 | 2470 | 40 | 300 | 300 |
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1977_ModularAudioResponse**
+- **Carlson_1979_VowelPerceptionSalience**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fujimura_1962_NasalConsonantAnalysis**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1979_SpeechPerceptionLexicalAccess**
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Rabiner_1968_SynthesisByRule**
+- **Stevens_1971_AirflowTurbulenceNoise**

@@ -199,3 +199,17 @@ $$
 - [1] **Klatt 1987** - TTS review (already have)
 - [25] Prahallad et al. 2002 - Syllable-based synthesis for Indian languages
 - [20] Kawahara 1999 - STRAIGHT vocoder (pitch-adaptive analysis)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1987_TTS_Review**
+
+### New Leads (Not Yet in Collection)
+- **Tokuda et al. (1995, 1996, 2000)** [9, 10, 11] - Core HMM-based speech synthesis methodology; essential for understanding the statistical parametric synthesis framework used in this paper.
+- **Prahallad et al. (2002)** [25] - Earlier work on syllable-based synthesis for Indian languages, foundational for the syllable modeling approach in this paper.
+- **Black et al. (2007)** [5] - Statistical parametric speech synthesis overview; provides context for modern HMM-based TTS development.
+- **Kawahara et al. (1999)** [20] - STRAIGHT vocoder; important vocoding technique used in speech synthesis and F0 extraction.

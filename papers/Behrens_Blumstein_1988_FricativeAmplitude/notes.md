@@ -189,3 +189,16 @@ Previous research (Heinz & Stevens 1961; McCasland 1979a,b) suggested that frica
 - **Harris (1958)** - Perceptual experiments using natural speech
 - **Schadle (1985)** - The Acoustics of Fricative Consonants (RLE Tech Rep)
 - **Strevens (1960)** - Spectra of fricative noise in human speech
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Klatt_1987_TTS_Review**
+- **Stevens_1971_AirflowTurbulenceNoise**
+
+### New Leads (Not Yet in Collection)
+- **Heinz & Stevens (1961)** - "On the properties of voiceless fricative consonants" - foundational acoustic analysis of fricative properties including amplitude characteristics.
+- **Hughes & Halle (1956)** - "Spectral properties of fricative consonants" - key reference for fricative spectral characteristics that distinguish place of articulation.
+- **Schadle (1985)** - *The Acoustics of Fricative Consonants* - comprehensive MIT technical report on fricative acoustics, likely contains detailed parameters for synthesis.

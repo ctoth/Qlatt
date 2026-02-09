@@ -216,3 +216,18 @@ For `tts-frontend-rules.js`:
 ### Cross-Cultural
 
 10. **Tickle (1999)** [41] - Cross-language vocalization of emotion
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Banse_1996_VocalEmotionAcousticProfiles**
+- **France_2000_SpeechDepressionSuicideAcoustics**
+- **Mozziconacci_1998_SpeechEmotionProsody**
+
+### New Leads (Not Yet in Collection)
+- **[24] Ladd et al., 1985** - Foundational work on F0 range and voice quality as independent carriers of speaker affect
+- **[42] Williams & Stevens, 1972** - Classic study on acoustic factors in emotional expression (fundamental frequency and envelope amplitude)
+- **[30] Patterson & Ladd, 1999** - Pitch range modeling and linguistic dimensions of prosodic variation
+- **[14] Fujisaki, 1991** - Influential model for generating F0 contours with linguistic and paralinguistic functions

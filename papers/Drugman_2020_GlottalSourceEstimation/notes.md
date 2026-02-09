@@ -210,3 +210,21 @@ Source-tract separation quality depends on:
 - Childers & Lee (1991) - Voice quality factors
 - Drugman & Dutoit (2009) - GCI/GOI detection algorithm
 - Walker & Murphy (2007) - Review of glottal waveform analysis
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Doval_2003_VoiceSourceCALM**
+- **Doval_2006_SpectrumGlottalFlowModels**
+- **Fant_1985_LFModelGlottalFlow**
+- **Gobl_2003_VoiceQualityEmotion**
+- **Hanson_1995_GlottalCharacteristicsFemale**
+- **Klatt_1990_VoiceQualityVariations**
+- **Yegnanarayana_1998_VocalTractExtraction**
+
+### New Leads (Not Yet in Collection)
+- **Alku et al. (2002)** - "Normalized amplitude quotient for parametrization of the glottal flow" - Defines NAQ, the most discriminative voice quality feature
+- **Walker & Murphy (2007)** - "A review of glottal waveform analysis" - Comprehensive review of glottal analysis methods, good for understanding the broader landscape

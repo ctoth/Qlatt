@@ -221,3 +221,18 @@ Note: Higher EPDs in other studies may be due to vibrato, amplitude constraints,
 2. Rₒ (open quotient) has the lowest perceptual impact - larger changes (~0.05-0.1) needed for audibility
 3. A perceptual distance of 4.3 dB EPD represents one JND - changes below this are imperceptible
 4. Voice quality perception is relatively consistent across vowels /a/ and /i/
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Doval_2003_VoiceSourceCALM**
+- **Fant_1985_LFModelGlottalFlow**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **Moore et al. (1997)** and **Rao et al. (2001)** - Provide the auditory perception model (excitation patterns, loudness) that underpins the perceptual distance measure used in this paper; critical for understanding how to map acoustic variations to perceived differences.
+- **Scherer et al. (1998)** and **Henrich et al. (2003)** - Prior empirical studies measuring JNDs for glottal parameters (Oq, Sq, asymmetry coefficient); provide direct comparison data for validating the present method's results.
+- **Veldhuis (1998)** - Analyzes spectral relevance of LF R-parameters; provides complementary spectral analysis perspective to the perceptual distance approach in this paper.

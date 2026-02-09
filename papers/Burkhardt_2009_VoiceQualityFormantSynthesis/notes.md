@@ -187,3 +187,17 @@ Tracheal/nasal coupling (FTP, FTZ, FNP, FNZ, BTP, BNP) may need addition for bre
 - Gobl & Chasaide 2003 (ref [5]) - Voice quality and emotion
 - Fant et al. 1985 (ref [8]) - LF model (4 parameters)
 - Klatt 1990 unpublished (ref [14]) - KLATTALK tracheal coupling details
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Burkhardt_2005_GermanEmotionalSpeechDatabase**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Gobl_2003_VoiceQualityEmotion**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **[4] Laver 1980** - The canonical reference for phonation type terminology (modal, breathy, whispery, creaky, tense, lax). Defines the voice quality categories being simulated.

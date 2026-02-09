@@ -222,3 +222,17 @@ Where:
 - Narayanan et al. (1995) - MRI study of fricatives
 - Fletcher (1989) - Palatometric specification of stops, affricates, sibilants
 - Brunner et al. (2009) - Palate shape and articulatory behavior
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Recasens_1997_LingualCoarticulationDAC**
+
+### New Leads (Not Yet in Collection)
+- **Recasens & Espinosa (2009)** - Foundational degree of articulatory constraints (DAC) model using electromagnetic articulography to examine coarticulation and tongue position variability in multiple languages.
+- **Fletcher (1989)** - Classic electropalatography study establishing normative expectations for tongue-palate contact patterns in English consonants; directly comparable methodology.
+- **Brunner et al. (2005, 2009)** - Comprehensive analysis of how palate morphology (shape, height, curvature) influences articulatory variability—directly relevant to this paper's palate findings.
+- **Guenther et al. (1999)** - DIVA model framework for understanding articulatory targets as regions rather than points; theoretical foundation for target region concept.
+- **Narayanan et al. (1995)** - MRI articulatory study of fricative consonants providing detailed characterization of tongue shaping strategies (apical vs. laminal) relevant to fricative target locations.

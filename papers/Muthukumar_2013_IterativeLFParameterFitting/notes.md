@@ -170,3 +170,17 @@ LSP+LF optimization produces smoother speech but affects durations.
 - **Raitio et al. 2011** [2] - HMM synthesis with glottal inverse filtering
 - **Fant & Lin 1988** [23] - Frequency domain interpretation of LF parameters (OQ/SQ/RQ definitions)
 - **Kane & Gobl 2009** [8] - Automatic LF parameterization (time + frequency domain)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1988_LFFrequencyDomainInterpretation**
+- **Gobl_2003_VoiceQualityEmotion**
+- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+
+### New Leads (Not Yet in Collection)
+- **Raitio et al. 2011 [2]** - Comprehensive IAIF + HMM synthesis paper. Details the inverse filtering method used here and its integration with statistical synthesis.
+- **Kane & Gobl 2009 [8]** - Automatic LF parameterization combining time and frequency domain. Alternative fitting approach that might be more efficient than gradient descent.

@@ -320,3 +320,17 @@ Fant's empirical attenuation formula ($a = 0.007 \cdot (\pi/A)^{1/2}$) provides 
 3. **Wall vibration losses**: Van den Berg estimates 25-50 Hz at 300 Hz, but proportional to $f^{-2.5}$
 4. **Turbulent flow effects**: Reynolds number criteria for onset; critical Re ~1800
 5. **Sinus piriformis**: Introduces pole-zero pair around 3500-5000 Hz; omitted in simple models
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **House_Stevens_1956_NasalizationVowels**
+- **Peterson_Barney_1952_VowelControl**
+
+### New Leads (Not Yet in Collection)
+- **Fant, C. G. M. (1952)** - "Transmission properties of the vocal tract with application to the acoustic specification of phonemes". This is Fant's own M.I.T. technical report that forms the core of the acoustic theory presented in this book.
+- **Delattre, P. C., Liberman, A. M., and Cooper, F. S. (1951, 1955)** - Multiple papers on synthetic vowels, acoustic loci, and transitional cues for consonants. These are key experimental validations of the acoustic theory with pattern playback.
+- **van den Berg, Jw. (1950s)** - Multiple papers on vocal fold mechanics, subglottic pressure, and laryngeal function. Essential for understanding the physiological basis of the voice source model.

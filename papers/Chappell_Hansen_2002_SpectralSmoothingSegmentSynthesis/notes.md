@@ -257,3 +257,17 @@ Where:
 - Klabbers & Veldhuis, 1998 - Concatenation artifact reduction
 - Plumpe et al., 1998 - HMM-based smoothing
 - Stevens & House, 1955 - Quantitative vowel articulation description
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+
+### New Leads (Not Yet in Collection)
+- **Conkie & Isard (1997)** - Introduces optimal coupling technique for improving segment concatenation by adjusting boundaries for better spectral match
+- **Kleijn & Haagen (1995)** - Foundational work on waveform interpolation for speech coding and synthesis applications
+- **Shadle & Atal (1979)** - Foundational linear prediction spectral interpolation technique; directly relevant to LP smoothing methods
+- **Hansen & Chappell (1998)** - Auditory-neural based distance measure (ANBM) for assessing spectral discontinuities objectively
+- **Moulines & Charpentier (1990)** - PSOLA (Pitch-synchronous Overlap-Add) technique for prosodic modification referenced throughout for segment boundary handling

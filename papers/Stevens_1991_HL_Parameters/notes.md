@@ -264,3 +264,18 @@ AerodynamicState {
 - Stevens, K. N. (1971) Airflow and turbulence noise for fricative and stop consonants - aerodynamic noise
 - Bickley, C. A. & Stevens, K. N. (1986) Effects of vocal-tract constriction on glottal source - source-tract interaction
 - Shadle, C. (1985) The acoustics of fricative consonants - frication modeling
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Badin_1989_FricativeProductionModelling**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fujimura_1962_NasalConsonantAnalysis**
+- **Hawkins_Stevens_1985_NasalVowelCorrelates**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1990_VoiceQualityVariations**
+- **Shadle_1985_FricativeAcoustics**
+- **Stevens_1971_AirflowTurbulenceNoise**

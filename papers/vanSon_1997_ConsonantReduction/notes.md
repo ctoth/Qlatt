@@ -195,3 +195,17 @@ $$
 - [7] Koopmans-Van Beinum (1992) - Focus words in natural vs synthetic speech
 - [4] Duez (1995) - Spontaneous French speech, voiced stop reduction
 - [5] Farnetani (1995) - Consonant reduction in conversational Italian
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Byrd (1994)**: Relations of sex and dialect to reduction - foundational work on consonant reduction variability across speaker categories
+- **Van Bergem (1995)**: Acoustic and lexical vowel reduction - core reference for understanding vowel reduction mechanisms
+- **Sluijter (1995)**: Phonetic correlates of stress and accent - critical for understanding the relationship between spectral slope (COG) and perceived stress
+- **Duez (1995)**: Spontaneous French speech reduction and assimilation - cross-linguistic evidence for reduction in Romance languages
+- **Koopmans-Van Beinum (1992)**: Role of focus words in continuous speech - relevant for understanding how prosodic prominence affects both vowel and consonant reduction

@@ -349,3 +349,20 @@ The four key KLSYN88 parameters for female voice quality control:
 **Measurement Methods:**
 - Rothenberg (1973, 1977) - Oral airflow measurement techniques
 - Fujimura & Lindqvist (1971) - F1 bandwidth measurements
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1988_LFFrequencyDomainInterpretation**
+- **Holmberg_1988_GlottalAirflowPressure**
+- **Klatt_1990_VoiceQualityVariations**
+- **Shadle_1985_FricativeAcoustics**
+- **Stevens_1971_AirflowTurbulenceNoise**
+
+### New Leads (Not Yet in Collection)
+- **Titze, I. R. (1989a, 1989b)** - Establishes physiologic and acoustic differences between male and female voices, directly relevant to sex-specific synthesis parameter selection.
+- **Gobl, C. and Ní Chasaide, A. (1988, 1993)** - Provides methods for analyzing voice source variation and consonant-dependent effects on voice quality, essential for contextual parameter modification in synthesis.

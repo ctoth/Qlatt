@@ -333,3 +333,21 @@ When spacing > 3.5 Bark:
 - Shadle, C. (1985) - Fricative acoustics (RLE Technical Report 506)
 - Stevens & Keyser (1989) - Enhancement theory for consonants
 - Liljencrants & Lindblom (1972) - Vowel space optimization
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Carlson_1975_RuleBasedTTS**
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Hawkins_Stevens_1985_NasalVowelCorrelates**
+- **House_Stevens_1956_NasalizationVowels**
+- **Klatt_1987_TTS_Review**
+- **Shadle_1985_FricativeAcoustics**
+
+### New Leads (Not Yet in Collection)
+- **Chistovich & Lublinskaya (1979) - Center of Gravity Effect**: Critical auditory perception experiments on formant spacing and vowel quality perception; demonstrates perceptual thresholds in the auditory domain.
+- **Jakobson, Fant & Halle (1963) - Preliminaries to Speech Analysis**: Classic distinctive feature theory reference; provides the theoretical context for understanding how quantal relations map to phonological features.
+- **Delgutte & Kiang (1984a, 1984b) - Speech Coding in the Auditory Nerve**: Foundational auditory physiology work examining how auditory-nerve responses encode acoustic information; directly supports Stevens' claims about auditory-acoustic quantal relations.

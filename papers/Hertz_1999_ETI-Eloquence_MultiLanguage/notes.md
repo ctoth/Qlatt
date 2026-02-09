@@ -303,3 +303,18 @@ None explicitly provided - the system is rule-based rather than equation-driven.
 - **Fig 3 (p3)**: Phone/transition/nucleus structure for "five"
 - **Fig 4 (p4)**: AV, AF, F2 alignment for "five" - **key implementation reference**
 - **Fig 5 (p4)**: F0 alignment for "five inches" - prosody positioning
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Hertz_1982_SRS_TextToSpeech**
+- **Hertz_1991_StreamsPhonesTransitions**
+- **Klatt_1990_VoiceQualityVariations**
+- **Pierrehumbert_1980_EnglishIntonation**
+
+### New Leads (Not Yet in Collection)
+- **[4] Hertz (1990)** - Documents the Delta programming language itself, the core tool enabling rule-based text-to-speech development across languages.
+- **[1] Beckman & Pierrehumbert (1986)** - Provides the intonational framework (tones and tiers) used for F0 contour generation across languages.
+- **[2] Clements & Hertz (1995)** - Shows an integrated phonological and phonetic approach to deriving acoustic parameters from linguistic structure.

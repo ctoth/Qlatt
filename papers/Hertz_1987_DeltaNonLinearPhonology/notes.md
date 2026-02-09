@@ -444,3 +444,17 @@ Qlatt's current linear phoneme representation could be enhanced with:
 > "[h] adds no duration of its own, but rather, is realized by aspiration superimposed on the transition between the preceding and following segment." (p. 104)
 
 > "The absence of h in the phoneme stream... completely eliminates the much-debated problem of whether aspiration of stops in English should be considered for segmentation purposes as part of the preceding stop or part of the following vowel." (p. 105)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Hertz_1985_DeltaRuleSystem**
+- **Pierrehumbert_1980_EnglishIntonation**
+- **Stevens_1989_QuantalNatureSpeech**
+
+### New Leads (Not Yet in Collection)
+- **Holmes, Mattingly, & Shearme (1964) - Speech synthesis by rule** - Early formant synthesis work establishing target-and-transition model used throughout Hertz's paper
+- **Clements & Keyser (1983) - CV Phonology** - Multi-level representation theory that Delta implements, fundamental to understanding non-linear phonological structure

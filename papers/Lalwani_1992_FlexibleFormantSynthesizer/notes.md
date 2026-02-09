@@ -251,3 +251,27 @@ When "ah" or "af" suddenly increases by 50 dB:
 - Childers and Wu (1990) - Stylized pulses for LPC, quality assessment
 - Gold and Rabiner (1968) - Impulse invariant transform for resonator coefficients
 - Klatt (1987) - Minimum and inherent durations table
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Fant_1988_LFFrequencyDomainInterpretation**
+- **Holmberg_1988_GlottalAirflowPressure**
+- **Holmes_1983_FormantSynthesizersCascadeParallel**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1987_TTS_Review**
+- **Klatt_1990_VoiceQualityVariations**
+- **Maeda_1982_VowelNasalizationCues**
+- **Peterson_Barney_1952_VowelControl**
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Rabiner_1968_SynthesisByRule**
+- **Stevens_1971_AirflowTurbulenceNoise**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **Childers, D. G., and Wu, K. (1990). "Quality of speech produced by analysis-synthesis"** - Related work from the same research group on speech quality assessment.

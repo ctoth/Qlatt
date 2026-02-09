@@ -180,3 +180,17 @@ const vowelTargets = {
 - Potter, Kopp & Green (1947) "Visible Speech" - Bar movement importance
 - Fletcher (1929) "Speech and Hearing" - Phonetic power ratios
 - Thomas (1947) "Phonetics of American English" - Dialect classification
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Potter & Steinberg (1950)**: Foundational work on the sound spectrograph - the measurement instrument used throughout this paper. Essential for understanding the acoustic measurement methodology.
+- **Stevens & Volkman (1940)**: Establishes the mel scale for frequency perception, which Peterson & Barney use for plotting their vowel loop diagrams - critical for understanding auditory frequency scaling.
+- **Fletcher (1929)**: Classic reference on speech and hearing perception. Provides the power ratio framework used to normalize formant amplitude measurements across vowels.
+- **Potter, Kopp & Green (1947)**: "Visible Speech" - provides the conceptual framework for acoustic phonetics and spectrographic analysis that underpins this entire study.
+- **Koenig (1949)**: Practical guide to interpreting spectrograms and frequency calibration, directly relevant to the measurement procedures described in this paper.

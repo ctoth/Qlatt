@@ -207,3 +207,17 @@ The functional framework offers:
 > "The interpretation of polysyllabic shortening as the attenuation of a lengthening effect is parsimonious, invoking only one well-established process – salient elements (domain heads) are lengthened in speech" (p.46)
 
 > "For temporal units in speech production, the smaller, the better." (van Santen 1997, quoted p.47)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Klatt_1976_SegmentalDuration**
+- **Recasens_2003_ArticulationSoundChangeRomance**
+
+### New Leads (Not Yet in Collection)
+- **Turk, A.E., & Shattuck-Hufnagel, S., 2000** - "Word-boundary-related duration patterns in English" - Critical for understanding domain-edge (word-initial and phrase-final) lengthening effects that are implementable in TTS.
+- **Beckman, M.E., 1992** - "Evidence for speech rhythms across languages" - Establishes cross-linguistic validity of prosodic timing effects, relevant for extending Qlatt's framework beyond English.
+- **Byrd, D., & Saltzman, E., 2003** - "The elastic phrase: modeling the dynamics of boundary-adjacent lengthening" - Proposes the p-gesture framework for implementing structural timing effects in articulatory models, directly applicable to Qlatt's runtime.
+- **White, L., Mattys, S.L., Wiget, L., 2012** - "Language categorization by adults is based on sensitivity to durational cues, not rhythm class" - Demonstrates listener sensitivity to durational variation across languages, validating the perceptual importance of accurate timing implementation in synthesis.

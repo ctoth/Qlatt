@@ -199,3 +199,16 @@ This represents a massive ~1000+ Hz shift in F2 while maintaining lip rounding.
 > "The sound change has involved a shift in which these vowels used to be differentiated based on both lingual and labial features some 50 years ago to one in which the importance for the /i–u/ distinction of the lingual feature has waned and the labial feature has strengthened." (p. 153)
 
 > "There is no evidence that the SSBE diachronic shift in /u ʊ/ has involved an unrounding of the lips." (p. 155)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+
+### New Leads (Not Yet in Collection)
+- **Lindblom & Sundberg (1971)** - Acoustic consequences of lip, tongue, jaw, and larynx movement. Foundational work establishing how formant changes result from different articulatory movements, directly relevant to understanding F2 changes in vowel fronting.
+- **Ohala (1981, 1993)** - The listener as source of sound change and phonetics of sound change. Theoretical framework explaining how coarticulation drives diachronic vowel changes, relevant to understanding the mechanisms of vowel fronting across languages.
+- **Perkell et al. (1993)** - Trading relations between tongue-body raising and lip rounding in /u/ production. Motor equivalence study showing articulatory flexibility in achieving equivalent acoustic targets, directly applicable to modeling /u/ synthesis variations.
+- **Hawkins & Midgley (2005)** - Formant frequencies of RP monophthongs in four age groups. Provides comprehensive formant target data for British English vowels across different speaker ages, essential reference for speech synthesis targeting in SSBE.

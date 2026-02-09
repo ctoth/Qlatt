@@ -171,3 +171,16 @@ The synthetic F2 values are generally higher, compensating for missing F3.
 - Peterson & Barney (1952) - "Control Methods Used in a Study of the Vowels" JASA 24:175-84
 - Joos (1948) - *Acoustic Phonetics*, Language Monographs No. 23
 - Fletcher (1929) - *Speech and Hearing* (early single-formant observations)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Peterson_Barney_1952_VowelControl**
+
+### New Leads (Not Yet in Collection)
+- **Chiba & Kajiyama (1941)** - Early foundational work on vowel nature and structure; historical reference for two-formant vowel synthesis.
+- **Cooper et al. (1951)** - Pattern playback methodology and technique development; essential for understanding the experimental instrumentation and broader research program on synthetic speech perception.
+- **Joos (1948)** - Acoustic phonetics framework; establishes the theoretical context that two formants can produce reasonable vowel approximations.
+- **Fletcher (1929)** - Early observations on single-formant vowel behavior in back vowels; provides historical context for perceptual averaging phenomenon.

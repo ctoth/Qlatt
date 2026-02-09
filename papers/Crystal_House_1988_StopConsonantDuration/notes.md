@@ -224,3 +224,15 @@ elif word_final:
 > "Only 437 out of a total of 972 identified stops were complete... the difficulties encountered in identifying stop sounds by means of automatic algorithms were exacerbated." (p. 285)
 
 > "When the syllable was stressed, the stops tended to be complete (97%), but the proportion of nonprepausal stressed word-final syllables ending in a stop varied from 0.05 when the word-boundary was followed by a stop to 0.69 when the word-boundary was followed by a vowel." (p. 287)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Zue_1976_StopConsonantAcoustics**
+
+### New Leads (Not Yet in Collection)
+- **Klatt (1973)** - Durational characteristics of stop consonants in clusters; directly relevant for understanding consonant shortening in initial /st/ combinations
+- **Port (1979)** - Systematic study of stop closure duration as a cue for voicing and place; establishes duration ordering across places of articulation
+- **Luce & Charles-Luce (1985)** - Contextual effects on closure duration and consonant/vowel ratio; relevant for understanding stop duration variation across positions

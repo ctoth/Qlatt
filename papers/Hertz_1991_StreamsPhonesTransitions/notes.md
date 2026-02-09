@@ -251,3 +251,22 @@ The multi-stream delta architecture could inform Qlatt's internal representation
 > "Unlike the interior transition of a diphthong, the interior transition of a gliding vowel is not stable; it lengthens and shortens along with the vowel" (p.101)
 
 > "The universal lengthening [before voiced obstruents] seems to be a very different phenomenon from the much greater lengthening of phones in English syllable nuclei" (p.105)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1987_MITalk_TTS**
+- **Carlson_1975_RuleBasedTTS**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Hertz_1982_SRS_TextToSpeech**
+- **Hertz_1985_DeltaRuleSystem**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1979_SpeechPerceptionLexicalAccess**
+- **Klatt_1987_TTS_Review**
+
+### New Leads (Not Yet in Collection)
+- **Gay (1968)** - Critical for understanding diphthong behavior in fast speech and the undershoot phenomenon that Hertz's model elegantly explains through the "fast_speech" stream concept.
+- **Chen (1970)** - Original observation of sonorant sequence lengthening before voiced obstruents (beyond simple vowel lengthening), which motivates Hertz's nucleus-level representation.
+- **Goldsmith (1976)** - Autosegmental phonology framework that inspired the multi-tiered parallel structure of Delta, providing the linguistic theory underlying Hertz's framework.

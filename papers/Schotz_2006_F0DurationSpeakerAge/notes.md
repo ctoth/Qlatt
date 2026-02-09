@@ -194,3 +194,16 @@ F0 and duration are the most robust parameters for speaker age synthesis - they 
 - **Liljencrants (1968)** - OVE III synthesizer (GLOVE's foundation)
 - **Linville (2001)** - "Vocal Aging" - comprehensive summary of age-voice research
 - **Brückl & Sendlmeier (2003)** - Aging female voices acoustic/perceptual analysis
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1985_LFModelGlottalFlow**
+
+### New Leads (Not Yet in Collection)
+- **[11] Linville (2001)** - Comprehensive book on vocal aging; primary reference for understanding acoustic age cues across voice quality dimensions.
+- **[3] Carlson, Granström, Karlsson (1991)** - Foundational work on voice modeling in speech synthesis; describes GLOVE synthesizer framework used in this paper.
+- **[10] Liljencrants (1968)** - OVE III speech synthesizer; the cascade formant synthesis architecture that GLOVE extends.
+- **[2] Brückl and Sendlmeier (2003)** - Directly relevant study of female voice aging and F0/duration relationships; cited for age-related acoustic findings.

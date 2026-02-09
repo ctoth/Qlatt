@@ -176,3 +176,17 @@ VOT increases as articulation moves posteriorly:
 - Cho & Ladefoged (1999) - VOT variation across 18 languages
 - Klatt (1975) - VOT, frication, aspiration in clusters
 - Keating (1984) - Phonetic/phonological representation of voicing
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Lisker, L., & Abramson, A. S. (1964)** - The foundational VOT paper with cross-language acoustic measurements from 11 languages. Essential for understanding the original definition and typology.
+- **Klatt, D. H. (1975)** - Voice onset time, frication, and aspiration in word-initial consonant clusters. Directly relevant to Klatt synthesizer implementation of VOT.
+- **Cho, T., & Ladefoged, P. (1999)** - Variation and universals in VOT across 18 languages. Provides language-specific VOT targets useful for multilingual synthesis.
+- **Stevens, K. N. (1993)** - Models for the production and acoustics of stop consonants. Theoretical foundation for implementing stop consonant synthesis.
+- **Crystal, T. H., & House, A. S. (1982)** - Segmental durations in connected speech. Important for understanding how VOT varies in running speech contexts.

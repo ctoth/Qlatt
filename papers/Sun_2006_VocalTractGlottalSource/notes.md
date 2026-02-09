@@ -165,3 +165,16 @@ Where:
 - [3] Childers 1995 - Glottal source modeling for voice conversion (polynomial approach)
 - [6] Childers & Lee 1991 - Vocal quality factors (already in papers/)
 - [7] Fant et al. 1985 - LF model (already in papers/)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Fant_1985_LFModelGlottalFlow**
+
+### New Leads (Not Yet in Collection)
+- **[2] Moore & Clements 2004 - Glottal Waveform Estimation**: The automatic glottal extraction algorithm used by this paper; critical for understanding the analysis methodology
+- **[8] Rosenberg 1971 - Glottal Pulse Shape**: Classic reference model for glottal waveforms that this paper benchmarks against; important baseline for comparative analysis
+- **[10] Kain & Macon 1998 - Spectral Voice Conversion**: The voice conversion application framework that motivates this paper's glottal source modeling approach

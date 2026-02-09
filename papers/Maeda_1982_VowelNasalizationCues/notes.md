@@ -73,3 +73,14 @@ For Klatt synthesizer nasalization:
 - [ ] Does current Klatt implementation produce spectral flattening in 300-2500 Hz?
 - [ ] What FNZ (nasal zero frequency) values best achieve this flattening?
 - [ ] How does coupling magnitude map to AN parameter values?
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Fant (1979) Status Report** - Essential reference for glottal flow and vocal-tract theory; foundational for understanding acoustic characteristics
+- **Miller (1959)** - Classic work on inverse filtering techniques; relevant for analyzing glottal characteristics and spectral analysis methods

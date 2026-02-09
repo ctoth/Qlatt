@@ -222,3 +222,18 @@ Multicycle method reduces error by ~10× for most vowels at SNR=40dB.
 - [17] Murthy & Yegnanarayana (1991) - Formant extraction from group delay - related prior work
 - [20] Smits & Yegnanarayana (1995) - GCI detection using group delay - core method paper
 - [23] Fant, Liljencrants & Lin (1985) - LF glottal model - **relevant to synthesis**
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Childers_Lee_1991_VoiceQualityFactors**
+- **Fant_1985_LFModelGlottalFlow**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1990_VoiceQualityVariations**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **[6] Flanagan (1965)** and **[7] Fant (1970)** - Classic formant bandwidth and acoustic theory references providing empirical validation data
+- **[16] Markel & Gray (1976)** - Linear prediction fundamentals underlying the covariance method used throughout this paper

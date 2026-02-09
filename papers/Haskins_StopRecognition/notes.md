@@ -189,3 +189,12 @@ For velar stops (/g,k/):
 - Zue (1976) - Acoustic characteristics of stops (PhD thesis)
 - Stevens (1975) - Front cavity resonance theory
 - Kuhn (1975) - Front cavity resonance in speech perception
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Zue_1976_StopConsonantAcoustics**

@@ -250,3 +250,16 @@ Black (1949) correlation suggests: connected speech duration ≈ 0.6 × /hVd/ du
 - **Zahorian & Jagharghi (1993):** Spectral shape vs. formants for vowel classification
 - **Syrdal & Gopal (1986):** Perceptual model using Bark scale
 - **Miller (1989):** Auditory-perceptual vowel interpretation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Peterson_Barney_1952_VowelControl**
+
+### New Leads (Not Yet in Collection)
+- **Fant (1973)**: Speech theory and spectral characteristics; fundamental reference for formant-based synthesis
+- **Stevens & House (1963)**: Perturbation of vowel acoustics by consonantal context; crucial for understanding coarticulation effects in synthesis
+- **Nearey (1989, 1992)**: Vowel perception models incorporating dynamic and relational properties; demonstrates importance of spectral change beyond static formants
+- **Miller (1989)**: Auditory-perceptual interpretation of vowels; bridges acoustic measurements to perceptual reality for synthesis applications

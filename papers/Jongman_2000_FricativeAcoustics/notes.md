@@ -260,3 +260,20 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 - Stevens (1998) - Acoustic Phonetics (comprehensive reference)
 - Hedrick & Ohde (1993) - Relative amplitude perception
 - Shadle (1990) - Articulatory-acoustic fricative relationships
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Behrens_Blumstein_1988_FricativeAmplitude**
+- **Crystal_House_1988_StopConsonantDuration**
+- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Jongman_1989_FricativeDuration**
+- **Stevens_1971_AirflowTurbulenceNoise**
+- **Stevens_1998_AcousticPhonetics**
+
+### New Leads (Not Yet in Collection)
+- **Shadle (1990) - Articulatory-Acoustic Relationships in Fricatives** — Directly addresses the connection between articulation and acoustic output for fricatives, providing essential context for understanding which acoustic properties are controllable in synthesis.
+- **Forrest et al. (1988) - Spectral Moments Method** — Original methodology paper for spectral moments analysis applied to obstruents; foundational for the analysis techniques used throughout this paper.
+- **Hedrick & Ohde (1993) - Relative Amplitude Perception** — Complements this acoustic work with perceptual validation of relative amplitude as a cue to fricative place, directly supporting synthesis parameter selection.

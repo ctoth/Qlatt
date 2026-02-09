@@ -150,3 +150,18 @@ Verify `tts-frontend-rules.js` fricative durations meet minimums:
 - Behrens & Blumstein (1988a,b) - Acoustic characteristics of fricatives, amplitude role
 - Hughes & Halle (1956) - Spectral properties of fricative consonants
 - Soli (1981) - Fricative-vowel coarticulation effects on F2
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Behrens_Blumstein_1988_FricativeAmplitude**
+- **Blumstein_Stevens_1979_AcousticInvariance**
+- **Stevens_1971_AirflowTurbulenceNoise**
+
+### New Leads (Not Yet in Collection)
+- **Stevens & Blumstein (1978-1980)**: Invariant cue theory for stop consonants; provides theoretical framework for understanding how place of articulation is extracted from spectral properties, applicable to fricatives.
+- **Klatt (1986)**: Unpublished analysis of fricative spectral properties; relevant for modern formant synthesis models needing fricative acoustic parameters.
+- **LaRiviere et al. (1975)**: Earlier perceptual study establishing role of vowel vs. frication noise in fricative identification; foundational for current work.
+- **Soli (1981)**: Fricative-vowel coarticulation effects on spectral characteristics; important for understanding context-dependent acoustic variation in fricative synthesis.

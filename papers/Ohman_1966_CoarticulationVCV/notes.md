@@ -256,3 +256,16 @@ VCV utterance = V1-to-V2 diphthongal gesture + superimposed C gesture
 > "A VCV utterance of the kind studied here can, accordingly, not be regarded as a linear sequence of three successive gestures. We have clear evidence that the stop-consonant gestures are actually superimposed on a context-dependent vowel substrate that is present during all of the consonantal gesture." (p. 165)
 
 > "The freedom of coarticulation of the Russian stops is small. Apparently, these stops must always be coarticulated with one of two fixed vowels, the palatal [i] or the velar [ɨ]." (p. 168)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+
+### New Leads (Not Yet in Collection)
+- **Delattre, Liberman, & Cooper (1955) - Acoustic Loci**: The classical "locus theory" paper that Ohman critiques. Directly relevant for understanding static vs. dynamic models of stop consonant synthesis.
+- **House & Stevens (1963) - Consonantal Perturbation of Vowels**: Complementary work on coarticulation effects showing how consonants influence vowel acoustics, the flip side of Ohman's vowel-on-consonant analysis.
+- **Lindblom (1963) - Vowel Reduction**: Addresses vowel variability in different contexts, relevant to understanding the vowel targets that influence consonant transitions.
+- **Halle (1959) - Sound Pattern of Russian**: Important for understanding the palatalization distinction in Russian and how it constrains coarticulation, contrasting with the greater freedom in Swedish/English.

@@ -230,3 +230,16 @@ function getTransitionDirection(consonant) {
 - Kent & Moll (1972). "Cinefluorographic analyses of lingual consonants" - tongue-dorsum coupling
 - Recasens (1984, 1985, 1987, 1989). Series on Catalan coarticulation - prior work by first author
 - Sproat & Fujimura (1993). "Allophone variation in English /l/" - dark /l/ gesture analysis
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+
+### New Leads (Not Yet in Collection)
+- **Browman, C. P., and Goldstein, L. (1986). "Towards an articulatory phonology"** - Theoretical framework for understanding articulatory gestures and constraints, directly underlying the DAC model presented in this paper.
+- **Kent, R. D., and Moll, K. L. (1972). "Cinefluorographic analyses of selected lingual consonants"** - Empirical data on consonant articulation that provides baseline measurements for understanding coarticulation effects.
+- **Öhman, S. (1966). "Coarticulation in VCV sequences"** - Seminal work on vowel-consonant coarticulation patterns that establishes foundational principles later extended in this paper.
+- **Farnetani, E., and Recasens, D. (1993). "Anticipatory consonant-to-vowel coarticulation in Italian"** - Related cross-linguistic study applying similar methodology to Italian, useful for validation and understanding language-specific variations in coarticulation.

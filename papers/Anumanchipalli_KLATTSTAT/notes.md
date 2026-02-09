@@ -274,3 +274,17 @@ The paper's parameter numbering maps to standard Klatt parameters. Key observati
 ### Analysis Window
 - 50ms window, 5ms shift (200 Hz frame rate)
 - Different from typical 5ms frames used in Qlatt - may need adjustment
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Allen_1987_MITalk_TTS**
+- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- **Klatt_1987_TTS_Review**
+
+### New Leads (Not Yet in Collection)
+- **[12] Metze 2007 - Discriminative Articulatory Features** - Describes the GMM-based discriminative approach used for detecting nasality, aspiration, and frication. Useful technique for automatic parameter extraction.
+- **[15] Iles & Ing-Simmons 1995 - Klatt in C** - The C implementation of Klatt used for resynthesis in this paper. A reference implementation that may be useful for comparison.
+- **[14] Black 2006 - CLUSTERGEN** - The statistical parametric synthesizer framework that was extended to use Klatt parameters. Describes the trajectory modeling approach for parameter prediction.

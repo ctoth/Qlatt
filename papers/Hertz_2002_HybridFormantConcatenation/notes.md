@@ -154,3 +154,16 @@ Systems used:
 - [3] **Klatt & Klatt 1990** - KLSYN-88, KLGLOTT-88, voice quality variations *(already in papers/)*
 - [4] Hertz 1991 - Phone-and-transition model for formant timing - core ETI-Eloquence approach
 - [5] Hertz & Huffman 1992 - Nucleus-based timing model - syllable structure effects
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Hertz_1991_StreamsPhonesTransitions**
+- **Hertz_1999_ETI-Eloquence_MultiLanguage**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **[2] Verhelst 2000** - Describes the WSOLA join technique used to splice waveform fragments in the hybrid utterances; technically important for understanding the concatenation methodology.
+- **[5] Hertz & Huffman 1992** - Presents nucleus-based timing models for speech synthesis; relevant for understanding prosodic and durational aspects of synthesis-by-rule.

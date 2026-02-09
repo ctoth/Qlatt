@@ -149,3 +149,13 @@ The modular architecture allows independent development of each component.
 - Allen 1987 MITalk book (full system documentation)
 - Klatt 1980 (vocal tract model specification)
 - Hunnicutt letter-to-sound rules
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- None. No citations are provided in this paper.

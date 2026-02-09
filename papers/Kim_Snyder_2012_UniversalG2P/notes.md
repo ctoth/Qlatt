@@ -198,3 +198,17 @@ Where:
 - Grapheme-phoneme mappings: http://www.omniglot.com/writing/langalph.htm#latin
 - Texts: Universal Declaration of Human Rights (UDHR) translations
 - Language metadata: World Atlas of Language Structures (WALS)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Clements, G.N. (2003)** - Feature economy in sound systems: Foundational work on how natural languages organize phoneme inventories with feature-based constraints, directly relevant to predicting valid phonemic systems across language families.
+- **Kenstowicz, M.J. and Kisseberth, C.W. (1979)** - Generative phonology: Essential background on phonotactic constraints and how languages sequence phonemes, which the paper's model learns to exploit for cross-linguistic generalization.
+- **Liljencrants, J. and Lindblom, B. (1972)** - Numerical simulation of vowel quality systems: Important for understanding the principle of maximal perceptual contrast referenced in the paper's phoneme inventory analysis.
+- **Lafferty, J.D., McCallum, A., and Pereira, F.C.N. (2001)** - Conditional random fields: Technical foundation for the undirected graphical model approach used in this paper for joint probabilistic inference.
+- **Spirtes, P., Glymour, C.N., and Scheines, R. (2000)** - Causation, prediction, and search: Provides the PC structure learning algorithm critical to automatically inducing graph topology for discovering relationships between grapheme-phoneme predictions.

@@ -177,3 +177,16 @@ b10: Die wird auf dem Platz sein, wo wir sie immer hinlegen.
 - Burkhardt 2001 - "Simulation emotionaler Sprechweise" (emotional TTS with formant synthesis)
 - Laver 1980 - "The Phonetic Description of Voice Quality" (voice quality framework)
 - Zwicker & Fastl 1990 - Psychoacoustics (loudness-based rhythm model)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Banse_1996_VocalEmotionAcousticProfiles**
+
+### New Leads (Not Yet in Collection)
+- **Laver 1980 [11]** - "The Phonetic Description of Voice Quality" - Canonical reference for voice quality terminology and classification; essential for understanding the articulatory settings labels used in emotional speech annotation.
+- **Burkhardt 2001 [3]** - "Simulation emotionaler Sprechweise mit Sprachsyntheseverfahren" - Direct application of emotional speech simulation using speech synthesis; highly relevant for implementing expressive TTS.
+- **Burkhardt & Sendlmeier 2000 [14]** - "Verification of Acoustical Correlates of Emotional Speech Using Formant Synthesis" - Validates acoustic correlates of emotion using formant synthesis; directly applicable to Klatt synthesizer parameter manipulation for emotional speech.
+- **Sendlmeier & Klasmeyer 2000 [6]** - "Voice and Emotional States" - Covers relationship between voice quality and emotional states; useful for understanding which synthesis parameters to modify for different emotions.

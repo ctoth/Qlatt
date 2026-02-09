@@ -240,3 +240,16 @@ For the JavaScript Klatt synthesizer:
 - **PERL implementation**: http://www.cs.cmu.edu/~lenzo/t2p
 - **CMU Pronouncing Dictionary**: http://www.speech.cs.cmu.edu/cgi-bin/cmudict
 - **OALD**: Oxford Text Archive (British English lexicon used in paper)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Daelemans & van den Bosch (1996)** [#6] - Alternative language-independent G2P approach; useful for comparing methodologies and understanding the state-of-the-art baseline this paper improves upon.
+- **van den Bosch, Weijters & Daelemans (1998)** [#12] - Demonstrates that joint phone+stress prediction outperforms modular approaches; directly validates the paper's stress assignment findings.
+- **Luk & Damper (1996)** [#8] - Stochastic G2P approach for comparison; represents an alternative statistical framework to the CART-based method presented here.
+- **Breiman et al. (1984)** [#3] - The foundational CART book; essential reference for understanding the decision tree methodology underlying the LTS rule generation.

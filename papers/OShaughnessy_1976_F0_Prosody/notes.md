@@ -444,3 +444,18 @@ Papers cited that may be worth reading:
 - **Collier (1974, 1975)**: Physiological correlates of intonation
 - **Olive & Nakatani (1974)**: Rule-synthesis by word concatenation
 - **Pierrehumbert (later work)**: ToBI autosegmental-metrical theory (post-dates thesis)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Rabiner_1968_SynthesisByRule**
+
+### New Leads (Not Yet in Collection)
+- **Bolinger, Dwight (1951-1972)** - Seminal work on English intonation levels, accent patterns, and grammatical intonation. Multiple publications establishing foundational concepts of pitch accents and their linguistic functions.
+- **Klatt, Dennis (1973)** - "Discrimination of fundamental frequency contours in synthetic speech: implications for models of pitch perception" (JASA 53). Critical for understanding F0 perception and discrimination in synthetic speech.
+- **Lieberman, Philip (1960-1970)** - Extensive research on acoustic correlates of stress, intonation perception, and language. Book "Intonation, Perception, and Language" (1967) provides comprehensive framework for understanding F0 in linguistic context.
+- **Lea, Wayne (1973)** - "Segmental and Suprasegmental Influences on Fundamental Frequency Contours." Directly addresses how segmental features affect F0, critical for TTS implementation.
+- **Mattingly, Ignatius (1966-1970)** - Multiple publications on "Synthesis by Rule" establishing methods for rule-based prosodic synthesis, foundational for speech synthesis approaches.

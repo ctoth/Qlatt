@@ -159,3 +159,22 @@ Linear interpolation between control points.
 - Klatt (1979c) - Speech perception model
 - Zwicker & Feldtkeller (1967) - Critical band theory
 - Paterson (1976) - Auditory filter shape measurements
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Klatt_1976_SegmentalDuration**
+- **Klatt_1979_SpeechPerceptionLexicalAccess**
+
+### New Leads (Not Yet in Collection)
+- Foundational acoustic theory referenced for understanding spectral tilt and voicing source characteristics essential to formant synthesis.
+- Direct model of speech perception mechanisms relevant to understanding how acoustic parameters affect vowel perception in synthesis.
+- **Paterson, R.D. (1976)** - Auditory filter shape derived with noise stimuli
+- Critical band filter modeling directly applicable to designing perception-aligned formant synthesizers with psychoacoustically accurate filtering.
+- **Flanagan, J.L. (1957)** - Estimates of the maximum precision necessary in quantizing certain dimensions of vowel sounds
+- Establishes just-noticeable-difference (JND) thresholds for vowel parameters, crucial for understanding perceptual salience of acoustic manipulations.
+- **Zwicker, E. & Feldtkeller, R. (1967)** - Das Ohr als Nachrichtenempfänger
+- Comprehensive auditory system modeling for understanding critical band analysis and psychoacoustic principles underlying vowel perception.

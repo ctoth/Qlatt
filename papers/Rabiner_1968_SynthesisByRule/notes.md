@@ -190,3 +190,16 @@ Input includes: phonemes, vowel stress marks (1-4), word/sentence markers, pause
 - Flanagan (1965) - Speech Analysis, Synthesis and Perception - Theory [7]
 - Lieberman (1967) - Intonation, Perception and Language - F0 model basis [9]
 - Pickett & Coulter (1966) - F2 statistics and prediction [8]
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Rabiner_1968_DigitalFormantSynthesizer**
+- **Strong_1967_MachineAidedFormantDetermination**
+
+### New Leads (Not Yet in Collection)
+- **[7] Flanagan (1965)** - Comprehensive theory of speech analysis, synthesis and perception; foundational source for source-filter theory and acoustic phonetics underlying the synthesis strategy.
+- **[9] Lieberman (1967)** - Intonation, perception, and language; provides the theoretical basis and F0 modeling approach for the suprasegmental component of the synthesis model.
+- **[11] Rabiner et al. (1969)** - Investigation of stress patterns for synthesis; directly addresses stress-dependent duration modifications in connected speech synthesis.

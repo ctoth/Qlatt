@@ -235,3 +235,17 @@ Despite similar Uo/Ee ratios:
 - **Gobl (1988)** - Voice Source Dynamics in Connected Speech
 - **Holmberg, Hillman, & Perkell (1988)** - Glottal flow measurements
 - **Sundberg & Gauffin (1979)** - Glottal voice source waveform and spectrum
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Fant_1985_LFModelGlottalFlow**
+- **Holmberg_1988_GlottalAirflowPressure**
+- **Sundberg_1972_SingingFormant**
+
+### New Leads (Not Yet in Collection)
+- **Gobl (1988) - "Voice Source Dynamics in Connected Speech"** - Studies temporal variation of LF parameters in running speech. Important for understanding how parameters change during coarticulation.
+- **Sundberg & Gauffin (1979)** - Detailed analysis of glottal voice source waveforms and spectra, including singing voice characteristics. Relevant for understanding the relationship between waveform shape and spectral content.

@@ -254,3 +254,17 @@ const PATTERNS = {
 - Allen, Hunnicutt & Klatt (1987) - MITalk system (full TTS with morphology)
 - Klatt (1987) - Review of text-to-speech conversion for English
 - Hunnicutt (1976) - Phonological rules for speech synthesis **[IN PAPERS FOLDER]**
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Dudley (1939) - The Synthesizer** - The foundational hardware speech synthesizer that motivated computer-based TTS research and established the practical need for automatic pronunciation generation.
+- **Ainsworth (University of Keele)** - Context-sensitive letter-to-sound rule system that provided the starting point for the NRL system's rule development methodology.
+- **McIlroy (Bell Telephone Laboratories)** - Demonstrates the state-of-the-art in commercial letter-to-sound rule systems (750+ rules) and provides comparison for evaluating the NRL system's efficiency (329 rules achieving 90% accuracy).
+- **Brown Corpus** - The standard evaluation dataset (50,000 words of Present-Day Edited American English) used to measure rule performance, establishing the benchmark for modern TTS systems.
+- **MIT System (Allen & Lee)** - Contemporary research effort combining automatic text translation, parts-of-speech analysis, and speech synthesizer control, representing an alternative more complex approach to the simpler letter-to-sound rule method.

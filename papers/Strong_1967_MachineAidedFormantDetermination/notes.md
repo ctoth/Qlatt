@@ -185,3 +185,15 @@ $$f_N = 40N - 20 \text{ cps}, \quad N = 1, 2, \ldots, 100$$
 - Noll (1964) - "Short-Time Spectrum and 'Cepstrum' Techniques for Vocal Pitch Detection" - JASA 36, 296-302
 - Schroeder and Noll (1965) - "Recent Studies in Speech Research at Bell Telephone Laboratories" - Proceedings of the Fifth International Congress of Acoustics
 - Griffiths (1966) - "Further Rhyme-Test Modification for Diagnostic Articulation Testing" - JASA 40, 1256(A)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Holmes, Mattingly, and Shearme (1964)** - "Speech Synthesis by Rule" - This is the foundational paper Strong contrasts his approach with. Holmes et al. used spectrographic analysis and listening to modify rules; Strong instead extracts detailed parameters to compare against. Essential for understanding the two competing approaches to synthesis-by-rule development.
+- **Noll (1964)** - "Cepstrum Techniques for Vocal Pitch Detection" - The F0 extraction method Strong uses is based on Noll's cepstrum technique. Relevant for understanding pitch tracking algorithms and their limitations in weak voicing regions.
+- **Griffiths (1966)** - "Modified Rhyme Test" - The intelligibility test methodology used for evaluation. Understanding this test format is important for interpreting the error rate results and comparing to other synthesizer evaluations.

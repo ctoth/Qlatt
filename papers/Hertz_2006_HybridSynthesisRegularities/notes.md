@@ -146,3 +146,17 @@ The study validates that:
 - [ ] How do edge transition durations trade off with phone durations quantitatively?
 - [ ] What determines the ~30 ms parsing window into AN?
 - [ ] How do heavily reduced vowels pattern with ACCs in implementation?
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Hertz_1991_StreamsPhonesTransitions**
+- **Hertz_1999_ETI-Eloquence_MultiLanguage**
+- **Hertz_2002_HybridFormantConcatenation**
+- **Klatt_1990_VoiceQualityVariations**
+
+### New Leads (Not Yet in Collection)
+- **[4] Hertz & Huffman 1992 (Nucleus-based timing model)** — Directly relevant for understanding timing patterns in consonant and vowel structure, foundational to the hybrid model framework.
+- **[2] Pierrehumbert 2000 (Exemplar dynamics)** — Contrasting view on how listeners process speech; important for understanding the rules-vs-exemplars debate that motivates this work.

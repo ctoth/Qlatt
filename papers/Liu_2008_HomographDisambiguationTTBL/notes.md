@@ -177,3 +177,17 @@ For English heteronym disambiguation in TTS frontend:
 - **Fig 4 (p.3):** Combined templates beat either alone
 - **Fig 5 (p.4):** DT templates nearly match manual templates
 - **Fig 6 (p.4):** TTBL (90.36%) greatly exceeds decision tree (87.82%)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **Yarowsky 1997** - Foundational work on homograph disambiguation in speech synthesis using log-likelihood ratio; directly precedes this work and provides English homograph methodology that influenced TTBL design.
+- **Brill 1995** - Original transformation-based error-driven learning paper; essential for understanding TBL framework that TTBL extends with automatic template generation.
+- **Zhang & Chu (ref 3, ISCSLP2002)** - Chinese grapheme-to-phoneme conversion using stochastic complexity; provides competing approach to polyphone disambiguation specific to Mandarin.
+- **Wang et al. 1996 (ref 2, ICSLP96)** - Earlier broad homograph disambiguation study for Mandarin speech synthesis; establishes baseline approaches that TTBL improves upon.
+- **Yang & Pedersen 1998 (ref 8, ICML97)** - Feature selection methods in text categorization; provides theoretical foundation for keyword selection measures (information gain, mutual information) that TTBL evaluates.

@@ -214,3 +214,17 @@ FujisakiModel:
 - Fujisaki & Hirose, 1984. "Analysis of voice fundamental frequency contours for declarative sentences of Japanese" - Core model paper
 - Mixdorff & Fujisaki, 1994. "Analysis of voice fundamental frequency contours of German utterances" - Application to Germanic language
 - Taylor, 2000. "The Tilt model of intonation" - Alternative approach (already in papers collection)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- **[4] Fujisaki & Hirose, 1984** - The foundational paper establishing the model for Japanese declarative sentences. Essential for understanding the original formulation.
+- **[13] Fujisaki & Ohno, 1995** - Application to English utterances. Most directly relevant for Qlatt's English TTS target.
+- **[15] Mixdorff & Fujisaki, 1994** - German analysis. Mixdorff has extensive follow-up work on the Fujisaki model and maintains an implementation.
+- **[2] Öhman, 1967** - Earlier quantitative intonation model from KTH. Important historical context and alternative approach.
+- **[5] Fujisaki, 1988** - Physiological basis paper. Critical for understanding why the model structure is the way it is (cricothyroid muscle mechanics).

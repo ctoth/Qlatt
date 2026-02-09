@@ -402,3 +402,21 @@ Compare synthesized fricative spectra against:
 6. **Catford (1977)** - Effect of teeth on fricative spectra (with/without teeth recordings)
 7. **Goldstein (1976)** - Free jet sound power formulas
 8. **Morse and Ingard** - Acoustic line source model for distributed jet source
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Stevens_1971_AirflowTurbulenceNoise**
+
+### New Leads (Not Yet in Collection)
+- For fricative aeroacoustics modeling:**
+- **Shadle (1983)** - "Experiments on the Acoustics of Whistling" - Directly addresses how constriction geometry affects fricative resonance and transition to whistles
+- **Heinz & Stevens (1961)** - "On the properties of voiceless fricative consonants" - Foundational study on fricative noise generation and spectral properties
+- **Lighthill (1952, 1954)** - "On Sound Generated Aerodynamically" - Theoretical framework for turbulent noise generation, cited throughout
+- For frication synthesis control:**
+- **Fant (1983)** - "Preliminaries to Analysis of the Human Voice Source" - Voice source characterization applicable to frication generation
+- For formant resonance and transfer functions:**
+- Beranek (1949, 1954) - Acoustic theory and measurement foundations
+- Morse & Ingard (1968) - Theoretical acoustics for vocal tract modeling

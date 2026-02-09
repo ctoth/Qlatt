@@ -202,3 +202,19 @@ This is unavoidable - if F0 > F1, there are no harmonics to represent F1.
 > "When f0 is higher than F1, there are no harmonics to represent the F1" (p. 25)
 
 > "Vowels with low F1 (i.e., closed vowels) have more errors with a higher f0" (p. 22)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Herbst_2015_GlottalAdductionSubglottalPressure**
+- **Peterson_Barney_1952_VowelControl**
+- **Titze_2015_OddHarmonicSensitivity**
+
+### New Leads (Not Yet in Collection)
+- **Monsen & Engebretson (1983)** - Foundational comparison of manual formant tracking vs. automatic LPC estimation; provides historical baseline for evaluating formant estimation accuracy.
+- **Escudero et al. (2009)** - Introduces the optimized formant ceiling procedure being evaluated; critical for understanding the optimization strategy based on variance minimization.
+- **Watanabe (2001)** - Describes inverse-filter control (IFC), an automated method that handles high fundamental frequency better than LPC-based approaches; important alternative to explore.
+- **Dissen et al. (2019)** - Deep learning approach to formant estimation that adapts to speaker characteristics; represents recent progress on the fundamental frequency problem.

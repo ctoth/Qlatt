@@ -274,3 +274,18 @@ Two approaches:
 ### Phonological
 - Chomsky & Halle (1968) - *The Sound Pattern of English*
 - Oshika et al. (1975) - Role of phonological rules in speech understanding
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Carlson_1975_RuleBasedTTS**
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Klatt_1976_SegmentalDuration**
+- **Zue_1976_StopConsonantAcoustics**
+
+### New Leads (Not Yet in Collection)
+- **Blumstein, Stevens & Nigro (1977). Property detectors for bursts and transitions.** - Describes acoustic-phonetic invariants that can inform synthesis target selection.
+- **Lowerre & Reddy (1978). The HARPY speech understanding system.** - Describes the 15,000-state decoding network that LAFS improves upon.
+- **Chomsky & Halle (1968). The Sound Pattern of English.** - Foundational phonological rules that should be implemented in TTS frontend.

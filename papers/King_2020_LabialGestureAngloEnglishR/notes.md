@@ -183,3 +183,20 @@ Is tongue tip up?
 - Stevens (1998) - Acoustic Phonetics, theoretical basis for F3 lowering
 - Dalcher et al. (2008) - Perceptual differences between American and Anglo-English /r/
 - Smith et al. (2019) - American English /r/ lip postures (more variable than Anglo-English)
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Fant_1960_AcousticTheorySpeechProduction**
+- **Harrington_2011_HighBackVowelFronting**
+- **Recasens_2003_ArticulationSoundChangeRomance**
+- **Stevens_1998_AcousticPhonetics**
+
+### New Leads (Not Yet in Collection)
+- **Espy-Wilson et al. (2000)** - Foundational work on acoustic modeling of American English /r/, directly relevant to understanding formant values and front cavity contributions to F3 lowering.
+- **Alwan et al. (1997)** - Critical for understanding articulatory-acoustic trading relations between sublingual space and palatal constriction in /r/, which is the core theoretical framework of the King & Ferragne study.
+- **Mielke, Baker, & Archangeli (2016)** - Large-scale comparison of bunched vs. retroflex /r/ in American English, providing the main comparative baseline for understanding Anglo-English patterns.
+- **Laver (1980)** - Essential theoretical work on labial articulation taxonomy (endolabial vs. exolabial, horizontal constriction), which frames the lip posture analysis in this paper.
+- **Lawson, Scobbie, & Stuart-Smith** (2011, 2013, 2015, 2018) - Series of complementary ultrasound studies on Scottish English /r/, providing related articulatory methods and comparative dialect data.

@@ -166,3 +166,17 @@ None (text-only conference paper)
 - [13] Recasens 1990 "Articulatory characteristics of palatal consonants" J.Phonetics - palatographic evidence
 - [21] Sproat & Fujimura 1993 - English /l/ allophony and timing
 - [22] Recasens 1991 - Alveolar tap/trill production and coarticulation
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- [7] Recasens "Lingual coarticulation" (1999) - Foundational work on coarticulation effects that drives many of the sound change patterns explained in the paper.
+- [13] Recasens "The articulatory characteristics of palatal consonants" (1990) - Describes palatal articulation zones and provides direct evidence for the palatalization mechanisms discussed throughout.
+- [35] Beddor "Phonological and Phonetic Effects of Nasalization in Vowel Height" (1983) - Explains how nasal formants affect vowel spectra, relevant to understanding nasalization-driven sound changes.
+- [22] Recasens "Production and coarticulatory characteristics of alveolar taps and trills" (1991) - Details articulatory mechanisms of alveolar consonants that explain weakening and strengthening processes.
+- [15] Guion "The role of perception in the sound change of velar palatalization" (1998) - Provides perceptual counterarguments to articulatory accounts of palatalization, offering a complementary view of sound change drivers.

@@ -138,3 +138,16 @@ Quantitative equivalences:
 - de Cheveigné et al. (1997) - Concurrent vowel identification: level and F0 effects [2]
 - Klatt (1982) - Perceived phonetic distance from critical-band spectra [7]
 - Rosner & Pickering (1994) - Vowel perception and production [8]
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- **Klatt_1982_KlattalkTTS**
+
+### New Leads (Not Yet in Collection)
+- **Assmann & Summerfield (1990) [1]** - Foundation for concurrent vowel research; provides the "normal bandwidth" values used in this experiment. Essential for understanding baseline bandwidth parameters.
+- **Hirahara & Kato (1992) [6]** - Source of the Japanese vowel formant frequencies used in the experiment. Useful reference data for vowel synthesis.
+- **Rosner & Pickering (1994) [8]** - Comprehensive vowel perception/production text; useful for understanding why bandwidth has little effect on isolated vowels.
+- **de Cheveigné et al. (1997) [2]** - Detailed methods for concurrent vowel experiments; useful if implementing auditory scene analysis or multi-talker synthesis testing.

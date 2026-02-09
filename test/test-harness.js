@@ -36,6 +36,8 @@ let runStartTime = 0;
 let sessionId = 0; // Incremented each play for session isolation (P1)
 let telemetryTimer = null;
 let meterTimer = null;
+let meterBindingMode = null;
+let meterBindingOwner = null;
 let lastDiagnostics = "";
 const spikeThreshold = 1.0;
 const spikeCooldown = 0.2;
@@ -1698,7 +1700,19 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
 
 function attachMeters() {
   const nodes = synth.nodes;
-  if (!nodes?.outputSum || meters.size > 0) return;
+  if (!nodes?.outputSum) return;
+  if (
+    meterBindingMode === "legacy" &&
+    meterBindingOwner === synth &&
+    meters.size > 0
+  ) {
+    return;
+  }
+
+  meters.clear();
+  meterBindingMode = "legacy";
+  meterBindingOwner = synth;
+
   const targets = [
     { name: "cascade-out", node: nodes.cascadeOutGain },
     { name: "parallel-out", node: nodes.parallelOutGain },
@@ -1716,6 +1730,19 @@ function attachMeters() {
 
 // Attach meters to new runtime output nodes
 function attachMetersNewRuntime(runtime) {
+  if (!runtime) return;
+  if (
+    meterBindingMode === "new" &&
+    meterBindingOwner === runtime &&
+    meters.size > 0
+  ) {
+    return;
+  }
+
+  meters.clear();
+  meterBindingMode = "new";
+  meterBindingOwner = runtime;
+
   // Map from legacy meter names to new graph node IDs
   const outputTargets = [
     { name: "cascade-out", nodeId: "cascadeOutGain" },
@@ -1729,9 +1756,6 @@ function attachMetersNewRuntime(runtime) {
       console.warn(`[QLATT] Meter node ${target.nodeId} not found`);
       continue;
     }
-
-    // Don't duplicate if already attached
-    if (meters.has(target.name)) continue;
 
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;

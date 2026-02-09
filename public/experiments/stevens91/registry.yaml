@@ -6,8 +6,21 @@
 # Stevens (1998) "Acoustic Phonetics" MIT Press
 
 primitives:
+  tilt-filter:
+    description: "Spectral tilt filter - applies TL proxy from HL mapping"
+    worklet: "tilt-filter-processor.js"
+    wasm: "tilt-filter.wasm"
+    params:
+      tilt:
+        type: float
+        default: 0
+        unit: "dB/octave"
+        description: "Spectral tilt in dB/octave"
+    inputs: 1
+    outputs: 1
+
   aerodynamic-model:
-    description: "Stevens (1991) aerodynamic model - derives voicing, aspiration, B1 from glottal/constriction areas"
+    description: "Stevens (1991) HL-derived model - approximates AV/AH/AF/B1/FNP/FNZ/OQ/TL from HL controls"
     worklet: "aerodynamic-model-processor.js"
     wasm: "aerodynamic-model.wasm"
     params:
@@ -15,16 +28,31 @@ primitives:
         type: float
         default: 0.05
         unit: "cm2"
-        description: "Glottal area — Stevens (1998) Ch. 2"
+        description: "HL ag: glottal area (Table I: usually 0-0.4 cm2)"
       ac:
         type: float
-        default: 0
+        default: 0.4
         unit: "cm2"
-        description: "Constriction area — Stevens (1998) Ch. 7"
+        description: "HL ac: narrowest oral constriction area (Table I: 0-0.4 cm2 for consonants)"
+      an:
+        type: float
+        default: 0.0
+        unit: "cm2"
+        description: "HL an: velopharyngeal port area (Table I: 0-1.0 cm2)"
+      st:
+        type: float
+        default: 0.0
+        unit: "dB"
+        description: "HL st: stridency correction (Table I: 0 to -10 dB)"
+      pm:
+        type: float
+        default: 0.0
+        unit: "fraction of Ps"
+        description: "HL pm: pressure manipulation term (Table I: usually -0.5 to +0.2 of Ps)"
       ps:
         type: float
         default: 8
         unit: "cm H2O"
-        description: "Subglottal pressure — Stevens (1998) Ch. 2"
+        description: "Subglottal pressure context (model constant in this experiment)"
     inputs: 0
-    outputs: 3
+    outputs: 8

@@ -22,7 +22,7 @@
       "id": "stevens91",
       "name": "Stevens 1991 HL Parameters",
       "extends": "klatt80-baseline",
-      "description": "Aerodynamic model with ag/ac/ps quasi-articulatory control"
+      "description": "HL controls (f1-f4, f0, ag, ac, an, st, pm) mapped to KL controls"
     }
   ]
 }

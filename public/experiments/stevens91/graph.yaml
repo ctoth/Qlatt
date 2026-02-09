@@ -5,9 +5,9 @@ meta:
   semantics: ./semantics.yaml
   description: |
     Stevens 1991 higher-level parameter experiment.
-    Extends Klatt 80 topology with aerodynamic model that derives
-    voicing amplitude, aspiration amplitude, and B1 bandwidth from
-    quasi-articulatory parameters (ag, ac, ps).
+    Extends Klatt 80 topology with a paper-aligned HL layer.
+    Exposes HL controls f1 f2 f3 f4 f0 ag ac an st pm and derives
+    AV/AH/AF/B1/FNP/FNZ plus OQ/TL proxies using explicit approximations.
 
     Stevens & Bickley (1991) "Constraints among parameters simplify
       control of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
@@ -32,7 +32,7 @@ nodes:
     params:
       f0: { bind: F0 }
       gain: 1.0
-      openPhaseRatio: { bind: openPhaseRatio }
+      openPhaseRatio: 0.0
 
   noiseSource:
     type: noise-source
@@ -54,19 +54,26 @@ nodes:
 
   # ---------------------------------------------------------------------------
   # AERODYNAMIC MODEL — Stevens & Bickley (1991)
-  # Outputs: [0] voicing amplitude, [1] aspiration amplitude, [2] B1 bandwidth
+  # Outputs:
+  #   [0] AV linear, [1] AH linear, [2] AF linear, [3] B1 Hz
+  #   [4] FNP Hz, [5] FNZ Hz, [6] OQ ratio, [7] TL proxy dB
   # ---------------------------------------------------------------------------
   aeroModel:
     type: aerodynamic-model
     params:
       ag: { bind: ag }
       ac: { bind: ac }
-      ps: { bind: ps }
+      an: { bind: an }
+      st: { bind: st }
+      pm: { bind: pm }
+      ps: 8.0
 
   # ---------------------------------------------------------------------------
   # PLSTEP BURST MECHANISM
   # ---------------------------------------------------------------------------
-  # Klatt 80 PLSTEP: DC step injection triggered by AF or AH rise >= 49 dB
+  # PLSTEP burst: DC step injection triggered by rapid AF/AH rises.
+  # In this experiment AF/AH are derived as linear amplitudes and fed
+  # to edge-detector AudioParams.
   # Creates transient rarefaction pulse at stop/fricative onsets
   #
   # From PARCOE.FOR:
@@ -78,15 +85,15 @@ nodes:
   afEdgeDetector:
     type: edge-detector
     params:
-      threshold: 49.0  # Klatt 80 threshold
-      input: { bind: AF }  # Monitor frication amplitude
+      threshold: 0.15
+      input: 0
 
   # Edge detector for AH (aspiration amplitude)
   ahEdgeDetector:
     type: edge-detector
     params:
-      threshold: 49.0  # Klatt 80 threshold
-      input: { bind: AH }  # Monitor aspiration amplitude
+      threshold: 0.08
+      input: 0
 
   # Sum triggers (OR gate - either AF or AH trigger fires the envelope)
   plstepTriggerSum:
@@ -122,6 +129,12 @@ nodes:
     type: gain
     params:
       gain: 1.0
+
+  # Spectral tilt proxy (TL) for source shaping
+  tiltFilter:
+    type: tilt-filter
+    params:
+      tilt: 0.0
 
   # Source mode switching for cascade path
   sourceBypassGain:
@@ -433,7 +446,7 @@ nodes:
   parallelFricGain:
     type: gain
     params:
-      gain: { bind: fricGainScaled }
+      gain: 0.0
 
   parallelDiffSum:
     type: gain
@@ -491,16 +504,17 @@ connections:
   - [lfSourceGain, sourceSum]
   - [impulseSource, impulseGain]
   - [impulseGain, sourceSum]
+  - [sourceSum, tiltFilter]
 
   # ---------------------------------------------------------------------------
   # Glottal shaping - cascade path
   # ---------------------------------------------------------------------------
-  - [sourceSum, rgp]
-  - [sourceSum, rgs]
+  - [tiltFilter, rgp]
+  - [tiltFilter, rgs]
   - [rgs, rgpAvs]
 
   # Voice cascade path - three parallel routes merged at voiceGain
-  - [sourceSum, sourceBypassGain]
+  - [tiltFilter, sourceBypassGain]
   - [sourceBypassGain, voiceGain]
   - [rgp, sourceDirectGain]
   - [sourceDirectGain, voiceGain]
@@ -513,7 +527,7 @@ connections:
   # ---------------------------------------------------------------------------
   # Glottal shaping - parallel AVS path
   # ---------------------------------------------------------------------------
-  - [sourceSum, avsBypassGain]
+  - [tiltFilter, avsBypassGain]
   - [avsBypassGain, avsGain]
   - [rgpAvs, avsDirectGain]
   - [avsDirectGain, avsGain]
@@ -618,16 +632,32 @@ connections:
 
   # ---------------------------------------------------------------------------
   # Aerodynamic model -> AudioParam connections
-  # Stevens & Bickley (1991) — ag/ac/ps -> AV/AH/B1
+  # Stevens & Bickley (1991) HL controls -> derived KL controls
   # ---------------------------------------------------------------------------
   - from: { node: aeroModel, port: 0 }
     to: { node: voiceGain, param: gain }
   - from: { node: aeroModel, port: 1 }
     to: { node: noiseGain, param: gain }
   - from: { node: aeroModel, port: 2 }
-    to: { node: cascadeF1, param: bandwidth }
+    to: { node: parallelFricGain, param: gain }
+  - from: { node: aeroModel, port: 1 }
+    to: { node: ahEdgeDetector, param: input }
   - from: { node: aeroModel, port: 2 }
+    to: { node: afEdgeDetector, param: input }
+  - from: { node: aeroModel, port: 3 }
+    to: { node: cascadeF1, param: bandwidth }
+  - from: { node: aeroModel, port: 3 }
     to: { node: parallelF1, param: bandwidth }
+  - from: { node: aeroModel, port: 4 }
+    to: { node: np, param: frequency }
+  - from: { node: aeroModel, port: 4 }
+    to: { node: parallelNasal, param: frequency }
+  - from: { node: aeroModel, port: 5 }
+    to: { node: nz, param: frequency }
+  - from: { node: aeroModel, port: 6 }
+    to: { node: impulseSource, param: openPhaseRatio }
+  - from: { node: aeroModel, port: 7 }
+    to: { node: tiltFilter, param: tilt }
 
 # =============================================================================
 # OUTPUTS

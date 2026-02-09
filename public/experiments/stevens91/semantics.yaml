@@ -1,40 +1,125 @@
 # Stevens 1991 Higher-Level Parameters — Semantics Overrides
 #
-# New params: ag, ac, ps (quasi-articulatory control)
-# Overridden realize rules: voiceGain and aspGain set to 0.0
-# (aerodynamic model drives these via audio-rate AudioParam connections)
+# This experiment exposes the paper's 10 HL controls (Table I):
+#   f1 f2 f3 f4 f0 ag ac an st pm
+# and maps them onto KL controls with aerodynamic/acoustic approximations.
 #
 # Stevens & Bickley (1991) "Constraints among parameters simplify
 #   control of Klatt formant synthesizer" Journal of Phonetics 19, 161-174
 # Stevens (1998) "Acoustic Phonetics" MIT Press
 
 params:
+  # HL natural frequencies and f0 (Table I)
+  f1:
+    type: float
+    range: [180, 800]
+    default: 500
+    unit: "Hz"
+  f2:
+    type: float
+    range: [800, 2500]
+    default: 1500
+    unit: "Hz"
+  f3:
+    type: float
+    range: [2000, 3500]
+    default: 2500
+    unit: "Hz"
+  f4:
+    type: float
+    range: [3000, 4500]
+    default: 3500
+    unit: "Hz"
+  f0:
+    type: float
+    range: [0, 500]
+    default: 120
+    unit: "Hz"
+
+  # HL quasi-articulatory controls (Table I)
   ag:
     type: float
-    range: [0, 0.5]
+    range: [0, 0.4]
     default: 0.05
     unit: "cm2"
-    description: "Glottal area — modal ~0.05, breathy ~0.15 — Stevens (1998) Ch. 2"
+    description: "HL ag: glottal area (modal ~0.03-0.05)"
   ac:
     type: float
-    range: [0, 5]
-    default: 3.0
+    range: [0, 0.4]
+    default: 0.4
     unit: "cm2"
-    description: "Constriction area — open vowel ~3.0, closed ~0.0 — Stevens (1998) Ch. 7"
-  ps:
+    description: "HL ac: oral constriction area for consonants"
+  an:
     type: float
-    range: [0, 20]
-    default: 8
-    unit: "cm H2O"
-    description: "Subglottal pressure — Stevens (1998) Ch. 2"
+    range: [0, 1.0]
+    default: 0.0
+    unit: "cm2"
+    description: "HL an: velopharyngeal opening area"
+  st:
+    type: float
+    range: [-10, 0]
+    default: 0.0
+    unit: "dB"
+    description: "HL st: stridency correction (0=max, -10=min)"
+  pm:
+    type: float
+    range: [-0.5, 0.2]
+    default: 0.0
+    unit: "fraction of Ps"
+    description: "HL pm: active pressure manipulation as fraction of Ps"
 
 realize:
+  # Map HL natural frequencies to KL formants.
+  # F1 includes a small ag-dependent shift (paper: large ag raises F1).
+  F0:
+    expr: "f0"
+    deps: [f0]
+
+  f1ShiftFromAg:
+    expr: "ag > 0.1 ? (ag - 0.1) * 600 : 0"
+    deps: [ag]
+    description: "Approximation of F1 shift with large glottal opening"
+
+  F1:
+    expr: "f1 + f1ShiftFromAg"
+    deps: [f1, f1ShiftFromAg]
+  F2:
+    expr: "f2"
+    deps: [f2]
+  F3:
+    expr: "f3"
+    deps: [f3]
+  F4:
+    expr: "f4"
+    deps: [f4]
+
+  # OQ/TL proxies from ag for topology parameters that expect these effects.
+  OQ:
+    expr: "min(90, max(40, 50 + (ag - 0.05) * 130))"
+    deps: [ag]
+    description: "Approximate open-quotient percent from ag"
+  TL:
+    expr: "min(30, max(0, (OQ - 50) * 0.75))"
+    deps: [OQ]
+    description: "Approximate high-frequency tilt proxy from OQ"
+
+  # Let aerodynamic-model outputs drive these additively via AudioParam wiring.
   voiceGain:
     expr: "0.0"
     deps: []
-    description: "Set to 0 — aerodynamic model output[0] drives voiceGain.gain additively"
+    description: "Driven by aerodynamic-model output[0]"
   aspGain:
     expr: "0.0"
     deps: []
     ramp: true
-    description: "Set to 0 — aerodynamic model output[1] drives noiseGain.gain additively"
+    description: "Driven by aerodynamic-model output[1]"
+  fricGain:
+    expr: "0.0"
+    deps: []
+    ramp: true
+    description: "Driven by aerodynamic-model output[2]"
+  fricGainScaled:
+    expr: "0.0"
+    deps: []
+    ramp: true
+    description: "Driven by aerodynamic-model output[2]"

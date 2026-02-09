@@ -1,6 +1,16 @@
 ## Appendix D: Implementation Notes
 
-### D.1 Snapshot Strategy
+### D.1 Propagation Strategy
+
+Use a monotone propagator network with dependency tracking:
+
+- Each mutable field is a **cell** with a lattice join.
+- Propagators read cells and monotonically `put()` derived facts.
+- Track read dependencies per propagator firing to support `explain` traces.
+- Maintain an **applied match set** per rule to ensure idempotent rule firing.
+- Separate **structural** propagators (suppression/insert) from **finalize** propagators (timing/points).
+
+### D.2 Snapshot Strategy
 
 Use copy-on-write:
 
@@ -8,7 +18,7 @@ Use copy-on-write:
 - Patch application creates new arrays only for affected streams
 - Same semantics, no quadratic copying
 
-### D.2 Rank Utilities (Informative)
+### D.3 Rank Utilities (Informative)
 
 ```typescript
 // order_rank.ts

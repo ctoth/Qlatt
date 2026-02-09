@@ -48,11 +48,11 @@ type TraceEvent =
 
   | ExpressionEvaluation
 
-  | PatchGenerated
+  | RewriteGenerated
 
-  | PatchApplied
+  | RewriteApplied
 
-  | PatchSkipped
+  | RewriteSkipped
 
   | ScalarResolution
 
@@ -140,29 +140,54 @@ interface ExpressionEvaluation {
 
 
 
-interface PatchGenerated {
+type Rewrite =
+  | { type: 'suppress'; target: TokenId }
+  | { type: 'insert_base'; boundary: SyncMarkId; side: 'before' | 'after'; tokens: TokenSummary[] }
+  | { type: 'replace_range'; range_left: SyncMarkId; range_right: SyncMarkId; suppress: TokenId[]; insert: TokenSummary[] }
+  | { type: 'suppress_tokens'; suppress: TokenId[] }
+  | { type: 'insert_interval'; stream: string; token: TokenSummary }
+  | { type: 'insert_point'; stream: string; point_id: string }
+  | { type: 'modify'; target: TokenId; field: string; op: 'set' | 'mul' | 'add'; value: number }
+  | { type: 'associate'; from: TokenId; to: TokenId; assoc_name: string }
+  | { type: 'disassociate'; from: TokenId; to: TokenId; assoc_name: string };
 
-  type: 'patch_generated';
+
+
+interface RewriteGenerated {
+
+  type: 'rewrite_generated';
 
   rule: string;
 
   match_index: number;
 
-  patch: Patch;
+  rewrite: Rewrite;                // structural or scalar action
 
-  source_tokens: TokenId[];        // tokens that triggered this patch
+  source_tokens: TokenId[];        // tokens that triggered this rewrite
 
 }
 
 
 
-interface PatchSkipped {
+interface RewriteApplied {
 
-  type: 'patch_skipped';
+  type: 'rewrite_applied';
 
-  patch: Patch;
+  rewrite: Rewrite;
 
-  reason: 'target_deleted' | 'target_null' | 'conflict' | 'validation_failed';
+  details: string;
+
+}
+
+
+
+interface RewriteSkipped {
+
+  type: 'rewrite_skipped';
+
+  rewrite: Rewrite;
+
+  reason: 'target_suppressed' | 'target_null' | 'conflict' | 'validation_failed';
 
   details: string;
 
@@ -364,7 +389,7 @@ interface SnapshotDiff {
 
     added: TokenSummary[];
 
-    deleted: TokenSummary[];
+    suppressed: TokenSummary[];
 
     modified: TokenModification[];
 
@@ -376,7 +401,7 @@ interface SnapshotDiff {
 
     added: SyncMarkId[];
 
-    deleted: SyncMarkId[];
+    removed: SyncMarkId[];   // optional if GC is enabled
 
   };
 
@@ -386,7 +411,7 @@ interface SnapshotDiff {
 
     added: AssociationEdge[];
 
-    deleted: AssociationEdge[];
+    removed: AssociationEdge[];
 
   };
 
@@ -546,7 +571,7 @@ interface TokenDisplay {
 
   scalars: Record<string, string>;
 
-  highlight: 'none' | 'selected' | 'matched' | 'modified' | 'inserted' | 'deleted';
+  highlight: 'none' | 'selected' | 'matched' | 'modified' | 'inserted' | 'suppressed';
 
   provenance_available: string[];    // which fields have provenance
 
@@ -574,7 +599,7 @@ interface SyncMarkDisplay {
 
 interface Annotation {
 
-  type: 'rule_match' | 'patch_applied' | 'warning' | 'custom';
+  type: 'rule_match' | 'rewrite_applied' | 'warning' | 'custom';
 
   x_start: number;
 
@@ -664,7 +689,7 @@ type BreakpointLocation =
 
   | { type: 'match'; pattern: string; token?: TokenId }
 
-  | { type: 'patch'; patch_type: string }
+  | { type: 'rewrite'; rewrite_type: string }
 
   | { type: 'token_modified'; token: TokenId; field?: string }
 
@@ -820,9 +845,9 @@ interface PerformanceReport {
 
       matching: number;
 
-      patch_generation: number;
+      rewrite_generation: number;
 
-      patch_application: number;
+      rewrite_application: number;
 
       resolution: number;
 
@@ -894,7 +919,7 @@ debug:
 
   trace:
 
-    events: [match_success, match_failure, patch_applied, scalar_resolution]
+    events: [match_success, match_failure, rewrite_applied, scalar_resolution]
 
     # or: all, none, errors_only
 

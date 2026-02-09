@@ -12,16 +12,23 @@ A domain-specific language for phonological and phonetic rules in speech synthes
 
 ## Part 0: Compilation Contract
 
-### 0.1 Compilation Pipeline
+### 0.1 Compilation Lifecycle
 
-This section defines the **global** compilation phases. Later sections MUST state which phase they affect.
+This section defines the **global** lifecycle. Later sections MUST state which stage they affect.
 
 1. **PARSE**            Parse YAML -> typed AST
 2. **VALIDATE**         Validate schema + static constraints (Part 9)
-3. **INITIALIZE**       Build initial global sync axis + base stream
-4. **APPLY PHASES**     For each phase in order (Part 7), run the rule-evaluation pipeline (Part 5), then normalize
-5. **FINAL RESOLVE**    If any mark time is null, run `RESOLVE SCALARS` then `COMPUTE TIMES`, then resolve points (this reuses the §5.11 logic to finalize emitter times)
+3. **INITIALIZE**       Build initial global sync axis + base stream; create cells/propagators; set all parsed tokens to `ACTIVE` unless explicitly marked otherwise
+4. **RUN PHASES**       For each phase in order (Part 7), enable its rule propagators and run to quiescence
+5. **FINALIZE**         Enable timing/point resolution propagators; run to quiescence; validate invariants
 6. **EMIT**             Emit outputs/traces (Part 8, Part 10)
+
+### 0.1a Suppression Model (Summary)
+
+- Tokens are **persistent**; structural rewrites **never delete** tokens.
+- Rules and splices **suppress** tokens by moving `status` monotonically toward `SUPPRESSED`.
+- Matching, selection, navigation, and output operate over **ACTIVE** tokens only by default.
+- Overlapping splices are **jointly applied**; any resulting ACTIVE overlaps or gaps are rejected during validation.
 
 ### 0.2 Determinism Contract
 
@@ -29,13 +36,56 @@ Implementations MUST produce identical results for the same inputs by adhering t
 
 - **Phase order:** Phases execute in the order listed in `phases` (Part 7).
 - **Rule order:** Within a phase, rules execute in the listed order.
-- **Match order:** Each rule enumerates matches in a single left-to-right sweep over the snapshot, ordered by earliest involved sync mark (leftmost). The *earliest involved sync mark* for a match is the minimum `sync_left.order` across all captured interval tokens in that match (i.e., the leftmost boundary of any capture). Matches are collected, then patches are generated and applied later by the patch ordering and splice overlap policy (Part 5.4, Part 9).
-- **Select order:** For select rules, tokens are visited in stream order. Base streams use list order; non-base interval streams use `(sync_left.order, sync_right.order, id)` as a total tie-breaker; point streams use `(anchor_left.order, anchor_right.order, ratio, id)`.
-- **No fixpoint:** Rules are single-pass unless the spec explicitly adds a bounded repeat mechanism (not defined in v11).
+- **Match order:** Each rule enumerates matches in a single left-to-right sweep over the snapshot **of ACTIVE tokens only**, ordered by earliest involved sync mark (leftmost). The *earliest involved sync mark* for a match is the minimum `sync_left.order` across all captured interval tokens in that match (i.e., the leftmost boundary of any capture). Matches are applied once per match identity (Part 5.2).
+- **Select order:** For select rules, **ACTIVE tokens** are visited in stream order. Base streams use list order; non-base interval streams use `(sync_left.order, sync_right.order, id)` as a total tie-breaker; point streams use `(anchor_left.order, anchor_right.order, ratio, id)`.
+- **Quiescence:** Propagation runs until no new information is produced. Rules fire at most once per match identity (Part 5.2).
 
-### 0.3 Normalization Contract
+### 0.3 Validation Contract
 
-Normalization is the **only** phase allowed to repair invariants after rewrites. Repairs are deterministic and bounded (Part 5.13).
+Validation is the only stage allowed to **reject** invariant violations after rewrites. The engine MUST NOT repair structure beyond deterministic ordering; structural changes are monotone and explicit (Part 5.9).
+
+### 0.4 Input Contract (Normative)
+
+The declarative frontend operates on a **pre-tokenized** linguistic representation. It does **not** define text normalization, lexicon lookup, or G2P. Implementations MUST accept a fully constructed token model at **PARSE** time, including:
+
+- Base stream tokens (e.g., `phone`) with initial `features` and `scalars` populated.
+- Span streams (e.g., `syllable`, `word`, `phrase`) with parent-child links established.
+- Boundary features on span streams sufficient to express phrase/word boundaries and punctuation effects.
+- All tokens marked `ACTIVE` unless explicitly marked otherwise.
+
+Required minimum fields for a typical English phone frontend:
+
+```yaml
+input_contract:
+  base_stream: phone
+  spans: [phrase, word, syllable]
+  required_features:
+    phone: [manner, place, voicing, stress]
+    syllable: [stress, boundary]
+    word: [pos]
+    phrase: [boundary]
+  required_scalars:
+    phone: [duration, F1, F2, F3, B1, B2, B3, AV, AH, AF]
+```
+
+Upstream components MAY supply additional streams or features. The DSL engine MUST NOT infer missing span structure.
+
+### 0.5 Pipeline Boundaries (Informative)
+
+This spec defines the **rule engine** portion of the frontend. A complete TTS system typically follows:
+
+1. **Upstream linguistic frontend (outside this spec)**
+   - Text normalization
+   - Lexicon lookup / G2P
+   - Syllabification and phrasing
+   - Construction of token streams + spans + initial scalars
+2. **Declarative rule engine (this spec)**
+   - Pattern/select rules
+   - Structural rewrites and scalar effects
+   - Timing/point resolution
+3. **Renderer (outside this spec)**
+   - Interpolation, smoothing, and frame generation
+   - Audio synthesis (e.g., Klatt)
 
 ## Part 1: Core Data Model
 
@@ -175,7 +225,7 @@ const END: SyncMark   = { id: 'END', order: { kind: 'END' }, time: null };
 
 
 
-**Interior marks:** A sync mark may exist inside a base token interval. Time is computed by interpolation (§5.11).
+**Interior marks:** A sync mark may exist inside a base token interval. Time is computed by interpolation (§5.8).
 
 
 
@@ -192,6 +242,8 @@ interface IntervalToken {
   stream: string;
 
   name: string;
+
+  status: TokenStatus;  // monotone: UNKNOWN < ACTIVE < SUPPRESSED
 
   sync_left: SyncMarkId;
 
@@ -227,6 +279,8 @@ interface PointToken {
 
   stream: string;
 
+  status: TokenStatus;  // monotone: UNKNOWN < ACTIVE < SUPPRESSED
+
   anchor_left: SyncMarkId;
 
   anchor_right: SyncMarkId;
@@ -255,6 +309,22 @@ interface PointToken {
 
 **Time:** `time = anchor_left.time + ratio × (anchor_right.time - anchor_left.time)`
 
+**Token status (normative):**
+
+Tokens are persistent objects. Structural rewrites **never delete** tokens; they only change a token's `status` monotonically toward `SUPPRESSED`.
+
+```
+UNKNOWN < ACTIVE < SUPPRESSED
+join = max
+```
+
+```typescript
+enum TokenStatus { UNKNOWN = 0, ACTIVE = 1, SUPPRESSED = 2 }
+```
+
+- The only permitted transition is upward in the lattice (no re-activation).
+- Suppressed tokens remain addressable by ID for tracing/provenance, but are excluded from matching, selection, and output by default (see Part 5, Part 8).
+
 
 
 ### 1.5 Stream Types
@@ -275,7 +345,7 @@ interface PointToken {
 
 **Base stream adjacency:**
 
-Base tokens form an ordered sequence. Adjacency is defined by list position (`$prev`/`$next`), NOT by shared sync mark IDs. Tokens may share a boundary sync mark or have distinct marks at the same order position. The **base coverage invariant** requires that in order-space, base tokens partition `[START, END]` with no gaps. In time-space (after `COMPUTE TIMES`), times must be monotonically non-decreasing.
+Base tokens form an ordered sequence by list position. **ACTIVE** tokens define the effective base stream for matching, selection, and output. Adjacency is defined by list position (`$prev`/`$next`) among ACTIVE tokens, NOT by shared sync mark IDs. Tokens may share a boundary sync mark or have distinct marks at the same order position. The **base coverage invariant** applies to ACTIVE tokens only: in order-space, ACTIVE base tokens must partition `[START, END]` with no gaps or overlaps. In time-space (after `COMPUTE TIMES`), times must be monotonically non-decreasing.
 
 
 
@@ -311,7 +381,7 @@ interface ResolvedEffect {
 
   rule: string;
 
-  order: number;              // assigned at patch application time
+  order: number;              // assigned at rule firing time
 
 }
 
@@ -319,7 +389,7 @@ interface ResolvedEffect {
 
 
 
-**Effect ordering:** `order` is assigned as a monotonic integer during patch application, in global application order. Within a single patch, effects are ordered by their position in the YAML list.
+**Effect ordering:** `order` is assigned deterministically at rule firing time, using `(phase_index, rule_index, match_index, effect_index, local_seq)` as a stable lexicographic key. This yields a total order independent of propagator scheduling.
 
 
 
@@ -415,6 +485,8 @@ interface TokenView {
 
   name: string;
 
+  status: TokenStatus;
+
   f: Record<string, Value>;           // features (alias for features)
 
   s: Record<string, number | null>;   // resolved scalar values
@@ -436,6 +508,8 @@ interface TokenView {
 \- `t.f` → `t.features`
 
 \- `t.s.duration` → `t.scalars.duration.resolved ?? t.scalars.duration.base`
+
+\- `t.status` → `t.status`
 
 \- Raw `ScalarState` objects are not exposed (use tracing for debugging)
 
@@ -511,12 +585,20 @@ interface TokenView {
 
 | `$at_sync(s)` | Anchor |
 
+| `$prev_point(stream)` | PointToken \\| null |
+
+| `$next_point(stream)` | PointToken \\| null |
+
+**Navigation filtering (normative):** All navigation helpers (`$prev`, `$next`, `$parent`, `$children`, `$assoc`, `$spanning`) operate over **ACTIVE** tokens only. Suppressed tokens remain in the internal model for provenance but are excluded from expression-level navigation.
+
 **Function notes (selected):**
 
 | Function | Notes |
 |----------|-------|
 | `$spanning(t, stream)` | Returns interval tokens in `stream` that fully contain `t` (interval containment by order). Ordered by `(sync_left.order, sync_right.order, id)`. |
 | `$midpoint(t)` | Returns an `Anchor` at the midpoint; uses time if resolved, otherwise rank interpolation (time remains null). |
+| `$prev_point(stream)` | Returns the immediately previous **ACTIVE** point in `stream` ordered by `time` if resolved, otherwise by `(anchor_left.order, anchor_right.order, ratio, id)`. |
+| `$next_point(stream)` | Returns the immediately next **ACTIVE** point in `stream` ordered by `time` if resolved, otherwise by `(anchor_left.order, anchor_right.order, ratio, id)`. |
 
 
 
@@ -693,11 +775,11 @@ streams:
 
 
 
-**Span tokens are stable.** They are created by upstream processing (lexer, syllabifier) and persist throughout rule evaluation. The "rebuild" step (§5.9) only recomputes boundaries; it never creates or destroys span tokens.
+**Span tokens are stable.** They are created by upstream processing (lexer, syllabifier) and persist throughout rule evaluation. The "rebuild" step (§5.10) only recomputes boundaries; it never creates or destroys span tokens.
 
 
 
-**Empty spans:** If all children of a span are deleted (e.g., by coalescence), the span becomes empty:
+**Empty spans:** If all children of a span are suppressed (e.g., by coalescence), the span becomes empty:
 
 \- Boundaries collapse: `sync_left == sync_right`
 
@@ -717,7 +799,7 @@ def rebuild_span_boundaries(span_stream, child_stream):
 
     for span in span_stream.tokens:
 
-        children = [t for t in child_stream.tokens if t.parent == span.id]
+        children = [t for t in child_stream.tokens if t.parent == span.id and t.status == TokenStatus.ACTIVE]
 
         if not children:
 
@@ -941,121 +1023,41 @@ patterns:
 
 
 
-## Part 5: Rule Evaluation
+## Part 5: Propagator Evaluation
 
+### 5.1 Propagation Model (Normative)
 
+The engine is a monotone propagator network:
 
-### 5.1 Pipeline
+- **Cells** hold state (token fields, status, scalar stacks, associations, sync mark times).
+- **Propagators** read cells and monotonically add information to other cells.
+- **Join** is idempotent and monotone; no propagation step retracts information.
+- **Scheduling** may be arbitrary; determinism is enforced by rule ordering and match enumeration (see §0.2, §5.2).
 
-This is the **per-phase** rule-evaluation pipeline used during APPLY PHASES (Part 0, Step 4). Global FINAL RESOLVE (Part 0, Step 5) reruns the relevant resolve steps as needed.
+**Active filtering (normative):** Matching, selection, navigation, and output operate on **ACTIVE** tokens only. SUPPRESSED tokens remain in the model for provenance/tracing but are excluded from rule evaluation and output unless explicitly stated.
 
-```
-1. SNAPSHOT           Copy-on-write view of streams
-2. MATCH + EVALUATE   Find matches, evaluate expressions
-3. GENERATE PATCHES   Create patch objects
-4. SORT PATCHES       Deterministic order
-5. BATCH BASE SPLICES Group base edits by affected range
-6. APPLY PATCHES      Execute as batched splice plans
-7. ASSOCIATION GC     Remove deleted IDs from association sets
-8. SYNC MARK GC       Remove unreferenced marks that are outside any base interval (interior marks are retained for interpolation)
-9. REBUILD SPANS      Recompute span boundaries
-10. RESOLVE SCALARS   Collapse effect stacks
-11. COMPUTE TIMES     Assign times to sync marks
-12. RESOLVE POINTS    Evaluate deferred values, assign times
-```
+### 5.2 Match Facts and Rule Firing
 
-### 5.2 Patch Types
+Each rule installs a matcher propagator that scans the ACTIVE stream in deterministic left-to-right order. For each match, it emits a **match fact** and fires the rule once.
 
+**Match identity:** A match is identified by `(rule_name, leftmost_token_id, rightmost_token_id, capture_ids...)` for pattern rules. For select rules, match identity is `(rule_name, token_id)`. Each rule maintains an **applied set** of match identities; once applied, it MUST NOT re-apply the same match (idempotent).
 
+**Constraint evaluation timing:** Constraints are evaluated **after** all captures bind. If a constraint fails, the match fact is discarded.
 
-Base stream mutations use one of three splice variants:
+**Deterministic match order:** Matches are enumerated by earliest involved sync mark (leftmost) and within that by the ordering in §0.2.
 
+### 5.3 Structural Rewrites (Monotone)
 
+Structural actions are monotone facts:
 
-```typescript
+- **Suppress:** `status := SUPPRESSED` (idempotent; no re-activation).
+- **Insert:** create new tokens and sync marks (persistent).
+- **Modify:** append scalar effects to a token's effect stack.
+- **Associate/Disassociate:** add association edges or suppress them (associations are persistent; filtered views ignore SUPPRESSED tokens).
 
-// Point insertion: insert at a boundary, no deletions
+Overlapping structural rewrites are **all applied**. Any resulting overlaps or gaps in the ACTIVE base stream are rejected during validation (§5.10, §9).
 
-interface InsertAtBoundaryPatch {
-
-  type: 'insert_at_boundary';
-
-  boundary: SyncMarkId;
-
-  side: 'before' | 'after';       // which direction to extend
-
-  insert_tokens: TokenSpec[];
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Replacement: delete tokens and insert replacements
-
-interface ReplaceRangePatch {
-
-  type: 'replace_range';
-
-  range_left: SyncMarkId;         // left boundary of affected region
-
-  range_right: SyncMarkId;        // right boundary of affected region
-
-  delete_tokens: TokenId[];       // tokens to remove (must be within range)
-
-  insert_tokens: TokenSpec[];     // tokens to insert (partition the range)
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Pure deletion: remove tokens, no insertions
-
-interface DeleteTokensPatch {
-
-  type: 'delete_tokens';
-
-  delete_tokens: TokenId[];
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-type BaseSplicePatch = InsertAtBoundaryPatch | ReplaceRangePatch | DeleteTokensPatch;
-
-```
-
-**Range membership semantics:**
-
-A token `t` is "within range `[L, R]`" if and only if:
-- `L.order <= t.sync_left.order` AND `t.sync_right.order <= R.order`
-
-That is, the token must be **fully contained** within the range boundaries. Partially overlapping tokens are NOT within the range. Splices MUST NOT attempt to partially delete a token.
-
-**SpliceSpec (rule YAML):**
+**Splice semantics (rule YAML):**
 
 ```typescript
 type SpliceSpec =
@@ -1069,206 +1071,47 @@ type SpliceSpec =
       type: 'replace_range';
       range_left: SyncMarkId;
       range_right: SyncMarkId;
-      delete: TokenId[];
+      suppress: TokenId[];
       insert: TokenSpec[];
     }
   | {
+      type: 'suppress_tokens';
+      suppress: TokenId[];
+    }
+  | {
+      // Back-compat alias: treated as suppress
       type: 'delete_tokens';
       delete: TokenId[];
     };
 ```
 
-**SpliceSpec mapping:** `insert` maps to `insert_tokens`, and `delete` maps to `delete_tokens` in the generated patch objects.
+**Range membership semantics:** A token `t` is within `[L, R]` iff `L.order <= t.sync_left.order` AND `t.sync_right.order <= R.order`. Partially overlapping tokens are NOT within the range.
 
+**Insert at END:** Use `boundary: "last_token.sync_right"` and `side: after`. If the base stream is empty, use `boundary: "START"`; the first inserted token spans `[START, END]`.
 
+**Insert boundary assignment (normative):**
+
+- `insert_at_boundary` inserts `N` tokens adjacent to `boundary` on the given `side`.
+- Let `L` and `R` be the adjacent base boundary marks on that side (for `side: after`, `L = boundary` and `R` is the next base boundary; for `side: before`, `R = boundary` and `L` is the previous base boundary).
+- If `N = 1`, the inserted token spans `[L, R]` by default. If `N > 1`, create `N-1` new interior marks strictly between `L` and `R` using rank insertion (§1.1). These marks define `N` consecutive intervals in order.
+- If rank insertion fails due to no representable midpoint, raise `E_RANK_NO_SPACE`, rebalance, and retry.
+
+**Replace range assignment (normative):**
+
+- `replace_range` suppresses tokens within `[range_left, range_right]` and inserts `N` new tokens.
+- If `N = 1`, the inserted token spans `[range_left, range_right]`.
+- If `N > 1`, create `N-1` new interior marks strictly between `range_left` and `range_right` using rank insertion (§1.1), and span tokens consecutively in order.
+
+### 5.4 Token Specification
 
 ```typescript
-
-// Non-base interval insertion
-
-interface InsertIntervalPatch {
-
-  type: 'insert_interval';
-
-  stream: string;               // NOT base
-
-  sync_left: SyncMarkId;
-
-  sync_right: SyncMarkId;
-
-  token: TokenSpec;
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Point insertion
-
-interface InsertPointPatch {
-
-  type: 'insert_point';
-
-  stream: string;
-
-  anchor_left: SyncMarkId;
-
-  anchor_right: SyncMarkId;
-
-  ratio: number;
-
-  value_expr: DeferredExpr;
-
-  context: CapturedContext;
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Modification (any stream)
-
-interface ModifyPatch {
-
-  type: 'modify';
-
-  target: TokenId;
-
-  effects: ResolvedEffect[];
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Deletion (non-base only; use splice for base)
-
-interface DeletePatch {
-
-  type: 'delete';
-
-  stream: string;               // NOT base
-
-  target: TokenId;
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Create association
-
-interface AssociatePatch {
-
-  type: 'associate';
-
-  from: TokenId;
-
-  to: TokenId;
-
-  assoc_name: string;
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-
-
-// Remove association
-
-interface DisassociatePatch {
-
-  type: 'disassociate';
-
-  from: TokenId;
-
-  to: TokenId;
-
-  assoc_name: string;
-
-  rule: string;
-
-  rule_index: number;
-
-  match_index: number;
-
-  patch_seq: number;
-
-}
-
-```
-
-
-
-**Association semantics:**
-
-\- Associations are many-to-many: a token can have multiple associations of the same type
-
-\- Initial associations may be created by upstream processing or by rules
-
-\- `AssociatePatch` adds `to` to `from.associations[assoc_name]`
-
-\- `DisassociatePatch` removes `to` from `from.associations[assoc_name]`
-
-\- Association GC (§5.8) removes references to deleted tokens
-
-
-
-### 5.3 Token Specification
-
-
-
-```typescript
-
 interface TokenSpec {
-
   name: string;
-
   features?: Record<string, Value>;
-
   scalars?: Record<string, { base?: number; floor?: number }>;
-
   parent?: TokenId | string | 'inherit_left';  // default: inherit_left
-
 }
-
 ```
-
-
 
 **Expression syntax:** Any string field in TokenSpec (or Effect values, or other polymorphic contexts) is a JSONata expression evaluated at runtime. Use string literals explicitly (e.g., `"'dʒ'"`) if a literal string is required.
 
@@ -1298,168 +1141,48 @@ This convention enables unambiguous parsing, LSP support, and validation.
 **Parent inheritance:** If `parent` is omitted or `'inherit_left'`, the new token inherits the parent of the token immediately to its left. If the insertion boundary is shared by two spans, `inherit_left` attaches to the left span (i.e., it extends that span after rebuild).
 **Left token for boundary insertions (normative):** For `insert_at_boundary`, the "left" token is the token whose `sync_right` equals the insertion boundary (i.e., the token immediately to the left in base stream order). This applies even when the boundary is shared by two adjacent tokens.
 
+### 5.5 Sync Mark Retention and Interior Marks
 
-
-### 5.4 Patch Ordering
-
-
-
-Sort key: `(rule_index, match_index, patch_seq)`
-
-
-
-\- `rule_index`: position of rule in phase's rule list
-
-\- `match_index`: which match of this rule (0, 1, 2, ...)
-
-\- `patch_seq`: which patch from this match (for rules generating multiple patches)
-
-
-
-
-
-
-### 5.5 Base Stream Splice
-
-
-Base stream mutations use the `BaseSplicePatch` discriminated union (Section 5.2):
-
-\- `InsertAtBoundaryPatch`: point insertion at a sync mark
-
-\- `ReplaceRangePatch`: delete tokens and insert replacements
-
-\- `DeleteTokensPatch`: remove tokens with no replacement
-
-
-**Overlap rule (normative):**
-
-- Each patch has an **affected order-space interval**:
-  - `ReplaceRangePatch`: `[range_left, range_right]`
-  - `DeleteTokensPatch`: union of deleted token intervals
-  - `InsertAtBoundaryPatch`: the zero-length interval at `boundary`
-- Two patches **overlap** if their affected intervals intersect.
-- For overlap testing, `InsertAtBoundaryPatch` uses the boundary point regardless of `side`; insertion at a range boundary overlaps that range.
-- Overlaps are resolved by sort order (Part 5.4): earlier patches win; later overlapping patches are skipped (`patch_skipped`, reason `shadowed`).
-
-**Batching:** After overlap resolution, adjacent non-overlapping patches MAY be batched for efficiency without changing results.
-
-### 5.6 Insertion at END
-
-
-
-To append a token at the end of the utterance, use boundary insertion:
-
-
-
-```yaml
-
-splice:
-
-  type: insert_at_boundary
-
-  boundary: "last_token.sync_right"  # boundary before END
-
-  side: after
-
-  insert: [...]
-
-```
-
-
-
-The splice algorithm creates new sync mark(s) between the specified boundary and `END`.
-
-**Empty base stream:** If there are no base tokens, use `boundary: "START"` to insert the first token. The first inserted token spans `[START, END]` (sentinel boundaries). If multiple tokens are inserted in a single operation, create fresh FINITE ranks between `START` and `END` to partition the range.
-**Sentinel boundary note (normative):** `START` and `END` are sentinel boundaries, not finite ranks. It is valid and expected for the first/last base token to use sentinel boundaries as `sync_left`/`sync_right`.
-
-
-
-### 5.7 Sync Mark GC and Interior Marks
-
-Sync marks are never deleted by rules. Sync Mark GC (Step 8) removes only marks that are **unreferenced and outside all base intervals**.
+Sync marks are persistent. Optional GC MUST NOT remove marks referenced by any token (including SUPPRESSED) or point.
 
 - Marks referenced by any token or point always persist.
-- Unreferenced interior marks are retained for interpolation and may be removed only after final time resolution.
-- Interior marks that persist are timed by interpolation during `COMPUTE TIMES` (Section 5.11).
+- Unreferenced interior marks may be removed only after final time resolution (optional).
+- Interior marks that persist are timed by interpolation during `COMPUTE TIMES` (§5.8).
 
-### 5.8 Association GC
+### 5.6 Association Filtering
 
+Associations are persistent for provenance. `disassociate` MUST NOT remove edges; it suppresses them by marking the association edge as `SUPPRESSED` (monotone). Navigation and output **ignore SUPPRESSED tokens and SUPPRESSED association edges** by default; implementations MAY materialize filtered association views without mutating the underlying sets.
 
-
-After patch application, scan all tokens and remove any TokenId from association sets that no longer exists.
-
-
-
-### 5.9 Span Boundary Rebuild
-
-
-
-After base splices, recompute span boundaries bottom-up through hierarchy:
-
-
-
-```python
-
-for stream in reversed(topology.hierarchy[:-1]):  # skip base
-
-    rebuild_span_boundaries(stream, child_stream_of(stream))
-
-```
-
-
-
-### 5.10 Scalar Resolution
-
-
+### 5.7 Scalar Resolution
 
 **Standard:**
 
 ```python
-
 def resolve_standard(base, effects, min_val, max_val):
-
     v = base
-
     for e in sorted(effects, key=lambda x: x.order):
-
         if e.op == 'set': v = e.value
-
-        elif e.op == 'mul': v = v \* e.value
-
+        elif e.op == 'mul': v = v * e.value
         elif e.op == 'add': v = v + e.value
-
     return clamp(v, min_val, max_val)
-
 ```
-
-
 
 **Klatt:**
 
 ```python
-
 def resolve_klatt(base, floor, effects, max_val):
-
     d = base
-
     for e in sorted(effects, key=lambda x: x.order):
-
         if e.op == 'set': d = e.value
-
-        elif e.op == 'mul': d = e.value \* (d - floor) + floor
-
+        elif e.op == 'mul': d = e.value * (d - floor) + floor
         elif e.op == 'add': d = d + e.value
-
     return clamp(d, floor, max_val)
-
 ```
 
-
-
-### 5.11 Time Computation
+### 5.8 Time Computation
 
 ```python
-# Assumes: base stream is contiguous and scalar durations resolved.
+# Assumes: ACTIVE base stream is contiguous and scalar durations resolved.
 # Uses numeric rank values from the fixed-length base-36 encoding.
 
 # MAX = 36^RANK_LEN - 1
@@ -1472,6 +1195,7 @@ def parse_base36(s):
     for ch in s:
         value = value * 36 + ALPHABET.index(ch)
     return value
+
 def rank_to_int(order):
     if order.kind == 'START':
         return 0
@@ -1503,7 +1227,7 @@ def compute_times(base_stream, all_sync_marks):
         if not interior:
             continue
 
-        # Edge case: zero duration interval (should not occur after normalization)
+        # Edge case: zero duration interval (should not occur after validation)
         if left_time == right_time:
             for mark in interior:
                 mark.time = left_time
@@ -1526,7 +1250,7 @@ def compute_times(base_stream, all_sync_marks):
 # rank_to_int returns 0 for START, MAX for END, and base-36 value for FINITE.
 ```
 
-**Error case:** If any sync mark remains unassigned after scanning all base intervals, emit `E_TIME_NO_BASE_SUPPORT`.
+**Error case:** If any sync mark remains unassigned after scanning all ACTIVE base intervals, emit `E_TIME_NO_BASE_SUPPORT`.
 
 **Monotonicity:** After this step, sync mark times must be non-decreasing with order, and strictly increasing for base boundaries.
 
@@ -1534,83 +1258,59 @@ def compute_times(base_stream, all_sync_marks):
 
 **Zero-duration base intervals (normative):** If a base interval has `sync_left.time == sync_right.time`, all interior marks within that interval MUST be assigned the left boundary time. Implementations MAY emit a warning.
 
-### 5.12 Point Resolution
-
-
+### 5.9 Point Resolution
 
 ```python
-
 def resolve_points(point_stream, context_map):
-
     for pt in point_stream.tokens:
-
         # Compute time from anchors
-
         left_t = pt.anchor_left.time
-
         right_t = pt.anchor_right.time
-
-        pt.time = left_t + pt.ratio \* (right_t - left_t)
-
-        
+        pt.time = left_t + pt.ratio * (right_t - left_t)
 
         # Evaluate deferred value
-
         if pt.value_expr:
-
             ctx = context_map[pt.id]
-
             pt.value = jsonata_evaluate(pt.value_expr, ctx)
-
 ```
-
-
 
 **Deferred expression restrictions:**
 
-
-
 Deferred expressions (in `value_expr`) may reference:
 
-\- Token features (`current.f.\*`)
-
-\- Resolved scalar values (`current.s.\*`)
-
-\- Sync mark times (`current.sync_left.time`)
-
-\- Navigation functions (`$parent`, `$next`, etc.)
-
-\- Parameters (`params.\*`)
-
-
+- Token features (`current.f.*`)
+- Resolved scalar values (`current.s.*`)
+- Sync mark times (`current.sync_left.time`)
+- Navigation functions (`$parent`, `$next`, etc.)
+- Parameters (`params.*`)
 
 Deferred expressions may **NOT** reference:
 
-\- Other point token values (prevents circular dependencies)
+- Other point token values **except** via `$prev_point` / `$next_point` within the **same** point stream
+- Unresolved scalars (must use resolved values)
 
-\- Unresolved scalars (must use resolved values)
+**Point dependency constraints (normative):**
 
-
-
-Point resolution order within a stream is undefined. If a deferred expression attempted to reference another point's value, behavior would be undefined.
-
-
+- `$prev_point` and `$next_point` are permitted only within point rules for the **same stream**.
+- Implementations MUST evaluate point values in deterministic stream order (as defined in §0.2) so that `$prev_point` is always resolved when referenced.
+- If `$next_point` is referenced, implementations MUST either:
+  - Reject at validation with `E_POINT_FWD_REF`, or
+  - Defer evaluation with a second pass until all points are resolved.
+  - This choice MUST be fixed for the implementation and documented.
 
 ---
 
+### 5.10 Quiescence, Finalize, and Validation
 
+- **Quiescence:** Run propagators until the work queue is empty.
+- **Finalize:** Enable timing/point resolution propagators only **after** structural rewrites quiesce. If structural rewrites occur after finalize, emit `E_FINALIZE_DIRTY` (or require a full re-run).
+- **Validation:** After quiescence (and finalize, if enabled), validate invariants:
+  - Rebuild span boundaries from ACTIVE children (Part 3.2) before validation.
+  - ACTIVE base tokens partition [START, END] with no gaps (`E_BASE_NOT_CONTIGUOUS`) and no overlaps (`E_BASE_OVERLAP`).
+  - Interval tokens satisfy sync_left.order < sync_right.order (span streams may use ==).
+  - All tokens/points reference existing marks.
 
-### 5.13 Normalization (Phase 5)
-
-Normalization restores invariants after rewrites. It is deterministic and limited to the following actions:
-
-- **Reorder stream lists** into total order (base: list order preserved; non-base: (sync_left.order, sync_right.order, id)).
-- **Rebuild spans** as specified in §5.9 (empty spans collapse to sync_left == sync_right).
-- **Validate base coverage**: base tokens must partition [START, END] in order-space with no gaps or overlaps. Violations raise E_BASE_NOT_CONTIGUOUS.
-- **Validate token shape**: interval tokens must satisfy sync_left.order < sync_right.order (span streams may use ==); violations raise E_TOKEN_BAD_INTERVAL.
-- **Validate mark references**: every token/point must reference existing marks; violations raise E_MARK_MISSING.
-
-Normalization MUST NOT invent new tokens or delete existing tokens (except for previously deleted tokens already removed by patches).
+Validation MUST NOT invent new tokens or delete existing tokens.
 
 ## Part 6: Rule Definitions
 
@@ -1654,11 +1354,12 @@ interface Rule {
 
   insert_point?: PointSpec;       // point stream insertion
 
-  delete?: boolean;               // delete matched token (non-base only)
+  suppress?: boolean;             // suppress matched token(s) (non-base only)
+  delete?: boolean;               // back-compat alias for suppress
 
-  associate?: AssocSpec[];        // create associations
+  associate?: AssocSpec[];        // create associations (ACTIVE edge)
 
-  disassociate?: AssocSpec[];     // remove associations
+  disassociate?: AssocSpec[];     // suppress associations (SUPPRESSED edge)
 
 }
 
@@ -1703,7 +1404,7 @@ For pattern rules, `constraint` evaluates **after all captures bind**. The patte
 
 \- Constraints cannot cause early exit from pattern matching
 
-\- If constraint returns false, the match is discarded (no patches generated)
+\- If constraint returns false, the match is discarded
 
 
 
@@ -1712,6 +1413,8 @@ For select rules, `constraint` evaluates after `where` passes.
 
 
 ### 6.1 Select Rules
+
+**Suppression semantics:** `suppress: true` sets the matched token's status to `SUPPRESSED` (monotone). `delete: true` is a back-compat alias. Base stream suppression MUST be expressed via `splice`. For pattern rules, `suppress: true` suppresses **all captures** in the match. For select rules, it suppresses `current` only.
 
 ```yaml
 rules:
@@ -1753,7 +1456,7 @@ rules:
       type: replace_range
       range_left: d.sync_left
       range_right: j.sync_right
-      delete: [d, j]
+      suppress: [d, j]
       insert:
         - name: "'dʒ'"
           parent: "$parent(d, 'syllable').id"
@@ -1773,6 +1476,18 @@ rules:
       stream: f0
       at: "$midpoint(current)"
       value: "params.base_f0"
+      tag: f0
+
+  # Question rise on final boundary (requires $prev_point)
+  question_rise:
+    citation: "Ladd 2008 Ch.5"
+    select:
+      stream: phrase
+      where: "current.f.boundary = 'question'"
+    insert_point:
+      stream: f0
+      at: "$at_sync(current.sync_right)"
+      value: "$prev_point('f0').value + params.question_rise_hz"
       tag: f0
 ```
 ### 6.4 Formant Rules
@@ -1808,7 +1523,7 @@ rules:
         value: "current.f.voicing = 'voiced' ? 50 : 60"
         tag: frication
 ```
-### 6.6 Deletion (Non-Base)
+### 6.6 Suppression (Non-Base)
 
 
 
@@ -1816,11 +1531,11 @@ rules:
 
 rules:
 
-  # Autosegmental phonology: floating tones delete if unassociated
+  # Autosegmental phonology: floating tones suppress if unassociated
 
   # Goldsmith (1976): tone deletion in African languages
 
-  delete_floating_tone:
+  suppress_floating_tone:
 
     citation: "Goldsmith 1976"
 
@@ -1830,9 +1545,9 @@ rules:
 
       where: "current.f.floating = true"
 
-    delete: true
+    suppress: true
 
-```
+**Back-compat:** `delete: true` is accepted as an alias for `suppress: true`.
 
 
 
@@ -1865,9 +1580,13 @@ rules:
 ---
 ## Part 7: Phases
 
+Phases are **ordered activation blocks** for propagators. For each phase, the engine:
 
+1. Enables the phase's rule propagators.
+2. Runs propagation to quiescence.
+3. Optionally enables scalar/time/point resolution propagators (see flags below).
 
-Each phase runs the full pipeline (§5.1). Span boundaries are recomputed in step 9 of every phase. The `after` list is a validation constraint only; phases still execute in the listed order.
+The `after` list is a validation constraint only; phases still execute in the listed order.
 
 
 
@@ -1893,8 +1612,6 @@ phases:
 
     resolve_scalars: [duration]
 
-    compute_times: true
-
 
 
   - name: formants
@@ -1913,8 +1630,6 @@ phases:
 
     rules: [f0_targets]
 
-    resolve_points: [f0]
-
 
 
   - name: source
@@ -1923,21 +1638,30 @@ phases:
 
     resolve_scalars: [AV, AH, AF]
 
+
+  - name: finalize
+
+    after: [duration, formants, prosody, source]
+
+    compute_times: true
+
+    resolve_points: [f0]
+
 ```
 
 
 
 **Phase flags:**
 
-\- `rules`: list of rule names to execute (order matters)
+\- `rules`: list of rule names to enable (order matters)
 
 \- `after`: dependency on other phases
 
-\- `resolve_scalars`: scalar fields to resolve this phase
+\- `resolve_scalars`: scalar fields to resolve (enabled after the phase reaches quiescence)
 
-\- `compute_times`: assign times to sync marks (requires duration resolved)
+\- `compute_times`: if true, triggers **FINALIZE** (timing propagators enabled; no further structural rewrites allowed)
 
-\- `resolve_points`: point streams to resolve (requires times computed)
+\- `resolve_points`: point streams to resolve (enabled during FINALIZE after times are computed)
 
 
 
@@ -1947,7 +1671,7 @@ phases:
 
 ## Part 8: Output
 
-
+Output rendering uses **ACTIVE** tokens and points only. SUPPRESSED tokens remain for provenance/tracing but are excluded from interpolation and emission.
 
 ### 8.1 Scalar Interpolation
 
@@ -2037,6 +1761,26 @@ output:
 
 
 
+### 8.4 Rendering Contract (Normative)
+
+The DSL engine outputs resolved scalars on interval tokens and resolved point streams. **Rendering** (frame generation, interpolation smoothing, and transition blending) is a downstream responsibility.
+
+Implementations SHOULD expose a renderer configuration that is **not** part of the rule language. This keeps phonological rules deterministic and separable from signal rendering heuristics.
+
+Example renderer configuration (informative):
+
+```yaml
+rendering:
+  transitions:
+    formants:
+      types: [vowel, nasal, liquid, glide]
+      duration_ms: 30
+      blend: 0.35
+  f0:
+    interpolate: monotone_cubic
+    unvoiced_value: 0
+```
+
 ---
 
 
@@ -2054,35 +1798,37 @@ output:
 | E_MARK_MISSING | token/point references missing mark | token/point |
 | E_TOKEN_BAD_INTERVAL | interval token has sync_left.order >= sync_right.order (span streams may use ==) | token |
 | E_BASE_NOT_CONTIGUOUS | base stream does not partition [START, END] | base stream |
+| E_BASE_OVERLAP | ACTIVE base tokens overlap in order-space | base stream |
 | E_TIME_NO_BASE_SUPPORT | sync mark cannot be enclosed by any base interval | sync mark |
+| E_FINALIZE_DIRTY | structural rewrite attempted after finalize | engine |
 | E_INVALID_RATIO | point ratio not in [0,1] | point token |
+| E_POINT_FWD_REF | point value references unresolved `$next_point` | point rule |
 | E_JSONATA_INVALID | expression parse/eval error at compile time | rule |
 | E_PHASE_ORDER_VIOLATION | phases violate declared order constraints | phases |
-| E_SPLICE_CONFLICT | overlapping splices in strict mode | rule/patch |
+| E_SPLICE_CONFLICT | overlapping splices in strict mode | rule/rewrite |
 
 **Warnings:**
 
 - W_NULL_TARGET_AT_RUNTIME
-- W_DELETED_TARGET_AT_RUNTIME
+- W_SUPPRESSED_TARGET_AT_RUNTIME
 - W_DURATION_EDIT_AFTER_TIMES
 - W_MISSING_CITATION
 - W_EMPTY_SPAN
 
 ### 9.2 Invariants
 
-- base_coverage (base partitions [START, END])
+- base_coverage (ACTIVE base tokens partition [START, END] with no gaps)
+- base_overlap (ACTIVE base tokens do not overlap in order-space)
 - span_boundary_match (spans match children or are empty)
 - time_monotonicity (times non-decreasing in order)
 
 **Splice overlap policy:**
 
-- Adjacent (non-overlapping) splices are allowed and batched together for efficiency
-- **Overlapping splices are NOT jointly applied.** After sorting by (rule_index, match_index, patch_seq):
-  - Earlier patches (lower sort key) take precedence
-  - Later patches that overlap an already-accepted patch are skipped (shadowed)
-  - Trace events (patch_skipped) are emitted with reason 'shadowed'
-- **Conflict (optional strict mode):** Two splices that both delete the same token but specify different insertions may raise an error instead of shadowing
-- **Not a conflict:** Two splices that affect adjacent ranges without token overlap
+- Adjacent (non-overlapping) splices are allowed.
+- **Overlapping splices are jointly applied** (monotone). This can introduce overlapping ACTIVE base tokens.
+- **Validation outcome:** If overlaps (or gaps) remain in the ACTIVE base stream after all rewrites, validation raises `E_BASE_OVERLAP` or `E_BASE_NOT_CONTIGUOUS`.
+- **Conflict (optional strict mode):** Implementations MAY raise `E_SPLICE_CONFLICT` earlier when an overlap is detected.
+- **Not a conflict:** Two splices that affect adjacent ranges without token overlap.
 
 ---
 
@@ -2091,13 +1837,14 @@ output:
 Implementations MUST provide tracing and introspection facilities sufficient to:
 
 - Explain rule application and scalar provenance
+- Explain derived values via dependency tracking ("why did this cell change?")
 - Diff state between phases
 - Inspect tokens, sync marks, and associations
 - Support debugging (breakpoints, stepping)
 
 Minimum trace event fields:
 
-- event category (match, patch, resolve, error)
+- event category (match, rewrite, resolve, error)
 - phase and rule identifiers (if applicable)
 - affected token IDs and sync mark IDs
 - timestamp or order index for sequencing
@@ -2190,13 +1937,18 @@ phases:
 
     resolve_scalars: [duration]
 
-    compute_times: true
-
 
 
   - name: prosody
 
     rules: [f0_targets]
+
+
+  - name: finalize
+
+    after: [duration, prosody]
+
+    compute_times: true
 
     resolve_points: [f0]
 
@@ -2220,7 +1972,7 @@ rules:
 
       range_right: j.sync_right
 
-      delete: [d, j]
+      suppress: [d, j]
 
       insert:
 
@@ -2321,7 +2073,10 @@ rules:
 
 | Interior mark | Sync mark inside a base interval (interpolated time) |
 
-| Splice | Atomic delete+insert on base stream |
+| Splice | Atomic suppress+insert on base stream |
+| Propagator | Monotone rule that derives new facts from existing facts |
+| Quiescence | Point where no propagators can add new information |
+| Finalize | Stage that enables timing/point resolution after structural rewrites |
 
 | Span | Stable token whose boundaries are recomputed from children |
 
@@ -2462,6 +2217,7 @@ rules:
 
 
 **Hertz, S. R.** (1991). Streams, phones, and transitions: Toward a new phonological and phonetic model of formant timing. \*Journal of Phonetics\*, 19(1), 91-109.
+
 
 
 

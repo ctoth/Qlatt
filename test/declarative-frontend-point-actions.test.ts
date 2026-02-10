@@ -155,5 +155,28 @@ describe("declarative frontend point actions and helpers", () => {
     expect(p1?.duration).toBe(105);
     expect(p2?.duration).toBe(125);
   });
-});
 
+  it("throws E_INVALID_RATIO when point anchors use an out-of-range ratio", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+        f0: { type: "point" },
+      },
+      rules: {
+        invalid_ratio: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          insert_point: {
+            stream: "f0",
+            at: { anchor_left: "s0", anchor_right: "s1", ratio: 1.2 },
+            value: "100",
+            tag: "f0",
+          },
+        },
+      },
+      phases: [{ name: "prosody", rules: ["invalid_ratio"] }],
+    };
+
+    const input = [{ id: "p1", stream: "phone", sync_left: "s0", sync_right: "s1", status: 1 }];
+    expect(() => runRuleEngine(input, spec)).toThrowError(/E_INVALID_RATIO/);
+  });
+});

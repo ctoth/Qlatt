@@ -85,4 +85,47 @@ describe("declarative frontend splice actions", () => {
     expect(inserted?.sync_right).toBe(2);
     expect(inserted?.status).toBe(1);
   });
+
+  it("supports multi-token replace_range insertion on base36 boundaries", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        split_token: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: "current.sync_right",
+            suppress: ["current"],
+            insert: [{ name: "'A'" }, { name: "'B'" }],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["split_token"] }],
+    };
+
+    const input = [
+      {
+        id: "p1",
+        stream: "phone",
+        sync_left: "000000000000",
+        sync_right: "00000000000c",
+        status: 1,
+      },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const inserted = out.filter((t) => t.stream === "phone" && t.status === 1 && (t.name === "A" || t.name === "B"));
+    expect(inserted).toHaveLength(2);
+    const first = inserted.find((t) => t.name === "A");
+    const second = inserted.find((t) => t.name === "B");
+    expect(first?.sync_left).toBe("000000000000");
+    expect(second?.sync_right).toBe("00000000000c");
+    expect(first?.sync_right).toBe(second?.sync_left);
+    expect(typeof first?.sync_right).toBe("string");
+    expect(first && first.sync_right > "000000000000").toBe(true);
+    expect(first && first.sync_right < "00000000000c").toBe(true);
+  });
 });

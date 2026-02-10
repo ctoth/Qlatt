@@ -198,8 +198,75 @@ function getTokenStream(token) {
   return token?.stream ?? "phone";
 }
 
+const FINITE_RANK_RE = /^[0-9a-z]{12}$/;
+const BASE36_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
+const BASE36 = 36n;
+const MAX_FINITE_RANK = BASE36 ** 12n - 1n;
+
+function parseBase36Rank(rank) {
+  if (typeof rank !== "string" || !FINITE_RANK_RE.test(rank)) return null;
+  let value = 0n;
+  for (const ch of rank) {
+    value = value * BASE36 + BigInt(BASE36_DIGITS.indexOf(ch));
+  }
+  return value;
+}
+
+function formatBase36Rank(value) {
+  if (typeof value !== "bigint" || value < 0n || value > MAX_FINITE_RANK) return null;
+  let n = value;
+  const chars = new Array(12).fill("0");
+  for (let i = 11; i >= 0; i -= 1) {
+    const digit = Number(n % BASE36);
+    chars[i] = BASE36_DIGITS[digit];
+    n /= BASE36;
+  }
+  return chars.join("");
+}
+
+function toNumericOrder(mark) {
+  if (typeof mark === "number" && Number.isFinite(mark)) return mark;
+  if (typeof mark === "bigint") return Number(mark);
+
+  if (typeof mark === "string") {
+    const rank = parseBase36Rank(mark);
+    if (rank != null) return Number(rank);
+    if (/^-?\d+(\.\d+)?$/.test(mark)) {
+      const parsed = Number(mark);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+  }
+
+  if (mark && typeof mark === "object") {
+    if (mark.kind === "START") return 0;
+    if (mark.kind === "END") return Number(MAX_FINITE_RANK);
+    if (mark.kind === "FINITE") {
+      const rank = parseBase36Rank(mark.rank);
+      if (rank != null) return Number(rank);
+    }
+  }
+
+  return null;
+}
+
 function compareOrderValue(left, right) {
   if (left === right) return 0;
+
+  if (left && right && typeof left === "object" && typeof right === "object") {
+    const kindOrder = { START: 0, FINITE: 1, END: 2 };
+    if (left.kind && right.kind && left.kind !== right.kind) {
+      return (kindOrder[left.kind] ?? 0) - (kindOrder[right.kind] ?? 0);
+    }
+    if (left.kind === "FINITE" && right.kind === "FINITE") {
+      const lRank = String(left.rank ?? "");
+      const rRank = String(right.rank ?? "");
+      if (lRank < rRank) return -1;
+      if (lRank > rRank) return 1;
+      return 0;
+    }
+  }
+
   if (typeof left === "number" && typeof right === "number") {
     return left < right ? -1 : 1;
   }
@@ -261,11 +328,14 @@ function normalizeAnchor(anchor, fallbackToken = null) {
     throw new Error("Point anchor is missing anchor_left/anchor_right");
   }
 
+  const hasExplicitRatio = Object.prototype.hasOwnProperty.call(source, "ratio");
   let ratio = source.ratio;
-  if (!Number.isFinite(ratio)) {
+  if (!hasExplicitRatio || ratio == null) {
     ratio = anchorLeft === anchorRight ? 0 : 0.5;
+  } else if (!Number.isFinite(ratio) || ratio < 0 || ratio > 1) {
+    throw new Error(`E_INVALID_RATIO: point ratio must be in [0,1], got ${String(ratio)}`);
   }
-  ratio = clampRatio(ratio);
+
   if (anchorLeft === anchorRight) ratio = 0;
 
   return {
@@ -446,7 +516,7 @@ function buildNavigationFunctions(sequence, runtime = null, options = {}) {
         {
           anchor_left: bounds.left,
           anchor_right: bounds.right,
-          ratio: clampRatio(Number(ratio)),
+          ratio: Number(ratio),
         },
         token
       );
@@ -481,6 +551,12 @@ function evaluateSelectWhere(whereExpr, token, params, functions) {
     { current: token, params: params ?? {} },
     functions
   );
+  return Boolean(result);
+}
+
+function evaluateRuleConstraint(constraintExpr, context, functions) {
+  if (!constraintExpr || constraintExpr === "true") return true;
+  const result = evaluateExpression(constraintExpr, context, functions);
   return Boolean(result);
 }
 
@@ -615,18 +691,47 @@ function withinClosedRange(token, left, right) {
 function splitRange(left, right, count) {
   if (count <= 0) return [];
   if (count === 1) return [{ left, right }];
-  if (!(typeof left === "number" && typeof right === "number")) {
-    throw new Error("Multi-token splice requires numeric boundaries in current runtime");
+
+  if (typeof left === "number" && typeof right === "number") {
+    const step = (right - left) / count;
+    const segments = [];
+    for (let i = 0; i < count; i += 1) {
+      segments.push({
+        left: left + step * i,
+        right: left + step * (i + 1),
+      });
+    }
+    return segments;
   }
-  const step = (right - left) / count;
-  const segments = [];
-  for (let i = 0; i < count; i += 1) {
-    segments.push({
-      left: left + step * i,
-      right: left + step * (i + 1),
-    });
+
+  const leftRank = parseBase36Rank(left);
+  const rightRank = parseBase36Rank(right);
+  if (leftRank != null && rightRank != null && leftRank < rightRank) {
+    const span = rightRank - leftRank;
+    const boundaries = [leftRank];
+    for (let i = 1; i < count; i += 1) {
+      const cut = leftRank + (span * BigInt(i)) / BigInt(count);
+      const prev = boundaries[boundaries.length - 1];
+      if (cut <= prev || cut >= rightRank) {
+        throw new Error("E_RANK_NO_SPACE: rebalance required");
+      }
+      boundaries.push(cut);
+    }
+    boundaries.push(rightRank);
+
+    const segments = [];
+    for (let i = 0; i < count; i += 1) {
+      const segmentLeft = formatBase36Rank(boundaries[i]);
+      const segmentRight = formatBase36Rank(boundaries[i + 1]);
+      if (!segmentLeft || !segmentRight) {
+        throw new Error("E_RANK_INVALID: unable to format split boundary rank");
+      }
+      segments.push({ left: segmentLeft, right: segmentRight });
+    }
+    return segments;
   }
-  return segments;
+
+  throw new Error("Multi-token splice requires numeric or base36-rank boundaries");
 }
 
 function buildSpliceInsertions(insertSpecs, stream, bounds, context, runtime, functions) {
@@ -900,6 +1005,13 @@ function applySelectRule(rule, sequence, runtime) {
     const navigationFunctions = buildNavigationFunctions(sequence, runtime, {
       currentToken: token,
     });
+    const constraintOk = evaluateRuleConstraint(
+      rule.constraint,
+      { ...extraContext, params: runtime.params ?? {} },
+      navigationFunctions
+    );
+    if (!constraintOk) continue;
+
     applyEffectsToTargets(
       rule,
       (targetName) => (targetName === "current" ? token : null),
@@ -976,6 +1088,13 @@ function applyPatternRule(rule, sequence, runtime) {
     const currentToken = captures[defaultTarget] ?? null;
     const extraContext = { ...captures, current: currentToken };
     const captureFunctions = buildNavigationFunctions(sequence, runtime, { currentToken });
+    const constraintOk = evaluateRuleConstraint(
+      rule.constraint,
+      { ...extraContext, params: runtime.params ?? {} },
+      captureFunctions
+    );
+    if (!constraintOk) continue;
+
     applyEffectsToTargets(
       rule,
       (targetName) => captures[targetName] ?? null,
@@ -1041,6 +1160,110 @@ function applyRule(rule, sequence, runtime) {
   }
 }
 
+function isStructuralRule(rule) {
+  if (!rule || typeof rule !== "object") return false;
+  if (rule.splice) return true;
+  if (rule.insert_point) return true;
+  if (rule.suppress || rule.delete) return true;
+  if (Array.isArray(rule.associate) && rule.associate.length > 0) return true;
+  if (Array.isArray(rule.disassociate) && rule.disassociate.length > 0) return true;
+  if (rule.op === "insert_stop_releases") return true;
+  return false;
+}
+
+function collectReferencedMarks(sequence) {
+  const marks = new Set();
+  for (const token of sequence) {
+    if (token?.sync_left != null) marks.add(token.sync_left);
+    if (token?.sync_right != null) marks.add(token.sync_right);
+    if (token?.anchor_left != null) marks.add(token.anchor_left);
+    if (token?.anchor_right != null) marks.add(token.anchor_right);
+  }
+  return marks;
+}
+
+function describeMark(mark) {
+  if (typeof mark === "string") return mark;
+  if (typeof mark === "number") return String(mark);
+  try {
+    return JSON.stringify(mark);
+  } catch {
+    return String(mark);
+  }
+}
+
+function interpolateMarkTimes(markTimes, referencedMarks) {
+  const unresolved = new Set(
+    [...referencedMarks].filter((mark) => !Number.isFinite(markTimes.get(mark)))
+  );
+  if (unresolved.size === 0) return;
+
+  let progressed = true;
+  while (progressed && unresolved.size > 0) {
+    progressed = false;
+    const timedMarks = [...markTimes.keys()].filter((mark) => Number.isFinite(markTimes.get(mark)));
+
+    for (const mark of [...unresolved]) {
+      let leftBound = null;
+      let rightBound = null;
+
+      for (const timed of timedMarks) {
+        const cmp = compareOrderValue(timed, mark);
+        if (cmp <= 0) {
+          if (leftBound == null || compareOrderValue(leftBound, timed) <= 0) {
+            leftBound = timed;
+          }
+        }
+        if (cmp >= 0) {
+          if (rightBound == null || compareOrderValue(timed, rightBound) <= 0) {
+            rightBound = timed;
+          }
+        }
+      }
+
+      if (leftBound == null || rightBound == null) continue;
+      const leftTime = Number(markTimes.get(leftBound));
+      const rightTime = Number(markTimes.get(rightBound));
+      if (!Number.isFinite(leftTime) || !Number.isFinite(rightTime)) continue;
+
+      if (compareOrderValue(leftBound, rightBound) === 0) {
+        markTimes.set(mark, leftTime);
+        unresolved.delete(mark);
+        progressed = true;
+        continue;
+      }
+
+      const leftOrder = toNumericOrder(leftBound);
+      const rightOrder = toNumericOrder(rightBound);
+      const currentOrder = toNumericOrder(mark);
+      if (
+        !Number.isFinite(leftOrder) ||
+        !Number.isFinite(rightOrder) ||
+        !Number.isFinite(currentOrder)
+      ) {
+        continue;
+      }
+
+      const denom = rightOrder - leftOrder;
+      if (!Number.isFinite(denom) || denom === 0) continue;
+      let ratio = (currentOrder - leftOrder) / denom;
+      if (!Number.isFinite(ratio)) continue;
+      if (ratio < 0) ratio = 0;
+      if (ratio > 1) ratio = 1;
+
+      const interpolated = leftTime + ratio * (rightTime - leftTime);
+      markTimes.set(mark, interpolated);
+      unresolved.delete(mark);
+      progressed = true;
+    }
+  }
+
+  if (unresolved.size > 0) {
+    const unknown = [...unresolved].map((mark) => describeMark(mark)).join(", ");
+    throw new Error(`E_TIME_NO_BASE_SUPPORT: unable to assign times for marks: ${unknown}`);
+  }
+}
+
 function computeSyncTimes(sequence, runtime) {
   const markTimes = new Map();
   const activeBase = sequence
@@ -1081,6 +1304,9 @@ function computeSyncTimes(sequence, runtime) {
     cursor = rightTime;
   }
 
+  const referencedMarks = collectReferencedMarks(sequence);
+  interpolateMarkTimes(markTimes, referencedMarks);
+
   runtime.markTimes = markTimes;
   return markTimes;
 }
@@ -1103,7 +1329,10 @@ function resolvePointTimes(sequence, runtime, pointStreams) {
       token.time = null;
       continue;
     }
-    const ratio = clampRatio(Number(token.ratio));
+    const ratio = Number(token.ratio);
+    if (!Number.isFinite(ratio) || ratio < 0 || ratio > 1) {
+      throw new Error(`E_INVALID_RATIO: point ratio must be in [0,1], got ${String(token.ratio)}`);
+    }
     token.time = Number(left) + ratio * (Number(right) - Number(left));
   }
 }
@@ -1141,6 +1370,7 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     insertCounters: new Map(),
     usedTokenIds,
     markTimes: new Map(),
+    finalized: false,
   };
 
   const selectedPhases = Array.isArray(options.phases) && options.phases.length > 0
@@ -1154,6 +1384,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     trace.push({ type: "phase_start", phase: phase.name });
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
+      if (runtime.finalized && isStructuralRule(rule)) {
+        throw new Error(
+          `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`
+        );
+      }
       trace.push({ type: "rule_start", phase: phase.name, rule: ruleName });
       current = applyRule(rule, current, runtime);
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
@@ -1165,6 +1400,9 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     if (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0) {
       resolvePointTimes(current, runtime, phase.resolve_points);
       trace.push({ type: "points_resolved", phase: phase.name, streams: phase.resolve_points });
+    }
+    if (phase.compute_times || (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0)) {
+      runtime.finalized = true;
     }
     trace.push({ type: "phase_end", phase: phase.name });
   }

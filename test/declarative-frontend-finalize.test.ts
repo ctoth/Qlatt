@@ -86,4 +86,74 @@ describe("declarative frontend finalize stages", () => {
     expect(point).toBeTruthy();
     expect(point?.time).toBe(30);
   });
+
+  it("interpolates interior base36 marks during compute_times", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        f0: { type: "point" },
+      },
+      rules: {
+        target: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          insert_point: {
+            stream: "f0",
+            at: "$at_sync('000000000006')",
+            value: "120",
+            tag: "f0",
+          },
+        },
+      },
+      phases: [
+        { name: "prosody", rules: ["target"] },
+        { name: "finalize", after: ["prosody"], rules: [], compute_times: true, resolve_points: ["f0"] },
+      ],
+    };
+
+    const input = [
+      {
+        id: "p1",
+        stream: "phone",
+        sync_left: "000000000000",
+        sync_right: "00000000000c",
+        duration: 120,
+        status: 1,
+      },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const point = out.find((t) => t.stream === "f0");
+    expect(point).toBeTruthy();
+    expect(point?.time).toBe(60);
+  });
+
+  it("throws E_TIME_NO_BASE_SUPPORT when referenced marks cannot be timed", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        f0: { type: "point" },
+      },
+      rules: {
+        target: {
+          select: { stream: "phone", where: "true" },
+          insert_point: {
+            stream: "f0",
+            at: "$at_sync('not-orderable-mark')",
+            value: "100",
+            tag: "f0",
+          },
+        },
+      },
+      phases: [
+        { name: "prosody", rules: ["target"] },
+        { name: "finalize", after: ["prosody"], rules: [], compute_times: true, resolve_points: ["f0"] },
+      ],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: "a", sync_right: "b", duration: 100, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrowError(/E_TIME_NO_BASE_SUPPORT/);
+  });
 });

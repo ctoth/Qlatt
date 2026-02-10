@@ -82,8 +82,23 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/engine.js` now computes mark times from ACTIVE base tokens when `phase.compute_times` is set, resolves point token `time` when `phase.resolve_points` is set, and records finalize trace events.
 - Evidence: point ordering now prefers resolved `time` before anchor tuple fallback for `$prev_point` / `$next_point`.
 - Evidence: `test/declarative-frontend-finalize.test.ts` added and passing; full declarative suite now passes (`14` files / `36` tests).
-- Limitation: multi-token splice insertion currently requires numeric boundaries in runtime (non-numeric mark ranks for `N > 1` are not implemented yet).
-- Limitation: `compute_times` currently supports only numeric boundary marks and does not yet implement full sync-mark interpolation/diagnostics from spec Part 5.8/Part 9 (`E_TIME_NO_BASE_SUPPORT`, interior mark timing, sentinel semantics).
+- 2026-02-10: compute-times interpolation expanded with base36-rank support and strict unresolved-mark diagnostics.
+- Evidence: `src/declarative-frontend/engine.js` now interpolates referenced interior marks using numeric/base36 order when possible, and throws `E_TIME_NO_BASE_SUPPORT` if marks remain untimed.
+- Evidence: `test/declarative-frontend-finalize.test.ts` now covers interior base36 interpolation and `E_TIME_NO_BASE_SUPPORT`; full declarative suite passes (`14` files / `38` tests).
+- 2026-02-10: multi-token splice insertion now supports base36 rank boundaries in addition to numeric boundaries.
+- Evidence: `src/declarative-frontend/engine.js` `splitRange` now emits interior base36 marks for `N > 1` insertions and raises `E_RANK_NO_SPACE` when no representable split exists.
+- Evidence: `test/declarative-frontend-splice-actions.test.ts` now includes base36 multi-token replace-range coverage; full declarative suite passes (`14` files / `39` tests).
+- 2026-02-10: rule `constraint` execution semantics implemented for both select and pattern rules.
+- Evidence: `src/declarative-frontend/engine.js` now evaluates `rule.constraint` after select `where` filtering and after full pattern capture binding, before actions are applied.
+- Evidence: `test/declarative-frontend-constraints.test.ts` added; full declarative suite now passes (`15` files / `41` tests).
+- 2026-02-10: initial finalize-dirty lifecycle guard implemented (`E_FINALIZE_DIRTY`).
+- Evidence: runtime now rejects structural rewrites (`splice`, `insert_point`, suppression, association rewrites, structural ops) after any finalize phase (`compute_times` or `resolve_points`) has executed.
+- Evidence: `test/declarative-frontend-finalize-dirty.test.ts` added and passing; full declarative suite now passes (`16` files / `43` tests).
+- 2026-02-10: point ratio diagnostics tightened to spec behavior (`E_INVALID_RATIO`).
+- Evidence: `src/declarative-frontend/engine.js` now rejects out-of-range explicit anchor ratios and invalid point-token ratios during point resolution instead of silently clamping.
+- Evidence: `test/declarative-frontend-point-actions.test.ts` now covers invalid-ratio failure; full declarative suite now passes (`16` files / `44` tests).
+- Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
+- Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -98,7 +113,7 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [ ] `B1` `IN_PROGRESS`: Implement full typed model for sync marks, interval/point tokens, token status lattice, associations, and stream topology.
 - [ ] `B2` `IN_PROGRESS`: Replace slice executor with deterministic phase/rule/match execution with quiescence and match identity semantics.
 - [ ] `B3` `NOT_STARTED`: Implement complete diagnostics catalog from spec Part 9 with stable codes and blame paths.
-- [ ] `B4` `NOT_STARTED`: Implement finalize lifecycle guards (`E_FINALIZE_DIRTY`) and enforce no structural rewrites after finalize.
+- [ ] `B4` `IN_PROGRESS`: Implement finalize lifecycle guards (`E_FINALIZE_DIRTY`) and enforce no structural rewrites after finalize.
 
 Acceptance criteria:
 - Active-token filtering behavior is implemented exactly as spec for matching/navigation/output.

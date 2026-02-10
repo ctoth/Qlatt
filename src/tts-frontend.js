@@ -4,10 +4,8 @@ import {
   fillDefaultParams,
   rule_GenerateF0Contour,
   rule_K_Context,
-  rule_PreBoundaryLengthening,
-  rule_StressDuration,
-  rule_VowelShortening,
 } from "./tts-frontend-rules.js";
+import { runDeclarativeFrontend } from "./declarative-frontend/adapter.js";
 
 export function normalizeText(text) {
   let normalized = text.toLowerCase();
@@ -337,64 +335,6 @@ export function transcribeText(text) {
   return flatPhonemeList; // Return the flat list of phoneme objects
 }
 
-// --- Stop Release Rule --- (Operates on flat list)
-function insertStopReleases(phonemeList) {
-  // Now receives the flat list
-  const newList = [];
-  const releaseMap = {
-    P_CL: "P_REL",
-    T_CL: "T_REL",
-    K_CL: "K_REL",
-    B_CL: "B_REL",
-    D_CL: "D_REL",
-    G_CL: "G_REL",
-  };
-  // Voiceless stops have separate aspiration phase following burst
-  const aspirationMap = {
-    P_REL: "P_ASP",
-    T_REL: "T_ASP",
-    K_REL: "K_ASP",
-  };
-  for (let i = 0; i < phonemeList.length; i++) {
-    const current = phonemeList[i];
-    newList.push(current);
-    const releasePhoneme = releaseMap[current.phoneme];
-    if (releasePhoneme) {
-      let addRelease = true;
-      if (phonemeList[i + 1]) {
-        const nextPhKey = phonemeList[i + 1].phoneme;
-        const nextPhTarget =
-          PHONEME_TARGETS[nextPhKey + "1"] ||
-          PHONEME_TARGETS[nextPhKey + "0"] ||
-          PHONEME_TARGETS[nextPhKey];
-        if (
-          phonemeList[i + 1].phoneme === "SIL" ||
-          nextPhTarget?.type?.includes("stop")
-        ) {
-          addRelease = false;
-        }
-      }
-      if (addRelease) {
-        newList.push({ phoneme: releasePhoneme, stress: current.stress });
-        // Voiceless stops: add aspiration phase after burst
-        const aspirationPhoneme = aspirationMap[releasePhoneme];
-        if (aspirationPhoneme) {
-          newList.push({ phoneme: aspirationPhoneme, stress: current.stress });
-        }
-      } else if (phonemeList[i + 1]?.phoneme === "SIL") {
-        // Add weak release for word-final stops (before silence) for clarity
-        newList.push({ phoneme: releasePhoneme, stress: current.stress, weak: true });
-        // Also add weak aspiration for voiceless stops
-        const aspirationPhoneme = aspirationMap[releasePhoneme];
-        if (aspirationPhoneme) {
-          newList.push({ phoneme: aspirationPhoneme, stress: current.stress, weak: true });
-        }
-      }
-    }
-  }
-  return newList;
-}
-
 // --- Debug Logger ---
 
 function debugLog(...args) {
@@ -510,8 +450,10 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   debugLog("Initial parameter sequence prepared after mapping.");
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
-  debugLog("Applying rule: insertStopReleases...");
-  parameterSequence = insertStopReleases(parameterSequence); // Operates on the flat list
+  debugLog("Applying declarative phase: structural...");
+  parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    phases: ["structural"],
+  });
   // --- Simplified Refill Step ---
   debugLog("Applying rule: Refill params/durations for releases...");
   for (let i = 0; i < parameterSequence.length; i++) {
@@ -584,12 +526,10 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       );
     }
   });
-  debugLog("Applying rule: rule_StressDuration...");
-  parameterSequence = rule_StressDuration(parameterSequence); // Note: This rule also ensures min duration
-  debugLog("Applying rule: rule_VowelShortening...");
-  parameterSequence = rule_VowelShortening(parameterSequence);
-  debugLog("Applying rule: rule_PreBoundaryLengthening...");
-  parameterSequence = rule_PreBoundaryLengthening(parameterSequence);
+  debugLog("Applying declarative phase: duration...");
+  parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    phases: ["duration"],
+  });
   // Set SW (source selection): parallel (SW=1) for most fricatives/stops, cascade (SW=0) for vowels/sonorants
   // Klatt 80 COEWAV.FOR: aspiration routes through cascade (SW=0), so HH uses cascade per explicit target
   parameterSequence.forEach((ph) => {

@@ -1,149 +1,223 @@
 # Declarative Frontend v11 Direct Migration Plan (No Backward-Compat Path)
 
-This is a hard migration plan. There is no dual-engine runtime, no feature flag switch, and no imperative fallback path kept alive after cutover.
+This is the execution plan for completing the full v11 declarative frontend from `projects/declarative-frontend/spec.md` and replacing the current hybrid implementation in `src`.
+
+Status baseline date: 2026-02-10.
 
 ## 0) Non-Negotiable Migration Rules
 
-- `textToKlattTrack()` remains the public API, but its internals are fully replaced by the declarative engine.
+- `textToKlattTrack()` remains the public API, but internals are fully declarative.
 - `normalizeText()` + `transcribeText()` remain upstream preprocessing (outside DSL), per spec Part 0.4.
 - No `frontendEngine: imperative|declarative` option.
 - No shadow execution in production path.
-- Imperative rule pipeline code in `src/tts-frontend.js` and rule functions in `src/tts-frontend-rules.js` are deleted as part of migration, not deferred.
+- Imperative frontend sequencing and rule mutators are deleted as part of cutover, not deferred.
+- No new imperative frontend behavior is allowed in `src/tts-frontend.js` or `src/tts-frontend-rules.js` during migration.
+- No new bespoke `rule.op` domain behavior is allowed once declarative primitives exist; behavior should be expressed as DSL rules.
 
-## 1) Scope
+## 1) Plan Maintenance Protocol
 
-Implement fully:
+Update this file at the end of every migration work session:
 
-- v11 rule engine from `projects/declarative-frontend/spec.md`
-- tracing/introspection from `projects/declarative-frontend/tracing.md`
-- CLI surface from `projects/declarative-frontend/cli.md`
-- integration into current TTS frontend entrypoint (`src/tts-frontend.js`)
-- dead code removal caused by declarativing frontend
+1. Update the checklist item statuses in Section 3.
+2. Add one line to Section 2 with date and concrete evidence.
+3. If scope changes, update acceptance criteria before code changes.
 
-## 2) Target Architecture After Migration
+Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
-- `src/tts-frontend.js`
-  - keeps: text normalization, dictionary/G2P fallback, call into declarative adapter, final track return.
-  - removes: imperative phoneme rule sequencing and imperative F0/formant/duration mutation pipeline.
-- `src/declarative-frontend/**` (new)
-  - owns parse/validate/execute/finalize/emit.
-- `src/tts-frontend-rules.js`
-  - reduced to shared phoneme inventory/constants only if still needed by preprocessing.
-  - imperative `rule_*` mutators removed.
+## 2) Current Repository Observations (Audit Log)
 
-## 3) Work Plan
+- 2026-02-10: only a first migration slice exists in runtime and tests.
+- Evidence: `src/declarative-frontend/rule-pack.js` is `version: "v11-slice"` with only structural + duration rules.
+- Evidence: `src/declarative-frontend/engine.js` supports only 4 hardcoded ops and throws for others.
+- Evidence: `src/tts-frontend.js` still runs imperative steps (`rule_K_Context`, punctuation pause loop, SW assignment, `rule_GenerateF0Contour`) in addition to two declarative phase calls.
+- Evidence: `test/declarative-frontend-slice.test.ts` is explicitly named "first migration slice".
+- Evidence: no `tts-dsl` CLI entrypoint exists in `package.json`.
+- 2026-02-10: parser/validator expanded to include broader v11 schema sections and cross-reference checks while keeping slice compatibility.
+- Evidence: `src/declarative-frontend/parser.js` now normalizes `streams`, `topology`, `patterns`, `interpolation`, and `output`.
+- Evidence: `src/declarative-frontend/validation.js` now validates stream types, topology references, pattern schema, rule shape/select/match links, and phase `resolve_points`/`resolve_scalars`.
+- Evidence: `test/declarative-frontend-schema.test.ts` added for schema normalization and cross-reference diagnostics; declarative frontend tests pass.
+- 2026-02-10: expression validation work started with forward point-reference policy enforcement.
+- Evidence: `src/declarative-frontend/validation.js` now emits `E_POINT_FWD_REF` when `insert_point.value` references `$next_point(...)`.
+- Evidence: `test/declarative-frontend-schema.test.ts` includes coverage for forward-reference rejection and expression diagnostics.
+- 2026-02-10: token status lattice groundwork added and wired into slice execution path using ACTIVE-token filtering.
+- Evidence: `src/declarative-frontend/model.js` adds `TokenStatus`, normalization, lattice join, and active-token predicates.
+- Evidence: `src/declarative-frontend/engine.js` now normalizes token status and applies structural/duration slice rules over ACTIVE tokens only.
+- Evidence: `test/declarative-frontend-model.test.ts` and new ACTIVE-filter tests in `test/declarative-frontend-slice.test.ts` pass.
+- 2026-02-10: first generic rule execution path added for select rules (`select` + `apply` + `suppress`) with deterministic rule order and ACTIVE filtering.
+- Evidence: `src/declarative-frontend/engine.js` executes `rule.select` before legacy `rule.op` switch.
+- Evidence: `test/declarative-frontend-generic-rules.test.ts` validates declared rule order and suppress-then-filter behavior.
+- Note: initial limited evaluator replaced by JSONata integration in later entries.
+- 2026-02-10: initial pattern-rule execution path added (`match` + capture targeting + suppress).
+- Evidence: `src/declarative-frontend/engine.js` resolves `rule.match` against parsed patterns and applies capture-targeted effects.
+- Evidence: `test/declarative-frontend-pattern-rules.test.ts` validates pattern suppression and capture-target `apply`.
+- Limitation: pattern matching is currently contiguous, single-stream, and scope/cross-boundary/quantifier semantics are not implemented yet.
+- 2026-02-10: JSONata integration started for runtime expression evaluation and compile-time validation.
+- Evidence: `src/declarative-frontend/expressions.js` added; engine where/value expressions now evaluate through JSONata.
+- Evidence: validator emits `E_JSONATA_INVALID` for malformed expressions in pattern/rule expression fields.
+- Evidence: `test/declarative-frontend-jsonata.test.ts` passes for runtime JSONata expressions and malformed-expression diagnostics.
+- Limitation: helper function coverage is partial and still expanding.
+- 2026-02-10: first navigation helper set implemented with ACTIVE-token filtering semantics.
+- Evidence: engine registers `$prev`, `$next`, `$index`, `$total` via JSONata function bindings against snapshot active stream order.
+- Evidence: `test/declarative-frontend-navigation.test.ts` validates navigation behavior and suppressed-token filtering.
+- Note: `$parent`, `$children`, `$assoc` implemented in subsequent entries.
+- 2026-02-10: hierarchy navigation helpers `$parent` and `$children` implemented with ACTIVE-token filtering.
+- Evidence: `src/declarative-frontend/engine.js` adds parent/child lookup functions over active tokens and stream filters.
+- Evidence: `test/declarative-frontend-hierarchy-navigation.test.ts` validates parent stress lookup and child counting with suppressed-child exclusion.
+- Note: `$assoc` implemented in subsequent entry.
+- 2026-02-10: association navigation helper `$assoc` implemented for active association edges.
+- Evidence: engine resolves association IDs from `token.associations[name]` and returns active associated tokens.
+- Evidence: `test/declarative-frontend-association-navigation.test.ts` validates suppressed associated tokens are excluded.
+- 2026-02-10: association actions implemented in generic rule runtime (`associate`/`disassociate`).
+- Evidence: engine now mutates association edges with monotonic status (ACTIVE/SUPPRESSED) and `$assoc` reads active edges only.
+- Evidence: `test/declarative-frontend-association-actions.test.ts` validates associate + downstream query behavior and disassociate suppression.
+- 2026-02-10: point helper and point insertion runtime landed (`$spanning`, `$midpoint`, `$at_ratio`, `$at_sync`, `$prev_point`, `$next_point`, `insert_point` action).
+- Evidence: `src/declarative-frontend/engine.js` now builds point-stream runtime metadata, evaluates anchor expressions, inserts ACTIVE point tokens with deterministic IDs, and exposes new JSONata helper bindings.
+- Evidence: `test/declarative-frontend-point-actions.test.ts` validates midpoint/ratio/sync anchors, `$prev_point` composition, `$next_point` reads, and `$spanning` usage.
+- Evidence: full declarative frontend suite passes (`12` files / `32` tests via `npx vitest run ...declarative-frontend...`).
+- 2026-02-10: splice action runtime implemented with TDD for `replace_range` and `insert_at_boundary`.
+- Evidence: `src/declarative-frontend/engine.js` now applies `rule.splice` in both select and pattern execution paths, supports suppression+insertion for `replace_range`, and boundary insertion for `insert_at_boundary`.
+- Evidence: expression context for actions now includes captures/current in pattern rules, enabling splice expressions like `c.sync_left` / `v.sync_right`.
+- Evidence: `test/declarative-frontend-splice-actions.test.ts` added and passing; full declarative suite now passes (`13` files / `34` tests).
+- 2026-02-10: initial finalize-stage runtime implemented for `compute_times` + `resolve_points` with deterministic phase behavior.
+- Evidence: `src/declarative-frontend/engine.js` now computes mark times from ACTIVE base tokens when `phase.compute_times` is set, resolves point token `time` when `phase.resolve_points` is set, and records finalize trace events.
+- Evidence: point ordering now prefers resolved `time` before anchor tuple fallback for `$prev_point` / `$next_point`.
+- Evidence: `test/declarative-frontend-finalize.test.ts` added and passing; full declarative suite now passes (`14` files / `36` tests).
+- Limitation: multi-token splice insertion currently requires numeric boundaries in runtime (non-numeric mark ranks for `N > 1` are not implemented yet).
+- Limitation: `compute_times` currently supports only numeric boundary marks and does not yet implement full sync-mark interpolation/diagnostics from spec Part 5.8/Part 9 (`E_TIME_NO_BASE_SUPPORT`, interior mark timing, sentinel semantics).
 
-### Phase 1: Engine Core
+## 3) Master Checklist (Spec-to-Code Execution)
 
-Build:
-- sync marks, rank/order, token status lattice, stream ordering
-- parser + static validation + diagnostics
-- JSONata integration with required navigation functions
-- deterministic phase/rule/match execution and quiescence
+### [A] Execution Grounding
 
-Tests:
-- deterministic ordering, rank edge cases, diagnostics catalog
+- [ ] `A1` `NOT_STARTED`: Add this plan status check into CI or PR template so status updates are enforced.
+- [ ] `A2` `NOT_STARTED`: Create a migration branch rule: no new imperative frontend logic merged into `src/tts-frontend.js` or `src/tts-frontend-rules.js`.
+- [ ] `A3` `IN_PROGRESS`: Enforce declarative-maximization guardrail: no new domain behavior via custom `rule.op`; prefer generic DSL actions.
 
-Exit:
-- engine can run standalone fixtures end-to-end.
+### [B] Engine Core (Spec Parts 0, 1, 5, 9)
 
-### Phase 2: Full Rule Semantics
+- [ ] `B1` `IN_PROGRESS`: Implement full typed model for sync marks, interval/point tokens, token status lattice, associations, and stream topology.
+- [ ] `B2` `IN_PROGRESS`: Replace slice executor with deterministic phase/rule/match execution with quiescence and match identity semantics.
+- [ ] `B3` `NOT_STARTED`: Implement complete diagnostics catalog from spec Part 9 with stable codes and blame paths.
+- [ ] `B4` `NOT_STARTED`: Implement finalize lifecycle guards (`E_FINALIZE_DIRTY`) and enforce no structural rewrites after finalize.
 
-Build:
-- select + pattern rules
-- apply/splice/insert_point/suppress/associate/disassociate
-- scalar resolution (standard + Klatt)
-- compute_times + resolve_points
-- finalize invariants and validation errors
+Acceptance criteria:
+- Active-token filtering behavior is implemented exactly as spec for matching/navigation/output.
+- All invariants in Part 9.2 are validated post-phase/finalize.
+- Engine can execute standalone fixture specs end-to-end with deterministic output.
 
-Tests:
-- one fixture for each rule/action family and critical diagnostics
+### [C] Parser + Validator (Spec Parts 3, 4, 6, 7, 9)
 
-Exit:
-- spec Appendix-style examples execute correctly and deterministically.
+- [ ] `C1` `IN_PROGRESS`: Expand parser beyond phases/rules to full DSL schema (`streams`, `topology`, `patterns`, `rules`, `phases`, `output`, interpolation sections).
+- [ ] `C2` `IN_PROGRESS`: Validate cross-references (streams, captures, fields, patterns, rules, phases).
+- [ ] `C3` `IN_PROGRESS`: Validate phase dependencies and ordering constraints.
+- [ ] `C4` `IN_PROGRESS`: Validate expression fields and point forward-reference policy.
 
-### Phase 3: Qlatt DSL Rule Pack
+Acceptance criteria:
+- Parser supports full v11 grammar used in `spec.md` appendix examples.
+- Validator emits deterministic diagnostics for invalid specs and accepts valid appendix-style specs.
 
-Build declarative replacements for existing frontend behavior:
-- stop release/aspiration insertion
-- K-context F2 behavior
-- stress/vowel shortening/pre-boundary duration behavior
-- punctuation pause behavior
-- SW/source assignment behavior
-- F0 target generation and question rise behavior
+### [D] Expression Runtime (Spec Part 2)
 
-Tests:
-- phrase corpus fixtures that assert expected track-level behavior.
+- [ ] `D1` `IN_PROGRESS`: Integrate JSONata evaluation for rule expressions and constraints.
+- [ ] `D2` `IN_PROGRESS`: Implement required helper functions (`$prev`, `$next`, `$parent`, `$children`, `$assoc`, `$spanning`, `$prev_point`, `$next_point`, etc.).
+- [ ] `D3` `IN_PROGRESS`: Enforce ACTIVE-token filtering in navigation helpers.
+- [ ] `D4` `IN_PROGRESS`: Add deterministic error handling for JSONata parse/eval failures (`E_JSONATA_INVALID`).
 
-Exit:
-- declarative outputs match required behavior envelope for current synth runtime.
+Acceptance criteria:
+- Expressions in appendix examples run unchanged.
+- Function outputs and ordering are deterministic and tested.
 
-### Phase 4: Direct Integration Cutover
+### [E] Rule Semantics (Spec Parts 4, 5, 6)
 
-Build:
-- replace internals of `textToKlattTrack()` to call declarative engine directly
-- keep output contract as current `KlattFrame[]` shape for interpreter/runtime consumers
+- [ ] `E1` `IN_PROGRESS`: Implement select and pattern rule execution.
+- [ ] `E2` `IN_PROGRESS`: Implement all actions: `apply`, `splice`, `insert_point`, `suppress/delete`, `associate`, `disassociate`.
+- [ ] `E3` `NOT_STARTED`: Implement scalar resolution (`set`, `mul`, `add`) including Klatt incompressibility handling.
+- [ ] `E4` `IN_PROGRESS`: Implement compute times and point resolution stages.
 
-Tests:
-- `test/test-harness.js` and runtime smoke continue to work with migrated frontend
-- golden/parity checks against expected outputs
+Acceptance criteria:
+- One integration fixture per action family.
+- Appendix-style multi-phase examples execute with deterministic ordering.
 
-Exit:
-- production/frontend path is declarative-only.
+### [F] Qlatt Rule Pack Migration (Current Behavior Coverage)
 
-### Phase 5: Immediate Dead Code Removal
+- [x] `F1` `DONE`: Stop release/aspiration insertion migrated in slice rulepack.
+- [x] `F2` `DONE`: Stress/vowel shortening/pre-boundary duration migrated in slice rulepack.
+- [ ] `F3` `NOT_STARTED`: Migrate K-context F2 behavior into declarative rules.
+- [ ] `F4` `NOT_STARTED`: Migrate punctuation pause duration behavior into declarative rules.
+- [ ] `F5` `NOT_STARTED`: Migrate SW/source assignment behavior into declarative rules.
+- [ ] `F6` `NOT_STARTED`: Migrate F0 target generation/question rise into declarative point rules.
 
-Delete:
-- imperative sequencing blocks in `src/tts-frontend.js` (rule_K_Context, duration mutators, imperative F0 pipeline, refill loops)
-- imperative rule functions in `src/tts-frontend-rules.js` replaced by DSL rules
-- disabled debug scaffolding only used by removed imperative path
+Acceptance criteria:
+- No frontend behavior for synthesis-relevant parameters is implemented imperatively.
+- Golden phrase corpus stays within agreed tolerance envelope.
 
-Refactor:
-- move retained inventory/constants to declarative assets where possible to avoid dual sources of truth
+### [G] Direct Runtime Cutover
 
-Tests:
-- full suite passes after deletions
+- [ ] `G1` `IN_PROGRESS`: Keep `textToKlattTrack()` public signature; replace internals with declarative engine call only.
+- [ ] `G2` `NOT_STARTED`: Remove imperative post-processing loops in `src/tts-frontend.js`.
+- [ ] `G3` `NOT_STARTED`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
 
-Exit:
-- no operational dependency on legacy imperative frontend code.
+Acceptance criteria:
+- `src/tts-frontend.js` contains no imperative phonological/phonetic rule pipeline.
+- Frontend path is declarative-only in production runtime.
 
-### Phase 6: Tooling Completion
+### [H] Dead Code Removal and Source of Truth Cleanup
 
-Build:
-- `tts-dsl` commands from `cli.md`
-- trace/provenance/diff/reporting from `tracing.md`
+- [ ] `H1` `NOT_STARTED`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
+- [ ] `H2` `NOT_STARTED`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.js`.
+- [ ] `H3` `NOT_STARTED`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
 
-Tests:
-- CLI command contract tests + trace schema tests
+Acceptance criteria:
+- No operational dependency on removed imperative rule code.
+- Code ownership boundaries are clear (`declarative-frontend/**` owns rule behavior).
 
-Exit:
-- spec-required tooling available on migrated codebase.
+### [I] Tooling Completion (Spec Part 10 + CLI doc)
 
-## 4) Test Strategy (Direct Migration)
+- [ ] `I1` `NOT_STARTED`: Implement trace model sufficient for match/rewrite/resolve/error sequencing.
+- [ ] `I2` `NOT_STARTED`: Implement explain/why-not/diff APIs on top of trace/provenance data.
+- [ ] `I3` `NOT_STARTED`: Add `tts-dsl` CLI entrypoint and subcommands from `projects/declarative-frontend/cli.md`.
+- [ ] `I4` `NOT_STARTED`: Add contract tests for CLI outputs and trace schemas.
 
-- Unit: order/rank/parser/evaluator/resolution functions
-- Integration: phase execution and diagnostics
-- Frontend behavior tests: declarative-only track generation on representative phrase corpus
-- Runtime smoke: generated track schedules in both harness runtime modes
-- Golden verification: regenerated expected outputs reviewed and locked
+Acceptance criteria:
+- `tts-dsl run|validate|explain|why-not|diff` are functional.
+- Trace and debugger-oriented introspection are usable for rule debugging.
 
-Note:
-- Comparisons to old imperative behavior are used only as migration verification during development; no dual runtime path remains in code.
+### [J] Test and Release Gate
 
-## 5) Definition of Done
+- [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
+- [ ] `J2` `NOT_STARTED`: Add integration tests for phases, diagnostics, and finalize behavior.
+- [ ] `J3` `NOT_STARTED`: Add declarative-only frontend behavior tests on phrase corpus.
+- [ ] `J4` `NOT_STARTED`: Run golden verification and lock outputs after review.
+- [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.
+
+Acceptance criteria:
+- Required tests pass in CI.
+- Docs no longer describe declarative frontend as future work.
+
+## 4) Sequenced Event Plan (Agent Execution Order)
+
+1. Complete missing declarative primitives first: remaining `D2/D3` helpers + `E2` actions + `E4` finalize/point timing.
+2. Complete `E3` scalar resolution semantics and diagnostics hardening (`B3/B4`).
+3. Migrate remaining runtime behavior (`F3-F6`) into declarative rules only after required primitives are in place.
+4. Execute hard cutover and deletions in one set: `G` + `H`.
+5. Complete `I` (tooling) on declarative-only runtime.
+6. Complete `J` and finalize docs/release.
+
+Declarative optimization policy:
+- Prefer building generic rule primitives once over adding special-case imperative behavior.
+- If a temporary workaround is added, record its removal trigger and target checklist item in Section 2.
+
+## 5) Design Decisions to Lock Before Implementation
+
+- `LOCKED 2026-02-10`: Point forward-reference policy for `$next_point` is **reject at validation** with `E_POINT_FWD_REF` (no implicit multi-pass point solver in v1 cutover).
+- `LOCKED 2026-02-10`: Splice conflict mode default is **permissive** with final invariant rejection (`E_BASE_OVERLAP` / `E_BASE_NOT_CONTIGUOUS`); strict `E_SPLICE_CONFLICT` may be added as opt-in.
+- `LOCKED 2026-02-10`: Post-cutover rule/inventory source of truth is **declarative assets**. Legacy constants may be mirrored only as temporary compatibility scaffolding during migration, then removed.
+
+## 6) Definition of Done
 
 - Declarative v11 engine is the only frontend rule engine in runtime path.
 - `textToKlattTrack()` is declarative-backed and keeps consumer output contract.
 - Legacy imperative frontend rule code is removed.
 - Required tests pass.
 - CLI + tracing + explain/why-not/diff capabilities are implemented.
-- docs reflect declarative frontend as the actual architecture, not planned architecture.
-
-## 6) First Implementation Slice
-
-Execute first:
-
-1. Create `src/declarative-frontend/` core + parser + validation + rank/order utilities.
-2. Add direct call from `textToKlattTrack()` into a minimal declarative adapter (no feature flag).
-3. Migrate first concrete ruleset (duration + one structural rewrite) and delete corresponding imperative code immediately after tests pass.
-
+- Docs reflect declarative frontend as current architecture.

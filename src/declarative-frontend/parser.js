@@ -4,6 +4,100 @@ function asPlainObject(value) {
   return value && typeof value === "object" && !Array.isArray(value);
 }
 
+function asString(value, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function asStringArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item) => typeof item === "string");
+}
+
+function cloneObject(value) {
+  return asPlainObject(value) ? { ...value } : {};
+}
+
+function normalizePhase(phase) {
+  return {
+    name: asString(phase?.name),
+    after: asStringArray(phase?.after),
+    rules: asStringArray(phase?.rules),
+    resolve_scalars: asStringArray(phase?.resolve_scalars),
+    compute_times: Boolean(phase?.compute_times),
+    resolve_points: asStringArray(phase?.resolve_points),
+  };
+}
+
+function normalizeStream(stream) {
+  if (!asPlainObject(stream)) return {};
+  return {
+    ...stream,
+    type: asString(stream.type),
+    spans: asString(stream.spans, null),
+    features: cloneObject(stream.features),
+    scalars: cloneObject(stream.scalars),
+    inventory: cloneObject(stream.inventory),
+    value_type: asString(stream.value_type, null),
+    unit: asString(stream.unit, null),
+  };
+}
+
+function normalizePatternStep(step) {
+  if (!asPlainObject(step)) return {};
+  return {
+    ...step,
+    capture: asString(step.capture),
+    where: asString(step.where),
+    optional: Boolean(step.optional),
+    repeat: step.repeat === "*" || step.repeat === "+" ? step.repeat : null,
+  };
+}
+
+function normalizePattern(pattern) {
+  if (!asPlainObject(pattern)) return {};
+  return {
+    ...pattern,
+    stream: asString(pattern.stream),
+    scope: asString(pattern.scope),
+    cross_boundary: Boolean(pattern.cross_boundary),
+    max_lookahead: Number.isInteger(pattern.max_lookahead) ? pattern.max_lookahead : null,
+    sequence: Array.isArray(pattern.sequence)
+      ? pattern.sequence.map((step) => normalizePatternStep(step))
+      : [],
+    constraint: asString(pattern.constraint, null),
+  };
+}
+
+function normalizeRule(rule) {
+  if (!asPlainObject(rule)) return {};
+  return {
+    ...rule,
+    citation: asString(rule.citation, null),
+    kind: asString(rule.kind, null),
+    op: asString(rule.op, null),
+    match: asString(rule.match, null),
+    constraint: asString(rule.constraint, null),
+    select: asPlainObject(rule.select)
+      ? {
+          ...rule.select,
+          stream: asString(rule.select.stream),
+          where: asString(rule.select.where),
+        }
+      : null,
+    apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
+    splice: asPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
+    insert_point: asPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
+    suppress: Boolean(rule.suppress),
+    delete: Boolean(rule.delete),
+    associate: Array.isArray(rule.associate)
+      ? rule.associate.map((entry) => cloneObject(entry))
+      : [],
+    disassociate: Array.isArray(rule.disassociate)
+      ? rule.disassociate.map((entry) => cloneObject(entry))
+      : [],
+  };
+}
+
 export function parseDslSpec(source) {
   let raw = source;
 
@@ -16,20 +110,37 @@ export function parseDslSpec(source) {
   }
 
   const phases = Array.isArray(raw.phases) ? raw.phases : [];
+  const streams = asPlainObject(raw.streams) ? raw.streams : {};
+  const patterns = asPlainObject(raw.patterns) ? raw.patterns : {};
   const rules = asPlainObject(raw.rules) ? raw.rules : {};
   const parameters = asPlainObject(raw.parameters) ? raw.parameters : {};
+  const topology = asPlainObject(raw.topology) ? raw.topology : {};
+  const interpolation = asPlainObject(raw.interpolation) ? raw.interpolation : {};
 
   return {
     version: raw.version ?? null,
     parameters,
-    phases: phases.map((phase) => ({
-      name: phase?.name ?? "",
-      after: Array.isArray(phase?.after) ? phase.after : [],
-      rules: Array.isArray(phase?.rules) ? phase.rules : [],
-      resolve_scalars: Array.isArray(phase?.resolve_scalars) ? phase.resolve_scalars : [],
-      compute_times: Boolean(phase?.compute_times),
-      resolve_points: Array.isArray(phase?.resolve_points) ? phase.resolve_points : [],
-    })),
-    rules,
+    input_contract: cloneObject(raw.input_contract),
+    streams: Object.fromEntries(
+      Object.entries(streams).map(([name, stream]) => [name, normalizeStream(stream)])
+    ),
+    topology: {
+      hierarchy: asStringArray(topology.hierarchy),
+      parallel: asStringArray(topology.parallel),
+      point: asStringArray(topology.point),
+    },
+    patterns: Object.fromEntries(
+      Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
+    ),
+    phases: phases.map((phase) => normalizePhase(phase)),
+    rules: Object.fromEntries(
+      Object.entries(rules).map(([name, rule]) => [name, normalizeRule(rule)])
+    ),
+    interpolation: {
+      scalars: cloneObject(interpolation.scalars),
+      points: cloneObject(interpolation.points),
+    },
+    output: cloneObject(raw.output),
+    include: Array.isArray(raw.include) ? raw.include.slice() : [],
   };
 }

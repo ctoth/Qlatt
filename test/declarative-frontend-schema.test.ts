@@ -132,4 +132,19 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.filter((code) => code === "E_RULE_EXPRESSION_INVALID").length).toBeGreaterThan(0);
     expect(codes.includes("E_POINT_FWD_REF")).toBe(true);
   });
+
+  it("rejects unknown custom rule ops", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+      rules: {
+        unknown_op: { op: "super_new_behavior" },
+      },
+      phases: [{ name: "duration", rules: ["unknown_op"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+
+    expect(codes.includes("E_RULE_OP_UNKNOWN")).toBe(true);
+  });
 });

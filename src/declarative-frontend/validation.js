@@ -6,6 +6,12 @@ function makeDiagnostic(code, message, path, severity = "error") {
 }
 
 const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
+const ALLOWED_RULE_OPS = new Set([
+  "insert_stop_releases",
+  "stress_duration",
+  "vowel_shortening",
+  "pre_boundary_lengthening",
+]);
 
 function asPlainObject(value) {
   return value && typeof value === "object" && !Array.isArray(value);
@@ -184,12 +190,23 @@ function validateRules(spec, streamByName, diagnostics) {
 
     const hasSelect = asPlainObject(rule.select);
     const hasMatch = typeof rule.match === "string" && rule.match.length > 0;
+    const hasOp = typeof rule.op === "string" && rule.op.length > 0;
     if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !rule.op)) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_SHAPE",
           `Rule '${name}' must define exactly one of select or match`,
           `rules.${name}`
+        )
+      );
+    }
+
+    if (hasOp && !ALLOWED_RULE_OPS.has(rule.op)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_OP_UNKNOWN",
+          `Rule '${name}' uses unsupported op '${rule.op}'`,
+          `rules.${name}.op`
         )
       );
     }

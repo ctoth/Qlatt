@@ -144,11 +144,15 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/engine.js` now accumulates phase-scoped scalar effects for fields with explicit scalar `resolution`, resolves them deterministically at phase boundary, applies standard min/max clamp, and applies Klatt incompressibility-floor semantics for `mul`.
 - Evidence: `test/declarative-frontend-scalar-resolution.test.ts` added and passing for standard and klatt resolution behavior.
 - Evidence: declarative + frontend migration suite now passes (`24` files / `60` tests).
+- 2026-02-11: validator now blocks unknown imperative `rule.op` additions to enforce declarative-maximization guardrail.
+- Evidence: `src/declarative-frontend/validation.js` now emits `E_RULE_OP_UNKNOWN` for unsupported `rule.op` values.
+- Evidence: `test/declarative-frontend-schema.test.ts` covers unknown `rule.op` rejection; declarative + frontend migration suite passes (`24` files / `61` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
-- Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); legacy fields without explicit resolution still execute immediate in-rule updates.
+- Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
+- Limitation: known temporary `rule.op` handlers remain for four migrated rulepack entries; eliminating these requires final declarative rewrites for stop-release insertion and duration heuristic rules.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 

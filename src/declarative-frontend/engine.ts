@@ -8,6 +8,15 @@ import {
   joinTokenStatus,
   normalizeTokenStatus,
 } from "./model";
+import {
+  buildInitialBoundaryOrders,
+  buildSyncAxis,
+  compareOrderValue,
+  isEndOrder,
+  isOrderObject,
+  isStartOrder,
+  toNumericOrder,
+} from "./axis";
 
 function cloneSequence(sequence) {
   return sequence.map((token) => ({
@@ -76,115 +85,6 @@ function initializeBaseStreamSyncMarks(sequence, baseStreams) {
   }
 }
 
-const FINITE_RANK_RE = /^[0-9a-z]{12}$/;
-const BASE36_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
-const BASE36 = 36n;
-const MAX_FINITE_RANK = BASE36 ** 12n - 1n;
-const START_ORDER = Object.freeze({ kind: "START" });
-const END_ORDER = Object.freeze({ kind: "END" });
-
-function parseBase36Rank(rank) {
-  if (typeof rank !== "string" || !FINITE_RANK_RE.test(rank)) return null;
-  let value = 0n;
-  for (const ch of rank) {
-    value = value * BASE36 + BigInt(BASE36_DIGITS.indexOf(ch));
-  }
-  return value;
-}
-
-function formatBase36Rank(value) {
-  if (typeof value !== "bigint" || value < 0n || value > MAX_FINITE_RANK) return null;
-  let n = value;
-  const chars = new Array(12).fill("0");
-  for (let i = 11; i >= 0; i -= 1) {
-    const digit = Number(n % BASE36);
-    chars[i] = BASE36_DIGITS[digit];
-    n /= BASE36;
-  }
-  return chars.join("");
-}
-
-function buildInitialBoundaryOrders(tokenCount) {
-  if (!Number.isInteger(tokenCount) || tokenCount <= 0) return [];
-  if (tokenCount === 1) return [START_ORDER, END_ORDER];
-
-  const boundaries = new Array(tokenCount + 1);
-  boundaries[0] = START_ORDER;
-  boundaries[tokenCount] = END_ORDER;
-
-  let previous = 0n;
-  const denominator = BigInt(tokenCount);
-  for (let i = 1; i < tokenCount; i += 1) {
-    let rankValue = (MAX_FINITE_RANK * BigInt(i)) / denominator;
-    if (rankValue <= previous) rankValue = previous + 1n;
-    if (rankValue >= MAX_FINITE_RANK) rankValue = MAX_FINITE_RANK - 1n;
-    if (rankValue <= previous) {
-      throw new Error("E_RANK_NO_SPACE: unable to bootstrap sync axis");
-    }
-    const rank = formatBase36Rank(rankValue);
-    if (!rank) {
-      throw new Error("E_RANK_INVALID: unable to format bootstrap rank");
-    }
-    boundaries[i] = { kind: "FINITE", rank };
-    previous = rankValue;
-  }
-
-  return boundaries;
-}
-
-function toNumericOrder(mark) {
-  if (typeof mark === "number" && Number.isFinite(mark)) return mark;
-  if (typeof mark === "bigint") return Number(mark);
-
-  if (typeof mark === "string") {
-    const rank = parseBase36Rank(mark);
-    if (rank != null) return Number(rank);
-    if (/^-?\d+(\.\d+)?$/.test(mark)) {
-      const parsed = Number(mark);
-      if (Number.isFinite(parsed)) return parsed;
-    }
-    return null;
-  }
-
-  if (mark && typeof mark === "object") {
-    if (mark.kind === "START") return 0;
-    if (mark.kind === "END") return Number(MAX_FINITE_RANK);
-    if (mark.kind === "FINITE") {
-      const rank = parseBase36Rank(mark.rank);
-      if (rank != null) return Number(rank);
-    }
-  }
-
-  return null;
-}
-
-function compareOrderValue(left, right) {
-  if (left === right) return 0;
-
-  if (left && right && typeof left === "object" && typeof right === "object") {
-    const kindOrder = { START: 0, FINITE: 1, END: 2 };
-    if (left.kind && right.kind && left.kind !== right.kind) {
-      return (kindOrder[left.kind] ?? 0) - (kindOrder[right.kind] ?? 0);
-    }
-    if (left.kind === "FINITE" && right.kind === "FINITE") {
-      const lRank = String(left.rank ?? "");
-      const rRank = String(right.rank ?? "");
-      if (lRank < rRank) return -1;
-      if (lRank > rRank) return 1;
-      return 0;
-    }
-  }
-
-  if (typeof left === "number" && typeof right === "number") {
-    return left < right ? -1 : 1;
-  }
-  const a = left == null ? "" : String(left);
-  const b = right == null ? "" : String(right);
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
-
 function comparePointTokenOrder(left, right) {
   const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
   const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
@@ -201,18 +101,6 @@ function comparePointTokenOrder(left, right) {
   return compareOrderValue(left?.id ?? "", right?.id ?? "");
 }
 
-function isOrderObject(mark) {
-  return mark != null && typeof mark === "object" && !Array.isArray(mark) && typeof mark.kind === "string";
-}
-
-function isStartOrder(mark) {
-  return isOrderObject(mark) && mark.kind === "START";
-}
-
-function isEndOrder(mark) {
-  return isOrderObject(mark) && mark.kind === "END";
-}
-
 function getTokenBounds(token) {
   if (token && token.sync_left != null && token.sync_right != null) {
     return { left: token.sync_left, right: token.sync_right };
@@ -221,6 +109,57 @@ function getTokenBounds(token) {
     return { left: token.anchor_left, right: token.anchor_right };
   }
   return null;
+}
+
+function canonicalizeTokenMark(token, axis, field) {
+  const raw = token?.[field];
+  if (raw == null) return null;
+  const id = axis.ensureMark(raw);
+  if (!id) return null;
+
+  const mark = axis.getMarkById(id);
+  if (!mark) return null;
+  token[field] = mark.order;
+  return id;
+}
+
+function canonicalizeSequenceAxisRefs(sequence, axis) {
+  for (const token of sequence) {
+    canonicalizeTokenMark(token, axis, "sync_left");
+    canonicalizeTokenMark(token, axis, "sync_right");
+    canonicalizeTokenMark(token, axis, "anchor_left");
+    canonicalizeTokenMark(token, axis, "anchor_right");
+  }
+}
+
+function resolveMarkId(runtime, markLike) {
+  if (!runtime?.axis || markLike == null) return null;
+  if (typeof markLike === "string" && runtime.axis.getMarkById(markLike)) return markLike;
+  return runtime.axis.ensureMark(markLike);
+}
+
+function getOrderForMarkId(runtime, markId) {
+  if (!runtime?.axis || typeof markId !== "string") return null;
+  const mark = runtime.axis.getMarkById(markId);
+  return mark ? mark.order : null;
+}
+
+function compareMarkIds(runtime, leftId, rightId) {
+  if (leftId === rightId) return 0;
+  if (!runtime?.axis) return compareOrderValue(leftId, rightId);
+  return runtime.axis.compareMarkIds(leftId, rightId);
+}
+
+function buildRuntimeMarkProps(runtime, mapping) {
+  const props = {};
+  const entries =
+    mapping && typeof mapping === "object" ? Object.entries(mapping) : [];
+  for (const [field, valueOrId] of entries) {
+    const markId = resolveMarkId(runtime, valueOrId);
+    if (!markId) continue;
+    props[field] = getOrderForMarkId(runtime, markId);
+  }
+  return props;
 }
 
 function clampRatio(value) {
@@ -834,76 +773,44 @@ function nextInsertedTokenId(runtime, stream) {
   return candidate;
 }
 
-function withinClosedRange(token, left, right) {
-  if (token?.sync_left == null || token?.sync_right == null) return false;
-  return (
-    compareOrderValue(left, token.sync_left) <= 0 &&
-    compareOrderValue(token.sync_right, right) <= 0
-  );
+function ensureTokenSyncMarkRefs(token, runtime) {
+  if (!token) return { leftId: null, rightId: null };
+  const leftId = resolveMarkId(runtime, token.sync_left);
+  const rightId = resolveMarkId(runtime, token.sync_right);
+  if (leftId) {
+    token.sync_left = getOrderForMarkId(runtime, leftId);
+  }
+  if (rightId) {
+    token.sync_right = getOrderForMarkId(runtime, rightId);
+  }
+  return { leftId: leftId ?? null, rightId: rightId ?? null };
 }
 
-function splitRange(left, right, count) {
-  if (count <= 0) return [];
-  if (count === 1) return [{ left, right }];
-  if (compareOrderValue(left, right) === 0) {
-    return Array.from({ length: count }, () => ({ left, right }));
-  }
-
-  if (typeof left === "number" && typeof right === "number") {
-    const step = (right - left) / count;
-    const segments = [];
-    for (let i = 0; i < count; i += 1) {
-      segments.push({
-        left: left + step * i,
-        right: left + step * (i + 1),
-      });
-    }
-    return segments;
-  }
-
-  const leftRank = parseBase36Rank(left);
-  const rightRank = parseBase36Rank(right);
-  if (leftRank != null && rightRank != null && leftRank < rightRank) {
-    const span = rightRank - leftRank;
-    const boundaries = [leftRank];
-    for (let i = 1; i < count; i += 1) {
-      const cut = leftRank + (span * BigInt(i)) / BigInt(count);
-      const prev = boundaries[boundaries.length - 1];
-      if (cut <= prev || cut >= rightRank) {
-        throw new Error("E_RANK_NO_SPACE: rebalance required");
-      }
-      boundaries.push(cut);
-    }
-    boundaries.push(rightRank);
-
-    const segments = [];
-    for (let i = 0; i < count; i += 1) {
-      const segmentLeft = formatBase36Rank(boundaries[i]);
-      const segmentRight = formatBase36Rank(boundaries[i + 1]);
-      if (!segmentLeft || !segmentRight) {
-        throw new Error("E_RANK_INVALID: unable to format split boundary rank");
-      }
-      segments.push({ left: segmentLeft, right: segmentRight });
-    }
-    return segments;
-  }
-
-  throw new Error("Multi-token splice requires numeric or base36-rank boundaries");
+function withinClosedRange(token, leftId, rightId, runtime) {
+  const { leftId: tokenLeft, rightId: tokenRight } = ensureTokenSyncMarkRefs(token, runtime);
+  if (!tokenLeft || !tokenRight) return false;
+  return (
+    compareMarkIds(runtime, leftId, tokenLeft) <= 0 &&
+    compareMarkIds(runtime, tokenRight, rightId) <= 0
+  );
 }
 
 function buildSpliceInsertions(insertSpecs, stream, bounds, context, runtime, functions) {
   const specs = Array.isArray(insertSpecs) ? insertSpecs : [];
   if (specs.length === 0) return [];
-  const segments = splitRange(bounds.left, bounds.right, specs.length);
+  const segments = runtime.axis.splitMarkRange(bounds.leftId, bounds.rightId, specs.length);
   return specs.map((spec, index) => {
     const template = spec && typeof spec === "object" ? spec : {};
     const evaluated = deepEvaluateTemplate(template, context, functions);
+    const markProps = buildRuntimeMarkProps(runtime, {
+      sync_left: segments[index].leftId,
+      sync_right: segments[index].rightId,
+    });
     const token = {
       ...evaluated,
       stream: evaluated.stream ?? stream,
       status: TokenStatus.ACTIVE,
-      sync_left: segments[index].left,
-      sync_right: segments[index].right,
+      ...markProps,
     };
     if (typeof token.id !== "string" || token.id.length === 0) {
       token.id = nextInsertedTokenId(runtime, token.stream);
@@ -914,7 +821,7 @@ function buildSpliceInsertions(insertSpecs, stream, bounds, context, runtime, fu
   });
 }
 
-function findInsertionIndexForRange(sequence, stream, right, suppressedSet) {
+function findInsertionIndexForRange(sequence, stream, rightId, suppressedSet, runtime) {
   let minIndex = Number.POSITIVE_INFINITY;
   for (const token of suppressedSet) {
     const idx = sequence.indexOf(token);
@@ -925,23 +832,25 @@ function findInsertionIndexForRange(sequence, stream, right, suppressedSet) {
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
     if (getTokenStream(token) !== stream) continue;
-    if (token?.sync_left == null) continue;
-    if (compareOrderValue(token.sync_left, right) >= 0) return i;
+    const { leftId } = ensureTokenSyncMarkRefs(token, runtime);
+    if (!leftId) continue;
+    if (compareMarkIds(runtime, leftId, rightId) >= 0) return i;
   }
   return sequence.length;
 }
 
-function findInsertionIndexForBoundary(sequence, stream, boundary, side) {
+function findInsertionIndexForBoundary(sequence, stream, boundaryId, side, runtime) {
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
     if (getTokenStream(token) !== stream) continue;
-    if (token?.sync_left == null) continue;
-    const leftCmp = compareOrderValue(token.sync_left, boundary);
+    const { leftId, rightId } = ensureTokenSyncMarkRefs(token, runtime);
+    if (!leftId) continue;
+    const leftCmp = compareMarkIds(runtime, leftId, boundaryId);
     if (leftCmp > 0) return i;
     if (leftCmp < 0) continue;
 
     if (side === "after") {
-      const rightCmp = compareOrderValue(token.sync_right, boundary);
+      const rightCmp = rightId ? compareMarkIds(runtime, rightId, boundaryId) : -1;
       if (rightCmp === 0) continue;
     }
     return i;
@@ -976,14 +885,16 @@ function applySpliceSpec(
   );
 
   if (spliceSpec.type === "replace_range") {
-    const left = evaluateActionExpression(spliceSpec.range_left, context, functions);
-    const right = evaluateActionExpression(spliceSpec.range_right, context, functions);
-    if (left == null || right == null) {
+    const leftExpr = evaluateActionExpression(spliceSpec.range_left, context, functions);
+    const rightExpr = evaluateActionExpression(spliceSpec.range_right, context, functions);
+    const leftId = resolveMarkId(runtime, leftExpr);
+    const rightId = resolveMarkId(runtime, rightExpr);
+    if (!leftId || !rightId) {
       throw new Error("replace_range splice requires range_left and range_right");
     }
 
     const suppressedSet = new Set(
-      activeStreamTokens.filter((token) => withinClosedRange(token, left, right))
+      activeStreamTokens.filter((token) => withinClosedRange(token, leftId, rightId, runtime))
     );
     const explicitSuppress = Array.isArray(spliceSpec.suppress) ? spliceSpec.suppress : [];
     for (const name of explicitSuppress) {
@@ -997,13 +908,14 @@ function applySpliceSpec(
     const insertionIndex = findInsertionIndexForRange(
       sequence,
       stream,
-      right,
-      suppressedSet
+      rightId,
+      suppressedSet,
+      runtime
     );
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
       stream,
-      { left, right },
+      { leftId, rightId },
       context,
       runtime,
       functions
@@ -1015,17 +927,24 @@ function applySpliceSpec(
   }
 
   if (spliceSpec.type === "insert_at_boundary") {
-    const boundary = evaluateActionExpression(spliceSpec.boundary, context, functions);
+    const boundaryExpr = evaluateActionExpression(spliceSpec.boundary, context, functions);
+    const boundaryId = resolveMarkId(runtime, boundaryExpr);
     const side = spliceSpec.side === "before" ? "before" : "after";
-    if (boundary == null) {
+    if (!boundaryId) {
       throw new Error("insert_at_boundary splice requires boundary");
     }
 
-    const insertionIndex = findInsertionIndexForBoundary(sequence, stream, boundary, side);
+    const insertionIndex = findInsertionIndexForBoundary(
+      sequence,
+      stream,
+      boundaryId,
+      side,
+      runtime
+    );
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
       stream,
-      { left: boundary, right: boundary },
+      { leftId: boundaryId, rightId: boundaryId },
       context,
       runtime,
       functions
@@ -1097,6 +1016,11 @@ function applyInsertPointSpec(
     pointCursorByStream: new Map([[stream, activePointCount]]),
   });
   const anchor = evaluateAnchorExpression(pointSpec.at, target, params, pointFunctions);
+  const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
+  const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);
+  if (!anchorLeftId || !anchorRightId) {
+    throw new Error("insert_point.at resolved to unknown sync marks");
+  }
   const value =
     pointSpec.value == null
       ? null
@@ -1106,8 +1030,10 @@ function applyInsertPointSpec(
     id: nextPointId(runtime, stream),
     stream,
     status: TokenStatus.ACTIVE,
-    anchor_left: anchor.anchor_left,
-    anchor_right: anchor.anchor_right,
+    ...buildRuntimeMarkProps(runtime, {
+      anchor_left: anchorLeftId,
+      anchor_right: anchorRightId,
+    }),
     ratio: anchor.ratio,
     value,
   };
@@ -1291,71 +1217,81 @@ function isStructuralRule(rule) {
   return false;
 }
 
-function collectReferencedMarks(sequence) {
+function collectReferencedMarkIds(sequence, runtime) {
   const marks = new Set();
   for (const token of sequence) {
-    if (token?.sync_left != null) marks.add(token.sync_left);
-    if (token?.sync_right != null) marks.add(token.sync_right);
-    if (token?.anchor_left != null) marks.add(token.anchor_left);
-    if (token?.anchor_right != null) marks.add(token.anchor_right);
+    const syncLeftId = canonicalizeTokenMark(token, runtime.axis, "sync_left");
+    const syncRightId = canonicalizeTokenMark(token, runtime.axis, "sync_right");
+    const anchorLeftId = canonicalizeTokenMark(token, runtime.axis, "anchor_left");
+    const anchorRightId = canonicalizeTokenMark(token, runtime.axis, "anchor_right");
+    if (syncLeftId) marks.add(syncLeftId);
+    if (syncRightId) marks.add(syncRightId);
+    if (anchorLeftId) marks.add(anchorLeftId);
+    if (anchorRightId) marks.add(anchorRightId);
   }
   return marks;
 }
 
-function describeMark(mark) {
-  if (typeof mark === "string") return mark;
-  if (typeof mark === "number") return String(mark);
+function describeMarkId(runtime, markId) {
+  if (typeof markId !== "string") return String(markId);
+  const mark = runtime?.axis?.getMarkById(markId);
+  if (!mark) return markId;
+  const order = mark.order;
+  if (typeof order === "string") return `${markId}:${order}`;
+  if (typeof order === "number") return `${markId}:${String(order)}`;
   try {
-    return JSON.stringify(mark);
+    return `${markId}:${JSON.stringify(order)}`;
   } catch {
-    return String(mark);
+    return markId;
   }
 }
 
-function interpolateMarkTimes(markTimes, referencedMarks) {
+function interpolateMarkTimes(runtime, referencedMarkIds) {
   const unresolved = new Set(
-    [...referencedMarks].filter((mark) => !Number.isFinite(markTimes.get(mark)))
+    [...referencedMarkIds].filter((markId) => !Number.isFinite(runtime.axis.getMarkTime(markId)))
   );
   if (unresolved.size === 0) return;
 
   let progressed = true;
   while (progressed && unresolved.size > 0) {
     progressed = false;
-    const timedMarks = [...markTimes.keys()].filter((mark) => Number.isFinite(markTimes.get(mark)));
+    const timedMarks = [...runtime.axis.marks.keys()].filter((markId) =>
+      Number.isFinite(runtime.axis.getMarkTime(markId))
+    );
 
-    for (const mark of [...unresolved]) {
+    for (const markId of [...unresolved]) {
       let leftBound = null;
       let rightBound = null;
 
       for (const timed of timedMarks) {
-        const cmp = compareOrderValue(timed, mark);
+        const cmp = compareMarkIds(runtime, timed, markId);
         if (cmp <= 0) {
-          if (leftBound == null || compareOrderValue(leftBound, timed) <= 0) {
+          if (leftBound == null || compareMarkIds(runtime, leftBound, timed) <= 0) {
             leftBound = timed;
           }
         }
         if (cmp >= 0) {
-          if (rightBound == null || compareOrderValue(timed, rightBound) <= 0) {
+          if (rightBound == null || compareMarkIds(runtime, timed, rightBound) <= 0) {
             rightBound = timed;
           }
         }
       }
 
       if (leftBound == null || rightBound == null) continue;
-      const leftTime = Number(markTimes.get(leftBound));
-      const rightTime = Number(markTimes.get(rightBound));
+      const leftTime = Number(runtime.axis.getMarkTime(leftBound));
+      const rightTime = Number(runtime.axis.getMarkTime(rightBound));
       if (!Number.isFinite(leftTime) || !Number.isFinite(rightTime)) continue;
 
-      if (compareOrderValue(leftBound, rightBound) === 0) {
-        markTimes.set(mark, leftTime);
-        unresolved.delete(mark);
+      if (compareMarkIds(runtime, leftBound, rightBound) === 0) {
+        runtime.axis.setMarkTime(markId, leftTime);
+        unresolved.delete(markId);
         progressed = true;
         continue;
       }
 
-      const leftOrder = toNumericOrder(leftBound);
-      const rightOrder = toNumericOrder(rightBound);
-      const currentOrder = toNumericOrder(mark);
+      const leftOrder = toNumericOrder(getOrderForMarkId(runtime, leftBound));
+      const rightOrder = toNumericOrder(getOrderForMarkId(runtime, rightBound));
+      const currentOrder = toNumericOrder(getOrderForMarkId(runtime, markId));
       if (
         !Number.isFinite(leftOrder) ||
         !Number.isFinite(rightOrder) ||
@@ -1372,20 +1308,22 @@ function interpolateMarkTimes(markTimes, referencedMarks) {
       if (ratio > 1) ratio = 1;
 
       const interpolated = leftTime + ratio * (rightTime - leftTime);
-      markTimes.set(mark, interpolated);
-      unresolved.delete(mark);
+      runtime.axis.setMarkTime(markId, interpolated);
+      unresolved.delete(markId);
       progressed = true;
     }
   }
 
   if (unresolved.size > 0) {
-    const unknown = [...unresolved].map((mark) => describeMark(mark)).join(", ");
+    const unknown = [...unresolved].map((markId) => describeMarkId(runtime, markId)).join(", ");
     throw new Error(`E_TIME_NO_BASE_SUPPORT: unable to assign times for marks: ${unknown}`);
   }
 }
 
 function computeSyncTimes(sequence, runtime) {
-  const markTimes = new Map();
+  for (const mark of runtime.axis.marks.values()) {
+    mark.time = null;
+  }
   const activeBase = sequence
     .filter(
       (token) =>
@@ -1396,43 +1334,44 @@ function computeSyncTimes(sequence, runtime) {
     )
     .slice()
     .sort((left, right) => {
-      const byLeft = compareOrderValue(left.sync_left, right.sync_left);
+      const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
+      const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
+      const byLeft = compareMarkIds(runtime, leftBounds.leftId, rightBounds.leftId);
       if (byLeft !== 0) return byLeft;
-      const byRight = compareOrderValue(left.sync_right, right.sync_right);
+      const byRight = compareMarkIds(runtime, leftBounds.rightId, rightBounds.rightId);
       if (byRight !== 0) return byRight;
       return compareOrderValue(left.id ?? "", right.id ?? "");
     });
 
   let cursor = 0;
   for (const token of activeBase) {
-    const left = token.sync_left;
-    const right = token.sync_right;
-    const existingLeft = markTimes.get(left);
+    const { leftId, rightId } = ensureTokenSyncMarkRefs(token, runtime);
+    if (!leftId || !rightId) continue;
+    const existingLeft = runtime.axis.getMarkTime(leftId);
     if (Number.isFinite(existingLeft)) {
       cursor = Number(existingLeft);
     } else {
-      markTimes.set(left, cursor);
+      runtime.axis.setMarkTime(leftId, cursor);
     }
 
     const duration = Number.isFinite(token.duration) ? Number(token.duration) : 0;
     const proposedRight = cursor + duration;
-    const existingRight = markTimes.get(right);
+    const existingRight = runtime.axis.getMarkTime(rightId);
     const rightTime = Number.isFinite(existingRight)
       ? Math.max(Number(existingRight), proposedRight)
       : proposedRight;
-    markTimes.set(right, rightTime);
+    runtime.axis.setMarkTime(rightId, rightTime);
     cursor = rightTime;
   }
 
-  const referencedMarks = collectReferencedMarks(sequence);
-  interpolateMarkTimes(markTimes, referencedMarks);
+  const referencedMarks = collectReferencedMarkIds(sequence, runtime);
+  interpolateMarkTimes(runtime, referencedMarks);
 
-  runtime.markTimes = markTimes;
-  return markTimes;
+  runtime.markTimes = runtime.axis.exportMarkTimes();
+  return runtime.markTimes;
 }
 
 function resolvePointTimes(sequence, runtime, pointStreams) {
-  const markTimes = runtime.markTimes instanceof Map ? runtime.markTimes : new Map();
   const selected =
     Array.isArray(pointStreams) && pointStreams.length > 0
       ? new Set(pointStreams)
@@ -1442,9 +1381,11 @@ function resolvePointTimes(sequence, runtime, pointStreams) {
     if (!isActiveToken(token)) continue;
     const stream = getTokenStream(token);
     if (!selected.has(stream)) continue;
-    if (token?.anchor_left == null || token?.anchor_right == null) continue;
-    const left = markTimes.get(token.anchor_left);
-    const right = markTimes.get(token.anchor_right);
+    const leftId = canonicalizeTokenMark(token, runtime.axis, "anchor_left");
+    const rightId = canonicalizeTokenMark(token, runtime.axis, "anchor_right");
+    if (!leftId || !rightId) continue;
+    const left = runtime.axis.getMarkTime(leftId);
+    const right = runtime.axis.getMarkTime(rightId);
     if (!Number.isFinite(left) || !Number.isFinite(right)) {
       token.time = null;
       continue;
@@ -1471,9 +1412,11 @@ function assertActiveBaseCoverage(sequence, runtime) {
       )
       .slice()
       .sort((left, right) => {
-        const byLeft = compareOrderValue(left.sync_left, right.sync_left);
+        const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
+        const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
+        const byLeft = compareMarkIds(runtime, leftBounds.leftId, rightBounds.leftId);
         if (byLeft !== 0) return byLeft;
-        const byRight = compareOrderValue(left.sync_right, right.sync_right);
+        const byRight = compareMarkIds(runtime, leftBounds.rightId, rightBounds.rightId);
         if (byRight !== 0) return byRight;
         return compareOrderValue(left.id ?? "", right.id ?? "");
       });
@@ -1499,7 +1442,9 @@ function assertActiveBaseCoverage(sequence, runtime) {
     for (let i = 0; i + 1 < active.length; i += 1) {
       const left = active[i];
       const right = active[i + 1];
-      const cmp = compareOrderValue(left.sync_right, right.sync_left);
+      const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
+      const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
+      const cmp = compareMarkIds(runtime, leftBounds.rightId, rightBounds.leftId);
       if (cmp > 0) {
         throw new Error(
           `E_BASE_OVERLAP: stream '${stream}' overlap between '${String(left.id ?? i)}' and '${String(
@@ -1564,10 +1509,14 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     currentRuleName: null,
     usedTokenIds,
     markTimes: new Map(),
+    axis: null,
     finalized: false,
   };
 
   initializeBaseStreamSyncMarks(current, baseStreams);
+  runtime.axis = buildSyncAxis(current);
+  canonicalizeSequenceAxisRefs(current, runtime.axis);
+  runtime.markTimes = runtime.axis.exportMarkTimes();
 
   const selectedPhases = Array.isArray(options.phases) && options.phases.length > 0
     ? new Set(options.phases)
@@ -1623,5 +1572,6 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     sequence: current,
     diagnostics,
     trace,
+    axis: runtime.axis,
   };
 }

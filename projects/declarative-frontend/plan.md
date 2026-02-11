@@ -179,6 +179,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: TS entrypoints now run through `ts-node` ESM loader (`scripts/build-cmudict.ts`, `scripts/run-golden.ts`, `scripts/export-declarative-corpus-summary.ts`) and import specifiers were normalized to extensionless TS-native module paths.
 - Evidence: `test/klsyn88.test.ts` assertions now match current klsyn88 primitive behavior (normalized impulsive amplitudes, bipolar square source, sustained-excitation delta modulation), and full suite passes via `npx vitest run` (`33` files / `115` tests).
 - Evidence: production build passes via `npm run build` (Vite); emitted JS in `dist/` remains expected build artifact output.
+- 2026-02-11: SyncAxis identity moved to runtime-internal mark entities with single-shape token fields (no dual `*_id` token fields).
+- Evidence: `src/declarative-frontend/engine.ts` now resolves mark identity through `runtime.axis` for splice/finalize/invariant logic while keeping tokens canonical on `sync_left/sync_right/anchor_left/anchor_right`.
+- Evidence: `test/declarative-frontend-axis-identity.test.ts` added to assert mark-ID-based runtime behavior and absence of dual token fields; full suite passes via `npx vitest run` (`34` files / `118` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.

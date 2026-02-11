@@ -4,7 +4,7 @@ import {
   joinTokenStatus,
   normalizeTokenStatus,
   isActiveToken,
-} from "../src/declarative-frontend/model.js";
+} from "../src/declarative-frontend/model";
 
 describe("declarative frontend token model", () => {
   it("normalizes token statuses with ACTIVE default", () => {

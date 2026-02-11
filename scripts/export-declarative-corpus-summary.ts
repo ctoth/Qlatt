@@ -1,5 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { textToKlattTrack } from "../src/tts-frontend.js";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 const corpusPath = "test/phrase-sets/linguistic.json";
 const outPath = "test/golden/declarative-corpus-summary.json";

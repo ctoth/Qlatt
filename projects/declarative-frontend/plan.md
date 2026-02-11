@@ -11,7 +11,7 @@ Status baseline date: 2026-02-10.
 - No `frontendEngine: imperative|declarative` option.
 - No shadow execution in production path.
 - Imperative frontend sequencing and rule mutators are deleted as part of cutover, not deferred.
-- No new imperative frontend behavior is allowed in `src/tts-frontend.js` or `src/tts-frontend-rules.js` during migration.
+- No new imperative frontend behavior is allowed in `src/tts-frontend.ts` or `src/tts-frontend-rules.ts` during migration.
 - No new bespoke `rule.op` domain behavior is allowed once declarative primitives exist; behavior should be expressed as DSL rules.
 
 ## 1) Plan Maintenance Protocol
@@ -27,32 +27,32 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 ## 2) Current Repository Observations (Audit Log)
 
 - 2026-02-10: only a first migration slice exists in runtime and tests.
-- Evidence: `src/declarative-frontend/rule-pack.js` is `version: "v11-slice"` with only structural + duration rules.
-- Evidence: `src/declarative-frontend/engine.js` supports only 4 hardcoded ops and throws for others.
-- Evidence: `src/tts-frontend.js` still runs imperative steps (`rule_K_Context`, punctuation pause loop, SW assignment, `rule_GenerateF0Contour`) in addition to two declarative phase calls.
+- Evidence: `src/declarative-frontend/rule-pack.ts` is `version: "v11-slice"` with only structural + duration rules.
+- Evidence: `src/declarative-frontend/engine.ts` supports only 4 hardcoded ops and throws for others.
+- Evidence: `src/tts-frontend.ts` still runs imperative steps (`rule_K_Context`, punctuation pause loop, SW assignment, `rule_GenerateF0Contour`) in addition to two declarative phase calls.
 - Evidence: `test/declarative-frontend-slice.test.ts` is explicitly named "first migration slice".
 - Evidence: no `tts-dsl` CLI entrypoint exists in `package.json`.
 - 2026-02-10: parser/validator expanded to include broader v11 schema sections and cross-reference checks while keeping slice compatibility.
-- Evidence: `src/declarative-frontend/parser.js` now normalizes `streams`, `topology`, `patterns`, `interpolation`, and `output`.
-- Evidence: `src/declarative-frontend/validation.js` now validates stream types, topology references, pattern schema, rule shape/select/match links, and phase `resolve_points`/`resolve_scalars`.
+- Evidence: `src/declarative-frontend/parser.ts` now normalizes `streams`, `topology`, `patterns`, `interpolation`, and `output`.
+- Evidence: `src/declarative-frontend/validation.ts` now validates stream types, topology references, pattern schema, rule shape/select/match links, and phase `resolve_points`/`resolve_scalars`.
 - Evidence: `test/declarative-frontend-schema.test.ts` added for schema normalization and cross-reference diagnostics; declarative frontend tests pass.
 - 2026-02-10: expression validation work started with forward point-reference policy enforcement.
-- Evidence: `src/declarative-frontend/validation.js` now emits `E_POINT_FWD_REF` when `insert_point.value` references `$next_point(...)`.
+- Evidence: `src/declarative-frontend/validation.ts` now emits `E_POINT_FWD_REF` when `insert_point.value` references `$next_point(...)`.
 - Evidence: `test/declarative-frontend-schema.test.ts` includes coverage for forward-reference rejection and expression diagnostics.
 - 2026-02-10: token status lattice groundwork added and wired into slice execution path using ACTIVE-token filtering.
-- Evidence: `src/declarative-frontend/model.js` adds `TokenStatus`, normalization, lattice join, and active-token predicates.
-- Evidence: `src/declarative-frontend/engine.js` now normalizes token status and applies structural/duration slice rules over ACTIVE tokens only.
+- Evidence: `src/declarative-frontend/model.ts` adds `TokenStatus`, normalization, lattice join, and active-token predicates.
+- Evidence: `src/declarative-frontend/engine.ts` now normalizes token status and applies structural/duration slice rules over ACTIVE tokens only.
 - Evidence: `test/declarative-frontend-model.test.ts` and new ACTIVE-filter tests in `test/declarative-frontend-slice.test.ts` pass.
 - 2026-02-10: first generic rule execution path added for select rules (`select` + `apply` + `suppress`) with deterministic rule order and ACTIVE filtering.
-- Evidence: `src/declarative-frontend/engine.js` executes `rule.select` before legacy `rule.op` switch.
+- Evidence: `src/declarative-frontend/engine.ts` executes `rule.select` before legacy `rule.op` switch.
 - Evidence: `test/declarative-frontend-generic-rules.test.ts` validates declared rule order and suppress-then-filter behavior.
 - Note: initial limited evaluator replaced by JSONata integration in later entries.
 - 2026-02-10: initial pattern-rule execution path added (`match` + capture targeting + suppress).
-- Evidence: `src/declarative-frontend/engine.js` resolves `rule.match` against parsed patterns and applies capture-targeted effects.
+- Evidence: `src/declarative-frontend/engine.ts` resolves `rule.match` against parsed patterns and applies capture-targeted effects.
 - Evidence: `test/declarative-frontend-pattern-rules.test.ts` validates pattern suppression and capture-target `apply`.
 - Limitation: pattern matching is currently contiguous, single-stream, and scope/cross-boundary/quantifier semantics are not implemented yet.
 - 2026-02-10: JSONata integration started for runtime expression evaluation and compile-time validation.
-- Evidence: `src/declarative-frontend/expressions.js` added; engine where/value expressions now evaluate through JSONata.
+- Evidence: `src/declarative-frontend/expressions.ts` added; engine where/value expressions now evaluate through JSONata.
 - Evidence: validator emits `E_JSONATA_INVALID` for malformed expressions in pattern/rule expression fields.
 - Evidence: `test/declarative-frontend-jsonata.test.ts` passes for runtime JSONata expressions and malformed-expression diagnostics.
 - Limitation: helper function coverage is partial and still expanding.
@@ -61,7 +61,7 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `test/declarative-frontend-navigation.test.ts` validates navigation behavior and suppressed-token filtering.
 - Note: `$parent`, `$children`, `$assoc` implemented in subsequent entries.
 - 2026-02-10: hierarchy navigation helpers `$parent` and `$children` implemented with ACTIVE-token filtering.
-- Evidence: `src/declarative-frontend/engine.js` adds parent/child lookup functions over active tokens and stream filters.
+- Evidence: `src/declarative-frontend/engine.ts` adds parent/child lookup functions over active tokens and stream filters.
 - Evidence: `test/declarative-frontend-hierarchy-navigation.test.ts` validates parent stress lookup and child counting with suppressed-child exclusion.
 - Note: `$assoc` implemented in subsequent entry.
 - 2026-02-10: association navigation helper `$assoc` implemented for active association edges.
@@ -71,57 +71,57 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: engine now mutates association edges with monotonic status (ACTIVE/SUPPRESSED) and `$assoc` reads active edges only.
 - Evidence: `test/declarative-frontend-association-actions.test.ts` validates associate + downstream query behavior and disassociate suppression.
 - 2026-02-10: point helper and point insertion runtime landed (`$spanning`, `$midpoint`, `$at_ratio`, `$at_sync`, `$prev_point`, `$next_point`, `insert_point` action).
-- Evidence: `src/declarative-frontend/engine.js` now builds point-stream runtime metadata, evaluates anchor expressions, inserts ACTIVE point tokens with deterministic IDs, and exposes new JSONata helper bindings.
+- Evidence: `src/declarative-frontend/engine.ts` now builds point-stream runtime metadata, evaluates anchor expressions, inserts ACTIVE point tokens with deterministic IDs, and exposes new JSONata helper bindings.
 - Evidence: `test/declarative-frontend-point-actions.test.ts` validates midpoint/ratio/sync anchors, `$prev_point` composition, `$next_point` reads, and `$spanning` usage.
 - Evidence: full declarative frontend suite passes (`12` files / `32` tests via `npx vitest run ...declarative-frontend...`).
 - 2026-02-10: splice action runtime implemented with TDD for `replace_range` and `insert_at_boundary`.
-- Evidence: `src/declarative-frontend/engine.js` now applies `rule.splice` in both select and pattern execution paths, supports suppression+insertion for `replace_range`, and boundary insertion for `insert_at_boundary`.
+- Evidence: `src/declarative-frontend/engine.ts` now applies `rule.splice` in both select and pattern execution paths, supports suppression+insertion for `replace_range`, and boundary insertion for `insert_at_boundary`.
 - Evidence: expression context for actions now includes captures/current in pattern rules, enabling splice expressions like `c.sync_left` / `v.sync_right`.
 - Evidence: `test/declarative-frontend-splice-actions.test.ts` added and passing; full declarative suite now passes (`13` files / `34` tests).
 - 2026-02-10: initial finalize-stage runtime implemented for `compute_times` + `resolve_points` with deterministic phase behavior.
-- Evidence: `src/declarative-frontend/engine.js` now computes mark times from ACTIVE base tokens when `phase.compute_times` is set, resolves point token `time` when `phase.resolve_points` is set, and records finalize trace events.
+- Evidence: `src/declarative-frontend/engine.ts` now computes mark times from ACTIVE base tokens when `phase.compute_times` is set, resolves point token `time` when `phase.resolve_points` is set, and records finalize trace events.
 - Evidence: point ordering now prefers resolved `time` before anchor tuple fallback for `$prev_point` / `$next_point`.
 - Evidence: `test/declarative-frontend-finalize.test.ts` added and passing; full declarative suite now passes (`14` files / `36` tests).
 - 2026-02-10: compute-times interpolation expanded with base36-rank support and strict unresolved-mark diagnostics.
-- Evidence: `src/declarative-frontend/engine.js` now interpolates referenced interior marks using numeric/base36 order when possible, and throws `E_TIME_NO_BASE_SUPPORT` if marks remain untimed.
+- Evidence: `src/declarative-frontend/engine.ts` now interpolates referenced interior marks using numeric/base36 order when possible, and throws `E_TIME_NO_BASE_SUPPORT` if marks remain untimed.
 - Evidence: `test/declarative-frontend-finalize.test.ts` now covers interior base36 interpolation and `E_TIME_NO_BASE_SUPPORT`; full declarative suite passes (`14` files / `38` tests).
 - 2026-02-10: multi-token splice insertion now supports base36 rank boundaries in addition to numeric boundaries.
-- Evidence: `src/declarative-frontend/engine.js` `splitRange` now emits interior base36 marks for `N > 1` insertions and raises `E_RANK_NO_SPACE` when no representable split exists.
+- Evidence: `src/declarative-frontend/engine.ts` `splitRange` now emits interior base36 marks for `N > 1` insertions and raises `E_RANK_NO_SPACE` when no representable split exists.
 - Evidence: `test/declarative-frontend-splice-actions.test.ts` now includes base36 multi-token replace-range coverage; full declarative suite passes (`14` files / `39` tests).
 - 2026-02-10: rule `constraint` execution semantics implemented for both select and pattern rules.
-- Evidence: `src/declarative-frontend/engine.js` now evaluates `rule.constraint` after select `where` filtering and after full pattern capture binding, before actions are applied.
+- Evidence: `src/declarative-frontend/engine.ts` now evaluates `rule.constraint` after select `where` filtering and after full pattern capture binding, before actions are applied.
 - Evidence: `test/declarative-frontend-constraints.test.ts` added; full declarative suite now passes (`15` files / `41` tests).
 - 2026-02-10: initial finalize-dirty lifecycle guard implemented (`E_FINALIZE_DIRTY`).
 - Evidence: runtime now rejects structural rewrites (`splice`, `insert_point`, suppression, association rewrites, structural ops) after any finalize phase (`compute_times` or `resolve_points`) has executed.
 - Evidence: `test/declarative-frontend-finalize-dirty.test.ts` added and passing; full declarative suite now passes (`16` files / `43` tests).
 - 2026-02-10: point ratio diagnostics tightened to spec behavior (`E_INVALID_RATIO`).
-- Evidence: `src/declarative-frontend/engine.js` now rejects out-of-range explicit anchor ratios and invalid point-token ratios during point resolution instead of silently clamping.
+- Evidence: `src/declarative-frontend/engine.ts` now rejects out-of-range explicit anchor ratios and invalid point-token ratios during point resolution instead of silently clamping.
 - Evidence: `test/declarative-frontend-point-actions.test.ts` now covers invalid-ratio failure; full declarative suite now passes (`16` files / `44` tests).
 - 2026-02-11: F0 generation path in `textToKlattTrack()` migrated from imperative contour function to declarative point rules + finalize timing.
-- Evidence: `src/tts-frontend.js` no longer calls `rule_GenerateF0Contour`; declarative phases `prosody` + `finalize` now produce point tokens and runtime interpolation consumes those resolved points.
-- Evidence: `src/declarative-frontend/rule-pack.js` now defines citation-tagged F0 rules (`f0_baseline_start`, `f0_targets`, `f0_stress_peak`, `f0_question_rise`) and point stream config.
+- Evidence: `src/tts-frontend.ts` no longer calls `rule_GenerateF0Contour`; declarative phases `prosody` + `finalize` now produce point tokens and runtime interpolation consumes those resolved points.
+- Evidence: `src/declarative-frontend/rule-pack.ts` now defines citation-tagged F0 rules (`f0_baseline_start`, `f0_targets`, `f0_stress_peak`, `f0_question_rise`) and point stream config.
 - Evidence: `test/tts-frontend-declarative-prosody.test.ts` asserts imperative `rule_GenerateF0Contour` is not invoked and question-rise behavior remains present.
 - Evidence: citation anchors now used for F0 defaults/rules are available locally in `papers/Pierrehumbert_1980_EnglishIntonation/notes.md`, `papers/OShaughnessy_1976_F0_Prosody/notes.md`, and `papers/Allen_1987_MITalk_TTS/notes.md` (with `Ladd 2008` still referenced from spec bibliography).
 - 2026-02-11: K-context F2, punctuation pause duration, and SW assignment behavior migrated from imperative runtime loops into declarative duration-phase rules.
-- Evidence: `src/declarative-frontend/rule-pack.js` adds `k_context_cl_f2`, `k_context_rel_copy`, `punctuation_pause`, `sw_explicit_override`, and `sw_default_assignment` with citation tags and declared rule order in `duration`.
-- Evidence: `src/declarative-frontend/engine.js` `apply` runtime now supports dotted field paths (e.g., `params.F2`, `params.SW`) for nested declarative scalar updates.
-- Evidence: `src/tts-frontend.js` no longer imports/calls `rule_K_Context` and no longer applies imperative punctuation/SW post-processing loops; inventory SW hints are carried as token metadata for declarative override semantics.
+- Evidence: `src/declarative-frontend/rule-pack.ts` adds `k_context_cl_f2`, `k_context_rel_copy`, `punctuation_pause`, `sw_explicit_override`, and `sw_default_assignment` with citation tags and declared rule order in `duration`.
+- Evidence: `src/declarative-frontend/engine.ts` `apply` runtime now supports dotted field paths (e.g., `params.F2`, `params.SW`) for nested declarative scalar updates.
+- Evidence: `src/tts-frontend.ts` no longer imports/calls `rule_K_Context` and no longer applies imperative punctuation/SW post-processing loops; inventory SW hints are carried as token metadata for declarative override semantics.
 - Evidence: `test/declarative-frontend-rulepack-context.test.ts` added for K-context, punctuation pause, and SW behavior; `test/tts-frontend-declarative-prosody.test.ts` now asserts imperative `rule_K_Context` is not invoked.
 - Evidence: regression suite passes via `npx vitest run ...declarative-frontend-*.test.ts test/tts-frontend-declarative-prosody.test.ts` (`19` files / `52` tests).
 - 2026-02-11: stop release/aspiration duration lock migrated from imperative post-processing loop to declarative duration-phase rule.
-- Evidence: `src/declarative-frontend/rule-pack.js` adds `lock_stop_release_duration` so `duration` phase owns fixed burst/aspiration timing from `inherentDuration`.
-- Evidence: `src/tts-frontend.js` removed the post-duration imperative loop that rewrote stop release/aspiration durations from inventory.
+- Evidence: `src/declarative-frontend/rule-pack.ts` adds `lock_stop_release_duration` so `duration` phase owns fixed burst/aspiration timing from `inherentDuration`.
+- Evidence: `src/tts-frontend.ts` removed the post-duration imperative loop that rewrote stop release/aspiration durations from inventory.
 - Evidence: `test/declarative-frontend-rulepack-context.test.ts` adds coverage for release/aspiration duration lock; declarative regression run now passes (`19` files / `53` tests).
 - 2026-02-11: structural stop-release insertion now materializes full target payloads declaratively, allowing removal of runtime refill logic.
-- Evidence: `src/declarative-frontend/engine.js` `ruleInsertStopReleases` now emits inserted release/aspiration tokens with filled `params`, `duration`/`inherentDuration`, copied metadata flags, `inventorySW`, and weak-release attenuation.
-- Evidence: `src/tts-frontend.js` no longer contains the imperative "refill params/durations for releases" loop after structural phase.
+- Evidence: `src/declarative-frontend/engine.ts` `ruleInsertStopReleases` now emits inserted release/aspiration tokens with filled `params`, `duration`/`inherentDuration`, copied metadata flags, `inventorySW`, and weak-release attenuation.
+- Evidence: `src/tts-frontend.ts` no longer contains the imperative "refill params/durations for releases" loop after structural phase.
 - Evidence: `test/declarative-frontend-slice.test.ts` now verifies inserted tokens are fully materialized during structural phase; declarative regression run now passes (`19` files / `54` tests).
 - 2026-02-11: removed obsolete imperative frontend mutators from shared rule module exports.
-- Evidence: `src/tts-frontend-rules.js` no longer exports `rule_K_Context` or `rule_GenerateF0Contour`; declarative rulepack is now the sole owner of those behaviors.
+- Evidence: `src/tts-frontend-rules.ts` no longer exports `rule_K_Context` or `rule_GenerateF0Contour`; declarative rulepack is now the sole owner of those behaviors.
 - Evidence: `test/tts-frontend-declarative-prosody.test.ts` now enforces absence of those exports while keeping behavioral question-rise coverage; declarative regression run passes (`19` files / `53` tests).
 - 2026-02-11: declarative F0 declination updated to phrase-local reset behavior (boundary-aware) instead of global utterance index slope.
-- Evidence: `src/declarative-frontend/engine.js` adds generic navigation helpers `$phrase_index` and `$phrase_total` (boundary-aware for phone stream punctuation tokens).
-- Evidence: `src/declarative-frontend/rule-pack.js` `f0_targets` now computes declination from phrase-local position (`$phrase_index/$phrase_total`) rather than global `$index/$total`.
+- Evidence: `src/declarative-frontend/engine.ts` adds generic navigation helpers `$phrase_index` and `$phrase_total` (boundary-aware for phone stream punctuation tokens).
+- Evidence: `src/declarative-frontend/rule-pack.ts` `f0_targets` now computes declination from phrase-local position (`$phrase_index/$phrase_total`) rather than global `$index/$total`.
 - Evidence: `test/declarative-frontend-rulepack-prosody.test.ts` adds punctuation-reset coverage; declarative regression run passes (`19` files / `54` tests).
 - 2026-02-11: integration coverage for phase sequencing/finalize trace started.
 - Evidence: `test/declarative-frontend-integration-phases.test.ts` added to validate end-to-end phase order (`structural`->`duration`->`prosody`->`finalize`) plus `times_resolved`/`points_resolved` trace events and finite resolved point times.
@@ -134,43 +134,54 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: declarative + frontend migration suite now passes (`22` files / `57` tests).
 - 2026-02-11: corpus-level declarative golden summary baseline locked for deterministic regression checking.
 - Evidence: `test/tts-frontend-declarative-golden-summary.test.ts` compares per-phrase summary metrics (`events`, `totalTime`, `voicedEvents`, `f0Min`, `f0Max`) against `test/golden/declarative-corpus-summary.json`.
-- Evidence: `scripts/export-declarative-corpus-summary.mjs` + `npm run golden:declarative-summary` provide explicit regeneration workflow for the locked baseline.
+- Evidence: `scripts/export-declarative-corpus-summary.ts` + `npm run golden:declarative-summary` provide explicit regeneration workflow for the locked baseline.
 - Evidence: declarative + frontend migration suite now passes (`23` files / `58` tests).
 - 2026-02-11: docs updated to describe declarative frontend as the current architecture (not future migration work).
 - Evidence: `README.md` now documents declarative frontend ownership and migration verification commands.
 - Evidence: `docs/parameter-scheduling.md` now documents phase-driven declarative frontend flow (`structural`/`duration`/`prosody`/`finalize`) and removes legacy mutator framing.
-- Evidence: `docs/adding-a-synthesizer.md` data flow now routes frontend behavior through `src/declarative-frontend/engine.js` + rule pack phases.
+- Evidence: `docs/adding-a-synthesizer.md` data flow now routes frontend behavior through `src/declarative-frontend/engine.ts` + rule pack phases.
 - 2026-02-11: scalar-resolution phase semantics (`resolve_scalars`) started with explicit `standard`/`klatt` resolution handling.
-- Evidence: `src/declarative-frontend/engine.js` now accumulates phase-scoped scalar effects for fields with explicit scalar `resolution`, resolves them deterministically at phase boundary, applies standard min/max clamp, and applies Klatt incompressibility-floor semantics for `mul`.
+- Evidence: `src/declarative-frontend/engine.ts` now accumulates phase-scoped scalar effects for fields with explicit scalar `resolution`, resolves them deterministically at phase boundary, applies standard min/max clamp, and applies Klatt incompressibility-floor semantics for `mul`.
 - Evidence: `test/declarative-frontend-scalar-resolution.test.ts` added and passing for standard and klatt resolution behavior.
 - Evidence: declarative + frontend migration suite now passes (`24` files / `60` tests).
 - 2026-02-11: validator now blocks unknown imperative `rule.op` additions to enforce declarative-maximization guardrail.
-- Evidence: `src/declarative-frontend/validation.js` now emits `E_RULE_OP_UNKNOWN` for unsupported `rule.op` values.
+- Evidence: `src/declarative-frontend/validation.ts` now emits `E_RULE_OP_UNKNOWN` for unsupported `rule.op` values.
 - Evidence: `test/declarative-frontend-schema.test.ts` covers unknown `rule.op` rejection; declarative + frontend migration suite passes (`24` files / `61` tests).
 - 2026-02-11: duration heuristics migrated from imperative `rule.op` handlers to declarative `select`/`apply` rules with Klatt scalar resolution.
-- Evidence: `src/declarative-frontend/rule-pack.js` `stress_duration`, `vowel_shortening`, and `pre_boundary_lengthening` are now declarative rules (no `op`) with citation tags and phase-local `resolve_scalars: ["duration"]` over `duration` scalar `resolution: "klatt"`.
-- Evidence: `src/declarative-frontend/engine.js` no longer contains duration `rule.op` handlers; only structural `insert_stop_releases` remains as a temporary op path.
+- Evidence: `src/declarative-frontend/rule-pack.ts` `stress_duration`, `vowel_shortening`, and `pre_boundary_lengthening` are now declarative rules (no `op`) with citation tags and phase-local `resolve_scalars: ["duration"]` over `duration` scalar `resolution: "klatt"`.
+- Evidence: `src/declarative-frontend/engine.ts` no longer contains duration `rule.op` handlers; only structural `insert_stop_releases` remains as a temporary op path.
 - Evidence: `test/declarative-frontend-rulepack-shape.test.ts` added to enforce op-free duration rules; declarative + frontend migration suite passes (`25` files / `62` tests).
 - 2026-02-11: structural stop release/aspiration insertion migrated to declarative `select` + `splice` rules with inventory-backed token materialization.
-- Evidence: `src/declarative-frontend/rule-pack.js` now uses `insert_voiceless_stop_release_and_aspiration` and `insert_voiced_stop_release` declarative structural rules (with citation tags) and no longer defines `insert_stop_releases` op.
-- Evidence: `src/declarative-frontend/engine.js` adds `$target(...)` helper-backed inventory materialization for declarative templates and no longer has any `rule.op` handlers.
-- Evidence: `src/declarative-frontend/validation.js` now disallows all `rule.op` usage (`E_RULE_OP_UNKNOWN` for any op).
+- Evidence: `src/declarative-frontend/rule-pack.ts` now uses `insert_voiceless_stop_release_and_aspiration` and `insert_voiced_stop_release` declarative structural rules (with citation tags) and no longer defines `insert_stop_releases` op.
+- Evidence: `src/declarative-frontend/engine.ts` adds `$target(...)` helper-backed inventory materialization for declarative templates and no longer has any `rule.op` handlers.
+- Evidence: `src/declarative-frontend/validation.ts` now disallows all `rule.op` usage (`E_RULE_OP_UNKNOWN` for any op).
 - Evidence: `test/declarative-frontend-rulepack-shape.test.ts` now enforces fully op-free rulepack; declarative + frontend migration suite passes (`25` files / `63` tests).
 - 2026-02-11: structural phase now initializes base-stream sync marks up front, and boundary insertion is fully boundary-driven (no target-index fallback path).
-- Evidence: `src/declarative-frontend/engine.js` adds `initializeBaseStreamSyncMarks(...)` invoked at rule-engine startup for active base streams missing sync bounds.
-- Evidence: `src/declarative-frontend/engine.js` `insert_at_boundary` now requires an explicit boundary and no longer branches to target-index insertion when stream tokens are unmarked.
+- Evidence: `src/declarative-frontend/engine.ts` adds `initializeBaseStreamSyncMarks(...)` invoked at rule-engine startup for active base streams missing sync bounds.
+- Evidence: `src/declarative-frontend/engine.ts` `insert_at_boundary` now requires an explicit boundary and no longer branches to target-index insertion when stream tokens are unmarked.
 - Evidence: `test/declarative-frontend-slice.test.ts` adds coverage that structural-phase phone tokens have initialized `sync_left`/`sync_right` and voiced-stop structural behavior (`B/D/G` release only); `test/declarative-frontend-splice-actions.test.ts` adds boundary-required guard coverage; declarative + frontend migration suite passes (`25` files / `66` tests).
 - 2026-02-11: base coverage invariant checks started, and boundary insert semantics were aligned with non-overlap partitioning in order space.
-- Evidence: `src/declarative-frontend/engine.js` now enforces active-base adjacency checks per base stream and throws `E_BASE_OVERLAP` / `E_BASE_NOT_CONTIGUOUS` at phase boundaries.
-- Evidence: `src/declarative-frontend/engine.js` `insert_at_boundary` now emits zero-width boundary spans (`sync_left == sync_right == boundary`) to avoid overlap with adjacent base intervals under current axis model.
+- Evidence: `src/declarative-frontend/engine.ts` now enforces active-base adjacency checks per base stream and throws `E_BASE_OVERLAP` / `E_BASE_NOT_CONTIGUOUS` at phase boundaries.
+- Evidence: `src/declarative-frontend/engine.ts` `insert_at_boundary` now emits zero-width boundary spans (`sync_left == sync_right == boundary`) to avoid overlap with adjacent base intervals under current axis model.
 - Evidence: `test/declarative-frontend-base-coverage.test.ts` added for contiguous/gap/overlap coverage, and `test/declarative-frontend-splice-actions.test.ts` now locks deterministic ordering for repeated same-boundary inserts; declarative + frontend migration suite passes (`26` files / `70` tests).
 - 2026-02-11: sync-axis bootstrap moved from numeric placeholders to sentinel/rank order keys for missing base streams.
-- Evidence: `src/declarative-frontend/engine.js` now initializes missing base boundaries as `START`/`FINITE`/`END` order objects with fixed-length base36 finite ranks.
-- Evidence: `src/declarative-frontend/engine.js` `splitRange` now supports equal-boundary multi-token insertion for non-numeric order keys (required for same-mark structural inserts).
+- Evidence: `src/declarative-frontend/engine.ts` now initializes missing base boundaries as `START`/`FINITE`/`END` order objects with fixed-length base36 finite ranks.
+- Evidence: `src/declarative-frontend/engine.ts` `splitRange` now supports equal-boundary multi-token insertion for non-numeric order keys (required for same-mark structural inserts).
 - Evidence: `test/declarative-frontend-sync-axis.test.ts` added for sentinel bootstrap and finite-boundary multi-insert behavior; declarative + frontend migration suite passes (`27` files / `72` tests).
+- 2026-02-11: locked a TS-native (Vite-first) cleanup track focused on full sync-axis object model, stronger invariants, and module boundary cleanup.
+- Evidence: plan now includes a dedicated checklist for `SyncAxis` entities, invariant hardening, structural rewrite semantics, scalar unification, timing on mark entities, TS-native modularization, and stronger determinism fixtures.
+- 2026-02-11: base-coverage invariants now enforce START/END anchoring for object-order base streams in addition to gap/overlap checks.
+- Evidence: `src/declarative-frontend/engine.ts` `assertActiveBaseCoverage` now raises `E_BASE_NOT_CONTIGUOUS` when object-order active coverage does not begin at `START` or end at `END`.
+- Evidence: `test/declarative-frontend-base-coverage.test.ts` now covers anchored object-order acceptance and missing-START/missing-END rejection; suppression-focused rule tests were updated to keep valid active coverage under stricter invariants.
+- Evidence: declarative + frontend migration suite passes (`27` files / `75` tests).
+- 2026-02-11: TS-native migration sweep landed across frontend/runtime/tooling; tracked source tree is now `.ts`-native.
+- Evidence: tracked `*.js` source files were renamed to `.ts` across `src`, `scripts`, `test`, and Vite config; `git ls-files "*.js"` is empty.
+- Evidence: TS entrypoints now run through `ts-node` ESM loader (`scripts/build-cmudict.ts`, `scripts/run-golden.ts`, `scripts/export-declarative-corpus-summary.ts`) and import specifiers were normalized to extensionless TS-native module paths.
+- Evidence: `test/klsyn88.test.ts` assertions now match current klsyn88 primitive behavior (normalized impulsive amplitudes, bipolar square source, sustained-excitation delta modulation), and full suite passes via `npx vitest run` (`33` files / `115` tests).
+- Evidence: production build passes via `npm run build` (Vite); emitted JS in `dist/` remains expected build artifact output.
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
-- Limitation: base-coverage validation currently checks interior adjacency (`token[i].sync_right` vs `token[i+1].sync_left`) but does not yet enforce full `[START, END]` boundary anchoring due the still-simplified sync-axis bootstrap model.
+- Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
@@ -181,7 +192,7 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 ### [A] Execution Grounding
 
 - [ ] `A1` `NOT_STARTED`: Add this plan status check into CI or PR template so status updates are enforced.
-- [ ] `A2` `NOT_STARTED`: Create a migration branch rule: no new imperative frontend logic merged into `src/tts-frontend.js` or `src/tts-frontend-rules.js`.
+- [ ] `A2` `NOT_STARTED`: Create a migration branch rule: no new imperative frontend logic merged into `src/tts-frontend.ts` or `src/tts-frontend-rules.ts`.
 - [x] `A3` `DONE`: Enforce declarative-maximization guardrail: no new domain behavior via custom `rule.op`; prefer generic DSL actions.
 
 ### [B] Engine Core (Spec Parts 0, 1, 5, 9)
@@ -245,17 +256,17 @@ Acceptance criteria:
 ### [G] Direct Runtime Cutover
 
 - [ ] `G1` `IN_PROGRESS`: Keep `textToKlattTrack()` public signature; replace internals with declarative engine call only.
-- [x] `G2` `DONE`: Remove imperative post-processing loops in `src/tts-frontend.js`.
+- [x] `G2` `DONE`: Remove imperative post-processing loops in `src/tts-frontend.ts`.
 - [ ] `G3` `NOT_STARTED`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
 
 Acceptance criteria:
-- `src/tts-frontend.js` contains no imperative phonological/phonetic rule pipeline.
+- `src/tts-frontend.ts` contains no imperative phonological/phonetic rule pipeline.
 - Frontend path is declarative-only in production runtime.
 
 ### [H] Dead Code Removal and Source of Truth Cleanup
 
 - [x] `H1` `DONE`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
-- [x] `H2` `DONE`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.js`.
+- [x] `H2` `DONE`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.ts`.
 - [ ] `H3` `NOT_STARTED`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
 
 Acceptance criteria:
@@ -285,14 +296,31 @@ Acceptance criteria:
 - Required tests pass in CI.
 - Docs no longer describe declarative frontend as future work.
 
+### [K] Principled Cleanup Track (TS-Native, Vite)
+
+- [ ] `K1` `IN_PROGRESS`: Introduce first-class `SyncAxis` model (`SyncMark` entities with stable IDs, order keys, and times) and stop relying on inline mark values on tokens.
+- [ ] `K2` `IN_PROGRESS`: Enforce full base coverage invariant as partition of `[START, END]` per base stream (not interior adjacency only).
+- [ ] `K3` `IN_PROGRESS`: Make structural rewrites fully axis-driven (`insert_at_boundary`/`replace_range` by mark identity) with deterministic conflict semantics.
+- [ ] `K4` `IN_PROGRESS`: Unify scalar execution so all declared scalar fields resolve at phase boundaries (remove mixed immediate/deferred behavior).
+- [ ] `K5` `IN_PROGRESS`: Resolve timing on axis entities (`mark.time`) and point-time computation from mark IDs only.
+- [ ] `K6` `IN_PROGRESS`: Refactor runtime into TS-native modules (`axis`, `rewrite`, `scalars`, `timing`, `invariants`, `diagnostics`) with explicit contracts.
+- [x] `K7` `DONE`: Add `ts-node`-compatible entrypoints and keep Vite/Vitest workflows green through migration.
+- [ ] `K8` `IN_PROGRESS`: Add executable spec fixtures + determinism/property tests for axis ordering, rank insertion/rebalance, and rewrite stability.
+
+Acceptance criteria:
+- Declarative frontend core modules are TypeScript-first, with deterministic behavior preserved.
+- Invariants and diagnostics align with spec Part 1/5/9 semantics (including sentinel anchoring and stable blame paths).
+- No runtime behavior depends on imperative or transitional fallback paths.
+
 ## 4) Sequenced Event Plan (Agent Execution Order)
 
 1. Complete missing declarative primitives first: remaining `D2/D3` helpers + `E2` actions + `E4` finalize/point timing.
 2. Complete `E3` scalar resolution semantics and diagnostics hardening (`B3/B4`).
-3. Complete any remaining runtime behavior parity adjustments in declarative rules (core migration items `F3-F6` are now done) only after required primitives are in place.
-4. Execute hard cutover and deletions in one set: `G` + `H`.
-5. Complete `I` (tooling) on declarative-only runtime.
-6. Complete `J` and finalize docs/release.
+3. Execute `K` principled-cleanup slices in order: axis entities -> full coverage invariants -> axis-driven rewrites -> scalar/timing unification -> TS module split.
+4. Complete any remaining runtime behavior parity adjustments in declarative rules (core migration items `F3-F6` are now done) only after required primitives are in place.
+5. Execute hard cutover and deletions in one set: `G` + `H`.
+6. Complete `I` (tooling) on declarative-only runtime.
+7. Complete `J` and finalize docs/release.
 
 Declarative optimization policy:
 - Prefer building generic rule primitives once over adding special-case imperative behavior.

@@ -6,7 +6,7 @@ import {
   midpointRank,
   rebalanceRanks,
   startOrder,
-} from "../src/declarative-frontend/order.js";
+} from "../src/declarative-frontend/order";
 
 describe("declarative rank/order utilities", () => {
   it("orders START < FINITE < END deterministically", () => {

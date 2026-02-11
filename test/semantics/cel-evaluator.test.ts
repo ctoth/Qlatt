@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createCelEvaluator } from '../../src/semantics/cel-evaluator.js';
+import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
 
 describe('CEL Evaluator', () => {
   it('evaluates simple math', () => {

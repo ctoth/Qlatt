@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initWasmModule, WasmBuffer } from "../worklets/wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "../src/worklets/wasm-utils";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
@@ -38,7 +38,7 @@ function maxAbs(values) {
 }
 
 async function compareResonator() {
-  const wasmPath = path.join(repoRoot, "worklets", "resonator.wasm");
+  const wasmPath = path.join(repoRoot, "public", "worklets", "resonator.wasm");
   const wasmBytes = fs.readFileSync(wasmPath);
   const { instance } = await initWasmModule(null, {}, wasmBytes);
   const wasm = instance.exports;
@@ -74,7 +74,7 @@ async function compareResonator() {
 }
 
 async function compareAntiresonator() {
-  const wasmPath = path.join(repoRoot, "worklets", "antiresonator.wasm");
+  const wasmPath = path.join(repoRoot, "public", "worklets", "antiresonator.wasm");
   const wasmBytes = fs.readFileSync(wasmPath);
   const { instance } = await initWasmModule(null, {}, wasmBytes);
   const wasm = instance.exports;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import * as frontendRules from "../src/tts-frontend-rules.js";
-import { textToKlattTrack } from "../src/tts-frontend.js";
+import * as frontendRules from "../src/tts-frontend-rules";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 describe("tts frontend declarative prosody migration", () => {
   it("removes imperative contour/context mutators from frontend rule exports", () => {

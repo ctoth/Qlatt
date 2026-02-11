@@ -3,15 +3,15 @@ import path from 'node:path';
 import yaml from 'js-yaml';
 import { describe, it, expect } from 'vitest';
 
-import { createCelEvaluator } from '../../src/semantics/cel-evaluator.js';
-import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator.js';
+import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
+import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator';
 import type {
   ParamValue,
   SemanticsDocument,
   RealizationRule,
   EvaluationContext,
-} from '../../src/semantics/types.js';
-import type { BaconGraph, ParamValueSpec } from '../../src/klatt-runtime.js';
+} from '../../src/semantics/types';
+import type { BaconGraph, ParamValueSpec } from '../../src/klatt-runtime';
 import {
   dbToLinear,
   dbToLinearKlsyn,
@@ -19,7 +19,7 @@ import {
   min,
   max,
   pow,
-} from '../../src/builtin-functions.js';
+} from '../../src/builtin-functions';
 
 type ApproxSpec = number | { value: number; tol?: number };
 

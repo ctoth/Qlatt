@@ -4,7 +4,7 @@
  *   output[0] = voice waveform (post-tilt + breathiness)
  *   output[1] = modulated noise (for aspiration/frication)
  */
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

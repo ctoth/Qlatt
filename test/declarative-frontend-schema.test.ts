@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseDslSpec } from "../src/declarative-frontend/parser.js";
-import { validateDslSpec } from "../src/declarative-frontend/validation.js";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
 
 describe("declarative frontend schema coverage", () => {
   it("normalizes v11 top-level sections beyond phase/rule slice", () => {

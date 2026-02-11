@@ -5,10 +5,10 @@
  * and topological ordering for Klatt parameter realization.
  */
 
-export * from './types.js';
+export * from './types';
 // Re-exports will be added as modules are implemented
-// export { createCelEvaluator } from './cel-evaluator.js';
-// export { createJmespathResolver } from './jmespath-resolver.js';
-// export { createTopologicalEvaluator } from './topological-evaluator.js';
+// export { createCelEvaluator } from './cel-evaluator';
+// export { createJmespathResolver } from './jmespath-resolver';
+// export { createTopologicalEvaluator } from './topological-evaluator';
 
 export const VERSION = '0.1.0';

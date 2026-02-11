@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createJmespathResolver } from '../../src/semantics/jmespath-resolver.js';
+import { createJmespathResolver } from '../../src/semantics/jmespath-resolver';
 
 describe('JMESPath Resolver', () => {
   it('resolves simple path', () => {

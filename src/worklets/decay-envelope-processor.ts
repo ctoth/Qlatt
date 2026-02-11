@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

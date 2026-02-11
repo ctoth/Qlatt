@@ -4,7 +4,7 @@
  */
 
 import { evaluate } from 'cel-js';
-import type { CelExpression, EvaluationContext, ParamValue } from './types.js';
+import type { CelExpression, EvaluationContext, ParamValue } from './types';
 
 export interface CelEvaluator {
   evaluate(expr: CelExpression, context: EvaluationContext): ParamValue;

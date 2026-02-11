@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { QLATT_V11_SLICE_RULEPACK } from "../src/declarative-frontend/rule-pack.js";
+import { QLATT_V11_SLICE_RULEPACK } from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend rulepack shape", () => {
   it("expresses duration heuristics as declarative select/apply rules", () => {

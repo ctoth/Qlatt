@@ -1,15 +1,16 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"
-    ? new URL("./fujisaki-resonator.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}fujisaki-resonator.wasm`;
+    ? new URL("./resonator.wasm", import.meta.url).toString()
+    : `${import.meta.url.replace(/[^/]*$/, "")}resonator.wasm`;
 
-class FujisakiResonatorProcessor extends AudioWorkletProcessor {
+class ResonatorProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
       { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
       { name: "bandwidth", defaultValue: 60, minValue: 0, maxValue: 10000, automationRate: "k-rate" },
+      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" },
     ];
   }
 
@@ -21,7 +22,7 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     this.outputBuffer = null;
     this.ready = false;
     this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "fujisaki-resonator";
+    this.nodeId = options?.processorOptions?.nodeId || "resonator";
     this.bypassAtZero = Boolean(options?.processorOptions?.bypassAtZero);
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
@@ -34,7 +35,7 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     const wasmBytes = options?.processorOptions?.wasmBytes;
     initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
       this.wasm = instance.exports;
-      this.state = this.wasm.fujisaki_resonator_new();
+      this.state = this.wasm.resonator_new();
       this.inputBuffer = new WasmBuffer(this.wasm);
       this.outputBuffer = new WasmBuffer(this.wasm);
       this.ready = true;
@@ -59,6 +60,7 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     const inputChannel = input && input[0] ? input[0] : null;
     const freq = parameters.frequency[0];
     const bw = parameters.bandwidth[0];
+    const gain = parameters.gain[0];
 
     this.inputBuffer.ensure(blockSize);
     this.outputBuffer.ensure(blockSize);
@@ -69,12 +71,14 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     }
 
     if (this.bypassAtZero && freq <= 0) {
+      const scale = Number.isFinite(gain) ? gain : 1;
       for (let i = 0; i < blockSize; i += 1) {
-        this.outputBuffer.view[i] = this.inputBuffer.view[i] || 0;
+        this.outputBuffer.view[i] = (this.inputBuffer.view[i] || 0) * scale;
       }
     } else {
-      this.wasm.fujisaki_resonator_set_params(this.state, freq, bw, sampleRate);
-      this.wasm.fujisaki_resonator_process(
+      this.wasm.resonator_set_params(this.state, freq, bw, sampleRate);
+      this.wasm.resonator_set_gain(this.state, gain);
+      this.wasm.resonator_process(
         this.state,
         this.inputBuffer.ptr,
         this.outputBuffer.ptr,
@@ -84,7 +88,7 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
 
     this.outputBuffer.refresh();
     outputChannel.set(this.outputBuffer.view);
-    this._reportMetrics(outputChannel, inputChannel, { freq, bw });
+    this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
     return true;
   }
 
@@ -118,9 +122,10 @@ class FujisakiResonatorProcessor extends AudioWorkletProcessor {
     if (params) {
       payload.freq = params.freq;
       payload.bw = params.bw;
+      payload.gain = params.gain;
     }
     this.port.postMessage(payload);
   }
 }
 
-registerProcessor("fujisaki-resonator-processor", FujisakiResonatorProcessor);
+registerProcessor("resonator-processor", ResonatorProcessor);

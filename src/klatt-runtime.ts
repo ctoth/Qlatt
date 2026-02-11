@@ -5,8 +5,8 @@
  * a registry.yaml file rather than being hardcoded.
  */
 
-import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator.js';
-import { dbToLinear, dbToLinearKlsyn, min, max, pow } from './builtin-functions.js';
+import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator';
+import { dbToLinear, dbToLinearKlsyn, min, max, pow } from './builtin-functions';
 
 // =============================================================================
 // Registry Types
@@ -212,9 +212,9 @@ function waitForNodeReady(
   });
 }
 
-import { createJmespathResolver, JmespathResolver } from './semantics/jmespath-resolver.js';
-import { createTopologicalEvaluator, TopologicalEvaluator } from './semantics/topological-evaluator.js';
-import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types.js';
+import { createJmespathResolver, JmespathResolver } from './semantics/jmespath-resolver';
+import { createTopologicalEvaluator, TopologicalEvaluator } from './semantics/topological-evaluator';
+import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
 
 // Bacon graph types (simplified - Bacon package has full types)
 export interface BaconGraph {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter.js";
-import { parseDslSpec } from "../src/declarative-frontend/parser.js";
-import { validateDslSpec } from "../src/declarative-frontend/validation.js";
+import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
 
 describe("declarative frontend first migration slice", () => {
   it("applies structural stop release insertion via declarative engine", () => {

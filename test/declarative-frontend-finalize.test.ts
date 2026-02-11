@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend finalize stages", () => {
   it("computes sync times from active base durations and resolves point times", () => {

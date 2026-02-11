@@ -12,11 +12,11 @@
  * 5. PLSTEP burst transients for plosive releases
  */
 
-import { createTopologicalEvaluator } from './semantics/topological-evaluator.js';
-import { createCelEvaluator } from './semantics/cel-evaluator.js';
-import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types.js';
-import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime.js';
-import { dbToLinear, dbToLinearKlsyn, proximity as proximityFn, min, max, pow } from './builtin-functions.js';
+import { createTopologicalEvaluator } from './semantics/topological-evaluator';
+import { createCelEvaluator } from './semantics/cel-evaluator';
+import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
+import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
+import { dbToLinear, dbToLinearKlsyn, proximity as proximityFn, min, max, pow } from './builtin-functions';
 
 // =============================================================================
 // Types

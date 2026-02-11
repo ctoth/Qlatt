@@ -1,13 +1,13 @@
-import { PHONEME_TARGETS, fillDefaultParams } from "../tts-frontend-rules.js";
-import { parseDslSpec } from "./parser.js";
-import { assertValidSpec } from "./validation.js";
-import { evaluateExpression } from "./expressions.js";
+import { PHONEME_TARGETS, fillDefaultParams } from "../tts-frontend-rules";
+import { parseDslSpec } from "./parser";
+import { assertValidSpec } from "./validation";
+import { evaluateExpression } from "./expressions";
 import {
   TokenStatus,
   isActiveToken,
   joinTokenStatus,
   normalizeTokenStatus,
-} from "./model.js";
+} from "./model";
 
 function cloneSequence(sequence) {
   return sequence.map((token) => ({
@@ -199,6 +199,18 @@ function comparePointTokenOrder(left, right) {
   const rightRatio = Number.isFinite(right?.ratio) ? Number(right.ratio) : 0;
   if (leftRatio !== rightRatio) return leftRatio < rightRatio ? -1 : 1;
   return compareOrderValue(left?.id ?? "", right?.id ?? "");
+}
+
+function isOrderObject(mark) {
+  return mark != null && typeof mark === "object" && !Array.isArray(mark) && typeof mark.kind === "string";
+}
+
+function isStartOrder(mark) {
+  return isOrderObject(mark) && mark.kind === "START";
+}
+
+function isEndOrder(mark) {
+  return isOrderObject(mark) && mark.kind === "END";
 }
 
 function getTokenBounds(token) {
@@ -1465,6 +1477,24 @@ function assertActiveBaseCoverage(sequence, runtime) {
         if (byRight !== 0) return byRight;
         return compareOrderValue(left.id ?? "", right.id ?? "");
       });
+
+    const usesOrderObjects = active.some(
+      (token) => isOrderObject(token.sync_left) || isOrderObject(token.sync_right)
+    );
+    if (usesOrderObjects && active.length > 0) {
+      const first = active[0];
+      const last = active[active.length - 1];
+      if (!isStartOrder(first.sync_left)) {
+        throw new Error(
+          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not start at START`
+        );
+      }
+      if (!isEndOrder(last.sync_right)) {
+        throw new Error(
+          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not end at END`
+        );
+      }
+    }
 
     for (let i = 0; i + 1 < active.length; i += 1) {
       const left = active[i];

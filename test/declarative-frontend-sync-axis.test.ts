@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend sync axis bootstrap", () => {
   it("initializes missing base sync marks using START/FINITE/END order keys", () => {

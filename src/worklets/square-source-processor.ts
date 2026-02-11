@@ -1,19 +1,19 @@
 /**
- * Tilt filter AudioWorklet processor
- * Wraps the tilt-filter WASM primitive
- * One-pole lowpass for spectral tilt control
+ * Square glottal source AudioWorklet processor
+ * Wraps the square-source WASM primitive
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"
-    ? new URL("./tilt-filter.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}tilt-filter.wasm`;
+    ? new URL("./square-source.wasm", import.meta.url).toString()
+    : `${import.meta.url.replace(/[^/]*$/, "")}square-source.wasm`;
 
-class TiltFilterProcessor extends AudioWorkletProcessor {
+class SquareSourceProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      { name: "tilt", defaultValue: 0, minValue: 0, maxValue: 34, automationRate: "k-rate" },
+      { name: "f0", defaultValue: 100, minValue: 20, maxValue: 500, automationRate: "a-rate" },
+      { name: "openQuotient", defaultValue: 0.5, minValue: 0.01, maxValue: 0.99, automationRate: "a-rate" },
     ];
   }
 
@@ -22,9 +22,8 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     this.wasm = null;
     this.state = 0;
     this.ready = false;
-    this.lastTilt = -1;
     this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "tilt-filter";
+    this.nodeId = options?.processorOptions?.nodeId || "square-source";
     this.reportInterval = options?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
 
@@ -32,8 +31,8 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
-        if (this.ready && this.wasm?.tilt_filter_reset) {
-          this.wasm.tilt_filter_reset(this.state);
+        if (this.ready && this.wasm?.square_source_reset) {
+          this.wasm.square_source_reset(this.state);
         }
       }
     };
@@ -41,21 +40,17 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     const wasmBytes = options?.processorOptions?.wasmBytes;
     initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
       this.wasm = instance.exports;
-      this.state = this.wasm.tilt_filter_new();
+      this.state = this.wasm.square_source_new(sampleRate);
       this.ready = true;
       this.port.postMessage({ type: "ready", node: this.nodeId });
     });
   }
 
   process(inputs, outputs, parameters) {
-    const input = inputs[0];
     const output = outputs[0];
-
-    if (!input || !input[0] || !output || !output[0]) {
+    if (!output || !output[0]) {
       return true;
     }
-
-    const inputChannel = input[0];
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
@@ -64,22 +59,21 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
       return true;
     }
 
-    // Update tilt parameter (k-rate, once per block)
-    const tilt = Math.round(parameters.tilt[0]);
-    if (tilt !== this.lastTilt) {
-      this.wasm.tilt_filter_set_tilt(this.state, tilt);
-      this.lastTilt = tilt;
-    }
+    const f0 = parameters.f0;
+    const oq = parameters.openQuotient;
 
-    // Process samples
     for (let i = 0; i < blockSize; i++) {
-      outputChannel[i] = this.wasm.tilt_filter_process(
+      const f0Val = f0.length > 1 ? f0[i] : f0[0];
+      const oqVal = oq.length > 1 ? oq[i] : oq[0];
+
+      outputChannel[i] = this.wasm.square_source_process(
         this.state,
-        inputChannel[i] || 0
+        f0Val,
+        oqVal
       );
     }
 
-    this._reportMetrics(outputChannel, { tilt });
+    this._reportMetrics(outputChannel, { f0: f0[0], oq: oq[0] });
     return true;
   }
 
@@ -104,9 +98,10 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
       node: this.nodeId,
       rms,
       peak,
-      tilt: params.tilt,
+      f0: params.f0,
+      openQuotient: params.oq,
     });
   }
 }
 
-registerProcessor("tilt-filter-processor", TiltFilterProcessor);
+registerProcessor("square-source-processor", SquareSourceProcessor);

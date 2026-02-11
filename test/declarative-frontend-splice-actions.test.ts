@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend splice actions", () => {
   it("supports pattern replace_range with suppression + insertion", () => {

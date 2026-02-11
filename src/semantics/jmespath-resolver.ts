@@ -4,7 +4,7 @@
  */
 
 import jmespath from 'jmespath';
-import type { JmesPath, EvaluationContext, ParamValue } from './types.js';
+import type { JmesPath, EvaluationContext, ParamValue } from './types';
 
 export interface JmespathResolver {
   resolve(path: JmesPath, context: EvaluationContext): ParamValue | undefined;

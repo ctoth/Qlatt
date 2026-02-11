@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend point actions and helpers", () => {
   it("inserts point tokens with midpoint anchors and computed values", () => {

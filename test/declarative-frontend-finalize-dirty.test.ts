@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend finalize dirty guard", () => {
   it("throws E_FINALIZE_DIRTY when structural rewrites run after finalize", () => {

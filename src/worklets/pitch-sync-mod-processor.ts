@@ -3,7 +3,7 @@
  * Wraps the pitch-sync-mod WASM primitive
  * F1/B1 modulation synchronized to glottal cycle
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

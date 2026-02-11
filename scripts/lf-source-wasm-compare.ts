@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initWasmModule, WasmBuffer } from "../worklets/wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "../src/worklets/wasm-utils";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
-const wasmPath = path.join(repoRoot, "worklets", "lf-source.wasm");
+const wasmPath = path.join(repoRoot, "public", "worklets", "lf-source.wasm");
 const goldenPath = path.join(repoRoot, "test", "golden", "klatt_paper.json");
 
 const wasmBytes = fs.readFileSync(wasmPath);

@@ -3,8 +3,8 @@ import {
   createKlattRuntime,
   BaconGraph,
   Registry,
-} from '../../src/klatt-runtime.js';
-import type { SemanticsDocument } from '../../src/semantics/types.js';
+} from '../../src/klatt-runtime';
+import type { SemanticsDocument } from '../../src/semantics/types';
 
 // Mock AudioContext for testing
 class MockAudioContext {

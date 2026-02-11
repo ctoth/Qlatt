@@ -1,9 +1,9 @@
-import { CMU_DICT } from "./cmu-dictionary.js";
+import { CMU_DICT } from "./cmu-dictionary";
 import {
   PHONEME_TARGETS,
   fillDefaultParams,
-} from "./tts-frontend-rules.js";
-import { runDeclarativeFrontend } from "./declarative-frontend/adapter.js";
+} from "./tts-frontend-rules";
+import { runDeclarativeFrontend } from "./declarative-frontend/adapter";
 
 export function normalizeText(text) {
   let normalized = text.toLowerCase();

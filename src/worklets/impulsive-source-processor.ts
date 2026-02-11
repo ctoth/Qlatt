@@ -2,7 +2,7 @@
  * Impulsive glottal source AudioWorklet processor
  * Wraps the impulsive-source WASM primitive
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

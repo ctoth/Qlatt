@@ -6,16 +6,25 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 
 const scripts = [
-  "scripts/klatt-tract-wasm-compare.mjs",
-  "scripts/lf-source-wasm-compare.mjs",
-  "scripts/render-phrase.mjs",
+  "scripts/klatt-tract-wasm-compare.ts",
+  "scripts/lf-source-wasm-compare.ts",
+  "scripts/render-phrase.ts",
 ];
 
 let failed = false;
 for (const script of scripts) {
-  const result = spawnSync(process.execPath, [path.join(repoRoot, script)], {
-    stdio: "inherit",
-  });
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--loader",
+      "ts-node/esm",
+      "--experimental-specifier-resolution=node",
+      path.join(repoRoot, script),
+    ],
+    {
+      stdio: "inherit",
+    }
+  );
   if (result.status !== 0) {
     failed = true;
   }

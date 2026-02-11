@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator.js';
-import { createCelEvaluator } from '../../src/semantics/cel-evaluator.js';
+import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator';
+import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
 
 describe('Topological Evaluator', () => {
   it('evaluates in dependency order', () => {

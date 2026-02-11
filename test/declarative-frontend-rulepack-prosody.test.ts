@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter.js";
+import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
 
 describe("declarative frontend rulepack prosody phase", () => {
   it("generates f0 points for stressed vowels and question rise in declarative phases", () => {

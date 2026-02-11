@@ -4,8 +4,8 @@
  */
 
 import toposort from 'toposort';
-import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types.js';
-import type { CelEvaluator } from './cel-evaluator.js';
+import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types';
+import type { CelEvaluator } from './cel-evaluator';
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;

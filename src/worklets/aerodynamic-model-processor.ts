@@ -16,7 +16,7 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

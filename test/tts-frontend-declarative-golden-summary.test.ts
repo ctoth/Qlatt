@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { textToKlattTrack } from "../src/tts-frontend.js";
+import { textToKlattTrack } from "../src/tts-frontend";
 
 type Corpus = {
   name: string;

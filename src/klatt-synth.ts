@@ -1,4 +1,4 @@
-import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions.js';
+import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
 
 export class KlattSynth {
   constructor(audioContext) {
@@ -16,15 +16,18 @@ export class KlattSynth {
     const baseUrl =
       (import.meta?.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : "/";
     const workletBase = `${baseUrl}worklets/`;
+    const workletModules = [
+      new URL("./worklets/resonator-processor.ts", import.meta.url),
+      new URL("./worklets/antiresonator-processor.ts", import.meta.url),
+      new URL("./worklets/impulse-train-processor.ts", import.meta.url),
+      new URL("./worklets/lf-source-processor.ts", import.meta.url),
+      new URL("./worklets/noise-source-processor.ts", import.meta.url),
+      new URL("./worklets/glottal-mod-processor.ts", import.meta.url),
+      new URL("./worklets/differentiator-processor.ts", import.meta.url),
+    ];
     await this._loadWasmBytes(workletBase);
     await Promise.all([
-      this.ctx.audioWorklet.addModule(workletBase + "resonator-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "antiresonator-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "impulse-train-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "lf-source-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "noise-source-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "glottal-mod-processor.js"),
-      this.ctx.audioWorklet.addModule(workletBase + "differentiator-processor.js"),
+      ...workletModules.map((url) => this.ctx.audioWorklet.addModule(url.href)),
     ]);
 
     this._createNodes();

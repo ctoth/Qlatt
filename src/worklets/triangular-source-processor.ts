@@ -7,7 +7,7 @@
  * - openQuotient: Fraction of period that glottis is open
  * - asymmetry: klsyn88-style asymmetry percent (0..100, 50=symmetric)
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule } from "./wasm-utils";
 
 const wasmUrl =
   typeof URL === "function"

@@ -1,7 +1,7 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
-import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions.js';
+import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
 
 // Klatt 80 Table III expected values for stop releases
 export const KLATT80_EXPECTED = {
@@ -243,7 +243,7 @@ export function formatPlstepEventsRelative(list, runStart) {
 }
 
 // Re-export dbToLinear from builtin-functions for backwards compatibility
-export { dbToLinear } from './builtin-functions.js';
+export { dbToLinear } from './builtin-functions';
 
 export function updateRange(range, value) {
   if (!Number.isFinite(value)) return range;

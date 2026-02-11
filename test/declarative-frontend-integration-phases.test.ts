@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter.js";
+import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
 
 describe("declarative frontend integration phases", () => {
   it("executes structural->duration->prosody->finalize with resolved point timing trace", () => {

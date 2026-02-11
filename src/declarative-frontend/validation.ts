@@ -1,5 +1,5 @@
-import { compareOrder } from "./order.js";
-import { validateExpressionSyntax } from "./expressions.js";
+import { compareOrder } from "./order";
+import { validateExpressionSyntax } from "./expressions";
 
 function makeDiagnostic(code, message, path, severity = "error") {
   return { code, message, path, severity };

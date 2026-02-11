@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
-import { parseDslSpec } from "../src/declarative-frontend/parser.js";
-import { validateDslSpec } from "../src/declarative-frontend/validation.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
 
 describe("declarative frontend JSONata expressions", () => {
   it("evaluates JSONata where and value expressions with params", () => {

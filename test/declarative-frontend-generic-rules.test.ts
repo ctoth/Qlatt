@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runRuleEngine } from "../src/declarative-frontend/engine.js";
+import { runRuleEngine } from "../src/declarative-frontend/engine";
 
 describe("declarative frontend generic select rules", () => {
   it("applies select/apply rules in declared order", () => {
@@ -44,8 +44,24 @@ describe("declarative frontend generic select rules", () => {
     };
 
     const input = [
-      { phoneme: "AE", stream: "phone", type: "vowel", duration: 100, status: 1 },
-      { phoneme: "T", stream: "phone", type: "stop", duration: 80, status: 1 },
+      {
+        phoneme: "AE",
+        stream: "phone",
+        type: "vowel",
+        duration: 100,
+        status: 1,
+        sync_left: { kind: "START" },
+        sync_right: { kind: "START" },
+      },
+      {
+        phoneme: "T",
+        stream: "phone",
+        type: "stop",
+        duration: 80,
+        status: 1,
+        sync_left: { kind: "START" },
+        sync_right: { kind: "END" },
+      },
     ];
     const out = runRuleEngine(input, spec).sequence;
 
@@ -54,4 +70,3 @@ describe("declarative frontend generic select rules", () => {
     expect(out[1].duration).toBe(85);
   });
 });
-

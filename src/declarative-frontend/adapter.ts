@@ -1,5 +1,5 @@
-import { runRuleEngine } from "./engine.js";
-import { QLATT_V11_SLICE_RULEPACK } from "./rule-pack.js";
+import { runRuleEngine } from "./engine";
+import { QLATT_V11_SLICE_RULEPACK } from "./rule-pack";
 
 export function runDeclarativeFrontend(sequence, options = {}) {
   const result = runRuleEngine(sequence, QLATT_V11_SLICE_RULEPACK, options);

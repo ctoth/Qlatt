@@ -129,6 +129,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: integration diagnostics coverage added at engine entrypoint.
 - Evidence: `test/declarative-frontend-integration-diagnostics.test.ts` verifies invalid-spec diagnostics (`E_RULE_UNKNOWN`, `E_PHASE_RESOLVE_POINT_STREAM_INVALID`) surface through `runRuleEngine`.
 - Evidence: declarative regression run now passes (`21` files / `56` tests).
+- 2026-02-11: declarative-only corpus behavior coverage started on linguistic phrase set.
+- Evidence: `test/tts-frontend-declarative-corpus.test.ts` validates finite/monotonic track output across `test/phrase-sets/linguistic.json` using `textToKlattTrack()` declarative runtime path.
+- Evidence: declarative + frontend migration suite now passes (`22` files / `57` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
@@ -234,7 +237,7 @@ Acceptance criteria:
 
 - [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
 - [x] `J2` `DONE`: Add integration tests for phases, diagnostics, and finalize behavior.
-- [ ] `J3` `NOT_STARTED`: Add declarative-only frontend behavior tests on phrase corpus.
+- [ ] `J3` `IN_PROGRESS`: Add declarative-only frontend behavior tests on phrase corpus.
 - [ ] `J4` `NOT_STARTED`: Run golden verification and lock outputs after review.
 - [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.
 

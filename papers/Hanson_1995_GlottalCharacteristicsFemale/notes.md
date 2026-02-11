@@ -366,3 +366,7 @@ The four key KLSYN88 parameters for female voice quality control:
 ### New Leads (Not Yet in Collection)
 - **Titze, I. R. (1989a, 1989b)** - Establishes physiologic and acoustic differences between male and female voices, directly relevant to sex-specific synthesis parameter selection.
 - **Gobl, C. and Ní Chasaide, A. (1988, 1993)** - Provides methods for analyzing voice source variation and consonant-dependent effects on voice quality, essential for contextual parameter modification in synthesis.
+
+---
+
+**See also:** Hanson_1997_GlottalCharacteristicsFemaleAcoustic - The published JASA paper version of this thesis, with corrected spectral measures (H1*-H2*, H1*-A1, H1*-A3*), Table I quantifying glottal chink area effects, and the two-group speaker classification.

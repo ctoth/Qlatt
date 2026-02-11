@@ -459,3 +459,7 @@ Papers cited that may be worth reading:
 - **Lieberman, Philip (1960-1970)** - Extensive research on acoustic correlates of stress, intonation perception, and language. Book "Intonation, Perception, and Language" (1967) provides comprehensive framework for understanding F0 in linguistic context.
 - **Lea, Wayne (1973)** - "Segmental and Suprasegmental Influences on Fundamental Frequency Contours." Directly addresses how segmental features affect F0, critical for TTS implementation.
 - **Mattingly, Ignatius (1966-1970)** - Multiple publications on "Synthesis by Rule" establishing methods for rule-based prosodic synthesis, foundational for speech synthesis approaches.
+
+---
+
+**See also:** Ladd_2008_IntonationalPhonology — provides a more principled phonological basis (AM theory) for accent placement and declination modeling that supersedes O'Shaughnessy's rule-based approach, though the practical word-class accent hierarchy and phonetic adjustment rules from O'Shaughnessy remain implementationally useful.

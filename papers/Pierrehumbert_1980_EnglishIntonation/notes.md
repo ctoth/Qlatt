@@ -402,3 +402,7 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 - **Bruce, G. (1977). Swedish Word Accents in Sentence Perspective.** — Cross-linguistic comparison showing how tone-based prosodic systems work in other languages, validates universality of Pierrehumbert's framework.
 - **Klatt, D.H. (1975). Vowel Lengthening is Syntactically Determined.** — Early work connecting speech acoustics to linguistic structure; important for understanding F0 contour implementation in synthesis.
 - **Lehiste, I., and G.E. Peterson (1961). Some Basic Considerations in the Analysis of Intonation.** — Classic foundational work on intonation measurement and acoustic analysis that Pierrehumbert builds upon.
+
+---
+
+**See also:** Ladd_2008_IntonationalPhonology — the mature theoretical exposition of Pierrehumbert's AM framework, with refinements including reduction from 7 to 5 pitch accents (MAE_ToBI), more careful treatment of alignment vs. association, extensive cross-linguistic validation (~30 languages), and a three-layer pitch scaling model (intrinsic/extrinsic/metrical).

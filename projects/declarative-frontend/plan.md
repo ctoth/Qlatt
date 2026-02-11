@@ -136,6 +136,10 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `test/tts-frontend-declarative-golden-summary.test.ts` compares per-phrase summary metrics (`events`, `totalTime`, `voicedEvents`, `f0Min`, `f0Max`) against `test/golden/declarative-corpus-summary.json`.
 - Evidence: `scripts/export-declarative-corpus-summary.mjs` + `npm run golden:declarative-summary` provide explicit regeneration workflow for the locked baseline.
 - Evidence: declarative + frontend migration suite now passes (`23` files / `58` tests).
+- 2026-02-11: docs updated to describe declarative frontend as the current architecture (not future migration work).
+- Evidence: `README.md` now documents declarative frontend ownership and migration verification commands.
+- Evidence: `docs/parameter-scheduling.md` now documents phase-driven declarative frontend flow (`structural`/`duration`/`prosody`/`finalize`) and removes legacy mutator framing.
+- Evidence: `docs/adding-a-synthesizer.md` data flow now routes frontend behavior through `src/declarative-frontend/engine.js` + rule pack phases.
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
@@ -244,7 +248,7 @@ Acceptance criteria:
 - [x] `J2` `DONE`: Add integration tests for phases, diagnostics, and finalize behavior.
 - [x] `J3` `DONE`: Add declarative-only frontend behavior tests on phrase corpus.
 - [ ] `J4` `IN_PROGRESS`: Run golden verification and lock outputs after review.
-- [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.
+- [x] `J5` `DONE`: Update docs to describe declarative frontend as current architecture.
 
 Acceptance criteria:
 - Required tests pass in CI.

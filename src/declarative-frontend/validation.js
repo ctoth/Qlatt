@@ -6,9 +6,7 @@ function makeDiagnostic(code, message, path, severity = "error") {
 }
 
 const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
-const ALLOWED_RULE_OPS = new Set([
-  "insert_stop_releases",
-]);
+const ALLOWED_RULE_OPS = new Set();
 
 function asPlainObject(value) {
   return value && typeof value === "object" && !Array.isArray(value);

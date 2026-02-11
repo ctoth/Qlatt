@@ -22,105 +22,32 @@ function getIncompressibleMin(token, inherent) {
   return inherent * ratio;
 }
 
-function ruleInsertStopReleases(sequence) {
-  const nextSequence = [];
-  const releaseMap = {
-    P_CL: "P_REL",
-    T_CL: "T_REL",
-    K_CL: "K_REL",
-    B_CL: "B_REL",
-    D_CL: "D_REL",
-    G_CL: "G_REL",
-  };
-  const aspirationMap = {
-    P_REL: "P_ASP",
-    T_REL: "T_ASP",
-    K_REL: "K_ASP",
+function materializeInventoryTarget(phoneme) {
+  const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
+  const target = PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {};
+  const payload = {
+    phoneme: key,
+    params: fillDefaultParams(target),
+    duration: target?.dur || 30,
+    inherentDuration: target?.dur,
   };
 
-  function findNextActive(startIndex) {
-    for (let i = startIndex; i < sequence.length; i += 1) {
-      if (isActiveToken(sequence[i])) return sequence[i];
-    }
-    return null;
-  }
-
-  function buildInsertedToken(phoneme, stress, weak = false) {
-    const target = PHONEME_TARGETS[phoneme] || PHONEME_TARGETS.SIL || {};
-    const token = {
-      phoneme,
-      stress,
-      status: TokenStatus.ACTIVE,
-      params: fillDefaultParams(target),
-      duration: target?.dur || 30,
-      inherentDuration: target?.dur,
-    };
-
-    if (weak) {
-      token.weak = true;
-      token.params.AF = Math.max(0, Number(token.params.AF || 0) - 10);
-      token.params.AH = Math.max(0, Number(token.params.AH || 0) - 10);
-      token.duration = Math.max(15, token.duration * 0.5);
-    }
-
-    for (const [key, value] of Object.entries(target)) {
-      if (key === "dur") continue;
-      if (key === "SW") {
-        token.inventorySW = value;
-        continue;
-      }
-      if (key === "type" && typeof value === "string") {
-        token.type = value;
-        continue;
-      }
-      if (typeof value === "boolean") {
-        token[key] = value;
-      }
-    }
-
-    return token;
-  }
-
-  for (let i = 0; i < sequence.length; i += 1) {
-    const current = sequence[i];
-    nextSequence.push(current);
-    if (!isActiveToken(current)) continue;
-
-    const releasePhoneme = releaseMap[current.phoneme];
-    if (!releasePhoneme) continue;
-
-    let addRelease = true;
-    const next = findNextActive(i + 1);
-    if (next) {
-      const nextTarget =
-        PHONEME_TARGETS[next.phoneme + "1"] ||
-        PHONEME_TARGETS[next.phoneme + "0"] ||
-        PHONEME_TARGETS[next.phoneme];
-
-      if (next.phoneme === "SIL" || nextTarget?.type?.includes("stop")) {
-        addRelease = false;
-      }
-    }
-
-    if (addRelease) {
-      nextSequence.push(buildInsertedToken(releasePhoneme, current.stress));
-      const aspiration = aspirationMap[releasePhoneme];
-      if (aspiration) {
-        nextSequence.push(buildInsertedToken(aspiration, current.stress));
-      }
+  for (const [entryKey, value] of Object.entries(target)) {
+    if (entryKey === "dur") continue;
+    if (entryKey === "SW") {
+      payload.inventorySW = value;
       continue;
     }
-
-    if (next?.phoneme === "SIL") {
-      nextSequence.push(buildInsertedToken(releasePhoneme, current.stress, true));
-      const aspiration = aspirationMap[releasePhoneme];
-      if (aspiration) {
-        nextSequence.push(buildInsertedToken(aspiration, current.stress, true));
-      }
+    if (entryKey === "type" && typeof value === "string") {
+      payload.type = value;
+      continue;
+    }
+    if (typeof value === "boolean") {
+      payload[entryKey] = value;
     }
   }
 
-  return nextSequence;
+  return payload;
 }
 
 function getTokenStream(token) {
@@ -486,6 +413,13 @@ function buildNavigationFunctions(sequence, runtime = null, options = {}) {
     },
     at_sync: (syncMark) =>
       normalizeAnchor({ anchor_left: syncMark, anchor_right: syncMark, ratio: 0 }),
+    target: (phoneme) => {
+      const payload = materializeInventoryTarget(phoneme);
+      return {
+        ...payload,
+        params: { ...payload.params },
+      };
+    },
     prev_point: (stream) => {
       const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
       if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
@@ -961,7 +895,7 @@ function findInsertionIndexForBoundary(sequence, stream, boundary, side) {
     const token = sequence[i];
     if (getTokenStream(token) !== stream) continue;
     if (token?.sync_left == null) continue;
-    if (compareOrderValue(token.sync_left, boundary) >= 0) return i;
+    if (compareOrderValue(token.sync_left, boundary) > 0) return i;
   }
   return sequence.length;
 }
@@ -1034,7 +968,30 @@ function applySpliceSpec(
   if (spliceSpec.type === "insert_at_boundary") {
     const boundary = evaluateActionExpression(spliceSpec.boundary, context, functions);
     const side = spliceSpec.side === "before" ? "before" : "after";
-    if (boundary == null) {
+    const streamHasUnmarkedTokens = activeStreamTokens.some(
+      (token) => token?.sync_left == null && token?.sync_right == null
+    );
+    if (boundary == null || streamHasUnmarkedTokens) {
+      if (target != null) {
+        const targetIndex = sequence.indexOf(target);
+        if (targetIndex < 0) {
+          throw new Error("insert_at_boundary splice target is not in sequence");
+        }
+        const insertionIndex = side === "before" ? targetIndex : targetIndex + 1;
+        const mark = side === "before" ? targetIndex : targetIndex + 1;
+        const inserts = buildSpliceInsertions(
+          spliceSpec.insert,
+          stream,
+          { left: mark, right: mark },
+          context,
+          runtime,
+          functions
+        );
+        if (inserts.length > 0) {
+          sequence.splice(insertionIndex, 0, ...inserts);
+        }
+        return;
+      }
       throw new Error("insert_at_boundary splice requires boundary");
     }
 
@@ -1303,13 +1260,7 @@ function applyRule(rule, sequence, runtime) {
   if (rule.match) {
     return applyPatternRule(rule, sequence, runtime);
   }
-
-  switch (rule.op) {
-    case "insert_stop_releases":
-      return ruleInsertStopReleases(sequence);
-    default:
-      throw new Error(`Unsupported declarative slice rule op '${rule.op}'`);
-  }
+  throw new Error(`Unsupported declarative slice rule op '${rule?.op}'`);
 }
 
 function isStructuralRule(rule) {
@@ -1319,7 +1270,6 @@ function isStructuralRule(rule) {
   if (rule.suppress || rule.delete) return true;
   if (Array.isArray(rule.associate) && rule.associate.length > 0) return true;
   if (Array.isArray(rule.disassociate) && rule.disassociate.length > 0) return true;
-  if (rule.op === "insert_stop_releases") return true;
   return false;
 }
 

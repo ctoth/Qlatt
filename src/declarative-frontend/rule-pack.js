@@ -22,7 +22,7 @@ export const QLATT_V11_SLICE_RULEPACK = {
   phases: [
     {
       name: "structural",
-      rules: ["insert_stop_releases"],
+      rules: ["insert_stop_release_tokens", "insert_stop_aspiration_tokens"],
     },
     {
       name: "duration",
@@ -52,10 +52,95 @@ export const QLATT_V11_SLICE_RULEPACK = {
     },
   ],
   rules: {
-    insert_stop_releases: {
+    insert_stop_release_tokens: {
       kind: "structural",
-      op: "insert_stop_releases",
-      citation: "Stevens 1998 Ch.8",
+      citation: "Stevens 1998 Ch.8; Allen et al. 1987 Table C-1",
+      select: {
+        stream: "phone",
+        where:
+          "current.type = 'stop_closure' and $next(current) != null and $not($contains($string($next(current).type), 'stop'))",
+      },
+      splice: {
+        type: "insert_at_boundary",
+        boundary: "current.sync_right",
+        side: "after",
+        insert: [
+          {
+            phoneme:
+              "(current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')))))",
+            stress: "current.stress",
+            word: "current.word",
+            weak: "$next(current).phoneme = 'SIL'",
+            params:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $p := $t.params; $weak ? $merge([$p, {'AF': $max([0, $number($p.AF) - 10]), 'AH': $max([0, $number($p.AH) - 10])}]) : $p)",
+            duration:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $weak ? $max([15, $t.duration * 0.5]) : $t.duration)",
+            inherentDuration:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).inherentDuration)",
+            type:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).type)",
+            inventorySW:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).inventorySW)",
+            voiced:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).voiced)",
+            voiceless:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).voiceless)",
+            front:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).front)",
+            back:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).back)",
+            hi:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).hi)",
+            low:
+              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : (current.phoneme = 'K_CL' ? 'K_REL' : (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))))); $target($rel).low)",
+          },
+        ],
+      },
+    },
+    insert_stop_aspiration_tokens: {
+      kind: "structural",
+      citation: "Stevens 1998 Ch.8; Allen et al. 1987 Table C-1",
+      select: {
+        stream: "phone",
+        where:
+          "current.type = 'stop_release' and (current.phoneme = 'P_REL' or current.phoneme = 'T_REL' or current.phoneme = 'K_REL')",
+      },
+      splice: {
+        type: "insert_at_boundary",
+        boundary: "current.sync_right",
+        side: "after",
+        insert: [
+          {
+            phoneme:
+              "(current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP'))",
+            stress: "current.stress",
+            word: "current.word",
+            weak: "$boolean(current.weak)",
+            params:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $t := $target($asp); $weak := $boolean(current.weak); $p := $t.params; $weak ? $merge([$p, {'AF': $max([0, $number($p.AF) - 10]), 'AH': $max([0, $number($p.AH) - 10])}]) : $p)",
+            duration:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $t := $target($asp); $weak := $boolean(current.weak); $weak ? $max([15, $t.duration * 0.5]) : $t.duration)",
+            inherentDuration:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).inherentDuration)",
+            type:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).type)",
+            inventorySW:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).inventorySW)",
+            voiced:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).voiced)",
+            voiceless:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).voiceless)",
+            front:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).front)",
+            back:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).back)",
+            hi:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).hi)",
+            low:
+              "($asp := (current.phoneme = 'P_REL' ? 'P_ASP' : (current.phoneme = 'T_REL' ? 'T_ASP' : 'K_ASP')); $target($asp).low)",
+          },
+        ],
+      },
     },
     stress_duration: {
       kind: "scalar",

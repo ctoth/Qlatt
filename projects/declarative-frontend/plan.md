@@ -151,12 +151,17 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/rule-pack.js` `stress_duration`, `vowel_shortening`, and `pre_boundary_lengthening` are now declarative rules (no `op`) with citation tags and phase-local `resolve_scalars: ["duration"]` over `duration` scalar `resolution: "klatt"`.
 - Evidence: `src/declarative-frontend/engine.js` no longer contains duration `rule.op` handlers; only structural `insert_stop_releases` remains as a temporary op path.
 - Evidence: `test/declarative-frontend-rulepack-shape.test.ts` added to enforce op-free duration rules; declarative + frontend migration suite passes (`25` files / `62` tests).
+- 2026-02-11: structural stop release/aspiration insertion migrated to declarative `select` + `splice` rules with inventory-backed token materialization.
+- Evidence: `src/declarative-frontend/rule-pack.js` now uses `insert_stop_release_tokens` and `insert_stop_aspiration_tokens` declarative structural rules (with citation tags) and no longer defines `insert_stop_releases` op.
+- Evidence: `src/declarative-frontend/engine.js` adds `$target(...)` helper-backed inventory materialization for declarative templates and no longer has any `rule.op` handlers.
+- Evidence: `src/declarative-frontend/validation.js` now disallows all `rule.op` usage (`E_RULE_OP_UNKNOWN` for any op).
+- Evidence: `test/declarative-frontend-rulepack-shape.test.ts` now enforces fully op-free rulepack; declarative + frontend migration suite passes (`25` files / `63` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
-- Limitation: one temporary `rule.op` handler remains (`insert_stop_releases`); eliminating this requires final declarative rewrite for structural stop-release insertion.
+- Limitation: `insert_at_boundary` currently uses a deterministic target-index fallback when stream tokens are missing comparable sync marks (structural pre-axis stage); this should be replaced by explicit sync-axis initialization to align fully with spec Part 1/5.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -164,7 +169,7 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
 - [ ] `A1` `NOT_STARTED`: Add this plan status check into CI or PR template so status updates are enforced.
 - [ ] `A2` `NOT_STARTED`: Create a migration branch rule: no new imperative frontend logic merged into `src/tts-frontend.js` or `src/tts-frontend-rules.js`.
-- [ ] `A3` `IN_PROGRESS`: Enforce declarative-maximization guardrail: no new domain behavior via custom `rule.op`; prefer generic DSL actions.
+- [x] `A3` `DONE`: Enforce declarative-maximization guardrail: no new domain behavior via custom `rule.op`; prefer generic DSL actions.
 
 ### [B] Engine Core (Spec Parts 0, 1, 5, 9)
 

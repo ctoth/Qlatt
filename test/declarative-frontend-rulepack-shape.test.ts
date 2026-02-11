@@ -19,4 +19,11 @@ describe("declarative frontend rulepack shape", () => {
     expect(Array.isArray(short?.apply)).toBe(true);
     expect(Array.isArray(boundary?.apply)).toBe(true);
   });
+
+  it("contains no imperative rule.op handlers", () => {
+    const opRules = Object.entries(QLATT_V11_SLICE_RULEPACK.rules).filter(
+      ([, rule]) => rule?.op != null
+    );
+    expect(opRules).toHaveLength(0);
+  });
 });

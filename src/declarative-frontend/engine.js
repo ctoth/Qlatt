@@ -635,7 +635,145 @@ function evaluateValueExpression(expr, token, params, functions, extraContext = 
   return Number(value);
 }
 
-function applyEffectToToken(effect, token, params, functions, extraContext = null) {
+function toFiniteOrNull(value) {
+  return Number.isFinite(value) ? Number(value) : null;
+}
+
+function getScalarConfig(runtime, token, field) {
+  if (!runtime || !token || typeof field !== "string") return null;
+  const stream = getTokenStream(token);
+  const byStream = runtime.scalarSpecsByStream?.get(stream);
+  if (!byStream || typeof byStream !== "object") return null;
+  const config = byStream[field];
+  return config && typeof config === "object" ? config : null;
+}
+
+function getScalarResolution(config) {
+  const raw = typeof config?.resolution === "string" ? config.resolution.toLowerCase() : null;
+  if (raw === "standard" || raw === "klatt") return raw;
+  return null;
+}
+
+function computeKlattFloor(token, field, config, baseValue) {
+  const explicitFloor = toFiniteOrNull(config?.floor);
+  if (explicitFloor != null) return explicitFloor;
+
+  const floorField = typeof config?.floor_field === "string" ? config.floor_field : null;
+  if (floorField && Number.isFinite(token?.[floorField])) return Number(token[floorField]);
+
+  if (field === "duration") {
+    const inherent = Number.isFinite(token?.inherentDuration)
+      ? Number(token.inherentDuration)
+      : baseValue;
+    return getIncompressibleMin(token, inherent);
+  }
+
+  const minVal = toFiniteOrNull(config?.min);
+  return minVal != null ? minVal : 0;
+}
+
+function getOrCreateScalarState(runtime, token, field, currentValue) {
+  if (!runtime || !token || typeof field !== "string") return null;
+
+  let perToken = runtime.scalarStates.get(token);
+  if (!perToken) {
+    perToken = new Map();
+    runtime.scalarStates.set(token, perToken);
+  }
+
+  let state = perToken.get(field);
+  if (state) return state;
+
+  const config = getScalarConfig(runtime, token, field);
+  const resolution = getScalarResolution(config);
+  if (!resolution) return null;
+
+  const base = Number.isFinite(currentValue) ? Number(currentValue) : 0;
+  state = {
+    resolution,
+    base,
+    preview: base,
+    floor: resolution === "klatt" ? computeKlattFloor(token, field, config, base) : null,
+    min: toFiniteOrNull(config?.min),
+    max: toFiniteOrNull(config?.max),
+    effects: [],
+    resolved: null,
+  };
+  perToken.set(field, state);
+  return state;
+}
+
+function previewScalarEffect(state, op, value) {
+  const current = Number.isFinite(state.preview) ? state.preview : state.base;
+  if (state.resolution === "klatt") {
+    const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
+    if (op === "set") return value;
+    if (op === "mul") return value * (current - floor) + floor;
+    if (op === "add") return current + value;
+    return current;
+  }
+
+  if (op === "set") return value;
+  if (op === "mul") return current * value;
+  if (op === "add") return current + value;
+  return current;
+}
+
+function resolveScalarState(state) {
+  let value = Number.isFinite(state.base) ? Number(state.base) : 0;
+  const orderedEffects = state.effects
+    .slice()
+    .sort((left, right) => Number(left.order) - Number(right.order));
+
+  if (state.resolution === "klatt") {
+    const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
+    for (const effect of orderedEffects) {
+      if (effect.op === "set") value = effect.value;
+      else if (effect.op === "mul") value = effect.value * (value - floor) + floor;
+      else if (effect.op === "add") value = value + effect.value;
+    }
+    const max = Number.isFinite(state.max) ? Number(state.max) : Number.POSITIVE_INFINITY;
+    if (value < floor) value = floor;
+    if (value > max) value = max;
+    return value;
+  }
+
+  for (const effect of orderedEffects) {
+    if (effect.op === "set") value = effect.value;
+    else if (effect.op === "mul") value = value * effect.value;
+    else if (effect.op === "add") value = value + effect.value;
+  }
+
+  const min = Number.isFinite(state.min) ? Number(state.min) : Number.NEGATIVE_INFINITY;
+  const max = Number.isFinite(state.max) ? Number(state.max) : Number.POSITIVE_INFINITY;
+  if (value < min) value = min;
+  if (value > max) value = max;
+  return value;
+}
+
+function resolveScalars(sequence, runtime, scalarFields) {
+  const fields = Array.isArray(scalarFields) ? scalarFields.filter((field) => typeof field === "string") : [];
+  if (fields.length === 0) return 0;
+
+  let resolvedCount = 0;
+  for (const [token, perToken] of runtime.scalarStates.entries()) {
+    if (!isActiveToken(token)) continue;
+    for (const field of fields) {
+      const state = perToken.get(field);
+      if (!state || state.effects.length === 0) continue;
+      const resolved = resolveScalarState(state);
+      token[field] = resolved;
+      state.resolved = resolved;
+      state.base = resolved;
+      state.preview = resolved;
+      state.effects = [];
+      resolvedCount += 1;
+    }
+  }
+  return resolvedCount;
+}
+
+function applyEffectToToken(effect, token, params, functions, runtime, extraContext = null) {
   if (!effect || typeof effect !== "object") return;
   const field = typeof effect.field === "string" ? effect.field : "";
   if (!field) return;
@@ -667,8 +805,34 @@ function applyEffectToToken(effect, token, params, functions, extraContext = nul
   const currentValue = getField();
   const current = Number.isFinite(currentValue) ? currentValue : 0;
   const value = evaluateValueExpression(effect.value, token, params, functions, extraContext);
+  const op = effect.op;
+  if (op !== "set" && op !== "add" && op !== "mul") {
+    throw new Error(`Unsupported effect op '${op}' in slice engine`);
+  }
 
-  switch (effect.op) {
+  if (runtime && fieldPath.length === 1) {
+    const scalarField = fieldPath[0];
+    if (runtime.activeResolveScalars?.has(scalarField)) {
+      const state = getOrCreateScalarState(runtime, token, scalarField, current);
+      if (state) {
+        const order = runtime.scalarEffectOrder++;
+        state.effects.push({
+          field: scalarField,
+          op,
+          value,
+          tag: effect.tag ?? null,
+          rule: runtime.currentRuleName ?? null,
+          order,
+        });
+        const preview = previewScalarEffect(state, op, value);
+        state.preview = preview;
+        setField(preview);
+        return;
+      }
+    }
+  }
+
+  switch (op) {
     case "set":
       setField(value);
       break;
@@ -678,8 +842,6 @@ function applyEffectToToken(effect, token, params, functions, extraContext = nul
     case "mul":
       setField(current * value);
       break;
-    default:
-      throw new Error(`Unsupported effect op '${effect.op}' in slice engine`);
   }
 }
 
@@ -688,6 +850,7 @@ function applyEffectsToTargets(
   resolveTarget,
   params,
   functions,
+  runtime,
   defaultTargetName = "current",
   extraContext = null
 ) {
@@ -698,7 +861,7 @@ function applyEffectsToTargets(
     if (!target) {
       throw new Error(`Unknown effect target '${targetName}' in slice engine`);
     }
-    applyEffectToToken(effect, target, params, functions, extraContext);
+    applyEffectToToken(effect, target, params, functions, runtime, extraContext);
   }
 }
 
@@ -1096,6 +1259,7 @@ function applySelectRule(rule, sequence, runtime) {
       (targetName) => (targetName === "current" ? token : null),
       runtime.params,
       navigationFunctions,
+      runtime,
       "current",
       extraContext
     );
@@ -1179,6 +1343,7 @@ function applyPatternRule(rule, sequence, runtime) {
       (targetName) => captures[targetName] ?? null,
       runtime.params,
       captureFunctions,
+      runtime,
       defaultTarget,
       extraContext
     );
@@ -1431,6 +1596,14 @@ export function runRuleEngine(sequence, specSource, options = {}) {
       .filter(([, stream]) => stream?.type === "base")
       .map(([name]) => name)
   );
+  const scalarSpecsByStream = new Map(
+    Object.entries(spec.streams ?? {}).map(([name, stream]) => [
+      name,
+      stream && typeof stream.scalars === "object" && !Array.isArray(stream.scalars)
+        ? stream.scalars
+        : {},
+    ])
+  );
   const usedTokenIds = new Set(
     current
       .map((token) => token?.id)
@@ -1447,6 +1620,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     baseStreams,
     pointCounters: new Map(),
     insertCounters: new Map(),
+    scalarSpecsByStream,
+    scalarStates: new Map(),
+    scalarEffectOrder: 0,
+    activeResolveScalars: new Set(),
+    currentRuleName: null,
     usedTokenIds,
     markTimes: new Map(),
     finalized: false,
@@ -1460,6 +1638,9 @@ export function runRuleEngine(sequence, specSource, options = {}) {
 
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
+    runtime.activeResolveScalars = new Set(
+      Array.isArray(phase.resolve_scalars) ? phase.resolve_scalars : []
+    );
     trace.push({ type: "phase_start", phase: phase.name });
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
@@ -1468,9 +1649,20 @@ export function runRuleEngine(sequence, specSource, options = {}) {
           `E_FINALIZE_DIRTY: structural rule '${ruleName}' executed after finalize stage`
         );
       }
+      runtime.currentRuleName = ruleName;
       trace.push({ type: "rule_start", phase: phase.name, rule: ruleName });
       current = applyRule(rule, current, runtime);
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
+      runtime.currentRuleName = null;
+    }
+    if (Array.isArray(phase.resolve_scalars) && phase.resolve_scalars.length > 0) {
+      const resolved = resolveScalars(current, runtime, phase.resolve_scalars);
+      trace.push({
+        type: "scalars_resolved",
+        phase: phase.name,
+        fields: phase.resolve_scalars,
+        count: resolved,
+      });
     }
     if (phase.compute_times) {
       computeSyncTimes(current, runtime);
@@ -1483,6 +1675,7 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     if (phase.compute_times || (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0)) {
       runtime.finalized = true;
     }
+    runtime.activeResolveScalars = new Set();
     trace.push({ type: "phase_end", phase: phase.name });
   }
 

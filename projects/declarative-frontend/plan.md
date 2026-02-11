@@ -140,10 +140,15 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `README.md` now documents declarative frontend ownership and migration verification commands.
 - Evidence: `docs/parameter-scheduling.md` now documents phase-driven declarative frontend flow (`structural`/`duration`/`prosody`/`finalize`) and removes legacy mutator framing.
 - Evidence: `docs/adding-a-synthesizer.md` data flow now routes frontend behavior through `src/declarative-frontend/engine.js` + rule pack phases.
+- 2026-02-11: scalar-resolution phase semantics (`resolve_scalars`) started with explicit `standard`/`klatt` resolution handling.
+- Evidence: `src/declarative-frontend/engine.js` now accumulates phase-scoped scalar effects for fields with explicit scalar `resolution`, resolves them deterministically at phase boundary, applies standard min/max clamp, and applies Klatt incompressibility-floor semantics for `mul`.
+- Evidence: `test/declarative-frontend-scalar-resolution.test.ts` added and passing for standard and klatt resolution behavior.
+- Evidence: declarative + frontend migration suite now passes (`24` files / `60` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
+- Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); legacy fields without explicit resolution still execute immediate in-rule updates.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -191,7 +196,7 @@ Acceptance criteria:
 
 - [ ] `E1` `IN_PROGRESS`: Implement select and pattern rule execution.
 - [ ] `E2` `IN_PROGRESS`: Implement all actions: `apply`, `splice`, `insert_point`, `suppress/delete`, `associate`, `disassociate`.
-- [ ] `E3` `NOT_STARTED`: Implement scalar resolution (`set`, `mul`, `add`) including Klatt incompressibility handling.
+- [ ] `E3` `IN_PROGRESS`: Implement scalar resolution (`set`, `mul`, `add`) including Klatt incompressibility handling.
 - [ ] `E4` `IN_PROGRESS`: Implement compute times and point resolution stages.
 
 Acceptance criteria:

@@ -8,9 +8,6 @@ function makeDiagnostic(code, message, path, severity = "error") {
 const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
 const ALLOWED_RULE_OPS = new Set([
   "insert_stop_releases",
-  "stress_duration",
-  "vowel_shortening",
-  "pre_boundary_lengthening",
 ]);
 
 function asPlainObject(value) {

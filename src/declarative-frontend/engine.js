@@ -16,23 +16,6 @@ function cloneSequence(sequence) {
   }));
 }
 
-function applyDurationScale(token, scale) {
-  if (!token || !Number.isFinite(scale)) return;
-  const di = Number.isFinite(token.duration) ? token.duration : 0;
-  if (di <= 0) return;
-  const dinh = Number.isFinite(token.inherentDuration) ? token.inherentDuration : di;
-  const dmin = getIncompressibleMin(token, dinh);
-  const df = scale * (di - dmin) + dmin;
-  token.duration = Math.round(Math.max(dmin, df));
-}
-
-function applyDurationFloor(token) {
-  if (!token || !Number.isFinite(token.duration)) return;
-  const dinh = Number.isFinite(token.inherentDuration) ? token.inherentDuration : token.duration;
-  const dmin = getIncompressibleMin(token, dinh);
-  token.duration = Math.round(Math.max(dmin, token.duration));
-}
-
 function getIncompressibleMin(token, inherent) {
   if (!Number.isFinite(inherent) || inherent <= 0) return 0;
   const ratio = token?.type === "vowel" ? 0.42 : 0.6;
@@ -138,78 +121,6 @@ function ruleInsertStopReleases(sequence) {
   }
 
   return nextSequence;
-}
-
-function ruleStressDuration(sequence) {
-  const STRESS_FACTOR = 1.3;
-  const UNSTRESSED_FACTOR = 0.8;
-
-  for (const token of sequence) {
-    if (!isActiveToken(token)) continue;
-    if (token.type === "vowel") {
-      if (token.stress === 1) applyDurationScale(token, STRESS_FACTOR);
-      else if (token.stress === 0) applyDurationScale(token, UNSTRESSED_FACTOR);
-    }
-    applyDurationFloor(token);
-  }
-  return sequence;
-}
-
-function ruleVowelShortening(sequence) {
-  const SHORTENING_FACTOR = 0.7;
-  const FRIC_SHORTENING = 0.85;
-  const PREPAUSAL_LENGTHENING = 1.2;
-  const active = sequence.filter(isActiveToken);
-
-  for (let i = 0; i < active.length; i += 1) {
-    const current = active[i];
-    if (!current || current.type !== "vowel") continue;
-    const next = active[i + 1];
-    if (!next) {
-      applyDurationScale(current, PREPAUSAL_LENGTHENING);
-      continue;
-    }
-
-    const nextTarget =
-      PHONEME_TARGETS[next.phoneme + "1"] ||
-      PHONEME_TARGETS[next.phoneme + "0"] ||
-      PHONEME_TARGETS[next.phoneme];
-
-    if (!nextTarget) continue;
-    if (nextTarget.type?.includes("stop") && nextTarget.voiceless) {
-      applyDurationScale(current, SHORTENING_FACTOR);
-    } else if (nextTarget.type === "fricative" && nextTarget.voiceless) {
-      applyDurationScale(current, FRIC_SHORTENING);
-    } else if (next.phoneme === "SIL") {
-      applyDurationScale(current, PREPAUSAL_LENGTHENING);
-    }
-  }
-  return sequence;
-}
-
-function rulePreBoundaryLengthening(sequence) {
-  const PHRASE_FINAL_FACTOR = 1.4;
-  const WORD_FINAL_FACTOR = 1.1;
-  const active = sequence.filter(isActiveToken);
-
-  for (let i = 0; i < active.length; i += 1) {
-    const current = active[i];
-    const next = active[i + 1];
-
-    if (current.phoneme === "SIL") continue;
-
-    const isBeforePhraseBreak = next?.phoneme === "SIL" && next?.punctuationSymbol;
-    if (isBeforePhraseBreak || (!next && current.phoneme !== "SIL")) {
-      applyDurationScale(current, PHRASE_FINAL_FACTOR);
-      continue;
-    }
-
-    if (next && current.word && next.word && current.word !== next.word && next.phoneme !== "SIL") {
-      applyDurationScale(current, WORD_FINAL_FACTOR);
-    }
-  }
-
-  return sequence;
 }
 
 function getTokenStream(token) {
@@ -696,6 +607,7 @@ function getOrCreateScalarState(runtime, token, field, currentValue) {
     floor: resolution === "klatt" ? computeKlattFloor(token, field, config, base) : null,
     min: toFiniteOrNull(config?.min),
     max: toFiniteOrNull(config?.max),
+    round: field === "duration" || config?.unit === "ms",
     effects: [],
     resolved: null,
   };
@@ -705,21 +617,23 @@ function getOrCreateScalarState(runtime, token, field, currentValue) {
 
 function previewScalarEffect(state, op, value) {
   const current = Number.isFinite(state.preview) ? state.preview : state.base;
+  const maybeRound = (n) => (state.round ? Math.round(n) : n);
   if (state.resolution === "klatt") {
     const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
-    if (op === "set") return value;
-    if (op === "mul") return value * (current - floor) + floor;
-    if (op === "add") return current + value;
-    return current;
+    if (op === "set") return maybeRound(value);
+    if (op === "mul") return maybeRound(value * (current - floor) + floor);
+    if (op === "add") return maybeRound(current + value);
+    return maybeRound(current);
   }
 
-  if (op === "set") return value;
-  if (op === "mul") return current * value;
-  if (op === "add") return current + value;
-  return current;
+  if (op === "set") return maybeRound(value);
+  if (op === "mul") return maybeRound(current * value);
+  if (op === "add") return maybeRound(current + value);
+  return maybeRound(current);
 }
 
 function resolveScalarState(state) {
+  const maybeRound = (n) => (state.round ? Math.round(n) : n);
   let value = Number.isFinite(state.base) ? Number(state.base) : 0;
   const orderedEffects = state.effects
     .slice()
@@ -728,27 +642,27 @@ function resolveScalarState(state) {
   if (state.resolution === "klatt") {
     const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
     for (const effect of orderedEffects) {
-      if (effect.op === "set") value = effect.value;
-      else if (effect.op === "mul") value = effect.value * (value - floor) + floor;
-      else if (effect.op === "add") value = value + effect.value;
+      if (effect.op === "set") value = maybeRound(effect.value);
+      else if (effect.op === "mul") value = maybeRound(effect.value * (value - floor) + floor);
+      else if (effect.op === "add") value = maybeRound(value + effect.value);
     }
     const max = Number.isFinite(state.max) ? Number(state.max) : Number.POSITIVE_INFINITY;
     if (value < floor) value = floor;
     if (value > max) value = max;
-    return value;
+    return maybeRound(value);
   }
 
   for (const effect of orderedEffects) {
-    if (effect.op === "set") value = effect.value;
-    else if (effect.op === "mul") value = value * effect.value;
-    else if (effect.op === "add") value = value + effect.value;
+    if (effect.op === "set") value = maybeRound(effect.value);
+    else if (effect.op === "mul") value = maybeRound(value * effect.value);
+    else if (effect.op === "add") value = maybeRound(value + effect.value);
   }
 
   const min = Number.isFinite(state.min) ? Number(state.min) : Number.NEGATIVE_INFINITY;
   const max = Number.isFinite(state.max) ? Number(state.max) : Number.POSITIVE_INFINITY;
   if (value < min) value = min;
   if (value > max) value = max;
-  return value;
+  return maybeRound(value);
 }
 
 function resolveScalars(sequence, runtime, scalarFields) {
@@ -1393,12 +1307,6 @@ function applyRule(rule, sequence, runtime) {
   switch (rule.op) {
     case "insert_stop_releases":
       return ruleInsertStopReleases(sequence);
-    case "stress_duration":
-      return ruleStressDuration(sequence);
-    case "vowel_shortening":
-      return ruleVowelShortening(sequence);
-    case "pre_boundary_lengthening":
-      return rulePreBoundaryLengthening(sequence);
     default:
       throw new Error(`Unsupported declarative slice rule op '${rule.op}'`);
   }

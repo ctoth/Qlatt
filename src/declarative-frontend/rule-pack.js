@@ -10,7 +10,7 @@ export const QLATT_V11_SLICE_RULEPACK = {
     phone: {
       type: "base",
       scalars: {
-        duration: { unit: "ms" },
+        duration: { unit: "ms", resolution: "klatt", max: 500 },
       },
     },
     f0: {
@@ -59,8 +59,19 @@ export const QLATT_V11_SLICE_RULEPACK = {
     },
     stress_duration: {
       kind: "scalar",
-      op: "stress_duration",
       citation: "Klatt 1976 §III.B",
+      select: {
+        stream: "phone",
+        where: "current.type = 'vowel'",
+      },
+      apply: [
+        {
+          field: "duration",
+          op: "mul",
+          value: "current.stress = 1 ? 1.3 : (current.stress = 0 ? 0.8 : 1)",
+          tag: "stress",
+        },
+      ],
     },
     k_context_cl_f2: {
       kind: "scalar",
@@ -112,13 +123,37 @@ export const QLATT_V11_SLICE_RULEPACK = {
     },
     vowel_shortening: {
       kind: "scalar",
-      op: "vowel_shortening",
       citation: "Chen 1970; Wells 1990",
+      select: {
+        stream: "phone",
+        where: "current.type = 'vowel'",
+      },
+      apply: [
+        {
+          field: "duration",
+          op: "mul",
+          value:
+            "($n := $next(current); $n = null or $n.phoneme = 'SIL' ? 1.2 : (($n.voiceless = true and ($n.type = 'stop' or $n.type = 'stop_closure')) ? 0.7 : (($n.voiceless = true and $n.type = 'fricative') ? 0.85 : 1)))",
+          tag: "segmental_context",
+        },
+      ],
     },
     pre_boundary_lengthening: {
       kind: "scalar",
-      op: "pre_boundary_lengthening",
       citation: "Klatt 1976 §III.A",
+      select: {
+        stream: "phone",
+        where: "current.phoneme != 'SIL'",
+      },
+      apply: [
+        {
+          field: "duration",
+          op: "mul",
+          value:
+            "($n := $next(current); ($n = null or ($n.phoneme = 'SIL' and $exists($n.punctuationSymbol))) ? 1.4 : (($n != null and $n.phoneme != 'SIL' and $exists(current.word) and $exists($n.word) and current.word != $n.word) ? 1.1 : 1))",
+          tag: "boundary",
+        },
+      ],
     },
     lock_stop_release_duration: {
       kind: "scalar",

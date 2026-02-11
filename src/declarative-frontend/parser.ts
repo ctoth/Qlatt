@@ -1,34 +1,48 @@
 import yaml from "js-yaml";
 
-function asPlainObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value);
+type PlainObject = Record<string, any>;
+
+type NormalizedPhase = {
+  name: string;
+  after: string[];
+  rules: string[];
+  resolve_scalars: string[];
+  compute_times: boolean;
+  resolve_points: string[];
+};
+
+function asPlainObject(value: unknown): value is PlainObject {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function asString(value, fallback = "") {
+function asString(value: unknown): string;
+function asString(value: unknown, fallback: string | null): string | null;
+function asString(value: unknown, fallback: string | null = ""): string | null {
   return typeof value === "string" ? value : fallback;
 }
 
-function asStringArray(value) {
+function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item) => typeof item === "string");
+  return value.filter((item: unknown): item is string => typeof item === "string");
 }
 
-function cloneObject(value) {
+function cloneObject(value: unknown): PlainObject {
   return asPlainObject(value) ? { ...value } : {};
 }
 
-function normalizePhase(phase) {
+function normalizePhase(phase: unknown): NormalizedPhase {
+  const input = asPlainObject(phase) ? phase : {};
   return {
-    name: asString(phase?.name),
-    after: asStringArray(phase?.after),
-    rules: asStringArray(phase?.rules),
-    resolve_scalars: asStringArray(phase?.resolve_scalars),
-    compute_times: Boolean(phase?.compute_times),
-    resolve_points: asStringArray(phase?.resolve_points),
+    name: asString(input.name),
+    after: asStringArray(input.after),
+    rules: asStringArray(input.rules),
+    resolve_scalars: asStringArray(input.resolve_scalars),
+    compute_times: Boolean(input.compute_times),
+    resolve_points: asStringArray(input.resolve_points),
   };
 }
 
-function normalizeStream(stream) {
+function normalizeStream(stream: unknown): PlainObject {
   if (!asPlainObject(stream)) return {};
   return {
     ...stream,
@@ -42,7 +56,7 @@ function normalizeStream(stream) {
   };
 }
 
-function normalizePatternStep(step) {
+function normalizePatternStep(step: unknown): PlainObject {
   if (!asPlainObject(step)) return {};
   return {
     ...step,
@@ -53,7 +67,7 @@ function normalizePatternStep(step) {
   };
 }
 
-function normalizePattern(pattern) {
+function normalizePattern(pattern: unknown): PlainObject {
   if (!asPlainObject(pattern)) return {};
   return {
     ...pattern,
@@ -62,13 +76,13 @@ function normalizePattern(pattern) {
     cross_boundary: Boolean(pattern.cross_boundary),
     max_lookahead: Number.isInteger(pattern.max_lookahead) ? pattern.max_lookahead : null,
     sequence: Array.isArray(pattern.sequence)
-      ? pattern.sequence.map((step) => normalizePatternStep(step))
+      ? pattern.sequence.map((step: unknown) => normalizePatternStep(step))
       : [],
     constraint: asString(pattern.constraint, null),
   };
 }
 
-function normalizeRule(rule) {
+function normalizeRule(rule: unknown): PlainObject {
   if (!asPlainObject(rule)) return {};
   return {
     ...rule,
@@ -98,7 +112,7 @@ function normalizeRule(rule) {
   };
 }
 
-export function parseDslSpec(source) {
+export function parseDslSpec(source: unknown): PlainObject {
   let raw = source;
 
   if (typeof source === "string") {

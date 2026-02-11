@@ -215,6 +215,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: core type gate expanded to include JSONata expression runtime typing.
 - Evidence: `src/declarative-frontend/expressions.ts` now has explicit compile/validate/evaluate signatures and Promise-like guard typing, and `tsconfig.core.json` includes this module.
 - Evidence: `npm run typecheck:core` remains green and focused regression (`jsonata` + `order/model` + `sync-axis`) passes (`5` files / `15` tests).
+- 2026-02-11: parser typing cleanup landed and core type gate now covers parse layer in addition to primitives/expressions.
+- Evidence: `src/declarative-frontend/parser.ts` now uses explicit plain-object guards, typed normalizers, and a typed `parseDslSpec` signature; `@types/js-yaml` was added for strict compile support.
+- Evidence: `tsconfig.core.json` now includes `src/declarative-frontend/parser.ts`; `npm run typecheck:core` remains green and full regression remains green via `npx vitest run` (`36` files / `122` tests).
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

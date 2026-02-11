@@ -25,6 +25,7 @@
     "toposort": "^2.0.2"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "puppeteer-core": "^23.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",

@@ -3,16 +3,21 @@ export const RANK_LEN = 12;
 const BASE = 36n;
 const MAX_RANK_INT = BASE ** BigInt(RANK_LEN) - 1n;
 
-const KIND_ORDER = {
+export type StartOrder = Readonly<{ kind: "START" }>;
+export type FiniteOrder = Readonly<{ kind: "FINITE"; rank: string }>;
+export type EndOrder = Readonly<{ kind: "END" }>;
+export type Order = StartOrder | FiniteOrder | EndOrder;
+
+const KIND_ORDER: Record<Order["kind"], number> = {
   START: 0,
   FINITE: 1,
   END: 2,
 };
 
-const RANK_RE = /^[0-9a-z]+$/;
+const RANK_RE = /^[0-9a-z]{12}$/;
 const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-function toBigInt(order) {
+function toBigInt(order: Order): bigint {
   if (!order || typeof order !== "object") {
     throw new Error("order must be an object");
   }
@@ -20,7 +25,7 @@ function toBigInt(order) {
   if (order.kind === "START") return 0n;
   if (order.kind === "END") return MAX_RANK_INT;
   if (order.kind !== "FINITE") {
-    throw new Error(`Unknown order kind: ${order.kind}`);
+    throw new Error("Unknown order kind");
   }
 
   const rank = order.rank;
@@ -35,13 +40,13 @@ function toBigInt(order) {
   return value;
 }
 
-function fromBigInt(value) {
+function fromBigInt(value: bigint): string {
   if (value < 0n || value > MAX_RANK_INT) {
     throw new Error("rank value out of range");
   }
 
   let n = value;
-  const chars = new Array(RANK_LEN).fill("0");
+  const chars = new Array<string>(RANK_LEN).fill("0");
   for (let i = RANK_LEN - 1; i >= 0; i -= 1) {
     const digit = Number(n % BASE);
     chars[i] = DIGITS[digit];
@@ -50,17 +55,17 @@ function fromBigInt(value) {
   return chars.join("");
 }
 
-export function compareOrder(a, b) {
+export function compareOrder(a: Order, b: Order): number {
   if (a.kind !== b.kind) {
     return KIND_ORDER[a.kind] - KIND_ORDER[b.kind];
   }
-  if (a.kind !== "FINITE") return 0;
+  if (a.kind !== "FINITE" || b.kind !== "FINITE") return 0;
   if (a.rank < b.rank) return -1;
   if (a.rank > b.rank) return 1;
   return 0;
 }
 
-export function midpointRank(lo, hi) {
+export function midpointRank(lo: Order, hi: Order): string {
   const loInt = toBigInt(lo);
   const hiInt = toBigInt(hi);
   if (loInt >= hiInt) {
@@ -73,11 +78,11 @@ export function midpointRank(lo, hi) {
   return fromBigInt(mid);
 }
 
-export function rebalanceRanks(count) {
+export function rebalanceRanks(count: number): string[] {
   if (!Number.isInteger(count) || count < 0) {
     throw new Error("count must be a non-negative integer");
   }
-  const ranks = [];
+  const ranks: string[] = [];
   for (let i = 1; i <= count; i += 1) {
     const intRank = (BigInt(i) * MAX_RANK_INT) / BigInt(count + 1);
     ranks.push(fromBigInt(intRank));
@@ -85,14 +90,14 @@ export function rebalanceRanks(count) {
   return ranks;
 }
 
-export function finiteOrder(rank) {
+export function finiteOrder(rank: string): FiniteOrder {
   return { kind: "FINITE", rank };
 }
 
-export function startOrder() {
+export function startOrder(): StartOrder {
   return { kind: "START" };
 }
 
-export function endOrder() {
+export function endOrder(): EndOrder {
   return { kind: "END" };
 }

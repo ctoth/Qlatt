@@ -208,9 +208,13 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/axis.ts` now has explicit `OrderObject`/`SyncAxis` types with finite-rank comparison narrowing fixed in `compareOrderValue`.
 - Evidence: `test/declarative-frontend-axis-identity.test.ts` and `test/declarative-frontend-sync-axis.test.ts` now use explicit token typing and runtime axis guards, eliminating local strict `implicit any`/nullable-axis type noise.
 - Evidence: focused regression remains green via `npx vitest run test/declarative-frontend-axis-identity.test.ts test/declarative-frontend-sync-axis.test.ts test/declarative-frontend-cli.test.ts` (`3` files / `7` tests), and filtered strict check for axis/tooling/test files is clean.
+- 2026-02-11: layered TypeScript gate bootstrapped for typed declarative primitives (`axis`/`order`/`model`) and made CI-ready via npm script.
+- Evidence: `tsconfig.core.json` added and `package.json` now exposes `npm run typecheck:core` (`tsc -p tsconfig.core.json --noEmit`) to validate the strict typed subset independently of broader backlog.
+- Evidence: `src/declarative-frontend/order.ts` and `src/declarative-frontend/model.ts` now have explicit exported domain types/signatures and strict-safe narrowing/indexing.
+- Evidence: `npm run typecheck:core` passes and full regression remains green via `npx vitest run` (`36` files / `122` tests).
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
-- Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps; staged TS check gates are not yet split by target surface.
+- Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar unification now applies to declared top-level scalar fields; nested dotted fields (e.g. `params.F2`) remain immediate unless promoted to declared scalar fields in stream metadata.

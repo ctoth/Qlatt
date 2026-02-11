@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/declarative-frontend/axis.ts",
+    "src/declarative-frontend/model.ts",
+    "src/declarative-frontend/order.ts",
+    "test/declarative-frontend-model.test.ts",
+    "test/declarative-frontend-order.test.ts"
+  ],
+  "exclude": ["node_modules", "dist", "public"]
+}

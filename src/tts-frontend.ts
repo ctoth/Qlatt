@@ -337,7 +337,6 @@ export function transcribeText(text) {
 
 function debugLog(...args) {
   return;
-  // console.log("[TTS Frontend DEBUG]", ...args);
 }
 
 function compareAxisMark(left, right) {
@@ -358,23 +357,6 @@ function parseTrailingInteger(value) {
   if (!match) return null;
   const parsed = Number(match[1]);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function withDeclarativePhoneAxis(sequence) {
-  let boundary = 0;
-  return sequence.map((token, index) => {
-    const left = boundary;
-    const right = boundary + 1;
-    boundary = right;
-    return {
-      ...token,
-      id: token.id ?? `ph_${index}`,
-      stream: "phone",
-      sync_left: left,
-      sync_right: right,
-      status: token.status ?? 1,
-    };
-  });
 }
 
 function buildF0ContourFromDeclarative(sequence, baseF0) {
@@ -557,7 +539,12 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     phases: ["duration"],
   });
-  parameterSequence = withDeclarativePhoneAxis(parameterSequence);
+  parameterSequence = parameterSequence.map((token, index) => ({
+    ...token,
+    id: token.id ?? `ph_${index}`,
+    stream: "phone",
+    status: token.status ?? 1,
+  }));
   debugLog("Applying declarative phase: prosody...");
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     phases: ["prosody", "finalize"],
@@ -669,14 +656,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     const phDuration = Math.max(minDuration, phDurationMs) / 1000.0;
     const segmentStart = currentTime;
 
-    // *** ADDED: Specific logging for P_REL inside loop ***
-    if (ph.phoneme === "P_REL") {
-      debugLog(`    INSIDE LOOP CHECK for P_REL:`);
-      debugLog(`      ph.duration (ms): ${ph.duration}`);
-      debugLog(`      Calculated phDuration (s): ${phDuration.toFixed(4)}`);
-    }
-    // *** END ADDED LOGGING ***
-
     if (phDuration <= 0) {
       console.warn(
         `[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(
@@ -689,18 +668,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       continue; // Explicitly skip if duration is bad
     }
     const targetTime = segmentStart + phDuration;
-
-    // *** ADDED: Specific logging for P_REL inside loop ***
-    if (ph.phoneme === "P_REL") {
-      debugLog(`      targetTime: ${targetTime.toFixed(4)}`);
-      debugLog(`      currentTime: ${currentTime.toFixed(4)}`);
-      debugLog(
-        `      Condition (targetTime > currentTime): ${
-          targetTime > currentTime
-        }`
-      );
-    }
-    // *** END ADDED LOGGING ***
 
     debugLog(
       `  Processing phoneme ${i}: ${ph.phoneme}${

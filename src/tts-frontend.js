@@ -553,63 +553,6 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     phases: ["structural"],
   });
-  // --- Simplified Refill Step ---
-  debugLog("Applying rule: Refill params/durations for releases...");
-  for (let i = 0; i < parameterSequence.length; i++) {
-    const ph = parameterSequence[i];
-    if (!ph.params) {
-      // Only process phonemes inserted by rules (like releases)
-      debugLog(`  Refilling params for inserted phoneme: ${ph.phoneme}`);
-
-      let baseTarget = PHONEME_TARGETS[ph.phoneme]; // Directly use phoneme name
-
-      if (!baseTarget) {
-        console.warn(
-          `[TTS Frontend] No target found for inserted phoneme ${ph.phoneme}. Using SIL.`
-        );
-        baseTarget = PHONEME_TARGETS["SIL"];
-        // Consider if we should change ph.phoneme to SIL here? Maybe not needed if params are SIL.
-      }
-
-      // Use the refined fillDefaultParams
-      ph.params = fillDefaultParams(baseTarget);
-      ph.duration = baseTarget?.dur || 30; // Use optional chaining
-      ph.inherentDuration = baseTarget?.dur;
-
-      // Reduce amplitude for weak releases (word-final stops)
-      if (ph.weak) {
-        ph.params.AF = Math.max(0, (ph.params.AF || 0) - 10); // Reduce frication by 10 dB
-        ph.params.AH = Math.max(0, (ph.params.AH || 0) - 10); // Reduce aspiration by 10 dB
-        ph.duration = Math.max(15, ph.duration * 0.5); // Shorter duration
-      }
-
-      // Add minimal type flag and other relevant flags
-      if (baseTarget) {
-        if (baseTarget.type) ph.type = baseTarget.type;
-        // Copy other flags that might be relevant, similar to initial mapping
-        if (baseTarget.hasOwnProperty("voiceless"))
-          ph.voiceless = baseTarget.voiceless;
-        if (baseTarget.hasOwnProperty("voiced")) ph.voiced = baseTarget.voiced;
-        // Add other flags from PHONEME_TARGETS if needed by future rules
-        if (baseTarget.hasOwnProperty("front")) ph.front = baseTarget.front;
-        if (baseTarget.hasOwnProperty("back")) ph.back = baseTarget.back;
-        if (baseTarget.hasOwnProperty("hi")) ph.hi = baseTarget.hi;
-        if (baseTarget.hasOwnProperty("low")) ph.low = baseTarget.low;
-        if (baseTarget.hasOwnProperty("SW")) ph.inventorySW = baseTarget.SW;
-        if (baseTarget.hasOwnProperty("bilabial"))
-          ph.bilabial = baseTarget.bilabial;
-        if (baseTarget.hasOwnProperty("alveolar"))
-          ph.alveolar = baseTarget.alveolar;
-        // etc. for other place/manner features if necessary
-      }
-
-      debugLog(
-        `    Filled Params (AV=${ph.params.AV}, AF=${ph.params.AF}, AH=${ph.params.AH}), Duration=${ph.duration}, Type=${ph.type}, Voiceless=${ph.voiceless}`
-      );
-    }
-  }
-  debugLog("Finished refilling params for releases.");
-  // --- End Simplified Refill Step ---
   debugLog("Applying declarative phase: duration...");
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     phases: ["duration"],

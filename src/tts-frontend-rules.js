@@ -865,7 +865,7 @@ export const PHONEME_TARGETS = {
   // Velars: compact spectrum - prominent midfrequency peak
   // Blumstein & Stevens (1979): single peak in 1200-3500 Hz range
   // Zue (1976): vowel-dependent (front: ~2700 Hz, back: ~1200-1800 Hz)
-  // F2 adjusted by rule_K_Context based on following vowel
+  // F2 adjusted by declarative rulepack k_context_cl_f2/k_context_rel_copy
   K_REL: {
     F1: 300,
     F2: 1990,
@@ -936,7 +936,7 @@ export const PHONEME_TARGETS = {
     alveolar: true,
   },
   // Velars: compact spectrum (Blumstein & Stevens 1979)
-  // F2 adjusted by rule_K_Context based on following vowel
+  // F2 adjusted by declarative rulepack k_context_cl_f2/k_context_rel_copy
   G_REL: {
     F1: 200,
     F2: 1990,
@@ -1092,172 +1092,4 @@ export function fillDefaultParams(target) {
   }
 
   return filled;
-}
-export function rule_K_Context(phonemeList) {
-  for (let i = 0; i < phonemeList.length; i++) {
-    if (!phonemeList[i].params) continue; // Ensure params exist
-
-    // --- Apply context to K_CL ---
-    if (phonemeList[i].phoneme === "K_CL") {
-      let nextVowelCandidate = null;
-      // Check if K_CL is followed by K_REL, then look at the phoneme after K_REL
-      if (phonemeList[i + 1]?.phoneme === "K_REL") {
-        if (phonemeList[i + 2]) {
-          nextVowelCandidate = phonemeList[i + 2];
-        }
-      } else if (phonemeList[i + 1]) {
-        // If K_CL is not followed by K_REL, then the immediately following phoneme is the candidate
-        nextVowelCandidate = phonemeList[i + 1];
-      }
-
-      if (nextVowelCandidate && nextVowelCandidate.type === "vowel") {
-        let targetF2 = 1500; // Default F2
-        if (nextVowelCandidate.back) {
-          targetF2 = 1200; // Back vowel context
-        } else if (nextVowelCandidate.front) {
-          targetF2 = 1900; // Front vowel context
-        } else if (nextVowelCandidate.hi) { // Fallback for high vowels not explicitly front/back
-          targetF2 = 1900; // Default to fronted for high vowels
-        }
-        phonemeList[i].params.F2 = targetF2;
-        // console.log(`[rule_K_Context DEBUG] K_CL at index ${i} (word: ${phonemeList[i].word}) F2 set to ${targetF2} based on vowel ${nextVowelCandidate.phoneme} (front:${nextVowelCandidate.front}, back:${nextVowelCandidate.back}, hi:${nextVowelCandidate.hi})`);
-      } else {
-        // Default F2 if no suitable vowel found or K_CL is at/near end of utterance
-        phonemeList[i].params.F2 = 1500;
-        // console.log(`[rule_K_Context DEBUG] K_CL at index ${i} (word: ${phonemeList[i].word}) F2 set to default 1500 (nextVowelCandidate: ${nextVowelCandidate?.phoneme})`);
-      }
-    }
-
-    // --- Copy context-adjusted F2 from K_CL to K_REL ---
-    if (
-      phonemeList[i].phoneme === "K_REL" &&
-      phonemeList[i - 1]?.phoneme === "K_CL" &&
-      phonemeList[i - 1]?.params // Check if previous params exist
-    ) {
-      // Copy the context-adjusted F2 from the preceding K_CL
-      const prevF2 = phonemeList[i - 1].params.F2 || 1500; // Default if somehow missing
-      // console.log(`[rule_K_Context] Copying F2=${prevF2} from K_CL to K_REL at index ${i}.`);
-      if (phonemeList[i].params) { // Ensure K_REL params exist before assigning
-          phonemeList[i].params.F2 = prevF2;
-      } else {
-          console.warn(`[rule_K_Context] K_REL at index ${i} missing params object, cannot copy F2.`);
-      }
-    }
-  }
-  return phonemeList;
-}
-export function rule_GenerateF0Contour(
-  phonemeList,
-  baseF0 = 110,
-  fallRate = 20,
-  stressRise = 1.15,
-  questionRiseHz = 30
-) {
-  /* ... same ... */
-  const f0Contour = [];
-  let currentTime = 0;
-  let currentF0 = baseF0;
-  const totalDuration =
-    phonemeList.reduce((sum, ph) => sum + Math.max(1, ph.duration || ph.inherentDuration || 0), 0) /
-    1000.0;
-  if (totalDuration === 0) return [{ time: 0, f0: 0 }];
-  const phraseIndexByPhoneme = [];
-  const phrases = [];
-  let phraseStartTime = 0;
-  let phraseIndex = 0;
-  let runningTime = 0;
-  for (let i = 0; i < phonemeList.length; i++) {
-    const phDuration = Math.max(1, phonemeList[i].duration || phonemeList[i].inherentDuration || 0) / 1000.0;
-    const endTime = runningTime + phDuration;
-    phraseIndexByPhoneme.push(phraseIndex);
-    if (
-      phonemeList[i].phoneme === "SIL" &&
-      phonemeList[i].punctuationSymbol
-    ) {
-      phrases.push({ startTime: phraseStartTime, endTime });
-      phraseStartTime = endTime;
-      phraseIndex += 1;
-    }
-    runningTime = endTime;
-  }
-  if (!phrases.length || phrases[phrases.length - 1].endTime < runningTime) {
-    phrases.push({ startTime: phraseStartTime, endTime: runningTime });
-  }
-  let finalRise = false;
-  for (let i = phonemeList.length - 1; i >= 0; i--) {
-    if (
-      phonemeList[i].phoneme === "SIL" &&
-      phonemeList[i].punctuationSymbol === "?"
-    ) {
-      finalRise = true;
-      break;
-    }
-    if (phonemeList[i].phoneme !== "SIL") break;
-  }
-  f0Contour.push({ time: 0, f0: baseF0 });
-  for (let i = 0; i < phonemeList.length; i++) {
-    const ph = phonemeList[i];
-    const phDuration = Math.max(20, ph.duration || 100) / 1000.0;
-    const endTime = currentTime + phDuration;
-    const phrase = phrases[phraseIndexByPhoneme[i]] || {
-      startTime: 0,
-      endTime: totalDuration,
-    };
-    const phraseSpan = Math.max(0.05, phrase.endTime - phrase.startTime);
-    const position = Math.min(
-      1,
-      Math.max(0, (endTime - phrase.startTime) / phraseSpan)
-    );
-    let targetF0 = baseF0 - fallRate * position;
-    const initialBoost = 0.08;
-    targetF0 *= 1 + initialBoost * Math.exp(-3 * position);
-    let peakTime = -1,
-      peakF0 = -1;
-    if (ph.stress === 1 && ph.type === "vowel") {
-      peakTime = currentTime + phDuration * 0.45;
-      peakF0 = targetF0 * stressRise;
-      f0Contour.push({ time: peakTime, f0: peakF0 });
-    }
-    const f0Factor = ph.params?.F0_Factor || 1.0;
-    targetF0 *= f0Factor;
-    if (
-      finalRise &&
-      (i === phonemeList.length - 1 ||
-        (i === phonemeList.length - 2 && phonemeList[i + 1]?.phoneme === "SIL"))
-    ) {
-      targetF0 =
-        (f0Contour[f0Contour.length - 1]?.f0 || baseF0) + questionRiseHz;
-    }
-    targetF0 = Math.max(targetF0, baseF0 * 0.6);
-    const isVoicedTarget = ph.params?.AV > 0 || ph.params?.AVS > 0;
-    f0Contour.push({ time: endTime, f0: isVoicedTarget ? targetF0 : 0 });
-    currentF0 = isVoicedTarget ? targetF0 : baseF0 - fallRate * position;
-    if (ph.phoneme === "SIL" && ph.punctuationSymbol) {
-      currentF0 = baseF0;
-    }
-    currentTime = endTime;
-  }
-  const cleanedContour = [];
-  if (f0Contour.length > 0) cleanedContour.push(f0Contour[0]);
-  for (let i = 1; i < f0Contour.length; i++) {
-    if (f0Contour[i].f0 !== f0Contour[i - 1].f0 || f0Contour[i].f0 !== 0) {
-      if (
-        !cleanedContour.length ||
-        f0Contour[i].time >
-          cleanedContour[cleanedContour.length - 1].time + 0.001
-      ) {
-        cleanedContour.push(f0Contour[i]);
-      } else {
-        cleanedContour[cleanedContour.length - 1].f0 = f0Contour[i].f0;
-      }
-    } else if (
-      cleanedContour.length > 0 &&
-      cleanedContour[cleanedContour.length - 1].f0 !== 0
-    ) {
-      cleanedContour.push(f0Contour[i]);
-    }
-  }
-  if (cleanedContour.length === 0 && f0Contour.length > 0)
-    cleanedContour.push(f0Contour[f0Contour.length - 1]);
-  return cleanedContour;
 }

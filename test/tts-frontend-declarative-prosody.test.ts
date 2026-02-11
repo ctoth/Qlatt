@@ -1,20 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import * as frontendRules from "../src/tts-frontend-rules.js";
 import { textToKlattTrack } from "../src/tts-frontend.js";
 
 describe("tts frontend declarative prosody migration", () => {
-  it("does not invoke imperative F0 contour generator in track synthesis", () => {
-    const spy = vi.spyOn(frontendRules, "rule_GenerateF0Contour");
-    textToKlattTrack("hello world.");
-    expect(spy).not.toHaveBeenCalled();
-    spy.mockRestore();
-  });
-
-  it("does not invoke imperative K-context mutator in track synthesis", () => {
-    const spy = vi.spyOn(frontendRules, "rule_K_Context");
-    textToKlattTrack("key coo.");
-    expect(spy).not.toHaveBeenCalled();
-    spy.mockRestore();
+  it("removes imperative contour/context mutators from frontend rule exports", () => {
+    expect("rule_GenerateF0Contour" in frontendRules).toBe(false);
+    expect("rule_K_Context" in frontendRules).toBe(false);
   });
 
   it("retains question-rise behavior through declarative prosody", () => {

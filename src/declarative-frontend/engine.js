@@ -1,4 +1,4 @@
-import { PHONEME_TARGETS } from "../tts-frontend-rules.js";
+import { PHONEME_TARGETS, fillDefaultParams } from "../tts-frontend-rules.js";
 import { parseDslSpec } from "./parser.js";
 import { assertValidSpec } from "./validation.js";
 import { evaluateExpression } from "./expressions.js";
@@ -62,6 +62,42 @@ function ruleInsertStopReleases(sequence) {
     return null;
   }
 
+  function buildInsertedToken(phoneme, stress, weak = false) {
+    const target = PHONEME_TARGETS[phoneme] || PHONEME_TARGETS.SIL || {};
+    const token = {
+      phoneme,
+      stress,
+      status: TokenStatus.ACTIVE,
+      params: fillDefaultParams(target),
+      duration: target?.dur || 30,
+      inherentDuration: target?.dur,
+    };
+
+    if (weak) {
+      token.weak = true;
+      token.params.AF = Math.max(0, Number(token.params.AF || 0) - 10);
+      token.params.AH = Math.max(0, Number(token.params.AH || 0) - 10);
+      token.duration = Math.max(15, token.duration * 0.5);
+    }
+
+    for (const [key, value] of Object.entries(target)) {
+      if (key === "dur") continue;
+      if (key === "SW") {
+        token.inventorySW = value;
+        continue;
+      }
+      if (key === "type" && typeof value === "string") {
+        token.type = value;
+        continue;
+      }
+      if (typeof value === "boolean") {
+        token[key] = value;
+      }
+    }
+
+    return token;
+  }
+
   for (let i = 0; i < sequence.length; i += 1) {
     const current = sequence[i];
     nextSequence.push(current);
@@ -84,37 +120,19 @@ function ruleInsertStopReleases(sequence) {
     }
 
     if (addRelease) {
-      nextSequence.push({
-        phoneme: releasePhoneme,
-        stress: current.stress,
-        status: TokenStatus.ACTIVE,
-      });
+      nextSequence.push(buildInsertedToken(releasePhoneme, current.stress));
       const aspiration = aspirationMap[releasePhoneme];
       if (aspiration) {
-        nextSequence.push({
-          phoneme: aspiration,
-          stress: current.stress,
-          status: TokenStatus.ACTIVE,
-        });
+        nextSequence.push(buildInsertedToken(aspiration, current.stress));
       }
       continue;
     }
 
     if (next?.phoneme === "SIL") {
-      nextSequence.push({
-        phoneme: releasePhoneme,
-        stress: current.stress,
-        weak: true,
-        status: TokenStatus.ACTIVE,
-      });
+      nextSequence.push(buildInsertedToken(releasePhoneme, current.stress, true));
       const aspiration = aspirationMap[releasePhoneme];
       if (aspiration) {
-        nextSequence.push({
-          phoneme: aspiration,
-          stress: current.stress,
-          weak: true,
-          status: TokenStatus.ACTIVE,
-        });
+        nextSequence.push(buildInsertedToken(aspiration, current.stress, true));
       }
     }
   }
@@ -436,6 +454,40 @@ function buildNavigationFunctions(sequence, runtime = null, options = {}) {
     return -1;
   };
 
+  const isPhonePhraseBoundary = (token) =>
+    token?.phoneme === "SIL" && token?.punctuationSymbol != null;
+
+  const getPhraseWindow = (token) => {
+    const stream = getTokenStream(token);
+    const active = getActiveStreamTokens(stream);
+    const index = active.indexOf(token);
+    if (index < 0) return { index: -1, total: 0 };
+    if (stream !== "phone") {
+      return { index, total: active.length };
+    }
+
+    let start = 0;
+    for (let i = index - 1; i >= 0; i -= 1) {
+      if (isPhonePhraseBoundary(active[i])) {
+        start = i + 1;
+        break;
+      }
+    }
+
+    let end = active.length - 1;
+    for (let i = index; i < active.length; i += 1) {
+      if (isPhonePhraseBoundary(active[i])) {
+        end = i;
+        break;
+      }
+    }
+
+    return {
+      index: index - start,
+      total: Math.max(1, end - start + 1),
+    };
+  };
+
   return {
     prev: (token) => {
       const stream = getTokenStream(token);
@@ -541,6 +593,8 @@ function buildNavigationFunctions(sequence, runtime = null, options = {}) {
       if (index < 0 || index >= points.length) return null;
       return points[index];
     },
+    phrase_index: (token) => getPhraseWindow(token).index,
+    phrase_total: (token) => getPhraseWindow(token).total,
   };
 }
 

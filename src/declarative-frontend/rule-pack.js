@@ -191,7 +191,7 @@ export const QLATT_V11_SLICE_RULEPACK = {
         stream: "f0",
         at: "$at_sync(current.sync_right)",
         value:
-          "$max([((params.base_f0 - params.fall_rate_hz * (($total('phone') <= 1) ? 0 : ($index(current) / ($total('phone') - 1)))) * ($exists(current.params.F0_Factor) ? current.params.F0_Factor : 1)), params.base_f0 * 0.6])",
+          "$max([((params.base_f0 - params.fall_rate_hz * (($phrase_total(current) <= 1) ? 0 : ($phrase_index(current) / ($phrase_total(current) - 1)))) * ($exists(current.params.F0_Factor) ? current.params.F0_Factor : 1)), params.base_f0 * 0.6])",
         tag: "f0_declination",
       },
     },

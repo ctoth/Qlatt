@@ -116,4 +116,32 @@ describe("declarative frontend first migration slice", () => {
     const phones = out.map((t) => t.phoneme);
     expect(phones).toEqual(["P_CL", "AE", "SIL"]);
   });
+
+  it("materializes inserted release targets during structural phase", () => {
+    const sequence = [
+      { phoneme: "K_CL", stress: 1, word: "back", type: "stop_closure", status: 1 },
+      { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const rel = out.find((t) => t.phoneme === "K_REL");
+    const asp = out.find((t) => t.phoneme === "K_ASP");
+
+    expect(rel).toBeDefined();
+    expect(asp).toBeDefined();
+
+    expect(rel?.params).toBeDefined();
+    expect(rel?.type).toBe("stop_release");
+    expect(rel?.inventorySW).toBe(1);
+    expect(rel?.weak).toBe(true);
+    expect(rel?.duration).toBe(15);
+    expect(rel?.params?.AF).toBe(45);
+    expect(rel?.params?.AH).toBe(43);
+
+    expect(asp?.params).toBeDefined();
+    expect(asp?.type).toBe("stop_aspiration");
+    expect(asp?.weak).toBe(true);
+    expect(asp?.duration).toBe(24);
+    expect(asp?.params?.AH).toBe(43);
+  });
 });

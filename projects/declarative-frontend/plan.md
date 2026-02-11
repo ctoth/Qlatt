@@ -112,10 +112,20 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/rule-pack.js` adds `lock_stop_release_duration` so `duration` phase owns fixed burst/aspiration timing from `inherentDuration`.
 - Evidence: `src/tts-frontend.js` removed the post-duration imperative loop that rewrote stop release/aspiration durations from inventory.
 - Evidence: `test/declarative-frontend-rulepack-context.test.ts` adds coverage for release/aspiration duration lock; declarative regression run now passes (`19` files / `53` tests).
+- 2026-02-11: structural stop-release insertion now materializes full target payloads declaratively, allowing removal of runtime refill logic.
+- Evidence: `src/declarative-frontend/engine.js` `ruleInsertStopReleases` now emits inserted release/aspiration tokens with filled `params`, `duration`/`inherentDuration`, copied metadata flags, `inventorySW`, and weak-release attenuation.
+- Evidence: `src/tts-frontend.js` no longer contains the imperative "refill params/durations for releases" loop after structural phase.
+- Evidence: `test/declarative-frontend-slice.test.ts` now verifies inserted tokens are fully materialized during structural phase; declarative regression run now passes (`19` files / `54` tests).
+- 2026-02-11: removed obsolete imperative frontend mutators from shared rule module exports.
+- Evidence: `src/tts-frontend-rules.js` no longer exports `rule_K_Context` or `rule_GenerateF0Contour`; declarative rulepack is now the sole owner of those behaviors.
+- Evidence: `test/tts-frontend-declarative-prosody.test.ts` now enforces absence of those exports while keeping behavioral question-rise coverage; declarative regression run passes (`19` files / `53` tests).
+- 2026-02-11: declarative F0 declination updated to phrase-local reset behavior (boundary-aware) instead of global utterance index slope.
+- Evidence: `src/declarative-frontend/engine.js` adds generic navigation helpers `$phrase_index` and `$phrase_total` (boundary-aware for phone stream punctuation tokens).
+- Evidence: `src/declarative-frontend/rule-pack.js` `f0_targets` now computes declination from phrase-local position (`$phrase_index/$phrase_total`) rather than global `$index/$total`.
+- Evidence: `test/declarative-frontend-rulepack-prosody.test.ts` adds punctuation-reset coverage; declarative regression run passes (`19` files / `54` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
-- Limitation: current declarative declination rule uses global phone-index slope rather than full phrase-local reset + continuation-rise decomposition from the prior imperative implementation.
-- Limitation: release-token parameter refill after structural insertion still happens in imperative runtime code (`textToKlattTrack`) instead of declarative dataflow.
+- Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -186,7 +196,7 @@ Acceptance criteria:
 ### [G] Direct Runtime Cutover
 
 - [ ] `G1` `IN_PROGRESS`: Keep `textToKlattTrack()` public signature; replace internals with declarative engine call only.
-- [ ] `G2` `IN_PROGRESS`: Remove imperative post-processing loops in `src/tts-frontend.js`.
+- [x] `G2` `DONE`: Remove imperative post-processing loops in `src/tts-frontend.js`.
 - [ ] `G3` `NOT_STARTED`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
 
 Acceptance criteria:
@@ -196,7 +206,7 @@ Acceptance criteria:
 ### [H] Dead Code Removal and Source of Truth Cleanup
 
 - [x] `H1` `DONE`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
-- [ ] `H2` `NOT_STARTED`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.js`.
+- [x] `H2` `DONE`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.js`.
 - [ ] `H3` `NOT_STARTED`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
 
 Acceptance criteria:

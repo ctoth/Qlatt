@@ -8,7 +8,7 @@ describe("declarative frontend scalar resolution", () => {
         phone: {
           type: "base",
           scalars: {
-            energy: { resolution: "standard", min: 0, max: 10 },
+            energy: { min: 0, max: 10 },
           },
         },
       },
@@ -26,19 +26,23 @@ describe("declarative frontend scalar resolution", () => {
           apply: [{ field: "energy", op: "add", value: "-1", tag: "add" }],
         },
       },
-      phases: [
-        {
-          name: "duration",
-          rules: ["set_energy", "mul_energy", "add_energy"],
-          resolve_scalars: ["energy"],
-        },
-      ],
+      phases: [{ name: "duration", rules: ["set_energy", "mul_energy", "add_energy"] }],
     };
 
     const input = [{ id: "p1", stream: "phone", energy: 1, status: 1 }];
-    const out = runRuleEngine(input, spec).sequence;
+    const result = runRuleEngine(input, spec);
+    const out = result.sequence;
 
     expect(out[0].energy).toBe(7);
+    expect(
+      result.trace.some(
+        (event) =>
+          event.type === "scalars_resolved" &&
+          event.phase === "duration" &&
+          Array.isArray(event.fields) &&
+          event.fields.includes("energy")
+      )
+    ).toBe(true);
   });
 
   it("resolves klatt duration with incompressible floor and clamp", () => {

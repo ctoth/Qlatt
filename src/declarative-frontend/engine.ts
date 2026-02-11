@@ -499,6 +499,7 @@ function getScalarConfig(runtime, token, field) {
 function getScalarResolution(config) {
   const raw = typeof config?.resolution === "string" ? config.resolution.toLowerCase() : null;
   if (raw === "standard" || raw === "klatt") return raw;
+  if (config && typeof config === "object") return "standard";
   return null;
 }
 
@@ -533,6 +534,7 @@ function getOrCreateScalarState(runtime, token, field, currentValue) {
   if (state) return state;
 
   const config = getScalarConfig(runtime, token, field);
+  if (!config) return null;
   const resolution = getScalarResolution(config);
   if (!resolution) return null;
 
@@ -624,6 +626,13 @@ function resolveScalars(sequence, runtime, scalarFields) {
   return resolvedCount;
 }
 
+function resolvePhaseScalarFields(phase, runtime) {
+  if (Array.isArray(phase?.resolve_scalars) && phase.resolve_scalars.length > 0) {
+    return phase.resolve_scalars.filter((field) => typeof field === "string");
+  }
+  return runtime?.allScalarFields instanceof Set ? [...runtime.allScalarFields] : [];
+}
+
 function applyEffectToToken(effect, token, params, functions, runtime, extraContext = null) {
   if (!effect || typeof effect !== "object") return;
   const field = typeof effect.field === "string" ? effect.field : "";
@@ -663,23 +672,21 @@ function applyEffectToToken(effect, token, params, functions, runtime, extraCont
 
   if (runtime && fieldPath.length === 1) {
     const scalarField = fieldPath[0];
-    if (runtime.activeResolveScalars?.has(scalarField)) {
-      const state = getOrCreateScalarState(runtime, token, scalarField, current);
-      if (state) {
-        const order = runtime.scalarEffectOrder++;
-        state.effects.push({
-          field: scalarField,
-          op,
-          value,
-          tag: effect.tag ?? null,
-          rule: runtime.currentRuleName ?? null,
-          order,
-        });
-        const preview = previewScalarEffect(state, op, value);
-        state.preview = preview;
-        setField(preview);
-        return;
-      }
+    const state = getOrCreateScalarState(runtime, token, scalarField, current);
+    if (state) {
+      const order = runtime.scalarEffectOrder++;
+      state.effects.push({
+        field: scalarField,
+        op,
+        value,
+        tag: effect.tag ?? null,
+        rule: runtime.currentRuleName ?? null,
+        order,
+      });
+      const preview = previewScalarEffect(state, op, value);
+      state.preview = preview;
+      setField(preview);
+      return;
     }
   }
 
@@ -1486,6 +1493,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
         : {},
     ])
   );
+  const allScalarFields = new Set(
+    [...scalarSpecsByStream.values()].flatMap((scalars) =>
+      scalars && typeof scalars === "object" ? Object.keys(scalars) : []
+    )
+  );
   const usedTokenIds = new Set(
     current
       .map((token) => token?.id)
@@ -1503,9 +1515,9 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     pointCounters: new Map(),
     insertCounters: new Map(),
     scalarSpecsByStream,
+    allScalarFields,
     scalarStates: new Map(),
     scalarEffectOrder: 0,
-    activeResolveScalars: new Set(),
     currentRuleName: null,
     usedTokenIds,
     markTimes: new Map(),
@@ -1526,9 +1538,7 @@ export function runRuleEngine(sequence, specSource, options = {}) {
 
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
-    runtime.activeResolveScalars = new Set(
-      Array.isArray(phase.resolve_scalars) ? phase.resolve_scalars : []
-    );
+    const phaseScalarFields = resolvePhaseScalarFields(phase, runtime);
     trace.push({ type: "phase_start", phase: phase.name });
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
@@ -1543,14 +1553,18 @@ export function runRuleEngine(sequence, specSource, options = {}) {
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
       runtime.currentRuleName = null;
     }
-    if (Array.isArray(phase.resolve_scalars) && phase.resolve_scalars.length > 0) {
-      const resolved = resolveScalars(current, runtime, phase.resolve_scalars);
-      trace.push({
-        type: "scalars_resolved",
-        phase: phase.name,
-        fields: phase.resolve_scalars,
-        count: resolved,
-      });
+    if (phaseScalarFields.length > 0) {
+      const resolved = resolveScalars(current, runtime, phaseScalarFields);
+      const hadExplicitResolveList =
+        Array.isArray(phase.resolve_scalars) && phase.resolve_scalars.length > 0;
+      if (resolved > 0 || hadExplicitResolveList) {
+        trace.push({
+          type: "scalars_resolved",
+          phase: phase.name,
+          fields: phaseScalarFields,
+          count: resolved,
+        });
+      }
     }
     if (phase.compute_times) {
       computeSyncTimes(current, runtime);
@@ -1564,7 +1578,6 @@ export function runRuleEngine(sequence, specSource, options = {}) {
       runtime.finalized = true;
     }
     assertActiveBaseCoverage(current, runtime);
-    runtime.activeResolveScalars = new Set();
     trace.push({ type: "phase_end", phase: phase.name });
   }
 

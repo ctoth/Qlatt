@@ -182,12 +182,15 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: SyncAxis identity moved to runtime-internal mark entities with single-shape token fields (no dual `*_id` token fields).
 - Evidence: `src/declarative-frontend/engine.ts` now resolves mark identity through `runtime.axis` for splice/finalize/invariant logic while keeping tokens canonical on `sync_left/sync_right/anchor_left/anchor_right`.
 - Evidence: `test/declarative-frontend-axis-identity.test.ts` added to assert mark-ID-based runtime behavior and absence of dual token fields; full suite passes via `npx vitest run` (`34` files / `118` tests).
+- 2026-02-11: scalar execution unified to phase-boundary resolution for all declared stream scalars (no mixed immediate/deferred declared-scalar path).
+- Evidence: `src/declarative-frontend/engine.ts` now defaults declared scalars without explicit `resolution` to `standard`, accumulates declared scalar effects uniformly during rule execution, and resolves declared scalar fields at each phase boundary (explicit `resolve_scalars` still supported as override).
+- Evidence: `test/declarative-frontend-scalar-resolution.test.ts` now validates automatic phase-boundary resolve for a declared scalar without explicit `resolution`/`resolve_scalars`; full suite passes via `npx vitest run` (`34` files / `118` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
-- Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
+- Limitation: scalar unification now applies to declared top-level scalar fields; nested dotted fields (e.g. `params.F2`) remain immediate unless promoted to declared scalar fields in stream metadata.
 - Limitation: sync-axis order keys now use sentinel/rank objects for bootstrap, but the runtime still treats marks as inline values on tokens (not full `SyncMark` entities with stable IDs/time cells), so full Part 1.1/1.2 object-model parity remains incomplete.
 
 ## 3) Master Checklist (Spec-to-Code Execution)

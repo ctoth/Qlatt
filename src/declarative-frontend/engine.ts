@@ -18,23 +18,27 @@ import {
   toNumericOrder,
 } from "./axis";
 
-function cloneSequence(sequence) {
+type TokenLike = Record<string, any>;
+type RuntimeLike = Record<string, any>;
+
+function cloneSequence(sequence: TokenLike[]): TokenLike[] {
   return sequence.map((token) => ({
     ...token,
     status: normalizeTokenStatus(token?.status),
   }));
 }
 
-function getIncompressibleMin(token, inherent) {
+function getIncompressibleMin(token: TokenLike | null | undefined, inherent: unknown): number {
   if (!Number.isFinite(inherent) || inherent <= 0) return 0;
   const ratio = token?.type === "vowel" ? 0.42 : 0.6;
   return inherent * ratio;
 }
 
-function materializeInventoryTarget(phoneme) {
+function materializeInventoryTarget(phoneme: unknown): TokenLike {
   const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
-  const target = PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {};
-  const payload = {
+  const inventory = PHONEME_TARGETS as Record<string, TokenLike>;
+  const target = inventory[key] || inventory.SIL || {};
+  const payload: TokenLike = {
     phoneme: key,
     params: fillDefaultParams(target),
     duration: target?.dur || 30,
@@ -59,11 +63,11 @@ function materializeInventoryTarget(phoneme) {
   return payload;
 }
 
-function getTokenStream(token) {
+function getTokenStream(token: TokenLike | null | undefined): string {
   return token?.stream ?? "phone";
 }
 
-function initializeBaseStreamSyncMarks(sequence, baseStreams) {
+function initializeBaseStreamSyncMarks(sequence: TokenLike[], baseStreams: Set<string>): void {
   if (!(baseStreams instanceof Set) || baseStreams.size === 0) return;
 
   for (const stream of baseStreams) {
@@ -85,7 +89,7 @@ function initializeBaseStreamSyncMarks(sequence, baseStreams) {
   }
 }
 
-function comparePointTokenOrder(left, right) {
+function comparePointTokenOrder(left: TokenLike, right: TokenLike): number {
   const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
   const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
   if (leftTime != null && rightTime != null && leftTime !== rightTime) {
@@ -101,7 +105,7 @@ function comparePointTokenOrder(left, right) {
   return compareOrderValue(left?.id ?? "", right?.id ?? "");
 }
 
-function getTokenBounds(token) {
+function getTokenBounds(token: TokenLike | null | undefined): { left: unknown; right: unknown } | null {
   if (token && token.sync_left != null && token.sync_right != null) {
     return { left: token.sync_left, right: token.sync_right };
   }
@@ -111,7 +115,7 @@ function getTokenBounds(token) {
   return null;
 }
 
-function canonicalizeTokenMark(token, axis, field) {
+function canonicalizeTokenMark(token: TokenLike, axis: any, field: string): string | null {
   const raw = token?.[field];
   if (raw == null) return null;
   const id = axis.ensureMark(raw);
@@ -128,7 +132,7 @@ function canonicalizeTokenMark(token, axis, field) {
   return id;
 }
 
-function canonicalizeSequenceAxisRefs(sequence, axis) {
+function canonicalizeSequenceAxisRefs(sequence: TokenLike[], axis: any): void {
   for (const token of sequence) {
     canonicalizeTokenMark(token, axis, "sync_left");
     canonicalizeTokenMark(token, axis, "sync_right");
@@ -137,26 +141,26 @@ function canonicalizeSequenceAxisRefs(sequence, axis) {
   }
 }
 
-function resolveMarkId(runtime, markLike) {
+function resolveMarkId(runtime: RuntimeLike | null | undefined, markLike: unknown): string | null {
   if (!runtime?.axis || markLike == null) return null;
   if (typeof markLike === "string" && runtime.axis.getMarkById(markLike)) return markLike;
   return runtime.axis.ensureMark(markLike);
 }
 
-function getOrderForMarkId(runtime, markId) {
+function getOrderForMarkId(runtime: RuntimeLike | null | undefined, markId: unknown): unknown {
   if (!runtime?.axis || typeof markId !== "string") return null;
   const mark = runtime.axis.getMarkById(markId);
   return mark ? mark.order : null;
 }
 
-function compareMarkIds(runtime, leftId, rightId) {
+function compareMarkIds(runtime: RuntimeLike | null | undefined, leftId: unknown, rightId: unknown): number {
   if (leftId === rightId) return 0;
   if (!runtime?.axis) return compareOrderValue(leftId, rightId);
   return runtime.axis.compareMarkIds(leftId, rightId);
 }
 
-function buildRuntimeMarkProps(runtime, mapping) {
-  const props = {};
+function buildRuntimeMarkProps(runtime: RuntimeLike | null | undefined, mapping: unknown): TokenLike {
+  const props: TokenLike = {};
   const entries =
     mapping && typeof mapping === "object" ? Object.entries(mapping) : [];
   for (const [field, valueOrId] of entries) {
@@ -167,14 +171,14 @@ function buildRuntimeMarkProps(runtime, mapping) {
   return props;
 }
 
-function clampRatio(value) {
+function clampRatio(value: unknown): number {
   if (!Number.isFinite(value)) return 0;
   if (value <= 0) return 0;
   if (value >= 1) return 1;
   return Number(value);
 }
 
-function normalizeAnchor(anchor, fallbackToken = null) {
+function normalizeAnchor(anchor: unknown, fallbackToken: TokenLike | null = null): TokenLike {
   const source =
     anchor && typeof anchor === "object" && !Array.isArray(anchor) ? anchor : {};
 
@@ -209,7 +213,7 @@ function normalizeAnchor(anchor, fallbackToken = null) {
   };
 }
 
-function normalizeAssociationEntries(raw) {
+function normalizeAssociationEntries(raw: unknown): Array<{ to: string; status: number }> {
   const source = Array.isArray(raw) ? raw : raw instanceof Set ? [...raw] : [];
   const entries = [];
   for (const item of source) {
@@ -224,7 +228,7 @@ function normalizeAssociationEntries(raw) {
   return entries;
 }
 
-function getAssociationEntries(token, assocName) {
+function getAssociationEntries(token: TokenLike, assocName: string): Array<{ to: string; status: number }> {
   if (!token || typeof assocName !== "string" || assocName.length === 0) return [];
   if (!token.associations || typeof token.associations !== "object") {
     token.associations = {};
@@ -234,7 +238,12 @@ function getAssociationEntries(token, assocName) {
   return entries;
 }
 
-function upsertAssociationEdge(fromToken, assocName, toId, status) {
+function upsertAssociationEdge(
+  fromToken: TokenLike,
+  assocName: string,
+  toId: string,
+  status: unknown
+): void {
   if (!fromToken || typeof toId !== "string") return;
   const entries = getAssociationEntries(fromToken, assocName);
   const edge = entries.find((entry) => entry.to === toId);
@@ -245,7 +254,11 @@ function upsertAssociationEdge(fromToken, assocName, toId, status) {
   edge.status = joinTokenStatus(edge.status, status);
 }
 
-function buildNavigationFunctions(sequence, runtime = null, options = {}) {
+function buildNavigationFunctions(
+  sequence: TokenLike[],
+  runtime: RuntimeLike | null = null,
+  options: RuntimeLike = {}
+) {
   const currentToken = options.currentToken ?? null;
   const pointCursorByStream =
     options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
@@ -451,7 +464,12 @@ function buildNavigationFunctions(sequence, runtime = null, options = {}) {
   };
 }
 
-function evaluateSelectWhere(whereExpr, token, params, functions) {
+function evaluateSelectWhere(
+  whereExpr: unknown,
+  token: TokenLike,
+  params: RuntimeLike,
+  functions: RuntimeLike
+): boolean {
   if (!whereExpr || whereExpr === "true") return true;
   const result = evaluateExpression(
     whereExpr,
@@ -461,13 +479,23 @@ function evaluateSelectWhere(whereExpr, token, params, functions) {
   return Boolean(result);
 }
 
-function evaluateRuleConstraint(constraintExpr, context, functions) {
+function evaluateRuleConstraint(
+  constraintExpr: unknown,
+  context: RuntimeLike,
+  functions: RuntimeLike
+): boolean {
   if (!constraintExpr || constraintExpr === "true") return true;
   const result = evaluateExpression(constraintExpr, context, functions);
   return Boolean(result);
 }
 
-function evaluateValueExpression(expr, token, params, functions, extraContext = null) {
+function evaluateValueExpression(
+  expr: unknown,
+  token: TokenLike,
+  params: RuntimeLike,
+  functions: RuntimeLike,
+  extraContext: RuntimeLike | null = null
+): number {
   if (typeof expr === "number") return expr;
   if (typeof expr !== "string") {
     throw new Error(`E_EXPR_VALUE_TYPE: unsupported value expression type: ${typeof expr}`);
@@ -488,11 +516,11 @@ function evaluateValueExpression(expr, token, params, functions, extraContext = 
   return Number(value);
 }
 
-function toFiniteOrNull(value) {
+function toFiniteOrNull(value: unknown): number | null {
   return Number.isFinite(value) ? Number(value) : null;
 }
 
-function getScalarConfig(runtime, token, field) {
+function getScalarConfig(runtime: RuntimeLike, token: TokenLike, field: string): TokenLike | null {
   if (!runtime || !token || typeof field !== "string") return null;
   const stream = getTokenStream(token);
   const byStream = runtime.scalarSpecsByStream?.get(stream);
@@ -501,14 +529,14 @@ function getScalarConfig(runtime, token, field) {
   return config && typeof config === "object" ? config : null;
 }
 
-function getScalarResolution(config) {
+function getScalarResolution(config: TokenLike | null): "standard" | "klatt" | null {
   const raw = typeof config?.resolution === "string" ? config.resolution.toLowerCase() : null;
   if (raw === "standard" || raw === "klatt") return raw;
   if (config && typeof config === "object") return "standard";
   return null;
 }
 
-function computeKlattFloor(token, field, config, baseValue) {
+function computeKlattFloor(token: TokenLike, field: string, config: TokenLike, baseValue: number): number {
   const explicitFloor = toFiniteOrNull(config?.floor);
   if (explicitFloor != null) return explicitFloor;
 
@@ -526,7 +554,12 @@ function computeKlattFloor(token, field, config, baseValue) {
   return minVal != null ? minVal : 0;
 }
 
-function getOrCreateScalarState(runtime, token, field, currentValue) {
+function getOrCreateScalarState(
+  runtime: RuntimeLike,
+  token: TokenLike,
+  field: string,
+  currentValue: unknown
+): TokenLike | null {
   if (!runtime || !token || typeof field !== "string") return null;
 
   let perToken = runtime.scalarStates.get(token);
@@ -559,7 +592,7 @@ function getOrCreateScalarState(runtime, token, field, currentValue) {
   return state;
 }
 
-function previewScalarEffect(state, op, value) {
+function previewScalarEffect(state: TokenLike, op: string, value: number): number {
   const current = Number.isFinite(state.preview) ? state.preview : state.base;
   const maybeRound = (n) => (state.round ? Math.round(n) : n);
   if (state.resolution === "klatt") {
@@ -576,7 +609,7 @@ function previewScalarEffect(state, op, value) {
   return maybeRound(current);
 }
 
-function resolveScalarState(state) {
+function resolveScalarState(state: TokenLike): number {
   const maybeRound = (n) => (state.round ? Math.round(n) : n);
   let value = Number.isFinite(state.base) ? Number(state.base) : 0;
   const orderedEffects = state.effects
@@ -609,7 +642,7 @@ function resolveScalarState(state) {
   return maybeRound(value);
 }
 
-function resolveScalars(sequence, runtime, scalarFields) {
+function resolveScalars(sequence: TokenLike[], runtime: RuntimeLike, scalarFields: unknown): number {
   const fields = Array.isArray(scalarFields) ? scalarFields.filter((field) => typeof field === "string") : [];
   if (fields.length === 0) return 0;
 
@@ -631,14 +664,21 @@ function resolveScalars(sequence, runtime, scalarFields) {
   return resolvedCount;
 }
 
-function resolvePhaseScalarFields(phase, runtime) {
+function resolvePhaseScalarFields(phase: TokenLike, runtime: RuntimeLike): string[] {
   if (Array.isArray(phase?.resolve_scalars) && phase.resolve_scalars.length > 0) {
     return phase.resolve_scalars.filter((field) => typeof field === "string");
   }
   return runtime?.allScalarFields instanceof Set ? [...runtime.allScalarFields] : [];
 }
 
-function applyEffectToToken(effect, token, params, functions, runtime, extraContext = null) {
+function applyEffectToToken(
+  effect: TokenLike,
+  token: TokenLike,
+  params: RuntimeLike,
+  functions: RuntimeLike,
+  runtime: RuntimeLike,
+  extraContext: RuntimeLike | null = null
+): void {
   if (!effect || typeof effect !== "object") return;
   const field = typeof effect.field === "string" ? effect.field : "";
   if (!field) return;
@@ -709,13 +749,13 @@ function applyEffectToToken(effect, token, params, functions, runtime, extraCont
 }
 
 function applyEffectsToTargets(
-  rule,
-  resolveTarget,
-  params,
-  functions,
-  runtime,
+  rule: TokenLike,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  params: RuntimeLike,
+  functions: RuntimeLike,
+  runtime: RuntimeLike,
   defaultTargetName = "current",
-  extraContext = null
+  extraContext: RuntimeLike | null = null
 ) {
   const effects = Array.isArray(rule.apply) ? rule.apply : [];
   for (const effect of effects) {
@@ -728,7 +768,11 @@ function applyEffectsToTargets(
   }
 }
 
-function applyAssociationSpecs(specs, resolveTarget, status) {
+function applyAssociationSpecs(
+  specs: unknown,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  status: unknown
+): void {
   if (!Array.isArray(specs)) return;
   for (const spec of specs) {
     if (!spec || typeof spec !== "object") continue;
@@ -745,14 +789,14 @@ function applyAssociationSpecs(specs, resolveTarget, status) {
   }
 }
 
-function evaluateActionExpression(expr, context, functions) {
+function evaluateActionExpression(expr: unknown, context: RuntimeLike, functions: RuntimeLike): unknown {
   if (typeof expr === "string") {
     return evaluateExpression(expr, context, functions);
   }
   return expr;
 }
 
-function deepEvaluateTemplate(value, context, functions) {
+function deepEvaluateTemplate(value: unknown, context: RuntimeLike, functions: RuntimeLike): unknown {
   if (typeof value === "string") {
     return evaluateExpression(value, context, functions);
   }
@@ -770,7 +814,7 @@ function deepEvaluateTemplate(value, context, functions) {
   return value;
 }
 
-function nextInsertedTokenId(runtime, stream) {
+function nextInsertedTokenId(runtime: RuntimeLike, stream: unknown): string {
   const key = typeof stream === "string" && stream.length > 0 ? stream : "token";
   if (!runtime.insertCounters) runtime.insertCounters = new Map();
   const existing = runtime.insertCounters.get(key) ?? 0;
@@ -785,7 +829,10 @@ function nextInsertedTokenId(runtime, stream) {
   return candidate;
 }
 
-function ensureTokenSyncMarkRefs(token, runtime) {
+function ensureTokenSyncMarkRefs(
+  token: TokenLike,
+  runtime: RuntimeLike
+): { leftId: string | null; rightId: string | null } {
   if (!token) return { leftId: null, rightId: null };
   const leftId = resolveMarkId(runtime, token.sync_left);
   const rightId = resolveMarkId(runtime, token.sync_right);
@@ -798,7 +845,7 @@ function ensureTokenSyncMarkRefs(token, runtime) {
   return { leftId: leftId ?? null, rightId: rightId ?? null };
 }
 
-function withinClosedRange(token, leftId, rightId, runtime) {
+function withinClosedRange(token: TokenLike, leftId: string, rightId: string, runtime: RuntimeLike): boolean {
   const { leftId: tokenLeft, rightId: tokenRight } = ensureTokenSyncMarkRefs(token, runtime);
   if (!tokenLeft || !tokenRight) return false;
   return (
@@ -807,7 +854,14 @@ function withinClosedRange(token, leftId, rightId, runtime) {
   );
 }
 
-function buildSpliceInsertions(insertSpecs, stream, bounds, context, runtime, functions) {
+function buildSpliceInsertions(
+  insertSpecs: unknown,
+  stream: string,
+  bounds: { leftId: string; rightId: string },
+  context: RuntimeLike,
+  runtime: RuntimeLike,
+  functions: RuntimeLike
+): TokenLike[] {
   const specs = Array.isArray(insertSpecs) ? insertSpecs : [];
   if (specs.length === 0) return [];
   const segments = runtime.axis.splitMarkRange(bounds.leftId, bounds.rightId, specs.length);
@@ -833,7 +887,13 @@ function buildSpliceInsertions(insertSpecs, stream, bounds, context, runtime, fu
   });
 }
 
-function findInsertionIndexForRange(sequence, stream, rightId, suppressedSet, runtime) {
+function findInsertionIndexForRange(
+  sequence: TokenLike[],
+  stream: string,
+  rightId: string,
+  suppressedSet: Set<TokenLike>,
+  runtime: RuntimeLike
+): number {
   let minIndex = Number.POSITIVE_INFINITY;
   for (const token of suppressedSet) {
     const idx = sequence.indexOf(token);
@@ -851,7 +911,13 @@ function findInsertionIndexForRange(sequence, stream, rightId, suppressedSet, ru
   return sequence.length;
 }
 
-function findInsertionIndexForBoundary(sequence, stream, boundaryId, side, runtime) {
+function findInsertionIndexForBoundary(
+  sequence: TokenLike[],
+  stream: string,
+  boundaryId: string,
+  side: "before" | "after",
+  runtime: RuntimeLike
+): number {
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
     if (getTokenStream(token) !== stream) continue;
@@ -871,14 +937,14 @@ function findInsertionIndexForBoundary(sequence, stream, boundaryId, side, runti
 }
 
 function applySpliceSpec(
-  spliceSpec,
-  resolveTarget,
-  params,
-  sequence,
-  runtime,
-  functions,
+  spliceSpec: TokenLike,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  params: RuntimeLike,
+  sequence: TokenLike[],
+  runtime: RuntimeLike,
+  functions: RuntimeLike,
   defaultTargetName = "current",
-  extraContext = null
+  extraContext: RuntimeLike | null = null
 ) {
   if (!spliceSpec || typeof spliceSpec !== "object") return;
   const targetName = spliceSpec.target ?? defaultTargetName;
@@ -970,7 +1036,7 @@ function applySpliceSpec(
   throw new Error(`E_SPLICE_TYPE_UNSUPPORTED: unsupported splice type '${spliceSpec.type}' in slice engine`);
 }
 
-function nextPointId(runtime, stream) {
+function nextPointId(runtime: RuntimeLike, stream: string): string {
   const key = typeof stream === "string" && stream.length > 0 ? stream : "point";
   const existing = runtime.pointCounters.get(key) ?? 0;
   let counter = existing;
@@ -984,7 +1050,12 @@ function nextPointId(runtime, stream) {
   return candidate;
 }
 
-function evaluateAnchorExpression(expr, token, params, functions) {
+function evaluateAnchorExpression(
+  expr: unknown,
+  token: TokenLike,
+  params: RuntimeLike,
+  functions: RuntimeLike
+): TokenLike {
   if (typeof expr === "string") {
     const evaluated = evaluateExpression(
       expr,
@@ -1000,11 +1071,11 @@ function evaluateAnchorExpression(expr, token, params, functions) {
 }
 
 function applyInsertPointSpec(
-  pointSpec,
-  resolveTarget,
-  params,
-  sequence,
-  runtime,
+  pointSpec: TokenLike,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  params: RuntimeLike,
+  sequence: TokenLike[],
+  runtime: RuntimeLike,
   defaultTargetName = "current"
 ) {
   if (!pointSpec || typeof pointSpec !== "object") return;
@@ -1038,7 +1109,7 @@ function applyInsertPointSpec(
       ? null
       : evaluateValueExpression(pointSpec.value, target, params, pointFunctions);
 
-  const pointToken = {
+  const pointToken: TokenLike = {
     id: nextPointId(runtime, stream),
     stream,
     status: TokenStatus.ACTIVE,
@@ -1055,7 +1126,7 @@ function applyInsertPointSpec(
   sequence.push(pointToken);
 }
 
-function applySelectRule(rule, sequence, runtime) {
+function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
   const select = rule.select ?? {};
   const stream = select.stream;
   const where = select.where ?? "true";
@@ -1136,8 +1207,14 @@ function applySelectRule(rule, sequence, runtime) {
   return sequence;
 }
 
-function matchPatternFrom(activeTokens, startIndex, pattern, params, functions) {
-  const captures = {};
+function matchPatternFrom(
+  activeTokens: TokenLike[],
+  startIndex: number,
+  pattern: TokenLike,
+  params: RuntimeLike,
+  functions: RuntimeLike
+) {
+  const captures: TokenLike = {};
   let cursor = startIndex;
   for (const step of pattern.sequence) {
     const token = activeTokens[cursor];

@@ -221,6 +221,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: validator typing cleanup landed and core gate now validates parser+validation layers together.
 - Evidence: `src/declarative-frontend/validation.ts` now has explicit diagnostic/spec signatures and strict-safe narrowing for scalar/phase ordering checks.
 - Evidence: `tsconfig.core.json` now includes `src/declarative-frontend/validation.ts` and `test/declarative-frontend-schema.test.ts`; `npm run typecheck:core` remains green and full regression remains green (`36` files / `122` tests).
+- 2026-02-11: first engine typing sweep landed for declarative runtime helper layer (sync-axis/navigation/scalar/splice setup paths).
+- Evidence: `src/declarative-frontend/engine.ts` top-level helper functions now have explicit token/runtime parameter typing (`TokenLike`/`RuntimeLike`) and typed return contracts for mark/anchor/splice helper paths, removing a large block of implicit-any signatures.
+- Evidence: behavior remains stable via `npx vitest run` (`36` files / `122` tests), and staged core gate remains green via `npm run typecheck:core`.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

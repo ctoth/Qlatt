@@ -2,16 +2,25 @@ import { parseDslSpec } from "./parser";
 import { runRuleEngine } from "./engine";
 import { validateDslSpec } from "./validation";
 
-function cloneJson(value) {
-  return JSON.parse(JSON.stringify(value));
+type TokenLike = Record<string, any>;
+
+type PhaseSnapshotsModel = {
+  spec: any;
+  phaseNames: string[];
+  snapshots: Map<string, TokenLike[]>;
+  finalResult: any;
+};
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function getByPath(obj, path) {
+function getByPath(obj: TokenLike | null | undefined, path: string): any {
   if (!obj || typeof path !== "string" || path.length === 0) return undefined;
-  return path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), obj);
+  return path.split(".").reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), obj);
 }
 
-function selectToken(sequence, selector) {
+function selectToken(sequence: TokenLike[], selector: string): TokenLike | null {
   if (!Array.isArray(sequence) || typeof selector !== "string" || selector.length === 0) {
     return null;
   }
@@ -25,24 +34,28 @@ function selectToken(sequence, selector) {
   return sequence.find((token) => token?.id === selector) ?? null;
 }
 
-function tokenKey(token, index) {
+function tokenKey(token: TokenLike, index: number): string {
   if (typeof token?.id === "string" && token.id.length > 0) return token.id;
-  return `${token?.stream ?? "token"}#${index}`;
+  return `${String(token?.stream ?? "token")}#${index}`;
 }
 
-function normalizePhaseName(name, phaseNames) {
+function normalizePhaseName(name: string, phaseNames: string[]): string | null {
   if (name === "init") return "init";
   if (name === "final") return "final";
   if (phaseNames.includes(name)) return name;
   return null;
 }
 
-export function buildPhaseSnapshots(sequence, specSource, options = {}) {
+export function buildPhaseSnapshots(
+  sequence: TokenLike[],
+  specSource: unknown,
+  options: { parameters?: Record<string, unknown> } = {}
+): PhaseSnapshotsModel {
   const spec = parseDslSpec(specSource);
-  const phaseNames = spec.phases.map((phase) => phase.name);
-  const snapshots = new Map();
+  const phaseNames = spec.phases.map((phase: any) => phase.name as string);
+  const snapshots = new Map<string, TokenLike[]>();
   snapshots.set("init", cloneJson(sequence));
-  let finalResult = {
+  let finalResult: any = {
     sequence: cloneJson(sequence),
     diagnostics: validateDslSpec(spec),
     trace: [],
@@ -72,7 +85,12 @@ export function buildPhaseSnapshots(sequence, specSource, options = {}) {
   };
 }
 
-export function explainField(snapshotsModel, selector, field, phase = "final") {
+export function explainField(
+  snapshotsModel: PhaseSnapshotsModel,
+  selector: string,
+  field: string,
+  phase: string = "final"
+) {
   const normalizedPhase = normalizePhaseName(phase, snapshotsModel.phaseNames);
   if (!normalizedPhase) {
     throw new Error(`Unknown phase '${phase}'`);
@@ -85,8 +103,8 @@ export function explainField(snapshotsModel, selector, field, phase = "final") {
   const tokenId = token?.id ?? null;
   const currentValue = getByPath(token, field);
 
-  const changes = [];
-  let previousValue = undefined;
+  const changes: Array<{ phase: string; before: any; after: any }> = [];
+  let previousValue: any = undefined;
   const phasesToScan = ["init", ...snapshotsModel.phaseNames];
   for (const phaseName of phasesToScan) {
     const seq = snapshotsModel.snapshots.get(phaseName) ?? [];
@@ -119,27 +137,35 @@ export function explainField(snapshotsModel, selector, field, phase = "final") {
   };
 }
 
-export function whyNotRule(sequence, specSource, selector, ruleName, phase = null) {
+export function whyNotRule(
+  sequence: TokenLike[],
+  specSource: unknown,
+  selector: string,
+  ruleName: string,
+  phase: string | null = null
+) {
   const spec = parseDslSpec(specSource);
   const result = runRuleEngine(sequence, spec);
   const token = selectToken(result.sequence, selector);
   const tokenId = token?.id ?? null;
   const containingPhase =
     phase ??
-    spec.phases.find((candidate) => Array.isArray(candidate.rules) && candidate.rules.includes(ruleName))
-      ?.name ??
+    spec.phases.find(
+      (candidate: any) => Array.isArray(candidate.rules) && candidate.rules.includes(ruleName)
+    )?.name ??
     null;
 
   const matches = result.trace.filter(
-    (event) =>
+    (event: any) =>
       event.type === "match" &&
       event.rule === ruleName &&
       (containingPhase == null || event.phase === containingPhase)
   );
-  const fired = matches.some((event) => {
+  const fired = matches.some((event: any) => {
     if (!tokenId) return false;
     if (event.token === tokenId) return true;
-    const captures = event.captures && typeof event.captures === "object" ? Object.values(event.captures) : [];
+    const captures =
+      event.captures && typeof event.captures === "object" ? Object.values(event.captures) : [];
     return captures.includes(tokenId);
   });
 
@@ -154,7 +180,12 @@ export function whyNotRule(sequence, specSource, selector, ruleName, phase = nul
   };
 }
 
-export function diffPhaseState(snapshotsModel, fromPhase, toPhase, stream = null) {
+export function diffPhaseState(
+  snapshotsModel: PhaseSnapshotsModel,
+  fromPhase: string,
+  toPhase: string,
+  stream: string | null = null
+) {
   const fromName = normalizePhaseName(fromPhase, snapshotsModel.phaseNames);
   const toName = normalizePhaseName(toPhase, snapshotsModel.phaseNames);
   if (!fromName) throw new Error(`Unknown from-phase '${fromPhase}'`);
@@ -167,12 +198,12 @@ export function diffPhaseState(snapshotsModel, fromPhase, toPhase, stream = null
     (token) => !stream || token?.stream === stream
   );
 
-  const fromMap = new Map(fromSeq.map((token, index) => [tokenKey(token, index), token]));
-  const toMap = new Map(toSeq.map((token, index) => [tokenKey(token, index), token]));
+  const fromMap = new Map<string, TokenLike>(fromSeq.map((token, index) => [tokenKey(token, index), token]));
+  const toMap = new Map<string, TokenLike>(toSeq.map((token, index) => [tokenKey(token, index), token]));
 
-  const added = [];
-  const removed = [];
-  const modified = [];
+  const added: Array<{ key: string; token: TokenLike }> = [];
+  const removed: Array<{ key: string; token: TokenLike }> = [];
+  const modified: Array<{ key: string; before: TokenLike | undefined; after: TokenLike }> = [];
 
   for (const [key, token] of toMap.entries()) {
     if (!fromMap.has(key)) {

@@ -204,6 +204,10 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: TypeScript toolchain activation and project-scope typecheck baseline established.
 - Evidence: `package.json`/`package-lock.json` include `typescript` as dev dependency, and `tsconfig.json` `rootDir` is now `"."` so scripts/tests/config are included consistently.
 - Evidence: `npx tsc --noEmit` now runs project-wide and reports current strict-type backlog (primarily `scripts/*.ts`, `src/declarative-frontend/*.ts`, and `test/test-harness.ts`).
+- 2026-02-11: targeted strict typing cleanup landed for sync-axis/util tooling surfaces and axis identity tests.
+- Evidence: `src/declarative-frontend/axis.ts` now has explicit `OrderObject`/`SyncAxis` types with finite-rank comparison narrowing fixed in `compareOrderValue`.
+- Evidence: `test/declarative-frontend-axis-identity.test.ts` and `test/declarative-frontend-sync-axis.test.ts` now use explicit token typing and runtime axis guards, eliminating local strict `implicit any`/nullable-axis type noise.
+- Evidence: focused regression remains green via `npx vitest run test/declarative-frontend-axis-identity.test.ts test/declarative-frontend-sync-axis.test.ts test/declarative-frontend-cli.test.ts` (`3` files / `7` tests), and filtered strict check for axis/tooling/test files is clean.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps; staged TS check gates are not yet split by target surface.

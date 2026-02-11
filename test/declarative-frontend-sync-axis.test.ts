@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 
+type TokenLike = {
+  id?: string;
+  name?: string;
+  sync_left?: { kind?: string; rank?: string } | null;
+  sync_right?: { kind?: string; rank?: string } | null;
+};
+
 describe("declarative frontend sync axis bootstrap", () => {
   it("initializes missing base sync marks using START/FINITE/END order keys", () => {
     const spec = {
@@ -18,9 +25,9 @@ describe("declarative frontend sync axis bootstrap", () => {
     ];
 
     const out = runRuleEngine(input, spec).sequence;
-    const p1 = out.find((t) => t.id === "p1");
-    const p2 = out.find((t) => t.id === "p2");
-    const p3 = out.find((t) => t.id === "p3");
+    const p1 = out.find((t: TokenLike) => t.id === "p1");
+    const p2 = out.find((t: TokenLike) => t.id === "p2");
+    const p3 = out.find((t: TokenLike) => t.id === "p3");
 
     expect(p1?.sync_left?.kind).toBe("START");
     expect(p1?.sync_right?.kind).toBe("FINITE");
@@ -58,10 +65,10 @@ describe("declarative frontend sync axis bootstrap", () => {
     ];
 
     const out = runRuleEngine(input, spec).sequence;
-    const ids = out.map((t) => t.id ?? t.name);
-    const a = out.find((t) => t.name === "A");
-    const b = out.find((t) => t.name === "B");
-    const p1 = out.find((t) => t.id === "p1");
+    const ids = out.map((t: TokenLike) => t.id ?? t.name);
+    const a = out.find((t: TokenLike) => t.name === "A");
+    const b = out.find((t: TokenLike) => t.name === "B");
+    const p1 = out.find((t: TokenLike) => t.id === "p1");
 
     expect(ids).toEqual(["p1", "phone_ins_0", "phone_ins_1", "p2"]);
     expect(a?.sync_left).toBe(p1?.sync_right);

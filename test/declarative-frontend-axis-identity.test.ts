@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import type { SyncAxis } from "../src/declarative-frontend/axis";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+
+type TokenLike = {
+  id?: string;
+  name?: string;
+  sync_left?: unknown;
+  sync_right?: unknown;
+};
+
+function isSyncAxis(axis: unknown): axis is SyncAxis {
+  return (
+    axis != null &&
+    typeof axis === "object" &&
+    typeof (axis as SyncAxis).getMarkId === "function" &&
+    typeof (axis as SyncAxis).getMarkTime === "function"
+  );
+}
+
+function requireAxis(result: ReturnType<typeof runRuleEngine>): SyncAxis {
+  const axis = (result as { axis?: unknown }).axis;
+  if (!isSyncAxis(axis)) {
+    throw new Error("E_TEST_AXIS_MISSING: expected non-null runtime axis");
+  }
+  return axis;
+}
 
 describe("declarative frontend SyncAxis identity", () => {
   it("canonicalizes token sync refs onto stable mark IDs", () => {
@@ -20,11 +45,12 @@ describe("declarative frontend SyncAxis identity", () => {
     ];
 
     const result = runRuleEngine(input, spec);
-    const p1 = result.sequence.find((t) => t.id === "p1");
-    const p2 = result.sequence.find((t) => t.id === "p2");
-    const p1LeftId = result.axis.getMarkId(p1?.sync_left);
-    const p1RightId = result.axis.getMarkId(p1?.sync_right);
-    const p2LeftId = result.axis.getMarkId(p2?.sync_left);
+    const axis = requireAxis(result);
+    const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
+    const p2 = result.sequence.find((t: TokenLike) => t.id === "p2");
+    const p1LeftId = axis.getMarkId(p1?.sync_left);
+    const p1RightId = axis.getMarkId(p1?.sync_right);
+    const p2LeftId = axis.getMarkId(p2?.sync_left);
 
     expect("sync_left_id" in (p1 ?? {})).toBe(false);
     expect("sync_right_id" in (p1 ?? {})).toBe(false);
@@ -32,7 +58,7 @@ describe("declarative frontend SyncAxis identity", () => {
     expect(typeof p1RightId).toBe("string");
     expect(p1RightId).toBe(p2LeftId);
 
-    const rightMark = result.axis.getMarkById(p1RightId);
+    const rightMark = axis.getMarkById(p1RightId);
     expect(rightMark?.order).toBe(p1?.sync_right);
     expect(rightMark?.order).toBe(p2?.sync_left);
   });
@@ -64,11 +90,12 @@ describe("declarative frontend SyncAxis identity", () => {
     ];
 
     const result = runRuleEngine(input, spec);
-    const p1 = result.sequence.find((t) => t.id === "p1");
-    const rel = result.sequence.find((t) => t.name === "REL");
-    const p1RightId = result.axis.getMarkId(p1?.sync_right);
-    const relLeftId = result.axis.getMarkId(rel?.sync_left);
-    const relRightId = result.axis.getMarkId(rel?.sync_right);
+    const axis = requireAxis(result);
+    const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
+    const rel = result.sequence.find((t: TokenLike) => t.name === "REL");
+    const p1RightId = axis.getMarkId(p1?.sync_right);
+    const relLeftId = axis.getMarkId(rel?.sync_left);
+    const relRightId = axis.getMarkId(rel?.sync_right);
 
     expect(relLeftId).toBe(p1RightId);
     expect(relRightId).toBe(p1RightId);
@@ -93,15 +120,16 @@ describe("declarative frontend SyncAxis identity", () => {
     ];
 
     const result = runRuleEngine(input, spec);
-    const p1 = result.sequence.find((t) => t.id === "p1");
-    const p2 = result.sequence.find((t) => t.id === "p2");
-    const p1LeftId = result.axis.getMarkId(p1?.sync_left);
-    const p1RightId = result.axis.getMarkId(p1?.sync_right);
-    const p2RightId = result.axis.getMarkId(p2?.sync_right);
+    const axis = requireAxis(result);
+    const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
+    const p2 = result.sequence.find((t: TokenLike) => t.id === "p2");
+    const p1LeftId = axis.getMarkId(p1?.sync_left);
+    const p1RightId = axis.getMarkId(p1?.sync_right);
+    const p2RightId = axis.getMarkId(p2?.sync_right);
 
-    const tLeft = result.axis.getMarkTime(p1LeftId);
-    const tMid = result.axis.getMarkTime(p1RightId);
-    const tRight = result.axis.getMarkTime(p2RightId);
+    const tLeft = axis.getMarkTime(p1LeftId);
+    const tMid = axis.getMarkTime(p1RightId);
+    const tRight = axis.getMarkTime(p2RightId);
 
     expect(tLeft).toBe(0);
     expect(tMid).toBe(120);

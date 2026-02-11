@@ -2,8 +2,6 @@ import { CMU_DICT } from "./cmu-dictionary.js";
 import {
   PHONEME_TARGETS,
   fillDefaultParams,
-  rule_GenerateF0Contour,
-  rule_K_Context,
 } from "./tts-frontend-rules.js";
 import { runDeclarativeFrontend } from "./declarative-frontend/adapter.js";
 
@@ -342,6 +340,106 @@ function debugLog(...args) {
   // console.log("[TTS Frontend DEBUG]", ...args);
 }
 
+function compareAxisMark(left, right) {
+  if (left === right) return 0;
+  if (typeof left === "number" && typeof right === "number") {
+    return left < right ? -1 : 1;
+  }
+  const a = left == null ? "" : String(left);
+  const b = right == null ? "" : String(right);
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+function parseTrailingInteger(value) {
+  if (typeof value !== "string") return null;
+  const match = value.match(/(\d+)$/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function withDeclarativePhoneAxis(sequence) {
+  let boundary = 0;
+  return sequence.map((token, index) => {
+    const left = boundary;
+    const right = boundary + 1;
+    boundary = right;
+    return {
+      ...token,
+      id: token.id ?? `ph_${index}`,
+      stream: "phone",
+      sync_left: left,
+      sync_right: right,
+      status: token.status ?? 1,
+    };
+  });
+}
+
+function buildF0ContourFromDeclarative(sequence, baseF0) {
+  const points = sequence
+    .filter(
+      (token) =>
+        token?.stream === "f0" &&
+        token?.status !== 2 &&
+        Number.isFinite(token?.value)
+    )
+    .slice()
+    .sort((left, right) => {
+      const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
+      const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
+      if (leftTime != null && rightTime != null && leftTime !== rightTime) {
+        return leftTime < rightTime ? -1 : 1;
+      }
+      const byLeft = compareAxisMark(left?.anchor_left, right?.anchor_left);
+      if (byLeft !== 0) return byLeft;
+      const byRight = compareAxisMark(left?.anchor_right, right?.anchor_right);
+      if (byRight !== 0) return byRight;
+      const leftRatio = Number.isFinite(left?.ratio) ? Number(left.ratio) : 0;
+      const rightRatio = Number.isFinite(right?.ratio) ? Number(right.ratio) : 0;
+      if (leftRatio !== rightRatio) return leftRatio < rightRatio ? -1 : 1;
+      const leftIdNum = parseTrailingInteger(left?.id ?? null);
+      const rightIdNum = parseTrailingInteger(right?.id ?? null);
+      if (leftIdNum != null && rightIdNum != null && leftIdNum !== rightIdNum) {
+        return leftIdNum < rightIdNum ? -1 : 1;
+      }
+      return compareAxisMark(left?.id ?? "", right?.id ?? "");
+    });
+
+  if (points.length === 0) {
+    return [{ time: 0, f0: baseF0 }];
+  }
+
+  const contour = points
+    .map((point) => ({
+      time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
+      f0: Number(point.value),
+    }))
+    .filter((point) => point.time >= 0 && Number.isFinite(point.f0));
+
+  if (contour.length === 0) return [{ time: 0, f0: baseF0 }];
+  if (contour[0].time > 0) {
+    contour.unshift({ time: 0, f0: baseF0 });
+  }
+
+  const cleaned = [contour[0]];
+  for (let i = 1; i < contour.length; i += 1) {
+    const prev = cleaned[cleaned.length - 1];
+    const curr = contour[i];
+    if (curr.time <= prev.time + 1e-6) {
+      cleaned[cleaned.length - 1] = {
+        time: prev.time,
+        f0: curr.f0,
+      };
+      continue;
+    }
+    cleaned.push(curr);
+  }
+
+  return cleaned;
+}
+
 // --- Main Pipeline ---
 export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {  
   debugLog("--- textToKlattTrack Start ---");
@@ -431,6 +529,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       if (baseTarget.hasOwnProperty("back")) flags.back = baseTarget.back;
       if (baseTarget.hasOwnProperty("hi")) flags.hi = baseTarget.hi;
       if (baseTarget.hasOwnProperty("low")) flags.low = baseTarget.low;
+      if (baseTarget.hasOwnProperty("SW")) flags.inventorySW = baseTarget.SW;
       // Add other flags as needed by rules
     }
 
@@ -496,6 +595,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
         if (baseTarget.hasOwnProperty("back")) ph.back = baseTarget.back;
         if (baseTarget.hasOwnProperty("hi")) ph.hi = baseTarget.hi;
         if (baseTarget.hasOwnProperty("low")) ph.low = baseTarget.low;
+        if (baseTarget.hasOwnProperty("SW")) ph.inventorySW = baseTarget.SW;
         if (baseTarget.hasOwnProperty("bilabial"))
           ph.bilabial = baseTarget.bilabial;
         if (baseTarget.hasOwnProperty("alveolar"))
@@ -510,54 +610,33 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   }
   debugLog("Finished refilling params for releases.");
   // --- End Simplified Refill Step ---
-
-  debugLog("Applying rule: rule_K_Context...");
-  parameterSequence = rule_K_Context(parameterSequence);
-  debugLog("Applying rule: Punctuation pause adjustments...");
-  parameterSequence.forEach((ph) => {
-    /* Punctuation pause adjustments */
-    if (ph.phoneme === "SIL" && ph.punctuationSymbol) {
-      const oldDur = ph.duration;
-      if (ph.punctuationSymbol === ",") ph.duration = 150;
-      else if ([".", "?", "!"].includes(ph.punctuationSymbol))
-        ph.duration = 300;
-      debugLog(
-        `  Adjusted SIL duration for '${ph.punctuationSymbol}' from ${oldDur} to ${ph.duration}`
-      );
-    }
-  });
   debugLog("Applying declarative phase: duration...");
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     phases: ["duration"],
   });
-  // Set SW (source selection): parallel (SW=1) for most fricatives/stops, cascade (SW=0) for vowels/sonorants
-  // Klatt 80 COEWAV.FOR: aspiration routes through cascade (SW=0), so HH uses cascade per explicit target
-  parameterSequence.forEach((ph) => {
-    if (!ph?.params) return;
-    // Respect explicit SW in phoneme definition (e.g., HH uses cascade per Klatt 80)
-    const target = PHONEME_TARGETS[ph.phoneme];
-    if (target && target.SW !== undefined) {
-      ph.params.SW = target.SW;
-      return;
-    }
-    const useParallel =
-      ph.type === "fricative" ||
-      ph.type === "affricate" ||
-      ph.type === "stop_release" ||
-      ph.type === "stop_aspiration";
-    ph.params.SW = useParallel ? 1 : 0;
+  parameterSequence = withDeclarativePhoneAxis(parameterSequence);
+  debugLog("Applying declarative phase: prosody...");
+  parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    phases: ["prosody", "finalize"],
+    parameters: {
+      base_f0: baseF0,
+      fall_rate_hz: 20,
+      stress_rise: 1.15,
+      question_rise_hz: 30,
+    },
   });
+  const phoneSequence = parameterSequence.filter((token) => token?.stream !== "f0");
   debugLog("Finished applying rules.");
   debugLog(
     "Parameter sequence after rules:",
-    parameterSequence
+    phoneSequence
       .map((p) => `${p.phoneme}${p.stress ?? ""}(${p.duration}ms)`)
       .join(" ")
   );
 
   // *** ADDED LOGGING: Inspect sequence before final loop ***
   debugLog("Inspecting parameterSequence before final track generation:");
-  parameterSequence.forEach((ph, index) => {
+  phoneSequence.forEach((ph, index) => {
     debugLog(
       `  [${index}] ${ph.phoneme}${ph.stress ?? ""}: Duration=${
         ph.duration
@@ -573,7 +652,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
 
   // *** ADDED LOGGING: Inspect sequence before F0 generation ***
   debugLog("Inspecting parameterSequence before F0 generation:");
-  parameterSequence.forEach((ph, index) => {
+  phoneSequence.forEach((ph, index) => {
     debugLog(
       `  [${index}] ${ph.phoneme}: AV=${ph.params?.AV?.toFixed(
         1
@@ -582,11 +661,11 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   });
   // *** END ADDED LOGGING ***
 
-  // --- Generate F0 ---
-  debugLog("Generating F0 contour...");
-  const f0Contour = rule_GenerateF0Contour(parameterSequence, baseF0);
+  // --- Generate F0 from declarative points ---
+  debugLog("Generating F0 contour from declarative points...");
+  const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
   // *** ADDED LOGGING: Log the generated contour ***
-  debugLog("Generated F0 Contour (Raw):", JSON.stringify(f0Contour));
+  debugLog("Generated F0 Contour (Declarative):", JSON.stringify(f0Contour));
   // *** END ADDED LOGGING ***
   debugLog(
     "F0 Contour:",
@@ -637,8 +716,8 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
   }); // Use filled SIL params directly
 
-  for (let i = 0; i < parameterSequence.length; i++) {
-    const ph = parameterSequence[i];
+  for (let i = 0; i < phoneSequence.length; i++) {
+    const ph = phoneSequence[i];
     // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
     const minDuration = isStopRelease ? 5 : 20;
@@ -735,7 +814,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     );
 
     if (targetTime > segmentStart) {
-      const nextPh = parameterSequence[i + 1];
+      const nextPh = phoneSequence[i + 1];
       const canSmooth =
         transitionSec > 0 &&
         smoothTypes.has(ph.type) &&

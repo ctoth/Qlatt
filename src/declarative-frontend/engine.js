@@ -583,21 +583,46 @@ function evaluateValueExpression(expr, token, params, functions, extraContext = 
 
 function applyEffectToToken(effect, token, params, functions, extraContext = null) {
   if (!effect || typeof effect !== "object") return;
-  const field = effect.field;
+  const field = typeof effect.field === "string" ? effect.field : "";
   if (!field) return;
 
-  const current = Number.isFinite(token[field]) ? token[field] : 0;
+  const fieldPath = field.split(".").filter((part) => part.length > 0);
+  if (fieldPath.length === 0) return;
+
+  const getField = () => {
+    let value = token;
+    for (const segment of fieldPath) {
+      if (!value || typeof value !== "object") return undefined;
+      value = value[segment];
+    }
+    return value;
+  };
+
+  const setField = (nextValue) => {
+    let cursor = token;
+    for (let i = 0; i < fieldPath.length - 1; i += 1) {
+      const segment = fieldPath[i];
+      if (!cursor[segment] || typeof cursor[segment] !== "object") {
+        cursor[segment] = {};
+      }
+      cursor = cursor[segment];
+    }
+    cursor[fieldPath[fieldPath.length - 1]] = nextValue;
+  };
+
+  const currentValue = getField();
+  const current = Number.isFinite(currentValue) ? currentValue : 0;
   const value = evaluateValueExpression(effect.value, token, params, functions, extraContext);
 
   switch (effect.op) {
     case "set":
-      token[field] = value;
+      setField(value);
       break;
     case "add":
-      token[field] = current + value;
+      setField(current + value);
       break;
     case "mul":
-      token[field] = current * value;
+      setField(current * value);
       break;
     default:
       throw new Error(`Unsupported effect op '${effect.op}' in slice engine`);

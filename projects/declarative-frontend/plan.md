@@ -97,8 +97,25 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-10: point ratio diagnostics tightened to spec behavior (`E_INVALID_RATIO`).
 - Evidence: `src/declarative-frontend/engine.js` now rejects out-of-range explicit anchor ratios and invalid point-token ratios during point resolution instead of silently clamping.
 - Evidence: `test/declarative-frontend-point-actions.test.ts` now covers invalid-ratio failure; full declarative suite now passes (`16` files / `44` tests).
+- 2026-02-11: F0 generation path in `textToKlattTrack()` migrated from imperative contour function to declarative point rules + finalize timing.
+- Evidence: `src/tts-frontend.js` no longer calls `rule_GenerateF0Contour`; declarative phases `prosody` + `finalize` now produce point tokens and runtime interpolation consumes those resolved points.
+- Evidence: `src/declarative-frontend/rule-pack.js` now defines citation-tagged F0 rules (`f0_baseline_start`, `f0_targets`, `f0_stress_peak`, `f0_question_rise`) and point stream config.
+- Evidence: `test/tts-frontend-declarative-prosody.test.ts` asserts imperative `rule_GenerateF0Contour` is not invoked and question-rise behavior remains present.
+- Evidence: citation anchors now used for F0 defaults/rules are available locally in `papers/Pierrehumbert_1980_EnglishIntonation/notes.md`, `papers/OShaughnessy_1976_F0_Prosody/notes.md`, and `papers/Allen_1987_MITalk_TTS/notes.md` (with `Ladd 2008` still referenced from spec bibliography).
+- 2026-02-11: K-context F2, punctuation pause duration, and SW assignment behavior migrated from imperative runtime loops into declarative duration-phase rules.
+- Evidence: `src/declarative-frontend/rule-pack.js` adds `k_context_cl_f2`, `k_context_rel_copy`, `punctuation_pause`, `sw_explicit_override`, and `sw_default_assignment` with citation tags and declared rule order in `duration`.
+- Evidence: `src/declarative-frontend/engine.js` `apply` runtime now supports dotted field paths (e.g., `params.F2`, `params.SW`) for nested declarative scalar updates.
+- Evidence: `src/tts-frontend.js` no longer imports/calls `rule_K_Context` and no longer applies imperative punctuation/SW post-processing loops; inventory SW hints are carried as token metadata for declarative override semantics.
+- Evidence: `test/declarative-frontend-rulepack-context.test.ts` added for K-context, punctuation pause, and SW behavior; `test/tts-frontend-declarative-prosody.test.ts` now asserts imperative `rule_K_Context` is not invoked.
+- Evidence: regression suite passes via `npx vitest run ...declarative-frontend-*.test.ts test/tts-frontend-declarative-prosody.test.ts` (`19` files / `52` tests).
+- 2026-02-11: stop release/aspiration duration lock migrated from imperative post-processing loop to declarative duration-phase rule.
+- Evidence: `src/declarative-frontend/rule-pack.js` adds `lock_stop_release_duration` so `duration` phase owns fixed burst/aspiration timing from `inherentDuration`.
+- Evidence: `src/tts-frontend.js` removed the post-duration imperative loop that rewrote stop release/aspiration durations from inventory.
+- Evidence: `test/declarative-frontend-rulepack-context.test.ts` adds coverage for release/aspiration duration lock; declarative regression run now passes (`19` files / `53` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
+- Limitation: current declarative declination rule uses global phone-index slope rather than full phrase-local reset + continuation-rise decomposition from the prior imperative implementation.
+- Limitation: release-token parameter refill after structural insertion still happens in imperative runtime code (`textToKlattTrack`) instead of declarative dataflow.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -157,10 +174,10 @@ Acceptance criteria:
 
 - [x] `F1` `DONE`: Stop release/aspiration insertion migrated in slice rulepack.
 - [x] `F2` `DONE`: Stress/vowel shortening/pre-boundary duration migrated in slice rulepack.
-- [ ] `F3` `NOT_STARTED`: Migrate K-context F2 behavior into declarative rules.
-- [ ] `F4` `NOT_STARTED`: Migrate punctuation pause duration behavior into declarative rules.
-- [ ] `F5` `NOT_STARTED`: Migrate SW/source assignment behavior into declarative rules.
-- [ ] `F6` `NOT_STARTED`: Migrate F0 target generation/question rise into declarative point rules.
+- [x] `F3` `DONE`: Migrate K-context F2 behavior into declarative rules.
+- [x] `F4` `DONE`: Migrate punctuation pause duration behavior into declarative rules.
+- [x] `F5` `DONE`: Migrate SW/source assignment behavior into declarative rules.
+- [ ] `F6` `IN_PROGRESS`: Migrate F0 target generation/question rise into declarative point rules.
 
 Acceptance criteria:
 - No frontend behavior for synthesis-relevant parameters is implemented imperatively.
@@ -169,7 +186,7 @@ Acceptance criteria:
 ### [G] Direct Runtime Cutover
 
 - [ ] `G1` `IN_PROGRESS`: Keep `textToKlattTrack()` public signature; replace internals with declarative engine call only.
-- [ ] `G2` `NOT_STARTED`: Remove imperative post-processing loops in `src/tts-frontend.js`.
+- [ ] `G2` `IN_PROGRESS`: Remove imperative post-processing loops in `src/tts-frontend.js`.
 - [ ] `G3` `NOT_STARTED`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
 
 Acceptance criteria:
@@ -178,7 +195,7 @@ Acceptance criteria:
 
 ### [H] Dead Code Removal and Source of Truth Cleanup
 
-- [ ] `H1` `NOT_STARTED`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
+- [x] `H1` `DONE`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
 - [ ] `H2` `NOT_STARTED`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.js`.
 - [ ] `H3` `NOT_STARTED`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
 

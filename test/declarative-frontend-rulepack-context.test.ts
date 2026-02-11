@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
+import { runDeclarativeFrontend } from "../src/declarative-frontend";
 
 describe("declarative frontend rulepack context migration", () => {
   it("applies K-context F2 to K_CL and copies to K_REL", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
+import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend rulepack prosody phase", () => {

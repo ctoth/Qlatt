@@ -3,7 +3,7 @@ import {
   PHONEME_TARGETS,
   fillDefaultParams,
 } from "./tts-frontend-rules";
-import { runDeclarativeFrontend } from "./declarative-frontend/adapter";
+import { runDeclarativeFrontend } from "./declarative-frontend";
 
 export function normalizeText(text) {
   let normalized = text.toLowerCase();

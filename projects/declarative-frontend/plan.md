@@ -198,6 +198,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: strict SyncAxis order-object enforcement completed for runtime/test path (legacy numeric/string marks removed from declarative fixtures).
 - Evidence: `src/declarative-frontend/engine.ts` now throws `E_SYNC_MARK_INVALID` when token sync/anchor fields are not `START|FINITE|END` order objects.
 - Evidence: declarative fixture inputs were migrated to explicit order objects using `test/utils/order-marks.ts`; declarative/frontend suite passes via `npx vitest run` (`30` files / `88` tests).
+- 2026-02-11: removed adapter indirection and made declarative frontend package entrypoint the single runtime surface.
+- Evidence: `src/declarative-frontend/adapter.ts` deleted; `runDeclarativeFrontend` now lives in `src/declarative-frontend/index.ts` and callers import from `src/declarative-frontend`.
+- Evidence: declarative rulepack + frontend regression subset passes via `npx vitest run test/declarative-frontend-slice.test.ts test/declarative-frontend-rulepack-context.test.ts test/declarative-frontend-rulepack-prosody.test.ts test/declarative-frontend-integration-phases.test.ts test/tts-frontend-declarative-prosody.test.ts test/tts-frontend-declarative-corpus.test.ts` (`6` files / `19` tests).
 - 2026-02-11: TypeScript toolchain activation and project-scope typecheck baseline established.
 - Evidence: `package.json`/`package-lock.json` include `typescript` as dev dependency, and `tsconfig.json` `rootDir` is now `"."` so scripts/tests/config are included consistently.
 - Evidence: `npx tsc --noEmit` now runs project-wide and reports current strict-type backlog (primarily `scripts/*.ts`, `src/declarative-frontend/*.ts`, and `test/test-harness.ts`).

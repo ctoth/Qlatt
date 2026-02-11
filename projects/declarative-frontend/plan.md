@@ -188,6 +188,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: `textToKlattTrack()` output contract is now explicitly locked with schema-level tests.
 - Evidence: `test/tts-frontend-output-contract.test.ts` verifies frame-key schema (`time`, `params`, optional `phoneme`/`word`), monotonic finite time, and stable full param-key coverage on every emitted frame.
 - Evidence: full suite passes via `npx vitest run` (`35` files / `119` tests).
+- 2026-02-11: runtime diagnostics hardened with stable error codes for rule-execution failures plus deterministic rule blame-path annotation.
+- Evidence: `src/declarative-frontend/engine.ts` now emits coded runtime errors (e.g. `E_EFFECT_TARGET_UNKNOWN`, `E_SPLICE_BOUNDARY_REQUIRED`, `E_POINT_STREAM_INVALID`) and annotates thrown rule errors with `phase=<name> rule=<name> path=rules.<name>`.
+- Evidence: `test/declarative-frontend-integration-diagnostics.test.ts` now validates runtime error code + blame path propagation; full suite passes via `npx vitest run` (`35` files / `120` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.

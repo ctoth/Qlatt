@@ -184,7 +184,7 @@ function normalizeAnchor(anchor, fallbackToken = null) {
   }
 
   if (anchorLeft == null || anchorRight == null) {
-    throw new Error("Point anchor is missing anchor_left/anchor_right");
+    throw new Error("E_POINT_ANCHOR_MISSING: point anchor is missing anchor_left/anchor_right");
   }
 
   const hasExplicitRatio = Object.prototype.hasOwnProperty.call(source, "ratio");
@@ -465,7 +465,7 @@ function evaluateRuleConstraint(constraintExpr, context, functions) {
 function evaluateValueExpression(expr, token, params, functions, extraContext = null) {
   if (typeof expr === "number") return expr;
   if (typeof expr !== "string") {
-    throw new Error(`Unsupported value expression type: ${typeof expr}`);
+    throw new Error(`E_EXPR_VALUE_TYPE: unsupported value expression type: ${typeof expr}`);
   }
   const context = {
     current: token,
@@ -478,7 +478,7 @@ function evaluateValueExpression(expr, token, params, functions, extraContext = 
     functions
   );
   if (!Number.isFinite(value)) {
-    throw new Error(`Expression '${expr}' did not evaluate to a finite number`);
+    throw new Error(`E_EXPR_NONFINITE: expression '${expr}' did not evaluate to a finite number`);
   }
   return Number(value);
 }
@@ -667,7 +667,7 @@ function applyEffectToToken(effect, token, params, functions, runtime, extraCont
   const value = evaluateValueExpression(effect.value, token, params, functions, extraContext);
   const op = effect.op;
   if (op !== "set" && op !== "add" && op !== "mul") {
-    throw new Error(`Unsupported effect op '${op}' in slice engine`);
+    throw new Error(`E_EFFECT_OP_UNSUPPORTED: unsupported effect op '${op}' in slice engine`);
   }
 
   if (runtime && fieldPath.length === 1) {
@@ -717,7 +717,7 @@ function applyEffectsToTargets(
     const targetName = effect?.target ?? defaultTargetName;
     const target = resolveTarget(targetName);
     if (!target) {
-      throw new Error(`Unknown effect target '${targetName}' in slice engine`);
+      throw new Error(`E_EFFECT_TARGET_UNKNOWN: unknown effect target '${targetName}' in slice engine`);
     }
     applyEffectToToken(effect, target, params, functions, runtime, extraContext);
   }
@@ -879,7 +879,7 @@ function applySpliceSpec(
   const targetName = spliceSpec.target ?? defaultTargetName;
   const target = resolveTarget(targetName);
   if (!target) {
-    throw new Error(`Unknown splice target '${targetName}' in slice engine`);
+    throw new Error(`E_SPLICE_TARGET_UNKNOWN: unknown splice target '${targetName}' in slice engine`);
   }
   const stream = getTokenStream(target);
   const context = {
@@ -897,7 +897,7 @@ function applySpliceSpec(
     const leftId = resolveMarkId(runtime, leftExpr);
     const rightId = resolveMarkId(runtime, rightExpr);
     if (!leftId || !rightId) {
-      throw new Error("replace_range splice requires range_left and range_right");
+      throw new Error("E_SPLICE_RANGE_REQUIRED: replace_range splice requires range_left and range_right");
     }
 
     const suppressedSet = new Set(
@@ -938,7 +938,7 @@ function applySpliceSpec(
     const boundaryId = resolveMarkId(runtime, boundaryExpr);
     const side = spliceSpec.side === "before" ? "before" : "after";
     if (!boundaryId) {
-      throw new Error("insert_at_boundary splice requires boundary");
+      throw new Error("E_SPLICE_BOUNDARY_REQUIRED: insert_at_boundary splice requires boundary");
     }
 
     const insertionIndex = findInsertionIndexForBoundary(
@@ -962,7 +962,7 @@ function applySpliceSpec(
     return;
   }
 
-  throw new Error(`Unsupported splice type '${spliceSpec.type}' in slice engine`);
+  throw new Error(`E_SPLICE_TYPE_UNSUPPORTED: unsupported splice type '${spliceSpec.type}' in slice engine`);
 }
 
 function nextPointId(runtime, stream) {
@@ -991,7 +991,7 @@ function evaluateAnchorExpression(expr, token, params, functions) {
   if (expr && typeof expr === "object") {
     return normalizeAnchor(expr, token);
   }
-  throw new Error(`Unsupported point anchor expression type: ${typeof expr}`);
+  throw new Error(`E_POINT_ANCHOR_TYPE_UNSUPPORTED: unsupported point anchor expression type: ${typeof expr}`);
 }
 
 function applyInsertPointSpec(
@@ -1005,13 +1005,13 @@ function applyInsertPointSpec(
   if (!pointSpec || typeof pointSpec !== "object") return;
   const stream = pointSpec.stream;
   if (typeof stream !== "string" || stream.length === 0) {
-    throw new Error("insert_point.stream must be a non-empty string");
+    throw new Error("E_POINT_STREAM_INVALID: insert_point.stream must be a non-empty string");
   }
 
   const targetName = pointSpec.target ?? defaultTargetName;
   const target = resolveTarget(targetName);
   if (!target) {
-    throw new Error(`Unknown insert_point target '${targetName}' in slice engine`);
+    throw new Error(`E_POINT_TARGET_UNKNOWN: unknown insert_point target '${targetName}' in slice engine`);
   }
 
   const activePointCount = sequence.filter(
@@ -1026,7 +1026,7 @@ function applyInsertPointSpec(
   const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
   const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);
   if (!anchorLeftId || !anchorRightId) {
-    throw new Error("insert_point.at resolved to unknown sync marks");
+    throw new Error("E_POINT_ANCHOR_UNKNOWN: insert_point.at resolved to unknown sync marks");
   }
   const value =
     pointSpec.value == null
@@ -1211,7 +1211,7 @@ function applyRule(rule, sequence, runtime) {
   if (rule.match) {
     return applyPatternRule(rule, sequence, runtime);
   }
-  throw new Error(`Unsupported declarative slice rule op '${rule?.op}'`);
+  throw new Error(`E_RULE_SHAPE: unsupported declarative slice rule op '${rule?.op}'`);
 }
 
 function isStructuralRule(rule) {
@@ -1222,6 +1222,16 @@ function isStructuralRule(rule) {
   if (Array.isArray(rule.associate) && rule.associate.length > 0) return true;
   if (Array.isArray(rule.disassociate) && rule.disassociate.length > 0) return true;
   return false;
+}
+
+function annotateRuntimeRuleError(error, phaseName, ruleName) {
+  const message =
+    error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
+  const context = `phase=${phaseName} rule=${ruleName} path=rules.${ruleName}`;
+  if (message.includes("path=rules.")) {
+    return new Error(message);
+  }
+  return new Error(`${message} [${context}]`);
 }
 
 function collectReferencedMarkIds(sequence, runtime) {
@@ -1549,7 +1559,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
       }
       runtime.currentRuleName = ruleName;
       trace.push({ type: "rule_start", phase: phase.name, rule: ruleName });
-      current = applyRule(rule, current, runtime);
+      try {
+        current = applyRule(rule, current, runtime);
+      } catch (error) {
+        throw annotateRuntimeRuleError(error, phase.name, ruleName);
+      }
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
       runtime.currentRuleName = null;
     }

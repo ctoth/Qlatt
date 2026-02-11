@@ -22,6 +22,20 @@ describe("declarative frontend first migration slice", () => {
     expect(weakAsp?.weak).toBe(true);
   });
 
+  it("inserts release but no aspiration for voiced stop closures", () => {
+    const sequence = [
+      { phoneme: "B_CL", stress: 1, word: "bad", type: "stop_closure" },
+      { phoneme: "AE", stress: 1, word: "bad", type: "vowel" },
+      { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const phones = out.map((t) => t.phoneme);
+
+    expect(phones).toEqual(["B_CL", "B_REL", "AE", "SIL"]);
+    expect(out.some((t) => t.phoneme === "B_ASP")).toBe(false);
+  });
+
   it("applies duration rules in declared order", () => {
     const sequence = [
       {
@@ -143,5 +157,22 @@ describe("declarative frontend first migration slice", () => {
     expect(asp?.weak).toBe(true);
     expect(asp?.duration).toBe(24);
     expect(asp?.params?.AH).toBe(43);
+  });
+
+  it("initializes sync marks on base stream tokens during structural phase", () => {
+    const sequence = [
+      { phoneme: "P_CL", stress: 1, word: "pat", type: "stop_closure", status: 1 },
+      { phoneme: "AE", stress: 1, word: "pat", type: "vowel", status: 1 },
+      { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const phones = out.filter((token) => (token.stream ?? "phone") === "phone");
+    expect(phones.length).toBeGreaterThan(0);
+    expect(
+      phones.every(
+        (token) => Number.isFinite(token.sync_left) && Number.isFinite(token.sync_right)
+      )
+    ).toBe(true);
   });
 });

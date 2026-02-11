@@ -54,6 +54,27 @@ function getTokenStream(token) {
   return token?.stream ?? "phone";
 }
 
+function initializeBaseStreamSyncMarks(sequence, baseStreams) {
+  if (!(baseStreams instanceof Set) || baseStreams.size === 0) return;
+
+  for (const stream of baseStreams) {
+    const activeStreamTokens = sequence.filter(
+      (token) => isActiveToken(token) && getTokenStream(token) === stream
+    );
+    if (activeStreamTokens.length === 0) continue;
+
+    const needsInitialization = activeStreamTokens.some(
+      (token) => token?.sync_left == null || token?.sync_right == null
+    );
+    if (!needsInitialization) continue;
+
+    for (let i = 0; i < activeStreamTokens.length; i += 1) {
+      activeStreamTokens[i].sync_left = i;
+      activeStreamTokens[i].sync_right = i + 1;
+    }
+  }
+}
+
 const FINITE_RANK_RE = /^[0-9a-z]{12}$/;
 const BASE36_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 const BASE36 = 36n;
@@ -864,38 +885,20 @@ function findInsertionIndexForRange(sequence, stream, right, suppressedSet) {
   return sequence.length;
 }
 
-function computeBoundaryNeighbor(activeStreamTokens, boundary, direction) {
-  let best = null;
-  for (const token of activeStreamTokens) {
-    for (const mark of [token.sync_left, token.sync_right]) {
-      if (mark == null) continue;
-      const cmp = compareOrderValue(mark, boundary);
-      if (direction === "gt" && cmp > 0) {
-        if (best == null || compareOrderValue(mark, best) < 0) best = mark;
-      } else if (direction === "lt" && cmp < 0) {
-        if (best == null || compareOrderValue(mark, best) > 0) best = mark;
-      }
-    }
-  }
-  return best;
-}
-
 function findInsertionIndexForBoundary(sequence, stream, boundary, side) {
-  if (side === "before") {
-    for (let i = 0; i < sequence.length; i += 1) {
-      const token = sequence[i];
-      if (getTokenStream(token) !== stream) continue;
-      if (token?.sync_left == null) continue;
-      if (compareOrderValue(token.sync_left, boundary) >= 0) return i;
-    }
-    return sequence.length;
-  }
-
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
     if (getTokenStream(token) !== stream) continue;
     if (token?.sync_left == null) continue;
-    if (compareOrderValue(token.sync_left, boundary) > 0) return i;
+    const leftCmp = compareOrderValue(token.sync_left, boundary);
+    if (leftCmp > 0) return i;
+    if (leftCmp < 0) continue;
+
+    if (side === "after") {
+      const rightCmp = compareOrderValue(token.sync_right, boundary);
+      if (rightCmp === 0) continue;
+    }
+    return i;
   }
   return sequence.length;
 }
@@ -968,46 +971,15 @@ function applySpliceSpec(
   if (spliceSpec.type === "insert_at_boundary") {
     const boundary = evaluateActionExpression(spliceSpec.boundary, context, functions);
     const side = spliceSpec.side === "before" ? "before" : "after";
-    const streamHasUnmarkedTokens = activeStreamTokens.some(
-      (token) => token?.sync_left == null && token?.sync_right == null
-    );
-    if (boundary == null || streamHasUnmarkedTokens) {
-      if (target != null) {
-        const targetIndex = sequence.indexOf(target);
-        if (targetIndex < 0) {
-          throw new Error("insert_at_boundary splice target is not in sequence");
-        }
-        const insertionIndex = side === "before" ? targetIndex : targetIndex + 1;
-        const mark = side === "before" ? targetIndex : targetIndex + 1;
-        const inserts = buildSpliceInsertions(
-          spliceSpec.insert,
-          stream,
-          { left: mark, right: mark },
-          context,
-          runtime,
-          functions
-        );
-        if (inserts.length > 0) {
-          sequence.splice(insertionIndex, 0, ...inserts);
-        }
-        return;
-      }
+    if (boundary == null) {
       throw new Error("insert_at_boundary splice requires boundary");
     }
 
-    const left =
-      side === "after"
-        ? boundary
-        : computeBoundaryNeighbor(activeStreamTokens, boundary, "lt") ?? boundary;
-    const right =
-      side === "after"
-        ? computeBoundaryNeighbor(activeStreamTokens, boundary, "gt") ?? boundary
-        : boundary;
     const insertionIndex = findInsertionIndexForBoundary(sequence, stream, boundary, side);
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
       stream,
-      { left, right },
+      { left: boundary, right: boundary },
       context,
       runtime,
       functions
@@ -1439,6 +1411,49 @@ function resolvePointTimes(sequence, runtime, pointStreams) {
   }
 }
 
+function assertActiveBaseCoverage(sequence, runtime) {
+  if (!(runtime?.baseStreams instanceof Set) || runtime.baseStreams.size === 0) return;
+
+  for (const stream of runtime.baseStreams) {
+    const active = sequence
+      .filter(
+        (token) =>
+          isActiveToken(token) &&
+          getTokenStream(token) === stream &&
+          token?.sync_left != null &&
+          token?.sync_right != null
+      )
+      .slice()
+      .sort((left, right) => {
+        const byLeft = compareOrderValue(left.sync_left, right.sync_left);
+        if (byLeft !== 0) return byLeft;
+        const byRight = compareOrderValue(left.sync_right, right.sync_right);
+        if (byRight !== 0) return byRight;
+        return compareOrderValue(left.id ?? "", right.id ?? "");
+      });
+
+    for (let i = 0; i + 1 < active.length; i += 1) {
+      const left = active[i];
+      const right = active[i + 1];
+      const cmp = compareOrderValue(left.sync_right, right.sync_left);
+      if (cmp > 0) {
+        throw new Error(
+          `E_BASE_OVERLAP: stream '${stream}' overlap between '${String(left.id ?? i)}' and '${String(
+            right.id ?? i + 1
+          )}'`
+        );
+      }
+      if (cmp < 0) {
+        throw new Error(
+          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' gap between '${String(
+            left.id ?? i
+          )}' and '${String(right.id ?? i + 1)}'`
+        );
+      }
+    }
+  }
+}
+
 export function runRuleEngine(sequence, specSource, options = {}) {
   const spec = parseDslSpec(specSource);
   const diagnostics = assertValidSpec(spec);
@@ -1488,6 +1503,8 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     finalized: false,
   };
 
+  initializeBaseStreamSyncMarks(current, baseStreams);
+
   const selectedPhases = Array.isArray(options.phases) && options.phases.length > 0
     ? new Set(options.phases)
     : null;
@@ -1533,6 +1550,7 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     if (phase.compute_times || (Array.isArray(phase.resolve_points) && phase.resolve_points.length > 0)) {
       runtime.finalized = true;
     }
+    assertActiveBaseCoverage(current, runtime);
     runtime.activeResolveScalars = new Set();
     trace.push({ type: "phase_end", phase: phase.name });
   }

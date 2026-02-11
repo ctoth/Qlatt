@@ -82,7 +82,7 @@ describe("declarative frontend splice actions", () => {
     const inserted = out.find((t) => t.name === "REL");
     expect(inserted).toBeTruthy();
     expect(inserted?.sync_left).toBe(1);
-    expect(inserted?.sync_right).toBe(2);
+    expect(inserted?.sync_right).toBe(1);
     expect(inserted?.status).toBe(1);
   });
 
@@ -127,5 +127,74 @@ describe("declarative frontend splice actions", () => {
     expect(typeof first?.sync_right).toBe("string");
     expect(first && first.sync_right > "000000000000").toBe(true);
     expect(first && first.sync_right < "00000000000c").toBe(true);
+  });
+
+  it("requires a resolved boundary for insert_at_boundary", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        add_release: {
+          select: {
+            stream: "phone",
+            where: "current.id = 'p1'",
+          },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.missing_boundary",
+            side: "after",
+            insert: [{ name: "'REL'" }],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["add_release"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrow("insert_at_boundary splice requires boundary");
+  });
+
+  it("preserves rule order for multiple after-boundary inserts at the same mark", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        insert_a: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [{ name: "'A'" }],
+          },
+        },
+        insert_b: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [{ name: "'B'" }],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["insert_a", "insert_b"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const names = out.filter((t) => t.name === "A" || t.name === "B").map((t) => t.name);
+
+    expect(names).toEqual(["A", "B"]);
   });
 });

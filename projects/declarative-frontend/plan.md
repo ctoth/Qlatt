@@ -152,16 +152,25 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/engine.js` no longer contains duration `rule.op` handlers; only structural `insert_stop_releases` remains as a temporary op path.
 - Evidence: `test/declarative-frontend-rulepack-shape.test.ts` added to enforce op-free duration rules; declarative + frontend migration suite passes (`25` files / `62` tests).
 - 2026-02-11: structural stop release/aspiration insertion migrated to declarative `select` + `splice` rules with inventory-backed token materialization.
-- Evidence: `src/declarative-frontend/rule-pack.js` now uses `insert_stop_release_tokens` and `insert_stop_aspiration_tokens` declarative structural rules (with citation tags) and no longer defines `insert_stop_releases` op.
+- Evidence: `src/declarative-frontend/rule-pack.js` now uses `insert_voiceless_stop_release_and_aspiration` and `insert_voiced_stop_release` declarative structural rules (with citation tags) and no longer defines `insert_stop_releases` op.
 - Evidence: `src/declarative-frontend/engine.js` adds `$target(...)` helper-backed inventory materialization for declarative templates and no longer has any `rule.op` handlers.
 - Evidence: `src/declarative-frontend/validation.js` now disallows all `rule.op` usage (`E_RULE_OP_UNKNOWN` for any op).
 - Evidence: `test/declarative-frontend-rulepack-shape.test.ts` now enforces fully op-free rulepack; declarative + frontend migration suite passes (`25` files / `63` tests).
+- 2026-02-11: structural phase now initializes base-stream sync marks up front, and boundary insertion is fully boundary-driven (no target-index fallback path).
+- Evidence: `src/declarative-frontend/engine.js` adds `initializeBaseStreamSyncMarks(...)` invoked at rule-engine startup for active base streams missing sync bounds.
+- Evidence: `src/declarative-frontend/engine.js` `insert_at_boundary` now requires an explicit boundary and no longer branches to target-index insertion when stream tokens are unmarked.
+- Evidence: `test/declarative-frontend-slice.test.ts` adds coverage that structural-phase phone tokens have initialized `sync_left`/`sync_right` and voiced-stop structural behavior (`B/D/G` release only); `test/declarative-frontend-splice-actions.test.ts` adds boundary-required guard coverage; declarative + frontend migration suite passes (`25` files / `66` tests).
+- 2026-02-11: base coverage invariant checks started, and boundary insert semantics were aligned with non-overlap partitioning in order space.
+- Evidence: `src/declarative-frontend/engine.js` now enforces active-base adjacency checks per base stream and throws `E_BASE_OVERLAP` / `E_BASE_NOT_CONTIGUOUS` at phase boundaries.
+- Evidence: `src/declarative-frontend/engine.js` `insert_at_boundary` now emits zero-width boundary spans (`sync_left == sync_right == boundary`) to avoid overlap with adjacent base intervals under current axis model.
+- Evidence: `test/declarative-frontend-base-coverage.test.ts` added for contiguous/gap/overlap coverage, and `test/declarative-frontend-splice-actions.test.ts` now locks deterministic ordering for repeated same-boundary inserts; declarative + frontend migration suite passes (`26` files / `70` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
+- Limitation: base-coverage validation currently checks interior adjacency (`token[i].sync_right` vs `token[i+1].sync_left`) but does not yet enforce full `[START, END]` boundary anchoring due the still-simplified sync-axis bootstrap model.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
-- Limitation: `insert_at_boundary` currently uses a deterministic target-index fallback when stream tokens are missing comparable sync marks (structural pre-axis stage); this should be replaced by explicit sync-axis initialization to align fully with spec Part 1/5.
+- Limitation: sync-axis initialization currently bootstraps missing base-stream marks as numeric contiguous intervals (`[i, i+1]`) rather than materializing full sentinel/rank objects (`START`/`FINITE`/`END`) from spec Part 1.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -175,7 +184,7 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
 - [ ] `B1` `IN_PROGRESS`: Implement full typed model for sync marks, interval/point tokens, token status lattice, associations, and stream topology.
 - [ ] `B2` `IN_PROGRESS`: Replace slice executor with deterministic phase/rule/match execution with quiescence and match identity semantics.
-- [ ] `B3` `NOT_STARTED`: Implement complete diagnostics catalog from spec Part 9 with stable codes and blame paths.
+- [ ] `B3` `IN_PROGRESS`: Implement complete diagnostics catalog from spec Part 9 with stable codes and blame paths.
 - [ ] `B4` `IN_PROGRESS`: Implement finalize lifecycle guards (`E_FINALIZE_DIRTY`) and enforce no structural rewrites after finalize.
 
 Acceptance criteria:

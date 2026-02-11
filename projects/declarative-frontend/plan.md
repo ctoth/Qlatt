@@ -123,6 +123,12 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/engine.js` adds generic navigation helpers `$phrase_index` and `$phrase_total` (boundary-aware for phone stream punctuation tokens).
 - Evidence: `src/declarative-frontend/rule-pack.js` `f0_targets` now computes declination from phrase-local position (`$phrase_index/$phrase_total`) rather than global `$index/$total`.
 - Evidence: `test/declarative-frontend-rulepack-prosody.test.ts` adds punctuation-reset coverage; declarative regression run passes (`19` files / `54` tests).
+- 2026-02-11: integration coverage for phase sequencing/finalize trace started.
+- Evidence: `test/declarative-frontend-integration-phases.test.ts` added to validate end-to-end phase order (`structural`->`duration`->`prosody`->`finalize`) plus `times_resolved`/`points_resolved` trace events and finite resolved point times.
+- Evidence: declarative regression run now passes (`20` files / `55` tests).
+- 2026-02-11: integration diagnostics coverage added at engine entrypoint.
+- Evidence: `test/declarative-frontend-integration-diagnostics.test.ts` verifies invalid-spec diagnostics (`E_RULE_UNKNOWN`, `E_PHASE_RESOLVE_POINT_STREAM_INVALID`) surface through `runRuleEngine`.
+- Evidence: declarative regression run now passes (`21` files / `56` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
@@ -187,7 +193,7 @@ Acceptance criteria:
 - [x] `F3` `DONE`: Migrate K-context F2 behavior into declarative rules.
 - [x] `F4` `DONE`: Migrate punctuation pause duration behavior into declarative rules.
 - [x] `F5` `DONE`: Migrate SW/source assignment behavior into declarative rules.
-- [ ] `F6` `IN_PROGRESS`: Migrate F0 target generation/question rise into declarative point rules.
+- [x] `F6` `DONE`: Migrate F0 target generation/question rise into declarative point rules.
 
 Acceptance criteria:
 - No frontend behavior for synthesis-relevant parameters is implemented imperatively.
@@ -227,7 +233,7 @@ Acceptance criteria:
 ### [J] Test and Release Gate
 
 - [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
-- [ ] `J2` `NOT_STARTED`: Add integration tests for phases, diagnostics, and finalize behavior.
+- [ ] `J2` `IN_PROGRESS`: Add integration tests for phases, diagnostics, and finalize behavior.
 - [ ] `J3` `NOT_STARTED`: Add declarative-only frontend behavior tests on phrase corpus.
 - [ ] `J4` `NOT_STARTED`: Run golden verification and lock outputs after review.
 - [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.
@@ -240,7 +246,7 @@ Acceptance criteria:
 
 1. Complete missing declarative primitives first: remaining `D2/D3` helpers + `E2` actions + `E4` finalize/point timing.
 2. Complete `E3` scalar resolution semantics and diagnostics hardening (`B3/B4`).
-3. Migrate remaining runtime behavior (`F3-F6`) into declarative rules only after required primitives are in place.
+3. Complete any remaining runtime behavior parity adjustments in declarative rules (core migration items `F3-F6` are now done) only after required primitives are in place.
 4. Execute hard cutover and deletions in one set: `G` + `H`.
 5. Complete `I` (tooling) on declarative-only runtime.
 6. Complete `J` and finalize docs/release.

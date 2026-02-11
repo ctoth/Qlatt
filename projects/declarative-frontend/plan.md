@@ -233,7 +233,7 @@ Acceptance criteria:
 ### [J] Test and Release Gate
 
 - [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
-- [ ] `J2` `IN_PROGRESS`: Add integration tests for phases, diagnostics, and finalize behavior.
+- [x] `J2` `DONE`: Add integration tests for phases, diagnostics, and finalize behavior.
 - [ ] `J3` `NOT_STARTED`: Add declarative-only frontend behavior tests on phrase corpus.
 - [ ] `J4` `NOT_STARTED`: Run golden verification and lock outputs after review.
 - [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.

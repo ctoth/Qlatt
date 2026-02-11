@@ -29,9 +29,10 @@ function cloneSequence(sequence: TokenLike[]): TokenLike[] {
 }
 
 function getIncompressibleMin(token: TokenLike | null | undefined, inherent: unknown): number {
-  if (!Number.isFinite(inherent) || inherent <= 0) return 0;
+  const inherentMs = Number(inherent);
+  if (!Number.isFinite(inherentMs) || inherentMs <= 0) return 0;
   const ratio = token?.type === "vowel" ? 0.42 : 0.6;
-  return inherent * ratio;
+  return inherentMs * ratio;
 }
 
 function materializeInventoryTarget(phoneme: unknown): TokenLike {
@@ -172,15 +173,16 @@ function buildRuntimeMarkProps(runtime: RuntimeLike | null | undefined, mapping:
 }
 
 function clampRatio(value: unknown): number {
-  if (!Number.isFinite(value)) return 0;
-  if (value <= 0) return 0;
-  if (value >= 1) return 1;
-  return Number(value);
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  if (n <= 0) return 0;
+  if (n >= 1) return 1;
+  return n;
 }
 
 function normalizeAnchor(anchor: unknown, fallbackToken: TokenLike | null = null): TokenLike {
-  const source =
-    anchor && typeof anchor === "object" && !Array.isArray(anchor) ? anchor : {};
+  const source: TokenLike =
+    anchor && typeof anchor === "object" && !Array.isArray(anchor) ? (anchor as TokenLike) : {};
 
   let anchorLeft = source.anchor_left ?? source.left ?? source.sync_left ?? null;
   let anchorRight = source.anchor_right ?? source.right ?? source.sync_right ?? null;
@@ -274,7 +276,7 @@ function buildNavigationFunctions(
     }
   };
 
-  const getActiveStreamTokens = (stream) => {
+  const getActiveStreamTokens = (stream: string): TokenLike[] => {
     const key = stream || "phone";
     if (cache.has(key)) return cache.get(key);
     let active = sequence.filter(
@@ -292,13 +294,13 @@ function buildNavigationFunctions(
     return active;
   };
 
-  const getIndex = (token) => {
+  const getIndex = (token: TokenLike): number => {
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
     return active.indexOf(token);
   };
 
-  const getPointCursor = (stream) => {
+  const getPointCursor = (stream: string): number => {
     if (pointCursorByStream?.has(stream)) {
       return pointCursorByStream.get(stream);
     }
@@ -313,10 +315,10 @@ function buildNavigationFunctions(
     return -1;
   };
 
-  const isPhonePhraseBoundary = (token) =>
+  const isPhonePhraseBoundary = (token: TokenLike): boolean =>
     token?.phoneme === "SIL" && token?.punctuationSymbol != null;
 
-  const getPhraseWindow = (token) => {
+  const getPhraseWindow = (token: TokenLike): { index: number; total: number } => {
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
     const index = active.indexOf(token);
@@ -348,23 +350,23 @@ function buildNavigationFunctions(
   };
 
   return {
-    prev: (token) => {
+    prev: (token: TokenLike) => {
       const stream = getTokenStream(token);
       const active = getActiveStreamTokens(stream);
       const index = active.indexOf(token);
       if (index <= 0) return null;
       return active[index - 1];
     },
-    next: (token) => {
+    next: (token: TokenLike) => {
       const stream = getTokenStream(token);
       const active = getActiveStreamTokens(stream);
       const index = active.indexOf(token);
       if (index < 0 || index + 1 >= active.length) return null;
       return active[index + 1];
     },
-    index: (token) => getIndex(token),
-    total: (stream) => getActiveStreamTokens(stream).length,
-    parent: (token, stream) => {
+    index: (token: TokenLike) => getIndex(token),
+    total: (stream: string) => getActiveStreamTokens(stream).length,
+    parent: (token: TokenLike, stream?: string) => {
       if (!token || token.parent == null) return null;
       // Build ID index lazily for all active streams referenced so far.
       if (!activeById.has(token.parent)) ensureActiveIdIndex();
@@ -373,38 +375,38 @@ function buildNavigationFunctions(
       if (stream && getTokenStream(parent) !== stream) return null;
       return parent;
     },
-    children: (token, stream) => {
+    children: (token: TokenLike, stream?: string) => {
       if (!token || token.id == null) return [];
-      return sequence.filter((candidate) => {
+      return sequence.filter((candidate: TokenLike) => {
         if (!isActiveToken(candidate)) return false;
         if (candidate?.parent !== token.id) return false;
         if (stream && getTokenStream(candidate) !== stream) return false;
         return true;
       });
     },
-    assoc: (token, assocName) => {
+    assoc: (token: TokenLike, assocName: string) => {
       if (!token || typeof assocName !== "string" || assocName.length === 0) return [];
       ensureActiveIdIndex();
 
       const entries = getAssociationEntries(token, assocName);
       return entries
-        .filter((entry) => normalizeTokenStatus(entry.status) === TokenStatus.ACTIVE)
-        .map((entry) => activeById.get(entry.to))
-        .filter((candidate) => candidate != null);
+        .filter((entry: { to: string; status: number }) => normalizeTokenStatus(entry.status) === TokenStatus.ACTIVE)
+        .map((entry: { to: string; status: number }) => activeById.get(entry.to))
+        .filter((candidate: TokenLike | undefined) => candidate != null);
     },
-    spanning: (token, stream) => {
+    spanning: (token: TokenLike, stream: string) => {
       if (!token || typeof stream !== "string" || stream.length === 0) return [];
       const target = getTokenBounds(token);
       if (!target) return [];
       return getActiveStreamTokens(stream)
-        .filter((candidate) => {
+        .filter((candidate: TokenLike) => {
           if (!candidate || candidate.sync_left == null || candidate.sync_right == null) return false;
           return (
             compareOrderValue(candidate.sync_left, target.left) <= 0 &&
             compareOrderValue(candidate.sync_right, target.right) >= 0
           );
         })
-        .sort((left, right) => {
+        .sort((left: TokenLike, right: TokenLike) => {
           const byLeft = compareOrderValue(left.sync_left, right.sync_left);
           if (byLeft !== 0) return byLeft;
           const byRight = compareOrderValue(left.sync_right, right.sync_right);
@@ -412,7 +414,7 @@ function buildNavigationFunctions(
           return compareOrderValue(left.id ?? "", right.id ?? "");
         });
     },
-    midpoint: (token) => {
+    midpoint: (token: TokenLike) => {
       const bounds = getTokenBounds(token);
       if (!bounds) return null;
       return normalizeAnchor(
@@ -420,7 +422,7 @@ function buildNavigationFunctions(
         token
       );
     },
-    at_ratio: (token, ratio) => {
+    at_ratio: (token: TokenLike, ratio: number) => {
       const bounds = getTokenBounds(token);
       if (!bounds) return null;
       return normalizeAnchor(
@@ -432,16 +434,16 @@ function buildNavigationFunctions(
         token
       );
     },
-    at_sync: (syncMark) =>
+    at_sync: (syncMark: unknown) =>
       normalizeAnchor({ anchor_left: syncMark, anchor_right: syncMark, ratio: 0 }),
-    target: (phoneme) => {
+    target: (phoneme: string) => {
       const payload = materializeInventoryTarget(phoneme);
       return {
         ...payload,
         params: { ...payload.params },
       };
     },
-    prev_point: (stream) => {
+    prev_point: (stream: string) => {
       const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
       if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
       const points = getActiveStreamTokens(streamName);
@@ -450,7 +452,7 @@ function buildNavigationFunctions(
       if (index < 0 || index >= points.length) return null;
       return points[index];
     },
-    next_point: (stream) => {
+    next_point: (stream: string) => {
       const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
       if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
       const points = getActiveStreamTokens(streamName);
@@ -459,8 +461,8 @@ function buildNavigationFunctions(
       if (index < 0 || index >= points.length) return null;
       return points[index];
     },
-    phrase_index: (token) => getPhraseWindow(token).index,
-    phrase_total: (token) => getPhraseWindow(token).total,
+    phrase_index: (token: TokenLike) => getPhraseWindow(token).index,
+    phrase_total: (token: TokenLike) => getPhraseWindow(token).total,
   };
 }
 
@@ -471,6 +473,7 @@ function evaluateSelectWhere(
   functions: RuntimeLike
 ): boolean {
   if (!whereExpr || whereExpr === "true") return true;
+  if (typeof whereExpr !== "string") return false;
   const result = evaluateExpression(
     whereExpr,
     { current: token, params: params ?? {} },
@@ -485,6 +488,7 @@ function evaluateRuleConstraint(
   functions: RuntimeLike
 ): boolean {
   if (!constraintExpr || constraintExpr === "true") return true;
+  if (typeof constraintExpr !== "string") return false;
   const result = evaluateExpression(constraintExpr, context, functions);
   return Boolean(result);
 }
@@ -593,8 +597,8 @@ function getOrCreateScalarState(
 }
 
 function previewScalarEffect(state: TokenLike, op: string, value: number): number {
-  const current = Number.isFinite(state.preview) ? state.preview : state.base;
-  const maybeRound = (n) => (state.round ? Math.round(n) : n);
+  const current = Number.isFinite(state.preview) ? Number(state.preview) : Number(state.base ?? 0);
+  const maybeRound = (n: number): number => (state.round ? Math.round(n) : n);
   if (state.resolution === "klatt") {
     const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
     if (op === "set") return maybeRound(value);
@@ -610,7 +614,7 @@ function previewScalarEffect(state: TokenLike, op: string, value: number): numbe
 }
 
 function resolveScalarState(state: TokenLike): number {
-  const maybeRound = (n) => (state.round ? Math.round(n) : n);
+  const maybeRound = (n: number): number => (state.round ? Math.round(n) : n);
   let value = Number.isFinite(state.base) ? Number(state.base) : 0;
   const orderedEffects = state.effects
     .slice()
@@ -695,7 +699,7 @@ function applyEffectToToken(
     return value;
   };
 
-  const setField = (nextValue) => {
+  const setField = (nextValue: unknown) => {
     let cursor = token;
     for (let i = 0; i < fieldPath.length - 1; i += 1) {
       const segment = fieldPath[i];
@@ -708,7 +712,7 @@ function applyEffectToToken(
   };
 
   const currentValue = getField();
-  const current = Number.isFinite(currentValue) ? currentValue : 0;
+  const current = Number.isFinite(currentValue) ? Number(currentValue) : 0;
   const value = evaluateValueExpression(effect.value, token, params, functions, extraContext);
   const op = effect.op;
   if (op !== "set" && op !== "add" && op !== "mul") {

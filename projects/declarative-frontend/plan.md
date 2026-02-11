@@ -185,6 +185,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: scalar execution unified to phase-boundary resolution for all declared stream scalars (no mixed immediate/deferred declared-scalar path).
 - Evidence: `src/declarative-frontend/engine.ts` now defaults declared scalars without explicit `resolution` to `standard`, accumulates declared scalar effects uniformly during rule execution, and resolves declared scalar fields at each phase boundary (explicit `resolve_scalars` still supported as override).
 - Evidence: `test/declarative-frontend-scalar-resolution.test.ts` now validates automatic phase-boundary resolve for a declared scalar without explicit `resolution`/`resolve_scalars`; full suite passes via `npx vitest run` (`34` files / `118` tests).
+- 2026-02-11: `textToKlattTrack()` output contract is now explicitly locked with schema-level tests.
+- Evidence: `test/tts-frontend-output-contract.test.ts` verifies frame-key schema (`time`, `params`, optional `phoneme`/`word`), monotonic finite time, and stable full param-key coverage on every emitted frame.
+- Evidence: full suite passes via `npx vitest run` (`35` files / `119` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.
@@ -263,7 +266,7 @@ Acceptance criteria:
 
 - [ ] `G1` `IN_PROGRESS`: Keep `textToKlattTrack()` public signature; replace internals with declarative engine call only.
 - [x] `G2` `DONE`: Remove imperative post-processing loops in `src/tts-frontend.ts`.
-- [ ] `G3` `NOT_STARTED`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
+- [x] `G3` `DONE`: Keep output contract as current `KlattFrame[]` shape for downstream runtime.
 
 Acceptance criteria:
 - `src/tts-frontend.ts` contains no imperative phonological/phonetic rule pipeline.

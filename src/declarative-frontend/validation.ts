@@ -1,18 +1,32 @@
 import { compareOrder } from "./order";
 import { validateExpressionSyntax } from "./expressions";
 
-function makeDiagnostic(code, message, path, severity = "error") {
+type DiagnosticSeverity = "error" | "warning";
+type ValidationDiagnostic = {
+  code: string;
+  message: string;
+  path: string;
+  severity: DiagnosticSeverity;
+};
+type PlainObject = Record<string, any>;
+
+function makeDiagnostic(
+  code: string,
+  message: string,
+  path: string,
+  severity: DiagnosticSeverity = "error"
+): ValidationDiagnostic {
   return { code, message, path, severity };
 }
 
 const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
 const ALLOWED_RULE_OPS = new Set();
 
-function asPlainObject(value) {
-  return value && typeof value === "object" && !Array.isArray(value);
+function asPlainObject(value: unknown): value is PlainObject {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function validateStreams(spec, diagnostics) {
+function validateStreams(spec: PlainObject, diagnostics: ValidationDiagnostic[]): Map<string, any> {
   const streamNames = Object.keys(spec.streams || {});
   const streamByName = new Map();
 
@@ -53,7 +67,11 @@ function validateStreams(spec, diagnostics) {
   return streamByName;
 }
 
-function validateTopology(spec, streamByName, diagnostics) {
+function validateTopology(
+  spec: PlainObject,
+  streamByName: Map<string, any>,
+  diagnostics: ValidationDiagnostic[]
+): void {
   const sections = ["hierarchy", "parallel", "point"];
   for (const section of sections) {
     const values = Array.isArray(spec.topology?.[section]) ? spec.topology[section] : [];
@@ -83,7 +101,11 @@ function validateTopology(spec, streamByName, diagnostics) {
   }
 }
 
-function validatePatterns(spec, streamByName, diagnostics) {
+function validatePatterns(
+  spec: PlainObject,
+  streamByName: Map<string, any>,
+  diagnostics: ValidationDiagnostic[]
+): void {
   const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
   for (const [name, pattern] of Object.entries(patterns)) {
     if (!asPlainObject(pattern)) {
@@ -158,8 +180,8 @@ function validatePatterns(spec, streamByName, diagnostics) {
   }
 }
 
-function collectScalarFields(spec) {
-  const fields = new Set();
+function collectScalarFields(spec: PlainObject): Set<string> {
+  const fields = new Set<string>();
   const streams = asPlainObject(spec.streams) ? spec.streams : {};
   for (const stream of Object.values(streams)) {
     if (!asPlainObject(stream)) continue;
@@ -171,7 +193,11 @@ function collectScalarFields(spec) {
   return fields;
 }
 
-function validateRules(spec, streamByName, diagnostics) {
+function validateRules(
+  spec: PlainObject,
+  streamByName: Map<string, any>,
+  diagnostics: ValidationDiagnostic[]
+): void {
   const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
   const rules = asPlainObject(spec.rules) ? spec.rules : {};
 
@@ -335,8 +361,8 @@ function validateRules(spec, streamByName, diagnostics) {
   }
 }
 
-export function validateDslSpec(spec) {
-  const diagnostics = [];
+export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
+  const diagnostics: ValidationDiagnostic[] = [];
   const phaseByName = new Map();
   const phaseNames = [];
   const streamByName = validateStreams(spec, diagnostics);
@@ -419,7 +445,7 @@ export function validateDslSpec(spec) {
   for (const phase of spec.phases) {
     for (const dep of phase.after) {
       if (!phaseIndex.has(dep) || !phaseIndex.has(phase.name)) continue;
-      if (phaseIndex.get(dep) >= phaseIndex.get(phase.name)) {
+      if (phaseIndex.get(dep)! >= phaseIndex.get(phase.name)!) {
         diagnostics.push(
           makeDiagnostic(
             "E_PHASE_ORDER_VIOLATION",
@@ -434,7 +460,7 @@ export function validateDslSpec(spec) {
   return diagnostics;
 }
 
-export function assertValidSpec(spec) {
+export function assertValidSpec(spec: PlainObject): ValidationDiagnostic[] {
   const diagnostics = validateDslSpec(spec);
   const errors = diagnostics.filter((d) => d.severity === "error");
   if (errors.length > 0) {
@@ -444,8 +470,8 @@ export function assertValidSpec(spec) {
   return diagnostics;
 }
 
-export function validateSyncAxis(syncMarks) {
-  const diagnostics = [];
+export function validateSyncAxis(syncMarks: unknown): ValidationDiagnostic[] {
+  const diagnostics: ValidationDiagnostic[] = [];
   const seen = new Set();
   const marks = Array.isArray(syncMarks) ? syncMarks : [];
 

@@ -11,7 +11,8 @@
     "build:dict": "node scripts/build-cmudict.js",
     "build:wasm": "bash build.sh",
     "build:wasm:ps": "pwsh -File build.ps1",
-    "test:golden": "node scripts/run-golden.mjs"
+    "test:golden": "node scripts/run-golden.mjs",
+    "golden:declarative-summary": "node scripts/export-declarative-corpus-summary.mjs"
   },
   "dependencies": {
     "cel-js": "^0.8.2",

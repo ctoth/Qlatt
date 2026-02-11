@@ -132,9 +132,14 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: declarative-only corpus behavior coverage started on linguistic phrase set.
 - Evidence: `test/tts-frontend-declarative-corpus.test.ts` validates finite/monotonic track output across `test/phrase-sets/linguistic.json` using `textToKlattTrack()` declarative runtime path.
 - Evidence: declarative + frontend migration suite now passes (`22` files / `57` tests).
+- 2026-02-11: corpus-level declarative golden summary baseline locked for deterministic regression checking.
+- Evidence: `test/tts-frontend-declarative-golden-summary.test.ts` compares per-phrase summary metrics (`events`, `totalTime`, `voicedEvents`, `f0Min`, `f0Max`) against `test/golden/declarative-corpus-summary.json`.
+- Evidence: `scripts/export-declarative-corpus-summary.mjs` + `npm run golden:declarative-summary` provide explicit regeneration workflow for the locked baseline.
+- Evidence: declarative + frontend migration suite now passes (`23` files / `58` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
+- Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -237,8 +242,8 @@ Acceptance criteria:
 
 - [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
 - [x] `J2` `DONE`: Add integration tests for phases, diagnostics, and finalize behavior.
-- [ ] `J3` `IN_PROGRESS`: Add declarative-only frontend behavior tests on phrase corpus.
-- [ ] `J4` `NOT_STARTED`: Run golden verification and lock outputs after review.
+- [x] `J3` `DONE`: Add declarative-only frontend behavior tests on phrase corpus.
+- [ ] `J4` `IN_PROGRESS`: Run golden verification and lock outputs after review.
 - [ ] `J5` `NOT_STARTED`: Update docs to describe declarative frontend as current architecture.
 
 Acceptance criteria:

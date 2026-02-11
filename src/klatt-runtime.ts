@@ -261,7 +261,7 @@ export interface KlattRuntimeOptions {
   audioContext: AudioContext;
   semantics: SemanticsDocument;
   graph: BaconGraph;
-  registry?: Registry;                        // Registry defining primitives (optional for backward compat)
+  registry: Registry;                         // Registry defining primitives (required)
   workletBasePath?: string;                   // Base path for worklet JS files, defaults to '/worklets/'
   wasmModules?: Record<string, ArrayBuffer>;  // Pre-loaded WASM modules (optional)
   logger?: (msg: string) => void;             // Optional logging callback

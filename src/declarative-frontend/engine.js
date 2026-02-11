@@ -68,9 +68,10 @@ function initializeBaseStreamSyncMarks(sequence, baseStreams) {
     );
     if (!needsInitialization) continue;
 
+    const boundaries = buildInitialBoundaryOrders(activeStreamTokens.length);
     for (let i = 0; i < activeStreamTokens.length; i += 1) {
-      activeStreamTokens[i].sync_left = i;
-      activeStreamTokens[i].sync_right = i + 1;
+      activeStreamTokens[i].sync_left = boundaries[i];
+      activeStreamTokens[i].sync_right = boundaries[i + 1];
     }
   }
 }
@@ -79,6 +80,8 @@ const FINITE_RANK_RE = /^[0-9a-z]{12}$/;
 const BASE36_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 const BASE36 = 36n;
 const MAX_FINITE_RANK = BASE36 ** 12n - 1n;
+const START_ORDER = Object.freeze({ kind: "START" });
+const END_ORDER = Object.freeze({ kind: "END" });
 
 function parseBase36Rank(rank) {
   if (typeof rank !== "string" || !FINITE_RANK_RE.test(rank)) return null;
@@ -99,6 +102,34 @@ function formatBase36Rank(value) {
     n /= BASE36;
   }
   return chars.join("");
+}
+
+function buildInitialBoundaryOrders(tokenCount) {
+  if (!Number.isInteger(tokenCount) || tokenCount <= 0) return [];
+  if (tokenCount === 1) return [START_ORDER, END_ORDER];
+
+  const boundaries = new Array(tokenCount + 1);
+  boundaries[0] = START_ORDER;
+  boundaries[tokenCount] = END_ORDER;
+
+  let previous = 0n;
+  const denominator = BigInt(tokenCount);
+  for (let i = 1; i < tokenCount; i += 1) {
+    let rankValue = (MAX_FINITE_RANK * BigInt(i)) / denominator;
+    if (rankValue <= previous) rankValue = previous + 1n;
+    if (rankValue >= MAX_FINITE_RANK) rankValue = MAX_FINITE_RANK - 1n;
+    if (rankValue <= previous) {
+      throw new Error("E_RANK_NO_SPACE: unable to bootstrap sync axis");
+    }
+    const rank = formatBase36Rank(rankValue);
+    if (!rank) {
+      throw new Error("E_RANK_INVALID: unable to format bootstrap rank");
+    }
+    boundaries[i] = { kind: "FINITE", rank };
+    previous = rankValue;
+  }
+
+  return boundaries;
 }
 
 function toNumericOrder(mark) {
@@ -802,6 +833,9 @@ function withinClosedRange(token, left, right) {
 function splitRange(left, right, count) {
   if (count <= 0) return [];
   if (count === 1) return [{ left, right }];
+  if (compareOrderValue(left, right) === 0) {
+    return Array.from({ length: count }, () => ({ left, right }));
+  }
 
   if (typeof left === "number" && typeof right === "number") {
     const step = (right - left) / count;

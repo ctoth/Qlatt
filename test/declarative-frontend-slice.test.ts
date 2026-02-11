@@ -171,8 +171,10 @@ describe("declarative frontend first migration slice", () => {
     expect(phones.length).toBeGreaterThan(0);
     expect(
       phones.every(
-        (token) => Number.isFinite(token.sync_left) && Number.isFinite(token.sync_right)
+        (token) => token.sync_left != null && token.sync_right != null
       )
     ).toBe(true);
+    expect(phones[0]?.sync_left?.kind).toBe("START");
+    expect(phones[phones.length - 1]?.sync_right?.kind).toBe("END");
   });
 });

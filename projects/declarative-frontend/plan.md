@@ -164,13 +164,17 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/declarative-frontend/engine.js` now enforces active-base adjacency checks per base stream and throws `E_BASE_OVERLAP` / `E_BASE_NOT_CONTIGUOUS` at phase boundaries.
 - Evidence: `src/declarative-frontend/engine.js` `insert_at_boundary` now emits zero-width boundary spans (`sync_left == sync_right == boundary`) to avoid overlap with adjacent base intervals under current axis model.
 - Evidence: `test/declarative-frontend-base-coverage.test.ts` added for contiguous/gap/overlap coverage, and `test/declarative-frontend-splice-actions.test.ts` now locks deterministic ordering for repeated same-boundary inserts; declarative + frontend migration suite passes (`26` files / `70` tests).
+- 2026-02-11: sync-axis bootstrap moved from numeric placeholders to sentinel/rank order keys for missing base streams.
+- Evidence: `src/declarative-frontend/engine.js` now initializes missing base boundaries as `START`/`FINITE`/`END` order objects with fixed-length base36 finite ranks.
+- Evidence: `src/declarative-frontend/engine.js` `splitRange` now supports equal-boundary multi-token insertion for non-numeric order keys (required for same-mark structural inserts).
+- Evidence: `test/declarative-frontend-sync-axis.test.ts` added for sentinel bootstrap and finite-boundary multi-insert behavior; declarative + frontend migration suite passes (`27` files / `72` tests).
 - Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: base-coverage validation currently checks interior adjacency (`token[i].sync_right` vs `token[i+1].sync_left`) but does not yet enforce full `[START, END]` boundary anchoring due the still-simplified sync-axis bootstrap model.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar effect accumulation currently activates only for fields with explicit stream scalar `resolution` metadata (`standard`/`klatt`); fields without explicit resolution metadata still execute immediate in-rule updates.
-- Limitation: sync-axis initialization currently bootstraps missing base-stream marks as numeric contiguous intervals (`[i, i+1]`) rather than materializing full sentinel/rank objects (`START`/`FINITE`/`END`) from spec Part 1.
+- Limitation: sync-axis order keys now use sentinel/rank objects for bootstrap, but the runtime still treats marks as inline values on tokens (not full `SyncMark` entities with stable IDs/time cells), so full Part 1.1/1.2 object-model parity remains incomplete.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 

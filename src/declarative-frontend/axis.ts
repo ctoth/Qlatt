@@ -7,13 +7,6 @@ export const MAX_FINITE_RANK = BASE36 ** BigInt(RANK_LEN) - 1n;
 export const START_ORDER = Object.freeze({ kind: "START", id: "START" });
 export const END_ORDER = Object.freeze({ kind: "END", id: "END" });
 
-function normalizeNumericString(value) {
-  if (typeof value !== "string" || !/^-?\d+(\.\d+)?$/.test(value)) return null;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return null;
-  return String(parsed);
-}
-
 export function parseBase36Rank(rank) {
   if (typeof rank !== "string" || !FINITE_RANK_RE.test(rank)) return null;
   let value = 0n;
@@ -53,56 +46,26 @@ export function isEndOrder(mark) {
 }
 
 export function serializeOrderValue(mark) {
-  if (mark == null) return null;
-
-  if (typeof mark === "number" && Number.isFinite(mark)) {
-    return `NUM:${String(Object.is(mark, -0) ? 0 : mark)}`;
-  }
-  if (typeof mark === "bigint") {
-    return `BIG:${mark.toString()}`;
-  }
-  if (typeof mark === "string") {
-    if (parseBase36Rank(mark) != null) return `FINITE:${mark}`;
-    const normalizedNumeric = normalizeNumericString(mark);
-    if (normalizedNumeric != null) return `NUM:${normalizedNumeric}`;
-    return `STR:${mark}`;
-  }
-  if (isOrderObject(mark)) {
-    if (mark.kind === "START") return "START";
-    if (mark.kind === "END") return "END";
-    if (mark.kind === "FINITE") {
-      if (typeof mark.rank === "string" && FINITE_RANK_RE.test(mark.rank)) {
-        return `FINITE:${mark.rank}`;
-      }
-      return `FINITE_RAW:${String(mark.rank ?? "")}`;
+  if (!isOrderObject(mark)) return null;
+  if (mark.kind === "START") return "START";
+  if (mark.kind === "END") return "END";
+  if (mark.kind === "FINITE") {
+    if (typeof mark.rank === "string" && FINITE_RANK_RE.test(mark.rank)) {
+      return `FINITE:${mark.rank}`;
     }
-    return `ORDER_RAW:${String(mark.kind)}`;
+    return `FINITE_RAW:${String(mark.rank ?? "")}`;
   }
-
-  return `RAW:${String(mark)}`;
+  return `ORDER_RAW:${String(mark.kind)}`;
 }
 
 export function toNumericOrder(mark) {
-  if (typeof mark === "number" && Number.isFinite(mark)) return mark;
-  if (typeof mark === "bigint") return Number(mark);
-
-  if (typeof mark === "string") {
-    const rank = parseBase36Rank(mark);
+  if (!isOrderObject(mark)) return null;
+  if (mark.kind === "START") return 0;
+  if (mark.kind === "END") return Number(MAX_FINITE_RANK);
+  if (mark.kind === "FINITE") {
+    const rank = parseBase36Rank(mark.rank);
     if (rank != null) return Number(rank);
-    const normalized = normalizeNumericString(mark);
-    if (normalized != null) return Number(normalized);
-    return null;
   }
-
-  if (isOrderObject(mark)) {
-    if (mark.kind === "START") return 0;
-    if (mark.kind === "END") return Number(MAX_FINITE_RANK);
-    if (mark.kind === "FINITE") {
-      const rank = parseBase36Rank(mark.rank);
-      if (rank != null) return Number(rank);
-    }
-  }
-
   return null;
 }
 
@@ -169,9 +132,6 @@ function toSplitBigInt(mark) {
     if (mark.kind === "FINITE") return parseBase36Rank(mark.rank);
     return null;
   }
-  if (typeof mark === "string") {
-    return parseBase36Rank(mark);
-  }
   return null;
 }
 
@@ -185,18 +145,6 @@ export function splitOrderRange(left, right, count) {
   if (count === 1) return [{ left, right }];
   if (compareOrderValue(left, right) === 0) {
     return Array.from({ length: count }, () => ({ left, right }));
-  }
-
-  if (typeof left === "number" && typeof right === "number") {
-    const step = (right - left) / count;
-    const segments = [];
-    for (let i = 0; i < count; i += 1) {
-      segments.push({
-        left: left + step * i,
-        right: left + step * (i + 1),
-      });
-    }
-    return segments;
   }
 
   const leftRank = toSplitBigInt(left);
@@ -229,7 +177,7 @@ export function splitOrderRange(left, right, count) {
   }
 
   throw new Error(
-    "Multi-token splice requires numeric or order-rank boundaries with representable interior cuts"
+    "Multi-token splice requires declarative order boundaries with representable interior cuts"
   );
 }
 
@@ -241,12 +189,6 @@ function stableMarkIdFromOrder(order, indexHint) {
     if (order.kind === "FINITE" && typeof order.rank === "string") {
       return `M_${order.rank}`;
     }
-  }
-  if (typeof order === "string" && parseBase36Rank(order) != null) {
-    return `M_${order}`;
-  }
-  if (typeof order === "number" && Number.isFinite(order)) {
-    return `M_NUM_${String(order).replace(/[^0-9a-zA-Z]/g, "_")}`;
   }
   return `M_${indexHint}`;
 }

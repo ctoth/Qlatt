@@ -191,9 +191,19 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: runtime diagnostics hardened with stable error codes for rule-execution failures plus deterministic rule blame-path annotation.
 - Evidence: `src/declarative-frontend/engine.ts` now emits coded runtime errors (e.g. `E_EFFECT_TARGET_UNKNOWN`, `E_SPLICE_BOUNDARY_REQUIRED`, `E_POINT_STREAM_INVALID`) and annotates thrown rule errors with `phase=<name> rule=<name> path=rules.<name>`.
 - Evidence: `test/declarative-frontend-integration-diagnostics.test.ts` now validates runtime error code + blame path propagation; full suite passes via `npx vitest run` (`35` files / `120` tests).
-- Limitation: multi-token splice insertion still rejects non-numeric, non-base36 boundary schemes (full explicit sync-axis/rank object support remains pending).
+- 2026-02-11: initial `tts-dsl` tooling surface landed with trace-backed `run|validate|explain|why-not|diff` workflows and contract tests.
+- Evidence: `scripts/tts-dsl.ts` now provides CLI entrypoint with subcommands `run`, `validate`, `explain`, `why-not`, and `diff` over declarative engine/runtime.
+- Evidence: `src/declarative-frontend/tooling.ts` now provides reusable snapshot/analysis APIs (`buildPhaseSnapshots`, `explainField`, `whyNotRule`, `diffPhaseState`) and runtime trace now includes `match`/`rewrite`/`error` events in addition to phase/rule/resolution events.
+- Evidence: `test/declarative-frontend-cli.test.ts` validates CLI output contracts and trace schema event presence; full suite passes via `npx vitest run` (`36` files / `121` tests).
+- 2026-02-11: strict SyncAxis order-object enforcement completed for runtime/test path (legacy numeric/string marks removed from declarative fixtures).
+- Evidence: `src/declarative-frontend/engine.ts` now throws `E_SYNC_MARK_INVALID` when token sync/anchor fields are not `START|FINITE|END` order objects.
+- Evidence: declarative fixture inputs were migrated to explicit order objects using `test/utils/order-marks.ts`; declarative/frontend suite passes via `npx vitest run` (`30` files / `88` tests).
+- 2026-02-11: TypeScript toolchain activation and project-scope typecheck baseline established.
+- Evidence: `package.json`/`package-lock.json` include `typescript` as dev dependency, and `tsconfig.json` `rootDir` is now `"."` so scripts/tests/config are included consistently.
+- Evidence: `npx tsc --noEmit` now runs project-wide and reports current strict-type backlog (primarily `scripts/*.ts`, `src/declarative-frontend/*.ts`, and `test/test-harness.ts`).
+- Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
-- Limitation: START/END anchoring is enforced for object-order streams, but numeric/base36-legacy token inputs are still accepted without mandatory sentinel anchoring during migration.
+- Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps; staged TS check gates are not yet split by target surface.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar unification now applies to declared top-level scalar fields; nested dotted fields (e.g. `params.F2`) remain immediate unless promoted to declared scalar fields in stream metadata.
@@ -287,10 +297,10 @@ Acceptance criteria:
 
 ### [I] Tooling Completion (Spec Part 10 + CLI doc)
 
-- [ ] `I1` `NOT_STARTED`: Implement trace model sufficient for match/rewrite/resolve/error sequencing.
-- [ ] `I2` `NOT_STARTED`: Implement explain/why-not/diff APIs on top of trace/provenance data.
-- [ ] `I3` `NOT_STARTED`: Add `tts-dsl` CLI entrypoint and subcommands from `projects/declarative-frontend/cli.md`.
-- [ ] `I4` `NOT_STARTED`: Add contract tests for CLI outputs and trace schemas.
+- [x] `I1` `DONE`: Implement trace model sufficient for match/rewrite/resolve/error sequencing.
+- [x] `I2` `DONE`: Implement explain/why-not/diff APIs on top of trace/provenance data.
+- [x] `I3` `DONE`: Add `tts-dsl` CLI entrypoint and subcommands from `projects/declarative-frontend/cli.md`.
+- [x] `I4` `DONE`: Add contract tests for CLI outputs and trace schemas.
 
 Acceptance criteria:
 - `tts-dsl run|validate|explain|why-not|diff` are functional.
@@ -318,6 +328,7 @@ Acceptance criteria:
 - [ ] `K6` `IN_PROGRESS`: Refactor runtime into TS-native modules (`axis`, `rewrite`, `scalars`, `timing`, `invariants`, `diagnostics`) with explicit contracts.
 - [x] `K7` `DONE`: Add `ts-node`-compatible entrypoints and keep Vite/Vitest workflows green through migration.
 - [ ] `K8` `IN_PROGRESS`: Add executable spec fixtures + determinism/property tests for axis ordering, rank insertion/rebalance, and rewrite stability.
+- [ ] `K9` `IN_PROGRESS`: Land layered TypeScript check gates (core/frontend first, scripts/harness next) and drive `npx tsc --noEmit` to green.
 
 Acceptance criteria:
 - Declarative frontend core modules are TypeScript-first, with deterministic behavior preserved.

@@ -11,8 +11,9 @@
     "build:dict": "node --loader ts-node/esm --experimental-specifier-resolution=node scripts/build-cmudict.ts",
     "build:wasm": "bash build.sh",
     "build:wasm:ps": "pwsh -File build.ps1",
-    "test:golden": "node --loader ts-node/esm --experimental-specifier-resolution=node scripts/run-golden.ts",
-    "golden:declarative-summary": "node --loader ts-node/esm --experimental-specifier-resolution=node scripts/export-declarative-corpus-summary.ts"
+    "test:golden": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/run-golden.ts",
+    "golden:declarative-summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/export-declarative-corpus-summary.ts",
+    "tts-dsl": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/tts-dsl.ts"
   },
   "dependencies": {
     "cel-js": "^0.8.2",
@@ -25,7 +26,7 @@
   "devDependencies": {
     "puppeteer-core": "^23.10.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
   }

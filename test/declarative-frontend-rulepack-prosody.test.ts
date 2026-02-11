@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend rulepack prosody phase", () => {
   it("generates f0 points for stressed vowels and question rise in declarative phases", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const sequence = [
       {
         id: "p1",
@@ -12,8 +18,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         stress: 1,
         duration: 100,
         params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 0,
-        sync_right: 1,
+        sync_left: s0,
+        sync_right: s1,
         status: 1,
       },
       {
@@ -24,8 +30,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         stress: 0,
         duration: 80,
         params: { AV: 56, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 1,
-        sync_right: 2,
+        sync_left: s1,
+        sync_right: s2,
         status: 1,
       },
       {
@@ -36,8 +42,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         duration: 300,
         punctuationSymbol: "?",
         params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 2,
-        sync_right: 3,
+        sync_left: s2,
+        sync_right: s3,
         status: 1,
       },
     ];
@@ -60,6 +66,12 @@ describe("declarative frontend rulepack prosody phase", () => {
   });
 
   it("resets declination baseline after punctuation boundary", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = finiteOrder(3);
+    const s4 = endOrder();
+
     const sequence = [
       {
         id: "p1",
@@ -69,8 +81,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         stress: 0,
         duration: 100,
         params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 0,
-        sync_right: 1,
+        sync_left: s0,
+        sync_right: s1,
         status: 1,
       },
       {
@@ -81,8 +93,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         duration: 150,
         punctuationSymbol: ",",
         params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 1,
-        sync_right: 2,
+        sync_left: s1,
+        sync_right: s2,
         status: 1,
       },
       {
@@ -93,8 +105,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         stress: 0,
         duration: 100,
         params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 2,
-        sync_right: 3,
+        sync_left: s2,
+        sync_right: s3,
         status: 1,
       },
       {
@@ -105,8 +117,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         duration: 300,
         punctuationSymbol: ".",
         params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 3,
-        sync_right: 4,
+        sync_left: s3,
+        sync_right: s4,
         status: 1,
       },
     ];

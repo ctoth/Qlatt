@@ -115,7 +115,12 @@ function canonicalizeTokenMark(token, axis, field) {
   const raw = token?.[field];
   if (raw == null) return null;
   const id = axis.ensureMark(raw);
-  if (!id) return null;
+  if (!id) {
+    const tokenId = typeof token?.id === "string" && token.id.length > 0 ? token.id : "<anonymous>";
+    throw new Error(
+      `E_SYNC_MARK_INVALID: token '${tokenId}' field '${field}' must be START/FINITE/END order object`
+    );
+  }
 
   const mark = axis.getMarkById(id);
   if (!mark) return null;
@@ -1075,6 +1080,13 @@ function applySelectRule(rule, sequence, runtime) {
       navigationFunctions
     );
     if (!constraintOk) continue;
+    runtime.trace?.push({
+      type: "match",
+      phase: runtime.currentPhase ?? null,
+      rule: runtime.currentRuleName ?? null,
+      mode: "select",
+      token: token?.id ?? null,
+    });
 
     applyEffectsToTargets(
       rule,
@@ -1112,6 +1124,13 @@ function applySelectRule(rule, sequence, runtime) {
     if (rule.suppress || rule.delete) {
       token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
     }
+    runtime.trace?.push({
+      type: "rewrite",
+      phase: runtime.currentPhase ?? null,
+      rule: runtime.currentRuleName ?? null,
+      mode: "select",
+      token: token?.id ?? null,
+    });
   }
 
   return sequence;
@@ -1159,6 +1178,15 @@ function applyPatternRule(rule, sequence, runtime) {
       captureFunctions
     );
     if (!constraintOk) continue;
+    runtime.trace?.push({
+      type: "match",
+      phase: runtime.currentPhase ?? null,
+      rule: runtime.currentRuleName ?? null,
+      mode: "pattern",
+      captures: Object.fromEntries(
+        Object.entries(captures).map(([name, token]) => [name, token?.id ?? null])
+      ),
+    });
 
     applyEffectsToTargets(
       rule,
@@ -1199,6 +1227,15 @@ function applyPatternRule(rule, sequence, runtime) {
         token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
       }
     }
+    runtime.trace?.push({
+      type: "rewrite",
+      phase: runtime.currentPhase ?? null,
+      rule: runtime.currentRuleName ?? null,
+      mode: "pattern",
+      captures: Object.fromEntries(
+        Object.entries(captures).map(([name, token]) => [name, token?.id ?? null])
+      ),
+    });
   }
 
   return sequence;
@@ -1529,9 +1566,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     scalarStates: new Map(),
     scalarEffectOrder: 0,
     currentRuleName: null,
+    currentPhase: null,
     usedTokenIds,
     markTimes: new Map(),
     axis: null,
+    trace: null,
     finalized: false,
   };
 
@@ -1545,9 +1584,11 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     : null;
 
   const trace = [];
+  runtime.trace = trace;
 
   for (const phase of spec.phases) {
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
+    runtime.currentPhase = phase.name;
     const phaseScalarFields = resolvePhaseScalarFields(phase, runtime);
     trace.push({ type: "phase_start", phase: phase.name });
     for (const ruleName of phase.rules) {
@@ -1562,6 +1603,13 @@ export function runRuleEngine(sequence, specSource, options = {}) {
       try {
         current = applyRule(rule, current, runtime);
       } catch (error) {
+        trace.push({
+          type: "error",
+          phase: phase.name,
+          rule: ruleName,
+          message:
+            error instanceof Error ? error.message : typeof error === "string" ? error : String(error),
+        });
         throw annotateRuntimeRuleError(error, phase.name, ruleName);
       }
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
@@ -1593,6 +1641,7 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     }
     assertActiveBaseCoverage(current, runtime);
     trace.push({ type: "phase_end", phase: phase.name });
+    runtime.currentPhase = null;
   }
 
   return {

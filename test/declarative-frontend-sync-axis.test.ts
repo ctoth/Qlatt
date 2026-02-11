@@ -69,4 +69,20 @@ describe("declarative frontend sync axis bootstrap", () => {
     expect(b?.sync_left).toBe(p1?.sync_right);
     expect(b?.sync_right).toBe(p1?.sync_right);
   });
+
+  it("rejects legacy non-object sync marks", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {},
+      phases: [{ name: "structural", rules: [] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrowError(/E_SYNC_MARK_INVALID/);
+  });
 });

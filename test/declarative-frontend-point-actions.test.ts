@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend point actions and helpers", () => {
   it("inserts point tokens with midpoint anchors and computed values", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const spec = {
       parameters: { base_f0: 100 },
       streams: {
@@ -28,8 +34,8 @@ describe("declarative frontend point actions and helpers", () => {
         id: "p1",
         stream: "phone",
         type: "vowel",
-        sync_left: "s0",
-        sync_right: "s1",
+        sync_left: s0,
+        sync_right: s1,
         duration: 100,
         status: 1,
       },
@@ -37,8 +43,8 @@ describe("declarative frontend point actions and helpers", () => {
         id: "p2",
         stream: "phone",
         type: "stop",
-        sync_left: "s1",
-        sync_right: "s2",
+        sync_left: s1,
+        sync_right: s2,
         duration: 70,
         status: 1,
       },
@@ -46,8 +52,8 @@ describe("declarative frontend point actions and helpers", () => {
         id: "p3",
         stream: "phone",
         type: "vowel",
-        sync_left: "s2",
-        sync_right: "s3",
+        sync_left: s2,
+        sync_right: s3,
         duration: 120,
         status: 1,
       },
@@ -56,14 +62,18 @@ describe("declarative frontend point actions and helpers", () => {
     const out = runRuleEngine(input, spec).sequence;
     const points = out.filter((t) => t.stream === "f0");
     expect(points).toHaveLength(2);
-    expect(points[0].anchor_left).toBe("s0");
-    expect(points[0].anchor_right).toBe("s1");
+    expect(points[0].anchor_left).toEqual(s0);
+    expect(points[0].anchor_right).toEqual(s1);
     expect(points[0].ratio).toBe(0.5);
     expect(points[0].value).toBe(100);
     expect(points[1].value).toBe(102);
   });
 
   it("supports $at_ratio and $at_sync anchor helpers", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
@@ -90,20 +100,24 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: "s0", sync_right: "s1", status: 1 },
-      { id: "p2", stream: "phone", sync_left: "s1", sync_right: "s2", status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;
     const points = out.filter((t) => t.stream === "f0");
     expect(points).toHaveLength(2);
     expect(points[0].ratio).toBe(0.25);
-    expect(points[1].anchor_left).toBe("s2");
-    expect(points[1].anchor_right).toBe("s2");
+    expect(points[1].anchor_left).toEqual(s2);
+    expect(points[1].anchor_right).toEqual(s2);
     expect(points[1].ratio).toBe(0);
   });
 
   it("supports point navigation helpers and spanning helper", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         word: { type: "span" },
@@ -141,9 +155,9 @@ describe("declarative frontend point actions and helpers", () => {
     };
 
     const input = [
-      { id: "w1", stream: "word", sync_left: 0, sync_right: 2, status: 1 },
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, duration: 100, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, duration: 120, status: 1 },
+      { id: "w1", stream: "word", sync_left: s0, sync_right: s2, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 120, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;
@@ -157,6 +171,9 @@ describe("declarative frontend point actions and helpers", () => {
   });
 
   it("throws E_INVALID_RATIO when point anchors use an out-of-range ratio", () => {
+    const s0 = startOrder();
+    const s1 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base" },
@@ -167,7 +184,7 @@ describe("declarative frontend point actions and helpers", () => {
           select: { stream: "phone", where: "current.id = 'p1'" },
           insert_point: {
             stream: "f0",
-            at: { anchor_left: "s0", anchor_right: "s1", ratio: 1.2 },
+            at: { anchor_left: s0, anchor_right: s1, ratio: 1.2 },
             value: "100",
             tag: "f0",
           },
@@ -176,7 +193,7 @@ describe("declarative frontend point actions and helpers", () => {
       phases: [{ name: "prosody", rules: ["invalid_ratio"] }],
     };
 
-    const input = [{ id: "p1", stream: "phone", sync_left: "s0", sync_right: "s1", status: 1 }];
+    const input = [{ id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 }];
     expect(() => runRuleEngine(input, spec)).toThrowError(/E_INVALID_RATIO/);
   });
 });

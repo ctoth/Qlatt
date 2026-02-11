@@ -17,3 +17,9 @@ export {
   joinTokenStatus,
   isActiveToken,
 } from "./model";
+export {
+  buildPhaseSnapshots,
+  explainField,
+  whyNotRule,
+  diffPhaseState,
+} from "./tooling";

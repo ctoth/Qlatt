@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend splice actions", () => {
   it("supports pattern replace_range with suppression + insertion", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base" },
@@ -32,9 +38,9 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", type: "stop", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", type: "vowel", sync_left: 1, sync_right: 2, status: 1 },
-      { id: "p3", stream: "phone", type: "fricative", sync_left: 2, sync_right: 3, status: 1 },
+      { id: "p1", stream: "phone", type: "stop", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", type: "vowel", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p3", stream: "phone", type: "fricative", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;
@@ -46,12 +52,16 @@ describe("declarative frontend splice actions", () => {
     expect(p1?.status).toBe(2);
     expect(p2?.status).toBe(2);
     expect(inserted).toBeTruthy();
-    expect(inserted?.sync_left).toBe(0);
-    expect(inserted?.sync_right).toBe(2);
+    expect(inserted?.sync_left).toEqual(s0);
+    expect(inserted?.sync_right).toEqual(s2);
     expect(activePhone).toHaveLength(2);
   });
 
   it("supports select insert_at_boundary on the right side", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base" },
@@ -74,19 +84,22 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;
     const inserted = out.find((t) => t.name === "REL");
     expect(inserted).toBeTruthy();
-    expect(inserted?.sync_left).toBe(1);
-    expect(inserted?.sync_right).toBe(1);
+    expect(inserted?.sync_left).toEqual(s1);
+    expect(inserted?.sync_right).toEqual(s1);
     expect(inserted?.status).toBe(1);
   });
 
-  it("supports multi-token replace_range insertion on base36 boundaries", () => {
+  it("supports multi-token replace_range insertion on object-order boundaries", () => {
+    const s0 = startOrder();
+    const s1 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base" },
@@ -110,8 +123,8 @@ describe("declarative frontend splice actions", () => {
       {
         id: "p1",
         stream: "phone",
-        sync_left: "000000000000",
-        sync_right: "00000000000c",
+        sync_left: s0,
+        sync_right: s1,
         status: 1,
       },
     ];
@@ -121,12 +134,10 @@ describe("declarative frontend splice actions", () => {
     expect(inserted).toHaveLength(2);
     const first = inserted.find((t) => t.name === "A");
     const second = inserted.find((t) => t.name === "B");
-    expect(first?.sync_left).toBe("000000000000");
-    expect(second?.sync_right).toBe("00000000000c");
+    expect(first?.sync_left).toEqual(s0);
+    expect(second?.sync_right).toEqual(s1);
     expect(first?.sync_right).toBe(second?.sync_left);
-    expect(typeof first?.sync_right).toBe("string");
-    expect(first && first.sync_right > "000000000000").toBe(true);
-    expect(first && first.sync_right < "00000000000c").toBe(true);
+    expect(first?.sync_right?.kind).toBe("FINITE");
   });
 
   it("requires a resolved boundary for insert_at_boundary", () => {
@@ -152,14 +163,30 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+      {
+        id: "p1",
+        stream: "phone",
+        sync_left: startOrder(),
+        sync_right: finiteOrder(1),
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        sync_left: finiteOrder(1),
+        sync_right: endOrder(),
+        status: 1,
+      },
     ];
 
     expect(() => runRuleEngine(input, spec)).toThrow("insert_at_boundary splice requires boundary");
   });
 
   it("preserves rule order for multiple after-boundary inserts at the same mark", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base" },
@@ -188,8 +215,8 @@ describe("declarative frontend splice actions", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;

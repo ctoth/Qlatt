@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend SyncAxis identity", () => {
   it("canonicalizes token sync refs onto stable mark IDs", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: { phone: { type: "base" } },
       rules: {},
@@ -10,8 +15,8 @@ describe("declarative frontend SyncAxis identity", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const result = runRuleEngine(input, spec);
@@ -33,6 +38,10 @@ describe("declarative frontend SyncAxis identity", () => {
   });
 
   it("drives insert_at_boundary with mark identity", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: { phone: { type: "base" } },
       rules: {
@@ -50,8 +59,8 @@ describe("declarative frontend SyncAxis identity", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
     const result = runRuleEngine(input, spec);
@@ -68,6 +77,10 @@ describe("declarative frontend SyncAxis identity", () => {
   });
 
   it("stores finalize timing on SyncAxis marks", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: { phone: { type: "base" } },
       rules: {},
@@ -75,8 +88,8 @@ describe("declarative frontend SyncAxis identity", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, duration: 120, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, duration: 80, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
     const result = runRuleEngine(input, spec);

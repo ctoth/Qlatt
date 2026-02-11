@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend finalize stages", () => {
   it("computes sync times from active base durations and resolves point times", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
@@ -30,8 +35,8 @@ describe("declarative frontend finalize stages", () => {
         id: "p1",
         stream: "phone",
         type: "vowel",
-        sync_left: 0,
-        sync_right: 1,
+        sync_left: s0,
+        sync_right: s1,
         duration: 100,
         status: 1,
       },
@@ -39,8 +44,8 @@ describe("declarative frontend finalize stages", () => {
         id: "p2",
         stream: "phone",
         type: "stop",
-        sync_left: 1,
-        sync_right: 2,
+        sync_left: s1,
+        sync_right: s2,
         duration: 50,
         status: 1,
       },
@@ -53,6 +58,10 @@ describe("declarative frontend finalize stages", () => {
   });
 
   it("keeps point resolution deterministic when compute_times and resolve_points are in separate phases", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
@@ -77,8 +86,8 @@ describe("declarative frontend finalize stages", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, duration: 120, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, duration: 80, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 120, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, duration: 80, status: 1 },
     ];
 
     const out = runRuleEngine(input, spec).sequence;
@@ -88,6 +97,10 @@ describe("declarative frontend finalize stages", () => {
   });
 
   it("interpolates interior base36 marks during compute_times", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder("00000000000c");
+    const s2 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
@@ -98,7 +111,11 @@ describe("declarative frontend finalize stages", () => {
           select: { stream: "phone", where: "current.id = 'p1'" },
           insert_point: {
             stream: "f0",
-            at: "$at_sync('000000000006')",
+            at: {
+              anchor_left: finiteOrder("000000000006"),
+              anchor_right: finiteOrder("000000000006"),
+              ratio: 0,
+            },
             value: "120",
             tag: "f0",
           },
@@ -114,8 +131,16 @@ describe("declarative frontend finalize stages", () => {
       {
         id: "p1",
         stream: "phone",
-        sync_left: "000000000000",
-        sync_right: "00000000000c",
+        sync_left: s0,
+        sync_right: s1,
+        duration: 120,
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        sync_left: s1,
+        sync_right: s2,
         duration: 120,
         status: 1,
       },
@@ -128,6 +153,9 @@ describe("declarative frontend finalize stages", () => {
   });
 
   it("throws E_TIME_NO_BASE_SUPPORT when referenced marks cannot be timed", () => {
+    const s0 = startOrder();
+    const s1 = endOrder();
+
     const spec = {
       streams: {
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
@@ -138,7 +166,11 @@ describe("declarative frontend finalize stages", () => {
           select: { stream: "phone", where: "true" },
           insert_point: {
             stream: "f0",
-            at: "$at_sync('not-orderable-mark')",
+            at: {
+              anchor_left: { kind: "FINITE", rank: "not-orderable-mark" },
+              anchor_right: { kind: "FINITE", rank: "not-orderable-mark" },
+              ratio: 0,
+            },
             value: "100",
             tag: "f0",
           },
@@ -151,7 +183,7 @@ describe("declarative frontend finalize stages", () => {
     };
 
     const input = [
-      { id: "p1", stream: "phone", sync_left: "a", sync_right: "b", duration: 100, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, duration: 100, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, spec)).toThrowError(/E_TIME_NO_BASE_SUPPORT/);

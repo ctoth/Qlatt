@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend base coverage invariants", () => {
   const spec = {
@@ -11,37 +12,52 @@ describe("declarative frontend base coverage invariants", () => {
   };
 
   it("accepts contiguous active base coverage", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 2, status: 1 },
-      { id: "p3", stream: "phone", sync_left: 2, sync_right: 3, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p3", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, spec)).not.toThrow();
   });
 
   it("rejects overlapping active base tokens", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 2, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 1, sync_right: 3, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s2, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
   });
 
   it("rejects gapped active base coverage", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const input = [
-      { id: "p1", stream: "phone", sync_left: 0, sync_right: 1, status: 1 },
-      { id: "p2", stream: "phone", sync_left: 2, sync_right: 3, status: 1 },
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 
     expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
   });
 
   it("accepts anchored START/END object-order coverage", () => {
-    const start = { kind: "START" };
-    const mid = { kind: "FINITE", rank: "000000000001" };
-    const end = { kind: "END" };
+    const start = startOrder();
+    const mid = finiteOrder(1);
+    const end = endOrder();
     const input = [
       { id: "p1", stream: "phone", sync_left: start, sync_right: mid, status: 1 },
       { id: "p2", stream: "phone", sync_left: mid, sync_right: end, status: 1 },
@@ -51,8 +67,8 @@ describe("declarative frontend base coverage invariants", () => {
   });
 
   it("rejects object-order coverage that does not start at START", () => {
-    const left = { kind: "FINITE", rank: "000000000001" };
-    const right = { kind: "END" };
+    const left = finiteOrder(1);
+    const right = endOrder();
     const input = [
       { id: "p1", stream: "phone", sync_left: left, sync_right: right, status: 1 },
     ];
@@ -61,8 +77,8 @@ describe("declarative frontend base coverage invariants", () => {
   });
 
   it("rejects object-order coverage that does not end at END", () => {
-    const start = { kind: "START" };
-    const right = { kind: "FINITE", rank: "00000000000z" };
+    const start = startOrder();
+    const right = finiteOrder("00000000000z");
     const input = [
       { id: "p1", stream: "phone", sync_left: start, sync_right: right, status: 1 },
     ];

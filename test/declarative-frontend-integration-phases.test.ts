@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend/adapter";
+import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
 describe("declarative frontend integration phases", () => {
   it("executes structural->duration->prosody->finalize with resolved point timing trace", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
     const sequence = [
       {
         id: "ph0",
@@ -13,8 +19,8 @@ describe("declarative frontend integration phases", () => {
         duration: 60,
         inherentDuration: 60,
         params: { AV: 0, AVS: 0 },
-        sync_left: 0,
-        sync_right: 1,
+        sync_left: s0,
+        sync_right: s1,
         status: 1,
       },
       {
@@ -26,8 +32,8 @@ describe("declarative frontend integration phases", () => {
         duration: 100,
         inherentDuration: 100,
         params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 1,
-        sync_right: 2,
+        sync_left: s1,
+        sync_right: s2,
         status: 1,
       },
       {
@@ -39,8 +45,8 @@ describe("declarative frontend integration phases", () => {
         inherentDuration: 100,
         punctuationSymbol: "?",
         params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: 2,
-        sync_right: 3,
+        sync_left: s2,
+        sync_right: s3,
         status: 1,
       },
     ];

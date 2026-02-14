@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
+import type { ParamValue } from '../../src/semantics/types';
 
 describe('CEL Evaluator', () => {
   it('evaluates simple math', () => {
@@ -15,7 +16,13 @@ describe('CEL Evaluator', () => {
 
   it('calls registered functions', () => {
     const evaluator = createCelEvaluator();
-    evaluator.registerFunction('double', (x: number) => x * 2);
+    evaluator.registerFunction('double', (...args: ParamValue[]) => {
+      const x = args[0];
+      if (typeof x !== 'number' || !Number.isFinite(x)) {
+        throw new Error('double expects a finite number');
+      }
+      return x * 2;
+    });
     expect(evaluator.evaluate('double(5)', { params: {}, constants: {} })).toBe(10);
   });
 });

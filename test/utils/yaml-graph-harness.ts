@@ -181,6 +181,13 @@ interface EvaluatedFrame {
   realized: Record<string, ParamValue>;
 }
 
+function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
+  }
+  return value;
+}
+
 function createSemanticsHarness(
   semantics: SemanticsDocument,
   suiteSampleRate: number | undefined
@@ -190,12 +197,31 @@ function createSemanticsHarness(
   rampParams: Set<string>;
 } {
   const celEvaluator = createCelEvaluator();
-  celEvaluator.registerFunction('dbToLinear', dbToLinear);
-  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
-  celEvaluator.registerFunction('min', min);
-  celEvaluator.registerFunction('max', max);
-  celEvaluator.registerFunction('pow', pow);
-  celEvaluator.registerFunction('proximity', proximity);
+  celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinear', 0, args[0]);
+    return dbToLinear(db);
+  });
+  celEvaluator.registerFunction('dbToLinearKlsyn', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinearKlsyn', 0, args[0]);
+    return dbToLinearKlsyn(db);
+  });
+  celEvaluator.registerFunction('min', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('min', index, arg));
+    return min(...values);
+  });
+  celEvaluator.registerFunction('max', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('max', index, arg));
+    return max(...values);
+  });
+  celEvaluator.registerFunction('pow', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('pow', 0, args[0]);
+    const y = requireNumericArg('pow', 1, args[1]);
+    return pow(x, y);
+  });
+  celEvaluator.registerFunction('proximity', (...args: ParamValue[]): ParamValue => {
+    const delta = requireNumericArg('proximity', 0, args[0]);
+    return proximity(delta);
+  });
 
   const topoEvaluator = createTopologicalEvaluator(celEvaluator);
   const defaults = getParamDefaults(semantics);

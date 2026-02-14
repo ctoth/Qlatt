@@ -1,15 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { QLATT_V11_SLICE_RULEPACK } from "../src/declarative-frontend/rule-pack";
 
+function ruleOp(rule: unknown): unknown {
+  if (!rule || typeof rule !== "object") return undefined;
+  if (!("op" in rule)) return undefined;
+  return (rule as { op?: unknown }).op;
+}
+
 describe("declarative frontend rulepack shape", () => {
   it("expresses duration heuristics as declarative select/apply rules", () => {
     const stress = QLATT_V11_SLICE_RULEPACK.rules.stress_duration;
     const short = QLATT_V11_SLICE_RULEPACK.rules.vowel_shortening;
     const boundary = QLATT_V11_SLICE_RULEPACK.rules.pre_boundary_lengthening;
 
-    expect(stress?.op).toBeUndefined();
-    expect(short?.op).toBeUndefined();
-    expect(boundary?.op).toBeUndefined();
+    expect(ruleOp(stress)).toBeUndefined();
+    expect(ruleOp(short)).toBeUndefined();
+    expect(ruleOp(boundary)).toBeUndefined();
 
     expect(stress?.select?.stream).toBe("phone");
     expect(short?.select?.stream).toBe("phone");
@@ -22,7 +28,7 @@ describe("declarative frontend rulepack shape", () => {
 
   it("contains no imperative rule.op handlers", () => {
     const opRules = Object.entries(QLATT_V11_SLICE_RULEPACK.rules).filter(
-      ([, rule]) => rule?.op != null
+      ([, rule]) => ruleOp(rule) != null
     );
     expect(opRules).toHaveLength(0);
   });

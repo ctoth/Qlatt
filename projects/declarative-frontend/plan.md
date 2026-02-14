@@ -282,6 +282,10 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/worklets/resonator-processor.ts`, `src/worklets/antiresonator-processor.ts`, and `src/worklets/lf-source-processor.ts` now have strict option/class-field/process/message typing and explicit instantiate result narrowing for `Instance | WebAssemblyInstantiatedSource`.
 - Evidence: dead code was removed in this pass (`phase` field in `src/worklets/impulse-train-processor.ts`, unused `WasmBuffer.free()` in `src/worklets/wasm-utils.ts`), and `tsconfig.audio.json` now includes the three additional processors.
 - Evidence: verification remains green via `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run typecheck:core`, `npm run test:golden`, and `npm test`.
+- 2026-02-14: expanded `typecheck:audio` across the PLSTEP runtime chain worklets (edge detect, envelope decay, branch switch) and removed one stale field.
+- Evidence: `src/worklets/edge-detector-processor.ts`, `src/worklets/decay-envelope-processor.ts`, and `src/worklets/signal-switch-processor.ts` now have strict option/class-field/process/message typing, explicit WASM instantiate narrowing, and null-safe WasmBuffer view handling.
+- Evidence: dead code cleanup in this pass removed the unused edge-detector field `_lastTriggered`; `tsconfig.audio.json` now includes all three PLSTEP chain worklets.
+- Evidence: verification remains green via `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run typecheck:core`, `npm run test:golden`, and `npm test`.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

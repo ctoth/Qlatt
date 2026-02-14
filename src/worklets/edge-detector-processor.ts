@@ -11,13 +11,54 @@
  */
 import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
+interface EdgeDetectorWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
+  edge_detector_new(): number;
+  edge_detector_process(
+    state: number,
+    inputPtr: number,
+    outputPtr: number,
+    blockSize: number,
+    threshold: number
+  ): void;
+  edge_detector_reset(state: number): void;
+}
+
+interface EdgeDetectorProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
+
+interface EdgeDetectorMetricsMessage {
+  type: "metrics";
+  node: string;
+  triggerCount: number;
+  threshold: number;
+}
+
 const wasmUrl =
   typeof URL === "function"
     ? new URL("./edge-detector.wasm", import.meta.url).toString()
     : `${import.meta.url.replace(/[^/]*$/, "")}edge-detector.wasm`;
 
 class EdgeDetectorProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  wasm: EdgeDetectorWasmExports | null;
+  state: number;
+  inputBuffer: WasmBuffer | null;
+  outputBuffer: WasmBuffer | null;
+  ready: boolean;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
       {
         name: "threshold",
@@ -36,20 +77,19 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as EdgeDetectorProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
     this.inputBuffer = null;
     this.outputBuffer = null;
     this.ready = false;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "edge-detector";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "edge-detector";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this._lastTriggered = false;
-
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -59,9 +99,11 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
       }
     };
 
-    const wasmBytes = options?.processorOptions?.wasmBytes;
-    initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
-      this.wasm = instance.exports;
+    const wasmBytes = opts?.processorOptions?.wasmBytes;
+    initWasmModule(wasmUrl, {}, wasmBytes).then((instantiated) => {
+      const instance =
+        instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
+      this.wasm = instance.exports as unknown as EdgeDetectorWasmExports;
       this.state = this.wasm.edge_detector_new();
       this.inputBuffer = new WasmBuffer(this.wasm);
       this.outputBuffer = new WasmBuffer(this.wasm);
@@ -70,7 +112,11 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
     });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    _inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
@@ -78,25 +124,31 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready) {
+    if (!this.ready || !this.wasm || !this.inputBuffer || !this.outputBuffer) {
       outputChannel.fill(0);
       return true;
     }
 
-    const threshold = parameters.threshold[0];
-    const inputParam = parameters.input;
+    const threshold = parameters.threshold?.[0] ?? 49;
+    const inputParam = parameters.input ?? new Float32Array([0]);
 
     this.inputBuffer.ensure(blockSize);
     this.outputBuffer.ensure(blockSize);
+    const inputView = this.inputBuffer.view;
+    const outputView = this.outputBuffer.view;
+    if (!inputView || !outputView) {
+      outputChannel.fill(0);
+      return true;
+    }
 
     // Fill input buffer from the 'input' AudioParam
     // If a-rate, we get per-sample values; if k-rate, we get a single value
     if (inputParam.length === 1) {
       // k-rate: fill with constant
-      this.inputBuffer.view.fill(inputParam[0]);
+      inputView.fill(inputParam[0] ?? 0);
     } else {
       // a-rate: copy per-sample values
-      this.inputBuffer.view.set(inputParam);
+      inputView.set(inputParam);
     }
 
     this.wasm.edge_detector_process(
@@ -108,13 +160,17 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
     );
 
     this.outputBuffer.refresh();
+    if (!this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
     outputChannel.set(this.outputBuffer.view);
 
     this._reportMetrics(outputChannel, { threshold });
     return true;
   }
 
-  _reportMetrics(buffer, params) {
+  _reportMetrics(buffer: Float32Array, params: { threshold: number }): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -126,7 +182,7 @@ class EdgeDetectorProcessor extends AudioWorkletProcessor {
       if (buffer[i] > 0.5) triggerCount += 1;
     }
 
-    const payload = {
+    const payload: EdgeDetectorMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
       triggerCount,

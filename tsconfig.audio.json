@@ -8,7 +8,10 @@
     "src/worklets/differentiator-processor.ts",
     "src/worklets/resonator-processor.ts",
     "src/worklets/antiresonator-processor.ts",
-    "src/worklets/lf-source-processor.ts"
+    "src/worklets/lf-source-processor.ts",
+    "src/worklets/edge-detector-processor.ts",
+    "src/worklets/decay-envelope-processor.ts",
+    "src/worklets/signal-switch-processor.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

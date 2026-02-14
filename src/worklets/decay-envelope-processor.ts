@@ -1,5 +1,47 @@
 import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
+interface DecayEnvelopeWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
+  decay_envelope_new(sampleRate: number): number;
+  decay_envelope_reset(state: number): void;
+  decay_envelope_get_value(state: number): number;
+  decay_coefficient_for_sample_rate(sampleRate: number): number;
+  decay_envelope_process(
+    state: number,
+    triggerPtr: number,
+    triggerLen: number,
+    amplitudePtr: number,
+    amplitudeLen: number,
+    decayPtr: number,
+    decayLen: number,
+    outputPtr: number,
+    blockSize: number
+  ): void;
+}
+
+interface DecayEnvelopeProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
+
+interface DecayEnvelopeMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  currentValue: number;
+  decay: number;
+  trigger: number;
+  amplitude: number;
+  audioTriggerDetected: boolean;
+}
+
 const wasmUrl =
   typeof URL === "function"
     ? new URL("./decay-envelope.wasm", import.meta.url).toString()
@@ -15,7 +57,21 @@ const wasmUrl =
  * The decay coefficient is automatically adapted for the actual sample rate.
  */
 class DecayEnvelopeProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  wasm: DecayEnvelopeWasmExports | null;
+  state: number;
+  triggerBuffer: WasmBuffer | null;
+  amplitudeBuffer: WasmBuffer | null;
+  decayBuffer: WasmBuffer | null;
+  outputBuffer: WasmBuffer | null;
+  ready: boolean;
+  autoDecay: number;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+  lastTriggerAudio: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
       {
         name: "trigger",
@@ -41,8 +97,9 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as DecayEnvelopeProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
     this.triggerBuffer = null;
@@ -51,15 +108,15 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     this.outputBuffer = null;
     this.ready = false;
     this.autoDecay = 0.995; // Will be calculated from sample rate
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "decay-envelope";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "decay-envelope";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     // Track last trigger audio sample for cross-block edge detection
     // (WASM also tracks this internally, but JS tracking enables metrics)
     this.lastTriggerAudio = 0;
 
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -69,9 +126,11 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       }
     };
 
-    const wasmBytes = options?.processorOptions?.wasmBytes;
-    initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
-      this.wasm = instance.exports;
+    const wasmBytes = opts?.processorOptions?.wasmBytes;
+    initWasmModule(wasmUrl, {}, wasmBytes).then((instantiated) => {
+      const instance =
+        instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
+      this.wasm = instance.exports as unknown as DecayEnvelopeWasmExports;
       this.state = this.wasm.decay_envelope_new(sampleRate);
       this.triggerBuffer = new WasmBuffer(this.wasm);
       this.amplitudeBuffer = new WasmBuffer(this.wasm);
@@ -87,7 +146,11 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
@@ -95,7 +158,14 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready) {
+    if (
+      !this.ready ||
+      !this.wasm ||
+      !this.triggerBuffer ||
+      !this.amplitudeBuffer ||
+      !this.decayBuffer ||
+      !this.outputBuffer
+    ) {
       outputChannel.fill(0);
       return true;
     }
@@ -124,10 +194,10 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       this.lastTriggerAudio = inputChannel[inputChannel.length - 1];
     } else {
       // Fall back to parameter
-      trigger = parameters.trigger;
+      trigger = parameters.trigger ?? new Float32Array([0]);
     }
-    const amplitude = parameters.amplitude;
-    const decayParam = parameters.decay[0];
+    const amplitude = parameters.amplitude ?? new Float32Array([1]);
+    const decayParam = parameters.decay?.[0] ?? 0;
 
     // Use auto-calculated decay if param is 0, otherwise use the provided value
     const decayValue = decayParam > 0 ? decayParam : this.autoDecay;
@@ -137,6 +207,15 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
     this.amplitudeBuffer.ensure(amplitude.length);
     this.decayBuffer.ensure(1);
     this.outputBuffer.ensure(blockSize);
+    if (
+      !this.triggerBuffer.view ||
+      !this.amplitudeBuffer.view ||
+      !this.decayBuffer.view ||
+      !this.outputBuffer.view
+    ) {
+      outputChannel.fill(0);
+      return true;
+    }
 
     // Copy trigger values
     this.triggerBuffer.view.set(trigger);
@@ -162,18 +241,30 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
 
     // Copy output
     this.outputBuffer.refresh();
+    if (!this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
     outputChannel.set(this.outputBuffer.view);
 
     this._reportMetrics(outputChannel, {
       decayValue,
-      trigger: trigger[0],
-      amplitude: amplitude[0],
+      trigger: trigger[0] ?? 0,
+      amplitude: amplitude[0] ?? 0,
       audioTriggerDetected,
     });
     return true;
   }
 
-  _reportMetrics(buffer, params) {
+  _reportMetrics(
+    buffer: Float32Array,
+    params: {
+      decayValue: number;
+      trigger: number;
+      amplitude: number;
+      audioTriggerDetected: boolean;
+    }
+  ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -188,9 +279,10 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
+    if (!this.wasm) return;
     const currentValue = this.wasm.decay_envelope_get_value(this.state);
 
-    this.port.postMessage({
+    const payload: DecayEnvelopeMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
       rms,
@@ -200,7 +292,8 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
       trigger: params.trigger,
       amplitude: params.amplitude,
       audioTriggerDetected: params.audioTriggerDetected,
-    });
+    };
+    this.port.postMessage(payload);
   }
 }
 

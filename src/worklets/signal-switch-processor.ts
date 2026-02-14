@@ -1,5 +1,42 @@
 import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
+interface SignalSwitchWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
+  signal_switch_new(): number;
+  signal_switch_process_krate(
+    state: number,
+    input0Ptr: number,
+    input1Ptr: number,
+    selector: number,
+    outputPtr: number,
+    blockSize: number
+  ): void;
+}
+
+interface SignalSwitchProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
+
+interface SignalSwitchMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  selector: number;
+  selectedBranch: "cascade" | "parallel";
+  in0Rms?: number;
+  in0Peak?: number;
+  in1Rms?: number;
+  in1Peak?: number;
+}
+
 const wasmUrl =
   typeof URL === "function"
     ? new URL("./signal-switch.wasm", import.meta.url).toString()
@@ -15,7 +52,18 @@ const wasmUrl =
  * Switching is instantaneous (no crossfade) per Klatt 80 specification.
  */
 class SignalSwitchProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  wasm: SignalSwitchWasmExports | null;
+  state: number;
+  input0Buffer: WasmBuffer | null;
+  input1Buffer: WasmBuffer | null;
+  outputBuffer: WasmBuffer | null;
+  ready: boolean;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
       {
         name: "selector",
@@ -27,27 +75,30 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as SignalSwitchProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
     this.input0Buffer = null;
     this.input1Buffer = null;
     this.outputBuffer = null;
     this.ready = false;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "signal-switch";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "signal-switch";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
     };
 
-    const wasmBytes = options?.processorOptions?.wasmBytes;
-    initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
-      this.wasm = instance.exports;
+    const wasmBytes = opts?.processorOptions?.wasmBytes;
+    initWasmModule(wasmUrl, {}, wasmBytes).then((instantiated) => {
+      const instance =
+        instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
+      this.wasm = instance.exports as unknown as SignalSwitchWasmExports;
       this.state = this.wasm.signal_switch_new();
       this.input0Buffer = new WasmBuffer(this.wasm);
       this.input1Buffer = new WasmBuffer(this.wasm);
@@ -57,7 +108,11 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
@@ -65,7 +120,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready) {
+    if (!this.ready || !this.wasm || !this.input0Buffer || !this.input1Buffer || !this.outputBuffer) {
       outputChannel.fill(0);
       return true;
     }
@@ -75,12 +130,16 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     const input1 = inputs[1];
     const input0Channel = input0 && input0[0] ? input0[0] : null;
     const input1Channel = input1 && input1[0] ? input1[0] : null;
-    const selector = parameters.selector[0];
+    const selector = parameters.selector?.[0] ?? 0;
 
     // Ensure buffers are allocated
     this.input0Buffer.ensure(blockSize);
     this.input1Buffer.ensure(blockSize);
     this.outputBuffer.ensure(blockSize);
+    if (!this.input0Buffer.view || !this.input1Buffer.view || !this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
 
     // Fill input buffers
     if (input0Channel) {
@@ -106,12 +165,21 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
     );
 
     this.outputBuffer.refresh();
+    if (!this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
     outputChannel.set(this.outputBuffer.view);
     this._reportMetrics(outputChannel, input0Channel, input1Channel, selector);
     return true;
   }
 
-  _reportMetrics(buffer, input0Buffer, input1Buffer, selector) {
+  _reportMetrics(
+    buffer: Float32Array,
+    input0Buffer: Float32Array | null,
+    input1Buffer: Float32Array | null,
+    selector: number
+  ): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -126,7 +194,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    const payload = {
+    const payload: SignalSwitchMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
       rms,

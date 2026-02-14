@@ -2,7 +2,7 @@
  * Square glottal source AudioWorklet processor
  * Wraps the square-source WASM primitive
  */
-import { initWasmModule } from "./wasm-utils";
+import { initWasmModule } from "./wasm-utils.js";
 
 interface SquareSourceWasmExports {
   square_source_new(sampleRate: number): number;

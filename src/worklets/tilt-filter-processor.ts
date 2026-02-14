@@ -3,7 +3,7 @@
  * Wraps the tilt-filter WASM primitive
  * One-pole lowpass for spectral tilt control
  */
-import { initWasmModule } from "./wasm-utils";
+import { initWasmModule } from "./wasm-utils.js";
 
 interface TiltFilterWasmExports {
   tilt_filter_new(): number;

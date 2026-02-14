@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils";
+import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
 
 interface ResonatorWasmExports {
   memory: WebAssembly.Memory;

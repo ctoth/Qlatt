@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 
 const ctx = new AudioContext();
 const synth = new KlattSynth(ctx);
+const WORKLET_BASE_PATH = `${import.meta.env.BASE_URL}worklets/`;
 let newRuntime = null;
 let newInterpreter = null;
 let newRuntimeGraph = null;
@@ -443,7 +444,7 @@ async function initializeNewRuntime() {
       graph: newRuntimeGraph,
       semantics: newRuntimeSemantics,
       registry: newRuntimeRegistry,
-      workletBasePath: "./worklets/",
+      workletBasePath: WORKLET_BASE_PATH,
       logger: (msg) => console.log(msg),
       telemetry: true,  // Enable worklet debug metrics
       telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler

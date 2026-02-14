@@ -7,7 +7,7 @@
  * - openQuotient: Fraction of period that glottis is open
  * - asymmetry: klsyn88-style asymmetry percent (0..100, 50=symmetric)
  */
-import { initWasmModule } from "./wasm-utils";
+import { initWasmModule } from "./wasm-utils.js";
 
 interface TriangularSourceWasmExports {
   triangular_source_new(sampleRate: number): number;

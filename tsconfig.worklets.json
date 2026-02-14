@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "allowJs": false,
+    "outDir": "./public/worklets",
+    "rootDir": "./src/worklets",
+    "declaration": false
+  },
+  "include": [
+    "src/worklets/audio-worklet-globals.d.ts",
+    "src/worklets/wasm-utils.ts",
+    "src/worklets/*-processor.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

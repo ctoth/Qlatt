@@ -4,7 +4,7 @@
  *   output[0] = voice waveform (post-tilt + breathiness)
  *   output[1] = modulated noise (for aspiration/frication)
  */
-import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils";
+import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils.js";
 
 interface OversampledGlottalSourceWasmExports {
   memory: WebAssembly.Memory;

@@ -3,7 +3,7 @@
  * Wraps the pitch-sync-mod WASM primitive
  * F1/B1 modulation synchronized to glottal cycle
  */
-import { initWasmModule } from "./wasm-utils";
+import { initWasmModule } from "./wasm-utils.js";
 
 interface PitchSyncModWasmExports {
   pitch_sync_resonator_new(sampleRate: number): number;

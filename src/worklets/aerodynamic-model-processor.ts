@@ -16,7 +16,7 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils";
+import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils.js";
 
 interface AerodynamicModelWasmExports {
   memory: WebAssembly.Memory;

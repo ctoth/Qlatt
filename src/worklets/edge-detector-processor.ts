@@ -9,7 +9,7 @@
  * > "A step function, PLSTEP, is included in order to simulate plosive bursts...
  * > The generator is triggered on by a sudden increase in AF or AH of 49 dB or more."
  */
-import { initWasmModule, WasmBuffer } from "./wasm-utils";
+import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
 
 interface EdgeDetectorWasmExports {
   memory: WebAssembly.Memory;

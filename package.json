@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "npm run build:worklets",
     "dev": "vite",
+    "prebuild": "npm run build:worklets",
     "build": "vite build",
     "preview": "vite preview",
+    "build:worklets": "tsc -p tsconfig.worklets.json",
     "test": "vitest run",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "typecheck:audio": "tsc -p tsconfig.audio.json --noEmit",

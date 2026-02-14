@@ -9,6 +9,7 @@
     "src/declarative-frontend/order.ts",
     "src/declarative-frontend/parser.ts",
     "src/declarative-frontend/validation.ts",
+    "src/tts-frontend.ts",
     "test/declarative-frontend-model.test.ts",
     "test/declarative-frontend-order.test.ts",
     "test/declarative-frontend-schema.test.ts"

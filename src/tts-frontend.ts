@@ -6,9 +6,15 @@ import {
 } from "./declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "./declarative-frontend";
 
-export function normalizeText(text) {
+type FrontendToken = Record<string, any>;
+type KlattParams = Record<string, number>;
+
+const CMU_DICT_MAP = CMU_DICT as Record<string, string | undefined>;
+const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
+
+export function normalizeText(text: string): string {
   let normalized = text.toLowerCase();
-  normalized = normalized.replace(/(\d+)/g, (match) =>
+  normalized = normalized.replace(/(\d+)/g, (match: string) =>
     numberToWords(parseInt(match))
   );
   normalized = normalized.replace(/,/g, " , ");
@@ -18,7 +24,7 @@ export function normalizeText(text) {
   normalized = normalized.replace(/\s+/g, " ").trim();
   return normalized;
 }
-function numberToWords(num) {
+function numberToWords(num: number): string {
   /* ... */
   const ones = [
     "",
@@ -66,11 +72,11 @@ function numberToWords(num) {
   return String(num);
 }
 
-function guessPronunciation(word) {
+function guessPronunciation(word: string): string[] {
   const cleaned = word.toLowerCase().replace(/[^a-z']/g, "");
   if (!cleaned) return [];
   const phones = [];
-  const isVowel = (ch) => "aeiouy".includes(ch);
+  const isVowel = (ch: string) => "aeiouy".includes(ch);
   let i = 0;
 
   while (i < cleaned.length) {
@@ -261,9 +267,9 @@ function guessPronunciation(word) {
 }
 
 // --- Phonetic Transcription --- (MODIFIED: Return flat phoneme list with word info)
-export function transcribeText(text) {
+export function transcribeText(text: string): FrontendToken[] {
   const words = text.split(" ");
-  const flatPhonemeList = []; // Flat array of { phoneme: '...', stress: ..., word: '...' }
+  const flatPhonemeList: FrontendToken[] = []; // Flat array of { phoneme: '...', stress: ..., word: '...' }
   const punctuation = [",", ".", "?", "!"];
 
   for (const word of words) {
@@ -279,10 +285,10 @@ export function transcribeText(text) {
       });
     } else {
       const lowerWord = word.toLowerCase();
-      let pronunciation = CMU_DICT[lowerWord];
+      let pronunciation = CMU_DICT_MAP[lowerWord];
       // Handle alternate pronunciations like "read(1)" -> "read"
       if (!pronunciation && lowerWord.includes("(")) {
-        pronunciation = CMU_DICT[lowerWord.replace(/\(\d+\)$/, "")];
+        pronunciation = CMU_DICT_MAP[lowerWord.replace(/\(\d+\)$/, "")];
       }
 
       if (pronunciation) {
@@ -334,7 +340,7 @@ export function transcribeText(text) {
   return flatPhonemeList; // Return the flat list of phoneme objects
 }
 
-function compareAxisMark(left, right) {
+function compareAxisMark(left: unknown, right: unknown): number {
   if (left === right) return 0;
   if (typeof left === "number" && typeof right === "number") {
     return left < right ? -1 : 1;
@@ -346,7 +352,7 @@ function compareAxisMark(left, right) {
   return 0;
 }
 
-function parseTrailingInteger(value) {
+function parseTrailingInteger(value: unknown): number | null {
   if (typeof value !== "string") return null;
   const match = value.match(/(\d+)$/);
   if (!match) return null;
@@ -354,7 +360,10 @@ function parseTrailingInteger(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function buildF0ContourFromDeclarative(sequence, baseF0) {
+function buildF0ContourFromDeclarative(
+  sequence: FrontendToken[],
+  baseF0: number
+): Array<{ time: number; f0: number }> {
   const points = sequence
     .filter(
       (token) =>
@@ -363,7 +372,7 @@ function buildF0ContourFromDeclarative(sequence, baseF0) {
         Number.isFinite(token?.value)
     )
     .slice()
-    .sort((left, right) => {
+    .sort((left: FrontendToken, right: FrontendToken) => {
       const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
       const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
       if (leftTime != null && rightTime != null && leftTime !== rightTime) {
@@ -389,11 +398,11 @@ function buildF0ContourFromDeclarative(sequence, baseF0) {
   }
 
   const contour = points
-    .map((point) => ({
+    .map((point: FrontendToken) => ({
       time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
       f0: Number(point.value),
     }))
-    .filter((point) => point.time >= 0 && Number.isFinite(point.f0));
+    .filter((point: { time: number; f0: number }) => point.time >= 0 && Number.isFinite(point.f0));
 
   if (contour.length === 0) return [{ time: 0, f0: baseF0 }];
   if (contour[0].time > 0) {
@@ -418,13 +427,13 @@ function buildF0ContourFromDeclarative(sequence, baseF0) {
 }
 
 // --- Main Pipeline ---
-export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {  
+export function textToKlattTrack(inputText: string, baseF0 = 110, transitionMs = 30): FrontendToken[] {
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
-  let parameterSequence = transcribeText(normalized);
+  let parameterSequence: FrontendToken[] = transcribeText(normalized);
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
-  parameterSequence = parameterSequence.map((ph) => {
+  parameterSequence = parameterSequence.map((ph: FrontendToken) => {
     let targetKeyBase = ph.phoneme;
     // Map P, T, K, B, D, G to their closure versions initially
     if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
@@ -432,46 +441,46 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     }
 
     // Determine lookup key: Vowels use stress, Consonants ignore stress for lookup
-    let baseTarget;
+    let baseTarget: Record<string, any> | undefined;
     const targetInfoBase =
-      PHONEME_TARGETS[targetKeyBase + "1"] ||
-      PHONEME_TARGETS[targetKeyBase + "0"] ||
-      PHONEME_TARGETS[targetKeyBase]; // Check base first
+      PHONEME_TARGET_MAP[targetKeyBase + "1"] ||
+      PHONEME_TARGET_MAP[targetKeyBase + "0"] ||
+      PHONEME_TARGET_MAP[targetKeyBase]; // Check base first
     const isVowel = targetInfoBase?.type === "vowel";
 
     if (isVowel) {
       let stressMarker = ph.stress === 1 ? "1" : "0"; // Default null/2 stress to 0
       let targetKey = targetKeyBase + stressMarker;
-      baseTarget = PHONEME_TARGETS[targetKey];
+      baseTarget = PHONEME_TARGET_MAP[targetKey];
       // Fallback for vowels if specific stress variant missing
       if (!baseTarget) {
         let fallbackStressMarker = stressMarker === "1" ? "0" : "1";
-        baseTarget = PHONEME_TARGETS[targetKeyBase + fallbackStressMarker];
+        baseTarget = PHONEME_TARGET_MAP[targetKeyBase + fallbackStressMarker];
       }
     } else {
       // For consonants, try finding *any* entry (ignore stress marker initially)
       baseTarget =
-        PHONEME_TARGETS[targetKeyBase + "1"] ||
-        PHONEME_TARGETS[targetKeyBase + "0"] ||
-        PHONEME_TARGETS[targetKeyBase];
+        PHONEME_TARGET_MAP[targetKeyBase + "1"] ||
+        PHONEME_TARGET_MAP[targetKeyBase + "0"] ||
+        PHONEME_TARGET_MAP[targetKeyBase];
     }
 
     // Handle punctuation and final fallback
     if (!baseTarget && ph.isPunctuation) {
-      baseTarget = PHONEME_TARGETS["SIL"];
+      baseTarget = PHONEME_TARGET_MAP["SIL"];
       targetKeyBase = "SIL"; // Update the base key
     } else if (!baseTarget) {
       console.warn(
         `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
       );
-      baseTarget = PHONEME_TARGETS["SIL"];
+      baseTarget = PHONEME_TARGET_MAP["SIL"];
       targetKeyBase = "SIL"; // Update the base key
     }
 
     const filledParams = fillDefaultParams(baseTarget);
 
     // Copy essential flags from baseTarget
-    const flags = {};
+    const flags: FrontendToken = {};
     if (baseTarget) {
       if (baseTarget.type) flags.type = baseTarget.type;
       if (baseTarget.hasOwnProperty("voiceless"))
@@ -503,12 +512,12 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     ...declarativeInventory,
     phases: ["structural"],
-  });
+  }) as FrontendToken[];
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
     ...declarativeInventory,
     phases: ["duration"],
-  });
-  parameterSequence = parameterSequence.map((token, index) => ({
+  }) as FrontendToken[];
+  parameterSequence = parameterSequence.map((token: FrontendToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
     stream: "phone",
@@ -523,23 +532,23 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       stress_rise: 1.15,
       question_rise_hz: 30,
     },
-  });
+  }) as FrontendToken[];
   const phoneSequence = parameterSequence.filter(
-    (token) => token?.stream !== "f0" && token?.status !== 2
+    (token: FrontendToken) => token?.stream !== "f0" && token?.status !== 2
   );
 
   // --- Generate F0 from declarative points ---
   const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
 
   // --- Generate Final Klatt Track (FILTER PARAMS) ---
-  const klattTrack = [];
+  const klattTrack: FrontendToken[] = [];
   let currentTime = 0;
   const transitionSec = Math.max(0, transitionMs) / 1000.0;
   const blendFactor = 0.35;
   const smoothTypes = new Set(["vowel", "nasal", "liquid", "glide"]);
   const blendKeys = ["F1", "F2", "F3", "B1", "B2", "B3"];
 
-  function blendParams(baseParams, nextParams) {
+  function blendParams(baseParams: KlattParams, nextParams?: KlattParams | null): KlattParams {
     if (!nextParams) return { ...baseParams };
     const blended = { ...baseParams };
     for (const key of blendKeys) {
@@ -551,7 +560,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     }
     return blended;
   }
-  function getF0AtTime(time) {
+  function getF0AtTime(time: number): number {
     /* ... (same interpolation) ... */
     if (!f0Contour || f0Contour.length === 0) return 0;
     for (let i = 0; i < f0Contour.length - 1; i++) {
@@ -569,15 +578,15 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   // Start silent
   klattTrack.push({
     time: 0,
-    params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
+    params: fillDefaultParams(PHONEME_TARGET_MAP["SIL"]),
   }); // Use filled SIL params directly
 
   for (let i = 0; i < phoneSequence.length; i++) {
-    const ph = phoneSequence[i];
+    const ph = phoneSequence[i] as FrontendToken;
     // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
     const minDuration = isStopRelease ? 5 : 20;
-    const targetDur = isStopRelease ? PHONEME_TARGETS[ph.phoneme]?.dur : null;
+    const targetDur = isStopRelease ? PHONEME_TARGET_MAP[ph.phoneme]?.dur : null;
     const phDurationMs = Number.isFinite(targetDur) ? targetDur : (ph.duration || 100);
     const phDuration = Math.max(minDuration, phDurationMs) / 1000.0;
     const segmentStart = currentTime;
@@ -593,9 +602,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     const targetTime = segmentStart + phDuration;
 
     // Use the params object directly from the sequence (already filled and potentially modified by rules)
-    const finalParams = ph.params
+    const finalParams: KlattParams = ph.params
       ? { ...ph.params }
-      : fillDefaultParams(PHONEME_TARGETS["SIL"]); // Ensure we have a params object, copy it
+      : fillDefaultParams(PHONEME_TARGET_MAP["SIL"]); // Ensure we have a params object, copy it
 
     // Determine and set F0.
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
@@ -608,7 +617,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     finalParams.F0 = calculatedF0; // Set F0 on the copied params
 
     if (targetTime > segmentStart) {
-      const nextPh = phoneSequence[i + 1];
+      const nextPh = phoneSequence[i + 1] as FrontendToken | undefined;
       const canSmooth =
         transitionSec > 0 &&
         smoothTypes.has(ph.type) &&
@@ -644,7 +653,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   klattTrack.push({
     time: finalTime,
     phoneme: "SIL",
-    params: fillDefaultParams(PHONEME_TARGETS["SIL"]),
+    params: fillDefaultParams(PHONEME_TARGET_MAP["SIL"]),
   });
   return klattTrack;
 }

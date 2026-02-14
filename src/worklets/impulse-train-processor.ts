@@ -21,7 +21,6 @@ interface ImpulseTrainMetricsMessage {
 }
 
 class ImpulseTrainProcessor extends AudioWorkletProcessor {
-  phase: number;
   periodLength: number;
   openPhaseLength: number;
   positionInPeriod: number;
@@ -46,7 +45,6 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
   constructor(options?: unknown) {
     super(options);
     const opts = options as ImpulseTrainProcessorOptions | undefined;
-    this.phase = 0;
     this.periodLength = 0;
     this.openPhaseLength = 0;
     this.positionInPeriod = 0;

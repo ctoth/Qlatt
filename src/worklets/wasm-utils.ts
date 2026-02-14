@@ -70,12 +70,4 @@ export class WasmBuffer {
       this.view = new Float32Array(this.exports.memory.buffer, this.ptr, this.len);
     }
   }
-
-  free(): void {
-    if (!this.ptr) return;
-    this.exports.dealloc_f32(this.ptr, this.len);
-    this.ptr = 0;
-    this.len = 0;
-    this.view = null;
-  }
 }

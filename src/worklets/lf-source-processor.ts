@@ -1,21 +1,72 @@
 import { initWasmModule, WasmBuffer } from "./wasm-utils";
 
+interface LfSourceWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
+  lf_source_new(sampleRate: number): number;
+  lf_source_process(
+    state: number,
+    f0Ptr: number,
+    f0Len: number,
+    rdPtr: number,
+    rdLen: number,
+    outputPtr: number,
+    blockSize: number
+  ): void;
+  lf_source_set_mode?: (state: number, mode: number) => void;
+}
+
+interface LfSourceProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
+
+interface LfSourceMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  f0: number;
+  rd: number;
+  lfMode: number;
+}
+
 const wasmUrl =
   typeof URL === "function"
     ? new URL("./lf-source.wasm", import.meta.url).toString()
     : `${import.meta.url.replace(/[^/]*$/, "")}lf-source.wasm`;
 
 class LfSourceProcessor extends AudioWorkletProcessor {
+  wasm: LfSourceWasmExports | null;
+  state: number;
+  outputBuffer: WasmBuffer | null;
+  f0Buffer: WasmBuffer | null;
+  rdBuffer: WasmBuffer | null;
+  ready: boolean;
+  lastF0: number;
+  lastRd: number;
+  lastMode: number;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
   static get parameterDescriptors() {
     return [
-      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
-      { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" },
-      { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" },
+      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
+      { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" as const },
+      { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" as const },
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as LfSourceProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
     this.outputBuffer = null;
@@ -25,19 +76,21 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this.lastF0 = 0;
     this.lastRd = 0;
     this.lastMode = 0;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "lf-source";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "lf-source";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
     };
 
-    const wasmBytes = options?.processorOptions?.wasmBytes;
-    initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
-      this.wasm = instance.exports;
+    const wasmBytes = opts?.processorOptions?.wasmBytes;
+    initWasmModule(wasmUrl, {}, wasmBytes).then((instantiated) => {
+      const instance =
+        instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
+      this.wasm = instance.exports as unknown as LfSourceWasmExports;
       this.state = this.wasm.lf_source_new(sampleRate);
       this.outputBuffer = new WasmBuffer(this.wasm);
       this.f0Buffer = new WasmBuffer(this.wasm);
@@ -47,7 +100,11 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    _inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
@@ -55,7 +112,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready) {
+    if (!this.ready || !this.wasm || !this.outputBuffer || !this.f0Buffer || !this.rdBuffer) {
       outputChannel.fill(0);
       return true;
     }
@@ -91,6 +148,10 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this.outputBuffer.ensure(blockSize);
     this.f0Buffer.ensure(f0Len);
     this.rdBuffer.ensure(rdLen);
+    if (!this.outputBuffer.view || !this.f0Buffer.view || !this.rdBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
     this.f0Buffer.view.set(f0Values);
     this.rdBuffer.view.set(rdValues);
 
@@ -105,12 +166,16 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     );
 
     this.outputBuffer.refresh();
+    if (!this.outputBuffer.view) {
+      outputChannel.fill(0);
+      return true;
+    }
     outputChannel.set(this.outputBuffer.view);
     this._reportMetrics(outputChannel);
     return true;
   }
 
-  _reportMetrics(buffer) {
+  _reportMetrics(buffer: Float32Array): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -124,7 +189,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    this.port.postMessage({
+    const payload: LfSourceMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
       rms,
@@ -132,7 +197,8 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       f0: this.lastF0,
       rd: this.lastRd,
       lfMode: this.lastMode,
-    });
+    };
+    this.port.postMessage(payload);
   }
 }
 

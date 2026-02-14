@@ -5,7 +5,10 @@
     "src/worklets/noise-source-processor.ts",
     "src/worklets/impulse-train-processor.ts",
     "src/worklets/glottal-mod-processor.ts",
-    "src/worklets/differentiator-processor.ts"
+    "src/worklets/differentiator-processor.ts",
+    "src/worklets/resonator-processor.ts",
+    "src/worklets/antiresonator-processor.ts",
+    "src/worklets/lf-source-processor.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

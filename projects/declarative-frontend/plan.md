@@ -324,9 +324,11 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `tsconfig.scripts.json` and `package.json` script `typecheck:scripts` now gate `scripts/dev-server.ts` and `scripts/export-declarative-corpus-summary.ts` independently from core/audio/golden gates.
 - Evidence: script typing fixes in this pass include explicit path parameter typing and extension lookup narrowing in `scripts/dev-server.ts`, plus explicit phrase typing in `scripts/export-declarative-corpus-summary.ts`.
 - Evidence: verification remains green via `npm run typecheck:core`, `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run typecheck:scripts`, `npm run test:golden`, and `npm test`.
+- 2026-02-14: project-wide strict typecheck is now green and legacy manual-harness TS debt was removed from the strict pipeline.
+- Evidence: `npx tsc --noEmit` now passes project-wide with no diagnostics.
+- Evidence: browser-only manual harness was renamed from `test/test-harness.ts` to `test/test-harness.js` (matching existing HTML/module usage), removing non-production strict debt without changing runtime behavior.
 - Decision: legacy numeric/string sync-mark payloads are intentionally unsupported; all internal callers are migrated to explicit `START|FINITE|END` order objects (`E_SYNC_MARK_INVALID` remains a strict invariant guard).
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
-- Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad test-harness/declarative-test typing debt and a small number of non-gated script/test utility files; layered gates (`typecheck:core`, `typecheck:audio`, `typecheck:golden`, `typecheck:scripts`) are now in place and green.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar unification now applies to declared top-level scalar fields; nested dotted fields (e.g. `params.F2`) remain immediate unless promoted to declared scalar fields in stream metadata.

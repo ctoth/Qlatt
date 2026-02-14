@@ -3,8 +3,27 @@
 
 import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
 
+type Range = { min: number; max: number };
+type TrackParams = Record<string, number | undefined>;
+type TrackEvent = { time: number; phoneme?: string; params?: TrackParams };
+type TelemetryLike = { get?: (key: string) => any } | Map<string, any> | null | undefined;
+type StopReleaseExpected = {
+  dur: number;
+  label: string;
+  AF?: number;
+  AH?: number;
+  AV?: number;
+  AB?: number;
+  A1?: number;
+  A2?: number;
+  A3?: number;
+  A4?: number;
+  A5?: number;
+  A6?: number;
+};
+
 // Klatt 80 Table III expected values for stop releases
-export const KLATT80_EXPECTED = {
+export const KLATT80_EXPECTED: Record<string, StopReleaseExpected> = {
   P_REL: { AF: 55, AH: 52, AB: 63, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0, dur: 5, label: '[p] labial burst' },
   T_REL: { AF: 58, AH: 55, AB: 0, A2: 0, A3: 30, A4: 45, A5: 57, A6: 63, dur: 15, label: '[t] alveolar burst' },
   K_REL: { AF: 55, AH: 53, AB: 0, A2: 0, A3: 53, A4: 43, A5: 45, A6: 45, dur: 25, label: '[k] velar burst' },
@@ -17,9 +36,9 @@ export const KLATT80_EXPECTED = {
 };
 
 // Analyze stop releases in track
-export function analyzeStopReleases(track, plstepEvents = [], runStartTime = 0) {
-  const releases = [];
-  const isStopRelease = (ph) => ph?.includes('_REL') || ph?.includes('_ASP');
+export function analyzeStopReleases(track: TrackEvent[], plstepEvents: any[] = [], runStartTime = 0): any[] {
+  const releases: any[] = [];
+  const isStopRelease = (ph: string | undefined): boolean => ph?.includes('_REL') || ph?.includes('_ASP') || false;
 
   for (let i = 0; i < track.length; i++) {
     const event = track[i];
@@ -28,7 +47,7 @@ export function analyzeStopReleases(track, plstepEvents = [], runStartTime = 0) 
 
     const nextEvent = track[i + 1];
     const duration = nextEvent ? (nextEvent.time - event.time) * 1000 : 0;
-    const expected = KLATT80_EXPECTED[phoneme];
+    const expected = phoneme ? KLATT80_EXPECTED[phoneme] : undefined;
     const p = event.params || {};
 
     const plstepMatch = plstepEvents.find(pl => {
@@ -36,7 +55,7 @@ export function analyzeStopReleases(track, plstepEvents = [], runStartTime = 0) 
       return Math.abs(plTime - event.time) < 0.02;
     });
 
-    const release = {
+    const release: any = {
       time: event.time,
       phoneme,
       duration: duration.toFixed(1),
@@ -74,7 +93,7 @@ export function analyzeStopReleases(track, plstepEvents = [], runStartTime = 0) 
   return releases;
 }
 
-export function formatStopReleases(releases) {
+export function formatStopReleases(releases: any[] | null | undefined): string[] {
   if (!releases || releases.length === 0) return ['(no stop releases in track)'];
   const lines = [];
   lines.push('TIME     PHONEME   DUR    F1   F2    F3    SW  AF   AH   AV   A1-A6            AB   PLSTEP   ISSUES');
@@ -91,7 +110,7 @@ export function formatStopReleases(releases) {
   return lines;
 }
 
-export function buildTimeline(track) {
+export function buildTimeline(track: TrackEvent[]): string[] {
   if (!track || track.length === 0) return ["(no events)"];
   const lines = [];
   lines.push("TIME     PHONEME   DUR   BRANCH     SOURCES                    PARALLEL FORMANTS");
@@ -104,11 +123,12 @@ export function buildTimeline(track) {
     const branch = sw === 1 ? "PARALLEL" : "CASCADE ";
     const time = event.time.toFixed(3);
     const phoneme = (event.phoneme ?? "").padEnd(8);
-    const sources = [];
-    if ((event.params?.AV ?? 0) > 0) sources.push(`AV=${(event.params.AV).toFixed(0)}`);
-    if ((event.params?.AVS ?? 0) > 0) sources.push(`AVS=${(event.params.AVS).toFixed(0)}`);
-    if ((event.params?.AF ?? 0) > 0) sources.push(`AF=${(event.params.AF).toFixed(0)}`);
-    if ((event.params?.AH ?? 0) > 0) sources.push(`AH=${(event.params.AH).toFixed(0)}`);
+    const sources: string[] = [];
+    const params = event.params ?? {};
+    if ((params.AV ?? 0) > 0) sources.push(`AV=${(params.AV ?? 0).toFixed(0)}`);
+    if ((params.AVS ?? 0) > 0) sources.push(`AVS=${(params.AVS ?? 0).toFixed(0)}`);
+    if ((params.AF ?? 0) > 0) sources.push(`AF=${(params.AF ?? 0).toFixed(0)}`);
+    if ((params.AH ?? 0) > 0) sources.push(`AH=${(params.AH ?? 0).toFixed(0)}`);
     let parallelInfo = "";
     if (sw === 1) {
       const a1 = event.params?.A1 ?? 0, a2 = event.params?.A2 ?? 0;
@@ -127,7 +147,13 @@ export function buildTimeline(track) {
   return lines;
 }
 
-export function summarizeTrack(track) {
+export function summarizeTrack(track: TrackEvent[]): {
+  events: number;
+  totalTime: number;
+  voicedEvents: number;
+  f0Min: number;
+  f0Max: number;
+} {
   const totalTime = track.length ? track[track.length - 1].time : 0;
   const voiced = track.filter((e) => (e.params?.AV ?? 0) > 0 || (e.params?.AVS ?? 0) > 0);
   const f0Values = track.map((e) => e.params?.F0 ?? 0).filter((v) => v > 0);
@@ -140,7 +166,13 @@ export function summarizeTrack(track) {
   };
 }
 
-export function summarizeParallel(track) {
+export function summarizeParallel(track: TrackEvent[]): {
+  swOn: number;
+  swOff: number;
+  parallelEvents: number;
+  swOnSeconds: number;
+  swOnShare: number;
+} {
   let swOn = 0, swOff = 0, parallelEvents = 0, swOnSeconds = 0, swTotalSeconds = 0;
   for (const event of track) {
     const params = event.params;
@@ -164,13 +196,14 @@ export function summarizeParallel(track) {
   return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare: swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0 };
 }
 
-export function summarizeLfMode(track, fallbackMode = 0) {
-  const counts = { 0: 0, 1: 0, 2: 0 };
-  const seconds = { 0: 0, 1: 0, 2: 0 };
+export function summarizeLfMode(track: TrackEvent[], fallbackMode = 0): { counts: Record<number, number>; seconds: Record<number, number> } {
+  const counts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
+  const seconds: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
   let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : 0;
   for (let i = 0; i < track.length; i += 1) {
     const event = track[i];
-    if (Number.isFinite(event?.params?.lfMode)) current = Math.round(event.params.lfMode);
+    const lfMode = event.params?.lfMode;
+    if (typeof lfMode === 'number' && Number.isFinite(lfMode)) current = Math.round(lfMode);
     counts[current] = (counts[current] || 0) + 1;
     const duration = i < track.length - 1 ? track[i + 1].time - event.time : 0;
     if (Number.isFinite(duration) && duration > 0) seconds[current] = (seconds[current] || 0) + duration;
@@ -178,21 +211,27 @@ export function summarizeLfMode(track, fallbackMode = 0) {
   return { counts, seconds };
 }
 
-export function collectParamRange(track, key, fallback) {
+export function collectParamRange(track: TrackEvent[], key: string, fallback: number): Range | null {
   let min = Infinity, max = -Infinity, current = fallback;
   for (const event of track) {
-    if (Number.isFinite(event?.params?.[key])) current = event.params[key];
+    const next = event?.params?.[key];
+    if (typeof next === 'number' && Number.isFinite(next)) current = next;
     if (Number.isFinite(current)) { min = Math.min(min, current); max = Math.max(max, current); }
   }
   return (!Number.isFinite(min) || !Number.isFinite(max)) ? null : { min, max };
 }
 
-export function findVoicingIssues(track, fallback) {
-  const issues = [];
-  const state = { F0: fallback?.F0 ?? 0, AV: fallback?.AV ?? 0, AVS: fallback?.AVS ?? 0, AF: fallback?.AF ?? 0, AH: fallback?.AH ?? 0 };
+export function findVoicingIssues(track: TrackEvent[], fallback: Partial<Record<string, number>> | undefined): string[] {
+  const issues: string[] = [];
+  const state: Record<string, number> = { F0: fallback?.F0 ?? 0, AV: fallback?.AV ?? 0, AVS: fallback?.AVS ?? 0, AF: fallback?.AF ?? 0, AH: fallback?.AH ?? 0 };
   for (let i = 0; i < track.length && issues.length < 6; i += 1) {
     const event = track[i];
-    if (event?.params) for (const key of Object.keys(state)) if (Number.isFinite(event.params[key])) state[key] = event.params[key];
+    if (event?.params) {
+      for (const key of Object.keys(state)) {
+        const value = event.params[key];
+        if (typeof value === 'number' && Number.isFinite(value)) state[key] = value;
+      }
+    }
     const voiced = (state.AV ?? 0) > 0 || (state.AVS ?? 0) > 0;
     const noise = (state.AF ?? 0) > 0 || (state.AH ?? 0) > 0;
     const f0 = state.F0 ?? 0;
@@ -202,35 +241,35 @@ export function findVoicingIssues(track, fallback) {
   return issues;
 }
 
-export function findSwAtTime(track, time) {
+export function findSwAtTime(track: TrackEvent[], time: number): { sw: number; phoneme: string } | null {
   if (!track || track.length === 0 || !Number.isFinite(time)) return null;
-  for (let i = track.length - 1; i >= 0; i--) if (time >= track[i].time) return { sw: track[i].params?.SW ?? 0, phoneme: track[i].phoneme ?? "" };
-  return { sw: track[0]?.params?.SW ?? 0, phoneme: track[0]?.phoneme ?? "" };
+  for (let i = track.length - 1; i >= 0; i--) if (time >= track[i].time) return { sw: Number(track[i].params?.SW ?? 0), phoneme: track[i].phoneme ?? "" };
+  return { sw: Number(track[0]?.params?.SW ?? 0), phoneme: track[0]?.phoneme ?? "" };
 }
 
-export function findPhonemeAtTime(track, time) {
+export function findPhonemeAtTime(track: TrackEvent[], time: number): string {
   if (!track || track.length === 0) return "?";
   for (let i = track.length - 1; i >= 0; i--) if (track[i].time <= time) return track[i].phoneme || "?";
   return track[0]?.phoneme || "?";
 }
 
 // Formatting helpers
-export function formatLevel(value) {
+export function formatLevel(value: number): string {
   if (!Number.isFinite(value)) return "n/a";
   if (value === 0) return "0";
   return Math.abs(value) < 1e-6 ? value.toExponential(2) : value.toFixed(6);
 }
 
-export function formatRange(range, digits = 1) {
+export function formatRange(range: Range | null, digits = 1): string {
   return range ? `${range.min.toFixed(digits)} - ${range.max.toFixed(digits)}` : "n/a";
 }
 
-export function formatMaxContext(time, phoneme) {
+export function formatMaxContext(time: number, phoneme?: string): string {
   if (!Number.isFinite(time)) return "";
   return ` @${time.toFixed(3)}s${phoneme ? ` ${phoneme}` : ""}`;
 }
 
-export function formatPlstepEventsRelative(list, runStart) {
+export function formatPlstepEventsRelative(list: any[] | null | undefined, runStart: number): string[] {
   if (!list || list.length === 0) return ["(none)"];
   return list.map((evt) => {
     let relTime = "n/a";
@@ -245,7 +284,7 @@ export function formatPlstepEventsRelative(list, runStart) {
 // Re-export dbToLinear from builtin-functions for backwards compatibility
 export { dbToLinear } from './builtin-functions';
 
-export function updateRange(range, value) {
+export function updateRange(range: Range | null, value: number): Range | null {
   if (!Number.isFinite(value)) return range;
   if (!range) return { min: value, max: value };
   range.min = Math.min(range.min, value);
@@ -254,9 +293,13 @@ export function updateRange(range, value) {
 }
 
 
-export function analyzeTrackGains(track, synthParams, sampleRate = 48000) {
+export function analyzeTrackGains(
+  track: TrackEvent[],
+  synthParams: Record<string, number | undefined>,
+  sampleRate = 48000,
+): { ranges: any; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
-  const ranges = { voiceGain: null, aspGain: null, fricGain: null, parallelVoiceGain: null, parallelBypassGain: null, parallelFormantGain: null, parallelNasalGain: null, masterGain: null, mix: null };
+  const ranges: any = { voiceGain: null, aspGain: null, fricGain: null, parallelVoiceGain: null, parallelBypassGain: null, parallelFormantGain: null, parallelNasalGain: null, masterGain: null, mix: null };
   const outputScale = dbToLinear(ndbScale.AF + 44);
   const parallelScale = synthParams.parallelGainScale ?? 1.0;
   const baseBoost = synthParams.masterGain ?? 1.0;
@@ -264,13 +307,17 @@ export function analyzeTrackGains(track, synthParams, sampleRate = 48000) {
 
   for (const event of track) {
     if (event?.params) Object.assign(state, event.params);
-    const f1 = state.F1 ?? synthParams.F1, f2 = state.F2 ?? synthParams.F2, f3 = state.F3 ?? synthParams.F3;
-    const f4 = state.F4 ?? synthParams.F4, f5 = state.F5 ?? synthParams.F5, f6 = state.F6 ?? synthParams.F6;
+    const f1 = state.F1 ?? synthParams.F1 ?? 0;
+    const f2 = state.F2 ?? synthParams.F2 ?? 0;
+    const f3 = state.F3 ?? synthParams.F3 ?? 0;
+    const f4 = state.F4 ?? synthParams.F4 ?? 0;
+    const f5 = state.F5 ?? synthParams.F5 ?? 0;
+    const f6 = state.F6 ?? synthParams.F6 ?? 0;
     const delF1 = f1 > 0 ? f1 / 500 : 1, delF2 = f2 > 0 ? f2 / 1500 : 1;
     let a2Cor = delF1 * delF1; const a2Skrt = delF2 * delF2; const a3Cor = a2Cor * a2Skrt;
     a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
     const n12Cor = proximity(f2 - f1), n23Cor = proximity(f3 - f2 - 50), n34Cor = proximity(f4 - f3 - 150);
-    const mix = state.SW === 1 ? 1 : synthParams.parallelMix;
+    const mix = state.SW === 1 ? 1 : (synthParams.parallelMix ?? 0);
     const fricDbAdj = state.SW === 1 ? Math.max(state.AF ?? -70, state.AH ?? -70) : (state.AF ?? -70);
 
     ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear((state.AV ?? -70) + ndbScale.AV));
@@ -307,18 +354,18 @@ export function analyzeTrackGains(track, synthParams, sampleRate = 48000) {
   return { ranges, warnings, parallelScale };
 }
 
-export function findTimingMismatches(track, telemetryMax) {
+export function findTimingMismatches(track: TrackEvent[], telemetryMax: TelemetryLike): string[] {
   if (!track || track.length === 0) return [];
   const mismatches = [];
   const swRanges = track.map((e, i) => ({ startTime: e.time, endTime: track[i + 1]?.time ?? e.time + 0.5, sw: e.params?.SW ?? 0, phoneme: e.phoneme ?? "" }));
-  const findSwAt = (time) => { for (let i = swRanges.length - 1; i >= 0; i--) if (time >= swRanges[i].startTime) return swRanges[i]; return swRanges[0]; };
+  const findSwAt = (time: number) => { for (let i = swRanges.length - 1; i >= 0; i--) if (time >= swRanges[i].startTime) return swRanges[i]; return swRanges[0] ?? { startTime: 0, endTime: 0, sw: 0, phoneme: "" }; };
 
-  const cascadeMax = telemetryMax.get?.("cascade-out");
+  const cascadeMax = telemetryMax?.get?.("cascade-out");
   if (cascadeMax?.rmsTime != null) {
     const range = findSwAt(cascadeMax.rmsTime);
     if (range?.sw === 1 && cascadeMax.rms > 0.001) mismatches.push(`!! cascade-out max @${cascadeMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=1)`);
   }
-  const parallelMax = telemetryMax.get?.("parallel-out");
+  const parallelMax = telemetryMax?.get?.("parallel-out");
   if (parallelMax?.rmsTime != null) {
     const range = findSwAt(parallelMax.rmsTime);
     if (range?.sw === 0 && parallelMax.rms > 0.001) mismatches.push(`!! parallel-out max @${parallelMax.rmsTime.toFixed(3)}s during ${range.phoneme} (SW=0)`);
@@ -326,7 +373,7 @@ export function findTimingMismatches(track, telemetryMax) {
   return mismatches;
 }
 
-export function formatTelemetry(telemetry, telemetryMax) {
+export function formatTelemetry(telemetry: Map<string, any> | null | undefined, telemetryMax: TelemetryLike): string[] {
   if (!telemetry || telemetry.size === 0) return ["(no telemetry)"];
   return Array.from(telemetry.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([node, data]) => {
     const parts = [];
@@ -338,7 +385,7 @@ export function formatTelemetry(telemetry, telemetryMax) {
   });
 }
 
-export function formatMeters(meters, meterMax) {
+export function formatMeters(meters: Map<string, any> | null | undefined, meterMax: TelemetryLike): string[] {
   if (!meters || meters.size === 0) return ["(no meters)"];
   return Array.from(meters.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([node, data]) => {
     const max = meterMax?.get?.(node);

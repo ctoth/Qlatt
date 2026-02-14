@@ -312,6 +312,10 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-14: expanded `typecheck:core` further to include `src/klatt-interpreter.ts` and aligned interpreter CEL registrations with strict `ParamValue` function signatures.
 - Evidence: `src/klatt-interpreter.ts` now registers `dbToLinear`, `dbToLinearKlsyn`, `min`, `max`, and `pow` via numeric-argument adapter wrappers that validate finite numeric inputs before dispatching to builtin math helpers.
 - Evidence: `tsconfig.core.json` now includes `src/klatt-interpreter.ts`, and verification remains green via `npm run typecheck:core`, `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run test:golden`, and `npm test`.
+- 2026-02-14: expanded `typecheck:core` again to include `src/track-analysis.ts` and resolved strict nullability/indexing issues across diagnostics helpers.
+- Evidence: `src/track-analysis.ts` now has explicit track/params/range helper types, typed function signatures/returns, guarded optional parameter access, and typed telemetry/map handling for formatter functions.
+- Evidence: release-analysis and LF/switch summary helpers now use strict-safe numeric narrowing (e.g., guarded `lfMode` reads, finite-value checks, typed `KLATT80_EXPECTED` lookup), eliminating implicit-`any` and undefined arithmetic paths.
+- Evidence: `tsconfig.core.json` now includes `src/track-analysis.ts`, and verification remains green via `npm run typecheck:core`, `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run test:golden`, and `npm test`.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

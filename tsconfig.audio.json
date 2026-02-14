@@ -11,7 +11,12 @@
     "src/worklets/lf-source-processor.ts",
     "src/worklets/edge-detector-processor.ts",
     "src/worklets/decay-envelope-processor.ts",
-    "src/worklets/signal-switch-processor.ts"
+    "src/worklets/signal-switch-processor.ts",
+    "src/worklets/impulsive-source-processor.ts",
+    "src/worklets/square-source-processor.ts",
+    "src/worklets/triangular-source-processor.ts",
+    "src/worklets/pitch-sync-mod-processor.ts",
+    "src/worklets/tilt-filter-processor.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

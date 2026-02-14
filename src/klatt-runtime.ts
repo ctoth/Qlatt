@@ -157,6 +157,10 @@ export async function registerWorklets(
   );
 }
 
+function isAudioWorkletNode(node: AudioNode): node is AudioWorkletNode {
+  return 'port' in node;
+}
+
 /**
  * Wait for all worklet nodes to be ready
  */
@@ -165,9 +169,12 @@ async function awaitWorkletReady(
   timeoutMs = 2000,
   log: (msg: string) => void = () => {}
 ): Promise<void> {
-  const workletNodes = Array.from(nodes.entries()).filter(
-    ([, node]): node is [string, AudioWorkletNode] => 'port' in node
-  );
+  const workletNodes: Array<[string, AudioWorkletNode]> = [];
+  for (const [id, node] of nodes.entries()) {
+    if (isAudioWorkletNode(node)) {
+      workletNodes.push([id, node]);
+    }
+  }
 
   if (workletNodes.length === 0) {
     log('No worklet nodes to await');
@@ -212,9 +219,43 @@ function waitForNodeReady(
   });
 }
 
-import { createJmespathResolver, JmespathResolver } from './semantics/jmespath-resolver';
-import { createTopologicalEvaluator, TopologicalEvaluator } from './semantics/topological-evaluator';
+import { createTopologicalEvaluator } from './semantics/topological-evaluator';
 import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
+
+function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
+  }
+  return value;
+}
+
+function registerNumericBuiltins(celEvaluator: CelEvaluator): void {
+  celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinear', 0, args[0]);
+    return dbToLinear(db);
+  });
+
+  celEvaluator.registerFunction('dbToLinearKlsyn', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinearKlsyn', 0, args[0]);
+    return dbToLinearKlsyn(db);
+  });
+
+  celEvaluator.registerFunction('min', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('min', index, arg));
+    return min(...values);
+  });
+
+  celEvaluator.registerFunction('max', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('max', index, arg));
+    return max(...values);
+  });
+
+  celEvaluator.registerFunction('pow', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('pow', 0, args[0]);
+    const y = requireNumericArg('pow', 1, args[1]);
+    return pow(x, y);
+  });
+}
 
 // Bacon graph types (simplified - Bacon package has full types)
 export interface BaconGraph {
@@ -355,15 +396,10 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Create evaluators
   const celEvaluator = createCelEvaluator();
-  const jmespathResolver = createJmespathResolver();
   const topoEvaluator = createTopologicalEvaluator(celEvaluator);
 
   // Register standard functions with CEL evaluator (using imported functions)
-  celEvaluator.registerFunction('dbToLinear', dbToLinear);
-  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
-  celEvaluator.registerFunction('min', min);
-  celEvaluator.registerFunction('max', max);
-  celEvaluator.registerFunction('pow', pow);
+  registerNumericBuiltins(celEvaluator);
 
   // Current input values
   let currentInputs: Record<string, ParamValue> = {};
@@ -535,10 +571,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Attach telemetry port listeners if handler provided
   if (telemetryHandler) {
     let attached = 0;
-    for (const [nodeId, node] of nodes) {
-      // Check if it's an AudioWorkletNode with a port
-      const workletNode = node as AudioWorkletNode;
-      if (!workletNode.port) continue;
+    for (const [, node] of nodes) {
+      if (!isAudioWorkletNode(node)) continue;
+      const workletNode = node;
 
       workletNode.port.addEventListener('message', (event: MessageEvent) => {
         const data = event.data;

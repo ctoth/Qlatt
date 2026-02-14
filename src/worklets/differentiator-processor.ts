@@ -1,15 +1,40 @@
+interface DifferentiatorProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+  };
+}
+
+interface DifferentiatorMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  inRms?: number;
+  inPeak?: number;
+}
+
 class DifferentiatorProcessor extends AudioWorkletProcessor {
-  constructor(options) {
+  prev: number[];
+  debug: boolean;
+  nodeId: string;
+  scale: number;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as DifferentiatorProcessorOptions | undefined;
     this.prev = [];
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "diff";
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "diff";
     // Klatt80 uses SR=10kHz; scale first-difference so UGLOT amplitude
     // matches the 10kHz reference when running at higher sample rates.
     this.scale = sampleRate / 10000;
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -17,7 +42,11 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
     this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    _parameters: Record<string, Float32Array>
+  ): boolean {
     const input = inputs[0];
     const output = outputs[0];
     if (!input || !output) {
@@ -31,7 +60,7 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
 
       let prev = this.prev[ch] || 0;
       for (let i = 0; i < outCh.length; i += 1) {
-        const x = inCh[i];
+        const x = inCh[i] ?? 0;
         outCh[i] = (x - prev) * this.scale;
         prev = x;
       }
@@ -41,7 +70,7 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
     return true;
   }
 
-  _reportMetrics(buffer, inputBuffer) {
+  _reportMetrics(buffer?: Float32Array, inputBuffer?: Float32Array): void {
     if (!this.debug || !buffer) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -55,7 +84,12 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    const payload: DifferentiatorMetricsMessage = {
+      type: "metrics",
+      node: this.nodeId,
+      rms,
+      peak,
+    };
     if (inputBuffer) {
       let inSum = 0;
       let inPeak = 0;

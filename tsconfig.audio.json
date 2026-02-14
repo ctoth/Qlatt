@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/worklets/audio-worklet-globals.d.ts",
+    "src/worklets/noise-source-processor.ts",
+    "src/worklets/impulse-train-processor.ts",
+    "src/worklets/glottal-mod-processor.ts",
+    "src/worklets/differentiator-processor.ts"
+  ],
+  "exclude": ["node_modules", "dist", "public"]
+}

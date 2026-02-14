@@ -1,9 +1,8 @@
 import fs from "node:fs";
-import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { once } from "node:events";
 import puppeteer from "puppeteer-core";
+import { createServer as createViteServer } from "vite";
 
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -32,6 +31,28 @@ const writeGolden = args.get("write-golden") === "1";
 const includeTrack = (args.get("include-track") ?? "0") === "1";
 const leadTime = Number(args.get("lead-time") ?? 0.05);
 const tailTime = Number(args.get("tail-time") ?? 0.2);
+const noiseSeed = Number(args.get("noise-seed") ?? 20260214);
+const persistJson = writeGolden || args.has("out-json");
+const persistWav = writeGolden || args.has("out-wav");
+
+type RenderMetrics = { rms: number; peak: number };
+type RenderPayload = {
+  phrase: string;
+  baseF0: number;
+  sampleRate: number;
+  leadTime: number;
+  tailTime: number;
+  length: number;
+  metrics: RenderMetrics;
+  trackSummary: {
+    events: number;
+    totalTime: number;
+    voicedEvents: number;
+    f0Min: number;
+    f0Max: number;
+  };
+  samples: number[];
+};
 
 function resolveChromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
@@ -46,7 +67,7 @@ function resolveChromePath() {
   return null;
 }
 
-function toInt16(samples) {
+function toInt16(samples: ArrayLike<number>): Int16Array {
   const out = new Int16Array(samples.length);
   for (let i = 0; i < samples.length; i += 1) {
     const s = Math.max(-1, Math.min(1, samples[i]));
@@ -55,7 +76,7 @@ function toInt16(samples) {
   return out;
 }
 
-function writeWav(filePath, samples, sr) {
+function writeWav(filePath: string, samples: ArrayLike<number>, sr: number): void {
   const pcm = toInt16(samples);
   const byteRate = sr * 2;
   const blockAlign = 2;
@@ -81,7 +102,7 @@ function writeWav(filePath, samples, sr) {
   fs.writeFileSync(filePath, buffer);
 }
 
-function rmsError(actual, expected) {
+function rmsError(actual: ArrayLike<number>, expected: ArrayLike<number>): number {
   let sum = 0;
   for (let i = 0; i < expected.length; i += 1) {
     const delta = actual[i] - expected[i];
@@ -90,7 +111,7 @@ function rmsError(actual, expected) {
   return expected.length ? Math.sqrt(sum / expected.length) : 0;
 }
 
-function maxDelta(actual, expected) {
+function maxDelta(actual: ArrayLike<number>, expected: ArrayLike<number>): number {
   let max = 0;
   for (let i = 0; i < expected.length; i += 1) {
     const delta = Math.abs(actual[i] - expected[i]);
@@ -99,41 +120,22 @@ function maxDelta(actual, expected) {
   return max;
 }
 
-async function createServer(root) {
-  const mimeTypes = {
-    ".html": "text/html; charset=utf-8",
-    ".js": "text/javascript; charset=utf-8",
-    ".ts": "text/javascript; charset=utf-8",
-    ".json": "application/json; charset=utf-8",
-    ".wasm": "application/wasm",
-  };
-  const server = http.createServer((req, res) => {
-    const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
-    const safePath = urlPath === "/" ? "/test/render-offline.html" : urlPath;
-    const filePath = safePath.startsWith("/worklets/")
-      ? path.resolve(root, "public", safePath.slice(1))
-      : path.resolve(root, `.${safePath}`);
-    if (!filePath.startsWith(root)) {
-      res.writeHead(403);
-      res.end("Forbidden");
-      return;
-    }
-    fs.stat(filePath, (err, stat) => {
-      if (err || !stat.isFile()) {
-        res.writeHead(404);
-        res.end("Not Found");
-        return;
-      }
-      const ext = path.extname(filePath).toLowerCase();
-      const type = mimeTypes[ext] || "application/octet-stream";
-      res.writeHead(200, { "Content-Type": type });
-      fs.createReadStream(filePath).pipe(res);
-    });
+async function createServer(root: string): Promise<{ server: Awaited<ReturnType<typeof createViteServer>>; port: number }> {
+  const server = await createViteServer({
+    root,
+    logLevel: "error",
+    server: {
+      host: "127.0.0.1",
+      port: 0,
+    },
   });
-  server.listen(0);
-  await once(server, "listening");
-  const { port } = server.address();
-  return { server, port };
+  await server.listen();
+  const address = server.httpServer?.address();
+  if (!address || typeof address === "string") {
+    await server.close();
+    throw new Error("Failed to start Vite server for offline render.");
+  }
+  return { server, port: address.port };
 }
 
 const chromePath = resolveChromePath();
@@ -144,33 +146,48 @@ if (!chromePath) {
 
 const { server, port } = await createServer(repoRoot);
 const browser = await puppeteer.launch({
-  headless: "new",
+  headless: true,
   executablePath: chromePath,
   args: ["--autoplay-policy=no-user-gesture-required"],
 });
-const page = await browser.newPage();
-await page.goto(`http://localhost:${port}/test/render-offline.html`, {
-  waitUntil: "networkidle0",
-});
 
-const payload = await page.evaluate(async (opts) => {
-  const result = await window.renderOffline(opts);
-  return result;
-}, {
-  phrase,
-  baseF0,
-  sampleRate,
-  leadTime,
-  tailTime,
-  includeTrack,
-});
+let payload: RenderPayload;
+try {
+  const page = await browser.newPage();
+  await page.goto(`http://127.0.0.1:${port}/test/render-offline.html`, {
+    waitUntil: "networkidle0",
+  });
 
-await browser.close();
-server.close();
+  payload = await page.evaluate(
+    async (opts) => {
+      const runner = (
+        window as unknown as Window & { renderOffline: (o: typeof opts) => Promise<RenderPayload> }
+      ).renderOffline;
+      const result = await runner(opts);
+      return result;
+    },
+    {
+      phrase,
+      baseF0,
+      sampleRate,
+      leadTime,
+      tailTime,
+      includeTrack,
+      noiseSeed,
+    }
+  );
+} finally {
+  await browser.close();
+  await server.close();
+}
 
-fs.mkdirSync(path.dirname(outJson), { recursive: true });
-fs.writeFileSync(outJson, JSON.stringify(payload, null, 2));
-writeWav(outWav, payload.samples, payload.sampleRate);
+if (persistJson) {
+  fs.mkdirSync(path.dirname(outJson), { recursive: true });
+  fs.writeFileSync(outJson, JSON.stringify(payload, null, 2));
+}
+if (persistWav) {
+  writeWav(outWav, payload.samples, payload.sampleRate);
+}
 
 if (!writeGolden) {
   if (!fs.existsSync(goldenPath)) {
@@ -187,8 +204,13 @@ if (!writeGolden) {
     rmsError: rmsError(actual, expected),
   };
   console.log(JSON.stringify({ compare: deltas }, null, 2));
-  const maxAllowed = 1e-3;
-  if (deltas.maxDelta > maxAllowed) {
+  const maxAllowed = 0;
+  const rmsAllowed = 0;
+  if (
+    deltas.lengthMismatch !== 0 ||
+    deltas.maxDelta > maxAllowed ||
+    deltas.rmsError > rmsAllowed
+  ) {
     process.exitCode = 1;
   }
 }

@@ -1,14 +1,51 @@
+interface ImpulseTrainProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+  };
+}
+
+interface ImpulseTrainMetricsParams {
+  gainAvg: number;
+  gainPeak: number;
+}
+
+interface ImpulseTrainMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  gainAvg?: number;
+  gainPeak?: number;
+}
+
 class ImpulseTrainProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  phase: number;
+  periodLength: number;
+  openPhaseLength: number;
+  positionInPeriod: number;
+  a: number;
+  b: number;
+  c: number;
+  y1: number;
+  y2: number;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 0, minValue: 0, maxValue: 2000, automationRate: "a-rate" },
-      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "a-rate" },
-      { name: "openPhaseRatio", defaultValue: 0.7, minValue: 0, maxValue: 1, automationRate: "k-rate" },
+      { name: "f0", defaultValue: 0, minValue: 0, maxValue: 2000, automationRate: "a-rate" as const },
+      { name: "gain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "a-rate" as const },
+      { name: "openPhaseRatio", defaultValue: 0.7, minValue: 0, maxValue: 1, automationRate: "k-rate" as const },
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as ImpulseTrainProcessorOptions | undefined;
     this.phase = 0;
     this.periodLength = 0;
     this.openPhaseLength = 0;
@@ -18,11 +55,11 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     this.c = 0;
     this.y1 = 0;
     this.y2 = 0;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "impulse";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "impulse";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -30,21 +67,26 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
-  process(_inputs, outputs, parameters) {
+  process(
+    _inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) return true;
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
-    const f0Values = parameters.f0;
-    const gainValues = parameters.gain;
-    const openPhaseRatio = parameters.openPhaseRatio[0];
+    const f0Values = parameters.f0 ?? new Float32Array([0]);
+    const gainValues = parameters.gain ?? new Float32Array([0]);
+    const openPhaseValues = parameters.openPhaseRatio ?? new Float32Array([0.7]);
+    const openPhaseRatio = openPhaseValues[0] ?? 0.7;
     const sr = sampleRate || 48000;
 
     let gainSum = 0;
     let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
-      const f0 = f0Values.length > 1 ? f0Values[i] : f0Values[0];
-      const gain = gainValues.length > 1 ? gainValues[i] : gainValues[0];
+      const f0 = f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0);
+      const gain = gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
       gainSum += gain;
       if (gain > gainPeak) gainPeak = gain;
 
@@ -90,7 +132,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     return true;
   }
 
-  _setImpulseResonator(sr) {
+  _setImpulseResonator(sr: number): void {
     const bw = this.openPhaseLength > 0 ? sr / this.openPhaseLength : 0;
     if (!Number.isFinite(bw) || bw <= 0) {
       this.a = 0;
@@ -109,7 +151,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     this.y2 = 0;
   }
 
-  _reportMetrics(buffer, params) {
+  _reportMetrics(buffer: Float32Array, params?: ImpulseTrainMetricsParams): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -123,7 +165,12 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    const payload: ImpulseTrainMetricsMessage = {
+      type: "metrics",
+      node: this.nodeId,
+      rms,
+      peak,
+    };
     if (params) {
       payload.gainAvg = params.gainAvg;
       payload.gainPeak = params.gainPeak;

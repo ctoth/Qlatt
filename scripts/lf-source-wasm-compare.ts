@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initWasmModule, WasmBuffer } from "../src/worklets/wasm-utils";
+import { initWasmModule, WasmBuffer, type WasmAllocExports } from "../src/worklets/wasm-utils";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
@@ -9,16 +9,31 @@ const wasmPath = path.join(repoRoot, "public", "worklets", "lf-source.wasm");
 const goldenPath = path.join(repoRoot, "test", "golden", "klatt_paper.json");
 
 const wasmBytes = fs.readFileSync(wasmPath);
-const { instance } = await initWasmModule(null, {}, wasmBytes);
-const wasm = instance.exports;
+const moduleResult = await initWasmModule(null, {}, wasmBytes);
+const instance = "instance" in moduleResult ? moduleResult.instance : moduleResult;
+interface LfSourceExports extends WasmAllocExports {
+  lf_source_new(sampleRate: number): number;
+  lf_source_set_mode?(state: number, mode: number): void;
+  lf_source_process(
+    state: number,
+    f0Ptr: number,
+    f0Len: number,
+    rdPtr: number,
+    rdLen: number,
+    outPtr: number,
+    len: number
+  ): void;
+}
+
+const wasm = instance.exports as unknown as LfSourceExports;
 
 const golden = JSON.parse(fs.readFileSync(goldenPath, "utf8"));
 const target = golden.lfLm;
-const expected = target.samples;
+const expected = target.samples as number[];
 
-const sampleRate = golden.sampleRate;
-const f0 = target.params.f0;
-const rd = target.params.rd;
+const sampleRate = Number(golden.sampleRate);
+const f0 = Number(target.params.f0);
+const rd = Number(target.params.rd);
 const length = expected.length;
 
 const state = wasm.lf_source_new(sampleRate);
@@ -34,6 +49,9 @@ outputBuffer.ensure(length);
 f0Buffer.ensure(1);
 rdBuffer.ensure(1);
 
+if (!f0Buffer.view || !rdBuffer.view) {
+  throw new Error("Failed to initialize f0/rd buffers.");
+}
 f0Buffer.view[0] = f0;
 rdBuffer.view[0] = rd;
 
@@ -48,11 +66,15 @@ wasm.lf_source_process(
 );
 
 outputBuffer.refresh();
+if (!outputBuffer.view) {
+  throw new Error("Output buffer view was not initialized.");
+}
+const outputView = outputBuffer.view;
 
 let maxDelta = 0;
 let rmsError = 0;
 for (let i = 0; i < length; i += 1) {
-  const delta = outputBuffer.view[i] - expected[i];
+  const delta = outputView[i] - expected[i];
   const ad = Math.abs(delta);
   if (ad > maxDelta) maxDelta = ad;
   rmsError += delta * delta;

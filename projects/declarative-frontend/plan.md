@@ -227,13 +227,64 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-11: follow-up engine typing pass tightened helper numeric/object narrowing and navigation callback signatures.
 - Evidence: `src/declarative-frontend/engine.ts` now normalizes unknown numeric inputs (`inherent`, `ratio`, scalar previews) through explicit number coercion and has explicit parameter types on navigation helper callbacks.
 - Evidence: behavior remains stable via `npx vitest run` (`36` files / `122` tests); project strict backlog remains concentrated in `src/declarative-frontend/engine.ts` + scripts, with engine now at `55` remaining `npx tsc --noEmit` diagnostics.
+- 2026-02-14: inventory dependency seam cleanup started by injecting declarative `$target(...)` materialization via runtime options instead of hard imports inside the generic engine.
+- Evidence: `src/declarative-frontend/engine.ts` now accepts `inventoryResolver` in `runRuleEngine(...)` options and routes `$target` through that resolver.
+- Evidence: `src/tts-frontend-rules.ts` now exposes `materializePhonemeTarget(...)`; `src/tts-frontend.ts`, `src/declarative-frontend/index.ts`, `src/declarative-frontend/tooling.ts`, and `scripts/tts-dsl.ts` pass this resolver into declarative execution paths.
+- Evidence: `test/declarative-frontend-splice-actions.test.ts` adds injected-resolver coverage for `$target` payload materialization.
+- 2026-02-14: inventory/constants source-of-truth moved into declarative frontend assets module and legacy shim removed.
+- Evidence: canonical definitions now live in `src/declarative-frontend/inventory.ts` (`BASE_PARAMS`, `PHONEME_TARGETS`, `fillDefaultParams`, `materializePhonemeTarget`).
+- Evidence: `src/tts-frontend-rules.ts` was deleted after callers/tests migrated to `src/declarative-frontend/inventory.ts`; declarative runtime, CLI, and frontend paths import canonical inventory directly.
+- 2026-02-14: Sync-axis runtime moved to ID-first token mark handling (while preserving canonical token field shape) and removed one stale engine helper.
+- Evidence: `src/declarative-frontend/engine.ts` now tracks token mark refs in a runtime `WeakMap`, resolves/sorts/spans/coverage checks using mark IDs via `runtime.axis`, and writes canonical order objects back to token fields only as a projection.
+- Evidence: point-time resolution, referenced-mark collection, and base-coverage anchoring now read mark identity through `SyncAxis` lookups (`getMarkTime`/`getOrderById` paths) rather than ad-hoc inline mark normalization calls.
+- Evidence: `clampRatio` (engine) and unused `SyncAxis.getMark(...)` (axis API) were removed as dead code; focused regression remains green via `npx vitest run test/declarative-frontend-axis-identity.test.ts test/declarative-frontend-finalize.test.ts test/declarative-frontend-point-actions.test.ts test/declarative-frontend-splice-actions.test.ts test/declarative-frontend-integration-phases.test.ts test/tts-frontend-declarative-prosody.test.ts test/tts-frontend-output-contract.test.ts` (`7` files / `21` tests) and `npm run typecheck:core`.
+- 2026-02-14: base-partition invariant tightened to full ACTIVE coverage semantics and overlapping rewrite rejection was locked with targeted regression tests.
+- Evidence: `src/declarative-frontend/engine.ts` `assertActiveBaseCoverage(...)` now rejects non-empty base streams with zero ACTIVE tokens (`E_BASE_NOT_CONTIGUOUS`) and unconditionally enforces START/END anchoring for ACTIVE coverage.
+- Evidence: `test/declarative-frontend-base-coverage.test.ts` now covers empty-utterance acceptance and non-empty/no-ACTIVE rejection; `test/declarative-frontend-splice-actions.test.ts` now asserts overlapping replace-range rewrites fail deterministically with `E_BASE_OVERLAP`.
+- Evidence: removed dead timing/API surface state (`runtime.markTimes` in engine, unused `SyncAxis.exportMarkTimes(...)`, and unused public `SyncAxis.keyToId` exposure); focused regression passes via `npx vitest run test/declarative-frontend-base-coverage.test.ts test/declarative-frontend-splice-actions.test.ts test/declarative-frontend-axis-identity.test.ts test/declarative-frontend-finalize.test.ts test/declarative-frontend-point-actions.test.ts test/declarative-frontend-sync-axis.test.ts test/declarative-frontend-integration-phases.test.ts test/tts-frontend-declarative-prosody.test.ts test/tts-frontend-output-contract.test.ts` (`9` files / `33` tests) and `npm run typecheck:core`.
+- 2026-02-14: boundary insertion ordering was aligned with explicit left/right-token adjacency semantics and side=`before` behavior is now covered.
+- Evidence: `src/declarative-frontend/engine.ts` `findInsertionIndexForBoundary(...)` now resolves insertion index via ACTIVE-token boundary adjacency (`token.sync_right == boundary` for left token, `token.sync_left == boundary` for right token), with deterministic fallback only for non-boundary marks.
+- Evidence: `test/declarative-frontend-splice-actions.test.ts` now includes left-side boundary coverage and deterministic overlap diagnostics around shared boundaries.
+- Evidence: removed dead `compareMarkIds` fallback path in `src/declarative-frontend/engine.ts` (runtime axis is now required in all call sites); focused regression remains green via `npx vitest run test/declarative-frontend-splice-actions.test.ts test/declarative-frontend-axis-identity.test.ts test/declarative-frontend-base-coverage.test.ts test/declarative-frontend-sync-axis.test.ts test/declarative-frontend-finalize.test.ts test/tts-frontend-declarative-prosody.test.ts` (`6` files / `28` tests) and `npm run typecheck:core`.
+- 2026-02-14: full `insert_at_boundary` span assignment landed (`[L,R]` on selected side, split for `N>1`) with explicit overlap expectations and rulepack impact coverage.
+- Evidence: `src/declarative-frontend/engine.ts` now computes boundary adjacency (`findBoundaryAdjacency`) and derives insert bounds via side-specific neighbor spans (`resolveBoundaryInsertBounds`) before invoking `splitMarkRange`, so inserted boundary tokens occupy real intervals instead of zero-width boundary marks.
+- Evidence: `test/declarative-frontend-splice-actions.test.ts` now asserts unsuppressed shared-boundary inserts fail with `E_BASE_OVERLAP`, and separately validates multi-token `insert_at_boundary` splitting over `[L,R]` when overlap is explicitly suppressed in-phase.
+- Evidence: `test/declarative-frontend-axis-identity.test.ts` and `test/declarative-frontend-sync-axis.test.ts` were updated to validate mark-ID identity and finite interior split marks under the new boundary-span model.
+- Evidence: `src/declarative-frontend/rule-pack.ts` structural stop rules now use `replace_range` over the following segment span (reinserting a copy token) to preserve active-phone behavior under full boundary-span semantics, and `test/declarative-frontend-rulepack-impact.test.ts` was added for active-order + suppressed-provenance coverage.
+- Evidence: `src/tts-frontend.ts` now filters suppressed phone tokens before Klatt track emission (`status !== 2`), preventing suppressed provenance tokens from leaking into synthesis output.
+- 2026-02-14: golden gate was stabilized and explicitly re-locked after declarative/frontend behavior drift.
+- Evidence: `scripts/run-golden.ts` now executes child scripts via `ts-node/esm/transpile-only` (matching package script invocation) and no longer crashes under Node 22 loader behavior.
+- Evidence: `scripts/render-phrase.ts` now serves `test/render-offline.html` through Vite (TS-native module transform), making browser-side `window.renderOffline` initialization reliable.
+- Evidence: `scripts/klatt-paper-golden.py` now applies Perrotin Appendix C/D numerator normalization (`1 / sin(pi * (1 - alpha_m))`) consistent with the Rust LF source implementation and citation comment already in `crates/lf-source/src/lib.rs`; `test/golden/klatt_paper.json` was regenerated from that source.
+- Evidence: `test/golden/phrase-hello-world.json`/`.wav` were re-locked to current declarative output, and `npm run test:golden` now passes end-to-end.
+- Evidence: `scripts/render-phrase.ts` compare mode no longer rewrites golden artifacts unless `--write-golden 1` or explicit output paths are requested (dead artifact-churn path removed).
+- 2026-02-14: offline phrase golden rendering is now deterministic and uses strict zero-delta verification.
+- Evidence: `src/worklets/noise-source-processor.ts` now supports seeded deterministic white-noise generation (32-bit LCG) while preserving `Math.random()` behavior when no seed is provided.
+- Evidence: `src/klatt-synth.ts` now threads optional `noiseSeed` constructor options into noise/frication worklet instances using stable per-channel derived seeds.
+- Evidence: `test/render-offline.html` and `scripts/render-phrase.ts` now pass a fixed `noiseSeed` for golden runs (default `20260214`), and `render-phrase` compare mode now fails unless `lengthMismatch == 0`, `maxDelta == 0`, and `rmsError == 0`.
+- Evidence: repeated local compare runs are stable with identical outputs (`maxDelta: 0`, `rmsError: 0`), and `npm run test:golden` remains green end-to-end.
+- 2026-02-14: added a second layered strict typecheck gate for the golden toolchain (`scripts` + shared WASM utility) as a concrete K9 increment.
+- Evidence: `tsconfig.golden.json` and `package.json` script `typecheck:golden` now gate `scripts/run-golden.ts`, `scripts/render-phrase.ts`, `scripts/klatt-tract-wasm-compare.ts`, `scripts/lf-source-wasm-compare.ts`, and `src/worklets/wasm-utils.ts`.
+- Evidence: golden scripts and `wasm-utils` were typed with explicit interfaces/signatures (WASM export contracts, buffer helper fields, render payload types, strict browser callback casts), and `npm run typecheck:golden` passes.
+- Evidence: regression remains green after typing sweep via `npm run test:golden` and `npm run typecheck:core`.
+- 2026-02-14: started the dedicated audio-layer strict typecheck gate with typed AudioWorklet foundations.
+- Evidence: `src/worklets/audio-worklet-globals.d.ts` now defines minimal typed AudioWorklet runtime globals (`AudioWorkletProcessor`, `registerProcessor`, `sampleRate`) for strict compile context.
+- Evidence: `src/worklets/noise-source-processor.ts` now has explicit strict types for processor options, class fields, message payloads, and process/report method signatures (including deterministic-seed path).
+- Evidence: `tsconfig.audio.json` and `package.json` script `typecheck:audio` were added, and `npm run typecheck:audio` passes alongside `npm run typecheck:golden`, `npm run typecheck:core`, and `npm run test:golden`.
+- 2026-02-14: expanded `typecheck:audio` to additional core excitation/modulation worklets.
+- Evidence: `src/worklets/impulse-train-processor.ts` now has strict class-field/option typing, typed metrics payload contracts, and explicit process/report signatures.
+- Evidence: `src/worklets/glottal-mod-processor.ts` now has strict class-field/option typing and typed metrics reporting path.
+- Evidence: `tsconfig.audio.json` now includes `impulse-train` and `glottal-mod`, and the gate remains green (`npm run typecheck:audio`) with no regressions in `npm run typecheck:golden`, `npm run typecheck:core`, or `npm run test:golden`.
+- 2026-02-14: expanded `typecheck:audio` again to cover differentiator routing worklet typing.
+- Evidence: `src/worklets/differentiator-processor.ts` now has strict option/field typing, typed process signature, and typed metrics payload including input/output RMS/peak telemetry fields.
+- Evidence: `tsconfig.audio.json` now includes `differentiator`, and the gate remains green (`npm run typecheck:audio`) with golden/core regression still passing.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.
 - Limitation: declination now resets phrase-locally, but remains index-based and does not yet implement the prior imperative time-based phrase-shape details (initial boost/continuation-rise decomposition).
 - Limitation: locked corpus golden currently validates track-summary metrics, not full sample-level rendered waveform equivalence.
 - Limitation: scalar unification now applies to declared top-level scalar fields; nested dotted fields (e.g. `params.F2`) remain immediate unless promoted to declared scalar fields in stream metadata.
-- Limitation: sync-axis order keys now use sentinel/rank objects for bootstrap, but the runtime still treats marks as inline values on tokens (not full `SyncMark` entities with stable IDs/time cells), so full Part 1.1/1.2 object-model parity remains incomplete.
+- Limitation: runtime execution now resolves marks through `SyncAxis` IDs internally, but token payloads still carry projected inline order objects (no public mark-ID token fields yet), so full Part 1.1/1.2 object-model parity remains incomplete.
 
 ## 3) Master Checklist (Spec-to-Code Execution)
 
@@ -315,7 +366,7 @@ Acceptance criteria:
 
 - [x] `H1` `DONE`: Remove `rule_K_Context` and `rule_GenerateF0Contour` from runtime usage.
 - [x] `H2` `DONE`: Remove obsolete imperative rule mutators from `src/tts-frontend-rules.ts`.
-- [ ] `H3` `NOT_STARTED`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
+- [x] `H3` `DONE`: Decide and enforce single source of truth for inventory/constants (prefer declarative assets).
 
 Acceptance criteria:
 - No operational dependency on removed imperative rule code.
@@ -337,7 +388,7 @@ Acceptance criteria:
 - [ ] `J1` `IN_PROGRESS`: Keep and expand unit tests for order/parser/validation/engine determinism.
 - [x] `J2` `DONE`: Add integration tests for phases, diagnostics, and finalize behavior.
 - [x] `J3` `DONE`: Add declarative-only frontend behavior tests on phrase corpus.
-- [ ] `J4` `IN_PROGRESS`: Run golden verification and lock outputs after review.
+- [x] `J4` `DONE`: Run golden verification and lock outputs after review.
 - [x] `J5` `DONE`: Update docs to describe declarative frontend as current architecture.
 
 Acceptance criteria:

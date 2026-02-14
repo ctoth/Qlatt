@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "scripts/run-golden.ts",
+    "scripts/render-phrase.ts",
+    "scripts/klatt-tract-wasm-compare.ts",
+    "scripts/lf-source-wasm-compare.ts",
+    "src/worklets/wasm-utils.ts"
+  ],
+  "exclude": ["node_modules", "dist", "public"]
+}

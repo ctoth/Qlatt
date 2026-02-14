@@ -1,21 +1,66 @@
+interface NoiseProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    seed?: number;
+  };
+}
+
+interface NoiseMetricsParams {
+  gainAvg: number;
+  gainPeak: number;
+  cutoff: number;
+}
+
+interface NoiseMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  gainAvg?: number;
+  gainPeak?: number;
+  cutoff?: number;
+}
+
 class NoiseSourceProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  y1: number;
+  alpha: number;
+  _lastCutoff: number;
+  _useSeededNoise: boolean;
+  _prngState: number;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "gain", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" },
-      { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 8000, automationRate: "k-rate" },
+      { name: "gain", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" as const },
+      { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 8000, automationRate: "k-rate" as const },
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as NoiseProcessorOptions | undefined;
     this.y1 = 0;
     this.alpha = 0.0;
     this._lastCutoff = -1;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "noise";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    const requestedSeed = opts?.processorOptions?.seed;
+    const hasSeed = Number.isFinite(requestedSeed);
+    this._useSeededNoise = hasSeed;
+    if (hasSeed) {
+      const normalized = (Math.trunc(Number(requestedSeed)) >>> 0) || 1;
+      this._prngState = normalized;
+    } else {
+      this._prngState = 0;
+    }
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "noise";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -23,13 +68,30 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
-  _updateFilter(cutoff) {
+  _nextUniform() {
+    // Deterministic 32-bit LCG for reproducible offline golden rendering.
+    this._prngState = (1664525 * this._prngState + 1013904223) >>> 0;
+    return this._prngState / 0x100000000;
+  }
+
+  _nextWhiteNoiseSample() {
+    if (!this._useSeededNoise) {
+      return Math.random() * 2 - 1;
+    }
+    return this._nextUniform() * 2 - 1;
+  }
+
+  _updateFilter(cutoff: number): void {
     const clamped = Math.max(1, Math.min(cutoff, sampleRate * 0.45));
     this.alpha = Math.exp(-2 * Math.PI * clamped / sampleRate);
     this._lastCutoff = clamped;
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
@@ -38,8 +100,9 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     const blockSize = outputChannel.length;
     const modInput = inputs[0];
     const modChannel = modInput && modInput[0] ? modInput[0] : null;
-    const gainValues = parameters.gain;
-    const cutoff = parameters.cutoff[0];
+    const gainValues = parameters.gain ?? new Float32Array([0]);
+    const cutoffValues = parameters.cutoff ?? new Float32Array([1000]);
+    const cutoff = cutoffValues[0] ?? 1000;
 
     if (cutoff !== this._lastCutoff) {
       this._updateFilter(cutoff);
@@ -48,11 +111,11 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     let gainSum = 0;
     let gainPeak = 0;
     for (let i = 0; i < blockSize; i += 1) {
-      const gain = gainValues.length > 1 ? gainValues[i] : gainValues[0];
+      const gain = gainValues.length > 1 ? (gainValues[i] ?? gainValues[0] ?? 0) : (gainValues[0] ?? 0);
       const mod = modChannel ? modChannel[i] : 1;
       gainSum += gain;
       if (gain > gainPeak) gainPeak = gain;
-      const white = Math.random() * 2 - 1;
+      const white = this._nextWhiteNoiseSample();
       const y = (1 - this.alpha) * white + this.alpha * this.y1;
       this.y1 = y;
       outputChannel[i] = y * gain * mod;
@@ -66,7 +129,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     return true;
   }
 
-  _reportMetrics(buffer, params) {
+  _reportMetrics(buffer: Float32Array, params?: NoiseMetricsParams): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -80,7 +143,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    const payload = { type: "metrics", node: this.nodeId, rms, peak };
+    const payload: NoiseMetricsMessage = { type: "metrics", node: this.nodeId, rms, peak };
     if (params) {
       payload.gainAvg = params.gainAvg;
       payload.gainPeak = params.gainPeak;

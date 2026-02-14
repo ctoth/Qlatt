@@ -17,7 +17,7 @@ for (const script of scripts) {
     process.execPath,
     [
       "--loader",
-      "ts-node/esm",
+      "ts-node/esm/transpile-only",
       "--experimental-specifier-resolution=node",
       path.join(repoRoot, script),
     ],

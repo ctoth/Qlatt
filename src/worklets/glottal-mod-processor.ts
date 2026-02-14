@@ -1,19 +1,43 @@
+interface GlottalModProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+  };
+}
+
+interface GlottalModMetricsMessage {
+  type: "metrics";
+  node: string;
+  rms: number;
+  peak: number;
+  f0: number;
+}
+
 class GlottalModProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  phase: number;
+  lastF0: number;
+  debug: boolean;
+  nodeId: string;
+  reportInterval: number;
+  _reportCountdown: number;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
+      { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as GlottalModProcessorOptions | undefined;
     this.phase = 0;
     this.lastF0 = 0;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "glottal-mod";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
+    this.debug = Boolean(opts?.processorOptions?.debug);
+    this.nodeId = opts?.processorOptions?.nodeId || "glottal-mod";
+    this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
@@ -21,26 +45,32 @@ class GlottalModProcessor extends AudioWorkletProcessor {
     this.port.postMessage({ type: "ready", node: this.nodeId });
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    _inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const output = outputs[0];
     if (!output || !output[0]) {
       return true;
     }
     const out = output[0];
-    const f0Values = parameters.f0;
+    const f0Values = parameters.f0 ?? new Float32Array([0]);
     const hasF0 = f0Values && f0Values.length > 0;
     const blockSize = out.length;
 
     let f0Sum = 0;
     if (hasF0) {
       for (let i = 0; i < f0Values.length; i += 1) {
-        f0Sum += f0Values[i];
+        f0Sum += f0Values[i] ?? 0;
       }
       this.lastF0 = f0Sum / f0Values.length;
     }
 
     for (let i = 0; i < blockSize; i += 1) {
-      const f0 = hasF0 ? (f0Values.length > 1 ? f0Values[i] : f0Values[0]) : 0;
+      const f0 = hasF0
+        ? (f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0))
+        : 0;
       if (!f0 || f0 <= 0) {
         out[i] = 0.5;
         continue;
@@ -61,7 +91,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
     return true;
   }
 
-  _reportMetrics(buffer) {
+  _reportMetrics(buffer: Float32Array): void {
     if (!this.debug) return;
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
@@ -75,13 +105,14 @@ class GlottalModProcessor extends AudioWorkletProcessor {
       if (av > peak) peak = av;
     }
     const rms = Math.sqrt(sum / buffer.length);
-    this.port.postMessage({
+    const payload: GlottalModMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
       rms,
       peak,
       f0: this.lastF0,
-    });
+    };
+    this.port.postMessage(payload);
   }
 }
 

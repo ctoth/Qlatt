@@ -43,6 +43,7 @@
         agcMode = "utterance",
         sourceMode,
         openPhaseRatio,
+        noiseSeed,
       }) {
         const resolvedTrack = Array.isArray(track)
           ? track
@@ -54,7 +55,10 @@
         const length = Math.max(1, Math.ceil(totalTime * sampleRate));
 
         const ctx = new OfflineAudioContext(1, length, sampleRate);
-        const synth = new KlattSynth(ctx);
+        const synthOptions = Number.isFinite(noiseSeed)
+          ? { noiseSeed: Number(noiseSeed) }
+          : undefined;
+        const synth = new KlattSynth(ctx, synthOptions);
         const telemetry = includeTelemetry ? { nodes: {}, events: {} } : null;
         if (includeTelemetry) {
           synth.setTelemetryHandler((data) => {
@@ -186,6 +190,7 @@
           sampleRate,
           leadTime,
           tailTime,
+          noiseSeed: Number.isFinite(noiseSeed) ? Number(noiseSeed) : undefined,
           length,
           metrics: { rms, peak },
           agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,

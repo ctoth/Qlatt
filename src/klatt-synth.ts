@@ -1,8 +1,9 @@
 import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
 
 export class KlattSynth {
-  constructor(audioContext) {
+  constructor(audioContext, options = {}) {
     this.ctx = audioContext;
+    this.options = options ?? {};
     this.nodes = {};
     this.params = this._defaultParams();
     this.isInitialized = false;
@@ -128,6 +129,7 @@ export class KlattSynth {
       processorOptions: {
         debug: telemetry,
         nodeId: "noise",
+        seed: this._resolveNoiseSeed("noise"),
         reportInterval,
       },
     });
@@ -138,6 +140,7 @@ export class KlattSynth {
       processorOptions: {
         debug: telemetry,
         nodeId: "frication",
+        seed: this._resolveNoiseSeed("frication"),
         reportInterval,
       },
     });
@@ -529,6 +532,15 @@ export class KlattSynth {
   _setAudioParam(param, value, atTime) {
     if (!param || !Number.isFinite(value)) return;
     param.setValueAtTime(value, atTime);
+  }
+
+  _resolveNoiseSeed(channel) {
+    const configured = this.options?.noiseSeed;
+    if (!Number.isFinite(configured)) return undefined;
+    const base = (Math.trunc(Number(configured)) >>> 0) || 1;
+    const salt = channel === "frication" ? 0x9e3779b9 : 0x243f6a88;
+    const derived = (base ^ salt) >>> 0;
+    return derived || 1;
   }
 
   _setParallelFormantGain(index, dbValue, atTime, freq) {

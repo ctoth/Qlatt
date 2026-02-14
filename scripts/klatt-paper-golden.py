@@ -87,8 +87,14 @@ def perrotin_open_phase_coeffs(sample_rate, t0, oq, alpha_m, amplitude=1.0):
         2.0 * math.pi * fg / sample_rate
     )
     a2 = math.exp(-2.0 * math.pi * bg / sample_rate)
-    b1 = -amplitude
-    b2 = amplitude
+    sin_term = math.sin(math.pi * (1.0 - alpha_m))
+    if abs(sin_term) < 1e-9:
+        return None
+    # Perrotin et al. (2021) Appendix C Eq. C4 and Appendix D Eq. D2:
+    # normalize numerator by sin(pi * (1 - alpha_m)).
+    gain = amplitude / sin_term
+    b1 = -gain
+    b2 = gain
     return (b1, b2, a1, a2, fg, bg)
 
 

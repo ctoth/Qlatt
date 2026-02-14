@@ -98,6 +98,41 @@ const standardFunctions: Record<string, (...args: number[]) => number> = {
   pow,
 };
 
+function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
+  }
+  return value;
+}
+
+function registerNumericBuiltins(celEvaluator: ReturnType<typeof createCelEvaluator>): void {
+  celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinear', 0, args[0]);
+    return dbToLinear(db);
+  });
+
+  celEvaluator.registerFunction('dbToLinearKlsyn', (...args: ParamValue[]): ParamValue => {
+    const db = requireNumericArg('dbToLinearKlsyn', 0, args[0]);
+    return dbToLinearKlsyn(db);
+  });
+
+  celEvaluator.registerFunction('min', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('min', index, arg));
+    return min(...values);
+  });
+
+  celEvaluator.registerFunction('max', (...args: ParamValue[]): ParamValue => {
+    const values = args.map((arg, index) => requireNumericArg('max', index, arg));
+    return max(...values);
+  });
+
+  celEvaluator.registerFunction('pow', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('pow', 0, args[0]);
+    const y = requireNumericArg('pow', 1, args[1]);
+    return pow(x, y);
+  });
+}
+
 // =============================================================================
 // Interpreter Factory
 // =============================================================================
@@ -116,11 +151,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   // Create CEL evaluator and register standard functions
   const celEvaluator = createCelEvaluator();
-  celEvaluator.registerFunction('dbToLinear', dbToLinear);
-  celEvaluator.registerFunction('dbToLinearKlsyn', dbToLinearKlsyn);
-  celEvaluator.registerFunction('min', min);
-  celEvaluator.registerFunction('max', max);
-  celEvaluator.registerFunction('pow', pow);
+  registerNumericBuiltins(celEvaluator);
 
   // Create topological evaluator for semantics (wired to CEL)
   const evaluator = createTopologicalEvaluator(celEvaluator);

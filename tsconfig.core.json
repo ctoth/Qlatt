@@ -10,6 +10,7 @@
     "src/declarative-frontend/parser.ts",
     "src/declarative-frontend/validation.ts",
     "src/diagnostics.ts",
+    "src/klatt-interpreter.ts",
     "src/klatt-runtime.ts",
     "src/semantics/external-modules.d.ts",
     "src/tts-frontend.ts",

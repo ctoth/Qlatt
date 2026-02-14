@@ -309,6 +309,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - Evidence: `src/semantics/external-modules.d.ts` now declares minimal typed module surfaces for `jmespath` and `toposort`, and `tsconfig.core.json` now includes that declaration file so strict core checks remain self-contained.
 - Evidence: dead-code cleanup in this pass removed the unused runtime `jmespathResolver` instantiation/import from `src/klatt-runtime.ts`.
 - Evidence: verification remains green via `npm run typecheck:core`, `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run test:golden`, and `npm test`.
+- 2026-02-14: expanded `typecheck:core` further to include `src/klatt-interpreter.ts` and aligned interpreter CEL registrations with strict `ParamValue` function signatures.
+- Evidence: `src/klatt-interpreter.ts` now registers `dbToLinear`, `dbToLinearKlsyn`, `min`, `max`, and `pow` via numeric-argument adapter wrappers that validate finite numeric inputs before dispatching to builtin math helpers.
+- Evidence: `tsconfig.core.json` now includes `src/klatt-interpreter.ts`, and verification remains green via `npm run typecheck:core`, `npm run typecheck:audio`, `npm run typecheck:golden`, `npm run test:golden`, and `npm test`.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

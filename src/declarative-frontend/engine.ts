@@ -706,9 +706,9 @@ function previewScalarEffect(state: TokenLike, op: string, value: number): numbe
 function resolveScalarState(state: TokenLike): number {
   const maybeRound = (n: number): number => (state.round ? Math.round(n) : n);
   let value = Number.isFinite(state.base) ? Number(state.base) : 0;
-  const orderedEffects = state.effects
+  const orderedEffects = (Array.isArray(state.effects) ? state.effects : [])
     .slice()
-    .sort((left, right) => Number(left.order) - Number(right.order));
+    .sort((left: TokenLike, right: TokenLike) => Number(left.order) - Number(right.order));
 
   if (state.resolution === "klatt") {
     const floor = Number.isFinite(state.floor) ? Number(state.floor) : 0;
@@ -956,13 +956,17 @@ function buildSpliceInsertions(
   return specs.map((spec, index) => {
     const template = spec && typeof spec === "object" ? spec : {};
     const evaluated = deepEvaluateTemplate(template, context, functions);
+    const evaluatedObject =
+      evaluated && typeof evaluated === "object" && !Array.isArray(evaluated)
+        ? (evaluated as TokenLike)
+        : {};
     const markProps = buildRuntimeMarkProps(runtime, {
       sync_left: segments[index].leftId,
       sync_right: segments[index].rightId,
     });
-    const token = {
-      ...evaluated,
-      stream: evaluated.stream ?? stream,
+    const token: TokenLike = {
+      ...evaluatedObject,
+      stream: evaluatedObject.stream ?? stream,
       status: TokenStatus.ACTIVE,
       ...markProps,
     };
@@ -1392,16 +1396,16 @@ function matchPatternFrom(
   return captures;
 }
 
-function applyPatternRule(rule, sequence, runtime) {
+function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
   const pattern = runtime.patterns?.[rule.match];
   if (!pattern || !Array.isArray(pattern.sequence) || pattern.sequence.length === 0) {
     return sequence;
   }
 
   const active = sequence.filter(
-    (token) => isActiveToken(token) && getTokenStream(token) === pattern.stream
+    (token: TokenLike) => isActiveToken(token) && getTokenStream(token) === pattern.stream
   );
-  const matches = [];
+  const matches: Array<Record<string, TokenLike>> = [];
   const navigationFunctions = buildNavigationFunctions(sequence, runtime);
 
   for (let i = 0; i < active.length; i += 1) {
@@ -1484,7 +1488,7 @@ function applyPatternRule(rule, sequence, runtime) {
   return sequence;
 }
 
-function applyRule(rule, sequence, runtime) {
+function applyRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
   if (rule.select) {
     return applySelectRule(rule, sequence, runtime);
   }
@@ -1494,7 +1498,7 @@ function applyRule(rule, sequence, runtime) {
   throw new Error(`E_RULE_SHAPE: unsupported declarative slice rule op '${rule?.op}'`);
 }
 
-function isStructuralRule(rule) {
+function isStructuralRule(rule: TokenLike | null | undefined): boolean {
   if (!rule || typeof rule !== "object") return false;
   if (rule.splice) return true;
   if (rule.insert_point) return true;
@@ -1504,7 +1508,7 @@ function isStructuralRule(rule) {
   return false;
 }
 
-function annotateRuntimeRuleError(error, phaseName, ruleName) {
+function annotateRuntimeRuleError(error: unknown, phaseName: string, ruleName: string): Error {
   const message =
     error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
   const context = `phase=${phaseName} rule=${ruleName} path=rules.${ruleName}`;
@@ -1514,8 +1518,8 @@ function annotateRuntimeRuleError(error, phaseName, ruleName) {
   return new Error(`${message} [${context}]`);
 }
 
-function collectReferencedMarkIds(sequence, runtime) {
-  const marks = new Set();
+function collectReferencedMarkIds(sequence: TokenLike[], runtime: RuntimeLike): Set<string> {
+  const marks = new Set<string>();
   for (const token of sequence) {
     const syncLeftId = readTokenMarkId(token, runtime, "sync_left");
     const syncRightId = readTokenMarkId(token, runtime, "sync_right");
@@ -1529,7 +1533,7 @@ function collectReferencedMarkIds(sequence, runtime) {
   return marks;
 }
 
-function describeMarkId(runtime, markId) {
+function describeMarkId(runtime: RuntimeLike, markId: unknown): string {
   if (typeof markId !== "string") return String(markId);
   const mark = runtime?.axis?.getMarkById(markId);
   if (!mark) return markId;
@@ -1543,7 +1547,7 @@ function describeMarkId(runtime, markId) {
   }
 }
 
-function interpolateMarkTimes(runtime, referencedMarkIds) {
+function interpolateMarkTimes(runtime: RuntimeLike, referencedMarkIds: Set<string>): void {
   const unresolved = new Set(
     [...referencedMarkIds].filter((markId) => !Number.isFinite(runtime.axis.getMarkTime(markId)))
   );
@@ -1589,11 +1593,7 @@ function interpolateMarkTimes(runtime, referencedMarkIds) {
       const leftOrder = toNumericOrder(getOrderForMarkId(runtime, leftBound));
       const rightOrder = toNumericOrder(getOrderForMarkId(runtime, rightBound));
       const currentOrder = toNumericOrder(getOrderForMarkId(runtime, markId));
-      if (
-        !Number.isFinite(leftOrder) ||
-        !Number.isFinite(rightOrder) ||
-        !Number.isFinite(currentOrder)
-      ) {
+      if (leftOrder == null || rightOrder == null || currentOrder == null) {
         continue;
       }
 
@@ -1617,7 +1617,7 @@ function interpolateMarkTimes(runtime, referencedMarkIds) {
   }
 }
 
-function computeSyncTimes(sequence, runtime) {
+function computeSyncTimes(sequence: TokenLike[], runtime: RuntimeLike): void {
   for (const mark of runtime.axis.marks.values()) {
     mark.time = null;
   }
@@ -1630,7 +1630,7 @@ function computeSyncTimes(sequence, runtime) {
         token?.sync_right != null
     )
     .slice()
-    .sort((left, right) => {
+    .sort((left: TokenLike, right: TokenLike) => {
       const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
       const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
       const byLeft = compareMarkIds(runtime, leftBounds.leftId, rightBounds.leftId);
@@ -1665,7 +1665,11 @@ function computeSyncTimes(sequence, runtime) {
   interpolateMarkTimes(runtime, referencedMarks);
 }
 
-function resolvePointTimes(sequence, runtime, pointStreams) {
+function resolvePointTimes(
+  sequence: TokenLike[],
+  runtime: RuntimeLike,
+  pointStreams: unknown
+): void {
   const selected =
     Array.isArray(pointStreams) && pointStreams.length > 0
       ? new Set(pointStreams)
@@ -1692,21 +1696,21 @@ function resolvePointTimes(sequence, runtime, pointStreams) {
   }
 }
 
-function assertActiveBaseCoverage(sequence, runtime) {
+function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): void {
   if (!(runtime?.baseStreams instanceof Set) || runtime.baseStreams.size === 0) return;
 
   for (const stream of runtime.baseStreams) {
-    const hasAnyStreamToken = sequence.some((token) => getTokenStream(token) === stream);
+    const hasAnyStreamToken = sequence.some((token: TokenLike) => getTokenStream(token) === stream);
     const active = sequence
       .filter(
-        (token) =>
+        (token: TokenLike) =>
           isActiveToken(token) &&
           getTokenStream(token) === stream &&
           token?.sync_left != null &&
           token?.sync_right != null
       )
       .slice()
-      .sort((left, right) => {
+      .sort((left: TokenLike, right: TokenLike) => {
         const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
         const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
         const byLeft = compareMarkIds(runtime, leftBounds.leftId, rightBounds.leftId);
@@ -1772,23 +1776,28 @@ type RunRuleEngineOptions = {
   inventoryResolver?: InventoryResolver;
 };
 
-export function runRuleEngine(sequence, specSource, options: RunRuleEngineOptions = {}) {
+export function runRuleEngine(
+  sequence: TokenLike[],
+  specSource: unknown,
+  options: RunRuleEngineOptions = {}
+) {
   const spec = parseDslSpec(specSource);
   const diagnostics = assertValidSpec(spec);
   let current = cloneSequence(sequence);
 
+  const streams = (spec.streams ?? {}) as Record<string, TokenLike>;
   const pointStreams = new Set(
-    Object.entries(spec.streams ?? {})
+    Object.entries(streams)
       .filter(([, stream]) => stream?.type === "point")
       .map(([name]) => name)
   );
   const baseStreams = new Set(
-    Object.entries(spec.streams ?? {})
+    Object.entries(streams)
       .filter(([, stream]) => stream?.type === "base")
       .map(([name]) => name)
   );
   const scalarSpecsByStream = new Map(
-    Object.entries(spec.streams ?? {}).map(([name, stream]) => [
+    Object.entries(streams).map(([name, stream]) => [
       name,
       stream && typeof stream.scalars === "object" && !Array.isArray(stream.scalars)
         ? stream.scalars
@@ -1806,7 +1815,7 @@ export function runRuleEngine(sequence, specSource, options: RunRuleEngineOption
       .filter((id) => typeof id === "string" && id.length > 0)
   );
 
-  const runtime = {
+  const runtime: RuntimeLike = {
     params: {
       ...(spec.parameters ?? {}),
       ...(options.parameters ?? {}),
@@ -1839,7 +1848,7 @@ export function runRuleEngine(sequence, specSource, options: RunRuleEngineOption
     ? new Set(options.phases)
     : null;
 
-  const trace = [];
+  const trace: TokenLike[] = [];
   runtime.trace = trace;
 
   for (const phase of spec.phases) {

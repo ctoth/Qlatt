@@ -12,9 +12,9 @@ const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".wasm": "application/wasm",
-};
+} as const;
 
-function safePath(urlPath) {
+function safePath(urlPath: string): string {
   const decoded = decodeURIComponent(urlPath.split("?")[0]);
   if (decoded === "/") return "/test/test-harness.html";
   return decoded;
@@ -38,7 +38,7 @@ const server = http.createServer((req, res) => {
     }
 
     const ext = path.extname(filePath).toLowerCase();
-    const type = mimeTypes[ext] || "application/octet-stream";
+    const type = mimeTypes[ext as keyof typeof mimeTypes] || "application/octet-stream";
     res.writeHead(200, { "Content-Type": type });
     fs.createReadStream(filePath).pipe(res);
   });

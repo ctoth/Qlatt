@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "scripts/dev-server.ts",
+    "scripts/export-declarative-corpus-summary.ts"
+  ],
+  "exclude": ["node_modules", "dist", "public"]
+}

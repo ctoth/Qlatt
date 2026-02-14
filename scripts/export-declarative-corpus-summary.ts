@@ -12,7 +12,7 @@ if (phrases.length === 0) {
   throw new Error(`No phrases found in ${corpusPath}`);
 }
 
-const summaries = phrases.map((phrase) => {
+const summaries = phrases.map((phrase: string) => {
   const track = textToKlattTrack(phrase, baseF0);
   const voiced = track.filter((frame) => Number(frame.params?.AV) > 0 || Number(frame.params?.AVS) > 0);
   const voicedF0 = track

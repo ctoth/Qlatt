@@ -296,6 +296,9 @@ Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - 2026-02-14: `typecheck:core` coverage expanded to include the declarative runtime engine implementation.
 - Evidence: `src/declarative-frontend/engine.ts` now has strict-typing fixes for previously implicit-`any` / unknown spread sites (typed rule/timing helpers, object narrowing for splice template evaluation, and typed runtime/trace setup in `runRuleEngine`).
 - Evidence: `tsconfig.core.json` now includes `src/declarative-frontend/engine.ts`, and `npm run typecheck:core` remains green after the expansion.
+- 2026-02-14: `typecheck:core` coverage expanded again to include declarative phoneme inventory materialization.
+- Evidence: `src/declarative-frontend/inventory.ts` now has explicit typing for `fillDefaultParams` and `materializePhonemeTarget`, including safe key narrowing for base-parameter overrides and typed dynamic payload augmentation fields.
+- Evidence: `tsconfig.core.json` now includes `src/declarative-frontend/inventory.ts`, and `npm run typecheck:core` remains green with both engine + inventory in gate scope.
 - Limitation: runtime now rejects legacy numeric/string sync-mark inputs (`E_SYNC_MARK_INVALID`); no temporary auto-migration adapter exists for non-object mark payloads.
 - Limitation: finalize timing still uses runtime-inferred marks rather than a full explicit sync-axis object model (spec sentinel semantics and full Part 9 diagnostics remain incomplete).
 - Limitation: project-wide strict typecheck (`npx tsc --noEmit`) remains red due broad implicit-`any` and typing gaps in runtime/scripts; a first staged gate (`typecheck:core`) exists, but additional layered gates are still needed.

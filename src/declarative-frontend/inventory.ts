@@ -42,7 +42,7 @@ export const BASE_PARAMS = {
   // SR removed - determined by AudioContext
 };
 
-export const PHONEME_TARGETS = {
+export const PHONEME_TARGETS: Record<string, Record<string, unknown>> = {
   // --- Vowels (Stressed '1') ---
   // Vowel formant targets based on Peterson & Barney (1952) male speaker averages
   // "Control Methods Used in a Study of the Vowels", JASA 24(2):175-184
@@ -1062,22 +1062,30 @@ export const PHONEME_TARGETS = {
 };
 
 // --- Rule Functions ---
-export function fillDefaultParams(target) {
+export function fillDefaultParams(
+  target: Record<string, unknown> | null | undefined
+): Record<keyof typeof BASE_PARAMS, number> {
   const filled = { ...BASE_PARAMS }; // Start with base defaults
 
   if (target) {
     // Override defaults with valid numeric values from the target
     for (const key in target) {
       // Only process keys that are also defined in BASE_PARAMS (i.e., valid Klatt params)
-      if (BASE_PARAMS.hasOwnProperty(key) && target.hasOwnProperty(key)) {
-        const targetValue = target[key];
+      if (
+        Object.prototype.hasOwnProperty.call(BASE_PARAMS, key) &&
+        Object.prototype.hasOwnProperty.call(target, key)
+      ) {
+        const paramKey = key as keyof typeof BASE_PARAMS;
+        const targetValue = target[paramKey];
         // Check if the target value is a valid number
-        if (typeof targetValue === 'number' && isFinite(targetValue)) {
-          filled[key] = targetValue; // Use the valid target value
+        if (typeof targetValue === "number" && isFinite(targetValue)) {
+          filled[paramKey] = targetValue; // Use the valid target value
         } else {
           // Log a warning if the target has an invalid value for a known Klatt param
           // Keep the default value from BASE_PARAMS in this case.
-          console.warn(`[fillDefaultParams] Invalid value '${targetValue}' for key '${key}' in target. Using default: ${filled[key]}`);
+          console.warn(
+            `[fillDefaultParams] Invalid value '${targetValue}' for key '${key}' in target. Using default: ${filled[paramKey]}`
+          );
         }
       }
       // Ignore keys in target that are not in BASE_PARAMS (e.g., 'type', 'voiced')
@@ -1094,14 +1102,21 @@ export function fillDefaultParams(target) {
   return filled;
 }
 
-export function materializePhonemeTarget(phoneme) {
+export function materializePhonemeTarget(phoneme: unknown) {
   const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
-  const target = PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {};
-  const payload = {
+  const target = (PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {}) as Record<string, unknown>;
+  const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
+  const payload: {
+    phoneme: string;
+    params: Record<keyof typeof BASE_PARAMS, number>;
+    duration: number;
+    inherentDuration: number | undefined;
+    [key: string]: unknown;
+  } = {
     phoneme: key,
     params: fillDefaultParams(target),
-    duration: target?.dur || 30,
-    inherentDuration: target?.dur,
+    duration: targetDuration || 30,
+    inherentDuration: targetDuration,
   };
 
   for (const [entryKey, value] of Object.entries(target)) {

@@ -4,6 +4,7 @@
     "src/declarative-frontend/axis.ts",
     "src/declarative-frontend/engine.ts",
     "src/declarative-frontend/expressions.ts",
+    "src/declarative-frontend/inventory.ts",
     "src/declarative-frontend/model.ts",
     "src/declarative-frontend/order.ts",
     "src/declarative-frontend/parser.ts",

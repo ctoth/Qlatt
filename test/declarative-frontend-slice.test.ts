@@ -13,7 +13,7 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
-    const phones = out.map((t) => t.phoneme);
+    const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
 
     expect(phones).toEqual(["P_CL", "P_REL", "P_ASP", "AE", "T_CL", "T_REL", "T_ASP", "SIL"]);
     const weakRelease = out.find((t) => t.phoneme === "T_REL");
@@ -30,7 +30,7 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
-    const phones = out.map((t) => t.phoneme);
+    const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
 
     expect(phones).toEqual(["B_CL", "B_REL", "AE", "SIL"]);
     expect(out.some((t) => t.phoneme === "B_ASP")).toBe(false);
@@ -127,8 +127,8 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
-    const phones = out.map((t) => t.phoneme);
-    expect(phones).toEqual(["P_CL", "AE", "SIL"]);
+    const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
+    expect(phones).toEqual(["AE", "SIL"]);
   });
 
   it("materializes inserted release targets during structural phase", () => {

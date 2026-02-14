@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import * as frontendRules from "../src/tts-frontend-rules";
+import * as frontendRules from "../src/declarative-frontend/inventory";
 import { textToKlattTrack } from "../src/tts-frontend";
 
 describe("tts frontend declarative prosody migration", () => {

@@ -63,7 +63,7 @@ describe("declarative frontend SyncAxis identity", () => {
     expect(rightMark?.order).toBe(p2?.sync_left);
   });
 
-  it("drives insert_at_boundary with mark identity", () => {
+  it("drives insert_at_boundary [L,R] assignment with mark identity", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = endOrder();
@@ -80,8 +80,12 @@ describe("declarative frontend SyncAxis identity", () => {
             insert: [{ name: "'REL'" }],
           },
         },
+        suppress_right_neighbor: {
+          select: { stream: "phone", where: "current.id = 'p2'" },
+          suppress: true,
+        },
       },
-      phases: [{ name: "structural", rules: ["insert_release"] }],
+      phases: [{ name: "structural", rules: ["insert_release", "suppress_right_neighbor"] }],
     };
 
     const input = [
@@ -93,14 +97,16 @@ describe("declarative frontend SyncAxis identity", () => {
     const axis = requireAxis(result);
     const p1 = result.sequence.find((t: TokenLike) => t.id === "p1");
     const rel = result.sequence.find((t: TokenLike) => t.name === "REL");
+    const p2 = result.sequence.find((t: TokenLike) => t.id === "p2");
     const p1RightId = axis.getMarkId(p1?.sync_right);
     const relLeftId = axis.getMarkId(rel?.sync_left);
     const relRightId = axis.getMarkId(rel?.sync_right);
+    const p2RightId = axis.getMarkId(p2?.sync_right);
 
     expect(relLeftId).toBe(p1RightId);
-    expect(relRightId).toBe(p1RightId);
+    expect(relRightId).toBe(p2RightId);
     expect(rel?.sync_left).toBe(p1?.sync_right);
-    expect(rel?.sync_right).toBe(p1?.sync_right);
+    expect(rel?.sync_right).toBe(p2?.sync_right);
   });
 
   it("stores finalize timing on SyncAxis marks", () => {

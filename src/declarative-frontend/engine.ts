@@ -1,4 +1,3 @@
-import { PHONEME_TARGETS, fillDefaultParams } from "../tts-frontend-rules";
 import { parseDslSpec } from "./parser";
 import { assertValidSpec } from "./validation";
 import { evaluateExpression } from "./expressions";
@@ -13,13 +12,14 @@ import {
   buildSyncAxis,
   compareOrderValue,
   isEndOrder,
-  isOrderObject,
   isStartOrder,
   toNumericOrder,
 } from "./axis";
 
 type TokenLike = Record<string, any>;
 type RuntimeLike = Record<string, any>;
+export type InventoryResolver = (phoneme: string) => Record<string, unknown> | null | undefined;
+type TokenMarkRef = { raw: unknown; id: string };
 
 function cloneSequence(sequence: TokenLike[]): TokenLike[] {
   return sequence.map((token) => ({
@@ -35,32 +35,37 @@ function getIncompressibleMin(token: TokenLike | null | undefined, inherent: unk
   return inherentMs * ratio;
 }
 
-function materializeInventoryTarget(phoneme: unknown): TokenLike {
+function materializeInventoryTarget(
+  phoneme: unknown,
+  runtime: RuntimeLike | null | undefined
+): TokenLike {
   const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
-  const inventory = PHONEME_TARGETS as Record<string, TokenLike>;
-  const target = inventory[key] || inventory.SIL || {};
-  const payload: TokenLike = {
-    phoneme: key,
-    params: fillDefaultParams(target),
-    duration: target?.dur || 30,
-    inherentDuration: target?.dur,
-  };
-
-  for (const [entryKey, value] of Object.entries(target)) {
-    if (entryKey === "dur") continue;
-    if (entryKey === "SW") {
-      payload.inventorySW = value;
-      continue;
-    }
-    if (entryKey === "type" && typeof value === "string") {
-      payload.type = value;
-      continue;
-    }
-    if (typeof value === "boolean") {
-      payload[entryKey] = value;
-    }
+  const resolver =
+    runtime && typeof runtime.inventoryResolver === "function"
+      ? (runtime.inventoryResolver as InventoryResolver)
+      : null;
+  const resolved = resolver ? resolver(key) : null;
+  if (!resolved || typeof resolved !== "object" || Array.isArray(resolved)) {
+    return {
+      phoneme: key,
+      params: {},
+      duration: 30,
+      inherentDuration: 30,
+    };
   }
 
+  const payload: TokenLike = { ...resolved };
+  payload.phoneme =
+    typeof payload.phoneme === "string" && payload.phoneme.length > 0 ? payload.phoneme : key;
+  payload.params =
+    payload.params && typeof payload.params === "object" && !Array.isArray(payload.params)
+      ? { ...payload.params }
+      : {};
+  const duration = Number(payload.duration);
+  payload.duration = Number.isFinite(duration) && duration > 0 ? duration : 30;
+  const inherentDuration = Number(payload.inherentDuration);
+  payload.inherentDuration =
+    Number.isFinite(inherentDuration) && inherentDuration > 0 ? inherentDuration : payload.duration;
   return payload;
 }
 
@@ -90,15 +95,23 @@ function initializeBaseStreamSyncMarks(sequence: TokenLike[], baseStreams: Set<s
   }
 }
 
-function comparePointTokenOrder(left: TokenLike, right: TokenLike): number {
+function comparePointTokenOrder(
+  left: TokenLike,
+  right: TokenLike,
+  runtime: RuntimeLike | null = null
+): number {
   const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
   const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
   if (leftTime != null && rightTime != null && leftTime !== rightTime) {
     return leftTime < rightTime ? -1 : 1;
   }
-  const byLeft = compareOrderValue(left?.anchor_left, right?.anchor_left);
+  const leftAnchorLeft = runtime ? readTokenMarkOrder(left, runtime, "anchor_left") : left?.anchor_left;
+  const rightAnchorLeft = runtime ? readTokenMarkOrder(right, runtime, "anchor_left") : right?.anchor_left;
+  const byLeft = compareOrderValue(leftAnchorLeft, rightAnchorLeft);
   if (byLeft !== 0) return byLeft;
-  const byRight = compareOrderValue(left?.anchor_right, right?.anchor_right);
+  const leftAnchorRight = runtime ? readTokenMarkOrder(left, runtime, "anchor_right") : left?.anchor_right;
+  const rightAnchorRight = runtime ? readTokenMarkOrder(right, runtime, "anchor_right") : right?.anchor_right;
+  const byRight = compareOrderValue(leftAnchorRight, rightAnchorRight);
   if (byRight !== 0) return byRight;
   const leftRatio = Number.isFinite(left?.ratio) ? Number(left.ratio) : 0;
   const rightRatio = Number.isFinite(right?.ratio) ? Number(right.ratio) : 0;
@@ -106,20 +119,45 @@ function comparePointTokenOrder(left: TokenLike, right: TokenLike): number {
   return compareOrderValue(left?.id ?? "", right?.id ?? "");
 }
 
-function getTokenBounds(token: TokenLike | null | undefined): { left: unknown; right: unknown } | null {
-  if (token && token.sync_left != null && token.sync_right != null) {
-    return { left: token.sync_left, right: token.sync_right };
+function getTokenMarkRefCache(
+  runtime: RuntimeLike | null | undefined,
+  token: TokenLike | null | undefined,
+  create = false
+): Map<string, TokenMarkRef> | null {
+  if (!runtime || !token) return null;
+  if (!(runtime.tokenMarkRefs instanceof WeakMap)) {
+    if (!create) return null;
+    runtime.tokenMarkRefs = new WeakMap();
   }
-  if (token && token.anchor_left != null && token.anchor_right != null) {
-    return { left: token.anchor_left, right: token.anchor_right };
-  }
-  return null;
+  const existing = runtime.tokenMarkRefs.get(token);
+  if (existing) return existing;
+  if (!create) return null;
+  const created = new Map<string, TokenMarkRef>();
+  runtime.tokenMarkRefs.set(token, created);
+  return created;
 }
 
-function canonicalizeTokenMark(token: TokenLike, axis: any, field: string): string | null {
-  const raw = token?.[field];
+function readTokenMarkId(
+  token: TokenLike | null | undefined,
+  runtime: RuntimeLike | null | undefined,
+  field: string
+): string | null {
+  if (!token || !runtime || typeof field !== "string" || field.length === 0) return null;
+  const raw = token[field];
   if (raw == null) return null;
-  const id = axis.ensureMark(raw);
+
+  const cache = getTokenMarkRefCache(runtime, token, true);
+  const cached = cache?.get(field);
+  if (cached && cached.raw === raw) {
+    const canonicalOrder = getOrderForMarkId(runtime, cached.id);
+    if (canonicalOrder != null && token[field] !== canonicalOrder) {
+      token[field] = canonicalOrder;
+      cache?.set(field, { raw: token[field], id: cached.id });
+    }
+    return cached.id;
+  }
+
+  const id = resolveMarkId(runtime, raw);
   if (!id) {
     const tokenId = typeof token?.id === "string" && token.id.length > 0 ? token.id : "<anonymous>";
     throw new Error(
@@ -127,24 +165,79 @@ function canonicalizeTokenMark(token: TokenLike, axis: any, field: string): stri
     );
   }
 
-  const mark = axis.getMarkById(id);
-  if (!mark) return null;
-  token[field] = mark.order;
+  const canonicalOrder = getOrderForMarkId(runtime, id);
+  if (canonicalOrder != null) {
+    token[field] = canonicalOrder;
+  }
+
+  cache?.set(field, { raw: token[field], id });
   return id;
 }
 
-function canonicalizeSequenceAxisRefs(sequence: TokenLike[], axis: any): void {
+function writeTokenMarkId(
+  token: TokenLike | null | undefined,
+  runtime: RuntimeLike | null | undefined,
+  field: string,
+  markId: string | null | undefined
+): void {
+  if (!token || !runtime || typeof field !== "string" || field.length === 0) return;
+  if (typeof markId !== "string" || markId.length === 0) return;
+  const canonicalOrder = getOrderForMarkId(runtime, markId);
+  if (canonicalOrder != null) {
+    token[field] = canonicalOrder;
+  }
+  const cache = getTokenMarkRefCache(runtime, token, true);
+  cache?.set(field, { raw: token[field], id: markId });
+}
+
+function readTokenMarkOrder(
+  token: TokenLike | null | undefined,
+  runtime: RuntimeLike | null | undefined,
+  field: string
+): unknown {
+  const id = readTokenMarkId(token, runtime, field);
+  return id ? getOrderForMarkId(runtime, id) : null;
+}
+
+function getTokenBounds(
+  token: TokenLike | null | undefined,
+  runtime: RuntimeLike | null | undefined = null
+): { left: unknown; right: unknown } | null {
+  if (token) {
+    const left = runtime ? readTokenMarkOrder(token, runtime, "sync_left") : token.sync_left;
+    const right = runtime ? readTokenMarkOrder(token, runtime, "sync_right") : token.sync_right;
+    if (left != null && right != null) {
+      return { left, right };
+    }
+  }
+  if (token) {
+    const left = runtime ? readTokenMarkOrder(token, runtime, "anchor_left") : token.anchor_left;
+    const right = runtime ? readTokenMarkOrder(token, runtime, "anchor_right") : token.anchor_right;
+    if (left != null && right != null) {
+      return { left, right };
+    }
+  }
+  return null;
+}
+
+function canonicalizeSequenceAxisRefs(sequence: TokenLike[], runtime: RuntimeLike): void {
   for (const token of sequence) {
-    canonicalizeTokenMark(token, axis, "sync_left");
-    canonicalizeTokenMark(token, axis, "sync_right");
-    canonicalizeTokenMark(token, axis, "anchor_left");
-    canonicalizeTokenMark(token, axis, "anchor_right");
+    readTokenMarkId(token, runtime, "sync_left");
+    readTokenMarkId(token, runtime, "sync_right");
+    readTokenMarkId(token, runtime, "anchor_left");
+    readTokenMarkId(token, runtime, "anchor_right");
   }
 }
 
 function resolveMarkId(runtime: RuntimeLike | null | undefined, markLike: unknown): string | null {
   if (!runtime?.axis || markLike == null) return null;
   if (typeof markLike === "string" && runtime.axis.getMarkById(markLike)) return markLike;
+  if (markLike && typeof markLike === "object" && !Array.isArray(markLike)) {
+    const explicitId = (markLike as { id?: unknown }).id;
+    if (typeof explicitId === "string" && runtime.axis.getMarkById(explicitId)) {
+      return explicitId;
+    }
+  }
   return runtime.axis.ensureMark(markLike);
 }
 
@@ -154,9 +247,8 @@ function getOrderForMarkId(runtime: RuntimeLike | null | undefined, markId: unkn
   return mark ? mark.order : null;
 }
 
-function compareMarkIds(runtime: RuntimeLike | null | undefined, leftId: unknown, rightId: unknown): number {
+function compareMarkIds(runtime: RuntimeLike, leftId: unknown, rightId: unknown): number {
   if (leftId === rightId) return 0;
-  if (!runtime?.axis) return compareOrderValue(leftId, rightId);
   return runtime.axis.compareMarkIds(leftId, rightId);
 }
 
@@ -170,14 +262,6 @@ function buildRuntimeMarkProps(runtime: RuntimeLike | null | undefined, mapping:
     props[field] = getOrderForMarkId(runtime, markId);
   }
   return props;
-}
-
-function clampRatio(value: unknown): number {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 0;
-  if (n <= 0) return 0;
-  if (n >= 1) return 1;
-  return n;
 }
 
 function normalizeAnchor(anchor: unknown, fallbackToken: TokenLike | null = null): TokenLike {
@@ -283,7 +367,7 @@ function buildNavigationFunctions(
       (token) => isActiveToken(token) && getTokenStream(token) === key
     );
     if (runtime?.pointStreams?.has(key)) {
-      active = active.slice().sort(comparePointTokenOrder);
+      active = active.slice().sort((left, right) => comparePointTokenOrder(left, right, runtime));
     }
     cache.set(key, active);
     for (const token of active) {
@@ -396,26 +480,32 @@ function buildNavigationFunctions(
     },
     spanning: (token: TokenLike, stream: string) => {
       if (!token || typeof stream !== "string" || stream.length === 0) return [];
-      const target = getTokenBounds(token);
+      const target = getTokenBounds(token, runtime);
       if (!target) return [];
       return getActiveStreamTokens(stream)
         .filter((candidate: TokenLike) => {
-          if (!candidate || candidate.sync_left == null || candidate.sync_right == null) return false;
+          const bounds = getTokenBounds(candidate, runtime);
+          if (!bounds) return false;
           return (
-            compareOrderValue(candidate.sync_left, target.left) <= 0 &&
-            compareOrderValue(candidate.sync_right, target.right) >= 0
+            compareOrderValue(bounds.left, target.left) <= 0 &&
+            compareOrderValue(bounds.right, target.right) >= 0
           );
         })
         .sort((left: TokenLike, right: TokenLike) => {
-          const byLeft = compareOrderValue(left.sync_left, right.sync_left);
+          const leftBounds = getTokenBounds(left, runtime);
+          const rightBounds = getTokenBounds(right, runtime);
+          if (!leftBounds && !rightBounds) return 0;
+          if (!leftBounds) return 1;
+          if (!rightBounds) return -1;
+          const byLeft = compareOrderValue(leftBounds.left, rightBounds.left);
           if (byLeft !== 0) return byLeft;
-          const byRight = compareOrderValue(left.sync_right, right.sync_right);
+          const byRight = compareOrderValue(leftBounds.right, rightBounds.right);
           if (byRight !== 0) return byRight;
           return compareOrderValue(left.id ?? "", right.id ?? "");
         });
     },
     midpoint: (token: TokenLike) => {
-      const bounds = getTokenBounds(token);
+      const bounds = getTokenBounds(token, runtime);
       if (!bounds) return null;
       return normalizeAnchor(
         { anchor_left: bounds.left, anchor_right: bounds.right, ratio: 0.5 },
@@ -423,7 +513,7 @@ function buildNavigationFunctions(
       );
     },
     at_ratio: (token: TokenLike, ratio: number) => {
-      const bounds = getTokenBounds(token);
+      const bounds = getTokenBounds(token, runtime);
       if (!bounds) return null;
       return normalizeAnchor(
         {
@@ -437,7 +527,7 @@ function buildNavigationFunctions(
     at_sync: (syncMark: unknown) =>
       normalizeAnchor({ anchor_left: syncMark, anchor_right: syncMark, ratio: 0 }),
     target: (phoneme: string) => {
-      const payload = materializeInventoryTarget(phoneme);
+      const payload = materializeInventoryTarget(phoneme, runtime);
       return {
         ...payload,
         params: { ...payload.params },
@@ -838,14 +928,8 @@ function ensureTokenSyncMarkRefs(
   runtime: RuntimeLike
 ): { leftId: string | null; rightId: string | null } {
   if (!token) return { leftId: null, rightId: null };
-  const leftId = resolveMarkId(runtime, token.sync_left);
-  const rightId = resolveMarkId(runtime, token.sync_right);
-  if (leftId) {
-    token.sync_left = getOrderForMarkId(runtime, leftId);
-  }
-  if (rightId) {
-    token.sync_right = getOrderForMarkId(runtime, rightId);
-  }
+  const leftId = readTokenMarkId(token, runtime, "sync_left");
+  const rightId = readTokenMarkId(token, runtime, "sync_right");
   return { leftId: leftId ?? null, rightId: rightId ?? null };
 }
 
@@ -887,6 +971,8 @@ function buildSpliceInsertions(
     } else {
       runtime.usedTokenIds.add(token.id);
     }
+    writeTokenMarkId(token, runtime, "sync_left", segments[index].leftId);
+    writeTokenMarkId(token, runtime, "sync_right", segments[index].rightId);
     return token;
   });
 }
@@ -915,29 +1001,107 @@ function findInsertionIndexForRange(
   return sequence.length;
 }
 
-function findInsertionIndexForBoundary(
+type BoundaryAdjacency = {
+  activeCount: number;
+  leftTokenIndex: number;
+  rightTokenIndex: number;
+  leftNeighborLeftId: string | null;
+  rightNeighborRightId: string | null;
+};
+
+function findBoundaryAdjacency(
   sequence: TokenLike[],
   stream: string,
   boundaryId: string,
-  side: "before" | "after",
   runtime: RuntimeLike
-): number {
+): BoundaryAdjacency {
+  let activeCount = 0;
+  let leftTokenIndex = -1;
+  let rightTokenIndex = -1;
+  let leftNeighborLeftId: string | null = null;
+  let rightNeighborRightId: string | null = null;
+
   for (let i = 0; i < sequence.length; i += 1) {
     const token = sequence[i];
-    if (getTokenStream(token) !== stream) continue;
+    if (!isActiveToken(token) || getTokenStream(token) !== stream) continue;
+    activeCount += 1;
     const { leftId, rightId } = ensureTokenSyncMarkRefs(token, runtime);
-    if (!leftId) continue;
-    const leftCmp = compareMarkIds(runtime, leftId, boundaryId);
-    if (leftCmp > 0) return i;
-    if (leftCmp < 0) continue;
-
-    if (side === "after") {
-      const rightCmp = rightId ? compareMarkIds(runtime, rightId, boundaryId) : -1;
-      if (rightCmp === 0) continue;
+    if (rightId && compareMarkIds(runtime, rightId, boundaryId) === 0) {
+      leftTokenIndex = i;
+      leftNeighborLeftId = leftId ?? null;
     }
-    return i;
+    if (leftId && compareMarkIds(runtime, leftId, boundaryId) === 0 && rightTokenIndex < 0) {
+      rightTokenIndex = i;
+      rightNeighborRightId = rightId ?? null;
+    }
   }
-  return sequence.length;
+
+  return {
+    activeCount,
+    leftTokenIndex,
+    rightTokenIndex,
+    leftNeighborLeftId,
+    rightNeighborRightId,
+  };
+}
+
+function findInsertionIndexForBoundary(
+  adjacency: BoundaryAdjacency,
+  side: "before" | "after"
+): number {
+  const { leftTokenIndex, rightTokenIndex } = adjacency;
+
+  if (side === "after") {
+    if (leftTokenIndex >= 0) return leftTokenIndex + 1;
+    if (rightTokenIndex >= 0) return rightTokenIndex;
+  }
+  if (rightTokenIndex >= 0) return rightTokenIndex;
+  if (leftTokenIndex >= 0) return leftTokenIndex + 1;
+  return 0;
+}
+
+function resolveBoundaryInsertBounds(
+  runtime: RuntimeLike,
+  boundaryId: string,
+  side: "before" | "after",
+  adjacency: BoundaryAdjacency
+): { leftId: string; rightId: string } {
+  const startId = runtime.axis.getMarkId({ kind: "START" });
+  const endId = runtime.axis.getMarkId({ kind: "END" });
+  if (typeof startId !== "string" || typeof endId !== "string") {
+    throw new Error("E_SYNC_MARK_UNKNOWN: missing START/END sentinels on sync axis");
+  }
+
+  if (adjacency.activeCount === 0) {
+    if (boundaryId !== startId) {
+      throw new Error(
+        "E_SPLICE_BOUNDARY_ADJACENT_REQUIRED: empty base stream insertion requires boundary START"
+      );
+    }
+    return { leftId: startId, rightId: endId };
+  }
+
+  if (side === "after") {
+    if (!adjacency.rightNeighborRightId) {
+      throw new Error(
+        "E_SPLICE_BOUNDARY_ADJACENT_REQUIRED: insert_at_boundary side=after requires right adjacency"
+      );
+    }
+    return {
+      leftId: boundaryId,
+      rightId: adjacency.rightNeighborRightId,
+    };
+  }
+
+  if (!adjacency.leftNeighborLeftId) {
+    throw new Error(
+      "E_SPLICE_BOUNDARY_ADJACENT_REQUIRED: insert_at_boundary side=before requires left adjacency"
+    );
+  }
+  return {
+    leftId: adjacency.leftNeighborLeftId,
+    rightId: boundaryId,
+  };
 }
 
 function applySpliceSpec(
@@ -1016,17 +1180,13 @@ function applySpliceSpec(
       throw new Error("E_SPLICE_BOUNDARY_REQUIRED: insert_at_boundary splice requires boundary");
     }
 
-    const insertionIndex = findInsertionIndexForBoundary(
-      sequence,
-      stream,
-      boundaryId,
-      side,
-      runtime
-    );
+    const adjacency = findBoundaryAdjacency(sequence, stream, boundaryId, runtime);
+    const bounds = resolveBoundaryInsertBounds(runtime, boundaryId, side, adjacency);
+    const insertionIndex = findInsertionIndexForBoundary(adjacency, side);
     const inserts = buildSpliceInsertions(
       spliceSpec.insert,
       stream,
-      { leftId: boundaryId, rightId: boundaryId },
+      bounds,
       context,
       runtime,
       functions
@@ -1127,6 +1287,8 @@ function applyInsertPointSpec(
   if (pointSpec.tag != null) {
     pointToken.tag = pointSpec.tag;
   }
+  writeTokenMarkId(pointToken, runtime, "anchor_left", anchorLeftId);
+  writeTokenMarkId(pointToken, runtime, "anchor_right", anchorRightId);
   sequence.push(pointToken);
 }
 
@@ -1355,10 +1517,10 @@ function annotateRuntimeRuleError(error, phaseName, ruleName) {
 function collectReferencedMarkIds(sequence, runtime) {
   const marks = new Set();
   for (const token of sequence) {
-    const syncLeftId = canonicalizeTokenMark(token, runtime.axis, "sync_left");
-    const syncRightId = canonicalizeTokenMark(token, runtime.axis, "sync_right");
-    const anchorLeftId = canonicalizeTokenMark(token, runtime.axis, "anchor_left");
-    const anchorRightId = canonicalizeTokenMark(token, runtime.axis, "anchor_right");
+    const syncLeftId = readTokenMarkId(token, runtime, "sync_left");
+    const syncRightId = readTokenMarkId(token, runtime, "sync_right");
+    const anchorLeftId = readTokenMarkId(token, runtime, "anchor_left");
+    const anchorRightId = readTokenMarkId(token, runtime, "anchor_right");
     if (syncLeftId) marks.add(syncLeftId);
     if (syncRightId) marks.add(syncRightId);
     if (anchorLeftId) marks.add(anchorLeftId);
@@ -1501,9 +1663,6 @@ function computeSyncTimes(sequence, runtime) {
 
   const referencedMarks = collectReferencedMarkIds(sequence, runtime);
   interpolateMarkTimes(runtime, referencedMarks);
-
-  runtime.markTimes = runtime.axis.exportMarkTimes();
-  return runtime.markTimes;
 }
 
 function resolvePointTimes(sequence, runtime, pointStreams) {
@@ -1516,8 +1675,8 @@ function resolvePointTimes(sequence, runtime, pointStreams) {
     if (!isActiveToken(token)) continue;
     const stream = getTokenStream(token);
     if (!selected.has(stream)) continue;
-    const leftId = canonicalizeTokenMark(token, runtime.axis, "anchor_left");
-    const rightId = canonicalizeTokenMark(token, runtime.axis, "anchor_right");
+    const leftId = readTokenMarkId(token, runtime, "anchor_left");
+    const rightId = readTokenMarkId(token, runtime, "anchor_right");
     if (!leftId || !rightId) continue;
     const left = runtime.axis.getMarkTime(leftId);
     const right = runtime.axis.getMarkTime(rightId);
@@ -1537,6 +1696,7 @@ function assertActiveBaseCoverage(sequence, runtime) {
   if (!(runtime?.baseStreams instanceof Set) || runtime.baseStreams.size === 0) return;
 
   for (const stream of runtime.baseStreams) {
+    const hasAnyStreamToken = sequence.some((token) => getTokenStream(token) === stream);
     const active = sequence
       .filter(
         (token) =>
@@ -1556,22 +1716,30 @@ function assertActiveBaseCoverage(sequence, runtime) {
         return compareOrderValue(left.id ?? "", right.id ?? "");
       });
 
-    const usesOrderObjects = active.some(
-      (token) => isOrderObject(token.sync_left) || isOrderObject(token.sync_right)
-    );
-    if (usesOrderObjects && active.length > 0) {
-      const first = active[0];
-      const last = active[active.length - 1];
-      if (!isStartOrder(first.sync_left)) {
+    if (active.length === 0) {
+      if (hasAnyStreamToken) {
         throw new Error(
-          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not start at START`
+          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' has no ACTIVE tokens to cover [START, END]`
         );
       }
-      if (!isEndOrder(last.sync_right)) {
-        throw new Error(
-          `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not end at END`
-        );
-      }
+      continue;
+    }
+
+    const first = active[0];
+    const last = active[active.length - 1];
+    const firstBounds = ensureTokenSyncMarkRefs(first, runtime);
+    const lastBounds = ensureTokenSyncMarkRefs(last, runtime);
+    const firstLeftOrder = getOrderForMarkId(runtime, firstBounds.leftId);
+    const lastRightOrder = getOrderForMarkId(runtime, lastBounds.rightId);
+    if (!isStartOrder(firstLeftOrder)) {
+      throw new Error(
+        `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not start at START`
+      );
+    }
+    if (!isEndOrder(lastRightOrder)) {
+      throw new Error(
+        `E_BASE_NOT_CONTIGUOUS: stream '${stream}' active base does not end at END`
+      );
     }
 
     for (let i = 0; i + 1 < active.length; i += 1) {
@@ -1598,7 +1766,13 @@ function assertActiveBaseCoverage(sequence, runtime) {
   }
 }
 
-export function runRuleEngine(sequence, specSource, options = {}) {
+type RunRuleEngineOptions = {
+  phases?: string[];
+  parameters?: Record<string, unknown>;
+  inventoryResolver?: InventoryResolver;
+};
+
+export function runRuleEngine(sequence, specSource, options: RunRuleEngineOptions = {}) {
   const spec = parseDslSpec(specSource);
   const diagnostics = assertValidSpec(spec);
   let current = cloneSequence(sequence);
@@ -1649,16 +1823,17 @@ export function runRuleEngine(sequence, specSource, options = {}) {
     currentRuleName: null,
     currentPhase: null,
     usedTokenIds,
-    markTimes: new Map(),
     axis: null,
+    tokenMarkRefs: new WeakMap(),
     trace: null,
     finalized: false,
+    inventoryResolver:
+      typeof options.inventoryResolver === "function" ? options.inventoryResolver : null,
   };
 
   initializeBaseStreamSyncMarks(current, baseStreams);
   runtime.axis = buildSyncAxis(current);
-  canonicalizeSequenceAxisRefs(current, runtime.axis);
-  runtime.markTimes = runtime.axis.exportMarkTimes();
+  canonicalizeSequenceAxisRefs(current, runtime);
 
   const selectedPhases = Array.isArray(options.phases) && options.phases.length > 0
     ? new Set(options.phases)

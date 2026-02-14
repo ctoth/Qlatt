@@ -7,10 +7,10 @@ This document describes how Klatt parameters flow from text to audio output in t
 ```
 Text -> preprocess -> declarative frontend -> Klatt track -> interpreter -> WebAudio graph
          (normalize/transcribe)   (structural/duration/prosody/finalize)
-         src/tts-frontend.js      src/declarative-frontend/*
+         src/tts-frontend.ts      src/declarative-frontend/*
 ```
 
-`src/tts-frontend.js` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.js` and executed by `src/declarative-frontend/engine.js`.
+`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`.
 
 ## Track Structure
 
@@ -49,10 +49,10 @@ Defined in `experiments/klatt80-baseline/semantics.yaml` under `params:` section
 
 ### Active pipeline
 
-`textToKlattTrack()` in `src/tts-frontend.js` executes:
+`textToKlattTrack()` in `src/tts-frontend.ts` executes:
 
 1. `normalizeText()` and `transcribeText()`
-2. baseline inventory mapping from `PHONEME_TARGETS` in `src/tts-frontend-rules.js`
+2. baseline inventory mapping from `PHONEME_TARGETS` in `src/declarative-frontend/inventory.ts`
 3. declarative phases via `runDeclarativeFrontend()`:
    - `structural`
    - `duration`
@@ -64,7 +64,7 @@ Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`)
 
 ### Inventory Targets (not rule mutators)
 
-`src/tts-frontend-rules.js` is now inventory/default data plus helpers (for example `PHONEME_TARGETS`, `fillDefaultParams`). Runtime phonological/phonetic sequencing behavior is in the declarative rule pack.
+`src/declarative-frontend/inventory.ts` is the inventory/default source of truth (`PHONEME_TARGETS`, `fillDefaultParams`, `materializePhonemeTarget`).
 
 ### Current transition smoothing in frame emission
 

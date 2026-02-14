@@ -27,7 +27,6 @@ export type SyncMark = {
 
 export type SyncAxis = {
   marks: Map<string, SyncMark>;
-  keyToId: Map<string, string>;
   ensureMark: (order: unknown) => string | null;
   getMarkById: (id: string | null | undefined) => SyncMark | null;
   getOrderById: (id: string | null | undefined) => OrderObject | null;
@@ -39,9 +38,7 @@ export type SyncAxis = {
     rightId: string | null | undefined,
     count: number
   ) => SplitSegmentIds[];
-  exportMarkTimes: () => Map<string, number>;
   getMarkId: (order: unknown) => string | null;
-  getMark: (order: unknown) => SyncMark | null;
 };
 
 export const START_ORDER: StartOrder = Object.freeze({ kind: "START", id: "START" });
@@ -228,6 +225,46 @@ export function buildSyncAxis(sequence: TokenLike[]): SyncAxis {
   const keyToId = new Map<string, string>();
   let idCounter = 0;
 
+  const rebuildKeyIndex = (): void => {
+    keyToId.clear();
+    for (const mark of marks.values()) {
+      const key = serializeOrderValue(mark.order);
+      if (key != null && !keyToId.has(key)) {
+        keyToId.set(key, mark.id);
+      }
+    }
+  };
+
+  const rebalanceFiniteMarks = (): void => {
+    const finiteMarks = [...marks.values()]
+      .filter((mark): mark is SyncMark & { order: FiniteOrder } => mark.order.kind === "FINITE")
+      .sort((left, right) => compareOrderValue(left.order, right.order));
+
+    if (finiteMarks.length === 0) {
+      rebuildKeyIndex();
+      return;
+    }
+
+    let previous = 0n;
+    const denominator = BigInt(finiteMarks.length + 1);
+    for (let i = 0; i < finiteMarks.length; i += 1) {
+      let rankValue = (MAX_FINITE_RANK * BigInt(i + 1)) / denominator;
+      if (rankValue <= previous) rankValue = previous + 1n;
+      if (rankValue >= MAX_FINITE_RANK) rankValue = MAX_FINITE_RANK - 1n;
+      if (rankValue <= previous) {
+        throw new Error("E_RANK_NO_SPACE: unable to rebalance sync axis");
+      }
+      const rank = formatBase36Rank(rankValue);
+      if (!rank) {
+        throw new Error("E_RANK_INVALID: unable to format rebalance rank");
+      }
+      finiteMarks[i].order = { kind: "FINITE", rank, id: finiteMarks[i].id };
+      previous = rankValue;
+    }
+
+    rebuildKeyIndex();
+  };
+
   const add = (order: unknown): string | null => {
     const key = serializeOrderValue(order);
     if (key == null) return null;
@@ -298,12 +335,27 @@ export function buildSyncAxis(sequence: TokenLike[]): SyncAxis {
     rightId: string | null | undefined,
     count: number
   ): SplitSegmentIds[] => {
-    const leftOrder = getOrderById(leftId);
-    const rightOrder = getOrderById(rightId);
-    if (leftOrder == null || rightOrder == null) {
-      throw new Error("E_SYNC_MARK_UNKNOWN: cannot split unknown mark range");
+    const splitCurrentRange = (): SplitSegment[] => {
+      const leftOrder = getOrderById(leftId);
+      const rightOrder = getOrderById(rightId);
+      if (leftOrder == null || rightOrder == null) {
+        throw new Error("E_SYNC_MARK_UNKNOWN: cannot split unknown mark range");
+      }
+      return splitOrderRange(leftOrder, rightOrder, count);
+    };
+
+    let segments: SplitSegment[];
+    try {
+      segments = splitCurrentRange();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.startsWith("E_RANK_NO_SPACE")) {
+        throw error;
+      }
+      rebalanceFiniteMarks();
+      segments = splitCurrentRange();
     }
-    const segments = splitOrderRange(leftOrder, rightOrder, count);
+
     return segments.map((segment) => {
       const segLeftId = ensureMark(segment.left);
       const segRightId = ensureMark(segment.right);
@@ -317,29 +369,14 @@ export function buildSyncAxis(sequence: TokenLike[]): SyncAxis {
     });
   };
 
-  const exportMarkTimes = (): Map<string, number> => {
-    const out = new Map<string, number>();
-    for (const [id, mark] of marks.entries()) {
-      if (Number.isFinite(mark.time)) out.set(id, Number(mark.time));
-    }
-    return out;
-  };
-
   const getMarkId = (order: unknown): string | null => {
     const key = serializeOrderValue(order);
     if (key == null) return null;
     return keyToId.get(key) ?? null;
   };
 
-  const getMark = (order: unknown): SyncMark | null => {
-    const id = getMarkId(order);
-    if (id == null) return null;
-    return marks.get(id) ?? null;
-  };
-
   return {
     marks,
-    keyToId,
     ensureMark,
     getMarkById,
     getOrderById,
@@ -347,8 +384,6 @@ export function buildSyncAxis(sequence: TokenLike[]): SyncAxis {
     setMarkTime,
     getMarkTime,
     splitMarkRange,
-    exportMarkTimes,
     getMarkId,
-    getMark,
   };
 }

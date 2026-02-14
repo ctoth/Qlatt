@@ -15,7 +15,7 @@ This separation enables:
 - Reusing primitives across synthesizers
 - Declarative parameter conversion (dB to linear, proximity corrections)
 - Automatic dependency ordering for derived parameters
-- Declarative frontend rule ownership (phonological/phonetic behavior in `src/declarative-frontend/rule-pack.js`)
+- Declarative frontend rule ownership (phonological/phonetic behavior in `src/declarative-frontend/rule-pack.ts`)
 
 ## Architecture
 
@@ -25,10 +25,10 @@ This separation enables:
 Text Input
     |
     v
-[tts-frontend.js] normalizeText() -> transcribeText() -> PHONEME_TARGETS mapping
+[tts-frontend.ts] normalizeText() -> transcribeText() -> PHONEME_TARGETS mapping
     |
     v
-[declarative-frontend/engine.js] execute rule-pack phases
+[declarative-frontend/engine.ts] execute rule-pack phases
   structural -> duration -> prosody -> finalize
     |
     v
@@ -44,7 +44,7 @@ Text Input
 WebAudio destination -> Audio output
 ```
 
-`src/tts-frontend-rules.js` is inventory/default data (`PHONEME_TARGETS`, defaults) and helper code. Frontend behavioral rules are owned by the declarative rule pack.
+`src/declarative-frontend/inventory.ts` is inventory/default data (`PHONEME_TARGETS`, defaults) and helper code. Frontend behavioral rules are owned by the declarative rule pack.
 
 ### File Relationships
 
@@ -501,7 +501,7 @@ registerProcessor('simple-processor', SimpleProcessor);
 Wire your synthesizer into the TTS pipeline:
 
 ```javascript
-// In tts-frontend.js or new file
+// In tts-frontend.ts or new file
 
 import { createKlattRuntime } from './klatt-runtime.js';
 

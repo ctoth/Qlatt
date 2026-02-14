@@ -1093,3 +1093,31 @@ export function fillDefaultParams(target) {
 
   return filled;
 }
+
+export function materializePhonemeTarget(phoneme) {
+  const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
+  const target = PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {};
+  const payload = {
+    phoneme: key,
+    params: fillDefaultParams(target),
+    duration: target?.dur || 30,
+    inherentDuration: target?.dur,
+  };
+
+  for (const [entryKey, value] of Object.entries(target)) {
+    if (entryKey === "dur") continue;
+    if (entryKey === "SW") {
+      payload.inventorySW = value;
+      continue;
+    }
+    if (entryKey === "type" && typeof value === "string") {
+      payload.type = value;
+      continue;
+    }
+    if (typeof value === "boolean") {
+      payload[entryKey] = value;
+    }
+  }
+
+  return payload;
+}

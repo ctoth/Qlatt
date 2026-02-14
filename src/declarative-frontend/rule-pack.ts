@@ -61,9 +61,9 @@ export const QLATT_V11_SLICE_RULEPACK = {
           "(current.phoneme = 'P_CL' or current.phoneme = 'T_CL' or current.phoneme = 'K_CL') and $next(current) != null and $not($contains($string($next(current).type), 'stop'))",
       },
       splice: {
-        type: "insert_at_boundary",
-        boundary: "current.sync_right",
-        side: "after",
+        type: "replace_range",
+        range_left: "current.sync_right",
+        range_right: "$next(current).sync_right",
         insert: [
           {
             phoneme:
@@ -123,6 +123,24 @@ export const QLATT_V11_SLICE_RULEPACK = {
             low:
               "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).low)",
           },
+          {
+            phoneme: "$next(current).phoneme",
+            stress: "$next(current).stress",
+            word: "$next(current).word",
+            weak: "$next(current).weak",
+            params: "$next(current).params",
+            duration: "$next(current).duration",
+            inherentDuration: "$next(current).inherentDuration",
+            type: "$next(current).type",
+            inventorySW: "$next(current).inventorySW",
+            voiced: "$next(current).voiced",
+            voiceless: "$next(current).voiceless",
+            front: "$next(current).front",
+            back: "$next(current).back",
+            hi: "$next(current).hi",
+            low: "$next(current).low",
+            punctuationSymbol: "$next(current).punctuationSymbol",
+          },
         ],
       },
     },
@@ -135,9 +153,9 @@ export const QLATT_V11_SLICE_RULEPACK = {
           "(current.phoneme = 'B_CL' or current.phoneme = 'D_CL' or current.phoneme = 'G_CL') and $next(current) != null and $not($contains($string($next(current).type), 'stop'))",
       },
       splice: {
-        type: "insert_at_boundary",
-        boundary: "current.sync_right",
-        side: "after",
+        type: "replace_range",
+        range_left: "current.sync_right",
+        range_right: "$next(current).sync_right",
         insert: [
           {
             phoneme:
@@ -167,6 +185,24 @@ export const QLATT_V11_SLICE_RULEPACK = {
               "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).hi)",
             low:
               "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).low)",
+          },
+          {
+            phoneme: "$next(current).phoneme",
+            stress: "$next(current).stress",
+            word: "$next(current).word",
+            weak: "$next(current).weak",
+            params: "$next(current).params",
+            duration: "$next(current).duration",
+            inherentDuration: "$next(current).inherentDuration",
+            type: "$next(current).type",
+            inventorySW: "$next(current).inventorySW",
+            voiced: "$next(current).voiced",
+            voiceless: "$next(current).voiceless",
+            front: "$next(current).front",
+            back: "$next(current).back",
+            hi: "$next(current).hi",
+            low: "$next(current).low",
+            punctuationSymbol: "$next(current).punctuationSymbol",
           },
         ],
       },

@@ -2,7 +2,8 @@ import { CMU_DICT } from "./cmu-dictionary";
 import {
   PHONEME_TARGETS,
   fillDefaultParams,
-} from "./tts-frontend-rules";
+  materializePhonemeTarget,
+} from "./declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "./declarative-frontend";
 
 export function normalizeText(text) {
@@ -498,10 +499,13 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
   });
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
+  const declarativeInventory = { inventoryResolver: materializePhonemeTarget };
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    ...declarativeInventory,
     phases: ["structural"],
   });
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    ...declarativeInventory,
     phases: ["duration"],
   });
   parameterSequence = parameterSequence.map((token, index) => ({
@@ -511,6 +515,7 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
     status: token.status ?? 1,
   }));
   parameterSequence = runDeclarativeFrontend(parameterSequence, {
+    ...declarativeInventory,
     phases: ["prosody", "finalize"],
     parameters: {
       base_f0: baseF0,
@@ -519,7 +524,9 @@ export function textToKlattTrack(inputText, baseF0 = 110, transitionMs = 30) {
       question_rise_hz: 30,
     },
   });
-  const phoneSequence = parameterSequence.filter((token) => token?.stream !== "f0");
+  const phoneSequence = parameterSequence.filter(
+    (token) => token?.stream !== "f0" && token?.status !== 2
+  );
 
   // --- Generate F0 from declarative points ---
   const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);

@@ -26,6 +26,10 @@ describe("declarative frontend base coverage invariants", () => {
     expect(() => runRuleEngine(input, spec)).not.toThrow();
   });
 
+  it("accepts empty utterance base stream coverage", () => {
+    expect(() => runRuleEngine([], spec)).not.toThrow();
+  });
+
   it("rejects overlapping active base tokens", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
@@ -49,6 +53,17 @@ describe("declarative frontend base coverage invariants", () => {
     const input = [
       { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
       { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");
+  });
+
+  it("rejects non-empty stream with no ACTIVE base coverage", () => {
+    const s0 = startOrder();
+    const s1 = endOrder();
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 2 },
     ];
 
     expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_NOT_CONTIGUOUS");

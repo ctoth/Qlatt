@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
-import { PHONEME_TARGETS, fillDefaultParams } from "../src/tts-frontend-rules";
+import { PHONEME_TARGETS, fillDefaultParams } from "../src/declarative-frontend/inventory";
 
 describe("tts frontend output contract", () => {
   it("returns KlattFrame[] with stable key schema and finite params", () => {

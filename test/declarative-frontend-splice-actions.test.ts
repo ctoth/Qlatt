@@ -57,7 +57,7 @@ describe("declarative frontend splice actions", () => {
     expect(activePhone).toHaveLength(2);
   });
 
-  it("supports select insert_at_boundary on the right side", () => {
+  it("rejects unsuppressed right-side insert_at_boundary overlap", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = endOrder();
@@ -88,12 +88,157 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
+    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+  });
+
+  it("rejects unsuppressed left-side insert_at_boundary overlap", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        add_preboundary: {
+          select: {
+            stream: "phone",
+            where: "current.id = 'p2'",
+          },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_left",
+            side: "before",
+            insert: [{ name: "'PRE'" }],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["add_preboundary"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+  });
+
+  it("uses injected inventory resolver for $target materialization", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        add_release: {
+          select: {
+            stream: "phone",
+            where: "current.id = 'p1'",
+          },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [
+              {
+                name: "'REL'",
+                type: "$target('REL').type",
+                duration: "$target('REL').duration",
+                params: "$target('REL').params",
+              },
+            ],
+          },
+        },
+        suppress_right_neighbor: {
+          select: {
+            stream: "phone",
+            where: "current.id = 'p2'",
+          },
+          suppress: true,
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["add_release", "suppress_right_neighbor"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec, {
+      inventoryResolver: (phoneme) =>
+        phoneme === "REL"
+          ? {
+              phoneme: "REL",
+              type: "stop_release",
+              duration: 17,
+              params: { AF: 55, F1: 720 },
+            }
+          : {
+              phoneme: "SIL",
+              type: "silence",
+              duration: 30,
+              params: {},
+            },
+    }).sequence;
     const inserted = out.find((t) => t.name === "REL");
+
     expect(inserted).toBeTruthy();
+    expect(inserted?.type).toBe("stop_release");
+    expect(inserted?.duration).toBe(17);
+    expect(inserted?.params?.AF).toBe(55);
+    expect(inserted?.params?.F1).toBe(720);
     expect(inserted?.sync_left).toEqual(s1);
-    expect(inserted?.sync_right).toEqual(s1);
-    expect(inserted?.status).toBe(1);
+    expect(inserted?.sync_right).toEqual(s2);
+  });
+
+  it("splits [L,R] for multi-token insert_at_boundary when overlap is explicitly suppressed", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        insert_pair: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [{ name: "'A'" }, { name: "'B'" }],
+          },
+        },
+        suppress_right_neighbor: {
+          select: { stream: "phone", where: "current.id = 'p2'" },
+          suppress: true,
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["insert_pair", "suppress_right_neighbor"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const a = out.find((t) => t.name === "A" && t.status === 1);
+    const b = out.find((t) => t.name === "B" && t.status === 1);
+
+    expect(a).toBeTruthy();
+    expect(b).toBeTruthy();
+    expect(a?.sync_left).toEqual(s1);
+    expect(b?.sync_right).toEqual(s2);
+    expect(a?.sync_right).toBe(b?.sync_left);
+    expect(a?.sync_right?.kind).toBe("FINITE");
   });
 
   it("supports multi-token replace_range insertion on object-order boundaries", () => {
@@ -182,7 +327,7 @@ describe("declarative frontend splice actions", () => {
     expect(() => runRuleEngine(input, spec)).toThrow("insert_at_boundary splice requires boundary");
   });
 
-  it("preserves rule order for multiple after-boundary inserts at the same mark", () => {
+  it("rejects overlapping inserts from multiple after-boundary rules at the same mark", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = endOrder();
@@ -219,9 +364,48 @@ describe("declarative frontend splice actions", () => {
       { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
     ];
 
-    const out = runRuleEngine(input, spec).sequence;
-    const names = out.filter((t) => t.name === "A" || t.name === "B").map((t) => t.name);
+    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
+  });
 
-    expect(names).toEqual(["A", "B"]);
+  it("rejects overlapping active coverage after overlapping replace_range rewrites", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        left_span: {
+          select: { stream: "phone", where: "current.id = 'p1'" },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: s2,
+            insert: [{ name: "'X'" }],
+          },
+        },
+        overlap_right: {
+          select: { stream: "phone", where: "current.id = 'p3'" },
+          splice: {
+            type: "replace_range",
+            range_left: s1,
+            range_right: s3,
+            insert: [{ name: "'Y'" }],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["left_span", "overlap_right"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+      { id: "p3", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
   });
 });

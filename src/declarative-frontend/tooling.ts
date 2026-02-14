@@ -1,5 +1,6 @@
 import { parseDslSpec } from "./parser";
 import { runRuleEngine } from "./engine";
+import type { InventoryResolver } from "./engine";
 import { validateDslSpec } from "./validation";
 
 type TokenLike = Record<string, any>;
@@ -49,7 +50,7 @@ function normalizePhaseName(name: string, phaseNames: string[]): string | null {
 export function buildPhaseSnapshots(
   sequence: TokenLike[],
   specSource: unknown,
-  options: { parameters?: Record<string, unknown> } = {}
+  options: { parameters?: Record<string, unknown>; inventoryResolver?: InventoryResolver } = {}
 ): PhaseSnapshotsModel {
   const spec = parseDslSpec(specSource);
   const phaseNames = spec.phases.map((phase: any) => phase.name as string);
@@ -67,6 +68,7 @@ export function buildPhaseSnapshots(
     const result = runRuleEngine(sequence, spec, {
       phases,
       parameters: options.parameters ?? {},
+      inventoryResolver: options.inventoryResolver,
     });
     snapshots.set(phaseNames[i], cloneJson(result.sequence));
     snapshots.set("final", cloneJson(result.sequence));
@@ -142,10 +144,13 @@ export function whyNotRule(
   specSource: unknown,
   selector: string,
   ruleName: string,
-  phase: string | null = null
+  phase: string | null = null,
+  options: { inventoryResolver?: InventoryResolver } = {}
 ) {
   const spec = parseDslSpec(specSource);
-  const result = runRuleEngine(sequence, spec);
+  const result = runRuleEngine(sequence, spec, {
+    inventoryResolver: options.inventoryResolver,
+  });
   const token = selectToken(result.sequence, selector);
   const tokenId = token?.id ?? null;
   const containingPhase =

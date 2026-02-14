@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
@@ -153,7 +154,10 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
       const input = readInputSequence(positional[0], io);
       const spec = loadSpec(flags.spec ?? null);
       const phases = computeRunPhases(spec, flags);
-      const result = runRuleEngine(input, spec, { phases });
+      const result = runRuleEngine(input, spec, {
+        phases,
+        inventoryResolver: materializePhonemeTarget,
+      });
       if (typeof flags.trace === "string" && flags.trace.length > 0) {
         fs.writeFileSync(flags.trace, JSON.stringify(result.trace, null, 2), "utf8");
       }
@@ -169,7 +173,9 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
         throw new Error("explain requires --token and --field");
       }
       const spec = loadSpec(flags.spec ?? null);
-      const snapshots = buildPhaseSnapshots(input, spec);
+      const snapshots = buildPhaseSnapshots(input, spec, {
+        inventoryResolver: materializePhonemeTarget,
+      });
       const payload = explainField(snapshots, selector, field, flags.phase ?? "final");
       writeOutput(io, render(payload, format), flags.output);
       return 0;
@@ -183,7 +189,9 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
         throw new Error("why-not requires --rule and --token");
       }
       const spec = loadSpec(flags.spec ?? null);
-      const payload = whyNotRule(input, spec, selector, rule, flags.phase ?? null);
+      const payload = whyNotRule(input, spec, selector, rule, flags.phase ?? null, {
+        inventoryResolver: materializePhonemeTarget,
+      });
       writeOutput(io, render(payload, format), flags.output);
       return 0;
     }
@@ -196,7 +204,9 @@ export async function runTtsDslCli(argv: string[], io: CliIo = defaultIo()) {
         throw new Error("diff requires --from and --to");
       }
       const spec = loadSpec(flags.spec ?? null);
-      const snapshots = buildPhaseSnapshots(input, spec);
+      const snapshots = buildPhaseSnapshots(input, spec, {
+        inventoryResolver: materializePhonemeTarget,
+      });
       const payload = diffPhaseState(snapshots, from, to, flags.stream ?? null);
       writeOutput(io, render(payload, format), flags.output);
       return 0;

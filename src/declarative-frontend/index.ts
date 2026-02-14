@@ -9,10 +9,21 @@ type DeclarativeFrontendOptions = {
   inventoryResolver?: InventoryResolver;
 };
 
+type RuleEngineResult = ReturnType<typeof runRuleEngine>;
+type DeclarativeFrontendSequence = RuleEngineResult["sequence"];
+
+export function runDeclarativeFrontend(
+  sequence: Array<Record<string, unknown>>,
+  options: DeclarativeFrontendOptions & { includeTrace: true }
+): RuleEngineResult;
+export function runDeclarativeFrontend(
+  sequence: Array<Record<string, unknown>>,
+  options?: DeclarativeFrontendOptions & { includeTrace?: false | undefined }
+): DeclarativeFrontendSequence;
 export function runDeclarativeFrontend(
   sequence: Array<Record<string, unknown>>,
   options: DeclarativeFrontendOptions = {}
-) {
+): RuleEngineResult | DeclarativeFrontendSequence {
   const result = runRuleEngine(sequence, QLATT_V11_SLICE_RULEPACK, {
     phases: options.phases,
     parameters: options.parameters,

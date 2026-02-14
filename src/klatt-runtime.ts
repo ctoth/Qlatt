@@ -130,6 +130,33 @@ export async function loadWasmModules(
   return modules;
 }
 
+function normalizeBasePath(basePath: string): string {
+  return basePath.endsWith('/') ? basePath : `${basePath}/`;
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return Array.from(new Set(values));
+}
+
+function resolveWorkletModuleCandidates(basePath: string, file: string): string[] {
+  const normalizedBasePath = normalizeBasePath(basePath);
+  const candidates: string[] = [`${normalizedBasePath}${file}`];
+
+  // Vite dev fallback: registry uses *.js names but source modules are *.ts under /src/worklets.
+  if (file.endsWith('.js')) {
+    const tsName = `${file.slice(0, -3)}.ts`;
+    candidates.push(`${normalizedBasePath}${tsName}`);
+    candidates.push(`/src/worklets/${tsName}`);
+  }
+
+  return uniqueStrings(candidates);
+}
+
+function formatError(error: unknown): string {
+  if (error instanceof Error) return `${error.name}: ${error.message}`;
+  return String(error);
+}
+
 /**
  * Register all worklet processors specified in registry with the AudioContext
  */
@@ -150,9 +177,25 @@ export async function registerWorklets(
 
   await Promise.all(
     worklets.map(async (file) => {
-      log(`  Registering ${file}...`);
-      await ctx.audioWorklet.addModule(basePath + file);
-      log(`  Registered ${file}`);
+      const moduleCandidates = resolveWorkletModuleCandidates(basePath, file);
+      let lastError: unknown = null;
+
+      for (const moduleUrl of moduleCandidates) {
+        try {
+          log(`  Registering ${file} from ${moduleUrl}...`);
+          await ctx.audioWorklet.addModule(moduleUrl);
+          log(`  Registered ${file} from ${moduleUrl}`);
+          return;
+        } catch (error) {
+          lastError = error;
+          log(`  Failed ${file} from ${moduleUrl}: ${formatError(error)}`);
+        }
+      }
+
+      const tried = moduleCandidates.join(', ');
+      throw new Error(
+        `Unable to register worklet module '${file}'. Tried: ${tried}. Last error: ${formatError(lastError)}`
+      );
     })
   );
 }

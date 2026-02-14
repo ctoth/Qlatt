@@ -16,35 +16,99 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmBuffer } from "./wasm-utils";
+import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils";
+
+interface AerodynamicModelWasmExports {
+  memory: WebAssembly.Memory;
+  alloc_f32(len: number): number;
+  dealloc_f32(ptr: number, len: number): void;
+  aerodynamic_model_new(sampleRate: number): number;
+  aerodynamic_model_process(
+    state: number,
+    enablePtr: number,
+    enableLen: number,
+    agPtr: number,
+    agLen: number,
+    acPtr: number,
+    acLen: number,
+    anPtr: number,
+    anLen: number,
+    stPtr: number,
+    stLen: number,
+    pmPtr: number,
+    pmLen: number,
+    psPtr: number,
+    psLen: number,
+    voicingPtr: number,
+    aspirationPtr: number,
+    fricationPtr: number,
+    b1Ptr: number,
+    fnpPtr: number,
+    fnzPtr: number,
+    oqPtr: number,
+    tlPtr: number,
+    blockSize: number
+  ): void;
+  aerodynamic_model_reset?: (state: number) => void;
+}
+
+type AerodynamicParamName = "enable" | "ag" | "ac" | "an" | "st" | "pm" | "ps";
+type AerodynamicParamBuffers = Record<AerodynamicParamName, WasmBuffer>;
+
+interface AerodynamicModelProcessorOptions {
+  processorOptions?: {
+    nodeId?: string;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
 
 const wasmUrl =
   typeof URL === "function"
     ? new URL("./aerodynamic-model.wasm", import.meta.url).toString()
     : `${import.meta.url.replace(/[^/]*$/, "")}aerodynamic-model.wasm`;
 
+const UNINITIALIZED_ALLOC: WasmAllocExports = {
+  memory: new WebAssembly.Memory({ initial: 1 }),
+  alloc_f32: () => {
+    throw new Error("aerodynamic-model WASM not initialized");
+  },
+  dealloc_f32: () => {},
+};
+
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
+  wasm: AerodynamicModelWasmExports | null;
+  state: number;
+  ready: boolean;
+  nodeId: string;
+  voicingBuffer: WasmBuffer | null;
+  aspirationBuffer: WasmBuffer | null;
+  fricationBuffer: WasmBuffer | null;
+  b1Buffer: WasmBuffer | null;
+  fnpBuffer: WasmBuffer | null;
+  fnzBuffer: WasmBuffer | null;
+  oqBuffer: WasmBuffer | null;
+  tlBuffer: WasmBuffer | null;
+  paramBuffers: AerodynamicParamBuffers;
+
+  static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
-      { name: "enable", defaultValue: 0.0, minValue: 0, maxValue: 1, automationRate: "k-rate" },
-      { name: "ag", defaultValue: 0.05, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
-      { name: "ac", defaultValue: 0.4, minValue: 0, maxValue: 0.4, automationRate: "k-rate" },
-      { name: "an", defaultValue: 0.0, minValue: 0, maxValue: 1.0, automationRate: "k-rate" },
-      { name: "st", defaultValue: 0.0, minValue: -10, maxValue: 0, automationRate: "k-rate" },
-      { name: "pm", defaultValue: 0.0, minValue: -0.5, maxValue: 0.2, automationRate: "k-rate" },
-      { name: "ps", defaultValue: 8, minValue: 0, maxValue: 30, automationRate: "k-rate" },
+      { name: "enable", defaultValue: 0.0, minValue: 0, maxValue: 1, automationRate: "k-rate" as const },
+      { name: "ag", defaultValue: 0.05, minValue: 0, maxValue: 0.4, automationRate: "k-rate" as const },
+      { name: "ac", defaultValue: 0.4, minValue: 0, maxValue: 0.4, automationRate: "k-rate" as const },
+      { name: "an", defaultValue: 0.0, minValue: 0, maxValue: 1.0, automationRate: "k-rate" as const },
+      { name: "st", defaultValue: 0.0, minValue: -10, maxValue: 0, automationRate: "k-rate" as const },
+      { name: "pm", defaultValue: 0.0, minValue: -0.5, maxValue: 0.2, automationRate: "k-rate" as const },
+      { name: "ps", defaultValue: 8, minValue: 0, maxValue: 30, automationRate: "k-rate" as const },
     ];
   }
 
-  constructor(options) {
+  constructor(options?: unknown) {
     super(options);
+    const opts = options as AerodynamicModelProcessorOptions | undefined;
     this.wasm = null;
     this.state = 0;
     this.ready = false;
-    this.debug = Boolean(options?.processorOptions?.debug);
-    this.nodeId = options?.processorOptions?.nodeId || "aerodynamic-model";
-    this.reportInterval = options?.processorOptions?.reportInterval || 50;
-    this._reportCountdown = this.reportInterval;
+    this.nodeId = opts?.processorOptions?.nodeId || "aerodynamic-model";
 
     this.voicingBuffer = null;
     this.aspirationBuffer = null;
@@ -55,16 +119,16 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     this.oqBuffer = null;
     this.tlBuffer = null;
     this.paramBuffers = {
-      enable: new WasmBuffer(null),
-      ag: new WasmBuffer(null),
-      ac: new WasmBuffer(null),
-      an: new WasmBuffer(null),
-      st: new WasmBuffer(null),
-      pm: new WasmBuffer(null),
-      ps: new WasmBuffer(null),
+      enable: new WasmBuffer(UNINITIALIZED_ALLOC),
+      ag: new WasmBuffer(UNINITIALIZED_ALLOC),
+      ac: new WasmBuffer(UNINITIALIZED_ALLOC),
+      an: new WasmBuffer(UNINITIALIZED_ALLOC),
+      st: new WasmBuffer(UNINITIALIZED_ALLOC),
+      pm: new WasmBuffer(UNINITIALIZED_ALLOC),
+      ps: new WasmBuffer(UNINITIALIZED_ALLOC),
     };
 
-    this.port.onmessage = (event) => {
+    this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
@@ -74,30 +138,36 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
       }
     };
 
-    const wasmBytes = options?.processorOptions?.wasmBytes;
-    initWasmModule(wasmUrl, {}, wasmBytes).then(({ instance }) => {
-      this.wasm = instance.exports;
-      this.state = this.wasm.aerodynamic_model_new(sampleRate);
-      this.voicingBuffer = new WasmBuffer(this.wasm);
-      this.aspirationBuffer = new WasmBuffer(this.wasm);
-      this.fricationBuffer = new WasmBuffer(this.wasm);
-      this.b1Buffer = new WasmBuffer(this.wasm);
-      this.fnpBuffer = new WasmBuffer(this.wasm);
-      this.fnzBuffer = new WasmBuffer(this.wasm);
-      this.oqBuffer = new WasmBuffer(this.wasm);
-      this.tlBuffer = new WasmBuffer(this.wasm);
+    const wasmBytes = opts?.processorOptions?.wasmBytes;
+    initWasmModule(wasmUrl, {}, wasmBytes).then((instantiated) => {
+      const instance =
+        instantiated instanceof WebAssembly.Instance ? instantiated : instantiated.instance;
+      const wasm = instance.exports as unknown as AerodynamicModelWasmExports;
+      this.wasm = wasm;
+      this.state = wasm.aerodynamic_model_new(sampleRate);
+      this.voicingBuffer = new WasmBuffer(wasm);
+      this.aspirationBuffer = new WasmBuffer(wasm);
+      this.fricationBuffer = new WasmBuffer(wasm);
+      this.b1Buffer = new WasmBuffer(wasm);
+      this.fnpBuffer = new WasmBuffer(wasm);
+      this.fnzBuffer = new WasmBuffer(wasm);
+      this.oqBuffer = new WasmBuffer(wasm);
+      this.tlBuffer = new WasmBuffer(wasm);
       Object.values(this.paramBuffers).forEach((buf) => {
-        buf.exports = this.wasm;
+        buf.exports = wasm;
       });
       this.ready = true;
       this.port.postMessage({ type: "ready", node: this.nodeId });
     });
   }
 
-  _fillParamBuffer(buffer, values, blockSize) {
+  _fillParamBuffer(buffer: WasmBuffer, values: Float32Array, blockSize: number): number {
     const len = values.length > 1 ? blockSize : 1;
     buffer.ensure(len);
-    if (values.length > 1) {
+    if (!buffer.view) {
+      return len;
+    }
+    if (values.length > 1 && values.length === blockSize) {
       buffer.view.set(values);
     } else {
       buffer.view[0] = values.length > 0 ? values[0] : 0;
@@ -105,7 +175,11 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     return len;
   }
 
-  process(inputs, outputs, parameters) {
+  process(
+    _inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean {
     const voicingOut = outputs[0];
     const aspirationOut = outputs[1];
     const fricationOut = outputs[2];
@@ -138,7 +212,18 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     const tlChannel = tlOut[0];
     const blockSize = voicingChannel.length;
 
-    if (!this.ready) {
+    if (
+      !this.ready ||
+      !this.wasm ||
+      !this.voicingBuffer ||
+      !this.aspirationBuffer ||
+      !this.fricationBuffer ||
+      !this.b1Buffer ||
+      !this.fnpBuffer ||
+      !this.fnzBuffer ||
+      !this.oqBuffer ||
+      !this.tlBuffer
+    ) {
       voicingChannel.fill(0);
       aspirationChannel.fill(0);
       fricationChannel.fill(0);
@@ -150,13 +235,21 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
       return true;
     }
 
-    const enableLen = this._fillParamBuffer(this.paramBuffers.enable, parameters.enable, blockSize);
-    const agLen = this._fillParamBuffer(this.paramBuffers.ag, parameters.ag, blockSize);
-    const acLen = this._fillParamBuffer(this.paramBuffers.ac, parameters.ac, blockSize);
-    const anLen = this._fillParamBuffer(this.paramBuffers.an, parameters.an, blockSize);
-    const stLen = this._fillParamBuffer(this.paramBuffers.st, parameters.st, blockSize);
-    const pmLen = this._fillParamBuffer(this.paramBuffers.pm, parameters.pm, blockSize);
-    const psLen = this._fillParamBuffer(this.paramBuffers.ps, parameters.ps, blockSize);
+    const enableValues = parameters.enable ?? new Float32Array([0]);
+    const agValues = parameters.ag ?? new Float32Array([0.05]);
+    const acValues = parameters.ac ?? new Float32Array([0.4]);
+    const anValues = parameters.an ?? new Float32Array([0]);
+    const stValues = parameters.st ?? new Float32Array([0]);
+    const pmValues = parameters.pm ?? new Float32Array([0]);
+    const psValues = parameters.ps ?? new Float32Array([8]);
+
+    const enableLen = this._fillParamBuffer(this.paramBuffers.enable, enableValues, blockSize);
+    const agLen = this._fillParamBuffer(this.paramBuffers.ag, agValues, blockSize);
+    const acLen = this._fillParamBuffer(this.paramBuffers.ac, acValues, blockSize);
+    const anLen = this._fillParamBuffer(this.paramBuffers.an, anValues, blockSize);
+    const stLen = this._fillParamBuffer(this.paramBuffers.st, stValues, blockSize);
+    const pmLen = this._fillParamBuffer(this.paramBuffers.pm, pmValues, blockSize);
+    const psLen = this._fillParamBuffer(this.paramBuffers.ps, psValues, blockSize);
 
     this.voicingBuffer.ensure(blockSize);
     this.aspirationBuffer.ensure(blockSize);
@@ -166,6 +259,27 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     this.fnzBuffer.ensure(blockSize);
     this.oqBuffer.ensure(blockSize);
     this.tlBuffer.ensure(blockSize);
+
+    if (
+      !this.voicingBuffer.view ||
+      !this.aspirationBuffer.view ||
+      !this.fricationBuffer.view ||
+      !this.b1Buffer.view ||
+      !this.fnpBuffer.view ||
+      !this.fnzBuffer.view ||
+      !this.oqBuffer.view ||
+      !this.tlBuffer.view
+    ) {
+      voicingChannel.fill(0);
+      aspirationChannel.fill(0);
+      fricationChannel.fill(0);
+      b1Channel.fill(0);
+      fnpChannel.fill(0);
+      fnzChannel.fill(0);
+      oqChannel.fill(0);
+      tlChannel.fill(0);
+      return true;
+    }
 
     this.wasm.aerodynamic_model_process(
       this.state,
@@ -202,14 +316,33 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
     this.fnzBuffer.refresh();
     this.oqBuffer.refresh();
     this.tlBuffer.refresh();
-    voicingChannel.set(this.voicingBuffer.view);
-    aspirationChannel.set(this.aspirationBuffer.view);
-    fricationChannel.set(this.fricationBuffer.view);
-    b1Channel.set(this.b1Buffer.view);
-    fnpChannel.set(this.fnpBuffer.view);
-    fnzChannel.set(this.fnzBuffer.view);
-    oqChannel.set(this.oqBuffer.view);
-    tlChannel.set(this.tlBuffer.view);
+    const voicingView = this.voicingBuffer.view;
+    const aspirationView = this.aspirationBuffer.view;
+    const fricationView = this.fricationBuffer.view;
+    const b1View = this.b1Buffer.view;
+    const fnpView = this.fnpBuffer.view;
+    const fnzView = this.fnzBuffer.view;
+    const oqView = this.oqBuffer.view;
+    const tlView = this.tlBuffer.view;
+    if (!voicingView || !aspirationView || !fricationView || !b1View || !fnpView || !fnzView || !oqView || !tlView) {
+      voicingChannel.fill(0);
+      aspirationChannel.fill(0);
+      fricationChannel.fill(0);
+      b1Channel.fill(0);
+      fnpChannel.fill(0);
+      fnzChannel.fill(0);
+      oqChannel.fill(0);
+      tlChannel.fill(0);
+      return true;
+    }
+    voicingChannel.set(voicingView);
+    aspirationChannel.set(aspirationView);
+    fricationChannel.set(fricationView);
+    b1Channel.set(b1View);
+    fnpChannel.set(fnpView);
+    fnzChannel.set(fnzView);
+    oqChannel.set(oqView);
+    tlChannel.set(tlView);
 
     return true;
   }

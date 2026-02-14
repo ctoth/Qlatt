@@ -16,7 +16,10 @@
     "src/worklets/square-source-processor.ts",
     "src/worklets/triangular-source-processor.ts",
     "src/worklets/pitch-sync-mod-processor.ts",
-    "src/worklets/tilt-filter-processor.ts"
+    "src/worklets/tilt-filter-processor.ts",
+    "src/worklets/fujisaki-resonator-processor.ts",
+    "src/worklets/oversampled-glottal-source-processor.ts",
+    "src/worklets/aerodynamic-model-processor.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

@@ -1,7 +1,18 @@
 import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
 
 export class KlattSynth {
-  constructor(audioContext, options = {}) {
+  ctx: AudioContext;
+  options: Record<string, any>;
+  nodes: Record<string, any>;
+  params: Record<string, number>;
+  isInitialized: boolean;
+  telemetryHandler: ((event: unknown) => void) | null = null;
+  _lastAF: number;
+  _lastAH: number;
+  _readyPromise?: Promise<void>;
+  wasmBytes?: Record<string, ArrayBuffer>;
+
+  constructor(audioContext: AudioContext, options: Record<string, any> = {}) {
     this.ctx = audioContext;
     this.options = options ?? {};
     this.nodes = {};
@@ -12,10 +23,10 @@ export class KlattSynth {
     this._lastAH = 0;
   }
 
-  async initialize() {
+  async initialize(): Promise<void> {
     if (this.isInitialized) return;
-    const baseUrl =
-      (import.meta?.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : "/";
+    const env = (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env;
+    const baseUrl = env?.BASE_URL ?? "/";
     const workletBase = `${baseUrl}worklets/`;
     const workletModules = [
       new URL("./worklets/resonator-processor.ts", import.meta.url),
@@ -38,7 +49,7 @@ export class KlattSynth {
     this.isInitialized = true;
   }
 
-  _defaultParams() {
+  _defaultParams(): Record<string, number> {
     return {
       f0: 0,
       rd: 1.0,
@@ -94,7 +105,7 @@ export class KlattSynth {
     };
   }
 
-  _createNodes() {
+  _createNodes(): void {
     const ctx = this.ctx;
     const N = this.nodes;
     const wasm = this.wasmBytes;
@@ -339,7 +350,7 @@ export class KlattSynth {
     }
   }
 
-  _connectGraph() {
+  _connectGraph(): void {
     const N = this.nodes;
     N.lfSource.connect(N.lfSourceGain).connect(N.sourceSum);
     N.impulseSource.connect(N.impulseGain).connect(N.sourceSum);
@@ -413,7 +424,7 @@ export class KlattSynth {
     N.outputSum.connect(N.outputLp).connect(N.masterGain).connect(N.outputGain).connect(this.ctx.destination);
   }
 
-  _applyAllParams(atTime) {
+  _applyAllParams(atTime: number): void {
     const p = this.params;
     const gpFreq = Number.isFinite(p.FGP) ? p.FGP : p.rgpFrequency;
     const gpBw = Number.isFinite(p.BGP) ? p.BGP : p.rgpBandwidth;
@@ -510,7 +521,7 @@ export class KlattSynth {
     this._setParallelMix(p.parallelMix, atTime);
   }
 
-  _applySourceMode(mode, atTime) {
+  _applySourceMode(mode: number, atTime: number): void {
     const modeValue = Number(mode);
     const useLf = modeValue === 1;
     const useBypass = modeValue === 2;
@@ -529,12 +540,12 @@ export class KlattSynth {
     this.nodes.avsDiffGain.gain.setValueAtTime(diffGain, atTime);
   }
 
-  _setAudioParam(param, value, atTime) {
+  _setAudioParam(param: AudioParam | undefined | null, value: number, atTime: number): void {
     if (!param || !Number.isFinite(value)) return;
     param.setValueAtTime(value, atTime);
   }
 
-  _resolveNoiseSeed(channel) {
+  _resolveNoiseSeed(channel: string): number | undefined {
     const configured = this.options?.noiseSeed;
     if (!Number.isFinite(configured)) return undefined;
     const base = (Math.trunc(Number(configured)) >>> 0) || 1;
@@ -543,7 +554,7 @@ export class KlattSynth {
     return derived || 1;
   }
 
-  _setParallelFormantGain(index, dbValue, atTime, freq) {
+  _setParallelFormantGain(index: number, dbValue: number, atTime: number, freq = 0): void {
     // Klatt 80 applies parallel formant gains directly to first-differenced signal
     // without compensation. The low-frequency attenuation is intentional -
     // it prevents F2-F6 energy from polluting the F1 region.
@@ -558,7 +569,7 @@ export class KlattSynth {
     );
   }
 
-  _scheduleAudioParam(param, value, atTime, ramp) {
+  _scheduleAudioParam(param: AudioParam | undefined | null, value: number, atTime: number, ramp: boolean): void {
     if (!param || !Number.isFinite(value)) return;
     const automationRate = param.automationRate;
     const allowRamp = !automationRate || automationRate === "a-rate";
@@ -569,13 +580,13 @@ export class KlattSynth {
     }
   }
 
-  _cancelParamAutomation(param, atTime) {
+  _cancelParamAutomation(param: AudioParam | undefined | null, atTime: number): void {
     if (!param) return;
     param.cancelScheduledValues(atTime);
     param.setValueAtTime(param.value, atTime);
   }
 
-  _cancelScheduledValues(atTime) {
+  _cancelScheduledValues(atTime: number): void {
     const params = [
       this.nodes.lfSource.parameters.get("f0"),
       this.nodes.lfSource.parameters.get("rd"),
@@ -640,7 +651,7 @@ export class KlattSynth {
     }
   }
 
-  _applyKlattParams(params, atTime, ramp = false) {
+  _applyKlattParams(params: Record<string, number>, atTime: number, ramp = false): void {
     const voiceDb = params.AV ?? -70;
     const voiceParDb = params.AVS ?? -70;
     const aspDb = params.AH ?? -70;
@@ -845,7 +856,7 @@ export class KlattSynth {
     this._scheduleAudioParam(this.nodes.parallelNasal.parameters.get("bandwidth"), params.BNP, atTime, ramp);
   }
 
-  scheduleTrack(track, startTime = this.ctx.currentTime + 0.05) {
+  scheduleTrack(track: Array<{ time: number; phoneme?: string; params: Record<string, number> }>, startTime = this.ctx.currentTime + 0.05): void {
     if (!track || track.length === 0) return;
     this._cancelScheduledValues(startTime);
     const baseTime = startTime;
@@ -936,7 +947,7 @@ export class KlattSynth {
    * @param {string} [triggerParam] - Which parameter triggered the burst ('AF' or 'AH')
    * @param {number} [triggerDelta] - The delta value that triggered the burst
    */
-  _scheduleBurstTransient(atTime, params, triggerParam = 'AF', triggerDelta = 0) {
+  _scheduleBurstTransient(atTime: number, params: Record<string, number>, triggerParam = 'AF', triggerDelta = 0): void {
     // Calculate PLSTEP amplitude per PARCOE.FOR line 131:
     // PLSTEP = GETAMP(NNG0 + NDBSCA(11) + 44)
     // where NDBSCA(11) = -72 (AF scale factor)
@@ -987,7 +998,7 @@ export class KlattSynth {
     plstepGain.setValueAtTime(0, decayEnd + 0.001);
   }
 
-  _setParallelMix(value, atTime, updateParam = true, ramp = false, allParallel = false) {
+  _setParallelMix(value: number, atTime: number, updateParam = true, ramp = false, allParallel = false): void {
     const mix = Math.max(0, Math.min(1, Number(value)));
     if (updateParam) {
       this.params.parallelMix = mix;
@@ -1018,35 +1029,36 @@ export class KlattSynth {
     }
   }
 
-  setTelemetryHandler(handler) {
+  setTelemetryHandler(handler: ((event: unknown) => void) | null): void {
     this.telemetryHandler = handler;
   }
 
-  _attachTelemetry(node) {
-    if (!this.telemetryHandler || !node?.port) return;
-    node.port.addEventListener("message", (event) => {
+  _attachTelemetry(node: AudioWorkletNode): void {
+    const telemetryHandler = this.telemetryHandler;
+    if (!telemetryHandler || !node?.port) return;
+    node.port.addEventListener("message", (event: MessageEvent) => {
       const data = event.data;
       if (!data || data.type !== "metrics") return;
-      this.telemetryHandler(data);
+      telemetryHandler(data);
     });
     if (typeof node.port.start === "function") {
       node.port.start();
     }
   }
 
-  async _awaitWorkletReady(timeoutMs = 2000) {
+  async _awaitWorkletReady(timeoutMs = 2000): Promise<void> {
     if (this._readyPromise) return this._readyPromise;
     const nodes = Object.values(this.nodes).filter((node) => node?.port);
     this._readyPromise = Promise.all(
       nodes.map((node) => this._waitForNodeReady(node, timeoutMs))
-    );
+    ).then(() => undefined);
     return this._readyPromise;
   }
 
-  _waitForNodeReady(node, timeoutMs) {
-    return new Promise((resolve) => {
+  _waitForNodeReady(node: AudioWorkletNode, timeoutMs: number): Promise<void> {
+    return new Promise<void>((resolve) => {
       let done = false;
-      const handler = (event) => {
+      const handler = (event: MessageEvent) => {
         const data = event?.data;
         if (!data || data.type !== "ready") return;
         done = true;
@@ -1062,16 +1074,16 @@ export class KlattSynth {
         setTimeout(() => {
           if (done) return;
           node.port.removeEventListener("message", handler);
-          console.warn(`[KlattSynth] worklet ready timeout: ${node?.port?.name ?? "node"}`);
+          console.warn("[KlattSynth] worklet ready timeout");
           resolve();
         }, timeoutMs);
       }
     });
   }
 
-  async _loadWasmBytes(workletBase) {
+  async _loadWasmBytes(workletBase: string): Promise<void> {
     if (this.wasmBytes) return;
-    const load = async (file) => {
+    const load = async (file: string): Promise<ArrayBuffer> => {
       const response = await fetch(workletBase + file);
       return response.arrayBuffer();
     };
@@ -1083,7 +1095,7 @@ export class KlattSynth {
     this.wasmBytes = { resonator, antiresonator, lfSource };
   }
 
-  setParam(name, value, atTime = this.ctx.currentTime) {
+  setParam(name: string, value: number, atTime = this.ctx.currentTime): void {
     if (!Number.isFinite(value)) return;
     this.params[name] = value;
 

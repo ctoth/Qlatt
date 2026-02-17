@@ -636,6 +636,15 @@ function applyUrlParams() {
 
 }
 
+// Load experiment manifest independently — must not be gated on synth init
+// (synth.initialize() can fail on GH Pages due to worklet loading)
+loadExperimentManifest().then(() => {
+  const experimentSelect = document.getElementById("experimentSelect");
+  if (experimentSelect) {
+    experimentSelect.addEventListener("change", onExperimentChange);
+  }
+});
+
 (async () => {
   synth.setTelemetryHandler(handleTelemetry);
   await synth.initialize();
@@ -643,12 +652,6 @@ function applyUrlParams() {
   attachSpectrogram();
   bindControls();
   applyUrlParams();
-  await loadExperimentManifest();
-  // Listen for experiment changes
-  const experimentSelect = document.getElementById("experimentSelect");
-  if (experimentSelect) {
-    experimentSelect.addEventListener("change", onExperimentChange);
-  }
 })();
 
 document.getElementById("startBtn").addEventListener("click", start);

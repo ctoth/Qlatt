@@ -22,12 +22,18 @@ function discoverBundledRulepacks(): Map<string, string> {
     return sources;
   }
 
-  // @ts-expect-error `glob` is provided by Vite at transform time.
-  const modules = import.meta.glob("/public/rules/*.yaml", {
-    query: "?raw",
-    import: "default",
-    eager: true,
-  }) as Record<string, unknown>;
+  let modules: Record<string, unknown> = {};
+  try {
+    // @ts-expect-error `glob` is provided by Vite at transform time.
+    modules = import.meta.glob("/public/rules/*.yaml", {
+      query: "?raw",
+      import: "default",
+      eager: true,
+    }) as Record<string, unknown>;
+  } catch {
+    // Browser runtime cannot raw-import from /public; we'll fall back to URL loading.
+    return sources;
+  }
 
   for (const [filePath, source] of Object.entries(modules)) {
     if (typeof source !== "string") continue;
@@ -42,18 +48,32 @@ const BUNDLED_RULEPACK_SOURCES = discoverBundledRulepacks();
 const BUNDLED_RULEPACK_CACHE = new Map<string, PlainObject>();
 
 export function listBundledRulepackPaths(): string[] {
-  return [...BUNDLED_RULEPACK_SOURCES.keys()].sort();
+  const known = new Set<string>([
+    ...BUNDLED_RULEPACK_SOURCES.keys(),
+    ...BUNDLED_RULEPACK_CACHE.keys(),
+    DEFAULT_RULEPACK_PATH,
+  ]);
+  return [...known].sort();
+}
+
+function loadRulepackSourceByUrl(specPath: string): string | null {
+  if (typeof XMLHttpRequest !== "function") return null;
+  const request = new XMLHttpRequest();
+  request.open("GET", specPath, false);
+  request.send();
+  if (request.status < 200 || request.status >= 300) return null;
+  return typeof request.responseText === "string" ? request.responseText : null;
 }
 
 export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PATH): PlainObject {
   const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
   if (cached) return cached;
 
-  const source = BUNDLED_RULEPACK_SOURCES.get(specPath);
+  const source = BUNDLED_RULEPACK_SOURCES.get(specPath) ?? loadRulepackSourceByUrl(specPath);
   if (typeof source !== "string") {
     const known = listBundledRulepackPaths();
     throw new Error(
-      `E_RULESET_PATH_UNKNOWN: '${specPath}' is not a bundled ruleset path` +
+      `E_RULESET_PATH_UNKNOWN: '${specPath}' could not be loaded` +
         (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
     );
   }

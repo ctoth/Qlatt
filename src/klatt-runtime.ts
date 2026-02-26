@@ -7,6 +7,7 @@
 
 import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator';
 import { registerNumericBuiltins } from './semantics/register-builtins';
+import { applyParamValue } from './audio-param-utils';
 
 // =============================================================================
 // Registry Types
@@ -488,8 +489,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
         }
 
         const value = resolveParamValue(paramSpec, realizedValues, currentInputs);
-        if (value !== undefined) {
-          applyParamToNode(node, paramName, value);
+        if (typeof value === 'number') {
+          applyParamValue(node, paramName, value);
         }
       }
     }
@@ -830,42 +831,4 @@ function resolveParamValue(
   return undefined;
 }
 
-// Helper: Apply param to node
-function applyParamToNode(node: AudioNode, paramName: string, value: ParamValue): void {
-  if (typeof value !== 'number') return;
-
-  // Handle GainNode (duck typing for Node.js test compatibility)
-  const anyNode = node as unknown as Record<string, unknown>;
-  if (paramName === 'gain' && anyNode.gain) {
-    const gainParam = anyNode.gain as { value?: number; setValueAtTime?: (v: number, t: number) => void };
-    if (typeof gainParam.setValueAtTime === 'function') {
-      gainParam.setValueAtTime(value, node.context.currentTime);
-    } else if (typeof gainParam.value === 'number') {
-      gainParam.value = value;
-    }
-    return;
-  }
-
-  // Handle ConstantSourceNode offset
-  if (paramName === 'offset' && anyNode.offset) {
-    const offsetParam = anyNode.offset as { value?: number; setValueAtTime?: (v: number, t: number) => void };
-    if (typeof offsetParam.setValueAtTime === 'function') {
-      offsetParam.setValueAtTime(value, node.context.currentTime);
-    } else if (typeof offsetParam.value === 'number') {
-      offsetParam.value = value;
-    }
-    return;
-  }
-
-  // Handle AudioWorkletNode (duck typing for Node.js test compatibility)
-  if (anyNode.parameters && typeof (anyNode.parameters as Record<string, unknown>).get === 'function') {
-    const param = (anyNode.parameters as { get: (name: string) => AudioParam | { value: number } | undefined }).get(paramName);
-    if (param) {
-      if ('setValueAtTime' in param && typeof param.setValueAtTime === 'function') {
-        param.setValueAtTime(value, node.context.currentTime);
-      } else if ('value' in param) {
-        param.value = value;
-      }
-    }
-  }
-}
+// applyParamToNode removed — now using shared applyParamValue from audio-param-utils.ts

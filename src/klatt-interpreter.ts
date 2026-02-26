@@ -18,6 +18,7 @@ import { registerNumericBuiltins } from './semantics/register-builtins';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
 import { dbToLinear } from './builtin-functions';
+import { getAudioParam } from './audio-param-utils';
 
 // =============================================================================
 // Types
@@ -200,31 +201,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         rampParams.add(name);
       }
     }
-  }
-
-  /**
-   * Get AudioParam from node by name
-   */
-  function getAudioParam(node: AudioNode, paramName: string): AudioParam | null {
-    const anyNode = node as unknown as Record<string, unknown>;
-
-    // Handle GainNode
-    if (paramName === 'gain' && anyNode.gain) {
-      return anyNode.gain as AudioParam;
-    }
-
-    // Handle ConstantSourceNode
-    if (paramName === 'offset' && anyNode.offset) {
-      return anyNode.offset as AudioParam;
-    }
-
-    // Handle AudioWorkletNode parameters
-    if (anyNode.parameters && typeof (anyNode.parameters as Map<string, AudioParam>).get === 'function') {
-      const param = (anyNode.parameters as Map<string, AudioParam>).get(paramName);
-      if (param) return param;
-    }
-
-    return null;
   }
 
   // Build bindings: use provided bindingMap if available (from runtime), otherwise walk graph

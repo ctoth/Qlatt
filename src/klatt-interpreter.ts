@@ -17,7 +17,7 @@ import { createCelEvaluator } from './semantics/cel-evaluator';
 import { registerNumericBuiltins } from './semantics/register-builtins';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
-import { dbToLinear, dbToLinearKlsyn, proximity as proximityFn, min, max, pow } from './builtin-functions';
+import { dbToLinear, proximity as proximityFn } from './builtin-functions';
 
 // =============================================================================
 // Types
@@ -90,16 +90,43 @@ export interface KlattInterpreter {
   getTrackDuration(): number;
 }
 
-// Standard functions imported from builtin-functions.js
-const standardFunctions: Record<string, (...args: number[]) => number> = {
-  dbToLinear,
-  dbToLinearKlsyn,
-  min,
-  max,
-  pow,
-};
-
 // requireNumericArg and registerNumericBuiltins moved to ./semantics/register-builtins.ts
+
+// =============================================================================
+// Exported Context Builders (testable, pure functions)
+// =============================================================================
+
+/**
+ * Build the static context from constants, param defaults, and sampleRate.
+ * Contains only data values (numbers, strings, nested objects) — no functions.
+ * Functions are registered with the CEL evaluator separately.
+ */
+export function buildStaticContext(
+  constants: Record<string, unknown>,
+  paramDefaults: Map<string, number>,
+  sampleRate: number,
+): Record<string, unknown> {
+  const ctx: Record<string, unknown> = { ...constants };
+  for (const [name, value] of paramDefaults) {
+    ctx[name] = value;
+  }
+  ctx['sampleRate'] = sampleRate;
+  return ctx;
+}
+
+/**
+ * Build a per-frame evaluation context by deep-copying staticContext and overlaying frame params.
+ * Uses structuredClone to protect nested objects (e.g., ndbScale) from mutation.
+ */
+export function buildFrameContext(
+  staticContext: Record<string, unknown>,
+  params: Record<string, number>,
+): Record<string, unknown> {
+  const ctx: Record<string, unknown> = structuredClone(staticContext);
+  // Overlay track params (these override defaults)
+  Object.assign(ctx, params);
+  return ctx;
+}
 
 // =============================================================================
 // Interpreter Factory
@@ -143,15 +170,9 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   }
   log(`Loaded ${paramDefaults.size} param defaults from semantics`);
 
-  // Build static context once at init time (constants + functions + defaults)
-  // This avoids rebuilding these every frame
-  const staticContext: Record<string, unknown> = { ...constants };
-  Object.assign(staticContext, standardFunctions);
-  for (const [name, value] of paramDefaults) {
-    staticContext[name] = value;
-  }
-  staticContext['proximity'] = proximityFn;
-  staticContext['sampleRate'] = audioContext.sampleRate;
+  // Build static context once at init time (constants + defaults + sampleRate)
+  // Contains only data values — functions are registered with the CEL evaluator separately
+  const staticContext = buildStaticContext(constants, paramDefaults, audioContext.sampleRate);
   log(`Built staticContext with ${Object.keys(staticContext).length} entries`);
 
   // Build binding map: semantics output name -> list of AudioParams
@@ -284,14 +305,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   /**
    * Build evaluation context from frame params
-   * Copies staticContext to ensure all properties are own properties (required by evaluator)
+   * Uses buildFrameContext (structuredClone) to protect nested objects from mutation.
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
-    // Deep copy staticContext to prevent mutation of nested objects (e.g., ndbScale)
-    const ctx: Record<string, unknown> = JSON.parse(JSON.stringify(staticContext));
-
-    // Overlay track params (these override defaults)
-    Object.assign(ctx, params);
+    const ctx = buildFrameContext(staticContext, params);
 
     // Compute proximity corrections (using defaults-then-overlay values)
     const f1 = ctx['F1'] as number;

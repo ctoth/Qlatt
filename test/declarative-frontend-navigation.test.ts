@@ -117,4 +117,43 @@ describe("declarative frontend navigation helpers", () => {
     expect(out[2].duration).toBe(80);
     expect(out[4].duration).toBe(109);
   });
+
+  it("supports look_back_where() for predicate-based backward scans", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+      },
+      rules: {
+        lookback_rule: {
+          select: {
+            stream: "phone",
+            where: "current.phoneme == 'K'",
+          },
+          define: {
+            hit: "look_back_where(current, 4, \"has(current.stress) && current.stress == 1\")",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "hit != null && hit.phoneme == 'EH' ? 13 : 0",
+              tag: "look_back_where",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["lookback_rule"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
+      { stream: "phone", phoneme: "AA", type: "vowel", stress: 1, duration: 100, status: 2 },
+      { stream: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
+      { stream: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
+      { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out[4].duration).toBe(73);
+  });
 });

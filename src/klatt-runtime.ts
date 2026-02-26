@@ -390,6 +390,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   // Current realized values (result of semantics evaluation)
   let realizedValues: Record<string, ParamValue> = {};
 
+  // Names of realize rules that errored in the last evaluation
+  let lastEvaluationErrorNames: Set<string> = new Set();
+
   // Audio nodes created from graph
   const nodes = new Map<string, AudioNode>();
 
@@ -417,8 +420,17 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     const result = topoEvaluator.evaluate(semantics, context);
     realizedValues = result.values;
 
+    // Track which realize rules errored
+    lastEvaluationErrorNames = new Set<string>();
+
     if (result.errors.length > 0) {
-      console.warn('Semantics evaluation errors:', result.errors);
+      // Route errors through the runtime's log callback so callers can see them
+      for (const err of result.errors) {
+        if (typeof err === 'object' && err !== null && 'name' in err) {
+          lastEvaluationErrorNames.add((err as { name: string }).name);
+        }
+        log(`Semantics evaluation error: ${typeof err === 'string' ? err : JSON.stringify(err)}`);
+      }
     }
   }
 
@@ -436,16 +448,34 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Apply realized values to nodes
   function applyValues(): void {
+    // Detect bound params whose realize rules errored — these are using
+    // the param-seeded fallback value instead of the intended derived value
+    const affectedBindings: string[] = [];
+
     for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
       const node = nodes.get(nodeId);
       if (!node || !nodeDef.params) continue;
 
       for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
+        // Check if this binding references a failed realize rule
+        if (typeof paramSpec === 'object' && paramSpec !== null && 'bind' in paramSpec) {
+          const bindName = (paramSpec as { bind: string }).bind;
+          if (lastEvaluationErrorNames.has(bindName)) {
+            affectedBindings.push(bindName);
+          }
+        }
+
         const value = resolveParamValue(paramSpec, realizedValues, currentInputs);
         if (value !== undefined) {
           applyParamToNode(node, paramName, value);
         }
       }
+    }
+
+    // Log a single summary line for bindings affected by failed realize rules
+    if (affectedBindings.length > 0) {
+      const unique = [...new Set(affectedBindings)];
+      log(`Semantics fallthrough for: ${unique.join(', ')} (realize rule failed, using raw input values)`);
     }
   }
 

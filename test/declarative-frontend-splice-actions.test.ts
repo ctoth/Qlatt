@@ -11,7 +11,7 @@ describe("declarative frontend splice actions", () => {
 
     const spec = {
       streams: {
-        phone: { type: "base" },
+        phone: { type: "base", features: { type: ["stop", "vowel", "fricative"] } },
       },
       patterns: {
         cv: {
@@ -316,6 +316,60 @@ describe("declarative frontend splice actions", () => {
     expect(inserted?.weak).toBeNull();
     expect(inserted?.inherentDuration).toBeNull();
     expect(inserted?.punctuationSymbol).toBeNull();
+    expect(inserted?.sync_left).toEqual(s1);
+    expect(inserted?.sync_right).toEqual(s2);
+  });
+
+  it("supports dispatch in splice insert field expressions", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        insert_release: {
+          select: { stream: "phone", where: "current.id == 'p1'" },
+          define: {
+            weak: "next != null && next.phoneme == 'SIL'",
+          },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [
+              {
+                phoneme: "'REL'",
+                duration: {
+                  dispatch: [
+                    { when: "weak", value: 15 },
+                    { default: 30 },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        suppress_right_neighbor: {
+          select: { stream: "phone", where: "current.id == 'p2'" },
+          suppress: true,
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["insert_release", "suppress_right_neighbor"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", phoneme: "SIL", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const inserted = out.find((t) => t.phoneme === "REL" && t.status === 1);
+
+    expect(inserted).toBeTruthy();
+    expect(inserted?.duration).toBe(15);
     expect(inserted?.sync_left).toEqual(s1);
     expect(inserted?.sync_right).toEqual(s2);
   });

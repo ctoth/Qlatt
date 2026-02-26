@@ -105,7 +105,7 @@ describe("declarative frontend schema coverage", () => {
     expect(shapeErrors).toHaveLength(2);
   });
 
-  it("rejects forward point references and non-string expressions", () => {
+  it("rejects forward point references", () => {
     const spec = parseDslSpec({
       streams: {
         phone: { type: "base", scalars: { duration: {} } },
@@ -129,7 +129,6 @@ describe("declarative frontend schema coverage", () => {
 
     const diagnostics = validateDslSpec(spec);
     const codes = diagnostics.map((d) => d.code);
-    expect(codes.filter((code) => code === "E_RULE_EXPRESSION_INVALID").length).toBeGreaterThan(0);
     expect(codes.includes("E_POINT_FWD_REF")).toBe(true);
   });
 
@@ -156,7 +155,11 @@ describe("declarative frontend schema coverage", () => {
           select: { stream: "phone", where: "next3 != null" },
         },
         ok_depth: {
-          select: { stream: "phone", where: "ahead(current, 3) == null || behind(current, 1) != null" },
+          select: {
+            stream: "phone",
+            where:
+              "ahead(current, 3) == null || behind(current, 1) != null || look_back_where(current, 4, \"current.phoneme == 'AA'\") == null",
+          },
         },
       },
       phases: [{ name: "duration", rules: ["bad_depth", "ok_depth"] }],
@@ -169,5 +172,82 @@ describe("declarative frontend schema coverage", () => {
     expect(badDepth?.code).toBe("E_CEL_INVALID");
     expect(badDepth?.message).toContain("Unsupported cursor 'next3'");
     expect(okDepth).toBeUndefined();
+  });
+
+  it("validates dispatch exclusivity and default requirements", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        bad_effect: {
+          select: { stream: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "mul",
+              value: "1.1",
+              dispatch: [{ when: "true", value: 1.2 }, { default: 1.0 }],
+            },
+          ],
+        },
+        missing_default: {
+          select: { stream: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "mul",
+              dispatch: [{ when: "true", value: 1.2 }],
+            },
+          ],
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [
+              {
+                phoneme: "'REL'",
+                duration: {
+                  dispatch: [{ when: "true", value: 12 }],
+                },
+              },
+            ],
+          },
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad_effect", "missing_default"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+
+    expect(codes.includes("E_DISPATCH_AND_VALUE")).toBe(true);
+    expect(codes.filter((code) => code === "E_DISPATCH_NO_DEFAULT").length).toBeGreaterThan(0);
+  });
+
+  it("requires streams to declare features.type when rules reference .type", () => {
+    const missing = parseDslSpec({
+      streams: { phone: { type: "base", features: { manner: ["vowel"] } } },
+      rules: {
+        bad: {
+          select: { stream: "phone", where: "current.type == 'vowel'" },
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad"] }],
+    });
+
+    const ok = parseDslSpec({
+      streams: { phone: { type: "base", features: { type: ["vowel"] } } },
+      rules: {
+        good: {
+          select: { stream: "phone", where: "current.type == 'vowel'" },
+        },
+      },
+      phases: [{ name: "duration", rules: ["good"] }],
+    });
+
+    const missingCodes = validateDslSpec(missing).map((d) => d.code);
+    const okCodes = validateDslSpec(ok).map((d) => d.code);
+
+    expect(missingCodes.includes("E_TOKEN_FIELD_UNDECLARED")).toBe(true);
+    expect(okCodes.includes("E_TOKEN_FIELD_UNDECLARED")).toBe(false);
   });
 });

@@ -1,12 +1,177 @@
 version: v12-cel
 parameters:
-  base_f0: 110
-  fall_rate_hz: 20
-  stress_rise: 1.15
-  question_rise_hz: 30
-  question_rise_ratio: 1.2
-  question_target_floor_hz: 170
-  question_target_ceiling_hz: 190
+  policy:
+    duration:
+      vot_target_ms:
+        p:
+          value: 58
+          citations:
+            - Lisker & Abramson 1964
+        t:
+          value: 70
+          citations:
+            - Lisker & Abramson 1964
+        k:
+          value: 80
+          citations:
+            - Lisker & Abramson 1964
+      vot_split_fallback_share:
+        value: 0.5
+        citations:
+          - Allen et al. 1987 Table C-1
+      weak_release_min_ms:
+        value: 15
+        citations:
+          - Allen et al. 1987 Table C-1
+      weak_release_scale:
+        value: 0.5
+        citations:
+          - Allen et al. 1987 Table C-1
+      stress_primary_multiplier:
+        value: 1.3
+        citations:
+          - Klatt 1976 §III.B
+      stress_unstressed_multiplier:
+        value: 0.8
+        citations:
+          - Klatt 1976 §III.B
+      punctuation_pause_comma_ms:
+        value: 150
+        citations:
+          - Allen et al. 1987 Ch.8
+      punctuation_pause_terminal_ms:
+        value: 300
+        citations:
+          - Allen et al. 1987 Ch.8
+      vowel_shortening_end_multiplier:
+        value: 1.2
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiced_fricative_multiplier:
+        value: 1.6
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiced_stop_multiplier:
+        value: 1.2
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_nasal_multiplier:
+        value: 0.85
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiceless_stop_multiplier:
+        value: 0.7
+        citations:
+          - Allen et al. 1987 Ch.9
+      pre_boundary_terminal_multiplier:
+        value: 1.4
+        citations:
+          - Klatt 1976 §III.A
+      pre_boundary_word_multiplier:
+        value: 1.1
+        citations:
+          - Klatt 1976 §III.A
+    f0:
+      base_hz:
+        value: 110
+        citations:
+          - O'Shaughnessy 1976
+      fall_rate_hz:
+        value: 20
+        citations:
+          - O'Shaughnessy 1976
+      declination_floor_ratio:
+        value: 0.6
+        citations:
+          - O'Shaughnessy 1976
+      stress_rise:
+        value: 1.15
+        citations:
+          - O'Shaughnessy 1976
+      question_rise_hz:
+        value: 30
+        citations:
+          - O'Shaughnessy 1976
+      question_rise_ratio:
+        value: 1.2
+        citations:
+          - O'Shaughnessy 1976
+      question_target_floor_hz:
+        value: 170
+        citations:
+          - O'Shaughnessy 1976
+      question_target_ceiling_hz:
+        value: 190
+        citations:
+          - O'Shaughnessy 1976
+    formant:
+      bilabial_f2_locus:
+        value: 1200
+        citations:
+          - Stevens & House 1955
+          - Allen et al. 1987 Ch.11
+      alveolar_f2_locus:
+        value: 1800
+        citations:
+          - Stevens & House 1955
+          - Allen et al. 1987 Ch.11
+      alveolar_f2_locus_front:
+        value: 1900
+        citations:
+          - Stevens & House 1955
+      alveolar_f2_locus_back:
+        value: 1700
+        citations:
+          - Stevens & House 1955
+      nasal_fnz_m:
+        value: 900
+        citations:
+          - Hawkins & Stevens 1985
+          - House & Stevens 1956
+      nasal_fnz_n:
+        value: 1700
+        citations:
+          - Hawkins & Stevens 1985
+          - House & Stevens 1956
+      nasal_fnz_ng:
+        value: 2800
+        citations:
+          - Hawkins & Stevens 1985
+          - House & Stevens 1956
+      dark_l_f2:
+        value: 750
+        citations:
+          - Recasens 2012
+          - Sproat & Fujimura 1993
+      dark_l_f3:
+        value: 2400
+        citations:
+          - Recasens 2012
+      r_f3_onset:
+        value: 1600
+        citations:
+          - Espy-Wilson 2000
+      r_f3_coda:
+        value: 1400
+        citations:
+          - Espy-Wilson 2000
+      f1_release_labial:
+        value: 250
+        citations:
+          - Stevens 1998 Ch.8
+      f1_release_alveolar:
+        value: 300
+        citations:
+          - Stevens 1998 Ch.8
+      f1_release_velar:
+        value: 280
+        citations:
+          - Stevens 1998 Ch.8
+predicates:
+  is_question_boundary: >-
+    current.phoneme == 'SIL' && current.punctuationSymbol == '?'
+  is_stressed_vowel: >-
+    current.type == 'vowel' && has(current.stress) && current.stress == 1
 streams:
   phone:
     type: base
@@ -41,6 +206,14 @@ phases:
     rules:
       - k_context_cl_f2
       - k_context_rel_copy
+      - bilabial_f2_locus
+      - bilabial_rel_copy
+      - alveolar_f2_locus
+      - alveolar_rel_copy
+      - nasal_antiformant_by_place
+      - dark_l_allophony
+      - r_f3_lowering
+      - f1_stop_onset
       - punctuation_pause
       - stress_duration
       - vowel_shortening
@@ -84,9 +257,12 @@ rules:
         next_token != null ? next_token.phoneme == "SIL" : false
       rel_target: target(rel)
       asp_target: target(asp)
-      vot_target: 'rel == "P_REL" ? 58 : (rel == "T_REL" ? 70 : 80)'
+      vot_target: >-
+        rel == "P_REL" ? params.policy.duration.vot_target_ms.p : (rel == "T_REL" ?
+        params.policy.duration.vot_target_ms.t : params.policy.duration.vot_target_ms.k)
       vot_sum: 'rel_target.duration + asp_target.duration'
-      rel_share: 'vot_sum > 0 ? rel_target.duration / vot_sum : 0.5'
+      rel_share: >-
+        vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share
       rel_duration_base: 'vot_target * rel_share'
       asp_duration_base: 'vot_target - rel_duration_base'
       rel_params: >-
@@ -95,8 +271,12 @@ rules:
       asp_params: >-
         weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH -
         10])}) : asp_target.params
-      rel_duration: 'weak ? max([15, rel_duration_base * 0.5]) : rel_duration_base'
-      asp_duration: 'weak ? max([15, asp_duration_base * 0.5]) : asp_duration_base'
+      rel_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms,
+        rel_duration_base * params.policy.duration.weak_release_scale]) : rel_duration_base
+      asp_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms,
+        asp_duration_base * params.policy.duration.weak_release_scale]) : asp_duration_base
     splice:
       type: replace_range
       range_left: current.sync_right
@@ -149,7 +329,9 @@ rules:
       rel_params: >-
         weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
         10])}) : rel_target.params
-      rel_duration: 'weak ? max([15, rel_target.duration * 0.5]) : rel_target.duration'
+      rel_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms,
+        rel_target.duration * params.policy.duration.weak_release_scale]) : rel_target.duration
     splice:
       type: replace_range
       range_left: current.sync_right
@@ -184,7 +366,9 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: 'has(current.stress) && current.stress == 1 ? 1.3 : ((has(current.stress) && current.stress == 0) ? 0.8 : 1)'
+        value: >-
+          has(current.stress) && current.stress == 1 ? params.policy.duration.stress_primary_multiplier :
+          ((has(current.stress) && current.stress == 0) ? params.policy.duration.stress_unstressed_multiplier : 1)
         tag: stress
   k_context_cl_f2:
     kind: scalar
@@ -218,6 +402,148 @@ rules:
       - field: params.F2
         op: set
         value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : 1500'
+  bilabial_f2_locus:
+    kind: scalar
+    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (bilabial F2 locus ~1200 Hz)
+    select:
+      stream: phone
+      where: current.phoneme in ['P_CL', 'B_CL', 'M']
+    define:
+      cand: >-
+        current.phoneme == "P_CL" ? (next != null && next.phoneme == "P_REL" ? ahead(current, 2) : next) :
+        (current.phoneme == "B_CL" ? (next != null && next.phoneme == "B_REL" ? ahead(current, 2) : next) : next)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi)
+              ? cand.hi == true : false))
+            value: 1350
+          - when: >-
+              cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)
+            value: 1100
+          - default: params.policy.formant.bilabial_f2_locus
+  bilabial_rel_copy:
+    kind: scalar
+    citation: Stevens & House 1955; Allen et al. 1987 Ch.11 (bilabial locus transitions)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ["P_REL", "B_REL"] && (prev != null ? prev.phoneme in ["P_CL", "B_CL"] : false)
+    apply:
+      - field: params.F2
+        op: set
+        value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus'
+  alveolar_f2_locus:
+    kind: scalar
+    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
+    select:
+      stream: phone
+      where: current.phoneme in ['T_CL', 'D_CL', 'N']
+    define:
+      cand: >-
+        current.phoneme == "T_CL" ? (next != null && next.phoneme == "T_REL" ? ahead(current, 2) : next) :
+        (current.phoneme == "D_CL" ? (next != null && next.phoneme == "D_REL" ? ahead(current, 2) : next) : next)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi)
+              ? cand.hi == true : false))
+            value: params.policy.formant.alveolar_f2_locus_front
+          - when: >-
+              cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)
+            value: params.policy.formant.alveolar_f2_locus_back
+          - default: params.policy.formant.alveolar_f2_locus
+  alveolar_rel_copy:
+    kind: scalar
+    citation: Stevens & House 1955; Allen et al. 1987 Ch.11 (alveolar locus transitions)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ["T_REL", "D_REL"] && (prev != null ? prev.phoneme in ["T_CL", "D_CL"] : false)
+    apply:
+      - field: params.F2
+        op: set
+        value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus'
+  nasal_antiformant_by_place:
+    kind: scalar
+    citation: Hawkins & Stevens 1985 (nasal pole-zero correlates); House & Stevens 1956 (nasal antiformants by place)
+    select:
+      stream: phone
+      where: current.type == 'nasal'
+    apply:
+      - field: params.FNZ
+        op: set
+        dispatch:
+          - when: current.phoneme == 'M'
+            value: params.policy.formant.nasal_fnz_m
+          - when: current.phoneme == 'N'
+            value: params.policy.formant.nasal_fnz_n
+          - when: current.phoneme == 'NG'
+            value: params.policy.formant.nasal_fnz_ng
+          - default: 'has(current.params.FNZ) ? current.params.FNZ : 480'
+  dark_l_allophony:
+    kind: scalar
+    citation: Recasens 2012 (lateral allophones); Sproat & Fujimura 1993 (syllable-final /l/ darkening)
+    select:
+      stream: phone
+      where: current.phoneme == 'L'
+    define:
+      n: next
+      is_coda: >-
+        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate']
+        || (has(n.word) && has(current.word) && n.word != current.word)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.dark_l_f2
+          - default: 'has(current.params.F2) ? current.params.F2 : 1050'
+      - field: params.F3
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.dark_l_f3
+          - default: 'has(current.params.F3) ? current.params.F3 : 2600'
+  r_f3_lowering:
+    kind: scalar
+    citation: Espy-Wilson 2000 (acoustic modeling of American /r/); Stevens 1998 Ch.9
+    select:
+      stream: phone
+      where: current.phoneme == 'R'
+    define:
+      n: next
+      is_coda: >-
+        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate']
+        || (has(n.word) && has(current.word) && n.word != current.word)
+    apply:
+      - field: params.F3
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.r_f3_coda
+          - default: params.policy.formant.r_f3_onset
+  f1_stop_onset:
+    kind: scalar
+    citation: Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    apply:
+      - field: params.F1
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.f1_release_labial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.f1_release_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.f1_release_velar
+          - default: 280
   punctuation_pause:
     kind: scalar
     citation: Allen et al. 1987 Ch.8 (pause insertion)
@@ -228,7 +554,8 @@ rules:
       - field: duration
         op: set
         value: >-
-          current.punctuationSymbol == ',' ? 150 : (current.punctuationSymbol in ['.', '?', '!'] ? 300 :
+          current.punctuationSymbol == ',' ? params.policy.duration.punctuation_pause_comma_ms :
+          (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.punctuation_pause_terminal_ms :
           current.duration)
   vowel_shortening:
     kind: scalar
@@ -243,18 +570,18 @@ rules:
         op: mul
         dispatch:
           - when: "n == null ? true : n.phoneme == 'SIL'"
-            value: 1.2
+            value: params.policy.duration.vowel_shortening_end_multiplier
           - when: >-
               n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')
-            value: 1.6
+            value: params.policy.duration.vowel_shortening_voiced_fricative_multiplier
           - when: >-
               n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_release'])
-            value: 1.2
+            value: params.policy.duration.vowel_shortening_voiced_stop_multiplier
           - when: "n == null ? false : n.type == 'nasal'"
-            value: 0.85
+            value: params.policy.duration.vowel_shortening_nasal_multiplier
           - when: >-
               n == null ? false : (has(n.voiceless) && n.voiceless == true && n.type in ['stop', 'stop_closure'])
-            value: 0.7
+            value: params.policy.duration.vowel_shortening_voiceless_stop_multiplier
           - default: 1
         tag: segmental_context
   pre_boundary_lengthening:
@@ -274,11 +601,11 @@ rules:
         op: mul
         dispatch:
           - when: "n == null"
-            value: 1.4
+            value: params.policy.duration.pre_boundary_terminal_multiplier
           - when: "n.phoneme == 'SIL' && has(n.punctuationSymbol)"
-            value: 1.4
+            value: params.policy.duration.pre_boundary_terminal_multiplier
           - when: "n.phoneme != 'SIL' && cur_word != '' && next_word != '' && cur_word != next_word"
-            value: 1.1
+            value: params.policy.duration.pre_boundary_word_multiplier
           - default: 1
         tag: boundary
   lock_stop_release_duration:
@@ -321,7 +648,7 @@ rules:
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: params.base_f0
+      value: params.policy.f0.base_hz
       tag: f0_baseline
   f0_targets:
     kind: point
@@ -335,9 +662,9 @@ rules:
       stream: f0
       at: at_sync(current.sync_right)
       value: >-
-        max([((params.base_f0 - params.fall_rate_hz * (phrase_total <= 1 ? 0 : (double(phrase_index) /
-        double(phrase_total - 1)))) * (has(current.params.F0_Factor) ? current.params.F0_Factor : 1)), params.base_f0 *
-        0.6])
+        max([((params.policy.f0.base_hz - params.policy.f0.fall_rate_hz * (phrase_total <= 1 ? 0 :
+        (double(phrase_index) / double(phrase_total - 1)))) * (has(current.params.F0_Factor) ?
+        current.params.F0_Factor : 1)), params.policy.f0.base_hz * params.policy.f0.declination_floor_ratio])
       tag: f0_declination
   f0_stress_peak:
     kind: point
@@ -352,25 +679,27 @@ rules:
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
-      value: '(prev_f0 == null ? params.base_f0 : prev_f0.value) * params.stress_rise'
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.stress_rise
       tag: f0_stress
   f0_question_rise:
     kind: point
     citation: O'Shaughnessy 1976 (Tune B final rise targets 170-190 Hz and ~20% lift); Pierrehumbert 1980; Ladd 2008
     select:
       stream: phone
-      where: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
+      where:
+        predicate: is_question_boundary
     define:
       prev_f0: prev_point('f0')
-      prior_f0_hz: 'prev_f0 == null ? params.base_f0 : prev_f0.value'
+      prior_f0_hz: 'prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value'
       rise_target_hz: >-
-        max([prior_f0_hz + params.question_rise_hz, prior_f0_hz * params.question_rise_ratio,
-        params.question_target_floor_hz])
+        max([prior_f0_hz + params.policy.f0.question_rise_hz, prior_f0_hz * params.policy.f0.question_rise_ratio,
+        params.policy.f0.question_target_floor_hz])
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        rise_target_hz > params.question_target_ceiling_hz ? params.question_target_ceiling_hz :
+        rise_target_hz > params.policy.f0.question_target_ceiling_hz ? params.policy.f0.question_target_ceiling_hz :
         rise_target_hz
       tag: f0_question
   f0_question_rise_onset:
@@ -378,14 +707,15 @@ rules:
     citation: O'Shaughnessy 1976 (rise begins before final boundary); Pierrehumbert 1980; Ladd 2008 Ch.5
     select:
       stream: phone
-      where: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
+      where:
+        predicate: is_question_boundary
     define:
       last_stress: >-
-        look_back_where(current, 8, "current.type == 'vowel' && has(current.stress) && current.stress == 1")
+        look_back_pred(current, 8, "is_stressed_vowel")
       prev_f0: prev_point('f0')
     constraint: 'last_stress != null'
     insert_point:
       stream: f0
       at: at_ratio(last_stress, 0.8)
-      value: 'prev_f0 == null ? params.base_f0 : prev_f0.value'
+      value: 'prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value'
       tag: f0_question_onset

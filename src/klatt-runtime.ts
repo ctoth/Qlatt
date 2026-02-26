@@ -201,21 +201,28 @@ async function awaitWorkletReady(
 
   await Promise.all(
     workletNodes.map(async ([id, node]) => {
-      await waitForNodeReady(node, timeoutMs, log);
-      log(`  ${id} ready`);
+      try {
+        await waitForNodeReady(node, timeoutMs, log);
+        log(`  ${id} ready`);
+      } catch (err) {
+        log(`  Warning: ${id} - ${err instanceof Error ? err.message : String(err)}`);
+        // Continue: worklet may still work, just unconfirmed ready
+      }
     })
   );
 }
 
 /**
- * Wait for a single worklet node to signal ready
+ * Wait for a single worklet node to signal ready.
+ * Rejects on timeout so callers can detect worklet initialization failure.
+ * Cleans up the message handler on both success and timeout paths.
  */
-function waitForNodeReady(
+export function waitForNodeReady(
   node: AudioWorkletNode,
   timeoutMs: number,
   log: (msg: string) => void = () => {}
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let done = false;
     const handler = (event: MessageEvent) => {
       if (event.data?.type !== 'ready') return;
@@ -228,8 +235,8 @@ function waitForNodeReady(
     node.port.postMessage({ type: 'ping' });
     setTimeout(() => {
       if (!done) {
-        log(`  Warning: worklet timed out waiting for ready`);
-        resolve();
+        node.port.removeEventListener('message', handler);
+        reject(new Error(`Worklet timed out waiting for ready after ${timeoutMs}ms`));
       }
     }, timeoutMs);
   });

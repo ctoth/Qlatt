@@ -17,7 +17,7 @@ import { createCelEvaluator } from './semantics/cel-evaluator';
 import { registerNumericBuiltins } from './semantics/register-builtins';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
-import { dbToLinear, proximity as proximityFn } from './builtin-functions';
+import { dbToLinear } from './builtin-functions';
 
 // =============================================================================
 // Types
@@ -308,18 +308,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
    * Uses buildFrameContext (structuredClone) to protect nested objects from mutation.
    */
   function buildContext(params: Record<string, number>): Record<string, unknown> {
-    const ctx = buildFrameContext(staticContext, params);
-
-    // Compute proximity corrections (using defaults-then-overlay values)
-    const f1 = ctx['F1'] as number;
-    const f2 = ctx['F2'] as number;
-    const f3 = ctx['F3'] as number;
-    const f4 = ctx['F4'] as number;
-    ctx['n12Cor'] = proximityFn(f2 - f1);
-    ctx['n23Cor'] = proximityFn(f3 - f2 - 50);
-    ctx['n34Cor'] = proximityFn(f4 - f3 - 150);
-
-    return ctx;
+    // Proximity corrections (n12Cor, n23Cor, n34Cor) are computed by
+    // realize rules in semantics.yaml via the proximity() CEL function.
+    // No hardcoded computation needed here.
+    return buildFrameContext(staticContext, params);
   }
 
   /**

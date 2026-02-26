@@ -12,13 +12,15 @@ import {
   explainField,
   whyNotRule,
 } from "../src/declarative-frontend/tooling";
-import { QLATT_V11_SLICE_RULEPACK } from "../src/declarative-frontend/rule-pack";
 
 type CliIo = {
   stdout: (text: string) => void;
   stderr: (text: string) => void;
   readStdin: () => string;
 };
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const DEFAULT_RULEPACK_PATH = path.resolve(SCRIPT_DIR, "../src/declarative-frontend/rule-pack.yaml");
 
 function defaultIo(): CliIo {
   return {
@@ -86,8 +88,7 @@ function readInputSequence(inputArg: string, io: CliIo) {
 }
 
 function loadSpec(specPath: string | null) {
-  if (!specPath) return parseDslSpec(QLATT_V11_SLICE_RULEPACK);
-  const resolved = path.resolve(specPath);
+  const resolved = specPath ? path.resolve(specPath) : DEFAULT_RULEPACK_PATH;
   const source = fs.readFileSync(resolved, "utf8");
   return parseDslSpec(source);
 }

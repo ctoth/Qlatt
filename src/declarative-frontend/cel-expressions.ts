@@ -27,6 +27,7 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "min",
   "contains",
   "merge",
+  "look_back_where",
 ]);
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;

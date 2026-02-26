@@ -1,16 +1,68 @@
-/// <reference path="./external-modules.d.ts" />
-
 import { parseDslSpec } from "./parser";
-import rulePackYaml from "./rule-pack.yaml?raw";
+import { assertValidSpec } from "./validation";
 
-// Canonical rulepack source is YAML (see rule-pack.yaml).
-export const QLATT_V12_CEL_RULEPACK = (() => {
-  const spec = parseDslSpec(rulePackYaml);
-  for (const rule of Object.values(spec.rules ?? {})) {
+type PlainObject = Record<string, unknown>;
+
+export const DEFAULT_RULEPACK_PATH = "/rules/frontend.yaml";
+
+function normalizeRuleShape(spec: PlainObject): PlainObject {
+  for (const rule of Object.values((spec.rules ?? {}) as Record<string, unknown>)) {
     if (rule && typeof rule === "object" && (rule as Record<string, unknown>).op == null) {
       delete (rule as Record<string, unknown>).op;
     }
   }
   return spec;
-})();
+}
+
+function discoverBundledRulepacks(): Map<string, string> {
+  const sources = new Map<string, string>();
+  // Vite injects import.meta.glob; in non-Vite contexts this may be undefined.
+  // @ts-expect-error `glob` is provided by Vite at transform time.
+  if (typeof import.meta.glob !== "function") {
+    return sources;
+  }
+
+  // @ts-expect-error `glob` is provided by Vite at transform time.
+  const modules = import.meta.glob("/public/rules/*.yaml", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }) as Record<string, unknown>;
+
+  for (const [filePath, source] of Object.entries(modules)) {
+    if (typeof source !== "string") continue;
+    const publicPath = filePath.startsWith("/public/") ? filePath.slice("/public".length) : filePath;
+    sources.set(publicPath, source);
+  }
+
+  return sources;
+}
+
+const BUNDLED_RULEPACK_SOURCES = discoverBundledRulepacks();
+const BUNDLED_RULEPACK_CACHE = new Map<string, PlainObject>();
+
+export function listBundledRulepackPaths(): string[] {
+  return [...BUNDLED_RULEPACK_SOURCES.keys()].sort();
+}
+
+export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PATH): PlainObject {
+  const cached = BUNDLED_RULEPACK_CACHE.get(specPath);
+  if (cached) return cached;
+
+  const source = BUNDLED_RULEPACK_SOURCES.get(specPath);
+  if (typeof source !== "string") {
+    const known = listBundledRulepackPaths();
+    throw new Error(
+      `E_RULESET_PATH_UNKNOWN: '${specPath}' is not a bundled ruleset path` +
+        (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+    );
+  }
+
+  const spec = normalizeRuleShape(parseDslSpec(source));
+  assertValidSpec(spec);
+  BUNDLED_RULEPACK_CACHE.set(specPath, spec);
+  return spec;
+}
+
+export const QLATT_V12_CEL_RULEPACK = loadRulepackSpecFromPath(DEFAULT_RULEPACK_PATH);
 export const QLATT_V11_SLICE_RULEPACK = QLATT_V12_CEL_RULEPACK;

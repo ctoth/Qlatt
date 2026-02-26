@@ -20,7 +20,10 @@ type CliIo = {
 };
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_RULEPACK_PATH = path.resolve(SCRIPT_DIR, "../src/declarative-frontend/rule-pack.yaml");
+const DEFAULT_RULEPACK_PATH = path.resolve(
+  SCRIPT_DIR,
+  "../public/rules/frontend.yaml"
+);
 
 function defaultIo(): CliIo {
   return {

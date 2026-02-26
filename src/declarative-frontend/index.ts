@@ -1,12 +1,14 @@
 import { materializePhonemeTarget } from "./inventory";
 import { runRuleEngine, type InventoryResolver } from "./engine";
-import { QLATT_V11_SLICE_RULEPACK } from "./rule-pack";
+import { QLATT_V12_CEL_RULEPACK, loadRulepackSpecFromPath } from "./rule-pack";
 
 type DeclarativeFrontendOptions = {
   includeTrace?: boolean;
   phases?: string[];
   parameters?: Record<string, unknown>;
   inventoryResolver?: InventoryResolver;
+  specSource?: unknown;
+  specPath?: string;
 };
 
 type RuleEngineResult = ReturnType<typeof runRuleEngine>;
@@ -24,7 +26,12 @@ export function runDeclarativeFrontend(
   sequence: Array<Record<string, unknown>>,
   options: DeclarativeFrontendOptions = {}
 ): RuleEngineResult | DeclarativeFrontendSequence {
-  const result = runRuleEngine(sequence, QLATT_V11_SLICE_RULEPACK, {
+  const specSource =
+    options.specSource ??
+    (typeof options.specPath === "string" && options.specPath.length > 0
+      ? loadRulepackSpecFromPath(options.specPath)
+      : QLATT_V12_CEL_RULEPACK);
+  const result = runRuleEngine(sequence, specSource, {
     phases: options.phases,
     parameters: options.parameters,
     inventoryResolver: options.inventoryResolver ?? materializePhonemeTarget,

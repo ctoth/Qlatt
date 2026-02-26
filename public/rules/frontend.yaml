@@ -4,9 +4,25 @@ parameters:
   fall_rate_hz: 20
   stress_rise: 1.15
   question_rise_hz: 30
+  question_rise_ratio: 1.2
+  question_target_floor_hz: 170
+  question_target_ceiling_hz: 190
 streams:
   phone:
     type: base
+    features:
+      type:
+        - vowel
+        - stop
+        - stop_closure
+        - stop_release
+        - stop_aspiration
+        - fricative
+        - affricate
+        - silence
+        - liquid
+        - nasal
+        - glide
     scalars:
       duration:
         unit: ms
@@ -39,6 +55,7 @@ phases:
       - f0_baseline_start
       - f0_targets
       - f0_stress_peak
+      - f0_question_rise_onset
       - f0_question_rise
   - name: finalize
     after:
@@ -51,13 +68,12 @@ phases:
 rules:
   insert_voiceless_stop_release_and_aspiration:
     kind: structural
-    citation: Stevens 1998 Ch.8; Allen et al. 1987 Table C-1
+    citation: Lisker & Abramson 1964 (English long-lag VOT isolated /p/=58, /t/=70, /k/=80 ms; sentence-initial /p/=28, /t/=39, /k/=43 ms); Stevens 1998 Ch.8; Allen et al. 1987 Table C-1
     select:
       stream: phone
       where: >-
-        (current.phoneme == 'P_CL' || current.phoneme == 'T_CL' || current.phoneme == 'K_CL') && (next != null ?
-        !(next.type == 'stop' || next.type == 'stop_closure' || next.type == 'stop_release' || next.type ==
-        'stop_aspiration') : false)
+        current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure',
+        'stop_release', 'stop_aspiration']) : false)
     define:
       rel: >-
         current.phoneme == "P_CL" ? "P_REL" : (current.phoneme == "T_CL" ? "T_REL" : "K_REL")
@@ -68,14 +84,19 @@ rules:
         next_token != null ? next_token.phoneme == "SIL" : false
       rel_target: target(rel)
       asp_target: target(asp)
+      vot_target: 'rel == "P_REL" ? 58 : (rel == "T_REL" ? 70 : 80)'
+      vot_sum: 'rel_target.duration + asp_target.duration'
+      rel_share: 'vot_sum > 0 ? rel_target.duration / vot_sum : 0.5'
+      rel_duration_base: 'vot_target * rel_share'
+      asp_duration_base: 'vot_target - rel_duration_base'
       rel_params: >-
         weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
         10])}) : rel_target.params
       asp_params: >-
         weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH -
         10])}) : asp_target.params
-      rel_duration: 'weak ? max([15, rel_target.duration * 0.5]) : rel_target.duration'
-      asp_duration: 'weak ? max([15, asp_target.duration * 0.5]) : asp_target.duration'
+      rel_duration: 'weak ? max([15, rel_duration_base * 0.5]) : rel_duration_base'
+      asp_duration: 'weak ? max([15, asp_duration_base * 0.5]) : asp_duration_base'
     splice:
       type: replace_range
       range_left: current.sync_right
@@ -112,13 +133,12 @@ rules:
             - punctuationSymbol
   insert_voiced_stop_release:
     kind: structural
-    citation: Stevens 1998 Ch.8; Allen et al. 1987 Table C-1
+    citation: Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position); Stevens 1998 Ch.8; Allen et al. 1987 Table C-1
     select:
       stream: phone
       where: >-
-        (current.phoneme == 'B_CL' || current.phoneme == 'D_CL' || current.phoneme == 'G_CL') && (next != null ?
-        !(next.type == 'stop' || next.type == 'stop_closure' || next.type == 'stop_release' || next.type ==
-        'stop_aspiration') : false)
+        current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure',
+        'stop_release', 'stop_aspiration']) : false)
     define:
       rel: >-
         current.phoneme == "B_CL" ? "B_REL" : (current.phoneme == "D_CL" ? "D_REL" : "G_REL")
@@ -178,9 +198,15 @@ rules:
     apply:
       - field: params.F2
         op: set
-        value: >-
-          cand != null && cand.type == 'vowel' ? ((has(cand.back) && cand.back == true) ? 1200 : (((has(cand.front) &&
-          cand.front == true) || (has(cand.hi) && cand.hi == true)) ? 1900 : 1500)) : 1500
+        dispatch:
+          - when: >-
+              cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)
+            value: 1200
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi)
+              ? cand.hi == true : false))
+            value: 1900
+          - default: 1500
   k_context_rel_copy:
     kind: scalar
     citation: Allen et al. 1987 Ch.11 (velar locus transitions)
@@ -202,11 +228,11 @@ rules:
       - field: duration
         op: set
         value: >-
-          current.punctuationSymbol == ',' ? 150 : ((current.punctuationSymbol == '.' || current.punctuationSymbol ==
-          '?' || current.punctuationSymbol == '!') ? 300 : current.duration)
+          current.punctuationSymbol == ',' ? 150 : (current.punctuationSymbol in ['.', '?', '!'] ? 300 :
+          current.duration)
   vowel_shortening:
     kind: scalar
-    citation: Chen 1970; Wells 1990
+    citation: Klatt 1976; Allen et al. 1987 Ch.9 (postvocalic context duration factors)
     select:
       stream: phone
       where: current.type == 'vowel'
@@ -215,10 +241,21 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: >-
-          n == null ? 1.2 : (n.phoneme == 'SIL' ? 1.2 : ((has(n.voiceless) && n.voiceless == true && (n.type == 'stop'
-          || n.type == 'stop_closure')) ? 0.7 : ((has(n.voiceless) && n.voiceless == true && n.type == 'fricative') ?
-          0.85 : 1)))
+        dispatch:
+          - when: "n == null ? true : n.phoneme == 'SIL'"
+            value: 1.2
+          - when: >-
+              n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')
+            value: 1.6
+          - when: >-
+              n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_release'])
+            value: 1.2
+          - when: "n == null ? false : n.type == 'nasal'"
+            value: 0.85
+          - when: >-
+              n == null ? false : (has(n.voiceless) && n.voiceless == true && n.type in ['stop', 'stop_closure'])
+            value: 0.7
+          - default: 1
         tag: segmental_context
   pre_boundary_lengthening:
     kind: scalar
@@ -235,16 +272,21 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: >-
-          n == null ? 1.4 : ((n.phoneme == 'SIL' && has(n.punctuationSymbol)) ? 1.4 : ((n.phoneme != 'SIL' && cur_word
-          != '' && next_word != '' && cur_word != next_word) ? 1.1 : 1))
+        dispatch:
+          - when: "n == null"
+            value: 1.4
+          - when: "n.phoneme == 'SIL' && has(n.punctuationSymbol)"
+            value: 1.4
+          - when: "n.phoneme != 'SIL' && cur_word != '' && next_word != '' && cur_word != next_word"
+            value: 1.1
+          - default: 1
         tag: boundary
   lock_stop_release_duration:
     kind: scalar
     citation: Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)
     select:
       stream: phone
-      where: current.type == 'stop_release' || current.type == 'stop_aspiration'
+      where: current.type in ['stop_release', 'stop_aspiration']
     apply:
       - field: duration
         op: set
@@ -269,8 +311,7 @@ rules:
       - field: params.SW
         op: set
         value: >-
-          (current.type == 'fricative' || current.type == 'affricate' || current.type == 'stop_release' || current.type
-          == 'stop_aspiration') ? 1 : 0
+          current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0
   f0_baseline_start:
     kind: point
     citation: Pierrehumbert 1980; O'Shaughnessy 1976
@@ -315,14 +356,36 @@ rules:
       tag: f0_stress
   f0_question_rise:
     kind: point
-    citation: Pierrehumbert 1980; Ladd 2008; O'Shaughnessy 1976
+    citation: O'Shaughnessy 1976 (Tune B final rise targets 170-190 Hz and ~20% lift); Pierrehumbert 1980; Ladd 2008
     select:
       stream: phone
       where: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
     define:
       prev_f0: prev_point('f0')
+      prior_f0_hz: 'prev_f0 == null ? params.base_f0 : prev_f0.value'
+      rise_target_hz: >-
+        max([prior_f0_hz + params.question_rise_hz, prior_f0_hz * params.question_rise_ratio,
+        params.question_target_floor_hz])
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: '(prev_f0 == null ? params.base_f0 : prev_f0.value) + params.question_rise_hz'
+      value: >-
+        rise_target_hz > params.question_target_ceiling_hz ? params.question_target_ceiling_hz :
+        rise_target_hz
       tag: f0_question
+  f0_question_rise_onset:
+    kind: point
+    citation: O'Shaughnessy 1976 (rise begins before final boundary); Pierrehumbert 1980; Ladd 2008 Ch.5
+    select:
+      stream: phone
+      where: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
+    define:
+      last_stress: >-
+        look_back_where(current, 8, "current.type == 'vowel' && has(current.stress) && current.stress == 1")
+      prev_f0: prev_point('f0')
+    constraint: 'last_stress != null'
+    insert_point:
+      stream: f0
+      at: at_ratio(last_stress, 0.8)
+      value: 'prev_f0 == null ? params.base_f0 : prev_f0.value'
+      tag: f0_question_onset

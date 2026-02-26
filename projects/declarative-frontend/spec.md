@@ -1,4 +1,4 @@
-# Declarative TTS Frontend DSL v11
+# Declarative TTS Frontend DSL v12
 
 
 
@@ -345,7 +345,7 @@ enum TokenStatus { UNKNOWN = 0, ACTIVE = 1, SUPPRESSED = 2 }
 
 **Base stream adjacency:**
 
-Base tokens form an ordered sequence by list position. **ACTIVE** tokens define the effective base stream for matching, selection, and output. Adjacency is defined by list position (`$prev`/`$next`) among ACTIVE tokens, NOT by shared sync mark IDs. Tokens may share a boundary sync mark or have distinct marks at the same order position. The **base coverage invariant** applies to ACTIVE tokens only: in order-space, ACTIVE base tokens must partition `[START, END]` with no gaps or overlaps. In time-space (after `COMPUTE TIMES`), times must be monotonically non-decreasing.
+Base tokens form an ordered sequence by list position. **ACTIVE** tokens define the effective base stream for matching, selection, and output. Adjacency is defined by list position (`prev`/`next` cursor fields) among ACTIVE tokens, NOT by shared sync mark IDs. Tokens may share a boundary sync mark or have distinct marks at the same order position. The **base coverage invariant** applies to ACTIVE tokens only: in order-space, ACTIVE base tokens must partition `[START, END]` with no gaps or overlaps. In time-space (after `COMPUTE TIMES`), times must be monotonically non-decreasing.
 
 
 
@@ -417,218 +417,235 @@ Only the compressible portion `(D_i - D_min)` scales. This prevents unnaturally 
 
 
 
-## Part 2: Expression Language (JSONata)
+## Part 2: Expression Language (CEL + Typed Cursor)
 
+Expressions use [CEL (Common Expression Language)](https://github.com/google/cel-spec). CEL is non-Turing-complete, terminating, and side-effect free, which preserves deterministic rule evaluation while adding static type checking.
 
+### 2.1 CEL
 
-Expressions use [JSONata](https://jsonata.org).
+CEL provides:
 
+- Static type checking against declared stream schemas.
+- Deterministic evaluation (no async, no side effects).
+- `==` for equality.
+- No silent undefined propagation; invalid field/type access is a compile-time validation error.
 
-
-### 2.1 Evaluation Model
-
-
-
-**Data root model:** The context is passed as the data root. Expressions access fields directly without `$` prefix.
-
-
-
-```javascript
-
-// Context for select rules:
-
-{
-
-  "current": { "name": "æ", "f": {...}, "s": {...} },
-
-  "params": { "stress_factor": 1.3 }
-
-}
-
-
-
-// Expression (note: no $ on current/params):
-
-"current.f.manner = 'vowel'"
-
+```yaml
+# Feature check
+where: 'current.f.manner == "vowel"'
 ```
 
+### 2.2 Typed Cursor
 
+Before CEL evaluates any expression, a **typed cursor** materializes evaluation context from stream topology + schema declarations.
 
-**Registered functions** use `$` prefix:
+The cursor:
 
+1. Reads topology declaration (`hierarchy: [phrase, word, syllable, phone]`).
+2. Walks hierarchy for each token position.
+3. Emits a typed nested object where navigation is field access.
 
+Before (legacy function-style navigation):
 
-```javascript
-
-"$parent(current, 'syllable').f.stress = 1"
-
-"$next(current).f.manner"
-
+```yaml
+value: 'parent(current, "syllable").f.stress == 1 ? params.stress_factor : 1.0'
 ```
 
+After (cursor field access):
 
+```yaml
+value: 'current.syllable.f.stress == 1 ? params.stress_factor : 1.0'
+```
 
-### 2.2 Expression Context
+Navigation is context materialization, not runtime tree walking:
 
+```yaml
+# Legacy style
+constraint: 'parent(d, "word").id != parent(j, "word").id'
 
+# CEL + cursor
+constraint: 'd.word.id != j.word.id'
+```
 
-Expressions receive a **TokenView** facade, not the raw token model:
+### 2.3 Expression Context
 
-
+Expressions receive a typed `TokenView` facade, not the raw token model.
 
 ```typescript
-
 interface TokenView {
-
   id: string;
-
   name: string;
-
   status: TokenStatus;
-
-  f: Record<string, Value>;           // features (alias for features)
-
+  f: Record<string, Value>;           // features
   s: Record<string, number | null>;   // resolved scalar values
-
   sync_left: SyncMarkId;
-
   sync_right: SyncMarkId;
-
   parent: TokenId | null;
 
+  // Materialized hierarchy fields (typed by topology)
+  syllable?: TokenView;
+  word?: TokenView;
+  phrase?: TokenView;
 }
-
 ```
-
-
 
 **Mapping from internal model:**
 
-\- `t.f` → `t.features`
-
-\- `t.s.duration` → `t.scalars.duration.resolved ?? t.scalars.duration.base`
-
-\- `t.status` → `t.status`
-
-\- Raw `ScalarState` objects are not exposed (use tracing for debugging)
-
-
+- `t.f` -> `t.features`
+- `t.s.duration` -> `t.scalars.duration.resolved ?? t.scalars.duration.base`
+- Raw `ScalarState` objects are not exposed (use tracing for debugging)
 
 **Select rules:**
 
-```javascript
-
-{
-
-  "current": TokenView,
-
-  "params": Record<string, Value>
-
+```typescript
+interface SelectContext {
+  current: TokenView;
+  prev: TokenView | null;        // previous ACTIVE token in stream
+  next: TokenView | null;        // next ACTIVE token in stream
+  prev2?: TokenView | null;      // optional 2-step previous ACTIVE token
+  next2?: TokenView | null;      // optional 2-step next ACTIVE token
+  current_index?: number;        // optional zero-based index
+  phrase_index?: number;         // optional phrase-relative position
+  phrase_total?: number;         // optional phrase-relative total count
+  params: Record<string, Value>;
 }
-
 ```
-
-
 
 **Pattern rules:**
 
-```javascript
-
-{
-
-  "stop": TokenView,      // capture name
-
-  "son": TokenView,       // capture name
-
-  "current": TokenView,   // current step being evaluated (in where clauses)
-
-  "params": Record<string, Value>
-
+```typescript
+interface PatternContext {
+  current: TokenView;            // current step in sequence where-clauses
+  params: Record<string, Value>;
+  [captureName: string]: TokenView | Record<string, Value>;
 }
-
 ```
 
+### 2.4 Registered Functions (Minimal CEL Profile)
 
+Only functions that cannot be represented as cursor field access are registered:
 
-### 2.3 Registered Functions
+| Function | Signature | Notes |
+|----------|-----------|-------|
+| `midpoint(t)` | `TokenView -> Anchor` | Midpoint anchor. |
+| `at_ratio(t, r)` | `(TokenView, double) -> Anchor` | Anchor at ratio. |
+| `at_sync(s)` | `SyncMarkId -> Anchor` | Anchor at sync mark. |
+| `prev_point(stream)` | `string -> PointToken \| null` | Previous ACTIVE point in stream order. |
+| `total(stream)` | `string -> int` | Count of ACTIVE tokens in stream. |
+| `target(phoneme)` | `string -> map` | Inventory lookup. MUST return a plain CEL map (e.g., `{"params": {...}}`). |
 
+Optional extension (only if association rules are used in expressions):
 
+| Function | Signature | Notes |
+|----------|-----------|-------|
+| `assoc(t, name)` | `(TokenView, string) -> list<TokenView>` | Association lookup over ACTIVE edges. |
 
-| Function | Returns |
+Navigation formerly expressed as functions is now cursor data:
 
-|----------|---------|
+- Previous token: `prev`
+- Next token: `next`
+- Bounded lookahead/lookbehind: `prev2`, `next2` (optional)
+- Parent lookup: `t.syllable`, `t.word`, `t.phrase`
+- Index lookup: `current_index` (if provided by implementation)
+- Phrase-relative helpers: `phrase_index`, `phrase_total` (if provided by implementation)
 
-| `$prev(t)` | Token \\| null |
+### 2.5 Nullability
 
-| `$next(t)` | Token \\| null |
+In the typed model, nullable expression values are limited to:
 
-| `$prev_sibling(t)` | Token \\| null |
+- `prev` / `next` at stream boundaries.
+- `prev_point(stream)` when no prior point exists.
+- Hierarchy fields when a token truly has no parent in that stream.
 
-| `$next_sibling(t)` | Token \\| null |
+Use CEL `has()` for these boundary/null checks:
 
-| `$parent(t, stream)` | Token \\| null |
+```cel
+has(prev) && prev.f.manner == "stop"
+```
 
-| `$children(t, stream)` | Token[] |
+Feature access on typed streams is otherwise non-nullable. Access to undeclared fields is a compile-time error.
 
-| `$assoc(t, name)` | Token[] |
+### 2.6 Static Validation
 
-| `$spanning(t, stream)` | Token[] |
+At VALIDATE, every CEL expression is compiled against declared stream schemas and expression context types.
 
-| `$index(t)` | number |
+Compile-time errors include:
 
-| `$total(stream)` | number |
+- Undeclared feature/scalar names.
+- Type mismatches (e.g., string vs number comparisons).
+- Invalid stream names in `total()` / `prev_point()`.
+- Unknown identifiers/functions.
 
-| `$midpoint(t)` | Anchor |
+Expression compile/type diagnostics use `E_CEL_INVALID` (Part 9).
 
-| `$at_ratio(t, r)` | Anchor |
+### 2.7 Expression Syntax in YAML
 
-| `$at_sync(s)` | Anchor |
-
-| `$prev_point(stream)` | PointToken \\| null |
-
-| `$next_point(stream)` | PointToken \\| null |
-
-**Navigation filtering (normative):** All navigation helpers (`$prev`, `$next`, `$parent`, `$children`, `$assoc`, `$spanning`) operate over **ACTIVE** tokens only. Suppressed tokens remain in the internal model for provenance but are excluded from expression-level navigation.
-
-**Function notes (selected):**
-
-| Function | Notes |
-|----------|-------|
-| `$spanning(t, stream)` | Returns interval tokens in `stream` that fully contain `t` (interval containment by order). Ordered by `(sync_left.order, sync_right.order, id)`. |
-| `$midpoint(t)` | Returns an `Anchor` at the midpoint; uses time if resolved, otherwise rank interpolation (time remains null). |
-| `$prev_point(stream)` | Returns the immediately previous **ACTIVE** point in `stream` ordered by `time` if resolved, otherwise by `(anchor_left.order, anchor_right.order, ratio, id)`. |
-| `$next_point(stream)` | Returns the immediately next **ACTIVE** point in `stream` ordered by `time` if resolved, otherwise by `(anchor_left.order, anchor_right.order, ratio, id)`. |
-
-
-
-### 2.4 Undefined Handling
-
-
-
-JSONata's native `undefined` propagation applies:
-
-\- `undefined.field` → `undefined`
-
-\- `undefined = x` → `false`
-
-\- Arithmetic with `undefined` → `undefined` → comparison fails
-
-
-
-This is correct for sparse linguistic features.
-
-
-
-### 2.5 Examples
+Rule expression fields use CEL syntax:
 
 ```yaml
-# Feature check (select rule)
-where: "current.f.manner = 'vowel'"
+# String literal expression
+name: '"dʒ"'
 
-# Parent navigation with parameter
-value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
+# Concatenation
+name: 'stop.name + "_rel"'
+
+# Equality
+where: 'current.f.manner == "vowel"'
 ```
+
+Conventions:
+
+- Equality: `==`
+- String concatenation: `+`
+- Booleans: `&&`, `||`, `!`
+- Strings: double quotes inside CEL expressions
+- YAML style: prefer folded blocks (`>-`) for long expressions or expressions containing many nested string literals.
+
+### 2.8 YAML-Level Bindings (`define:`)
+
+CEL has no portable let-binding syntax in this profile. Rules may define reusable CEL bindings at YAML level:
+
+```yaml
+define:
+  rel: 'current.name == "P_CL" ? "P_REL" : current.name == "T_CL" ? "T_REL" : "K_REL"'
+  t: 'target(rel)'
+apply:
+  - field: F2
+    op: set
+    value: 't.params.F2'
+    tag: release
+```
+
+`define:` is evaluated once per rule firing, top-to-bottom. Each binding is visible to later bindings and all expression fields (`constraint`, `apply`, `splice.insert`, `insert_point`) in that same rule firing.
+
+### 2.9 Multi-Step Lookahead
+
+This profile defines **bounded cursor depth = 2** for adjacency navigation:
+
+- Guaranteed: `prev`, `next`
+- Optional but supported by this implementation profile: `prev2`, `next2`
+- Not part of the profile: `prev3`, `next3`, or arbitrary chained depth
+
+Rules that need lookahead/lookbehind deeper than 2 SHOULD be rewritten as pattern rules with explicit captures.
+
+### 2.10 Runtime Portability Note (Informative)
+
+Prototype investigation (`notes/cel-runtime-notes.md`) and the existing interpreter CEL evaluator (`src/semantics/cel-evaluator.ts`) show the portable profile is:
+
+- Pre-materialized object context.
+- Global function registration (no receiver-style methods).
+- No CEL let-binding extensions.
+
+This specification is written to that portable profile.
+
+### 2.11 Acid-Test Coverage (Informative)
+
+The English rulepack stress-cases are representable in this model:
+
+- Stop release + aspiration insertion: use `next`, `target()`, and rule-level `define`.
+- Inventory parameter reuse across multiple insert/effect fields: compute once in `define`, reuse in CEL fields.
+
+**OPEN QUESTION:** Phrase-relative position helpers used by some F0 rules (`phrase_index`, `phrase_total`) can be modeled either as cursor fields or as registered functions. v12 does not yet mandate one form.
 ## Part 3: Stream Definitions
 
 
@@ -817,7 +834,7 @@ def rebuild_span_boundaries(span_stream, child_stream):
 
 ```
 
-**Empty span collapse policy:** When a span becomes empty, `sync_right` is set equal to `sync_left` (not the other way around). This preserves the span's left boundary position for provenance. Empty spans may be selected/matched; `$children()` returns `[]`.
+**Empty span collapse policy:** When a span becomes empty, `sync_right` is set equal to `sync_left` (not the other way around). This preserves the span's left boundary position for provenance. Empty spans may be selected/matched; child queries return `[]`.
 
 
 
@@ -869,11 +886,11 @@ patterns:
 
       - capture: stop
 
-        where: "current.f.manner = 'stop'"
+        where: 'current.f.manner == "stop"'
 
       - capture: son
 
-        where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
+        where: 'current.f.manner in ["vowel", "nasal", "liquid", "glide"]'
 
   voiceless_stop_before_vowel:
 
@@ -885,11 +902,11 @@ patterns:
 
       - capture: stop
 
-        where: "current.f.manner = 'stop' and current.f.voicing = 'voiceless'"
+        where: 'current.f.manner == "stop" && current.f.voicing == "voiceless"'
 
       - capture: v
 
-        where: "current.f.manner = 'vowel'"
+        where: 'current.f.manner == "vowel"'
 
   vowel_before_obstruent:
 
@@ -901,11 +918,11 @@ patterns:
 
       - capture: v
 
-        where: "current.f.manner = 'vowel'"
+        where: 'current.f.manner == "vowel"'
 
       - capture: obs
 
-        where: "current.f.manner in ['stop', 'fricative', 'affricate']"
+        where: 'current.f.manner in ["stop", "fricative", "affricate"]'
 
   consonant_vowel:
 
@@ -917,11 +934,11 @@ patterns:
 
       - capture: c
 
-        where: "current.f.manner in ['stop', 'fricative', 'affricate', 'nasal', 'liquid', 'glide']"
+        where: 'current.f.manner in ["stop", "fricative", "affricate", "nasal", "liquid", "glide"]'
 
       - capture: v
 
-        where: "current.f.manner = 'vowel'"
+        where: 'current.f.manner == "vowel"'
 
 ```
 
@@ -959,13 +976,13 @@ patterns:
 
       - capture: d
 
-        where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
+        where: 'current.f.manner == "stop" && current.f.place == "alveolar" && current.f.voicing == "voiced"'
 
       - capture: j
 
-        where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
+        where: 'current.f.manner == "glide" && current.f.place == "palatal"'
 
-    constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
+    constraint: 'd.word.id != j.word.id'
 
 ```
 
@@ -993,7 +1010,7 @@ patterns:
 
       - capture: final
 
-        where: "$next(current) = null"
+        where: '!has(next)'
 
 ```
 
@@ -1113,27 +1130,27 @@ interface TokenSpec {
 }
 ```
 
-**Expression syntax:** Any string field in TokenSpec (or Effect values, or other polymorphic contexts) is a JSONata expression evaluated at runtime. Use string literals explicitly (e.g., `"'dʒ'"`) if a literal string is required.
+**Expression syntax:** TokenSpec expression fields (`name`, expression-valued feature/scalar entries, and expression-valued `parent`) use CEL and are evaluated at runtime. String literals inside CEL expressions use double quotes.
 
 Examples:
 ```yaml
 # Literal phoneme name
-name: "'dʒ'"
+name: '"dʒ"'
 
 # Expression: concatenate stop name with suffix
-name: "stop.name & '_rel'"
+name: 'stop.name + "_rel"'
 
 # Literal feature value
-features: { place: "'alveolar'" }
+features: { place: '"alveolar"' }
 
 # Expression: copy feature from captured token
 features: { place: "stop.f.place" }
 
 # Literal parent reference
-parent: "'syllable_42'"
+parent: '"syllable_42"'
 
 # Expression: compute parent
-parent: "$parent(stop, 'syllable').id"
+parent: 'stop.syllable.id'
 ```
 
 This convention enables unambiguous parsing, LSP support, and validation.
@@ -1271,7 +1288,7 @@ def resolve_points(point_stream, context_map):
         # Evaluate deferred value
         if pt.value_expr:
             ctx = context_map[pt.id]
-            pt.value = jsonata_evaluate(pt.value_expr, ctx)
+            pt.value = cel_evaluate(pt.value_expr, ctx)
 ```
 
 **Deferred expression restrictions:**
@@ -1281,19 +1298,19 @@ Deferred expressions (in `value_expr`) may reference:
 - Token features (`current.f.*`)
 - Resolved scalar values (`current.s.*`)
 - Sync mark times (`current.sync_left.time`)
-- Navigation functions (`$parent`, `$next`, etc.)
+- Cursor fields (`current.syllable`, `prev`, `next`, etc.)
 - Parameters (`params.*`)
 
 Deferred expressions may **NOT** reference:
 
-- Other point token values **except** via `$prev_point` / `$next_point` within the **same** point stream
+- Other point token values **except** via `prev_point` within the **same** point stream
 - Unresolved scalars (must use resolved values)
 
 **Point dependency constraints (normative):**
 
-- `$prev_point` and `$next_point` are permitted only within point rules for the **same stream**.
-- Implementations MUST evaluate point values in deterministic stream order (as defined in §0.2) so that `$prev_point` is always resolved when referenced.
-- If `$next_point` is referenced, implementations MUST either:
+- `prev_point` is permitted only within point rules for the **same stream**.
+- Implementations MUST evaluate point values in deterministic stream order (as defined in §0.2) so that `prev_point` is always resolved when referenced.
+- If an implementation enables non-core forward references (e.g., `next_point`), it MUST either:
   - Reject at validation with `E_POINT_FWD_REF`, or
   - Defer evaluation with a second pass until all points are resolved.
   - This choice MUST be fixed for the implementation and documented.
@@ -1342,7 +1359,8 @@ interface Rule {
 
   // Optional:
 
-  constraint?: string;            // additional JSONata filter (post-match)
+  define?: Record<string, string>; // CEL bindings, evaluated once per firing (top-to-bottom)
+  constraint?: string;             // additional CEL filter (post-match)
 
   
 
@@ -1373,7 +1391,7 @@ interface Effect {
 
   op: 'set' | 'mul' | 'add';
 
-  value: string;                 // JSONata expression (use string literals explicitly)
+  value: string;                 // CEL expression
 
   tag: string;                   // provenance tag
 
@@ -1393,6 +1411,8 @@ interface AssocSpec {
 ```
 
 **Effect target defaulting:** If `target` is omitted, it defaults to `'current'`. For pattern rules, `target` may reference any capture name (e.g., `'v'`, `'stop'`).
+
+**Define binding scope (normative):** `define` is rule-level. Bindings are evaluated once per rule firing, top-to-bottom, and are available to subsequent bindings plus all expression fields in the same firing (`constraint`, `apply`, `splice.insert`, `insert_point`).
 
 **Constraint evaluation timing:**
 
@@ -1424,11 +1444,11 @@ rules:
     citation: "Klatt 1976 §III.B"
     select:
       stream: phone
-      where: "current.f.manner = 'vowel'"
+      where: 'current.f.manner == "vowel"'
     apply:
       - field: duration
         op: mul
-        value: "params.stress_factor"
+        value: 'params.stress_factor'
         tag: stress
 ```
 ### 6.2 Pattern Rules with Splice
@@ -1445,8 +1465,8 @@ rules:
       boundary: stop.sync_right
       side: after
       insert:
-        - name: "stop.name & '_rel'"
-          parent: "$parent(stop, 'syllable').id"
+        - name: 'stop.name + "_rel"'
+          parent: 'stop.syllable.id'
 
   # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
   coalesce_dj:
@@ -1458,8 +1478,8 @@ rules:
       range_right: j.sync_right
       suppress: [d, j]
       insert:
-        - name: "'dʒ'"
-          parent: "$parent(d, 'syllable').id"
+        - name: '"dʒ"'
+          parent: 'd.syllable.id'
 ```
 ### 6.3 Point Insertion
 
@@ -1471,23 +1491,23 @@ rules:
     citation: "Pierrehumbert 1980"
     select:
       stream: phone
-      where: "current.f.manner = 'vowel'"
+      where: 'current.f.manner == "vowel"'
     insert_point:
       stream: f0
-      at: "$midpoint(current)"
-      value: "params.base_f0"
+      at: 'midpoint(current)'
+      value: 'params.base_f0'
       tag: f0
 
-  # Question rise on final boundary (requires $prev_point)
+  # Question rise on final boundary (requires prev_point)
   question_rise:
     citation: "Ladd 2008 Ch.5"
     select:
       stream: phrase
-      where: "current.f.boundary = 'question'"
+      where: 'current.f.boundary == "question"'
     insert_point:
       stream: f0
-      at: "$at_sync(current.sync_right)"
-      value: "$prev_point('f0').value + params.question_rise_hz"
+      at: 'at_sync(current.sync_right)'
+      value: 'prev_point("f0").value + params.question_rise_hz'
       tag: f0
 ```
 ### 6.4 Formant Rules
@@ -1503,7 +1523,7 @@ rules:
       - target: c
         field: F2
         op: set
-        value: "params.locus[c.f.place] + params.slope[c.f.place] * v.s.F2"
+        value: 'params.locus[c.f.place] + params.slope[c.f.place] * v.s.F2'
         tag: locus
 ```
 ### 6.5 Source Rules
@@ -1516,11 +1536,11 @@ rules:
     citation: "Stevens 1971"
     select:
       stream: phone
-      where: "current.f.manner = 'fricative'"
+      where: 'current.f.manner == "fricative"'
     apply:
       - field: AF
         op: set
-        value: "current.f.voicing = 'voiced' ? 50 : 60"
+        value: 'current.f.voicing == "voiced" ? 50 : 60'
         tag: frication
 ```
 ### 6.6 Suppression (Non-Base)
@@ -1543,7 +1563,7 @@ rules:
 
       stream: tone
 
-      where: "current.f.floating = true"
+      where: 'current.f.floating == true'
 
     suppress: true
 
@@ -1802,8 +1822,8 @@ rendering:
 | E_TIME_NO_BASE_SUPPORT | sync mark cannot be enclosed by any base interval | sync mark |
 | E_FINALIZE_DIRTY | structural rewrite attempted after finalize | engine |
 | E_INVALID_RATIO | point ratio not in [0,1] | point token |
-| E_POINT_FWD_REF | point value references unresolved `$next_point` | point rule |
-| E_JSONATA_INVALID | expression parse/eval error at compile time | rule |
+| E_POINT_FWD_REF | point value references unresolved `next_point` | point rule |
+| E_CEL_INVALID | expression parse/type error at compile time | rule |
 | E_PHASE_ORDER_VIOLATION | phases violate declared order constraints | phases |
 | E_SPLICE_CONFLICT | overlapping splices in strict mode | rule/rewrite |
 
@@ -1855,209 +1875,118 @@ Detailed trace formats and debugger protocols are documented in `projects/declar
 
 ## Appendix A: Complete Example
 
+Migration quick-reference (legacy syntax -> CEL):
 
+| Legacy | CEL |
+|--------|-----|
+| `=` (equality) | `==` |
+| `&` (string concat) | `+` |
+| `and` / `or` | `&&` / `\|\|` |
+| `parent(t, "stream")` | `t.stream` (cursor field) |
+| `next(current)` / `prev(current)` | `next` / `prev` |
+| `midpoint(t)` | `midpoint(t)` |
+| `at_ratio(t, r)` | `at_ratio(t, r)` |
+| `at_sync(s)` | `at_sync(s)` |
+| `index(current)` | `current_index` |
+| `total("stream")` | `total("stream")` |
+| `prev_point("f0")` | `prev_point("f0")` |
+| `exists(x)` | `has(x)` |
+| local let-binding | YAML `define:` |
 
 ```yaml
 
 include: [streams.yaml]
 
-
-
 parameters:
-
-  stress_factor: 1.3      # Klatt 1976: stressed ~1.3x unstressed
-
-  clipping_factor: 0.6    # Chen 1970: ~60% before voiceless
-
-  base_f0: 110            # typical male fundamental
-
-
+  stress_factor: 1.3
+  clipping_factor: 0.6
+  base_f0: 110
 
 patterns:
-
   stop_before_sonorant:
-
     stream: phone
-
     scope: syllable
-
     max_lookahead: 20
-
     sequence:
-
       - capture: stop
-
-        where: "current.f.manner = 'stop'"
-
+        where: 'current.f.manner == "stop"'
       - capture: son
-
-        where: "current.f.manner in ['vowel', 'nasal', 'liquid', 'glide']"
-
-
+        where: 'current.f.manner in ["vowel", "nasal", "liquid", "glide"]'
 
   d_j_coalescence:
-
     stream: phone
-
     scope: phrase
-
     cross_boundary: true
-
     sequence:
-
       - capture: d
-
-        where: "current.f.manner = 'stop' and current.f.place = 'alveolar' and current.f.voicing = 'voiced'"
-
+        where: 'current.f.manner == "stop" && current.f.place == "alveolar" && current.f.voicing == "voiced"'
       - capture: j
-
-        where: "current.f.manner = 'glide' and current.f.place = 'palatal'"
-
-    constraint: "$parent(d, 'word').id != $parent(j, 'word').id"
-
-
+        where: 'current.f.manner == "glide" && current.f.place == "palatal"'
+    constraint: 'd.word.id != j.word.id'
 
 phases:
-
   - name: sandhi
-
     rules: [coalesce_dj]
-
-
-
   - name: allophonic
-
     rules: [insert_release]
-
-
-
   - name: duration
-
     rules: [stress_lengthening]
-
     resolve_scalars: [duration]
-
-
-
   - name: prosody
-
     rules: [f0_targets]
-
-
   - name: finalize
-
     after: [duration, prosody]
-
     compute_times: true
-
     resolve_points: [f0]
 
-
-
 rules:
-
-  # Cruttenden 2014 §10.3: yod coalescence /dj/ → /dʒ/
-
   coalesce_dj:
-
     citation: "Cruttenden 2014 §10.3"
-
     match: d_j_coalescence
-
     splice:
-
       type: replace_range
-
       range_left: d.sync_left
-
       range_right: j.sync_right
-
       suppress: [d, j]
-
       insert:
-
-        - name: "'dʒ'"
-
-          parent: "$parent(d, 'syllable').id"
-
-
-
-  # Stevens 1998 Ch.8: stop release burst modeling
+        - name: '"dʒ"'
+          parent: 'd.syllable.id'
 
   insert_release:
-
     citation: "Stevens 1998 Ch.8"
-
     match: stop_before_sonorant
-
     splice:
-
       type: insert_at_boundary
-
       boundary: stop.sync_right
-
       side: after
-
       insert:
-
-        - name: "stop.name \& '_rel'"
-          parent: "$parent(stop, 'syllable').id"
-
-
-
-  # Klatt 1976 §III.B: stressed vowels longer
+        - name: 'stop.name + "_rel"'
+          parent: 'stop.syllable.id'
 
   stress_lengthening:
-
     citation: "Klatt 1976 §III.B"
-
     select:
-
       stream: phone
-
-      where: "current.f.manner = 'vowel'"
-
+      where: 'current.f.manner == "vowel"'
     apply:
-
       - field: duration
-
         op: mul
-
-        value: "$parent(current, 'syllable').f.stress = 1 ? params.stress_factor : 1"
-
+        value: 'current.syllable.f.stress == 1 ? params.stress_factor : 1.0'
         tag: stress
 
-
-
-  # Pierrehumbert 1980: F0 targets at vowel midpoints with declination
-
   f0_targets:
-
     citation: "Pierrehumbert 1980"
-
     select:
-
       stream: phone
-
-      where: "current.f.manner = 'vowel'"
-
+      where: 'current.f.manner == "vowel"'
     insert_point:
-
       stream: f0
-
-      at: "$midpoint(current)"
-
-      value: "params.base_f0 \* (1.1 - 0.2 \* $index(current) / $total('phone'))"
-
+      at: 'midpoint(current)'
+      value: 'params.base_f0 * (1.1 - 0.2 * double(current_index) / double(total("phone")))'
       tag: f0
-
 ```
 
-
-
 ---
-
-
 
 ## Appendix B: Glossary
 
@@ -2084,7 +2013,7 @@ rules:
 
 | Klatt resolution | Duration with incompressibility floor |
 
-| JSONata | Expression language (data-root model, $ for registered functions) |
+| CEL | Expression language with typed cursor context and static validation |
 
 
 
@@ -2093,6 +2022,10 @@ rules:
 
 
 ## Appendix C: References
+
+### Expression Language
+
+**Google CEL Project.** (n.d.). *Common Expression Language Specification*. https://github.com/google/cel-spec
 
 
 

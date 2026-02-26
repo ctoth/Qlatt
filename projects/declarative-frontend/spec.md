@@ -626,7 +626,12 @@ This profile defines **bounded cursor depth = 2** for adjacency navigation:
 - Optional but supported by this implementation profile: `prev2`, `next2`
 - Not part of the profile: `prev3`, `next3`, or arbitrary chained depth
 
-Rules that need lookahead/lookbehind deeper than 2 SHOULD be rewritten as pattern rules with explicit captures.
+For deeper navigation, use helper functions:
+
+- `ahead(current, n)` for `n`-step lookahead
+- `behind(current, n)` for `n`-step lookbehind
+
+Rules that need complex structural context beyond local traversal SHOULD still be rewritten as pattern rules with explicit captures.
 
 ### 2.10 Runtime Portability Note (Informative)
 
@@ -1127,8 +1132,12 @@ interface TokenSpec {
   features?: Record<string, Value>;
   scalars?: Record<string, { base?: number; floor?: number }>;
   parent?: TokenId | string | 'inherit_left';  // default: inherit_left
+  copy_from?: Expr<TokenView>;                  // optional source token/object expression
+  copy_fields?: string[];                       // optional field subset, null if missing
 }
 ```
+
+`copy_from` + `copy_fields` are optional shorthand for splice insertion templates. They copy selected fields from a source token/object with null-on-missing semantics before explicit template fields are applied.
 
 **Expression syntax:** TokenSpec expression fields (`name`, expression-valued feature/scalar entries, and expression-valued `parent`) use CEL and are evaluated at runtime. String literals inside CEL expressions use double quotes.
 

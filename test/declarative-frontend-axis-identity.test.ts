@@ -72,7 +72,7 @@ describe("declarative frontend SyncAxis identity", () => {
       streams: { phone: { type: "base" } },
       rules: {
         insert_release: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -81,7 +81,7 @@ describe("declarative frontend SyncAxis identity", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },

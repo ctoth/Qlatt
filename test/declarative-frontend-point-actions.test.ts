@@ -17,11 +17,11 @@ describe("declarative frontend point actions and helpers", () => {
       },
       rules: {
         f0_targets: {
-          select: { stream: "phone", where: "current.type = 'vowel'" },
+          select: { stream: "phone", where: "current.type == 'vowel'" },
           insert_point: {
             stream: "f0",
-            at: "$midpoint(current)",
-            value: "params.base_f0 + $index(current)",
+            at: "midpoint(current)",
+            value: "params.base_f0 + current_index",
             tag: "f0",
           },
         },
@@ -69,7 +69,7 @@ describe("declarative frontend point actions and helpers", () => {
     expect(points[1].value).toBe(102);
   });
 
-  it("supports $at_ratio and $at_sync anchor helpers", () => {
+  it("supports at_ratio and at_sync anchor helpers", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = endOrder();
@@ -78,19 +78,19 @@ describe("declarative frontend point actions and helpers", () => {
       streams: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         ratio_point: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           insert_point: {
             stream: "f0",
-            at: "$at_ratio(current, 0.25)",
+            at: "at_ratio(current, 0.25)",
             value: "120",
             tag: "f0",
           },
         },
         sync_point: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
           insert_point: {
             stream: "f0",
-            at: "$at_sync(current.sync_right)",
+            at: "at_sync(current.sync_right)",
             value: "130",
             tag: "f0",
           },
@@ -113,7 +113,7 @@ describe("declarative frontend point actions and helpers", () => {
     expect(points[1].ratio).toBe(0);
   });
 
-  it("supports point navigation helpers and spanning helper", () => {
+  it("supports prev_point and total helpers", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = endOrder();
@@ -126,32 +126,35 @@ describe("declarative frontend point actions and helpers", () => {
       },
       rules: {
         insert_a: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           insert_point: {
             stream: "f0",
-            at: "$midpoint(current)",
+            at: "midpoint(current)",
             value: "100",
             tag: "f0",
           },
         },
         insert_b: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
+          define: {
+            prev_f0: "prev_point('f0')",
+          },
           insert_point: {
             stream: "f0",
-            at: "$midpoint(current)",
-            value: "$prev_point('f0').value + 10",
+            at: "midpoint(current)",
+            value: "prev_f0 == null ? 100 : prev_f0.value + 10",
             tag: "f0",
           },
         },
-        mark_spanned: {
+        mark_total: {
           select: {
             stream: "phone",
-            where: "$count($spanning(current, 'word')) = 1 and $next_point('f0').value = 100",
+            where: "total('word') == 1",
           },
           apply: [{ field: "duration", op: "add", value: "5", tag: "span" }],
         },
       },
-      phases: [{ name: "prosody", rules: ["insert_a", "insert_b", "mark_spanned"] }],
+      phases: [{ name: "prosody", rules: ["insert_a", "insert_b", "mark_total"] }],
     };
 
     const input = [
@@ -181,7 +184,7 @@ describe("declarative frontend point actions and helpers", () => {
       },
       rules: {
         invalid_ratio: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           insert_point: {
             stream: "f0",
             at: { anchor_left: s0, anchor_right: s1, ratio: 1.2 },

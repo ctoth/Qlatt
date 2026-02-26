@@ -17,8 +17,8 @@ describe("declarative frontend splice actions", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },
@@ -70,7 +70,7 @@ describe("declarative frontend splice actions", () => {
         add_release: {
           select: {
             stream: "phone",
-            where: "current.id = 'p1'",
+            where: "current.id == 'p1'",
           },
           splice: {
             type: "insert_at_boundary",
@@ -104,7 +104,7 @@ describe("declarative frontend splice actions", () => {
         add_preboundary: {
           select: {
             stream: "phone",
-            where: "current.id = 'p2'",
+            where: "current.id == 'p2'",
           },
           splice: {
             type: "insert_at_boundary",
@@ -138,7 +138,10 @@ describe("declarative frontend splice actions", () => {
         add_release: {
           select: {
             stream: "phone",
-            where: "current.id = 'p1'",
+            where: "current.id == 'p1'",
+          },
+          define: {
+            rel: "target('REL')",
           },
           splice: {
             type: "insert_at_boundary",
@@ -147,9 +150,9 @@ describe("declarative frontend splice actions", () => {
             insert: [
               {
                 name: "'REL'",
-                type: "$target('REL').type",
-                duration: "$target('REL').duration",
-                params: "$target('REL').params",
+                type: "rel.type",
+                duration: "rel.duration",
+                params: "rel.params",
               },
             ],
           },
@@ -157,7 +160,7 @@ describe("declarative frontend splice actions", () => {
         suppress_right_neighbor: {
           select: {
             stream: "phone",
-            where: "current.id = 'p2'",
+            where: "current.id == 'p2'",
           },
           suppress: true,
         },
@@ -208,7 +211,7 @@ describe("declarative frontend splice actions", () => {
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -217,7 +220,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -241,6 +244,82 @@ describe("declarative frontend splice actions", () => {
     expect(a?.sync_right?.kind).toBe("FINITE");
   });
 
+  it("supports splice insert copy_from + copy_fields with null-on-missing semantics", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        copy_right_neighbor: {
+          select: { stream: "phone", where: "current.id == 'p1'" },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [
+              {
+                name: "'COPY'",
+                copy_from: "next",
+                copy_fields: [
+                  "phoneme",
+                  "stress",
+                  "word",
+                  "weak",
+                  "params",
+                  "duration",
+                  "inherentDuration",
+                  "type",
+                  "punctuationSymbol",
+                ],
+              },
+            ],
+          },
+        },
+        suppress_right_neighbor: {
+          select: { stream: "phone", where: "current.id == 'p2'" },
+          suppress: true,
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["copy_right_neighbor", "suppress_right_neighbor"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        word: "cat",
+        duration: 90,
+        params: { F1: 710 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+      },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const inserted = out.find((t) => t.name === "COPY" && t.status === 1);
+
+    expect(inserted).toBeTruthy();
+    expect(inserted?.phoneme).toBe("AE");
+    expect(inserted?.type).toBe("vowel");
+    expect(inserted?.word).toBe("cat");
+    expect(inserted?.duration).toBe(90);
+    expect(inserted?.params).toEqual({ F1: 710 });
+    expect(inserted?.stress).toBeNull();
+    expect(inserted?.weak).toBeNull();
+    expect(inserted?.inherentDuration).toBeNull();
+    expect(inserted?.punctuationSymbol).toBeNull();
+    expect(inserted?.sync_left).toEqual(s1);
+    expect(inserted?.sync_right).toEqual(s2);
+  });
+
   it("supports multi-token replace_range insertion on object-order boundaries", () => {
     const s0 = startOrder();
     const s1 = endOrder();
@@ -251,7 +330,7 @@ describe("declarative frontend splice actions", () => {
       },
       rules: {
         split_token: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "replace_range",
             range_left: "current.sync_left",
@@ -294,11 +373,11 @@ describe("declarative frontend splice actions", () => {
         add_release: {
           select: {
             stream: "phone",
-            where: "current.id = 'p1'",
+            where: "current.id == 'p1'",
           },
           splice: {
             type: "insert_at_boundary",
-            boundary: "current.missing_boundary",
+            boundary: "'missing_boundary'",
             side: "after",
             insert: [{ name: "'REL'" }],
           },
@@ -338,7 +417,7 @@ describe("declarative frontend splice actions", () => {
       },
       rules: {
         insert_a: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -347,7 +426,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         insert_b: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -379,7 +458,7 @@ describe("declarative frontend splice actions", () => {
       },
       rules: {
         left_span: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "replace_range",
             range_left: "current.sync_left",
@@ -388,7 +467,7 @@ describe("declarative frontend splice actions", () => {
           },
         },
         overlap_right: {
-          select: { stream: "phone", where: "current.id = 'p3'" },
+          select: { stream: "phone", where: "current.id == 'p3'" },
           splice: {
             type: "replace_range",
             range_left: s1,

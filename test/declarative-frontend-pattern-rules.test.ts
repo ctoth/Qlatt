@@ -9,8 +9,8 @@ describe("declarative frontend pattern rules", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },
@@ -65,8 +65,8 @@ describe("declarative frontend pattern rules", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },

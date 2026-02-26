@@ -11,7 +11,7 @@ describe("declarative frontend association navigation helpers", () => {
         linked_only: {
           select: {
             stream: "tone",
-            where: "$count($assoc(current, 'link')) = 1",
+            where: "size(assoc(current, 'link')) == 1",
           },
           apply: [{ field: "duration", op: "add", value: "5", tag: "a1" }],
         },
@@ -35,4 +35,3 @@ describe("declarative frontend association navigation helpers", () => {
     expect(out[0].duration).toBe(55);
   });
 });
-

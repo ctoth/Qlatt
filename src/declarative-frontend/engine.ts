@@ -365,6 +365,7 @@ function buildNavigationFunctions(
   runtime: RuntimeLike | null = null,
   options: RuntimeLike = {}
 ): NavigationBundle {
+  const TOKEN_REF = Symbol("token_ref");
   const currentToken = options.currentToken ?? null;
   const pointCursorByStream =
     options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
@@ -471,6 +472,36 @@ function buildNavigationFunctions(
     return active[index + 1];
   };
 
+  const resolveLiveToken = (tokenRef: unknown): TokenLike | null => {
+    if (!tokenRef || typeof tokenRef !== "object" || Array.isArray(tokenRef)) return null;
+    const tokenLike = tokenRef as TokenLike;
+    const embedded = (tokenLike as Record<symbol, unknown>)[TOKEN_REF];
+    if (embedded && typeof embedded === "object" && sequence.includes(embedded as TokenLike)) {
+      return embedded as TokenLike;
+    }
+    const id = typeof tokenLike.id === "string" && tokenLike.id.length > 0 ? tokenLike.id : null;
+    if (id) {
+      ensureActiveIdIndex();
+      return activeById.get(id) ?? null;
+    }
+    if (sequence.includes(tokenLike)) return tokenLike;
+    return null;
+  };
+
+  const getRelativeToken = (tokenRef: unknown, offset: unknown): TokenLike | null => {
+    const token = resolveLiveToken(tokenRef);
+    if (!token) return null;
+    const delta = Math.trunc(Number(offset));
+    if (!Number.isFinite(delta)) return null;
+    if (delta === 0) return token;
+    const stream = getTokenStream(token);
+    const active = getActiveStreamTokens(stream);
+    const index = active.indexOf(token);
+    const nextIndex = index + delta;
+    if (index < 0 || nextIndex < 0 || nextIndex >= active.length) return null;
+    return active[nextIndex];
+  };
+
   const getParentToken = (token: TokenLike): TokenLike | null => {
     if (!token || token.parent == null) return null;
     if (!activeById.has(token.parent)) ensureActiveIdIndex();
@@ -494,6 +525,12 @@ function buildNavigationFunctions(
     if (!token) return null;
     if (viewCache.has(token)) return viewCache.get(token) ?? null;
     const view: TokenLike = { ...token };
+    Object.defineProperty(view, TOKEN_REF, {
+      value: token,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
     viewCache.set(token, view);
     if (seen.has(token)) return view;
 
@@ -643,6 +680,16 @@ function buildNavigationFunctions(
     at_ratio: atRatioFn,
     at_sync: atSyncFn,
     prev_point: prevPointFn,
+    ahead: (token: unknown, n: unknown = 1) => {
+      const steps = Math.trunc(Number(n));
+      if (!Number.isFinite(steps) || steps < 0) return null;
+      return toCursorView(getRelativeToken(token, steps));
+    },
+    behind: (token: unknown, n: unknown = 1) => {
+      const steps = Math.trunc(Number(n));
+      if (!Number.isFinite(steps) || steps < 0) return null;
+      return toCursorView(getRelativeToken(token, -steps));
+    },
     total: totalFn,
     target: targetFn,
     assoc: assocFn,
@@ -1014,6 +1061,51 @@ function deepEvaluateTemplate(
   return value;
 }
 
+const RESERVED_SPLICE_COPY_FIELDS = new Set([
+  "id",
+  "stream",
+  "status",
+  "sync_left",
+  "sync_right",
+  "anchor_left",
+  "anchor_right",
+]);
+
+function cloneTemplateData(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => cloneTemplateData(item));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, cloneTemplateData(item)])
+    );
+  }
+  return value;
+}
+
+function materializeSpliceCopyFields(
+  template: TokenLike,
+  context: RuntimeLike,
+  navigation: NavigationBundle
+): TokenLike {
+  if (!Object.prototype.hasOwnProperty.call(template, "copy_from")) return {};
+  const source = evaluateActionExpression(template.copy_from, context, navigation);
+  if (!source || typeof source !== "object" || Array.isArray(source)) return {};
+
+  const sourceObject = source as TokenLike;
+  const requested = Array.isArray(template.copy_fields)
+    ? template.copy_fields.filter((field: unknown): field is string => typeof field === "string")
+    : Object.keys(sourceObject).filter((field) => !RESERVED_SPLICE_COPY_FIELDS.has(field));
+
+  const copied: TokenLike = {};
+  for (const field of requested) {
+    copied[field] = Object.prototype.hasOwnProperty.call(sourceObject, field)
+      ? cloneTemplateData(sourceObject[field])
+      : null;
+  }
+  return copied;
+}
+
 function nextInsertedTokenId(runtime: RuntimeLike, stream: unknown): string {
   const key = typeof stream === "string" && stream.length > 0 ? stream : "token";
   if (!runtime.insertCounters) runtime.insertCounters = new Map();
@@ -1061,7 +1153,13 @@ function buildSpliceInsertions(
   const segments = runtime.axis.splitMarkRange(bounds.leftId, bounds.rightId, specs.length);
   return specs.map((spec, index) => {
     const template = spec && typeof spec === "object" ? spec : {};
-    const evaluated = deepEvaluateTemplate(template, context, navigation);
+    const copiedFields = materializeSpliceCopyFields(template, context, navigation);
+    const evaluatedTemplate = Object.fromEntries(
+      Object.entries(template).filter(
+        ([key]) => key !== "copy_from" && key !== "copy_fields"
+      )
+    );
+    const evaluated = deepEvaluateTemplate(evaluatedTemplate, context, navigation);
     const evaluatedObject =
       evaluated && typeof evaluated === "object" && !Array.isArray(evaluated)
         ? (evaluated as TokenLike)
@@ -1071,6 +1169,7 @@ function buildSpliceInsertions(
       sync_right: segments[index].rightId,
     });
     const token: TokenLike = {
+      ...copiedFields,
       ...evaluatedObject,
       stream: evaluatedObject.stream ?? stream,
       status: TokenStatus.ACTIVE,

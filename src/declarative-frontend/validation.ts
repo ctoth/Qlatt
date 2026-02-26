@@ -1,5 +1,5 @@
 import { compareOrder } from "./order";
-import { validateExpressionSyntax } from "./expressions";
+import { validateExpressionSyntax } from "./cel-expressions";
 
 type DiagnosticSeverity = "error" | "warning";
 type ValidationDiagnostic = {
@@ -106,6 +106,7 @@ function validatePatterns(
   streamByName: Map<string, any>,
   diagnostics: ValidationDiagnostic[]
 ): void {
+  const streamNames = new Set(streamByName.keys());
   const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
   for (const [name, pattern] of Object.entries(patterns)) {
     if (!asPlainObject(pattern)) {
@@ -165,12 +166,12 @@ function validatePatterns(
       captures.add(step.capture);
 
       if (typeof step.where === "string" && step.where.length > 0) {
-        const syntaxError = validateExpressionSyntax(step.where);
+        const syntaxError = validateExpressionSyntax(step.where, { streamNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
-              "E_JSONATA_INVALID",
-              `Pattern '${name}' step ${i} has invalid where expression: ${syntaxError}`,
+              "E_CEL_INVALID",
+              `Pattern '${name}' step ${i} has invalid CEL where expression: ${syntaxError}`,
               `patterns.${name}.sequence[${i}].where`
             )
           );
@@ -198,6 +199,7 @@ function validateRules(
   streamByName: Map<string, any>,
   diagnostics: ValidationDiagnostic[]
 ): void {
+  const streamNames = new Set(streamByName.keys());
   const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
   const rules = asPlainObject(spec.rules) ? spec.rules : {};
 
@@ -253,12 +255,12 @@ function validateRules(
         );
       }
       if (typeof rule.select.where === "string" && rule.select.where.length > 0) {
-        const syntaxError = validateExpressionSyntax(rule.select.where);
+        const syntaxError = validateExpressionSyntax(rule.select.where, { streamNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
-              "E_JSONATA_INVALID",
-              `Rule '${name}' has invalid select.where expression: ${syntaxError}`,
+              "E_CEL_INVALID",
+              `Rule '${name}' has invalid CEL select.where expression: ${syntaxError}`,
               `rules.${name}.select.where`
             )
           );
@@ -286,15 +288,40 @@ function validateRules(
       );
     }
     if (typeof rule.constraint === "string" && rule.constraint.length > 0) {
-      const syntaxError = validateExpressionSyntax(rule.constraint);
+      const syntaxError = validateExpressionSyntax(rule.constraint, { streamNames });
       if (syntaxError) {
         diagnostics.push(
           makeDiagnostic(
-            "E_JSONATA_INVALID",
-            `Rule '${name}' has invalid constraint expression: ${syntaxError}`,
+            "E_CEL_INVALID",
+            `Rule '${name}' has invalid CEL constraint expression: ${syntaxError}`,
             `rules.${name}.constraint`
           )
         );
+      }
+    }
+
+    if (rule.define && typeof rule.define === "object" && !Array.isArray(rule.define)) {
+      for (const [defineKey, defineExpr] of Object.entries(rule.define)) {
+        if (typeof defineExpr !== "string") {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_RULE_EXPRESSION_INVALID",
+              `Rule '${name}' define.${defineKey} must be a string expression`,
+              `rules.${name}.define.${defineKey}`
+            )
+          );
+          continue;
+        }
+        const syntaxError = validateExpressionSyntax(defineExpr, { streamNames });
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `Rule '${name}' has invalid CEL define.${defineKey} expression: ${syntaxError}`,
+              `rules.${name}.define.${defineKey}`
+            )
+          );
+        }
       }
     }
 
@@ -311,12 +338,12 @@ function validateRules(
           );
         }
         if (typeof effect?.value === "string" && effect.value.length > 0) {
-          const syntaxError = validateExpressionSyntax(effect.value);
+          const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
           if (syntaxError) {
             diagnostics.push(
               makeDiagnostic(
-                "E_JSONATA_INVALID",
-                `Rule '${name}' apply[${i}] has invalid value expression: ${syntaxError}`,
+                "E_CEL_INVALID",
+                `Rule '${name}' apply[${i}] has invalid CEL value expression: ${syntaxError}`,
                 `rules.${name}.apply[${i}].value`
               )
             );
@@ -336,22 +363,22 @@ function validateRules(
           )
         );
       }
-      if (typeof valueExpr === "string" && valueExpr.includes("$next_point(")) {
+      if (typeof valueExpr === "string" && valueExpr.includes("next_point(")) {
         diagnostics.push(
           makeDiagnostic(
             "E_POINT_FWD_REF",
-            `Rule '${name}' uses $next_point forward reference in point value`,
+            `Rule '${name}' uses next_point forward reference in point value`,
             `rules.${name}.insert_point.value`
           )
         );
       }
       if (typeof valueExpr === "string" && valueExpr.length > 0) {
-        const syntaxError = validateExpressionSyntax(valueExpr);
+        const syntaxError = validateExpressionSyntax(valueExpr, { streamNames });
         if (syntaxError) {
           diagnostics.push(
             makeDiagnostic(
-              "E_JSONATA_INVALID",
-              `Rule '${name}' has invalid insert_point.value expression: ${syntaxError}`,
+              "E_CEL_INVALID",
+              `Rule '${name}' has invalid CEL insert_point.value expression: ${syntaxError}`,
               `rules.${name}.insert_point.value`
             )
           );

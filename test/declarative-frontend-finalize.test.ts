@@ -15,10 +15,10 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         f0_targets: {
-          select: { stream: "phone", where: "current.type = 'vowel'" },
+          select: { stream: "phone", where: "current.type == 'vowel'" },
           insert_point: {
             stream: "f0",
-            at: "$midpoint(current)",
+            at: "midpoint(current)",
             value: "100",
             tag: "f0",
           },
@@ -69,10 +69,10 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         first: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           insert_point: {
             stream: "f0",
-            at: "$at_ratio(current, 0.25)",
+            at: "at_ratio(current, 0.25)",
             value: "110",
             tag: "f0",
           },
@@ -108,7 +108,7 @@ describe("declarative frontend finalize stages", () => {
       },
       rules: {
         target: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           insert_point: {
             stream: "f0",
             at: {

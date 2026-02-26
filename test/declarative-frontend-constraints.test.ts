@@ -10,7 +10,7 @@ describe("declarative frontend rule constraints", () => {
       parameters: { min_duration: 90 },
       rules: {
         long_vowels_only: {
-          select: { stream: "phone", where: "current.type = 'vowel'" },
+          select: { stream: "phone", where: "current.type == 'vowel'" },
           constraint: "current.duration >= params.min_duration",
           apply: [{ field: "duration", op: "add", value: "10", tag: "c1" }],
         },
@@ -37,15 +37,15 @@ describe("declarative frontend rule constraints", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },
       rules: {
         first_cv_only: {
           match: "cv",
-          constraint: "c.id = 'p1' and v.id = 'p2'",
+          constraint: "c.id == 'p1' && v.id == 'p2'",
           apply: [{ target: "v", field: "duration", op: "add", value: "5", tag: "c2" }],
         },
       },

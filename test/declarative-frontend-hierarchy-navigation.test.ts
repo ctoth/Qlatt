@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { runRuleEngine } from "../src/declarative-frontend/engine";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
 
 describe("declarative frontend hierarchy navigation helpers", () => {
-  it("supports $parent(current, stream) for active hierarchy lookups", () => {
+  it("materializes parent stream fields on current token", () => {
     const spec = {
       streams: {
         syllable: { type: "span" },
@@ -12,7 +14,7 @@ describe("declarative frontend hierarchy navigation helpers", () => {
         stressed_parent_boost: {
           select: {
             stream: "phone",
-            where: "$parent(current, 'syllable').stress = 1",
+            where: "current.syllable.stress == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "h1" }],
         },
@@ -34,8 +36,8 @@ describe("declarative frontend hierarchy navigation helpers", () => {
     expect(p2?.duration).toBe(100);
   });
 
-  it("supports $children(current, stream) and ignores suppressed children", () => {
-    const spec = {
+  it("rejects deprecated navigation helpers in CEL expressions", () => {
+    const spec = parseDslSpec({
       streams: {
         syllable: { type: "span" },
         phone: { type: "base" },
@@ -44,28 +46,15 @@ describe("declarative frontend hierarchy navigation helpers", () => {
         mark_if_two_children: {
           select: {
             stream: "syllable",
-            where: "$count($children(current, 'phone')) = 2",
+            where: "size(children(current, 'phone')) == 2",
           },
           apply: [{ field: "marked", op: "set", value: "1", tag: "h2" }],
         },
       },
       phases: [{ name: "structure", rules: ["mark_if_two_children"] }],
-    };
+    });
 
-    const input = [
-      { id: "sy1", stream: "syllable", status: 1 },
-      { id: "p1", stream: "phone", parent: "sy1", status: 1 },
-      { id: "p2", stream: "phone", parent: "sy1", status: 1 },
-      { id: "p3", stream: "phone", parent: "sy1", status: 2 },
-      { id: "sy2", stream: "syllable", status: 1 },
-      { id: "p4", stream: "phone", parent: "sy2", status: 1 },
-    ];
-
-    const out = runRuleEngine(input, spec).sequence;
-    const sy1 = out.find((t) => t.id === "sy1");
-    const sy2 = out.find((t) => t.id === "sy2");
-    expect(sy1?.marked).toBe(1);
-    expect(sy2?.marked).toBeUndefined();
+    const diagnostics = validateDslSpec(spec);
+    expect(diagnostics.some((d) => d.code === "E_CEL_INVALID")).toBe(true);
   });
 });
-

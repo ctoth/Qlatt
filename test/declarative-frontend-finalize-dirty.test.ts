@@ -13,7 +13,7 @@ describe("declarative frontend finalize dirty guard", () => {
       },
       rules: {
         suppress_after_finalize: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           suppress: true,
         },
       },
@@ -40,7 +40,7 @@ describe("declarative frontend finalize dirty guard", () => {
       },
       rules: {
         late_scalar: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           apply: [{ field: "duration", op: "add", value: "5", tag: "late" }],
         },
       },

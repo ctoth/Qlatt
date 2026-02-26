@@ -20,14 +20,14 @@ describe("declarative frontend schema coverage", () => {
           stream: "phone",
           scope: "syllable",
           sequence: [
-            { capture: "c", where: "current.f.manner = 'stop'" },
-            { capture: "v", where: "current.f.manner = 'vowel'" },
+            { capture: "c", where: "current.f.manner == 'stop'" },
+            { capture: "v", where: "current.f.manner == 'vowel'" },
           ],
         },
       },
       rules: {
         stress_lengthening: {
-          select: { stream: "phone", where: "current.f.manner = 'vowel'" },
+          select: { stream: "phone", where: "current.f.manner == 'vowel'" },
           apply: [{ field: "duration", op: "mul", value: "1.3", tag: "stress" }],
         },
       },
@@ -119,8 +119,8 @@ describe("declarative frontend schema coverage", () => {
           apply: [{ field: "duration", op: "mul", value: 1.2 }],
           insert_point: {
             stream: "f0",
-            at: "$midpoint(current)",
-            value: "$next_point('f0').value + 10",
+            at: "midpoint(current)",
+            value: "next_point('f0').value + 10",
           },
         },
       },
@@ -146,5 +146,28 @@ describe("declarative frontend schema coverage", () => {
     const codes = diagnostics.map((d) => d.code);
 
     expect(codes.includes("E_RULE_OP_UNKNOWN")).toBe(true);
+  });
+
+  it("rejects next3/prev3 cursor fields and points users to ahead/behind helpers", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        bad_depth: {
+          select: { stream: "phone", where: "next3 != null" },
+        },
+        ok_depth: {
+          select: { stream: "phone", where: "ahead(current, 3) == null || behind(current, 1) != null" },
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad_depth", "ok_depth"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const badDepth = diagnostics.find((d) => d.path === "rules.bad_depth.select.where");
+    const okDepth = diagnostics.find((d) => d.path === "rules.ok_depth.select.where");
+
+    expect(badDepth?.code).toBe("E_CEL_INVALID");
+    expect(badDepth?.message).toContain("Unsupported cursor 'next3'");
+    expect(okDepth).toBeUndefined();
   });
 });

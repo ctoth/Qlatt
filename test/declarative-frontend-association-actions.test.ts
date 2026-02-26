@@ -11,8 +11,8 @@ describe("declarative frontend association actions", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },
@@ -24,7 +24,7 @@ describe("declarative frontend association actions", () => {
         boost_linked: {
           select: {
             stream: "phone",
-            where: "$count($assoc(current, 'link')) = 1",
+            where: "size(assoc(current, 'link')) == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "assoc" }],
         },
@@ -54,8 +54,8 @@ describe("declarative frontend association actions", () => {
         cv: {
           stream: "phone",
           sequence: [
-            { capture: "c", where: "current.type = 'stop'" },
-            { capture: "v", where: "current.type = 'vowel'" },
+            { capture: "c", where: "current.type == 'stop'" },
+            { capture: "v", where: "current.type == 'vowel'" },
           ],
         },
       },
@@ -71,7 +71,7 @@ describe("declarative frontend association actions", () => {
         boost_linked: {
           select: {
             stream: "phone",
-            where: "$count($assoc(current, 'link')) = 1",
+            where: "size(assoc(current, 'link')) == 1",
           },
           apply: [{ field: "duration", op: "add", value: "10", tag: "assoc" }],
         },
@@ -89,4 +89,3 @@ describe("declarative frontend association actions", () => {
     expect(p1?.duration).toBe(70);
   });
 });
-

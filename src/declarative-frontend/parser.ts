@@ -84,6 +84,14 @@ function normalizePattern(pattern: unknown): PlainObject {
 
 function normalizeRule(rule: unknown): PlainObject {
   if (!asPlainObject(rule)) return {};
+  const define =
+    asPlainObject(rule.define)
+      ? Object.fromEntries(
+          Object.entries(rule.define)
+            .filter(([name]) => typeof name === "string" && name.length > 0)
+            .map(([name, expr]) => [name, asString(expr, null)])
+        )
+      : {};
   return {
     ...rule,
     citation: asString(rule.citation, null),
@@ -91,6 +99,7 @@ function normalizeRule(rule: unknown): PlainObject {
     op: asString(rule.op, null),
     match: asString(rule.match, null),
     constraint: asString(rule.constraint, null),
+    define,
     select: asPlainObject(rule.select)
       ? {
           ...rule.select,

@@ -32,7 +32,7 @@ describe("declarative frontend generic select rules", () => {
       },
       rules: {
         suppressVowels: {
-          select: { stream: "phone", where: "current.type = 'vowel'" },
+          select: { stream: "phone", where: "current.type == 'vowel'" },
           suppress: true,
         },
         add5: {

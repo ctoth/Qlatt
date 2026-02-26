@@ -47,7 +47,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -56,7 +56,7 @@ describe("declarative frontend sync axis bootstrap", () => {
           },
         },
         suppress_right_neighbor: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },
@@ -89,7 +89,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       },
       rules: {
         insert_pair: {
-          select: { stream: "phone", where: "current.id = 'p1'" },
+          select: { stream: "phone", where: "current.id == 'p1'" },
           splice: {
             type: "insert_at_boundary",
             boundary: "current.sync_right",
@@ -98,7 +98,7 @@ describe("declarative frontend sync axis bootstrap", () => {
           },
         },
         suppress_middle: {
-          select: { stream: "phone", where: "current.id = 'p2'" },
+          select: { stream: "phone", where: "current.id == 'p2'" },
           suppress: true,
         },
       },

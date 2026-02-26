@@ -16,6 +16,8 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "at_ratio",
   "at_sync",
   "prev_point",
+  "ahead",
+  "behind",
   "total",
   "target",
   "assoc",
@@ -29,6 +31,7 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 const STREAM_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
+const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
 
 function compileExpression(expression: string): CompiledCelExpression {
   if (typeof expression !== "string") {
@@ -74,6 +77,16 @@ function validateStreamHelpers(expression: string, streamNames: Set<string>): st
   return null;
 }
 
+function validateCursorDepth(expression: string): string | null {
+  for (const match of expression.matchAll(CURSOR_DEPTH_PATTERN)) {
+    const steps = Number(match[2]);
+    if (!Number.isFinite(steps) || steps <= 2) continue;
+    const cursorName = `${match[1]}${steps}`;
+    return `Unsupported cursor '${cursorName}'; use ahead(current, ${steps}) or behind(current, ${steps})`;
+  }
+  return null;
+}
+
 export function validateExpressionSyntax(
   expression: string,
   options: ExpressionValidationOptions = {}
@@ -89,6 +102,9 @@ export function validateExpressionSyntax(
   );
   const functionError = validateFunctionSurface(expression, allowedFunctions);
   if (functionError) return functionError;
+
+  const cursorDepthError = validateCursorDepth(expression);
+  if (cursorDepthError) return cursorDepthError;
 
   if (options.streamNames) {
     const streamNames = new Set([...options.streamNames]);

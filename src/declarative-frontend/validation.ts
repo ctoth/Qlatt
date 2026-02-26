@@ -175,6 +175,15 @@ function validatePatterns(
               `patterns.${name}.sequence[${i}].where`
             )
           );
+        } else {
+          validateDeclaredTypeFieldUsage(
+            step.where,
+            streamByName,
+            pattern.stream,
+            diagnostics,
+            `patterns.${name}.sequence[${i}].where`,
+            `Pattern '${name}' step ${i} where`
+          );
         }
       }
     }
@@ -192,6 +201,219 @@ function collectScalarFields(spec: PlainObject): Set<string> {
     }
   }
   return fields;
+}
+
+function streamHasDeclaredTypeField(streamByName: Map<string, any>, streamName: unknown): boolean {
+  if (typeof streamName !== "string" || streamName.length === 0) return false;
+  const stream = streamByName.get(streamName);
+  if (!asPlainObject(stream)) return false;
+  const features = asPlainObject(stream.features) ? stream.features : null;
+  if (!features) return false;
+  return Object.prototype.hasOwnProperty.call(features, "type");
+}
+
+function validateDeclaredTypeFieldUsage(
+  expression: string,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (!/\.type\b/.test(expression)) return;
+  if (streamHasDeclaredTypeField(streamByName, streamName)) return;
+  diagnostics.push(
+    makeDiagnostic(
+      "E_TOKEN_FIELD_UNDECLARED",
+      `${contextLabel} uses '.type' but stream '${String(
+        streamName ?? ""
+      )}' does not declare features.type`,
+      path
+    )
+  );
+}
+
+function validateDispatchValueExpression(
+  expr: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (typeof expr === "number") return;
+  if (typeof expr !== "string") {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_RULE_EXPRESSION_INVALID",
+        `${contextLabel} must be a string/number expression`,
+        path
+      )
+    );
+    return;
+  }
+  if (expr.length === 0) return;
+  const syntaxError = validateExpressionSyntax(expr, { streamNames });
+  if (syntaxError) {
+    diagnostics.push(
+      makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
+    );
+    return;
+  }
+  validateDeclaredTypeFieldUsage(expr, streamByName, streamName, diagnostics, path, contextLabel);
+}
+
+function validateDispatchSpec(
+  dispatchValue: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (!Array.isArray(dispatchValue)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_RULE_EXPRESSION_INVALID",
+        `${contextLabel} must be an array of dispatch rows`,
+        path
+      )
+    );
+    return;
+  }
+
+  let hasDefault = false;
+  for (let i = 0; i < dispatchValue.length; i += 1) {
+    const row = dispatchValue[i];
+    const rowPath = `${path}[${i}]`;
+    if (!asPlainObject(row)) {
+      diagnostics.push(
+        makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} must be an object`, rowPath)
+      );
+      continue;
+    }
+
+    const rowHasWhen = Object.prototype.hasOwnProperty.call(row, "when");
+    const rowHasDefault = Object.prototype.hasOwnProperty.call(row, "default");
+    if (rowHasWhen) {
+      if (typeof row.when !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_EXPRESSION_INVALID",
+            `${contextLabel} row ${i} when must be a string expression`,
+            `${rowPath}.when`
+          )
+        );
+      } else {
+        const syntaxError = validateExpressionSyntax(row.when, { streamNames });
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `${contextLabel} row ${i} has invalid CEL when expression: ${syntaxError}`,
+              `${rowPath}.when`
+            )
+          );
+        }
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(row, "value")) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_EXPRESSION_INVALID",
+            `${contextLabel} row ${i} must include value`,
+            `${rowPath}.value`
+          )
+        );
+      } else {
+        validateDispatchValueExpression(
+          row.value,
+          streamByName,
+          streamName,
+          streamNames,
+          diagnostics,
+          `${rowPath}.value`,
+          `${contextLabel} row ${i} value`
+        );
+      }
+    }
+
+    if (rowHasDefault) {
+      hasDefault = true;
+      validateDispatchValueExpression(
+        row.default,
+        streamByName,
+        streamName,
+        streamNames,
+        diagnostics,
+        `${rowPath}.default`,
+        `${contextLabel} row ${i} default`
+      );
+    }
+  }
+
+  if (!hasDefault) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_DISPATCH_NO_DEFAULT",
+        `${contextLabel} is missing required default dispatch row`,
+        path
+      )
+    );
+  }
+}
+
+function validateTemplateDispatchExpressions(
+  value: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i += 1) {
+      validateTemplateDispatchExpressions(
+        value[i],
+        streamByName,
+        streamName,
+        streamNames,
+        diagnostics,
+        `${path}[${i}]`,
+        contextLabel
+      );
+    }
+    return;
+  }
+
+  if (!asPlainObject(value)) return;
+  if (Object.prototype.hasOwnProperty.call(value, "dispatch")) {
+    validateDispatchSpec(
+      value.dispatch,
+      streamByName,
+      streamName,
+      streamNames,
+      diagnostics,
+      `${path}.dispatch`,
+      contextLabel
+    );
+    return;
+  }
+
+  for (const [key, nested] of Object.entries(value)) {
+    validateTemplateDispatchExpressions(
+      nested,
+      streamByName,
+      streamName,
+      streamNames,
+      diagnostics,
+      `${path}.${key}`,
+      contextLabel
+    );
+  }
 }
 
 function validateRules(
@@ -214,6 +436,12 @@ function validateRules(
     const hasSelect = asPlainObject(rule.select);
     const hasMatch = typeof rule.match === "string" && rule.match.length > 0;
     const hasOp = typeof rule.op === "string" && rule.op.length > 0;
+    const matchPattern = hasMatch ? patterns[rule.match] : null;
+    const ruleStreamName = hasSelect
+      ? rule.select.stream
+      : asPlainObject(matchPattern)
+        ? matchPattern.stream
+        : null;
     if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !rule.op)) {
       diagnostics.push(
         makeDiagnostic(
@@ -264,6 +492,15 @@ function validateRules(
               `rules.${name}.select.where`
             )
           );
+        } else {
+          validateDeclaredTypeFieldUsage(
+            rule.select.where,
+            streamByName,
+            rule.select.stream,
+            diagnostics,
+            `rules.${name}.select.where`,
+            `Rule '${name}' select.where`
+          );
         }
       }
     }
@@ -297,6 +534,15 @@ function validateRules(
             `rules.${name}.constraint`
           )
         );
+      } else {
+        validateDeclaredTypeFieldUsage(
+          rule.constraint,
+          streamByName,
+          ruleStreamName,
+          diagnostics,
+          `rules.${name}.constraint`,
+          `Rule '${name}' constraint`
+        );
       }
     }
 
@@ -321,6 +567,15 @@ function validateRules(
               `rules.${name}.define.${defineKey}`
             )
           );
+        } else {
+          validateDeclaredTypeFieldUsage(
+            defineExpr,
+            streamByName,
+            ruleStreamName,
+            diagnostics,
+            `rules.${name}.define.${defineKey}`,
+            `Rule '${name}' define.${defineKey}`
+          );
         }
       }
     }
@@ -328,27 +583,77 @@ function validateRules(
     if (Array.isArray(rule.apply)) {
       for (let i = 0; i < rule.apply.length; i += 1) {
         const effect = rule.apply[i];
-        if (effect?.value && typeof effect.value !== "string") {
+        const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
+        const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
+        if (hasValue && hasDispatch) {
           diagnostics.push(
             makeDiagnostic(
-              "E_RULE_EXPRESSION_INVALID",
-              `Rule '${name}' apply[${i}] has non-string value expression`,
-              `rules.${name}.apply[${i}].value`
+              "E_DISPATCH_AND_VALUE",
+              `Rule '${name}' apply[${i}] cannot specify both value and dispatch`,
+              `rules.${name}.apply[${i}]`
             )
           );
         }
-        if (typeof effect?.value === "string" && effect.value.length > 0) {
-          const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
-          if (syntaxError) {
+        if (hasDispatch) {
+          validateDispatchSpec(
+            effect?.dispatch,
+            streamByName,
+            ruleStreamName,
+            streamNames,
+            diagnostics,
+            `rules.${name}.apply[${i}].dispatch`,
+            `Rule '${name}' apply[${i}] dispatch`
+          );
+        } else if (hasValue) {
+          if (
+            effect?.value != null &&
+            typeof effect.value !== "string" &&
+            typeof effect.value !== "number"
+          ) {
             diagnostics.push(
               makeDiagnostic(
-                "E_CEL_INVALID",
-                `Rule '${name}' apply[${i}] has invalid CEL value expression: ${syntaxError}`,
+                "E_RULE_EXPRESSION_INVALID",
+                `Rule '${name}' apply[${i}] has non-string/non-number value expression`,
                 `rules.${name}.apply[${i}].value`
               )
             );
           }
+          if (typeof effect?.value === "string" && effect.value.length > 0) {
+            const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
+            if (syntaxError) {
+              diagnostics.push(
+                makeDiagnostic(
+                  "E_CEL_INVALID",
+                  `Rule '${name}' apply[${i}] has invalid CEL value expression: ${syntaxError}`,
+                  `rules.${name}.apply[${i}].value`
+                )
+              );
+            } else {
+              validateDeclaredTypeFieldUsage(
+                effect.value,
+                streamByName,
+                ruleStreamName,
+                diagnostics,
+                `rules.${name}.apply[${i}].value`,
+                `Rule '${name}' apply[${i}] value`
+              );
+            }
+          }
         }
+      }
+    }
+
+    if (asPlainObject(rule.splice) && Array.isArray(rule.splice.insert)) {
+      for (let i = 0; i < rule.splice.insert.length; i += 1) {
+        validateTemplateDispatchExpressions(
+          rule.splice.insert[i],
+          streamByName,
+          ruleStreamName,
+          streamNames,
+          diagnostics,
+          `rules.${name}.splice.insert[${i}]`,
+          `Rule '${name}' splice.insert[${i}]`
+        );
       }
     }
 
@@ -381,6 +686,15 @@ function validateRules(
               `Rule '${name}' has invalid CEL insert_point.value expression: ${syntaxError}`,
               `rules.${name}.insert_point.value`
             )
+          );
+        } else {
+          validateDeclaredTypeFieldUsage(
+            valueExpr,
+            streamByName,
+            ruleStreamName,
+            diagnostics,
+            `rules.${name}.insert_point.value`,
+            `Rule '${name}' insert_point.value`
           );
         }
       }

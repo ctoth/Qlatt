@@ -349,7 +349,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         param.cancelScheduledValues(now);
         param.setValueAtTime(param.value, now);
       } catch (e) {
-        // Ignore errors on already-cancelled params
+        log(`Warning: cancelScheduledValues failed for param: ${e instanceof Error ? e.message : e}`);
       }
     }
     scheduledParams.clear();

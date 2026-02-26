@@ -526,7 +526,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
             }
           } else {
             // Native nodes (GainNode, etc.): access as property
-            const audioParam = (toNode as any)[toParamName];
+            const audioParam = (toNode as unknown as Record<string, unknown>)[toParamName];
             if (audioParam instanceof AudioParam) {
               fromNode.connect(audioParam, fromIndex);
               log(`  Connected ${fromId}[${fromIndex}] -> ${toId}.${toParamName} (AudioParam)`);

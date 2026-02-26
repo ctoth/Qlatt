@@ -1141,6 +1141,17 @@ interface TokenSpec {
 
 **Expression syntax:** TokenSpec expression fields (`name`, expression-valued feature/scalar entries, and expression-valued `parent`) use CEL and are evaluated at runtime. String literals inside CEL expressions use double quotes.
 
+**Dispatch in insert fields (normative):** Any expression-valued insert field MAY alternatively use:
+
+```yaml
+dispatch:
+  - when: <CEL bool expr>
+    value: <CEL value expr>
+  - default: <CEL value expr>
+```
+
+with the same semantics as effect-level `dispatch` in Part 6 (first-match, required default).
+
 Examples:
 ```yaml
 # Literal phoneme name
@@ -1400,11 +1411,19 @@ interface Effect {
 
   op: 'set' | 'mul' | 'add';
 
-  value: string;                 // CEL expression
+  value?: Expr;                  // CEL expression (string) or literal scalar
+  dispatch?: DispatchSpec;       // ordered condition/value rows + required default
 
   tag: string;                   // provenance tag
 
 }
+
+type DispatchSpec = Array<
+  | { when: string; value: Expr }     // CEL condition + CEL value
+  | { default: Expr }                 // required fallback CEL value
+>;
+
+type Expr = string | number;
 
 
 interface AssocSpec {
@@ -1422,6 +1441,16 @@ interface AssocSpec {
 **Effect target defaulting:** If `target` is omitted, it defaults to `'current'`. For pattern rules, `target` may reference any capture name (e.g., `'v'`, `'stop'`).
 
 **Define binding scope (normative):** `define` is rule-level. Bindings are evaluated once per rule firing, top-to-bottom, and are available to subsequent bindings plus all expression fields in the same firing (`constraint`, `apply`, `splice.insert`, `insert_point`).
+
+**Dispatch semantics (normative):**
+
+- `dispatch` is an alternative to `value` on an effect.
+- `dispatch` and `value` are mutually exclusive. If both are present, emit `E_DISPATCH_AND_VALUE`.
+- A `dispatch` block MUST include a `default` row. If missing, emit `E_DISPATCH_NO_DEFAULT`.
+- `when` rows are evaluated top-to-bottom in CEL using the same rule firing context (including `define` bindings).
+- First matching `when` wins; if none match, `default` is selected.
+- The effect's `op` and `tag` apply to the selected value exactly as with `value`.
+- `dispatch` is syntactic sugar; implementations MAY desugar to equivalent nested ternary CEL with identical first-match semantics.
 
 **Constraint evaluation timing:**
 
@@ -1552,6 +1581,53 @@ rules:
         value: 'current.f.voicing == "voiced" ? 50 : 60'
         tag: frication
 ```
+### 6.5.1 Dispatch Tables (Non-normative)
+
+`dispatch` is preferred when a rule has three or more conditional branches and the cited literature is table-shaped.
+
+```yaml
+# vowel_shortening (Chen 1970; Wells 1990)
+apply:
+  - field: duration
+    op: mul
+    tag: segmental_context
+    dispatch:
+      - when: n == null || n.phoneme == "SIL"
+        value: 1.2
+      - when: has(n.voiceless) && n.voiceless && (n.type == "stop" || n.type == "stop_closure")
+        value: 0.7
+      - when: has(n.voiceless) && n.voiceless && n.type == "fricative"
+        value: 0.85
+      - default: 1.0
+
+# pre_boundary_lengthening
+apply:
+  - field: duration
+    op: mul
+    tag: boundary
+    dispatch:
+      - when: n == null
+        value: 1.4
+      - when: n.phoneme == "SIL" && has(n.punctuationSymbol)
+        value: 1.4
+      - when: n.phoneme != "SIL" && cur_word != "" && next_word != "" && cur_word != next_word
+        value: 1.1
+      - default: 1.0
+
+# k_context_cl_f2 (Allen et al. 1987)
+apply:
+  - field: params.F2
+    op: set
+    dispatch:
+      - when: cand != null && cand.type == "vowel" && has(cand.back) && cand.back
+        value: 1200
+      - when: cand != null && cand.type == "vowel" && ((has(cand.front) && cand.front) || (has(cand.hi) && cand.hi))
+        value: 1900
+      - default: 1500
+```
+
+Two-branch cases can remain inline ternaries in `value`.
+
 ### 6.6 Suppression (Non-Base)
 
 
@@ -1833,6 +1909,9 @@ rendering:
 | E_INVALID_RATIO | point ratio not in [0,1] | point token |
 | E_POINT_FWD_REF | point value references unresolved `next_point` | point rule |
 | E_CEL_INVALID | expression parse/type error at compile time | rule |
+| E_TOKEN_FIELD_UNDECLARED | expression references token field not declared in stream schema | rule |
+| E_DISPATCH_NO_DEFAULT | dispatch block missing required `default` row | rule |
+| E_DISPATCH_AND_VALUE | effect specifies both `dispatch` and `value` | rule |
 | E_PHASE_ORDER_VIOLATION | phases violate declared order constraints | phases |
 | E_SPLICE_CONFLICT | overlapping splices in strict mode | rule/rewrite |
 

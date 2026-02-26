@@ -377,11 +377,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const t = baseTime + frame.time;
       const realized = evaluateSemantics(frame.params);
 
-      // PLSTEP detection: check for AF/AH threshold crossing
-      // Emit telemetry event when frication or aspiration rises rapidly (plosive release)
+      // PLSTEP detection: track AF/AH state unconditionally, emit telemetry if handler present
+      const currentAF = frame.params.AF ?? -70;
+      const currentAH = frame.params.AH ?? -70;
+
       if (telemetryHandler) {
-        const currentAF = frame.params.AF ?? -70;
-        const currentAH = frame.params.AH ?? -70;
         const deltaAF = currentAF - prevAF;
         const deltaAH = currentAH - prevAH;
 
@@ -403,10 +403,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
             phoneme: frame.phoneme ?? '',
           });
         }
-
-        prevAF = currentAF;
-        prevAH = currentAH;
       }
+
+      // Always update state — delta tracking must not depend on telemetry being enabled
+      prevAF = currentAF;
+      prevAH = currentAH;
 
       // Add step entries for realized bindings
       for (const { name, param } of realizedBindingsList) {

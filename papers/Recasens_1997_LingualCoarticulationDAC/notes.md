@@ -243,3 +243,7 @@ function getTransitionDirection(consonant) {
 - **Kent, R. D., and Moll, K. L. (1972). "Cinefluorographic analyses of selected lingual consonants"** - Empirical data on consonant articulation that provides baseline measurements for understanding coarticulation effects.
 - **Öhman, S. (1966). "Coarticulation in VCV sequences"** - Seminal work on vowel-consonant coarticulation patterns that establishes foundational principles later extended in this paper.
 - **Farnetani, E., and Recasens, D. (1993). "Anticipatory consonant-to-vowel coarticulation in Italian"** - Related cross-linguistic study applying similar methodology to Italian, useful for validation and understanding language-specific variations in coarticulation.
+
+---
+
+**See also:** Volenec_2015_Coarticulation — provides broader theoretical context for the DAC model by situating it within the Coproduction framework and contrasting it with competing approaches (Speech Economy, Window Model)

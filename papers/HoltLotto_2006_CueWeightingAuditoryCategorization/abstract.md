@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The ability to integrate and weight information across dimensions is central to perception and is particularly important for speech categorization. The present experiments investigate cue weighting by training participants to categorize sounds drawn from a two-dimensional acoustic space defined by the center frequency (CF) and modulation frequency (MF) of frequency-modulated sine waves. These dimensions were psychophysically matched to be equally discriminable and, in the first experiment, were equally informative for accurate categorization. Nevertheless, listeners' category responses reflected a bias for use of CF. This bias remained even when the informativeness of CF was decreased by shifting distributions to create more overlap in CF. A reversal of weighting (MF over CF) was obtained when distribution variance was increased for CF. These results demonstrate that even when equally informative and discriminable, acoustic cues are not necessarily equally weighted in categorization; listeners exhibit biases when integrating multiple acoustic dimensions. Moreover, changes in weighting strategies can be affected by changes in input distribution parameters. This methodology provides potential insights into acquisition of speech sound categories, particularly second language categories. One implication is that ineffective cue weighting strategies for phonetic categories may be alleviated by manipulating variance of uninformative dimensions in training stimuli.
+
+---
+
+## Our Interpretation
+
+This paper asks: when listeners learn to categorize sounds defined by two equally informative and equally discriminable acoustic dimensions, do they weight both dimensions equally? The answer is no - listeners show inherent biases favoring certain dimensions, and these biases are most effectively shifted by manipulating within-category variance rather than informativeness. The practical implication for speech research is that distributional experience shapes how listeners weight the multiple acoustic cues that define speech categories, which explains why L2 learners struggle with phonetic contrasts that require different cue weighting from their native language.

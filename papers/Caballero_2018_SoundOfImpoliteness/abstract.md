@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Until recently, research on im/politeness has primarily focused on the role of linguistic strategies while neglecting the contributions of prosody and acoustic cues for communicating politeness. Here, we analyzed a large set of recordings — verbal requests spoken in a direct manner (Lend me a nickel), preceded by the word "Please", or in a conventionally-indirect manner (Can you) — which were known to convey polite or rude impressions on the listener. The pragmatic imposition of the request was also manipulated (Lend me a nickel vs. hundred). Fundamental frequency (f0: mean, range, contour shape), duration, and voice quality (harmonics-to-noise ratio) were measured over the whole utterance and for key constituents within the utterance. Differences in perceived politeness corresponded with systematic differences in continuous utterance measures as well as local acoustic adjustments, defined by both categorical and graded vocal contrasts. Compared to polite utterances, rude requests displayed a slower speech rate, lower pitch, and tended to fall in pitch (or rise less markedly in the context of yes-no questions). The high versus low imposition of a request separately influenced the acoustic structure of requests, with evidence of these effects right at utterance-onset. Results are consistent with theoretical proposals about how prosody functions to convey speaker politeness as one facet of emotive communication. It is suggested that while a specific "prosody of politeness" may not exist, prosodic cues routinely and potently interact with other sources of information to allow listeners to generate inferences about im/politeness.
+
+---
+
+## Our Interpretation
+
+This study addresses a gap in politeness research by quantifying exactly how prosody (as opposed to word choice) signals politeness in spoken requests. The key finding is that polite speech is characterized by higher pitch, faster rate, rising contours, and clearer voice quality - patterns that hold across different request formulations. For speech synthesis, this provides actionable acoustic targets: to make synthesized speech sound more polite, raise F0, increase F0 range, use rising terminal contours, speed up slightly, and improve voice clarity (higher HNR).

@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+When we hear a new voice we automatically form a "first impression" of the voice owner's personality; a single word is sufficient to yield ratings highly consistent across listeners. Past studies have shown correlations between personality ratings and acoustical parameters of voice, suggesting a potential acoustical basis for voice personality impressions, but its nature and extent remain unclear. Here we used data-driven voice computational modelling to investigate the link between acoustics and perceived trustworthiness in the single word "hello". Two prototypical voice stimuli were generated based on the acoustical features of voices rated low or high in perceived trustworthiness, respectively, as well as a continuum of stimuli inter- and extrapolated between these two prototypes. Five hundred listeners provided trustworthiness ratings on the stimuli via an online interface. We observed an extremely tight relationship between trustworthiness ratings and position along the trustworthiness continuum (r = 0.99). Not only were trustworthiness ratings higher for the high- than the low-prototypes, but the difference could be modulated quasi-linearly by reducing or exaggerating the acoustical difference between the prototypes, resulting in a strong caricaturing effect. The f0 trajectory, or intonation, appeared a parameter of particular relevance: hellos rated high in trustworthiness were characterized by a high starting f0 then a marked decrease at mid-utterance to finish on a strong rise. These results demonstrate a strong acoustical basis for voice personality impressions, opening the door to multiple potential applications.
+
+---
+
+## Our Interpretation
+
+The paper tackles a practical question: can we make synthetic speech sound more trustworthy by manipulating specific acoustic features? Using voice morphing between "untrustworthy" and "trustworthy" sounding voices, they found an almost perfect linear relationship (r=0.99) between acoustic parameters and perceived trustworthiness. The key insight is the f0 contour pattern—trustworthy voices start high, dip in the middle, then rise at the end. This gives TTS systems a concrete prosodic target for generating friendly-sounding speech.

@@ -247,6 +247,10 @@ VCV utterance = V1-to-V2 diphthongal gesture + superimposed C gesture
 - **Delattre, Liberman & Cooper (1955)** - "Acoustic Loci and Transitional Cues" - Original locus theory
 - **Halle (1959)** - *Sound Pattern of Russian* - Palatalization constraints
 
+---
+
+**See also:** Volenec_2015_Coarticulation — contextualizes this paper as a pioneering study that established V-to-V transconsonantal coarticulation; situates it within the broader landscape of Speech Economy, Window Model, and Coproduction frameworks
+
 ## Key Quotes
 
 > "The second-formant transition in the vowel preceding the stop is rising when the vowel following the stop is /y/, but it is falling when the vowel following the stop is /u/." (p. 151)

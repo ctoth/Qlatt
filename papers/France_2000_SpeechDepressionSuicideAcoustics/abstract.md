@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Acoustic properties of speech have previously been identified as possible cues to depression, and there is evidence that certain vocal parameters may be used further to objectively discriminate between depressed and suicidal speech. Studies were performed to analyze and compare the speech acoustics of separate male and female samples comprised of normal individuals and individuals carrying diagnoses of depression and high-risk, near-term suicidality. The female sample consisted of ten control subjects, 17 dysthymic patients, and 21 major depressed patients. The male sample contained 24 control subjects, 21 major depressed patients, and 22 high-risk suicidal patients. Acoustic analyses of voice fundamental frequency (F₀), amplitude modulation (AM), formants, and power distribution were performed on speech samples extracted from audio recordings collected from the sample members. Multivariate feature and discriminant analyses were performed on feature vectors representing the members of the control and disordered classes. Features derived from the formant and power spectral density measurements were found to be the best discriminators of class membership in both the male and female studies. AM features emerged as strong class discriminators of the male classes. Features describing F₀ were generally ineffective discriminators in both studies. The results support theories that identify psychomotor disturbances as central elements in depression and suicidality.
+
+---
+
+## Our Interpretation
+
+This study tests whether speech acoustics can objectively distinguish between healthy, depressed, and suicidal individuals - a valuable clinical tool since current suicide risk assessment relies heavily on subjective clinical judgment. The surprising finding is that fundamental frequency (F0/pitch) features, often assumed to be the primary acoustic marker of depression, performed poorly compared to formant frequencies and power spectral distribution. For speech synthesis, this suggests that modeling "depressed" or "flat" affect requires more than just flattening F0 contours - the vocal tract shaping (formants) and spectral energy distribution may be more perceptually salient markers of affective state.

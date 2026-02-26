@@ -173,8 +173,8 @@ export async function registerWorklets(
   );
 }
 
-function isAudioWorkletNode(node: AudioNode): node is AudioWorkletNode {
-  return 'port' in node;
+export function isAudioWorkletNode(node: AudioNode): node is AudioWorkletNode {
+  return typeof AudioWorkletNode !== 'undefined' && node instanceof AudioWorkletNode;
 }
 
 /**

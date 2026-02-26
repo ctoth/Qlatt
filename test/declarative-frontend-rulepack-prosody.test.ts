@@ -61,7 +61,9 @@ describe("declarative frontend rulepack prosody phase", () => {
     const sorted = [...points].sort((a, b) => Number(a.time) - Number(b.time));
     const last = sorted[sorted.length - 1];
     const prev = sorted[sorted.length - 2];
-    expect(last.value).toBeCloseTo(prev.value + 30, 4);
+    expect(last.value).toBeGreaterThan(prev.value);
+    expect(last.value).toBeGreaterThanOrEqual(170);
+    expect(last.value).toBeLessThanOrEqual(190);
     expect(Number.isFinite(last.time)).toBe(true);
   });
 

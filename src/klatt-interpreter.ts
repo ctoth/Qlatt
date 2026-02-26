@@ -189,6 +189,31 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
+  /**
+   * Get AudioParam from node by name
+   */
+  function getAudioParam(node: AudioNode, paramName: string): AudioParam | null {
+    const anyNode = node as unknown as Record<string, unknown>;
+
+    // Handle GainNode
+    if (paramName === 'gain' && anyNode.gain) {
+      return anyNode.gain as AudioParam;
+    }
+
+    // Handle ConstantSourceNode
+    if (paramName === 'offset' && anyNode.offset) {
+      return anyNode.offset as AudioParam;
+    }
+
+    // Handle AudioWorkletNode parameters
+    if (anyNode.parameters && typeof (anyNode.parameters as Map<string, AudioParam>).get === 'function') {
+      const param = (anyNode.parameters as Map<string, AudioParam>).get(paramName);
+      if (param) return param;
+    }
+
+    return null;
+  }
+
   // Build bindings: use provided bindingMap if available (from runtime), otherwise walk graph
   // Either way, we need to resolve AudioParams from runtime nodes
   const sourceBindingMap = options.bindingMap ?? runtime.getBindingMap();
@@ -277,31 +302,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   // Store all scheduled params for cancellation
   const scheduledParams = new Set<AudioParam>();
-
-  /**
-   * Get AudioParam from node by name
-   */
-  function getAudioParam(node: AudioNode, paramName: string): AudioParam | null {
-    const anyNode = node as unknown as Record<string, unknown>;
-
-    // Handle GainNode
-    if (paramName === 'gain' && anyNode.gain) {
-      return anyNode.gain as AudioParam;
-    }
-
-    // Handle ConstantSourceNode
-    if (paramName === 'offset' && anyNode.offset) {
-      return anyNode.offset as AudioParam;
-    }
-
-    // Handle AudioWorkletNode parameters
-    if (anyNode.parameters && typeof (anyNode.parameters as Map<string, AudioParam>).get === 'function') {
-      const param = (anyNode.parameters as Map<string, AudioParam>).get(paramName);
-      if (param) return param;
-    }
-
-    return null;
-  }
 
   /**
    * Build evaluation context from frame params

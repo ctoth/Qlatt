@@ -657,18 +657,18 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     },
 
     connectToDestination(): void {
-      // Find output node(s) and connect
-      // Try graph-specified outputs first, then common names
-      const outputNodeId = graph.outputs?.[0];
-      const outputNode = outputNodeId
-        ? nodes.get(typeof outputNodeId === 'string' ? outputNodeId : outputNodeId.node)
-        : nodes.get('outputGain') ?? nodes.get('output') ?? nodes.get('masterGain');
-      if (outputNode) {
-        log(`Connecting ${outputNodeId ?? 'fallback'} to destination`);
-        outputNode.connect(audioContext.destination);
-      } else {
-        log('Warning: No output node found to connect to destination');
+      // Graph spec is authoritative — no fallback guessing
+      if (!graph.outputs || graph.outputs.length === 0) {
+        throw new Error('Graph definition missing "outputs" field — cannot connect to destination');
       }
+      const outputRef = graph.outputs[0];
+      const nodeId = typeof outputRef === 'string' ? outputRef : outputRef.node;
+      const outputNode = nodes.get(nodeId);
+      if (!outputNode) {
+        throw new Error(`Output node "${nodeId}" specified in graph.outputs not found in created nodes`);
+      }
+      log(`Connecting ${nodeId} to destination`);
+      outputNode.connect(audioContext.destination);
     },
 
     disconnect(): void {

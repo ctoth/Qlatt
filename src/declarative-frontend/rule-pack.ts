@@ -1,5 +1,5 @@
-export const QLATT_V11_SLICE_RULEPACK = {
-  version: "v11-slice",
+export const QLATT_V12_CEL_RULEPACK = {
+  version: "v12-cel",
   parameters: {
     base_f0: 110,
     fall_rate_hz: 20,
@@ -58,88 +58,63 @@ export const QLATT_V11_SLICE_RULEPACK = {
       select: {
         stream: "phone",
         where:
-          "(current.phoneme = 'P_CL' or current.phoneme = 'T_CL' or current.phoneme = 'K_CL') and $next(current) != null and $not($contains($string($next(current).type), 'stop'))",
+          "(current.phoneme == 'P_CL' || current.phoneme == 'T_CL' || current.phoneme == 'K_CL') && (next != null ? !(next.type == 'stop' || next.type == 'stop_closure' || next.type == 'stop_release' || next.type == 'stop_aspiration') : false)",
+      },
+      define: {
+        rel: "current.phoneme == 'P_CL' ? 'P_REL' : (current.phoneme == 'T_CL' ? 'T_REL' : 'K_REL')",
+        asp: "current.phoneme == 'P_CL' ? 'P_ASP' : (current.phoneme == 'T_CL' ? 'T_ASP' : 'K_ASP')",
+        next_token: "next",
+        weak: "next_token != null ? next_token.phoneme == 'SIL' : false",
+        rel_target: "target(rel)",
+        asp_target: "target(asp)",
+        rel_params:
+          "weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH - 10])}) : rel_target.params",
+        asp_params:
+          "weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH - 10])}) : asp_target.params",
+        rel_duration: "weak ? max([15, rel_target.duration * 0.5]) : rel_target.duration",
+        asp_duration: "weak ? max([15, asp_target.duration * 0.5]) : asp_target.duration",
       },
       splice: {
         type: "replace_range",
         range_left: "current.sync_right",
-        range_right: "$next(current).sync_right",
+        range_right: "next_token.sync_right",
         insert: [
           {
-            phoneme:
-              "(current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL'))",
-            stress: "current.stress",
-            word: "current.word",
-            weak: "$next(current).phoneme = 'SIL'",
-            params:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $p := $t.params; $weak ? $merge([$p, {'AF': $max([0, $number($p.AF) - 10]), 'AH': $max([0, $number($p.AH) - 10])}]) : $p)",
-            duration:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $weak ? $max([15, $t.duration * 0.5]) : $t.duration)",
-            inherentDuration:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).inherentDuration)",
-            type:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).type)",
+            phoneme: "rel",
+            stress: "has(current.stress) ? current.stress : null",
+            word: "has(current.word) ? current.word : null",
+            weak: "weak",
+            params: "rel_params",
+            duration: "rel_duration",
+            inherentDuration: "rel_target.inherentDuration",
+            type: "rel_target.type",
             inventorySW:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).inventorySW)",
-            voiced:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).voiced)",
-            voiceless:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).voiceless)",
-            front:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).front)",
-            back:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).back)",
-            hi:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).hi)",
-            low:
-              "($rel := (current.phoneme = 'P_CL' ? 'P_REL' : (current.phoneme = 'T_CL' ? 'T_REL' : 'K_REL')); $target($rel).low)",
+              "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)",
           },
           {
-            phoneme:
-              "(current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP'))",
-            stress: "current.stress",
-            word: "current.word",
-            weak: "$next(current).phoneme = 'SIL'",
-            params:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $t := $target($asp); $weak := ($next(current).phoneme = 'SIL'); $p := $t.params; $weak ? $merge([$p, {'AF': $max([0, $number($p.AF) - 10]), 'AH': $max([0, $number($p.AH) - 10])}]) : $p)",
-            duration:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $t := $target($asp); $weak := ($next(current).phoneme = 'SIL'); $weak ? $max([15, $t.duration * 0.5]) : $t.duration)",
-            inherentDuration:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).inherentDuration)",
-            type:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).type)",
+            phoneme: "asp",
+            stress: "has(current.stress) ? current.stress : null",
+            word: "has(current.word) ? current.word : null",
+            weak: "weak",
+            params: "asp_params",
+            duration: "asp_duration",
+            inherentDuration: "asp_target.inherentDuration",
+            type: "asp_target.type",
             inventorySW:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).inventorySW)",
-            voiced:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).voiced)",
-            voiceless:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).voiceless)",
-            front:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).front)",
-            back:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).back)",
-            hi:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).hi)",
-            low:
-              "($asp := (current.phoneme = 'P_CL' ? 'P_ASP' : (current.phoneme = 'T_CL' ? 'T_ASP' : 'K_ASP')); $target($asp).low)",
+              "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)",
           },
           {
-            phoneme: "$next(current).phoneme",
-            stress: "$next(current).stress",
-            word: "$next(current).word",
-            weak: "$next(current).weak",
-            params: "$next(current).params",
-            duration: "$next(current).duration",
-            inherentDuration: "$next(current).inherentDuration",
-            type: "$next(current).type",
-            inventorySW: "$next(current).inventorySW",
-            voiced: "$next(current).voiced",
-            voiceless: "$next(current).voiceless",
-            front: "$next(current).front",
-            back: "$next(current).back",
-            hi: "$next(current).hi",
-            low: "$next(current).low",
-            punctuationSymbol: "$next(current).punctuationSymbol",
+            phoneme: "next_token.phoneme",
+            stress: "has(next_token.stress) ? next_token.stress : null",
+            word: "has(next_token.word) ? next_token.word : null",
+            weak: "has(next_token.weak) ? next_token.weak : null",
+            params: "has(next_token.params) ? next_token.params : {}",
+            duration: "has(next_token.duration) ? next_token.duration : null",
+            inherentDuration:
+              "has(next_token.inherentDuration) ? next_token.inherentDuration : null",
+            type: "next_token.type",
+            punctuationSymbol:
+              "has(next_token.punctuationSymbol) ? next_token.punctuationSymbol : null",
           },
         ],
       },
@@ -150,59 +125,46 @@ export const QLATT_V11_SLICE_RULEPACK = {
       select: {
         stream: "phone",
         where:
-          "(current.phoneme = 'B_CL' or current.phoneme = 'D_CL' or current.phoneme = 'G_CL') and $next(current) != null and $not($contains($string($next(current).type), 'stop'))",
+          "(current.phoneme == 'B_CL' || current.phoneme == 'D_CL' || current.phoneme == 'G_CL') && (next != null ? !(next.type == 'stop' || next.type == 'stop_closure' || next.type == 'stop_release' || next.type == 'stop_aspiration') : false)",
+      },
+      define: {
+        rel: "current.phoneme == 'B_CL' ? 'B_REL' : (current.phoneme == 'D_CL' ? 'D_REL' : 'G_REL')",
+        next_token: "next",
+        weak: "next_token != null ? next_token.phoneme == 'SIL' : false",
+        rel_target: "target(rel)",
+        rel_params:
+          "weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH - 10])}) : rel_target.params",
+        rel_duration: "weak ? max([15, rel_target.duration * 0.5]) : rel_target.duration",
       },
       splice: {
         type: "replace_range",
         range_left: "current.sync_right",
-        range_right: "$next(current).sync_right",
+        range_right: "next_token.sync_right",
         insert: [
           {
-            phoneme:
-              "(current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL'))",
-            stress: "current.stress",
-            word: "current.word",
-            weak: "$next(current).phoneme = 'SIL'",
-            params:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $p := $t.params; $weak ? $merge([$p, {'AF': $max([0, $number($p.AF) - 10]), 'AH': $max([0, $number($p.AH) - 10])}]) : $p)",
-            duration:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $t := $target($rel); $weak := ($next(current).phoneme = 'SIL'); $weak ? $max([15, $t.duration * 0.5]) : $t.duration)",
-            inherentDuration:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).inherentDuration)",
-            type:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).type)",
+            phoneme: "rel",
+            stress: "has(current.stress) ? current.stress : null",
+            word: "has(current.word) ? current.word : null",
+            weak: "weak",
+            params: "rel_params",
+            duration: "rel_duration",
+            inherentDuration: "rel_target.inherentDuration",
+            type: "rel_target.type",
             inventorySW:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).inventorySW)",
-            voiced:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).voiced)",
-            voiceless:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).voiceless)",
-            front:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).front)",
-            back:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).back)",
-            hi:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).hi)",
-            low:
-              "($rel := (current.phoneme = 'B_CL' ? 'B_REL' : (current.phoneme = 'D_CL' ? 'D_REL' : 'G_REL')); $target($rel).low)",
+              "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)",
           },
           {
-            phoneme: "$next(current).phoneme",
-            stress: "$next(current).stress",
-            word: "$next(current).word",
-            weak: "$next(current).weak",
-            params: "$next(current).params",
-            duration: "$next(current).duration",
-            inherentDuration: "$next(current).inherentDuration",
-            type: "$next(current).type",
-            inventorySW: "$next(current).inventorySW",
-            voiced: "$next(current).voiced",
-            voiceless: "$next(current).voiceless",
-            front: "$next(current).front",
-            back: "$next(current).back",
-            hi: "$next(current).hi",
-            low: "$next(current).low",
-            punctuationSymbol: "$next(current).punctuationSymbol",
+            phoneme: "next_token.phoneme",
+            stress: "has(next_token.stress) ? next_token.stress : null",
+            word: "has(next_token.word) ? next_token.word : null",
+            weak: "has(next_token.weak) ? next_token.weak : null",
+            params: "has(next_token.params) ? next_token.params : {}",
+            duration: "has(next_token.duration) ? next_token.duration : null",
+            inherentDuration:
+              "has(next_token.inherentDuration) ? next_token.inherentDuration : null",
+            type: "next_token.type",
+            punctuationSymbol:
+              "has(next_token.punctuationSymbol) ? next_token.punctuationSymbol : null",
           },
         ],
       },
@@ -212,13 +174,14 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Klatt 1976 §III.B",
       select: {
         stream: "phone",
-        where: "current.type = 'vowel'",
+        where: "current.type == 'vowel'",
       },
       apply: [
         {
           field: "duration",
           op: "mul",
-          value: "current.stress = 1 ? 1.3 : (current.stress = 0 ? 0.8 : 1)",
+          value:
+            "has(current.stress) && current.stress == 1 ? 1.3 : ((has(current.stress) && current.stress == 0) ? 0.8 : 1)",
           tag: "stress",
         },
       ],
@@ -228,14 +191,17 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Allen et al. 1987 Ch.11 (velar locus)",
       select: {
         stream: "phone",
-        where: "current.phoneme = 'K_CL'",
+        where: "current.phoneme == 'K_CL'",
+      },
+      define: {
+        cand: "next != null && next.phoneme == 'K_REL' ? next2 : next",
       },
       apply: [
         {
           field: "params.F2",
           op: "set",
           value:
-            "($cand := ($next(current) != null and $next(current).phoneme = 'K_REL' ? $next($next(current)) : $next(current)); $cand != null and $cand.type = 'vowel' ? ($cand.back ? 1200 : (($cand.front or $cand.hi) ? 1900 : 1500)) : 1500)",
+            "cand != null && cand.type == 'vowel' ? ((has(cand.back) && cand.back == true) ? 1200 : (((has(cand.front) && cand.front == true) || (has(cand.hi) && cand.hi == true)) ? 1900 : 1500)) : 1500",
         },
       ],
     },
@@ -244,14 +210,13 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Allen et al. 1987 Ch.11 (velar locus transitions)",
       select: {
         stream: "phone",
-        where:
-          "current.phoneme = 'K_REL' and $prev(current) != null and $prev(current).phoneme = 'K_CL'",
+        where: "current.phoneme == 'K_REL' && (prev != null ? prev.phoneme == 'K_CL' : false)",
       },
       apply: [
         {
           field: "params.F2",
           op: "set",
-          value: "$exists($prev(current).params.F2) ? $prev(current).params.F2 : 1500",
+          value: "prev != null && has(prev.params.F2) ? prev.params.F2 : 1500",
         },
       ],
     },
@@ -260,14 +225,14 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Allen et al. 1987 Ch.8 (pause insertion)",
       select: {
         stream: "phone",
-        where: "current.phoneme = 'SIL' and $exists(current.punctuationSymbol)",
+        where: "current.phoneme == 'SIL' && has(current.punctuationSymbol)",
       },
       apply: [
         {
           field: "duration",
           op: "set",
           value:
-            "current.punctuationSymbol = ',' ? 150 : ((current.punctuationSymbol = '.' or current.punctuationSymbol = '?' or current.punctuationSymbol = '!') ? 300 : current.duration)",
+            "current.punctuationSymbol == ',' ? 150 : ((current.punctuationSymbol == '.' || current.punctuationSymbol == '?' || current.punctuationSymbol == '!') ? 300 : current.duration)",
         },
       ],
     },
@@ -276,14 +241,17 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Chen 1970; Wells 1990",
       select: {
         stream: "phone",
-        where: "current.type = 'vowel'",
+        where: "current.type == 'vowel'",
+      },
+      define: {
+        n: "next",
       },
       apply: [
         {
           field: "duration",
           op: "mul",
           value:
-            "($n := $next(current); $n = null or $n.phoneme = 'SIL' ? 1.2 : (($n.voiceless = true and ($n.type = 'stop' or $n.type = 'stop_closure')) ? 0.7 : (($n.voiceless = true and $n.type = 'fricative') ? 0.85 : 1)))",
+            "n == null ? 1.2 : (n.phoneme == 'SIL' ? 1.2 : ((has(n.voiceless) && n.voiceless == true && (n.type == 'stop' || n.type == 'stop_closure')) ? 0.7 : ((has(n.voiceless) && n.voiceless == true && n.type == 'fricative') ? 0.85 : 1)))",
           tag: "segmental_context",
         },
       ],
@@ -295,12 +263,17 @@ export const QLATT_V11_SLICE_RULEPACK = {
         stream: "phone",
         where: "current.phoneme != 'SIL'",
       },
+      define: {
+        n: "next",
+        cur_word: "has(current.word) ? current.word : ''",
+        next_word: "n != null && has(n.word) ? n.word : ''",
+      },
       apply: [
         {
           field: "duration",
           op: "mul",
           value:
-            "($n := $next(current); ($n = null or ($n.phoneme = 'SIL' and $exists($n.punctuationSymbol))) ? 1.4 : (($n != null and $n.phoneme != 'SIL' and $exists(current.word) and $exists($n.word) and current.word != $n.word) ? 1.1 : 1))",
+            "n == null ? 1.4 : ((n.phoneme == 'SIL' && has(n.punctuationSymbol)) ? 1.4 : ((n.phoneme != 'SIL' && cur_word != '' && next_word != '' && cur_word != next_word) ? 1.1 : 1))",
           tag: "boundary",
         },
       ],
@@ -310,13 +283,13 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)",
       select: {
         stream: "phone",
-        where: "current.type = 'stop_release' or current.type = 'stop_aspiration'",
+        where: "current.type == 'stop_release' || current.type == 'stop_aspiration'",
       },
       apply: [
         {
           field: "duration",
           op: "set",
-          value: "$exists(current.inherentDuration) ? current.inherentDuration : current.duration",
+          value: "has(current.inherentDuration) ? current.inherentDuration : current.duration",
         },
       ],
     },
@@ -325,7 +298,7 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Klatt 1980 (SW switch); Allen et al. 1987 Table 12-1",
       select: {
         stream: "phone",
-        where: "$exists(current.inventorySW)",
+        where: "has(current.inventorySW)",
       },
       apply: [
         {
@@ -340,14 +313,14 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Klatt 1980 (cascade/parallel source routing)",
       select: {
         stream: "phone",
-        where: "$not($exists(current.inventorySW))",
+        where: "!has(current.inventorySW)",
       },
       apply: [
         {
           field: "params.SW",
           op: "set",
           value:
-            "(current.type = 'fricative' or current.type = 'affricate' or current.type = 'stop_release' or current.type = 'stop_aspiration') ? 1 : 0",
+            "(current.type == 'fricative' || current.type == 'affricate' || current.type == 'stop_release' || current.type == 'stop_aspiration') ? 1 : 0",
         },
       ],
     },
@@ -356,11 +329,11 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Pierrehumbert 1980; O'Shaughnessy 1976",
       select: {
         stream: "phone",
-        where: "$prev(current) = null",
+        where: "prev == null",
       },
       insert_point: {
         stream: "f0",
-        at: "$at_sync(current.sync_left)",
+        at: "at_sync(current.sync_left)",
         value: "params.base_f0",
         tag: "f0_baseline",
       },
@@ -370,13 +343,14 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Pierrehumbert 1980; Allen et al. 1987; O'Shaughnessy 1976",
       select: {
         stream: "phone",
-        where: "current.phoneme != 'SIL' and (current.params.AV > 0 or current.params.AVS > 0)",
+        where:
+          "current.phoneme != 'SIL' && ((has(current.params.AV) && current.params.AV > 0) || (has(current.params.AVS) && current.params.AVS > 0))",
       },
       insert_point: {
         stream: "f0",
-        at: "$at_sync(current.sync_right)",
+        at: "at_sync(current.sync_right)",
         value:
-          "$max([((params.base_f0 - params.fall_rate_hz * (($phrase_total(current) <= 1) ? 0 : ($phrase_index(current) / ($phrase_total(current) - 1)))) * ($exists(current.params.F0_Factor) ? current.params.F0_Factor : 1)), params.base_f0 * 0.6])",
+          "max([((params.base_f0 - params.fall_rate_hz * (phrase_total <= 1 ? 0 : (double(phrase_index) / double(phrase_total - 1)))) * (has(current.params.F0_Factor) ? current.params.F0_Factor : 1)), params.base_f0 * 0.6])",
         tag: "f0_declination",
       },
     },
@@ -385,12 +359,16 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "O'Shaughnessy 1976; Allen et al. 1987",
       select: {
         stream: "phone",
-        where: "current.type = 'vowel' and current.stress = 1 and (current.params.AV > 0 or current.params.AVS > 0)",
+        where:
+          "current.type == 'vowel' && current.stress == 1 && ((has(current.params.AV) && current.params.AV > 0) || (has(current.params.AVS) && current.params.AVS > 0))",
+      },
+      define: {
+        prev_f0: "prev_point('f0')",
       },
       insert_point: {
         stream: "f0",
-        at: "$at_ratio(current, 0.45)",
-        value: "($prev_point('f0') = null ? params.base_f0 : $prev_point('f0').value) * params.stress_rise",
+        at: "at_ratio(current, 0.45)",
+        value: "(prev_f0 == null ? params.base_f0 : prev_f0.value) * params.stress_rise",
         tag: "f0_stress",
       },
     },
@@ -399,14 +377,19 @@ export const QLATT_V11_SLICE_RULEPACK = {
       citation: "Pierrehumbert 1980; Ladd 2008; O'Shaughnessy 1976",
       select: {
         stream: "phone",
-        where: "current.phoneme = 'SIL' and current.punctuationSymbol = '?'",
+        where: "current.phoneme == 'SIL' && current.punctuationSymbol == '?'",
+      },
+      define: {
+        prev_f0: "prev_point('f0')",
       },
       insert_point: {
         stream: "f0",
-        at: "$at_sync(current.sync_left)",
-        value: "($prev_point('f0') = null ? params.base_f0 : $prev_point('f0').value) + params.question_rise_hz",
+        at: "at_sync(current.sync_left)",
+        value: "(prev_f0 == null ? params.base_f0 : prev_f0.value) + params.question_rise_hz",
         tag: "f0_question",
       },
     },
   },
 };
+
+export const QLATT_V11_SLICE_RULEPACK = QLATT_V12_CEL_RULEPACK;

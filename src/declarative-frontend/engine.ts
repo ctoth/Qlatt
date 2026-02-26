@@ -1,6 +1,6 @@
 import { parseDslSpec } from "./parser";
 import { assertValidSpec } from "./validation";
-import { evaluateExpression } from "./expressions";
+import { evaluateExpression } from "./cel-expressions";
 import {
   TokenStatus,
   isActiveToken,
@@ -20,6 +20,26 @@ type TokenLike = Record<string, any>;
 type RuntimeLike = Record<string, any>;
 export type InventoryResolver = (phoneme: string) => Record<string, unknown> | null | undefined;
 type TokenMarkRef = { raw: unknown; id: string };
+type NavigationBundle = {
+  functions: Record<string, (...args: any[]) => unknown>;
+  buildContext: (
+    token: TokenLike,
+    params: RuntimeLike,
+    extraContext?: RuntimeLike | null
+  ) => RuntimeLike;
+};
+
+function isTokenLike(value: unknown): value is TokenLike {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return (
+    Object.prototype.hasOwnProperty.call(value, "stream") ||
+    Object.prototype.hasOwnProperty.call(value, "sync_left") ||
+    Object.prototype.hasOwnProperty.call(value, "sync_right") ||
+    Object.prototype.hasOwnProperty.call(value, "anchor_left") ||
+    Object.prototype.hasOwnProperty.call(value, "anchor_right") ||
+    Object.prototype.hasOwnProperty.call(value, "status")
+  );
+}
 
 function cloneSequence(sequence: TokenLike[]): TokenLike[] {
   return sequence.map((token) => ({
@@ -344,20 +364,22 @@ function buildNavigationFunctions(
   sequence: TokenLike[],
   runtime: RuntimeLike | null = null,
   options: RuntimeLike = {}
-) {
+): NavigationBundle {
   const currentToken = options.currentToken ?? null;
   const pointCursorByStream =
     options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
   const cache = new Map();
   const activeById = new Map();
+  let activeIdIndexComplete = false;
   const ensureActiveIdIndex = () => {
-    if (activeById.size > 0) return;
+    if (activeIdIndexComplete) return;
     for (const candidate of sequence) {
       if (!isActiveToken(candidate)) continue;
       if (candidate?.id != null && !activeById.has(candidate.id)) {
         activeById.set(candidate.id, candidate);
       }
     }
+    activeIdIndexComplete = true;
   };
 
   const getActiveStreamTokens = (stream: string): TokenLike[] => {
@@ -433,126 +455,209 @@ function buildNavigationFunctions(
     };
   };
 
-  return {
-    prev: (token: TokenLike) => {
-      const stream = getTokenStream(token);
-      const active = getActiveStreamTokens(stream);
-      const index = active.indexOf(token);
-      if (index <= 0) return null;
-      return active[index - 1];
-    },
-    next: (token: TokenLike) => {
-      const stream = getTokenStream(token);
-      const active = getActiveStreamTokens(stream);
-      const index = active.indexOf(token);
-      if (index < 0 || index + 1 >= active.length) return null;
-      return active[index + 1];
-    },
-    index: (token: TokenLike) => getIndex(token),
-    total: (stream: string) => getActiveStreamTokens(stream).length,
-    parent: (token: TokenLike, stream?: string) => {
-      if (!token || token.parent == null) return null;
-      // Build ID index lazily for all active streams referenced so far.
-      if (!activeById.has(token.parent)) ensureActiveIdIndex();
-      const parent = activeById.get(token.parent) ?? null;
-      if (!parent) return null;
-      if (stream && getTokenStream(parent) !== stream) return null;
-      return parent;
-    },
-    children: (token: TokenLike, stream?: string) => {
-      if (!token || token.id == null) return [];
-      return sequence.filter((candidate: TokenLike) => {
-        if (!isActiveToken(candidate)) return false;
-        if (candidate?.parent !== token.id) return false;
-        if (stream && getTokenStream(candidate) !== stream) return false;
-        return true;
-      });
-    },
-    assoc: (token: TokenLike, assocName: string) => {
-      if (!token || typeof assocName !== "string" || assocName.length === 0) return [];
-      ensureActiveIdIndex();
+  const getPrevToken = (token: TokenLike): TokenLike | null => {
+    const stream = getTokenStream(token);
+    const active = getActiveStreamTokens(stream);
+    const index = active.indexOf(token);
+    if (index <= 0) return null;
+    return active[index - 1];
+  };
 
-      const entries = getAssociationEntries(token, assocName);
-      return entries
-        .filter((entry: { to: string; status: number }) => normalizeTokenStatus(entry.status) === TokenStatus.ACTIVE)
-        .map((entry: { to: string; status: number }) => activeById.get(entry.to))
-        .filter((candidate: TokenLike | undefined) => candidate != null);
-    },
-    spanning: (token: TokenLike, stream: string) => {
-      if (!token || typeof stream !== "string" || stream.length === 0) return [];
-      const target = getTokenBounds(token, runtime);
-      if (!target) return [];
-      return getActiveStreamTokens(stream)
-        .filter((candidate: TokenLike) => {
-          const bounds = getTokenBounds(candidate, runtime);
-          if (!bounds) return false;
-          return (
-            compareOrderValue(bounds.left, target.left) <= 0 &&
-            compareOrderValue(bounds.right, target.right) >= 0
-          );
-        })
-        .sort((left: TokenLike, right: TokenLike) => {
-          const leftBounds = getTokenBounds(left, runtime);
-          const rightBounds = getTokenBounds(right, runtime);
-          if (!leftBounds && !rightBounds) return 0;
-          if (!leftBounds) return 1;
-          if (!rightBounds) return -1;
-          const byLeft = compareOrderValue(leftBounds.left, rightBounds.left);
-          if (byLeft !== 0) return byLeft;
-          const byRight = compareOrderValue(leftBounds.right, rightBounds.right);
-          if (byRight !== 0) return byRight;
-          return compareOrderValue(left.id ?? "", right.id ?? "");
-        });
-    },
-    midpoint: (token: TokenLike) => {
-      const bounds = getTokenBounds(token, runtime);
-      if (!bounds) return null;
-      return normalizeAnchor(
-        { anchor_left: bounds.left, anchor_right: bounds.right, ratio: 0.5 },
-        token
-      );
-    },
-    at_ratio: (token: TokenLike, ratio: number) => {
-      const bounds = getTokenBounds(token, runtime);
-      if (!bounds) return null;
-      return normalizeAnchor(
-        {
-          anchor_left: bounds.left,
-          anchor_right: bounds.right,
-          ratio: Number(ratio),
-        },
-        token
-      );
-    },
-    at_sync: (syncMark: unknown) =>
-      normalizeAnchor({ anchor_left: syncMark, anchor_right: syncMark, ratio: 0 }),
-    target: (phoneme: string) => {
-      const payload = materializeInventoryTarget(phoneme, runtime);
-      return {
-        ...payload,
-        params: { ...payload.params },
-      };
-    },
-    prev_point: (stream: string) => {
-      const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
-      if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
-      const points = getActiveStreamTokens(streamName);
-      const cursor = getPointCursor(streamName);
-      const index = cursor >= 0 ? cursor - 1 : points.length - 1;
-      if (index < 0 || index >= points.length) return null;
-      return points[index];
-    },
-    next_point: (stream: string) => {
-      const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
-      if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
-      const points = getActiveStreamTokens(streamName);
-      const cursor = getPointCursor(streamName);
-      const index = cursor >= 0 ? cursor + 1 : 0;
-      if (index < 0 || index >= points.length) return null;
-      return points[index];
-    },
-    phrase_index: (token: TokenLike) => getPhraseWindow(token).index,
-    phrase_total: (token: TokenLike) => getPhraseWindow(token).total,
+  const getNextToken = (token: TokenLike): TokenLike | null => {
+    const stream = getTokenStream(token);
+    const active = getActiveStreamTokens(stream);
+    const index = active.indexOf(token);
+    if (index < 0 || index + 1 >= active.length) return null;
+    return active[index + 1];
+  };
+
+  const getParentToken = (token: TokenLike): TokenLike | null => {
+    if (!token || token.parent == null) return null;
+    if (!activeById.has(token.parent)) ensureActiveIdIndex();
+    return activeById.get(token.parent) ?? null;
+  };
+
+  const resolveAncestorInStream = (token: TokenLike, stream: string): TokenLike | null => {
+    let cursor = getParentToken(token);
+    while (cursor) {
+      if (getTokenStream(cursor) === stream) return cursor;
+      cursor = getParentToken(cursor);
+    }
+    return null;
+  };
+
+  const hierarchyStreams =
+    runtime?.hierarchyStreams instanceof Set ? [...runtime.hierarchyStreams] : [];
+  const viewCache = new WeakMap<TokenLike, TokenLike>();
+
+  const toCursorView = (token: TokenLike | null, seen: Set<TokenLike> = new Set()): TokenLike | null => {
+    if (!token) return null;
+    if (viewCache.has(token)) return viewCache.get(token) ?? null;
+    const view: TokenLike = { ...token };
+    viewCache.set(token, view);
+    if (seen.has(token)) return view;
+
+    const nextSeen = new Set(seen);
+    nextSeen.add(token);
+    for (const streamName of hierarchyStreams) {
+      const ancestor = resolveAncestorInStream(token, streamName);
+      view[streamName] = ancestor ? toCursorView(ancestor, nextSeen) : null;
+    }
+    return view;
+  };
+
+  const toContextValue = (value: unknown): unknown => {
+    if (isTokenLike(value)) return toCursorView(value);
+    if (Array.isArray(value)) return value.map((entry) => toContextValue(entry));
+    if (value && typeof value === "object") {
+      const entries = Object.entries(value).map(([key, entry]) => [key, toContextValue(entry)]);
+      return Object.fromEntries(entries);
+    }
+    return value;
+  };
+
+  const buildContext = (
+    token: TokenLike,
+    params: RuntimeLike,
+    extraContext: RuntimeLike | null = null
+  ): RuntimeLike => {
+    const extra = extraContext && typeof extraContext === "object" ? extraContext : {};
+    const current = isTokenLike(extra.current) ? (extra.current as TokenLike) : token;
+    const prev = getPrevToken(current);
+    const next = getNextToken(current);
+    const prev2 = prev ? getPrevToken(prev) : null;
+    const next2 = next ? getNextToken(next) : null;
+    const phraseWindow = getPhraseWindow(current);
+    const context: RuntimeLike = {
+      current: toCursorView(current),
+      prev: toCursorView(prev),
+      next: toCursorView(next),
+      prev2: toCursorView(prev2),
+      next2: toCursorView(next2),
+      current_index: getIndex(current),
+      phrase_index: phraseWindow.index,
+      phrase_total: phraseWindow.total,
+      params: params ?? {},
+    };
+    for (const [key, value] of Object.entries(extra)) {
+      if (key === "params") continue;
+      context[key] = toContextValue(value);
+    }
+    return context;
+  };
+
+  const midpointFn = (token: TokenLike) => {
+    const bounds = getTokenBounds(token, runtime);
+    if (!bounds) return null;
+    return normalizeAnchor(
+      { anchor_left: bounds.left, anchor_right: bounds.right, ratio: 0.5 },
+      token
+    );
+  };
+
+  const atRatioFn = (token: TokenLike, ratio: number) => {
+    const bounds = getTokenBounds(token, runtime);
+    if (!bounds) return null;
+    return normalizeAnchor(
+      {
+        anchor_left: bounds.left,
+        anchor_right: bounds.right,
+        ratio: Number(ratio),
+      },
+      token
+    );
+  };
+
+  const atSyncFn = (syncMark: unknown) =>
+    normalizeAnchor({ anchor_left: syncMark, anchor_right: syncMark, ratio: 0 });
+
+  const targetFn = (phoneme: string) => {
+    const payload = materializeInventoryTarget(phoneme, runtime);
+    return {
+      ...payload,
+      params: { ...payload.params },
+    };
+  };
+
+  const totalFn = (stream: string) => {
+    const streamName = typeof stream === "string" ? stream : "";
+    if (!streamName) return 0;
+    if (runtime?.knownStreams instanceof Set && !runtime.knownStreams.has(streamName)) {
+      throw new Error(`E_STREAM_UNKNOWN: unknown stream '${streamName}' in total()`);
+    }
+    return getActiveStreamTokens(streamName).length;
+  };
+
+  const prevPointFn = (stream: string) => {
+    const streamName = typeof stream === "string" && stream.length > 0 ? stream : null;
+    if (!streamName || !runtime?.pointStreams?.has(streamName)) return null;
+    const points = getActiveStreamTokens(streamName);
+    const cursor = getPointCursor(streamName);
+    const index = cursor >= 0 ? cursor - 1 : points.length - 1;
+    if (index < 0 || index >= points.length) return null;
+    return toCursorView(points[index]);
+  };
+
+  const assocFn = (token: TokenLike, assocName: string) => {
+    if (!token || typeof assocName !== "string" || assocName.length === 0) return [];
+    ensureActiveIdIndex();
+    const entries = getAssociationEntries(token, assocName);
+    return entries
+      .filter(
+        (entry: { to: string; status: number }) =>
+          normalizeTokenStatus(entry.status) === TokenStatus.ACTIVE
+      )
+      .map((entry: { to: string; status: number }) => activeById.get(entry.to))
+      .filter((candidate: TokenLike | undefined) => candidate != null)
+      .map((candidate: TokenLike) => toCursorView(candidate));
+  };
+
+  const maxFn = (...args: unknown[]): number => {
+    const source = args.length === 1 && Array.isArray(args[0]) ? (args[0] as unknown[]) : args;
+    const values = source.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+    if (values.length === 0) return Number.NEGATIVE_INFINITY;
+    return Math.max(...values);
+  };
+
+  const minFn = (...args: unknown[]): number => {
+    const source = args.length === 1 && Array.isArray(args[0]) ? (args[0] as unknown[]) : args;
+    const values = source.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+    if (values.length === 0) return Number.POSITIVE_INFINITY;
+    return Math.min(...values);
+  };
+
+  const mergeFn = (base: unknown, patch: unknown): Record<string, unknown> => {
+    const lhs =
+      base && typeof base === "object" && !Array.isArray(base)
+        ? (base as Record<string, unknown>)
+        : {};
+    const rhs =
+      patch && typeof patch === "object" && !Array.isArray(patch)
+        ? (patch as Record<string, unknown>)
+        : {};
+    return { ...lhs, ...rhs };
+  };
+
+  const functions = {
+    midpoint: midpointFn,
+    at_ratio: atRatioFn,
+    at_sync: atSyncFn,
+    prev_point: prevPointFn,
+    total: totalFn,
+    target: targetFn,
+    assoc: assocFn,
+    double: (value: unknown) => Number(value),
+    string: (value: unknown) => String(value),
+    max: maxFn,
+    min: minFn,
+    contains: (haystack: unknown, needle: unknown) =>
+      String(haystack ?? "").includes(String(needle ?? "")),
+    merge: mergeFn,
+  };
+
+  return {
+    functions,
+    buildContext,
   };
 }
 
@@ -560,26 +665,27 @@ function evaluateSelectWhere(
   whereExpr: unknown,
   token: TokenLike,
   params: RuntimeLike,
-  functions: RuntimeLike
+  navigation: NavigationBundle,
+  extraContext: RuntimeLike | null = null
 ): boolean {
   if (!whereExpr || whereExpr === "true") return true;
   if (typeof whereExpr !== "string") return false;
-  const result = evaluateExpression(
-    whereExpr,
-    { current: token, params: params ?? {} },
-    functions
-  );
+  const context = navigation.buildContext(token, params, extraContext);
+  const result = evaluateExpression(whereExpr, context, navigation.functions);
   return Boolean(result);
 }
 
 function evaluateRuleConstraint(
   constraintExpr: unknown,
-  context: RuntimeLike,
-  functions: RuntimeLike
+  token: TokenLike,
+  params: RuntimeLike,
+  navigation: NavigationBundle,
+  extraContext: RuntimeLike | null = null
 ): boolean {
   if (!constraintExpr || constraintExpr === "true") return true;
   if (typeof constraintExpr !== "string") return false;
-  const result = evaluateExpression(constraintExpr, context, functions);
+  const context = navigation.buildContext(token, params, extraContext);
+  const result = evaluateExpression(constraintExpr, context, navigation.functions);
   return Boolean(result);
 }
 
@@ -587,23 +693,15 @@ function evaluateValueExpression(
   expr: unknown,
   token: TokenLike,
   params: RuntimeLike,
-  functions: RuntimeLike,
+  navigation: NavigationBundle,
   extraContext: RuntimeLike | null = null
 ): number {
   if (typeof expr === "number") return expr;
   if (typeof expr !== "string") {
     throw new Error(`E_EXPR_VALUE_TYPE: unsupported value expression type: ${typeof expr}`);
   }
-  const context = {
-    current: token,
-    params: params ?? {},
-    ...(extraContext ?? {}),
-  };
-  const value = evaluateExpression(
-    expr,
-    context,
-    functions
-  );
+  const context = navigation.buildContext(token, params, extraContext);
+  const value = evaluateExpression(expr, context, navigation.functions);
   if (!Number.isFinite(value)) {
     throw new Error(`E_EXPR_NONFINITE: expression '${expr}' did not evaluate to a finite number`);
   }
@@ -769,7 +867,7 @@ function applyEffectToToken(
   effect: TokenLike,
   token: TokenLike,
   params: RuntimeLike,
-  functions: RuntimeLike,
+  navigation: NavigationBundle,
   runtime: RuntimeLike,
   extraContext: RuntimeLike | null = null
 ): void {
@@ -803,7 +901,7 @@ function applyEffectToToken(
 
   const currentValue = getField();
   const current = Number.isFinite(currentValue) ? Number(currentValue) : 0;
-  const value = evaluateValueExpression(effect.value, token, params, functions, extraContext);
+  const value = evaluateValueExpression(effect.value, token, params, navigation, extraContext);
   const op = effect.op;
   if (op !== "set" && op !== "add" && op !== "mul") {
     throw new Error(`E_EFFECT_OP_UNSUPPORTED: unsupported effect op '${op}' in slice engine`);
@@ -846,7 +944,7 @@ function applyEffectsToTargets(
   rule: TokenLike,
   resolveTarget: (targetName: string) => TokenLike | null,
   params: RuntimeLike,
-  functions: RuntimeLike,
+  navigation: NavigationBundle,
   runtime: RuntimeLike,
   defaultTargetName = "current",
   extraContext: RuntimeLike | null = null
@@ -858,7 +956,7 @@ function applyEffectsToTargets(
     if (!target) {
       throw new Error(`E_EFFECT_TARGET_UNKNOWN: unknown effect target '${targetName}' in slice engine`);
     }
-    applyEffectToToken(effect, target, params, functions, runtime, extraContext);
+    applyEffectToToken(effect, target, params, navigation, runtime, extraContext);
   }
 }
 
@@ -883,25 +981,33 @@ function applyAssociationSpecs(
   }
 }
 
-function evaluateActionExpression(expr: unknown, context: RuntimeLike, functions: RuntimeLike): unknown {
+function evaluateActionExpression(
+  expr: unknown,
+  context: RuntimeLike,
+  navigation: NavigationBundle
+): unknown {
   if (typeof expr === "string") {
-    return evaluateExpression(expr, context, functions);
+    return evaluateExpression(expr, context, navigation.functions);
   }
   return expr;
 }
 
-function deepEvaluateTemplate(value: unknown, context: RuntimeLike, functions: RuntimeLike): unknown {
+function deepEvaluateTemplate(
+  value: unknown,
+  context: RuntimeLike,
+  navigation: NavigationBundle
+): unknown {
   if (typeof value === "string") {
-    return evaluateExpression(value, context, functions);
+    return evaluateExpression(value, context, navigation.functions);
   }
   if (Array.isArray(value)) {
-    return value.map((item) => deepEvaluateTemplate(item, context, functions));
+    return value.map((item) => deepEvaluateTemplate(item, context, navigation));
   }
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => [
         key,
-        deepEvaluateTemplate(item, context, functions),
+        deepEvaluateTemplate(item, context, navigation),
       ])
     );
   }
@@ -948,14 +1054,14 @@ function buildSpliceInsertions(
   bounds: { leftId: string; rightId: string },
   context: RuntimeLike,
   runtime: RuntimeLike,
-  functions: RuntimeLike
+  navigation: NavigationBundle
 ): TokenLike[] {
   const specs = Array.isArray(insertSpecs) ? insertSpecs : [];
   if (specs.length === 0) return [];
   const segments = runtime.axis.splitMarkRange(bounds.leftId, bounds.rightId, specs.length);
   return specs.map((spec, index) => {
     const template = spec && typeof spec === "object" ? spec : {};
-    const evaluated = deepEvaluateTemplate(template, context, functions);
+    const evaluated = deepEvaluateTemplate(template, context, navigation);
     const evaluatedObject =
       evaluated && typeof evaluated === "object" && !Array.isArray(evaluated)
         ? (evaluated as TokenLike)
@@ -1114,7 +1220,7 @@ function applySpliceSpec(
   params: RuntimeLike,
   sequence: TokenLike[],
   runtime: RuntimeLike,
-  functions: RuntimeLike,
+  navigation: NavigationBundle,
   defaultTargetName = "current",
   extraContext: RuntimeLike | null = null
 ) {
@@ -1125,18 +1231,14 @@ function applySpliceSpec(
     throw new Error(`E_SPLICE_TARGET_UNKNOWN: unknown splice target '${targetName}' in slice engine`);
   }
   const stream = getTokenStream(target);
-  const context = {
-    current: target,
-    params: params ?? {},
-    ...(extraContext ?? {}),
-  };
+  const context = navigation.buildContext(target, params, extraContext);
   const activeStreamTokens = sequence.filter(
     (token) => isActiveToken(token) && getTokenStream(token) === stream
   );
 
   if (spliceSpec.type === "replace_range") {
-    const leftExpr = evaluateActionExpression(spliceSpec.range_left, context, functions);
-    const rightExpr = evaluateActionExpression(spliceSpec.range_right, context, functions);
+    const leftExpr = evaluateActionExpression(spliceSpec.range_left, context, navigation);
+    const rightExpr = evaluateActionExpression(spliceSpec.range_right, context, navigation);
     const leftId = resolveMarkId(runtime, leftExpr);
     const rightId = resolveMarkId(runtime, rightExpr);
     if (!leftId || !rightId) {
@@ -1168,7 +1270,7 @@ function applySpliceSpec(
       { leftId, rightId },
       context,
       runtime,
-      functions
+      navigation
     );
     if (inserts.length > 0) {
       sequence.splice(insertionIndex, 0, ...inserts);
@@ -1177,7 +1279,7 @@ function applySpliceSpec(
   }
 
   if (spliceSpec.type === "insert_at_boundary") {
-    const boundaryExpr = evaluateActionExpression(spliceSpec.boundary, context, functions);
+    const boundaryExpr = evaluateActionExpression(spliceSpec.boundary, context, navigation);
     const boundaryId = resolveMarkId(runtime, boundaryExpr);
     const side = spliceSpec.side === "before" ? "before" : "after";
     if (!boundaryId) {
@@ -1193,7 +1295,7 @@ function applySpliceSpec(
       bounds,
       context,
       runtime,
-      functions
+      navigation
     );
     if (inserts.length > 0) {
       sequence.splice(insertionIndex, 0, ...inserts);
@@ -1222,14 +1324,12 @@ function evaluateAnchorExpression(
   expr: unknown,
   token: TokenLike,
   params: RuntimeLike,
-  functions: RuntimeLike
+  navigation: NavigationBundle,
+  extraContext: RuntimeLike | null = null
 ): TokenLike {
   if (typeof expr === "string") {
-    const evaluated = evaluateExpression(
-      expr,
-      { current: token, params: params ?? {} },
-      functions
-    );
+    const context = navigation.buildContext(token, params, extraContext);
+    const evaluated = evaluateExpression(expr, context, navigation.functions);
     return normalizeAnchor(evaluated, token);
   }
   if (expr && typeof expr === "object") {
@@ -1244,7 +1344,8 @@ function applyInsertPointSpec(
   params: RuntimeLike,
   sequence: TokenLike[],
   runtime: RuntimeLike,
-  defaultTargetName = "current"
+  defaultTargetName = "current",
+  extraContext: RuntimeLike | null = null
 ) {
   if (!pointSpec || typeof pointSpec !== "object") return;
   const stream = pointSpec.stream;
@@ -1266,7 +1367,7 @@ function applyInsertPointSpec(
     currentToken: target,
     pointCursorByStream: new Map([[stream, activePointCount]]),
   });
-  const anchor = evaluateAnchorExpression(pointSpec.at, target, params, pointFunctions);
+  const anchor = evaluateAnchorExpression(pointSpec.at, target, params, pointFunctions, extraContext);
   const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
   const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);
   if (!anchorLeftId || !anchorRightId) {
@@ -1275,7 +1376,7 @@ function applyInsertPointSpec(
   const value =
     pointSpec.value == null
       ? null
-      : evaluateValueExpression(pointSpec.value, target, params, pointFunctions);
+      : evaluateValueExpression(pointSpec.value, target, params, pointFunctions, extraContext);
 
   const pointToken: TokenLike = {
     id: nextPointId(runtime, stream),
@@ -1296,6 +1397,31 @@ function applyInsertPointSpec(
   sequence.push(pointToken);
 }
 
+function evaluateRuleDefine(
+  rule: TokenLike,
+  token: TokenLike,
+  params: RuntimeLike,
+  navigation: NavigationBundle,
+  extraContext: RuntimeLike | null = null
+): RuntimeLike {
+  const define = rule?.define;
+  if (!define || typeof define !== "object" || Array.isArray(define)) return {};
+  const resolved: RuntimeLike = {};
+  for (const [name, expr] of Object.entries(define)) {
+    if (typeof name !== "string" || name.length === 0) continue;
+    if (typeof expr !== "string") {
+      resolved[name] = expr;
+      continue;
+    }
+    const context = navigation.buildContext(token, params, {
+      ...(extraContext ?? {}),
+      ...resolved,
+    });
+    resolved[name] = evaluateExpression(expr, context, navigation.functions);
+  }
+  return resolved;
+}
+
 function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
   const select = rule.select ?? {};
   const stream = select.stream;
@@ -1311,14 +1437,24 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
   }
 
   for (const token of selected) {
-    const extraContext = { current: token };
+    const baseContext = { current: token };
     const navigationFunctions = buildNavigationFunctions(sequence, runtime, {
       currentToken: token,
     });
+    const defineContext = evaluateRuleDefine(
+      rule,
+      token,
+      runtime.params,
+      navigationFunctions,
+      baseContext
+    );
+    const extraContext = { ...baseContext, ...defineContext };
     const constraintOk = evaluateRuleConstraint(
       rule.constraint,
-      { ...extraContext, params: runtime.params ?? {} },
-      navigationFunctions
+      token,
+      runtime.params,
+      navigationFunctions,
+      extraContext
     );
     if (!constraintOk) continue;
     runtime.trace?.push({
@@ -1359,7 +1495,9 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       (targetName) => (targetName === "current" ? token : null),
       runtime.params,
       sequence,
-      runtime
+      runtime,
+      "current",
+      extraContext
     );
 
     if (rule.suppress || rule.delete) {
@@ -1382,7 +1520,7 @@ function matchPatternFrom(
   startIndex: number,
   pattern: TokenLike,
   params: RuntimeLike,
-  functions: RuntimeLike
+  functions: NavigationBundle
 ) {
   const captures: TokenLike = {};
   let cursor = startIndex;
@@ -1417,12 +1555,22 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
     const captureNames = Object.keys(captures);
     const defaultTarget = captureNames[0] ?? "current";
     const currentToken = captures[defaultTarget] ?? null;
-    const extraContext = { ...captures, current: currentToken };
+    const baseContext = { ...captures, current: currentToken };
     const captureFunctions = buildNavigationFunctions(sequence, runtime, { currentToken });
+    const defineContext = evaluateRuleDefine(
+      rule,
+      currentToken,
+      runtime.params,
+      captureFunctions,
+      baseContext
+    );
+    const extraContext = { ...baseContext, ...defineContext };
     const constraintOk = evaluateRuleConstraint(
       rule.constraint,
-      { ...extraContext, params: runtime.params ?? {} },
-      captureFunctions
+      currentToken,
+      runtime.params,
+      captureFunctions,
+      extraContext
     );
     if (!constraintOk) continue;
     runtime.trace?.push({
@@ -1466,7 +1614,8 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       runtime.params,
       sequence,
       runtime,
-      defaultTarget
+      defaultTarget,
+      extraContext
     );
 
     if (rule.suppress || rule.delete) {
@@ -1796,6 +1945,14 @@ export function runRuleEngine(
       .filter(([, stream]) => stream?.type === "base")
       .map(([name]) => name)
   );
+  const knownStreams = new Set(Object.keys(streams));
+  const hierarchyStreams = new Set(
+    Array.isArray(spec.topology?.hierarchy) && spec.topology.hierarchy.length > 0
+      ? spec.topology.hierarchy.filter((name: unknown) => typeof name === "string" && knownStreams.has(name))
+      : Object.entries(streams)
+          .filter(([, stream]) => stream?.type === "span")
+          .map(([name]) => name)
+  );
   const scalarSpecsByStream = new Map(
     Object.entries(streams).map(([name, stream]) => [
       name,
@@ -1823,6 +1980,8 @@ export function runRuleEngine(
     patterns: spec.patterns ?? {},
     pointStreams,
     baseStreams,
+    knownStreams,
+    hierarchyStreams,
     pointCounters: new Map(),
     insertCounters: new Map(),
     scalarSpecsByStream,

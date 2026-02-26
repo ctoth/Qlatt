@@ -354,6 +354,21 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     throw new Error('Registry is required for createKlattRuntime');
   }
 
+  // Validate graph param specs — reject { expr: "..." } at load time
+  // Inline expressions are not supported; use realize rules in semantics.yaml.
+  for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
+    if (!nodeDef.params) continue;
+    for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
+      if (typeof paramSpec === 'object' && paramSpec !== null && 'expr' in paramSpec) {
+        throw new Error(
+          `Inline expressions ({ expr: ... }) are not supported in graph param specs. ` +
+          `Use a realize rule in semantics.yaml instead. ` +
+          `Found on node '${nodeId}', param '${paramName}'`
+        );
+      }
+    }
+  }
+
   // Create prefixed logger
   const log = (msg: string) => logger(`[klatt-runtime] ${msg}`);
 

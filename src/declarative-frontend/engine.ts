@@ -675,6 +675,46 @@ function buildNavigationFunctions(
     return { ...lhs, ...rhs };
   };
 
+  const runtimeParams =
+    runtime?.params && typeof runtime.params === "object" ? runtime.params : {};
+
+  const lookBackWhereFn = (
+    tokenRef: unknown,
+    maxSteps: unknown = 1,
+    predicateExpr: unknown
+  ): TokenLike | null => {
+    const source = resolveLiveToken(tokenRef);
+    if (!source) return null;
+
+    const steps = Math.trunc(Number(maxSteps));
+    if (!Number.isFinite(steps) || steps <= 0) return null;
+
+    const predicate = typeof predicateExpr === "string" ? predicateExpr.trim() : "";
+    if (!predicate) return null;
+
+    const stream = getTokenStream(source);
+    const active = getActiveStreamTokens(stream);
+    const sourceIndex = active.indexOf(source);
+    if (sourceIndex <= 0) return null;
+
+    const limit = Math.min(steps, sourceIndex);
+    for (let offset = 1; offset <= limit; offset += 1) {
+      const candidate = active[sourceIndex - offset];
+      if (!candidate) continue;
+      // Evaluate the predicate with candidate-local cursors and `source` as origin.
+      const context = buildContext(candidate, runtimeParams, {
+        source,
+        candidate,
+        lookback_offset: offset,
+      });
+      if (Boolean(evaluateExpression(predicate, context, functions))) {
+        return toCursorView(candidate);
+      }
+    }
+
+    return null;
+  };
+
   const functions = {
     midpoint: midpointFn,
     at_ratio: atRatioFn,
@@ -700,6 +740,7 @@ function buildNavigationFunctions(
     contains: (haystack: unknown, needle: unknown) =>
       String(haystack ?? "").includes(String(needle ?? "")),
     merge: mergeFn,
+    look_back_where: lookBackWhereFn,
   };
 
   return {
@@ -743,14 +784,12 @@ function evaluateValueExpression(
   navigation: NavigationBundle,
   extraContext: RuntimeLike | null = null
 ): number {
-  if (typeof expr === "number") return expr;
-  if (typeof expr !== "string") {
-    throw new Error(`E_EXPR_VALUE_TYPE: unsupported value expression type: ${typeof expr}`);
-  }
   const context = navigation.buildContext(token, params, extraContext);
-  const value = evaluateExpression(expr, context, navigation.functions);
+  const value = evaluateActionExpression(expr, context, navigation);
   if (!Number.isFinite(value)) {
-    throw new Error(`E_EXPR_NONFINITE: expression '${expr}' did not evaluate to a finite number`);
+    throw new Error(
+      `E_EXPR_NONFINITE: expression '${typeof expr === "string" ? expr : JSON.stringify(expr)}' did not evaluate to a finite number`
+    );
   }
   return Number(value);
 }
@@ -921,6 +960,12 @@ function applyEffectToToken(
   if (!effect || typeof effect !== "object") return;
   const field = typeof effect.field === "string" ? effect.field : "";
   if (!field) return;
+  const hasValueExpr = Object.prototype.hasOwnProperty.call(effect, "value");
+  const hasDispatchExpr = Object.prototype.hasOwnProperty.call(effect, "dispatch");
+  if (hasValueExpr && hasDispatchExpr) {
+    throw new Error("E_DISPATCH_AND_VALUE: effect cannot specify both value and dispatch");
+  }
+  const valueExpr = hasDispatchExpr ? { dispatch: effect.dispatch } : effect.value;
 
   const fieldPath = field.split(".").filter((part) => part.length > 0);
   if (fieldPath.length === 0) return;
@@ -948,7 +993,7 @@ function applyEffectToToken(
 
   const currentValue = getField();
   const current = Number.isFinite(currentValue) ? Number(currentValue) : 0;
-  const value = evaluateValueExpression(effect.value, token, params, navigation, extraContext);
+  const value = evaluateValueExpression(valueExpr, token, params, navigation, extraContext);
   const op = effect.op;
   if (op !== "set" && op !== "add" && op !== "mul") {
     throw new Error(`E_EFFECT_OP_UNSUPPORTED: unsupported effect op '${op}' in slice engine`);
@@ -1033,6 +1078,29 @@ function evaluateActionExpression(
   context: RuntimeLike,
   navigation: NavigationBundle
 ): unknown {
+  if (expr && typeof expr === "object" && !Array.isArray(expr) && Array.isArray((expr as TokenLike).dispatch)) {
+    const rows = (expr as TokenLike).dispatch as unknown[];
+    let hasDefault = false;
+    let defaultExpr: unknown = null;
+    for (const row of rows) {
+      if (!row || typeof row !== "object" || Array.isArray(row)) continue;
+      const dispatchRow = row as TokenLike;
+      if (Object.prototype.hasOwnProperty.call(dispatchRow, "when")) {
+        const condition = evaluateActionExpression(dispatchRow.when, context, navigation);
+        if (Boolean(condition)) {
+          return evaluateActionExpression(dispatchRow.value, context, navigation);
+        }
+      }
+      if (Object.prototype.hasOwnProperty.call(dispatchRow, "default")) {
+        hasDefault = true;
+        defaultExpr = dispatchRow.default;
+      }
+    }
+    if (!hasDefault) {
+      throw new Error("E_DISPATCH_NO_DEFAULT: dispatch block requires a default clause");
+    }
+    return evaluateActionExpression(defaultExpr, context, navigation);
+  }
   if (typeof expr === "string") {
     return evaluateExpression(expr, context, navigation.functions);
   }
@@ -1044,6 +1112,9 @@ function deepEvaluateTemplate(
   context: RuntimeLike,
   navigation: NavigationBundle
 ): unknown {
+  if (value && typeof value === "object" && !Array.isArray(value) && Array.isArray((value as TokenLike).dispatch)) {
+    return evaluateActionExpression(value, context, navigation);
+  }
   if (typeof value === "string") {
     return evaluateExpression(value, context, navigation.functions);
   }

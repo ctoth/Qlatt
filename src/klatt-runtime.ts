@@ -6,7 +6,7 @@
  */
 
 import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator';
-import { dbToLinear, dbToLinearKlsyn, min, max, pow } from './builtin-functions';
+import { registerNumericBuiltins } from './semantics/register-builtins';
 
 // =============================================================================
 // Registry Types
@@ -238,40 +238,7 @@ function waitForNodeReady(
 import { createTopologicalEvaluator } from './semantics/topological-evaluator';
 import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
 
-function requireNumericArg(fnName: string, index: number, value: ParamValue): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw new Error(`${fnName} expected finite numeric argument at index ${index}`);
-  }
-  return value;
-}
-
-function registerNumericBuiltins(celEvaluator: CelEvaluator): void {
-  celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg('dbToLinear', 0, args[0]);
-    return dbToLinear(db);
-  });
-
-  celEvaluator.registerFunction('dbToLinearKlsyn', (...args: ParamValue[]): ParamValue => {
-    const db = requireNumericArg('dbToLinearKlsyn', 0, args[0]);
-    return dbToLinearKlsyn(db);
-  });
-
-  celEvaluator.registerFunction('min', (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg('min', index, arg));
-    return min(...values);
-  });
-
-  celEvaluator.registerFunction('max', (...args: ParamValue[]): ParamValue => {
-    const values = args.map((arg, index) => requireNumericArg('max', index, arg));
-    return max(...values);
-  });
-
-  celEvaluator.registerFunction('pow', (...args: ParamValue[]): ParamValue => {
-    const x = requireNumericArg('pow', 0, args[0]);
-    const y = requireNumericArg('pow', 1, args[1]);
-    return pow(x, y);
-  });
-}
+// requireNumericArg and registerNumericBuiltins moved to ./semantics/register-builtins.ts
 
 // Bacon graph types (simplified - Bacon package has full types)
 export interface BaconGraph {

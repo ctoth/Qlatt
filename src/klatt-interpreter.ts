@@ -365,7 +365,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // PLSTEP detection state
     let prevAF = -70;
     let prevAH = -70;
-    const PLSTEP_THRESHOLD = 49;  // dB rise threshold for burst detection
+    // Read threshold from semantics constant (single source of truth), fallback to 49
+    const PLSTEP_THRESHOLD = (typeof constants['plstepThreshold'] === 'number')
+      ? constants['plstepThreshold']
+      : 49;  // dB rise threshold for burst detection (Klatt 80 PARCOE.FOR)
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];

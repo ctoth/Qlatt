@@ -332,6 +332,12 @@ constants:
   # Parallel formant sign alternation
   parallelSign: [1, -1, 1, -1, 1, -1]
 
+  # PLSTEP burst detection threshold (dB rise between frames)
+  # From Klatt 80 PARCOE.FOR:
+  #   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  #   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  plstepThreshold: 49
+
 # Realize rules - convert input params to realized values
 realize:
   # Formant proximity corrections
@@ -491,6 +497,12 @@ realize:
   outputLpBandwidth:
     expr: "sampleRate * 0.1"
     deps: [sampleRate]
+
+  # PLSTEP burst detection threshold (pass constant through to realized values)
+  # Used by edge-detectors in graph.yaml via { bind: plstepThreshold }
+  plstepThreshold:
+    expr: "plstepThreshold"
+    deps: []
 
   # PLSTEP burst amplitude
   # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)

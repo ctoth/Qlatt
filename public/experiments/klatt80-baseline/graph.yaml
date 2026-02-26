@@ -62,14 +62,14 @@ nodes:
   afEdgeDetector:
     type: edge-detector
     params:
-      threshold: 49.0  # Klatt 80 threshold
+      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
       input: { bind: AF }  # Monitor frication amplitude
 
   # Edge detector for AH (aspiration amplitude)
   ahEdgeDetector:
     type: edge-detector
     params:
-      threshold: 49.0  # Klatt 80 threshold
+      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
       input: { bind: AH }  # Monitor aspiration amplitude
 
   # Sum triggers (OR gate - either AF or AH trigger fires the envelope)

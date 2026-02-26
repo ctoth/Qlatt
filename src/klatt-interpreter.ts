@@ -38,11 +38,24 @@ interface Binding {
   param: AudioParam;
   nodeId: string;
   paramName: string;
-  ramp: boolean;  // true for aspiration/frication
 }
 
 // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
 type BindingList = Binding[];
+
+/**
+ * Tagged union for binding categorization.
+ * Makes the mutual-exclusion invariant structural and compiler-checked:
+ * - 'realized': has a realize rule, uses setValueAtTime every frame
+ * - 'ramp': has a realize rule with ramp: true, uses setValueAtTime at frame 0
+ *           and linearRampToValueAtTime for subsequent frames
+ * - 'passthrough': no realize rule, raw param value passed through with setValueAtTime
+ */
+type CategorizedBinding = {
+  name: string;
+  param: AudioParam;
+  type: 'realized' | 'ramp' | 'passthrough';
+};
 
 // Schedule entry for pre-compiled parameter automation
 type ScheduleEntry = {
@@ -228,74 +241,40 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const param = getAudioParam(audioNode, paramName);
       if (param) {
         const existing = bindings.get(bindName) ?? [];
-        existing.push({
-          param,
-          nodeId,
-          paramName,
-          ramp: rampParams.has(bindName),
-        });
+        existing.push({ param, nodeId, paramName });
         bindings.set(bindName, existing);
       }
     }
   }
 
-  // Partition bindings into realized (has realize rule) vs passthrough (no rule)
-  // This ensures each binding is written exactly once with the correct value
+  // Categorize all bindings into a single tagged-union list.
+  // Each binding gets exactly one discriminant: 'ramp', 'realized', or 'passthrough'.
+  // This makes the mutual-exclusion invariant structural — no procedural if/continue logic.
   const realizedNames = new Set(Object.keys(semantics.realize || {}));
-  const realizedBindings = new Set<string>();
-  const passthroughBindings = new Set<string>();
-  for (const name of bindings.keys()) {
-    if (realizedNames.has(name)) {
-      realizedBindings.add(name);
+  const allBindings: CategorizedBinding[] = [];
+
+  let realizedCount = 0;
+  let rampCount = 0;
+  let passthroughCount = 0;
+
+  for (const [name, bindingList] of bindings) {
+    let type: CategorizedBinding['type'];
+    if (rampParams.has(name)) {
+      type = 'ramp';
+      rampCount++;
+    } else if (realizedNames.has(name)) {
+      type = 'realized';
+      realizedCount++;
     } else {
-      passthroughBindings.add(name);
+      type = 'passthrough';
+      passthroughCount++;
+    }
+    for (const binding of bindingList) {
+      allBindings.push({ name, param: binding.param, type });
     }
   }
 
-  // Flatten binding lists at init time to avoid repeated Map lookups and null checks
-  type FlatBinding = { name: string; param: AudioParam; ramp: boolean };
-
-  // Flatten realized bindings, EXCLUDING ramp params to prevent double-write
-  // Ramp params are handled separately: setValueAtTime at frame 0, linearRampToValueAtTime for i>0
-  const realizedBindingsList: FlatBinding[] = [];
-  for (const name of realizedBindings) {
-    if (rampParams.has(name)) continue;  // Skip ramp params - handled by rampBindingsList
-    const bindingList = bindings.get(name);
-    if (bindingList) {
-      for (const binding of bindingList) {
-        realizedBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
-      }
-    }
-  }
-
-  // Flatten passthrough bindings
-  const passthroughBindingsList: FlatBinding[] = [];
-  for (const name of passthroughBindings) {
-    const bindingList = bindings.get(name);
-    if (bindingList) {
-      for (const binding of bindingList) {
-        passthroughBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
-      }
-    }
-  }
-
-  // Flatten ramp bindings
-  const rampBindingsList: FlatBinding[] = [];
-  for (const name of rampParams) {
-    const bindingList = bindings.get(name);
-    if (bindingList) {
-      for (const binding of bindingList) {
-        rampBindingsList.push({ name, param: binding.param, ramp: binding.ramp });
-      }
-    }
-  }
-
-  // Count total bindings
-  let totalBindings = 0;
-  for (const list of bindings.values()) {
-    totalBindings += list.length;
-  }
-  log(`Built ${bindings.size} unique bindings (${totalBindings} total targets), ${realizedBindings.size} realized, ${passthroughBindings.size} passthrough`);
+  log(`Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${realizedCount} realized, ${rampCount} ramp, ${passthroughCount} passthrough`);
 
   // Track duration for getTrackDuration()
   let trackDuration = 0;
@@ -409,38 +388,31 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       prevAF = currentAF;
       prevAH = currentAH;
 
-      // Add step entries for realized bindings
-      for (const { name, param } of realizedBindingsList) {
-        const value = realized[name];
-        if (typeof value === 'number') {
-          schedule.push({ time: t, param, value, ramp: false });
-        }
-      }
-
-      // Add step entries for passthrough bindings
-      for (const { name, param } of passthroughBindingsList) {
-        const value = frame.params[name];
-        if (typeof value === 'number') {
-          schedule.push({ time: t, param, value, ramp: false });
-        }
-      }
-
-      // Ramp params: setValueAtTime at frame 0, linearRampToValueAtTime thereafter
-      // This prevents double-write that would collapse ramps to steps
-      if (i === 0) {
-        // Frame 0: set initial value for ramp params
-        for (const { name, param } of rampBindingsList) {
-          const value = realized[name];
-          if (typeof value === 'number') {
-            schedule.push({ time: t, param, value, ramp: false });  // setValueAtTime
+      // Schedule all bindings via tagged-union discriminant
+      for (const binding of allBindings) {
+        switch (binding.type) {
+          case 'realized': {
+            const value = realized[binding.name];
+            if (typeof value === 'number') {
+              schedule.push({ time: t, param: binding.param, value, ramp: false });
+            }
+            break;
           }
-        }
-      } else {
-        // Frames 1+: ramp to new value
-        for (const { name, param } of rampBindingsList) {
-          const value = realized[name];
-          if (typeof value === 'number') {
-            schedule.push({ time: t, param, value, ramp: true });  // linearRampToValueAtTime
+          case 'passthrough': {
+            const value = frame.params[binding.name];
+            if (typeof value === 'number') {
+              schedule.push({ time: t, param: binding.param, value, ramp: false });
+            }
+            break;
+          }
+          case 'ramp': {
+            // Ramp params: setValueAtTime at frame 0, linearRampToValueAtTime thereafter
+            // This prevents double-write that would collapse ramps to steps
+            const value = realized[binding.name];
+            if (typeof value === 'number') {
+              schedule.push({ time: t, param: binding.param, value, ramp: i > 0 });
+            }
+            break;
           }
         }
       }

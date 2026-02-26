@@ -106,6 +106,157 @@ function mockRuntime(): KlattRuntime {
 // Tests
 // ---------------------------------------------------------------------------
 
+describe('Binding categorization (tagged union)', () => {
+  it('every bound name appears in exactly one binding category', () => {
+    // Set up semantics with mixed bindings: some realized+ramp, some realized, some passthrough
+    const semantics: SemanticsDocument = {
+      params: {
+        AF: { default: 0, min: 0, max: 80 },
+        AH: { default: 0, min: 0, max: 80 },
+        F1: { default: 500, min: 200, max: 1000 },
+        F0: { default: 120, min: 80, max: 500 },
+      },
+      constants: {},
+      realize: {
+        AF: { expr: 'AF', ramp: true },       // ramp binding
+        AH: { expr: 'AH', ramp: true },       // ramp binding
+        F1: { expr: 'F1' },                   // realized (no ramp)
+        // F0 has no realize rule → passthrough
+      },
+    };
+
+    // Create mock nodes with parameters
+    const afParam = mockAudioParam();
+    const ahParam = mockAudioParam();
+    const f1Param = mockAudioParam();
+    const f0Param = mockAudioParam();
+
+    const lfNode = mockWorkletNode(['f0', 'af', 'ah']);
+    const resNode = mockWorkletNode(['frequency']);
+
+    // Set up binding map so each name maps to a node+param
+    const bindingMap = new Map<string, BindingInfo[]>([
+      ['AF', [{ nodeId: 'lfSource', paramName: 'af', bindName: 'AF' }]],
+      ['AH', [{ nodeId: 'lfSource', paramName: 'ah', bindName: 'AH' }]],
+      ['F1', [{ nodeId: 'resonator1', paramName: 'frequency', bindName: 'F1' }]],
+      ['F0', [{ nodeId: 'lfSource', paramName: 'f0', bindName: 'F0' }]],
+    ]);
+
+    const nodeMap = new Map<string, AudioNode>([
+      ['lfSource', lfNode],
+      ['resonator1', resNode],
+    ]);
+
+    const rt = {
+      ...mockRuntime(),
+      getNode: vi.fn((id: string) => nodeMap.get(id)),
+      getBindingMap: vi.fn(() => bindingMap),
+    } as unknown as KlattRuntime;
+
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: rt,
+      graph: minimalGraph(),
+      semantics,
+      bindingMap,
+    });
+
+    // Schedule a minimal track to exercise all bindings
+    const track: KlattFrame[] = [
+      { time: 0.0, params: { AF: 10, AH: 10, F1: 500, F0: 120 } },
+      { time: 0.005, params: { AF: 20, AH: 20, F1: 600, F0: 130 } },
+    ];
+
+    // Should not throw — if any binding were double-written or dropped,
+    // the schedule would have incorrect entry counts
+    expect(() => interpreter.scheduleTrack(track, 0)).not.toThrow();
+
+    // Verify: each param should have been scheduled
+    // AF (ramp): frame 0 → setValueAtTime, frame 1 → linearRampToValueAtTime
+    const lfParams = (lfNode as unknown as { parameters: Map<string, AudioParam> }).parameters;
+    const afMock = lfParams.get('af')!;
+    expect(afMock.setValueAtTime).toHaveBeenCalled();
+    expect(afMock.linearRampToValueAtTime).toHaveBeenCalled();
+
+    // F1 (realized, non-ramp): both frames → setValueAtTime only
+    const resParams = (resNode as unknown as { parameters: Map<string, AudioParam> }).parameters;
+    const f1Mock = resParams.get('frequency')!;
+    expect(f1Mock.setValueAtTime).toHaveBeenCalled();
+    expect(f1Mock.linearRampToValueAtTime).not.toHaveBeenCalled();
+
+    // F0 (passthrough): both frames → setValueAtTime only
+    const f0Mock = lfParams.get('f0')!;
+    expect(f0Mock.setValueAtTime).toHaveBeenCalled();
+    expect(f0Mock.linearRampToValueAtTime).not.toHaveBeenCalled();
+  });
+
+  it('binding type discriminant is correct: ramp, realized, passthrough', () => {
+    // This test verifies correct categorization by checking scheduling behavior:
+    // - 'ramp' bindings: setValueAtTime at frame 0, linearRampToValueAtTime at frame 1+
+    // - 'realized' bindings: setValueAtTime at every frame
+    // - 'passthrough' bindings: setValueAtTime at every frame (raw param values)
+    const semantics: SemanticsDocument = {
+      params: {
+        AF: { default: 0, min: 0, max: 80 },
+        voiceGain: { default: 0 },
+        F0: { default: 120, min: 80, max: 500 },
+      },
+      constants: {},
+      realize: {
+        AF: { expr: 'AF', ramp: true },       // ramp
+        voiceGain: { expr: 'voiceGain' },      // realized (no ramp)
+        // F0 has no realize rule → passthrough
+      },
+    };
+
+    const node = mockWorkletNode(['af', 'voiceGain', 'f0']);
+    const bindingMap = new Map<string, BindingInfo[]>([
+      ['AF', [{ nodeId: 'src', paramName: 'af', bindName: 'AF' }]],
+      ['voiceGain', [{ nodeId: 'src', paramName: 'voiceGain', bindName: 'voiceGain' }]],
+      ['F0', [{ nodeId: 'src', paramName: 'f0', bindName: 'F0' }]],
+    ]);
+
+    const rt = {
+      ...mockRuntime(),
+      getNode: vi.fn((id: string) => id === 'src' ? node : undefined),
+      getBindingMap: vi.fn(() => bindingMap),
+    } as unknown as KlattRuntime;
+
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: rt,
+      graph: minimalGraph(),
+      semantics,
+      bindingMap,
+    });
+
+    const track: KlattFrame[] = [
+      { time: 0.0, params: { AF: 10, voiceGain: 40, F0: 120 } },
+      { time: 0.005, params: { AF: 20, voiceGain: 50, F0: 130 } },
+      { time: 0.010, params: { AF: 30, voiceGain: 60, F0: 140 } },
+    ];
+
+    interpreter.scheduleTrack(track, 0);
+
+    const params = (node as unknown as { parameters: Map<string, AudioParam> }).parameters;
+
+    // AF is ramp: 1 setValueAtTime (frame 0) + 2 linearRamp (frames 1,2)
+    const afParam = params.get('af')!;
+    expect(afParam.setValueAtTime).toHaveBeenCalledTimes(1);
+    expect(afParam.linearRampToValueAtTime).toHaveBeenCalledTimes(2);
+
+    // voiceGain is realized (non-ramp): 3 setValueAtTime, 0 linearRamp
+    const vgParam = params.get('voiceGain')!;
+    expect(vgParam.setValueAtTime).toHaveBeenCalledTimes(3);
+    expect(vgParam.linearRampToValueAtTime).not.toHaveBeenCalled();
+
+    // F0 is passthrough: 3 setValueAtTime, 0 linearRamp
+    const f0Param = params.get('f0')!;
+    expect(f0Param.setValueAtTime).toHaveBeenCalledTimes(3);
+    expect(f0Param.linearRampToValueAtTime).not.toHaveBeenCalled();
+  });
+});
+
 describe('PLSTEP state tracking', () => {
   it('fires PLSTEP telemetry for >49 dB AF jump', () => {
     const events: TelemetryEvent[] = [];

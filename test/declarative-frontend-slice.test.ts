@@ -156,7 +156,8 @@ describe("declarative frontend first migration slice", () => {
     expect(asp?.params).toBeDefined();
     expect(asp?.type).toBe("stop_aspiration");
     expect(asp?.weak).toBe(true);
-    expect(asp?.duration).toBe(24);
+    // Weak phrase-final aspiration duration is derived from VOT split and weak scaling.
+    expect(asp?.duration).toBeCloseTo(26.301369863013697);
     expect(asp?.params?.AH).toBe(43);
   });
 

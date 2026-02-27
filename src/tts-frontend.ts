@@ -8,74 +8,75 @@ import {
   materializePhonemeTarget,
 } from "./declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "./declarative-frontend";
+import { normalizeText } from "./g2p/text-normalize";
+import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
+import type { ProvenanceCollector } from "./provenance";
 
 type FrontendToken = Record<string, any>;
 type KlattParams = Record<string, number>;
+type RuleSpec = { citation?: string };
+
+type TranscriptionOptions = {
+  provenance?: ProvenanceCollector | null;
+};
+
+export type TextToKlattTrackOptions = {
+  provenance?: ProvenanceCollector | null;
+};
+
+const CMU_DICTIONARY_CITATION = "CMU Pronouncing Dictionary";
+const FALLBACK_PRONUNCIATION_CITATION = "Qlatt fallback pronunciation rules (src/tts-frontend.ts)";
+const INVENTORY_CITATION = "public/rules/inventory.yaml";
 
 const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
   DEFAULT_CMU_DICTIONARY_PATH
 );
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
+const RULE_CITATIONS = new Map<string, string[]>(
+  Object.entries((QLATT_V12_CEL_RULEPACK?.rules ?? {}) as Record<string, RuleSpec>).map(
+    ([ruleName, ruleDef]) => {
+      const citation = typeof ruleDef?.citation === "string" ? ruleDef.citation.trim() : "";
+      return [ruleName, citation.length > 0 ? [citation] : []];
+    }
+  )
+);
 
-export function normalizeText(text: string): string {
-  let normalized = text.toLowerCase();
-  normalized = normalized.replace(/(\d+)/g, (match: string) =>
-    numberToWords(parseInt(match))
-  );
-  normalized = normalized.replace(/,/g, " , ");
-  normalized = normalized.replace(/\./g, " . ");
-  normalized = normalized.replace(/\?/g, " ? ");
-  normalized = normalized.replace(/!/g, " ! ");
-  normalized = normalized.replace(/\s+/g, " ").trim();
-  return normalized;
+function emitRuleTraceDecisions(trace: FrontendToken[], provenance: ProvenanceCollector): void {
+  for (const event of trace) {
+    if (event?.type !== "match" && event?.type !== "rewrite") continue;
+
+    const ruleName = typeof event?.rule === "string" && event.rule.length > 0
+      ? event.rule
+      : "<unknown-rule>";
+    const phaseName = typeof event?.phase === "string" && event.phase.length > 0
+      ? event.phase
+      : "<unknown-phase>";
+    const citations = RULE_CITATIONS.get(ruleName) ?? [];
+    const decisionType = event.type === "match" ? "rule_matched" : "rule_rewrite_applied";
+
+    let subject = `rule:${ruleName}`;
+    if (typeof event?.token === "string" && event.token.length > 0) {
+      subject = `token:${event.token}`;
+    } else if (event?.captures && typeof event.captures === "object") {
+      const captureIds = Object.values(event.captures)
+        .filter((value): value is string => typeof value === "string" && value.length > 0);
+      if (captureIds.length > 0) {
+        subject = `captures:${captureIds.join(",")}`;
+      }
+    }
+
+    provenance.add({
+      stage: "rules",
+      type: decisionType,
+      subject,
+      reason: `${ruleName} ${event.type} in phase ${phaseName}`,
+      citations,
+    });
+  }
 }
-function numberToWords(num: number): string {
-  /* ... */
-  const ones = [
-    "",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-  ];
-  const tens = [
-    "",
-    "",
-    "twenty",
-    "thirty",
-    "forty",
-    "fifty",
-    "sixty",
-    "seventy",
-    "eighty",
-    "ninety",
-  ];
-  const teens = [
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-  ];
-  if (num === 0) return "zero";
-  if (num < 10) return ones[num];
-  if (num < 20) return teens[num - 10];
-  if (num < 100)
-    return (
-      tens[Math.floor(num / 10)] + (num % 10 !== 0 ? " " + ones[num % 10] : "")
-    );
-  return String(num);
-}
+
+// normalizeText is imported from ./g2p/text-normalize
+export { normalizeText } from "./g2p/text-normalize";
 
 function guessPronunciation(word: string): string[] {
   const cleaned = word.toLowerCase().replace(/[^a-z']/g, "");
@@ -272,7 +273,8 @@ function guessPronunciation(word: string): string[] {
 }
 
 // --- Phonetic Transcription --- (MODIFIED: Return flat phoneme list with word info)
-export function transcribeText(text: string): FrontendToken[] {
+export function transcribeText(text: string, options: TranscriptionOptions = {}): FrontendToken[] {
+  const provenance = options.provenance ?? null;
   const words = text.split(" ");
   const flatPhonemeList: FrontendToken[] = []; // Flat array of { phoneme: '...', stress: ..., word: '...' }
   const punctuation = [",", ".", "?", "!"];
@@ -297,6 +299,13 @@ export function transcribeText(text: string): FrontendToken[] {
       }
 
       if (pronunciation) {
+        provenance?.add({
+          stage: "transcribe",
+          type: "dictionary_pronunciation_selected",
+          subject: `word:${word}`,
+          reason: `Used CMU dictionary pronunciation for '${word}'`,
+          citations: [CMU_DICTIONARY_CITATION],
+        });
         const phones = pronunciation.split(" ");
         for (const phoneWithStress of phones) {
           const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
@@ -314,6 +323,13 @@ export function transcribeText(text: string): FrontendToken[] {
       } else {
         const fallbackPhones = guessPronunciation(lowerWord);
         if (fallbackPhones.length) {
+          provenance?.add({
+            stage: "transcribe",
+            type: "fallback_pronunciation_selected",
+            subject: `word:${word}`,
+            reason: `Word '${word}' missing from dictionary; used fallback grapheme rules`,
+            citations: [FALLBACK_PRONUNCIATION_CITATION],
+          });
           console.warn(
             `[TTS Frontend] Word "${word}" not found. Using fallback phonemes.`
           );
@@ -330,6 +346,13 @@ export function transcribeText(text: string): FrontendToken[] {
             }
           }
         } else {
+          provenance?.add({
+            stage: "transcribe",
+            type: "fallback_pronunciation_selected",
+            subject: `word:${word}`,
+            reason: `Word '${word}' missing from dictionary and fallback rules; using SIL`,
+            citations: [FALLBACK_PRONUNCIATION_CITATION],
+          });
           console.warn(`Word "${word}" not found. Representing as SIL.`);
           // Represent unknown word as silence associated with the word
           flatPhonemeList.push({
@@ -432,13 +455,19 @@ function buildF0ContourFromDeclarative(
 }
 
 // --- Main Pipeline ---
-export function textToKlattTrack(inputText: string, baseF0 = 110, transitionMs = 30): FrontendToken[] {
+export function textToKlattTrack(
+  inputText: string,
+  baseF0 = 110,
+  transitionMs = 30,
+  options: TextToKlattTrackOptions = {}
+): FrontendToken[] {
+  const provenance = options.provenance ?? null;
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
-  let parameterSequence: FrontendToken[] = transcribeText(normalized);
+  let parameterSequence: FrontendToken[] = transcribeText(normalized, { provenance });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
-  parameterSequence = parameterSequence.map((ph: FrontendToken) => {
+  parameterSequence = parameterSequence.map((ph: FrontendToken, index: number) => {
     let targetKeyBase = ph.phoneme;
     // Map P, T, K, B, D, G to their closure versions initially
     if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
@@ -483,6 +512,13 @@ export function textToKlattTrack(inputText: string, baseF0 = 110, transitionMs =
     }
 
     const filledParams = fillDefaultParams(baseTarget);
+    provenance?.add({
+      stage: "transcribe",
+      type: "inventory_target_selected",
+      subject: `token:${index}:${targetKeyBase}`,
+      reason: `Selected inventory target '${targetKeyBase}' for source phoneme '${ph.phoneme}'`,
+      citations: [INVENTORY_CITATION],
+    });
 
     // Copy essential flags from baseTarget
     const flags: FrontendToken = {};
@@ -514,34 +550,52 @@ export function textToKlattTrack(inputText: string, baseF0 = 110, transitionMs =
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
   const declarativeInventory = { inventoryResolver: materializePhonemeTarget };
-  parameterSequence = runDeclarativeFrontend(parameterSequence, {
-    ...declarativeInventory,
-    phases: ["structural"],
-  }) as FrontendToken[];
-  parameterSequence = runDeclarativeFrontend(parameterSequence, {
-    ...declarativeInventory,
-    phases: ["duration"],
-  }) as FrontendToken[];
+
+  function runPhases(
+    sequence: FrontendToken[],
+    phases: string[],
+    parameters?: Record<string, unknown>,
+  ): FrontendToken[] {
+    if (!provenance) {
+      return runDeclarativeFrontend(sequence, {
+        ...declarativeInventory,
+        phases,
+        parameters,
+      }) as FrontendToken[];
+    }
+
+    const result = runDeclarativeFrontend(sequence, {
+      ...declarativeInventory,
+      phases,
+      parameters,
+      includeTrace: true as const,
+    }) as { sequence: FrontendToken[]; trace?: FrontendToken[] };
+
+    if (Array.isArray(result.trace)) {
+      emitRuleTraceDecisions(result.trace, provenance);
+    }
+
+    return result.sequence;
+  }
+
+  parameterSequence = runPhases(parameterSequence, ["structural"]);
+  parameterSequence = runPhases(parameterSequence, ["duration"]);
   parameterSequence = parameterSequence.map((token: FrontendToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
     stream: "phone",
     status: token.status ?? 1,
   }));
-  parameterSequence = runDeclarativeFrontend(parameterSequence, {
-    ...declarativeInventory,
-    phases: ["prosody", "finalize"],
-    parameters: {
-      policy: {
-        f0: {
-          base_hz: baseF0,
-          fall_rate_hz: 20,
-          stress_rise: 1.15,
-          question_rise_hz: 30,
-        },
+  parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], {
+    policy: {
+      f0: {
+        base_hz: baseF0,
+        fall_rate_hz: 20,
+        stress_rise: 1.15,
+        question_rise_hz: 30,
       },
     },
-  }) as FrontendToken[];
+  });
   const phoneSequence = parameterSequence.filter(
     (token: FrontendToken) => token?.stream !== "f0" && token?.status !== 2
   );

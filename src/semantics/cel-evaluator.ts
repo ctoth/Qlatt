@@ -3,7 +3,6 @@
  * Uses @marcbachmann/cel-js for expression parsing and evaluation.
  */
 
-import "../cel-compat"; // must be imported before any CEL evaluation
 import { Environment } from '@marcbachmann/cel-js';
 import type { CelExpression, EvaluationContext, ParamValue } from './types';
 

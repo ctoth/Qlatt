@@ -1,4 +1,3 @@
-import "../cel-compat"; // must be imported before any CEL evaluation
 import { Environment } from "@marcbachmann/cel-js";
 
 type CompiledCelExpression = (context?: Record<string, any>) => any;

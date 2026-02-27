@@ -1156,7 +1156,7 @@ rules:
       stream: f0
       at: at_sync(current.sync_right)
       value: >-
-        max([((params.policy.f0.base_hz - params.policy.f0.fall_rate_hz * (phrase_total <= 1 ? 0 :
+        max([((params.policy.f0.base_hz - params.policy.f0.fall_rate_hz * (phrase_total <= 1 ? 0.0 :
         (double(phrase_index) / double(phrase_total - 1)))) * (has(current.?params.F0_Factor) ?
         current.params.F0_Factor : 1)), params.policy.f0.base_hz * params.policy.f0.declination_floor_ratio])
       tag: f0_declination

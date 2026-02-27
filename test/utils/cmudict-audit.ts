@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { expect } from "vitest";
 
 export interface Frame {
   time: number;
@@ -131,4 +132,19 @@ export function selectAuditWords(dict: Record<string, string>): [string, string]
   }
 
   return Array.from(selected.entries());
+}
+
+export function isAuditReportOnlyMode(): boolean {
+  return process.env.AUDIT_REPORT_ONLY === "1";
+}
+
+export function expectNoViolationsOrReport<T>(violations: T[], assertionMessage: string): void {
+  if (isAuditReportOnlyMode() && violations.length > 0) {
+    console.warn(
+      `[audit report-only] ${assertionMessage} | violations=${violations.length}`
+    );
+    return;
+  }
+
+  expect(violations, assertionMessage).toHaveLength(0);
 }

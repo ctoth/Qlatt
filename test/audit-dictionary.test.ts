@@ -22,6 +22,8 @@ import {
   NASAL_PHONEMES,
   STOP_BASES,
   extractSegments,
+  expectNoViolationsOrReport,
+  isAuditReportOnlyMode,
   loadCmuDictionary,
   selectAuditWords,
   stripStress,
@@ -86,6 +88,9 @@ describe("full dictionary audit", () => {
       console.log(
         `\n[audit] Mode: ${isFullAudit ? "FULL" : "subset"}, ${auditWords.length} words selected`
       );
+      if (isAuditReportOnlyMode()) {
+        console.log("[audit] Report-only mode enabled: violations will be logged but not fail tests");
+      }
 
       // Suppress console warnings during bulk processing
       const warnSpy = vi
@@ -188,11 +193,11 @@ describe("full dictionary audit", () => {
         }
       }
 
-      expect(
+      expectNoViolationsOrReport(
         violations,
         `${violations.length} diphthong expansion violations in ${affectedWords} words` +
           ` (first: ${violations[0]?.word ?? "none"})`
-      ).toHaveLength(0);
+      );
     });
   });
 
@@ -264,11 +269,11 @@ describe("full dictionary audit", () => {
         }
       }
 
-      expect(
+      expectNoViolationsOrReport(
         violations,
         `${violations.length} stop-final words missing release` +
           ` (first: ${violations[0]?.word ?? "none"})`
-      ).toHaveLength(0);
+      );
     });
   });
 
@@ -319,11 +324,11 @@ describe("full dictionary audit", () => {
         }
       }
 
-      expect(
+      expectNoViolationsOrReport(
         violations,
         `${violations.length} trailing SIL frames with AV>0` +
           ` in ${affectedWords} words`
-      ).toHaveLength(0);
+      );
     });
   });
 
@@ -406,11 +411,11 @@ describe("full dictionary audit", () => {
         }
       }
 
-      expect(
+      expectNoViolationsOrReport(
         violations,
         `${violations.length} duration floor violations in ${affectedWords} words` +
           ` (first: ${violations[0]?.word ?? "none"}: ${violations[0]?.phoneme ?? ""} = ${violations[0]?.durationMs ?? ""}ms)`
-      ).toHaveLength(0);
+      );
     });
   });
 });

@@ -39,6 +39,11 @@ parameters:
         value: 150
         citations:
           - Allen et al. 1987 Ch.8
+      punctuation_pause_phrase_break_ms:
+        value: 200
+        citations:
+          - Allen et al. 1987 Ch.8
+          - "Engineering estimate: semicolon/colon pause is typically stronger than comma and weaker than terminal punctuation"
       punctuation_pause_terminal_ms:
         value: 300
         citations:
@@ -171,10 +176,27 @@ parameters:
         value: 8
         citations:
           - O'Shaughnessy 1976
+      continuation_minor_rise_hz:
+        value: 5
+        citations:
+          - O'Shaughnessy 1976
+          - "Engineering estimate: semicolon/colon continuation rise is milder than comma rise"
       question_base_hz:
         value: 125
         citations:
           - O'Shaughnessy 1976
+      question_scan_window_tokens:
+        value: 30
+        citations:
+          - Pierrehumbert 1980
+          - Ladd 2008 Ch.5
+          - "Engineering estimate: token scan window for detecting upcoming question boundary"
+      question_last_stress_lookback_tokens:
+        value: 12
+        citations:
+          - O'Shaughnessy 1976
+          - Ladd 2008 Ch.5
+          - "Engineering estimate: lookback window for placing pre-boundary question-rise onset"
     formant:
       bilabial_f2_locus:
         value: 1200
@@ -975,7 +997,7 @@ rules:
           - default: current.duration
   punctuation_pause:
     kind: scalar
-    citation: Allen et al. 1987 Ch.8 (pause insertion)
+    citation: "Allen et al. 1987 Ch.8 (pause insertion); semicolon/colon mapping is engineering estimate"
     select:
       stream: phone
       where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
@@ -984,8 +1006,9 @@ rules:
         op: set
         value: >-
           current.punctuationSymbol == ',' ? params.policy.duration.punctuation_pause_comma_ms :
+          (current.punctuationSymbol in [';', ':'] ? params.policy.duration.punctuation_pause_phrase_break_ms :
           (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.punctuation_pause_terminal_ms :
-          current.duration)
+          current.duration))
   vowel_shortening:
     kind: scalar
     citation: Klatt 1976; Allen et al. 1987 Ch.9 (postvocalic context duration factors)
@@ -1140,7 +1163,7 @@ rules:
         predicate: is_question_boundary
     define:
       last_stress: >-
-        look_back_pred(current, 8, "is_stressed_vowel")
+        look_back_pred(current, params.policy.f0.question_last_stress_lookback_tokens, "is_stressed_vowel")
       prev_f0: prev_point('f0')
     constraint: 'last_stress != null'
     insert_point:
@@ -1190,19 +1213,22 @@ rules:
       tag: f0_onset_perturbation
   f0_continuation_rise:
     kind: point
-    citation: O'Shaughnessy 1976 (continuation rise +8 Hz at non-terminal boundaries like commas)
+    citation: "O'Shaughnessy 1976 (continuation rise at non-terminal boundaries); semicolon/colon rise magnitude is engineering estimate"
     select:
       stream: phone
       where: >-
         current.phoneme == 'SIL'
-        && (has(current.punctuationSymbol) ? current.punctuationSymbol == ',' : false)
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol in [',', ';', ':'] : false)
     define:
       prev_f0: prev_point('f0')
+      continuation_rise: >-
+        current.punctuationSymbol == ',' ? params.policy.f0.continuation_rise_hz :
+        params.policy.f0.continuation_minor_rise_hz
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + params.policy.f0.continuation_rise_hz
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + continuation_rise
       tag: f0_continuation
   palatal_f2_locus:
     kind: scalar
@@ -1398,7 +1424,7 @@ rules:
       where: prev == null
     define:
       question_ahead: >-
-        look_ahead_pred(current, 20, "is_question_boundary")
+        look_ahead_pred(current, params.policy.f0.question_scan_window_tokens, "is_question_boundary")
     constraint: 'question_ahead != null'
     insert_point:
       stream: f0

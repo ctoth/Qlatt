@@ -70,6 +70,14 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "SIL",
         type: "silence",
         params: {},
+        punctuationSymbol: ";",
+        duration: 90,
+        inherentDuration: 90,
+      },
+      {
+        phoneme: "SIL",
+        type: "silence",
+        params: {},
         punctuationSymbol: "?",
         duration: 90,
         inherentDuration: 90,
@@ -78,7 +86,8 @@ describe("declarative frontend rulepack context migration", () => {
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
     expect(out[0].duration).toBe(150);
-    expect(out[1].duration).toBe(300);
+    expect(out[1].duration).toBe(200);
+    expect(out[2].duration).toBe(300);
   });
 
   it("assigns SW declaratively and respects explicit inventory SW overrides", () => {

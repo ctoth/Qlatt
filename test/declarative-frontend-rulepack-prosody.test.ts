@@ -289,6 +289,113 @@ describe("declarative frontend rulepack prosody phase", () => {
     expect(continuation!.value).toBeLessThanOrEqual(130);
   });
 
+  it("uses a smaller continuation rise at semicolon boundary than at comma", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = finiteOrder(3);
+    const s4 = finiteOrder(4);
+    const s5 = finiteOrder(5);
+    const s6 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 170,
+        params: { AV: 64, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 150,
+        punctuationSymbol: ";",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+      },
+      {
+        id: "p3",
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 0,
+        duration: 100,
+        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s2,
+        sync_right: s3,
+        status: 1,
+      },
+      {
+        id: "p4",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 150,
+        punctuationSymbol: ",",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s3,
+        sync_right: s4,
+        status: 1,
+      },
+      {
+        id: "p5",
+        stream: "phone",
+        phoneme: "AA",
+        type: "vowel",
+        stress: 0,
+        duration: 100,
+        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s4,
+        sync_right: s5,
+        status: 1,
+      },
+      {
+        id: "p6",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s5,
+        sync_right: s6,
+        status: 1,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            continuation_rise_hz: 8,
+            continuation_minor_rise_hz: 5,
+          },
+        },
+      },
+    });
+
+    const continuationPoints = out
+      .filter((t) => t.stream === "f0" && t.tag === "f0_continuation")
+      .sort((a, b) => Number(a.time) - Number(b.time));
+
+    expect(continuationPoints.length).toBeGreaterThanOrEqual(2);
+    const semicolonRise = Number(continuationPoints[0].value);
+    const commaRise = Number(continuationPoints[1].value);
+    expect(commaRise).toBeGreaterThan(semicolonRise);
+  });
+
   // --- F0 question baseline raise ---
 
   it("raises F0 baseline at utterance start for questions", () => {
@@ -405,6 +512,117 @@ describe("declarative frontend rulepack prosody phase", () => {
     // No question baseline point for declarative
     const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
     expect(qBaseline).toBeUndefined();
+  });
+
+  it("detects question boundary beyond legacy 20-token window when scan window is configured wider", () => {
+    const leadTokens = 24;
+    const start = startOrder();
+    const sequence = Array.from({ length: leadTokens }, (_, index) => ({
+      id: `lead-${index}`,
+      stream: "phone",
+      phoneme: index % 2 === 0 ? "AE" : "L",
+      type: index % 2 === 0 ? "vowel" : "liquid",
+      stress: index === 0 ? 1 : 0,
+      duration: 80,
+      params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
+      sync_left: index === 0 ? start : finiteOrder(index),
+      sync_right: finiteOrder(index + 1),
+      status: 1,
+    }));
+
+    sequence.push({
+      id: "q-end",
+      stream: "phone",
+      phoneme: "SIL",
+      type: "silence",
+      duration: 300,
+      punctuationSymbol: "?",
+      params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+      sync_left: finiteOrder(leadTokens),
+      sync_right: endOrder(),
+      status: 1,
+    });
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            question_base_hz: 125,
+            question_scan_window_tokens: 30,
+          },
+        },
+      },
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
+    expect(qBaseline).toBeTruthy();
+    expect(qBaseline!.value).toBe(125);
+  });
+
+  it("places question-rise onset when last stressed vowel is farther back than legacy lookback", () => {
+    const unstressedTail = 9;
+    const s0 = startOrder();
+    const sequence = [
+      {
+        id: "p0",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 62, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s0,
+        sync_right: finiteOrder(1),
+        status: 1,
+      },
+    ];
+
+    for (let i = 0; i < unstressedTail; i += 1) {
+      sequence.push({
+        id: `u-${i}`,
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 0,
+        duration: 80,
+        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
+        sync_left: finiteOrder(i + 1),
+        sync_right: finiteOrder(i + 2),
+        status: 1,
+      });
+    }
+
+    sequence.push({
+      id: "q",
+      stream: "phone",
+      phoneme: "SIL",
+      type: "silence",
+      duration: 300,
+      punctuationSymbol: "?",
+      params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+      sync_left: finiteOrder(unstressedTail + 1),
+      sync_right: endOrder(),
+      status: 1,
+    });
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            question_last_stress_lookback_tokens: 12,
+          },
+        },
+      },
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const onset = points.find((p) => p.tag === "f0_question_onset");
+    expect(onset).toBeTruthy();
   });
 
   // --- F0 pitch reset ---

@@ -518,12 +518,17 @@ phoneme_targets:
     B2: 90
     B3: 200
     AV: 0
-    AF: 48
+    # Dental fricatives are weaker and more diffuse than sibilants, but this
+    # branch needs enough frication energy to remain intelligible in synthesis.
+    # Citation: Jongman et al. 2000; Stevens 1998 Ch.10; engineering estimate.
+    AF: 54
     AH: 0
     AVS: -70
-    A5: 28
-    A6: 48
-    AB: 48
+    A3: 36
+    A4: 40
+    A5: 40
+    A6: 50
+    AB: 50
     dur: 80
     type: fricative
     voiceless: true
@@ -536,10 +541,15 @@ phoneme_targets:
     B2: 80
     B3: 170
     AV: 47
-    AF: 38
+    # Voiced dental remains weaker than voiceless dental, but should not drop
+    # below audibility in connected speech.
+    # Citation: Jongman et al. 2000; Stevens 1998 Ch.10; engineering estimate.
+    AF: 44
     AH: 0
     AVS: 47
-    A5: 28
+    A3: 32
+    A4: 36
+    A5: 38
     A6: 48
     AB: 48
     dur: 70

@@ -53,6 +53,12 @@ interface VoicingBleedViolation {
   avValue: number;
 }
 
+interface MaterializationWarning {
+  word: string;
+  message: string;
+  phoneme: string;
+}
+
 interface DurationFloorViolation {
   word: string;
   phoneme: string;
@@ -103,6 +109,7 @@ describe("full dictionary audit", () => {
   let auditWords: [string, string][] = [];
   const trackCache = new Map<string, Frame[]>();
   const segmentCache = new Map<string, Segment[]>();
+  const materializationWarnings: MaterializationWarning[] = [];
 
   beforeAll(
     async () => {
@@ -124,20 +131,31 @@ describe("full dictionary audit", () => {
       }
 
       // Suppress console warnings during bulk processing
-      const warnSpy = vi
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
+      let currentWordForWarnings: string | null = null;
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation((...args: unknown[]) => {
+        const text = args.map((value) => String(value)).join(" ");
+        const missingMatch = text.match(/No baseline target found for\s+([A-Z0-9_]+)/);
+        if (missingMatch && currentWordForWarnings) {
+          materializationWarnings.push({
+            word: currentWordForWarnings,
+            message: text,
+            phoneme: missingMatch[1],
+          });
+        }
+      });
       try {
         let processed = 0;
         let errors = 0;
         for (const [word] of auditWords) {
           try {
+            currentWordForWarnings = word;
             const track = textToKlattTrack(word) as Frame[];
             trackCache.set(word, track);
             segmentCache.set(word, extractSegments(track));
           } catch {
             errors++;
           }
+          currentWordForWarnings = null;
           processed++;
           if (processed % 5000 === 0) {
             console.log(
@@ -363,7 +381,39 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 4: Phoneme Envelope Sanity -------------------------------------
+  // -- Block 4: Inventory Materialization -----------------------------------
+
+  describe("inventory materialization", () => {
+    it("does not emit baseline-target-missing warnings during CMUdict audit words", () => {
+      const warningsByPhone: Record<string, number> = {};
+      for (const warning of materializationWarnings) {
+        warningsByPhone[warning.phoneme] = (warningsByPhone[warning.phoneme] ?? 0) + 1;
+      }
+
+      const affectedWords = new Set(materializationWarnings.map((entry) => entry.word)).size;
+      console.log(
+        `\ninventory materialization warnings: ${materializationWarnings.length} entries` +
+          ` across ${affectedWords} words`
+      );
+      for (const [phoneme, count] of Object.entries(warningsByPhone).sort((a, b) => b[1] - a[1])) {
+        console.log(`  ${phoneme}: ${count}`);
+      }
+      if (materializationWarnings.length > 0) {
+        console.log("  First 20 warnings:");
+        for (const warning of materializationWarnings.slice(0, 20)) {
+          console.log(`    ${warning.word}: ${warning.message}`);
+        }
+      }
+
+      expectNoViolationsOrReport(
+        materializationWarnings,
+        `${materializationWarnings.length} inventory materialization warnings` +
+          ` in ${affectedWords} words (first: ${materializationWarnings[0]?.word ?? "none"})`
+      );
+    });
+  });
+
+  // -- Block 5: Phoneme Envelope Sanity -------------------------------------
 
   describe("phoneme envelope sanity", () => {
     it("maintains robust fricative routing and energy envelopes for critical phones", () => {
@@ -543,7 +593,7 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 5: Phoneme Contrast Separation ---------------------------------
+  // -- Block 6: Phoneme Contrast Separation ---------------------------------
 
   describe("phoneme contrast separation", () => {
     it("keeps confusable fricatives acoustically separable at inventory level", () => {
@@ -710,7 +760,7 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 6: Segment Duration Floors -------------------------------------
+  // -- Block 7: Segment Duration Floors -------------------------------------
 
   describe("segment duration floors", () => {
     it("segments should respect manner-class minimum durations", () => {

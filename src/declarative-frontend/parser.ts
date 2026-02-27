@@ -146,7 +146,11 @@ function normalizeRule(rule: unknown): PlainObject {
       : {};
   return {
     ...rule,
-    citation: asString(rule.citation, null),
+    citations: Array.isArray(rule.citations)
+      ? rule.citations.map((c: any) => String(c).trim()).filter(Boolean)
+      : typeof rule.citation === "string"
+        ? [rule.citation.trim()].filter(Boolean)
+        : [],
     kind: asString(rule.kind, null),
     op: asString(rule.op, null),
     match: asString(rule.match, null),

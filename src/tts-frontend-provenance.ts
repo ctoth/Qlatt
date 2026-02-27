@@ -20,7 +20,7 @@ import { runDeclarativeFrontend } from "./declarative-frontend";
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PipelineRecord = Record<string, any>;
-type RuleSpec = { citation?: string };
+type RuleSpec = { citations?: string[] };
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -35,8 +35,8 @@ export const INVENTORY_CITATION = "public/rules/inventory.yaml";
 export const RULE_CITATIONS = new Map<string, string[]>(
   Object.entries((QLATT_V12_CEL_RULEPACK?.rules ?? {}) as Record<string, RuleSpec>).map(
     ([ruleName, ruleDef]) => {
-      const citation = typeof ruleDef?.citation === "string" ? ruleDef.citation.trim() : "";
-      return [ruleName, citation.length > 0 ? [citation] : []];
+      const citations = Array.isArray(ruleDef?.citations) ? ruleDef.citations : [];
+      return [ruleName, citations];
     }
   )
 );

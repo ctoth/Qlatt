@@ -2,7 +2,6 @@ import {
   PHONEME_TARGETS,
   materializePhonemeTarget,
 } from "./declarative-frontend/inventory";
-import { runDeclarativeFrontend } from "./declarative-frontend";
 import { normalizeText } from "./g2p/text-normalize";
 import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
@@ -10,28 +9,22 @@ import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack } from "./track-assembler";
 import type { OutputConfig } from "./track-assembler";
 import type { TranscriptionConfig } from "./tts-frontend-types";
+import {
+  recordInventoryDecision,
+  runPhasesWithProvenance,
+} from "./tts-frontend-provenance";
 
 type FrontendToken = Record<string, any>;
-type RuleSpec = { citation?: string };
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
 };
 
-const INVENTORY_CITATION = "public/rules/inventory.yaml";
 // Plain stop symbols are intentionally rewritten in the structural phase
 // (Klatt 1980 stop model: closure + release).
 const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
 
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
-const RULE_CITATIONS = new Map<string, string[]>(
-  Object.entries((QLATT_V12_CEL_RULEPACK?.rules ?? {}) as Record<string, RuleSpec>).map(
-    ([ruleName, ruleDef]) => {
-      const citation = typeof ruleDef?.citation === "string" ? ruleDef.citation.trim() : "";
-      return [ruleName, citation.length > 0 ? [citation] : []];
-    }
-  )
-);
 
 // Extract output and transcription configuration from the loaded YAML rulepack.
 // These override hardcoded defaults in track-assembler and transcribe-text.
@@ -39,71 +32,6 @@ const RULEPACK_OUTPUT_CONFIG: OutputConfig | undefined =
   (QLATT_V12_CEL_RULEPACK as any)?.output ?? undefined;
 const RULEPACK_TRANSCRIPTION_CONFIG: TranscriptionConfig | undefined =
   (QLATT_V12_CEL_RULEPACK as any)?.transcription ?? undefined;
-
-function collectTraceTokenIds(event: FrontendToken): string[] {
-  const ids: string[] = [];
-  if (typeof event?.token === "string" && event.token.length > 0) {
-    ids.push(event.token);
-  }
-  if (event?.captures && typeof event.captures === "object") {
-    ids.push(
-      ...Object.values(event.captures).filter(
-        (value): value is string => typeof value === "string" && value.length > 0
-      )
-    );
-  }
-  return [...new Set(ids)];
-}
-
-function emitRuleTraceDecisions(
-  trace: FrontendToken[],
-  provenance: ProvenanceCollector,
-  tokenDecisionIds: Map<string, string>
-): void {
-  for (const event of trace) {
-    if (event?.type !== "match" && event?.type !== "rewrite") continue;
-
-    const ruleName = typeof event?.rule === "string" && event.rule.length > 0
-      ? event.rule
-      : "<unknown-rule>";
-    const phaseName = typeof event?.phase === "string" && event.phase.length > 0
-      ? event.phase
-      : "<unknown-phase>";
-    const citations = RULE_CITATIONS.get(ruleName) ?? [];
-    const decisionType = event.type === "match" ? "rule_matched" : "rule_rewrite_applied";
-    const traceTokenIds = collectTraceTokenIds(event);
-
-    let subject = `rule:${ruleName}`;
-    if (typeof event?.token === "string" && event.token.length > 0) {
-      subject = `token:${event.token}`;
-    } else if (event?.captures && typeof event.captures === "object") {
-      const captureIds = Object.values(event.captures)
-        .filter((value): value is string => typeof value === "string" && value.length > 0);
-      if (captureIds.length > 0) {
-        subject = `captures:${captureIds.join(",")}`;
-      }
-    }
-
-    const parentIds = [...new Set(
-      traceTokenIds
-        .map((tokenId) => tokenDecisionIds.get(tokenId))
-        .filter((id): id is string => typeof id === "string" && id.length > 0)
-    )];
-
-    const decision = provenance.add({
-      stage: "rules",
-      type: decisionType,
-      subject,
-      reason: `${ruleName} ${event.type} in phase ${phaseName}`,
-      citations,
-      parents: parentIds.length > 0 ? parentIds : undefined,
-    });
-
-    for (const tokenId of traceTokenIds) {
-      tokenDecisionIds.set(tokenId, decision.id);
-    }
-  }
-}
 
 // Re-export normalizeText from g2p/text-normalize
 export { normalizeText } from "./g2p/text-normalize";
@@ -147,19 +75,15 @@ export function textToKlattTrack(
     }
 
     const tokenId = `ph_${index}`;
-    const inventoryDecision = provenance?.add({
-      stage: "transcribe",
-      type: "inventory_target_selected",
-      subject: `token:${index}:${targetKeyBase}`,
-      reason: `Selected inventory target '${targetKeyBase}' for source phoneme '${ph.phoneme}'`,
-      citations: [INVENTORY_CITATION],
-      parents:
-        typeof ph._pronDecisionId === "string" && ph._pronDecisionId.length > 0
-          ? [ph._pronDecisionId]
-          : undefined,
-    });
-    if (inventoryDecision?.id) {
-      tokenDecisionIds.set(tokenId, inventoryDecision.id);
+    const decisionId = recordInventoryDecision(
+      provenance,
+      index,
+      targetKeyBase,
+      ph.phoneme,
+      ph._pronDecisionId,
+    );
+    if (decisionId) {
+      tokenDecisionIds.set(tokenId, decisionId);
     }
 
     // Return the enriched phoneme data object for the sequence.
@@ -176,34 +100,19 @@ export function textToKlattTrack(
   });
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
-  const declarativeInventory = { inventoryResolver: materializePhonemeTarget };
-
-  function runPhases(
+  const runPhases = (
     sequence: FrontendToken[],
     phases: string[],
     parameters?: Record<string, unknown>,
-  ): FrontendToken[] {
-    if (!provenance) {
-      return runDeclarativeFrontend(sequence, {
-        ...declarativeInventory,
-        phases,
-        parameters,
-      }) as FrontendToken[];
-    }
-
-    const result = runDeclarativeFrontend(sequence, {
-      ...declarativeInventory,
+  ): FrontendToken[] =>
+    runPhasesWithProvenance(
+      sequence,
       phases,
+      materializePhonemeTarget,
+      provenance,
+      tokenDecisionIds,
       parameters,
-      includeTrace: true as const,
-    }) as { sequence: FrontendToken[]; trace?: FrontendToken[] };
-
-    if (Array.isArray(result.trace)) {
-      emitRuleTraceDecisions(result.trace, provenance, tokenDecisionIds);
-    }
-
-    return result.sequence;
-  }
+    );
 
   parameterSequence = runPhases(parameterSequence, ["structural"]);
   // Run postlexical rules (t-flapping, the-reduction) after structural

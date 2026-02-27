@@ -1,0 +1,241 @@
+rules:
+  non_word_initial_consonant_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
+        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false)
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.non_word_initial_consonant_multiplier
+        tag: consonant_position
+    citations:
+      - Klatt 1976 Table III (non-word-initial consonant K=0.7)
+  word_medial_consonant_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
+        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false) && (next != null ?
+        (has(next.word) && has(current.word) ? next.word == current.word : false) : false)
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.word_medial_consonant_multiplier
+        tag: consonant_medial
+    citations:
+      - Klatt 1976 Table III (word-medial consonant K=0.7)
+  unstressed_consonant_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (has(current.stress) ?
+        current.stress == 0 : false)
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.unstressed_consonant_multiplier
+        tag: consonant_stress
+    citations:
+      - Klatt 1976 Table III (unstressed consonant K=0.8)
+  word_initial_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev == null ? true :
+        (has(prev.word) && has(current.word) ? prev.word != current.word : true))
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.word_initial_lengthening_multiplier
+        tag: word_initial
+    citations:
+      - White 2014 (localized word-initial lengthening +20-30% on onset consonants)
+  punctuation_pause:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
+    apply:
+      - field: duration
+        op: set
+        value: >-
+          current.punctuationSymbol == ',' ? params.policy.duration.punctuation_pause_comma_ms :
+          (current.punctuationSymbol in [';', ':'] ? params.policy.duration.punctuation_pause_phrase_break_ms :
+          (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.punctuation_pause_terminal_ms :
+          current.duration))
+    citations:
+      - Allen et al. 1987 Ch.8 (pause insertion)
+      - semicolon/colon mapping is engineering estimate
+  stress_duration:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    apply:
+      - field: duration
+        op: mul
+        value: >-
+          has(current.stress) && current.stress == 1 ? params.policy.duration.stress_primary_multiplier :
+          ((has(current.stress) && current.stress == 0) ? params.policy.duration.stress_unstressed_multiplier : 1.0)
+        tag: stress
+    citations:
+      - Klatt 1976 §III.B
+  vowel_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: "n == null ? true : n.phoneme == 'SIL'"
+            value: params.policy.duration.vowel_shortening_end_multiplier
+          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')"
+            value: params.policy.duration.vowel_shortening_voiced_fricative_multiplier
+          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_release'])"
+            value: params.policy.duration.vowel_shortening_voiced_stop_multiplier
+          - when: "n == null ? false : n.type == 'nasal'"
+            value: params.policy.duration.vowel_shortening_nasal_multiplier
+          - when: "n == null ? false : (has(n.voiceless) && n.voiceless == true && n.type in ['stop', 'stop_closure'])"
+            value: params.policy.duration.vowel_shortening_voiceless_stop_multiplier
+          - default: 1
+        tag: segmental_context
+    citations:
+      - Klatt 1976
+      - Allen et al. 1987 Ch.9 (postvocalic context duration factors)
+  vowel_before_voiceless_stop_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: |-
+        current.type == 'vowel' && (next != null ? (next.type == 'stop_closure'
+            ? (has(next.voiceless) ? next.voiceless == true : false)
+            : false)
+           : false)
+    define:
+      nn: ahead(current, 2)
+      phrase_final: "nn == null ? true : nn.phoneme == 'SIL'"
+    apply:
+      - field: duration
+        op: add
+        dispatch:
+          - when: phrase_final
+            value: params.policy.duration.vowel_vl_stop_shortening_phrasefinal_ms
+          - default: params.policy.duration.vowel_vl_stop_shortening_other_ms
+        tag: voiceless_context
+    citations:
+      - Klatt 1976 Table I (vowel shortening before voiceless stops)
+  pre_boundary_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    define:
+      "n": next
+      cur_word: "has(current.word) ? current.word : \"\""
+      next_word: "n != null && has(n.word) ? n.word : \"\""
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: n == null
+            value: params.policy.duration.pre_boundary_terminal_multiplier
+          - when: >-
+              n.phoneme == 'SIL' && has(n.punctuationSymbol) && current.type in ['stop_closure', 'stop_release',
+              'stop_aspiration', 'fricative', 'affricate']
+            value: params.policy.duration.pre_boundary_terminal_obstruent_multiplier
+          - when: n.phoneme == 'SIL' && has(n.punctuationSymbol)
+            value: params.policy.duration.pre_boundary_terminal_multiplier
+          - when: n.phoneme != 'SIL' && cur_word != '' && next_word != '' && cur_word != next_word
+            value: params.policy.duration.pre_boundary_word_multiplier
+          - default: 1
+        tag: boundary
+    citations:
+      - Klatt 1976 §III.A
+      - Crystal & House 1988 (stronger phrase-final lengthening on sonorants/vowels than obstruents)
+  fricative_minimum_duration:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'fricative'
+    apply:
+      - field: duration
+        op: set
+        dispatch:
+          - when: current.phoneme in ['S', 'Z', 'SH', 'ZH']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_sibilant_ms ? current.duration :
+              params.policy.duration.fricative_min_sibilant_ms
+          - when: current.phoneme in ['F', 'V']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_labiodental_ms ? current.duration :
+              params.policy.duration.fricative_min_labiodental_ms
+          - when: current.phoneme in ['TH', 'DH']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_dental_ms ? current.duration :
+              params.policy.duration.fricative_min_dental_ms
+          - when: current.phoneme == 'HH'
+            value: >-
+              current.duration > params.policy.duration.fricative_min_glottal_ms ? current.duration :
+              params.policy.duration.fricative_min_glottal_ms
+          - default: current.duration
+    citations:
+      - >-
+        Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full
+        duration; glottal /hh/ not tested -- value is engineering estimate)
+  lock_stop_release_duration:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type in ['stop_release', 'stop_aspiration']
+    apply:
+      - field: duration
+        op: set
+        value: "has(current.inherentDuration) ? current.inherentDuration : current.duration"
+    citations:
+      - Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)
+  stop_unreleasing:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    define:
+      "n": next
+    constraint: "n != null ? n.type == 'stop_closure' : false"
+    apply:
+      - field: params.AF
+        op: set
+        value: 0
+      - field: duration
+        op: set
+        value: params.policy.duration.stop_unreleasing_min_ms
+    citations:
+      - Miller 1998 (unreleased stops before non-sonorants)
+      - Crystal & House 1988
+  s_cluster_aspiration_reduction:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_aspiration'
+    define:
+      s_token: look_back_where(current, 4, "current.phoneme == 'S'")
+    constraint: s_token != null
+    apply:
+      - field: duration
+        op: set
+        value: params.policy.duration.s_cluster_aspiration_ms
+      - field: params.AH
+        op: add
+        value: "-(params.policy.duration.s_cluster_ah_reduction_db)"
+    citations:
+      - Lisker & Abramson 1964 (s-cluster VOT)
+      - Zue 1976 (s-clusters reduce VOT to voice-like values)

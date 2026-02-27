@@ -1,0 +1,54 @@
+rules:
+  the_prevocalic_reduction:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'AH' && (has(current.stress) ? current.stress == 0 : false) && (has(current.word) ?
+        current.word == 'the' : false) && next != null && (has(next.word) ? next.word != 'the' : false) && next.type ==
+        'vowel'
+    define:
+      ih_target: target("IH0")
+      ih_params: ih_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+            - duration
+            - inherentDuration
+            - type
+          phoneme: "\"IH\""
+          params: ih_params
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+  t_flapping:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'T' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
+        && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
+    define:
+      dx_target: target("DX")
+      dx_params: dx_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "\"DX\""
+          type: "\"flap\""
+          duration: "30"
+          inherentDuration: "30"
+          params: dx_params
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)

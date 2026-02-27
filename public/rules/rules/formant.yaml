@@ -1,0 +1,372 @@
+rules:
+  k_context_cl_f2:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'K_CL'
+    define:
+      cand: "next != null && next.phoneme == \"K_REL\" ? ahead(current, 2) : next"
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
+            value: 1200
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
+              cand.hi == true : false))
+            value: 1900
+          - default: 1500
+    citations:
+      - Allen et al. 1987 Ch.11 (velar locus)
+  k_context_rel_copy:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme == \"K_REL\" && (prev != null ? prev.phoneme == \"K_CL\" : false)"
+    apply:
+      - field: params.F2
+        op: set
+        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : 1500"
+    citations:
+      - Allen et al. 1987 Ch.11 (velar locus transitions)
+  bilabial_f2_locus:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme in ['P_CL', 'B_CL', 'M']
+    define:
+      cand: >-
+        current.phoneme == "P_CL" ? (next != null && next.phoneme == "P_REL" ? ahead(current, 2) : next) :
+        (current.phoneme == "B_CL" ? (next != null && next.phoneme == "B_REL" ? ahead(current, 2) : next) : next)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
+              cand.hi == true : false))
+            value: 1350
+          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
+            value: 1100
+          - default: params.policy.formant.bilabial_f2_locus
+    citations:
+      - >-
+        Stevens & House 1956 (locus varies 700-1500 Hz by vowel context; 1200 Hz is midpoint approximation per Allen et
+        al. 1987 Ch.11)
+  bilabial_rel_copy:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme in [\"P_REL\", \"B_REL\"] && (prev != null ? prev.phoneme in [\"P_CL\", \"B_CL\"] : false)"
+    apply:
+      - field: params.F2
+        op: set
+        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus"
+    citations:
+      - Stevens & House 1956
+      - Allen et al. 1987 Ch.11 (bilabial locus transitions)
+  alveolar_f2_locus:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme in ['T_CL', 'D_CL', 'N']
+    define:
+      cand: >-
+        current.phoneme == "T_CL" ? (next != null && next.phoneme == "T_REL" ? ahead(current, 2) : next) :
+        (current.phoneme == "D_CL" ? (next != null && next.phoneme == "D_REL" ? ahead(current, 2) : next) : next)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: >-
+              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
+              cand.hi == true : false))
+            value: params.policy.formant.alveolar_f2_locus_front
+          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
+            value: params.policy.formant.alveolar_f2_locus_back
+          - default: params.policy.formant.alveolar_f2_locus
+    citations:
+      - Stevens & House 1956 (formant transitions)
+      - Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
+  alveolar_rel_copy:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme in [\"T_REL\", \"D_REL\"] && (prev != null ? prev.phoneme in [\"T_CL\", \"D_CL\"] : false)"
+    apply:
+      - field: params.F2
+        op: set
+        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus"
+    citations:
+      - Stevens & House 1956
+      - Allen et al. 1987 Ch.11 (alveolar locus transitions)
+  palatal_f2_locus:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'Y'
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: "next != null ? (next.type == 'vowel' ? (has(next.back) ? next.back == true : false) : false) : false"
+            value: params.policy.formant.palatal_f2_back_vowel
+          - default: params.policy.formant.palatal_f2_locus
+    citations:
+      - Stevens & House 1956 (formant transitions)
+      - Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
+  nasal_antiformant_by_place:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'nasal'
+    apply:
+      - field: params.FNZ
+        op: set
+        dispatch:
+          - when: current.phoneme == 'M'
+            value: params.policy.formant.nasal_fnz_m
+          - when: current.phoneme == 'N'
+            value: params.policy.formant.nasal_fnz_n
+          - when: current.phoneme == 'NG'
+            value: params.policy.formant.nasal_fnz_ng
+          - default: "has(current.?params.FNZ) ? current.params.FNZ : 480"
+    citations:
+      - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
+      - Fujimura 1962 (nasal consonant antiresonances by place)
+  nasal_place_assimilation:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'N'
+    define:
+      "n": next
+      next_is_obstruent: "n != null ? (n.type in ['stop_closure', 'stop_release', 'fricative', 'affricate']) : false"
+      next_bilabial: "next_is_obstruent ? (has(n.bilabial) ? n.bilabial == true : false) : false"
+      next_velar: "next_is_obstruent ? (has(n.velar) ? n.velar == true : false) : false"
+    constraint: next_is_obstruent
+    apply:
+      - field: params.FNZ
+        op: set
+        dispatch:
+          - when: next_bilabial
+            value: params.policy.formant.nasal_fnz_m
+          - when: next_velar
+            value: params.policy.formant.nasal_fnz_ng
+          - default: "has(current.?params.FNZ) ? current.params.FNZ : 1700"
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: next_bilabial
+            value: params.policy.formant.bilabial_f2_locus
+          - when: next_velar
+            value: "has(current.?params.F2) ? current.params.F2 : 1400"
+          - default: "has(current.?params.F2) ? current.params.F2 : 1400"
+    citations:
+      - Allen et al. 1987 Ch.10 (nasal place assimilation)
+      - Fujimura 1962 (nasal consonant place acoustics)
+      - Stevens 1998 Ch.10
+  dark_l_allophony:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'L'
+    define:
+      "n": next
+      is_coda: >-
+        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
+        (has(n.word) && has(current.word) && n.word != current.word)
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.dark_l_f2
+          - default: "has(current.?params.F2) ? current.params.F2 : 1050"
+      - field: params.F3
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.dark_l_f3
+          - default: "has(current.?params.F3) ? current.params.F3 : 2600"
+    citations:
+      - Recasens 2012 (lateral allophones)
+      - Sproat & Fujimura 1993 (syllable-final /l/ darkening)
+  r_f3_lowering:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'R'
+    define:
+      "n": next
+      is_coda: >-
+        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
+        (has(n.word) && has(current.word) && n.word != current.word)
+    apply:
+      - field: params.F3
+        op: set
+        dispatch:
+          - when: is_coda
+            value: params.policy.formant.r_f3_coda
+          - default: params.policy.formant.r_f3_onset
+    citations:
+      - Espy-Wilson 2000 (acoustic modeling of American /r/)
+      - Stevens 1998 Ch.9
+  f1_stop_onset:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    apply:
+      - field: params.F1
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.f1_release_labial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.f1_release_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.f1_release_velar
+          - default: 280
+    citations:
+      - Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)
+  burst_spectral_template:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    apply:
+      - field: params.A2
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 50
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 40
+          - when: has(current.velar) && current.velar == true
+            value: 45
+          - default: "has(current.?params.A2) ? current.params.A2 : 0"
+      - field: params.A3
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 40
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 50
+          - default: "has(current.?params.A3) ? current.params.A3 : 0"
+      - field: params.A4
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 35
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 55
+          - default: "has(current.?params.A4) ? current.params.A4 : 0"
+      - field: params.A5
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 45
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 45
+          - when: has(current.velar) && current.velar == true
+            value: 40
+          - default: "has(current.?params.A5) ? current.params.A5 : 0"
+      - field: params.A6
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 30
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 35
+          - default: "has(current.?params.A6) ? current.params.A6 : 0"
+    citations:
+      - Blumstein & Stevens 1979 (burst spectral invariance)
+      - Zue 1976 (burst amplitude by place)
+  vcv_coarticulation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type in ['stop_closure', 'nasal', 'liquid', 'glide'] && (prev != null ? prev.type == 'vowel' : false)"
+    define:
+      "n": next
+      next_vowel: >-
+        n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
+        ahead(current, 2) : null) : null))
+      has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
+      prev_f2: "has(prev.?params.F2) ? prev.params.F2 : 1500"
+      next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : 1500) : 1500"
+      flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
+      cur_f2: "has(current.?params.F2) ? current.params.F2 : 1500"
+    constraint: has_flanking
+    apply:
+      - field: params.F2
+        op: set
+        value: cur_f2 + (flanking_avg_f2 - cur_f2) * params.policy.formant.vcv_coarticulation_rate
+    citations:
+      - Ohman 1966 (VCV coarticulation model, F2 varies ~280 Hz by transconsonantal vowel)
+      - Allen et al. 1987 Ch.11
+  vowel_reduction:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && has(current.params) && has(current.?params.F1) && (has(current.stress) ?
+        current.stress == 0 : false)
+    apply:
+      - field: params.F1
+        op: set
+        value: >-
+          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          params.policy.formant.vowel_reduction_rate
+      - field: params.F2
+        op: set
+        value: >-
+          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          params.policy.formant.vowel_reduction_rate
+    citations:
+      - Allen et al. 1987 Ch.9 (unstressed vowel centralization)
+      - Klatt 1976 (unstressed shortening)
+      - Peterson & Barney 1952 (schwa formants)
+  anticipatory_nasalization:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && (next != null ? next.type == 'nasal' : false)"
+    apply:
+      - field: params.B1
+        op: mul
+        value: params.policy.formant.nasalization_b1_multiplier
+    citations:
+      - Chen 1997 (nasalized vowel acoustics -- B1 increase 1.5-3x)
+      - Hawkins & Stevens 1985 (nasal vowel correlates)
+  sw_explicit_override:
+    kind: scalar
+    select:
+      stream: phone
+      where: has(current.inventorySW)
+    apply:
+      - field: params.SW
+        op: set
+        value: current.inventorySW
+    citations:
+      - Klatt 1980 (SW switch)
+      - Allen et al. 1987 Table 12-1
+  sw_default_assignment:
+    kind: scalar
+    select:
+      stream: phone
+      where: "!has(current.inventorySW)"
+    apply:
+      - field: params.SW
+        op: set
+        value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
+    citations:
+      - Klatt 1980 (cascade/parallel source routing)

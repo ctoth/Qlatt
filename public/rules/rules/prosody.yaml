@@ -1,0 +1,185 @@
+rules:
+  f0_baseline_start:
+    kind: point
+    select:
+      stream: phone
+      where: prev == null
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.base_hz
+      tag: f0_baseline
+    citations:
+      - Pierrehumbert 1980
+      - O'Shaughnessy 1976
+  f0_question_baseline_raise:
+    kind: point
+    select:
+      stream: phone
+      where: prev == null
+    define:
+      question_ahead: look_ahead_pred(current, params.policy.f0.question_scan_window_tokens, "is_question_boundary")
+    constraint: question_ahead != null
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.question_base_hz
+      tag: f0_question_baseline
+    citations:
+      - O'Shaughnessy 1976 (question baseline 125 Hz vs declarative 110 Hz)
+  f0_pitch_reset:
+    kind: point
+    select:
+      stream: phone
+      where: |-
+        current.phoneme != 'SIL' && (prev != null ? (prev.phoneme == 'SIL'
+            ? (has(prev.punctuationSymbol) ? true : false)
+            : false)
+           : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.base_hz
+      tag: f0_reset
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.5 (declination reset at intonational phrase boundaries)
+  f0_targets:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL' && ((has(current.?params.AV) && current.params.AV > 0) || (has(current.?params.AVS) &&
+        current.params.AVS > 0))
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: >-
+        max([((params.policy.f0.base_hz - params.policy.f0.fall_rate_hz * (phrase_total <= 1 ? 0.0 :
+        (double(phrase_index) / double(phrase_total - 1)))) * (has(current.?params.F0_Factor) ? current.params.F0_Factor
+        : 1.0)), params.policy.f0.base_hz * params.policy.f0.declination_floor_ratio])
+      tag: f0_declination
+    citations:
+      - Pierrehumbert 1980
+      - Allen et al. 1987
+      - O'Shaughnessy 1976
+  f0_voiceless_onset_perturbation:
+    kind: point
+    select:
+      stream: phone
+      where: |-
+        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_release', 'stop_aspiration']
+            ? (has(prev.voiceless) ? prev.voiceless == true : false)
+            : (prev.type == 'fricative'
+               ? (has(prev.voiceless) ? prev.voiceless == true : false)
+               : false))
+           : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise"
+      tag: f0_onset_perturbation
+    citations:
+      - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
+      - "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
+  f0_voiced_onset_perturbation:
+    kind: point
+    select:
+      stream: phone
+      where: |-
+        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_closure', 'stop_release']
+            ? (has(prev.voiced) ? prev.voiced == true : false)
+            : false)
+           : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower"
+      tag: f0_onset_perturbation
+    citations:
+      - O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)
+  f0_stress_peak:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && current.stress == 1 && ((has(current.?params.AV) && current.params.AV > 0) ||
+        (has(current.?params.AVS) && current.params.AVS > 0))
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_ratio(current, 0.45)
+      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.stress_rise"
+      tag: f0_stress
+    citations:
+      - O'Shaughnessy 1976
+      - Allen et al. 1987
+  f0_continuation_rise:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL' && (has(current.punctuationSymbol) ? current.punctuationSymbol in [',', ';', ':'] :
+        false)
+    define:
+      prev_f0: prev_point('f0')
+      continuation_rise: >-
+        current.punctuationSymbol == ',' ? params.policy.f0.continuation_rise_hz :
+        params.policy.f0.continuation_minor_rise_hz
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + continuation_rise"
+      tag: f0_continuation
+    citations:
+      - O'Shaughnessy 1976 (continuation rise at non-terminal boundaries)
+      - semicolon/colon rise magnitude is engineering estimate
+  f0_question_rise_onset:
+    kind: point
+    select:
+      stream: phone
+      where:
+        predicate: is_question_boundary
+    define:
+      last_stress: look_back_pred(current, params.policy.f0.question_last_stress_lookback_tokens, "is_stressed_vowel")
+      prev_f0: prev_point('f0')
+    constraint: last_stress != null
+    insert_point:
+      stream: f0
+      at: at_ratio(last_stress, 0.8)
+      value: "prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value"
+      tag: f0_question_onset
+    citations:
+      - O'Shaughnessy 1976 (rise begins before final boundary)
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.5
+  f0_question_rise:
+    kind: point
+    select:
+      stream: phone
+      where:
+        predicate: is_question_boundary
+    define:
+      prev_f0: prev_point('f0')
+      prior_f0_hz: "prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value"
+      rise_target_hz: >-
+        max([prior_f0_hz + params.policy.f0.question_rise_hz, prior_f0_hz * params.policy.f0.question_rise_ratio,
+        params.policy.f0.question_target_floor_hz])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        rise_target_hz > params.policy.f0.question_target_ceiling_hz ? params.policy.f0.question_target_ceiling_hz :
+        rise_target_hz
+      tag: f0_question
+    citations:
+      - O'Shaughnessy 1976 (Tune B final rise targets 170-190 Hz and ~20% lift)
+      - Pierrehumbert 1980
+      - Ladd 2008

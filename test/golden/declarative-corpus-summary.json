@@ -5,7 +5,7 @@
     {
       "phrase": "The quick brown fox jumps over the lazy dog.",
       "events": 49,
-      "totalTime": 3.6170000000000004,
+      "totalTime": 3.545,
       "voicedEvents": 33,
       "f0Min": 90.5,
       "f0Max": 110
@@ -13,7 +13,7 @@
     {
       "phrase": "She sells seashells by the seashore.",
       "events": 28,
-      "totalTime": 2.7470000000000003,
+      "totalTime": 2.706,
       "voicedEvents": 19,
       "f0Min": 90.9090909090909,
       "f0Max": 109.0909090909091
@@ -21,7 +21,7 @@
     {
       "phrase": "Thin thieves thought that they thrilled.",
       "events": 31,
-      "totalTime": 2.524,
+      "totalTime": 2.4939999999999998,
       "voicedEvents": 18,
       "f0Min": 90.8,
       "f0Max": 109.2
@@ -29,7 +29,7 @@
     {
       "phrase": "Ship shape, sheep shop, and cheap chips.",
       "events": 41,
-      "totalTime": 2.955999999999999,
+      "totalTime": 2.9349999999999996,
       "voicedEvents": 11,
       "f0Min": 96.6666666666668,
       "f0Max": 109.99999999999999
@@ -37,15 +37,15 @@
     {
       "phrase": "Sip zip, sip ship, sip sip.",
       "events": 35,
-      "totalTime": 2.5079999999999996,
+      "totalTime": 2.4989999999999997,
       "voicedEvents": 7,
       "f0Min": 98,
-      "f0Max": 108
+      "f0Max": 108.93223140495867
     },
     {
       "phrase": "A zoo can be fun on a sunny day.",
       "events": 34,
-      "totalTime": 2.5900000000000003,
+      "totalTime": 2.589000000000001,
       "voicedEvents": 26,
       "f0Min": 90.83333333333333,
       "f0Max": 110
@@ -53,7 +53,7 @@
     {
       "phrase": "He had your dark suit in greasy wash water all year.",
       "events": 59,
-      "totalTime": 4.2170000000000005,
+      "totalTime": 4.153,
       "voicedEvents": 42,
       "f0Min": 90.46511627906978,
       "f0Max": 109.53488372093024
@@ -61,7 +61,7 @@
     {
       "phrase": "Say oh, ee, and oo again.",
       "events": 23,
-      "totalTime": 2.0989999999999998,
+      "totalTime": 2.077,
       "voicedEvents": 17,
       "f0Min": 92,
       "f0Max": 110
@@ -69,7 +69,7 @@
     {
       "phrase": "Bob bought a big blue balloon.",
       "events": 32,
-      "totalTime": 2.1100000000000003,
+      "totalTime": 2.0810000000000004,
       "voicedEvents": 26,
       "f0Min": 90.8,
       "f0Max": 110
@@ -77,15 +77,15 @@
     {
       "phrase": "Pat tapped a pot and picked a paper cup.",
       "events": 52,
-      "totalTime": 2.8899999999999992,
+      "totalTime": 2.855999999999999,
       "voicedEvents": 13,
-      "f0Min": 91.66666666666679,
+      "f0Min": 91.6666666666669,
       "f0Max": 108.75
     },
     {
       "phrase": "Gag, gang, and gunk go together.",
       "events": 37,
-      "totalTime": 2.6299999999999994,
+      "totalTime": 2.5849999999999995,
       "voicedEvents": 28,
       "f0Min": 91,
       "f0Max": 110
@@ -93,7 +93,7 @@
     {
       "phrase": "Layer, lawyer, royal, rural.",
       "events": 34,
-      "totalTime": 2.509,
+      "totalTime": 2.4859999999999998,
       "voicedEvents": 28,
       "f0Min": 94,
       "f0Max": 110
@@ -101,7 +101,7 @@
     {
       "phrase": "Nina mumbled many minimal numbers.",
       "events": 54,
-      "totalTime": 2.5600000000000005,
+      "totalTime": 2.4860000000000007,
       "voicedEvents": 51,
       "f0Min": 90.64516129032258,
       "f0Max": 110
@@ -109,15 +109,15 @@
     {
       "phrase": "Fresh frost forms on five fields.",
       "events": 36,
-      "totalTime": 3.1700000000000004,
+      "totalTime": 3.0709999999999997,
       "voicedEvents": 23,
       "f0Min": 90.74074074074073,
-      "f0Max": 109.38271604938271
+      "f0Max": 109.38552188552188
     },
     {
       "phrase": "Vera vapes very vivid violets.",
       "events": 40,
-      "totalTime": 2.6740000000000004,
+      "totalTime": 2.6180000000000008,
       "voicedEvents": 30,
       "f0Min": 93.33333333333333,
       "f0Max": 110
@@ -125,7 +125,7 @@
     {
       "phrase": "Zesty zest is easy to spot.",
       "events": 33,
-      "totalTime": 2.7560000000000002,
+      "totalTime": 2.7130000000000005,
       "voicedEvents": 12,
       "f0Min": 92.66666666666666,
       "f0Max": 110
@@ -133,7 +133,7 @@
     {
       "phrase": "Shy sharks shimmer in shallow shoals.",
       "events": 34,
-      "totalTime": 2.7750000000000004,
+      "totalTime": 2.73,
       "voicedEvents": 22,
       "f0Min": 90.86956521739131,
       "f0Max": 109.1304347826087
@@ -141,7 +141,7 @@
     {
       "phrase": "They bathed the smooth leather.",
       "events": 23,
-      "totalTime": 2.1860000000000004,
+      "totalTime": 2.1770000000000005,
       "voicedEvents": 19,
       "f0Min": 91.11111111111111,
       "f0Max": 110
@@ -149,18 +149,18 @@
     {
       "phrase": "S, f, sh, th, z, v, zh, dh.",
       "events": 31,
-      "totalTime": 3.6209999999999996,
+      "totalTime": 3.5869999999999993,
       "voicedEvents": 12,
-      "f0Min": 96.66666666666667,
+      "f0Min": 96.66666666666671,
       "f0Max": 110
     },
     {
       "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
       "events": 52,
-      "totalTime": 5.200999999999999,
+      "totalTime": 5.144999999999999,
       "voicedEvents": 16,
       "f0Min": 92.85714285714286,
-      "f0Max": 110
+      "f0Max": 108.89724310776943
     }
   ]
 }

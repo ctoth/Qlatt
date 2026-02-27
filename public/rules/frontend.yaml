@@ -71,6 +71,43 @@ parameters:
         value: 1.1
         citations:
           - Klatt 1976 §III.A
+      s_cluster_aspiration_ms:
+        value: 10
+        citations:
+          - Lisker & Abramson 1964
+          - Zue 1976
+      s_cluster_ah_reduction_db:
+        value: 10
+        citations:
+          - Zue 1976
+      non_word_initial_consonant_multiplier:
+        value: 0.7
+        citations:
+          - Klatt 1976 Table III
+      unstressed_consonant_multiplier:
+        value: 0.8
+        citations:
+          - Klatt 1976 Table III
+      word_initial_lengthening_multiplier:
+        value: 1.2
+        citations:
+          - White 2014
+      fricative_min_sibilant_ms:
+        value: 30
+        citations:
+          - Jongman 1989
+      fricative_min_labiodental_ms:
+        value: 50
+        citations:
+          - Jongman 1989
+      fricative_min_dental_ms:
+        value: 60
+        citations:
+          - Jongman 1989
+      fricative_min_glottal_ms:
+        value: 40
+        citations:
+          - Jongman 1989
     f0:
       base_hz:
         value: 110
@@ -167,6 +204,22 @@ parameters:
         value: 280
         citations:
           - Stevens 1998 Ch.8
+      vowel_reduction_schwa_f1:
+        value: 500
+        citations:
+          - Peterson & Barney 1952
+      vowel_reduction_schwa_f2:
+        value: 1500
+        citations:
+          - Peterson & Barney 1952
+      vowel_reduction_rate:
+        value: 0.4
+        citations:
+          - Allen et al. 1987 Ch.9
+      nasalization_b1_multiplier:
+        value: 2.0
+        citations:
+          - Chen 1997
 predicates:
   is_question_boundary: >-
     current.phoneme == 'SIL' && current.punctuationSymbol == '?'
@@ -214,11 +267,18 @@ phases:
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset
+      - vowel_reduction
+      - anticipatory_nasalization
+      - non_word_initial_consonant_shortening
+      - unstressed_consonant_shortening
+      - word_initial_lengthening
       - punctuation_pause
       - stress_duration
       - vowel_shortening
       - pre_boundary_lengthening
+      - fricative_minimum_duration
       - lock_stop_release_duration
+      - s_cluster_aspiration_reduction
       - sw_explicit_override
       - sw_default_assignment
     resolve_scalars:
@@ -544,6 +604,117 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.f1_release_velar
           - default: 280
+  s_cluster_aspiration_reduction:
+    kind: scalar
+    citation: Lisker & Abramson 1964 (s-cluster VOT); Zue 1976 (s-clusters reduce VOT to voice-like values)
+    select:
+      stream: phone
+      where: current.type == 'stop_aspiration'
+    define:
+      s_token: >-
+        look_back_where(current, 4, "current.phoneme == 'S'")
+    constraint: 's_token != null'
+    apply:
+      - field: duration
+        op: set
+        value: params.policy.duration.s_cluster_aspiration_ms
+      - field: params.AH
+        op: add
+        value: >-
+          -(params.policy.duration.s_cluster_ah_reduction_db)
+  vowel_reduction:
+    kind: scalar
+    citation: Allen et al. 1987 Ch.9 (unstressed vowel centralization); Klatt 1976 (unstressed shortening); Peterson & Barney 1952 (schwa formants)
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && has(current.params) && has(current.params.F1)
+        && (has(current.stress) ? current.stress == 0 : false)
+    apply:
+      - field: params.F1
+        op: set
+        value: >-
+          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) * params.policy.formant.vowel_reduction_rate
+      - field: params.F2
+        op: set
+        value: >-
+          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) * params.policy.formant.vowel_reduction_rate
+  anticipatory_nasalization:
+    kind: scalar
+    citation: Chen 1997 (nasalized vowel acoustics -- B1 increase 1.5-3x); Hawkins & Stevens 1985 (nasal vowel correlates)
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && (next != null ? next.type == 'nasal' : false)
+    apply:
+      - field: params.B1
+        op: mul
+        value: params.policy.formant.nasalization_b1_multiplier
+  non_word_initial_consonant_shortening:
+    kind: scalar
+    citation: Klatt 1976 Table III (non-word-initial consonant K=0.7)
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']
+        && (prev != null ? (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false)
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.non_word_initial_consonant_multiplier
+        tag: consonant_position
+  unstressed_consonant_shortening:
+    kind: scalar
+    citation: Klatt 1976 Table III (unstressed consonant K=0.8)
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']
+        && (has(current.stress) ? current.stress == 0 : false)
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.unstressed_consonant_multiplier
+        tag: consonant_stress
+  word_initial_lengthening:
+    kind: scalar
+    citation: White 2014 (localized word-initial lengthening +20-30% on onset consonants)
+    select:
+      stream: phone
+      where: >-
+        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']
+        && (prev == null ? true : (has(prev.word) && has(current.word) ? prev.word != current.word : true))
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.word_initial_lengthening_multiplier
+        tag: word_initial
+  fricative_minimum_duration:
+    kind: scalar
+    citation: Jongman 1989 (minimum fricative durations for perceptual identification)
+    select:
+      stream: phone
+      where: current.type == 'fricative'
+    apply:
+      - field: duration
+        op: set
+        dispatch:
+          - when: >-
+              current.phoneme in ['S', 'Z', 'SH', 'ZH']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_sibilant_ms ? current.duration : params.policy.duration.fricative_min_sibilant_ms
+          - when: >-
+              current.phoneme in ['F', 'V']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_labiodental_ms ? current.duration : params.policy.duration.fricative_min_labiodental_ms
+          - when: >-
+              current.phoneme in ['TH', 'DH']
+            value: >-
+              current.duration > params.policy.duration.fricative_min_dental_ms ? current.duration : params.policy.duration.fricative_min_dental_ms
+          - when: current.phoneme == 'HH'
+            value: >-
+              current.duration > params.policy.duration.fricative_min_glottal_ms ? current.duration : params.policy.duration.fricative_min_glottal_ms
+          - default: current.duration
   punctuation_pause:
     kind: scalar
     citation: Allen et al. 1987 Ch.8 (pause insertion)

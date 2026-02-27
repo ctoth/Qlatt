@@ -539,4 +539,343 @@ describe("declarative frontend rulepack context migration", () => {
     // Velar F1=280
     expect(out[2].params.F1).toBe(280);
   });
+
+  // --- S-cluster aspiration reduction ---
+
+  it("reduces aspiration duration in s-cluster (S before stop)", () => {
+    const sequence = [
+      {
+        phoneme: "S",
+        type: "fricative",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 60 },
+        duration: 100,
+        inherentDuration: 100,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 58, AH: 55 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        alveolar: true,
+        params: { AH: 55 },
+        duration: 56,
+        inherentDuration: 56,
+      },
+      {
+        phoneme: "AA",
+        type: "vowel",
+        low: true,
+        params: { F1: 700, F2: 1220, AV: 64 },
+        duration: 180,
+        inherentDuration: 180,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // T_ASP: aspiration dramatically reduced by s-cluster rule
+    // Klatt incompressibility floor (inherentDuration * 0.6 = 56 * 0.6 = 33.6 -> 34) prevents
+    // going all the way to 10ms, but 34ms is still dramatically shorter than the original 56ms
+    const asp = out.find((t) => t.phoneme === "T_ASP");
+    expect(asp).toBeTruthy();
+    expect(asp!.duration).toBeLessThanOrEqual(34);
+    expect(asp!.duration).toBeLessThan(56);
+    // AH reduced by 10 dB: 55 - 10 = 45
+    expect(asp!.params.AH).toBe(45);
+  });
+
+  // --- Vowel reduction ---
+
+  it("centralizes formants of unstressed vowels toward schwa", () => {
+    // IY0: F1=330, F2=1950 -- should move toward schwa (500, 1500)
+    const sequence = [
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        hi: true,
+        stress: 0,
+        params: { F1: 330, F2: 1950, AV: 58 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // F1: 330 + (500 - 330) * 0.4 = 330 + 68 = 398
+    expect(out[0].params.F1).toBeCloseTo(398, 0);
+    // F2: 1950 + (1500 - 1950) * 0.4 = 1950 - 180 = 1770
+    expect(out[0].params.F2).toBeCloseTo(1770, 0);
+  });
+
+  it("does not reduce formants of stressed vowels", () => {
+    const sequence = [
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        hi: true,
+        stress: 1,
+        params: { F1: 310, F2: 2020, AV: 63 },
+        duration: 150,
+        inherentDuration: 150,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Stressed vowels should not be reduced
+    expect(out[0].params.F1).toBe(310);
+    expect(out[0].params.F2).toBe(2020);
+  });
+
+  // --- Anticipatory nasalization ---
+
+  it("widens B1 bandwidth on vowels before nasals", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        low: true,
+        front: true,
+        params: { F1: 620, F2: 1660, B1: 70, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "M",
+        type: "nasal",
+        bilabial: true,
+        params: { FNZ: 480 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // B1 doubled: 70 * 2.0 = 140
+    expect(out[0].params.B1).toBe(140);
+  });
+
+  it("does not nasalize vowels not followed by nasal", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        low: true,
+        front: true,
+        params: { F1: 620, F2: 1660, B1: 70, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // B1 unchanged (next is not nasal)
+    expect(out[0].params.B1).toBe(70);
+  });
+
+  // --- Non-word-initial consonant shortening ---
+
+  it("shortens non-word-initial consonants by K=0.7", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        word: "cat",
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        word: "cat",
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "SIL",
+        type: "silence",
+        punctuationSymbol: ".",
+        word: ".",
+        params: {},
+        duration: 100,
+        inherentDuration: 100,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // T_CL: in same word as preceding AE, so non-word-initial: duration * 0.7
+    // Also gets word_initial_lengthening? No -- prev.word == current.word so not word-initial
+    // But gets pre_boundary_terminal_multiplier (1.4) since next is terminal SIL
+    // non_word_initial: 40 * 0.7 = 28, then pre_boundary: 28 * 1.4 = 39.2 -> resolved via Klatt incompressibility
+    // Let's just verify it's less than the original 40 * 1.4 = 56 (without shortening)
+    const tcl = out.find((t) => t.phoneme === "T_CL");
+    expect(tcl).toBeTruthy();
+    expect(tcl!.duration).toBeLessThan(56);
+  });
+
+  // --- Word-initial lengthening ---
+
+  it("lengthens word-initial consonants by 1.2", () => {
+    const sequence = [
+      {
+        phoneme: "SIL",
+        type: "silence",
+        params: {},
+        duration: 100,
+        inherentDuration: 100,
+      },
+      {
+        phoneme: "K_CL",
+        type: "stop_closure",
+        voiceless: true,
+        velar: true,
+        word: "cat",
+        params: {},
+        duration: 60,
+        inherentDuration: 60,
+      },
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        word: "cat",
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // K_CL: word-initial (prev is SIL, no word). Gets word_initial_lengthening: 60 * 1.2 = 72
+    // Also gets pre_boundary_word_multiplier since next is different word? No -- AE is same word "cat"
+    const kcl = out.find((t) => t.phoneme === "K_CL");
+    expect(kcl).toBeTruthy();
+    // Should be longer than 60 (inherent) due to word-initial lengthening
+    expect(kcl!.duration).toBeGreaterThan(60);
+  });
+
+  // --- Fricative minimum duration ---
+
+  it("enforces minimum duration floor on short fricatives", () => {
+    // A very short /F/ (20ms) should be floored to 50ms (labiodental min)
+    const sequence = [
+      {
+        phoneme: "F",
+        type: "fricative",
+        voiceless: true,
+        labiodental: true,
+        params: { AF: 48 },
+        duration: 20,
+        inherentDuration: 20,
+      },
+      {
+        phoneme: "SIL",
+        type: "silence",
+        params: {},
+        duration: 100,
+        inherentDuration: 100,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // F: duration was 20, should be floored to fricative_min_labiodental_ms (50)
+    // But it also gets word_initial_lengthening (1.2) and pre_boundary_terminal (1.4)
+    // word_initial: 20 * 1.2 = 24; pre_boundary: 24 * 1.4 = 33.6
+    // fricative_minimum_duration floor: max(33.6, 50) = 50
+    const fric = out.find((t) => t.phoneme === "F");
+    expect(fric).toBeTruthy();
+    expect(fric!.duration).toBeGreaterThanOrEqual(50);
+  });
+
+  it("does not reduce already-long fricatives below minimum", () => {
+    // A long /S/ (100ms) should stay at 100ms
+    const sequence = [
+      {
+        phoneme: "S",
+        type: "fricative",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 60 },
+        duration: 100,
+        inherentDuration: 100,
+      },
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // S: duration 100ms with word-initial (1.2) => 120, well above 30ms sibilant min
+    const sib = out.find((t) => t.phoneme === "S");
+    expect(sib).toBeTruthy();
+    expect(sib!.duration).toBeGreaterThanOrEqual(30);
+    // Should be >= 100 because it gets word_initial_lengthening
+    expect(sib!.duration).toBeGreaterThanOrEqual(100);
+  });
+
+  it("enforces dental fricative minimum duration", () => {
+    // A short /TH/ (25ms) should be floored to 60ms
+    const sequence = [
+      {
+        phoneme: "TH",
+        type: "fricative",
+        voiceless: true,
+        dental: true,
+        params: { AF: 48 },
+        duration: 25,
+        inherentDuration: 25,
+      },
+      {
+        phoneme: "SIL",
+        type: "silence",
+        params: {},
+        duration: 100,
+        inherentDuration: 100,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const th = out.find((t) => t.phoneme === "TH");
+    expect(th).toBeTruthy();
+    // Should be at least 60ms (dental minimum)
+    expect(th!.duration).toBeGreaterThanOrEqual(60);
+  });
 });

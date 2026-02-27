@@ -161,8 +161,8 @@ parameters:
       voiceless_onset_raise:
         value: 1.2
         citations:
-          - O'Shaughnessy 1976
-          - Hombert et al. 1979
+          - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
+          - "Hombert et al. 1979 (empirical: ~8% perturbation; 1.2 follows O'Shaughnessy's synthesis heuristic, not Hombert's measured value)"
       voiced_onset_lower:
         value: 0.95
         citations:
@@ -179,41 +179,41 @@ parameters:
       bilabial_f2_locus:
         value: 1200
         citations:
-          - Stevens & House 1955
-          - Allen et al. 1987 Ch.11
+          - "Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)"
+          - "Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)"
       alveolar_f2_locus:
         value: 1800
         citations:
-          - Stevens & House 1955
+          - Stevens & House 1956
           - Allen et al. 1987 Ch.11
       alveolar_f2_locus_front:
         value: 1900
         citations:
-          - Stevens & House 1955
+          - Stevens & House 1956
       alveolar_f2_locus_back:
         value: 1700
         citations:
-          - Stevens & House 1955
+          - Stevens & House 1956
       nasal_fnz_m:
         value: 900
         citations:
-          - Hawkins & Stevens 1985
-          - House & Stevens 1956
+          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
+          - Fujimura 1962 (nasal consonant antiresonances by place)
       nasal_fnz_n:
         value: 1700
         citations:
-          - Hawkins & Stevens 1985
-          - House & Stevens 1956
+          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
+          - Fujimura 1962 (nasal consonant antiresonances by place)
       nasal_fnz_ng:
         value: 2800
         citations:
-          - Hawkins & Stevens 1985
-          - House & Stevens 1956
+          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
+          - Fujimura 1962 (nasal consonant antiresonances by place)
       dark_l_f2:
-        value: 750
+        value: 900
         citations:
-          - Recasens 2012
-          - Sproat & Fujimura 1993
+          - "Sproat & Fujimura 1993 (dark /l/ F2 ~800-1000 Hz)"
+          - "Recasens 2012 (American English dark /l/ mean F2 ~860-900 Hz)"
       dark_l_f3:
         value: 2400
         citations:
@@ -257,12 +257,12 @@ parameters:
       palatal_f2_locus:
         value: 2600
         citations:
-          - Stevens & House 1955
+          - Stevens & House 1956
           - Allen et al. 1987 Ch.11
       palatal_f2_back_vowel:
         value: 2400
         citations:
-          - Stevens & House 1955
+          - Stevens & House 1956
           - Allen et al. 1987 Ch.11
       vcv_coarticulation_rate:
         value: 0.3
@@ -524,7 +524,7 @@ rules:
         value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : 1500'
   bilabial_f2_locus:
     kind: scalar
-    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (bilabial F2 locus ~1200 Hz)
+    citation: "Stevens & House 1956 (locus varies 700-1500 Hz by vowel context; 1200 Hz is midpoint approximation per Allen et al. 1987 Ch.11)"
     select:
       stream: phone
       where: current.phoneme in ['P_CL', 'B_CL', 'M']
@@ -546,7 +546,7 @@ rules:
           - default: params.policy.formant.bilabial_f2_locus
   bilabial_rel_copy:
     kind: scalar
-    citation: Stevens & House 1955; Allen et al. 1987 Ch.11 (bilabial locus transitions)
+    citation: Stevens & House 1956; Allen et al. 1987 Ch.11 (bilabial locus transitions)
     select:
       stream: phone
       where: >-
@@ -557,7 +557,7 @@ rules:
         value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus'
   alveolar_f2_locus:
     kind: scalar
-    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
+    citation: Stevens & House 1956 (formant transitions); Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
     select:
       stream: phone
       where: current.phoneme in ['T_CL', 'D_CL', 'N']
@@ -579,7 +579,7 @@ rules:
           - default: params.policy.formant.alveolar_f2_locus
   alveolar_rel_copy:
     kind: scalar
-    citation: Stevens & House 1955; Allen et al. 1987 Ch.11 (alveolar locus transitions)
+    citation: Stevens & House 1956; Allen et al. 1987 Ch.11 (alveolar locus transitions)
     select:
       stream: phone
       where: >-
@@ -590,7 +590,7 @@ rules:
         value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus'
   nasal_antiformant_by_place:
     kind: scalar
-    citation: Hawkins & Stevens 1985 (nasal pole-zero correlates); House & Stevens 1956 (nasal antiformants by place)
+    citation: Stevens 1998 Ch.10 (nasal consonant oral cavity zeros); Fujimura 1962 (nasal consonant antiresonances by place)
     select:
       stream: phone
       where: current.type == 'nasal'
@@ -751,7 +751,7 @@ rules:
         tag: word_initial
   fricative_minimum_duration:
     kind: scalar
-    citation: Jongman 1989 (minimum fricative durations for perceptual identification)
+    citation: "Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full duration; glottal /hh/ not tested -- value is engineering estimate)"
     select:
       stream: phone
       where: current.type == 'fricative'
@@ -952,7 +952,7 @@ rules:
       tag: f0_question_onset
   f0_voiceless_onset_perturbation:
     kind: point
-    citation: O'Shaughnessy 1976 (after voiceless onset F0 starts ~20% higher); Hombert et al. 1979
+    citation: "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset); cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
     select:
       stream: phone
       where: >-
@@ -1008,7 +1008,7 @@ rules:
       tag: f0_continuation
   palatal_f2_locus:
     kind: scalar
-    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
+    citation: Stevens & House 1956 (formant transitions); Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
     select:
       stream: phone
       where: current.phoneme == 'Y'

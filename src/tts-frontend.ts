@@ -8,6 +8,8 @@ import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack } from "./track-assembler";
+import type { OutputConfig } from "./track-assembler";
+import type { TranscriptionConfig } from "./tts-frontend-types";
 
 type FrontendToken = Record<string, any>;
 type RuleSpec = { citation?: string };
@@ -27,6 +29,13 @@ const RULE_CITATIONS = new Map<string, string[]>(
     }
   )
 );
+
+// Extract output and transcription configuration from the loaded YAML rulepack.
+// These override hardcoded defaults in track-assembler and transcribe-text.
+const RULEPACK_OUTPUT_CONFIG: OutputConfig | undefined =
+  (QLATT_V12_CEL_RULEPACK as any)?.output ?? undefined;
+const RULEPACK_TRANSCRIPTION_CONFIG: TranscriptionConfig | undefined =
+  (QLATT_V12_CEL_RULEPACK as any)?.transcription ?? undefined;
 
 function collectTraceTokenIds(event: FrontendToken): string[] {
   const ids: string[] = [];
@@ -110,7 +119,10 @@ export function textToKlattTrack(
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
-  let parameterSequence: FrontendToken[] = transcribeText(normalized, { provenance });
+  let parameterSequence: FrontendToken[] = transcribeText(normalized, {
+    provenance,
+    transcriptionConfig: RULEPACK_TRANSCRIPTION_CONFIG,
+  });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
   parameterSequence = parameterSequence.map((ph: FrontendToken, index: number) => {
@@ -215,5 +227,6 @@ export function textToKlattTrack(
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0,
     transitionMs,
+    outputConfig: RULEPACK_OUTPUT_CONFIG,
   });
 }

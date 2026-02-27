@@ -23,6 +23,14 @@ export interface TranscriptionToken {
   _pronDecisionId?: string;
 }
 
+/** YAML-sourced transcription configuration. */
+export type TranscriptionConfig = {
+  diagnostic_symbols?: Record<string, string[]>;
+  punctuation_tokens?: string[];
+};
+
 export type TranscriptionOptions = {
   provenance?: ProvenanceCollector | null;
+  /** Transcription config from YAML (overrides hardcoded defaults). */
+  transcriptionConfig?: TranscriptionConfig;
 };

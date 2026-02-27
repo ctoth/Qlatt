@@ -32,7 +32,7 @@ const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 
 // ---------------------------------------------------------------------------
-// Constants
+// Default constants — overridden by YAML transcription config when available
 // ---------------------------------------------------------------------------
 
 export const PUNCTUATION_TOKENS = new Set([",", ".", "?", "!", ";", ":"]);
@@ -127,14 +127,38 @@ export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
  */
 export function transcribeText(text: string, options: TranscriptionOptions = {}): TranscriptionToken[] {
   const provenance = options.provenance ?? null;
+  const cfg = options.transcriptionConfig;
+
+  // Resolve effective lookup tables from YAML config, falling back to hardcoded defaults.
+  const effectiveSymbols: Record<string, string[]> =
+    cfg?.diagnostic_symbols && Object.keys(cfg.diagnostic_symbols).length > 0
+      ? cfg.diagnostic_symbols
+      : DIAGNOSTIC_SYMBOL_PHONEMES;
+  const effectivePunctuation: Set<string> =
+    cfg?.punctuation_tokens && cfg.punctuation_tokens.length > 0
+      ? new Set(cfg.punctuation_tokens)
+      : PUNCTUATION_TOKENS;
+
+  const isEffectivePunctuation = (word: string): boolean => effectivePunctuation.has(word);
+  const getEffectiveSymbol = (word: string): string[] | null => {
+    const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
+    const phones = effectiveSymbols[normalized];
+    return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
+  };
+
   const words = text.split(" ");
   const flatPhonemeList: TranscriptionToken[] = [];
-  const useSymbolMode = shouldUseDiagnosticSymbolMode(words);
+
+  // Use effective lookup functions for symbol mode detection
+  const nonPunctuation = words.filter((w) => w.length > 0 && !isEffectivePunctuation(w));
+  const useSymbolMode =
+    nonPunctuation.length > 0 &&
+    nonPunctuation.every((w) => getEffectiveSymbol(w) !== null);
 
   for (const word of words) {
     if (!word) continue; // Skip empty strings resulting from multiple spaces
 
-    if (isPunctuationToken(word)) {
+    if (isEffectivePunctuation(word)) {
       flatPhonemeList.push({
         phoneme: "SIL",
         stress: null,
@@ -143,7 +167,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         word: word, // Associate punctuation with itself as the 'word'
       });
     } else {
-      const symbolPronunciation = useSymbolMode ? getDiagnosticSymbolPronunciation(word) : null;
+      const symbolPronunciation = useSymbolMode ? getEffectiveSymbol(word) : null;
       // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress.
       const pronResult: PronunciationResult =
         symbolPronunciation == null

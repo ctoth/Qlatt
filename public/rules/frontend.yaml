@@ -1495,3 +1495,53 @@ rules:
       at: at_sync(current.sync_left)
       value: params.policy.f0.base_hz
       tag: f0_reset
+
+# ---------------------------------------------------------------------------
+# Output configuration — track assembly parameters
+# These constants control how the phone sequence is assembled into Klatt frames.
+# ---------------------------------------------------------------------------
+output:
+  blend:
+    factor: 0.35
+    keys: ["F1", "F2", "F3", "B1", "B2", "B3"]
+    smooth_types: ["vowel", "nasal", "liquid", "glide"]
+    citations:
+      - "Ohman 1966 (VCV coarticulation model)"
+  min_duration:
+    stop_release_ms: 5
+    default_ms: 20
+    citations:
+      - "Allen et al. 1987 Ch.8"
+  transition_ms: 30
+  final_silence_ms: 100
+
+# ---------------------------------------------------------------------------
+# Transcription configuration — diagnostic symbols and punctuation
+# ---------------------------------------------------------------------------
+transcription:
+  diagnostic_symbols:
+    b: ["B"]
+    ch: ["CH"]
+    d: ["D"]
+    dh: ["DH"]
+    f: ["F"]
+    g: ["G"]
+    hh: ["HH"]
+    jh: ["JH"]
+    k: ["K"]
+    l: ["L"]
+    m: ["M"]
+    n: ["N"]
+    ng: ["NG"]
+    p: ["P"]
+    r: ["R"]
+    s: ["S"]
+    sh: ["SH"]
+    t: ["T"]
+    th: ["TH"]
+    v: ["V"]
+    w: ["W"]
+    y: ["Y"]
+    z: ["Z"]
+    zh: ["ZH"]
+  punctuation_tokens: [",", ".", "?", "!", ";", ":"]

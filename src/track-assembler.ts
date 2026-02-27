@@ -23,12 +23,29 @@ const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any>
 /** An F0 contour point (time in seconds, f0 in Hz). */
 export type F0Point = { time: number; f0: number };
 
+/** YAML-sourced output configuration for track assembly. */
+export type OutputConfig = {
+  blend?: {
+    factor?: number;
+    keys?: string[];
+    smooth_types?: string[];
+  };
+  min_duration?: {
+    stop_release_ms?: number;
+    default_ms?: number;
+  };
+  transition_ms?: number;
+  final_silence_ms?: number;
+};
+
 /** Options passed to {@link assembleKlattTrack}. */
 export type AssembleTrackOptions = {
   /** Base F0 in Hz (default 110). */
   baseF0?: number;
   /** Transition duration in milliseconds (default 30). */
   transitionMs?: number;
+  /** Output configuration from YAML (overrides hardcoded defaults). */
+  outputConfig?: OutputConfig;
 };
 
 // ---------------------------------------------------------------------------
@@ -139,18 +156,27 @@ function getF0AtTime(f0Contour: F0Point[], time: number): number {
   return f0Contour[f0Contour.length - 1].f0;
 }
 
-const BLEND_FACTOR = 0.35;
-const SMOOTH_TYPES = new Set(["vowel", "nasal", "liquid", "glide"]);
-const BLEND_KEYS = ["F1", "F2", "F3", "B1", "B2", "B3"];
+// Hardcoded defaults — overridden by YAML output config when available
+const DEFAULT_BLEND_FACTOR = 0.35;
+const DEFAULT_SMOOTH_TYPES = new Set(["vowel", "nasal", "liquid", "glide"]);
+const DEFAULT_BLEND_KEYS = ["F1", "F2", "F3", "B1", "B2", "B3"];
+const DEFAULT_MIN_DURATION_STOP_RELEASE_MS = 5;
+const DEFAULT_MIN_DURATION_MS = 20;
+const DEFAULT_FINAL_SILENCE_MS = 100;
 
-function blendParams(baseParams: KlattParams, nextParams?: KlattParams | null): KlattParams {
+function blendParams(
+  baseParams: KlattParams,
+  nextParams: KlattParams | null | undefined,
+  blendKeys: string[],
+  blendFactor: number,
+): KlattParams {
   if (!nextParams) return { ...baseParams };
   const blended = { ...baseParams };
-  for (const key of BLEND_KEYS) {
+  for (const key of blendKeys) {
     const a = baseParams[key];
     const b = nextParams[key];
     if (Number.isFinite(a) && Number.isFinite(b)) {
-      blended[key] = a + (b - a) * BLEND_FACTOR;
+      blended[key] = a + (b - a) * blendFactor;
     }
   }
   return blended;
@@ -175,7 +201,20 @@ export function assembleKlattTrack(
   options: AssembleTrackOptions = {}
 ): FrontendToken[] {
   const baseF0 = options.baseF0 ?? 110;
-  const transitionMs = options.transitionMs ?? 30;
+  const cfg = options.outputConfig;
+  const transitionMs = options.transitionMs ?? cfg?.transition_ms ?? 30;
+
+  // Resolve blend config from YAML, falling back to hardcoded defaults.
+  const blendFactor = cfg?.blend?.factor ?? DEFAULT_BLEND_FACTOR;
+  const blendKeys = cfg?.blend?.keys ?? DEFAULT_BLEND_KEYS;
+  const smoothTypes = cfg?.blend?.smooth_types
+    ? new Set(cfg.blend.smooth_types)
+    : DEFAULT_SMOOTH_TYPES;
+  const minDurationStopReleaseMs =
+    cfg?.min_duration?.stop_release_ms ?? DEFAULT_MIN_DURATION_STOP_RELEASE_MS;
+  const minDurationDefaultMs =
+    cfg?.min_duration?.default_ms ?? DEFAULT_MIN_DURATION_MS;
+  const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
 
   // Build the F0 contour from declarative points.
   const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
@@ -194,7 +233,7 @@ export function assembleKlattTrack(
     const ph = phoneSequence[i] as FrontendToken;
     // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
-    const minDuration = isStopRelease ? 5 : 20;
+    const minDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
     const targetDur = isStopRelease ? PHONEME_TARGET_MAP[ph.phoneme]?.dur : null;
     const phDurationMs = Number.isFinite(targetDur) ? targetDur : (ph.duration || 100);
     const phDuration = Math.max(minDuration, phDurationMs) / 1000.0;
@@ -229,8 +268,8 @@ export function assembleKlattTrack(
       const nextPh = phoneSequence[i + 1] as FrontendToken | undefined;
       const canSmooth =
         transitionSec > 0 &&
-        SMOOTH_TYPES.has(ph.type) &&
-        SMOOTH_TYPES.has(nextPh?.type);
+        smoothTypes.has(ph.type) &&
+        smoothTypes.has(nextPh?.type);
       const steadyTime = canSmooth
         ? Math.max(segmentStart + 0.02, targetTime - transitionSec)
         : null;
@@ -243,7 +282,7 @@ export function assembleKlattTrack(
       });
 
       if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
-        const transitionParams = blendParams(finalParams, nextPh?.params);
+        const transitionParams = blendParams(finalParams, nextPh?.params, blendKeys, blendFactor);
         const transitionF0 = isTargetVoiced ? getF0AtTime(f0Contour, steadyTime) : 0;
         transitionParams.F0 = ph.phoneme === "SIL" ? 0 : transitionF0;
         klattTrack.push({
@@ -258,7 +297,7 @@ export function assembleKlattTrack(
   }
 
   // Add final silence.
-  const finalTime = currentTime + 0.1;
+  const finalTime = currentTime + finalSilenceMs / 1000.0;
   klattTrack.push({
     time: finalTime,
     phoneme: "SIL",

@@ -223,6 +223,7 @@ export function parseDslSpec(source: unknown): PlainObject {
       points: cloneObject(interpolation.points),
     },
     output: cloneObject(raw.output),
+    transcription: cloneObject(raw.transcription),
     include: Array.isArray(raw.include) ? raw.include.slice() : [],
   };
 }

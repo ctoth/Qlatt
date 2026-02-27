@@ -107,7 +107,7 @@ parameters:
       fricative_min_glottal_ms:
         value: 40
         citations:
-          - Jongman 1989
+          - "Engineering estimate (Jongman 1989 does not test glottal /hh/)"
       vowel_vl_stop_shortening_phrasefinal_ms:
         value: -45
         citations:
@@ -1300,7 +1300,7 @@ rules:
           - default: 'has(current.params.A6) ? current.params.A6 : 0'
   nasal_place_assimilation:
     kind: scalar
-    citation: Allen et al. 1987 Ch.10 (nasal place assimilation); research-coarticulation.md
+    citation: Allen et al. 1987 Ch.10 (nasal place assimilation); Fujimura 1962 (nasal consonant place acoustics); Stevens 1998 Ch.10
     select:
       stream: phone
       where: current.phoneme == 'N'

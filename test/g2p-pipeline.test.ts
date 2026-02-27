@@ -181,6 +181,14 @@ describe("pronounce() morphology integration", () => {
     expect(result.source).toBe("morphology");
     expect(result.rootWord).toBe("happy");
   });
+
+  it("handles prefix + suffix decomposition before falling back to LTS", () => {
+    const dict = makeDict({ kind: ["K", "AY1", "N", "D"] });
+    const result = pronounce("unkindness", dict);
+    expect(result.source).toBe("morphology");
+    expect(result.rootWord).toBe("kind");
+    expect(result.phonemes).toEqual(["AH0", "N", "K", "AY1", "N", "D", "N", "AH0", "S"]);
+  });
 });
 
 // --- Block 4: OOV Tracking ---

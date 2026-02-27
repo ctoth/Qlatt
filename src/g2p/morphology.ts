@@ -115,6 +115,48 @@ function tryRootLookup(
   return null;
 }
 
+function resolveSuffixPhonemes(
+  suffix: SuffixEntry,
+  rootPhonemes: string[],
+): string[] | null {
+  if (suffix.pronunciation === 'contextual') {
+    if (suffix.affix === 'ed') {
+      return edPronunciation(rootPhonemes);
+    }
+    if (suffix.affix === 's') {
+      return sPronunciation(rootPhonemes);
+    }
+    return null;
+  }
+  return suffix.pronunciation;
+}
+
+function trySuffixDecomposition(
+  surfaceWord: string,
+  suffixes: SuffixEntry[],
+  dictLookup: DictLookup,
+): { rootWord: string; phonemes: string[] } | null {
+  for (const suffix of suffixes) {
+    if (!surfaceWord.endsWith(suffix.affix)) continue;
+
+    const root = surfaceWord.slice(0, surfaceWord.length - suffix.affix.length);
+    if (root.length < suffix.min_root) continue;
+
+    const lookup = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup);
+    if (!lookup) continue;
+
+    const suffixPhonemes = resolveSuffixPhonemes(suffix, lookup.phonemes);
+    if (!suffixPhonemes) continue;
+
+    return {
+      rootWord: lookup.rootWord,
+      phonemes: [...lookup.phonemes, ...suffixPhonemes],
+    };
+  }
+
+  return null;
+}
+
 /**
  * Attempt morphological decomposition of a word.
  * Returns a PronunciationResult if successful, null otherwise.
@@ -130,35 +172,14 @@ export function decomposeWord(
   const lowerWord = word.toLowerCase();
   const data = getMorphologyData();
 
-  // Try suffixes (already ordered longest-first in YAML)
-  for (const suffix of data.suffixes) {
-    if (!lowerWord.endsWith(suffix.affix)) continue;
-
-    const root = lowerWord.slice(0, lowerWord.length - suffix.affix.length);
-    if (root.length < suffix.min_root) continue;
-
-    const lookup = tryRootLookup(root, suffix.try_silent_e ?? false, dictLookup);
-    if (!lookup) continue;
-
-    // Determine suffix pronunciation
-    let suffixPhonemes: string[];
-    if (suffix.pronunciation === 'contextual') {
-      if (suffix.affix === 'ed') {
-        suffixPhonemes = edPronunciation(lookup.phonemes);
-      } else if (suffix.affix === 's') {
-        suffixPhonemes = sPronunciation(lookup.phonemes);
-      } else {
-        continue; // Unknown contextual suffix
-      }
-    } else {
-      suffixPhonemes = suffix.pronunciation;
-    }
-
+  // Try suffixes first (already ordered longest-first in YAML).
+  const suffixOnly = trySuffixDecomposition(lowerWord, data.suffixes, dictLookup);
+  if (suffixOnly) {
     return {
-      phonemes: [...lookup.phonemes, ...suffixPhonemes],
+      phonemes: suffixOnly.phonemes,
       source: 'morphology',
       word: lowerWord,
-      rootWord: lookup.rootWord,
+      rootWord: suffixOnly.rootWord,
     };
   }
 
@@ -170,13 +191,25 @@ export function decomposeWord(
     if (remainder.length < prefix.min_remainder) continue;
 
     const remainderPhonemes = dictLookup(remainder);
-    if (!remainderPhonemes) continue;
+    if (remainderPhonemes) {
+      return {
+        phonemes: [...prefix.pronunciation, ...remainderPhonemes],
+        source: 'morphology',
+        word: lowerWord,
+        rootWord: remainder,
+      };
+    }
+
+    // Compound morphology: prefix + (suffix decomposition of remainder)
+    // Example: "unkindness" = "un" + "kind" + "ness".
+    const suffixInRemainder = trySuffixDecomposition(remainder, data.suffixes, dictLookup);
+    if (!suffixInRemainder) continue;
 
     return {
-      phonemes: [...prefix.pronunciation, ...remainderPhonemes],
+      phonemes: [...prefix.pronunciation, ...suffixInRemainder.phonemes],
       source: 'morphology',
       word: lowerWord,
-      rootWord: remainder,
+      rootWord: suffixInRemainder.rootWord,
     };
   }
 

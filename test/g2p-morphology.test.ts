@@ -118,6 +118,14 @@ describe('decomposeWord', () => {
       expect(result!.rootWord).toBe('start');
       expect(result!.phonemes).toEqual(['R', 'IY0', 'S', 'T', 'AA1', 'R', 'T']);
     });
+
+    it('"unkindness" -> un- + (kind + -ness)', () => {
+      const result = decomposeWord('unkindness', mockLookup);
+      expect(result).not.toBeNull();
+      expect(result!.source).toBe('morphology');
+      expect(result!.rootWord).toBe('kind');
+      expect(result!.phonemes).toEqual(['AH0', 'N', 'K', 'AY1', 'N', 'D', 'N', 'AH0', 'S']);
+    });
   });
 
   describe('guard rails (should return null)', () => {

@@ -760,7 +760,164 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 7: Inventory-Wide Obstruent Separation -------------------------
+  // -- Block 7: Affricate Differentiation -----------------------------------
+
+  describe("affricate differentiation", () => {
+    it("keeps CH/JH distinct from SH/ZH using closure+frication cues", () => {
+      // Citation anchors:
+      // - Stevens 1998 Ch.8/10 (affricates carry stop-gap + frication cues)
+      // - Allen et al. 1987 Table C-1 (distinct affricate timing targets)
+      const phones = ["CH", "SH", "JH", "ZH"] as const;
+      const byPhone = new Map<
+        string,
+        {
+          closurePrev: number[];
+          onsetDelta: number[];
+          duration: number[];
+          AF: number[];
+          A5: number[];
+        }
+      >(
+        phones.map((phone) => [
+          phone,
+          { closurePrev: [], onsetDelta: [], duration: [], AF: [], A5: [] },
+        ])
+      );
+
+      const maxInSegment = (segment: Segment, key: string): number =>
+        Math.max(...segment.frames.map((frame) => Number(frame.params?.[key] ?? 0)));
+
+      for (const [word] of auditWords) {
+        const segments = segmentCache.get(word);
+        if (!segments) continue;
+        for (let idx = 0; idx < segments.length; idx += 1) {
+          const segment = segments[idx];
+          const phone = stripStress(segment.phoneme);
+          if (!byPhone.has(phone)) continue;
+          const prev = idx > 0 ? segments[idx - 1] : null;
+          const prevPhone = prev ? stripStress(prev.phoneme) : null;
+          const prevAF = prev ? maxInSegment(prev, "AF") : 0;
+          const currAF = maxInSegment(segment, "AF");
+          const currA5 = maxInSegment(segment, "A5");
+          const currDuration = segment.durationMs;
+
+          const expectsClosure = phone === "CH" || phone === "JH";
+          const expectedClosurePhone = phone === "CH" ? "CH_CL" : phone === "JH" ? "JH_CL" : "";
+          const hasExpectedClosurePrev = expectsClosure && prevPhone === expectedClosurePhone;
+
+          const stats = byPhone.get(phone)!;
+          stats.closurePrev.push(hasExpectedClosurePrev ? 1 : 0);
+          stats.onsetDelta.push(currAF - prevAF);
+          stats.duration.push(currDuration);
+          stats.AF.push(currAF);
+          stats.A5.push(currA5);
+        }
+      }
+
+      const summary = new Map<
+        string,
+        {
+          count: number;
+          closureRate: number;
+          onsetDelta: ReturnType<typeof summarizeNumbers>;
+          duration: ReturnType<typeof summarizeNumbers>;
+          AF: ReturnType<typeof summarizeNumbers>;
+          A5: ReturnType<typeof summarizeNumbers>;
+        }
+      >();
+
+      for (const phone of phones) {
+        const stats = byPhone.get(phone)!;
+        const count = stats.duration.length;
+        const closureRate =
+          count === 0 ? 0 : stats.closurePrev.reduce((acc, value) => acc + value, 0) / count;
+        summary.set(phone, {
+          count,
+          closureRate,
+          onsetDelta: summarizeNumbers(stats.onsetDelta),
+          duration: summarizeNumbers(stats.duration),
+          AF: summarizeNumbers(stats.AF),
+          A5: summarizeNumbers(stats.A5),
+        });
+      }
+
+      const violations: ContrastViolation[] = [];
+      const assertMin = (pair: string, metric: string, observed: number, min: number, sampleCount: number) => {
+        if (observed < min) {
+          violations.push({
+            pair,
+            metric,
+            observed,
+            expected: `>= ${min}`,
+            sampleCount,
+          });
+        }
+      };
+      const assertMax = (pair: string, metric: string, observed: number, max: number, sampleCount: number) => {
+        if (observed > max) {
+          violations.push({
+            pair,
+            metric,
+            observed,
+            expected: `<= ${max}`,
+            sampleCount,
+          });
+        }
+      };
+
+      const ch = summary.get("CH")!;
+      const sh = summary.get("SH")!;
+      const jh = summary.get("JH")!;
+      const zh = summary.get("ZH")!;
+
+      const zLikeMinCount = isFullAudit ? 20 : 5;
+      assertMin("CH", "count", ch.count, 20, ch.count);
+      assertMin("SH", "count", sh.count, 20, sh.count);
+      assertMin("JH", "count", jh.count, 20, jh.count);
+      assertMin("ZH", "count", zh.count, zLikeMinCount, zh.count);
+
+      // Affricates should usually be preceded by their dedicated closure segment.
+      assertMin("CH", "closureRate", ch.closureRate, 0.85, ch.count);
+      assertMin("JH", "closureRate", jh.closureRate, 0.85, jh.count);
+      // Fricatives should not systematically get affricate-style closures.
+      assertMax("SH", "closureRate", sh.closureRate, 0.25, sh.count);
+      assertMax("ZH", "closureRate", zh.closureRate, 0.25, zh.count);
+
+      // Affricates should keep distinct timing and frication-shape cues.
+      assertMin("CH vs SH", "A5.p50 gap", ch.A5.p50 - sh.A5.p50, 6, Math.min(ch.count, sh.count));
+      assertMin("JH vs ZH", "A5.p50 gap", jh.A5.p50 - zh.A5.p50, 3, Math.min(jh.count, zh.count));
+      assertMin("CH vs SH", "duration p50 gap", sh.duration.p50 - ch.duration.p50, 15, Math.min(ch.count, sh.count));
+      assertMin("JH vs ZH", "duration p50 gap", zh.duration.p50 - jh.duration.p50, 10, Math.min(jh.count, zh.count));
+
+      console.log("\naffricate differentiation:");
+      for (const phone of phones) {
+        const item = summary.get(phone)!;
+        console.log(
+          `  ${phone}: count=${item.count} closureRate=${item.closureRate.toFixed(2)} ` +
+            `dur.p50=${item.duration.p50.toFixed(1)} AF.p50=${item.AF.p50.toFixed(1)} ` +
+            `A5.p50=${item.A5.p50.toFixed(1)} onsetDelta.p50=${item.onsetDelta.p50.toFixed(1)}`
+        );
+      }
+
+      if (violations.length > 0) {
+        console.log("  First 20 affricate differentiation violations:");
+        for (const violation of violations.slice(0, 20)) {
+          console.log(
+            `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} affricate differentiation violations` +
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+      );
+    });
+  });
+
+  // -- Block 8: Inventory-Wide Obstruent Separation -------------------------
 
   describe("inventory-wide obstruent separation", () => {
     it("maintains pairwise separability across fricative/affricate inventory", () => {
@@ -919,7 +1076,7 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 8: Segment Duration Floors -------------------------------------
+  // -- Block 9: Segment Duration Floors -------------------------------------
 
   describe("segment duration floors", () => {
     it("segments should respect manner-class minimum durations", () => {

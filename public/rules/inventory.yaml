@@ -910,6 +910,38 @@ phoneme_targets:
     type: stop_aspiration
     voiceless: true
     velar: true
+  # Affricate closure targets provide the stop-gap component preceding postalveolar frication.
+  # Citation: Stevens 1998 Ch.8 (affricate stop closure + frication sequence).
+  CH_CL:
+    F1: 220
+    F2: 1800
+    F3: 2800
+    B1: 300
+    B2: 110
+    B3: 260
+    AV: 0
+    AF: 0
+    AH: 0
+    AVS: -70
+    dur: 16
+    type: stop_closure
+    voiceless: true
+    postalveolar: true
+  JH_CL:
+    F1: 220
+    F2: 1750
+    F3: 2800
+    B1: 300
+    B2: 110
+    B3: 260
+    AV: 47
+    AF: 0
+    AH: 0
+    AVS: -70
+    dur: 14
+    type: stop_closure
+    voiced: true
+    postalveolar: true
   CH:
     F1: 300
     F2: 1840
@@ -927,11 +959,14 @@ phoneme_targets:
     A2: 0
     A3: 57
     A4: 48
-    A5: 48
-    A6: 46
+    # Affricate frication keeps stronger high-band emphasis than plain /sh/
+    # once preceded by stop closure.
+    # Citation: Stevens 1998 Ch.8, Ch.10 (affricate burst+frication cue bundle).
+    A5: 56
+    A6: 54
     AB: 0
     SW: 1
-    dur: 70
+    dur: 54
     type: affricate
     voiceless: true
     postalveolar: true
@@ -952,11 +987,13 @@ phoneme_targets:
     A2: 0
     A3: 44
     A4: 60
-    A5: 53
-    A6: 53
+    # Voiced affricate keeps a mild high-band lift over /zh/ to avoid merger.
+    # Citation: Stevens 1998 Ch.8, Ch.10.
+    A5: 57
+    A6: 57
     AB: 0
     SW: 1
-    dur: 65
+    dur: 51
     type: affricate
     voiced: true
     postalveolar: true

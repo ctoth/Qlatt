@@ -30,6 +30,50 @@ rules:
           inventorySW: "has(cl_target.inventorySW) ? cl_target.inventorySW : 0"
     citations:
       - Klatt 1980 (stop consonants modeled as closure + release phases)
+  expand_affricates_with_closure:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme in ['CH', 'JH']
+    define:
+      cl_key: current.phoneme + "_CL"
+      cl_target: target(cl_key)
+      fr_target: target(current.phoneme)
+      fr_duration: max([params.policy.duration.affricate_frication_min_ms, current.duration - cl_target.duration])
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: cl_key
+          type: cl_target.type
+          duration: cl_target.duration
+          inherentDuration: cl_target.inherentDuration
+          params: cl_target.params
+          voiceless: "has(cl_target.voiceless) ? cl_target.voiceless : null"
+          voiced: "has(cl_target.voiced) ? cl_target.voiced : null"
+          postalveolar: "has(cl_target.postalveolar) ? cl_target.postalveolar : null"
+          inventorySW: "has(cl_target.inventorySW) ? cl_target.inventorySW : 0"
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: current.phoneme
+          type: fr_target.type
+          duration: fr_duration
+          inherentDuration: fr_target.inherentDuration
+          params: fr_target.params
+          voiceless: "has(fr_target.voiceless) ? fr_target.voiceless : null"
+          voiced: "has(fr_target.voiced) ? fr_target.voiced : null"
+          postalveolar: "has(fr_target.postalveolar) ? fr_target.postalveolar : null"
+          inventorySW: "has(fr_target.inventorySW) ? fr_target.inventorySW : 0"
+    citations:
+      - Klatt 1980 (affricates modeled as stop closure plus frication interval)
+      - Stevens 1998 Ch.8 (affricate stop-gap + frication cue sequence)
   expand_diphthongs:
     kind: structural
     select:

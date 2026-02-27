@@ -128,6 +128,11 @@ parameters:
         value: 40
         citations:
           - Engineering estimate (Jongman 1989 does not test glottal /hh/)
+      affricate_frication_min_ms:
+        value: 20
+        citations:
+          - Allen et al. 1987 Table C-1
+          - Stevens 1998 Ch.8
       vowel_vl_stop_shortening_phrasefinal_ms:
         value: -45
         citations:

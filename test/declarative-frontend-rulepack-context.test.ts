@@ -1104,4 +1104,281 @@ describe("declarative frontend rulepack context migration", () => {
     // Should be at least 60ms (dental minimum)
     expect(th!.duration).toBeGreaterThanOrEqual(60);
   });
+
+  // --- Nasal place assimilation ---
+
+  it("assimilates N to bilabial place before bilabial stop", () => {
+    const sequence = [
+      {
+        phoneme: "N",
+        type: "nasal",
+        alveolar: true,
+        voiced: true,
+        params: { F2: 1400, FNZ: 480 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+      {
+        phoneme: "P_CL",
+        type: "stop_closure",
+        voiceless: true,
+        bilabial: true,
+        params: {},
+        duration: 50,
+        inherentDuration: 50,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const n = out.find((t) => t.phoneme === "N");
+    expect(n).toBeTruthy();
+    // N before bilabial: FNZ = 900 (like /M/), F2 = 1200 (bilabial locus)
+    expect(n!.params.FNZ).toBe(900);
+    expect(n!.params.F2).toBe(1200);
+  });
+
+  it("assimilates N to velar place before velar stop", () => {
+    const sequence = [
+      {
+        phoneme: "N",
+        type: "nasal",
+        alveolar: true,
+        voiced: true,
+        params: { F2: 1400, FNZ: 480 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+      {
+        phoneme: "K_CL",
+        type: "stop_closure",
+        voiceless: true,
+        velar: true,
+        params: {},
+        duration: 60,
+        inherentDuration: 60,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const n = out.find((t) => t.phoneme === "N");
+    expect(n).toBeTruthy();
+    // N before velar: FNZ = 2800 (like /NG/)
+    expect(n!.params.FNZ).toBe(2800);
+  });
+
+  it("does not assimilate N before alveolar stop (same place)", () => {
+    const sequence = [
+      {
+        phoneme: "N",
+        type: "nasal",
+        alveolar: true,
+        voiced: true,
+        params: { F2: 1400, FNZ: 480 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const n = out.find((t) => t.phoneme === "N");
+    expect(n).toBeTruthy();
+    // N before alveolar: nasal_antiformant_by_place sets FNZ=1700, assimilation keeps it (no change)
+    expect(n!.params.FNZ).toBe(1700);
+  });
+
+  // --- Stop unreleasing ---
+
+  it("unreleases stop release before another stop closure", () => {
+    const sequence = [
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 58, AH: 55 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+      {
+        phoneme: "P_CL",
+        type: "stop_closure",
+        voiceless: true,
+        bilabial: true,
+        params: {},
+        duration: 50,
+        inherentDuration: 50,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const rel = out.find((t) => t.phoneme === "T_REL");
+    expect(rel).toBeTruthy();
+    // Stop unreleasing: AF = 0, duration = 5ms minimum
+    expect(rel!.params.AF).toBe(0);
+    expect(rel!.duration).toBeLessThanOrEqual(15);
+  });
+
+  it("does not unrelease stop release before vowel", () => {
+    const sequence = [
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 58, AH: 55 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const rel = out.find((t) => t.phoneme === "T_REL");
+    expect(rel).toBeTruthy();
+    // Not unreleased: AF should remain 58
+    expect(rel!.params.AF).toBe(58);
+  });
+
+  // --- Word-medial consonant shortening ---
+
+  it("shortens word-medial consonants by K=0.85", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        word: "matter",
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        word: "matter",
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "ER",
+        type: "vowel",
+        stress: 0,
+        word: "matter",
+        params: { F1: 470, F2: 1200, AV: 58 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const tcl = out.find((t) => t.phoneme === "T_CL");
+    expect(tcl).toBeTruthy();
+    // T_CL is word-medial (prev and next in same word "matter")
+    // Gets non_word_initial_consonant_shortening (0.7) AND word_medial (0.85)
+    // 40 * 0.7 * 0.85 = 23.8 (before incompressibility)
+    // Much less than 40
+    expect(tcl!.duration).toBeLessThan(40);
+  });
+
+  // --- VCV coarticulation ---
+
+  it("shifts consonant F2 toward flanking vowels average", () => {
+    const sequence = [
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        hi: true,
+        stress: 1,
+        params: { F1: 310, F2: 2020, AV: 63 },
+        duration: 150,
+        inherentDuration: 150,
+      },
+      {
+        phoneme: "M",
+        type: "nasal",
+        bilabial: true,
+        voiced: true,
+        params: { F2: 1100, FNZ: 480 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+      {
+        phoneme: "AA",
+        type: "vowel",
+        low: true,
+        stress: 1,
+        params: { F1: 700, F2: 1220, AV: 64 },
+        duration: 180,
+        inherentDuration: 180,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const m = out.find((t) => t.phoneme === "M");
+    expect(m).toBeTruthy();
+    // bilabial_f2_locus sets M's F2 to 1200 (default bilabial locus before non-front non-back vowel AA)
+    // Then vcv_coarticulation: flanking avg = (2020 + 1220) / 2 = 1620
+    // adjusted = 1200 + (1620 - 1200) * 0.3 = 1200 + 126 = 1326
+    expect(m!.params.F2).toBeGreaterThan(1200);
+    expect(m!.params.F2).toBeLessThan(1620);
+  });
+
+  it("does not apply VCV coarticulation when not flanked by vowels", () => {
+    const sequence = [
+      {
+        phoneme: "S",
+        type: "fricative",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 60 },
+        duration: 100,
+        inherentDuration: 100,
+      },
+      {
+        phoneme: "M",
+        type: "nasal",
+        bilabial: true,
+        voiced: true,
+        params: { F2: 1100, FNZ: 480 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+      {
+        phoneme: "AA",
+        type: "vowel",
+        low: true,
+        stress: 1,
+        params: { F1: 700, F2: 1220, AV: 64 },
+        duration: 180,
+        inherentDuration: 180,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const m = out.find((t) => t.phoneme === "M");
+    expect(m).toBeTruthy();
+    // M's prev is S (fricative, not vowel), so vcv rule doesn't fire
+    // bilabial_f2_locus default = 1200
+    expect(m!.params.F2).toBe(1200);
+  });
 });

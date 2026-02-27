@@ -289,6 +289,204 @@ describe("declarative frontend rulepack prosody phase", () => {
     expect(continuation!.value).toBeLessThanOrEqual(130);
   });
 
+  // --- F0 question baseline raise ---
+
+  it("raises F0 baseline at utterance start for questions", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "EH",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "L",
+        type: "liquid",
+        stress: 0,
+        duration: 80,
+        params: { AV: 56, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+      },
+      {
+        id: "p3",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: "?",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s2,
+        sync_right: s3,
+        status: 1,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            question_base_hz: 125,
+            question_rise_hz: 30,
+          },
+        },
+      },
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    // There should be a question baseline point
+    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
+    expect(qBaseline).toBeTruthy();
+    // Value should be 125 (question baseline)
+    expect(qBaseline!.value).toBe(125);
+  });
+
+  it("does not raise F0 baseline for declarative sentences", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "EH",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            question_base_hz: 125,
+          },
+        },
+      },
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    // No question baseline point for declarative
+    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
+    expect(qBaseline).toBeUndefined();
+  });
+
+  // --- F0 pitch reset ---
+
+  it("resets F0 at phrase boundary after punctuation", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = finiteOrder(3);
+    const s4 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "EH",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+      },
+      {
+        id: "p3",
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 1,
+        duration: 150,
+        params: { AV: 63, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s2,
+        sync_right: s3,
+        status: 1,
+      },
+      {
+        id: "p4",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        sync_left: s3,
+        sync_right: s4,
+        status: 1,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 110,
+            fall_rate_hz: 20,
+          },
+        },
+      },
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    // There should be a pitch reset point
+    const reset = points.find((p) => p.tag === "f0_reset");
+    expect(reset).toBeTruthy();
+    // Value should be base_hz (110)
+    expect(reset!.value).toBe(110);
+  });
+
   it("resets declination baseline after punctuation boundary", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);

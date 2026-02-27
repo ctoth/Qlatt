@@ -19,6 +19,9 @@ export type TextToKlattTrackOptions = {
 };
 
 const INVENTORY_CITATION = "public/rules/inventory.yaml";
+// Plain stop symbols are intentionally rewritten in the structural phase
+// (Klatt 1980 stop model: closure + release).
+const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
 
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 const RULE_CITATIONS = new Map<string, string[]>(
@@ -132,7 +135,12 @@ export function textToKlattTrack(
     const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
 
     // Warn if phoneme was not found (materialized falls back to SIL internally)
-    if (!PHONEME_TARGET_MAP[materialized.phoneme] && !PHONEME_TARGET_MAP[targetKeyBase]) {
+    const isStructuralStopBase = STRUCTURAL_STOP_BASES.has(targetKeyBase);
+    if (
+      !isStructuralStopBase &&
+      !PHONEME_TARGET_MAP[materialized.phoneme] &&
+      !PHONEME_TARGET_MAP[targetKeyBase]
+    ) {
       console.warn(
         `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
       );

@@ -17,7 +17,7 @@
  */
 
 import type { DictLookup, PronunciationResult } from './types';
-import { decomposeWord } from './morphology';
+import { decomposeWord, getStressHintForWord } from './morphology';
 import { applyLtsRules } from './lts-engine';
 import { assignStress } from './stress';
 
@@ -63,6 +63,7 @@ export function pronounce(word: string, dictLookup: DictLookup): PronunciationRe
 
   // 4. Fall back to Elovitz LTS rules + Hunnicutt stress assignment
   const ltsPhonemes = applyLtsRules(lowerWord);
-  const stressedPhonemes = assignStress(ltsPhonemes);
+  const stressHint = getStressHintForWord(lowerWord);
+  const stressedPhonemes = assignStress(ltsPhonemes, stressHint);
   return { phonemes: stressedPhonemes, source: 'lts-rules', word: lowerWord };
 }

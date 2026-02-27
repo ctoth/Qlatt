@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { decomposeWord } from '../src/g2p/morphology';
+import { decomposeWord, getStressHintForWord } from '../src/g2p/morphology';
 import type { DictLookup } from '../src/g2p/types';
 
 // Mock dictionary for testing
@@ -159,5 +159,24 @@ describe('decomposeWord', () => {
       const result = decomposeWord('xyz', mockLookup);
       expect(result).toBeNull();
     });
+  });
+});
+
+describe('getStressHintForWord', () => {
+  it('returns forcing-penult hint for -ation words', () => {
+    expect(getStressHintForWord('celebration')).toEqual({
+      stressType: 'forcing',
+      stressTarget: 'penult',
+    });
+  });
+
+  it('returns non-affecting hint for -ness words', () => {
+    expect(getStressHintForWord('kindness')).toEqual({
+      stressType: 'non_affecting',
+    });
+  });
+
+  it('returns undefined when no configured suffix matches', () => {
+    expect(getStressHintForWord('blorf')).toBeUndefined();
   });
 });

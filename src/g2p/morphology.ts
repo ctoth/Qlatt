@@ -6,6 +6,7 @@
  */
 
 import type { DictLookup, PronunciationResult } from './types';
+import type { StressHint } from './stress';
 import { loadYamlDocumentSync } from '../yaml-loader';
 
 // --- Affix data types ---
@@ -13,6 +14,8 @@ import { loadYamlDocumentSync } from '../yaml-loader';
 interface SuffixEntry {
   affix: string;
   pronunciation: string[] | 'contextual';
+  stress_type?: 'forcing' | 'non_affecting';
+  stress_target?: 'penult' | 'antepenult' | 'final';
   min_root: number;
   try_silent_e?: boolean;
 }
@@ -178,4 +181,38 @@ export function decomposeWord(
   }
 
   return null;
+}
+
+/**
+ * Return a suffix-derived stress hint for LTS fallback when available.
+ *
+ * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
+ */
+export function getStressHintForWord(word: string): StressHint | undefined {
+  if (!word || word.length < 4) return undefined;
+
+  const lowerWord = word.toLowerCase();
+  const data = getMorphologyData();
+
+  for (const suffix of data.suffixes) {
+    if (!lowerWord.endsWith(suffix.affix)) continue;
+
+    const root = lowerWord.slice(0, lowerWord.length - suffix.affix.length);
+    if (root.length < suffix.min_root) continue;
+
+    if (suffix.stress_type === 'forcing' && suffix.stress_target) {
+      return {
+        stressType: 'forcing',
+        stressTarget: suffix.stress_target,
+      };
+    }
+
+    if (suffix.stress_type === 'non_affecting') {
+      return { stressType: 'non_affecting' };
+    }
+
+    return undefined;
+  }
+
+  return undefined;
 }

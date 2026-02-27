@@ -11,6 +11,8 @@
 
 import { describe, expect, it } from "vitest";
 import { pronounce } from "../src/g2p";
+import { applyLtsRules } from "../src/g2p/lts-engine";
+import { assignStress } from "../src/g2p/stress";
 import type { DictLookup } from "../src/g2p/types";
 
 // --- Helper dict factories ---
@@ -115,6 +117,22 @@ describe("pronounce() LTS pronunciation quality", () => {
     // At least one vowel should have stress 1
     const hasStress1 = vowelPhonemes.some((p) => p.endsWith("1"));
     expect(hasStress1).toBe(true);
+  });
+
+  it("uses suffix-derived forcing stress hints in LTS fallback", () => {
+    const word = "celebration";
+    const ltsPhonemes = applyLtsRules(word);
+    const result = pronounce(word, emptyDict);
+
+    const expectedWithHint = assignStress(ltsPhonemes, {
+      stressType: "forcing",
+      stressTarget: "penult",
+    });
+    const defaultStress = assignStress(ltsPhonemes);
+
+    expect(result.source).toBe("lts-rules");
+    expect(result.phonemes).toEqual(expectedWithHint);
+    expect(result.phonemes).not.toEqual(defaultStress);
   });
 });
 

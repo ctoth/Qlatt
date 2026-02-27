@@ -409,8 +409,8 @@ describe("declarative frontend rulepack context migration", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // Coda /L/: dark allophone F2=750, F3=2400
-    expect(out[1].params.F2).toBe(750);
+    // Coda /L/: dark allophone follows policy.formant.dark_l_f2/dark_l_f3.
+    expect(out[1].params.F2).toBe(900);
     expect(out[1].params.F3).toBe(2400);
   });
 

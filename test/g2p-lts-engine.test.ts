@@ -1,0 +1,258 @@
+import { describe, it, expect } from 'vitest';
+import { mapElovitzToQlatt } from '../src/g2p/phoneme-map';
+import { applyLtsRules } from '../src/g2p/lts-engine';
+
+describe('phoneme mapping', () => {
+  it('maps AX to AH (schwa)', () => {
+    expect(mapElovitzToQlatt(['AX'])).toEqual(['AH']);
+  });
+
+  it('maps NX to NG (velar nasal)', () => {
+    expect(mapElovitzToQlatt(['NX'])).toEqual(['NG']);
+  });
+
+  it('maps WH to W (wh-merger)', () => {
+    expect(mapElovitzToQlatt(['WH'])).toEqual(['W']);
+  });
+
+  it('passes through standard phonemes unchanged', () => {
+    expect(mapElovitzToQlatt(['B', 'AE', 'T'])).toEqual(['B', 'AE', 'T']);
+  });
+
+  it('filters out prosodic markers', () => {
+    expect(mapElovitzToQlatt(['< >', 'B', 'AE', 'T', '<.>'])).toEqual(['B', 'AE', 'T']);
+    expect(mapElovitzToQlatt(['<,>'])).toEqual([]);
+    expect(mapElovitzToQlatt(['<?>'])).toEqual([]);
+    expect(mapElovitzToQlatt(['<->'])).toEqual([]);
+  });
+
+  it('maps multiple Elovitz phonemes in a sequence', () => {
+    expect(mapElovitzToQlatt(['DH', 'AX'])).toEqual(['DH', 'AH']);
+  });
+
+  it('handles empty input', () => {
+    expect(mapElovitzToQlatt([])).toEqual([]);
+  });
+});
+
+describe('context pattern compilation', () => {
+  // These are tested indirectly through rule application.
+  // The context symbols from the JSON define:
+  //   # = [AEIOUY]+ (one or more vowels)
+  //   ^ = [BCDFGHJKLMNPQRSTVWXZ] (single consonant)
+  //   . = [BDVGJLMNRWZ] (voiced consonant)
+  //   + = [EIY] (front vowel)
+  //   : = [BCDFGHJKLMNPQRSTVWXZ]* (zero or more consonants)
+  //   % = (?:ER|E|ES|ED|ING|ELY) (suffix)
+  //   & = (?:S|C|G|Z|X|J|CH|SH) (sibilant)
+  //   @ = (?:T|S|R|D|L|Z|N|J|TH|CH|SH) (specific consonants)
+
+  it('# matches one or more vowels via rule application', () => {
+    // E rule: #:E -> [] (silent E after vowel + consonants)
+    // "make" = " MAKE " -> M + A rule -> EY + K + silent E
+    // This is verified through full word tests below
+  });
+
+  it('^ matches single consonant via rule application', () => {
+    // A rule: A -> EY when right context is ^+# (consonant + front vowel + vowel)
+    // "ACING" -> A before C(^) + I(+) + NG(#) -> EY
+    // Verified through full word tests
+  });
+});
+
+describe('individual rule application', () => {
+  it('" THE " -> DH AH', () => {
+    // Rule: left=" " letters="THE" right=" " phonemes=["DH","AX"]
+    // AX maps to AH
+    const result = applyLtsRules('the');
+    expect(result).toEqual(['DH', 'AH']);
+  });
+
+  it('"TO " -> T UW', () => {
+    // Rule: left="" letters="TO" right=" " phonemes=["T","UW"]
+    const result = applyLtsRules('to');
+    expect(result).toEqual(['T', 'UW']);
+  });
+
+  it('[SH] -> SH', () => {
+    const result = applyLtsRules('she');
+    // SH rule matches first, then E -> IY (at end " E " with left context : -> IY)
+    expect(result).toEqual(['SH', 'IY']);
+  });
+
+  it('[CH] -> CH in "chin"', () => {
+    const result = applyLtsRules('chin');
+    // CH -> CH, I -> IH (I before ^+:# = IH), N -> N
+    expect(result).toEqual(['CH', 'IH', 'N']);
+  });
+
+  it('[TH] -> TH (unvoiced) in "through"', () => {
+    // Rule: letters="THROUGH" phonemes=["TH","R","UW"]
+    const result = applyLtsRules('through');
+    expect(result).toEqual(['TH', 'R', 'UW']);
+  });
+
+  it('" A " -> AH (isolated a)', () => {
+    // Rule: left="" letters="A" right=" " phonemes=["AX"]
+    // AX maps to AH
+    const result = applyLtsRules('a');
+    expect(result).toEqual(['AH']);
+  });
+
+  it('[QU] -> K W in "quick"', () => {
+    // Rule: left="" letters="QU" phonemes=["K","W"]
+    const result = applyLtsRules('quick');
+    // QU -> K W, I -> IH, CK -> K
+    expect(result).toEqual(['K', 'W', 'IH', 'K']);
+  });
+});
+
+describe('full word tests', () => {
+  it('"cat" -> K AE T', () => {
+    const result = applyLtsRules('cat');
+    expect(result).toEqual(['K', 'AE', 'T']);
+  });
+
+  it('"the" -> DH AH', () => {
+    const result = applyLtsRules('the');
+    expect(result).toEqual(['DH', 'AH']);
+  });
+
+  it('"phone" -> F OW N', () => {
+    // PH -> F, O before N+E -> OW (O^EN rule? or O^% rule?), N, silent E
+    const result = applyLtsRules('phone');
+    expect(result).toEqual(['F', 'OW', 'N']);
+  });
+
+  it('"ship" -> SH IH P', () => {
+    const result = applyLtsRules('ship');
+    expect(result).toEqual(['SH', 'IH', 'P']);
+  });
+
+  it('"through" -> TH R UW', () => {
+    const result = applyLtsRules('through');
+    expect(result).toEqual(['TH', 'R', 'UW']);
+  });
+
+  it('"that" -> DH AE T', () => {
+    // Rule: left="" letters="THAT" right=" " phonemes=["DH","AE","T"]
+    const result = applyLtsRules('that');
+    expect(result).toEqual(['DH', 'AE', 'T']);
+  });
+
+  it('"quick" -> K W IH K', () => {
+    const result = applyLtsRules('quick');
+    expect(result).toEqual(['K', 'W', 'IH', 'K']);
+  });
+
+  it('"know" -> N OW', () => {
+    // K before N at word start -> silent K (rule: left=" " letters="K" right="N" phonemes=[])
+    // N -> N, OW -> OW
+    const result = applyLtsRules('know');
+    expect(result).toEqual(['N', 'OW']);
+  });
+
+  it('"write" -> R AY T', () => {
+    // WR -> R (rule: letters="WR" phonemes=["R"])
+    // I -> AY (I before ^+:# context), T, silent E
+    const result = applyLtsRules('write');
+    expect(result).toEqual(['R', 'AY', 'T']);
+  });
+});
+
+describe('edge cases', () => {
+  it('empty string -> empty array', () => {
+    const result = applyLtsRules('');
+    expect(result).toEqual([]);
+  });
+
+  it('"a" -> single phoneme', () => {
+    const result = applyLtsRules('a');
+    expect(result).toEqual(['AH']);
+  });
+});
+
+describe('extended word tests', () => {
+  it('"make" -> M EY K (silent E)', () => {
+    const result = applyLtsRules('make');
+    expect(result).toEqual(['M', 'EY', 'K']);
+  });
+
+  it('"thought" -> TH AO T', () => {
+    // OUGH -> AO T (rule: OUGHT -> AO T), then? No...
+    // Actually: TH -> TH, OUGHT -> AO T
+    const result = applyLtsRules('thought');
+    expect(result).toEqual(['TH', 'AO', 'T']);
+  });
+
+  it('"light" -> L AY T', () => {
+    // L -> L, IGH -> AY (I rule: I before GH), T -> T
+    // Actually need to check I rules more carefully
+    const result = applyLtsRules('light');
+    expect(result).toEqual(['L', 'AY', 'T']);
+  });
+
+  it('"judge" -> JH AH D JH', () => {
+    // J -> JH, U -> AH (U before ^^ = two consonants),
+    // D -> D (default), G before E -> JH, silent E
+    // No DG digraph rule exists in Elovitz ruleset
+    const result = applyLtsRules('judge');
+    expect(result).toEqual(['JH', 'AH', 'D', 'JH']);
+  });
+
+  it('"nation" -> N EY SH AH N (via -TION -> SH)', () => {
+    // N -> N, A before ^+# -> EY, TI before O -> SH, ION -> AH N
+    const result = applyLtsRules('nation');
+    expect(result).toEqual(['N', 'EY', 'SH', 'AH', 'N']);
+  });
+
+  it('"enough" -> EH N AH F (OUGH -> AH F)', () => {
+    // E -> EH (default), N -> N, OUGH -> AH F
+    // Note: Elovitz rules produce EH for initial E, not IH
+    const result = applyLtsRules('enough');
+    expect(result).toEqual(['EH', 'N', 'AH', 'F']);
+  });
+
+  it('"knight" -> N AY T (silent K before N)', () => {
+    // K before N at word start -> silent, N -> N, IGH -> AY, T -> T
+    const result = applyLtsRules('knight');
+    expect(result).toEqual(['N', 'AY', 'T']);
+  });
+
+  it('"edge" -> EH D JH', () => {
+    // E -> EH (default), D -> D, G before E -> JH, silent E
+    const result = applyLtsRules('edge');
+    expect(result).toEqual(['EH', 'D', 'JH']);
+  });
+
+  it('"psychology" -> P S IH CH AA L AA JH IY', () => {
+    // Note: Elovitz rules do not handle silent P before S —
+    // this is a known limitation of the rule set
+    const result = applyLtsRules('psychology');
+    expect(result).toEqual(['P', 'S', 'IH', 'CH', 'AA', 'L', 'AA', 'JH', 'IY']);
+  });
+
+  it('"pneumonia" -> P N Y UW M OW N IH AH', () => {
+    // Note: Elovitz rules do not handle silent P before N —
+    // this is a known limitation of the rule set
+    const result = applyLtsRules('pneumonia');
+    expect(result).toEqual(['P', 'N', 'Y', 'UW', 'M', 'OW', 'N', 'IH', 'AH']);
+  });
+
+  it('"hello" -> HH EH L OW', () => {
+    const result = applyLtsRules('hello');
+    expect(result).toEqual(['HH', 'EH', 'L', 'OW']);
+  });
+
+  it('"world" -> W ER L D', () => {
+    const result = applyLtsRules('world');
+    expect(result).toEqual(['W', 'ER', 'L', 'D']);
+  });
+
+  it('"beautiful" -> B IY Y UW T IH F UH L', () => {
+    // EA -> IY (rule 28), U -> Y UW (default U), T -> T,
+    // I -> IH, FUL -> F UH L
+    const result = applyLtsRules('beautiful');
+    expect(result).toEqual(['B', 'IY', 'Y', 'UW', 'T', 'IH', 'F', 'UH', 'L']);
+  });
+});

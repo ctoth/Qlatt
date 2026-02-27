@@ -378,8 +378,9 @@ export function normalizeText(text: string): string {
     result = result.replace(re, expansion);
   }
 
-  // Expand dotted initialisms (e.g., U.S., U.S.A.) into speakable letters.
-  result = result.replace(/\b(?:[a-z]\.){2,}/gi, (match) =>
+  // Expand dotted initialisms (e.g., U.S., U.S.A., C.D.S) into speakable letters.
+  // CMUdict includes both terminal-dot and non-terminal-dot spellings.
+  result = result.replace(/\b(?:[a-z]\.){2,}[a-z]?\.?/gi, (match) =>
     match
       .replace(/\./g, "")
       .split("")
@@ -434,7 +435,13 @@ export function normalizeText(text: string): string {
   // Strategy: protect lexical apostrophes with placeholder, separate pause
   // punctuation with spaces, strip remaining punctuation, then restore.
   const PLACEHOLDER = "\x00";
-  result = result.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
+  // Run until fixed point so multiple internal apostrophes in one token
+  // (e.g., rock'n'roll) are all preserved.
+  let previous = "";
+  while (previous !== result) {
+    previous = result;
+    result = result.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
+  }
   // Preserve trailing apostrophes used for colloquial elision spellings
   // (e.g., "comin'", "ol'") so CMUdict keys survive normalization.
   result = result.replace(/([a-z])'(?=\s|$|[,.\?!;:])/gi, `$1${PLACEHOLDER}`);

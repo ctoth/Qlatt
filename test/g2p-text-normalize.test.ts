@@ -180,6 +180,7 @@ describe("normalizeText", () => {
     it("expands dotted initialisms", () => {
       expect(normalizeText("U.S. policy")).toBe("u s policy");
       expect(normalizeText("U.S.A. today")).toBe("u s a today");
+      expect(normalizeText("C.D.S briefing")).toBe("c d s briefing");
     });
   });
 
@@ -237,6 +238,10 @@ describe("normalizeText", () => {
     it("preserves trailing apostrophes for colloquial elision spellings", () => {
       expect(normalizeText("comin' home")).toBe("comin' home");
       expect(normalizeText("ol' friend")).toBe("ol' friend");
+    });
+
+    it("preserves multiple internal apostrophes in one token", () => {
+      expect(normalizeText("rock'n'roll forever")).toBe("rock'n'roll forever");
     });
   });
 });

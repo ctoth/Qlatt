@@ -78,15 +78,21 @@ const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDiction
  */
 const cmuDictLookup: DictLookup = (word: string): string[] | null => {
   const lowerWord = word.toLowerCase();
-  const entry = CMU_DICT_MAP[lowerWord];
-  if (entry) return entry.split(" ");
+  const candidates: string[] = [lowerWord];
 
   // Handle elided spellings where the dictionary key keeps leading apostrophe
   // (e.g., "'cuse") but normalized input token may not ("cuse").
-  const elidedEntry = lowerWord.startsWith("'") ? null : CMU_DICT_MAP[`'${lowerWord}`];
-  if (elidedEntry) return elidedEntry.split(" ");
-  const trailingElisionEntry = lowerWord.endsWith("'") ? null : CMU_DICT_MAP[`${lowerWord}'`];
-  if (trailingElisionEntry) return trailingElisionEntry.split(" ");
+  if (!lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
+  // Handle converse elision: input may omit or include trailing apostrophe.
+  if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
+  if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+  // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
+  if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
+
+  for (const candidate of candidates) {
+    const entry = CMU_DICT_MAP[candidate];
+    if (entry) return entry.split(" ");
+  }
 
   // Handle alternate pronunciations like "read(1)" -> "read"
   if (word.includes("(")) {
@@ -186,17 +192,19 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
       let sourceWord = word;
       let consumedWords = 1;
 
-      // Recover CMUdict hyphenated entries after normalization splits tokens
-      // (e.g., "adl tabatabai" -> "adl-tabatabai") when at least one split
-      // token has no direct dictionary entry.
-      const nextWord = words[index + 1];
-      if (nextWord && !isEffectivePunctuation(nextWord)) {
-        const hyphenated = `${word}-${nextWord}`;
-        const currentKnown = hasDirectDictionaryEntry(word);
-        const nextKnown = hasDirectDictionaryEntry(nextWord);
-        if (hasDirectDictionaryEntry(hyphenated) && (!currentKnown || !nextKnown)) {
-          sourceWord = hyphenated;
-          consumedWords = 2;
+      // Recover CMUdict compounds after normalization splits tokens.
+      // Citation anchor: CMUdict orthography includes hyphenated and apostrophe-linked compounds.
+      const maxCompoundSpan = 4;
+      for (let span = Math.min(maxCompoundSpan, words.length - index); span >= 2; span -= 1) {
+        const parts = words.slice(index, index + span);
+        if (parts.some((part) => !part || isEffectivePunctuation(part))) continue;
+        if (parts.every((part) => hasDirectDictionaryEntry(part))) continue;
+        const candidates = [parts.join("-"), parts.join("'")];
+        const match = candidates.find((candidate) => hasDirectDictionaryEntry(candidate));
+        if (match) {
+          sourceWord = match;
+          consumedWords = span;
+          break;
         }
       }
 

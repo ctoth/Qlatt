@@ -91,6 +91,39 @@ describe("transcribe-text", () => {
       expect(missWarnings).toHaveLength(0);
     });
 
+    it("recovers multi-token hyphenated compounds", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("kebab n kurry");
+      expect(result.length).toBeGreaterThan(0);
+      expect(new Set(result.map((t) => t.word))).toEqual(new Set(["kebab-n-kurry"]));
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
+    it("recovers longer multi-token hyphenated compounds", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("trente et quarante");
+      expect(result.length).toBeGreaterThan(0);
+      expect(new Set(result.map((t) => t.word))).toEqual(new Set(["trente-et-quarante"]));
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
+    it("recovers apostrophe-linked compounds split by normalization", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("rock'n roll");
+      expect(result.length).toBeGreaterThan(0);
+      expect(new Set(result.map((t) => t.word))).toEqual(new Set(["rock'n'roll"]));
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
     it("supports elided dictionary entries without leading apostrophe in input", () => {
       warnSpy.mockClear();
       const result = transcribeText("cuse");
@@ -107,6 +140,26 @@ describe("transcribe-text", () => {
       expect(result.length).toBeGreaterThan(0);
       const missWarnings = warnSpy.mock.calls.filter((args) =>
         String(args[0]).includes('Word \"comin\" not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
+    it("recovers dictionary entries that keep trailing periods", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("cr");
+      expect(result.length).toBeGreaterThan(0);
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('Word \"cr\" not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
+    it("recovers tokens with trailing apostrophe by stripping when needed", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("s'");
+      expect(result.length).toBeGreaterThan(0);
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('Word \"s\'\" not found in dictionary')
       );
       expect(missWarnings).toHaveLength(0);
     });

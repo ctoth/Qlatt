@@ -10,12 +10,14 @@ import {
   PHONEME_TARGETS,
   fillDefaultParams,
 } from "./declarative-frontend/inventory";
+import type { KlattFrame } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type FrontendToken = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InputToken = Record<string, any>;
 type KlattParams = Record<string, number>;
 
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
@@ -73,7 +75,7 @@ export function parseTrailingInteger(value: unknown): number | null {
 }
 
 export function buildF0ContourFromDeclarative(
-  sequence: FrontendToken[],
+  sequence: InputToken[],
   baseF0: number
 ): F0Point[] {
   const points = sequence
@@ -84,7 +86,7 @@ export function buildF0ContourFromDeclarative(
         Number.isFinite(token?.value)
     )
     .slice()
-    .sort((left: FrontendToken, right: FrontendToken) => {
+    .sort((left: InputToken, right: InputToken) => {
       const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
       const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
       if (leftTime != null && rightTime != null && leftTime !== rightTime) {
@@ -110,7 +112,7 @@ export function buildF0ContourFromDeclarative(
   }
 
   const contour = points
-    .map((point: FrontendToken) => ({
+    .map((point: InputToken) => ({
       time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
       f0: Number(point.value),
     }))
@@ -196,10 +198,10 @@ function blendParams(
  * @returns KlattFrame[] with monotonically increasing times.
  */
 export function assembleKlattTrack(
-  phoneSequence: FrontendToken[],
-  parameterSequence: FrontendToken[],
+  phoneSequence: InputToken[],
+  parameterSequence: InputToken[],
   options: AssembleTrackOptions = {}
-): FrontendToken[] {
+): KlattFrame[] {
   const baseF0 = options.baseF0 ?? 110;
   const cfg = options.outputConfig;
   const transitionMs = options.transitionMs ?? cfg?.transition_ms ?? 30;
@@ -219,7 +221,7 @@ export function assembleKlattTrack(
   // Build the F0 contour from declarative points.
   const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
 
-  const klattTrack: FrontendToken[] = [];
+  const klattTrack: KlattFrame[] = [];
   let currentTime = 0;
   const transitionSec = Math.max(0, transitionMs) / 1000.0;
 
@@ -230,7 +232,7 @@ export function assembleKlattTrack(
   });
 
   for (let i = 0; i < phoneSequence.length; i++) {
-    const ph = phoneSequence[i] as FrontendToken;
+    const ph = phoneSequence[i] as InputToken;
     // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
     const minDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
@@ -265,7 +267,7 @@ export function assembleKlattTrack(
     finalParams.F0 = calculatedF0;
 
     if (targetTime > segmentStart) {
-      const nextPh = phoneSequence[i + 1] as FrontendToken | undefined;
+      const nextPh = phoneSequence[i + 1] as InputToken | undefined;
       const canSmooth =
         transitionSec > 0 &&
         smoothTypes.has(ph.type) &&

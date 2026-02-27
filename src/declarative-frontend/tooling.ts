@@ -3,6 +3,13 @@ import { runRuleEngine } from "./engine";
 import type { InventoryResolver } from "./engine";
 import { validateDslSpec } from "./validation";
 
+/**
+ * Internal tooling token type. Intentionally loose — tooling inspects arbitrary
+ * dynamic fields for debugging and explanation purposes.
+ *
+ * @see EngineToken in `tts-frontend-types.ts` for the typed boundary type.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TokenLike = Record<string, any>;
 
 type PhaseSnapshotsModel = {

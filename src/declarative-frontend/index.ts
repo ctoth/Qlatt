@@ -64,3 +64,13 @@ export {
   whyNotRule,
   diffPhaseState,
 } from "./tooling";
+export type {
+  PhoneToken,
+  F0PointToken,
+  EngineToken,
+  KlattFrame,
+} from "../tts-frontend-types";
+export {
+  isPhoneToken,
+  isF0PointToken,
+} from "../tts-frontend-types";

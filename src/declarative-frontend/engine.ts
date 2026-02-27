@@ -16,7 +16,20 @@ import {
   toNumericOrder,
 } from "./axis";
 
+/**
+ * Internal engine token type. Intentionally loose (`any` index) because the
+ * rule engine dynamically reads/writes arbitrary fields injected by YAML rules.
+ *
+ * At module boundaries, prefer the typed {@link EngineToken} union from
+ * `tts-frontend-types.ts` (PhoneToken | F0PointToken).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TokenLike = Record<string, any>;
+/**
+ * Internal runtime state bag. Holds evaluation context, spec data, axis, etc.
+ * Intentionally untyped — the engine is the only consumer.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RuntimeLike = Record<string, any>;
 export type InventoryResolver = (phoneme: string) => Record<string, unknown> | null | undefined;
 type TokenMarkRef = { raw: unknown; id: string };

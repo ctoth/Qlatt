@@ -8,13 +8,21 @@ import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack } from "./track-assembler";
 import type { OutputConfig } from "./track-assembler";
-import type { TranscriptionConfig } from "./tts-frontend-types";
+import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
   recordInventoryDecision,
   runPhasesWithProvenance,
 } from "./tts-frontend-provenance";
 
-type FrontendToken = Record<string, any>;
+/**
+ * Loose token type for intermediate pipeline stages.
+ * Starts as TranscriptionToken shape, gains fields through inventory lookup
+ * and rule application, eventually becomes a PhoneToken or F0PointToken.
+ *
+ * Internal to the pipeline — module boundaries use {@link KlattFrame}.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PipelineToken = Record<string, any>;
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
@@ -45,18 +53,18 @@ export function textToKlattTrack(
   baseF0 = 110,
   transitionMs = 30,
   options: TextToKlattTrackOptions = {}
-): FrontendToken[] {
+): KlattFrame[] {
   const provenance = options.provenance ?? null;
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
-  let parameterSequence: FrontendToken[] = transcribeText(normalized, {
+  let parameterSequence: PipelineToken[] = transcribeText(normalized, {
     provenance,
     transcriptionConfig: RULEPACK_TRANSCRIPTION_CONFIG,
   });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
-  parameterSequence = parameterSequence.map((ph: FrontendToken, index: number) => {
+  parameterSequence = parameterSequence.map((ph: PipelineToken, index: number) => {
     let targetKeyBase = ph.phoneme;
 
     // Delegate stress-aware inventory lookup to materializePhonemeTarget
@@ -101,10 +109,10 @@ export function textToKlattTrack(
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
   const runPhases = (
-    sequence: FrontendToken[],
+    sequence: PipelineToken[],
     phases: string[],
     parameters?: Record<string, unknown>,
-  ): FrontendToken[] =>
+  ): PipelineToken[] =>
     runPhasesWithProvenance(
       sequence,
       phases,
@@ -120,7 +128,7 @@ export function textToKlattTrack(
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
   parameterSequence = runPhases(parameterSequence, ["postlexical"]);
   parameterSequence = runPhases(parameterSequence, ["duration"]);
-  parameterSequence = parameterSequence.map((token: FrontendToken, index: number) => ({
+  parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
     stream: "phone",
@@ -137,7 +145,7 @@ export function textToKlattTrack(
     },
   });
   const phoneSequence = parameterSequence.filter(
-    (token: FrontendToken) => token?.stream !== "f0" && token?.status !== 2
+    (token: PipelineToken) => token?.stream !== "f0" && token?.status !== 2
   );
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---

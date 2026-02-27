@@ -13,7 +13,13 @@ import type { ProvenanceCollector } from "./provenance";
 import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import { runDeclarativeFrontend } from "./declarative-frontend";
 
-type FrontendToken = Record<string, any>;
+/**
+ * Loose token/event type for pipeline intermediates and trace events.
+ * Provenance code reads dynamic fields defensively (typeof checks)
+ * so the `any` index is safe here.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PipelineRecord = Record<string, any>;
 type RuleSpec = { citation?: string };
 
 // ---------------------------------------------------------------------------
@@ -43,7 +49,7 @@ export const RULE_CITATIONS = new Map<string, string[]>(
  * Extract unique token IDs from a rule-trace event, considering both
  * the `token` field and any named captures.
  */
-export function collectTraceTokenIds(event: FrontendToken): string[] {
+export function collectTraceTokenIds(event: PipelineRecord): string[] {
   const ids: string[] = [];
   if (typeof event?.token === "string" && event.token.length > 0) {
     ids.push(event.token);
@@ -64,7 +70,7 @@ export function collectTraceTokenIds(event: FrontendToken): string[] {
  * `tokenDecisionIds`.
  */
 export function emitRuleTraceDecisions(
-  trace: FrontendToken[],
+  trace: PipelineRecord[],
   provenance: ProvenanceCollector,
   tokenDecisionIds: Map<string, string>
 ): void {
@@ -156,13 +162,13 @@ export function recordInventoryDecision(
  * lightweight (array-only) code path is used.
  */
 export function runPhasesWithProvenance(
-  sequence: FrontendToken[],
+  sequence: PipelineRecord[],
   phases: string[],
   inventoryResolver: (phoneme: string, opts?: Record<string, any>) => any,
   provenance: ProvenanceCollector | null,
   tokenDecisionIds: Map<string, string>,
   parameters?: Record<string, unknown>,
-): FrontendToken[] {
+): PipelineRecord[] {
   const declarativeInventory = { inventoryResolver };
 
   if (!provenance) {
@@ -170,7 +176,7 @@ export function runPhasesWithProvenance(
       ...declarativeInventory,
       phases,
       parameters,
-    }) as FrontendToken[];
+    }) as PipelineRecord[];
   }
 
   const result = runDeclarativeFrontend(sequence, {
@@ -178,7 +184,7 @@ export function runPhasesWithProvenance(
     phases,
     parameters,
     includeTrace: true as const,
-  }) as { sequence: FrontendToken[]; trace?: FrontendToken[] };
+  }) as { sequence: PipelineRecord[]; trace?: PipelineRecord[] };
 
   if (Array.isArray(result.trace)) {
     emitRuleTraceDecisions(result.trace, provenance, tokenDecisionIds);

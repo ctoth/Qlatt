@@ -34,3 +34,120 @@ export type TranscriptionOptions = {
   /** Transcription config from YAML (overrides hardcoded defaults). */
   transcriptionConfig?: TranscriptionConfig;
 };
+
+// ---------------------------------------------------------------------------
+// Engine token types (Phase 8)
+// ---------------------------------------------------------------------------
+
+/**
+ * A phone-stream token with typed known fields.
+ *
+ * Produced by the TTS frontend pipeline: transcription -> inventory lookup ->
+ * rule engine phases -> track assembly. The index signature allows rule-injected
+ * dynamic fields (boolean phoneme flags, scalar states, etc.).
+ */
+export interface PhoneToken {
+  /** Unique token identifier (e.g. "ph_0", "ph_1") */
+  id: string;
+  /** Stream discriminator — always "phone" for phone tokens */
+  stream: "phone";
+  /** Token status: 1 = active, 2 = deleted/suppressed */
+  status: number;
+  /** ARPABET phoneme symbol (e.g. "HH", "AH", "SIL") */
+  phoneme: string;
+  /** Klatt synthesis parameters (F0, F1, AV, etc.) */
+  params: Record<string, number>;
+  /** Duration in milliseconds */
+  duration: number;
+  /** Inherent (inventory-sourced) duration in milliseconds, if known */
+  inherentDuration?: number;
+  /** Phoneme class (e.g. "vowel", "fricative", "stop_release", "stop_closure") */
+  type: string;
+  /** Lexical stress: 0 = unstressed, 1 = primary, 2 = secondary, null = N/A */
+  stress: number | null;
+  /** The source word this phoneme was produced from */
+  word: string;
+  /** Punctuation symbol if this token originated from punctuation, else null */
+  punctuationSymbol?: string | null;
+  /** Inventory-sourced SW (cascade/parallel switch) value */
+  inventorySW?: unknown;
+  /** Sync axis left boundary mark */
+  sync_left?: string;
+  /** Sync axis right boundary mark */
+  sync_right?: string;
+  // Boolean phoneme classification flags (from inventory)
+  voiced?: boolean;
+  voiceless?: boolean;
+  nasal?: boolean;
+  stop?: boolean;
+  fricative?: boolean;
+  liquid?: boolean;
+  glide?: boolean;
+  affricate?: boolean;
+  aspirated?: boolean;
+  // Allow rule-injected dynamic fields
+  [key: string]: unknown;
+}
+
+/**
+ * An F0-stream (or other point-stream) token.
+ *
+ * Point tokens carry a single scalar value anchored to the time axis.
+ * They are produced by prosody rules (insert_point actions).
+ */
+export interface F0PointToken {
+  /** Unique token identifier (e.g. "f0_0", "f0_1") */
+  id: string;
+  /** Stream name — typically "f0" for pitch contour points */
+  stream: string;
+  /** Token status: 1 = active, 2 = deleted/suppressed */
+  status: number;
+  /** The scalar value (e.g. F0 in Hz) */
+  value?: number;
+  /** Resolved time in milliseconds (set after finalize phase) */
+  time?: number;
+  /** Left anchor token or mark reference */
+  anchor_left?: unknown;
+  /** Right anchor token or mark reference */
+  anchor_right?: unknown;
+  /** Position ratio between anchors (0.0 = left, 1.0 = right) */
+  ratio?: number;
+  /** Sync axis left boundary mark */
+  sync_left?: string;
+  /** Sync axis right boundary mark */
+  sync_right?: string;
+  // Allow dynamic fields
+  [key: string]: unknown;
+}
+
+/** Union of token types the engine produces */
+export type EngineToken = PhoneToken | F0PointToken;
+
+/**
+ * A Klatt frame in the output track.
+ *
+ * Produced by the track assembler — a time-stamped snapshot of Klatt
+ * synthesis parameters ready for the interpreter to schedule.
+ */
+export interface KlattFrame {
+  /** Time offset in seconds from utterance start */
+  time: number;
+  /** ARPABET phoneme label (omitted for initial silence) */
+  phoneme?: string;
+  /** Source word (for diagnostics) */
+  word?: string;
+  /** Klatt synthesis parameters (F0, F1, AV, etc.) */
+  params: Record<string, number>;
+  // Allow additional metadata
+  [key: string]: unknown;
+}
+
+/** Type guard for phone tokens */
+export function isPhoneToken(token: EngineToken): token is PhoneToken {
+  return token.stream === "phone";
+}
+
+/** Type guard for F0/point tokens */
+export function isF0PointToken(token: EngineToken): token is F0PointToken {
+  return typeof token.stream === "string" && token.stream !== "phone";
+}

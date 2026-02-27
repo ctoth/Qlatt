@@ -52,7 +52,7 @@ Defined in `experiments/klatt80-baseline/semantics.yaml` under `params:` section
 `textToKlattTrack()` in `src/tts-frontend.ts` executes:
 
 1. `normalizeText()` and `transcribeText()`
-2. baseline inventory mapping from `PHONEME_TARGETS` in `src/declarative-frontend/inventory.ts`
+2. baseline inventory mapping from `public/rules/inventory.yaml` (loaded via `src/declarative-frontend/inventory.ts`)
 3. declarative phases via `runDeclarativeFrontend()`:
    - `structural`
    - `duration`
@@ -64,7 +64,7 @@ Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`)
 
 ### Inventory Targets (not rule mutators)
 
-`src/declarative-frontend/inventory.ts` is the inventory/default source of truth (`PHONEME_TARGETS`, `fillDefaultParams`, `materializePhonemeTarget`).
+`public/rules/inventory.yaml` is the inventory/default source of truth; `src/declarative-frontend/inventory.ts` loads it and exposes `PHONEME_TARGETS`, `fillDefaultParams`, and `materializePhonemeTarget`.
 
 ### Current transition smoothing in frame emission
 

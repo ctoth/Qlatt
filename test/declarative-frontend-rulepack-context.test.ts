@@ -90,6 +90,65 @@ describe("declarative frontend rulepack context migration", () => {
     expect(out[2].duration).toBe(300);
   });
 
+  it("applies weaker terminal pre-boundary lengthening to obstruents than sonorants", () => {
+    const baseParams = {
+      policy: {
+        duration: {
+          pre_boundary_terminal_multiplier: 1.4,
+          pre_boundary_terminal_obstruent_multiplier: 1.15,
+        },
+      },
+    };
+
+    const sonorant = runDeclarativeFrontend(
+      [
+        {
+          phoneme: "L",
+          type: "liquid",
+          params: {},
+          duration: 100,
+          inherentDuration: 100,
+        },
+        {
+          phoneme: "SIL",
+          type: "silence",
+          params: {},
+          punctuationSymbol: ".",
+          duration: 300,
+          inherentDuration: 300,
+        },
+      ],
+      { phases: ["duration"], parameters: baseParams }
+    );
+
+    const obstruent = runDeclarativeFrontend(
+      [
+        {
+          phoneme: "S",
+          type: "fricative",
+          voiceless: true,
+          alveolar: true,
+          params: { AF: 60 },
+          duration: 100,
+          inherentDuration: 100,
+        },
+        {
+          phoneme: "SIL",
+          type: "silence",
+          params: {},
+          punctuationSymbol: ".",
+          duration: 300,
+          inherentDuration: 300,
+        },
+      ],
+      { phases: ["duration"], parameters: baseParams }
+    );
+
+    expect(sonorant[0].duration).toBeGreaterThan(100);
+    expect(obstruent[0].duration).toBeGreaterThan(100);
+    expect(obstruent[0].duration).toBeLessThan(sonorant[0].duration);
+  });
+
   it("assigns SW declaratively and respects explicit inventory SW overrides", () => {
     const sequence = [
       {

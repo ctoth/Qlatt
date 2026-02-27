@@ -116,7 +116,7 @@ rules:
       prev_f0: prev_point('f0')
     insert_point:
       stream: f0
-      at: at_ratio(current, 0.45)
+      at: at_ratio(current, params.policy.f0.stress_peak_position)
       value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.stress_rise"
       tag: f0_stress
     citations:
@@ -154,7 +154,7 @@ rules:
     constraint: last_stress != null
     insert_point:
       stream: f0
-      at: at_ratio(last_stress, 0.8)
+      at: at_ratio(last_stress, params.policy.f0.question_rise_onset_position)
       value: "prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value"
       tag: f0_question_onset
     citations:

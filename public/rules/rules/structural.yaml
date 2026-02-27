@@ -48,8 +48,8 @@ rules:
       comp1_target: target(comp1_key)
       comp2_target: target(comp2_key)
       total_dur: current.duration
-      comp1_duration: total_dur * 0.6
-      comp2_duration: total_dur * 0.4
+      comp1_duration: total_dur * params.policy.duration.diphthong_nucleus_share
+      comp2_duration: total_dur * (1 - params.policy.duration.diphthong_nucleus_share)
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -93,11 +93,11 @@ rules:
       rel_duration_base: vot_target * rel_share
       asp_duration_base: vot_target - rel_duration_base
       rel_params: >-
-        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
-        10])}) : rel_target.params
+        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
       asp_params: >-
-        weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH -
-        10])}) : asp_target.params
+        weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])}) : asp_target.params
       rel_duration: >-
         weak ? max([params.policy.duration.weak_release_min_ms, rel_duration_base *
         params.policy.duration.weak_release_scale]) : rel_duration_base
@@ -162,8 +162,8 @@ rules:
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
       rel_duration_base: vot_target * rel_share
       asp_duration_base: vot_target - rel_duration_base
-      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH - 10])})"
-      asp_params: "merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH - 10])})"
+      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
+      asp_params: "merge(asp_target.params, {'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
       rel_duration: max([params.policy.duration.weak_release_min_ms, rel_duration_base * params.policy.duration.weak_release_scale])
       asp_duration: max([params.policy.duration.weak_release_min_ms, asp_duration_base * params.policy.duration.weak_release_scale])
     splice:
@@ -205,8 +205,8 @@ rules:
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
       rel_params: >-
-        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
-        10])}) : rel_target.params
+        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
       rel_duration: >-
         weak ? max([params.policy.duration.weak_release_min_ms, rel_target.duration *
         params.policy.duration.weak_release_scale]) : rel_target.duration
@@ -248,7 +248,7 @@ rules:
       rel: "current.phoneme == \"B_CL\" ? \"B_REL\" : (current.phoneme == \"D_CL\" ? \"D_REL\" : \"G_REL\")"
       weak: "true"
       rel_target: target(rel)
-      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH - 10])})"
+      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
       rel_duration: >-
         max([params.policy.duration.weak_release_min_ms, rel_target.duration *
         params.policy.duration.weak_release_scale])

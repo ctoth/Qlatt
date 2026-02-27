@@ -12,12 +12,12 @@ rules:
         op: set
         dispatch:
           - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
-            value: 1200
+            value: params.policy.formant.velar_f2_locus_back
           - when: >-
               cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
               cand.hi == true : false))
-            value: 1900
-          - default: 1500
+            value: params.policy.formant.velar_f2_locus_front
+          - default: params.policy.formant.velar_f2_locus
     citations:
       - Allen et al. 1987 Ch.11 (velar locus)
   k_context_rel_copy:
@@ -28,7 +28,7 @@ rules:
     apply:
       - field: params.F2
         op: set
-        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : 1500"
+        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.velar_f2_locus"
     citations:
       - Allen et al. 1987 Ch.11 (velar locus transitions)
   bilabial_f2_locus:
@@ -47,9 +47,9 @@ rules:
           - when: >-
               cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
               cand.hi == true : false))
-            value: 1350
+            value: params.policy.formant.bilabial_f2_locus_front
           - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
-            value: 1100
+            value: params.policy.formant.bilabial_f2_locus_back
           - default: params.policy.formant.bilabial_f2_locus
     citations:
       - >-
@@ -132,7 +132,7 @@ rules:
             value: params.policy.formant.nasal_fnz_n
           - when: current.phoneme == 'NG'
             value: params.policy.formant.nasal_fnz_ng
-          - default: "has(current.?params.FNZ) ? current.params.FNZ : 480"
+          - default: "has(current.?params.FNZ) ? current.params.FNZ : params.policy.formant.nasal_fnz_default"
     citations:
       - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
       - Fujimura 1962 (nasal consonant antiresonances by place)
@@ -155,15 +155,15 @@ rules:
             value: params.policy.formant.nasal_fnz_m
           - when: next_velar
             value: params.policy.formant.nasal_fnz_ng
-          - default: "has(current.?params.FNZ) ? current.params.FNZ : 1700"
+          - default: "has(current.?params.FNZ) ? current.params.FNZ : params.policy.formant.nasal_fnz_n"
       - field: params.F2
         op: set
         dispatch:
           - when: next_bilabial
             value: params.policy.formant.bilabial_f2_locus
           - when: next_velar
-            value: "has(current.?params.F2) ? current.params.F2 : 1400"
-          - default: "has(current.?params.F2) ? current.params.F2 : 1400"
+            value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
+          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
     citations:
       - Allen et al. 1987 Ch.10 (nasal place assimilation)
       - Fujimura 1962 (nasal consonant place acoustics)
@@ -184,13 +184,13 @@ rules:
         dispatch:
           - when: is_coda
             value: params.policy.formant.dark_l_f2
-          - default: "has(current.?params.F2) ? current.params.F2 : 1050"
+          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
       - field: params.F3
         op: set
         dispatch:
           - when: is_coda
             value: params.policy.formant.dark_l_f3
-          - default: "has(current.?params.F3) ? current.params.F3 : 2600"
+          - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
     citations:
       - Recasens 2012 (lateral allophones)
       - Sproat & Fujimura 1993 (syllable-final /l/ darkening)
@@ -229,7 +229,7 @@ rules:
             value: params.policy.formant.f1_release_alveolar
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.f1_release_velar
-          - default: 280
+          - default: params.policy.formant.f1_release_default
     citations:
       - Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)
   burst_spectral_template:
@@ -242,51 +242,51 @@ rules:
         op: set
         dispatch:
           - when: has(current.bilabial) && current.bilabial == true
-            value: 50
+            value: params.policy.formant.burst_a2_bilabial
           - when: has(current.alveolar) && current.alveolar == true
-            value: 40
+            value: params.policy.formant.burst_a2_alveolar
           - when: has(current.velar) && current.velar == true
-            value: 45
+            value: params.policy.formant.burst_a2_velar
           - default: "has(current.?params.A2) ? current.params.A2 : 0"
       - field: params.A3
         op: set
         dispatch:
           - when: has(current.bilabial) && current.bilabial == true
-            value: 40
+            value: params.policy.formant.burst_a3_bilabial
           - when: has(current.alveolar) && current.alveolar == true
-            value: 50
+            value: params.policy.formant.burst_a3_alveolar
           - when: has(current.velar) && current.velar == true
-            value: 50
+            value: params.policy.formant.burst_a3_velar
           - default: "has(current.?params.A3) ? current.params.A3 : 0"
       - field: params.A4
         op: set
         dispatch:
           - when: has(current.bilabial) && current.bilabial == true
-            value: 35
+            value: params.policy.formant.burst_a4_bilabial
           - when: has(current.alveolar) && current.alveolar == true
-            value: 50
+            value: params.policy.formant.burst_a4_alveolar
           - when: has(current.velar) && current.velar == true
-            value: 55
+            value: params.policy.formant.burst_a4_velar
           - default: "has(current.?params.A4) ? current.params.A4 : 0"
       - field: params.A5
         op: set
         dispatch:
           - when: has(current.bilabial) && current.bilabial == true
-            value: 45
+            value: params.policy.formant.burst_a5_bilabial
           - when: has(current.alveolar) && current.alveolar == true
-            value: 45
+            value: params.policy.formant.burst_a5_alveolar
           - when: has(current.velar) && current.velar == true
-            value: 40
+            value: params.policy.formant.burst_a5_velar
           - default: "has(current.?params.A5) ? current.params.A5 : 0"
       - field: params.A6
         op: set
         dispatch:
           - when: has(current.bilabial) && current.bilabial == true
-            value: 30
+            value: params.policy.formant.burst_a6_bilabial
           - when: has(current.alveolar) && current.alveolar == true
-            value: 50
+            value: params.policy.formant.burst_a6_alveolar
           - when: has(current.velar) && current.velar == true
-            value: 35
+            value: params.policy.formant.burst_a6_velar
           - default: "has(current.?params.A6) ? current.params.A6 : 0"
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
@@ -302,10 +302,10 @@ rules:
         n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
         ahead(current, 2) : null) : null))
       has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
-      prev_f2: "has(prev.?params.F2) ? prev.params.F2 : 1500"
-      next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : 1500) : 1500"
+      prev_f2: "has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.default_f2_fallback"
+      next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
       flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
-      cur_f2: "has(current.?params.F2) ? current.params.F2 : 1500"
+      cur_f2: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.default_f2_fallback"
     constraint: has_flanking
     apply:
       - field: params.F2

@@ -145,6 +145,19 @@ parameters:
         citations:
           - Crystal & House 1988
           - Miller 1998
+      flap_duration_ms:
+        value: 30
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis
+      diphthong_nucleus_share:
+        value: 0.6
+        citations:
+          - Standard diphthong decomposition for formant synthesis
+      weak_release_amplitude_reduction_db:
+        value: 10
+        citations:
+          - Allen et al. 1987 Table C-1
+          - Stevens 1998 Ch.8
     f0:
       base_hz:
         value: 110
@@ -214,6 +227,15 @@ parameters:
           - O'Shaughnessy 1976
           - Ladd 2008 Ch.5
           - "Engineering estimate: lookback window for placing pre-boundary question-rise onset"
+      stress_peak_position:
+        value: 0.45
+        citations:
+          - O'Shaughnessy 1976
+      question_rise_onset_position:
+        value: 0.8
+        citations:
+          - O'Shaughnessy 1976
+          - Pierrehumbert 1980
     formant:
       bilabial_f2_locus:
         value: 1200
@@ -307,6 +329,126 @@ parameters:
         value: 0.3
         citations:
           - Ohman 1966
+      velar_f2_locus:
+        value: 1500
+        citations:
+          - Allen et al. 1987 Ch.11 (velar locus default)
+      velar_f2_locus_back:
+        value: 1200
+        citations:
+          - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
+      velar_f2_locus_front:
+        value: 1900
+        citations:
+          - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
+      bilabial_f2_locus_front:
+        value: 1350
+        citations:
+          - Stevens & House 1956 (bilabial locus, front/high vowel context)
+      bilabial_f2_locus_back:
+        value: 1100
+        citations:
+          - Stevens & House 1956 (bilabial locus, back vowel context)
+      nasal_fnz_default:
+        value: 480
+        citations:
+          - Stevens 1998 Ch.10 (nasal consonant antiformant fallback)
+      nasal_n_f2_default:
+        value: 1400
+        citations:
+          - Allen et al. 1987 Ch.10 (nasal place assimilation F2 fallback)
+      light_l_f2:
+        value: 1050
+        citations:
+          - Sproat & Fujimura 1993 (onset /l/ F2)
+          - Recasens 2012
+      light_l_f3:
+        value: 2600
+        citations:
+          - Recasens 2012 (onset /l/ F3)
+      f1_release_default:
+        value: 280
+        citations:
+          - Stevens 1998 Ch.8 (stop consonant F1 at release, default fallback)
+      burst_a2_bilabial:
+        value: 50
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a2_alveolar:
+        value: 40
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a2_velar:
+        value: 45
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a3_bilabial:
+        value: 40
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a3_alveolar:
+        value: 50
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a3_velar:
+        value: 50
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a4_bilabial:
+        value: 35
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a4_alveolar:
+        value: 50
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a4_velar:
+        value: 55
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a5_bilabial:
+        value: 45
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a5_alveolar:
+        value: 45
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a5_velar:
+        value: 40
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a6_bilabial:
+        value: 30
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a6_alveolar:
+        value: 50
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      burst_a6_velar:
+        value: 35
+        citations:
+          - Blumstein & Stevens 1979
+          - Zue 1976
+      default_f2_fallback:
+        value: 1500
+        citations:
+          - Peterson & Barney 1952 (midrange F2 default)
 output:
   blend:
     factor: 0.35

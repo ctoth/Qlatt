@@ -48,8 +48,8 @@ rules:
             - word
           phoneme: "\"DX\""
           type: "\"flap\""
-          duration: "30"
-          inherentDuration: "30"
+          duration: "params.policy.duration.flap_duration_ms"
+          inherentDuration: "params.policy.duration.flap_duration_ms"
           params: dx_params
     citations:
       - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)

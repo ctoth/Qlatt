@@ -23,9 +23,12 @@ export interface FormantSpec {
   freqDefault: number;
   bwRange: [number, number];
   bwDefault: number;
-  ndbScale: number;
-  sign: 1 | -1;
-  parallelSource: string;
+  /** ndbScale offset for parallel amplitude — omit for cascade-only formants */
+  ndbScale?: number;
+  /** Sign alternation for parallel amplitude — omit for cascade-only formants */
+  sign?: 1 | -1;
+  /** Parallel source node name — omit for cascade-only formants (no parallel resonator/gain) */
+  parallelSource?: string;
   bypassAtZero?: boolean;
 }
 
@@ -71,7 +74,7 @@ export function expandFormantBanks(
     for (const f of sortedFormants) {
       const N = f.index;
 
-      // Cascade resonator
+      // Cascade resonator (always generated)
       const cascadeNode: BaconNode = {
         type: 'resonator',
         params: {
@@ -81,27 +84,28 @@ export function expandFormantBanks(
       };
       graph.nodes[`cascadeF${N}`] = cascadeNode;
 
-      // Parallel resonator
-      const parallelNode: BaconNode = {
-        type: 'resonator',
-        params: {
-          frequency: { bind: `F${N}` },
-          bandwidth: { bind: `B${N}` },
-        },
-      };
-      if (f.bypassAtZero) {
-        parallelNode.options = { bypassAtZero: true };
-      }
-      graph.nodes[`parallelF${N}`] = parallelNode;
+      // Parallel resonator + gain — only when parallelSource is specified
+      if (f.parallelSource) {
+        const parallelNode: BaconNode = {
+          type: 'resonator',
+          params: {
+            frequency: { bind: `F${N}` },
+            bandwidth: { bind: `B${N}` },
+          },
+        };
+        if (f.bypassAtZero) {
+          parallelNode.options = { bypassAtZero: true };
+        }
+        graph.nodes[`parallelF${N}`] = parallelNode;
 
-      // Parallel gain
-      const gainNode: BaconNode = {
-        type: 'gain',
-        params: {
-          gain: { bind: `a${N}Linear` },
-        },
-      };
-      graph.nodes[`parallelF${N}Gain`] = gainNode;
+        const gainNode: BaconNode = {
+          type: 'gain',
+          params: {
+            gain: { bind: `a${N}Linear` },
+          },
+        };
+        graph.nodes[`parallelF${N}Gain`] = gainNode;
+      }
     }
 
     // ------------------------------------------------------------------
@@ -128,9 +132,10 @@ export function expandFormantBanks(
     ] as BaconConnection);
 
     // ------------------------------------------------------------------
-    // 3. Generate parallel channel connections
+    // 3. Generate parallel channel connections (only for formants with parallelSource)
     // ------------------------------------------------------------------
     for (const f of sortedFormants) {
+      if (!f.parallelSource) continue;
       const N = f.index;
       graph.connections.push([
         f.parallelSource,
@@ -152,6 +157,7 @@ export function expandFormantBanks(
     if (!semantics.params) semantics.params = {};
     for (const f of sortedFormants) {
       const N = f.index;
+      // Frequency and bandwidth params — always generated
       semantics.params[`F${N}`] = {
         type: 'float',
         range: f.freqRange,
@@ -164,16 +170,19 @@ export function expandFormantBanks(
         default: f.bwDefault,
         unit: 'Hz',
       };
-      semantics.params[`A${N}`] = {
-        type: 'float',
-        range: [0, 80],
-        default: 0,
-        unit: 'dB',
-      };
+      // Amplitude param — only for formants with parallel branch
+      if (f.parallelSource) {
+        semantics.params[`A${N}`] = {
+          type: 'float',
+          range: [0, 80],
+          default: 0,
+          unit: 'dB',
+        };
+      }
     }
 
     // ------------------------------------------------------------------
-    // 5. Generate semantics constants (ndbScale entries)
+    // 5. Generate semantics constants (ndbScale entries — parallel only)
     // ------------------------------------------------------------------
     if (!semantics.constants) semantics.constants = {};
     if (!semantics.constants.ndbScale) {
@@ -181,7 +190,9 @@ export function expandFormantBanks(
     }
     const ndbScale = semantics.constants.ndbScale as Record<string, number>;
     for (const f of sortedFormants) {
-      ndbScale[`A${f.index}`] = f.ndbScale;
+      if (f.ndbScale != null) {
+        ndbScale[`A${f.index}`] = f.ndbScale;
+      }
     }
 
     // ------------------------------------------------------------------
@@ -221,6 +232,9 @@ export function expandFormantBanks(
     }
 
     for (const f of sortedFormants) {
+      // Only generate a{N}Linear for formants with parallel branch
+      if (!f.parallelSource) continue;
+
       const N = f.index;
       const corrections = correctionTerms.get(N) || [];
       const prefix = f.sign === -1 ? '-' : '';

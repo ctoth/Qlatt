@@ -69,6 +69,35 @@ formantBanks:
         ndbScale: -80
         sign: -1
         parallelSource: parallelFricGain
+      # Cascade-only higher formants — Rabiner (1968) defaults
+      # At 44.1 kHz sample rate, the z-transform pole repetition that provided
+      # automatic higher-pole correction at Klatt's 10 kHz is above audibility.
+      # Explicit resonators F7-F10 compensate for this.
+      # Refs: Rabiner (1968), Fant (1960) Eq. 1.3-4, Holmes (1983)
+      - index: 7
+        freqRange: [5000, 8000]
+        freqDefault: 6500
+        bwRange: [200, 2000]
+        bwDefault: 722
+        # Rabiner (1968) — cascade-only higher formant, Q=9
+      - index: 8
+        freqRange: [6000, 9000]
+        freqDefault: 7500
+        bwRange: [400, 3000]
+        bwDefault: 1250
+        # Rabiner (1968) — cascade-only higher formant, Q=6
+      - index: 9
+        freqRange: [7000, 10000]
+        freqDefault: 8500
+        bwRange: [500, 5000]
+        bwDefault: 2125
+        # Rabiner (1968) — cascade-only higher formant, Q=4
+      - index: 10
+        freqRange: [8000, 12000]
+        freqDefault: 9500
+        bwRange: [1000, 8000]
+        bwDefault: 4750
+        # Rabiner (1968) — cascade-only higher formant, Q=2
 
 nodes:
   # ---------------------------------------------------------------------------

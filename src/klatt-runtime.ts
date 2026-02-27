@@ -441,10 +441,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     if (result.errors.length > 0) {
       // Route errors through the runtime's log callback so callers can see them
       for (const err of result.errors) {
-        if (typeof err === 'object' && err !== null && 'name' in err) {
-          lastEvaluationErrorNames.add((err as { name: string }).name);
-        }
-        log(`Semantics evaluation error: ${typeof err === 'string' ? err : JSON.stringify(err)}`);
+        lastEvaluationErrorNames.add(err.name);
+        log(`Semantics evaluation error: ${err.name}: ${err.error}`);
       }
     }
   }

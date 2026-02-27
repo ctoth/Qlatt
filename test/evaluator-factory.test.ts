@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createConfiguredEvaluator } from '../src/semantics/evaluator-factory';
-import type { SemanticsDocument, EvaluationContext } from '../src/semantics/types';
+import type { SemanticsDocument, EvaluationContext, EvaluationError } from '../src/semantics/types';
 
 describe('createConfiguredEvaluator', () => {
   it('returns both cel and topo evaluators', () => {
@@ -68,5 +68,33 @@ describe('createConfiguredEvaluator', () => {
     const b = createConfiguredEvaluator();
     expect(a.celEvaluator).not.toBe(b.celEvaluator);
     expect(a.topoEvaluator).not.toBe(b.topoEvaluator);
+  });
+
+  it('evaluation error has typed EvaluationError shape (name + error)', () => {
+    const { topoEvaluator } = createConfiguredEvaluator();
+
+    const semantics: SemanticsDocument = {
+      name: 'test-error-shape',
+      realize: {
+        broken: {
+          expr: 'undeclaredVariable + 1',
+          deps: [],
+        },
+      },
+    };
+
+    const context: EvaluationContext = {
+      params: {},
+      constants: {},
+    };
+
+    const result = topoEvaluator.evaluate(semantics, context);
+    expect(result.errors).toHaveLength(1);
+
+    // Verify the error conforms to the EvaluationError interface
+    const err: EvaluationError = result.errors[0];
+    expect(err.name).toBe('broken');
+    expect(typeof err.error).toBe('string');
+    expect(err.error.length).toBeGreaterThan(0);
   });
 });

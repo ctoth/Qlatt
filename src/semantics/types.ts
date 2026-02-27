@@ -48,8 +48,14 @@ export interface ParamDefinition {
   unit?: string;
 }
 
+/** A single rule-evaluation failure (rule name + message) */
+export interface EvaluationError {
+  name: string;
+  error: string;
+}
+
 /** Evaluation result */
 export interface EvaluationResult {
   values: Record<string, ParamValue>;
-  errors: Array<{ name: string; error: string }>;
+  errors: EvaluationError[];
 }

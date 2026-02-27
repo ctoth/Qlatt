@@ -44,10 +44,11 @@ function getActivePhoneTokens(result: any): any[] {
 }
 
 describe("postlexical rules", () => {
-  describe('"the" reduction: AH0 -> IH0 before vowel-initial word', () => {
+  describe('"the" reduction: AH (stress=0) -> IH before vowel-initial word', () => {
     it('reduces "the" before vowel-initial word (the apple)', () => {
-      // "the apple" -> DH AH0 AE1 P_CL L SIL
-      // The AH0 in "the" should reduce to IH0 because "apple" starts with a vowel
+      // "the apple" -> DH AH(0) AE(1) P_CL L SIL
+      // Pipeline stores phoneme without stress suffix; stress is a separate field.
+      // The AH in "the" (stress=0) should reduce to IH because "apple" starts with a vowel.
       const s0 = startOrder();
       const s1 = finiteOrder(1);
       const s2 = finiteOrder(2);
@@ -58,8 +59,8 @@ describe("postlexical rules", () => {
 
       const sequence = [
         makeToken("ph0", "DH", "fricative", 0, 70, s0, s1, { word: "the" }),
-        makeToken("ph1", "AH0", "vowel", 0, 50, s1, s2, { word: "the" }),
-        makeToken("ph2", "AE1", "vowel", 1, 170, s2, s3, { word: "apple" }),
+        makeToken("ph1", "AH", "vowel", 0, 50, s1, s2, { word: "the" }),
+        makeToken("ph2", "AE", "vowel", 1, 170, s2, s3, { word: "apple" }),
         makeToken("ph3", "P_CL", "stop_closure", 0, 50, s3, s4, { word: "apple" }),
         makeToken("ph4", "L", "liquid", 0, 80, s4, s5, { word: "apple" }),
         makeToken("ph5", "SIL", "silence", 0, 300, s5, sEnd, { punctuationSymbol: "." }),
@@ -71,19 +72,19 @@ describe("postlexical rules", () => {
       });
 
       const phoneTokens = getActivePhoneTokens(result);
-      // The splice replaces AH0 with a new token that has phoneme IH0.
+      // The splice replaces AH with a new token that has phoneme IH.
       // The original ph1 is suppressed; the replacement has a generated ID.
-      // Check that no AH0 remains and IH0 is present for word "the".
+      // Check that no AH remains and IH is present for word "the".
       const theVowels = phoneTokens.filter(
         (t: any) => t.word === "the" && t.type === "vowel"
       );
       expect(theVowels.length).toBe(1);
-      expect(theVowels[0].phoneme).toBe("IH0");
+      expect(theVowels[0].phoneme).toBe("IH");
     });
 
     it('does NOT reduce "the" before consonant-initial word (the book)', () => {
-      // "the book" -> DH AH0 B_CL UH1 K_CL SIL
-      // AH0 should stay because "book" starts with a consonant
+      // "the book" -> DH AH(0) B_CL UH(1) K_CL SIL
+      // AH should stay because "book" starts with a consonant
       const s0 = startOrder();
       const s1 = finiteOrder(1);
       const s2 = finiteOrder(2);
@@ -94,9 +95,9 @@ describe("postlexical rules", () => {
 
       const sequence = [
         makeToken("ph0", "DH", "fricative", 0, 70, s0, s1, { word: "the" }),
-        makeToken("ph1", "AH0", "vowel", 0, 50, s1, s2, { word: "the" }),
+        makeToken("ph1", "AH", "vowel", 0, 50, s1, s2, { word: "the" }),
         makeToken("ph2", "B_CL", "stop_closure", 1, 45, s2, s3, { word: "book" }),
-        makeToken("ph3", "UH1", "vowel", 1, 110, s3, s4, { word: "book" }),
+        makeToken("ph3", "UH", "vowel", 1, 110, s3, s4, { word: "book" }),
         makeToken("ph4", "K_CL", "stop_closure", 0, 60, s4, s5, { word: "book" }),
         makeToken("ph5", "SIL", "silence", 0, 300, s5, sEnd, { punctuationSymbol: "." }),
       ];
@@ -109,7 +110,7 @@ describe("postlexical rules", () => {
       const phoneTokens = getActivePhoneTokens(result);
       const theVowel = phoneTokens.find((t: any) => t.id === "ph1");
       expect(theVowel).toBeDefined();
-      expect(theVowel.phoneme).toBe("AH0");
+      expect(theVowel.phoneme).toBe("AH");
     });
   });
 

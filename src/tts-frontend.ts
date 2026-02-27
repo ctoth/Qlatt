@@ -273,6 +273,10 @@ export function textToKlattTrack(
   }
 
   parameterSequence = runPhases(parameterSequence, ["structural"]);
+  // Run postlexical rules (t-flapping, the-reduction) after structural
+  // so T_CL exists for t_flapping to match, but before duration assignment.
+  // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
+  parameterSequence = runPhases(parameterSequence, ["postlexical"]);
   parameterSequence = runPhases(parameterSequence, ["duration"]);
   parameterSequence = parameterSequence.map((token: FrontendToken, index: number) => ({
     ...token,

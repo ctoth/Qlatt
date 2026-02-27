@@ -401,11 +401,15 @@ rules:
     select:
       stream: phone
       where: >-
-        current.phoneme == 'AH0'
+        current.phoneme == 'AH'
+        && (has(current.stress) ? current.stress == 0 : false)
         && (has(current.word) ? current.word == 'the' : false)
         && next != null
         && (has(next.word) ? next.word != 'the' : false)
         && next.type == 'vowel'
+    define:
+      ih_target: target("IH0")
+      ih_params: ih_target.params
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -415,11 +419,11 @@ rules:
           copy_fields:
             - stress
             - word
-            - params
             - duration
             - inherentDuration
             - type
-          phoneme: '"IH0"'
+          phoneme: '"IH"'
+          params: ih_params
   t_flapping:
     kind: postlexical
     citation: Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)

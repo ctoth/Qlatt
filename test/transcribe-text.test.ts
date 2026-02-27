@@ -79,6 +79,27 @@ describe("transcribe-text", () => {
       expect(punctTokens.length).toBe(2);
       expect(wordTokens.length).toBeGreaterThan(0);
     });
+
+    it("recovers hyphenated CMUdict entries split by normalization", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("adl tabatabai");
+      expect(result.length).toBeGreaterThan(0);
+      expect(new Set(result.map((t) => t.word))).toEqual(new Set(["adl-tabatabai"]));
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
+
+    it("supports elided dictionary entries without leading apostrophe in input", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("cuse");
+      expect(result.length).toBeGreaterThan(0);
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('Word \"cuse\" not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
   });
 
   describe("isPunctuationToken", () => {

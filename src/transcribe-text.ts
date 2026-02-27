@@ -77,8 +77,15 @@ const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDiction
  * Also handles alternate pronunciation entries like "read(1)".
  */
 const cmuDictLookup: DictLookup = (word: string): string[] | null => {
-  const entry = CMU_DICT_MAP[word.toLowerCase()];
+  const lowerWord = word.toLowerCase();
+  const entry = CMU_DICT_MAP[lowerWord];
   if (entry) return entry.split(" ");
+
+  // Handle elided spellings where the dictionary key keeps leading apostrophe
+  // (e.g., "'cuse") but normalized input token may not ("cuse").
+  const elidedEntry = lowerWord.startsWith("'") ? null : CMU_DICT_MAP[`'${lowerWord}`];
+  if (elidedEntry) return elidedEntry.split(" ");
+
   // Handle alternate pronunciations like "read(1)" -> "read"
   if (word.includes("(")) {
     const base = CMU_DICT_MAP[word.replace(/\(\d+\)$/, "")];
@@ -148,6 +155,8 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
 
   const words = text.split(" ");
   const flatPhonemeList: TranscriptionToken[] = [];
+  const hasDirectDictionaryEntry = (token: string): boolean =>
+    typeof CMU_DICT_MAP[token.toLowerCase()] === "string";
 
   // Use effective lookup functions for symbol mode detection
   const nonPunctuation = words.filter((w) => w.length > 0 && !isEffectivePunctuation(w));
@@ -155,8 +164,12 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
     nonPunctuation.length > 0 &&
     nonPunctuation.every((w) => getEffectiveSymbol(w) !== null);
 
-  for (const word of words) {
-    if (!word) continue; // Skip empty strings resulting from multiple spaces
+  for (let index = 0; index < words.length;) {
+    const word = words[index];
+    if (!word) {
+      index += 1;
+      continue; // Skip empty strings resulting from multiple spaces
+    }
 
     if (isEffectivePunctuation(word)) {
       flatPhonemeList.push({
@@ -166,16 +179,34 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         symbol: word,
         word: word, // Associate punctuation with itself as the 'word'
       });
+      index += 1;
     } else {
-      const symbolPronunciation = useSymbolMode ? getEffectiveSymbol(word) : null;
+      let sourceWord = word;
+      let consumedWords = 1;
+
+      // Recover CMUdict hyphenated entries after normalization splits tokens
+      // (e.g., "adl tabatabai" -> "adl-tabatabai") when at least one split
+      // token has no direct dictionary entry.
+      const nextWord = words[index + 1];
+      if (nextWord && !isEffectivePunctuation(nextWord)) {
+        const hyphenated = `${word}-${nextWord}`;
+        const currentKnown = hasDirectDictionaryEntry(word);
+        const nextKnown = hasDirectDictionaryEntry(nextWord);
+        if (hasDirectDictionaryEntry(hyphenated) && (!currentKnown || !nextKnown)) {
+          sourceWord = hyphenated;
+          consumedWords = 2;
+        }
+      }
+
+      const symbolPronunciation = useSymbolMode ? getEffectiveSymbol(sourceWord) : null;
       // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress.
       const pronResult: PronunciationResult =
         symbolPronunciation == null
-          ? pronounce(word, cmuDictLookup)
+          ? pronounce(sourceWord, cmuDictLookup)
           : {
               phonemes: symbolPronunciation,
               source: "unknown",
-              word: word.toLowerCase(),
+              word: sourceWord.toLowerCase(),
             };
 
       // Select provenance citation based on which layer handled the word
@@ -184,29 +215,29 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
       let citations: string[];
       if (symbolPronunciation != null) {
         decisionType = "symbol_pronunciation_selected";
-        reason = `Used diagnostic symbol pronunciation for '${word}'`;
+        reason = `Used diagnostic symbol pronunciation for '${sourceWord}'`;
         citations = [SYMBOL_PRONUNCIATION_CITATION];
       } else if (pronResult.source === 'dictionary') {
         decisionType = "dictionary_pronunciation_selected";
-        reason = `Used CMU dictionary pronunciation for '${word}'`;
+        reason = `Used CMU dictionary pronunciation for '${sourceWord}'`;
         citations = [CMU_DICTIONARY_CITATION];
       } else if (pronResult.source === 'morphology') {
         decisionType = "morphology_pronunciation_selected";
-        reason = `Morphological decomposition for '${word}' (root: ${pronResult.rootWord ?? '?'})`;
+        reason = `Morphological decomposition for '${sourceWord}' (root: ${pronResult.rootWord ?? '?'})`;
         citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
       } else {
         decisionType = "fallback_pronunciation_selected";
-        reason = `Word '${word}' not in dictionary; used Elovitz LTS + Hunnicutt stress`;
+        reason = `Word '${sourceWord}' not in dictionary; used Elovitz LTS + Hunnicutt stress`;
         citations = [FALLBACK_PRONUNCIATION_CITATION];
         console.warn(
-          `[TTS Frontend] Word "${word}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`
+          `[TTS Frontend] Word "${sourceWord}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`
         );
       }
 
       const pronunciationDecision = provenance?.add({
         stage: "transcribe",
         type: decisionType,
-        subject: `word:${word}`,
+        subject: `word:${sourceWord}`,
         reason,
         citations,
       });
@@ -218,28 +249,29 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
             flatPhonemeList.push({
               phoneme: match[1],
               stress: match[2] ? parseInt(match[2]) : null,
-              word: word,
+              word: sourceWord,
               _pronDecisionId: pronunciationDecision?.id,
             });
           } else if (phoneWithStress === "SIL") {
             flatPhonemeList.push({
               phoneme: "SIL",
               stress: null,
-              word: word,
+              word: sourceWord,
               _pronDecisionId: pronunciationDecision?.id,
             });
           }
         }
       } else {
-        console.warn(`[TTS Frontend] Word "${word}" produced no phonemes. Representing as SIL.`);
+        console.warn(`[TTS Frontend] Word "${sourceWord}" produced no phonemes. Representing as SIL.`);
         flatPhonemeList.push({
           phoneme: "SIL",
           stress: null,
           duration: 50,
-          word: word,
+          word: sourceWord,
           _pronDecisionId: pronunciationDecision?.id,
         });
       }
+      index += consumedWords;
     }
   }
   return flatPhonemeList; // Return the flat list of phoneme objects

@@ -82,6 +82,14 @@ interface EnvelopeViolation {
   sampleCount: number;
 }
 
+interface ContrastViolation {
+  pair: string;
+  metric: string;
+  observed: number;
+  expected: string;
+  sampleCount: number;
+}
+
 // -- Helpers ----------------------------------------------------------------
 
 const CLOSURE_SUFFIXES = ["_CL"];
@@ -355,7 +363,7 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 4: Segment Duration Floors -------------------------------------
+  // -- Block 4: Phoneme Envelope Sanity -------------------------------------
 
   describe("phoneme envelope sanity", () => {
     it("maintains robust fricative routing and energy envelopes for critical phones", () => {
@@ -535,7 +543,174 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 4: Segment Duration Floors -------------------------------------
+  // -- Block 5: Phoneme Contrast Separation ---------------------------------
+
+  describe("phoneme contrast separation", () => {
+    it("keeps confusable fricatives acoustically separable at inventory level", () => {
+      // Citation anchors:
+      // - Jongman et al. 2000 (sibilant vs non-sibilant fricative contrasts)
+      // - Stevens 1998 Ch.10 (fricative place cues in spectral envelopes)
+      // These are implementation guardrails for anti-collapse behavior.
+      const targetPhones = ["TH", "DH", "S", "Z", "F"];
+      const byPhone = new Map<string, EnvelopeObservation[]>(
+        targetPhones.map((phone) => [phone, []])
+      );
+
+      const maxInSegment = (segment: Segment, key: string): number =>
+        Math.max(...segment.frames.map((frame) => Number(frame.params?.[key] ?? 0)));
+
+      for (const [word] of auditWords) {
+        const segments = segmentCache.get(word);
+        if (!segments) continue;
+        for (const segment of segments) {
+          const phone = stripStress(segment.phoneme);
+          if (!byPhone.has(phone)) continue;
+          byPhone.get(phone)!.push({
+            word,
+            phoneme: phone,
+            durationMs: segment.durationMs,
+            AF: maxInSegment(segment, "AF"),
+            AH: maxInSegment(segment, "AH"),
+            AV: maxInSegment(segment, "AV"),
+            SW: maxInSegment(segment, "SW"),
+            A3: maxInSegment(segment, "A3"),
+            A4: maxInSegment(segment, "A4"),
+            A5: maxInSegment(segment, "A5"),
+            A6: maxInSegment(segment, "A6"),
+          });
+        }
+      }
+
+      const summaryByPhone = new Map<
+        string,
+        {
+          count: number;
+          AF: ReturnType<typeof summarizeNumbers>;
+          A5: ReturnType<typeof summarizeNumbers>;
+        }
+      >();
+      for (const phone of targetPhones) {
+        const observations = byPhone.get(phone) ?? [];
+        summaryByPhone.set(phone, {
+          count: observations.length,
+          AF: summarizeNumbers(observations.map((entry) => entry.AF)),
+          A5: summarizeNumbers(observations.map((entry) => entry.A5)),
+        });
+      }
+
+      const violations: ContrastViolation[] = [];
+      const ensureMinCount = (phone: string, minCount: number) => {
+        const count = summaryByPhone.get(phone)?.count ?? 0;
+        if (count < minCount) {
+          violations.push({
+            pair: phone,
+            metric: "count",
+            observed: count,
+            expected: `>= ${minCount}`,
+            sampleCount: count,
+          });
+        }
+      };
+      const assertDirectionalGap = (
+        pair: string,
+        metric: string,
+        stronger: number,
+        weaker: number,
+        minGap: number,
+        sampleCount: number
+      ) => {
+        const observedGap = stronger - weaker;
+        if (observedGap < minGap) {
+          violations.push({
+            pair,
+            metric,
+            observed: observedGap,
+            expected: `>= ${minGap}`,
+            sampleCount,
+          });
+        }
+      };
+      const assertAbsoluteGap = (
+        pair: string,
+        metric: string,
+        first: number,
+        second: number,
+        minGap: number,
+        sampleCount: number
+      ) => {
+        const observedGap = Math.abs(first - second);
+        if (observedGap < minGap) {
+          violations.push({
+            pair,
+            metric,
+            observed: observedGap,
+            expected: `>= ${minGap}`,
+            sampleCount,
+          });
+        }
+      };
+
+      ensureMinCount("TH", 20);
+      ensureMinCount("S", 20);
+      ensureMinCount("F", 20);
+      ensureMinCount("Z", 20);
+      ensureMinCount("DH", isFullAudit ? 20 : 5);
+
+      const th = summaryByPhone.get("TH")!;
+      const dh = summaryByPhone.get("DH")!;
+      const s = summaryByPhone.get("S")!;
+      const z = summaryByPhone.get("Z")!;
+      const f = summaryByPhone.get("F")!;
+
+      const thVsSCount = Math.min(th.count, s.count);
+      const dhVsZCount = Math.min(dh.count, z.count);
+      const fVsThCount = Math.min(f.count, th.count);
+
+      // Sibilants should remain stronger in high-band frication cues than dentals.
+      assertDirectionalGap("TH vs S", "AF.p50 gap", s.AF.p50, th.AF.p50, 4, thVsSCount);
+      assertDirectionalGap("TH vs S", "A5.p50 gap", s.A5.p50, th.A5.p50, 8, thVsSCount);
+      assertDirectionalGap("DH vs Z", "AF.p50 gap", z.AF.p50, dh.AF.p50, 4, dhVsZCount);
+      assertDirectionalGap("DH vs Z", "A5.p50 gap", z.A5.p50, dh.A5.p50, 6, dhVsZCount);
+
+      // Non-sibilant confusions: /f/ and /th/ should still avoid complete collapse.
+      assertAbsoluteGap("F vs TH", "AF.p50 abs gap", f.AF.p50, th.AF.p50, 3, fVsThCount);
+
+      console.log("\nphoneme contrast separation (subset/full realized medians):");
+      for (const phone of targetPhones) {
+        const summary = summaryByPhone.get(phone)!;
+        console.log(
+          `  ${phone}: count=${summary.count} ` +
+            `AF[p50]=${summary.AF.p50.toFixed(1)} ` +
+            `A5[p50]=${summary.A5.p50.toFixed(1)}`
+        );
+      }
+      console.log(
+        `  TH vs S: AF.gap=${(s.AF.p50 - th.AF.p50).toFixed(1)} A5.gap=${(s.A5.p50 - th.A5.p50).toFixed(1)}`
+      );
+      console.log(
+        `  DH vs Z: AF.gap=${(z.AF.p50 - dh.AF.p50).toFixed(1)} A5.gap=${(z.A5.p50 - dh.A5.p50).toFixed(1)}`
+      );
+      console.log(`  F vs TH: |AF.gap|=${Math.abs(f.AF.p50 - th.AF.p50).toFixed(1)}`);
+
+      if (violations.length > 0) {
+        console.log("  First 20 contrast violations:");
+        for (const violation of violations.slice(0, 20)) {
+          console.log(
+            `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} phoneme contrast violations` +
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+      );
+    });
+  });
+
+  // -- Block 6: Segment Duration Floors -------------------------------------
 
   describe("segment duration floors", () => {
     it("segments should respect manner-class minimum durations", () => {

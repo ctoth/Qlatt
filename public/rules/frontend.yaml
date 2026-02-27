@@ -1,11 +1,11 @@
 version: v13-cel
 include:
   - pipeline.yaml
-  - rules/postlexical.yaml
-  - rules/structural.yaml
-  - rules/duration.yaml
-  - rules/formant.yaml
-  - rules/prosody.yaml
+  - phases/postlexical.yaml
+  - phases/structural.yaml
+  - phases/duration.yaml
+  - phases/formant.yaml
+  - phases/prosody.yaml
 parameters:
   policy:
     duration:

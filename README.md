@@ -48,6 +48,11 @@ npm run golden:declarative-summary
 node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/check-strict-citations.ts --corpus test/phrase-sets/linguistic.json
 ```
 
+- Export paired A/B listening manifest (for blind listening batches):
+```
+node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/export-listening-ab-manifest.ts --corpus test/phrase-sets/linguistic.json --out test/golden/listening-ab-manifest.json
+```
+
 ## Structure
 
 - `crates/`: Rust WASM DSP primitives.

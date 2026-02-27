@@ -813,12 +813,7 @@ function resolveParamValue(
     return realized[spec.bind] ?? inputs[spec.bind];
   }
 
-  if ('expr' in spec) {
-    // Expression evaluation would go through CEL
-    // For MVP, skip inline expressions
-    console.warn('Inline expressions not yet supported');
-    return undefined;
-  }
+  // Note: { expr } specs are rejected at graph validation time (see createKlattRuntime)
 
   return undefined;
 }

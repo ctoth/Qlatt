@@ -760,7 +760,166 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 7: Segment Duration Floors -------------------------------------
+  // -- Block 7: Inventory-Wide Obstruent Separation -------------------------
+
+  describe("inventory-wide obstruent separation", () => {
+    it("maintains pairwise separability across fricative/affricate inventory", () => {
+      // Citation anchors:
+      // - Stevens 1998 Ch.10 (obstruent place/manner cue structure)
+      // - Jongman et al. 2000 (fricative acoustic class contrasts)
+      // Engineering guardrail: every obstruent pair should differ on at least
+      // one robust control dimension to avoid inventory collapse.
+      const obstruentPhones = ["F", "V", "TH", "DH", "S", "Z", "SH", "ZH", "HH", "CH", "JH"];
+      const byPhone = new Map<string, EnvelopeObservation[]>(
+        obstruentPhones.map((phone) => [phone, []])
+      );
+
+      const maxInSegment = (segment: Segment, key: string): number =>
+        Math.max(...segment.frames.map((frame) => Number(frame.params?.[key] ?? 0)));
+
+      for (const [word] of auditWords) {
+        const segments = segmentCache.get(word);
+        if (!segments) continue;
+        for (const segment of segments) {
+          const phone = stripStress(segment.phoneme);
+          if (!byPhone.has(phone)) continue;
+          byPhone.get(phone)!.push({
+            word,
+            phoneme: phone,
+            durationMs: segment.durationMs,
+            AF: maxInSegment(segment, "AF"),
+            AH: maxInSegment(segment, "AH"),
+            AV: maxInSegment(segment, "AV"),
+            SW: maxInSegment(segment, "SW"),
+            A3: maxInSegment(segment, "A3"),
+            A4: maxInSegment(segment, "A4"),
+            A5: maxInSegment(segment, "A5"),
+            A6: maxInSegment(segment, "A6"),
+          });
+        }
+      }
+
+      const summaryByPhone = new Map<
+        string,
+        {
+          count: number;
+          duration: ReturnType<typeof summarizeNumbers>;
+          AF: ReturnType<typeof summarizeNumbers>;
+          AV: ReturnType<typeof summarizeNumbers>;
+          A3: ReturnType<typeof summarizeNumbers>;
+          A5: ReturnType<typeof summarizeNumbers>;
+        }
+      >();
+      for (const phone of obstruentPhones) {
+        const observations = byPhone.get(phone) ?? [];
+        summaryByPhone.set(phone, {
+          count: observations.length,
+          duration: summarizeNumbers(observations.map((entry) => entry.durationMs)),
+          AF: summarizeNumbers(observations.map((entry) => entry.AF)),
+          AV: summarizeNumbers(observations.map((entry) => entry.AV)),
+          A3: summarizeNumbers(observations.map((entry) => entry.A3)),
+          A5: summarizeNumbers(observations.map((entry) => entry.A5)),
+        });
+      }
+
+      const violations: ContrastViolation[] = [];
+      const ensureMinCount = (phone: string, minCount: number) => {
+        const count = summaryByPhone.get(phone)?.count ?? 0;
+        if (count < minCount) {
+          violations.push({
+            pair: phone,
+            metric: "count",
+            observed: count,
+            expected: `>= ${minCount}`,
+            sampleCount: count,
+          });
+        }
+      };
+
+      for (const phone of obstruentPhones) {
+        ensureMinCount(phone, isFullAudit ? 20 : 5);
+      }
+
+      type PairScore = { pair: string; separation: number; metrics: string };
+      const pairScores: PairScore[] = [];
+
+      for (let i = 0; i < obstruentPhones.length; i += 1) {
+        for (let j = i + 1; j < obstruentPhones.length; j += 1) {
+          const left = obstruentPhones[i];
+          const right = obstruentPhones[j];
+          const l = summaryByPhone.get(left)!;
+          const r = summaryByPhone.get(right)!;
+          const sampleCount = Math.min(l.count, r.count);
+          if (sampleCount === 0) continue;
+
+          const avGap = Math.abs(l.AV.p50 - r.AV.p50);
+          const afGap = Math.abs(l.AF.p50 - r.AF.p50);
+          const a5Gap = Math.abs(l.A5.p50 - r.A5.p50);
+          const a3Gap = Math.abs(l.A3.p50 - r.A3.p50);
+          const durGap = Math.abs(l.duration.p50 - r.duration.p50);
+
+          const separation = Math.max(
+            avGap / 20,
+            afGap / 3,
+            a5Gap / 4,
+            a3Gap / 4,
+            durGap / 8
+          );
+
+          pairScores.push({
+            pair: `${left} vs ${right}`,
+            separation,
+            metrics:
+              `AV=${avGap.toFixed(1)} AF=${afGap.toFixed(1)} ` +
+              `A5=${a5Gap.toFixed(1)} A3=${a3Gap.toFixed(1)} dur=${durGap.toFixed(1)}ms`,
+          });
+
+          if (separation < 1) {
+            violations.push({
+              pair: `${left} vs ${right}`,
+              metric: "pairwise-separation",
+              observed: separation,
+              expected: ">= 1.0",
+              sampleCount,
+            });
+          }
+        }
+      }
+
+      console.log("\ninventory-wide obstruent separation:");
+      for (const phone of obstruentPhones) {
+        const summary = summaryByPhone.get(phone)!;
+        console.log(
+          `  ${phone}: count=${summary.count} dur.p50=${summary.duration.p50.toFixed(1)}ms ` +
+            `AF.p50=${summary.AF.p50.toFixed(1)} AV.p50=${summary.AV.p50.toFixed(1)} ` +
+            `A3.p50=${summary.A3.p50.toFixed(1)} A5.p50=${summary.A5.p50.toFixed(1)}`
+        );
+      }
+      const weakestPairs = [...pairScores].sort((a, b) => a.separation - b.separation).slice(0, 15);
+      console.log("  weakest separations:");
+      for (const pair of weakestPairs) {
+        console.log(`    ${pair.pair}: score=${pair.separation.toFixed(2)} ${pair.metrics}`);
+      }
+
+      if (violations.length > 0) {
+        console.log("  First 20 obstruent-separation violations:");
+        for (const violation of violations.slice(0, 20)) {
+          console.log(
+            `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} obstruent separation violations` +
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+      );
+    });
+  });
+
+  // -- Block 8: Segment Duration Floors -------------------------------------
 
   describe("segment duration floors", () => {
     it("segments should respect manner-class minimum durations", () => {

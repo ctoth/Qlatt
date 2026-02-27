@@ -16,13 +16,14 @@ describe('CEL Evaluator', () => {
 
   it('calls registered functions', () => {
     const evaluator = createCelEvaluator();
-    evaluator.registerFunction('double', (...args: ParamValue[]) => {
+    // Note: "double" is a CEL builtin (type cast); use a custom name instead
+    evaluator.registerFunction('dbToLinear', (...args: ParamValue[]) => {
       const x = args[0];
       if (typeof x !== 'number' || !Number.isFinite(x)) {
-        throw new Error('double expects a finite number');
+        throw new Error('dbToLinear expects a finite number');
       }
       return x * 2;
     });
-    expect(evaluator.evaluate('double(5)', { params: {}, constants: {} })).toBe(10);
+    expect(evaluator.evaluate('dbToLinear(5)', { params: {}, constants: {} })).toBe(10);
   });
 });

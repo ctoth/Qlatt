@@ -1,6 +1,7 @@
-import { evaluate, parse } from "cel-js";
+import "../cel-compat"; // must be imported before any CEL evaluation
+import { Environment } from "@marcbachmann/cel-js";
 
-type CompiledCelExpression = unknown;
+type CompiledCelExpression = (context?: Record<string, any>) => any;
 
 export type ExpressionValidationOptions = {
   allowedFunctions?: Iterable<string>;
@@ -36,6 +37,91 @@ const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 const STREAM_HELPER_PATTERN = /\b(total|prev_point)\s*\(\s*(['"])([^'"]+)\2\s*\)/g;
 const CURSOR_DEPTH_PATTERN = /\b(prev|next)(\d+)\b/g;
 
+/**
+ * Mutable binding for current evaluation's custom functions.
+ * Safe because CEL evaluation is synchronous — no concurrent calls.
+ */
+let _currentFunctions: Record<string, (...args: any[]) => unknown> = {};
+
+/**
+ * Create the shared CEL Environment with:
+ * - Mixed int/double arithmetic operators (CEL spec is strict about types)
+ * - All known custom function signatures dispatching through _currentFunctions
+ */
+function createCelEnvironment(): Environment {
+  const env = new Environment({
+    unlistedVariablesAreDyn: true,
+    homogeneousAggregateLiterals: false,
+  });
+
+  // Register mixed-type arithmetic operators.
+  // @marcbachmann/cel-js follows the CEL spec strictly: int + double is not
+  // allowed by default. Our context variables are JS numbers (CEL double) but
+  // expressions contain integer literals (CEL int = BigInt). These overloads
+  // bridge the gap, coercing results to JS number (double).
+  env.registerOperator("double + int", (a: number, b: bigint) => a + Number(b));
+  env.registerOperator("int + double", (a: bigint, b: number) => Number(a) + b);
+  env.registerOperator("double * int", (a: number, b: bigint) => a * Number(b));
+  env.registerOperator("int * double", (a: bigint, b: number) => Number(a) * b);
+  env.registerOperator("double - int", (a: number, b: bigint) => a - Number(b));
+  env.registerOperator("int - double", (a: bigint, b: number) => Number(a) - b);
+  env.registerOperator("double / int", (a: number, b: bigint) => a / Number(b));
+  env.registerOperator("int / double", (a: bigint, b: number) => Number(a) / b);
+  env.registerOperator("double % int", (a: number, b: bigint) => a % Number(b));
+  env.registerOperator("int % double", (a: bigint, b: number) => Number(a) % b);
+  env.registerOperator("double == int", (a: number, b: bigint) => a === Number(b));
+
+  // Register all known custom function signatures.
+  // These dispatch through _currentFunctions so that the actual implementation
+  // can change per evaluateExpression() call (navigation functions are built
+  // dynamically with closures over the token sequence).
+  //
+  // "double" and "string" are CEL built-in type casts and must NOT be
+  // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
+  // String(x) are functionally identical to the CEL builtins.
+  // Register all known custom function names with overloads for arities
+  // 1, 2, and 3. This covers all call patterns used in YAML rule expressions.
+  // "double" and "string" are CEL builtins and must NOT be re-registered.
+  const knownFunctionNames = [
+    "midpoint", "at_ratio", "at_sync", "prev_point",
+    "ahead", "behind", "total", "target", "assoc",
+    "max", "min", "contains", "merge",
+    "look_back_where", "look_back_pred", "look_ahead_pred",
+  ];
+
+  const knownFunctions: Array<[string, string[]]> = knownFunctionNames.map((name) => [
+    name,
+    [
+      `${name}(dyn): dyn`,
+      `${name}(dyn, dyn): dyn`,
+      `${name}(dyn, dyn, dyn): dyn`,
+    ],
+  ]);
+
+  for (const [name, signatures] of knownFunctions) {
+    for (const sig of signatures) {
+      env.registerFunction(sig, (...args: any[]) => {
+        const fn = _currentFunctions[name];
+        if (!fn) throw new Error(`CEL function '${name}' not available in current context`);
+        return fn(...args);
+      });
+    }
+  }
+
+  return env;
+}
+
+const celEnv = createCelEnvironment();
+
+/**
+ * Coerce @marcbachmann/cel-js results: BigInt (CEL int) → JS number.
+ * The rest of the codebase expects plain JS numbers everywhere.
+ */
+function coerceResult(value: unknown): unknown {
+  if (typeof value === "bigint") return Number(value);
+  return value;
+}
+
 function compileExpression(expression: string): CompiledCelExpression {
   if (typeof expression !== "string") {
     throw new Error("expression must be a string");
@@ -44,15 +130,13 @@ function compileExpression(expression: string): CompiledCelExpression {
   let compiled = expressionCache.get(expression);
   if (compiled) return compiled;
 
-  const parsed = parse(expression) as
-    | { isSuccess: true; cst: unknown }
-    | { isSuccess: false; errors?: string[] };
-  if (!parsed || parsed.isSuccess !== true) {
-    const errors = parsed && Array.isArray(parsed.errors) ? parsed.errors : [];
-    throw new Error(errors.length > 0 ? errors.join("; ") : "Invalid CEL expression");
+  try {
+    compiled = celEnv.parse(expression);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(msg || "Invalid CEL expression");
   }
 
-  compiled = parsed.cst;
   expressionCache.set(expression, compiled);
   return compiled;
 }
@@ -124,6 +208,8 @@ export function evaluateExpression(
   functions: Record<string, unknown> | null = null
 ): unknown {
   const compiled = compileExpression(expression);
+
+  // Set up the mutable function binding for this evaluation
   const registry: Record<string, (...args: unknown[]) => unknown> = {};
   if (functions && typeof functions === "object") {
     for (const [name, fn] of Object.entries(functions)) {
@@ -132,5 +218,11 @@ export function evaluateExpression(
       }
     }
   }
-  return evaluate(compiled as any, (context ?? {}) as Record<string, unknown>, registry);
+  _currentFunctions = registry;
+
+  try {
+    return coerceResult(compiled((context ?? {}) as Record<string, any>));
+  } finally {
+    _currentFunctions = {};
+  }
 }

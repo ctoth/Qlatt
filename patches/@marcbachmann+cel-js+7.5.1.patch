@@ -1,0 +1,14 @@
+diff --git a/node_modules/@marcbachmann/cel-js/lib/macros.js b/node_modules/@marcbachmann/cel-js/lib/macros.js
+index 3f7b5ef..2ad6e4e 100644
+--- a/node_modules/@marcbachmann/cel-js/lib/macros.js
++++ b/node_modules/@marcbachmann/cel-js/lib/macros.js
+@@ -94,8 +94,7 @@ function createHasExpander() {
+       if (node.op === '.?') inOptionalContext ??= true
+       obj = ev.debugType(obj).fieldLazy(obj, node.args[1], node, ev)
+       if (obj !== undefined) continue
+-      if (!(!inOptionalContext && i && node.op === '.')) break
+-      throw new EvaluationError(`No such key: ${node.args[1]}`, node)
++      break // lenient has(): return false for any missing intermediate field
+     }
+     return obj !== undefined
+   }

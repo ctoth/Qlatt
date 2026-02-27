@@ -6,8 +6,9 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
-const outPath = path.join(root, "src", "cmu-dictionary.ts");
+const outPath = path.join(root, "public", "cmu-dictionary.json");
 
-const payload = `export const CMU_DICT = ${JSON.stringify(dictionary)};\n`;
+const payload = `${JSON.stringify(dictionary)}\n`;
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, payload, "utf8");
 console.log(`Wrote ${Object.keys(dictionary).length} entries to ${outPath}`);

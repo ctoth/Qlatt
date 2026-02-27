@@ -26,6 +26,7 @@ import {
   isAuditReportOnlyMode,
   loadCmuDictionary,
   selectAuditWords,
+  summarizeNumbers,
   stripStress,
   type Frame,
   type Segment,
@@ -57,6 +58,28 @@ interface DurationFloorViolation {
   phoneme: string;
   durationMs: number;
   minimumMs: number;
+}
+
+interface EnvelopeObservation {
+  word: string;
+  phoneme: string;
+  durationMs: number;
+  AF: number;
+  AH: number;
+  AV: number;
+  SW: number;
+  A3: number;
+  A4: number;
+  A5: number;
+  A6: number;
+}
+
+interface EnvelopeViolation {
+  phoneme: string;
+  metric: string;
+  observed: number;
+  expected: string;
+  sampleCount: number;
 }
 
 // -- Helpers ----------------------------------------------------------------
@@ -328,6 +351,186 @@ describe("full dictionary audit", () => {
         violations,
         `${violations.length} trailing SIL frames with AV>0` +
           ` in ${affectedWords} words`
+      );
+    });
+  });
+
+  // -- Block 4: Segment Duration Floors -------------------------------------
+
+  describe("phoneme envelope sanity", () => {
+    it("maintains robust fricative routing and energy envelopes for critical phones", () => {
+      // Citation anchors:
+      // - Jongman et al. 2000 (fricative class energy/intelligibility contrasts)
+      // - Stevens 1998 Ch.10 (place/manner acoustic distinctions)
+      // Thresholds are conservative engineering guardrails around current
+      // synthesis behavior, not direct copied measurements.
+      const targetPhones = ["TH", "DH", "S", "Z", "F", "V", "SH", "ZH", "HH"];
+      const byPhone = new Map<string, EnvelopeObservation[]>(
+        targetPhones.map((phone) => [phone, []])
+      );
+
+      const maxInSegment = (segment: Segment, key: string): number =>
+        Math.max(...segment.frames.map((frame) => Number(frame.params?.[key] ?? 0)));
+
+      for (const [word] of auditWords) {
+        const segments = segmentCache.get(word);
+        if (!segments) continue;
+        for (const segment of segments) {
+          const phone = stripStress(segment.phoneme);
+          if (!byPhone.has(phone)) continue;
+
+          byPhone.get(phone)!.push({
+            word,
+            phoneme: phone,
+            durationMs: segment.durationMs,
+            AF: maxInSegment(segment, "AF"),
+            AH: maxInSegment(segment, "AH"),
+            AV: maxInSegment(segment, "AV"),
+            SW: maxInSegment(segment, "SW"),
+            A3: maxInSegment(segment, "A3"),
+            A4: maxInSegment(segment, "A4"),
+            A5: maxInSegment(segment, "A5"),
+            A6: maxInSegment(segment, "A6"),
+          });
+        }
+      }
+
+      const violations: EnvelopeViolation[] = [];
+      const ensureMinCount = (phone: string, minCount: number) => {
+        const count = byPhone.get(phone)?.length ?? 0;
+        if (count < minCount) {
+          violations.push({
+            phoneme: phone,
+            metric: "count",
+            observed: count,
+            expected: `>= ${minCount}`,
+            sampleCount: count,
+          });
+        }
+      };
+      const assertMin = (phone: string, metric: string, observed: number, min: number, sampleCount: number) => {
+        if (observed < min) {
+          violations.push({
+            phoneme: phone,
+            metric,
+            observed,
+            expected: `>= ${min}`,
+            sampleCount,
+          });
+        }
+      };
+      const assertMax = (phone: string, metric: string, observed: number, max: number, sampleCount: number) => {
+        if (observed > max) {
+          violations.push({
+            phoneme: phone,
+            metric,
+            observed,
+            expected: `<= ${max}`,
+            sampleCount,
+          });
+        }
+      };
+
+      const summaryByPhone = new Map<
+        string,
+        {
+          count: number;
+          AF: ReturnType<typeof summarizeNumbers>;
+          AH: ReturnType<typeof summarizeNumbers>;
+          AV: ReturnType<typeof summarizeNumbers>;
+          SW: ReturnType<typeof summarizeNumbers>;
+          A5: ReturnType<typeof summarizeNumbers>;
+        }
+      >();
+
+      for (const phone of targetPhones) {
+        const observations = byPhone.get(phone) ?? [];
+        summaryByPhone.set(phone, {
+          count: observations.length,
+          AF: summarizeNumbers(observations.map((entry) => entry.AF)),
+          AH: summarizeNumbers(observations.map((entry) => entry.AH)),
+          AV: summarizeNumbers(observations.map((entry) => entry.AV)),
+          SW: summarizeNumbers(observations.map((entry) => entry.SW)),
+          A5: summarizeNumbers(observations.map((entry) => entry.A5)),
+        });
+      }
+
+      ensureMinCount("TH", 20);
+      ensureMinCount("S", 20);
+      ensureMinCount("HH", 20);
+      ensureMinCount("DH", isFullAudit ? 20 : 5);
+
+      const th = summaryByPhone.get("TH")!;
+      const dh = summaryByPhone.get("DH")!;
+      const s = summaryByPhone.get("S")!;
+      const z = summaryByPhone.get("Z")!;
+      const f = summaryByPhone.get("F")!;
+      const v = summaryByPhone.get("V")!;
+      const sh = summaryByPhone.get("SH")!;
+      const zh = summaryByPhone.get("ZH")!;
+      const hh = summaryByPhone.get("HH")!;
+
+      // TH/DH fail-tier checks (this is the bug class we just fixed).
+      assertMin("TH", "AF.p50", th.AF.p50, 50, th.count);
+      assertMin("TH", "A5.p50", th.A5.p50, 36, th.count);
+      assertMin("DH", "AF.p50", dh.AF.p50, 40, dh.count);
+      assertMin("DH", "A5.p50", dh.A5.p50, 34, dh.count);
+      assertMin("DH", "AV.p50", dh.AV.p50, 40, dh.count);
+
+      // Core fricatives should route to parallel branch; HH should remain cascade-routed.
+      for (const phone of ["TH", "DH", "S", "Z", "F", "V", "SH", "ZH"]) {
+        const summary = summaryByPhone.get(phone)!;
+        assertMin(phone, "SW.p10", summary.SW.p10, 1, summary.count);
+      }
+      assertMax("HH", "SW.p50", hh.SW.p50, 0, hh.count);
+      assertMin("HH", "AH.p50", hh.AH.p50, 35, hh.count);
+
+      // Voicing sanity envelopes by fricative class.
+      for (const phone of ["TH", "S", "F", "SH", "HH"]) {
+        const summary = summaryByPhone.get(phone)!;
+        assertMax(phone, "AV.p90", summary.AV.p90, 5, summary.count);
+      }
+      for (const phone of ["DH", "Z", "V", "ZH"]) {
+        const summary = summaryByPhone.get(phone)!;
+        assertMin(phone, "AV.p10", summary.AV.p10, 35, summary.count);
+      }
+
+      // Keep weak fricatives audibly distinct from complete collapse.
+      assertMin("S", "AF.p50", s.AF.p50, 55, s.count);
+      assertMin("F", "AF.p50", f.AF.p50, 45, f.count);
+      assertMin("Z", "AF.p50", z.AF.p50, 45, z.count);
+      assertMin("V", "AF.p50", v.AF.p50, 35, v.count);
+      assertMin("SH", "AF.p50", sh.AF.p50, 60, sh.count);
+      assertMin("ZH", "AF.p50", zh.AF.p50, 50, zh.count);
+
+      // TH should remain stronger than DH in AF median.
+      assertMin("TH", "AF.p50 - DH.AF.p50", th.AF.p50 - dh.AF.p50, 3, th.count);
+
+      console.log("\nphoneme envelope sanity (subset/full realized medians):");
+      for (const phone of targetPhones) {
+        const summary = summaryByPhone.get(phone)!;
+        console.log(
+          `  ${phone}: count=${summary.count} ` +
+            `AF[p10/p50/p90]=${summary.AF.p10.toFixed(1)}/${summary.AF.p50.toFixed(1)}/${summary.AF.p90.toFixed(1)} ` +
+            `AV[p10/p50/p90]=${summary.AV.p10.toFixed(1)}/${summary.AV.p50.toFixed(1)}/${summary.AV.p90.toFixed(1)} ` +
+            `SW[p10/p50/p90]=${summary.SW.p10.toFixed(1)}/${summary.SW.p50.toFixed(1)}/${summary.SW.p90.toFixed(1)}`
+        );
+      }
+
+      if (violations.length > 0) {
+        console.log("  First 20 envelope violations:");
+        for (const violation of violations.slice(0, 20)) {
+          console.log(
+            `    ${violation.phoneme}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} phoneme envelope violations` +
+          ` (first: ${violations[0]?.phoneme ?? "none"}.${violations[0]?.metric ?? ""})`
       );
     });
   });

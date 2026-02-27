@@ -14,7 +14,7 @@ import {
   type TelemetryEvent,
 } from '../src/klatt-interpreter';
 import type { SemanticsDocument } from '../src/semantics/types';
-import type { KlattRuntime, BaconGraph, BindingInfo } from '../src/klatt-runtime';
+import type { KlattRuntime, BaconGraph, BindingSpec } from '../src/klatt-runtime';
 
 // ---------------------------------------------------------------------------
 // Helpers: minimal mocks for AudioContext / AudioParam / KlattRuntime
@@ -89,7 +89,7 @@ function minimalGraph(): BaconGraph {
 
 /** Create a mock KlattRuntime with an empty binding map */
 function mockRuntime(): KlattRuntime {
-  const emptyBindingMap = new Map<string, BindingInfo[]>();
+  const emptyBindingMap = new Map<string, BindingSpec[]>();
   return {
     getNode: vi.fn(() => undefined),
     getBindingMap: vi.fn(() => emptyBindingMap),
@@ -135,7 +135,7 @@ describe('Binding categorization (tagged union)', () => {
     const resNode = mockWorkletNode(['frequency']);
 
     // Set up binding map so each name maps to a node+param
-    const bindingMap = new Map<string, BindingInfo[]>([
+    const bindingMap = new Map<string, BindingSpec[]>([
       ['AF', [{ nodeId: 'lfSource', paramName: 'af', bindName: 'AF' }]],
       ['AH', [{ nodeId: 'lfSource', paramName: 'ah', bindName: 'AH' }]],
       ['F1', [{ nodeId: 'resonator1', paramName: 'frequency', bindName: 'F1' }]],
@@ -210,7 +210,7 @@ describe('Binding categorization (tagged union)', () => {
     };
 
     const node = mockWorkletNode(['af', 'voiceGain', 'f0']);
-    const bindingMap = new Map<string, BindingInfo[]>([
+    const bindingMap = new Map<string, BindingSpec[]>([
       ['AF', [{ nodeId: 'src', paramName: 'af', bindName: 'AF' }]],
       ['voiceGain', [{ nodeId: 'src', paramName: 'voiceGain', bindName: 'voiceGain' }]],
       ['F0', [{ nodeId: 'src', paramName: 'f0', bindName: 'F0' }]],

@@ -14,7 +14,7 @@
 
 import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
-import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
+import type { KlattRuntime, BaconGraph, BindingSpec } from './klatt-runtime';
 import { dbToLinear } from './builtin-functions';
 import { getAudioParam } from './audio-param-utils';
 
@@ -33,14 +33,14 @@ export interface KlattTrack {
   frames: KlattFrame[];
 }
 
-interface Binding {
+interface ResolvedBinding {
   param: AudioParam;
   nodeId: string;
   paramName: string;
 }
 
 // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
-type BindingList = Binding[];
+type ResolvedBindingList = ResolvedBinding[];
 
 /**
  * Tagged union for binding categorization.
@@ -73,7 +73,7 @@ export interface KlattInterpreterOptions {
   telemetryHandler?: (event: TelemetryEvent) => void;
   // Optional: binding map from runtime (avoids duplicate graph traversal)
   // If not provided, interpreter builds bindings locally (backward compatible)
-  bindingMap?: Map<string, BindingInfo[]>;
+  bindingMap?: Map<string, BindingSpec[]>;
 }
 
 export interface TelemetryEvent {
@@ -198,7 +198,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   // Build binding map: semantics output name -> list of AudioParams
   // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
-  const bindings = new Map<string, BindingList>();
+  const bindings = new Map<string, ResolvedBindingList>();
 
   // Derive ramp params from semantics (replaces hardcoded set)
   const rampParams = new Set<string>();

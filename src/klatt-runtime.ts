@@ -298,7 +298,7 @@ export interface KlattRuntimeOptions {
 }
 
 // Binding information for interpreter use
-export interface BindingInfo {
+export interface BindingSpec {
   nodeId: string;
   paramName: string;
   bindName: string;
@@ -329,7 +329,7 @@ export interface KlattRuntime {
 
   // Get binding map (semantic name -> list of node/param targets)
   // Allows interpreter to reuse binding discovery
-  getBindingMap(): Map<string, BindingInfo[]>;
+  getBindingMap(): Map<string, BindingSpec[]>;
 }
 
 /**
@@ -566,7 +566,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
 
   // Build binding map (semantic name -> node/param targets)
   // This is exposed via getBindingMap() for interpreter to reuse
-  const bindingMap = new Map<string, BindingInfo[]>();
+  const bindingMap = new Map<string, BindingSpec[]>();
   for (const [nodeId, nodeDef] of Object.entries(graph.nodes)) {
     if (!nodeDef.params) continue;
     for (const [paramName, paramSpec] of Object.entries(nodeDef.params)) {
@@ -668,7 +668,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       }
     },
 
-    getBindingMap(): Map<string, BindingInfo[]> {
+    getBindingMap(): Map<string, BindingSpec[]> {
       return bindingMap;
     },
   };

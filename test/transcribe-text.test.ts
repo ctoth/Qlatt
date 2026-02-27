@@ -100,6 +100,16 @@ describe("transcribe-text", () => {
       );
       expect(missWarnings).toHaveLength(0);
     });
+
+    it("supports colloquial trailing-elision forms without apostrophe in input", () => {
+      warnSpy.mockClear();
+      const result = transcribeText("comin");
+      expect(result.length).toBeGreaterThan(0);
+      const missWarnings = warnSpy.mock.calls.filter((args) =>
+        String(args[0]).includes('Word \"comin\" not found in dictionary')
+      );
+      expect(missWarnings).toHaveLength(0);
+    });
   });
 
   describe("isPunctuationToken", () => {

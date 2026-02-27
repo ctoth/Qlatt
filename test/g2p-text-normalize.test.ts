@@ -233,5 +233,10 @@ describe("normalizeText", () => {
       expect(normalizeText("it's fine")).toBe("it's fine");
       expect(normalizeText("don't stop")).toBe("don't stop");
     });
+
+    it("preserves trailing apostrophes for colloquial elision spellings", () => {
+      expect(normalizeText("comin' home")).toBe("comin' home");
+      expect(normalizeText("ol' friend")).toBe("ol' friend");
+    });
   });
 });

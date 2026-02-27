@@ -431,10 +431,13 @@ export function normalizeText(text: string): string {
   // 1. Apostrophes inside words (contractions: it's, don't)
   // 2. Pause-generating punctuation (, . ? ! ; :) which become separate tokens
   //    so that transcribeText() can convert them to SIL pauses.
-  // Strategy: protect contractions with placeholder, separate pause punctuation
-  // with spaces, strip remaining punctuation, then restore.
+  // Strategy: protect lexical apostrophes with placeholder, separate pause
+  // punctuation with spaces, strip remaining punctuation, then restore.
   const PLACEHOLDER = "\x00";
   result = result.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
+  // Preserve trailing apostrophes used for colloquial elision spellings
+  // (e.g., "comin'", "ol'") so CMUdict keys survive normalization.
+  result = result.replace(/([a-z])'(?=\s|$|[,.\?!;:])/gi, `$1${PLACEHOLDER}`);
   // Surround pause-generating punctuation with spaces so they become separate tokens
   result = result.replace(/([,.\?!;:])/g, " $1 ");
   // Strip all remaining punctuation (quotes, parens, brackets, etc.)

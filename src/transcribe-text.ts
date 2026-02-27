@@ -85,6 +85,8 @@ const cmuDictLookup: DictLookup = (word: string): string[] | null => {
   // (e.g., "'cuse") but normalized input token may not ("cuse").
   const elidedEntry = lowerWord.startsWith("'") ? null : CMU_DICT_MAP[`'${lowerWord}`];
   if (elidedEntry) return elidedEntry.split(" ");
+  const trailingElisionEntry = lowerWord.endsWith("'") ? null : CMU_DICT_MAP[`${lowerWord}'`];
+  if (trailingElisionEntry) return trailingElisionEntry.split(" ");
 
   // Handle alternate pronunciations like "read(1)" -> "read"
   if (word.includes("(")) {

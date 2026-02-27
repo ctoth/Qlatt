@@ -176,6 +176,11 @@ describe("normalizeText", () => {
     it("expands Ave.", () => {
       expect(normalizeText("5th Ave.")).toBe("fifth avenue");
     });
+
+    it("expands dotted initialisms", () => {
+      expect(normalizeText("U.S. policy")).toBe("u s policy");
+      expect(normalizeText("U.S.A. today")).toBe("u s a today");
+    });
   });
 
   describe("edge cases", () => {

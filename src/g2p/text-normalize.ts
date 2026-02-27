@@ -378,6 +378,14 @@ export function normalizeText(text: string): string {
     result = result.replace(re, expansion);
   }
 
+  // Expand dotted initialisms (e.g., U.S., U.S.A.) into speakable letters.
+  result = result.replace(/\b(?:[a-z]\.){2,}/gi, (match) =>
+    match
+      .replace(/\./g, "")
+      .split("")
+      .join(" ")
+  );
+
   // Semiotic class normalization pass inspired by Kestrel-style workflows:
   // prioritize class-specific verbalization (date/time/currency/number) before
   // generic token cleanup. See Ebden & Sproat (2014/2015), and MITalk text

@@ -400,7 +400,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
   const { topoEvaluator } = createConfiguredEvaluator();
 
   // Current input values
-  let currentInputs: Record<string, ParamValue> = {};
+  const currentInputs: Record<string, ParamValue> = {};
 
   // Current realized values (result of semantics evaluation)
   let realizedValues: Record<string, ParamValue> = {};

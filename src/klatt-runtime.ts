@@ -7,6 +7,8 @@
 
 import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import { applyParamValue } from './audio-param-utils';
+import { expandFormantBanks } from './formant-bank';
+import type { FormantBankSpec } from './formant-bank';
 
 // =============================================================================
 // Registry Types
@@ -248,6 +250,7 @@ import type { SemanticsDocument, EvaluationContext, ParamValue } from './semanti
 export interface BaconGraph {
   bacon: string;
   name?: string;
+  formantBanks?: Record<string, FormantBankSpec>;
   nodes: Record<string, BaconNode>;
   connections?: BaconConnection[];
   outputs?: PortRef[];
@@ -365,6 +368,10 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       }
     }
   }
+
+  // Expand formant bank declarations into concrete nodes, connections, and rules.
+  // Must happen before node/WASM detection, defaults init, and binding-map build.
+  expandFormantBanks(graph, semantics);
 
   // Create prefixed logger
   const log = (msg: string) => logger(`[klatt-runtime] ${msg}`);

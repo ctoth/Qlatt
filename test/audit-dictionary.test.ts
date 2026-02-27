@@ -13,25 +13,23 @@
  */
 
 import { describe, expect, it, vi, beforeAll } from "vitest";
-import { readFileSync } from "node:fs";
 import { textToKlattTrack } from "../src/tts-frontend";
+import {
+  DIPHTHONG_BASES,
+  DIPHTHONG_COMPONENTS,
+  GLIDE_PHONEMES,
+  LIQUID_PHONEMES,
+  NASAL_PHONEMES,
+  STOP_BASES,
+  extractSegments,
+  loadCmuDictionary,
+  selectAuditWords,
+  stripStress,
+  type Frame,
+  type Segment,
+} from "./utils/cmudict-audit";
 
 // -- Types ------------------------------------------------------------------
-
-interface Frame {
-  time: number;
-  phoneme?: string;
-  word?: string;
-  params: Record<string, number>;
-}
-
-interface Segment {
-  phoneme: string;
-  startTime: number;
-  endTime: number;
-  durationMs: number;
-  frames: Frame[];
-}
 
 interface DiphthongViolation {
   word: string;
@@ -61,121 +59,6 @@ interface DurationFloorViolation {
 
 // -- Helpers ----------------------------------------------------------------
 
-/** Group consecutive frames with the same phoneme into segments. */
-function extractSegments(track: Frame[]): Segment[] {
-  if (track.length === 0) return [];
-
-  const segments: Segment[] = [];
-  let currentPhoneme = track[0].phoneme ?? "SIL";
-  let startIdx = 0;
-
-  for (let i = 1; i <= track.length; i++) {
-    const ph = i < track.length ? (track[i].phoneme ?? "SIL") : null;
-    if (ph !== currentPhoneme) {
-      const startTime = track[startIdx].time;
-      const endTime =
-        i < track.length ? track[i].time : track[track.length - 1].time;
-      segments.push({
-        phoneme: currentPhoneme,
-        startTime,
-        endTime,
-        durationMs: (endTime - startTime) * 1000,
-        frames: track.slice(startIdx, i),
-      });
-      if (i < track.length) {
-        currentPhoneme = ph!;
-        startIdx = i;
-      }
-    }
-  }
-
-  return segments;
-}
-
-/** Strip stress digit from ARPABET phone (e.g. "AY1" -> "AY") */
-function stripStress(phone: string): string {
-  return phone.replace(/\d$/, "");
-}
-
-/** Select a deterministic ~5k word subset for audit. */
-function selectAuditWords(
-  dict: Record<string, string>
-): [string, string][] {
-  const entries = Object.entries(dict);
-  const selected = new Map<string, string>(); // word -> arpabet, deduped
-
-  // Category 1: words ending in stops -- sample up to 350 per stop consonant
-  // (~2100 total) to ensure good coverage of the stop-release check
-  const stopConsonants = ["P", "T", "K", "B", "D", "G"];
-  for (const stop of stopConsonants) {
-    let count = 0;
-    for (const [word, arpabet] of entries) {
-      if (selected.has(word)) continue;
-      const phones = arpabet.split(" ");
-      const last = stripStress(phones[phones.length - 1]);
-      if (last === stop) {
-        selected.set(word, arpabet);
-        if (++count >= 350) break;
-      }
-    }
-  }
-
-  // Category 2: words with diphthongs (sample up to 200 per diphthong)
-  const diphthongs = ["AW", "AY", "EY", "OW", "OY"];
-  for (const diph of diphthongs) {
-    let count = 0;
-    for (const [word, arpabet] of entries) {
-      if (selected.has(word)) continue;
-      if (arpabet.split(" ").some((p) => stripStress(p) === diph)) {
-        selected.set(word, arpabet);
-        if (++count >= 200) break;
-      }
-    }
-  }
-
-  // Category 3: nasals, liquids, glides (sample)
-  const categories = [
-    { phones: ["M", "N", "NG"], max: 500 },
-    { phones: ["L", "R"], max: 500 },
-    { phones: ["W", "Y"], max: 500 },
-  ];
-  for (const cat of categories) {
-    let count = 0;
-    for (const [word, arpabet] of entries) {
-      if (selected.has(word)) continue;
-      if (
-        arpabet.split(" ").some((p) => cat.phones.includes(stripStress(p)))
-      ) {
-        selected.set(word, arpabet);
-        if (++count >= cat.max) break;
-      }
-    }
-  }
-
-  // Fill to ~5000 with remaining entries (alphabetical = deterministic)
-  for (const [word, arpabet] of entries) {
-    if (selected.size >= 5000) break;
-    if (!selected.has(word)) selected.set(word, arpabet);
-  }
-
-  return Array.from(selected.entries());
-}
-
-// -- Constants --------------------------------------------------------------
-
-const DIPHTHONG_COMPONENTS: Record<string, [string, string]> = {
-  AY: ["AA", "IH"],
-  AW: ["AE", "UH"],
-  EY: ["EH", "IH"],
-  OW: ["AO", "UH"],
-  OY: ["AO", "IH"],
-};
-
-const DIPHTHONG_BASES = new Set(Object.keys(DIPHTHONG_COMPONENTS));
-const STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
-const NASAL_PHONEMES = new Set(["M", "N", "NG"]);
-const LIQUID_PHONEMES = new Set(["L", "R"]);
-const GLIDE_PHONEMES = new Set(["W", "Y"]);
 const CLOSURE_SUFFIXES = ["_CL"];
 
 // -- Test Suite -------------------------------------------------------------
@@ -191,8 +74,7 @@ describe("full dictionary audit", () => {
   beforeAll(
     async () => {
       // Load CMU dictionary
-      const raw = readFileSync("public/cmu-dictionary.json", "utf8");
-      const dict: Record<string, string> = JSON.parse(raw);
+      const dict = loadCmuDictionary();
 
       // Select words
       if (isFullAudit) {

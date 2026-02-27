@@ -192,3 +192,7 @@ Linguistic Space
 - **[12] van Santen (1992)** - Detailed study of contextual effects on vowel duration. Full-length version of this ACL paper with expanded results and analysis.
 - **[11] van Santen & Olive (1990)** - Earlier analysis of contextual effects on segmental duration. Establishes the problem space and sparsity challenges that motivate sums-of-products approach.
 - **[19] Krantz et al. (1971)** - Foundations of Measurement. Provides mathematical basis for ordinal patterns and why sums-of-products models work well for this domain.
+
+---
+
+**See also:** vanSanten_1994_SegmentalDurationTTS - the full journal version of this work with complete statistical methodology description and perceptual evaluation results.

@@ -151,3 +151,7 @@ Speech planning modeled as activation fields over gestural representations:
 - AP framework operates in articulatory space, not acoustic space (the "Acoustic Phonology" gap)
 - The equations describe articulatory trajectories, not formant trajectories directly
 - Converting task dynamics to Klatt parameters requires an articulatory-to-acoustic mapping (like Stevens 1991 HL parameters)
+
+---
+
+**See also:** Browman_Goldstein_1992_ArticulatoryPhonologyOverview - the foundational 1992 overview paper that this 2022 appraisal extends and critically evaluates; provides the original tract variable taxonomy, gestural score notation, and overlap-based accounts of coarticulation and allophony

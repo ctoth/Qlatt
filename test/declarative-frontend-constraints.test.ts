@@ -5,7 +5,11 @@ describe("declarative frontend rule constraints", () => {
   it("applies select rule effects only when constraint evaluates true", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       parameters: { min_duration: 90 },
       rules: {
@@ -31,7 +35,11 @@ describe("declarative frontend rule constraints", () => {
   it("applies pattern rule effects only when post-match constraint passes", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["stop", "vowel"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       patterns: {
         cv: {

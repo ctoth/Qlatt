@@ -1,0 +1,20 @@
+{
+  "phrase": "Vera vapes very vivid violets.",
+  "slug": "vera-vapes-very-vivid-violets",
+  "compare": {
+    "lengthMismatch": -9,
+    "rmsA": 0.338621241973786,
+    "rmsB": 0.11839742498444855,
+    "rmsError": 1.0874427984486796,
+    "maxDelta": 7.497776304677201,
+    "shift": 34,
+    "overlapLength": 25747,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\klatt-syn.json"
+  }
+}

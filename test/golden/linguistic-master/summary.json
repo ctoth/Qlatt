@@ -1,0 +1,421 @@
+{
+  "config": {
+    "phrasesPath": "test\\phrase-sets\\linguistic.json",
+    "baseF0": 110,
+    "sampleRate": 10000,
+    "normalize": true,
+    "maxShift": 128,
+    "qlatt": {
+      "sourceMode": 1,
+      "agc": false,
+      "leadTime": 0,
+      "tailTime": 0.005
+    },
+    "klatt": {
+      "glottal": "natural",
+      "noAgc": true
+    }
+  },
+  "results": [
+    {
+      "phrase": "The quick brown fox jumps over the lazy dog.",
+      "slug": "the-quick-brown-fox-jumps-over-the-lazy-dog",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.4294370449181916,
+        "rmsB": 0.1418322502058054,
+        "rmsError": 1.0550056587488195,
+        "maxDelta": 23.112761359209486,
+        "shift": 34,
+        "overlapLength": 34796,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "She sells seashells by the seashore.",
+      "slug": "she-sells-seashells-by-the-seashore",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.289373491289863,
+        "rmsB": 0.14276508956851142,
+        "rmsError": 1.0081089073416367,
+        "maxDelta": 8.432208333314666,
+        "shift": 34,
+        "overlapLength": 26046,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Thin thieves thought that they thrilled.",
+      "slug": "thin-thieves-thought-that-they-thrilled",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.39639038018543254,
+        "rmsB": 0.14151447753223484,
+        "rmsError": 1.0068364961952203,
+        "maxDelta": 21.923762211946528,
+        "shift": 35,
+        "overlapLength": 24485,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Ship shape, sheep shop, and cheap chips.",
+      "slug": "ship-shape-sheep-shop-and-cheap-chips",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.2989591300980728,
+        "rmsB": 0.11308702949080282,
+        "rmsError": 1.0525645189123969,
+        "maxDelta": 9.09966588495365,
+        "shift": 35,
+        "overlapLength": 29605,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Sip zip, sip ship, sip sip.",
+      "slug": "sip-zip-sip-ship-sip-sip",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.22038732542869321,
+        "rmsB": 0.08153004853542956,
+        "rmsError": 0.8933917843046109,
+        "maxDelta": 7.275617578873618,
+        "shift": 32,
+        "overlapLength": 25098,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "A zoo can be fun on a sunny day.",
+      "slug": "a-zoo-can-be-fun-on-a-sunny-day",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.4060278614961269,
+        "rmsB": 0.15495517236191764,
+        "rmsError": 0.9874893444621734,
+        "maxDelta": 5.357581204630738,
+        "shift": 34,
+        "overlapLength": 26156,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "He had your dark suit in greasy wash water all year.",
+      "slug": "he-had-your-dark-suit-in-greasy-wash-water-all-year",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.360748174271788,
+        "rmsB": 0.1626911551864592,
+        "rmsError": 1.1000114409851192,
+        "maxDelta": 12.308304982196566,
+        "shift": 34,
+        "overlapLength": 41676,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Say oh, ee, and oo again.",
+      "slug": "say-oh-ee-and-oo-again",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.4287853028327185,
+        "rmsB": 0.13632340728299963,
+        "rmsError": 0.9751214601666615,
+        "maxDelta": 8.536908879576881,
+        "shift": 36,
+        "overlapLength": 21174,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Bob bought a big blue balloon.",
+      "slug": "bob-bought-a-big-blue-balloon",
+      "compare": {
+        "lengthMismatch": -9,
+        "rmsA": 0.288922875132972,
+        "rmsB": 0.16175622337046863,
+        "rmsError": 0.9880770684595497,
+        "maxDelta": 17.49114789681436,
+        "shift": 32,
+        "overlapLength": 21319,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Pat tapped a pot and picked a paper cup.",
+      "slug": "pat-tapped-a-pot-and-picked-a-paper-cup",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.284416906453574,
+        "rmsB": 0.14917706290278965,
+        "rmsError": 1.1184046597825226,
+        "maxDelta": 47.19663147916706,
+        "shift": 32,
+        "overlapLength": 28948,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Gag, gang, and gunk go together.",
+      "slug": "gag-gang-and-gunk-go-together",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.4150567925116279,
+        "rmsB": 0.12371638794719529,
+        "rmsError": 0.9573831951599321,
+        "maxDelta": 8.41497299112349,
+        "shift": 36,
+        "overlapLength": 26024,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Layer, lawyer, royal, rural.",
+      "slug": "layer-lawyer-royal-rural",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.47053943807254034,
+        "rmsB": 0.1328642738052617,
+        "rmsError": 0.991479471422046,
+        "maxDelta": 16.77035275747482,
+        "shift": 35,
+        "overlapLength": 25105,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Nina mumbled many minimal numbers.",
+      "slug": "nina-mumbled-many-minimal-numbers",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.2754686601689466,
+        "rmsB": 0.11279101851557771,
+        "rmsError": 1.0007111144413279,
+        "maxDelta": 6.94423417586298,
+        "shift": 34,
+        "overlapLength": 26166,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Fresh frost forms on five fields.",
+      "slug": "fresh-frost-forms-on-five-fields",
+      "compare": {
+        "lengthMismatch": -9,
+        "rmsA": 0.32865380505968717,
+        "rmsB": 0.14928032856576182,
+        "rmsError": 1.0663468939011524,
+        "maxDelta": 23.353200773846478,
+        "shift": 35,
+        "overlapLength": 30786,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Vera vapes very vivid violets.",
+      "slug": "vera-vapes-very-vivid-violets",
+      "compare": {
+        "lengthMismatch": -9,
+        "rmsA": 0.338621241973786,
+        "rmsB": 0.11839742498444855,
+        "rmsError": 1.0874427984486796,
+        "maxDelta": 7.497776304677201,
+        "shift": 34,
+        "overlapLength": 25747,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\vera-vapes-very-vivid-violets\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Zesty zest is easy to spot.",
+      "slug": "zesty-zest-is-easy-to-spot",
+      "compare": {
+        "lengthMismatch": -9,
+        "rmsA": 0.26656490184594284,
+        "rmsB": 0.130814295357829,
+        "rmsError": 0.974956286854078,
+        "maxDelta": 26.353904962870317,
+        "shift": 34,
+        "overlapLength": 25827,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Shy sharks shimmer in shallow shoals.",
+      "slug": "shy-sharks-shimmer-in-shallow-shoals",
+      "compare": {
+        "lengthMismatch": -9,
+        "rmsA": 0.35780569221956604,
+        "rmsB": 0.14496599730273074,
+        "rmsError": 1.1628710889200886,
+        "maxDelta": 7.872022819375183,
+        "shift": 35,
+        "overlapLength": 27626,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "They bathed the smooth leather.",
+      "slug": "they-bathed-the-smooth-leather",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.40833450735215554,
+        "rmsB": 0.12139002865158888,
+        "rmsError": 1.0615791423902432,
+        "maxDelta": 6.684095331296182,
+        "shift": 30,
+        "overlapLength": 19780,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "S, f, sh, th, z, v, zh, dh.",
+      "slug": "s-f-sh-th-z-v-zh-dh",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.368146011245994,
+        "rmsB": 0.12241782690305847,
+        "rmsError": 0.9066106123913428,
+        "maxDelta": 6.036775945104593,
+        "shift": 35,
+        "overlapLength": 35945,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\klatt-syn.json"
+      }
+    },
+    {
+      "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
+      "slug": "soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty",
+      "compare": {
+        "lengthMismatch": -10,
+        "rmsA": 0.23975359470279883,
+        "rmsB": 0.12985418694189874,
+        "rmsError": 1.1896854170621536,
+        "maxDelta": 39.664983248263546,
+        "shift": -76,
+        "overlapLength": 50514,
+        "sampleRateA": 10000,
+        "sampleRateB": 10000
+      },
+      "paths": {
+        "track": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\track.json",
+        "qlatt": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\qlatt.json",
+        "klatt": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\klatt-syn.json"
+      }
+    }
+  ]
+}

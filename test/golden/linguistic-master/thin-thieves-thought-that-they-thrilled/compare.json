@@ -1,0 +1,20 @@
+{
+  "phrase": "Thin thieves thought that they thrilled.",
+  "slug": "thin-thieves-thought-that-they-thrilled",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.39639038018543254,
+    "rmsB": 0.14151447753223484,
+    "rmsError": 1.0068364961952203,
+    "maxDelta": 21.923762211946528,
+    "shift": 35,
+    "overlapLength": 24485,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\thin-thieves-thought-that-they-thrilled\\klatt-syn.json"
+  }
+}

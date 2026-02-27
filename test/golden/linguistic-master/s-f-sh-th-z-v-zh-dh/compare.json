@@ -1,0 +1,20 @@
+{
+  "phrase": "S, f, sh, th, z, v, zh, dh.",
+  "slug": "s-f-sh-th-z-v-zh-dh",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.368146011245994,
+    "rmsB": 0.12241782690305847,
+    "rmsError": 0.9066106123913428,
+    "maxDelta": 6.036775945104593,
+    "shift": 35,
+    "overlapLength": 35945,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\s-f-sh-th-z-v-zh-dh\\klatt-syn.json"
+  }
+}

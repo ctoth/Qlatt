@@ -20,6 +20,7 @@
  */
 
 import { mapElovitzToQlatt } from './phoneme-map';
+import { loadYamlDocumentSync } from '../yaml-loader';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -35,6 +36,8 @@ interface LtsRulesData {
   rules_by_letter: Record<string, LtsRule[]>;
 }
 
+const DEFAULT_LTS_RULES_PATH = "/rules/lts-rules.yaml";
+
 // ── Module-level state (lazy init) ─────────────────────────────────────
 
 let rulesData: LtsRulesData | null = null;
@@ -42,9 +45,7 @@ let compiledContextCache: Map<string, RegExp> | null = null;
 
 function loadRules(): LtsRulesData {
   if (rulesData) return rulesData;
-  // Use require for JSON import (works in both Node and Vitest)
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  rulesData = require('./lts-rules.json') as LtsRulesData;
+  rulesData = loadYamlDocumentSync<LtsRulesData>(DEFAULT_LTS_RULES_PATH);
   compiledContextCache = new Map();
   return rulesData;
 }

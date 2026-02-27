@@ -9,18 +9,18 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import yaml from 'js-yaml';
 
 import { createCelEvaluator } from '../src/semantics/cel-evaluator';
 import { registerNumericBuiltins } from '../src/semantics/register-builtins';
 import { createTopologicalEvaluator } from '../src/semantics/topological-evaluator';
 import { proximity } from '../src/builtin-functions';
 import type { SemanticsDocument, EvaluationContext } from '../src/semantics/types';
+import { parseYamlString } from '../src/yaml-loader';
 
 // Load the real semantics.yaml
 const semanticsPath = resolve(__dirname, '../public/experiments/klatt80-baseline/semantics.yaml');
 const semanticsRaw = readFileSync(semanticsPath, 'utf-8');
-const semantics = yaml.load(semanticsRaw) as SemanticsDocument;
+const semantics = parseYamlString<SemanticsDocument>(semanticsRaw, semanticsPath);
 
 describe('proximity corrections from semantics pipeline', () => {
   function evaluateWithFormants(f1: number, f2: number, f3: number, f4: number) {

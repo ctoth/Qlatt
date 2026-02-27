@@ -466,3 +466,7 @@ For Qlatt's TTS frontend, this book motivates:
 - Willems, Collier, and de Pijper (1988) -- "A synthesis scheme for British English intonation"
 - Shriberg et al. (1996) -- "Modeling pitch range variation within and across speakers"
 - Truckenbrodt (2002) -- Nested downstep evidence
+
+---
+
+**See also:** Goldsmith_1976_AutosegmentalPhonology - the original PhD dissertation that founded autosegmental phonology and the multi-tier representation framework that Ladd's AM theory comprehensively develops and extends.

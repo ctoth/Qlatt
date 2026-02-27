@@ -1,0 +1,20 @@
+{
+  "phrase": "A zoo can be fun on a sunny day.",
+  "slug": "a-zoo-can-be-fun-on-a-sunny-day",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.4060278614961269,
+    "rmsB": 0.15495517236191764,
+    "rmsError": 0.9874893444621734,
+    "maxDelta": 5.357581204630738,
+    "shift": 34,
+    "overlapLength": 26156,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\a-zoo-can-be-fun-on-a-sunny-day\\klatt-syn.json"
+  }
+}

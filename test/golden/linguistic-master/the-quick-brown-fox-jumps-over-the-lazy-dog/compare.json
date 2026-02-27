@@ -1,0 +1,20 @@
+{
+  "phrase": "The quick brown fox jumps over the lazy dog.",
+  "slug": "the-quick-brown-fox-jumps-over-the-lazy-dog",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.4294370449181916,
+    "rmsB": 0.1418322502058054,
+    "rmsError": 1.0550056587488195,
+    "maxDelta": 23.112761359209486,
+    "shift": 34,
+    "overlapLength": 34796,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\the-quick-brown-fox-jumps-over-the-lazy-dog\\klatt-syn.json"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "phrase": "He had your dark suit in greasy wash water all year.",
+  "slug": "he-had-your-dark-suit-in-greasy-wash-water-all-year",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.360748174271788,
+    "rmsB": 0.1626911551864592,
+    "rmsError": 1.1000114409851192,
+    "maxDelta": 12.308304982196566,
+    "shift": 34,
+    "overlapLength": 41676,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\he-had-your-dark-suit-in-greasy-wash-water-all-year\\klatt-syn.json"
+  }
+}

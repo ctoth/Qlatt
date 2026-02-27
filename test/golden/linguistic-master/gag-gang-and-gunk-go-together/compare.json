@@ -1,0 +1,20 @@
+{
+  "phrase": "Gag, gang, and gunk go together.",
+  "slug": "gag-gang-and-gunk-go-together",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.4150567925116279,
+    "rmsB": 0.12371638794719529,
+    "rmsError": 0.9573831951599321,
+    "maxDelta": 8.41497299112349,
+    "shift": 36,
+    "overlapLength": 26024,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\gag-gang-and-gunk-go-together\\klatt-syn.json"
+  }
+}

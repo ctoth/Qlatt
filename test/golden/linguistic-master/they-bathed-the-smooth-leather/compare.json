@@ -1,0 +1,20 @@
+{
+  "phrase": "They bathed the smooth leather.",
+  "slug": "they-bathed-the-smooth-leather",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.40833450735215554,
+    "rmsB": 0.12139002865158888,
+    "rmsError": 1.0615791423902432,
+    "maxDelta": 6.684095331296182,
+    "shift": 30,
+    "overlapLength": 19780,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\they-bathed-the-smooth-leather\\klatt-syn.json"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "phrase": "Fresh frost forms on five fields.",
+  "slug": "fresh-frost-forms-on-five-fields",
+  "compare": {
+    "lengthMismatch": -9,
+    "rmsA": 0.32865380505968717,
+    "rmsB": 0.14928032856576182,
+    "rmsError": 1.0663468939011524,
+    "maxDelta": 23.353200773846478,
+    "shift": 35,
+    "overlapLength": 30786,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\fresh-frost-forms-on-five-fields\\klatt-syn.json"
+  }
+}

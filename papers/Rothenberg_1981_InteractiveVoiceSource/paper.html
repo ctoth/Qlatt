@@ -1,0 +1,650 @@
+<html>
+
+<head>
+
+<title>An Interactive Model for the Voice Source (Printerfriendly)</title>
+
+<script>
+
+// Script Source: CodeLifter.com
+// Copyright 2003
+// Do not remove this notice.
+
+// SETUPS:
+// ===============================
+
+// Set the horizontal and vertical position for the popup
+
+PositionX = 100;
+PositionY = 100;
+
+// Set these value approximately 20 pixels greater than the
+// size of the largest image to be used (needed for Netscape)
+
+defaultWidth  = 500;
+defaultHeight = 500;
+
+// Set autoclose true to have the window close automatically
+// Set autoclose false to allow multiple popup windows
+
+var AutoClose = false;
+
+// Do not edit below this line...
+// ================================
+if (parseInt(navigator.appVersion.charAt(0))>=4){
+var isNN=(navigator.appName=="Netscape")?1:0;
+var isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}
+var optNN='scrollbars=no,width='+defaultWidth+',height='+defaultHeight+',left='+PositionX+',top='+PositionY;
+var optIE='scrollbars=no,width=150,height=100,left='+PositionX+',top='+PositionY;
+function popImage(imageURL,imageTitle){
+if (isNN){imgWin=window.open('about:blank','',optNN);}
+if (isIE){imgWin=window.open('about:blank','',optIE);}
+with (imgWin.document){
+writeln('<html><head><title>Loading...</title><style>body{margin:0px;}</style>');writeln('<sc'+'ript>');
+writeln('var isNN,isIE;');writeln('if (parseInt(navigator.appVersion.charAt(0))>=4){');
+writeln('isNN=(navigator.appName=="Netscape")?1:0;');writeln('isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}');
+writeln('function reSizeToImage(){');writeln('if (isIE){');writeln('window.resizeTo(100,100);');
+writeln('width=100-(document.body.clientWidth-document.images[0].width);');
+writeln('height=100-(document.body.clientHeight-document.images[0].height);');
+writeln('window.resizeTo(width,height);}');writeln('if (isNN){');       
+writeln('window.innerWidth=document.images["George"].width;');writeln('window.innerHeight=document.images["George"].height;}}');
+writeln('function doTitle(){document.title="'+imageTitle+'";}');writeln('</sc'+'ript>');
+if (!AutoClose) writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()">')
+else writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()" onblur="self.close()">');
+writeln('<img name="George" src='+imageURL+' style="display:block"></body></html>');
+close();		
+}}
+
+</script>
+
+</head>
+
+<body BGCOLOR="#FFFFFF" LINK="#FF0000" VLINK="#0000FF" ALINK="#008000">
+<div align="left"><b><font size="3">Publications of Dr. Martin Rothenberg:</font></b> 
+</div>
+<p align="center"><font size="5">An Interactive Model for the Voice Source*</font></p>
+
+<p align="center"><font size="3">by Martin Rothenberg**</font></p>
+<p align="left"><em>Vocal Fold Physiology: Contemporary</em> <em>Research and
+    Clinical Issues, </em>D. M. Bless and J. H. Abbs, Eds., College Hill Press,
+San Diego, pp. 155-165, 1983.</p>
+<hr>
+<div align="center"><font size="4">Abstract</font> </div>
+<p>A parametric model for the voice source is described which includes the acoustic 
+  interaction between the glottal source and the subglottal and supraglottal acoustic 
+  systems. </p>
+<hr>
+<p><br>
+  The acoustic theory of speech production, as first proposed, and as generally
+  now implemented in formant-based speech synthesis, models the speech production
+  mechanism during vocalic sounds with three relatively independent subsystems.
+  These subsystems, shown diagrammatically in Fig.
+  I-A-1, are (1) the respiratory system, which produces a slowly varying
+  tracheal air pressure, (2) a time-varying glottal flow resistance (more properly,
+  a complex impedance) whose valving action creates quasi-periodic air pulses,
+  and (3) a supraglottal vocal tract that shapes the spectrum of the glottal
+  flow pulses. Though each of these systems interacts with the other two systems
+  to some degree, order-of-magnitude calculations, model studies and early measurements
+  have indicated that for many applications it is sufficient to consider these
+  three subsystems as operating independently, at least during voiced sounds
+  with no strong supraglottal oral constriction (Fant, 1960; Flanagan, 1972). <br>
+  <br>
+However, as we look for more precise models of the voice source, whether this
+be for higher quality synthesis of speech or singing, or for the study of unusual
+or pathological voice qualities, it is necessary to return to an interactive
+model. Detailed physical-acoustic models of the subglottal systems have been
+proposed that can generate patterns of pressure and air flow that seem quite
+realistic (Flanagan &amp; Landgraf, 1968; Mrayati &amp; Guerin, 1976; Titze 
+  &amp; Talkin, 1979). However, such detailed models often do not make clear
+  which aspects of the interaction between the glottal source and vocal tract
+  are most active in determining the quality of the voice. In order to understand
+  the way in which voice quality is affected by the source-tract interaction
+  it is desirable to formulate a model or models that break down this interaction
+  into its more important and less important components, just as in acoustic
+  phonetics the supraglottal vocal tract in non-nasalized vocalic speech is modeled
+  by a number of resonances with varying degrees of importance (the &quot;formants&quot;)
+  and, in physiological phonetics, by a small number of minimally redundant jaw,
+  tongue and lip parameters representing the major degrees of freedom of the
+supraglottal speech production mechanism. </p>
+<hr>
+*This paper was first presented at the Vocal Fold Physiology Conference at the
+University of Wisconsin, Madison Wisconsin, 31 May - 4 June, 1981. The version
+presented here is from the quarterly progress and status report of the Speech
+Transmission Laboratory of the Royal Institute of Technology (KTH) Stockholm
+#4. It differs only in monor details from the version in the conference proceedings. <br>
+**Syracuse University. Guest researcher at the Department of Speech Communication 
+&amp; Music Acoustics February - December 1980.<br>
+<hr>
+<p><img src="fig1.jpg" alt="Figure I-A-1" width="599" height="294"></p>
+<p>It appears to this writer that no previous parametric model of this type has
+  satisfactorily explained the variety among the glottal air flaw waveforms that
+  have been found when inverse-filtering the air flow or pressure at the mouth,
+  and the relationship of these waveforms to the relatively simple and invariant
+  waveforms of projected glottal width or area (width or area as seen from directly
+  above or below the glottis) that have been reported from photographic and photoglottographic
+  measurements (for example, Colton &amp; Estill, 1981; Farnsworth, 1940; Hildebrand,
+  1976*; Gall, et al., 1971; Harden, 1973; Hirano, et al., 1981; Holmes, 1963;
+  Koster &amp; 
+  Smith, 1970; Kitzing, 1977; Kitzing &amp; Sonesson, 1974; Lindqvist, 1965 and
+  1970; Miller, 1959; Moore, et al., 1962; Rothenberg, 1973; Sonesson, 1960;
+  Tanabe, et al., 1975; Timcke, et al., 1958 and 1959. Hildebrand, 1976, contains
+  an extensive bibliography of optical measurements before 1976.). The reason
+  for this seems to be that progress toward a satisfactorily explanatory parametric
+  interactive model has been delayed by an underestimate of the effect of the
+  acoustic reactance of the subglottal and supraglottal vocal tract at frequencies
+  below the first formant. When to this factor is added the oscillatory energy
+  in the lowest supraglottal and subglottal resonances that is carried over between
+  glottal cycles, it is possible to construct a useful interactive model of the
+  voice source having a relatively small number of physiologically-based parameters.
+  Such a model is sketched in this paper. <br>
+  <br>
+  The glottal air flow waveform could be considered independent of the subglottal
+  and supraglottal systems if the pressures immediately above and below the glottis
+  were relatively constant during the glottal cycle. But this is often not the
+  case. It is surely not the case for voiced consonants, or those vowel sounds
+  in which there is a supraglottal constriction strong enough to raise the average
+  supraglottal pressure to an appreciable fraction of the lung pressure (as strongly
+  palatalized or labialized vowels). In such cases, the dissipative or resistive
+  portion of the impedance at the supraglottal constriction is no longer negligible
+  with respect to the glottal flow resistance, and we also find that the frequency
+  of the first formant becomes very low (approaching zero as the constriction approaches
+  a complete closure. However, in this paper we concentrate on the development
+  of a model which is valid for the more open vocalic sounds that comprise most
+  of speech and singing. In such sounds the (dissipative) supraglottal flow resistance
+  is small compared to the glottal flow resistance and the frequency of the first
+  formant is appreciably greater than the voice fundamental frequency. Our studies
+  of the glottal flow have indicated that for such unconstricted vocal tract configurations
+  the influence of the vocal tract acoustics on the glottal flow waveform stems
+  primarily from two factors. The first is the subglottal and supraglottal pressure
+  variations caused by the inertive components of the subglottal and supraglottal
+  vocal tract impedances at the voice fundamental frequency F<font size="1">0</font> and
+  its lower harmonics, and the second is the supraglottal pressure oscillations
+  at the lowest vocal tract resonance. The subglottal pressure oscillations at
+  the lowest subglottal resonance may also be significant at the higher ranges
+  of fundamental frequency used in singing and some types of speech, but this factor
+  has not been included explicitly in our model. <br>
+  <br>
+  When the ratio of the first formant frequency (f<font size="1"><sub>1</sub></font>)
+  to f<font size="1"><sub>0 </sub></font>is high, say, more than about three,
+  the formant energy carried over between glottal cycles is small enough so that
+  the inertive loading tends to be the more significant factor, tilting the glottal
+  flow pulse to the right, and causing the sharp slope discontinuity at the instant
+  of glottal closure which generates most of higher frequency energy in voiced
+  speech. This mechanism is illustrated diagrammatically in Fig.
+    I-A-2. In the figure, the vocal tract is shown as a horizontal tube with
+  a simple constriction representing the glottis, and the glottal area waveform
+  represented by a roughly triangular pulse. This pulse is similar in shape to
+  many recordings of projected glottal area (the area of the opening that would
+  be seen from directly above or below the glottis) that have been made using photoglottographic
+  techniques. <br>
+  <br>
+  For the purpose of this simplified discussion, the glottal constriction can be
+  thought of as a purely dissipative flow resistance which is inversely proportional
+  to the glottal area. In addition, the acoustic impedance of the supraglottal
+  and subglottal systems can be approximated by an inertive reactance at f<font size="1"><sub>0</sub></font> and
+  those glottal harmonics falling below f<font size="1"><sub>1</sub></font> (for
+  the supraglottal system) and below the lowest subglottal acoustic resonance (for
+  the subglottal system). The justification for this simplified representation
+  is that the supraglottal acoustic impedance as seen by the glottis is inertive
+  for frequencies more than a few percent less than f<font size="1"><sub>1</sub></font> and
+  the subglottal acoustic impedance as seen by the glottis also tends to be inertive
+  for frequencies between the highest respiratory tissue resonance, which is of
+  the order-of-magnitude of 10 Hz in adults (van den Berg, 1960), and the lowest
+  acoustic resonance, which is roughly 300 to 400 Hz in adults. (van den Berg's
+  calculations (1960) result in a resonance frequency near 300 Hz; however, the
+  oscillations in some of the subglottal pressure recordings made by Koike (1981)
+show a resonance at about 400 Hz.) </p>
+<p><img src="fig2.jpg" alt="Figure I-A-2" width="544" height="700"><br>
+  <br>
+  Since the subglottal and supraglottal air masses can be considered to be more
+  inertive (mass-like) than compliant (compressible) under our assumptions, if
+  the vocal folds open after being closed a long time, there will be a delay
+  or lag in the build-up of air flow relative to the increase in area, as the
+  lung pressure acts to overcome the inertia of the combined air mass. This lag
+  is shown by the left-most horizontal arrow of the sketch of the glottal area
+  and flow waveforms in Fig. I-A-2.
+  (The inertance of the air mass in the glottis acts differently because it is
+  time-varying and will be neglected in this simplified discussion.) If we assume
+  a linear-system viewpoint, the opening phase of the glottal air flow, until
+  about 3/4 of the glottal area pulse has passed, shows a time lag, or shift
+  to the right, due to the time constant L<font size="1"><sub>t</sub></font>/R<font size="1"><sub>g</sub></font>,
+  where L<font size="1"><sub>t</sub></font> is the tract inertance at f<font size="1"><sub>0</sub></font> and
+  its lowest harmonics and R<font size="1"><sub>g</sub></font> is the (time-varying)
+  glottal resistance. This time constant also causes an appreciable rounding
+  or smoothing of the top of the air flow pulse, since the time constant is near
+  its largest value at that time due to the low value of R<font size="1"><sub>g</sub></font>. <br>
+  <br>
+  However, the linear system analogy breaks down during the final 1/4 of the
+  glottal pulse, since the closing vocal folds force the glottal resistance to
+  be infinite at the closure (assuming perfect closure), and thereby force the
+  flow to zero in a relatively short time. During that time interval (the last
+  1/4 or so of the glottal pulse) the tracheal pressure can be found to have
+  a significant increase due to the inertance of the subglottal flow, and the
+  pharyngeal pressure a significant decrease due to the inertance of the supraglottal
+  flow (Kitzing 
+  &amp; Lindqvist, 1975; Koike, 1981). Thus, the transglottal pressure during
+  this interval is much higher than during the rest of the glottal pulse, and
+  acts to support the glottal air flow until the actual instant of glottal closure
+  is approached. <br>
+  <br>
+  Fig. I-A-3 shows
+  the solution of the nonlinear differential equation that results when the
+  glottis is represented by a time-varying resistance and the subglottal and
+  supraglottal acoustic systems by a single constant inertance (Rothenberg,
+  1981). The system is shown in the figure in its analogous electrical circuit
+  form, where </p>
+<table width="736" border="0" height="132" align="center" cellpadding="0" cellspacing="0">
+     <tr>
+       <td width="310">Y<sub><font size="1">g</font></sub> = 1/R = the glottal
+         conductance <br>
+         P<sub><font size="1">L</font></sub> = the average alveolar pressure
+         in the lungs <br>
+         L<font size="1">t</font> = the sum of subglottal and supraglottal inertance
+         near f<font size="1"><sub>0</sub></font><br>
+         U<font size="1"><sub>g</sub></font> = the glottal volume velocity</td>
+     </tr>
+</table>
+   <p>The glottal flow conductance is assumed not to be flow dependent and to
+     have a symmetrical triangular waveform, presumably from a roughly triangular
+     area function. (It is shown in Rothenberg (1981) that the precise shape
+     of the glottal conductance pulse does not materially affect the general
+     properties of the solution of the nonlinear equation. The effect of flow
+     dependence is discussed below.) The form of the resulting current pulse
+     is determined by the &quot;normalized vocal tract inertance&quot; L<font size="1">t</font> defined
+     as</p>
+   <table width="22%" border="0" height="57" align="center" cellpadding="0" cellspacing="0">
+     <tr>
+       <td><b><u>L</u><font size="1"><sub>t</sub></font>= L<font size="1"><sub>t</sub></font>(2Y<font size="1"><sub>g</sub></font><font size="1">MAX</font>/<font face="Symbol" size="4">t</font><font size="1">p</font>)</b></td>
+     </tr>
+   </table>
+   <p>where <font face="Symbol" size="4">t</font><font size="1">p</font> is the
+     duration of the glottal pulse, and Y<font size="1"><sub>g</sub></font><font size="1">MAX </font>is
+     the maximum glottal conductance. <br>
+    <br>
+     The major feature of the air flow waveforms in Fig.
+     I-A-3 is that there is a critical range for the normalized inertance <u>L</u><font size="1"><sub>t</sub></font> from
+     about 0.2 to 1.0, in which the glottal flow changes from a roughly symmetrical
+     triangle to a rounded &quot;sawtooth&quot; having one major point of slope
+     discontinuity at the instant of closure. In fact, the mathematical solution
+     to this idealized case shows that the slope of the flow waveform becomes
+     infinite at closure (as t<font face="Symbol">&reg;</font><font face="Symbol" size="4">t</font><font size="1">p</font> in
+     Fig. I-A-3) for all values of <u>L</u><font size="1"><sub>t </sub></font>larger
+     than unity.<br>
+    <br>
+     Though we have not been able to find a closed form solution to the non-linear
+     differential equation for the more realistic representation of Y<sub><font size="1">g</font></sub>in
+     which Y<sub><font size="1">g</font></sub>depends on U<sub><font size="1">g </font></sub>as
+     discussed by Fant (1960) and Flanagan (1972), our experiments with an analog
+     simulation of the differential equation, with and without flow dependence,
+     indicate that the flow pattern with flow dependence included is similar
+     to that without flow dependence if the value of L<font size="1"><sub>t</sub></font> is
+     decreased by about 50% when the flow dependence is removed. In other words,
+     the flow patterns in Fig.
+     I-A-3 can be used to predict the approximate flow pattern if an appropriate
+     adjusted value of <u>L</u><font size="1"><sub>t</sub></font> is chosen.<br>
+    <br>
+     The R, L model in Fig.
+     I-A-3 does not include the interaction with the first formant. To include
+     a first-order approximation to the action of the first formant, the model
+     can be modified by adding an oral compliance, C<font size="1"><sub>0</sub></font> as
+     shown in Fig. I-A-4.
+     This oral compliance can be considered a lumped approximation to the compressibility
+     of the supraglottal air and, at lower values of f<font size="1"><sub>1</sub></font>,
+     a small component due to the effective compliance of the walls of the supraglottal
+     tract. In this model, the supraglottal inertance is split into two parts,
+     one on either side of the oral compliance. The forward or oral component
+     is the prime determinant of f<font size="1"><sub>1</sub></font>, in combination
+     with C<font size="1"><sub>0</sub></font>, while the rear or pharyngeal component
+     is more important in determining the overall asymmetry or tilting of the
+     glottal air flow waveform, since it acts directly on the glottis, without
+     the &quot;cushioning&quot; effect of an intermediate compliance. In this
+     model, a back vowel such as [a] would have a high value for the pharyngeal
+     inertance and a low value for the oral component, while the reverse would
+     hold for a front vowel such as [i]. Naturally, if this model is to be useful,
+     a more detailed definition would have to be worked out from these general
+     principles. <br>
+    <br>
+     The dissipative elements associated with the vocal tract, R<font size="1"><sub>OC</sub></font>,R<font size="1"><sub>OL</sub></font>,
+     and R<font size="1"><sub>ON</sub></font>, are shown dashed, since not all
+     may be needed in a simple model. R<font size="1"><sub>OC</sub></font> primarily
+     represents the dissipation associated with the compressibility of the air
+     flow and the compliance of the cavity walls; R<font size="1"><sub>OL</sub></font> represents the dissipation
+     associated with the velocity of the air flow (boundary layer effects, etc,);
+     and  R<font size="1"><sub>ON</sub></font> represents any shunting effects,
+     such as a small velopharyngeal leakage. For non-nasal vowels with a high
+     value of f<font size="1"><sub>1</sub></font>, the main effect of oral dissipation
+     is to determine the damping of f<font size="1"><sub>1</sub></font> during
+     the period of glottal closure, and since the total dissipative loss is generally
+     very small in this case, any one of these three components can be used.
+     However, for low values of f<font size="1"><sub>1</sub></font> or for nasalized
+     vowels, the placement and distribution of the dissipative loss elements
+     should be reconsidered.</p>
+   <p><img src="fig3.jpg" alt="Figure I-A-3" width="530" height="632"></p>
+   <p><img src="fig4.jpg" alt="Figure I-A-4" width="650" height="502"><br>
+     <br>
+     Informal experimentation with an electrical analog version of the model
+     in Fig. I-A-4 has
+     shown that as the ratio f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0 </sub></font>a
+     gets smaller than about three, the value of this ratio is increasingly significant
+     in determining voice quality. When f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> is
+     near integral values, energy from previous glottal cycles tends to cause
+     a decrease in supraglottal pressure as the glottis is closing (in addition
+     to any component caused by the low frequency vocal tract inertance). This
+     decrease in pressure raises the transglottal pressure and, as discussed
+     above, causes a sharper drop in flow at closure. Likewise, values of f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> that
+     fall about halfway between integral values tend to <em>decrease</em> transglottal
+     pressure during glottal closure and cause a less sharp drop in flow at the
+     instant of complete closure. Thus, if the ratio f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> a
+     is low, the high frequency energy generated by the glottal closure is determined
+     by both the vocal tract inertance at low frequencies <em>and</em> the value
+     of f<font size="1"><sub>1</sub></font>. <br>
+     <br>
+     The interaction between f<font size="1"><sub>1</sub></font> and f<font size="1"><sub>0</sub></font> should
+     be differentiated from the interaction predicted by the linear, non-interactive
+     model. In the linear model, a formant is maximally strengthened when it
+     is an exact multiple of the fundamental frequency, while the value of f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> for
+     maximum transglottal pressure during the glottal closure may not be an exact
+     integer. Of more significance is the fact that the linear non-interactive
+     model predicts that the coincidence of f<font size="1"><sub>1</sub></font>and
+     a multiple of f<font size="1"><sub>0 </sub></font>will strengthen only f<font size="1"><sub>1</sub></font> and
+     not the higher order formants. The interactive model shows that the ratio
+     of f<font size="1"><sub>1</sub></font> to f<font size="1"><sub>0</sub></font> can
+     have a significant effect on <em>all</em> formants. This interaction between
+     f<font size="1"><sub>1</sub></font> and the amplitude of the higher order
+     formants was seen experimentally some time ago by Fant &amp; Martony (1963),
+     but, as they noted, it could not be justified in terms of a linear non-interactive
+     model.</p>
+   <table width="622" height="34" border="0" cellpadding="0" cellspacing="0">
+     <tr>
+       <td><div align="center"><img src="fig5.jpg" alt="Figure I-A-5" width="559" height="530"><br>
+               <strong><font size="5">Fig I-A-5</font></strong></div></td>
+     </tr>
+   </table>
+   <p><br>
+     <br>
+     In Fig. I-A-4,
+     the dashed line to the glottal inertance represents the fact that our testing
+     of this model in its electrical analog version indicates that the effect
+     of the time-varying glottal inertance is entirely different from the effect
+     of the fixed vocal tract interance, and that the glottal inertance should
+     be considered as a separate parameter with generally less significance than
+     the fixed inertances L<font size="1"><sub>1</sub></font> and L<font size="1"><sub>2</sub></font>.
+     For the higher values of the ratio f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> tested,
+     the time-varying glottal inertance did not have much effect on the apparent
+     value of <u>L</u><font size="1"><sub>t</sub></font>, as reflected in the
+     asymmetry of the glottal flow pulse. Introduction of the glottal inertance
+     merely caused a small reduction in pulse amplitude and a small added delay
+     in the buildup of air flow, which reduced the discontinuity in the time
+     derivative at the flow onset, thus producing a more gradual onset. (That
+     a time-varying inertance should tend to act as a resistance and decrease
+     the amplitude of the flow pulse is not so surprising if one considers that
+     the time derivative of inertance has the sane units as resistance.)<br>
+     <br>
+     What remains to be specified in the model are the parameters of the glottal
+     resistance function R<font size="1"><sub>g</sub></font>, or rather its inverse
+     Y<font size="1"><sub>g</sub></font>. Since, as noted above, a more realistic
+     representation of the glottal resistance that includes flow dependence does
+     not appear to be necessary if the value of <u>L</u><font size="1"><sub>t </sub></font>is
+     adjusted appropriately, we model the glottal constriction by a linear conductance
+     Y<font size="1"><sub>g </sub></font>having a waveform illustrated in Fig.
+       I-A-5 . The parameters of Y<font size="1"><sub>g</sub></font> are
+       as follows: </p>
+   <p>&nbsp;</p>
+   <table width="833" border="0" cellspacing="0" cellpadding="0" align="center">
+     <tr>
+       <td width="833">T<sub><font size="1">0</font></sub> = The glottal period. <br>
+           <br>
+         A<font size="1"><sub>y</sub></font> = The peak-to-peak amplitude of
+         the glottal conductance function, when extrapolated into a complete
+         triangular or sinusoidal waveform. <br>
+              <br>
+         S<font size="1"><sub>1</sub></font> = A shape factor that reflects the
+         tendency of the area and conductance functions to be either triangular
+         or sinusoidal. The triangular function is generally considered to be
+         due to a phase difference between the upper and lower margins of the
+         vocal folds, with the movements along anyone horizontal plane tending
+         to be more smooth or sinusoidal. Thus, for falsetto or other laryngeal
+         adjustments in which the vocal folds are thinner, with less phase difference
+         between the upper and lower margins, S<font size="1">1</font> might
+         be expected to be closer to +1. The general conductance waveform would
+         be approximated as a weighted average of sinusoidal and triangular components
+         according to the value of S1.<br>
+                  <br>
+         S<font size="1"><sub>2 </sub></font> = A shape factor reflecting any
+         tendency of the area and conductance functions to have opening and closing
+         tines that differ. <br>
+                    <br>
+         B<font size="1"><sub>1</sub></font> = Reflects the state of abduction
+         (B<font size="1"><sub>1</sub></font> more positive) or adduction (B<font size="1"><sub>1 </sub></font>more
+         negative) of the vocal folds. <br>
+            <br>
+         B<font size="1"><sub>2 </sub></font>= An added constant factor that
+         reflects an incomplete glottal closure, usually posteriorly, between
+         the arytenoid cartilages. B<font size="1"><sub>2</sub></font> can be
+         termed an &quot;offset&quot; parameter. <br>
+                  <br>
+         B<font size="1"><sub>3 </sub></font> = A third parameter in the accurate
+         description of breathy voice that reflects the amplitude of any variation
+         in the conductance waveform during the &quot;closed&quot; phase of the
+         glottal cycle, as from continued motion of a slightly open posterior
+         segment of the vocal folds during te period in which the anterior segment
+         is closed, or a phase difference along the anterior-posterior dimension. </td>
+     </tr>
+   </table>
+   <p><br>
+     The open phase , with duration <font face="Symbol" size="4">t</font><font size="1">p</font>,
+     is defined as the conductance &quot;pulse&quot; bounded by the discontinuities
+     in slope at the head of arrow A<font size="1"><sub>2</sub></font>. The closed
+     phase is defined as T<sub><font size="1">0</font></sub> - <font face="Symbol" size="4">t</font><font size="1">p</font>,
+     and the duty cycle as <font face="Symbol" size="4">t</font><font size="1">p</font>/T<sub><font size="1">0</font></sub>.
+     These are not considered independent parameters in this model, and can be
+     computed from the values of f<font size="1"><sub>0</sub></font>, S<font size="1"><sub>1</sub></font>,
+     S<font size="1"><sub>2</sub></font>, B<font size="1"><sub>1</sub></font>,
+     and B<font size="1"><sub>2</sub></font>.</p>
+   <p>Since the exact shape of the closed phase when A<font size="1"><sub>3 </sub></font>and
+     B<font size="1"><sub>3</sub></font> are non-zerois not very important, the
+     form is assumed to follow the pattern defined by S<font size="1"><sub>1</sub></font>.
+     This assumption mat need reconsideration, however, since actual patterns
+     of conductance variation during the closed phase, as estimated from flow
+     measurements, vary widely and are not necessarily related to the form of
+     the conductance variation during open phase.<br>
+    <br>
+     Future work may indicate that other factors should be added to these glottal
+     and vocal tract parameters, for example, an air flow component which is
+     due to the air displaced by vocal fold motion and which appears to have
+     a primary effect similar to a small increase in L<font size="1"><sub>t</sub></font> (Rothenberg,
+     1973; Rothenberg &amp; 
+     Zahorian, 1977; Flanagan &amp; Ishizaka, 1978*). In addition, the effect
+     of flow dependence on the conductance waveform should be specified more
+     exactly, including a more explicit empirical definition of the value of
+     the idealized (linear) parameter Y<font size="1"><sub>g</sub></font>, that
+     should be used to model an actual (flow dependent) glottal conductance.
+     The effect of the time-varying glottal inertance at lower values of the
+     ratio f<font size="1"><sub>1</sub></font>/f<font size="1"><sub>0</sub></font> could
+     be considered, and possibly the effect of f<font size="1"><sub>2</sub></font> when
+     it is low in frequency. Also, a broader model should include a representation
+     of the more significant dependencies between the parameters, as the dependency
+     of A<font size="1"><sub>y</sub></font>on P<font size="1"><sub>L</sub></font>,
+     U<font size="1"><sub>g</sub></font>, and B<font size="1"><sub>1</sub></font>.<br>
+    <br>
+     Finally, I believe that an important part of any model for the voice source
+     should be an ordering of the parameters according to their significance.
+     At this point, I would estimate that the most basic parameters <br>
+   </p>
+   <hr>
+* The computer simulation reported by Flanagan &amp; Ishizaka (1978) appears
+to indicate that the effect of the air displaced by the lateral vocal fold movements
+is similar to a small decrease in L<font size="1"><sub>t</sub></font>. However,
+this conclusion would mean that the air displaced by the closing vocal folds
+was decreasing the flow emerging from the glottis, and not adding to it, as we
+feel is more logical. However, their estimate of the order-of-magnitude of this
+effect seems to agree well with our previous calculations. <br>
+<hr>
+<p><br>
+  are f<font size="1"><sub>0</sub></font>, P<font size="1"><sub>L</sub></font>,
+  B<font size="1"><sub>1</sub></font>, and A<font size="1"><sub>L</sub></font>.
+  That is, the proper specification of these parameters during running speech
+  should allow a reasonably intelligible and natural-sounding foment synthesis,
+  providing B<font size="1"><sub>2</sub></font>, B<font size="1"><sub>3</sub></font>,
+  and C<font size="1"><sub>0</sub></font> are set to zero, and reasonably, constant
+  values are chosen for L<font size="1"><sub>t</sub></font>, S<font size="1"><sub>1</sub></font>,
+  and S<font size="1"><sub>2</sub></font>.<br>
+    <br>
+  For a more natural synthesis, I would estimate that L<font size="1"><sub>t</sub></font> and
+  B<font size="1"><sub>2</sub></font> should be dynamically varying, and perhaps
+  C<font size="1"><sub>0</sub></font> should
+  be added to include the interaction with the first formant. I would judge as
+  least significant, but not necessarily always negligible, the effect of B<font size="1"><sub>3</sub></font>,
+  S<font size="1"><sub>1</sub></font>, S<font size="1"><sub>2</sub></font>and
+  the air displaced by the moving vocal folds. <br>
+    <br>
+  I could add in closing that this model leads naturally to some speculations
+  as to the source of voice quality differences of glottal origin. If it is true,
+  as inverse filtering results to date indicate, that some individuals have a
+  glottal flow waveform that can be characterized as being generated with a higher
+  or lower than average value of L<font size="1"><sub>t</sub></font>, what parameter
+  or parameters are responsible? The pulse duration <font face="Symbol" size="4">t</font><font size="1">p</font> (for
+  a given f<font size="1"><sub>0</sub></font>) can be
+  such a factor; however, any attempt to voluntarily decrease <font face="Symbol" size="4">t</font><font size="1">p</font> by
+  increasing the medial compression (adduction) of the vocal folds would also
+  tend to decrease Y<font size="1"><sub>g</sub></font><font size="1">MAX</font>,
+  leaving L<font size="1">t</font> relatively unchanged. It is possible that
+  a speaker with a voice naturally rich in harmonics may have a laryngeal configuration
+  with an especially low <font size="2">Y<font size="1"><sub>g</sub>MAX</font> </font>for a given <font face="Symbol" size="4">t</font><font size="1">p</font> ,
+  e.g. , vocal folds that open wider, or with a shape that results in a smaller
+  resistance to air flow. Another possibility, of course, is a difference in
+  the value of L<font size="1">t</font> due to the shape of the laryngeal vestibule
+  or the characteristics of the jet of air emerging from the open glottis. Any
+  component of L<font size="1">t</font> located
+  that close to the glottis would have a maximal effect on the glottal flow waveform,
+  while having a minimal effect on the frequencies of the vocal tract formants. <br>
+    <br>
+  Acknowledgements <br>
+  The model presented in this paper embodies a multitude of judgments about the
+  relationship of the glottal flow waveform to certain underlying physiological
+  parameters and the acoustic and perceptual significance of the resulting flow
+  waveform differences. Most of these judgments are based on the author's experience
+  with an analog simulation of the model that was constructed and tested while
+  he was a guest researcher in the apartment of Speech Communication and Music
+  Acoustics at the Royal Institute of Technology in Stockholm. During this period
+  there was a constant interaction with staff members in the department, especially
+  Professor Gunnar Fant and Dr. Jan Gauffin, and many aspects of the model reflect
+  their comments, suggestions and questions. As one important example, I recall
+  that it was during a discussion with Professor Fant that I first became aware
+  of the potential significance in an interactive model of the subglottal component
+  of the flow inertance and the subglottal resonances. <br>
+    <br>
+  This work was sponsored, in part, by a grant from the U. S. National Institutes
+  of Health and from the Bank of Sweden Tercentenary Foundation, grant no. 79-86.</p>
+<p align="center"><br>
+    <font size="4">References</font> </p>
+<p>COLTON, R.H. &amp; ESTILL, J.A. (1981): &quot;Elements of voice quality: Perceptual,
+  acoustic and physiological aspects&quot;, in Speech and Language: Theory and
+  Practice (ed. by N. Lass), Vol. 5, Academic Press, New York, pp. 311-403. <br>
+    <br>
+  FANT, G. (1960): Acoustic Theory of Speech Production, Mouton, Hague. <br>
+  <br>
+  FANT, G. &amp; MARTONY, J. (1963): &quot;Formant amplitude measurements&quot;,
+  STL- QPSR 1/1963, pp. 1-5. <br>
+    <br>
+  FARN, D.W. (1940): &quot;High-speed motion pictures of the human vocal cords&quot;,
+  Bell Lab. Record 18, pp. 203-208. <br>
+    <br>
+  FLANAGAN, J.L. (1972): Analysis Synthesis and Perception of Speech, Springer
+  Verlag, Berlin. <br>
+    <br>
+  FLANAGAN, J.L. &amp; ISHIZAKA, K. (1978): &quot;Computer model to characterize
+  the air volume displaced by the vibrating vocal cords&quot;, J .Acoust.Soc.
+  Am. 63, pp. 1559-1565. <br>
+    <br>
+  FLANAGAN, J.L. &amp; LANDGRAF, L.L. (1968): &quot;Self oscillating source for
+  vocal tract synthesizers&quot;, IEEE Trans. Audio Electro-acoust. 16, pp. 57-64.
+  - <br>
+    <br>
+  GALL, B., GALL, D., &amp; HANSON, J. (1971): &quot;Larynx-Fotokymografie&quot;,
+  Arch. klin.exp.Ohr-, Nas.- u. Kehlk.Heilk. 200, pp. 34-41. <br>
+    <br>
+  HARDEN, R.J. (1973): &quot;Comparison of glottal area changes as measured from
+  ultrahigh-speed photographs and photoelectric glottographs&quot;, J. Speech
+  and Hearing Res. 18, pp. 728-738. <br>
+    <br>
+  HILDEBRAND, B.H. (1976): &quot;Vibratory patterns of the human vocal cords
+  during variations in frequency and intensity&quot;, Doctoral Diss., Univ. of
+  Florida. <br>
+    <br>
+  HIRANO, M., KAKITA, Y., KAWASAKI, H., GOULD, W.J., &amp; IAMBIASE,A. (1981): 
+  &quot;Data from high speed motion picture studies&quot;, in Vocal Fold Physiology
+  (ed. by K.N. Stevens &amp; M. Hirano), Univ. of Tokyo Press, pp.85-91. <br>
+    <br>
+  HOIMES, J.N. (1963): &quot;An investigation of the volume velocity waveform
+  at the larynx during speech by means of an inverse filter&quot;, Proc. of the
+  Speech Communication Seminar, Vol. I, Stockholm 1962, paper B-4. (Dept. of
+  Speech Communication, Royal Inst. Technology, Stockholm).<br>
+    <br>
+  KITZING, P. (1977): &quot;Metode zur kombinierten photo- und elektroglottographischen
+  Registrierung von Stinmlippenschwingungen&quot;, Folia Phoniat. 29, pp. 249-260. </p>
+<p>KITZING, P. &amp; LOFQVIST, A. (1975): &quot;Subglottal and oral air pressures
+  during phonation - preliminary investigation using a miniature transducer system&quot;,
+  Medical and Biological Eng., Sept, 1975b, pp. 644-648. <br>
+    <br>
+  KITZING, P. &amp; SONESSON, B. (1974): &quot;A photoglottographical study of
+  the female vocal folds during phonation&quot;, Folia Phoniat. 26, pp. 138-149. <br>
+    <br>
+  KOIKE, Y. (1981): &quot;Sub- and supraglottal pressure variation during phonation&quot;,
+  in&quot; Vocal Fold Physiology (ed. by K.N. Stevens &amp; M. Hirano), Univ.
+  of Tokyo Press, pp. 181-189. <br>
+    <br>
+  KOSTER, J-P. &amp; SMITH, S. (1970): &quot;Zur Interpretation elektrischer
+  und photoelektrischer Glottograntre&quot;, Folia Phoniat. 22, pp. 92-99. <br>
+    <br>
+  LINDQVIST, J. ( 1965) : &quot;Studies of the voice source by means of inverse
+  filtering technique&quot;, paper A35 in Congr.Rep. 5th la, Liege, Vol. 1. <br>
+    <br>
+  LINDQVIST, J. (1970): &quot;The voice source studied by means of inverse filtering&quot;,
+  STL-QPSR 1/1970, pp. 3-9. <br>
+    <br>
+  MILLER, R.L. (1959): &quot;Nature of the vocal cord wave&quot;, J .Acoust.
+  Soc.Am. 21-, pp. 667-679. <br>
+    <br>
+  MOORE, G.P., WHITE, F.D., &amp; von LEDEN, H. (1962): &quot;Ultra high-speed
+  photography in laryngeal physiology&quot;, J. Speech and Hearing Disorders
+  27, pp. 165-171. , <br>
+    <br>
+  MRAYATI, M. &amp; GUERIN, B. (1976): &quot;Etude de l'impedance d'entree du
+  conduit vocal - Couplage source-conduit vocal&quot;, Acoustica 35. pp. 330-340. <br>
+    <br>
+    ROTHENBERG M. (1973): 
+    &quot;A new inverse-filtering technique for deriving the glottal air flow
+      waveform during voicing&quot;, J. Acoust. Soc. Am. 53, pp. 1632-1645. <br>
+    <br>
+  ROTHENBERG M. (1981): &quot;Acoustic interaction between the glottal source
+  and the vocal tract&quot;, in Vocal Fold Physiology (ed. by K.N. Stevens &amp; 
+  M. Hirano, Univ. of Tokyo Press, pp. 305-323. <br>
+    <br>
+  ROTHENBERG M. &amp; ZAHORIAN, S. (1977): &quot;nonlinear inverse filtering
+  technique for estimating the glottal area waveform&quot;, J. Acoust. Soc. Am.
+  61, pp. 1063-1071. <br>
+    <br>
+  SONESSON, B. (1960): &quot;On the anatomy and vibratory pattern of the human
+  vocal folds&quot;, Acta Oto-Laryng., Supple 156 (Lund). <br>
+    <br>
+  TAKASUGI, R., NAKATSUI, M., &amp; SUZUKI, J. (1970): &quot;Observation of glottal
+  waveform from speech waves&quot;, J. Acoust. Soc. Japan 26 (3), pp. 141-149. <br>
+    <br>
+  TANABE, M., KITAJIMA, K., GOULD, W.J., &amp; LAMBIASE, A. (1975): &quot;Analysis
+  of high-speed zrotion pictures of the vocal folds&quot;, Folia Phoniat. 27,
+  pp. 77-87.<br>
+    <br>
+  TIMCKE, R., von LEDEN, H., &amp; MOORE, P. (1958): &quot;laryngeal vibrations:
+  measurements of the glottis wave, part I: The normal vibratory cycle&quot;,
+  Arch. Otolaryng. 68, pp. 1-19, and part II: &quot;Physiologic variations&quot;,
+  Arch. Otolaryng. 69, pp. 438-444. <br>
+    <br>
+  TITZE, I.R. &amp; TALKIN, D.T. (1979): &quot;A theoretical study of the effect
+  of various laryngeal configurations on the acoustics of phonation&quot;, J.
+  Acoust. Soc. Am. 66, pp. 60-74. <br>
+    <br>
+  van den BERG, Jw. (1960): &quot;An electrical analogue of the trachea, lungs
+and tissues&quot;, Acta Physiol. Pharnacol. Neer landica 9, pp. 361- 385.</p>
+</body>
+</html>

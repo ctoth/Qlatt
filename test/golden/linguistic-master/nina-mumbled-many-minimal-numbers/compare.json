@@ -1,0 +1,20 @@
+{
+  "phrase": "Nina mumbled many minimal numbers.",
+  "slug": "nina-mumbled-many-minimal-numbers",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.2754686601689466,
+    "rmsB": 0.11279101851557771,
+    "rmsError": 1.0007111144413279,
+    "maxDelta": 6.94423417586298,
+    "shift": 34,
+    "overlapLength": 26166,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\nina-mumbled-many-minimal-numbers\\klatt-syn.json"
+  }
+}

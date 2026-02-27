@@ -1,0 +1,13 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The paper does not contain a formal abstract section. The Summary (p. 421-422) states:
+
+"Linguists often find it useful to divide the phonemes of a language into 'voiced' and 'voiceless' categories. For stops, some languages are said to utilize aspiration in conjunction with voicing to yield two, three, or four categories, while in other languages categories are said to be distinguished solely by differences in aspiration. Some linguists, moreover, speak of fortis and lenis categories. Despite the fact that these features of voicing, aspiration and force of articulation are usually treated as independent dimensions of phonetic description, there are some grounds for considering them to be plausible consequences of a single underlying variable. In the search for acoustic features which serve as cues for the perception of stop consonants in initial position we have focused our attention on spectrographic measurements of the time interval between the burst that marks release and the onset of periodicity that reflects laryngeal vibration. This measure of voice onset time has been applied to word-initial stops in eleven languages and has been found to be highly effective as a means of separating phonemic categories, although these languages differ both in the number of those categories and in the phonetic features usually ascribed to them. The boundaries between contrasting categories along the continuum of voice onset time vary from language to language, but this variation is so far from random in nature that we may speak of three general phonetic types from which the categories of a particular language are selected. It would seem that such features as voicing, aspiration and force of articulation are predictable consequences of differences in the relative timing of events at the glottis and at the place of oral occlusion."
+
+---
+
+## Our Interpretation
+
+The paper establishes Voice Onset Time (VOT) as a universal acoustic measure for classifying stop consonant voicing categories across languages, replacing the traditional multidimensional description (voicing, aspiration, fortis/lenis) with a single temporal dimension. The key finding is that all 11 studied languages select their stop categories from approximately three universal VOT modes: voicing lead (~-100 ms), short lag (~+10 ms), and long lag (~+75 ms). For speech synthesis, VOT directly controls the timing relationship between burst release, aspiration noise onset, and voicing onset, making it the fundamental parameter for natural-sounding stop consonant production.

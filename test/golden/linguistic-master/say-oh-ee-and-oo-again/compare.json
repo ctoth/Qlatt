@@ -1,0 +1,20 @@
+{
+  "phrase": "Say oh, ee, and oo again.",
+  "slug": "say-oh-ee-and-oo-again",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.4287853028327185,
+    "rmsB": 0.13632340728299963,
+    "rmsError": 0.9751214601666615,
+    "maxDelta": 8.536908879576881,
+    "shift": 36,
+    "overlapLength": 21174,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\say-oh-ee-and-oo-again\\klatt-syn.json"
+  }
+}

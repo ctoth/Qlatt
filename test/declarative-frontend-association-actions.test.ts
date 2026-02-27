@@ -5,7 +5,11 @@ describe("declarative frontend association actions", () => {
   it("supports pattern associate + downstream $assoc query", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["stop", "vowel", "fricative"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       patterns: {
         cv: {
@@ -48,7 +52,11 @@ describe("declarative frontend association actions", () => {
   it("supports disassociate by suppressing active association edges", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["stop", "vowel"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       patterns: {
         cv: {

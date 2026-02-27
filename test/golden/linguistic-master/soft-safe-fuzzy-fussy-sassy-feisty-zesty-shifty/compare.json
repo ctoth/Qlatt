@@ -1,0 +1,20 @@
+{
+  "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
+  "slug": "soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.23975359470279883,
+    "rmsB": 0.12985418694189874,
+    "rmsError": 1.1896854170621536,
+    "maxDelta": 39.664983248263546,
+    "shift": -76,
+    "overlapLength": 50514,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\soft-safe-fuzzy-fussy-sassy-feisty-zesty-shifty\\klatt-syn.json"
+  }
+}

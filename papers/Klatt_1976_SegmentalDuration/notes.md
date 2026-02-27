@@ -257,3 +257,11 @@ Key quantitative findings:
 - **Fry (1958)** - Experiments in the Perception of Stress: Demonstrates that duration changes perception of stress patterns in English.
 - **Oller (1973)** - The Effect of Position in Utterance on Speech Segment Duration: Provides complementary empirical data on positional effects that validate the rule framework.
 - **Umeda (1975a)** - Vowel Duration in American English: Contemporary alternative vowel duration modeling approach with continuous discourse validation.
+
+---
+
+**See also:** Campbell_Isard_1991_SegmentDurationsSyllable - extends Klatt's segment-level duration rules with a higher-level syllable timing framework where syllable duration is predicted first, then segment durations are accommodated within the syllable frame using an elasticity measure. Complementary rather than competing: Klatt provides inherent durations and contextual factors, Campbell & Isard add syllable-level prosodic timing.
+
+---
+
+**See also:** vanSanten_1994_SegmentalDurationTTS - demonstrates that Klatt's pure multiplicative duration model is a special case of sums-of-products, and that key interactions (pitch accent x syllabic stress) are not properly captured by multiplication alone. The new system is perceptually preferred 73% of the time.

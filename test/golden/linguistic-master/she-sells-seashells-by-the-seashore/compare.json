@@ -1,0 +1,20 @@
+{
+  "phrase": "She sells seashells by the seashore.",
+  "slug": "she-sells-seashells-by-the-seashore",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.289373491289863,
+    "rmsB": 0.14276508956851142,
+    "rmsError": 1.0081089073416367,
+    "maxDelta": 8.432208333314666,
+    "shift": 34,
+    "overlapLength": 26046,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\she-sells-seashells-by-the-seashore\\klatt-syn.json"
+  }
+}

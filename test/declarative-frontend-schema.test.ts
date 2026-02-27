@@ -250,4 +250,125 @@ describe("declarative frontend schema coverage", () => {
     expect(missingCodes.includes("E_TOKEN_FIELD_UNDECLARED")).toBe(true);
     expect(okCodes.includes("E_TOKEN_FIELD_UNDECLARED")).toBe(false);
   });
+
+  it("accepts structural condition maps with predicate references", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },
+      predicates: {
+        is_stop: { expr: "current.type == 'stop'" },
+        in_question: {
+          any: [
+            { predicate: "is_stop" },
+            { expr: "current.phoneme == 'SIL' && current.punctuationSymbol == '?'" },
+          ],
+        },
+      },
+      rules: {
+        good: {
+          select: {
+            stream: "phone",
+            where: {
+              all: [{ predicate: "in_question" }, { not: { expr: "current.phoneme == 'P'" } }],
+            },
+          },
+          constraint: { predicate: "is_stop" },
+        },
+      },
+      phases: [{ name: "duration", rules: ["good"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const errors = diagnostics.filter((d) => d.severity === "error");
+    expect(errors).toHaveLength(0);
+  });
+
+  it("reports unknown and cyclic predicate references", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", features: { type: ["vowel"] } } },
+      predicates: {
+        a: { predicate: "b" },
+        b: { predicate: "a" },
+      },
+      rules: {
+        bad_ref: {
+          select: { stream: "phone", where: { predicate: "missing_pred" } },
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad_ref"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+    expect(codes.includes("E_PREDICATE_UNKNOWN")).toBe(true);
+    expect(codes.includes("E_PREDICATE_CYCLE")).toBe(true);
+  });
+
+  it("enforces policy-path references and critical literal bans", () => {
+    const spec = parseDslSpec({
+      parameters: {
+        policy: {
+          duration: {
+            stress_factor: {
+              value: 1.3,
+              citations: ["Klatt 1976 §III.B"],
+            },
+          },
+        },
+      },
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        bad_path: {
+          select: { stream: "phone", where: "true" },
+          apply: [{ field: "duration", op: "mul", value: "params.policy.duration.missing", tag: "x" }],
+        },
+        bad_literal: {
+          select: { stream: "phone", where: "true" },
+          apply: [{ field: "duration", op: "mul", value: "1.3", tag: "x" }],
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad_path", "bad_literal"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+    expect(codes.includes("E_POLICY_PARAM_UNKNOWN")).toBe(true);
+    expect(codes.includes("E_POLICY_LITERAL_CRITICAL")).toBe(true);
+  });
+
+  it("emits uncited and unused policy warnings", () => {
+    const spec = parseDslSpec({
+      parameters: {
+        policy: {
+          duration: {
+            used_factor: {
+              value: 1.1,
+              citations: ["citation"],
+            },
+            uncited_unused_factor: {
+              value: 1.2,
+            },
+          },
+        },
+      },
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        use_policy: {
+          select: { stream: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "mul",
+              value: "params.policy.duration.used_factor",
+              tag: "policy",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["use_policy"] }],
+    });
+
+    const warnings = validateDslSpec(spec).filter((d) => d.severity === "warning").map((d) => d.code);
+    expect(warnings.includes("W_POLICY_PARAM_UNCITED")).toBe(true);
+    expect(warnings.includes("W_POLICY_PARAM_UNUSED")).toBe(true);
+  });
 });

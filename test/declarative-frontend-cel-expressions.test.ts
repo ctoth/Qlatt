@@ -8,7 +8,11 @@ describe("declarative frontend CEL expressions", () => {
     const spec = {
       parameters: { enabled: true, mul: 1.5, add: 10 },
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       rules: {
         scale_and_add: {
@@ -41,7 +45,13 @@ describe("declarative frontend CEL expressions", () => {
 
   it("emits E_CEL_INVALID for malformed expressions", () => {
     const spec = parseDslSpec({
-      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      streams: {
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: {} },
+        },
+      },
       rules: {
         bad: {
           select: { stream: "phone", where: "current.type ==" },
@@ -58,7 +68,11 @@ describe("declarative frontend CEL expressions", () => {
   it("evaluates rule-level define bindings once per firing", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       rules: {
         use_define: {

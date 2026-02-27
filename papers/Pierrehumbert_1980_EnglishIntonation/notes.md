@@ -406,3 +406,7 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 ---
 
 **See also:** Ladd_2008_IntonationalPhonology — the mature theoretical exposition of Pierrehumbert's AM framework, with refinements including reduction from 7 to 5 pitch accents (MAE_ToBI), more careful treatment of alignment vs. association, extensive cross-linguistic validation (~30 languages), and a three-layer pitch scaling model (intrinsic/extrinsic/metrical).
+
+---
+
+**See also:** Goldsmith_1976_AutosegmentalPhonology - the foundational work on autosegmental phonology that Pierrehumbert's AM theory directly builds upon; introduces the multi-tier representation, association lines, Well-formedness Condition, and accentual star convention that became the basis for ToBI.

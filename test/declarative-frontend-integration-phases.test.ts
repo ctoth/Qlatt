@@ -55,9 +55,13 @@ describe("declarative frontend integration phases", () => {
       includeTrace: true,
       phases: ["structural", "duration", "prosody", "finalize"],
       parameters: {
-        base_f0: 110,
-        fall_rate_hz: 20,
-        question_rise_hz: 30,
+        policy: {
+          f0: {
+            base_hz: 110,
+            fall_rate_hz: 20,
+            question_rise_hz: 30,
+          },
+        },
       },
     });
 

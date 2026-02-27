@@ -11,19 +11,19 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import yaml from 'js-yaml';
 import type { SemanticsDocument } from '../src/semantics/types';
+import { parseYamlString } from '../src/yaml-loader';
 
 // Load the real YAML files
 const basePath = resolve(__dirname, '../public/experiments/klatt80-baseline');
 
 const semanticsRaw = readFileSync(resolve(basePath, 'semantics.yaml'), 'utf-8');
-const semantics = yaml.load(semanticsRaw) as SemanticsDocument;
+const semantics = parseYamlString<SemanticsDocument>(semanticsRaw, resolve(basePath, 'semantics.yaml'));
 
 const graphRaw = readFileSync(resolve(basePath, 'graph.yaml'), 'utf-8');
-const graph = yaml.load(graphRaw) as {
+const graph = parseYamlString<{
   nodes: Record<string, { type: string; params?: Record<string, unknown> }>;
-};
+}>(graphRaw, resolve(basePath, 'graph.yaml'));
 
 describe('PLSTEP threshold single source of truth', () => {
   it('semantics.yaml defines plstepThreshold constant', () => {

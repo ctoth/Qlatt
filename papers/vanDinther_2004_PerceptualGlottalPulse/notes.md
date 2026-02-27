@@ -236,3 +236,7 @@ Note: Higher EPDs in other studies may be due to vibrato, amplitude constraints,
 - **Moore et al. (1997)** and **Rao et al. (2001)** - Provide the auditory perception model (excitation patterns, loudness) that underpins the perceptual distance measure used in this paper; critical for understanding how to map acoustic variations to perceived differences.
 - **Scherer et al. (1998)** and **Henrich et al. (2003)** - Prior empirical studies measuring JNDs for glottal parameters (Oq, Sq, asymmetry coefficient); provide direct comparison data for validating the present method's results.
 - **Veldhuis (1998)** - Analyzes spectral relevance of LF R-parameters; provides complementary spectral analysis perspective to the perceptual distance approach in this paper.
+
+---
+
+**See also:** Henrich_2003_JND_OpenQuotient - Provides complementary psychoacoustic JND data for open quotient (~10-14% relative JND, Weber's law) and asymmetry coefficient (~4% relative JND), validating and extending the EPD-based perceptual model. Together these papers establish the full perceptual resolution landscape for LF voice source parameters.

@@ -1,0 +1,20 @@
+{
+  "phrase": "Layer, lawyer, royal, rural.",
+  "slug": "layer-lawyer-royal-rural",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.47053943807254034,
+    "rmsB": 0.1328642738052617,
+    "rmsError": 0.991479471422046,
+    "maxDelta": 16.77035275747482,
+    "shift": 35,
+    "overlapLength": 25105,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\layer-lawyer-royal-rural\\klatt-syn.json"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "phrase": "Pat tapped a pot and picked a paper cup.",
+  "slug": "pat-tapped-a-pot-and-picked-a-paper-cup",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.284416906453574,
+    "rmsB": 0.14917706290278965,
+    "rmsError": 1.1184046597825226,
+    "maxDelta": 47.19663147916706,
+    "shift": 32,
+    "overlapLength": 28948,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\pat-tapped-a-pot-and-picked-a-paper-cup\\klatt-syn.json"
+  }
+}

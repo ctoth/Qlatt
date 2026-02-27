@@ -10,9 +10,22 @@ describe("declarative frontend point actions and helpers", () => {
     const s3 = endOrder();
 
     const spec = {
-      parameters: { base_f0: 100 },
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: {
+              value: 100,
+              citations: ["test fixture"],
+            },
+          },
+        },
+      },
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
         f0: { type: "point" },
       },
       rules: {
@@ -21,7 +34,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: "midpoint(current)",
-            value: "params.base_f0 + current_index",
+            value: "params.policy.f0.base_hz + current_index",
             tag: "f0",
           },
         },
@@ -75,6 +88,14 @@ describe("declarative frontend point actions and helpers", () => {
     const s2 = endOrder();
 
     const spec = {
+      parameters: {
+        policy: {
+          f0: {
+            ratio_point_hz: 120,
+            sync_point_hz: 130,
+          },
+        },
+      },
       streams: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         ratio_point: {
@@ -82,7 +103,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: "at_ratio(current, 0.25)",
-            value: "120",
+            value: "params.policy.f0.ratio_point_hz",
             tag: "f0",
           },
         },
@@ -91,7 +112,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: "at_sync(current.sync_right)",
-            value: "130",
+            value: "params.policy.f0.sync_point_hz",
             tag: "f0",
           },
         },
@@ -119,6 +140,17 @@ describe("declarative frontend point actions and helpers", () => {
     const s2 = endOrder();
 
     const spec = {
+      parameters: {
+        policy: {
+          duration: {
+            total_bonus_ms: 5,
+          },
+          f0: {
+            base_hz: 100,
+            step_hz: 10,
+          },
+        },
+      },
       streams: {
         word: { type: "span" },
         phone: { type: "base", scalars: { duration: { unit: "ms" } } },
@@ -130,7 +162,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: "midpoint(current)",
-            value: "100",
+            value: "params.policy.f0.base_hz",
             tag: "f0",
           },
         },
@@ -142,7 +174,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: "midpoint(current)",
-            value: "prev_f0 == null ? 100 : prev_f0.value + 10",
+            value: "prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value + params.policy.f0.step_hz",
             tag: "f0",
           },
         },
@@ -151,7 +183,14 @@ describe("declarative frontend point actions and helpers", () => {
             stream: "phone",
             where: "total('word') == 1",
           },
-          apply: [{ field: "duration", op: "add", value: "5", tag: "span" }],
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "params.policy.duration.total_bonus_ms",
+              tag: "span",
+            },
+          ],
         },
       },
       phases: [{ name: "prosody", rules: ["insert_a", "insert_b", "mark_total"] }],
@@ -178,6 +217,13 @@ describe("declarative frontend point actions and helpers", () => {
     const s1 = endOrder();
 
     const spec = {
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 100,
+          },
+        },
+      },
       streams: {
         phone: { type: "base" },
         f0: { type: "point" },
@@ -188,7 +234,7 @@ describe("declarative frontend point actions and helpers", () => {
           insert_point: {
             stream: "f0",
             at: { anchor_left: s0, anchor_right: s1, ratio: 1.2 },
-            value: "100",
+            value: "params.policy.f0.base_hz",
             tag: "f0",
           },
         },

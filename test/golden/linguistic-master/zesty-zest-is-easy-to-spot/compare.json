@@ -1,0 +1,20 @@
+{
+  "phrase": "Zesty zest is easy to spot.",
+  "slug": "zesty-zest-is-easy-to-spot",
+  "compare": {
+    "lengthMismatch": -9,
+    "rmsA": 0.26656490184594284,
+    "rmsB": 0.130814295357829,
+    "rmsError": 0.974956286854078,
+    "maxDelta": 26.353904962870317,
+    "shift": 34,
+    "overlapLength": 25827,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\zesty-zest-is-easy-to-spot\\klatt-syn.json"
+  }
+}

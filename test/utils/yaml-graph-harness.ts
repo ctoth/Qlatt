@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import yaml from 'js-yaml';
 import { describe, it, expect } from 'vitest';
+import { parseYamlString } from '../../src/yaml-loader';
 
 import { createCelEvaluator } from '../../src/semantics/cel-evaluator';
 import { createTopologicalEvaluator } from '../../src/semantics/topological-evaluator';
@@ -90,7 +90,7 @@ interface YamlGraphSuite {
 function readYamlFile<T>(filePath: string): T {
   const absPath = path.resolve(process.cwd(), filePath);
   const text = fs.readFileSync(absPath, 'utf8');
-  return yaml.load(text) as T;
+  return parseYamlString<T>(text, filePath);
 }
 
 function resolveNumber(value: ParamValue | undefined, fallback: number): number {

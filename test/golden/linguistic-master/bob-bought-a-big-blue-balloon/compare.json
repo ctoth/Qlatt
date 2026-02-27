@@ -1,0 +1,20 @@
+{
+  "phrase": "Bob bought a big blue balloon.",
+  "slug": "bob-bought-a-big-blue-balloon",
+  "compare": {
+    "lengthMismatch": -9,
+    "rmsA": 0.288922875132972,
+    "rmsB": 0.16175622337046863,
+    "rmsError": 0.9880770684595497,
+    "maxDelta": 17.49114789681436,
+    "shift": 32,
+    "overlapLength": 21319,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\bob-bought-a-big-blue-balloon\\klatt-syn.json"
+  }
+}

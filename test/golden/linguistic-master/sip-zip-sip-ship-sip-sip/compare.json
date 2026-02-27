@@ -1,0 +1,20 @@
+{
+  "phrase": "Sip zip, sip ship, sip sip.",
+  "slug": "sip-zip-sip-ship-sip-sip",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.22038732542869321,
+    "rmsB": 0.08153004853542956,
+    "rmsError": 0.8933917843046109,
+    "maxDelta": 7.275617578873618,
+    "shift": 32,
+    "overlapLength": 25098,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\sip-zip-sip-ship-sip-sip\\klatt-syn.json"
+  }
+}

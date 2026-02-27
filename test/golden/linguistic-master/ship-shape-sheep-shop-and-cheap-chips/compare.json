@@ -1,0 +1,20 @@
+{
+  "phrase": "Ship shape, sheep shop, and cheap chips.",
+  "slug": "ship-shape-sheep-shop-and-cheap-chips",
+  "compare": {
+    "lengthMismatch": -10,
+    "rmsA": 0.2989591300980728,
+    "rmsB": 0.11308702949080282,
+    "rmsError": 1.0525645189123969,
+    "maxDelta": 9.09966588495365,
+    "shift": 35,
+    "overlapLength": 29605,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\ship-shape-sheep-shop-and-cheap-chips\\klatt-syn.json"
+  }
+}

@@ -218,3 +218,7 @@ Need for cross-linguistic acoustic data on /l/ formant frequencies to understand
 - **Recasens, D., Espinosa, A., 2005** - Articulatory, positional and coarticulatory characteristics for clear /l/ and dark /l/: Detailed articulatory-acoustic mapping for lateral consonants including coarticulation patterns directly applicable to synthesis rules.
 - **Bladon, R.A.W., Al-Bamerni, A., 1976** - Coarticulatory resistance in English /l/: Key study on how /l/ resists coarticulation, foundational for understanding allophonic variation and formant transition modeling.
 - **Narayanan, S.S., Alwan, A.A., Haker, K., 1997** - Toward articulatory-acoustic models for liquid approximants based on MRI and EPG data: Advanced articulatory imaging and acoustic modeling techniques for lateral consonants providing detailed vocal tract configurations.
+
+---
+
+**See also:** Sproat_Fujimura_1993_AllophonicVariationEnglishL - provides articulatory (X-ray microbeam) evidence for the two-gesture timing model underlying the acoustic F2 patterns documented here, explaining WHY syllable-final /l/ has lower F2 through earlier dorsal retraction gesture timing

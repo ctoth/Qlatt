@@ -1,0 +1,20 @@
+{
+  "phrase": "Shy sharks shimmer in shallow shoals.",
+  "slug": "shy-sharks-shimmer-in-shallow-shoals",
+  "compare": {
+    "lengthMismatch": -9,
+    "rmsA": 0.35780569221956604,
+    "rmsB": 0.14496599730273074,
+    "rmsError": 1.1628710889200886,
+    "maxDelta": 7.872022819375183,
+    "shift": 35,
+    "overlapLength": 27626,
+    "sampleRateA": 10000,
+    "sampleRateB": 10000
+  },
+  "paths": {
+    "track": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\track.json",
+    "qlatt": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\qlatt.json",
+    "klatt": "test\\golden\\linguistic-master\\shy-sharks-shimmer-in-shallow-shoals\\klatt-syn.json"
+  }
+}

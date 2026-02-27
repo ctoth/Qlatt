@@ -4,7 +4,12 @@ import { runRuleEngine } from "../src/declarative-frontend/engine";
 describe("declarative frontend pattern rules", () => {
   it("suppresses all captures for a matched pattern", () => {
     const spec = {
-      streams: { phone: { type: "base" } },
+      streams: {
+        phone: {
+          type: "base",
+          features: { type: ["stop", "vowel", "fricative"] },
+        },
+      },
       patterns: {
         cv: {
           stream: "phone",
@@ -59,7 +64,11 @@ describe("declarative frontend pattern rules", () => {
   it("applies targeted effects to captures", () => {
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["stop", "vowel"] },
+          scalars: { duration: { unit: "ms" } },
+        },
       },
       patterns: {
         cv: {

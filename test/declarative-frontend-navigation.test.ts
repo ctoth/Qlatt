@@ -156,4 +156,48 @@ describe("declarative frontend navigation helpers", () => {
     const out = runRuleEngine(input, spec).sequence;
     expect(out[4].duration).toBe(73);
   });
+
+  it("supports structural where predicates and look_back_pred()", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", features: { type: ["vowel", "stop"] }, scalars: { duration: { unit: "ms" } } },
+      },
+      predicates: {
+        is_stop: { expr: "current.type == 'stop'" },
+        is_stressed: "has(current.stress) && current.stress == 1",
+      },
+      rules: {
+        lookback_rule: {
+          select: {
+            stream: "phone",
+            where: {
+              all: [{ predicate: "is_stop" }, { expr: "current.phoneme == 'K'" }],
+            },
+          },
+          define: {
+            hit: "look_back_pred(current, 4, 'is_stressed')",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "hit != null && hit.phoneme == 'EH' ? 11 : 0",
+              tag: "look_back_pred",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["lookback_rule"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "P", type: "stop", duration: 70, status: 1 },
+      { stream: "phone", phoneme: "EH", type: "vowel", stress: 1, duration: 80, status: 1 },
+      { stream: "phone", phoneme: "IH", type: "vowel", stress: 0, duration: 90, status: 1 },
+      { stream: "phone", phoneme: "K", type: "stop", duration: 60, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out[3].duration).toBe(71);
+  });
 });

@@ -10,7 +10,11 @@ describe("declarative frontend finalize stages", () => {
 
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
         f0: { type: "point" },
       },
       rules: {
@@ -64,7 +68,11 @@ describe("declarative frontend finalize stages", () => {
 
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
         f0: { type: "point" },
       },
       rules: {
@@ -103,7 +111,11 @@ describe("declarative frontend finalize stages", () => {
 
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
         f0: { type: "point" },
       },
       rules: {
@@ -158,7 +170,11 @@ describe("declarative frontend finalize stages", () => {
 
     const spec = {
       streams: {
-        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop"] },
+          scalars: { duration: { unit: "ms" } },
+        },
         f0: { type: "point" },
       },
       rules: {

@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import { parseYamlString } from "../yaml-loader";
 
 type PlainObject = Record<string, any>;
 
@@ -28,6 +28,51 @@ function asStringArray(value: unknown): string[] {
 
 function cloneObject(value: unknown): PlainObject {
   return asPlainObject(value) ? { ...value } : {};
+}
+
+function cloneValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneValue(entry));
+  }
+  if (asPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)])
+    );
+  }
+  return value;
+}
+
+function normalizeConditionSpec(value: unknown): unknown {
+  if (typeof value === "string") return value;
+  if (!asPlainObject(value)) return cloneValue(value);
+
+  const normalized: PlainObject = {};
+  if (Object.prototype.hasOwnProperty.call(value, "expr")) {
+    normalized.expr = asString(value.expr, null);
+  }
+  if (Object.prototype.hasOwnProperty.call(value, "predicate")) {
+    normalized.predicate = asString(value.predicate, null);
+  }
+  if (Object.prototype.hasOwnProperty.call(value, "all")) {
+    normalized.all = Array.isArray(value.all)
+      ? value.all.map((entry: unknown) => normalizeConditionSpec(entry))
+      : cloneValue(value.all);
+  }
+  if (Object.prototype.hasOwnProperty.call(value, "any")) {
+    normalized.any = Array.isArray(value.any)
+      ? value.any.map((entry: unknown) => normalizeConditionSpec(entry))
+      : cloneValue(value.any);
+  }
+  if (Object.prototype.hasOwnProperty.call(value, "not")) {
+    normalized.not = normalizeConditionSpec(value.not);
+  }
+
+  for (const [key, entry] of Object.entries(value)) {
+    if (Object.prototype.hasOwnProperty.call(normalized, key)) continue;
+    normalized[key] = cloneValue(entry);
+  }
+
+  return normalized;
 }
 
 function normalizePhase(phase: unknown): NormalizedPhase {
@@ -61,7 +106,7 @@ function normalizePatternStep(step: unknown): PlainObject {
   return {
     ...step,
     capture: asString(step.capture),
-    where: asString(step.where),
+    where: normalizeConditionSpec(step.where),
     optional: Boolean(step.optional),
     repeat: step.repeat === "*" || step.repeat === "+" ? step.repeat : null,
   };
@@ -78,7 +123,7 @@ function normalizePattern(pattern: unknown): PlainObject {
     sequence: Array.isArray(pattern.sequence)
       ? pattern.sequence.map((step: unknown) => normalizePatternStep(step))
       : [],
-    constraint: asString(pattern.constraint, null),
+    constraint: normalizeConditionSpec(pattern.constraint),
   };
 }
 
@@ -98,13 +143,13 @@ function normalizeRule(rule: unknown): PlainObject {
     kind: asString(rule.kind, null),
     op: asString(rule.op, null),
     match: asString(rule.match, null),
-    constraint: asString(rule.constraint, null),
+    constraint: normalizeConditionSpec(rule.constraint),
     define,
     select: asPlainObject(rule.select)
       ? {
           ...rule.select,
           stream: asString(rule.select.stream),
-          where: asString(rule.select.where),
+          where: normalizeConditionSpec(rule.select.where),
         }
       : null,
     apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
@@ -125,7 +170,7 @@ export function parseDslSpec(source: unknown): PlainObject {
   let raw = source;
 
   if (typeof source === "string") {
-    raw = yaml.load(source);
+    raw = parseYamlString(source, "dsl spec");
   }
 
   if (!asPlainObject(raw)) {
@@ -136,6 +181,7 @@ export function parseDslSpec(source: unknown): PlainObject {
   const streams = asPlainObject(raw.streams) ? raw.streams : {};
   const patterns = asPlainObject(raw.patterns) ? raw.patterns : {};
   const rules = asPlainObject(raw.rules) ? raw.rules : {};
+  const predicates = asPlainObject(raw.predicates) ? raw.predicates : {};
   const parameters = asPlainObject(raw.parameters) ? raw.parameters : {};
   const topology = asPlainObject(raw.topology) ? raw.topology : {};
   const interpolation = asPlainObject(raw.interpolation) ? raw.interpolation : {};
@@ -152,6 +198,12 @@ export function parseDslSpec(source: unknown): PlainObject {
       parallel: asStringArray(topology.parallel),
       point: asStringArray(topology.point),
     },
+    predicates: Object.fromEntries(
+      Object.entries(predicates).map(([name, predicateSpec]) => [
+        name,
+        normalizeConditionSpec(predicateSpec),
+      ])
+    ),
     patterns: Object.fromEntries(
       Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
     ),

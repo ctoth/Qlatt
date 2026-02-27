@@ -98,6 +98,19 @@ const ABBREVIATIONS: Record<string, string> = {
   "etc.": "etcetera",
 };
 
+const DIGIT_WORDS: Record<string, string> = {
+  "0": "zero",
+  "1": "one",
+  "2": "two",
+  "3": "three",
+  "4": "four",
+  "5": "five",
+  "6": "six",
+  "7": "seven",
+  "8": "eight",
+  "9": "nine",
+};
+
 // ---------------------------------------------------------------------------
 // numberToWords
 // ---------------------------------------------------------------------------
@@ -220,6 +233,46 @@ function convertOrdinal(n: number): string {
   return numberToWords(n) + "th";
 }
 
+function decimalToWords(integerPartRaw: string, fractionalPartRaw: string): string {
+  const integerPart = integerPartRaw.replace(/,/g, "");
+  const integerValue = parseInt(integerPart, 10);
+  const lhs = Number.isFinite(integerValue) ? numberToWords(integerValue) : integerPartRaw;
+  const rhs = fractionalPartRaw
+    .split("")
+    .map((digit) => DIGIT_WORDS[digit] ?? digit)
+    .join(" ");
+  return `${lhs} point ${rhs}`;
+}
+
+function currencyToWords(integerPartRaw: string, fractionalPartRaw?: string): string {
+  const integerPart = integerPartRaw.replace(/,/g, "");
+  const dollars = parseInt(integerPart, 10);
+  if (!Number.isFinite(dollars) || dollars < 0) {
+    return `$${integerPartRaw}${fractionalPartRaw != null ? `.${fractionalPartRaw}` : ""}`;
+  }
+
+  if (fractionalPartRaw == null) {
+    const unit = dollars === 1 ? "dollar" : "dollars";
+    return `${numberToWords(dollars)} ${unit}`;
+  }
+
+  const centsValue = parseInt(fractionalPartRaw.padEnd(2, "0").slice(0, 2), 10);
+  const cents = Number.isFinite(centsValue) ? centsValue : 0;
+  if (dollars === 0) {
+    const centUnit = cents === 1 ? "cent" : "cents";
+    return `${numberToWords(cents)} ${centUnit}`;
+  }
+
+  if (cents === 0) {
+    const unit = dollars === 1 ? "dollar" : "dollars";
+    return `${numberToWords(dollars)} ${unit}`;
+  }
+
+  const dollarUnit = dollars === 1 ? "dollar" : "dollars";
+  const centUnit = cents === 1 ? "cent" : "cents";
+  return `${numberToWords(dollars)} ${dollarUnit} and ${numberToWords(cents)} ${centUnit}`;
+}
+
 // ---------------------------------------------------------------------------
 // normalizeText
 // ---------------------------------------------------------------------------
@@ -249,6 +302,16 @@ export function normalizeText(text: string): string {
     const re = new RegExp("\\b" + escaped, "gi");
     result = result.replace(re, expansion);
   }
+
+  // Convert currency forms like $12, $12.34
+  result = result.replace(/\$([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)(?:\.([0-9]{1,2}))?/g, (_m, dollars, cents) =>
+    currencyToWords(dollars, cents)
+  );
+
+  // Convert decimal numbers before integer conversion so 3.14 does not become "three . fourteen".
+  result = result.replace(/\b([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\.([0-9]+)\b/g, (_m, lhs, rhs) =>
+    decimalToWords(lhs, rhs)
+  );
 
   // Convert ordinals BEFORE numbers so "21st" doesn't become "twenty onest"
   result = result.replace(/\b(\d+)(?:st|nd|rd|th)\b/gi, (_match, digits) => {

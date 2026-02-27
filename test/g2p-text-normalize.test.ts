@@ -80,6 +80,36 @@ describe("normalizeText", () => {
     it("converts zero", () => {
       expect(normalizeText("0 degrees")).toBe("zero degrees");
     });
+
+    it("converts decimal numbers", () => {
+      expect(normalizeText("pi is 3.14")).toBe("pi is three point one four");
+      expect(normalizeText("value 1,234.56")).toBe(
+        "value one thousand two hundred thirty four point five six"
+      );
+    });
+  });
+
+  describe("currency", () => {
+    it("converts whole-dollar amounts", () => {
+      expect(normalizeText("$1")).toBe("one dollar");
+      expect(normalizeText("$12")).toBe("twelve dollars");
+    });
+
+    it("converts dollars and cents", () => {
+      expect(normalizeText("$1.01")).toBe("one dollar and one cent");
+      expect(normalizeText("$2.50")).toBe("two dollars and fifty cents");
+    });
+
+    it("converts cents-only amounts when dollars are zero", () => {
+      expect(normalizeText("$0.99")).toBe("ninety nine cents");
+      expect(normalizeText("$0.01")).toBe("one cent");
+    });
+
+    it("converts comma-grouped dollar amounts", () => {
+      expect(normalizeText("$1,234.56")).toBe(
+        "one thousand two hundred thirty four dollars and fifty six cents"
+      );
+    });
   });
 
   describe("ordinals", () => {

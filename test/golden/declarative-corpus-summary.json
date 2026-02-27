@@ -16,7 +16,7 @@
       "totalTime": 2.6919999999999997,
       "voicedEvents": 19,
       "f0Min": 90.9090909090909,
-      "f0Max": 109.0909090909091
+      "f0Max": 113.49745032530333
     },
     {
       "phrase": "Thin thieves thought that they thrilled.",
@@ -24,7 +24,7 @@
       "totalTime": 2.4489999999999994,
       "voicedEvents": 18,
       "f0Min": 90.80000000000004,
-      "f0Max": 109.2
+      "f0Max": 117.62881646655231
     },
     {
       "phrase": "Ship shape, sheep shop, and cheap chips.",
@@ -56,7 +56,7 @@
       "totalTime": 4.103,
       "voicedEvents": 42,
       "f0Min": 90.46511627906978,
-      "f0Max": 109.53488372093024
+      "f0Max": 111.38972605820702
     },
     {
       "phrase": "Say oh, ee, and oo again.",
@@ -64,7 +64,7 @@
       "totalTime": 2.071,
       "voicedEvents": 17,
       "f0Min": 92,
-      "f0Max": 110
+      "f0Max": 134.5
     },
     {
       "phrase": "Bob bought a big blue balloon.",
@@ -88,7 +88,7 @@
       "totalTime": 2.5559999999999996,
       "voicedEvents": 28,
       "f0Min": 91,
-      "f0Max": 110
+      "f0Max": 118
     },
     {
       "phrase": "Layer, lawyer, royal, rural.",
@@ -96,7 +96,7 @@
       "totalTime": 2.4789999999999996,
       "voicedEvents": 28,
       "f0Min": 94.00000000000003,
-      "f0Max": 110
+      "f0Max": 118
     },
     {
       "phrase": "Nina mumbled many minimal numbers.",
@@ -104,7 +104,7 @@
       "totalTime": 2.4600000000000004,
       "voicedEvents": 51,
       "f0Min": 90.64516129032258,
-      "f0Max": 110
+      "f0Max": 115.01576937973776
     },
     {
       "phrase": "Fresh frost forms on five fields.",
@@ -120,7 +120,7 @@
       "totalTime": 2.569,
       "voicedEvents": 30,
       "f0Min": 93.33333333333333,
-      "f0Max": 110
+      "f0Max": 115.6776273372018
     },
     {
       "phrase": "Zesty zest is easy to spot.",
@@ -128,7 +128,7 @@
       "totalTime": 2.662,
       "voicedEvents": 12,
       "f0Min": 92.66666666666666,
-      "f0Max": 110
+      "f0Max": 110.5458366167586
     },
     {
       "phrase": "Shy sharks shimmer in shallow shoals.",
@@ -136,7 +136,7 @@
       "totalTime": 2.7140000000000004,
       "voicedEvents": 22,
       "f0Min": 90.86956521739131,
-      "f0Max": 109.1304347826087
+      "f0Max": 111.5555513927655
     },
     {
       "phrase": "They bathed the smooth leather.",
@@ -151,8 +151,8 @@
       "events": 31,
       "totalTime": 3.5869999999999993,
       "voicedEvents": 12,
-      "f0Min": 96.66666666666671,
-      "f0Max": 111.33333333333336
+      "f0Min": 96.6666666666667,
+      "f0Max": 117.99999999999999
     },
     {
       "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
@@ -160,7 +160,7 @@
       "totalTime": 5.108999999999999,
       "voicedEvents": 16,
       "f0Min": 92.85714285714286,
-      "f0Max": 108.89724310776946
+      "f0Max": 117.99999999999999
     }
   ]
 }

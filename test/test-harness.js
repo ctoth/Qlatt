@@ -3,7 +3,7 @@ import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend";
 import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/builtin-functions";
-import yaml from "js-yaml";
+import { loadYamlDocument, loadYamlDocumentOrNull } from "../src/yaml-loader.ts";
 
 const ctx = new AudioContext();
 const synth = new KlattSynth(ctx);
@@ -286,14 +286,6 @@ function onExperimentChange() {
 }
 
 /**
- * Fetch a YAML file, returning null if the file doesn't exist (404).
- * Used for experiment inheritance where child experiments may omit configs.
- */
-function fetchYamlOrNull(url) {
-  return fetch(url).then(r => r.ok ? r.text().then(yaml.load) : null).catch(() => null);
-}
-
-/**
  * Merge parent and child registry configs. Child primitives override parent primitives
  * by name; parent primitives not in child are preserved.
  */
@@ -347,18 +339,18 @@ async function loadNewRuntimeConfig() {
 
     // Load child configs (some may be absent for inheriting experiments)
     const [childGraph, childSemantics, childRegistry] = await Promise.all([
-      fetchYamlOrNull(`${basePath}/graph.yaml`),
-      fetchYamlOrNull(`${basePath}/semantics.yaml`),
-      fetchYamlOrNull(`${basePath}/registry.yaml`),
+      loadYamlDocumentOrNull(`${basePath}/graph.yaml`),
+      loadYamlDocumentOrNull(`${basePath}/semantics.yaml`),
+      loadYamlDocumentOrNull(`${basePath}/registry.yaml`),
     ]);
 
     if (manifest && manifest.extends) {
       // Load parent configs
       const parentBase = `./experiments/${manifest.extends}`;
       const [parentGraph, parentSemantics, parentRegistry] = await Promise.all([
-        fetch(`${parentBase}/graph.yaml`).then(r => r.text()).then(yaml.load),
-        fetch(`${parentBase}/semantics.yaml`).then(r => r.text()).then(yaml.load),
-        fetch(`${parentBase}/registry.yaml`).then(r => r.text()).then(yaml.load),
+        loadYamlDocument(`${parentBase}/graph.yaml`),
+        loadYamlDocument(`${parentBase}/semantics.yaml`),
+        loadYamlDocument(`${parentBase}/registry.yaml`),
       ]);
 
       // Merge: child overrides parent
@@ -1702,8 +1694,8 @@ function attachMetersNewRuntime(runtime) {
   // Map from legacy meter names to new graph node IDs
   const outputTargets = [
     { name: "cascade-out", nodeId: "cascadeOutGain" },
+    { name: "parallel-out", nodeId: "parallelSum" },
     { name: "output-sum", nodeId: "outputSum" },
-    // Note: new runtime may not have direct "parallel-out" equivalent at same point
   ];
 
   for (const target of outputTargets) {

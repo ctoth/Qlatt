@@ -27,6 +27,12 @@ type NavigationBundle = {
     params: RuntimeLike,
     extraContext?: RuntimeLike | null
   ) => RuntimeLike;
+  evaluateCondition: (
+    condition: unknown,
+    token: TokenLike,
+    params: RuntimeLike,
+    extraContext?: RuntimeLike | null
+  ) => boolean;
 };
 
 function isTokenLike(value: unknown): value is TokenLike {
@@ -39,6 +45,66 @@ function isTokenLike(value: unknown): value is TokenLike {
     Object.prototype.hasOwnProperty.call(value, "anchor_right") ||
     Object.prototype.hasOwnProperty.call(value, "status")
   );
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function cloneRuntimeValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneRuntimeValue(entry));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, cloneRuntimeValue(entry)])
+    );
+  }
+  return value;
+}
+
+function projectPolicyValues(node: unknown): unknown {
+  if (!isPlainObject(node)) return cloneRuntimeValue(node);
+  if (Object.prototype.hasOwnProperty.call(node, "value")) {
+    return cloneRuntimeValue(node.value);
+  }
+  return Object.fromEntries(
+    Object.entries(node).map(([key, entry]) => [key, projectPolicyValues(entry)])
+  );
+}
+
+function normalizeParameterTree(parameters: unknown): Record<string, unknown> {
+  if (!isPlainObject(parameters)) return {};
+  const clone = cloneRuntimeValue(parameters) as Record<string, unknown>;
+  if (Object.prototype.hasOwnProperty.call(clone, "policy")) {
+    clone.policy = projectPolicyValues(clone.policy);
+  }
+  return clone;
+}
+
+function deepMergeRecords(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    const current = merged[key];
+    if (isPlainObject(current) && isPlainObject(value)) {
+      merged[key] = deepMergeRecords(current, value);
+      continue;
+    }
+    merged[key] = cloneRuntimeValue(value);
+  }
+  return merged;
+}
+
+function buildRuntimeParams(
+  specParameters: unknown,
+  overrideParameters: unknown
+): Record<string, unknown> {
+  const base = normalizeParameterTree(specParameters);
+  const override = normalizeParameterTree(overrideParameters);
+  return deepMergeRecords(base, override);
 }
 
 function cloneSequence(sequence: TokenLike[]): TokenLike[] {
@@ -419,6 +485,35 @@ function buildNavigationFunctions(
     ) {
       return getActiveStreamTokens(stream).indexOf(currentToken);
     }
+    // Cross-stream lookup: when the current token's stream differs from the
+    // requested point stream (e.g. phone-stream rule asking for prev_point('f0')),
+    // find the last point in the target stream whose anchor is temporally at or
+    // before the current token's right boundary.  Return cursor = lastIndex + 1
+    // so that prevPointFn (which subtracts 1) yields that point.
+    if (
+      currentToken &&
+      isActiveToken(currentToken) &&
+      runtime?.pointStreams?.has(stream)
+    ) {
+      const currentBounds = getTokenBounds(currentToken, runtime);
+      if (currentBounds && currentBounds.right != null) {
+        const points = getActiveStreamTokens(stream);
+        let lastBefore = -1;
+        for (let i = 0; i < points.length; i++) {
+          const pointBounds = getTokenBounds(points[i], runtime);
+          if (
+            pointBounds &&
+            pointBounds.left != null &&
+            compareOrderValue(pointBounds.left, currentBounds.right) <= 0
+          ) {
+            lastBefore = i;
+          }
+        }
+        if (lastBefore >= 0) {
+          return lastBefore + 1;
+        }
+      }
+    }
     return -1;
   };
 
@@ -677,11 +772,99 @@ function buildNavigationFunctions(
 
   const runtimeParams =
     runtime?.params && typeof runtime.params === "object" ? runtime.params : {};
+  const predicateLibrary =
+    runtime?.predicates && typeof runtime.predicates === "object" && !Array.isArray(runtime.predicates)
+      ? (runtime.predicates as Record<string, unknown>)
+      : {};
 
-  const lookBackWhereFn = (
+  const evaluateConditionInContext = (
+    condition: unknown,
+    context: RuntimeLike,
+    predicateStack: Set<string> = new Set()
+  ): boolean => {
+    if (condition == null || condition === true || condition === "true") return true;
+
+    if (typeof condition === "string") {
+      return Boolean(evaluateExpression(condition, context, functions));
+    }
+
+    if (!condition || typeof condition !== "object" || Array.isArray(condition)) {
+      throw new Error("E_CONDITION_INVALID: condition must be a string or condition object");
+    }
+
+    const keys = Object.keys(condition);
+    if (keys.length !== 1) {
+      throw new Error(
+        "E_CONDITION_INVALID: condition object must contain exactly one of expr/predicate/all/any/not"
+      );
+    }
+
+    const key = keys[0];
+    const value = (condition as TokenLike)[key];
+    if (key === "expr") {
+      if (typeof value !== "string") {
+        throw new Error("E_CONDITION_INVALID: expr condition must be a string");
+      }
+      return Boolean(evaluateExpression(value, context, functions));
+    }
+    if (key === "predicate") {
+      if (typeof value !== "string" || value.length === 0) {
+        throw new Error("E_CONDITION_INVALID: predicate condition must be a non-empty string");
+      }
+      if (!Object.prototype.hasOwnProperty.call(predicateLibrary, value)) {
+        throw new Error(`E_PREDICATE_UNKNOWN: unknown predicate '${value}'`);
+      }
+      if (predicateStack.has(value)) {
+        const chain = [...predicateStack, value].join(" -> ");
+        throw new Error(`E_PREDICATE_CYCLE: predicate cycle detected (${chain})`);
+      }
+      const nextStack = new Set(predicateStack);
+      nextStack.add(value);
+      return evaluateConditionInContext(predicateLibrary[value], context, nextStack);
+    }
+    if (key === "all") {
+      if (!Array.isArray(value)) {
+        throw new Error("E_CONDITION_INVALID: all condition must be an array");
+      }
+      for (const branch of value) {
+        if (!evaluateConditionInContext(branch, context, predicateStack)) return false;
+      }
+      return true;
+    }
+    if (key === "any") {
+      if (!Array.isArray(value)) {
+        throw new Error("E_CONDITION_INVALID: any condition must be an array");
+      }
+      for (const branch of value) {
+        if (evaluateConditionInContext(branch, context, predicateStack)) return true;
+      }
+      return false;
+    }
+    if (key === "not") {
+      return !evaluateConditionInContext(value, context, predicateStack);
+    }
+
+    throw new Error(
+      `E_CONDITION_INVALID: unknown condition key '${key}' (expected expr/predicate/all/any/not)`
+    );
+  };
+
+  const evaluateConditionForToken = (
+    condition: unknown,
+    token: TokenLike,
+    params: RuntimeLike,
+    extraContext: RuntimeLike | null = null
+  ): boolean => {
+    const context = buildContext(token, params, extraContext);
+    return evaluateConditionInContext(condition, context);
+  };
+
+  const scanWhere = (
     tokenRef: unknown,
-    maxSteps: unknown = 1,
-    predicateExpr: unknown
+    maxSteps: unknown,
+    predicate: unknown,
+    direction: -1 | 1,
+    tag: "lookback" | "lookahead"
   ): TokenLike | null => {
     const source = resolveLiveToken(tokenRef);
     if (!source) return null;
@@ -689,30 +872,53 @@ function buildNavigationFunctions(
     const steps = Math.trunc(Number(maxSteps));
     if (!Number.isFinite(steps) || steps <= 0) return null;
 
-    const predicate = typeof predicateExpr === "string" ? predicateExpr.trim() : "";
-    if (!predicate) return null;
-
     const stream = getTokenStream(source);
     const active = getActiveStreamTokens(stream);
     const sourceIndex = active.indexOf(source);
-    if (sourceIndex <= 0) return null;
+    if (sourceIndex < 0) return null;
 
-    const limit = Math.min(steps, sourceIndex);
+    const maxAvailable =
+      direction < 0 ? sourceIndex : Math.max(0, active.length - sourceIndex - 1);
+    const limit = Math.min(steps, maxAvailable);
     for (let offset = 1; offset <= limit; offset += 1) {
-      const candidate = active[sourceIndex - offset];
+      const candidate = active[sourceIndex + direction * offset];
       if (!candidate) continue;
-      // Evaluate the predicate with candidate-local cursors and `source` as origin.
       const context = buildContext(candidate, runtimeParams, {
         source,
         candidate,
-        lookback_offset: offset,
+        [`${tag}_offset`]: offset,
       });
-      if (Boolean(evaluateExpression(predicate, context, functions))) {
+      if (evaluateConditionInContext(predicate, context)) {
         return toCursorView(candidate);
       }
     }
-
     return null;
+  };
+
+  const lookBackWhereFn = (
+    tokenRef: unknown,
+    maxSteps: unknown = 1,
+    predicateExpr: unknown
+  ): TokenLike | null => scanWhere(tokenRef, maxSteps, predicateExpr, -1, "lookback");
+
+  const lookBackPredFn = (
+    tokenRef: unknown,
+    maxSteps: unknown = 1,
+    predicateName: unknown
+  ): TokenLike | null => {
+    const name = typeof predicateName === "string" ? predicateName.trim() : "";
+    if (!name) return null;
+    return scanWhere(tokenRef, maxSteps, { predicate: name }, -1, "lookback");
+  };
+
+  const lookAheadPredFn = (
+    tokenRef: unknown,
+    maxSteps: unknown = 1,
+    predicateName: unknown
+  ): TokenLike | null => {
+    const name = typeof predicateName === "string" ? predicateName.trim() : "";
+    if (!name) return null;
+    return scanWhere(tokenRef, maxSteps, { predicate: name }, 1, "lookahead");
   };
 
   const functions = {
@@ -741,11 +947,14 @@ function buildNavigationFunctions(
       String(haystack ?? "").includes(String(needle ?? "")),
     merge: mergeFn,
     look_back_where: lookBackWhereFn,
+    look_back_pred: lookBackPredFn,
+    look_ahead_pred: lookAheadPredFn,
   };
 
   return {
     functions,
     buildContext,
+    evaluateCondition: evaluateConditionForToken,
   };
 }
 
@@ -756,11 +965,7 @@ function evaluateSelectWhere(
   navigation: NavigationBundle,
   extraContext: RuntimeLike | null = null
 ): boolean {
-  if (!whereExpr || whereExpr === "true") return true;
-  if (typeof whereExpr !== "string") return false;
-  const context = navigation.buildContext(token, params, extraContext);
-  const result = evaluateExpression(whereExpr, context, navigation.functions);
-  return Boolean(result);
+  return navigation.evaluateCondition(whereExpr, token, params, extraContext);
 }
 
 function evaluateRuleConstraint(
@@ -770,11 +975,7 @@ function evaluateRuleConstraint(
   navigation: NavigationBundle,
   extraContext: RuntimeLike | null = null
 ): boolean {
-  if (!constraintExpr || constraintExpr === "true") return true;
-  if (typeof constraintExpr !== "string") return false;
-  const context = navigation.buildContext(token, params, extraContext);
-  const result = evaluateExpression(constraintExpr, context, navigation.functions);
-  return Boolean(result);
+  return navigation.evaluateCondition(constraintExpr, token, params, extraContext);
 }
 
 function evaluateValueExpression(
@@ -2143,10 +2344,11 @@ export function runRuleEngine(
   );
 
   const runtime: RuntimeLike = {
-    params: {
-      ...(spec.parameters ?? {}),
-      ...(options.parameters ?? {}),
-    },
+    params: buildRuntimeParams(spec.parameters, options.parameters),
+    predicates:
+      spec.predicates && typeof spec.predicates === "object" && !Array.isArray(spec.predicates)
+        ? spec.predicates
+        : {},
     patterns: spec.patterns ?? {},
     pointStreams,
     baseStreams,

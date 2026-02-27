@@ -1,4 +1,7 @@
-import { CMU_DICT } from "./cmu-dictionary";
+import {
+  DEFAULT_CMU_DICTIONARY_PATH,
+  preloadCmuDictionaryFromPath,
+} from "./cmu-dictionary-loader";
 import {
   PHONEME_TARGETS,
   fillDefaultParams,
@@ -9,7 +12,9 @@ import { runDeclarativeFrontend } from "./declarative-frontend";
 type FrontendToken = Record<string, any>;
 type KlattParams = Record<string, number>;
 
-const CMU_DICT_MAP = CMU_DICT as Record<string, string | undefined>;
+const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
+  DEFAULT_CMU_DICTIONARY_PATH
+);
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 
 export function normalizeText(text: string): string {
@@ -527,10 +532,14 @@ export function textToKlattTrack(inputText: string, baseF0 = 110, transitionMs =
     ...declarativeInventory,
     phases: ["prosody", "finalize"],
     parameters: {
-      base_f0: baseF0,
-      fall_rate_hz: 20,
-      stress_rise: 1.15,
-      question_rise_hz: 30,
+      policy: {
+        f0: {
+          base_hz: baseF0,
+          fall_rate_hz: 20,
+          stress_rise: 1.15,
+          question_rise_hz: 30,
+        },
+      },
     },
   }) as FrontendToken[];
   const phoneSequence = parameterSequence.filter(

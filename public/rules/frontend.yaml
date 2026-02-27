@@ -299,6 +299,10 @@ streams:
     value_type: number
     unit: Hz
 phases:
+  - name: postlexical
+    rules:
+      - the_prevocalic_reduction
+      - t_flapping
   - name: structural
     rules:
       - insert_voiceless_stop_release_and_aspiration
@@ -359,6 +363,59 @@ phases:
     resolve_points:
       - f0
 rules:
+  the_prevocalic_reduction:
+    kind: postlexical
+    citation: Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'AH0'
+        && (has(current.word) ? current.word == 'the' : false)
+        && next != null
+        && (has(next.word) ? next.word != 'the' : false)
+        && next.type == 'vowel'
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+            - params
+            - duration
+            - inherentDuration
+            - type
+          phoneme: '"IH0"'
+  t_flapping:
+    kind: postlexical
+    citation: Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'T_CL'
+        && prev != null && prev.type == 'vowel'
+        && (has(prev.stress) ? prev.stress == 1 : false)
+        && next != null && next.type == 'vowel'
+        && (has(next.stress) ? next.stress == 0 : false)
+    define:
+      dx_target: target("DX")
+      dx_params: dx_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: '"DX"'
+          type: '"flap"'
+          duration: '30'
+          inherentDuration: '30'
+          params: dx_params
   insert_voiceless_stop_release_and_aspiration:
     kind: structural
     citation: Lisker & Abramson 1964 (English long-lag VOT isolated /p/=58, /t/=70, /k/=80 ms; sentence-initial /p/=28, /t/=39, /k/=43 ms); Stevens 1998 Ch.8; Allen et al. 1987 Table C-1

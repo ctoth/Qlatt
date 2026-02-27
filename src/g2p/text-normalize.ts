@@ -111,6 +111,21 @@ const DIGIT_WORDS: Record<string, string> = {
   "9": "nine",
 };
 
+const MONTH_NAMES = [
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
+];
+
 // ---------------------------------------------------------------------------
 // numberToWords
 // ---------------------------------------------------------------------------
@@ -273,6 +288,66 @@ function currencyToWords(integerPartRaw: string, fractionalPartRaw?: string): st
   return `${numberToWords(dollars)} ${dollarUnit} and ${numberToWords(cents)} ${centUnit}`;
 }
 
+function timeToWords(hourRaw: string, minuteRaw: string, meridiemRaw?: string): string {
+  const hours = parseInt(hourRaw, 10);
+  const minutes = parseInt(minuteRaw, 10);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return `${hourRaw}:${minuteRaw}${meridiemRaw ? ` ${meridiemRaw}` : ""}`;
+  }
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    return `${hourRaw}:${minuteRaw}${meridiemRaw ? ` ${meridiemRaw}` : ""}`;
+  }
+
+  let spokenHour = hours;
+  let meridiem = meridiemRaw?.toLowerCase().replace(/\./g, "");
+  if (!meridiem) {
+    meridiem = hours < 12 ? "am" : "pm";
+    spokenHour = hours % 12;
+    if (spokenHour === 0) {
+      spokenHour = 12;
+    }
+  } else if (spokenHour === 0) {
+    spokenHour = 12;
+  } else if (spokenHour > 12) {
+    spokenHour -= 12;
+  }
+
+  const minuteWords =
+    minutes === 0
+      ? "o'clock"
+      : minutes < 10
+        ? `oh ${numberToWords(minutes)}`
+        : numberToWords(minutes);
+  const meridiemWords = meridiem === "pm" ? "p m" : "a m";
+  return `${numberToWords(spokenHour)} ${minuteWords} ${meridiemWords}`;
+}
+
+function dateToWords(monthRaw: string, dayRaw: string, yearRaw: string): string {
+  const month = parseInt(monthRaw, 10);
+  const day = parseInt(dayRaw, 10);
+  const year = parseInt(yearRaw, 10);
+  if (!Number.isFinite(month) || !Number.isFinite(day) || !Number.isFinite(year)) {
+    return `${monthRaw}/${dayRaw}/${yearRaw}`;
+  }
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
+    return `${monthRaw}/${dayRaw}/${yearRaw}`;
+  }
+  return `${MONTH_NAMES[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+}
+
+function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): string {
+  const month = parseInt(monthRaw, 10);
+  const day = parseInt(dayRaw, 10);
+  const year = parseInt(yearRaw, 10);
+  if (!Number.isFinite(month) || !Number.isFinite(day) || !Number.isFinite(year)) {
+    return `${yearRaw}-${monthRaw}-${dayRaw}`;
+  }
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
+    return `${yearRaw}-${monthRaw}-${dayRaw}`;
+  }
+  return `${MONTH_NAMES[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+}
+
 // ---------------------------------------------------------------------------
 // normalizeText
 // ---------------------------------------------------------------------------
@@ -302,6 +377,27 @@ export function normalizeText(text: string): string {
     const re = new RegExp("\\b" + escaped, "gi");
     result = result.replace(re, expansion);
   }
+
+  // Semiotic class normalization pass inspired by Kestrel-style workflows:
+  // prioritize class-specific verbalization (date/time/currency/number) before
+  // generic token cleanup. See Ebden & Sproat (2014/2015), and MITalk text
+  // analysis practices in Allen, Hunnicutt & Klatt (1987).
+
+  // Convert common date forms before numeric normalization.
+  result = result.replace(/\b([0-1]?[0-9])\/([0-3]?[0-9])\/([0-9]{4})\b/g, (_m, month, day, year) =>
+    dateToWords(month, day, year)
+  );
+  result = result.replace(/\b([0-9]{4})-([0-1][0-9])-([0-3][0-9])\b/g, (_m, year, month, day) =>
+    isoDateToWords(year, month, day)
+  );
+
+  // Convert time forms like 3:05 pm, 14:30, 9:00am before punctuation splitting.
+  result = result.replace(/\b([0-2]?[0-9]):([0-5][0-9])\s*([ap]\.?m\.?)\b/gi, (_m, hour, minute, meridiem) =>
+    timeToWords(hour, minute, meridiem)
+  );
+  result = result.replace(/\b([0-2]?[0-9]):([0-5][0-9])\b/g, (_m, hour, minute) =>
+    timeToWords(hour, minute)
+  );
 
   // Convert currency forms like $12, $12.34
   result = result.replace(/\$([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)(?:\.([0-9]{1,2}))?/g, (_m, dollars, cents) =>

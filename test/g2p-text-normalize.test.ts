@@ -112,6 +112,28 @@ describe("normalizeText", () => {
     });
   });
 
+  describe("time and date", () => {
+    it("converts times with explicit meridiem", () => {
+      expect(normalizeText("meet at 3:05 pm")).toBe("meet at three oh five p m");
+      expect(normalizeText("alarm at 9:00am")).toBe("alarm at nine o'clock a m");
+    });
+
+    it("converts 24-hour times to inferred 12-hour speech", () => {
+      expect(normalizeText("depart 14:30")).toBe("depart two thirty p m");
+      expect(normalizeText("start 00:15")).toBe("start twelve fifteen a m");
+    });
+
+    it("converts slash dates", () => {
+      expect(normalizeText("on 12/25/2024")).toBe("on december twenty fifth two thousand twenty four");
+    });
+
+    it("converts iso dates", () => {
+      expect(normalizeText("deadline 2026-02-27")).toBe(
+        "deadline february twenty seventh two thousand twenty six"
+      );
+    });
+  });
+
   describe("ordinals", () => {
     it("converts 1st", () => {
       expect(normalizeText("the 1st time")).toBe("the first time");

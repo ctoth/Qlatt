@@ -435,7 +435,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Cancel any previous scheduling
     cancelScheduled();
 
-    const baseTime = startTime ?? audioContext.currentTime;
+    const baseTime = startTime;
     trackDuration = track[track.length - 1]?.time ?? 0;
 
     log(`Scheduling ${track.length} frames starting at ${baseTime.toFixed(3)}s`);

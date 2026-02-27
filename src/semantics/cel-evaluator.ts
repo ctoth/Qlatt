@@ -25,6 +25,7 @@ export function createCelEvaluator(): CelEvaluator {
   const env = new Environment({
     unlistedVariablesAreDyn: true,
     homogeneousAggregateLiterals: false,
+    enableOptionalTypes: true,
   });
 
   // Register mixed-type arithmetic operators for int/double interop.

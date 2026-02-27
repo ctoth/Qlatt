@@ -22,8 +22,7 @@
     "golden:declarative-summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/export-declarative-corpus-summary.ts",
     "tts-dsl": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/tts-dsl.ts",
     "explain": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-phrase.ts",
-    "explain:summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-summary.ts",
-    "postinstall": "patch-package"
+    "explain:summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-summary.ts"
   },
   "dependencies": {
     "@marcbachmann/cel-js": "^7.5.1",
@@ -34,7 +33,6 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "patch-package": "^8.0.1",
     "puppeteer-core": "^23.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",

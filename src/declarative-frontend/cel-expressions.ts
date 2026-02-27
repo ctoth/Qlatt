@@ -52,6 +52,7 @@ function createCelEnvironment(): Environment {
   const env = new Environment({
     unlistedVariablesAreDyn: true,
     homogeneousAggregateLiterals: false,
+    enableOptionalTypes: true,
   });
 
   // Register mixed-type arithmetic operators.

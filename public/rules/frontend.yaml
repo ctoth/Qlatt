@@ -72,6 +72,12 @@ parameters:
         value: 1.4
         citations:
           - Klatt 1976 §III.A
+          - Crystal & House 1988
+      pre_boundary_terminal_obstruent_multiplier:
+        value: 1.15
+        citations:
+          - Crystal & House 1988
+          - "Engineering estimate: obstruents show weaker phrase-final lengthening than sonorants/vowels"
       pre_boundary_word_multiplier:
         value: 1.1
         citations:
@@ -741,7 +747,7 @@ rules:
     apply:
       - field: params.F2
         op: set
-        value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : 1500'
+        value: 'prev != null && has(prev.?params.F2) ? prev.params.F2 : 1500'
   bilabial_f2_locus:
     kind: scalar
     citation: "Stevens & House 1956 (locus varies 700-1500 Hz by vowel context; 1200 Hz is midpoint approximation per Allen et al. 1987 Ch.11)"
@@ -774,7 +780,7 @@ rules:
     apply:
       - field: params.F2
         op: set
-        value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus'
+        value: 'prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus'
   alveolar_f2_locus:
     kind: scalar
     citation: Stevens & House 1956 (formant transitions); Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
@@ -807,7 +813,7 @@ rules:
     apply:
       - field: params.F2
         op: set
-        value: 'prev != null && has(prev.params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus'
+        value: 'prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus'
   nasal_antiformant_by_place:
     kind: scalar
     citation: Stevens 1998 Ch.10 (nasal consonant oral cavity zeros); Fujimura 1962 (nasal consonant antiresonances by place)
@@ -824,7 +830,7 @@ rules:
             value: params.policy.formant.nasal_fnz_n
           - when: current.phoneme == 'NG'
             value: params.policy.formant.nasal_fnz_ng
-          - default: 'has(current.params.FNZ) ? current.params.FNZ : 480'
+          - default: 'has(current.?params.FNZ) ? current.params.FNZ : 480'
   dark_l_allophony:
     kind: scalar
     citation: Recasens 2012 (lateral allophones); Sproat & Fujimura 1993 (syllable-final /l/ darkening)
@@ -842,13 +848,13 @@ rules:
         dispatch:
           - when: is_coda
             value: params.policy.formant.dark_l_f2
-          - default: 'has(current.params.F2) ? current.params.F2 : 1050'
+          - default: 'has(current.?params.F2) ? current.params.F2 : 1050'
       - field: params.F3
         op: set
         dispatch:
           - when: is_coda
             value: params.policy.formant.dark_l_f3
-          - default: 'has(current.params.F3) ? current.params.F3 : 2600'
+          - default: 'has(current.?params.F3) ? current.params.F3 : 2600'
   r_f3_lowering:
     kind: scalar
     citation: Espy-Wilson 2000 (acoustic modeling of American /r/); Stevens 1998 Ch.9
@@ -908,7 +914,7 @@ rules:
     select:
       stream: phone
       where: >-
-        current.type == 'vowel' && has(current.params) && has(current.params.F1)
+        current.type == 'vowel' && has(current.params) && has(current.?params.F1)
         && (has(current.stress) ? current.stress == 0 : false)
     apply:
       - field: params.F1
@@ -1038,7 +1044,7 @@ rules:
         tag: segmental_context
   pre_boundary_lengthening:
     kind: scalar
-    citation: Klatt 1976 §III.A
+    citation: Klatt 1976 §III.A; Crystal & House 1988 (stronger phrase-final lengthening on sonorants/vowels than obstruents)
     select:
       stream: phone
       where: current.phoneme != 'SIL'
@@ -1054,6 +1060,10 @@ rules:
         dispatch:
           - when: "n == null"
             value: params.policy.duration.pre_boundary_terminal_multiplier
+          - when: >-
+              n.phoneme == 'SIL' && has(n.punctuationSymbol)
+              && current.type in ['stop_closure', 'stop_release', 'stop_aspiration', 'fricative', 'affricate']
+            value: params.policy.duration.pre_boundary_terminal_obstruent_multiplier
           - when: "n.phoneme == 'SIL' && has(n.punctuationSymbol)"
             value: params.policy.duration.pre_boundary_terminal_multiplier
           - when: "n.phoneme != 'SIL' && cur_word != '' && next_word != '' && cur_word != next_word"
@@ -1108,14 +1118,14 @@ rules:
     select:
       stream: phone
       where: >-
-        current.phoneme != 'SIL' && ((has(current.params.AV) && current.params.AV > 0) || (has(current.params.AVS) &&
+        current.phoneme != 'SIL' && ((has(current.?params.AV) && current.params.AV > 0) || (has(current.?params.AVS) &&
         current.params.AVS > 0))
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)
       value: >-
         max([((params.policy.f0.base_hz - params.policy.f0.fall_rate_hz * (phrase_total <= 1 ? 0 :
-        (double(phrase_index) / double(phrase_total - 1)))) * (has(current.params.F0_Factor) ?
+        (double(phrase_index) / double(phrase_total - 1)))) * (has(current.?params.F0_Factor) ?
         current.params.F0_Factor : 1)), params.policy.f0.base_hz * params.policy.f0.declination_floor_ratio])
       tag: f0_declination
   f0_stress_peak:
@@ -1124,8 +1134,8 @@ rules:
     select:
       stream: phone
       where: >-
-        current.type == 'vowel' && current.stress == 1 && ((has(current.params.AV) && current.params.AV > 0) ||
-        (has(current.params.AVS) && current.params.AVS > 0))
+        current.type == 'vowel' && current.stress == 1 && ((has(current.?params.AV) && current.params.AV > 0) ||
+        (has(current.?params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
     insert_point:
@@ -1283,7 +1293,7 @@ rules:
             value: 40
           - when: has(current.velar) && current.velar == true
             value: 45
-          - default: 'has(current.params.A2) ? current.params.A2 : 0'
+          - default: 'has(current.?params.A2) ? current.params.A2 : 0'
       - field: params.A3
         op: set
         dispatch:
@@ -1293,7 +1303,7 @@ rules:
             value: 50
           - when: has(current.velar) && current.velar == true
             value: 50
-          - default: 'has(current.params.A3) ? current.params.A3 : 0'
+          - default: 'has(current.?params.A3) ? current.params.A3 : 0'
       - field: params.A4
         op: set
         dispatch:
@@ -1303,7 +1313,7 @@ rules:
             value: 50
           - when: has(current.velar) && current.velar == true
             value: 55
-          - default: 'has(current.params.A4) ? current.params.A4 : 0'
+          - default: 'has(current.?params.A4) ? current.params.A4 : 0'
       - field: params.A5
         op: set
         dispatch:
@@ -1313,7 +1323,7 @@ rules:
             value: 45
           - when: has(current.velar) && current.velar == true
             value: 40
-          - default: 'has(current.params.A5) ? current.params.A5 : 0'
+          - default: 'has(current.?params.A5) ? current.params.A5 : 0'
       - field: params.A6
         op: set
         dispatch:
@@ -1323,7 +1333,7 @@ rules:
             value: 50
           - when: has(current.velar) && current.velar == true
             value: 35
-          - default: 'has(current.params.A6) ? current.params.A6 : 0'
+          - default: 'has(current.?params.A6) ? current.params.A6 : 0'
   nasal_place_assimilation:
     kind: scalar
     citation: Allen et al. 1987 Ch.10 (nasal place assimilation); Fujimura 1962 (nasal consonant place acoustics); Stevens 1998 Ch.10
@@ -1347,15 +1357,15 @@ rules:
             value: params.policy.formant.nasal_fnz_m
           - when: next_velar
             value: params.policy.formant.nasal_fnz_ng
-          - default: 'has(current.params.FNZ) ? current.params.FNZ : 1700'
+          - default: 'has(current.?params.FNZ) ? current.params.FNZ : 1700'
       - field: params.F2
         op: set
         dispatch:
           - when: next_bilabial
             value: params.policy.formant.bilabial_f2_locus
           - when: next_velar
-            value: 'has(current.params.F2) ? current.params.F2 : 1400'
-          - default: 'has(current.params.F2) ? current.params.F2 : 1400'
+            value: 'has(current.?params.F2) ? current.params.F2 : 1400'
+          - default: 'has(current.?params.F2) ? current.params.F2 : 1400'
   stop_unreleasing:
     kind: scalar
     citation: Miller 1998 (unreleased stops before non-sonorants); Crystal & House 1988
@@ -1403,13 +1413,13 @@ rules:
       has_flanking: >-
         next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false
       prev_f2: >-
-        has(prev.params.F2) ? prev.params.F2 : 1500
+        has(prev.?params.F2) ? prev.params.F2 : 1500
       next_f2: >-
-        has_flanking ? (has(next_vowel.params.F2) ? next_vowel.params.F2 : 1500) : 1500
+        has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : 1500) : 1500
       flanking_avg_f2: >-
         has_flanking ? (prev_f2 + next_f2) / 2 : 0
       cur_f2: >-
-        has(current.params.F2) ? current.params.F2 : 1500
+        has(current.?params.F2) ? current.params.F2 : 1500
     constraint: has_flanking
     apply:
       - field: params.F2

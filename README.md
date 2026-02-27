@@ -27,7 +27,7 @@ http://localhost:8000/test/test-harness.html
 
 - The LF source uses a natural glottal pulse with an Rd-driven open phase ratio and a simple spectral tilt mapping.
 - Resonator and antiresonator processors implement Klatt 1980 two-pole and two-zero sections.
-- `src/tts-frontend.ts` uses `src/cmu-dictionary.ts` (a small built-in dictionary). Swap to a full CMU dictionary if needed.
+- `src/tts-frontend.ts` preloads `public/cmu-dictionary.json` at runtime (generate/update it with `npm run build:dict`).
 - The frontend runtime is declarative-first: `src/declarative-frontend/rule-pack.ts` + `src/declarative-frontend/engine.ts` drive structural, duration, prosody, and finalize phases.
 - Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`) are removed from runtime usage and module exports.
 

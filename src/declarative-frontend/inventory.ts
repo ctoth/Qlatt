@@ -161,9 +161,59 @@ export function fillDefaultParams(target: Record<string, unknown> | null | undef
   return filled;
 }
 
-export function materializePhonemeTarget(phoneme: unknown) {
-  const key = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
-  const target = (PHONEME_TARGETS[key] || PHONEME_TARGETS.SIL || {}) as Record<string, unknown>;
+export function materializePhonemeTarget(
+  phoneme: unknown,
+  options?: { stress?: number | null },
+) {
+  const baseKey = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
+
+  // Resolve the actual lookup key, applying stress-aware vowel resolution when
+  // an options bag with a stress value is provided.
+  let resolvedKey = baseKey;
+  let target: Record<string, unknown> | undefined;
+
+  if (options && "stress" in options) {
+    // Determine whether the base phoneme is a vowel by probing stressed variants
+    // (vowels only exist in inventory as e.g. AH1/AH0, never bare AH).
+    const probeTarget =
+      PHONEME_TARGETS[baseKey + "1"] ||
+      PHONEME_TARGETS[baseKey + "0"] ||
+      PHONEME_TARGETS[baseKey];
+    const isVowel = (probeTarget as Record<string, unknown> | undefined)?.type === "vowel";
+
+    if (isVowel) {
+      const stressMarker = options.stress === 1 ? "1" : "0";
+      const fallbackMarker = stressMarker === "1" ? "0" : "1";
+      target = PHONEME_TARGETS[baseKey + stressMarker] as Record<string, unknown> | undefined;
+      if (target) {
+        resolvedKey = baseKey + stressMarker;
+      } else {
+        target = PHONEME_TARGETS[baseKey + fallbackMarker] as Record<string, unknown> | undefined;
+        if (target) {
+          resolvedKey = baseKey + fallbackMarker;
+        }
+      }
+    } else {
+      // Consonant: try with suffixes then bare key (matches original frontend logic)
+      target =
+        (PHONEME_TARGETS[baseKey + "1"] as Record<string, unknown> | undefined) ||
+        (PHONEME_TARGETS[baseKey + "0"] as Record<string, unknown> | undefined) ||
+        (PHONEME_TARGETS[baseKey] as Record<string, unknown> | undefined);
+      if (target) {
+        // resolvedKey stays baseKey for consonants (they don't rename)
+        resolvedKey = baseKey;
+      }
+    }
+  } else {
+    // No options: direct lookup (backward-compatible path)
+    target = PHONEME_TARGETS[resolvedKey] as Record<string, unknown> | undefined;
+  }
+
+  // Final fallback to SIL
+  if (!target) {
+    target = (PHONEME_TARGETS.SIL || {}) as Record<string, unknown>;
+  }
+
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
   const payload: {
     phoneme: string;
@@ -172,7 +222,7 @@ export function materializePhonemeTarget(phoneme: unknown) {
     inherentDuration: number | undefined;
     [key: string]: unknown;
   } = {
-    phoneme: key,
+    phoneme: resolvedKey,
     params: fillDefaultParams(target),
     duration: targetDuration || 30,
     inherentDuration: targetDuration,

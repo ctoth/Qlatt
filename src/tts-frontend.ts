@@ -207,44 +207,16 @@ export function textToKlattTrack(
       targetKeyBase += "_CL";
     }
 
-    // Determine lookup key: Vowels use stress, Consonants ignore stress for lookup
-    let baseTarget: Record<string, any> | undefined;
-    const targetInfoBase =
-      PHONEME_TARGET_MAP[targetKeyBase + "1"] ||
-      PHONEME_TARGET_MAP[targetKeyBase + "0"] ||
-      PHONEME_TARGET_MAP[targetKeyBase]; // Check base first
-    const isVowel = targetInfoBase?.type === "vowel";
+    // Delegate stress-aware inventory lookup to materializePhonemeTarget
+    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
 
-    if (isVowel) {
-      let stressMarker = ph.stress === 1 ? "1" : "0"; // Default null/2 stress to 0
-      let targetKey = targetKeyBase + stressMarker;
-      baseTarget = PHONEME_TARGET_MAP[targetKey];
-      // Fallback for vowels if specific stress variant missing
-      if (!baseTarget) {
-        let fallbackStressMarker = stressMarker === "1" ? "0" : "1";
-        baseTarget = PHONEME_TARGET_MAP[targetKeyBase + fallbackStressMarker];
-      }
-    } else {
-      // For consonants, try finding *any* entry (ignore stress marker initially)
-      baseTarget =
-        PHONEME_TARGET_MAP[targetKeyBase + "1"] ||
-        PHONEME_TARGET_MAP[targetKeyBase + "0"] ||
-        PHONEME_TARGET_MAP[targetKeyBase];
-    }
-
-    // Handle punctuation and final fallback
-    if (!baseTarget && ph.isPunctuation) {
-      baseTarget = PHONEME_TARGET_MAP["SIL"];
-      targetKeyBase = "SIL"; // Update the base key
-    } else if (!baseTarget) {
+    // Warn if phoneme was not found (materialized falls back to SIL internally)
+    if (!PHONEME_TARGET_MAP[materialized.phoneme] && !PHONEME_TARGET_MAP[targetKeyBase]) {
       console.warn(
         `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
       );
-      baseTarget = PHONEME_TARGET_MAP["SIL"];
-      targetKeyBase = "SIL"; // Update the base key
     }
 
-    const filledParams = fillDefaultParams(baseTarget);
     const tokenId = `ph_${index}`;
     const inventoryDecision = provenance?.add({
       stage: "transcribe",
@@ -261,32 +233,16 @@ export function textToKlattTrack(
       tokenDecisionIds.set(tokenId, inventoryDecision.id);
     }
 
-    // Copy essential flags from baseTarget
-    const flags: FrontendToken = {};
-    if (baseTarget) {
-      if (baseTarget.type) flags.type = baseTarget.type;
-      if (baseTarget.hasOwnProperty("voiceless"))
-        flags.voiceless = baseTarget.voiceless;
-      if (baseTarget.hasOwnProperty("voiced")) flags.voiced = baseTarget.voiced;
-      if (baseTarget.hasOwnProperty("front")) flags.front = baseTarget.front;
-      if (baseTarget.hasOwnProperty("back")) flags.back = baseTarget.back;
-      if (baseTarget.hasOwnProperty("hi")) flags.hi = baseTarget.hi;
-      if (baseTarget.hasOwnProperty("low")) flags.low = baseTarget.low;
-      if (baseTarget.hasOwnProperty("SW")) flags.inventorySW = baseTarget.SW;
-      // Add other flags as needed by rules
-    }
-
-    // Return the enriched phoneme data object for the sequence
+    // Return the enriched phoneme data object for the sequence.
+    // Spread materialized (params, duration, inherentDuration, type, boolean flags,
+    // inventorySW) then override phoneme with the base key (stress suffix stripped).
     return {
       id: tokenId,
-      phoneme: targetKeyBase, // Use the potentially modified targetKeyBase (e.g., P_CL, SIL)
+      ...materialized,
+      phoneme: targetKeyBase,
       stress: ph.stress,
-      params: filledParams,
-      duration: baseTarget?.dur || (targetKeyBase === "SIL" ? 100 : 50), // Default duration, use optional chaining
-      inherentDuration: baseTarget?.dur, // Preserve inherent duration for incompressibility
       punctuationSymbol: ph.isPunctuation ? ph.symbol : null,
-      ...flags,
-      word: ph.word, // Keep the word info
+      word: ph.word,
     };
   });
 

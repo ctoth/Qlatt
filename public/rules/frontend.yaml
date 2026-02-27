@@ -305,6 +305,7 @@ phases:
       - t_flapping
   - name: structural
     rules:
+      - expand_diphthongs
       - insert_voiceless_stop_release_and_aspiration
       - insert_voiceless_stop_release_and_aspiration_final
       - insert_voiced_stop_release
@@ -418,6 +419,54 @@ rules:
           duration: '30'
           inherentDuration: '30'
           params: dx_params
+  expand_diphthongs:
+    kind: structural
+    citation: Standard diphthong decomposition for formant synthesis (nucleus + offglide)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['EY', 'AY', 'OW', 'OY', 'AW']
+    define:
+      stress_suffix: >-
+        has(current.stress) && current.stress == 1 ? "1" : "0"
+      comp1_base: >-
+        current.phoneme == "EY" ? "EH" :
+        current.phoneme == "AY" ? "AA" :
+        current.phoneme == "OW" ? "AO" :
+        current.phoneme == "OY" ? "AO" :
+        current.phoneme == "AW" ? "AE" : "SIL"
+      comp2_base: >-
+        current.phoneme == "EY" ? "IH" :
+        current.phoneme == "AY" ? "IH" :
+        current.phoneme == "OW" ? "UH" :
+        current.phoneme == "OY" ? "IH" :
+        current.phoneme == "AW" ? "UH" : "SIL"
+      comp1_key: 'comp1_base + stress_suffix'
+      comp2_key: 'comp2_base + stress_suffix'
+      comp1_target: target(comp1_key)
+      comp2_target: target(comp2_key)
+      total_dur: current.duration
+      comp1_duration: 'total_dur * 0.6'
+      comp2_duration: 'total_dur * 0.4'
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - phoneme: comp1_key
+          params: comp1_target.params
+          duration: comp1_duration
+          inherentDuration: comp1_target.inherentDuration
+          type: comp1_target.type
+          stress: 'has(current.stress) ? current.stress : null'
+          word: 'has(current.word) ? current.word : null'
+        - phoneme: comp2_key
+          params: comp2_target.params
+          duration: comp2_duration
+          inherentDuration: comp2_target.inherentDuration
+          type: comp2_target.type
+          stress: 'has(current.stress) ? current.stress : null'
+          word: 'has(current.word) ? current.word : null'
   insert_voiceless_stop_release_and_aspiration:
     kind: structural
     citation: Lisker & Abramson 1964 (English long-lag VOT isolated /p/=58, /t/=70, /k/=80 ms; sentence-initial /p/=28, /t/=39, /k/=43 ms); Stevens 1998 Ch.8; Allen et al. 1987 Table C-1

@@ -28,11 +28,11 @@ describe("provenance range filters", () => {
     textToKlattTrack("hello world", 110, 30, { provenance });
     const decisions = provenance.getDecisions();
 
-    const filtered = applyRange(decisions, parseRangeSpec("token:ph_1-ph_3"));
+    const filtered = applyRange(decisions, parseRangeSpec("token:ph_1-ph_2"));
     expect(filtered.length).toBeGreaterThan(0);
     expect(filtered.every((decision) => decision.seq >= filtered[0].seq)).toBe(true);
     expect(filtered.some((decision) => decision.subject === "token:ph_1")).toBe(true);
-    expect(filtered.some((decision) => decision.subject === "token:ph_3")).toBe(true);
+    expect(filtered.some((decision) => decision.subject === "token:ph_2")).toBe(true);
   });
 
   it("rejects invalid range syntax", () => {

@@ -341,7 +341,7 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     semantics,
     graph,
     registry,
-    workletBasePath = '/worklets/',
+    workletBasePath = ((typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL) || "/") + 'worklets/',
     logger = () => {},
     telemetry = false,
     telemetryHandler,

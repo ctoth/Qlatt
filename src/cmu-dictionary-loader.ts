@@ -5,6 +5,7 @@ export type CmuDictionary = Record<string, string>;
 export const DEFAULT_CMU_DICTIONARY_PATH = "/cmu-dictionary.json";
 
 function normalizePath(rawPath: string): string {
+  const base = (typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL) || "/";
   let normalized = rawPath.trim().replace(/\\/g, "/");
   if (normalized.startsWith("/public/")) {
     normalized = normalized.slice("/public".length);
@@ -15,7 +16,10 @@ function normalizePath(rawPath: string): string {
   if (!normalized.startsWith("/")) {
     normalized = `/${normalized}`;
   }
-  return normalized;
+  // Prepend BASE_URL so paths resolve correctly on subpath deployments
+  // (e.g. GitHub Pages at /Qlatt/). normalized starts with "/",
+  // base ends with "/" (Vite guarantees this), so slice the leading "/".
+  return base + normalized.slice(1);
 }
 
 function isNodeRuntime(): boolean {

@@ -25,7 +25,7 @@ This separation enables:
 Text Input
     |
     v
-[tts-frontend.ts] normalizeText() -> transcribeText() -> PHONEME_TARGETS mapping
+[tts-frontend.ts] normalizeText() -> transcribeText() -> inventory mapping (`public/rules/inventory.yaml`)
     |
     v
 [declarative-frontend/engine.ts] execute rule-pack phases
@@ -44,7 +44,7 @@ Text Input
 WebAudio destination -> Audio output
 ```
 
-`src/declarative-frontend/inventory.ts` is inventory/default data (`PHONEME_TARGETS`, defaults) and helper code. Frontend behavioral rules are owned by the declarative rule pack.
+`public/rules/inventory.yaml` is the inventory/default source; `src/declarative-frontend/inventory.ts` loads and exposes inventory helpers (`PHONEME_TARGETS`, defaults, materializers). Frontend behavioral rules are owned by the declarative rule pack.
 
 ### File Relationships
 

@@ -202,10 +202,6 @@ export function textToKlattTrack(
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
   parameterSequence = parameterSequence.map((ph: FrontendToken, index: number) => {
     let targetKeyBase = ph.phoneme;
-    // Map P, T, K, B, D, G to their closure versions initially
-    if (["P", "T", "K", "B", "D", "G"].includes(targetKeyBase)) {
-      targetKeyBase += "_CL";
-    }
 
     // Delegate stress-aware inventory lookup to materializePhonemeTarget
     const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });

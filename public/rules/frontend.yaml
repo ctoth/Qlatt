@@ -333,6 +333,7 @@ phases:
       - t_flapping
   - name: structural
     rules:
+      - remap_stops_to_closures
       - expand_diphthongs
       - insert_voiceless_stop_release_and_aspiration
       - insert_voiceless_stop_release_and_aspiration_final
@@ -447,6 +448,37 @@ rules:
           duration: '30'
           inherentDuration: '30'
           params: dx_params
+  remap_stops_to_closures:
+    kind: structural
+    citation: Klatt 1980 (stop consonants modeled as closure + release phases)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['P', 'T', 'K', 'B', 'D', 'G']
+    define:
+      cl_key: >-
+        current.phoneme + "_CL"
+      cl_target: target(cl_key)
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: cl_key
+          type: cl_target.type
+          duration: cl_target.duration
+          inherentDuration: cl_target.inherentDuration
+          params: cl_target.params
+          voiceless: 'has(cl_target.voiceless) ? cl_target.voiceless : null'
+          voiced: 'has(cl_target.voiced) ? cl_target.voiced : null'
+          bilabial: 'has(cl_target.bilabial) ? cl_target.bilabial : null'
+          alveolar: 'has(cl_target.alveolar) ? cl_target.alveolar : null'
+          velar: 'has(cl_target.velar) ? cl_target.velar : null'
+          inventorySW: 'has(cl_target.inventorySW) ? cl_target.inventorySW : 0'
   expand_diphthongs:
     kind: structural
     citation: Standard diphthong decomposition for formant synthesis (nucleus + offglide)

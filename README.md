@@ -43,6 +43,11 @@ npx vitest run (Get-ChildItem -Path test -Filter 'declarative-frontend-*.test.ts
 npm run golden:declarative-summary
 ```
 
+- Run strict citation gate on a phrase corpus (CLI-first workflow):
+```
+node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/check-strict-citations.ts --corpus test/phrase-sets/linguistic.json
+```
+
 ## Structure
 
 - `crates/`: Rust WASM DSP primitives.

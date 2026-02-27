@@ -1,4 +1,11 @@
 version: v12-cel
+include:
+  - pipeline.yaml
+  - rules/postlexical.yaml
+  - rules/structural.yaml
+  - rules/duration.yaml
+  - rules/formant.yaml
+  - rules/prosody.yaml
 parameters:
   policy:
     duration:
@@ -300,108 +307,6 @@ parameters:
         value: 0.3
         citations:
           - Ohman 1966
-predicates:
-  is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
-  is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
-streams:
-  phone:
-    type: base
-    features:
-      type:
-        - vowel
-        - stop
-        - stop_closure
-        - stop_release
-        - stop_aspiration
-        - fricative
-        - affricate
-        - silence
-        - liquid
-        - nasal
-        - glide
-    scalars:
-      duration:
-        unit: ms
-        resolution: klatt
-        max: 500
-  f0:
-    type: point
-    value_type: number
-    unit: Hz
-phases:
-  - name: postlexical
-    rules:
-      - the_prevocalic_reduction
-      - t_flapping
-  - name: structural
-    rules:
-      - remap_stops_to_closures
-      - expand_diphthongs
-      - insert_voiceless_stop_release_and_aspiration
-      - insert_voiceless_stop_release_and_aspiration_final
-      - insert_voiced_stop_release
-      - insert_voiced_stop_release_final
-  - name: duration
-    rules:
-      - k_context_cl_f2
-      - k_context_rel_copy
-      - bilabial_f2_locus
-      - bilabial_rel_copy
-      - alveolar_f2_locus
-      - alveolar_rel_copy
-      - palatal_f2_locus
-      - nasal_antiformant_by_place
-      - nasal_place_assimilation
-      - dark_l_allophony
-      - r_f3_lowering
-      - f1_stop_onset
-      - burst_spectral_template
-      - vcv_coarticulation
-      - vowel_reduction
-      - anticipatory_nasalization
-      - non_word_initial_consonant_shortening
-      - word_medial_consonant_shortening
-      - unstressed_consonant_shortening
-      - word_initial_lengthening
-      - punctuation_pause
-      - stress_duration
-      - vowel_shortening
-      - vowel_before_voiceless_stop_shortening
-      - pre_boundary_lengthening
-      - fricative_minimum_duration
-      - lock_stop_release_duration
-      - stop_unreleasing
-      - s_cluster_aspiration_reduction
-      - sw_explicit_override
-      - sw_default_assignment
-    resolve_scalars:
-      - duration
-  - name: prosody
-    rules:
-      - f0_baseline_start
-      - f0_question_baseline_raise
-      - f0_pitch_reset
-      - f0_targets
-      - f0_voiceless_onset_perturbation
-      - f0_voiced_onset_perturbation
-      - f0_stress_peak
-      - f0_continuation_rise
-      - f0_question_rise_onset
-      - f0_question_rise
-  - name: finalize
-    after:
-      - duration
-      - prosody
-    rules: []
-    compute_times: true
-    resolve_points:
-      - f0
-include:
-  - rules/postlexical.yaml
-  - rules/structural.yaml
-  - rules/duration.yaml
-  - rules/formant.yaml
-  - rules/prosody.yaml
 output:
   blend:
     factor: 0.35

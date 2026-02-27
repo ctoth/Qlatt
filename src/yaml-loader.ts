@@ -148,6 +148,20 @@ export function parseYamlString<T = unknown>(source: string, label: string = "ya
   return parseYaml<T>(source, label);
 }
 
+/**
+ * Resolve a relative include path against the directory of the parent YAML file.
+ * Absolute paths (starting with "/") are returned as-is.
+ * Relative paths are resolved against the parent file's directory.
+ *
+ * @example resolveIncludePath("/rules/frontend.yaml", "duration.yaml") → "/rules/duration.yaml"
+ * @example resolveIncludePath("/rules/frontend.yaml", "/shared/common.yaml") → "/shared/common.yaml"
+ */
+export function resolveIncludePath(parentPath: string, includePath: string): string {
+  if (includePath.startsWith("/")) return includePath;
+  const parentDir = parentPath.substring(0, parentPath.lastIndexOf("/"));
+  return parentDir + "/" + includePath;
+}
+
 export function isPlainObject(value: unknown): value is PlainObject {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

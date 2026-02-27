@@ -18,7 +18,7 @@ type ParsedArgs = {
 type Logger = {
   info: (text: string) => void;
   warn: (text: string) => void;
-  close: () => void;
+  close: () => Promise<void>;
 };
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -65,7 +65,7 @@ function createLogger(logPath: string | null): Logger {
     return {
       info: (text: string) => process.stdout.write(`${text}\n`),
       warn: (text: string) => process.stderr.write(`${text}\n`),
-      close: () => {},
+      close: async () => {},
     };
   }
 
@@ -84,9 +84,10 @@ function createLogger(logPath: string | null): Logger {
       process.stderr.write(`${text}\n`);
       write(text);
     },
-    close: () => {
-      stream.end();
-    },
+    close: async () =>
+      new Promise<void>((resolve) => {
+        stream.end(() => resolve());
+      }),
   };
 }
 
@@ -154,7 +155,7 @@ export async function runDictionaryMissScan(argv: string[]): Promise<number> {
       }
     } finally {
       console.warn = originalWarn;
-      logger.close();
+      await logger.close();
     }
 
     return 0;

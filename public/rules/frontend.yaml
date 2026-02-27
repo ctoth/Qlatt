@@ -108,6 +108,14 @@ parameters:
         value: 40
         citations:
           - Jongman 1989
+      vowel_vl_stop_shortening_phrasefinal_ms:
+        value: -45
+        citations:
+          - Klatt 1976 Table I
+      vowel_vl_stop_shortening_other_ms:
+        value: -15
+        citations:
+          - Klatt 1976 Table I
     f0:
       base_hz:
         value: 110
@@ -139,6 +147,19 @@ parameters:
           - O'Shaughnessy 1976
       question_target_ceiling_hz:
         value: 190
+        citations:
+          - O'Shaughnessy 1976
+      voiceless_onset_raise:
+        value: 1.2
+        citations:
+          - O'Shaughnessy 1976
+          - Hombert et al. 1979
+      voiced_onset_lower:
+        value: 0.95
+        citations:
+          - O'Shaughnessy 1976
+      continuation_rise_hz:
+        value: 8
         citations:
           - O'Shaughnessy 1976
     formant:
@@ -220,6 +241,16 @@ parameters:
         value: 2.0
         citations:
           - Chen 1997
+      palatal_f2_locus:
+        value: 2600
+        citations:
+          - Stevens & House 1955
+          - Allen et al. 1987 Ch.11
+      palatal_f2_back_vowel:
+        value: 2400
+        citations:
+          - Stevens & House 1955
+          - Allen et al. 1987 Ch.11
 predicates:
   is_question_boundary: >-
     current.phoneme == 'SIL' && current.punctuationSymbol == '?'
@@ -263,10 +294,12 @@ phases:
       - bilabial_rel_copy
       - alveolar_f2_locus
       - alveolar_rel_copy
+      - palatal_f2_locus
       - nasal_antiformant_by_place
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset
+      - burst_spectral_template
       - vowel_reduction
       - anticipatory_nasalization
       - non_word_initial_consonant_shortening
@@ -275,6 +308,7 @@ phases:
       - punctuation_pause
       - stress_duration
       - vowel_shortening
+      - vowel_before_voiceless_stop_shortening
       - pre_boundary_lengthening
       - fricative_minimum_duration
       - lock_stop_release_duration
@@ -287,7 +321,10 @@ phases:
     rules:
       - f0_baseline_start
       - f0_targets
+      - f0_voiceless_onset_perturbation
+      - f0_voiced_onset_perturbation
       - f0_stress_peak
+      - f0_continuation_rise
       - f0_question_rise_onset
       - f0_question_rise
   - name: finalize
@@ -890,3 +927,153 @@ rules:
       at: at_ratio(last_stress, 0.8)
       value: 'prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value'
       tag: f0_question_onset
+  f0_voiceless_onset_perturbation:
+    kind: point
+    citation: O'Shaughnessy 1976 (after voiceless onset F0 starts ~20% higher); Hombert et al. 1979
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel'
+        && (prev != null ? (prev.type in ['stop_release', 'stop_aspiration']
+            ? (has(prev.voiceless) ? prev.voiceless == true : false)
+            : (prev.type == 'fricative'
+               ? (has(prev.voiceless) ? prev.voiceless == true : false)
+               : false))
+           : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise
+      tag: f0_onset_perturbation
+  f0_voiced_onset_perturbation:
+    kind: point
+    citation: O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel'
+        && (prev != null ? (prev.type in ['stop_closure', 'stop_release']
+            ? (has(prev.voiced) ? prev.voiced == true : false)
+            : false)
+           : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower
+      tag: f0_onset_perturbation
+  f0_continuation_rise:
+    kind: point
+    citation: O'Shaughnessy 1976 (continuation rise +8 Hz at non-terminal boundaries like commas)
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && (has(current.punctuationSymbol) ? current.punctuationSymbol == ',' : false)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + params.policy.f0.continuation_rise_hz
+      tag: f0_continuation
+  palatal_f2_locus:
+    kind: scalar
+    citation: Stevens & House 1955 (consonantal influence on vowels); Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
+    select:
+      stream: phone
+      where: current.phoneme == 'Y'
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: >-
+              next != null ? (next.type == 'vowel' ? (has(next.back) ? next.back == true : false) : false) : false
+            value: params.policy.formant.palatal_f2_back_vowel
+          - default: params.policy.formant.palatal_f2_locus
+  vowel_before_voiceless_stop_shortening:
+    kind: scalar
+    citation: Klatt 1976 Table I (vowel shortening before voiceless stops)
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel'
+        && (next != null ? (next.type == 'stop_closure'
+            ? (has(next.voiceless) ? next.voiceless == true : false)
+            : false)
+           : false)
+    define:
+      nn: ahead(current, 2)
+      phrase_final: >-
+        nn == null ? true : nn.phoneme == 'SIL'
+    apply:
+      - field: duration
+        op: add
+        dispatch:
+          - when: phrase_final
+            value: params.policy.duration.vowel_vl_stop_shortening_phrasefinal_ms
+          - default: params.policy.duration.vowel_vl_stop_shortening_other_ms
+        tag: voiceless_context
+  burst_spectral_template:
+    kind: scalar
+    citation: Blumstein & Stevens 1979 (burst spectral invariance); Zue 1976 (burst amplitude by place)
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    apply:
+      - field: params.A2
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 50
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 40
+          - when: has(current.velar) && current.velar == true
+            value: 45
+          - default: 'has(current.params.A2) ? current.params.A2 : 0'
+      - field: params.A3
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 40
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 50
+          - default: 'has(current.params.A3) ? current.params.A3 : 0'
+      - field: params.A4
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 35
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 55
+          - default: 'has(current.params.A4) ? current.params.A4 : 0'
+      - field: params.A5
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 45
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 45
+          - when: has(current.velar) && current.velar == true
+            value: 40
+          - default: 'has(current.params.A5) ? current.params.A5 : 0'
+      - field: params.A6
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: 30
+          - when: has(current.alveolar) && current.alveolar == true
+            value: 50
+          - when: has(current.velar) && current.velar == true
+            value: 35
+          - default: 'has(current.params.A6) ? current.params.A6 : 0'

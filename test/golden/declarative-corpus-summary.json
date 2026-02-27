@@ -5,9 +5,9 @@
     {
       "phrase": "The quick brown fox jumps over the lazy dog.",
       "events": 49,
-      "totalTime": 3.545,
+      "totalTime": 3.4979999999999993,
       "voicedEvents": 33,
-      "f0Min": 90.5,
+      "f0Min": 90.50000000000001,
       "f0Max": 110
     },
     {
@@ -21,31 +21,31 @@
     {
       "phrase": "Thin thieves thought that they thrilled.",
       "events": 31,
-      "totalTime": 2.4939999999999998,
+      "totalTime": 2.4639999999999995,
       "voicedEvents": 18,
-      "f0Min": 90.8,
+      "f0Min": 90.80000000000004,
       "f0Max": 109.2
     },
     {
       "phrase": "Ship shape, sheep shop, and cheap chips.",
       "events": 41,
-      "totalTime": 2.9349999999999996,
+      "totalTime": 2.8449999999999998,
       "voicedEvents": 11,
-      "f0Min": 96.6666666666668,
-      "f0Max": 109.99999999999999
+      "f0Min": 96.66666666666681,
+      "f0Max": 110
     },
     {
       "phrase": "Sip zip, sip ship, sip sip.",
       "events": 35,
-      "totalTime": 2.4989999999999997,
+      "totalTime": 2.4090000000000003,
       "voicedEvents": 7,
       "f0Min": 98,
-      "f0Max": 108.93223140495867
+      "f0Max": 108.9629268292683
     },
     {
       "phrase": "A zoo can be fun on a sunny day.",
       "events": 34,
-      "totalTime": 2.589000000000001,
+      "totalTime": 2.573000000000001,
       "voicedEvents": 26,
       "f0Min": 90.83333333333333,
       "f0Max": 110
@@ -53,7 +53,7 @@
     {
       "phrase": "He had your dark suit in greasy wash water all year.",
       "events": 59,
-      "totalTime": 4.153,
+      "totalTime": 4.122999999999999,
       "voicedEvents": 42,
       "f0Min": 90.46511627906978,
       "f0Max": 109.53488372093024
@@ -69,7 +69,7 @@
     {
       "phrase": "Bob bought a big blue balloon.",
       "events": 32,
-      "totalTime": 2.0810000000000004,
+      "totalTime": 2.0660000000000003,
       "voicedEvents": 26,
       "f0Min": 90.8,
       "f0Max": 110
@@ -77,15 +77,15 @@
     {
       "phrase": "Pat tapped a pot and picked a paper cup.",
       "events": 52,
-      "totalTime": 2.855999999999999,
+      "totalTime": 2.7159999999999997,
       "voicedEvents": 13,
-      "f0Min": 91.6666666666669,
+      "f0Min": 91.66666666666667,
       "f0Max": 108.75
     },
     {
       "phrase": "Gag, gang, and gunk go together.",
       "events": 37,
-      "totalTime": 2.5849999999999995,
+      "totalTime": 2.5679999999999996,
       "voicedEvents": 28,
       "f0Min": 91,
       "f0Max": 110
@@ -117,7 +117,7 @@
     {
       "phrase": "Vera vapes very vivid violets.",
       "events": 40,
-      "totalTime": 2.6180000000000008,
+      "totalTime": 2.5880000000000005,
       "voicedEvents": 30,
       "f0Min": 93.33333333333333,
       "f0Max": 110
@@ -125,7 +125,7 @@
     {
       "phrase": "Zesty zest is easy to spot.",
       "events": 33,
-      "totalTime": 2.7130000000000005,
+      "totalTime": 2.6820000000000004,
       "voicedEvents": 12,
       "f0Min": 92.66666666666666,
       "f0Max": 110
@@ -152,7 +152,7 @@
       "totalTime": 3.5869999999999993,
       "voicedEvents": 12,
       "f0Min": 96.66666666666671,
-      "f0Max": 110
+      "f0Max": 111.33333333333336
     },
     {
       "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",

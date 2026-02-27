@@ -73,7 +73,8 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    expect(out[0].duration).toBe(95);
+    // AE before voiceless stop: gets vowel_before_voiceless_stop_shortening (-15ms additive)
+    expect(out[0].duration).toBe(80);
     expect(out[2].duration).toBe(144);
   });
 

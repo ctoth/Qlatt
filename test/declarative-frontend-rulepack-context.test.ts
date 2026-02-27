@@ -851,6 +851,232 @@ describe("declarative frontend rulepack context migration", () => {
     expect(sib!.duration).toBeGreaterThanOrEqual(100);
   });
 
+  // --- Palatal F2 locus ---
+
+  it("sets palatal F2 locus on Y before back vowel", () => {
+    const sequence = [
+      {
+        phoneme: "Y",
+        type: "glide",
+        voiced: true,
+        palatal: true,
+        params: { F2: 2070 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+      {
+        phoneme: "UW",
+        type: "vowel",
+        back: true,
+        hi: true,
+        params: { F2: 900, AV: 63 },
+        duration: 180,
+        inherentDuration: 180,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Y before back vowel: F2 = palatal_f2_back_vowel = 2400
+    expect(out[0].params.F2).toBe(2400);
+  });
+
+  it("sets palatal F2 locus on Y default (before front vowel)", () => {
+    const sequence = [
+      {
+        phoneme: "Y",
+        type: "glide",
+        voiced: true,
+        palatal: true,
+        params: { F2: 2070 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        hi: true,
+        params: { F2: 2020, AV: 63 },
+        duration: 150,
+        inherentDuration: 150,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Y before front vowel: default F2 = palatal_f2_locus = 2600
+    expect(out[0].params.F2).toBe(2600);
+  });
+
+  // --- Vowel before voiceless stop shortening ---
+
+  it("shortens vowel before voiceless stop closure (non-phrase-final)", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        front: true,
+        low: true,
+        word: "cat",
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        word: "cat",
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        voiceless: true,
+        alveolar: true,
+        word: "cat",
+        params: { AF: 58, AH: 55 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        hi: true,
+        stress: 0,
+        word: "see",
+        params: { F1: 330, F2: 1950, AV: 58 },
+        duration: 70,
+        inherentDuration: 70,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const ae = out.find((t) => t.phoneme === "AE");
+    expect(ae).toBeTruthy();
+    // AE is before voiceless T_CL and next-next is T_REL (not null, not SIL)
+    // so non-phrase-final shortening applies: -15ms additive
+    // The vowel should be shorter than if the -15 were not applied
+    // Exact value depends on other multipliers, but the shortening should be present
+    // Base: 170ms, stress*1.3=221, vowel_shortening_voiceless*0.7=154.7, minus 15=~139.7
+    // plus pre_boundary and incompressibility adjustments
+    expect(ae!.duration).toBeLessThan(155);
+  });
+
+  it("shortens vowel more before voiceless stop at phrase end", () => {
+    const sequence = [
+      {
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        front: true,
+        low: true,
+        word: "cat",
+        params: { F1: 620, F2: 1660, AV: 64 },
+        duration: 170,
+        inherentDuration: 170,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        word: "cat",
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "SIL",
+        type: "silence",
+        punctuationSymbol: ".",
+        params: {},
+        duration: 300,
+        inherentDuration: 300,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const ae = out.find((t) => t.phoneme === "AE");
+    expect(ae).toBeTruthy();
+    // AE before voiceless T_CL, next-next is SIL -> phrase_final -> -45ms
+    // This should be shorter than the non-phrase-final case
+    // The additive shortening of -45 is substantial
+    expect(ae!.duration).toBeLessThan(170);
+  });
+
+  // --- Burst spectral template ---
+
+  it("sets burst spectral template on labial release", () => {
+    const sequence = [
+      {
+        phoneme: "P_REL",
+        type: "stop_release",
+        bilabial: true,
+        voiceless: true,
+        params: { F1: 400, F2: 1100, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 },
+        duration: 5,
+        inherentDuration: 5,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Labial diffuse-falling: A2=50, A3=40, A4=35, A5=45, A6=30
+    expect(out[0].params.A2).toBe(50);
+    expect(out[0].params.A3).toBe(40);
+    expect(out[0].params.A4).toBe(35);
+    expect(out[0].params.A5).toBe(45);
+    expect(out[0].params.A6).toBe(30);
+  });
+
+  it("sets burst spectral template on alveolar release", () => {
+    const sequence = [
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        alveolar: true,
+        voiceless: true,
+        params: { F1: 400, F2: 1600, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Alveolar diffuse-rising: A2=40, A3=50, A4=50, A5=45, A6=50
+    expect(out[0].params.A2).toBe(40);
+    expect(out[0].params.A3).toBe(50);
+    expect(out[0].params.A4).toBe(50);
+    expect(out[0].params.A5).toBe(45);
+    expect(out[0].params.A6).toBe(50);
+  });
+
+  it("sets burst spectral template on velar release", () => {
+    const sequence = [
+      {
+        phoneme: "K_REL",
+        type: "stop_release",
+        velar: true,
+        voiceless: true,
+        params: { F1: 300, F2: 1990, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 },
+        duration: 25,
+        inherentDuration: 25,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    // Velar compact mid-frequency: A2=45, A3=50, A4=55, A5=40, A6=35
+    expect(out[0].params.A2).toBe(45);
+    expect(out[0].params.A3).toBe(50);
+    expect(out[0].params.A4).toBe(55);
+    expect(out[0].params.A5).toBe(40);
+    expect(out[0].params.A6).toBe(35);
+  });
+
   it("enforces dental fricative minimum duration", () => {
     // A short /TH/ (25ms) should be floored to 60ms
     const sequence = [

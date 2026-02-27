@@ -148,3 +148,48 @@ export function expectNoViolationsOrReport<T>(violations: T[], assertionMessage:
 
   expect(violations, assertionMessage).toHaveLength(0);
 }
+
+function percentileFromSorted(sortedValues: number[], percentile: number): number {
+  if (sortedValues.length === 0) return 0;
+  if (percentile <= 0) return sortedValues[0];
+  if (percentile >= 100) return sortedValues[sortedValues.length - 1];
+
+  const rank = (percentile / 100) * (sortedValues.length - 1);
+  const lower = Math.floor(rank);
+  const upper = Math.ceil(rank);
+  if (lower === upper) return sortedValues[lower];
+  const weight = rank - lower;
+  return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+}
+
+export interface NumericSummary {
+  count: number;
+  min: number;
+  p10: number;
+  p50: number;
+  p90: number;
+  max: number;
+}
+
+export function summarizeNumbers(values: number[]): NumericSummary {
+  if (values.length === 0) {
+    return {
+      count: 0,
+      min: 0,
+      p10: 0,
+      p50: 0,
+      p90: 0,
+      max: 0,
+    };
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  return {
+    count: sorted.length,
+    min: sorted[0],
+    p10: percentileFromSorted(sorted, 10),
+    p50: percentileFromSorted(sorted, 50),
+    p90: percentileFromSorted(sorted, 90),
+    max: sorted[sorted.length - 1],
+  };
+}

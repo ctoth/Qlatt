@@ -431,7 +431,6 @@ function buildNavigationFunctions(
   runtime: RuntimeLike | null = null,
   options: RuntimeLike = {}
 ): NavigationBundle {
-  const TOKEN_REF = Symbol("token_ref");
   const currentToken = options.currentToken ?? null;
   const pointCursorByStream =
     options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
@@ -570,9 +569,9 @@ function buildNavigationFunctions(
   const resolveLiveToken = (tokenRef: unknown): TokenLike | null => {
     if (!tokenRef || typeof tokenRef !== "object" || Array.isArray(tokenRef)) return null;
     const tokenLike = tokenRef as TokenLike;
-    const embedded = (tokenLike as Record<symbol, unknown>)[TOKEN_REF];
-    if (embedded && typeof embedded === "object" && sequence.includes(embedded as TokenLike)) {
-      return embedded as TokenLike;
+    const embedded = viewToOriginal.get(tokenLike);
+    if (embedded && sequence.includes(embedded)) {
+      return embedded;
     }
     const id = typeof tokenLike.id === "string" && tokenLike.id.length > 0 ? tokenLike.id : null;
     if (id) {
@@ -615,17 +614,13 @@ function buildNavigationFunctions(
   const hierarchyStreams =
     runtime?.hierarchyStreams instanceof Set ? [...runtime.hierarchyStreams] : [];
   const viewCache = new WeakMap<TokenLike, TokenLike>();
+  const viewToOriginal = new WeakMap<TokenLike, TokenLike>();
 
   const toCursorView = (token: TokenLike | null, seen: Set<TokenLike> = new Set()): TokenLike | null => {
     if (!token) return null;
     if (viewCache.has(token)) return viewCache.get(token) ?? null;
     const view: TokenLike = { ...token };
-    Object.defineProperty(view, TOKEN_REF, {
-      value: token,
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
+    viewToOriginal.set(view, token);
     viewCache.set(token, view);
     if (seen.has(token)) return view;
 
@@ -657,15 +652,11 @@ function buildNavigationFunctions(
     const current = isTokenLike(extra.current) ? (extra.current as TokenLike) : token;
     const prev = getPrevToken(current);
     const next = getNextToken(current);
-    const prev2 = prev ? getPrevToken(prev) : null;
-    const next2 = next ? getNextToken(next) : null;
     const phraseWindow = getPhraseWindow(current);
-    const context: RuntimeLike = {
-      current: toCursorView(current),
-      prev: toCursorView(prev),
-      next: toCursorView(next),
-      prev2: toCursorView(prev2),
-      next2: toCursorView(next2),
+    // Lazy Proxy: defer toCursorView for current/prev/next until first access.
+    // Many where-clauses only check current.phoneme — prev/next are never touched.
+    // prev2/next2 removed entirely: zero rules reference them (scout report lines 165-173).
+    const target: RuntimeLike = {
       current_index: getIndex(current),
       phrase_index: phraseWindow.index,
       phrase_total: phraseWindow.total,
@@ -673,8 +664,27 @@ function buildNavigationFunctions(
     };
     for (const [key, value] of Object.entries(extra)) {
       if (key === "params") continue;
-      context[key] = toContextValue(value);
+      target[key] = toContextValue(value);
     }
+    const context: RuntimeLike = new Proxy(target, {
+      get(obj, prop, receiver) {
+        if (prop in obj) return (obj as any)[prop];
+        switch (prop) {
+          case 'current': return (obj as any).current = toCursorView(current);
+          case 'prev':    return (obj as any).prev = toCursorView(prev);
+          case 'next':    return (obj as any).next = toCursorView(next);
+        }
+        return undefined;
+      },
+      set(obj, prop, value) {
+        (obj as any)[prop] = value;
+        return true;
+      },
+      has(obj, prop) {
+        if (prop in obj) return true;
+        return prop === 'current' || prop === 'prev' || prop === 'next';
+      }
+    });
     return context;
   };
 

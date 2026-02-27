@@ -74,3 +74,18 @@ describe('PLSTEP threshold single source of truth', () => {
     expect(semantics.realize!.plstepThreshold).toBeDefined();
   });
 });
+
+describe('PLSTEP burst amplitude offset single source of truth', () => {
+  it('semantics.yaml defines plstepBurstOffsetDb constant', () => {
+    expect(semantics.constants).toBeDefined();
+    expect(semantics.constants!.plstepBurstOffsetDb).toBeDefined();
+    expect(typeof semantics.constants!.plstepBurstOffsetDb).toBe('number');
+    expect(semantics.constants!.plstepBurstOffsetDb).toBe(75);
+  });
+
+  it('semantics.yaml has a realize rule that passes plstepBurstOffsetDb through to realized values', () => {
+    // Same pattern as plstepThreshold — constant passthrough so it's available for binding
+    expect(semantics.realize).toBeDefined();
+    expect(semantics.realize!.plstepBurstOffsetDb).toBeDefined();
+  });
+});

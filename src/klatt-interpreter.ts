@@ -331,6 +331,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     const PLSTEP_THRESHOLD = (typeof constants['plstepThreshold'] === 'number')
       ? constants['plstepThreshold']
       : 49;  // dB rise threshold for burst detection (Klatt 80 PARCOE.FOR)
+    // Read burst amplitude offset from semantics constant, fallback to 75
+    const PLSTEP_BURST_OFFSET_DB = (typeof constants['plstepBurstOffsetDb'] === 'number')
+      ? constants['plstepBurstOffsetDb']
+      : 75;  // Burst amplitude = GO - 75 dB (Klatt 80 PARCOE.FOR)
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];
@@ -351,7 +355,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
           const trigger = deltaAF >= deltaAH ? 'AF' : 'AH';
           const delta = Math.max(deltaAF, deltaAH);
           const goDb = frame.params.GO ?? 47;
-          const burstDb = goDb - 75;  // Klatt80 PLSTEP amplitude formula
+          const burstDb = goDb - PLSTEP_BURST_OFFSET_DB;  // Klatt80 PLSTEP amplitude formula
           const burstAmplitude = dbToLinear(burstDb);
 
           telemetryHandler({

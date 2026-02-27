@@ -338,6 +338,11 @@ constants:
   #   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
   plstepThreshold: 49
 
+  # PLSTEP burst amplitude offset (dB subtracted from GO)
+  # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
+  # The -75 = -28 + -47 (G0 offset in GETAMP is -47 from dbToLinear threshold)
+  plstepBurstOffsetDb: 75
+
 # Realize rules - convert input params to realized values
 realize:
   # Formant proximity corrections
@@ -504,11 +509,16 @@ realize:
     expr: "plstepThreshold"
     deps: []
 
+  # PLSTEP burst amplitude offset (pass constant through to realized values)
+  plstepBurstOffsetDb:
+    expr: "plstepBurstOffsetDb"
+    deps: []
+
   # PLSTEP burst amplitude
   # From Klatt 80 PARCOE.FOR: PLSTEP = GETAMP(G0 - 28)
   # But we use G0 - 75 to get the linear amplitude (accounting for ndbScale offset)
   # The -75 = -28 + -47 (the G0 offset in GETAMP is -47 from dbToLinear threshold)
   plstepAmplitude:
-    expr: "dbToLinear(GO - 75)"
-    deps: [GO]
+    expr: "dbToLinear(GO - plstepBurstOffsetDb)"
+    deps: [GO, plstepBurstOffsetDb]
     description: "PLSTEP burst amplitude from Klatt 80 PARCOE.FOR"

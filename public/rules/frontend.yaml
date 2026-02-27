@@ -306,7 +306,9 @@ phases:
   - name: structural
     rules:
       - insert_voiceless_stop_release_and_aspiration
+      - insert_voiceless_stop_release_and_aspiration_final
       - insert_voiced_stop_release
+      - insert_voiced_stop_release_final
   - name: duration
     rules:
       - k_context_cl_f2
@@ -488,6 +490,64 @@ rules:
             - inherentDuration
             - type
             - punctuationSymbol
+  insert_voiceless_stop_release_and_aspiration_final:
+    kind: structural
+    citation: Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release); Stevens 1998 Ch.8
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null
+    define:
+      rel: >-
+        current.phoneme == "P_CL" ? "P_REL" : (current.phoneme == "T_CL" ? "T_REL" : "K_REL")
+      asp: >-
+        current.phoneme == "P_CL" ? "P_ASP" : (current.phoneme == "T_CL" ? "T_ASP" : "K_ASP")
+      weak: 'true'
+      rel_target: target(rel)
+      asp_target: target(asp)
+      vot_target: >-
+        rel == "P_REL" ? params.policy.duration.vot_target_ms.p : (rel == "T_REL" ?
+        params.policy.duration.vot_target_ms.t : params.policy.duration.vot_target_ms.k)
+      vot_sum: 'rel_target.duration + asp_target.duration'
+      rel_share: >-
+        vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share
+      rel_duration_base: 'vot_target * rel_share'
+      asp_duration_base: 'vot_target - rel_duration_base'
+      rel_params: >-
+        merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
+        10])})
+      asp_params: >-
+        merge(asp_target.params, {'AF': max([0, asp_target.params.AF - 10]), 'AH': max([0, asp_target.params.AH -
+        10])})
+      rel_duration: >-
+        max([params.policy.duration.weak_release_min_ms,
+        rel_duration_base * params.policy.duration.weak_release_scale])
+      asp_duration: >-
+        max([params.policy.duration.weak_release_min_ms,
+        asp_duration_base * params.policy.duration.weak_release_scale])
+    splice:
+      type: replace_range
+      range_left: current.sync_right
+      range_right: current.sync_right
+      insert:
+        - phoneme: rel
+          stress: 'has(current.stress) ? current.stress : null'
+          word: 'has(current.word) ? current.word : null'
+          weak: weak
+          params: rel_params
+          duration: rel_duration
+          inherentDuration: rel_target.inherentDuration
+          type: rel_target.type
+          inventorySW: 'has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)'
+        - phoneme: asp
+          stress: 'has(current.stress) ? current.stress : null'
+          word: 'has(current.word) ? current.word : null'
+          weak: weak
+          params: asp_params
+          duration: asp_duration
+          inherentDuration: asp_target.inherentDuration
+          type: asp_target.type
+          inventorySW: 'has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)'
   insert_voiced_stop_release:
     kind: structural
     citation: Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position); Stevens 1998 Ch.8; Allen et al. 1987 Table C-1
@@ -534,6 +594,38 @@ rules:
             - inherentDuration
             - type
             - punctuationSymbol
+  insert_voiced_stop_release_final:
+    kind: structural
+    citation: Lisker & Abramson 1964 (utterance-final voiced stops receive weak release); Stevens 1998 Ch.8
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && next == null
+    define:
+      rel: >-
+        current.phoneme == "B_CL" ? "B_REL" : (current.phoneme == "D_CL" ? "D_REL" : "G_REL")
+      weak: 'true'
+      rel_target: target(rel)
+      rel_params: >-
+        merge(rel_target.params, {'AF': max([0, rel_target.params.AF - 10]), 'AH': max([0, rel_target.params.AH -
+        10])})
+      rel_duration: >-
+        max([params.policy.duration.weak_release_min_ms,
+        rel_target.duration * params.policy.duration.weak_release_scale])
+    splice:
+      type: replace_range
+      range_left: current.sync_right
+      range_right: current.sync_right
+      insert:
+        - phoneme: rel
+          stress: 'has(current.stress) ? current.stress : null'
+          word: 'has(current.word) ? current.word : null'
+          weak: weak
+          params: rel_params
+          duration: rel_duration
+          inherentDuration: rel_target.inherentDuration
+          type: rel_target.type
+          inventorySW: 'has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)'
   stress_duration:
     kind: scalar
     citation: Klatt 1976 §III.B

@@ -6,7 +6,8 @@
  * - Ordinal expansion (1st, 2nd, 3rd, ...)
  * - Common abbreviation expansion (Dr., Mr., Mrs., etc.)
  * - Case normalization (lowercase)
- * - Punctuation stripping (preserves apostrophes in contractions)
+ * - Punctuation handling: pause-generating marks (, . ? ! ; :) kept as tokens;
+ *   other punctuation stripped; apostrophes in contractions preserved
  * - Whitespace collapse
  */
 
@@ -229,7 +230,8 @@ function convertOrdinal(n: number): string {
  * 2. Expand abbreviations (Dr., Mr., etc.)
  * 3. Convert ordinals to words (1st -> first)
  * 4. Convert numbers to words (42 -> forty two)
- * 5. Strip punctuation (except apostrophes in contractions)
+ * 5. Preserve pause-generating punctuation (, . ? ! ; :) as separate tokens
+ * 5b. Strip other punctuation (except apostrophes in contractions)
  * 6. Collapse whitespace
  */
 export function normalizeText(text: string): string {
@@ -258,12 +260,18 @@ export function normalizeText(text: string): string {
     return numberToWords(parseInt(digits, 10));
   });
 
-  // Strip punctuation EXCEPT apostrophes that are inside words (contractions).
-  // Strategy: replace apostrophes in contractions with a placeholder, strip
-  // all punctuation, then restore.
+  // Strip punctuation EXCEPT:
+  // 1. Apostrophes inside words (contractions: it's, don't)
+  // 2. Pause-generating punctuation (, . ? ! ; :) which become separate tokens
+  //    so that transcribeText() can convert them to SIL pauses.
+  // Strategy: protect contractions with placeholder, separate pause punctuation
+  // with spaces, strip remaining punctuation, then restore.
   const PLACEHOLDER = "\x00";
   result = result.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
-  result = result.replace(/[^\w\s\x00]/g, " ");
+  // Surround pause-generating punctuation with spaces so they become separate tokens
+  result = result.replace(/([,.\?!;:])/g, " $1 ");
+  // Strip all remaining punctuation (quotes, parens, brackets, etc.)
+  result = result.replace(/[^\w\s\x00,.\?!;:]/g, " ");
   result = result.replace(new RegExp(PLACEHOLDER, "g"), "'");
 
   // Collapse whitespace and trim

@@ -61,7 +61,7 @@
     {
       "phrase": "Say oh, ee, and oo again.",
       "events": 23,
-      "totalTime": 2.071,
+      "totalTime": 2.221,
       "voicedEvents": 17,
       "f0Min": 92,
       "f0Max": 134.5
@@ -85,7 +85,7 @@
     {
       "phrase": "Gag, gang, and gunk go together.",
       "events": 37,
-      "totalTime": 2.5559999999999996,
+      "totalTime": 2.637,
       "voicedEvents": 28,
       "f0Min": 91,
       "f0Max": 118
@@ -116,19 +116,19 @@
     },
     {
       "phrase": "Vera vapes very vivid violets.",
-      "events": 40,
-      "totalTime": 2.569,
-      "voicedEvents": 30,
-      "f0Min": 93.33333333333333,
-      "f0Max": 115.6776273372018
+      "events": 39,
+      "totalTime": 2.599,
+      "voicedEvents": 28,
+      "f0Min": 93.44827586206897,
+      "f0Max": 115.65330487560863
     },
     {
       "phrase": "Zesty zest is easy to spot.",
       "events": 33,
-      "totalTime": 2.662,
+      "totalTime": 2.7459999999999996,
       "voicedEvents": 12,
       "f0Min": 92.66666666666666,
-      "f0Max": 110.5458366167586
+      "f0Max": 110.54583661675859
     },
     {
       "phrase": "Shy sharks shimmer in shallow shoals.",
@@ -148,8 +148,8 @@
     },
     {
       "phrase": "S, f, sh, th, z, v, zh, dh.",
-      "events": 31,
-      "totalTime": 3.5869999999999993,
+      "events": 29,
+      "totalTime": 3.445999999999999,
       "voicedEvents": 12,
       "f0Min": 96.6666666666667,
       "f0Max": 117.99999999999999
@@ -157,7 +157,7 @@
     {
       "phrase": "Soft, safe, fuzzy, fussy, sassy, feisty, zesty, shifty.",
       "events": 52,
-      "totalTime": 5.108999999999999,
+      "totalTime": 5.192999999999999,
       "voicedEvents": 16,
       "f0Min": 92.85714285714286,
       "f0Max": 117.99999999999999

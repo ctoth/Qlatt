@@ -136,7 +136,7 @@ describe("normalizeText", () => {
     });
 
     it("handles punctuation-only input", () => {
-      expect(normalizeText("...").trim()).toBe("");
+      expect(normalizeText("...")).toBe(". . .");
     });
 
     it("lowercases text", () => {
@@ -149,12 +149,32 @@ describe("normalizeText", () => {
   });
 
   describe("punctuation handling", () => {
-    it("strips commas and exclamation marks", () => {
-      expect(normalizeText("Hello, world!")).toBe("hello world");
+    it("preserves commas and exclamation marks as separate tokens", () => {
+      expect(normalizeText("Hello, world!")).toBe("hello , world !");
     });
 
-    it("strips periods between words", () => {
-      expect(normalizeText("end. start")).toBe("end start");
+    it("preserves periods as separate tokens", () => {
+      expect(normalizeText("end. start")).toBe("end . start");
+    });
+
+    it("preserves question marks as separate tokens", () => {
+      expect(normalizeText("really?")).toBe("really ?");
+    });
+
+    it("preserves semicolons and colons as separate tokens", () => {
+      expect(normalizeText("stop; go")).toBe("stop ; go");
+      expect(normalizeText("note: important")).toBe("note : important");
+    });
+
+    it("strips non-pause punctuation (quotes, parens, brackets)", () => {
+      expect(normalizeText("(hello)")).toBe("hello");
+      expect(normalizeText('"hello"')).toBe("hello");
+      expect(normalizeText("[test]")).toBe("test");
+    });
+
+    it("preserves apostrophes in contractions", () => {
+      expect(normalizeText("it's fine")).toBe("it's fine");
+      expect(normalizeText("don't stop")).toBe("don't stop");
     });
   });
 });

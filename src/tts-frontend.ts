@@ -9,6 +9,8 @@ import {
 } from "./declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "./declarative-frontend";
 import { normalizeText } from "./g2p/text-normalize";
+import { pronounce } from "./g2p";
+import type { DictLookup } from "./g2p/types";
 import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 
@@ -25,12 +27,30 @@ export type TextToKlattTrackOptions = {
 };
 
 const CMU_DICTIONARY_CITATION = "CMU Pronouncing Dictionary";
-const FALLBACK_PRONUNCIATION_CITATION = "Qlatt fallback pronunciation rules (src/tts-frontend.ts)";
+const FALLBACK_PRONUNCIATION_CITATION =
+  "G2P pipeline: Elovitz LTS (NRL 7948) + Hunnicutt stress (Allen, Hunnicutt & Klatt 1987)";
+const MORPHOLOGY_PRONUNCIATION_CITATION =
+  "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)";
 const INVENTORY_CITATION = "public/rules/inventory.yaml";
 
 const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
   DEFAULT_CMU_DICTIONARY_PATH
 );
+
+/**
+ * Adapter: wrap the CMU_DICT_MAP (string values) as a DictLookup (string[] | null).
+ * Also handles alternate pronunciation entries like "read(1)".
+ */
+const cmuDictLookup: DictLookup = (word: string): string[] | null => {
+  const entry = CMU_DICT_MAP[word.toLowerCase()];
+  if (entry) return entry.split(" ");
+  // Handle alternate pronunciations like "read(1)" -> "read"
+  if (word.includes("(")) {
+    const base = CMU_DICT_MAP[word.replace(/\(\d+\)$/, "")];
+    if (base) return base.split(" ");
+  }
+  return null;
+};
 const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 const RULE_CITATIONS = new Map<string, string[]>(
   Object.entries((QLATT_V12_CEL_RULEPACK?.rules ?? {}) as Record<string, RuleSpec>).map(
@@ -78,200 +98,6 @@ function emitRuleTraceDecisions(trace: FrontendToken[], provenance: ProvenanceCo
 // normalizeText is imported from ./g2p/text-normalize
 export { normalizeText } from "./g2p/text-normalize";
 
-function guessPronunciation(word: string): string[] {
-  const cleaned = word.toLowerCase().replace(/[^a-z']/g, "");
-  if (!cleaned) return [];
-  const phones = [];
-  const isVowel = (ch: string) => "aeiouy".includes(ch);
-  let i = 0;
-
-  while (i < cleaned.length) {
-    const two = cleaned.slice(i, i + 2);
-    const three = cleaned.slice(i, i + 3);
-
-    if (three === "tch") {
-      phones.push("CH");
-      i += 3;
-      continue;
-    }
-    if (two === "ch") {
-      phones.push("CH");
-      i += 2;
-      continue;
-    }
-    if (two === "sh") {
-      phones.push("SH");
-      i += 2;
-      continue;
-    }
-    if (two === "th") {
-      phones.push("DH");
-      i += 2;
-      continue;
-    }
-    if (two === "ph") {
-      phones.push("F");
-      i += 2;
-      continue;
-    }
-    if (two === "ng") {
-      phones.push("NG");
-      i += 2;
-      continue;
-    }
-    if (two === "wh") {
-      phones.push("W");
-      i += 2;
-      continue;
-    }
-    if (two === "ck") {
-      phones.push("K");
-      i += 2;
-      continue;
-    }
-    if (two === "qu") {
-      phones.push("K", "W");
-      i += 2;
-      continue;
-    }
-    if (two === "ee") {
-      phones.push("IY0");
-      i += 2;
-      continue;
-    }
-    if (two === "oo") {
-      phones.push("UW0");
-      i += 2;
-      continue;
-    }
-    if (two === "ea") {
-      phones.push("IY0");
-      i += 2;
-      continue;
-    }
-    if (two === "ai" || two === "ay") {
-      phones.push("EY0");
-      i += 2;
-      continue;
-    }
-    if (two === "oi" || two === "oy") {
-      phones.push("OY1");
-      i += 2;
-      continue;
-    }
-    if (two === "ow" || two === "ou") {
-      phones.push("OW0");
-      i += 2;
-      continue;
-    }
-    if (two === "er" || two === "ur" || two === "ir") {
-      phones.push("ER0");
-      i += 2;
-      continue;
-    }
-    if (two === "ar") {
-      phones.push("AA0", "R");
-      i += 2;
-      continue;
-    }
-    if (two === "or") {
-      phones.push("AO0", "R");
-      i += 2;
-      continue;
-    }
-
-    const ch = cleaned[i];
-    const next = cleaned[i + 1] || "";
-    switch (ch) {
-      case "a":
-        phones.push("AE0");
-        break;
-      case "e":
-        phones.push("EH0");
-        break;
-      case "i":
-        phones.push("IH0");
-        break;
-      case "o":
-        phones.push("AO0");
-        break;
-      case "u":
-        phones.push("AH0");
-        break;
-      case "y":
-        phones.push(i === 0 ? "Y" : "IY0");
-        break;
-      case "b":
-        phones.push("B");
-        break;
-      case "c":
-        phones.push("eiy".includes(next) ? "S" : "K");
-        break;
-      case "d":
-        phones.push("D");
-        break;
-      case "f":
-        phones.push("F");
-        break;
-      case "g":
-        phones.push("eiy".includes(next) ? "JH" : "G");
-        break;
-      case "h":
-        phones.push("HH");
-        break;
-      case "j":
-        phones.push("JH");
-        break;
-      case "k":
-        phones.push("K");
-        break;
-      case "l":
-        phones.push("L");
-        break;
-      case "m":
-        phones.push("M");
-        break;
-      case "n":
-        phones.push("N");
-        break;
-      case "p":
-        phones.push("P");
-        break;
-      case "q":
-        phones.push("K");
-        break;
-      case "r":
-        phones.push("R");
-        break;
-      case "s":
-        phones.push(
-          i === cleaned.length - 1 && i > 0 && isVowel(cleaned[i - 1]) ? "Z" : "S"
-        );
-        break;
-      case "t":
-        phones.push("T");
-        break;
-      case "v":
-        phones.push("V");
-        break;
-      case "w":
-        phones.push("W");
-        break;
-      case "x":
-        phones.push("K", "S");
-        break;
-      case "z":
-        phones.push("Z");
-        break;
-      default:
-        break;
-    }
-    i += 1;
-  }
-
-  return phones;
-}
-
 // --- Phonetic Transcription --- (MODIFIED: Return flat phoneme list with word info)
 export function transcribeText(text: string, options: TranscriptionOptions = {}): FrontendToken[] {
   const provenance = options.provenance ?? null;
@@ -291,77 +117,66 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         word: word, // Associate punctuation with itself as the 'word'
       });
     } else {
-      const lowerWord = word.toLowerCase();
-      let pronunciation = CMU_DICT_MAP[lowerWord];
-      // Handle alternate pronunciations like "read(1)" -> "read"
-      if (!pronunciation && lowerWord.includes("(")) {
-        pronunciation = CMU_DICT_MAP[lowerWord.replace(/\(\d+\)$/, "")];
+      // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress
+      const pronResult = pronounce(word, cmuDictLookup);
+
+      // Select provenance citation based on which layer handled the word
+      let decisionType: string;
+      let reason: string;
+      let citations: string[];
+      if (pronResult.source === 'dictionary') {
+        decisionType = "dictionary_pronunciation_selected";
+        reason = `Used CMU dictionary pronunciation for '${word}'`;
+        citations = [CMU_DICTIONARY_CITATION];
+      } else if (pronResult.source === 'morphology') {
+        decisionType = "morphology_pronunciation_selected";
+        reason = `Morphological decomposition for '${word}' (root: ${pronResult.rootWord ?? '?'})`;
+        citations = [MORPHOLOGY_PRONUNCIATION_CITATION];
+      } else {
+        decisionType = "fallback_pronunciation_selected";
+        reason = `Word '${word}' not in dictionary; used Elovitz LTS + Hunnicutt stress`;
+        citations = [FALLBACK_PRONUNCIATION_CITATION];
+        console.warn(
+          `[TTS Frontend] Word "${word}" not found in dictionary. Using G2P pipeline (${pronResult.source}).`
+        );
       }
 
-      if (pronunciation) {
-        provenance?.add({
-          stage: "transcribe",
-          type: "dictionary_pronunciation_selected",
-          subject: `word:${word}`,
-          reason: `Used CMU dictionary pronunciation for '${word}'`,
-          citations: [CMU_DICTIONARY_CITATION],
-        });
-        const phones = pronunciation.split(" ");
-        for (const phoneWithStress of phones) {
+      const pronunciationDecision = provenance?.add({
+        stage: "transcribe",
+        type: decisionType,
+        subject: `word:${word}`,
+        reason,
+        citations,
+      });
+
+      if (pronResult.phonemes.length > 0) {
+        for (const phoneWithStress of pronResult.phonemes) {
           const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
           if (match) {
             flatPhonemeList.push({
               phoneme: match[1],
               stress: match[2] ? parseInt(match[2]) : null,
-              word: word, // Add the original word to each phoneme
+              word: word,
+              _pronDecisionId: pronunciationDecision?.id,
             });
           } else if (phoneWithStress === "SIL") {
-            // Handle SIL within a pronunciation if needed (though unlikely in CMU)
-            flatPhonemeList.push({ phoneme: "SIL", stress: null, word: word });
+            flatPhonemeList.push({
+              phoneme: "SIL",
+              stress: null,
+              word: word,
+              _pronDecisionId: pronunciationDecision?.id,
+            });
           }
         }
       } else {
-        const fallbackPhones = guessPronunciation(lowerWord);
-        if (fallbackPhones.length) {
-          provenance?.add({
-            stage: "transcribe",
-            type: "fallback_pronunciation_selected",
-            subject: `word:${word}`,
-            reason: `Word '${word}' missing from dictionary; used fallback grapheme rules`,
-            citations: [FALLBACK_PRONUNCIATION_CITATION],
-          });
-          console.warn(
-            `[TTS Frontend] Word "${word}" not found. Using fallback phonemes.`
-          );
-          for (const phoneWithStress of fallbackPhones) {
-            const match = phoneWithStress.match(/^([A-Z]+)(\d)?$/);
-            if (match) {
-              flatPhonemeList.push({
-                phoneme: match[1],
-                stress: match[2] ? parseInt(match[2]) : null,
-                word: word,
-              });
-            } else if (phoneWithStress === "SIL") {
-              flatPhonemeList.push({ phoneme: "SIL", stress: null, word: word });
-            }
-          }
-        } else {
-          provenance?.add({
-            stage: "transcribe",
-            type: "fallback_pronunciation_selected",
-            subject: `word:${word}`,
-            reason: `Word '${word}' missing from dictionary and fallback rules; using SIL`,
-            citations: [FALLBACK_PRONUNCIATION_CITATION],
-          });
-          console.warn(`Word "${word}" not found. Representing as SIL.`);
-          // Represent unknown word as silence associated with the word
-          flatPhonemeList.push({
-            phoneme: "SIL",
-            stress: null,
-            duration: 50,
-            word: word,
-          });
-        }
+        console.warn(`[TTS Frontend] Word "${word}" produced no phonemes. Representing as SIL.`);
+        flatPhonemeList.push({
+          phoneme: "SIL",
+          stress: null,
+          duration: 50,
+          word: word,
+          _pronDecisionId: pronunciationDecision?.id,
+        });
       }
     }
   }
@@ -518,6 +333,10 @@ export function textToKlattTrack(
       subject: `token:${index}:${targetKeyBase}`,
       reason: `Selected inventory target '${targetKeyBase}' for source phoneme '${ph.phoneme}'`,
       citations: [INVENTORY_CITATION],
+      parents:
+        typeof ph._pronDecisionId === "string" && ph._pronDecisionId.length > 0
+          ? [ph._pronDecisionId]
+          : undefined,
     });
 
     // Copy essential flags from baseTarget

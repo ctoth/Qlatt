@@ -57,27 +57,45 @@ describe("postlexical integration via textToKlattTrack", () => {
   });
 
   describe("t-flapping", () => {
-    // NOTE: The t_flapping rule matches T_CL when prev.type == 'vowel' (stressed)
-    // and next.type == 'vowel' (unstressed). After the structural phase inserts
-    // T_REL and T_ASP between T_CL and the following vowel, the condition
-    // next.type == 'vowel' no longer holds (next is T_REL, type=stop_release).
-    //
-    // This means t_flapping does not currently fire in the full pipeline.
-    // The rule works correctly when tested in isolation (see g2p-postlexical.test.ts).
-    // A future enhancement should adjust the rule's WHERE clause to look past
-    // release/aspiration tokens, or restructure phase ordering.
-    //
-    // For now, we document this known limitation with a test.
-    it("does not currently flap in full pipeline due to release insertion order", () => {
+    it('flaps intervocalic T in "butter" (stressed AH + T + unstressed ER)', () => {
       // "butter" = B AH1 T ER0 — T between stressed AH1 and unstressed ER0
-      // After structural: B_CL, (B_REL, B_ASP,) AH1, T_CL, T_REL, T_ASP, ER0
-      // t_flapping sees T_CL with next=T_REL (not vowel), so doesn't match.
+      // Postlexical runs before structural, so t_flapping sees raw T with
+      // prev=vowel(stressed) and next=vowel(unstressed) → replaces T with DX.
       const track = textToKlattTrack("butter", 110);
 
       const phonemes = track.map((f) => f.phoneme).filter(Boolean);
-      // T_CL should still be present (not flapped to DX)
-      expect(phonemes).toContain("T_CL");
+      // DX should be present (T was flapped)
+      expect(phonemes).toContain("DX");
+      // T_CL should NOT be present (T was replaced before structural ran)
+      expect(phonemes).not.toContain("T_CL");
+      // Plain T should also not remain
+      expect(phonemes).not.toContain("T");
+    });
+
+    it('flaps intervocalic T in "water" (stressed AO + T + unstressed ER)', () => {
+      const track = textToKlattTrack("water", 110);
+
+      const phonemes = track.map((f) => f.phoneme).filter(Boolean);
+      expect(phonemes).toContain("DX");
+      expect(phonemes).not.toContain("T_CL");
+    });
+
+    it('does NOT flap word-initial T in "top"', () => {
+      const track = textToKlattTrack("top", 110);
+
+      const phonemes = track.map((f) => f.phoneme).filter(Boolean);
+      // T at word start is not between vowels → no flapping
       expect(phonemes).not.toContain("DX");
+      expect(phonemes).toContain("T_CL");
+    });
+
+    it('does NOT flap word-final T in "pat"', () => {
+      const track = textToKlattTrack("pat", 110);
+
+      const phonemes = track.map((f) => f.phoneme).filter(Boolean);
+      // T at word end is not between vowels → no flapping
+      expect(phonemes).not.toContain("DX");
+      expect(phonemes).toContain("T_CL");
     });
   });
 });

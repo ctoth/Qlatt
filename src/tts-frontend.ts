@@ -122,11 +122,12 @@ export function textToKlattTrack(
       parameters,
     );
 
-  parameterSequence = runPhases(parameterSequence, ["structural"]);
-  // Run postlexical rules (t-flapping, the-reduction) after structural
-  // so T_CL exists for t_flapping to match, but before duration assignment.
+  // Run postlexical rules first (t-flapping, the-reduction operate on raw phonemes).
+  // t_flapping must see raw T between vowels; structural would split T into
+  // T_CL + T_REL + T_ASP, breaking the adjacency check.
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
   parameterSequence = runPhases(parameterSequence, ["postlexical"]);
+  parameterSequence = runPhases(parameterSequence, ["structural"]);
   parameterSequence = runPhases(parameterSequence, ["duration"]);
   parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
     ...token,

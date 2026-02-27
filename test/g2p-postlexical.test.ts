@@ -116,8 +116,8 @@ describe("postlexical rules", () => {
 
   describe("/t/ flapping: T -> DX between stressed vowel and unstressed vowel", () => {
     it('flaps T in "better" (stressed EH + T + unstressed ER)', () => {
-      // "better" -> B_CL EH1 T_CL ER0 SIL
-      // T_CL is between stressed EH1 and unstressed ER0 -> should become DX
+      // "better" -> B EH1 T ER0 SIL (raw phonemes, before structural)
+      // T is between stressed EH1 and unstressed ER0 -> should become DX
       const s0 = startOrder();
       const s1 = finiteOrder(1);
       const s2 = finiteOrder(2);
@@ -126,10 +126,10 @@ describe("postlexical rules", () => {
       const sEnd = endOrder();
 
       const sequence = [
-        makeToken("ph0", "B_CL", "stop_closure", 0, 45, s0, s1, { word: "better" }),
-        makeToken("ph1", "EH1", "vowel", 1, 120, s1, s2, { word: "better" }),
-        makeToken("ph2", "T_CL", "stop_closure", 0, 40, s2, s3, { word: "better" }),
-        makeToken("ph3", "ER0", "vowel", 0, 70, s3, s4, { word: "better" }),
+        makeToken("ph0", "B", "stop", 0, 45, s0, s1, { word: "better" }),
+        makeToken("ph1", "EH", "vowel", 1, 120, s1, s2, { word: "better" }),
+        makeToken("ph2", "T", "stop", 0, 40, s2, s3, { word: "better" }),
+        makeToken("ph3", "ER", "vowel", 0, 70, s3, s4, { word: "better" }),
         makeToken("ph4", "SIL", "silence", 0, 300, s4, sEnd, { punctuationSymbol: "." }),
       ];
 
@@ -139,10 +139,10 @@ describe("postlexical rules", () => {
       });
 
       const phoneTokens = getActivePhoneTokens(result);
-      // The T_CL (ph2) should be suppressed and replaced with a DX token
+      // The T (ph2) should be suppressed and replaced with a DX token
       const phonemes = phoneTokens.map((t: any) => t.phoneme);
       expect(phonemes).toContain("DX");
-      expect(phonemes).not.toContain("T_CL");
+      expect(phonemes).not.toContain("T");
     });
 
     it('flaps T in "butter" (stressed AH + T + unstressed ER)', () => {
@@ -154,10 +154,10 @@ describe("postlexical rules", () => {
       const sEnd = endOrder();
 
       const sequence = [
-        makeToken("ph0", "B_CL", "stop_closure", 0, 45, s0, s1, { word: "butter" }),
-        makeToken("ph1", "AH1", "vowel", 1, 100, s1, s2, { word: "butter" }),
-        makeToken("ph2", "T_CL", "stop_closure", 0, 40, s2, s3, { word: "butter" }),
-        makeToken("ph3", "ER0", "vowel", 0, 70, s3, s4, { word: "butter" }),
+        makeToken("ph0", "B", "stop", 0, 45, s0, s1, { word: "butter" }),
+        makeToken("ph1", "AH", "vowel", 1, 100, s1, s2, { word: "butter" }),
+        makeToken("ph2", "T", "stop", 0, 40, s2, s3, { word: "butter" }),
+        makeToken("ph3", "ER", "vowel", 0, 70, s3, s4, { word: "butter" }),
         makeToken("ph4", "SIL", "silence", 0, 300, s4, sEnd, { punctuationSymbol: "." }),
       ];
 
@@ -169,7 +169,7 @@ describe("postlexical rules", () => {
       const phoneTokens = getActivePhoneTokens(result);
       const phonemes = phoneTokens.map((t: any) => t.phoneme);
       expect(phonemes).toContain("DX");
-      expect(phonemes).not.toContain("T_CL");
+      expect(phonemes).not.toContain("T");
     });
 
     it('flaps T in "water" (stressed AO + T + unstressed ER)', () => {
@@ -182,9 +182,9 @@ describe("postlexical rules", () => {
 
       const sequence = [
         makeToken("ph0", "W", "glide", 0, 80, s0, s1, { word: "water" }),
-        makeToken("ph1", "AO1", "vowel", 1, 160, s1, s2, { word: "water" }),
-        makeToken("ph2", "T_CL", "stop_closure", 0, 40, s2, s3, { word: "water" }),
-        makeToken("ph3", "ER0", "vowel", 0, 70, s3, s4, { word: "water" }),
+        makeToken("ph1", "AO", "vowel", 1, 160, s1, s2, { word: "water" }),
+        makeToken("ph2", "T", "stop", 0, 40, s2, s3, { word: "water" }),
+        makeToken("ph3", "ER", "vowel", 0, 70, s3, s4, { word: "water" }),
         makeToken("ph4", "SIL", "silence", 0, 300, s4, sEnd, { punctuationSymbol: "." }),
       ];
 
@@ -196,7 +196,7 @@ describe("postlexical rules", () => {
       const phoneTokens = getActivePhoneTokens(result);
       const phonemes = phoneTokens.map((t: any) => t.phoneme);
       expect(phonemes).toContain("DX");
-      expect(phonemes).not.toContain("T_CL");
+      expect(phonemes).not.toContain("T");
     });
 
     it("does NOT flap word-final T in 'cat'", () => {
@@ -207,9 +207,9 @@ describe("postlexical rules", () => {
       const sEnd = endOrder();
 
       const sequence = [
-        makeToken("ph0", "K_CL", "stop_closure", 0, 60, s0, s1, { word: "cat" }),
-        makeToken("ph1", "AE1", "vowel", 1, 170, s1, s2, { word: "cat" }),
-        makeToken("ph2", "T_CL", "stop_closure", 0, 40, s2, s3, { word: "cat" }),
+        makeToken("ph0", "K", "stop", 0, 60, s0, s1, { word: "cat" }),
+        makeToken("ph1", "AE", "vowel", 1, 170, s1, s2, { word: "cat" }),
+        makeToken("ph2", "T", "stop", 0, 40, s2, s3, { word: "cat" }),
         makeToken("ph3", "SIL", "silence", 0, 300, s3, sEnd, { punctuationSymbol: "." }),
       ];
 
@@ -219,9 +219,9 @@ describe("postlexical rules", () => {
       });
 
       const phoneTokens = getActivePhoneTokens(result);
-      const tClosure = phoneTokens.find((t: any) => t.id === "ph2");
-      expect(tClosure).toBeDefined();
-      expect(tClosure.phoneme).toBe("T_CL");
+      const tToken = phoneTokens.find((t: any) => t.id === "ph2");
+      expect(tToken).toBeDefined();
+      expect(tToken.phoneme).toBe("T");
     });
 
     it("does NOT flap T before N in 'button'", () => {
@@ -233,9 +233,9 @@ describe("postlexical rules", () => {
       const sEnd = endOrder();
 
       const sequence = [
-        makeToken("ph0", "B_CL", "stop_closure", 0, 45, s0, s1, { word: "button" }),
-        makeToken("ph1", "AH1", "vowel", 1, 100, s1, s2, { word: "button" }),
-        makeToken("ph2", "T_CL", "stop_closure", 0, 40, s2, s3, { word: "button" }),
+        makeToken("ph0", "B", "stop", 0, 45, s0, s1, { word: "button" }),
+        makeToken("ph1", "AH", "vowel", 1, 100, s1, s2, { word: "button" }),
+        makeToken("ph2", "T", "stop", 0, 40, s2, s3, { word: "button" }),
         makeToken("ph3", "N", "nasal", 0, 70, s3, s4, { word: "button" }),
         makeToken("ph4", "SIL", "silence", 0, 300, s4, sEnd, { punctuationSymbol: "." }),
       ];
@@ -246,9 +246,9 @@ describe("postlexical rules", () => {
       });
 
       const phoneTokens = getActivePhoneTokens(result);
-      const tClosure = phoneTokens.find((t: any) => t.id === "ph2");
-      expect(tClosure).toBeDefined();
-      expect(tClosure.phoneme).toBe("T_CL");
+      const tToken = phoneTokens.find((t: any) => t.id === "ph2");
+      expect(tToken).toBeDefined();
+      expect(tToken.phoneme).toBe("T");
     });
   });
 });

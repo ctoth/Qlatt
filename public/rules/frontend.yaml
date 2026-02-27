@@ -430,7 +430,7 @@ rules:
     select:
       stream: phone
       where: >-
-        current.phoneme == 'T_CL'
+        current.phoneme == 'T'
         && prev != null && prev.type == 'vowel'
         && (has(prev.stress) ? prev.stress == 1 : false)
         && next != null && next.type == 'vowel'

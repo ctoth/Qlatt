@@ -134,6 +134,19 @@ export function buildFrameContext(
   staticContext: Record<string, unknown>,
   params: Record<string, number>,
 ): Record<string, unknown> {
+  // Deep clone is required here — a shallow copy (Object.assign / spread) is NOT sufficient.
+  //
+  // cel-js mutates the evaluation context in-place during collection macro expansion
+  // (e.g., .exists(), .all(), .filter()). Specifically, evaluateWithBinding() in
+  // cel-js's visitor.js assigns temporary iteration variables directly onto the
+  // context object. If the context contains nested objects (like ndbScale, which holds
+  // dB-offset lookup tables), shallow-copied references would share those nested objects
+  // with staticContext, and any macro-driven mutation would corrupt the shared state
+  // across all subsequent frames.
+  //
+  // Performance: structuredClone on the ~30-key staticContext takes sub-microsecond
+  // per call. At typical frame rates (100-200 frames/utterance), total overhead is
+  // well under 1ms — negligible compared to WebAudio scheduling.
   const ctx: Record<string, unknown> = structuredClone(staticContext);
   // Overlay track params (these override defaults)
   Object.assign(ctx, params);

@@ -10,7 +10,7 @@ import {
 import { runDeclarativeFrontend } from "./declarative-frontend";
 import { normalizeText } from "./g2p/text-normalize";
 import { pronounce } from "./g2p";
-import type { DictLookup } from "./g2p/types";
+import type { DictLookup, PronunciationResult } from "./g2p/types";
 import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 
@@ -31,7 +31,36 @@ const FALLBACK_PRONUNCIATION_CITATION =
   "G2P pipeline: Elovitz LTS (NRL 7948) + Hunnicutt stress (Allen, Hunnicutt & Klatt 1987)";
 const MORPHOLOGY_PRONUNCIATION_CITATION =
   "G2P pipeline: morphological decomposition (Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5)";
+const SYMBOL_PRONUNCIATION_CITATION =
+  "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const INVENTORY_CITATION = "public/rules/inventory.yaml";
+const PUNCTUATION_TOKENS = new Set([",", ".", "?", "!", ";", ":"]);
+const DIAGNOSTIC_SYMBOL_PHONEMES: Record<string, string[]> = {
+  b: ["B"],
+  ch: ["CH"],
+  d: ["D"],
+  dh: ["DH"],
+  f: ["F"],
+  g: ["G"],
+  hh: ["HH"],
+  jh: ["JH"],
+  k: ["K"],
+  l: ["L"],
+  m: ["M"],
+  n: ["N"],
+  ng: ["NG"],
+  p: ["P"],
+  r: ["R"],
+  s: ["S"],
+  sh: ["SH"],
+  t: ["T"],
+  th: ["TH"],
+  v: ["V"],
+  w: ["W"],
+  y: ["Y"],
+  z: ["Z"],
+  zh: ["ZH"],
+};
 
 const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDictionaryFromPath(
   DEFAULT_CMU_DICTIONARY_PATH
@@ -61,7 +90,44 @@ const RULE_CITATIONS = new Map<string, string[]>(
   )
 );
 
-function emitRuleTraceDecisions(trace: FrontendToken[], provenance: ProvenanceCollector): void {
+function isPunctuationToken(word: string): boolean {
+  return PUNCTUATION_TOKENS.has(word);
+}
+
+function getDiagnosticSymbolPronunciation(word: string): string[] | null {
+  const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
+  const phones = DIAGNOSTIC_SYMBOL_PHONEMES[normalized];
+  return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
+}
+
+function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
+  const nonPunctuation = words.filter((word) => word.length > 0 && !isPunctuationToken(word));
+  return (
+    nonPunctuation.length > 0 &&
+    nonPunctuation.every((word) => getDiagnosticSymbolPronunciation(word) !== null)
+  );
+}
+
+function collectTraceTokenIds(event: FrontendToken): string[] {
+  const ids: string[] = [];
+  if (typeof event?.token === "string" && event.token.length > 0) {
+    ids.push(event.token);
+  }
+  if (event?.captures && typeof event.captures === "object") {
+    ids.push(
+      ...Object.values(event.captures).filter(
+        (value): value is string => typeof value === "string" && value.length > 0
+      )
+    );
+  }
+  return [...new Set(ids)];
+}
+
+function emitRuleTraceDecisions(
+  trace: FrontendToken[],
+  provenance: ProvenanceCollector,
+  tokenDecisionIds: Map<string, string>
+): void {
   for (const event of trace) {
     if (event?.type !== "match" && event?.type !== "rewrite") continue;
 
@@ -73,6 +139,7 @@ function emitRuleTraceDecisions(trace: FrontendToken[], provenance: ProvenanceCo
       : "<unknown-phase>";
     const citations = RULE_CITATIONS.get(ruleName) ?? [];
     const decisionType = event.type === "match" ? "rule_matched" : "rule_rewrite_applied";
+    const traceTokenIds = collectTraceTokenIds(event);
 
     let subject = `rule:${ruleName}`;
     if (typeof event?.token === "string" && event.token.length > 0) {
@@ -85,13 +152,24 @@ function emitRuleTraceDecisions(trace: FrontendToken[], provenance: ProvenanceCo
       }
     }
 
-    provenance.add({
+    const parentIds = [...new Set(
+      traceTokenIds
+        .map((tokenId) => tokenDecisionIds.get(tokenId))
+        .filter((id): id is string => typeof id === "string" && id.length > 0)
+    )];
+
+    const decision = provenance.add({
       stage: "rules",
       type: decisionType,
       subject,
       reason: `${ruleName} ${event.type} in phase ${phaseName}`,
       citations,
+      parents: parentIds.length > 0 ? parentIds : undefined,
     });
+
+    for (const tokenId of traceTokenIds) {
+      tokenDecisionIds.set(tokenId, decision.id);
+    }
   }
 }
 
@@ -103,12 +181,12 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
   const provenance = options.provenance ?? null;
   const words = text.split(" ");
   const flatPhonemeList: FrontendToken[] = []; // Flat array of { phoneme: '...', stress: ..., word: '...' }
-  const punctuation = [",", ".", "?", "!"];
+  const useSymbolMode = shouldUseDiagnosticSymbolMode(words);
 
   for (const word of words) {
     if (!word) continue; // Skip empty strings resulting from multiple spaces
 
-    if (punctuation.includes(word)) {
+    if (isPunctuationToken(word)) {
       flatPhonemeList.push({
         phoneme: "SIL",
         stress: null,
@@ -117,14 +195,26 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
         word: word, // Associate punctuation with itself as the 'word'
       });
     } else {
-      // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress
-      const pronResult = pronounce(word, cmuDictLookup);
+      const symbolPronunciation = useSymbolMode ? getDiagnosticSymbolPronunciation(word) : null;
+      // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress.
+      const pronResult: PronunciationResult =
+        symbolPronunciation == null
+          ? pronounce(word, cmuDictLookup)
+          : {
+              phonemes: symbolPronunciation,
+              source: "unknown",
+              word: word.toLowerCase(),
+            };
 
       // Select provenance citation based on which layer handled the word
       let decisionType: string;
       let reason: string;
       let citations: string[];
-      if (pronResult.source === 'dictionary') {
+      if (symbolPronunciation != null) {
+        decisionType = "symbol_pronunciation_selected";
+        reason = `Used diagnostic symbol pronunciation for '${word}'`;
+        citations = [SYMBOL_PRONUNCIATION_CITATION];
+      } else if (pronResult.source === 'dictionary') {
         decisionType = "dictionary_pronunciation_selected";
         reason = `Used CMU dictionary pronunciation for '${word}'`;
         citations = [CMU_DICTIONARY_CITATION];
@@ -277,6 +367,7 @@ export function textToKlattTrack(
   options: TextToKlattTrackOptions = {}
 ): FrontendToken[] {
   const provenance = options.provenance ?? null;
+  const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
   let parameterSequence: FrontendToken[] = transcribeText(normalized, { provenance });
@@ -327,7 +418,8 @@ export function textToKlattTrack(
     }
 
     const filledParams = fillDefaultParams(baseTarget);
-    provenance?.add({
+    const tokenId = `ph_${index}`;
+    const inventoryDecision = provenance?.add({
       stage: "transcribe",
       type: "inventory_target_selected",
       subject: `token:${index}:${targetKeyBase}`,
@@ -338,6 +430,9 @@ export function textToKlattTrack(
           ? [ph._pronDecisionId]
           : undefined,
     });
+    if (inventoryDecision?.id) {
+      tokenDecisionIds.set(tokenId, inventoryDecision.id);
+    }
 
     // Copy essential flags from baseTarget
     const flags: FrontendToken = {};
@@ -356,6 +451,7 @@ export function textToKlattTrack(
 
     // Return the enriched phoneme data object for the sequence
     return {
+      id: tokenId,
       phoneme: targetKeyBase, // Use the potentially modified targetKeyBase (e.g., P_CL, SIL)
       stress: ph.stress,
       params: filledParams,
@@ -391,7 +487,7 @@ export function textToKlattTrack(
     }) as { sequence: FrontendToken[]; trace?: FrontendToken[] };
 
     if (Array.isArray(result.trace)) {
-      emitRuleTraceDecisions(result.trace, provenance);
+      emitRuleTraceDecisions(result.trace, provenance, tokenDecisionIds);
     }
 
     return result.sequence;

@@ -87,6 +87,26 @@ This spec defines the **rule engine** portion of the frontend. A complete TTS sy
    - Interpolation, smoothing, and frame generation
    - Audio synthesis (e.g., Klatt)
 
+### 0.6 Numeric Policy Layer (Normative)
+
+Critical numeric behavior MUST be centralized under `parameters.policy` and referenced via `params.policy.*` in rule expressions.
+
+`parameters.policy` is structural YAML data (maps + scalars). It is not a template system and does not introduce any expansion pass.
+
+Rulepacks SHOULD place these domains in `parameters.policy`:
+
+- Duration/VOT constants (floors, multipliers, clamps)
+- Pause and boundary-lengthening constants
+- F0 baseline/range/declination constants
+- Any numeric constant reused across multiple rules
+
+Normative requirements:
+
+- Rules MUST reference `params.policy.*` for critical timing/prosody constants instead of embedding raw numeric literals.
+- Implementations MUST expose `params.policy` unchanged in every rule expression context.
+- Unknown referenced policy paths MUST raise `E_POLICY_PARAM_UNKNOWN`.
+- Disallowed inline critical literals MUST raise `E_POLICY_LITERAL_CRITICAL` (Part 6.0a, Part 9).
+
 ## Part 1: Core Data Model
 
 
@@ -531,6 +551,9 @@ Only functions that cannot be represented as cursor field access are registered:
 | `at_ratio(t, r)` | `(TokenView, double) -> Anchor` | Anchor at ratio. |
 | `at_sync(s)` | `SyncMarkId -> Anchor` | Anchor at sync mark. |
 | `prev_point(stream)` | `string -> PointToken \| null` | Previous ACTIVE point in stream order. |
+| `ahead(t, n)` | `(TokenView, int) -> TokenView \| null` | `n`-step lookahead over ACTIVE stream order. |
+| `behind(t, n)` | `(TokenView, int) -> TokenView \| null` | `n`-step lookbehind over ACTIVE stream order. |
+| `look_back_where(t, n, expr)` | `(TokenView, int, string) -> TokenView \| null` | Returns nearest prior token within `n` where CEL `expr` is true. |
 | `total(stream)` | `string -> int` | Count of ACTIVE tokens in stream. |
 | `target(phoneme)` | `string -> map` | Inventory lookup. MUST return a plain CEL map (e.g., `{"params": {...}}`). |
 
@@ -539,6 +562,13 @@ Optional extension (only if association rules are used in expressions):
 | Function | Signature | Notes |
 |----------|-----------|-------|
 | `assoc(t, name)` | `(TokenView, string) -> list<TokenView>` | Association lookup over ACTIVE edges. |
+
+Predicate extension (enabled when top-level `predicates` is present):
+
+| Function | Signature | Notes |
+|----------|-----------|-------|
+| `look_back_pred(t, n, name)` | `(TokenView, int, string) -> TokenView \| null` | Named-predicate variant of `look_back_where`. |
+| `look_ahead_pred(t, n, name)` | `(TokenView, int, string) -> TokenView \| null` | Forward scan with named predicate. |
 
 Navigation formerly expressed as functions is now cursor data:
 
@@ -593,6 +623,15 @@ name: 'stop.name + "_rel"'
 where: 'current.f.manner == "vowel"'
 ```
 
+Condition slots (`where`, `constraint`) also support structural form:
+
+```yaml
+where:
+  all:
+    - predicate: is_question_boundary
+    - expr: 'has(prev)'
+```
+
 Conventions:
 
 - Equality: `==`
@@ -618,7 +657,46 @@ apply:
 
 `define:` is evaluated once per rule firing, top-to-bottom. Each binding is visible to later bindings and all expression fields (`constraint`, `apply`, `splice.insert`, `insert_point`) in that same rule firing.
 
-### 2.9 Multi-Step Lookahead
+### 2.8a Named Predicates (Structural Reuse, No Expansion Pass)
+
+The DSL MAY declare reusable boolean expressions at top level:
+
+```yaml
+predicates:
+  is_question_boundary: >-
+    current.phoneme == "SIL" && current.punctuationSymbol == "?"
+  is_stressed_vowel: >-
+    current.type == "vowel" && has(current.stress) && current.stress == 1
+```
+
+Usage:
+
+```yaml
+select:
+  stream: phone
+  where:
+    predicate: is_question_boundary
+define:
+  last_stress: 'look_back_pred(current, 8, "is_stressed_vowel")'
+```
+
+Normative behavior:
+
+- Predicates are first-class declarations, not templates/macros.
+- Implementations MUST NOT introduce an expression expansion pass for predicates.
+- Predicate bodies are validated/compiled at `VALIDATE` and evaluated directly at runtime in the current rule context.
+- Predicate lookup is by exact string key.
+- `where` and `constraint` accept either a CEL string or a structural condition map:
+  - `{ expr: "<CEL bool>" }`
+  - `{ predicate: "<name>" }`
+  - `{ all: [ConditionSpec, ...] }`
+  - `{ any: [ConditionSpec, ...] }`
+  - `{ not: ConditionSpec }`
+- Condition maps are strict tagged unions: exactly one of `expr`, `predicate`, `all`, `any`, `not`.
+- Unknown predicate names MUST raise `E_PREDICATE_UNKNOWN`.
+- Cycles in predicate references (e.g., `a -> b -> a`) MUST raise `E_PREDICATE_CYCLE`.
+
+### 2.9 Multi-Step Navigation
 
 This profile defines **bounded cursor depth = 2** for adjacency navigation:
 
@@ -630,6 +708,12 @@ For deeper navigation, use helper functions:
 
 - `ahead(current, n)` for `n`-step lookahead
 - `behind(current, n)` for `n`-step lookbehind
+- `look_back_where(current, n, "<cel bool expr>")` for predicate-based backward scans
+
+When top-level `predicates` are declared, prefer named predicate scans:
+
+- `look_back_pred(current, n, "predicate_name")`
+- `look_ahead_pred(current, n, "predicate_name")`
 
 Rules that need complex structural context beyond local traversal SHOULD still be rewritten as pattern rules with explicit captures.
 
@@ -1355,6 +1439,26 @@ Validation MUST NOT invent new tokens or delete existing tokens.
 
 Every rule should cite the phonetic/phonological literature justifying it.
 
+### Rulepack-Level Predicates
+
+Rulepacks MAY declare a top-level predicate library:
+
+```typescript
+type ConditionSpec =
+  | string
+  | { expr: string }
+  | { predicate: string }
+  | { all: ConditionSpec[] }
+  | { any: ConditionSpec[] }
+  | { not: ConditionSpec };
+
+type PredicateLibrary = Record<string, ConditionSpec>;
+```
+
+If present, each predicate expression is validated in the same type environment as rule expressions. Predicate names are global within the loaded rulepack.
+
+Predicate declarations are structural data in the rulepack and are evaluated by the engine at runtime. They are not text substitutions and do not alter the phase/rule execution model.
+
 
 
 ### 6.0 Rule Structure
@@ -1362,6 +1466,11 @@ Every rule should cite the phonetic/phonological literature justifying it.
 
 
 ```typescript
+
+interface SelectClause {
+  stream: string;
+  where?: ConditionSpec;
+}
 
 interface Rule {
 
@@ -1380,7 +1489,7 @@ interface Rule {
   // Optional:
 
   define?: Record<string, string>; // CEL bindings, evaluated once per firing (top-to-bottom)
-  constraint?: string;             // additional CEL filter (post-match)
+  constraint?: ConditionSpec;      // additional CEL filter (post-match)
 
   
 
@@ -1441,6 +1550,28 @@ interface AssocSpec {
 **Effect target defaulting:** If `target` is omitted, it defaults to `'current'`. For pattern rules, `target` may reference any capture name (e.g., `'v'`, `'stop'`).
 
 **Define binding scope (normative):** `define` is rule-level. Bindings are evaluated once per rule firing, top-to-bottom, and are available to subsequent bindings plus all expression fields in the same firing (`constraint`, `apply`, `splice.insert`, `insert_point`).
+
+### 6.0a Numeric Literal Policy (Normative)
+
+To keep rulepacks maintainable and citation-auditable, critical numeric constants MUST live in `parameters.policy` and be referenced as `params.policy.*`.
+
+Critical sites include:
+
+- `apply` effects targeting `duration`, `VOT`/`vot`, and `F0`/`f0`
+- `insert_point.value` for `f0` point streams
+- Duration/F0/VOT thresholds in `where`, `constraint`, `define`, and `dispatch` expressions
+
+Allowed inline numeric literals:
+
+- Identity/neutral constants: `0`, `1`, `-1`
+- Purely structural counting/index arithmetic that does not set a speech policy value
+
+Validation behavior:
+
+- Unknown `params.policy...` path -> `E_POLICY_PARAM_UNKNOWN`
+- Inline critical literal outside allowed exceptions -> `E_POLICY_LITERAL_CRITICAL`
+
+Rulepacks SHOULD keep policy entries citation-backed, consistent with rule-level citations.
 
 **Dispatch semantics (normative):**
 
@@ -1909,6 +2040,10 @@ rendering:
 | E_INVALID_RATIO | point ratio not in [0,1] | point token |
 | E_POINT_FWD_REF | point value references unresolved `next_point` | point rule |
 | E_CEL_INVALID | expression parse/type error at compile time | rule |
+| E_PREDICATE_UNKNOWN | condition/predicate scan references unknown predicate name | predicate call site |
+| E_PREDICATE_CYCLE | cycle detected in predicate references | predicate library |
+| E_POLICY_PARAM_UNKNOWN | `params.policy.*` reference path does not exist | expression site |
+| E_POLICY_LITERAL_CRITICAL | critical timing/prosody constant encoded as inline numeric literal | expression site |
 | E_TOKEN_FIELD_UNDECLARED | expression references token field not declared in stream schema | rule |
 | E_DISPATCH_NO_DEFAULT | dispatch block missing required `default` row | rule |
 | E_DISPATCH_AND_VALUE | effect specifies both `dispatch` and `value` | rule |
@@ -1922,6 +2057,8 @@ rendering:
 - W_DURATION_EDIT_AFTER_TIMES
 - W_MISSING_CITATION
 - W_EMPTY_SPAN
+- W_POLICY_PARAM_UNCITED
+- W_POLICY_PARAM_UNUSED
 
 ### 9.2 Invariants
 
@@ -1978,6 +2115,9 @@ Migration quick-reference (legacy syntax -> CEL):
 | `index(current)` | `current_index` |
 | `total("stream")` | `total("stream")` |
 | `prev_point("f0")` | `prev_point("f0")` |
+| deep lookbehind via nested ternary | `look_back_where(current, n, "<expr>")` |
+| repeated boolean snippets | top-level `predicates` + `{predicate: "name"}` |
+| repeated critical numeric constants | `parameters.policy.*` + `params.policy.*` |
 | `exists(x)` | `has(x)` |
 | local let-binding | YAML `define:` |
 
@@ -1986,9 +2126,14 @@ Migration quick-reference (legacy syntax -> CEL):
 include: [streams.yaml]
 
 parameters:
-  stress_factor: 1.3
   clipping_factor: 0.6
-  base_f0: 110
+  policy:
+    duration:
+      stress_factor: 1.3
+    f0:
+      base_hz: 110
+      declination_start: 1.1
+      declination_span: 0.2
 
 patterns:
   stop_before_sonorant:
@@ -2059,7 +2204,7 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: 'current.syllable.f.stress == 1 ? params.stress_factor : 1.0'
+        value: 'current.syllable.f.stress == 1 ? params.policy.duration.stress_factor : 1.0'
         tag: stress
 
   f0_targets:
@@ -2070,7 +2215,7 @@ rules:
     insert_point:
       stream: f0
       at: 'midpoint(current)'
-      value: 'params.base_f0 * (1.1 - 0.2 * double(current_index) / double(total("phone")))'
+      value: 'params.policy.f0.base_hz * (params.policy.f0.declination_start - params.policy.f0.declination_span * double(current_index) / double(total("phone")))'
       tag: f0
 ```
 

@@ -2,7 +2,9 @@
   "extends": "./tsconfig.json",
   "include": [
     "scripts/dev-server.ts",
-    "scripts/export-declarative-corpus-summary.ts"
+    "scripts/export-declarative-corpus-summary.ts",
+    "scripts/explain-phrase.ts",
+    "scripts/explain-summary.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

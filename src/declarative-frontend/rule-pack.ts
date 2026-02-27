@@ -1,4 +1,4 @@
-import { parseDslSpec } from "./parser";
+import { parseDslSpec, SPEC_VALIDATED } from "./parser";
 import { assertValidSpec } from "./validation";
 import { listBundledYamlPaths, loadYamlSource, loadYamlSourceSync } from "../yaml-loader";
 
@@ -39,6 +39,7 @@ export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PAT
 
   const spec = normalizeRuleShape(parseDslSpec(source));
   assertValidSpec(spec);
+  (spec as any)[SPEC_VALIDATED] = true;
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
 }
@@ -62,6 +63,7 @@ export async function preloadRulepackSpecFromPath(
 
   const spec = normalizeRuleShape(parseDslSpec(source));
   assertValidSpec(spec);
+  (spec as any)[SPEC_VALIDATED] = true;
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
 }

@@ -1,3 +1,4 @@
+version: v1
 rules:
   f0_baseline_start:
     kind: point

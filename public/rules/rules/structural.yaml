@@ -1,3 +1,4 @@
+version: v1
 rules:
   remap_stops_to_closures:
     kind: structural

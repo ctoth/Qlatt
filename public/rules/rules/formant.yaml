@@ -1,3 +1,4 @@
+version: v1
 rules:
   k_context_cl_f2:
     kind: scalar

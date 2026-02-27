@@ -1,3 +1,4 @@
+version: v1
 rules:
   non_word_initial_consonant_shortening:
     kind: scalar

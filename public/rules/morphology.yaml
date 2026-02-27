@@ -1,6 +1,7 @@
-# Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
-# Morphological affix tables for G2P decomposition
-
+version: v1
+citations:
+  - Hunnicutt 1976
+  - Allen, Hunnicutt & Klatt 1987 Ch.4-5
 suffixes:
   # Ordered longest-first for matching priority
   - affix: "ation"

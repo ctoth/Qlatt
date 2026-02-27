@@ -1,3 +1,4 @@
+version: v1
 predicates:
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1

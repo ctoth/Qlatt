@@ -1,9 +1,7 @@
-# Elovitz LTS rules for Qlatt G2P fallback
-# Source: Elovitz, Johnson, McHugh & Shore (1976), NRL Report 7948
-# Canonical runtime copy used by src/g2p/lts-engine.ts via yaml-loader
-
-_source: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
-_reference_impl: https://github.com/greg-kennedy/p5-NRL-TextToPhoneme
+version: v1
+citations:
+  - "Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948."
+  - "Reference implementation: https://github.com/greg-kennedy/p5-NRL-TextToPhoneme"
 context_symbols:
   '#': '[AEIOUY]+'
   '*': '[BCDFGHJKLMNPQRSTVWXZ]+'

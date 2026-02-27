@@ -12,9 +12,7 @@
  * 5. PLSTEP burst transients for plosive releases
  */
 
-import { createTopologicalEvaluator } from './semantics/topological-evaluator';
-import { createCelEvaluator } from './semantics/cel-evaluator';
-import { registerNumericBuiltins } from './semantics/register-builtins';
+import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
 import type { KlattRuntime, BaconGraph, BindingInfo } from './klatt-runtime';
 import { dbToLinear } from './builtin-functions';
@@ -158,12 +156,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
 
-  // Create CEL evaluator and register standard functions
-  const celEvaluator = createCelEvaluator();
-  registerNumericBuiltins(celEvaluator);
-
-  // Create topological evaluator for semantics (wired to CEL)
-  const evaluator = createTopologicalEvaluator(celEvaluator);
+  // Create CEL + topological evaluator pair with all standard builtins
+  const { celEvaluator, topoEvaluator: evaluator } = createConfiguredEvaluator();
 
   // Extract constants from semantics
   const constants: Record<string, unknown> = {};

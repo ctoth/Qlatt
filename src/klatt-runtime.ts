@@ -5,8 +5,7 @@
  * a registry.yaml file rather than being hardcoded.
  */
 
-import { createCelEvaluator, CelEvaluator } from './semantics/cel-evaluator';
-import { registerNumericBuiltins } from './semantics/register-builtins';
+import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import { applyParamValue } from './audio-param-utils';
 
 // =============================================================================
@@ -243,10 +242,7 @@ export function waitForNodeReady(
   });
 }
 
-import { createTopologicalEvaluator } from './semantics/topological-evaluator';
 import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
-
-// requireNumericArg and registerNumericBuiltins moved to ./semantics/register-builtins.ts
 
 // Bacon graph types (simplified - Bacon package has full types)
 export interface BaconGraph {
@@ -400,12 +396,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     await registerWorklets(audioContext, registry, workletBasePath, log);
   }
 
-  // Create evaluators
-  const celEvaluator = createCelEvaluator();
-  const topoEvaluator = createTopologicalEvaluator(celEvaluator);
-
-  // Register standard functions with CEL evaluator (using imported functions)
-  registerNumericBuiltins(celEvaluator);
+  // Create CEL + topological evaluator pair with all standard builtins
+  const { topoEvaluator } = createConfiguredEvaluator();
 
   // Current input values
   let currentInputs: Record<string, ParamValue> = {};

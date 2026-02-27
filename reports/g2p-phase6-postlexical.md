@@ -125,4 +125,4 @@ Executed and observed:
 No rule-engine limitation blocked implementation of these two postlexical rules.
 
 ## Commit Hash
-No Phase 6 commit exists in this workspace yet (current status: uncommitted changes).
+`1aa8f01` - `feat: add postlexical rules - 'the' reduction and /t/ flapping`

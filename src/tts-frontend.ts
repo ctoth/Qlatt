@@ -135,6 +135,9 @@ export function textToKlattTrack(
   parameterSequence = runPhases(parameterSequence, ["duration"], {
     policy: {
       duration: { rate_scale: rate },
+      // Vowel centralization increases at fast rates (Lindblom 1963).
+      // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
+      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
     },
   });
   parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({

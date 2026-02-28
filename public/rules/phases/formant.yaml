@@ -378,6 +378,27 @@ rules:
       - Allen et al. 1987 Ch.9 (unstressed vowel centralization)
       - Klatt 1976 (unstressed shortening)
       - Peterson & Barney 1952 (schwa formants)
+  vowel_rate_undershoot:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && has(current.params) && has(current.?params.F1)
+    constraint: params.policy.formant.rate_undershoot_factor > 0
+    apply:
+      - field: params.F1
+        op: set
+        value: >-
+          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          params.policy.formant.rate_undershoot_factor
+      - field: params.F2
+        op: set
+        value: >-
+          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          params.policy.formant.rate_undershoot_factor
+    citations:
+      - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
+      - Moon & Lindblom 1994 (rate-dependent formant undershoot)
   anticipatory_nasalization:
     kind: scalar
     select:

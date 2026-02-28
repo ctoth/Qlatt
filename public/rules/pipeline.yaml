@@ -58,6 +58,7 @@ phases:
       - burst_spectral_template
       - vcv_coarticulation
       - vowel_reduction
+      - vowel_rate_undershoot
       - anticipatory_nasalization
       - non_word_initial_consonant_shortening
       - word_medial_consonant_shortening

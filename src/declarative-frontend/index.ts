@@ -42,7 +42,7 @@ export function runDeclarativeFrontend(
 
 export { runRuleEngine } from "./engine";
 export { parseDslSpec } from "./parser";
-export { validateDslSpec, validateSyncAxis } from "./validation";
+export { validateDslSpec } from "./validation";
 export {
   RANK_LEN,
   compareOrder,

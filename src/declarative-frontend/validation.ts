@@ -1,4 +1,3 @@
-import { compareOrder } from "./order";
 import { validateExpressionSyntax } from "./cel-expressions";
 
 type DiagnosticSeverity = "error" | "warning";
@@ -20,7 +19,6 @@ function makeDiagnostic(
 }
 
 const ALLOWED_STREAM_TYPES = new Set(["base", "span", "parallel", "point"]);
-const ALLOWED_RULE_OPS = new Set();
 const POLICY_REF_PATTERN = /\bparams\.policy((?:\.[A-Za-z_][A-Za-z0-9_]*)+)/g;
 const NUMERIC_LITERAL_PATTERN = /(^|[^A-Za-z0-9_])(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=$|[^A-Za-z0-9_])/g;
 const CRITICAL_IDENTIFIER_PATTERN = /\b(duration|vot|f0)\b/i;
@@ -965,7 +963,6 @@ function validateRules(
 
     const hasSelect = asPlainObject(rule.select);
     const hasMatch = typeof rule.match === "string" && rule.match.length > 0;
-    const hasOp = typeof rule.op === "string" && rule.op.length > 0;
     const matchPattern = hasMatch ? patterns[rule.match] : null;
     const ruleStreamName = hasSelect
       ? rule.select.stream
@@ -978,16 +975,6 @@ function validateRules(
           "E_RULE_SHAPE",
           `Rule '${name}' must define exactly one of select or match`,
           `rules.${name}`
-        )
-      );
-    }
-
-    if (hasOp && !ALLOWED_RULE_OPS.has(rule.op)) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_RULE_OP_UNKNOWN",
-          `Rule '${name}' uses unsupported op '${rule.op}'`,
-          `rules.${name}.op`
         )
       );
     }
@@ -1367,40 +1354,5 @@ export function assertValidSpec(spec: PlainObject): ValidationDiagnostic[] {
     const detail = errors.map((d) => `${d.code} at ${d.path}: ${d.message}`).join("\n");
     throw new Error(`Invalid declarative frontend spec:\n${detail}`);
   }
-  return diagnostics;
-}
-
-export function validateSyncAxis(syncMarks: unknown): ValidationDiagnostic[] {
-  const diagnostics: ValidationDiagnostic[] = [];
-  const seen = new Set();
-  const marks = Array.isArray(syncMarks) ? syncMarks : [];
-
-  for (let i = 0; i < marks.length; i += 1) {
-    const mark = marks[i];
-    if (!mark?.id) {
-      diagnostics.push(makeDiagnostic("E_MARK_ID_MISSING", "Sync mark missing id", `sync[${i}]`));
-      continue;
-    }
-    if (seen.has(mark.id)) {
-      diagnostics.push(makeDiagnostic("E_MARK_ID_DUP", `Duplicate sync id '${mark.id}'`, `sync[${i}]`));
-    }
-    seen.add(mark.id);
-  }
-
-  for (let i = 1; i < marks.length; i += 1) {
-    const prev = marks[i - 1];
-    const curr = marks[i];
-    if (!prev?.order || !curr?.order) continue;
-    if (compareOrder(prev.order, curr.order) >= 0) {
-      diagnostics.push(
-        makeDiagnostic(
-          "E_AXIS_ORDER_NOT_TOTAL",
-          `Sync axis is not strictly increasing at ${prev.id} -> ${curr.id}`,
-          `sync[${i}]`
-        )
-      );
-    }
-  }
-
   return diagnostics;
 }

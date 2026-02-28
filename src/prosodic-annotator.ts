@@ -138,6 +138,7 @@ const CLAUSE_PUNCTUATION = new Set([",", ";", ":"]);
  * - isAccented (boolean)
  * - isNuclearAccent (boolean)
  * - accentType (string | null) — "H*", "L*", etc.
+ * - accentIndexInPhrase (number) — 0-based index of accented token within phrase; -1 for non-accented
  * - breakIndex (number 0-4)
  * - phraseAccent (string | null) — "H-" or "L-"
  * - boundaryTone (string | null) — "H%" or "L%"
@@ -178,6 +179,13 @@ export function annotateProsody(
 
     // Step 5: Assign accent types.
     assignAccentTypes(result, phrase, isQuestion);
+
+    // Step 5b: Assign accentIndexInPhrase — sequential count of accented
+    // stressed tokens per phrase.  Reset at each phrase boundary (breakIndex=4).
+    // The counter continues across breakIndex=3 (intermediate phrases),
+    // matching Pierrehumbert 1980's downstep domain = IP.
+    // Citation: Pierrehumbert 1980 (downstep resets at IP boundaries)
+    assignAccentIndices(result, phrase);
 
     // Step 7: Assign phrase accent and boundary tone on phrase boundary.
     assignPhraseEdgeTones(result, phrase);
@@ -374,6 +382,35 @@ function assignAccentTypes(
       // Prenuclear accent: H* (default).
       // Citation: Pierrehumbert 1980
       token.accentType = "H*";
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 5b: Assign accentIndexInPhrase
+// ---------------------------------------------------------------------------
+
+/**
+ * Assign a 0-based accent index to each accented stressed token within a phrase.
+ * Non-accented tokens get accentIndexInPhrase = -1.
+ *
+ * The index is used by the ToBI downstep formula: H_n = V * k^n, where n is
+ * accentIndexInPhrase.  The counter resets per phrase (naturally, since each
+ * phrase iteration starts fresh).
+ *
+ * Citations:
+ * - Pierrehumbert 1980 (downstep formula H_n = V * k^n)
+ * - Ladd 2008 Ch.2 (constant-proportion downstep ratio)
+ */
+function assignAccentIndices(tokens: PipelineToken[], phrase: Phrase): void {
+  let accentCount = 0;
+  for (const idx of phrase.tokenIndices) {
+    const token = tokens[idx];
+    if (token.isAccented && token.stress === 1) {
+      token.accentIndexInPhrase = accentCount;
+      accentCount++;
+    } else {
+      token.accentIndexInPhrase = -1;
     }
   }
 }

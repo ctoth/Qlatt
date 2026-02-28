@@ -993,6 +993,7 @@ function buildNavigationFunctions(
     sqrt: (x: unknown) => Math.sqrt(Number(x)),
     abs: (x: unknown) => Math.abs(Number(x)),
     log: (x: unknown) => Math.log(Number(x)),
+    pow: (x: unknown, n: unknown) => Math.pow(Number(x), Number(n)),
     contains: (haystack: unknown, needle: unknown) =>
       String(haystack ?? "").includes(String(needle ?? "")),
     merge: mergeFn,

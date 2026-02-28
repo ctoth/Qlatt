@@ -87,16 +87,16 @@ phases:
       - duration
   - name: prosody
     rules:
-      - f0_baseline_start
-      - f0_question_baseline_raise
-      - f0_pitch_reset
-      - f0_targets
+      - tobi_baseline_init
+      - tobi_accent_h_star
+      - tobi_accent_l_star
+      - tobi_unaccented_declination
+      - tobi_boundary_low
+      - tobi_boundary_rise
+      - tobi_register_reset
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation
-      - f0_stress_peak
       - f0_continuation_rise
-      - f0_question_rise_onset
-      - f0_question_rise
   - name: finalize
     after:
       - duration

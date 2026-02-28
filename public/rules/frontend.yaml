@@ -168,44 +168,54 @@ parameters:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8
     f0:
+      # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
       base_hz:
         value: 110
         citations:
           - O'Shaughnessy 1976
-      fall_rate_hz:
-        value: 20
+          - Pierrehumbert 1980
+      range_hz:
+        value: 80
         citations:
-          - O'Shaughnessy 1976
-          - "Superseded by declination_tau for exponential model; retained for reference"
-      declination_tau:
-        value: 0.12
+          - "Pierrehumbert 1980 (male typical range ~80 Hz: top ~190 Hz, baseline ~110 Hz)"
+          - Ladd 2008 Ch.5
+      # --- Accent targets (fraction of range) ---
+      h_star_height:
+        value: 0.85
         citations:
-          - "O'Shaughnessy 1976 (exponential declination ~3%/100ms, asymptoting)"
-          - "tau=0.12 → phrase-final F0 ≈ 89% of baseline (vs linear 82%); gentler on short phrases"
-      declination_floor_ratio:
+          - "Pierrehumbert 1980 (H* target near top of range)"
+          - Ladd 2008
+      l_star_height:
+        value: 0.15
+        citations:
+          - "Pierrehumbert 1980 (L* target near bottom of range)"
+      # --- Downstep ---
+      downstep_k:
         value: 0.6
         citations:
-          - O'Shaughnessy 1976
-      stress_rise:
-        value: 1.15
+          - "Pierrehumbert 1980 (k ≈ 0.60)"
+          - "Ladd 2008 (confirmed cross-linguistically)"
+      downstep_floor_fraction:
+        value: 0.25
         citations:
-          - O'Shaughnessy 1976
-      question_rise_hz:
-        value: 30
+          - "Engineering estimate: prevents F0 collapse on long sentences"
+          - "Derived from Pierrehumbert 1980 exponential floor behavior"
+      # --- Boundary tones (fraction of range) ---
+      boundary_l_pct_fraction:
+        value: 0.0
         citations:
-          - O'Shaughnessy 1976
-      question_rise_ratio:
-        value: 1.2
+          - "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)"
+      boundary_h_pct_fraction:
+        value: 0.8
         citations:
-          - O'Shaughnessy 1976
-      question_target_floor_hz:
-        value: 170
+          - "Pierrehumbert 1980 (H% near top of range)"
+      # --- Final lowering ---
+      final_lowering_factor:
+        value: 0.85
         citations:
-          - O'Shaughnessy 1976
-      question_target_ceiling_hz:
-        value: 190
-        citations:
-          - O'Shaughnessy 1976
+          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
+          - "Pierrehumbert 1980 (final lowering as separate effect)"
+      # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
         value: 1.2
         citations:
@@ -217,6 +227,7 @@ parameters:
         value: 0.95
         citations:
           - O'Shaughnessy 1976
+      # --- Continuation rise (kept for intermediate phrase boundaries) ---
       continuation_rise_hz:
         value: 8
         citations:
@@ -226,31 +237,6 @@ parameters:
         citations:
           - O'Shaughnessy 1976
           - "Engineering estimate: semicolon/colon continuation rise is milder than comma rise"
-      question_base_hz:
-        value: 125
-        citations:
-          - O'Shaughnessy 1976
-      question_scan_window_tokens:
-        value: 30
-        citations:
-          - Pierrehumbert 1980
-          - Ladd 2008 Ch.5
-          - "Engineering estimate: token scan window for detecting upcoming question boundary"
-      question_last_stress_lookback_tokens:
-        value: 12
-        citations:
-          - O'Shaughnessy 1976
-          - Ladd 2008 Ch.5
-          - "Engineering estimate: lookback window for placing pre-boundary question-rise onset"
-      stress_peak_position:
-        value: 0.45
-        citations:
-          - O'Shaughnessy 1976
-      question_rise_onset_position:
-        value: 0.8
-        citations:
-          - O'Shaughnessy 1976
-          - Pierrehumbert 1980
     formant:
       rate_undershoot_factor:
         value: 0

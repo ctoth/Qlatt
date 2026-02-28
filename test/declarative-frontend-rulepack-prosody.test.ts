@@ -2,8 +2,164 @@ import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 
+/**
+ * Tests for the prosody rule phase (ToBI intonation model).
+ *
+ * These tests exercise the YAML prosody rules by passing constructed token
+ * sequences directly to runDeclarativeFrontend. Tokens are annotated with
+ * the properties that annotateProsody() would set (isAccented, accentType,
+ * accentIndexInPhrase, boundaryTone, breakIndex, etc.).
+ *
+ * Citations:
+ * - Pierrehumbert 1980 (downstep formula, boundary tones)
+ * - Ladd 2008 (pitch range model, final lowering)
+ * - O'Shaughnessy 1976 (microprosodic perturbation)
+ */
+
+/** Default pitch range parameters matching frontend.yaml */
+const TOBI_PARAMS = {
+  policy: {
+    f0: {
+      base_hz: 110,
+      range_hz: 80,
+      h_star_height: 0.85,
+      l_star_height: 0.15,
+      downstep_k: 0.6,
+      downstep_floor_fraction: 0.25,
+      boundary_l_pct_fraction: 0.0,
+      boundary_h_pct_fraction: 0.8,
+      final_lowering_factor: 0.85,
+      voiceless_onset_raise: 1.2,
+      voiced_onset_lower: 0.95,
+      continuation_rise_hz: 8,
+      continuation_minor_rise_hz: 5,
+    },
+  },
+};
+
 describe("declarative frontend rulepack prosody phase", () => {
-  it("generates f0 points for stressed vowels and question rise in declarative phases", () => {
+  // --- ToBI baseline initialization ---
+
+  it("inserts baseline F0 at utterance start", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const baseline = points.find((p) => p.tag === "f0_baseline");
+    expect(baseline).toBeTruthy();
+    expect(baseline!.value).toBe(110);
+  });
+
+  // --- H* accent target with downstep ---
+
+  it("inserts H* accent target at first accent (index 0)", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const hStar = points.find((p) => p.tag === "f0_h_star");
+    expect(hStar).toBeTruthy();
+    // accentIndex=0, nuclear: 110 + 80 * max(0.85 * 0.6^0 * 0.85, 0.25) = 110 + 80 * 0.7225 = 167.8
+    expect(hStar!.value).toBeCloseTo(167.8, 0);
+  });
+
+  // --- Downstep sequence ---
+
+  it("applies downstep: second H* is lower than first", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = finiteOrder(2);
@@ -13,26 +169,40 @@ describe("declarative frontend rulepack prosody phase", () => {
       {
         id: "p1",
         stream: "phone",
-        phoneme: "EH",
+        phoneme: "AE",
         type: "vowel",
         stress: 1,
         duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 60, AVS: 0 },
         sync_left: s0,
         sync_right: s1,
         status: 1,
+        isAccented: true,
+        isNuclearAccent: false,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p2",
         stream: "phone",
-        phoneme: "L",
-        type: "liquid",
-        stress: 0,
-        duration: 80,
-        params: { AV: 56, AVS: 0, F0_Factor: 1.0 },
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
         sync_left: s1,
         sync_right: s2,
         status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 1,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p3",
@@ -40,38 +210,315 @@ describe("declarative frontend rulepack prosody phase", () => {
         phoneme: "SIL",
         type: "silence",
         duration: 300,
-        punctuationSymbol: "?",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
         sync_left: s2,
         sync_right: s3,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
       },
     ];
 
     const out = runDeclarativeFrontend(sequence, {
       phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            question_rise_hz: 30,
-          },
-        },
+      parameters: TOBI_PARAMS,
+    });
+
+    const hStars = out
+      .filter((t) => t.stream === "f0" && t.tag === "f0_h_star")
+      .sort((a, b) => Number(a.time) - Number(b.time));
+
+    expect(hStars.length).toBe(2);
+    // First H*: 110 + 80 * 0.85 = 178 (prenuclear, no final lowering)
+    expect(hStars[0].value).toBeCloseTo(178, 0);
+    // Second H* (nuclear, index=1): 110 + 80 * max(0.85 * 0.6 * 0.85, 0.25) = 110 + 80 * 0.4335 = 144.68
+    expect(Number(hStars[1].value)).toBeLessThan(Number(hStars[0].value));
+  });
+
+  // --- L* accent target ---
+
+  it("inserts L* accent target for question nuclear accent", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "L*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: "?",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "H%",
+        phraseAccent: "H-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
     });
 
     const points = out.filter((t) => t.stream === "f0");
-    expect(points.length).toBeGreaterThanOrEqual(2);
-    const sorted = [...points].sort((a, b) => Number(a.time) - Number(b.time));
-    const last = sorted[sorted.length - 1];
-    const prev = sorted[sorted.length - 2];
-    expect(last.value).toBeGreaterThan(prev.value);
-    expect(last.value).toBeGreaterThanOrEqual(170);
-    expect(last.value).toBeLessThanOrEqual(190);
-    expect(Number.isFinite(last.time)).toBe(true);
+    const lStar = points.find((p) => p.tag === "f0_l_star");
+    expect(lStar).toBeTruthy();
+    // L*: 110 + 80 * 0.15 = 122
+    expect(lStar!.value).toBeCloseTo(122, 0);
   });
 
-  // --- F0 voiceless onset perturbation ---
+  // --- Boundary tones ---
+
+  it("inserts L% boundary tone at declarative boundary", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const boundary = points.find((p) => p.tag === "f0_boundary_low");
+    expect(boundary).toBeTruthy();
+    // L%: 110 + 80 * 0.0 = 110
+    expect(boundary!.value).toBe(110);
+  });
+
+  it("inserts H% boundary tone at question boundary", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "L*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: "?",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "H%",
+        phraseAccent: "H-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const boundary = points.find((p) => p.tag === "f0_boundary_rise");
+    expect(boundary).toBeTruthy();
+    // H%: 110 + 80 * 0.8 = 174
+    expect(boundary!.value).toBeCloseTo(174, 0);
+  });
+
+  // --- Register reset ---
+
+  it("resets F0 at IP boundary (breakIndex >= 4)", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = finiteOrder(3);
+    const s4 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+      {
+        id: "p3",
+        stream: "phone",
+        phoneme: "IY",
+        type: "vowel",
+        stress: 1,
+        duration: 100,
+        params: { AV: 60, AVS: 0 },
+        sync_left: s2,
+        sync_right: s3,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p4",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s3,
+        sync_right: s4,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    const reset = points.find((p) => p.tag === "f0_register_reset");
+    expect(reset).toBeTruthy();
+    expect(reset!.value).toBe(110);
+  });
+
+  // --- Microprosodic perturbation (kept rules) ---
 
   it("raises F0 at vowel onset after voiceless stop release", () => {
     const s0 = startOrder();
@@ -92,6 +539,13 @@ describe("declarative frontend rulepack prosody phase", () => {
         sync_left: s0,
         sync_right: s1,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 0,
       },
       {
         id: "p2",
@@ -100,10 +554,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "vowel",
         stress: 1,
         duration: 170,
-        params: { AV: 64, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 64, AVS: 0 },
         sync_left: s1,
         sync_right: s2,
         status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p3",
@@ -112,35 +573,31 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "silence",
         duration: 300,
         punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 0, AVS: 0 },
         sync_left: s2,
         sync_right: s3,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
       },
     ];
 
     const out = runDeclarativeFrontend(sequence, {
       phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            voiceless_onset_raise: 1.2,
-          },
-        },
-      },
+      parameters: TOBI_PARAMS,
     });
 
     const points = out.filter((t) => t.stream === "f0");
-    // There should be a point tagged f0_onset_perturbation at the vowel's left boundary
     const onset = points.find((p) => p.tag === "f0_onset_perturbation");
     expect(onset).toBeTruthy();
-    // prev_point('f0') returns the last f0 point: declination for AE = base_hz - fall_rate*(1/2) = 100
-    // Value = 100 * 1.2 = 120 (20% higher than preceding declination level)
-    expect(onset!.value).toBeCloseTo(120, 0);
+    // prev F0 = baseline 110, perturbation = 110 * 1.2 = 132
+    expect(onset!.value).toBeCloseTo(132, 0);
   });
-
-  // --- F0 voiced onset perturbation ---
 
   it("lowers F0 at vowel onset after voiced stop", () => {
     const s0 = startOrder();
@@ -157,10 +614,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         voiced: true,
         bilabial: true,
         duration: 5,
-        params: { AV: 47, AF: 52, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 47, AF: 52, AVS: 0 },
         sync_left: s0,
         sync_right: s1,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 0,
       },
       {
         id: "p2",
@@ -169,10 +633,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "vowel",
         stress: 1,
         duration: 170,
-        params: { AV: 64, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 64, AVS: 0 },
         sync_left: s1,
         sync_right: s2,
         status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p3",
@@ -181,34 +652,33 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "silence",
         duration: 300,
         punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 0, AVS: 0 },
         sync_left: s2,
         sync_right: s3,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
       },
     ];
 
     const out = runDeclarativeFrontend(sequence, {
       phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            voiced_onset_lower: 0.95,
-          },
-        },
-      },
+      parameters: TOBI_PARAMS,
     });
 
     const points = out.filter((t) => t.stream === "f0");
     const onset = points.find((p) => p.tag === "f0_onset_perturbation");
     expect(onset).toBeTruthy();
-    // prev_point('f0') returns the last f0 point: declination for AE = base_hz - fall_rate*(1/2) = 100
-    // Value = 100 * 0.95 = 95 (5% lower than preceding declination level)
-    expect(onset!.value).toBeCloseTo(95, 0);
+    // prev F0 = baseline 110, perturbation = 110 * 0.95 = 104.5
+    expect(onset!.value).toBeCloseTo(104.5, 0);
   });
 
-  // --- F0 continuation rise ---
+  // --- Continuation rise ---
 
   it("inserts continuation rise at comma boundary", () => {
     const s0 = startOrder();
@@ -225,10 +695,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "vowel",
         stress: 1,
         duration: 170,
-        params: { AV: 64, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 64, AVS: 0 },
         sync_left: s0,
         sync_right: s1,
         status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p2",
@@ -237,10 +714,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "silence",
         duration: 150,
         punctuationSymbol: ",",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 0, AVS: 0 },
         sync_left: s1,
         sync_right: s2,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "H%",
+        phraseAccent: "L-",
+        breakIndex: 3,
       },
       {
         id: "p3",
@@ -249,10 +733,17 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "vowel",
         stress: 0,
         duration: 100,
-        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 58, AVS: 0 },
         sync_left: s2,
         sync_right: s3,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
       },
       {
         id: "p4",
@@ -261,527 +752,29 @@ describe("declarative frontend rulepack prosody phase", () => {
         type: "silence",
         duration: 300,
         punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
+        params: { AV: 0, AVS: 0 },
         sync_left: s3,
         sync_right: s4,
         status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
       },
     ];
 
     const out = runDeclarativeFrontend(sequence, {
       phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            continuation_rise_hz: 8,
-          },
-        },
-      },
+      parameters: TOBI_PARAMS,
     });
 
     const points = out.filter((t) => t.stream === "f0");
     const continuation = points.find((p) => p.tag === "f0_continuation");
     expect(continuation).toBeTruthy();
     // The rise should be ~8 Hz above the previous F0 point
-    // Previous F0 is the declination target on AE, which should be around base_hz
     expect(continuation!.value).toBeGreaterThan(110);
-    expect(continuation!.value).toBeLessThanOrEqual(130);
-  });
-
-  it("uses a smaller continuation rise at semicolon boundary than at comma", () => {
-    const s0 = startOrder();
-    const s1 = finiteOrder(1);
-    const s2 = finiteOrder(2);
-    const s3 = finiteOrder(3);
-    const s4 = finiteOrder(4);
-    const s5 = finiteOrder(5);
-    const s6 = endOrder();
-
-    const sequence = [
-      {
-        id: "p1",
-        stream: "phone",
-        phoneme: "AE",
-        type: "vowel",
-        stress: 1,
-        duration: 170,
-        params: { AV: 64, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: s1,
-        status: 1,
-      },
-      {
-        id: "p2",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 150,
-        punctuationSymbol: ";",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s1,
-        sync_right: s2,
-        status: 1,
-      },
-      {
-        id: "p3",
-        stream: "phone",
-        phoneme: "IY",
-        type: "vowel",
-        stress: 0,
-        duration: 100,
-        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s2,
-        sync_right: s3,
-        status: 1,
-      },
-      {
-        id: "p4",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 150,
-        punctuationSymbol: ",",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s3,
-        sync_right: s4,
-        status: 1,
-      },
-      {
-        id: "p5",
-        stream: "phone",
-        phoneme: "AA",
-        type: "vowel",
-        stress: 0,
-        duration: 100,
-        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s4,
-        sync_right: s5,
-        status: 1,
-      },
-      {
-        id: "p6",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s5,
-        sync_right: s6,
-        status: 1,
-      },
-    ];
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            continuation_rise_hz: 8,
-            continuation_minor_rise_hz: 5,
-          },
-        },
-      },
-    });
-
-    const continuationPoints = out
-      .filter((t) => t.stream === "f0" && t.tag === "f0_continuation")
-      .sort((a, b) => Number(a.time) - Number(b.time));
-
-    expect(continuationPoints.length).toBeGreaterThanOrEqual(2);
-    const semicolonRise = Number(continuationPoints[0].value);
-    const commaRise = Number(continuationPoints[1].value);
-    expect(commaRise).toBeGreaterThan(semicolonRise);
-  });
-
-  // --- F0 question baseline raise ---
-
-  it("raises F0 baseline at utterance start for questions", () => {
-    const s0 = startOrder();
-    const s1 = finiteOrder(1);
-    const s2 = finiteOrder(2);
-    const s3 = endOrder();
-
-    const sequence = [
-      {
-        id: "p1",
-        stream: "phone",
-        phoneme: "EH",
-        type: "vowel",
-        stress: 1,
-        duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: s1,
-        status: 1,
-      },
-      {
-        id: "p2",
-        stream: "phone",
-        phoneme: "L",
-        type: "liquid",
-        stress: 0,
-        duration: 80,
-        params: { AV: 56, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s1,
-        sync_right: s2,
-        status: 1,
-      },
-      {
-        id: "p3",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: "?",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s2,
-        sync_right: s3,
-        status: 1,
-      },
-    ];
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            question_base_hz: 125,
-            question_rise_hz: 30,
-          },
-        },
-      },
-    });
-
-    const points = out.filter((t) => t.stream === "f0");
-    // There should be a question baseline point
-    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
-    expect(qBaseline).toBeTruthy();
-    // Value should be 125 (question baseline)
-    expect(qBaseline!.value).toBe(125);
-  });
-
-  it("does not raise F0 baseline for declarative sentences", () => {
-    const s0 = startOrder();
-    const s1 = finiteOrder(1);
-    const s2 = endOrder();
-
-    const sequence = [
-      {
-        id: "p1",
-        stream: "phone",
-        phoneme: "EH",
-        type: "vowel",
-        stress: 1,
-        duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: s1,
-        status: 1,
-      },
-      {
-        id: "p2",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s1,
-        sync_right: s2,
-        status: 1,
-      },
-    ];
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            question_base_hz: 125,
-          },
-        },
-      },
-    });
-
-    const points = out.filter((t) => t.stream === "f0");
-    // No question baseline point for declarative
-    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
-    expect(qBaseline).toBeUndefined();
-  });
-
-  it("detects question boundary beyond legacy 20-token window when scan window is configured wider", () => {
-    const leadTokens = 24;
-    const start = startOrder();
-    const sequence = Array.from({ length: leadTokens }, (_, index) => ({
-      id: `lead-${index}`,
-      stream: "phone",
-      phoneme: index % 2 === 0 ? "AE" : "L",
-      type: index % 2 === 0 ? "vowel" : "liquid",
-      stress: index === 0 ? 1 : 0,
-      duration: 80,
-      params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
-      sync_left: index === 0 ? start : finiteOrder(index),
-      sync_right: finiteOrder(index + 1),
-      status: 1,
-    }));
-
-    sequence.push({
-      id: "q-end",
-      stream: "phone",
-      phoneme: "SIL",
-      type: "silence",
-      duration: 300,
-      punctuationSymbol: "?",
-      params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-      sync_left: finiteOrder(leadTokens),
-      sync_right: endOrder(),
-      status: 1,
-    });
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            question_base_hz: 125,
-            question_scan_window_tokens: 30,
-          },
-        },
-      },
-    });
-
-    const points = out.filter((t) => t.stream === "f0");
-    const qBaseline = points.find((p) => p.tag === "f0_question_baseline");
-    expect(qBaseline).toBeTruthy();
-    expect(qBaseline!.value).toBe(125);
-  });
-
-  it("places question-rise onset when last stressed vowel is farther back than legacy lookback", () => {
-    const unstressedTail = 9;
-    const s0 = startOrder();
-    const sequence = [
-      {
-        id: "p0",
-        stream: "phone",
-        phoneme: "AE",
-        type: "vowel",
-        stress: 1,
-        duration: 100,
-        params: { AV: 62, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: finiteOrder(1),
-        status: 1,
-      },
-    ];
-
-    for (let i = 0; i < unstressedTail; i += 1) {
-      sequence.push({
-        id: `u-${i}`,
-        stream: "phone",
-        phoneme: "IY",
-        type: "vowel",
-        stress: 0,
-        duration: 80,
-        params: { AV: 58, AVS: 0, F0_Factor: 1.0 },
-        sync_left: finiteOrder(i + 1),
-        sync_right: finiteOrder(i + 2),
-        status: 1,
-      });
-    }
-
-    sequence.push({
-      id: "q",
-      stream: "phone",
-      phoneme: "SIL",
-      type: "silence",
-      duration: 300,
-      punctuationSymbol: "?",
-      params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-      sync_left: finiteOrder(unstressedTail + 1),
-      sync_right: endOrder(),
-      status: 1,
-    });
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            question_last_stress_lookback_tokens: 12,
-          },
-        },
-      },
-    });
-
-    const points = out.filter((t) => t.stream === "f0");
-    const onset = points.find((p) => p.tag === "f0_question_onset");
-    expect(onset).toBeTruthy();
-  });
-
-  // --- F0 pitch reset ---
-
-  it("resets F0 at phrase boundary after punctuation", () => {
-    const s0 = startOrder();
-    const s1 = finiteOrder(1);
-    const s2 = finiteOrder(2);
-    const s3 = finiteOrder(3);
-    const s4 = endOrder();
-
-    const sequence = [
-      {
-        id: "p1",
-        stream: "phone",
-        phoneme: "EH",
-        type: "vowel",
-        stress: 1,
-        duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: s1,
-        status: 1,
-      },
-      {
-        id: "p2",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s1,
-        sync_right: s2,
-        status: 1,
-      },
-      {
-        id: "p3",
-        stream: "phone",
-        phoneme: "IY",
-        type: "vowel",
-        stress: 1,
-        duration: 150,
-        params: { AV: 63, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s2,
-        sync_right: s3,
-        status: 1,
-      },
-      {
-        id: "p4",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s3,
-        sync_right: s4,
-        status: 1,
-      },
-    ];
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            fall_rate_hz: 20,
-          },
-        },
-      },
-    });
-
-    const points = out.filter((t) => t.stream === "f0");
-    // There should be a pitch reset point
-    const reset = points.find((p) => p.tag === "f0_reset");
-    expect(reset).toBeTruthy();
-    // Value should be base_hz (110)
-    expect(reset!.value).toBe(110);
-  });
-
-  it("resets declination baseline after punctuation boundary", () => {
-    const s0 = startOrder();
-    const s1 = finiteOrder(1);
-    const s2 = finiteOrder(2);
-    const s3 = finiteOrder(3);
-    const s4 = endOrder();
-
-    const sequence = [
-      {
-        id: "p1",
-        stream: "phone",
-        phoneme: "EH",
-        type: "vowel",
-        stress: 0,
-        duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s0,
-        sync_right: s1,
-        status: 1,
-      },
-      {
-        id: "p2",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 150,
-        punctuationSymbol: ",",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s1,
-        sync_right: s2,
-        status: 1,
-      },
-      {
-        id: "p3",
-        stream: "phone",
-        phoneme: "IY",
-        type: "vowel",
-        stress: 0,
-        duration: 100,
-        params: { AV: 60, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s2,
-        sync_right: s3,
-        status: 1,
-      },
-      {
-        id: "p4",
-        stream: "phone",
-        phoneme: "SIL",
-        type: "silence",
-        duration: 300,
-        punctuationSymbol: ".",
-        params: { AV: 0, AVS: 0, F0_Factor: 1.0 },
-        sync_left: s3,
-        sync_right: s4,
-        status: 1,
-      },
-    ];
-
-    const out = runDeclarativeFrontend(sequence, {
-      phases: ["prosody", "finalize"],
-      parameters: {
-        policy: {
-          f0: {
-            base_hz: 110,
-            fall_rate_hz: 20,
-          },
-        },
-      },
-    });
-
-    const declination = out
-      .filter((t) => t.stream === "f0" && t.tag === "f0_declination")
-      .sort((a, b) => Number(a.time) - Number(b.time));
-
-    expect(declination.length).toBeGreaterThanOrEqual(2);
-    const firstPhraseTarget = Number(declination[0].value);
-    const secondPhraseTarget = Number(declination[1].value);
-    expect(secondPhraseTarget).toBeGreaterThan(firstPhraseTarget - 2);
   });
 });

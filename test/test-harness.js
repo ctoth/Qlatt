@@ -552,8 +552,7 @@ function applyUrlParams() {
 
 }
 
-// Load experiment manifest independently — must not be gated on synth init
-// (synth.initialize() can fail on GH Pages due to worklet loading)
+// Load experiment manifest independently — not gated on runtime init
 loadExperimentManifest().then(() => {
   const experimentSelect = document.getElementById("experimentSelect");
   if (experimentSelect) {
@@ -1119,7 +1118,7 @@ function handleTelemetry(data) {
   // Handle PLSTEP burst events specially
   if (data?.type === 'plstep') {
     // P1: Calculate proper scheduled relative time using runStartTime
-    // data.time is the absolute scheduled time from klatt-synth
+    // data.time is the absolute scheduled time from the interpreter
     // Proper relative time = scheduled time - session start time
     const scheduledRelTime = Number.isFinite(data.time) && runStartTime > 0
       ? data.time - runStartTime
@@ -1220,25 +1219,26 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   const parallelSummary = summarizeParallel(track);
   const fallbackMode = Number.isFinite(track[0]?.params?.lfMode)
     ? track[0].params.lfMode
-    : synth.params.lfMode;
+    : getSemanticsDefault("lfMode", 1);
   const fallbackF0 = Number.isFinite(track[0]?.params?.F0)
     ? track[0].params.F0
-    : synth.params.f0;
+    : getSemanticsDefault("f0", 0);
   const fallbackF1 = Number.isFinite(track[0]?.params?.F1)
     ? track[0].params.F1
-    : synth.params.F1;
+    : getSemanticsDefault("F1", 500);
   const fallbackF2 = Number.isFinite(track[0]?.params?.F2)
     ? track[0].params.F2
-    : synth.params.F2;
+    : getSemanticsDefault("F2", 1500);
   const fallbackF3 = Number.isFinite(track[0]?.params?.F3)
     ? track[0].params.F3
-    : synth.params.F3;
+    : getSemanticsDefault("F3", 2500);
   const lfSummary = summarizeLfMode(track, fallbackMode);
   const f1Range = collectParamRange(track, "F1", fallbackF1);
   const f2Range = collectParamRange(track, "F2", fallbackF2);
   const f3Range = collectParamRange(track, "F3", fallbackF3);
   const voicingIssues = findVoicingIssues(track, { F0: fallbackF0 });
-  const derived = analyzeTrackGains(track, synth.params);
+  const sliderParams = getCurrentSliderParams();
+  const derived = analyzeTrackGains(track, sliderParams);
   const cascade1Range = telemetryMax.get("cascadeF1") ?? telemetryMax.get("cascade-1");
   const cascade2Range = telemetryMax.get("cascadeF2") ?? telemetryMax.get("cascade-2");
   const cascade3Range = telemetryMax.get("cascadeF3") ?? telemetryMax.get("cascade-3");
@@ -1293,8 +1293,8 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   // P6: Check NZ/NP bypass status
   const nzRange = telemetryMax.get("nz");
   const npRange = telemetryMax.get("np");
-  lines.push(formatBypassCheck("nz", nzRange, synth.params.FNZ, synth.params.BNZ));
-  lines.push(formatBypassCheck("np", npRange, synth.params.FNP, synth.params.BNP));
+  lines.push(formatBypassCheck("nz", nzRange, getSemanticsDefault("FNZ", 280), getSemanticsDefault("BNZ", 90)));
+  lines.push(formatBypassCheck("np", npRange, getSemanticsDefault("FNP", 280), getSemanticsDefault("BNP", 90)));
   lines.push("");
   lines.push("");
   // P5: Enhanced event display with A1-A6 for SW=1 events
@@ -1331,7 +1331,7 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   lines.push(`Spikes (peak > ${spikeThreshold}):`);
   lines.push(...formatSpikes(spikeEvents));
   // P2: Gain derivation for focus event (first SW=1 event)
-  const gainDerivation = formatGainDerivation(track, synth.params);
+  const gainDerivation = formatGainDerivation(track, sliderParams);
   if (gainDerivation.length > 0) {
     lines.push("");
     lines.push("Gain derivation (focus event):");

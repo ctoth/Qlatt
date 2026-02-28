@@ -259,6 +259,10 @@ realize:
   # Conditional: only derive when param is at its Rabiner (1968) default.
   # If a track frame or speaker profile sets an explicit value, it wins.
   # Refs: Fant (1960) Eq. 1.3-4, Rabiner (1968) Table I
+  #
+  # NOTE: These rules fire correctly, but the cascade resonators they feed
+  # receive negligible signal energy (~82 dB attenuation by F1-F6 chain).
+  # See reports/scout-higher-formant-audibility.md
   # ---------------------------------------------------------------------------
   F7:
     expr: "F7 == 6500 ? F6 + 1000 : F7"

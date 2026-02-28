@@ -73,6 +73,13 @@ formantBanks:
       # At 44.1 kHz sample rate, the z-transform pole repetition that provided
       # automatic higher-pole correction at Klatt's 10 kHz is above audibility.
       # Explicit resonators F7-F10 compensate for this.
+      #
+      # NOTE: F7-F10 are perceptually inert for voiced speech. The cascade
+      # chain (F1-F6) attenuates signal by ~82 dB at F7+ frequencies before
+      # it reaches these resonators. They improve the transfer function on
+      # paper but do not change audible output (golden-test RMS diff ~1.7e-14).
+      # If audible higher-formant shaping is needed, consider parallel routing.
+      # See reports/scout-higher-formant-audibility.md
       # Refs: Rabiner (1968), Fant (1960) Eq. 1.3-4, Holmes (1983)
       - index: 7
         freqRange: [5000, 8000]

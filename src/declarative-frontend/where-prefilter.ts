@@ -59,12 +59,13 @@ let _parseFn: ParseFn | null = null;
 
 try {
   // Dynamic import of the cel2js parser (ESM module).
-  // This is a sibling repo at C:/Users/Q/code/cel2js.
+  // cel2js is a sibling repo (../cel2js relative to the project root).
   // The parser is standalone (Peggy-generated) with zero runtime dependencies.
   //
-  // On Windows, dynamic import() requires file:// URLs, not bare paths.
-  const { pathToFileURL } = await import("node:url");
-  const parserUrl = pathToFileURL("C:/Users/Q/code/cel2js/dist/parser/index.js").href;
+  // Resolve relative to this source file's location so the path is portable
+  // across machines. From src/declarative-frontend/ the sibling repo's parser
+  // is at ../../../cel2js/dist/parser/index.js.
+  const parserUrl = new URL("../../../cel2js/dist/parser/index.js", import.meta.url).href;
   const mod = await import(parserUrl);
   if (typeof mod?.parse === "function") {
     _parseFn = mod.parse as ParseFn;

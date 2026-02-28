@@ -5,9 +5,6 @@
 /** CEL expression string */
 export type CelExpression = string;
 
-/** JMESPath query string */
-export type JmesPath = string;
-
 /** Parameter value types */
 export type ParamValue = number | string | boolean;
 
@@ -16,12 +13,6 @@ export interface EvaluationContext {
   params: Record<string, ParamValue>;
   constants: Record<string, ParamValue | Record<string, ParamValue>>;
   [key: string]: unknown;
-}
-
-/** Function definition for CEL */
-export interface FunctionDef {
-  params: string[];
-  expr: CelExpression;
 }
 
 /** Realization rule */
@@ -33,10 +24,8 @@ export interface RealizationRule {
 /** Semantics document structure */
 export interface SemanticsDocument {
   name: string;
-  version?: string;
   params?: Record<string, ParamDefinition>;
   constants?: Record<string, ParamValue | Record<string, ParamValue>>;
-  functions?: Record<string, FunctionDef>;
   realize?: Record<string, RealizationRule | CelExpression>;
 }
 

@@ -14,7 +14,7 @@
 
 import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import type { SemanticsDocument, ParamValue, EvaluationContext } from './semantics/types';
-import type { KlattRuntime, BaconGraph, BindingSpec } from './klatt-runtime';
+import type { KlattRuntime, BindingSpec } from './klatt-runtime';
 import { dbToLinear } from './builtin-functions';
 import { getAudioParam } from './audio-param-utils';
 
@@ -67,7 +67,6 @@ type ScheduleEntry = {
 export interface KlattInterpreterOptions {
   audioContext: AudioContext;
   runtime: KlattRuntime;
-  graph: BaconGraph;
   semantics: SemanticsDocument;
   logger?: (msg: string) => void;
   telemetryHandler?: (event: TelemetryEvent) => void;
@@ -161,7 +160,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   const {
     audioContext,
     runtime,
-    graph,
     semantics,
     logger = () => {},
     telemetryHandler,
@@ -170,15 +168,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   const log = (msg: string) => logger(`[klatt-interpreter] ${msg}`);
 
   // Create CEL + topological evaluator pair with all standard builtins
-  const { celEvaluator, topoEvaluator: evaluator } = createConfiguredEvaluator();
+  const { topoEvaluator: evaluator } = createConfiguredEvaluator();
 
   // Extract constants from semantics
-  const constants: Record<string, unknown> = {};
-  if (semantics.constants) {
-    for (const [key, value] of Object.entries(semantics.constants)) {
-      constants[key] = value;
-    }
-  }
+  const constants: Record<string, unknown> = { ...(semantics.constants ?? {}) };
 
   // Build param defaults map from semantics.params at init time
   const paramDefaults = new Map<string, number>();

@@ -513,10 +513,18 @@ parameters:
         value: 13
         citations:
           - "Shadle et al. (2023)"
+      default_f1_fallback:
+        value: 500
+        citations:
+          - Peterson & Barney 1952 (midrange F1 default)
       default_f2_fallback:
         value: 1500
         citations:
           - Peterson & Barney 1952 (midrange F2 default)
+      default_f3_fallback:
+        value: 2500
+        citations:
+          - Peterson & Barney 1952 (midrange F3 default)
     speaker:
       base_f0_hz:
         value: 110

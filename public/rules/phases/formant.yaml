@@ -344,22 +344,38 @@ rules:
         n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
         ahead(current, 2) : null) : null))
       has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
+      prev_f1: "has(prev.?params.F1) ? prev.params.F1 : params.policy.formant.default_f1_fallback"
+      next_f1: "has_flanking ? (has(next_vowel.?params.F1) ? next_vowel.params.F1 : params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
+      flanking_avg_f1: "has_flanking ? (prev_f1 + next_f1) / 2 : 0"
+      cur_f1: "has(current.?params.F1) ? current.params.F1 : params.policy.formant.default_f1_fallback"
       prev_f2: "has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.default_f2_fallback"
       next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
       flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
       cur_f2: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.default_f2_fallback"
+      prev_f3: "has(prev.?params.F3) ? prev.params.F3 : params.policy.formant.default_f3_fallback"
+      next_f3: "has_flanking ? (has(next_vowel.?params.F3) ? next_vowel.params.F3 : params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
+      flanking_avg_f3: "has_flanking ? (prev_f3 + next_f3) / 2 : 0"
+      cur_f3: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.default_f3_fallback"
       dac_value: "has(current.dac) ? current.dac : 1"
       resistance: "dac_value / 3.0"
       dac_weight: "params.policy.formant.vcv_coarticulation_rate * (1.0 - resistance)"
     constraint: has_flanking
     apply:
+      - field: params.F1
+        op: set
+        value: "cur_f1 + (flanking_avg_f1 - cur_f1) * dac_weight"
+        tag: coarticulation
       - field: params.F2
         op: set
         value: "cur_f2 + (flanking_avg_f2 - cur_f2) * dac_weight"
         tag: coarticulation
+      - field: params.F3
+        op: set
+        value: "cur_f3 + (flanking_avg_f3 - cur_f3) * dac_weight"
+        tag: coarticulation
     citations:
       - Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)
-      - Ohman 1966 (VCV coarticulation model, F2 varies ~280 Hz by transconsonantal vowel)
+      - Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)
       - Allen et al. 1987 Ch.11
   vowel_reduction:
     kind: scalar

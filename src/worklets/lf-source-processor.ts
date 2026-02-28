@@ -1,4 +1,4 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface LfSourceWasmExports {
   memory: WebAssembly.Memory;
@@ -17,14 +17,7 @@ interface LfSourceWasmExports {
   lf_source_set_mode?: (state: number, mode: number) => void;
 }
 
-interface LfSourceProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
-  };
-}
+type LfSourceProcessorOptions = BaseProcessorOptions;
 
 interface LfSourceMetricsMessage {
   type: "metrics";
@@ -36,10 +29,7 @@ interface LfSourceMetricsMessage {
   lfMode: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./lf-source.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}lf-source.wasm`;
+const wasmUrl = resolveWasmUrl("./lf-source.wasm");
 
 class LfSourceProcessor extends AudioWorkletProcessor {
   wasm: LfSourceWasmExports | null;
@@ -81,7 +71,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
     };
@@ -180,15 +170,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
     const payload: LfSourceMetricsMessage = {
       type: "metrics",
       node: this.nodeId,

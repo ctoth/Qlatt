@@ -3,7 +3,7 @@
  * Wraps the tilt-filter WASM primitive
  * One-pole lowpass for spectral tilt control
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface TiltFilterWasmExports {
   tilt_filter_new(): number;
@@ -12,14 +12,7 @@ interface TiltFilterWasmExports {
   tilt_filter_reset?: (state: number) => void;
 }
 
-interface TiltFilterProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
-  };
-}
+type TiltFilterProcessorOptions = BaseProcessorOptions;
 
 interface TiltFilterMetricsParams {
   tilt: number;
@@ -33,10 +26,7 @@ interface TiltFilterMetricsMessage {
   tilt: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./tilt-filter.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}tilt-filter.wasm`;
+const wasmUrl = resolveWasmUrl("./tilt-filter.wasm");
 
 class TiltFilterProcessor extends AudioWorkletProcessor {
   wasm: TiltFilterWasmExports | null;
@@ -67,7 +57,7 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
         if (this.ready && this.wasm?.tilt_filter_reset) {
@@ -133,15 +123,7 @@ class TiltFilterProcessor extends AudioWorkletProcessor {
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
 
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
 
     const payload: TiltFilterMetricsMessage = {
       type: "metrics",

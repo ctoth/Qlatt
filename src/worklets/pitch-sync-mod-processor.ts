@@ -3,7 +3,7 @@
  * Wraps the pitch-sync-mod WASM primitive
  * F1/B1 modulation synchronized to glottal cycle
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface PitchSyncModWasmExports {
   pitch_sync_resonator_new(sampleRate: number): number;
@@ -22,14 +22,7 @@ interface PitchSyncModWasmExports {
   pitch_sync_resonator_reset?: (state: number) => void;
 }
 
-interface PitchSyncModProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
-  };
-}
+type PitchSyncModProcessorOptions = BaseProcessorOptions;
 
 interface PitchSyncModMetricsParams {
   f0: number;
@@ -47,10 +40,7 @@ interface PitchSyncModMetricsMessage {
   b1: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./pitch-sync-mod.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}pitch-sync-mod.wasm`;
+const wasmUrl = resolveWasmUrl("./pitch-sync-mod.wasm");
 
 class PitchSyncModProcessor extends AudioWorkletProcessor {
   wasm: PitchSyncModWasmExports | null;
@@ -92,7 +82,7 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
         if (this.ready && this.wasm?.pitch_sync_resonator_reset) {
@@ -184,15 +174,7 @@ class PitchSyncModProcessor extends AudioWorkletProcessor {
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
 
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
 
     const payload: PitchSyncModMetricsMessage = {
       type: "metrics",

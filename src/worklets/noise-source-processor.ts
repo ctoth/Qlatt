@@ -1,8 +1,7 @@
-interface NoiseProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
+import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
+
+interface NoiseProcessorOptions extends Omit<BaseProcessorOptions, "processorOptions"> {
+  processorOptions?: Omit<NonNullable<BaseProcessorOptions["processorOptions"]>, "wasmBytes"> & {
     seed?: number;
   };
 }
@@ -134,15 +133,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
     const payload: NoiseMetricsMessage = { type: "metrics", node: this.nodeId, rms, peak };
     if (params) {
       payload.gainAvg = params.gainAvg;

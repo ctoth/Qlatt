@@ -110,6 +110,24 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
     expect(directResult.params.F1).toBe(ah1.F1);
   });
 
+  it("materializePhonemeTarget passes through dac property", () => {
+    // DAC (Degree of Articulatory Constraint) is a numeric, non-BASE_PARAMS property.
+    // It must survive materialization to be available in the rule engine.
+    // Citations: Recasens 1997, Volenec 2015
+    const sResult = materializePhonemeTarget("S", { stress: null });
+    expect((sResult as Record<string, unknown>).dac).toBe(2);
+
+    const iyResult = materializePhonemeTarget("IY", { stress: 1 });
+    expect((iyResult as Record<string, unknown>).dac).toBe(3);
+
+    const mResult = materializePhonemeTarget("M", { stress: null });
+    expect((mResult as Record<string, unknown>).dac).toBe(1);
+
+    // SIL should have no dac
+    const silResult = materializePhonemeTarget("SIL");
+    expect((silResult as Record<string, unknown>).dac).toBeUndefined();
+  });
+
   it("stress-aware lookup with IY vowel", () => {
     const result1 = materializePhonemeTarget("IY", { stress: 1 });
     const iy1 = PHONEME_TARGETS["IY1"] as Record<string, unknown>;

@@ -2,7 +2,7 @@
 // Numerically stable replacement for Klatt FIR antiresonator at high sample rates.
 // Reference: Bristow-Johnson, "Audio EQ Cookbook" (2005)
 
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface BiquadNotchWasmExports {
   memory: WebAssembly.Memory;
@@ -14,13 +14,9 @@ interface BiquadNotchWasmExports {
   biquad_notch_process(state: number, inputPtr: number, outputPtr: number, blockSize: number): void;
 }
 
-interface BiquadNotchProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
+interface BiquadNotchProcessorOptions extends BaseProcessorOptions {
+  processorOptions?: BaseProcessorOptions["processorOptions"] & {
     bypassAtZero?: boolean;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
   };
 }
 
@@ -42,10 +38,7 @@ interface BiquadNotchMetricsMessage {
   gain?: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./biquad-notch.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}biquad-notch.wasm`;
+const wasmUrl = resolveWasmUrl("./biquad-notch.wasm");
 
 class BiquadNotchProcessor extends AudioWorkletProcessor {
   wasm: BiquadNotchWasmExports | null;
@@ -81,7 +74,7 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       }
     };
@@ -176,27 +169,12 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
     const payload: BiquadNotchMetricsMessage = { type: "metrics", node: this.nodeId, rms, peak };
     if (inputBuffer) {
-      let inSum = 0;
-      let inPeak = 0;
-      for (let i = 0; i < inputBuffer.length; i += 1) {
-        const v = inputBuffer[i];
-        inSum += v * v;
-        const av = Math.abs(v);
-        if (av > inPeak) inPeak = av;
-      }
-      payload.inRms = Math.sqrt(inSum / inputBuffer.length);
-      payload.inPeak = inPeak;
+      const inMetrics = computeRmsPeak(inputBuffer);
+      payload.inRms = inMetrics.rms;
+      payload.inPeak = inMetrics.peak;
     }
     if (params) {
       payload.freq = params.freq;

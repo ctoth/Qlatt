@@ -1,30 +1,7 @@
-import fs from "node:fs";
-import path from "node:path";
 import yaml from "js-yaml";
+import { normalizePath, isNodeRuntime, readFileFromFsSync } from "./path-utils";
 
 type PlainObject = Record<string, unknown>;
-
-function normalizePath(rawPath: string): string {
-  const base = (typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL) || "/";
-  let normalized = rawPath.trim().replace(/\\/g, "/");
-  if (normalized.startsWith("/public/")) {
-    normalized = normalized.slice("/public".length);
-  }
-  if (normalized.startsWith("./")) {
-    normalized = normalized.slice(1);
-  }
-  if (!normalized.startsWith("/")) {
-    normalized = `/${normalized}`;
-  }
-  // Prepend BASE_URL so paths resolve correctly on subpath deployments
-  // (e.g. GitHub Pages at /Qlatt/). normalized starts with "/",
-  // base ends with "/" (Vite guarantees this), so slice the leading "/".
-  return base + normalized.slice(1);
-}
-
-function isNodeRuntime(): boolean {
-  return typeof process !== "undefined" && Boolean(process.versions?.node);
-}
 
 function readYamlSourceFromUrlSync(specPath: string): string | null {
   if (typeof XMLHttpRequest !== "function") return null;
@@ -33,33 +10,6 @@ function readYamlSourceFromUrlSync(specPath: string): string | null {
   request.send();
   if (request.status < 200 || request.status >= 300) return null;
   return typeof request.responseText === "string" ? request.responseText : null;
-}
-
-function readYamlSourceFromFsSync(specPath: string): string | null {
-  if (!isNodeRuntime()) return null;
-
-  const normalized = normalizePath(specPath);
-  const relativePath = normalized.replace(/^\/+/, "");
-  const candidates = new Set<string>();
-
-  if (path.isAbsolute(specPath)) {
-    candidates.add(specPath);
-  }
-  if (relativePath.length > 0) {
-    candidates.add(path.resolve(process.cwd(), "public", relativePath));
-    candidates.add(path.resolve(process.cwd(), relativePath));
-  }
-
-  for (const candidate of candidates) {
-    try {
-      if (!fs.existsSync(candidate)) continue;
-      return fs.readFileSync(candidate, "utf8");
-    } catch {
-      // Ignore individual filesystem probe failures.
-    }
-  }
-
-  return null;
 }
 
 function parseYaml<T = unknown>(source: string, label: string): T {
@@ -80,7 +30,7 @@ export function loadYamlSourceSync(specPath: string): string {
   }
 
   for (const attempt of attempts) {
-    const fromFs = readYamlSourceFromFsSync(attempt);
+    const fromFs = readFileFromFsSync(attempt);
     if (typeof fromFs === "string") return fromFs;
   }
 
@@ -94,7 +44,7 @@ export async function loadYamlSource(specPath: string): Promise<string> {
   // In Node/test/CLI, prefer filesystem paths to avoid failed fetch() probes.
   if (isNodeRuntime()) {
     for (const attempt of attempts) {
-      const fromFs = readYamlSourceFromFsSync(attempt);
+      const fromFs = readFileFromFsSync(attempt);
       if (typeof fromFs === "string") return fromFs;
     }
   }

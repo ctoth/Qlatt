@@ -2,7 +2,7 @@
  * Square glottal source AudioWorklet processor
  * Wraps the square-source WASM primitive
  */
-import { initWasmModule } from "./wasm-utils.js";
+import { initWasmModule, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface SquareSourceWasmExports {
   square_source_new(sampleRate: number): number;
@@ -10,14 +10,7 @@ interface SquareSourceWasmExports {
   square_source_reset?: (state: number) => void;
 }
 
-interface SquareSourceProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
-  };
-}
+type SquareSourceProcessorOptions = BaseProcessorOptions;
 
 interface SquareSourceMetricsParams {
   f0: number;
@@ -33,10 +26,7 @@ interface SquareSourceMetricsMessage {
   openQuotient: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./square-source.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}square-source.wasm`;
+const wasmUrl = resolveWasmUrl("./square-source.wasm");
 
 class SquareSourceProcessor extends AudioWorkletProcessor {
   wasm: SquareSourceWasmExports | null;
@@ -72,7 +62,7 @@ class SquareSourceProcessor extends AudioWorkletProcessor {
     this._reportCountdown = this.reportInterval;
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
         if (this.ready && this.wasm?.square_source_reset) {
@@ -135,15 +125,7 @@ class SquareSourceProcessor extends AudioWorkletProcessor {
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
 
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
 
     const payload: SquareSourceMetricsMessage = {
       type: "metrics",

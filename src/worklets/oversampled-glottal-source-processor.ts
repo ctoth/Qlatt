@@ -4,7 +4,7 @@
  *   output[0] = voice waveform (post-tilt + breathiness)
  *   output[1] = modulated noise (for aspiration/frication)
  */
-import { initWasmModule, WasmAllocExports, WasmBuffer } from "./wasm-utils.js";
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl, BaseProcessorOptions, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
 
 interface OversampledGlottalSourceWasmExports {
   memory: WebAssembly.Memory;
@@ -50,14 +50,7 @@ type OversampledParamName =
   | "seed";
 type OversampledParamBuffers = Record<OversampledParamName, WasmBuffer>;
 
-interface OversampledGlottalSourceProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-    wasmBytes?: ArrayBuffer | ArrayBufferView;
-  };
-}
+type OversampledGlottalSourceProcessorOptions = BaseProcessorOptions;
 
 interface OversampledMetricsMessage {
   type: "metrics";
@@ -68,18 +61,7 @@ interface OversampledMetricsMessage {
   noisePeak: number;
 }
 
-const wasmUrl =
-  typeof URL === "function"
-    ? new URL("./oversampled-glottal-source.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}oversampled-glottal-source.wasm`;
-
-const UNINITIALIZED_ALLOC: WasmAllocExports = {
-  memory: new WebAssembly.Memory({ initial: 1 }),
-  alloc_f32: () => {
-    throw new Error("oversampled-glottal-source WASM not initialized");
-  },
-  dealloc_f32: () => {},
-};
+const wasmUrl = resolveWasmUrl("./oversampled-glottal-source.wasm");
 
 class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
   wasm: OversampledGlottalSourceWasmExports | null;
@@ -139,7 +121,7 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     };
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
-      if (event?.data?.type === "ping") {
+      if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
       } else if (event?.data?.type === "reset") {
         if (this.ready && this.wasm?.oversampled_glottal_source_reset) {
@@ -163,20 +145,6 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
       this.ready = true;
       this.port.postMessage({ type: "ready", node: this.nodeId });
     });
-  }
-
-  _fillParamBuffer(buffer: WasmBuffer, values: Float32Array, blockSize: number): number {
-    const len = values.length > 1 ? blockSize : 1;
-    buffer.ensure(len);
-    if (!buffer.view) {
-      return len;
-    }
-    if (values.length > 1 && values.length === blockSize) {
-      buffer.view.set(values);
-    } else {
-      buffer.view[0] = values.length > 0 ? values[0] : 0;
-    }
-    return len;
   }
 
   process(
@@ -211,15 +179,15 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     const sourceValues = parameters.source ?? new Float32Array([2]);
     const seedValues = parameters.seed ?? new Float32Array([1]);
 
-    const f0Len = this._fillParamBuffer(this.paramBuffers.f0, f0Values, blockSize);
-    const avLen = this._fillParamBuffer(this.paramBuffers.av, avValues, blockSize);
-    const aturbLen = this._fillParamBuffer(this.paramBuffers.aturb, aturbValues, blockSize);
-    const tiltLen = this._fillParamBuffer(this.paramBuffers.tilt, tiltValues, blockSize);
-    const oqLen = this._fillParamBuffer(this.paramBuffers.openQuotient, oqValues, blockSize);
-    const skewLen = this._fillParamBuffer(this.paramBuffers.skew, skewValues, blockSize);
-    const asymLen = this._fillParamBuffer(this.paramBuffers.asymmetry, asymValues, blockSize);
-    const sourceLen = this._fillParamBuffer(this.paramBuffers.source, sourceValues, blockSize);
-    const seedLen = this._fillParamBuffer(this.paramBuffers.seed, seedValues, blockSize);
+    const f0Len = fillParamBuffer(this.paramBuffers.f0, f0Values, blockSize);
+    const avLen = fillParamBuffer(this.paramBuffers.av, avValues, blockSize);
+    const aturbLen = fillParamBuffer(this.paramBuffers.aturb, aturbValues, blockSize);
+    const tiltLen = fillParamBuffer(this.paramBuffers.tilt, tiltValues, blockSize);
+    const oqLen = fillParamBuffer(this.paramBuffers.openQuotient, oqValues, blockSize);
+    const skewLen = fillParamBuffer(this.paramBuffers.skew, skewValues, blockSize);
+    const asymLen = fillParamBuffer(this.paramBuffers.asymmetry, asymValues, blockSize);
+    const sourceLen = fillParamBuffer(this.paramBuffers.source, sourceValues, blockSize);
+    const seedLen = fillParamBuffer(this.paramBuffers.seed, seedValues, blockSize);
 
     this.voiceBuffer.ensure(blockSize);
     this.noiseBuffer.ensure(blockSize);
@@ -274,30 +242,16 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
 
-    let vSum = 0;
-    let vPeak = 0;
-    let nSum = 0;
-    let nPeak = 0;
-    for (let i = 0; i < voice.length; i += 1) {
-      const v = voice[i];
-      vSum += v * v;
-      const av = Math.abs(v);
-      if (av > vPeak) vPeak = av;
-    }
-    for (let i = 0; i < noise.length; i += 1) {
-      const v = noise[i];
-      nSum += v * v;
-      const av = Math.abs(v);
-      if (av > nPeak) nPeak = av;
-    }
+    const voiceMetrics = computeRmsPeak(voice);
+    const noiseMetrics = computeRmsPeak(noise);
 
     const payload: OversampledMetricsMessage = {
       type: "metrics",
       node: this.nodeId,
-      voiceRms: Math.sqrt(vSum / voice.length),
-      voicePeak: vPeak,
-      noiseRms: Math.sqrt(nSum / noise.length),
-      noisePeak: nPeak,
+      voiceRms: voiceMetrics.rms,
+      voicePeak: voiceMetrics.peak,
+      noiseRms: noiseMetrics.rms,
+      noisePeak: noiseMetrics.peak,
     };
     this.port.postMessage(payload);
   }

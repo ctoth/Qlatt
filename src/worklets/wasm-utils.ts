@@ -1,9 +1,58 @@
+export function computeRmsPeak(buffer: Float32Array): { rms: number; peak: number } {
+  let sum = 0;
+  let peak = 0;
+  for (let i = 0; i < buffer.length; i += 1) {
+    const v = buffer[i];
+    sum += v * v;
+    const av = Math.abs(v);
+    if (av > peak) peak = av;
+  }
+  return { rms: Math.sqrt(sum / buffer.length), peak };
+}
+
+export function resolveWasmUrl(filename: string): string {
+  return typeof URL === "function"
+    ? new URL(filename, import.meta.url).toString()
+    : `${import.meta.url.replace(/[^/]*$/, "")}${filename}`;
+}
+
+export interface BaseProcessorOptions {
+  processorOptions?: {
+    debug?: boolean;
+    nodeId?: string;
+    reportInterval?: number;
+    wasmBytes?: ArrayBuffer | ArrayBufferView;
+  };
+}
+
 type WasmBytes = ArrayBuffer | ArrayBufferView | null;
 
 export interface WasmAllocExports {
   memory: WebAssembly.Memory;
   alloc_f32(len: number): number;
   dealloc_f32(ptr: number, len: number): void;
+}
+
+export const UNINITIALIZED_ALLOC: WasmAllocExports = {
+  memory: new WebAssembly.Memory({ initial: 1 }),
+  alloc_f32: () => {
+    throw new Error("WASM not initialized");
+  },
+  dealloc_f32: () => {},
+};
+
+export function fillParamBuffer(buffer: WasmBuffer, values: Float32Array, blockSize: number): number {
+  const len = values.length > 1 ? blockSize : 1;
+  buffer.ensure(len);
+  if (!buffer.view) {
+    return len;
+  }
+  if (values.length > 1 && values.length === blockSize) {
+    buffer.view.set(values);
+  } else {
+    buffer.view[0] = values.length > 0 ? values[0] : 0;
+  }
+  return len;
 }
 
 export async function initWasmModule(
@@ -23,7 +72,11 @@ export async function initWasmModule(
   if (!url) {
     throw new Error("WASM URL is required when wasmBytes is not provided");
   }
-  const response = await fetch(url);
+  // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
+  const bustUrl = typeof url === "string"
+    ? url + (url.includes("?") ? "&" : "?") + "v=" + Date.now()
+    : url;
+  const response = await fetch(bustUrl);
   if (WebAssembly.instantiateStreaming) {
     try {
       return await WebAssembly.instantiateStreaming(response, imports);

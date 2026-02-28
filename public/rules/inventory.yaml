@@ -76,6 +76,7 @@ phoneme_targets:
     type: vowel
     hi: true
     front: true
+    dac: 3  # Recasens 1997
   IH1:
     F1: 400
     F2: 1800
@@ -88,6 +89,7 @@ phoneme_targets:
     type: vowel
     hi: true
     front: true
+    dac: 3  # Recasens 1997
   EY1:
     F1: 480
     F2: 1720
@@ -100,6 +102,7 @@ phoneme_targets:
     type: vowel
     mid: true
     front: true
+    dac: 2  # Recasens 1997
     diph:
       - EH1
       - IH1
@@ -115,6 +118,7 @@ phoneme_targets:
     type: vowel
     mid: true
     front: true
+    dac: 2  # Recasens 1997
   AE1:
     F1: 620
     F2: 1660
@@ -127,6 +131,7 @@ phoneme_targets:
     type: vowel
     low: true
     front: true
+    dac: 2  # Recasens 1997
   AA1:
     F1: 700
     F2: 1220
@@ -139,6 +144,7 @@ phoneme_targets:
     type: vowel
     low: true
     back: false
+    dac: 2  # Recasens 1997
   AO1:
     F1: 600
     F2: 990
@@ -151,6 +157,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    dac: 2  # Recasens 1997
   OW1:
     F1: 540
     F2: 1100
@@ -163,6 +170,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    dac: 2  # Recasens 1997
     diph:
       - AO1
       - UH1
@@ -178,6 +186,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    dac: 3  # Recasens 1997
   UW1:
     F1: 320
     F2: 900
@@ -190,6 +199,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    dac: 3  # Recasens 1997
   AH1:
     F1: 620
     F2: 1220
@@ -202,6 +212,7 @@ phoneme_targets:
     type: vowel
     mid: true
     central: true
+    dac: 1  # Recasens 1997
   ER1:
     F1: 470
     F2: 1200
@@ -215,6 +226,7 @@ phoneme_targets:
     mid: true
     central: true
     rhotic: true
+    dac: 2  # Recasens 1997
   AY1:
     F1: 660
     F2: 1200
@@ -226,6 +238,7 @@ phoneme_targets:
     dur: 180
     type: vowel
     low: true
+    dac: 2  # Recasens 1997
     diph:
       - AA1
       - IH1
@@ -240,6 +253,7 @@ phoneme_targets:
     dur: 190
     type: vowel
     low: true
+    dac: 2  # Recasens 1997
     diph:
       - AE1
       - UH1
@@ -255,6 +269,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    dac: 2  # Recasens 1997
     diph:
       - AO1
       - IH1
@@ -270,6 +285,7 @@ phoneme_targets:
     type: vowel
     hi: true
     front: true
+    dac: 3  # Recasens 1997
   IH0:
     F1: 420
     F2: 1750
@@ -282,6 +298,7 @@ phoneme_targets:
     type: vowel
     hi: true
     front: true
+    dac: 3  # Recasens 1997
   EY0:
     F1: 500
     F2: 1700
@@ -294,6 +311,7 @@ phoneme_targets:
     type: vowel
     mid: true
     front: true
+    dac: 2  # Recasens 1997
     diph:
       - EH0
       - IH0
@@ -309,6 +327,7 @@ phoneme_targets:
     type: vowel
     mid: true
     front: true
+    dac: 2  # Recasens 1997
   AE0:
     F1: 640
     F2: 1600
@@ -321,6 +340,7 @@ phoneme_targets:
     type: vowel
     low: true
     front: true
+    dac: 2  # Recasens 1997
   AA0:
     F1: 680
     F2: 1250
@@ -333,6 +353,7 @@ phoneme_targets:
     type: vowel
     low: true
     back: false
+    dac: 2  # Recasens 1997
   AO0:
     F1: 620
     F2: 1020
@@ -345,6 +366,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    dac: 2  # Recasens 1997
   OW0:
     F1: 560
     F2: 1120
@@ -357,6 +379,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    dac: 2  # Recasens 1997
     diph:
       - AO0
       - UH0
@@ -372,6 +395,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    dac: 3  # Recasens 1997
   UW0:
     F1: 340
     F2: 950
@@ -384,6 +408,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    dac: 3  # Recasens 1997
   AH0:
     F1: 640
     F2: 1240
@@ -396,6 +421,7 @@ phoneme_targets:
     type: vowel
     mid: true
     central: true
+    dac: 1  # Recasens 1997
   ER0:
     F1: 490
     F2: 1250
@@ -409,6 +435,7 @@ phoneme_targets:
     mid: true
     central: true
     rhotic: true
+    dac: 2  # Recasens 1997
   S:
     F1: 320
     F2: 1390
@@ -430,6 +457,7 @@ phoneme_targets:
     type: fricative
     voiceless: true
     alveolar: true
+    dac: 2  # Recasens 1997
   Z:
     F1: 240
     F2: 1390
@@ -451,6 +479,7 @@ phoneme_targets:
     type: fricative
     voiced: true
     alveolar: true
+    dac: 2  # Recasens 1997
   SH:
     F1: 300
     F2: 1840
@@ -474,6 +503,7 @@ phoneme_targets:
     type: fricative
     voiceless: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   ZH:
     F1: 260
     F2: 1800
@@ -497,6 +527,7 @@ phoneme_targets:
     type: fricative
     voiced: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   F:
     F1: 340
     F2: 1100
@@ -521,6 +552,7 @@ phoneme_targets:
     type: fricative
     voiceless: true
     labiodental: true
+    dac: 1  # Recasens 1997
   V:
     F1: 220
     F2: 1100
@@ -545,6 +577,7 @@ phoneme_targets:
     type: fricative
     voiced: true
     labiodental: true
+    dac: 1  # Recasens 1997
   TH:
     F1: 320
     F2: 1290
@@ -569,6 +602,7 @@ phoneme_targets:
     type: fricative
     voiceless: true
     dental: true
+    dac: 1  # Recasens 1997
   DH:
     F1: 270
     F2: 1290
@@ -593,6 +627,7 @@ phoneme_targets:
     type: fricative
     voiced: true
     dental: true
+    dac: 1  # Recasens 1997
   HH:
     F1: 500
     F2: 1500
@@ -609,6 +644,7 @@ phoneme_targets:
     type: fricative
     voiceless: true
     glottal: true
+    dac: 1  # Recasens 1997
   M:
     F1: 250
     F2: 1100
@@ -626,6 +662,7 @@ phoneme_targets:
     type: nasal
     voiced: true
     bilabial: true
+    dac: 1  # Recasens 1997
   'N':
     F1: 250
     F2: 1400
@@ -643,6 +680,7 @@ phoneme_targets:
     type: nasal
     voiced: true
     alveolar: true
+    dac: 2  # Recasens 1997
   NG:
     F1: 250
     F2: 1700
@@ -660,6 +698,7 @@ phoneme_targets:
     type: nasal
     voiced: true
     velar: true
+    dac: 3  # Recasens 1997
   L:
     F1: 310
     F2: 1050
@@ -672,6 +711,7 @@ phoneme_targets:
     type: liquid
     voiced: true
     alveolar: true
+    dac: 3  # Recasens 1997
   R:
     F1: 310
     F2: 1060
@@ -684,6 +724,7 @@ phoneme_targets:
     type: liquid
     voiced: true
     rhotic: true
+    dac: 3  # Recasens 1997
   W:
     F1: 290
     F2: 610
@@ -696,6 +737,7 @@ phoneme_targets:
     type: glide
     voiced: true
     labiovelar: true
+    dac: 1  # Recasens 1997; Volenec 2015
   'Y':
     F1: 260
     F2: 2070
@@ -708,6 +750,7 @@ phoneme_targets:
     type: glide
     voiced: true
     palatal: true
+    dac: 3  # Recasens 1997
   P_CL:
     F1: 200
     F2: 800
@@ -720,6 +763,7 @@ phoneme_targets:
     type: stop_closure
     voiceless: true
     bilabial: true
+    dac: 1  # Recasens 1997
   T_CL:
     F1: 200
     F2: 1800
@@ -732,6 +776,7 @@ phoneme_targets:
     type: stop_closure
     voiceless: true
     alveolar: true
+    dac: 2  # Recasens 1997
   K_CL:
     F1: 200
     F2: 1500
@@ -744,6 +789,7 @@ phoneme_targets:
     type: stop_closure
     voiceless: true
     velar: true
+    dac: 3  # Recasens 1997
   B_CL:
     F1: 200
     F2: 800
@@ -757,6 +803,7 @@ phoneme_targets:
     type: stop_closure
     voiced: true
     bilabial: true
+    dac: 1  # Recasens 1997
   D_CL:
     F1: 200
     F2: 1800
@@ -770,6 +817,7 @@ phoneme_targets:
     type: stop_closure
     voiced: true
     alveolar: true
+    dac: 2  # Recasens 1997
   G_CL:
     F1: 200
     F2: 1500
@@ -783,6 +831,7 @@ phoneme_targets:
     type: stop_closure
     voiced: true
     velar: true
+    dac: 3  # Recasens 1997
   P_REL:
     F1: 400
     F2: 1100
@@ -802,6 +851,7 @@ phoneme_targets:
     type: stop_release
     voiceless: true
     bilabial: true
+    dac: 1  # Recasens 1997
   T_REL:
     F1: 400
     F2: 1600
@@ -825,6 +875,7 @@ phoneme_targets:
     type: stop_release
     voiceless: true
     alveolar: true
+    dac: 2  # Recasens 1997
   K_REL:
     F1: 300
     F2: 1990
@@ -848,6 +899,7 @@ phoneme_targets:
     type: stop_release
     voiceless: true
     velar: true
+    dac: 3  # Recasens 1997
   B_REL:
     F1: 200
     F2: 1100
@@ -870,6 +922,7 @@ phoneme_targets:
     type: stop_release
     voiced: true
     bilabial: true
+    dac: 1  # Recasens 1997
   D_REL:
     F1: 200
     F2: 1600
@@ -895,6 +948,7 @@ phoneme_targets:
     type: stop_release
     voiced: true
     alveolar: true
+    dac: 2  # Recasens 1997
   G_REL:
     F1: 200
     F2: 1990
@@ -920,6 +974,7 @@ phoneme_targets:
     type: stop_release
     voiced: true
     velar: true
+    dac: 3  # Recasens 1997
   P_ASP:
     F1: 400
     F2: 1100
@@ -939,6 +994,7 @@ phoneme_targets:
     type: stop_aspiration
     voiceless: true
     bilabial: true
+    dac: 1  # Recasens 1997
   T_ASP:
     F1: 400
     F2: 1600
@@ -961,6 +1017,7 @@ phoneme_targets:
     type: stop_aspiration
     voiceless: true
     alveolar: true
+    dac: 2  # Recasens 1997
   K_ASP:
     F1: 300
     F2: 1990
@@ -983,6 +1040,7 @@ phoneme_targets:
     type: stop_aspiration
     voiceless: true
     velar: true
+    dac: 3  # Recasens 1997
   # Affricate closure targets provide the stop-gap component preceding postalveolar frication.
   # Citation: Stevens 1998 Ch.8 (affricate stop closure + frication sequence).
   CH_CL:
@@ -1000,6 +1058,7 @@ phoneme_targets:
     type: stop_closure
     voiceless: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   JH_CL:
     F1: 220
     F2: 1750
@@ -1015,6 +1074,7 @@ phoneme_targets:
     type: stop_closure
     voiced: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   CH:
     F1: 300
     F2: 1840
@@ -1047,6 +1107,7 @@ phoneme_targets:
     type: affricate
     voiceless: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   JH:
     F1: 260
     F2: 1800
@@ -1078,6 +1139,7 @@ phoneme_targets:
     type: affricate
     voiced: true
     postalveolar: true
+    dac: 3  # Recasens 1997
   DX:
     F1: 300
     F2: 1600
@@ -1093,6 +1155,7 @@ phoneme_targets:
     type: flap
     voiced: true
     alveolar: true
+    dac: 2  # Recasens 1997
   SIL:
     F1: 500
     F2: 1500

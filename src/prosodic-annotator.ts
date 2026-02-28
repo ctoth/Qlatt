@@ -245,6 +245,13 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
 
 function markFunctionWords(tokens: PipelineToken[]): void {
   for (const token of tokens) {
+    // Initialize phrase-edge tone properties on ALL tokens for consistency.
+    // These are only set to non-null values on SIL tokens at phrase boundaries
+    // (in assignPhraseEdgeTones), but initializing to null prevents undefined
+    // in CEL expressions. Citation: Silverman et al. 1992 (ToBI tone tier).
+    token.phraseAccent = null;
+    token.boundaryTone = null;
+
     if (token.phoneme === "SIL") {
       // SIL tokens are neither function nor content words.
       token.isFunctionWord = false;
@@ -490,24 +497,7 @@ function assignPhraseEdgeTones(tokens: PipelineToken[], phrase: Phrase): void {
  * Citation: O'Shaughnessy 1976
  */
 function applyLongPhraseBreaking(tokens: PipelineToken[], phrase: Phrase): void {
-  // Count content words — need to identify unique words that are content words.
-  const contentWordLastPhones: number[] = [];
-  let prevWord: string | null = null;
-
-  for (const idx of phrase.tokenIndices) {
-    const token = tokens[idx];
-    const word = token.word ?? "";
-    if (word !== prevWord) {
-      // New word — if the previous word was a content word, record it.
-      if (prevWord !== null) {
-        // Check if any token of previous word was a content word.
-        // We already stored the last phone of the previous content word.
-      }
-      prevWord = word;
-    }
-  }
-
-  // Re-do more cleanly: collect the last phone index of each content word.
+  // Collect the last phone index of each content word.
   const contentWordEnds: number[] = [];
   let currentWord: string | null = null;
   let currentIsContent = false;

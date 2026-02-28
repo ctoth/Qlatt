@@ -394,6 +394,81 @@ describe("annotateProsody — unit tests", () => {
     });
   });
 
+  describe("edge cases", () => {
+    it("handles empty token array without crashing", () => {
+      const result = annotateProsody([]);
+      expect(result).toEqual([]);
+    });
+
+    it("assigns nuclear accent to a single content word phrase", () => {
+      // "Cat."
+      const tokens = [
+        sil(),
+        phone("K", "cat"),
+        phone("AE", "cat", 1),
+        phone("T", "cat"),
+        sil("."),
+      ];
+
+      const result = annotateProsody(tokens);
+
+      // The single content word should be nuclear
+      expect(result[2].isNuclearAccent).toBe(true);
+      expect(result[2].accentType).toBe("H*");
+      // All phones accented
+      expect(result[1].isAccented).toBe(true);
+      expect(result[2].isAccented).toBe(true);
+      expect(result[3].isAccented).toBe(true);
+    });
+
+    it("assigns no nuclear accent in all-function-word phrase", () => {
+      // "Is it in the ?"
+      const tokens = [
+        sil(),
+        phone("IH", "is", 0),
+        phone("Z", "is"),
+        phone("IH", "it", 0),
+        phone("T", "it"),
+        phone("IH", "in", 0),
+        phone("N", "in"),
+        phone("DH", "the"),
+        phone("AH", "the", 0),
+        sil("?"),
+      ];
+
+      const result = annotateProsody(tokens);
+
+      // No token should be accented (all function words)
+      for (let i = 1; i <= 8; i++) {
+        expect(result[i].isAccented).toBe(false);
+        expect(result[i].isNuclearAccent).toBe(false);
+        expect(result[i].accentType).toBeNull();
+      }
+    });
+
+    it("initializes phraseAccent and boundaryTone to null on all tokens", () => {
+      const tokens = [
+        sil(),
+        phone("K", "cat"),
+        phone("AE", "cat", 1),
+        phone("T", "cat"),
+        sil("."),
+      ];
+
+      const result = annotateProsody(tokens);
+
+      // Non-boundary tokens should have null (not undefined)
+      expect(result[1].phraseAccent).toBeNull();
+      expect(result[1].boundaryTone).toBeNull();
+      expect(result[2].phraseAccent).toBeNull();
+      expect(result[2].boundaryTone).toBeNull();
+
+      // Boundary SIL should have non-null values
+      expect(result[4].phraseAccent).toBe("L-");
+      expect(result[4].boundaryTone).toBe("L%");
+    });
+  });
+
   describe("long phrase breaking", () => {
     it("inserts breakIndex=2 in phrases with >6 content words", () => {
       // Build a phrase with 8 content words: w1 w2 w3 w4 w5 w6 w7 w8

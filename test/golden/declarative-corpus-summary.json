@@ -16,7 +16,7 @@
       "f0Mean": 104.39934249697085,
       "f0Span": 19.65618209538384,
       "f1MeanVoiced": 395.29,
-      "f2MeanVoiced": 1366.44,
+      "f2MeanVoiced": 1361.115,
       "b1MeanVoiced": 113.9625,
       "avMeanVoiced": 56.5,
       "ahMeanVoiced": 0
@@ -111,7 +111,7 @@
       "f0Mean": 104.29792115015711,
       "f0Span": 13.827683070653023,
       "f1MeanVoiced": 409.31071428571425,
-      "f2MeanVoiced": 1500.3714285714286,
+      "f2MeanVoiced": 1521.2464285714284,
       "b1MeanVoiced": 172.0625,
       "avMeanVoiced": 58.17857142857143,
       "ahMeanVoiced": 0
@@ -130,7 +130,7 @@
       "f0Mean": 103.86329678788812,
       "f0Span": 13.415728314456913,
       "f1MeanVoiced": 380.4390243902439,
-      "f2MeanVoiced": 1421.6341463414635,
+      "f2MeanVoiced": 1416.878048780488,
       "b1MeanVoiced": 96.82317073170732,
       "avMeanVoiced": 58.26829268292683,
       "ahMeanVoiced": 0
@@ -149,7 +149,7 @@
       "f0Mean": 108.00872773868234,
       "f0Span": 35.76096439265217,
       "f1MeanVoiced": 404.9,
-      "f2MeanVoiced": 1522.975,
+      "f2MeanVoiced": 1523.175,
       "b1MeanVoiced": 133.9125,
       "avMeanVoiced": 58.1,
       "ahMeanVoiced": 0
@@ -168,7 +168,7 @@
       "f0Mean": 103.4933233876677,
       "f0Span": 11.928406575848385,
       "f1MeanVoiced": 332.9111111111111,
-      "f2MeanVoiced": 1238.8185185185187,
+      "f2MeanVoiced": 1237.6703703703704,
       "b1MeanVoiced": 147.05555555555554,
       "avMeanVoiced": 54.18518518518518,
       "ahMeanVoiced": 0
@@ -206,7 +206,7 @@
       "f0Mean": 106.29952746556428,
       "f0Span": 19.82062573486445,
       "f1MeanVoiced": 370.4548387096774,
-      "f2MeanVoiced": 1569.4225806451611,
+      "f2MeanVoiced": 1569.5516129032258,
       "b1MeanVoiced": 166.83064516129033,
       "avMeanVoiced": 54.25806451612903,
       "ahMeanVoiced": 0
@@ -225,7 +225,7 @@
       "f0Mean": 109.04039063401255,
       "f0Span": 18.068958232442313,
       "f1MeanVoiced": 426.025,
-      "f2MeanVoiced": 1295.25,
+      "f2MeanVoiced": 1321.6875,
       "b1MeanVoiced": 68.6875,
       "avMeanVoiced": 59.9375,
       "ahMeanVoiced": 0
@@ -244,7 +244,7 @@
       "f0Mean": 104.8453453846076,
       "f0Span": 18.279615234998644,
       "f1MeanVoiced": 361.49215686274505,
-      "f2MeanVoiced": 1462.6490196078432,
+      "f2MeanVoiced": 1464.5117647058821,
       "b1MeanVoiced": 193.6813725490196,
       "avMeanVoiced": 57.21568627450981,
       "ahMeanVoiced": 0
@@ -282,7 +282,7 @@
       "f0Mean": 105.50299906612598,
       "f0Span": 16.465412381668244,
       "f1MeanVoiced": 407.64375,
-      "f2MeanVoiced": 1423.634375,
+      "f2MeanVoiced": 1398.415625,
       "b1MeanVoiced": 74.40625,
       "avMeanVoiced": 56.90625,
       "ahMeanVoiced": 0
@@ -320,7 +320,7 @@
       "f0Mean": 104.59919772959394,
       "f0Span": 19.07290372181727,
       "f1MeanVoiced": 447.9714285714286,
-      "f2MeanVoiced": 1337.2964285714286,
+      "f2MeanVoiced": 1328.7607142857144,
       "b1MeanVoiced": 111.32142857142857,
       "avMeanVoiced": 60,
       "ahMeanVoiced": 0
@@ -339,7 +339,7 @@
       "f0Mean": 104.8375635276439,
       "f0Span": 19.326475150218343,
       "f1MeanVoiced": 360.3695652173913,
-      "f2MeanVoiced": 1441.4347826086957,
+      "f2MeanVoiced": 1439.0869565217392,
       "b1MeanVoiced": 99.75,
       "avMeanVoiced": 55.17391304347826,
       "ahMeanVoiced": 0

@@ -28,6 +28,10 @@ export const ndbScale: Record<string, number> = {
   A4: -78,
   A5: -79,
   A6: -80,
+  A7: -81,
+  A8: -82,
+  A9: -83,
+  A10: -84,
   AB: -84,
   AN: -58,
 };

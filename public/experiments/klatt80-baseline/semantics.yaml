@@ -139,6 +139,32 @@ params:
     default: 0
     range: [0, 2]
 
+  OQ:
+    description: "Open quotient override in Klatt 1990 percentage. 0 = derive from Rd in LF crate"
+    type: float
+    default: 0
+    range: [0, 99]
+    unit: "%"
+
+  TL:
+    description: "Spectral tilt override in dB at 3 kHz (Klatt 1990). 0 = derive from Rd in LF crate"
+    type: float
+    default: 0
+    range: [0, 41]
+    unit: dB
+
+  flutter:
+    description: "F0 flutter amount (Klatt & Klatt 1990 Eq. 1 scale). 0 = none"
+    type: float
+    default: 0
+    range: [0, 100]
+
+  jitter:
+    description: "F0 jitter amount (Fraj 2011, normalized 0-100). 0 = none"
+    type: float
+    default: 0
+    range: [0, 100]
+
   openPhaseRatio:
     description: "Impulse source open phase ratio"
     type: float

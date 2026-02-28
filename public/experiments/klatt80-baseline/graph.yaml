@@ -124,6 +124,10 @@ nodes:
       f0: { bind: F0 }
       rd: { bind: Rd }
       lfMode: { bind: lfMode }
+      oq: { bind: OQ }
+      tl: { bind: TL }
+      flutter: { bind: flutter }
+      jitter: { bind: jitter }
 
   impulseSource:
     type: impulse-train
@@ -433,12 +437,9 @@ nodes:
       gain: 1.0
 
   # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass
-  # after the D/A converter. We approximate that reconstruction filter here.
+  # after the D/A converter. This dedicated DSP node models that output stage.
   outputLp:
-    type: lowpass-filter
-    params:
-      frequency: { bind: outputLpFrequency }
-      Q: { bind: outputLpQ }
+    type: reconstruction-filter
 
   masterGain:
     type: gain

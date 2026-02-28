@@ -37,25 +37,16 @@ primitives:
     inputs: 0
     outputs: 1
 
-  lowpass-filter:
-    description: "WebAudio BiquadFilterNode configured as a low-pass output filter"
-    native: BiquadFilterNode
-    params:
-      frequency:
-        type: float
-        unit: "Hz"
-        default: 5000
-        description: "Cutoff frequency"
-      Q:
-        type: float
-        default: 0.707
-        description: "Filter Q"
-    inputs: 1
-    outputs: 1
-
   # ===========================================================================
   # WASM-backed AudioWorklet Nodes
   # ===========================================================================
+
+  reconstruction-filter:
+    description: "Fixed 5 kHz reconstruction low-pass modeled after Klatt (1980) Appendix A"
+    worklet: "reconstruction-filter-processor.js"
+    wasm: "reconstruction-filter.wasm"
+    inputs: 1
+    outputs: 1
 
   resonator:
     description: "Two-pole resonator (formant filter) - implements second-order IIR bandpass"
@@ -144,6 +135,22 @@ primitives:
         type: int
         default: 1
         description: "LF model mode selection"
+      oq:
+        type: float
+        default: 0
+        description: "Open quotient override (Klatt 1990 %, 0-99). 0 = derive from Rd"
+      tl:
+        type: float
+        default: 0
+        description: "Spectral tilt override (dB at 3 kHz, Klatt 1990, 0-41). 0 = derive from Rd"
+      flutter:
+        type: float
+        default: 0
+        description: "F0 flutter (Klatt & Klatt 1990, 0-100). 0 = none"
+      jitter:
+        type: float
+        default: 0
+        description: "F0 jitter (Fraj 2011, 0-100). 0 = none"
     inputs: 0
     outputs: 1
 

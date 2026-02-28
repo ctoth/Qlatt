@@ -101,7 +101,6 @@ function createCelEnvironment(): Environment {
   // String(x) are functionally identical to the CEL builtins.
   // Register all known custom function names with overloads for arities
   // 1, 2, and 3. This covers all call patterns used in YAML rule expressions.
-  // "double" and "string" are CEL builtins and must NOT be re-registered.
   const knownFunctionNames = [
     "midpoint", "at_ratio", "at_sync", "prev_point",
     "ahead", "behind", "total", "target", "assoc",

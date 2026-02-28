@@ -1,4 +1,4 @@
-import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
+import { dbToLinear, proximity, ndbScale } from './builtin-functions';
 
 export class KlattSynth {
   ctx: AudioContext;
@@ -14,7 +14,7 @@ export class KlattSynth {
 
   constructor(audioContext: AudioContext, options: Record<string, any> = {}) {
     this.ctx = audioContext;
-    this.options = options ?? {};
+    this.options = options;
     this.nodes = {};
     this.params = this._defaultParams();
     this.isInitialized = false;
@@ -515,7 +515,7 @@ export class KlattSynth {
 
     const parallelGains = [p.A1, p.A2, p.A3, p.A4, p.A5, p.A6];
     for (let i = 0; i < this.nodes.parallelFormantGains.length; i += 1) {
-      this._setParallelFormantGain(i, parallelGains[i], atTime, formants[i].f);
+      this._setParallelFormantGain(i, parallelGains[i], atTime);
     }
 
     this._setParallelMix(p.parallelMix, atTime);
@@ -554,7 +554,7 @@ export class KlattSynth {
     return derived || 1;
   }
 
-  _setParallelFormantGain(index: number, dbValue: number, atTime: number, freq = 0): void {
+  _setParallelFormantGain(index: number, dbValue: number, atTime: number): void {
     // Klatt 80 applies parallel formant gains directly to first-differenced signal
     // without compensation. The low-frequency attenuation is intentional -
     // it prevents F2-F6 energy from polluting the F1 region.
@@ -1084,7 +1084,10 @@ export class KlattSynth {
   async _loadWasmBytes(workletBase: string): Promise<void> {
     if (this.wasmBytes) return;
     const load = async (file: string): Promise<ArrayBuffer> => {
-      const response = await fetch(workletBase + file);
+      // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
+      const url = workletBase + file;
+      const bustUrl = url + (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+      const response = await fetch(bustUrl);
       return response.arrayBuffer();
     };
     const [resonator, antiresonator, lfSource] = await Promise.all([

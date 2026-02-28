@@ -20,7 +20,7 @@ import type { KlattFrame } from "./tts-frontend-types";
 type InputToken = Record<string, any>;
 type KlattParams = Record<string, number>;
 
-const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
+export const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 
 /** An F0 contour point (time in seconds, f0 in Hz). */
 export type F0Point = { time: number; f0: number };

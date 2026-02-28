@@ -1,12 +1,11 @@
 import {
-  PHONEME_TARGETS,
   materializePhonemeTarget,
 } from "./declarative-frontend/inventory";
 import { normalizeText } from "./g2p/text-normalize";
 import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
-import { assembleKlattTrack } from "./track-assembler";
+import { assembleKlattTrack, PHONEME_TARGET_MAP } from "./track-assembler";
 import type { OutputConfig } from "./track-assembler";
 import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
@@ -34,8 +33,6 @@ export type TextToKlattTrackOptions = {
 // Plain stop symbols are intentionally rewritten in the structural phase
 // (Klatt 1980 stop model: closure + release).
 const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
-
-const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 
 // Extract output and transcription configuration from the loaded YAML rulepack.
 // These override hardcoded defaults in track-assembler and transcribe-text.
@@ -154,6 +151,7 @@ export function textToKlattTrack(
       f0: {
         base_hz: baseF0,
         fall_rate_hz: 20 * f0RangeFactor,
+        declination_tau: 0.12 * f0RangeFactor,
         stress_rise: 1.0 + (0.15 * f0RangeFactor),
         question_rise_hz: 30 * f0RangeFactor,
         continuation_rise_hz: 8 * f0RangeFactor,

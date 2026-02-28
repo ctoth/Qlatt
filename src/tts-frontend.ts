@@ -166,9 +166,11 @@ export function textToKlattTrack(
   );
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---
+  // Transition durations scale inversely with rate (Broad & Fertig 1970).
+  // At rate=1.0: transitionMs/1.0 = transitionMs (unchanged).
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0,
-    transitionMs,
+    transitionMs: transitionMs / rate,
     outputConfig: RULEPACK_OUTPUT_CONFIG,
   });
 }

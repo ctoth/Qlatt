@@ -164,8 +164,9 @@ async function speak() {
   await ctx.resume();
   const phrase = document.getElementById("phrase").value.trim();
   const baseF0 = Number(document.getElementById("baseF0").value) || 110;
+  const rate = Number(document.getElementById("rate").value) || 1.0;
   if (!phrase) return;
-  const track = textToKlattTrack(phrase, baseF0);
+  const track = textToKlattTrack(phrase, baseF0, 30, { rate });
 
   // Check which runtime to use
   const runtime = getSelectedRuntime();
@@ -602,6 +603,10 @@ loadExperimentManifest().then(() => {
 document.getElementById("startBtn").addEventListener("click", start);
 document.getElementById("stopBtn").addEventListener("click", stop);
 document.getElementById("speakBtn").addEventListener("click", speak);
+document.getElementById("rate").addEventListener("input", () => {
+  document.getElementById("rateValue").textContent =
+    Number(document.getElementById("rate").value).toFixed(2) + "x";
+});
 document.getElementById("copyDiagBtn").addEventListener("click", async () => {
   if (!lastRun) return;
   updateDiagnostics();

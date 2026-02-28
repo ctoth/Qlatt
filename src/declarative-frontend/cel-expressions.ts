@@ -13,6 +13,8 @@ const expressionCache = new Map<string, CompiledCelExpression>();
 let _celEvalCount = 0;
 let _celCacheHitCount = 0;
 let _celCacheMissCount = 0;
+let _celEvalTimeMs = 0;
+let _celTimingEnabled = false;
 
 /** Total number of CEL evaluations since last reset. */
 export function getCelEvalCount(): number { return _celEvalCount; }
@@ -20,8 +22,12 @@ export function getCelEvalCount(): number { return _celEvalCount; }
 export function getCelCacheHitCount(): number { return _celCacheHitCount; }
 /** Number of expression-cache misses since last reset. */
 export function getCelCacheMissCount(): number { return _celCacheMissCount; }
+/** Accumulated CEL evaluation wall-clock time in ms (only when timing enabled). */
+export function getCelEvalTimeMs(): number { return _celEvalTimeMs; }
+/** Enable/disable per-evaluation timing (adds performance.now() overhead). */
+export function setCelTimingEnabled(enabled: boolean): void { _celTimingEnabled = enabled; }
 /** Reset all CEL profiling counters to zero. */
-export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount = 0; _celCacheMissCount = 0; }
+export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount = 0; _celCacheMissCount = 0; _celEvalTimeMs = 0; }
 
 const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "has",
@@ -237,6 +243,12 @@ export function evaluateExpression(
   _currentFunctions = registry;
 
   try {
+    if (_celTimingEnabled) {
+      const t0 = performance.now();
+      const result = coerceResult(compiled((context ?? {}) as Record<string, any>));
+      _celEvalTimeMs += performance.now() - t0;
+      return result;
+    }
     return coerceResult(compiled((context ?? {}) as Record<string, any>));
   } finally {
     _currentFunctions = {};

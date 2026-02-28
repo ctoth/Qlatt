@@ -132,7 +132,11 @@ export function textToKlattTrack(
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
   parameterSequence = runPhases(parameterSequence, ["postlexical"]);
   parameterSequence = runPhases(parameterSequence, ["structural"]);
-  parameterSequence = runPhases(parameterSequence, ["duration"]);
+  parameterSequence = runPhases(parameterSequence, ["duration"], {
+    policy: {
+      duration: { rate_scale: rate },
+    },
+  });
   parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,

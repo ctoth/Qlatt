@@ -64,10 +64,12 @@ phases:
       - unstressed_consonant_shortening
       - word_initial_lengthening
       - punctuation_pause
+      - pause_rate_scaling
       - stress_duration
       - vowel_shortening
       - vowel_before_voiceless_stop_shortening
       - pre_boundary_lengthening
+      - speech_rate_scaling
       - fricative_minimum_duration
       - lock_stop_release_duration
       - stop_unreleasing

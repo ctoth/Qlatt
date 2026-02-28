@@ -240,3 +240,30 @@ rules:
     citations:
       - Lisker & Abramson 1964 (s-cluster VOT)
       - Zue 1976 (s-clusters reduce VOT to voice-like values)
+  speech_rate_scaling:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    constraint: params.policy.duration.rate_scale != 1.0
+    apply:
+      - field: duration
+        op: mul
+        value: 1.0 / params.policy.duration.rate_scale
+        tag: speech_rate
+    citations:
+      - Klatt 1976 §III (speech rate duration compression)
+      - Allen et al. 1987 Ch.9 (rate-dependent duration model)
+  pause_rate_scaling:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
+    constraint: params.policy.duration.rate_scale != 1.0
+    apply:
+      - field: duration
+        op: mul
+        value: 1.0 / params.policy.duration.rate_scale
+        tag: pause_rate
+    citations:
+      - Goldman-Eisler 1968 (pause duration scales with speaking rate)

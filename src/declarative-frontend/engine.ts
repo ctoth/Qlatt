@@ -2418,7 +2418,8 @@ export function runRuleEngine(
     if (selectedPhases && !selectedPhases.has(phase.name)) continue;
     runtime.currentPhase = phase.name;
     const phaseScalarFields = resolvePhaseScalarFields(phase, runtime);
-    trace.push({ type: "phase_start", phase: phase.name });
+    const phaseT0 = performance.now();
+    trace.push({ type: "phase_start", phase: phase.name, t0: phaseT0 });
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
       if (runtime.finalized && isStructuralRule(rule)) {
@@ -2427,7 +2428,8 @@ export function runRuleEngine(
         );
       }
       runtime.currentRuleName = ruleName;
-      trace.push({ type: "rule_start", phase: phase.name, rule: ruleName });
+      const ruleT0 = performance.now();
+      trace.push({ type: "rule_start", phase: phase.name, rule: ruleName, t0: ruleT0 });
       try {
         current = applyRule(rule, current, runtime);
       } catch (error) {
@@ -2440,7 +2442,7 @@ export function runRuleEngine(
         });
         throw annotateRuntimeRuleError(error, phase.name, ruleName);
       }
-      trace.push({ type: "rule_end", phase: phase.name, rule: ruleName });
+      trace.push({ type: "rule_end", phase: phase.name, rule: ruleName, elapsed: performance.now() - ruleT0 });
       runtime.currentRuleName = null;
     }
     if (phaseScalarFields.length > 0) {
@@ -2468,7 +2470,7 @@ export function runRuleEngine(
       runtime.finalized = true;
     }
     assertActiveBaseCoverage(current, runtime);
-    trace.push({ type: "phase_end", phase: phase.name });
+    trace.push({ type: "phase_end", phase: phase.name, elapsed: performance.now() - phaseT0 });
     runtime.currentPhase = null;
   }
 

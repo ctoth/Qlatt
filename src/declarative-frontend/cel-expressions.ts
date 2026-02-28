@@ -9,6 +9,20 @@ export type ExpressionValidationOptions = {
 
 const expressionCache = new Map<string, CompiledCelExpression>();
 
+// --- CEL evaluation counter (for profiling) ---
+let _celEvalCount = 0;
+let _celCacheHitCount = 0;
+let _celCacheMissCount = 0;
+
+/** Total number of CEL evaluations since last reset. */
+export function getCelEvalCount(): number { return _celEvalCount; }
+/** Number of expression-cache hits since last reset. */
+export function getCelCacheHitCount(): number { return _celCacheHitCount; }
+/** Number of expression-cache misses since last reset. */
+export function getCelCacheMissCount(): number { return _celCacheMissCount; }
+/** Reset all CEL profiling counters to zero. */
+export function resetCelCounters(): void { _celEvalCount = 0; _celCacheHitCount = 0; _celCacheMissCount = 0; }
+
 const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "has",
   "size",
@@ -128,7 +142,7 @@ function compileExpression(expression: string): CompiledCelExpression {
   }
 
   let compiled = expressionCache.get(expression);
-  if (compiled) return compiled;
+  if (compiled) { _celCacheHitCount++; return compiled; }
 
   try {
     compiled = celEnv.parse(expression);
@@ -137,6 +151,7 @@ function compileExpression(expression: string): CompiledCelExpression {
     throw new Error(msg || "Invalid CEL expression");
   }
 
+  _celCacheMissCount++;
   expressionCache.set(expression, compiled);
   return compiled;
 }
@@ -207,6 +222,7 @@ export function evaluateExpression(
   context: unknown,
   functions: Record<string, unknown> | null = null
 ): unknown {
+  _celEvalCount++;
   const compiled = compileExpression(expression);
 
   // Set up the mutable function binding for this evaluation

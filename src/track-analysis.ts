@@ -1,7 +1,7 @@
 // Track analysis module for Qlatt TTS diagnostics
 // Extracted from test-harness.html for maintainability
 
-import { dbToLinear, proximity, ndbScale, ndbCor } from './builtin-functions';
+import { dbToLinear, proximity, ndbScale } from './builtin-functions';
 
 type Range = { min: number; max: number };
 type TrackParams = Record<string, number | undefined>;

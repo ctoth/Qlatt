@@ -9,7 +9,7 @@
 // ndbCor correction values for proximity calculation
 export const ndbCor = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
-// ndbScale values (from klatt-synth.js _applyKlattParams)
+// ndbScale values (from klatt-synth.ts _applyKlattParams)
 // Source amplitude scale factors (PARCOE.FOR lines 51-53: NDBSCA)
 // AV, AH, AF, AVS are offset by -47 to compensate for G0 default of 47
 // This keeps default output level while making G0 functional as overall gain control

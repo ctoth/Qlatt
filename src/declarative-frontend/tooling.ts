@@ -82,10 +82,6 @@ export function buildPhaseSnapshots(
     finalResult = result;
   }
 
-  if (!snapshots.has("final")) {
-    snapshots.set("final", cloneJson(sequence));
-  }
-
   return {
     spec,
     phaseNames,

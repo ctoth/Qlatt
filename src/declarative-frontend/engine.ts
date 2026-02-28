@@ -3,7 +3,7 @@ import { assertValidSpec } from "./validation";
 import { evaluateExpression } from "./cel-expressions";
 import { passesPrefilter } from "./where-prefilter";
 import type { Prefilter } from "./where-prefilter";
-import { isPlainObject } from "../yaml-loader";
+import { isPlainObject, cloneValue } from "../yaml-loader";
 import {
   TokenStatus,
   isActiveToken,
@@ -68,22 +68,10 @@ function isTokenLike(value: unknown): value is TokenLike {
   );
 }
 
-function cloneRuntimeValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => cloneRuntimeValue(entry));
-  }
-  if (isPlainObject(value)) {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, cloneRuntimeValue(entry)])
-    );
-  }
-  return value;
-}
-
 function projectPolicyValues(node: unknown): unknown {
-  if (!isPlainObject(node)) return cloneRuntimeValue(node);
+  if (!isPlainObject(node)) return cloneValue(node);
   if (Object.prototype.hasOwnProperty.call(node, "value")) {
-    return cloneRuntimeValue(node.value);
+    return cloneValue(node.value);
   }
   return Object.fromEntries(
     Object.entries(node).map(([key, entry]) => [key, projectPolicyValues(entry)])
@@ -92,7 +80,7 @@ function projectPolicyValues(node: unknown): unknown {
 
 function normalizeParameterTree(parameters: unknown): Record<string, unknown> {
   if (!isPlainObject(parameters)) return {};
-  const clone = cloneRuntimeValue(parameters) as Record<string, unknown>;
+  const clone = cloneValue(parameters) as Record<string, unknown>;
   if (Object.prototype.hasOwnProperty.call(clone, "policy")) {
     clone.policy = projectPolicyValues(clone.policy);
   }
@@ -110,7 +98,7 @@ function deepMergeRecords(
       merged[key] = deepMergeRecords(current, value);
       continue;
     }
-    merged[key] = cloneRuntimeValue(value);
+    merged[key] = cloneValue(value);
   }
   return merged;
 }
@@ -1401,18 +1389,6 @@ const RESERVED_SPLICE_COPY_FIELDS = new Set([
   "anchor_right",
 ]);
 
-function cloneTemplateData(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((item) => cloneTemplateData(item));
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, cloneTemplateData(item)])
-    );
-  }
-  return value;
-}
-
 function materializeSpliceCopyFields(
   template: TokenLike,
   context: RuntimeLike,
@@ -1430,7 +1406,7 @@ function materializeSpliceCopyFields(
   const copied: TokenLike = {};
   for (const field of requested) {
     copied[field] = Object.prototype.hasOwnProperty.call(sourceObject, field)
-      ? cloneTemplateData(sourceObject[field])
+      ? cloneValue(sourceObject[field])
       : null;
   }
   return copied;

@@ -1,5 +1,5 @@
 import { validateExpressionSyntax } from "./cel-expressions";
-import { isPlainObject } from "../yaml-loader";
+import { cloneValue, isPlainObject } from "../yaml-loader";
 
 type DiagnosticSeverity = "error" | "warning";
 type ValidationDiagnostic = {
@@ -31,16 +31,6 @@ type PolicyValidationState = {
   uncitedLeafPaths: Set<string>;
   usedLeafPaths: Set<string>;
 };
-
-function cloneValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => cloneValue(entry));
-  }
-  if (isPlainObject(value)) {
-    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)]));
-  }
-  return value;
-}
 
 function projectPolicyValueTree(node: unknown): unknown {
   if (!isPlainObject(node)) return cloneValue(node);

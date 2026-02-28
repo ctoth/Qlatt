@@ -1,4 +1,4 @@
-import { parseYamlString, isPlainObject } from "../yaml-loader";
+import { parseYamlString, isPlainObject, cloneValue } from "../yaml-loader";
 import { extractPrefilterFromCondition } from "./where-prefilter";
 
 /**
@@ -32,18 +32,6 @@ function asStringArray(value: unknown): string[] {
 
 function cloneObject(value: unknown): PlainObject {
   return isPlainObject(value) ? { ...value } : {};
-}
-
-function cloneValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => cloneValue(entry));
-  }
-  if (isPlainObject(value)) {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)])
-    );
-  }
-  return value;
 }
 
 function normalizeConditionSpec(value: unknown): unknown {

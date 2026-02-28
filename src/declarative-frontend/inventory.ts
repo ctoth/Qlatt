@@ -1,4 +1,5 @@
 import {
+  cloneValue,
   isPlainObject,
   loadYamlSource,
   loadYamlSourceSync,
@@ -13,15 +14,6 @@ type InventorySpec = {
 // Source-of-truth inventory data lives in /public/rules/inventory.yaml.
 export const DEFAULT_INVENTORY_PATH = "/rules/inventory.yaml";
 
-function cloneValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => cloneValue(entry));
-  }
-  if (isPlainObject(value)) {
-    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)]));
-  }
-  return value;
-}
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
 
 export function listBundledInventoryPaths(): string[] {
@@ -237,6 +229,8 @@ export function materializePhonemeTarget(
       continue;
     }
     if (typeof value === "boolean") {
+      payload[entryKey] = value;
+    } else if (typeof value === "number" && !Object.prototype.hasOwnProperty.call(BASE_PARAMS, entryKey)) {
       payload[entryKey] = value;
     }
   }

@@ -153,3 +153,16 @@ export function resolveIncludePath(parentPath: string, includePath: string): str
 export function isPlainObject(value: unknown): value is PlainObject {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
+
+/** Recursive deep-clone of plain objects/arrays; primitives returned by identity. */
+export function cloneValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneValue(entry));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)])
+    );
+  }
+  return value;
+}

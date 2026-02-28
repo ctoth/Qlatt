@@ -111,11 +111,6 @@ export async function loadYamlSource(specPath: string): Promise<string> {
     }
   }
 
-  for (const attempt of attempts) {
-    const fromFs = readYamlSourceFromFsSync(attempt);
-    if (typeof fromFs === "string") return fromFs;
-  }
-
   throw new Error(`E_YAML_PATH_UNKNOWN: '${specPath}' could not be loaded`);
 }
 

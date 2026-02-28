@@ -121,14 +121,6 @@ export async function preloadCmuDictionaryFromPath(
     }
   }
 
-  for (const attempt of attempts) {
-    const source = readFromFsSync(attempt);
-    if (typeof source !== "string") continue;
-    const parsed = parseDictionary(source, attempt);
-    DICTIONARY_CACHE.set(specPath, parsed);
-    return parsed;
-  }
-
   const known = listBundledCmuDictionaryPaths();
   throw new Error(
     `E_CMU_DICT_PATH_UNKNOWN: '${specPath}' could not be loaded` +

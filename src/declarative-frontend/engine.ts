@@ -1004,6 +1004,7 @@ function buildNavigationFunctions(
     string: (value: unknown) => String(value),
     max: maxFn,
     min: minFn,
+    exp: (x: unknown) => Math.exp(Number(x)),
     contains: (haystack: unknown, needle: unknown) =>
       String(haystack ?? "").includes(String(needle ?? "")),
     merge: mergeFn,
@@ -1033,26 +1034,6 @@ function buildNavigationFunctions(
     rebindCurrentToken,
     invalidateStreamCache,
   };
-}
-
-function evaluateSelectWhere(
-  whereExpr: unknown,
-  token: TokenLike,
-  params: RuntimeLike,
-  navigation: NavigationBundle,
-  extraContext: RuntimeLike | null = null
-): boolean {
-  return navigation.evaluateCondition(whereExpr, token, params, extraContext);
-}
-
-function evaluateRuleConstraint(
-  constraintExpr: unknown,
-  token: TokenLike,
-  params: RuntimeLike,
-  navigation: NavigationBundle,
-  extraContext: RuntimeLike | null = null
-): boolean {
-  return navigation.evaluateCondition(constraintExpr, token, params, extraContext);
 }
 
 function evaluateValueExpression(
@@ -1883,7 +1864,7 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
     // Fast-reject via prefilter: skip full CEL evaluation for tokens that
     // cannot match the where-clause based on their own properties.
     if (prefilter && !passesPrefilter(token, prefilter)) continue;
-    if (!evaluateSelectWhere(where, token, runtime.params, navigation)) continue;
+    if (!navigation.evaluateCondition(where, token, runtime.params, null)) continue;
     selected.push(token);
   }
 
@@ -1901,11 +1882,10 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       baseContext
     );
     const extraContext = { ...baseContext, ...defineContext };
-    const constraintOk = evaluateRuleConstraint(
+    const constraintOk = navigation.evaluateCondition(
       rule.constraint,
       token,
       runtime.params,
-      navigation,
       extraContext
     );
     if (!constraintOk) continue;
@@ -1985,7 +1965,7 @@ function matchPatternFrom(
     if (!token) return null;
     const stepPrefilter: Prefilter | null = step._prefilter ?? null;
     if (stepPrefilter && !passesPrefilter(token, stepPrefilter)) return null;
-    if (!evaluateSelectWhere(step.where ?? "true", token, params, functions)) return null;
+    if (!functions.evaluateCondition(step.where ?? "true", token, params, null)) return null;
     captures[step.capture] = token;
     cursor += 1;
   }
@@ -2025,11 +2005,10 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       baseContext
     );
     const extraContext = { ...baseContext, ...defineContext };
-    const constraintOk = evaluateRuleConstraint(
+    const constraintOk = navigation.evaluateCondition(
       rule.constraint,
       capturedToken,
       runtime.params,
-      navigation,
       extraContext
     );
     if (!constraintOk) continue;
@@ -2242,7 +2221,6 @@ function computeSyncTimes(sequence: TokenLike[], runtime: RuntimeLike): void {
         token?.sync_left != null &&
         token?.sync_right != null
     )
-    .slice()
     .sort((left: TokenLike, right: TokenLike) => {
       const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
       const rightBounds = ensureTokenSyncMarkRefs(right, runtime);
@@ -2322,7 +2300,6 @@ function assertActiveBaseCoverage(sequence: TokenLike[], runtime: RuntimeLike): 
           token?.sync_left != null &&
           token?.sync_right != null
       )
-      .slice()
       .sort((left: TokenLike, right: TokenLike) => {
         const leftBounds = ensureTokenSyncMarkRefs(left, runtime);
         const rightBounds = ensureTokenSyncMarkRefs(right, runtime);

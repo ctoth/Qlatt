@@ -1,7 +1,7 @@
 import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend";
-import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/builtin-functions";
+import { dbToLinear, ndbScale } from "../src/builtin-functions";
 import {
   summarizeTrack,
   summarizeParallel,

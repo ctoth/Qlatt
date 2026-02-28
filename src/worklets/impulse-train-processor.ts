@@ -1,10 +1,4 @@
-interface ImpulseTrainProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-  };
-}
+import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils";
 
 interface ImpulseTrainMetricsParams {
   gainAvg: number;
@@ -44,7 +38,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
 
   constructor(options?: unknown) {
     super(options);
-    const opts = options as ImpulseTrainProcessorOptions | undefined;
+    const opts = options as BaseProcessorOptions | undefined;
     this.periodLength = 0;
     this.openPhaseLength = 0;
     this.positionInPeriod = 0;
@@ -154,15 +148,7 @@ class ImpulseTrainProcessor extends AudioWorkletProcessor {
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
     const payload: ImpulseTrainMetricsMessage = {
       type: "metrics",
       node: this.nodeId,

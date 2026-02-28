@@ -1,10 +1,4 @@
-interface GlottalModProcessorOptions {
-  processorOptions?: {
-    debug?: boolean;
-    nodeId?: string;
-    reportInterval?: number;
-  };
-}
+import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils";
 
 interface GlottalModMetricsMessage {
   type: "metrics";
@@ -30,7 +24,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
 
   constructor(options?: unknown) {
     super(options);
-    const opts = options as GlottalModProcessorOptions | undefined;
+    const opts = options as BaseProcessorOptions | undefined;
     this.phase = 0;
     this.lastF0 = 0;
     this.debug = Boolean(opts?.processorOptions?.debug);
@@ -96,15 +90,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
     this._reportCountdown -= 1;
     if (this._reportCountdown > 0) return;
     this._reportCountdown = this.reportInterval;
-    let sum = 0;
-    let peak = 0;
-    for (let i = 0; i < buffer.length; i += 1) {
-      const v = buffer[i];
-      sum += v * v;
-      const av = Math.abs(v);
-      if (av > peak) peak = av;
-    }
-    const rms = Math.sqrt(sum / buffer.length);
+    const { rms, peak } = computeRmsPeak(buffer);
     const payload: GlottalModMetricsMessage = {
       type: "metrics",
       node: this.nodeId,

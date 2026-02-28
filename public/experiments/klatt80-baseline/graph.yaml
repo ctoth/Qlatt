@@ -335,9 +335,12 @@ nodes:
   # NASAL RESONATORS
   # ---------------------------------------------------------------------------
 
-  # Nasal antiresonator (zero)
+  # Nasal antiresonator (zero) — biquad notch filter
+  # Replaces Klatt FIR antiresonator which is numerically unstable at 48 kHz.
+  # Bristow-Johnson Audio EQ Cookbook biquad notch: same spectral zero,
+  # coefficients near unity at any sample rate.
   nz:
-    type: antiresonator
+    type: biquad-notch
     options:
       bypassAtZero: true
     params:
@@ -429,12 +432,13 @@ nodes:
     params:
       gain: 1.0
 
-  # Output lowpass filter
+  # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass
+  # after the D/A converter. We approximate that reconstruction filter here.
   outputLp:
-    type: resonator
+    type: lowpass-filter
     params:
       frequency: { bind: outputLpFrequency }
-      bandwidth: { bind: outputLpBandwidth }
+      Q: { bind: outputLpQ }
 
   masterGain:
     type: gain

@@ -3,6 +3,18 @@ import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend";
 import { dbToLinear, proximity, ndbScale, ndbCor } from "../src/builtin-functions";
+import {
+  summarizeTrack,
+  summarizeParallel,
+  summarizeLfMode,
+  collectParamRange,
+  findVoicingIssues,
+  updateRange,
+  analyzeTrackGains,
+  formatLevel,
+  formatRange,
+  formatMaxContext,
+} from "../src/track-analysis.ts";
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../src/yaml-loader.ts";
 
 const ctx = new AudioContext();
@@ -184,6 +196,7 @@ async function speak() {
   const currentSessionId = sessionId;
   // Clear PLSTEP events BEFORE scheduleTrack (which emits them synchronously)
   plstepEvents.length = 0;
+  plstepTotalCount = 0;
   spikeEvents.length = 0;
   lastSpikeAt.clear();
   swWindowMax.clear();
@@ -458,6 +471,7 @@ async function speakWithNewRuntime(track) {
 
   // Clear state BEFORE scheduling (matching speak())
   plstepEvents.length = 0;
+  plstepTotalCount = 0;
   spikeEvents.length = 0;
   lastSpikeAt.clear();
   swWindowMax.clear();
@@ -622,6 +636,7 @@ document.getElementById("clearDiagBtn").addEventListener("click", () => {
   runStartTime = 0;
   spikeEvents.length = 0;
   plstepEvents.length = 0;
+  plstepTotalCount = 0;
   lastSpikeAt.clear();
   telemetry.clear();
   telemetryMax.clear();
@@ -631,21 +646,6 @@ document.getElementById("clearDiagBtn").addEventListener("click", () => {
   swWindowMaxTime.clear();
   playHistory.length = 0; // P7: Clear play history
 });
-
-function summarizeTrack(track) {
-  const totalTime = track.length ? track[track.length - 1].time : 0;
-  const voiced = track.filter((e) => (e.params?.AV ?? 0) > 0 || (e.params?.AVS ?? 0) > 0);
-  const f0Values = track.map((e) => e.params?.F0 ?? 0).filter((v) => v > 0);
-  const f0Min = f0Values.length ? Math.min(...f0Values) : 0;
-  const f0Max = f0Values.length ? Math.max(...f0Values) : 0;
-  return {
-    events: track.length,
-    totalTime,
-    voicedEvents: voiced.length,
-    f0Min,
-    f0Max,
-  };
-}
 
 function attachSpectrogram() {
   if (!specCtx || !specCanvas) return;
@@ -690,257 +690,9 @@ function startSpectrogram(track) {
   }, Math.max(0, duration * 1000 + 200));
 }
 
-function summarizeParallel(track) {
-  let swOn = 0;
-  let swOff = 0;
-  let parallelEvents = 0;
-  let swOnSeconds = 0;
-  let swTotalSeconds = 0;
-  for (const event of track) {
-    const params = event.params;
-    if (!params) continue;
-    if (params.SW === 1) swOn += 1;
-    else if (Number.isFinite(params.SW)) swOff += 1;
-    const hasParallel =
-      (params.AN ?? 0) > 0 ||
-      (params.AB ?? 0) > 0 ||
-      [params.A1, params.A2, params.A3, params.A4, params.A5, params.A6].some(
-        (v) => (v ?? 0) > 0
-      ) ||
-      (params.AVS ?? 0) > 0 ||
-      (params.AF ?? 0) > 0;
-    if (hasParallel) parallelEvents += 1;
-  }
-  for (let i = 0; i < track.length - 1; i += 1) {
-    const params = track[i]?.params;
-    const duration = track[i + 1].time - track[i].time;
-    if (!Number.isFinite(duration) || duration <= 0) continue;
-    if (params && Number.isFinite(params.SW)) {
-      swTotalSeconds += duration;
-      if (params.SW === 1) swOnSeconds += duration;
-    }
-  }
-  const swOnShare =
-    swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0;
-  return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare };
-}
-
-function updateRange(range, value) {
-  if (!Number.isFinite(value)) return range;
-  if (!range) return { min: value, max: value };
-  range.min = Math.min(range.min, value);
-  range.max = Math.max(range.max, value);
-  return range;
-}
-
-function analyzeTrackGains(track, synthParams) {
-  if (!track || track.length === 0) return null;
-  const ranges = {
-    voiceGain: null,
-    aspGain: null,
-    fricGain: null,
-    parallelVoiceGain: null,
-    parallelBypassGain: null,
-    parallelFormantGain: null,
-    parallelNasalGain: null,
-    masterGain: null,
-    mix: null,
-  };
-  const outputScale = dbToLinear(ndbScale.AF + 44);
-  const parallelScale = Number.isFinite(synthParams.parallelGainScale)
-    ? synthParams.parallelGainScale
-    : 1.0;
-  const baseBoost = Number.isFinite(synthParams.masterGain)
-    ? synthParams.masterGain
-    : 1.0;
-  const state = { ...(track[0]?.params ?? {}) };
-  for (let i = 0; i < track.length; i += 1) {
-    const event = track[i];
-    if (event?.params) {
-      Object.assign(state, event.params);
-    }
-    const f1 = state.F1 ?? synthParams.F1;
-    const f2 = state.F2 ?? synthParams.F2;
-    const f3 = state.F3 ?? synthParams.F3;
-    const f4 = state.F4 ?? synthParams.F4;
-    const f5 = state.F5 ?? synthParams.F5;
-    const f6 = state.F6 ?? synthParams.F6;
-    const delF1 = Number.isFinite(f1) && f1 > 0 ? f1 / 500 : 1;
-    const delF2 = Number.isFinite(f2) && f2 > 0 ? f2 / 1500 : 1;
-    let a2Cor = delF1 * delF1;
-    const a2Skrt = delF2 * delF2;
-    const a3Cor = a2Cor * a2Skrt;
-    a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
-    const n12Cor = proximity(f2 - f1);
-    const n23Cor = proximity(f3 - f2 - 50);
-    const n34Cor = proximity(f4 - f3 - 150);
-
-    const voiceDb = state.AV ?? -70;
-    const voiceParDb = state.AVS ?? -70;
-    const aspDb = state.AH ?? -70;
-    const fricDb = state.AF ?? -70;
-    const goDb = state.GO ?? 47;
-    const mix = state.SW === 1 ? 1 : synthParams.parallelMix;
-    const fricDbAdjusted = state.SW === 1 ? Math.max(fricDb, aspDb) : fricDb;
-
-    const voiceGain = dbToLinear(voiceDb + ndbScale.AV);
-    const aspGain = dbToLinear(aspDb + ndbScale.AH);
-    const fricGain =
-      dbToLinear(fricDbAdjusted + ndbScale.AF) * parallelScale;
-    const voiceParGain =
-      dbToLinear(voiceParDb + ndbScale.AVS) * 10 * parallelScale;
-    const bypassGain =
-      dbToLinear((state.AB ?? -70) + ndbScale.AB) * parallelScale;
-    const nasalGain =
-      dbToLinear((state.AN ?? -70) + ndbScale.AN) * parallelScale;
-    const masterGain = Math.min(
-      5.0,
-      dbToLinear(goDb) * baseBoost * outputScale
-    );
-
-    const parallelLinear = [
-      dbToLinear((state.A1 ?? -70) + n12Cor + ndbScale.A1),
-      dbToLinear((state.A2 ?? -70) + n12Cor + n12Cor + n23Cor + ndbScale.A2) *
-        a2Cor,
-      dbToLinear((state.A3 ?? -70) + n23Cor + n23Cor + n34Cor + ndbScale.A3) *
-        a3Cor,
-      dbToLinear((state.A4 ?? -70) + n34Cor + n34Cor + ndbScale.A4) * a3Cor,
-      dbToLinear((state.A5 ?? -70) + ndbScale.A5) * a3Cor,
-      dbToLinear((state.A6 ?? -70) + ndbScale.A6) * a3Cor,
-    ];
-    const formantFreqs = [f1, f2, f3, f4, f5, f6];
-    for (let idx = 0; idx < parallelLinear.length; idx += 1) {
-      let value = parallelLinear[idx] * parallelScale;
-      if (idx >= 1) {
-        const freq = formantFreqs[idx];
-        if (Number.isFinite(freq) && freq > 0) {
-          const w = (2 * Math.PI * freq) / ctx.sampleRate;
-          const diffGain = Math.sqrt(2 - 2 * Math.cos(w));
-          if (diffGain > 0) {
-            value /= diffGain;
-          }
-        }
-      }
-      ranges.parallelFormantGain = updateRange(
-        ranges.parallelFormantGain,
-        Math.abs(value)
-      );
-    }
-
-    ranges.voiceGain = updateRange(ranges.voiceGain, voiceGain);
-    ranges.aspGain = updateRange(ranges.aspGain, aspGain);
-    ranges.fricGain = updateRange(ranges.fricGain, fricGain);
-    ranges.parallelVoiceGain = updateRange(
-      ranges.parallelVoiceGain,
-      voiceParGain
-    );
-    ranges.parallelBypassGain = updateRange(
-      ranges.parallelBypassGain,
-      bypassGain
-    );
-    ranges.parallelNasalGain = updateRange(
-      ranges.parallelNasalGain,
-      nasalGain
-    );
-    ranges.masterGain = updateRange(ranges.masterGain, masterGain);
-    ranges.mix = updateRange(ranges.mix, mix);
-  }
-
-  const warnings = [];
-  if (
-    Number.isFinite(parallelScale) &&
-    parallelScale > 0 &&
-    parallelScale < 0.05
-  ) {
-    warnings.push(
-      `parallelGainScale=${parallelScale.toFixed(3)} is very low; parallel branch likely inaudible`
-    );
-  }
-  if (
-    ranges.mix?.max > 0 &&
-    (ranges.parallelVoiceGain?.max ?? 0) < 1e-3 &&
-    (ranges.fricGain?.max ?? 0) < 1e-3
-  ) {
-    warnings.push(
-      "Parallel gains peak below 1e-3; expect muted consonants when SW=1"
-    );
-  }
-  return { ranges, warnings, parallelScale };
-}
-
-function collectParamRange(track, key, fallback) {
-  let min = Infinity;
-  let max = -Infinity;
-  let current = fallback;
-  for (const event of track) {
-    if (Number.isFinite(event?.params?.[key])) {
-      current = event.params[key];
-    }
-    if (Number.isFinite(current)) {
-      min = Math.min(min, current);
-      max = Math.max(max, current);
-    }
-  }
-  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
-  return { min, max };
-}
-
-function summarizeLfMode(track, fallbackMode = 0) {
-  const counts = { 0: 0, 1: 0, 2: 0 };
-  const seconds = { 0: 0, 1: 0, 2: 0 };
-  let current = Number.isFinite(fallbackMode)
-    ? Math.round(fallbackMode)
-    : 0;
-  for (let i = 0; i < track.length; i += 1) {
-    const event = track[i];
-    if (Number.isFinite(event?.params?.lfMode)) {
-      current = Math.round(event.params.lfMode);
-    }
-    counts[current] = (counts[current] || 0) + 1;
-    const duration =
-      i < track.length - 1 ? track[i + 1].time - event.time : 0;
-    if (Number.isFinite(duration) && duration > 0) {
-      seconds[current] = (seconds[current] || 0) + duration;
-    }
-  }
-  return { counts, seconds };
-}
-
-function findVoicingIssues(track, fallback) {
-  const issues = [];
-  const state = {
-    F0: fallback?.F0 ?? 0,
-    AV: fallback?.AV ?? 0,
-    AVS: fallback?.AVS ?? 0,
-    AF: fallback?.AF ?? 0,
-    AH: fallback?.AH ?? 0,
-    SW: fallback?.SW ?? 0,
-  };
-  for (let i = 0; i < track.length; i += 1) {
-    const event = track[i];
-    if (event?.params) {
-      for (const key of Object.keys(state)) {
-        if (Number.isFinite(event.params[key])) {
-          state[key] = event.params[key];
-        }
-      }
-    }
-    const voiced = (state.AV ?? 0) > 0 || (state.AVS ?? 0) > 0;
-    const noise = (state.AF ?? 0) > 0 || (state.AH ?? 0) > 0;
-    const f0 = state.F0 ?? 0;
-    if (voiced && (!Number.isFinite(f0) || f0 <= 0)) {
-      issues.push(
-        `t=${event.time.toFixed(3)} ${event.phoneme ?? ""} voiced but F0=0`
-      );
-    } else if (f0 > 0 && !voiced && !noise) {
-      issues.push(
-        `t=${event.time.toFixed(3)} ${event.phoneme ?? ""} F0>0 but no AV/AVS/AF/AH`
-      );
-    }
-    if (issues.length >= 6) break;
-  }
-  return issues;
-}
+// analyzeTrackGains, summarizeTrack, summarizeParallel, summarizeLfMode,
+// collectParamRange, findVoicingIssues, updateRange, formatLevel,
+// formatRange, formatMaxContext — imported from track-analysis.ts
 
 function findEventAtTime(track, time) {
   if (!track || track.length === 0) return null;
@@ -1014,14 +766,6 @@ function formatPlstepEvents(list, trackDuration = 0) {
   );
 }
 
-function formatLevel(value) {
-  if (!Number.isFinite(value)) return "n/a";
-  if (value === 0) return "0";
-  const abs = Math.abs(value);
-  if (abs < 1e-6) return value.toExponential(2);
-  return value.toFixed(6);
-}
-
 // P2: Gain derivation - show how Klatt parameters become linear gains
 function formatGainDerivation(track, synthParams) {
   if (!track || track.length === 0) return [];
@@ -1050,45 +794,46 @@ function formatGainDerivation(track, synthParams) {
   if (!focusEvent) return [];
 
   const p = focusEvent.params;
+  const go = p.GO ?? 47;
 
   const lines = [];
   const phoneme = focusEvent.phoneme || `event ${focusIndex}`;
   const time = focusEvent.time?.toFixed(3) ?? "?";
   const sw = p.SW ?? 0;
-  lines.push(`Focus: ${phoneme} @${time}s (SW=${sw})`);
+  lines.push(`Focus: ${phoneme} @${time}s (SW=${sw}, GO=${go})`);
 
-  // Voice gain: AV + ndb(AV) -> linear
+  // Voice gain: GO + AV + ndb(AV) -> linear
   const av = p.AV ?? -70;
-  const voiceCalc = av + ndbScale.AV;
+  const voiceCalc = go + av + ndbScale.AV;
   const voiceGain = dbToLinear(voiceCalc);
-  lines.push(`  voiceGain: AV=${av.toFixed(0)} + ndb(-72) = ${voiceCalc.toFixed(0)}dB → ${voiceGain.toFixed(4)}`);
+  lines.push(`  voiceGain: GO=${go} + AV=${av.toFixed(0)} + ndb(-72) = ${voiceCalc.toFixed(0)}dB → ${voiceGain.toFixed(4)}`);
 
-  // Aspiration gain: AH + ndb(AH) -> linear
+  // Aspiration gain: GO + AH + ndb(AH) -> linear
   const ah = p.AH ?? -70;
-  const aspCalc = ah + ndbScale.AH;
+  const aspCalc = go + ah + ndbScale.AH;
   const aspGain = dbToLinear(aspCalc);
-  lines.push(`  aspGain:   AH=${ah.toFixed(0)} + ndb(-87) = ${aspCalc.toFixed(0)}dB → ${aspGain.toFixed(4)}`);
+  lines.push(`  aspGain:   GO=${go} + AH=${ah.toFixed(0)} + ndb(-87) = ${aspCalc.toFixed(0)}dB → ${aspGain.toFixed(4)}`);
 
-  // Frication gain: max(AF,AH) + ndb(AF) -> linear (when SW=1)
+  // Frication gain: GO + max(AF,AH) + ndb(AF) -> linear (when SW=1)
   const af = p.AF ?? -70;
   const fricSrc = sw === 1 ? Math.max(af, ah) : af;
-  const fricCalc = fricSrc + ndbScale.AF;
+  const fricCalc = go + fricSrc + ndbScale.AF;
   const fricGain = dbToLinear(fricCalc);
   if (sw === 1) {
-    lines.push(`  fricGain:  max(AF=${af.toFixed(0)},AH=${ah.toFixed(0)}) + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
+    lines.push(`  fricGain:  GO=${go} + max(AF=${af.toFixed(0)},AH=${ah.toFixed(0)}) + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
   } else {
-    lines.push(`  fricGain:  AF=${af.toFixed(0)} + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
+    lines.push(`  fricGain:  GO=${go} + AF=${af.toFixed(0)} + ndb(-72) = ${fricCalc.toFixed(0)}dB → ${fricGain.toFixed(4)}`);
   }
 
   // Parallel source gain: SW=1 → 1.0, otherwise 0
   const parallelSrcGain = sw === 1 ? 1.0 : 0;
   lines.push(`  parallelSrcGain: SW=${sw} → ${parallelSrcGain.toFixed(3)}`);
 
-  // AVS (parallel voice) gain: AVS + ndb(AVS) -> linear * 10
+  // AVS (parallel voice) gain: GO + AVS + ndb(AVS) -> linear * 10
   const avs = p.AVS ?? -70;
-  const avsCalc = avs + ndbScale.AVS;
+  const avsCalc = go + avs + ndbScale.AVS;
   const avsGain = dbToLinear(avsCalc) * 10;
-  lines.push(`  avsGain:   AVS=${avs.toFixed(0)} + ndb(-44) = ${avsCalc.toFixed(0)}dB → ${avsGain.toFixed(4)} (*10)`);
+  lines.push(`  avsGain:   GO=${go} + AVS=${avs.toFixed(0)} + ndb(-44) = ${avsCalc.toFixed(0)}dB → ${avsGain.toFixed(4)} (*10)`);
 
   // If SW=1, show parallel formant gains
   if (sw === 1) {
@@ -1271,17 +1016,6 @@ function formatSignalFlow() {
   return lines;
 }
 
-function formatRange(range, digits = 1) {
-  if (!range) return "n/a";
-  return `${range.min.toFixed(digits)} - ${range.max.toFixed(digits)}`;
-}
-
-function formatMaxContext(time, phoneme) {
-  if (!Number.isFinite(time)) return "";
-  const label = phoneme ? ` ${phoneme}` : "";
-  return ` @${time.toFixed(3)}s${label}`;
-}
-
 function formatTelemetry(map) {
   if (!map || map.size === 0) return ["(no telemetry yet)"];
   const entries = Array.from(map.entries()).sort(([a], [b]) =>
@@ -1425,6 +1159,7 @@ function updateDiagnostics() {
 
 // Store PLSTEP burst events for diagnostics display
 const plstepEvents = [];
+let plstepTotalCount = 0;
 
 function handleTelemetry(data) {
   // Handle PLSTEP burst events specially
@@ -1439,6 +1174,7 @@ function handleTelemetry(data) {
     // P1: Session isolation - only accept events with valid timing
     // Allow events during window OR if we're just starting (cold start)
     if (inWindow || !lastRun) {
+      plstepTotalCount += 1;
       plstepEvents.push({
         time: data.time, // Keep absolute time for debugging
         relTime, // Current ctx.currentTime relative to start
@@ -1450,10 +1186,15 @@ function handleTelemetry(data) {
         phoneme: event?.phoneme ?? '',
         sessionId: lastRun?.sessionId ?? sessionId, // P1: Track session
       });
-      // Keep only last 10 PLSTEP events
-      if (plstepEvents.length > 10) plstepEvents.shift();
+      // Keep only last 50 PLSTEP events
+      if (plstepEvents.length > 50) plstepEvents.shift();
       updateDiagnostics();
     }
+    return;
+  }
+  // Handle explosion reports from antiresonator instrumentation
+  if (data?.type === 'explosion') {
+    console.error(`[EXPLOSION REPORT] node=${data.node} outRms=${data.outRms?.toFixed(1)} inRms=${data.inRms?.toFixed(4)} freq=${data.freq} bw=${data.bw} gain=${data.gain} bypassAtZero=${data.bypassAtZero} sampleRate=${data.sampleRate}`);
     return;
   }
   if (!data?.node) return;
@@ -1544,9 +1285,9 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   const f3Range = collectParamRange(track, "F3", fallbackF3);
   const voicingIssues = findVoicingIssues(track, { F0: fallbackF0 });
   const derived = analyzeTrackGains(track, synth.params);
-  const cascade1Range = telemetryMax.get("cascade-1");
-  const cascade2Range = telemetryMax.get("cascade-2");
-  const cascade3Range = telemetryMax.get("cascade-3");
+  const cascade1Range = telemetryMax.get("cascadeF1") ?? telemetryMax.get("cascade-1");
+  const cascade2Range = telemetryMax.get("cascadeF2") ?? telemetryMax.get("cascade-2");
+  const cascade3Range = telemetryMax.get("cascadeF3") ?? telemetryMax.get("cascade-3");
   const lines = [];
   // P1: Session header with start time for isolation tracking
   const sessionStartStr = lastRun?.startTime
@@ -1629,7 +1370,7 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
   lines.push("Signal flow (max rms through chain):");
   lines.push(...formatSignalFlow());
   lines.push("");
-  lines.push("PLSTEP bursts (plosive release transients):");
+  lines.push(`PLSTEP bursts (showing last ${Math.min(plstepEvents.length, 50)} of ${plstepTotalCount} total):`);
   // P9: Pass trackDuration for timing integrity check
   lines.push(...formatPlstepEvents(plstepEvents, summary.totalTime));
   lines.push("");

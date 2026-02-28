@@ -17,6 +17,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "biquad-notch"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "decay-envelope"
 version = "0.1.0"
 dependencies = [

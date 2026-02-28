@@ -37,6 +37,22 @@ primitives:
     inputs: 0
     outputs: 1
 
+  lowpass-filter:
+    description: "WebAudio BiquadFilterNode configured as a low-pass output filter"
+    native: BiquadFilterNode
+    params:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 5000
+        description: "Cutoff frequency"
+      Q:
+        type: float
+        default: 0.707
+        description: "Filter Q"
+    inputs: 1
+    outputs: 1
+
   # ===========================================================================
   # WASM-backed AudioWorklet Nodes
   # ===========================================================================
@@ -79,6 +95,29 @@ primitives:
         unit: "Hz"
         default: 500
         description: "Zero frequency"
+      bandwidth:
+        type: float
+        unit: "Hz"
+        default: 100
+        description: "3dB bandwidth"
+    inputs: 1
+    outputs: 1
+
+  biquad-notch:
+    description: "Biquad notch (band-reject) filter — numerically stable replacement for FIR antiresonator at high sample rates. Bristow-Johnson Audio EQ Cookbook (2005)."
+    worklet: "biquad-notch-processor.js"
+    wasm: "biquad-notch.wasm"
+    options:
+      bypassAtZero:
+        type: bool
+        default: false
+        description: "When true, bypass filter if frequency is 0"
+    params:
+      frequency:
+        type: float
+        unit: "Hz"
+        default: 500
+        description: "Center frequency of the notch"
       bandwidth:
         type: float
         unit: "Hz"

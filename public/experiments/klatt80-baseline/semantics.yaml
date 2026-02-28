@@ -183,27 +183,27 @@ params:
 
   # Nasal resonator parameters
   FNZ:
-    description: "Nasal zero frequency"
+    description: "Nasal zero frequency (0 = bypass)"
     type: float
-    default: 270
+    default: 0
     unit: Hz
 
   BNZ:
-    description: "Nasal zero bandwidth"
+    description: "Nasal zero bandwidth (0 = bypass)"
     type: float
-    default: 100
+    default: 0
     unit: Hz
 
   FNP:
-    description: "Nasal pole frequency"
+    description: "Nasal pole frequency (0 = bypass)"
     type: float
-    default: 270
+    default: 0
     unit: Hz
 
   BNP:
-    description: "Nasal pole bandwidth"
+    description: "Nasal pole bandwidth (0 = bypass)"
     type: float
-    default: 100
+    default: 0
     unit: Hz
 
   # Output gain parameters
@@ -387,13 +387,15 @@ realize:
     expr: "sampleRate / 2"
     deps: [sampleRate]
 
-  # Output lowpass filter parameters (Klatt 80 sets near Nyquist)
+  # Klatt (1980) routes playback through an external 5000 Hz analog low-pass
+  # after the D/A converter (Fig. 1; Appendix A "EXTERNAL 5000 Hz LOW-PASS
+  # FILTER"). We approximate that reconstruction filter with a single biquad.
   outputLpFrequency:
-    expr: "sampleRate * 0.45"
+    expr: "min(5000, sampleRate / 2)"
     deps: [sampleRate]
 
-  outputLpBandwidth:
-    expr: "sampleRate * 0.1"
+  outputLpQ:
+    expr: "0.707"
     deps: [sampleRate]
 
   # PLSTEP burst detection threshold (pass constant through to realized values)

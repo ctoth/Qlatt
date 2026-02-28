@@ -54,6 +54,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
   bypassAtZero: boolean;
   reportInterval: number;
   _reportCountdown: number;
+  _explosionLogged: boolean;
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
@@ -76,6 +77,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
+    this._explosionLogged = false;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping") {
         this.port.postMessage({ type: "ready", node: this.nodeId });
@@ -158,6 +160,36 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
       return true;
     }
     outputChannel.set(this.outputBuffer.view);
+
+    // INSTRUMENTATION: detect explosion
+    if (!this._explosionLogged) {
+      let outSum = 0;
+      for (let i = 0; i < outputChannel.length; i++) {
+        outSum += outputChannel[i] * outputChannel[i];
+      }
+      const outRms = Math.sqrt(outSum / outputChannel.length);
+      if (outRms > 100) {
+        this._explosionLogged = true;
+        let inSum = 0;
+        if (inputChannel) {
+          for (let i = 0; i < inputChannel.length; i++) {
+            inSum += inputChannel[i] * inputChannel[i];
+          }
+        }
+        const inRms = Math.sqrt(inSum / (inputChannel?.length || 1));
+        console.error(
+          `[ANTIRESONATOR EXPLOSION] node=${this.nodeId} outRms=${outRms.toFixed(1)} inRms=${inRms.toFixed(4)} freq=${freq} bw=${bw} gain=${gain} bypassAtZero=${this.bypassAtZero} sampleRate=${sampleRate}`
+        );
+        this.port.postMessage({
+          type: "explosion",
+          node: this.nodeId,
+          outRms, inRms, freq, bw, gain,
+          bypassAtZero: this.bypassAtZero,
+          sampleRate,
+        });
+      }
+    }
+
     this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
     return true;
   }

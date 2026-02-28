@@ -32,10 +32,10 @@ base_params:
   AVS: -70
   F0: 0
   lfMode: 1
-  FNZ: 250
-  FNP: 250
-  BNP: 100
-  BNZ: 100
+  FNZ: 0
+  FNP: 0
+  BNP: 0
+  BNZ: 0
   AN: 0
   A1: 0
   A2: 0

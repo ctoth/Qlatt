@@ -450,6 +450,55 @@ parameters:
         citations:
           - Blumstein & Stevens 1979
           - Zue 1976
+      burst_a7_bilabial:
+        value: 38
+        citations:
+          - "Monson et al. (2014) — bilabial burst HF diffuse spectrum"
+          - "Shadle et al. (2023) — non-sibilant flat HF spectrum"
+      burst_a7_alveolar:
+        value: 50
+        citations:
+          - "Shadle et al. (2023) — sibilant HF energy extends above 7 kHz"
+      burst_a7_velar:
+        value: 33
+        citations:
+          - "Shadle et al. (2023) — velar bursts compact, lower HF"
+      burst_a8_bilabial:
+        value: 42
+        citations:
+          - "Monson et al. (2014) — /f/ spectral peak ~8-9 kHz maps to F8"
+      burst_a8_alveolar:
+        value: 45
+        citations:
+          - "Shadle et al. (2023)"
+      burst_a8_velar:
+        value: 26
+        citations:
+          - "Shadle et al. (2023)"
+      burst_a9_bilabial:
+        value: 38
+        citations:
+          - "Monson et al. (2014)"
+      burst_a9_alveolar:
+        value: 38
+        citations:
+          - "Shadle et al. (2023)"
+      burst_a9_velar:
+        value: 20
+        citations:
+          - "Shadle et al. (2023)"
+      burst_a10_bilabial:
+        value: 30
+        citations:
+          - "Monson et al. (2014)"
+      burst_a10_alveolar:
+        value: 30
+        citations:
+          - "Shadle et al. (2023)"
+      burst_a10_velar:
+        value: 13
+        citations:
+          - "Shadle et al. (2023)"
       default_f2_fallback:
         value: 1500
         citations:

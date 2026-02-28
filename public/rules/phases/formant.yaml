@@ -288,9 +288,51 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a6_velar
           - default: "has(current.?params.A6) ? current.params.A6 : 0"
+      - field: params.A7
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.burst_a7_bilabial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.burst_a7_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.burst_a7_velar
+          - default: "has(current.?params.A7) ? current.params.A7 : 0"
+      - field: params.A8
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.burst_a8_bilabial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.burst_a8_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.burst_a8_velar
+          - default: "has(current.?params.A8) ? current.params.A8 : 0"
+      - field: params.A9
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.burst_a9_bilabial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.burst_a9_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.burst_a9_velar
+          - default: "has(current.?params.A9) ? current.params.A9 : 0"
+      - field: params.A10
+        op: set
+        dispatch:
+          - when: has(current.bilabial) && current.bilabial == true
+            value: params.policy.formant.burst_a10_bilabial
+          - when: has(current.alveolar) && current.alveolar == true
+            value: params.policy.formant.burst_a10_alveolar
+          - when: has(current.velar) && current.velar == true
+            value: params.policy.formant.burst_a10_velar
+          - default: "has(current.?params.A10) ? current.params.A10 : 0"
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
       - Zue 1976 (burst amplitude by place)
+      - Shadle et al. 2023 (fricative HF spectra above 7 kHz)
+      - Monson et al. 2014 (perceptual significance of HF energy)
   vcv_coarticulation:
     kind: scalar
     select:

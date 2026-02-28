@@ -14,7 +14,7 @@ import {
   type TelemetryEvent,
 } from '../src/klatt-interpreter';
 import type { SemanticsDocument } from '../src/semantics/types';
-import type { KlattRuntime, BaconGraph, BindingSpec } from '../src/klatt-runtime';
+import type { KlattRuntime, BindingSpec } from '../src/klatt-runtime';
 
 // ---------------------------------------------------------------------------
 // Helpers: minimal mocks for AudioContext / AudioParam / KlattRuntime
@@ -76,14 +76,6 @@ function minimalSemantics(): SemanticsDocument {
       AF: { expr: 'AF', ramp: true },
       AH: { expr: 'AH', ramp: true },
     },
-  };
-}
-
-/** Minimal graph */
-function minimalGraph(): BaconGraph {
-  return {
-    bacon: '1.0',
-    nodes: {},
   };
 }
 
@@ -156,7 +148,6 @@ describe('Binding categorization (tagged union)', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: rt,
-      graph: minimalGraph(),
       semantics,
       bindingMap,
     });
@@ -225,7 +216,6 @@ describe('Binding categorization (tagged union)', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: rt,
-      graph: minimalGraph(),
       semantics,
       bindingMap,
     });
@@ -265,7 +255,6 @@ describe('PLSTEP state tracking', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: mockRuntime(),
-      graph: minimalGraph(),
       semantics: minimalSemantics(),
       telemetryHandler,
     });
@@ -292,7 +281,6 @@ describe('PLSTEP state tracking', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: mockRuntime(),
-      graph: minimalGraph(),
       semantics: minimalSemantics(),
       telemetryHandler,
     });
@@ -322,7 +310,6 @@ describe('PLSTEP state tracking', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: mockRuntime(),
-      graph: minimalGraph(),
       semantics: minimalSemantics(),
       // No telemetryHandler
     });
@@ -343,7 +330,6 @@ describe('PLSTEP state tracking', () => {
     const interpreter = createKlattInterpreter({
       audioContext: mockAudioContext(),
       runtime: mockRuntime(),
-      graph: minimalGraph(),
       semantics: minimalSemantics(),
       telemetryHandler,
     });

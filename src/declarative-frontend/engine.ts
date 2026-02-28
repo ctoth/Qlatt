@@ -3,6 +3,7 @@ import { assertValidSpec } from "./validation";
 import { evaluateExpression } from "./cel-expressions";
 import { passesPrefilter } from "./where-prefilter";
 import type { Prefilter } from "./where-prefilter";
+import { isPlainObject } from "../yaml-loader";
 import {
   TokenStatus,
   isActiveToken,
@@ -65,10 +66,6 @@ function isTokenLike(value: unknown): value is TokenLike {
     Object.prototype.hasOwnProperty.call(value, "anchor_right") ||
     Object.prototype.hasOwnProperty.call(value, "status")
   );
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function cloneRuntimeValue(value: unknown): unknown {

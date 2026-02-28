@@ -28,6 +28,23 @@ export type TextToKlattTrackOptions = {
   /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
    *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
   rate?: number;
+  /** Speaker profile overrides. Merged into params.policy.speaker in the CEL context.
+   *  Defaults are defined in frontend.yaml parameters.policy.speaker.
+   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990 */
+  speaker?: {
+    /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
+     *  Citation: O'Shaughnessy 1976 */
+    base_f0_hz?: number;
+    /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
+     *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
+    formant_scale?: number;
+    /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
+     *  Citation: Fant 1997 Table 1 */
+    rd_default?: number;
+    /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
+     *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
+    spectral_tilt_offset_db?: number;
+  };
 };
 
 // Plain stop symbols are intentionally rewritten in the structural phase
@@ -56,6 +73,11 @@ export function textToKlattTrack(
 ): KlattFrame[] {
   const provenance = options.provenance ?? null;
   const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
+  // Speaker profile overrides — merged into policy.speaker for all rule phases.
+  // Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990
+  const speakerOverrides = options.speaker
+    ? { speaker: options.speaker }
+    : {};
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
@@ -127,10 +149,13 @@ export function textToKlattTrack(
   // t_flapping must see raw T between vowels; structural would split T into
   // T_CL + T_REL + T_ASP, breaking the adjacency check.
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
-  parameterSequence = runPhases(parameterSequence, ["postlexical"]);
-  parameterSequence = runPhases(parameterSequence, ["structural"]);
+  // Speaker overrides flow into postlexical/structural only when present.
+  const speakerPolicy = options.speaker ? { policy: { ...speakerOverrides } } : undefined;
+  parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
+  parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["duration"], {
     policy: {
+      ...speakerOverrides,
       duration: { rate_scale: rate },
       // Vowel centralization increases at fast rates (Lindblom 1963).
       // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
@@ -148,6 +173,7 @@ export function textToKlattTrack(
   const f0RangeFactor = 1.0 / Math.sqrt(rate);
   parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], {
     policy: {
+      ...speakerOverrides,
       f0: {
         base_hz: baseF0,
         fall_rate_hz: 20 * f0RangeFactor,

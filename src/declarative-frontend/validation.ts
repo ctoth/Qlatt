@@ -1,4 +1,5 @@
 import { validateExpressionSyntax } from "./cel-expressions";
+import { isPlainObject } from "../yaml-loader";
 
 type DiagnosticSeverity = "error" | "warning";
 type ValidationDiagnostic = {
@@ -24,10 +25,6 @@ const NUMERIC_LITERAL_PATTERN = /(^|[^A-Za-z0-9_])(-?\d+(?:\.\d+)?(?:[eE][+-]?\d
 const CRITICAL_IDENTIFIER_PATTERN = /\b(duration|vot|f0)\b/i;
 const ALLOWED_INLINE_POLICY_LITERALS = new Set(["0", "1", "-1", "0.0", "1.0", "-1.0"]);
 
-function asPlainObject(value: unknown): value is PlainObject {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
 type PolicyValidationState = {
   policyTree: PlainObject | null;
   leafPaths: Set<string>;
@@ -39,14 +36,14 @@ function cloneValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((entry) => cloneValue(entry));
   }
-  if (asPlainObject(value)) {
+  if (isPlainObject(value)) {
     return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)]));
   }
   return value;
 }
 
 function projectPolicyValueTree(node: unknown): unknown {
-  if (!asPlainObject(node)) return cloneValue(node);
+  if (!isPlainObject(node)) return cloneValue(node);
   if (Object.prototype.hasOwnProperty.call(node, "value")) {
     return cloneValue(node.value);
   }
@@ -63,7 +60,7 @@ function analyzePolicyState(parameters: unknown): PolicyValidationState {
     usedLeafPaths: new Set<string>(),
   };
 
-  if (!asPlainObject(parameters) || !asPlainObject(parameters.policy)) {
+  if (!isPlainObject(parameters) || !isPlainObject(parameters.policy)) {
     return state;
   }
 
@@ -71,7 +68,7 @@ function analyzePolicyState(parameters: unknown): PolicyValidationState {
 
   const visit = (node: unknown, path: string): void => {
     if (!path) return;
-    if (!asPlainObject(node)) {
+    if (!isPlainObject(node)) {
       state.leafPaths.add(path);
       state.uncitedLeafPaths.add(path);
       return;
@@ -128,7 +125,7 @@ function policyPathExists(policyTree: PlainObject | null, path: string): boolean
   let cursor: unknown = policyTree;
   const segments = path.split(".");
   for (const segment of segments) {
-    if (!asPlainObject(cursor) || !Object.prototype.hasOwnProperty.call(cursor, segment)) {
+    if (!isPlainObject(cursor) || !Object.prototype.hasOwnProperty.call(cursor, segment)) {
       return false;
     }
     cursor = cursor[segment];
@@ -222,14 +219,14 @@ function validateStreams(spec: PlainObject, diagnostics: ValidationDiagnostic[])
 
   for (const [name, stream] of streamByName.entries()) {
     const path = `streams.${name}`;
-    if (!asPlainObject(stream)) {
+    if (!isPlainObject(stream)) {
       diagnostics.push(
         makeDiagnostic("E_STREAM_SCHEMA", `Stream '${name}' must be an object`, path)
       );
       continue;
     }
 
-    if (!ALLOWED_STREAM_TYPES.has(stream.type)) {
+    if (!ALLOWED_STREAM_TYPES.has(stream.type as string)) {
       diagnostics.push(
         makeDiagnostic(
           "E_STREAM_TYPE_INVALID",
@@ -295,9 +292,9 @@ function validatePatterns(
   diagnostics: ValidationDiagnostic[]
 ): void {
   const streamNames = new Set(streamByName.keys());
-  const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
+  const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
   for (const [name, pattern] of Object.entries(patterns)) {
-    if (!asPlainObject(pattern)) {
+    if (!isPlainObject(pattern)) {
       diagnostics.push(
         makeDiagnostic(
           "E_PATTERN_SCHEMA",
@@ -308,7 +305,7 @@ function validatePatterns(
       continue;
     }
 
-    if (!pattern.stream || !streamByName.has(pattern.stream)) {
+    if (!pattern.stream || !streamByName.has(pattern.stream as string)) {
       diagnostics.push(
         makeDiagnostic(
           "E_PATTERN_STREAM_UNKNOWN",
@@ -332,7 +329,7 @@ function validatePatterns(
     const captures = new Set();
     for (let i = 0; i < pattern.sequence.length; i += 1) {
       const step = pattern.sequence[i];
-      if (!asPlainObject(step) || !step.capture) {
+      if (!isPlainObject(step) || !step.capture) {
         diagnostics.push(
           makeDiagnostic(
             "E_PATTERN_STEP_INVALID",
@@ -384,10 +381,10 @@ function validatePatterns(
 
 function collectScalarFields(spec: PlainObject): Set<string> {
   const fields = new Set<string>();
-  const streams = asPlainObject(spec.streams) ? spec.streams : {};
+  const streams = isPlainObject(spec.streams) ? spec.streams : {};
   for (const stream of Object.values(streams)) {
-    if (!asPlainObject(stream)) continue;
-    const scalars = asPlainObject(stream.scalars) ? stream.scalars : {};
+    if (!isPlainObject(stream)) continue;
+    const scalars = isPlainObject(stream.scalars) ? stream.scalars : {};
     for (const field of Object.keys(scalars)) {
       fields.add(field);
     }
@@ -398,8 +395,8 @@ function collectScalarFields(spec: PlainObject): Set<string> {
 function streamHasDeclaredTypeField(streamByName: Map<string, any>, streamName: unknown): boolean {
   if (typeof streamName !== "string" || streamName.length === 0) return false;
   const stream = streamByName.get(streamName);
-  if (!asPlainObject(stream)) return false;
-  const features = asPlainObject(stream.features) ? stream.features : null;
+  if (!isPlainObject(stream)) return false;
+  const features = isPlainObject(stream.features) ? stream.features : null;
   if (!features) return false;
   return Object.prototype.hasOwnProperty.call(features, "type");
 }
@@ -497,7 +494,7 @@ function validateConditionSpec(
     return;
   }
 
-  if (!asPlainObject(condition)) {
+  if (!isPlainObject(condition)) {
     diagnostics.push(
       makeDiagnostic(
         "E_RULE_EXPRESSION_INVALID",
@@ -688,7 +685,7 @@ function validatePredicates(
   policyState: PolicyValidationState,
   diagnostics: ValidationDiagnostic[]
 ): PlainObject {
-  const predicates = asPlainObject(spec.predicates) ? spec.predicates : {};
+  const predicates = isPlainObject(spec.predicates) ? spec.predicates : {};
   const streamNames = new Set(streamByName.keys());
   const graph = new Map<string, Set<string>>();
 
@@ -796,7 +793,7 @@ function validateDispatchSpec(
   for (let i = 0; i < dispatchValue.length; i += 1) {
     const row = dispatchValue[i];
     const rowPath = `${path}[${i}]`;
-    if (!asPlainObject(row)) {
+    if (!isPlainObject(row)) {
       diagnostics.push(
         makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} must be an object`, rowPath)
       );
@@ -912,7 +909,7 @@ function validateTemplateDispatchExpressions(
     return;
   }
 
-  if (!asPlainObject(value)) return;
+  if (!isPlainObject(value)) return;
   if (Object.prototype.hasOwnProperty.call(value, "dispatch")) {
     validateDispatchSpec(
       value.dispatch,
@@ -950,26 +947,27 @@ function validateRules(
   diagnostics: ValidationDiagnostic[]
 ): void {
   const streamNames = new Set(streamByName.keys());
-  const patterns = asPlainObject(spec.patterns) ? spec.patterns : {};
-  const rules = asPlainObject(spec.rules) ? spec.rules : {};
+  const patterns = isPlainObject(spec.patterns) ? spec.patterns : {};
+  const rules = isPlainObject(spec.rules) ? spec.rules : {};
 
   for (const [name, rule] of Object.entries(rules)) {
-    if (!asPlainObject(rule)) {
+    if (!isPlainObject(rule)) {
       diagnostics.push(
         makeDiagnostic("E_RULE_SCHEMA", `Rule '${name}' must be an object`, `rules.${name}`)
       );
       continue;
     }
+    const r = rule as PlainObject;
 
-    const hasSelect = asPlainObject(rule.select);
-    const hasMatch = typeof rule.match === "string" && rule.match.length > 0;
-    const matchPattern = hasMatch ? patterns[rule.match] : null;
+    const hasSelect = isPlainObject(r.select);
+    const hasMatch = typeof r.match === "string" && r.match.length > 0;
+    const matchPattern = hasMatch ? patterns[r.match] : null;
     const ruleStreamName = hasSelect
-      ? rule.select.stream
-      : asPlainObject(matchPattern)
+      ? r.select.stream
+      : isPlainObject(matchPattern)
         ? matchPattern.stream
         : null;
-    if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !rule.op)) {
+    if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !r.op)) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_SHAPE",
@@ -980,7 +978,7 @@ function validateRules(
     }
 
     if (hasSelect) {
-      const stream = rule.select.stream;
+      const stream = r.select.stream;
       if (!streamByName.has(stream)) {
         diagnostics.push(
           makeDiagnostic(
@@ -991,9 +989,9 @@ function validateRules(
         );
       }
       validateConditionSpec(
-        rule.select.where,
+        r.select.where,
         streamByName,
-        rule.select.stream,
+        r.select.stream,
         streamNames,
         predicates,
         diagnostics,
@@ -1003,18 +1001,18 @@ function validateRules(
       );
     }
 
-    if (hasMatch && !Object.prototype.hasOwnProperty.call(patterns, rule.match)) {
+    if (hasMatch && !Object.prototype.hasOwnProperty.call(patterns, r.match)) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_PATTERN_UNKNOWN",
-          `Rule '${name}' references unknown pattern '${rule.match}'`,
+          `Rule '${name}' references unknown pattern '${r.match}'`,
           `rules.${name}.match`
         )
       );
     }
 
     validateConditionSpec(
-      rule.constraint,
+      r.constraint,
       streamByName,
       ruleStreamName,
       streamNames,
@@ -1025,8 +1023,8 @@ function validateRules(
       { expandPredicateBodies: true, policyState }
     );
 
-    if (rule.define && typeof rule.define === "object" && !Array.isArray(rule.define)) {
-      for (const [defineKey, defineExpr] of Object.entries(rule.define)) {
+    if (r.define && typeof r.define === "object" && !Array.isArray(r.define)) {
+      for (const [defineKey, defineExpr] of Object.entries(r.define)) {
         if (typeof defineExpr !== "string") {
           diagnostics.push(
             makeDiagnostic(
@@ -1066,9 +1064,9 @@ function validateRules(
       }
     }
 
-    if (Array.isArray(rule.apply)) {
-      for (let i = 0; i < rule.apply.length; i += 1) {
-        const effect = rule.apply[i];
+    if (Array.isArray(r.apply)) {
+      for (let i = 0; i < r.apply.length; i += 1) {
+        const effect = r.apply[i];
         const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
         const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
         if (hasValue && hasDispatch) {
@@ -1154,10 +1152,10 @@ function validateRules(
       }
     }
 
-    if (asPlainObject(rule.splice) && Array.isArray(rule.splice.insert)) {
-      for (let i = 0; i < rule.splice.insert.length; i += 1) {
+    if (isPlainObject(r.splice) && Array.isArray(r.splice.insert)) {
+      for (let i = 0; i < r.splice.insert.length; i += 1) {
         validateTemplateDispatchExpressions(
-          rule.splice.insert[i],
+          r.splice.insert[i],
           streamByName,
           ruleStreamName,
           streamNames,
@@ -1169,8 +1167,8 @@ function validateRules(
       }
     }
 
-    if (asPlainObject(rule.insert_point)) {
-      const valueExpr = rule.insert_point.value;
+    if (isPlainObject(r.insert_point)) {
+      const valueExpr = r.insert_point.value;
       if (valueExpr != null && typeof valueExpr !== "string") {
         diagnostics.push(
           makeDiagnostic(
@@ -1214,8 +1212,8 @@ function validateRules(
             `Rule '${name}' insert_point.value`,
             diagnostics,
             policyState,
-            typeof rule.insert_point.stream === "string" &&
-              rule.insert_point.stream.toLowerCase() === "f0"
+            typeof r.insert_point.stream === "string" &&
+              r.insert_point.stream.toLowerCase() === "f0"
           );
         }
       }

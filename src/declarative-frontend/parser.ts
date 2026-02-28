@@ -1,4 +1,4 @@
-import { parseYamlString } from "../yaml-loader";
+import { parseYamlString, isPlainObject } from "../yaml-loader";
 import { extractPrefilterFromCondition } from "./where-prefilter";
 
 /**
@@ -19,10 +19,6 @@ type NormalizedPhase = {
   resolve_points: string[];
 };
 
-function asPlainObject(value: unknown): value is PlainObject {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
 function asString(value: unknown): string;
 function asString(value: unknown, fallback: string | null): string | null;
 function asString(value: unknown, fallback: string | null = ""): string | null {
@@ -35,14 +31,14 @@ function asStringArray(value: unknown): string[] {
 }
 
 function cloneObject(value: unknown): PlainObject {
-  return asPlainObject(value) ? { ...value } : {};
+  return isPlainObject(value) ? { ...value } : {};
 }
 
 function cloneValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((entry) => cloneValue(entry));
   }
-  if (asPlainObject(value)) {
+  if (isPlainObject(value)) {
     return Object.fromEntries(
       Object.entries(value).map(([key, entry]) => [key, cloneValue(entry)])
     );
@@ -52,7 +48,7 @@ function cloneValue(value: unknown): unknown {
 
 function normalizeConditionSpec(value: unknown): unknown {
   if (typeof value === "string") return value;
-  if (!asPlainObject(value)) return cloneValue(value);
+  if (!isPlainObject(value)) return cloneValue(value);
 
   const normalized: PlainObject = {};
   if (Object.prototype.hasOwnProperty.call(value, "expr")) {
@@ -84,7 +80,7 @@ function normalizeConditionSpec(value: unknown): unknown {
 }
 
 function normalizePhase(phase: unknown): NormalizedPhase {
-  const input = asPlainObject(phase) ? phase : {};
+  const input = isPlainObject(phase) ? phase : {};
   return {
     name: asString(input.name),
     after: asStringArray(input.after),
@@ -96,7 +92,7 @@ function normalizePhase(phase: unknown): NormalizedPhase {
 }
 
 function normalizeStream(stream: unknown): PlainObject {
-  if (!asPlainObject(stream)) return {};
+  if (!isPlainObject(stream)) return {};
   return {
     ...stream,
     type: asString(stream.type),
@@ -110,7 +106,7 @@ function normalizeStream(stream: unknown): PlainObject {
 }
 
 function normalizePatternStep(step: unknown): PlainObject {
-  if (!asPlainObject(step)) return {};
+  if (!isPlainObject(step)) return {};
   const normalizedWhere = normalizeConditionSpec(step.where);
   return {
     ...step,
@@ -123,7 +119,7 @@ function normalizePatternStep(step: unknown): PlainObject {
 }
 
 function normalizePattern(pattern: unknown): PlainObject {
-  if (!asPlainObject(pattern)) return {};
+  if (!isPlainObject(pattern)) return {};
   return {
     ...pattern,
     stream: asString(pattern.stream),
@@ -138,9 +134,9 @@ function normalizePattern(pattern: unknown): PlainObject {
 }
 
 function normalizeRule(rule: unknown): PlainObject {
-  if (!asPlainObject(rule)) return {};
+  if (!isPlainObject(rule)) return {};
   const define =
-    asPlainObject(rule.define)
+    isPlainObject(rule.define)
       ? Object.fromEntries(
           Object.entries(rule.define)
             .filter(([name]) => typeof name === "string" && name.length > 0)
@@ -159,7 +155,7 @@ function normalizeRule(rule: unknown): PlainObject {
     match: asString(rule.match, null),
     constraint: normalizeConditionSpec(rule.constraint),
     define,
-    select: asPlainObject(rule.select)
+    select: isPlainObject(rule.select)
       ? (() => {
           const normalizedWhere = normalizeConditionSpec(rule.select.where);
           return {
@@ -171,8 +167,8 @@ function normalizeRule(rule: unknown): PlainObject {
         })()
       : null,
     apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
-    splice: asPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
-    insert_point: asPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
+    splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
+    insert_point: isPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
     suppress: Boolean(rule.suppress),
     delete: Boolean(rule.delete),
     associate: Array.isArray(rule.associate)
@@ -191,18 +187,18 @@ export function parseDslSpec(source: unknown): PlainObject {
     raw = parseYamlString(source, "dsl spec");
   }
 
-  if (!asPlainObject(raw)) {
+  if (!isPlainObject(raw)) {
     throw new Error("DSL spec must be an object or YAML object document");
   }
 
   const phases = Array.isArray(raw.phases) ? raw.phases : [];
-  const streams = asPlainObject(raw.streams) ? raw.streams : {};
-  const patterns = asPlainObject(raw.patterns) ? raw.patterns : {};
-  const rules = asPlainObject(raw.rules) ? raw.rules : {};
-  const predicates = asPlainObject(raw.predicates) ? raw.predicates : {};
-  const parameters = asPlainObject(raw.parameters) ? raw.parameters : {};
-  const topology = asPlainObject(raw.topology) ? raw.topology : {};
-  const interpolation = asPlainObject(raw.interpolation) ? raw.interpolation : {};
+  const streams = isPlainObject(raw.streams) ? raw.streams : {};
+  const patterns = isPlainObject(raw.patterns) ? raw.patterns : {};
+  const rules = isPlainObject(raw.rules) ? raw.rules : {};
+  const predicates = isPlainObject(raw.predicates) ? raw.predicates : {};
+  const parameters = isPlainObject(raw.parameters) ? raw.parameters : {};
+  const topology = isPlainObject(raw.topology) ? raw.topology : {};
+  const interpolation = isPlainObject(raw.interpolation) ? raw.interpolation : {};
 
   return {
     version: raw.version ?? null,

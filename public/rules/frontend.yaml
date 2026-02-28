@@ -176,6 +176,12 @@ parameters:
         value: 20
         citations:
           - O'Shaughnessy 1976
+          - "Superseded by declination_tau for exponential model; retained for reference"
+      declination_tau:
+        value: 0.12
+        citations:
+          - "O'Shaughnessy 1976 (exponential declination ~3%/100ms, asymptoting)"
+          - "tau=0.12 → phrase-final F0 ≈ 89% of baseline (vs linear 82%); gentler on short phrases"
       declination_floor_ratio:
         value: 0.6
         citations:
@@ -511,6 +517,23 @@ parameters:
         value: 1500
         citations:
           - Peterson & Barney 1952 (midrange F2 default)
+    speaker:
+      base_f0_hz:
+        value: 110
+        citations:
+          - O'Shaughnessy 1976
+      formant_scale:
+        value: 1.0
+        citations:
+          - Kent & Vorperian 2018
+      rd_default:
+        value: 0.7
+        citations:
+          - Fant 1997 Table 1
+      spectral_tilt_offset_db:
+        value: 0
+        citations:
+          - Klatt & Klatt 1990
 output:
   blend:
     factor: 0.35

@@ -1,4 +1,3 @@
-import { KlattSynth } from "../src/klatt-synth";
 import { createKlattRuntime } from "../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../src/tts-frontend";
@@ -18,7 +17,6 @@ import {
 import { loadYamlDocument, loadYamlDocumentOrNull } from "../src/yaml-loader.ts";
 
 const ctx = new AudioContext();
-const synth = new KlattSynth(ctx);
 const WORKLET_BASE_PATH = `${import.meta.env.BASE_URL}worklets/`;
 let newRuntime = null;
 let newInterpreter = null;
@@ -244,11 +242,6 @@ async function speak() {
 }
 
 renderControls();
-
-function getSelectedRuntime() {
-  const selected = document.querySelector('input[name="runtime"]:checked');
-  return selected ? selected.value : "new";
-}
 
 function getSelectedExperiment() {
   const select = document.getElementById("experimentSelect");
@@ -1390,36 +1383,6 @@ function buildDiagnostics({ phrase, baseF0, track, telemetry, meters }) {
     lines.push(...formatPlayHistory());
   }
   return lines.join("\n");
-}
-
-function attachMeters() {
-  const nodes = synth.nodes;
-  if (!nodes?.outputSum) return;
-  if (
-    meterBindingMode === "legacy" &&
-    meterBindingOwner === synth &&
-    meters.size > 0
-  ) {
-    return;
-  }
-
-  meters.clear();
-  meterBindingMode = "legacy";
-  meterBindingOwner = synth;
-
-  const targets = [
-    { name: "cascade-out", node: nodes.cascadeOutGain },
-    { name: "parallel-out", node: nodes.parallelOutGain },
-    { name: "output-sum", node: nodes.outputSum },
-  ];
-  for (const target of targets) {
-    if (!target.node) continue;
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 2048;
-    target.node.connect(analyser);
-    meters.set(target.name, analyser);
-  }
-  startMeterLoop();
 }
 
 // Attach meters to new runtime output nodes

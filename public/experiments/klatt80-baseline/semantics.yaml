@@ -126,6 +126,13 @@ params:
     default: 1.0
     range: [0.3, 2.7]
 
+  Ra:
+    description: "LF return phase ratio in percent (Fant 1997 Eq. A1)"
+    type: float
+    default: 3.8
+    range: [0, 12]
+    unit: "%"
+
   lfMode:
     description: "LF model mode selection"
     type: integer
@@ -299,6 +306,38 @@ realize:
     deps: [F10]
     description: "Derive B10 from F10/Q where Q=2 (Rabiner 1968)"
 
+  # ---------------------------------------------------------------------------
+  # Bandwidth adjustment for glottal leakage — Fant (1997)
+  #
+  # Per-phoneme B values from inventory.yaml represent modal-voice bandwidth.
+  # These realize rules ADD the glottal leakage delta relative to the modal
+  # reference (Rd=1.0, Ra=3.8%). At modal voice, DeltaB=0. Breathy voice
+  # (higher Rd) widens bandwidth; pressed voice (lower Rd) narrows it,
+  # clamped at a 40 Hz floor (radiation + wall losses alone ~ 15-20 Hz;
+  # Stevens 1998 Table 3.8).
+  #
+  # Ra is in PERCENT (range 0.44-12.0), NOT fraction.
+  # DeltaB1 = 250 * (F1/500)^2 * (Ra - 3.8) / 12  [Fant 1997]
+  # DeltaB2 = DeltaB1 * F1 / (2*F2)                 [Fant 1997]
+  # B3+ glottal contribution is negligible.
+  #
+  # Refs: Fant (1997), Stevens (1998) Section 3.8-3.9
+  # ---------------------------------------------------------------------------
+  Ra:
+    expr: "max(-1.0 + 4.8 * Rd, 0.0)"
+    deps: [Rd]
+    description: "LF return phase ratio from Rd (Fant 1997 Eq. A1). Ra is in percent."
+
+  B1:
+    expr: "max(B1 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - 3.8) / 12.0, 40.0)"
+    deps: [F1, Ra]
+    description: "Adjust B1 for glottal leakage relative to modal Rd=1.0 (Fant 1997). Floor 40 Hz."
+
+  B2:
+    expr: "max(B2 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - 3.8) / 12.0 * F1 / (2.0 * F2), 40.0)"
+    deps: [F1, F2, Ra]
+    description: "Adjust B2 for glottal leakage, attenuated by F1/(2*F2) (Fant 1997). Floor 40 Hz."
+
   # Source gains (linear)
   voiceGain:
     expr: "dbToLinear(GO + AV + ndbScale.AV)"
@@ -385,17 +424,6 @@ realize:
   # System constant
   nyquistFrequency:
     expr: "sampleRate / 2"
-    deps: [sampleRate]
-
-  # Klatt (1980) routes playback through an external 5000 Hz analog low-pass
-  # after the D/A converter (Fig. 1; Appendix A "EXTERNAL 5000 Hz LOW-PASS
-  # FILTER"). We approximate that reconstruction filter with a single biquad.
-  outputLpFrequency:
-    expr: "min(5000, sampleRate / 2)"
-    deps: [sampleRate]
-
-  outputLpQ:
-    expr: "0.707"
     deps: [sampleRate]
 
   # PLSTEP burst detection threshold (pass constant through to realized values)

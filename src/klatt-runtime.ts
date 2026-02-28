@@ -9,6 +9,7 @@ import { createConfiguredEvaluator } from './semantics/evaluator-factory';
 import { applyParamValue } from './audio-param-utils';
 import { expandFormantBanks } from './formant-bank';
 import type { FormantBankSpec } from './formant-bank';
+import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
 
 // =============================================================================
 // Registry Types
@@ -123,7 +124,10 @@ export async function loadWasmModules(
     wasmFiles.map(async (file) => {
       const key = file.replace('.wasm', '');
       log(`  Fetching ${file}...`);
-      const response = await fetch(basePath + file);
+      // Cache-bust WASM URLs so rebuilt modules load immediately in dev.
+      const url = basePath + file;
+      const bustUrl = url + (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+      const response = await fetch(bustUrl);
       modules[key] = await response.arrayBuffer();
       log(`  Loaded ${file} (${modules[key].byteLength} bytes)`);
     })
@@ -243,8 +247,6 @@ export function waitForNodeReady(
     }, timeoutMs);
   });
 }
-
-import type { SemanticsDocument, EvaluationContext, ParamValue } from './semantics/types';
 
 // Bacon graph types (simplified - Bacon package has full types)
 export interface BaconGraph {
@@ -606,9 +608,8 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
     let attached = 0;
     for (const [, node] of nodes) {
       if (!isAudioWorkletNode(node)) continue;
-      const workletNode = node;
 
-      workletNode.port.addEventListener('message', (event: MessageEvent) => {
+      node.port.addEventListener('message', (event: MessageEvent) => {
         const data = event.data;
         if (data && typeof data === 'object') {
           telemetryHandler(data);
@@ -616,9 +617,9 @@ export async function createKlattRuntime(options: KlattRuntimeOptions): Promise<
       });
 
       // Ensure port is started
-      if (typeof workletNode.port.start === 'function') {
+      if (typeof node.port.start === 'function') {
         try {
-          workletNode.port.start();
+          node.port.start();
         } catch {
           // Port may already be started
         }
@@ -707,7 +708,7 @@ function createAudioNode(
 
   switch (category) {
     case 'webaudio':
-      return createNativeNode(ctx, type, id, log);
+      return createNativeNode(ctx, type, log);
 
     case 'wasm-worklet':
       return createWasmWorkletNode(ctx, type, id, primitive, nodeOptions, wasmModules, log, telemetry);
@@ -725,7 +726,6 @@ function createAudioNode(
 function createNativeNode(
   ctx: AudioContext,
   type: string,
-  id: string,
   log: (msg: string) => void
 ): AudioNode | null {
   switch (type) {
@@ -822,5 +822,3 @@ function resolveParamValue(
 
   return undefined;
 }
-
-// applyParamToNode removed — now using shared applyParamValue from audio-param-utils.ts

@@ -90,3 +90,9 @@ export function proximity(delta: number): number {
 export const min = Math.min;
 export const max = Math.max;
 export const pow = Math.pow;
+
+// Math builtins for bandwidth decomposition formulas (Fant 1960)
+export function builtinSqrt(x: number): number { return Math.sqrt(x); }
+export function builtinExp(x: number): number { return Math.exp(x); }
+export function builtinAbs(x: number): number { return Math.abs(x); }
+export function builtinLog(x: number): number { return Math.log(x); }

@@ -63,4 +63,28 @@ describe('registerNumericBuiltins', () => {
     registerNumericBuiltins(evaluator);
     expect(evaluator.evaluate('pow(2, 3)', { params: {}, constants: {} })).toBe(8);
   });
+
+  it('registers sqrt that computes square root', () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate('sqrt(4.0)', { params: {}, constants: {} })).toBe(2);
+  });
+
+  it('registers exp that computes e^x', () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate('exp(0.0)', { params: {}, constants: {} })).toBe(1);
+  });
+
+  it('registers abs that computes absolute value', () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate('abs(-3.0)', { params: {}, constants: {} })).toBe(3);
+  });
+
+  it('registers log that computes natural logarithm', () => {
+    const evaluator = createCelEvaluator();
+    registerNumericBuiltins(evaluator);
+    expect(evaluator.evaluate('log(1.0)', { params: {}, constants: {} })).toBe(0);
+  });
 });

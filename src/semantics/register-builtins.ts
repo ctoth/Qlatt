@@ -7,7 +7,7 @@
 
 import type { CelEvaluator } from './cel-evaluator';
 import type { ParamValue } from './types';
-import { dbToLinear, dbToLinearKlsyn, proximity, min, max, pow } from '../builtin-functions';
+import { dbToLinear, dbToLinearKlsyn, proximity, min, max, pow, builtinSqrt, builtinExp, builtinAbs, builtinLog } from '../builtin-functions';
 
 /**
  * Validate that a function argument is a finite number.
@@ -54,5 +54,25 @@ export function registerNumericBuiltins(celEvaluator: CelEvaluator): void {
   celEvaluator.registerFunction('proximity', (...args: ParamValue[]): ParamValue => {
     const delta = requireNumericArg('proximity', 0, args[0]);
     return proximity(delta);
+  });
+
+  celEvaluator.registerFunction('sqrt', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('sqrt', 0, args[0]);
+    return builtinSqrt(x);
+  });
+
+  celEvaluator.registerFunction('exp', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('exp', 0, args[0]);
+    return builtinExp(x);
+  });
+
+  celEvaluator.registerFunction('abs', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('abs', 0, args[0]);
+    return builtinAbs(x);
+  });
+
+  celEvaluator.registerFunction('log', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('log', 0, args[0]);
+    return builtinLog(x);
   });
 }

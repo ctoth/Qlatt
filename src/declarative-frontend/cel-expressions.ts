@@ -45,6 +45,10 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "string",
   "max",
   "min",
+  "exp",
+  "sqrt",
+  "abs",
+  "log",
   "contains",
   "merge",
   "look_back_where",
@@ -104,7 +108,7 @@ function createCelEnvironment(): Environment {
   const knownFunctionNames = [
     "midpoint", "at_ratio", "at_sync", "prev_point",
     "ahead", "behind", "total", "target", "assoc",
-    "max", "min", "contains", "merge",
+    "max", "min", "exp", "sqrt", "abs", "log", "contains", "merge",
     "look_back_where", "look_back_pred", "look_ahead_pred",
   ];
 

@@ -1005,6 +1005,9 @@ function buildNavigationFunctions(
     max: maxFn,
     min: minFn,
     exp: (x: unknown) => Math.exp(Number(x)),
+    sqrt: (x: unknown) => Math.sqrt(Number(x)),
+    abs: (x: unknown) => Math.abs(Number(x)),
+    log: (x: unknown) => Math.log(Number(x)),
     contains: (haystack: unknown, needle: unknown) =>
       String(haystack ?? "").includes(String(needle ?? "")),
     merge: mergeFn,

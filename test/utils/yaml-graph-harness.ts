@@ -19,6 +19,10 @@ import {
   min,
   max,
   pow,
+  builtinSqrt,
+  builtinExp,
+  builtinAbs,
+  builtinLog,
 } from '../../src/builtin-functions';
 
 type ApproxSpec = number | { value: number; tol?: number };
@@ -221,6 +225,22 @@ function createSemanticsHarness(
   celEvaluator.registerFunction('proximity', (...args: ParamValue[]): ParamValue => {
     const delta = requireNumericArg('proximity', 0, args[0]);
     return proximity(delta);
+  });
+  celEvaluator.registerFunction('sqrt', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('sqrt', 0, args[0]);
+    return builtinSqrt(x);
+  });
+  celEvaluator.registerFunction('exp', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('exp', 0, args[0]);
+    return builtinExp(x);
+  });
+  celEvaluator.registerFunction('abs', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('abs', 0, args[0]);
+    return builtinAbs(x);
+  });
+  celEvaluator.registerFunction('log', (...args: ParamValue[]): ParamValue => {
+    const x = requireNumericArg('log', 0, args[0]);
+    return builtinLog(x);
   });
 
   const topoEvaluator = createTopologicalEvaluator(celEvaluator);

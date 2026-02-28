@@ -1,4 +1,4 @@
-"use strict";
+import { computeRmsPeak } from "./wasm-utils.js";
 class DifferentiatorProcessor extends AudioWorkletProcessor {
     prev;
     debug;
@@ -53,16 +53,7 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = {
             type: "metrics",
             node: this.nodeId,
@@ -70,17 +61,9 @@ class DifferentiatorProcessor extends AudioWorkletProcessor {
             peak,
         };
         if (inputBuffer) {
-            let inSum = 0;
-            let inPeak = 0;
-            for (let i = 0; i < inputBuffer.length; i += 1) {
-                const v = inputBuffer[i];
-                inSum += v * v;
-                const av = Math.abs(v);
-                if (av > inPeak)
-                    inPeak = av;
-            }
-            payload.inRms = Math.sqrt(inSum / inputBuffer.length);
-            payload.inPeak = inPeak;
+            const inMetrics = computeRmsPeak(inputBuffer);
+            payload.inRms = inMetrics.rms;
+            payload.inPeak = inMetrics.peak;
         }
         this.port.postMessage(payload);
     }

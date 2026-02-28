@@ -1,6 +1,8 @@
 import { parseDslSpec, SPEC_VALIDATED } from "./parser";
 import { assertValidSpec } from "./validation";
 import { evaluateExpression } from "./cel-expressions";
+import { passesPrefilter } from "./where-prefilter";
+import type { Prefilter } from "./where-prefilter";
 import {
   TokenStatus,
   isActiveToken,
@@ -1872,11 +1874,15 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
   const select = rule.select ?? {};
   const stream = select.stream;
   const where = select.where ?? "true";
+  const prefilter: Prefilter | null = select._prefilter ?? null;
   const selected = [];
 
   for (const token of sequence) {
     if (!isActiveToken(token)) continue;
     if (stream && getTokenStream(token) !== stream) continue;
+    // Fast-reject via prefilter: skip full CEL evaluation for tokens that
+    // cannot match the where-clause based on their own properties.
+    if (prefilter && !passesPrefilter(token, prefilter)) continue;
     if (!evaluateSelectWhere(where, token, runtime.params, navigation)) continue;
     selected.push(token);
   }
@@ -1977,6 +1983,8 @@ function matchPatternFrom(
   for (const step of pattern.sequence) {
     const token = activeTokens[cursor];
     if (!token) return null;
+    const stepPrefilter: Prefilter | null = step._prefilter ?? null;
+    if (stepPrefilter && !passesPrefilter(token, stepPrefilter)) return null;
     if (!evaluateSelectWhere(step.where ?? "true", token, params, functions)) return null;
     captures[step.capture] = token;
     cursor += 1;

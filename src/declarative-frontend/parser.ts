@@ -1,4 +1,5 @@
 import { parseYamlString } from "../yaml-loader";
+import { extractPrefilterFromCondition } from "./where-prefilter";
 
 /**
  * Symbol marker for specs that have already been through parseDslSpec + assertValidSpec.
@@ -110,10 +111,12 @@ function normalizeStream(stream: unknown): PlainObject {
 
 function normalizePatternStep(step: unknown): PlainObject {
   if (!asPlainObject(step)) return {};
+  const normalizedWhere = normalizeConditionSpec(step.where);
   return {
     ...step,
     capture: asString(step.capture),
-    where: normalizeConditionSpec(step.where),
+    where: normalizedWhere,
+    _prefilter: extractPrefilterFromCondition(normalizedWhere),
     optional: Boolean(step.optional),
     repeat: step.repeat === "*" || step.repeat === "+" ? step.repeat : null,
   };
@@ -157,11 +160,15 @@ function normalizeRule(rule: unknown): PlainObject {
     constraint: normalizeConditionSpec(rule.constraint),
     define,
     select: asPlainObject(rule.select)
-      ? {
-          ...rule.select,
-          stream: asString(rule.select.stream),
-          where: normalizeConditionSpec(rule.select.where),
-        }
+      ? (() => {
+          const normalizedWhere = normalizeConditionSpec(rule.select.where);
+          return {
+            ...rule.select,
+            stream: asString(rule.select.stream),
+            where: normalizedWhere,
+            _prefilter: extractPrefilterFromCondition(normalizedWhere),
+          };
+        })()
       : null,
     apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
     splice: asPlainObject(rule.splice) ? cloneObject(rule.splice) : null,

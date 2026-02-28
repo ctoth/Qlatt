@@ -1,9 +1,11 @@
 export type ProvenanceStage =
   | "transcribe"
   | "rules"
+  | "prosody"
   | "semantics"
   | "interpreter"
-  | "runtime";
+  | "runtime"
+  | "frontend";
 
 export interface DecisionRecord {
   id: string;

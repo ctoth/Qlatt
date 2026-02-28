@@ -12,6 +12,7 @@ import {
   recordInventoryDecision,
   runPhasesWithProvenance,
 } from "./tts-frontend-provenance";
+import { annotateProsody } from "./prosodic-annotator";
 
 /**
  * Loose token type for intermediate pipeline stages.
@@ -243,6 +244,14 @@ export function textToKlattTrack(
     stream: "phone",
     status: token.status ?? 1,
   }));
+  // --- Prosodic Structure Annotation ---
+  // Annotate tokens with prosodic structure (break indices, accent types,
+  // function/content word classification, nuclear accent) BEFORE prosody rules.
+  // Citations: Silverman 1992, Pierrehumbert 1980, O'Shaughnessy 1976, Allen 1987
+  parameterSequence = annotateProsody(parameterSequence, {
+    provenance: provenance ?? undefined,
+    baseF0,
+  });
   // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
   // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
   const f0RangeFactor = 1.0 / Math.sqrt(rate);

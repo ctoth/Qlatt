@@ -117,7 +117,7 @@ params:
   sampleRate:
     description: "Audio sample rate in Hz"
     type: integer
-    default: 44100
+    default: 48000
 
   # LF model parameters
   Rd:

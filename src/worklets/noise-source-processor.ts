@@ -37,7 +37,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
       { name: "gain", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" as const },
-      { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 8000, automationRate: "k-rate" as const },
+      { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 20000, automationRate: "k-rate" as const },
     ];
   }
 

@@ -40,6 +40,24 @@ export type OutputConfig = {
   final_silence_ms?: number;
 };
 
+/** Voice quality parameter overrides injected into every frame.
+ *  Resolved from voice_quality_presets in frontend.yaml.
+ *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
+export type VoiceQualityOverrides = {
+  /** Rd value for LF glottal source. Citation: Fant 1997 Table 1 */
+  rd: number;
+  /** Open quotient override (0 = derive from Rd). Citation: Klatt & Klatt 1990 */
+  oq: number;
+  /** Spectral tilt override in dB (0 = derive from Rd). Citation: Klatt & Klatt 1990 */
+  tl: number;
+  /** Additive AH offset in dB. Citation: Gobl 2003, Klatt & Klatt 1990 */
+  ah_offset_db: number;
+  /** Flutter amount (0-100). Citation: Klatt & Klatt 1990 Eq. 1 */
+  flutter: number;
+  /** Jitter amount (0-100). Citation: Burkhardt 2009 */
+  jitter: number;
+};
+
 /** Options passed to {@link assembleKlattTrack}. */
 export type AssembleTrackOptions = {
   /** Base F0 in Hz (default 110). */
@@ -48,6 +66,9 @@ export type AssembleTrackOptions = {
   transitionMs?: number;
   /** Output configuration from YAML (overrides hardcoded defaults). */
   outputConfig?: OutputConfig;
+  /** Voice quality overrides applied to every frame's params.
+   *  Citations: Fant 1997, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
+  voiceQuality?: VoiceQualityOverrides;
 };
 
 // ---------------------------------------------------------------------------
@@ -185,6 +206,37 @@ function blendParams(
 }
 
 // ---------------------------------------------------------------------------
+// Voice quality overlay
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply voice quality overrides to a frame's params.
+ * Injects Rd, OQ, TL, flutter, jitter into the params (overriding semantics defaults),
+ * and adds ah_offset_db to the existing AH value (additive).
+ *
+ * Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
+ */
+function applyVoiceQualityOverrides(
+  params: KlattParams,
+  vq: VoiceQualityOverrides,
+): void {
+  // Rd overrides the semantics default of 1.0
+  params.Rd = vq.rd;
+  // OQ and TL: 0 = derive from Rd in the LF WASM crate.
+  // Only set non-zero when the preset explicitly overrides (e.g. whispery TL=10).
+  params.OQ = vq.oq;
+  params.TL = vq.tl;
+  // Flutter and jitter override their semantics defaults of 0
+  params.flutter = vq.flutter;
+  params.jitter = vq.jitter;
+  // AH offset is ADDITIVE to per-phoneme AH from inventory.
+  // Citation: Klatt & Klatt 1990 (AH is the most important cue for breathiness)
+  if (vq.ah_offset_db !== 0) {
+    params.AH = (params.AH ?? 0) + vq.ah_offset_db;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
@@ -204,6 +256,7 @@ export function assembleKlattTrack(
 ): KlattFrame[] {
   const baseF0 = options.baseF0 ?? 110;
   const cfg = options.outputConfig;
+  const vq = options.voiceQuality;
   const transitionMs = options.transitionMs ?? cfg?.transition_ms ?? 30;
 
   // Resolve blend config from YAML, falling back to hardcoded defaults.
@@ -226,9 +279,11 @@ export function assembleKlattTrack(
   const transitionSec = Math.max(0, transitionMs) / 1000.0;
 
   // Start silent.
+  const silParams = fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+  if (vq) applyVoiceQualityOverrides(silParams, vq);
   klattTrack.push({
     time: 0,
-    params: fillDefaultParams(PHONEME_TARGET_MAP["SIL"]),
+    params: silParams,
   });
 
   for (let i = 0; i < phoneSequence.length; i++) {
@@ -255,6 +310,10 @@ export function assembleKlattTrack(
     const finalParams: KlattParams = ph.params
       ? { ...ph.params }
       : fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+
+    // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
+    // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
+    if (vq) applyVoiceQualityOverrides(finalParams, vq);
 
     // Determine and set F0.
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
@@ -284,6 +343,8 @@ export function assembleKlattTrack(
       });
 
       if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
+        // blendParams copies from finalParams (already has vq applied) for non-blend keys.
+        // Only F1-F3, B1-B3 are blended; Rd, OQ, TL, flutter, jitter, AH carry through.
         const transitionParams = blendParams(finalParams, nextPh?.params, blendKeys, blendFactor);
         const transitionF0 = isTargetVoiced ? getF0AtTime(f0Contour, steadyTime) : 0;
         transitionParams.F0 = ph.phoneme === "SIL" ? 0 : transitionF0;
@@ -300,10 +361,12 @@ export function assembleKlattTrack(
 
   // Add final silence.
   const finalTime = currentTime + finalSilenceMs / 1000.0;
+  const finalSilParams = fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+  if (vq) applyVoiceQualityOverrides(finalSilParams, vq);
   klattTrack.push({
     time: finalTime,
     phoneme: "SIL",
-    params: fillDefaultParams(PHONEME_TARGET_MAP["SIL"]),
+    params: finalSilParams,
   });
 
   return klattTrack;

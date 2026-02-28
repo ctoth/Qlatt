@@ -6,7 +6,7 @@ import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack, PHONEME_TARGET_MAP } from "./track-assembler";
-import type { OutputConfig } from "./track-assembler";
+import type { OutputConfig, VoiceQualityOverrides } from "./track-assembler";
 import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
   recordInventoryDecision,
@@ -22,6 +22,21 @@ import {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PipelineToken = Record<string, any>;
+
+/** Voice quality preset names.
+ *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
+export type VoiceQuality = 'modal' | 'breathy' | 'pressed' | 'creaky' | 'whispery' | 'falsetto';
+
+/** Resolved voice quality preset values (from frontend.yaml voice_quality_presets). */
+export interface VoiceQualityPreset {
+  rd: number;
+  oq: number;
+  tl: number;
+  ah_offset_db: number;
+  flutter: number;
+  jitter: number;
+  f0_scale: number;
+}
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
@@ -45,6 +60,10 @@ export type TextToKlattTrackOptions = {
      *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
     spectral_tilt_offset_db?: number;
   };
+  /** Voice quality preset. Controls glottal source shape (Rd), aspiration noise (AH),
+   *  spectral tilt (TL), flutter, and jitter. 'modal' or undefined = no change.
+   *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
+  voiceQuality?: VoiceQuality;
 };
 
 // Plain stop symbols are intentionally rewritten in the structural phase
@@ -78,6 +97,62 @@ export function textToKlattTrack(
   const speakerOverrides = options.speaker
     ? { speaker: options.speaker }
     : {};
+
+  // --- Voice Quality Preset Resolution ---
+  // Resolve voiceQuality preset BEFORE rule phases run.
+  // Presets are defined in frontend.yaml params.policy.speaker.voice_quality_presets.
+  // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
+  let voiceQualityOverrides: VoiceQualityOverrides | undefined;
+  const requestedQuality = options.voiceQuality;
+  if (requestedQuality && requestedQuality !== 'modal') {
+    const presetTable = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.speaker
+      ?.voice_quality_presets as Record<string, Record<string, unknown>> | undefined;
+    const presetRaw = presetTable?.[requestedQuality];
+    if (presetRaw) {
+      const preset: VoiceQualityPreset = {
+        rd: typeof presetRaw.rd === 'number' ? presetRaw.rd : 1.0,
+        oq: typeof presetRaw.oq === 'number' ? presetRaw.oq : 0,
+        tl: typeof presetRaw.tl === 'number' ? presetRaw.tl : 0,
+        ah_offset_db: typeof presetRaw.ah_offset_db === 'number' ? presetRaw.ah_offset_db : 0,
+        flutter: typeof presetRaw.flutter === 'number' ? presetRaw.flutter : 0,
+        jitter: typeof presetRaw.jitter === 'number' ? presetRaw.jitter : 0,
+        f0_scale: typeof presetRaw.f0_scale === 'number' ? presetRaw.f0_scale : 1.0,
+      };
+
+      // Apply F0 scaling: multiply baseF0 by preset's f0_scale.
+      // Citation: Burkhardt 2009 (falsetto F0 increase)
+      if (preset.f0_scale !== 1.0) {
+        baseF0 = Math.round(baseF0 * preset.f0_scale);
+      }
+
+      // Build voice quality overrides for the track assembler.
+      // These inject Rd, OQ, TL, flutter, jitter into every frame's params,
+      // and add ah_offset_db to every frame's AH value.
+      voiceQualityOverrides = {
+        rd: preset.rd,
+        oq: preset.oq,
+        tl: preset.tl,
+        ah_offset_db: preset.ah_offset_db,
+        flutter: preset.flutter,
+        jitter: preset.jitter,
+      };
+
+      // Emit provenance record for voice quality preset application
+      provenance?.add({
+        stage: 'frontend',
+        type: 'voice_quality_preset',
+        subject: 'voice_quality',
+        reason: `voiceQuality='${requestedQuality}' applied: Rd=${preset.rd}, AH offset=${preset.ah_offset_db} dB`,
+        citations: ['Fant 1997', 'Gobl 2003', 'Klatt & Klatt 1990'],
+        parents: [],
+      });
+    } else {
+      console.warn(
+        `[TTS Frontend] Unknown voice quality preset '${requestedQuality}'. Using modal defaults.`
+      );
+    }
+  }
+
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info
@@ -196,5 +271,6 @@ export function textToKlattTrack(
     baseF0,
     transitionMs: transitionMs / rate,
     outputConfig: RULEPACK_OUTPUT_CONFIG,
+    voiceQuality: voiceQualityOverrides,
   });
 }

@@ -534,6 +534,60 @@ parameters:
         value: 0
         citations:
           - Klatt & Klatt 1990
+      voice_quality_presets:
+        # Each preset maps to parameter overrides applied when voiceQuality is set.
+        # Rd drives OQ/TL derivation in WASM crate (OQ=0 means derive from Rd).
+        # B1/B2 bandwidth adjusts automatically via Fant 1997 realize rules.
+        # AH offset is additive to per-phoneme AH from inventory.
+        # Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
+        modal:
+          rd: 1.0          # Fant 1997 Table 1: relaxed modal
+          oq: 0            # derive from Rd
+          tl: 0            # derive from Rd
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        breathy:
+          rd: 2.0           # Fant 1997 Table 1: breathy (OQ~78%)
+          oq: 0             # derive from Rd
+          tl: 0             # derive from Rd
+          ah_offset_db: 20  # Klatt 1990: AH most important cue for breathiness; Gobl 2003: AH=35-50
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        pressed:
+          rd: 0.5           # Fant 1997 Table 1: slightly pressed (OQ~47%)
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        creaky:
+          rd: 0.8           # Between pressed and modal; Gobl 2003: OQ similar to modal
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 20         # Approximation for DI; true creaky needs diplophonia (not implemented)
+          f0_scale: 1.0
+        whispery:
+          rd: 2.0           # Fant 1997: breathy Rd range
+          oq: 0
+          tl: 10            # Gobl 2003: whispery TL=22-30; conservative 10 dB explicit override
+          ah_offset_db: 30  # Gobl 2003: whispery AH=45-55; 30 dB additive offset
+          flutter: 0
+          jitter: 5          # Gobl 2003: whispery DI=5%; jitter approximation
+          f0_scale: 1.0
+        falsetto:
+          rd: 2.5           # Fant 1997 Table 1: very breathy (OQ~79%); Childers 1991: OQ=0.99
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 50        # Burkhardt 2009: FL=rate; high flutter for falsetto instability
+          jitter: 0
+          f0_scale: 1.5      # Burkhardt 2009: F0 increase; conservative 1.5x
 output:
   blend:
     factor: 0.35

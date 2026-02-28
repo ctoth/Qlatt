@@ -1,6 +1,5 @@
 import {
   isPlainObject,
-  listBundledYamlPaths,
   loadYamlSource,
   loadYamlSourceSync,
   parseYamlString,
@@ -27,7 +26,6 @@ const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
 
 export function listBundledInventoryPaths(): string[] {
   const known = new Set<string>([
-    ...listBundledYamlPaths("/rules/"),
     ...BUNDLED_INVENTORY_CACHE.keys(),
     DEFAULT_INVENTORY_PATH,
   ]);

@@ -1,19 +1,10 @@
 import { parseDslSpec, SPEC_VALIDATED } from "./parser";
 import { assertValidSpec } from "./validation";
-import { listBundledYamlPaths, loadYamlSource, loadYamlSourceSync, resolveIncludePath } from "../yaml-loader";
+import { loadYamlSource, loadYamlSourceSync, resolveIncludePath } from "../yaml-loader";
 
 type PlainObject = Record<string, unknown>;
 
 export const DEFAULT_RULEPACK_PATH = "/rules/frontend.yaml";
-
-function normalizeRuleShape(spec: PlainObject): PlainObject {
-  for (const rule of Object.values((spec.rules ?? {}) as Record<string, unknown>)) {
-    if (rule && typeof rule === "object" && (rule as Record<string, unknown>).op == null) {
-      delete (rule as Record<string, unknown>).op;
-    }
-  }
-  return spec;
-}
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -90,7 +81,7 @@ function resolveIncludesSync(
     seenPaths.add(absPath);
 
     const source = loadYamlSourceSync(absPath);
-    const childSpec = normalizeRuleShape(parseDslSpec(source));
+    const childSpec = parseDslSpec(source);
     resolveIncludesSync(childSpec, absPath, seenPaths);
     mergeChildIntoRoot(spec, childSpec, absPath);
   }
@@ -119,7 +110,7 @@ async function resolveIncludesAsync(
     seenPaths.add(absPath);
 
     const source = await loadYamlSource(absPath);
-    const childSpec = normalizeRuleShape(parseDslSpec(source));
+    const childSpec = parseDslSpec(source);
     await resolveIncludesAsync(childSpec, absPath, seenPaths);
     mergeChildIntoRoot(spec, childSpec, absPath);
   }
@@ -130,7 +121,7 @@ async function resolveIncludesAsync(
 const BUNDLED_RULEPACK_CACHE = new Map<string, PlainObject>();
 
 export function listBundledRulepackPaths(): string[] {
-  const known = new Set<string>([...listBundledYamlPaths("/rules/"), ...BUNDLED_RULEPACK_CACHE.keys(), DEFAULT_RULEPACK_PATH]);
+  const known = new Set<string>([...BUNDLED_RULEPACK_CACHE.keys(), DEFAULT_RULEPACK_PATH]);
   return [...known].sort();
 }
 
@@ -149,7 +140,7 @@ export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PAT
     );
   }
 
-  const spec = normalizeRuleShape(parseDslSpec(source));
+  const spec = parseDslSpec(source);
   resolveIncludesSync(spec, specPath);
   assertValidSpec(spec);
   (spec as any)[SPEC_VALIDATED] = true;
@@ -174,7 +165,7 @@ export async function preloadRulepackSpecFromPath(
     );
   }
 
-  const spec = normalizeRuleShape(parseDslSpec(source));
+  const spec = parseDslSpec(source);
   await resolveIncludesAsync(spec, specPath);
   assertValidSpec(spec);
   (spec as any)[SPEC_VALIDATED] = true;
@@ -183,4 +174,3 @@ export async function preloadRulepackSpecFromPath(
 }
 
 export const QLATT_V12_CEL_RULEPACK = await preloadRulepackSpecFromPath(DEFAULT_RULEPACK_PATH);
-export const QLATT_V11_SLICE_RULEPACK = QLATT_V12_CEL_RULEPACK;

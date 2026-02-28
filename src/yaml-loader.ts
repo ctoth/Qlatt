@@ -70,13 +70,6 @@ function parseYaml<T = unknown>(source: string, label: string): T {
   return parsed as T;
 }
 
-export function listBundledYamlPaths(prefix: string | null = null): string[] {
-  const entries: string[] = [];
-  if (!prefix) return entries;
-  const normalizedPrefix = normalizePath(prefix);
-  return entries.filter((entry) => entry.startsWith(normalizedPrefix));
-}
-
 export function loadYamlSourceSync(specPath: string): string {
   const normalizedPath = normalizePath(specPath);
   const attempts = [normalizedPath, specPath].filter((value, index, all) => all.indexOf(value) === index);

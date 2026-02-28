@@ -417,7 +417,7 @@ phoneme_targets:
     B2: 80
     B3: 200
     AV: 0
-    AF: 60
+    AF: 60 # Klatt 1980 Table III
     AH: 0
     AVS: -70
     A5: 52
@@ -438,7 +438,7 @@ phoneme_targets:
     B2: 60
     B3: 180
     AV: 47
-    AF: 50
+    AF: 50 # 10 dB below S (Klatt 1980)
     AH: 0
     AVS: 47
     A5: 52
@@ -459,7 +459,7 @@ phoneme_targets:
     B2: 100
     B3: 300
     AV: 0
-    AF: 66
+    AF: 66 # Loudest fricative; Shadle 1985
     AH: 0
     AVS: -70
     A3: 57
@@ -482,7 +482,7 @@ phoneme_targets:
     B2: 80
     B3: 270
     AV: 47
-    AF: 56
+    AF: 56 # 10 dB below SH (Klatt 1980)
     AH: 0
     AVS: 47
     A3: 44
@@ -505,7 +505,7 @@ phoneme_targets:
     B2: 120
     B3: 150
     AV: 0
-    AF: 48
+    AF: 42 # Shadle 1985: 18 dB below /s/; Behrens & Blumstein 1988
     AH: 0
     AVS: -70
     A3: 40
@@ -529,7 +529,7 @@ phoneme_targets:
     B2: 90
     B3: 120
     AV: 47
-    AF: 38
+    AF: 32 # 10 dB below F (Klatt 1980 voiced convention)
     AH: 0
     AVS: 47
     A3: 40
@@ -553,10 +553,7 @@ phoneme_targets:
     B2: 90
     B3: 200
     AV: 0
-    # Dental fricatives are weaker and more diffuse than sibilants, but this
-    # branch needs enough frication energy to remain intelligible in synthesis.
-    # Citation: Jongman et al. 2000; Stevens 1998 Ch.10; engineering estimate.
-    AF: 54
+    AF: 40 # Shadle 1985: /theta/ weakest voiceless fricative (A_S=50 dB SPL); 20 dB below /s/
     AH: 0
     AVS: -70
     A3: 36
@@ -580,10 +577,7 @@ phoneme_targets:
     B2: 80
     B3: 170
     AV: 47
-    # Voiced dental remains weaker than voiceless dental, but should not drop
-    # below audibility in connected speech.
-    # Citation: Jongman et al. 2000; Stevens 1998 Ch.10; engineering estimate.
-    AF: 44
+    AF: 30 # 10 dB below TH (Klatt 1980 voiced convention)
     AH: 0
     AVS: 47
     A3: 32

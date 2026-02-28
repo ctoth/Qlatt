@@ -1847,13 +1847,11 @@ function evaluateRuleDefine(
   return resolved;
 }
 
-function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
+function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike, navigation: NavigationBundle): TokenLike[] {
   const select = rule.select ?? {};
   const stream = select.stream;
   const where = select.where ?? "true";
   const selected = [];
-  // Build navigation bundle ONCE for both where-pass and apply-pass
-  const navigation = buildNavigationFunctions(sequence, runtime);
 
   for (const token of sequence) {
     if (!isActiveToken(token)) continue;
@@ -1965,7 +1963,7 @@ function matchPatternFrom(
   return captures;
 }
 
-function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
+function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike, navigation: NavigationBundle): TokenLike[] {
   const pattern = runtime.patterns?.[rule.match];
   if (!pattern || !Array.isArray(pattern.sequence) || pattern.sequence.length === 0) {
     return sequence;
@@ -1975,8 +1973,6 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
     (token: TokenLike) => isActiveToken(token) && getTokenStream(token) === pattern.stream
   );
   const matches: Array<Record<string, TokenLike>> = [];
-  // Build navigation bundle ONCE for both matching and apply passes
-  const navigation = buildNavigationFunctions(sequence, runtime);
 
   for (let i = 0; i < active.length; i += 1) {
     const captures = matchPatternFrom(active, i, pattern, runtime.params, navigation);
@@ -2076,12 +2072,12 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
   return sequence;
 }
 
-function applyRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike): TokenLike[] {
+function applyRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike, navigation: NavigationBundle): TokenLike[] {
   if (rule.select) {
-    return applySelectRule(rule, sequence, runtime);
+    return applySelectRule(rule, sequence, runtime, navigation);
   }
   if (rule.match) {
-    return applyPatternRule(rule, sequence, runtime);
+    return applyPatternRule(rule, sequence, runtime, navigation);
   }
   throw new Error(`E_RULE_SHAPE: unsupported declarative slice rule op '${rule?.op}'`);
 }
@@ -2465,6 +2461,10 @@ export function runRuleEngine(
     const phaseScalarFields = resolvePhaseScalarFields(phase, runtime);
     const phaseT0 = performance.now();
     trace.push({ type: "phase_start", phase: phase.name, t0: phaseT0 });
+    // Build navigation bundle ONCE per phase — shared across all rules in this phase.
+    // Non-structural rules leave the sequence unchanged, so the bundle stays valid.
+    // Structural rules mutate the sequence; invalidateStreamCache() is called after each.
+    const phaseNavigation = buildNavigationFunctions(current, runtime);
     for (const ruleName of phase.rules) {
       const rule = spec.rules[ruleName];
       if (runtime.finalized && isStructuralRule(rule)) {
@@ -2476,7 +2476,7 @@ export function runRuleEngine(
       const ruleT0 = performance.now();
       trace.push({ type: "rule_start", phase: phase.name, rule: ruleName, t0: ruleT0 });
       try {
-        current = applyRule(rule, current, runtime);
+        current = applyRule(rule, current, runtime, phaseNavigation);
       } catch (error) {
         trace.push({
           type: "error",
@@ -2486,6 +2486,10 @@ export function runRuleEngine(
             error instanceof Error ? error.message : typeof error === "string" ? error : String(error),
         });
         throw annotateRuntimeRuleError(error, phase.name, ruleName);
+      }
+      // After structural rules, invalidate stream cache so the next rule sees fresh data
+      if (isStructuralRule(rule)) {
+        phaseNavigation.invalidateStreamCache();
       }
       trace.push({ type: "rule_end", phase: phase.name, rule: ruleName, elapsed: performance.now() - ruleT0 });
       runtime.currentRuleName = null;

@@ -177,68 +177,7 @@ async function speak() {
   const rate = Number(document.getElementById("rate").value) || 1.0;
   if (!phrase) return;
   const track = textToKlattTrack(phrase, baseF0, 30, { rate });
-
-  // Check which runtime to use
-  const runtime = getSelectedRuntime();
-  if (runtime === "new") {
-    console.log("[QLATT] Using new klatt-runtime");
-    await speakWithNewRuntime(track);
-    return;
-  }
-
-  // Legacy runtime path
-  await synth.initialize();
-  const startTime = ctx.currentTime + 0.05;
-  // P1: Session isolation - increment sessionId to detect stale telemetry
-  sessionId += 1;
-  const currentSessionId = sessionId;
-  // Clear PLSTEP events BEFORE scheduleTrack (which emits them synchronously)
-  plstepEvents.length = 0;
-  plstepTotalCount = 0;
-  spikeEvents.length = 0;
-  lastSpikeAt.clear();
-  swWindowMax.clear();
-  swWindowMaxTime.clear();
-  // Set run context BEFORE scheduleTrack so telemetry handler can use it
-  lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
-  runStartTime = startTime;
-  synth.scheduleTrack(track, startTime);
-  status.textContent = `Status: speaking "${phrase}"`;
-  telemetry.clear();
-  telemetryMax.clear();
-  meterMax.clear();
-  updateDiagnostics();
-  console.log("[QLATT] Track summary", summarizeTrack(track));
-  const parallelSummary = summarizeParallel(track);
-  console.log("[QLATT] Parallel summary", parallelSummary);
-  if (parallelSummary.parallelEvents > 0 && parallelSummary.swOn === 0) {
-    console.warn(
-      "[QLATT] Parallel params present, but SW=0 (cascade-only path)."
-    );
-  }
-  console.log("[QLATT] First events", track.slice(0, 6));
-  startSpectrogram(track);
-  // Auto-copy diagnostics to clipboard after audio finishes
-  const trackDuration = track.length ? track[track.length - 1].time : 0;
-  setTimeout(() => {
-    updateDiagnostics();
-    navigator.clipboard.writeText(diagnosticsEl.value).catch(() => {});
-    // P7: Record play history for warmup tracking
-    const outputMax = meterMax.get("output-sum");
-    if (outputMax) {
-      playHistory.push({
-        sessionId: currentSessionId,
-        phrase,
-        maxRms: outputMax.rms ?? 0,
-        maxPeak: outputMax.peak ?? 0,
-        timestamp: Date.now(),
-      });
-      // Keep only last N plays
-      while (playHistory.length > MAX_PLAY_HISTORY) {
-        playHistory.shift();
-      }
-    }
-  }, Math.max(0, trackDuration * 1000 + 300));
+  await speakWithNewRuntime(track);
 }
 
 renderControls();

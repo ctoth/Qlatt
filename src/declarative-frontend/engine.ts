@@ -671,6 +671,17 @@ function buildNavigationFunctions(
     return value;
   };
 
+  // Fully lazy buildContext: ALL navigation lookups (getPrevToken, getNextToken,
+  // getPhraseWindow, getIndex) are deferred until the CEL expression actually
+  // accesses the corresponding property. Most where-clauses only touch
+  // current.phoneme — prev, next, phrase_index, phrase_total, current_index are
+  // never accessed and their O(n) lookups are entirely skipped.
+  // phrase_index and phrase_total share a single getPhraseWindow call — accessing
+  // either one caches both.
+  const LAZY_PROPS = new Set([
+    'current', 'prev', 'next',
+    'current_index', 'phrase_index', 'phrase_total',
+  ]);
   const buildContext = (
     token: TokenLike,
     params: RuntimeLike,
@@ -678,16 +689,7 @@ function buildNavigationFunctions(
   ): RuntimeLike => {
     const extra = extraContext && typeof extraContext === "object" ? extraContext : {};
     const current = isTokenLike(extra.current) ? (extra.current as TokenLike) : token;
-    const prev = getPrevToken(current);
-    const next = getNextToken(current);
-    const phraseWindow = getPhraseWindow(current);
-    // Lazy Proxy: defer toCursorView for current/prev/next until first access.
-    // Many where-clauses only check current.phoneme — prev/next are never touched.
-    // prev2/next2 removed entirely: zero rules reference them (scout report lines 165-173).
     const target: RuntimeLike = {
-      current_index: getIndex(current),
-      phrase_index: phraseWindow.index,
-      phrase_total: phraseWindow.total,
       params: params ?? {},
     };
     for (const [key, value] of Object.entries(extra)) {
@@ -695,12 +697,31 @@ function buildNavigationFunctions(
       target[key] = toContextValue(value);
     }
     const context: RuntimeLike = new Proxy(target, {
-      get(obj, prop, receiver) {
+      get(obj, prop) {
         if (prop in obj) return (obj as any)[prop];
         switch (prop) {
-          case 'current': return (obj as any).current = toCursorView(current);
-          case 'prev':    return (obj as any).prev = toCursorView(prev);
-          case 'next':    return (obj as any).next = toCursorView(next);
+          case 'current':
+            return (obj as any).current = toCursorView(current);
+          case 'prev': {
+            const p = getPrevToken(current);
+            return (obj as any).prev = p ? toCursorView(p) : null;
+          }
+          case 'next': {
+            const n = getNextToken(current);
+            return (obj as any).next = n ? toCursorView(n) : null;
+          }
+          case 'current_index':
+            return (obj as any).current_index = getIndex(current);
+          case 'phrase_index': {
+            const w = getPhraseWindow(current);
+            (obj as any).phrase_total = w.total;
+            return (obj as any).phrase_index = w.index;
+          }
+          case 'phrase_total': {
+            const w = getPhraseWindow(current);
+            (obj as any).phrase_index = w.index;
+            return (obj as any).phrase_total = w.total;
+          }
         }
         return undefined;
       },
@@ -710,7 +731,7 @@ function buildNavigationFunctions(
       },
       has(obj, prop) {
         if (prop in obj) return true;
-        return prop === 'current' || prop === 'prev' || prop === 'next';
+        return LAZY_PROPS.has(prop as string);
       }
     });
     return context;

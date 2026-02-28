@@ -202,3 +202,7 @@ Where $f_s$ = sampling frequency
 - **Flanagan 1957** - Foundational work on terminal-analog synthesizer design principles
 - **Flanagan 1965** - Comprehensive speech analysis, synthesis and perception reference
 - **Gold & Rabiner (in press)** - Comparative analysis of digital versus analog formant synthesizer architectures
+
+---
+
+**See also:** Laine_1988_HigherPoleCorrection - corrects the claim that digital formant systems don't need higher pole correction; shows HPC is needed when effective vocal tract length varies across vowels (up to +/-20 dB error at 5 kHz for 5-pole systems)

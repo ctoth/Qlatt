@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Fricatives have noise sources that are filtered by the vocal tract and that typically possess energy over a much broader range of frequencies than observed for vowels and sonorant consonants. This paper introduces and refines fricative measurements that were designed to reflect underlying articulatory and aerodynamic conditions. These show differences in the pattern of high-frequency energy for sibilants vs non-sibilants, voiced vs voiceless fricatives, and non-sibilants differing in place of articulation. The results confirm the utility of a spectral peak measure (F_M) and low-mid frequency amplitude difference (Amp_D) for sibilants. Using a higher-frequency range for defining F_M for female voices for alveolars is justified; a still higher range was considered and rejected. High-frequency maximum amplitude (F_h) and amplitude difference between low- and higher-frequency regions (AmpRange) capture /f-theta/ differences in English and the dynamic amplitude range over the entire spectrum. For this dataset, with spectral information up to 15 kHz, a new measure, HighLevel_D, was more effective than previously used Level_D and Slope in showing changes over time within the frication. Finally, isolated words and connected speech differ. This work contributes improved measures of fricative spectra and demonstrates the necessity of including high-frequency energy in those measures.
+
+---
+
+## Our Interpretation
+
+This paper tackles the problem that most fricative acoustic analysis ignores energy above 7 kHz, which turns out to be important for distinguishing fricative types. The authors show that sibilants like /s/ have strong spectral peaks that extend well into the high-frequency range with gradual rolloff, while non-sibilants like /f/ and /theta/ have much flatter spectral profiles where high-frequency energy is proportionally more important for place discrimination. For our Klatt synthesizer, this means the A7-A10 parallel formant amplitudes need to be set differently for each fricative class: sibilants should have gradually decreasing high-frequency energy, while non-sibilants need relatively flat amplitude across the full frequency range.

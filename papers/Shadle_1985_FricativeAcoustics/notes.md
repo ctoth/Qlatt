@@ -420,3 +420,7 @@ Compare synthesized fricative spectra against:
 - For formant resonance and transfer functions:**
 - Beranek (1949, 1954) - Acoustic theory and measurement foundations
 - Morse & Ingard (1968) - Theoretical acoustics for vocal tract modeling
+
+---
+
+**See also:** Shadle_2023_FricativeSpectraHighFreq - Extends the 1985 mechanical model findings with human speech data recorded at 44.1 kHz, providing empirical validation up to 15 kHz that non-sibilant spectra are flat/rising at high frequencies as predicted by tube models, and introduces refined measures (HighLevelD, AmpRange) for characterizing fricative spectra

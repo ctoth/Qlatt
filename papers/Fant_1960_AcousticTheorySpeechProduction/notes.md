@@ -334,3 +334,7 @@ Fant's empirical attenuation formula ($a = 0.007 \cdot (\pi/A)^{1/2}$) provides 
 - **Fant, C. G. M. (1952)** - "Transmission properties of the vocal tract with application to the acoustic specification of phonemes". This is Fant's own M.I.T. technical report that forms the core of the acoustic theory presented in this book.
 - **Delattre, P. C., Liberman, A. M., and Cooper, F. S. (1951, 1955)** - Multiple papers on synthetic vowels, acoustic loci, and transitional cues for consonants. These are key experimental validations of the acoustic theory with pattern playback.
 - **van den Berg, Jw. (1950s)** - Multiple papers on vocal fold mechanics, subglottic pressure, and laryngeal function. Essential for understanding the physiological basis of the voice source model.
+
+---
+
+**See also:** Laine_1988_HigherPoleCorrection - validates and extends Fant's 1959 HPC formula (Ch. 2.33), showing it is insensitive to vocal tract profile variations and depends only on effective length; derives practical all-zero HPC filter models

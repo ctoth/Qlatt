@@ -277,3 +277,7 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 - **Shadle (1990) - Articulatory-Acoustic Relationships in Fricatives** — Directly addresses the connection between articulation and acoustic output for fricatives, providing essential context for understanding which acoustic properties are controllable in synthesis.
 - **Forrest et al. (1988) - Spectral Moments Method** — Original methodology paper for spectral moments analysis applied to obstruents; foundational for the analysis techniques used throughout this paper.
 - **Hedrick & Ohde (1993) - Relative Amplitude Perception** — Complements this acoustic work with perceptual validation of relative amplitude as a cue to fricative place, directly supporting synthesis parameter selection.
+
+---
+
+**See also:** Shadle_2023_FricativeSpectraHighFreq - Extends Jongman 2000 into the 7-15 kHz high-frequency range with recordings at 44.1 kHz, introducing HighLevelD as a superior measure to spectral moments for capturing fricative dynamics, and providing empirical data on non-sibilant spectral characteristics above 7 kHz

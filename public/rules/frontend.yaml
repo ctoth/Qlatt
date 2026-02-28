@@ -9,6 +9,10 @@ include:
 parameters:
   policy:
     duration:
+      rate_scale:
+        value: 1.0
+        citations:
+          - Klatt 1976 §III (speech rate scaling)
       vot_target_ms:
         p:
           value: 58
@@ -242,6 +246,10 @@ parameters:
           - O'Shaughnessy 1976
           - Pierrehumbert 1980
     formant:
+      rate_undershoot_factor:
+        value: 0
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
       bilabial_f2_locus:
         value: 1200
         citations:

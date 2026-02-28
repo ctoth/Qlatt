@@ -26,6 +26,9 @@ type PipelineToken = Record<string, any>;
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
+  /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
+   *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
+  rate?: number;
 };
 
 // Plain stop symbols are intentionally rewritten in the structural phase
@@ -55,6 +58,7 @@ export function textToKlattTrack(
   options: TextToKlattTrackOptions = {}
 ): KlattFrame[] {
   const provenance = options.provenance ?? null;
+  const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
   // Transcribe returns a flat list of phoneme objects with word info

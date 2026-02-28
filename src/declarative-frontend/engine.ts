@@ -46,6 +46,11 @@ type NavigationBundle = {
     params: RuntimeLike,
     extraContext?: RuntimeLike | null
   ) => boolean;
+  rebindCurrentToken: (
+    token: TokenLike | null,
+    pointCursor?: Map<string, number> | null
+  ) => void;
+  invalidateStreamCache: () => void;
 };
 
 function isTokenLike(value: unknown): value is TokenLike {
@@ -444,10 +449,11 @@ function buildNavigationFunctions(
   runtime: RuntimeLike | null = null,
   options: RuntimeLike = {}
 ): NavigationBundle {
-  const currentToken = options.currentToken ?? null;
-  const pointCursorByStream =
+  let currentToken = options.currentToken ?? null;
+  let pointCursorByStream: Map<string, number> | null =
     options.pointCursorByStream instanceof Map ? options.pointCursorByStream : null;
-  const cache = new Map();
+  const cache = new Map<string, TokenLike[]>();
+  const indexMaps = new Map<string, Map<TokenLike, number>>();
   const activeById = new Map();
   let activeIdIndexComplete = false;
   const ensureActiveIdIndex = () => {
@@ -463,7 +469,7 @@ function buildNavigationFunctions(
 
   const getActiveStreamTokens = (stream: string): TokenLike[] => {
     const key = stream || "phone";
-    if (cache.has(key)) return cache.get(key);
+    if (cache.has(key)) return cache.get(key)!;
     let active = sequence.filter(
       (token) => isActiveToken(token) && getTokenStream(token) === key
     );
@@ -471,18 +477,27 @@ function buildNavigationFunctions(
       active = active.slice().sort((left, right) => comparePointTokenOrder(left, right, runtime));
     }
     cache.set(key, active);
-    for (const token of active) {
-      if (token?.id != null && !activeById.has(token.id)) {
-        activeById.set(token.id, token);
+    // Build index map alongside cache for O(1) indexOf replacement
+    const idxMap = new Map<TokenLike, number>();
+    for (let i = 0; i < active.length; i++) {
+      idxMap.set(active[i], i);
+      if (active[i]?.id != null && !activeById.has(active[i].id)) {
+        activeById.set(active[i].id, active[i]);
       }
     }
+    indexMaps.set(key, idxMap);
     return active;
+  };
+
+  const getTokenIndex = (token: TokenLike, stream: string): number => {
+    const key = stream || "phone";
+    getActiveStreamTokens(key); // ensures cache + indexMap are populated
+    return indexMaps.get(key)?.get(token) ?? -1;
   };
 
   const getIndex = (token: TokenLike): number => {
     const stream = getTokenStream(token);
-    const active = getActiveStreamTokens(stream);
-    return active.indexOf(token);
+    return getTokenIndex(token, stream);
   };
 
   const getPointCursor = (stream: string): number => {
@@ -495,7 +510,7 @@ function buildNavigationFunctions(
       runtime?.pointStreams?.has(stream) &&
       getTokenStream(currentToken) === stream
     ) {
-      return getActiveStreamTokens(stream).indexOf(currentToken);
+      return getTokenIndex(currentToken, stream);
     }
     // Cross-stream lookup: when the current token's stream differs from the
     // requested point stream (e.g. phone-stream rule asking for prev_point('f0')),
@@ -535,7 +550,7 @@ function buildNavigationFunctions(
   const getPhraseWindow = (token: TokenLike): { index: number; total: number } => {
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
-    const index = active.indexOf(token);
+    const index = getTokenIndex(token, stream);
     if (index < 0) return { index: -1, total: 0 };
     if (stream !== "phone") {
       return { index, total: active.length };
@@ -566,7 +581,7 @@ function buildNavigationFunctions(
   const getPrevToken = (token: TokenLike): TokenLike | null => {
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
-    const index = active.indexOf(token);
+    const index = getTokenIndex(token, stream);
     if (index <= 0) return null;
     return active[index - 1];
   };
@@ -574,7 +589,7 @@ function buildNavigationFunctions(
   const getNextToken = (token: TokenLike): TokenLike | null => {
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
-    const index = active.indexOf(token);
+    const index = getTokenIndex(token, stream);
     if (index < 0 || index + 1 >= active.length) return null;
     return active[index + 1];
   };
@@ -603,7 +618,7 @@ function buildNavigationFunctions(
     if (delta === 0) return token;
     const stream = getTokenStream(token);
     const active = getActiveStreamTokens(stream);
-    const index = active.indexOf(token);
+    const index = getTokenIndex(token, stream);
     const nextIndex = index + delta;
     if (index < 0 || nextIndex < 0 || nextIndex >= active.length) return null;
     return active[nextIndex];
@@ -897,7 +912,7 @@ function buildNavigationFunctions(
 
     const stream = getTokenStream(source);
     const active = getActiveStreamTokens(stream);
-    const sourceIndex = active.indexOf(source);
+    const sourceIndex = getTokenIndex(source, stream);
     if (sourceIndex < 0) return null;
 
     const maxAvailable =
@@ -974,10 +989,26 @@ function buildNavigationFunctions(
     look_ahead_pred: lookAheadPredFn,
   };
 
+  const rebindCurrentToken = (
+    token: TokenLike | null,
+    pointCursor: Map<string, number> | null = null
+  ): void => {
+    currentToken = token;
+    pointCursorByStream = pointCursor;
+  };
+
+  const invalidateStreamCache = (): void => {
+    cache.clear();
+    indexMaps.clear();
+    activeIdIndexComplete = false;
+  };
+
   return {
     functions,
     buildContext,
     evaluateCondition: evaluateConditionForToken,
+    rebindCurrentToken,
+    invalidateStreamCache,
   };
 }
 
@@ -1821,25 +1852,27 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
   const stream = select.stream;
   const where = select.where ?? "true";
   const selected = [];
-  const selectionFunctions = buildNavigationFunctions(sequence, runtime);
+  // Build navigation bundle ONCE for both where-pass and apply-pass
+  const navigation = buildNavigationFunctions(sequence, runtime);
 
   for (const token of sequence) {
     if (!isActiveToken(token)) continue;
     if (stream && getTokenStream(token) !== stream) continue;
-    if (!evaluateSelectWhere(where, token, runtime.params, selectionFunctions)) continue;
+    if (!evaluateSelectWhere(where, token, runtime.params, navigation)) continue;
     selected.push(token);
   }
 
+  const structural = isStructuralRule(rule);
+
   for (const token of selected) {
+    // Rebind currentToken instead of rebuilding the entire bundle
+    navigation.rebindCurrentToken(token);
     const baseContext = { current: token };
-    const navigationFunctions = buildNavigationFunctions(sequence, runtime, {
-      currentToken: token,
-    });
     const defineContext = evaluateRuleDefine(
       rule,
       token,
       runtime.params,
-      navigationFunctions,
+      navigation,
       baseContext
     );
     const extraContext = { ...baseContext, ...defineContext };
@@ -1847,7 +1880,7 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       rule.constraint,
       token,
       runtime.params,
-      navigationFunctions,
+      navigation,
       extraContext
     );
     if (!constraintOk) continue;
@@ -1863,7 +1896,7 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       rule,
       (targetName) => (targetName === "current" ? token : null),
       runtime.params,
-      navigationFunctions,
+      navigation,
       runtime,
       "current",
       extraContext
@@ -1880,7 +1913,7 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       runtime.params,
       sequence,
       runtime,
-      navigationFunctions,
+      navigation,
       "current",
       extraContext
     );
@@ -1896,6 +1929,10 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
 
     if (rule.suppress || rule.delete) {
       token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
+    }
+    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete)
+    if (structural) {
+      navigation.invalidateStreamCache();
     }
     runtime.trace?.push({
       type: "rewrite",
@@ -1938,32 +1975,36 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
     (token: TokenLike) => isActiveToken(token) && getTokenStream(token) === pattern.stream
   );
   const matches: Array<Record<string, TokenLike>> = [];
-  const navigationFunctions = buildNavigationFunctions(sequence, runtime);
+  // Build navigation bundle ONCE for both matching and apply passes
+  const navigation = buildNavigationFunctions(sequence, runtime);
 
   for (let i = 0; i < active.length; i += 1) {
-    const captures = matchPatternFrom(active, i, pattern, runtime.params, navigationFunctions);
+    const captures = matchPatternFrom(active, i, pattern, runtime.params, navigation);
     if (captures) matches.push(captures);
   }
+
+  const structural = isStructuralRule(rule);
 
   for (const captures of matches) {
     const captureNames = Object.keys(captures);
     const defaultTarget = captureNames[0] ?? "current";
-    const currentToken = captures[defaultTarget] ?? null;
-    const baseContext = { ...captures, current: currentToken };
-    const captureFunctions = buildNavigationFunctions(sequence, runtime, { currentToken });
+    const capturedToken = captures[defaultTarget] ?? null;
+    // Rebind currentToken instead of rebuilding the entire bundle
+    navigation.rebindCurrentToken(capturedToken);
+    const baseContext = { ...captures, current: capturedToken };
     const defineContext = evaluateRuleDefine(
       rule,
-      currentToken,
+      capturedToken,
       runtime.params,
-      captureFunctions,
+      navigation,
       baseContext
     );
     const extraContext = { ...baseContext, ...defineContext };
     const constraintOk = evaluateRuleConstraint(
       rule.constraint,
-      currentToken,
+      capturedToken,
       runtime.params,
-      captureFunctions,
+      navigation,
       extraContext
     );
     if (!constraintOk) continue;
@@ -1981,7 +2022,7 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       rule,
       (targetName) => captures[targetName] ?? null,
       runtime.params,
-      captureFunctions,
+      navigation,
       runtime,
       defaultTarget,
       extraContext
@@ -1998,7 +2039,7 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       runtime.params,
       sequence,
       runtime,
-      captureFunctions,
+      navigation,
       defaultTarget,
       extraContext
     );
@@ -2016,6 +2057,10 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       for (const token of Object.values(captures)) {
         token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
       }
+    }
+    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete)
+    if (structural) {
+      navigation.invalidateStreamCache();
     }
     runtime.trace?.push({
       type: "rewrite",

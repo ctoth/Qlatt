@@ -204,8 +204,11 @@ if (!writeGolden) {
     rmsError: rmsError(actual, expected),
   };
   console.log(JSON.stringify({ compare: deltas }, null, 2));
-  const maxAllowed = 0;
-  const rmsAllowed = 0;
+  // Allow tiny floating-point non-determinism from Chrome's WebAudio offline renderer.
+  // Freshly-regenerated golden files show maxDelta ~6e-9 and rmsError ~5e-10 between
+  // identical runs due to IEEE-754 non-associativity in the audio graph.
+  const maxAllowed = 1e-6;
+  const rmsAllowed = 1e-7;
   if (
     deltas.lengthMismatch !== 0 ||
     deltas.maxDelta > maxAllowed ||

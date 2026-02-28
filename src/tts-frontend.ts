@@ -143,13 +143,18 @@ export function textToKlattTrack(
     stream: "phone",
     status: token.status ?? 1,
   }));
+  // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
+  // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
+  const f0RangeFactor = 1.0 / Math.sqrt(rate);
   parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], {
     policy: {
       f0: {
         base_hz: baseF0,
-        fall_rate_hz: 20,
-        stress_rise: 1.15,
-        question_rise_hz: 30,
+        fall_rate_hz: 20 * f0RangeFactor,
+        stress_rise: 1.0 + (0.15 * f0RangeFactor),
+        question_rise_hz: 30 * f0RangeFactor,
+        continuation_rise_hz: 8 * f0RangeFactor,
+        continuation_minor_rise_hz: 5 * f0RangeFactor,
       },
     },
   });

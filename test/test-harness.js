@@ -136,24 +136,49 @@ function formatValue(spec, value) {
   return Number(value).toFixed(2);
 }
 
+function getSemanticsDefault(paramName, fallback) {
+  const entry = newRuntimeSemantics?.params?.[paramName];
+  return entry?.default ?? fallback;
+}
+
+// Build an object of current slider values for use by diagnostics helpers
+function getCurrentSliderParams() {
+  const params = {};
+  for (const spec of controlSpec) {
+    const input = document.getElementById(spec.id);
+    if (input) params[spec.id] = Number(input.value);
+  }
+  return params;
+}
+
 function bindControls() {
+  // Default slider values: use semantics when available, otherwise midpoint
+  const sliderDefaults = {
+    f0: 110, rd: 1.0, lfMode: 1, sourceMode: 1, openPhaseRatio: 0.7,
+    voiceGain: 1, noiseGain: 0, noiseCutoff: 4000, fricationCutoff: 5000,
+    masterGain: 1, parallelMix: 0, parallelGainScale: 1, parallelVoiceGain: 0,
+    parallelFricationGain: 0, AB: -70, AN: -70,
+    A1: -70, A2: -70, A3: -70, A4: -70, A5: -70, A6: -70,
+    F1: 500, F2: 1500, F3: 2500, B1: 60, B2: 90, B3: 150,
+    FNZ: 280, BNZ: 90, FNP: 280, BNP: 90,
+  };
+
   for (const spec of controlSpec) {
     const input = document.getElementById(spec.id);
     const value = document.getElementById(`${spec.id}-value`);
-    const initial = synth.params[spec.id];
+    const initial = getSemanticsDefault(spec.id, sliderDefaults[spec.id] ?? spec.min);
     input.value = initial;
     value.textContent = formatValue(spec, initial);
     input.addEventListener("input", () => {
       const v = Number(input.value);
       value.textContent = formatValue(spec, v);
-      synth.setParam(spec.id, v);
     });
   }
 }
 
 async function start() {
-  await synth.initialize();
   await ctx.resume();
+  await initializeNewRuntime();
   status.textContent = "Status: running";
 }
 
@@ -520,7 +545,6 @@ function applyUrlParams() {
         if (input) {
           input.value = val;
           if (valueEl) valueEl.textContent = formatValue(spec, val);
-          synth.setParam(spec.id, val);
         }
       }
     }
@@ -538,9 +562,6 @@ loadExperimentManifest().then(() => {
 });
 
 (async () => {
-  synth.setTelemetryHandler(handleTelemetry);
-  await synth.initialize();
-  attachMeters();
   attachSpectrogram();
   bindControls();
   applyUrlParams();
@@ -584,7 +605,8 @@ function attachSpectrogram() {
   specState.analyser = ctx.createAnalyser();
   specState.analyser.fftSize = 1024;
   specState.analyser.smoothingTimeConstant = 0;
-  synth.nodes.masterGain.connect(specState.analyser);
+  // Connection deferred to speakWithNewRuntime() which connects
+  // the runtime's output node to specState.analyser on each play.
   clearSpectrogram();
 }
 

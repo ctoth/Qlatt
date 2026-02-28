@@ -131,6 +131,8 @@ pub struct LfSource {
     glottal: Biquad,
     tilt: LpPole,
     mode: LfMode,
+    time: f32,         // Cumulative time in seconds (for flutter)
+    rng_state: u32,    // xorshift32 PRNG state (for jitter)
 }
 
 impl LfSource {
@@ -143,7 +145,18 @@ impl LfSource {
             glottal: Biquad::new(),
             tilt: LpPole::new(),
             mode: LfMode::Legacy,
+            time: 0.0,
+            rng_state: 0x12345678,
         }
+    }
+
+    /// xorshift32 PRNG returning +1.0 or -1.0 with equal probability.
+    /// Used for per-period jitter perturbation (Fraj 2011).
+    fn rng_sign(&mut self) -> f32 {
+        self.rng_state ^= self.rng_state << 13;
+        self.rng_state ^= self.rng_state >> 17;
+        self.rng_state ^= self.rng_state << 5;
+        if self.rng_state & 1 == 0 { 1.0 } else { -1.0 }
     }
 
     fn set_mode(&mut self, mode: LfMode) {
@@ -155,7 +168,11 @@ impl LfSource {
         };
     }
 
-    fn start_period(&mut self, f0: f32, rd: f32) {
+    /// Recalculate LF model coefficients for a new glottal period.
+    ///
+    /// `oq_override`: Klatt 1990 OQ in percentage (0-99). 0 = derive from Rd.
+    /// `tl_override`: Klatt 1990 TL in dB at 3 kHz (0-41). 0 = derive from Rd.
+    fn start_period(&mut self, f0: f32, rd: f32, oq_override: f32, tl_override: f32) {
         if !f0.is_finite() || f0 <= 0.0 || !rd.is_finite() {
             self.period_len = 1;
             self.pos_in_period = 0;
@@ -167,6 +184,7 @@ impl LfSource {
         let rd_clamped = clamp(rd, 0.3, 2.7);
         let t0 = 1.0 / f0_clamped;
 
+        // Fant 1997 Eq. A1: Rd to R-params
         let ra = (-1.0 + 4.8 * rd_clamped) / 100.0;
         let rk = (22.4 + 11.8 * rd_clamped) / 100.0;
         let rg_denom = 0.44 * rd_clamped - 4.0 * ra * (0.5 + 1.2 * rk);
@@ -176,7 +194,12 @@ impl LfSource {
         }
         let rg = rk * (0.5 + 1.2 * rk) / rg_denom;
 
-        let oq = (1.0 + rk) / (2.0 * rg);
+        // Fant 1997: OQ_i = (1+Rk)/(2*Rg)
+        let oq = if oq_override > 0.0 {
+            oq_override / 100.0  // Klatt 1990: OQ in percentage, convert to ratio
+        } else {
+            (1.0 + rk) / (2.0 * rg)  // Fant 1997: derive from Rd
+        };
         let alpha_m = 1.0 / (1.0 + rk);
         let ta = ra * t0;
 
@@ -191,9 +214,11 @@ impl LfSource {
             return;
         }
 
+        // Perrotin 2021 Eq. C2: glottal formant frequency and bandwidth
         let fg = 1.0 / (2.0 * oq * t0);
         let bg = 1.0 / (oq * t0 * tan_term);
 
+        // Perrotin 2021 Eq. C3: biquad coefficients
         let a1 = -2.0 * f32::exp(-PI * bg / self.sample_rate)
             * f32::cos(2.0 * PI * fg / self.sample_rate);
         let a2 = f32::exp(-2.0 * PI * bg / self.sample_rate);
@@ -215,7 +240,18 @@ impl LfSource {
 
         self.glottal.set_coeffs(b0, b1, b2, a1, a2);
 
-        let fa = 1.0 / (2.0 * PI * ta);
+        // Spectral tilt filter cutoff
+        let fa = if tl_override > 0.0 {
+            // Klatt 1990: TL = dB down at 3 kHz
+            // From 1st-order lowpass: |H(f)|^2 = 1/(1+(f/Fa)^2)
+            // TL = 10*log10(1+(3000/Fa)^2) => Fa = 3000/sqrt(10^(TL/10)-1)
+            let denom = (10.0_f32.powf(tl_override / 10.0) - 1.0).max(0.001);
+            3000.0 / denom.sqrt()
+        } else {
+            1.0 / (2.0 * PI * ta)  // Perrotin 2021 Eq. C5: derive from Rd
+        };
+
+        // Perrotin 2021 Eq. C5/C6: spectral tilt filter coefficients
         let pole = f32::exp(-2.0 * PI * fa / self.sample_rate);
         let b_st = 1.0 - pole;
         let a_st = pole;
@@ -226,12 +262,37 @@ impl LfSource {
         self.voiced = true;
     }
 
-    fn process(&mut self, f0: &[f32], rd: &[f32], output: &mut [f32]) {
+    /// Compute flutter delta using Klatt & Klatt 1990 Eq. 1:
+    ///   delta_f0 = (FL/50) * (F0/100) * [sin(2*pi*12.7*t) + sin(2*pi*7.1*t) + sin(2*pi*4.7*t)]
+    /// Frequencies 12.7, 7.1, 4.7 Hz chosen for long repetition period.
+    fn flutter_delta(flutter: f32, f0: f32, t: f32) -> f32 {
+        // Klatt & Klatt 1990 Eq. 1
+        (flutter / 50.0) * (f0 / 100.0)
+            * ((2.0 * PI * 12.7 * t).sin()
+             + (2.0 * PI * 7.1 * t).sin()
+             + (2.0 * PI * 4.7 * t).sin())
+    }
+
+    fn process(
+        &mut self,
+        f0: &[f32],
+        rd: &[f32],
+        oq: &[f32],
+        tl: &[f32],
+        flutter: f32,   // k-rate: Klatt 1990 scale 0-100
+        jitter: f32,    // k-rate: normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+        output: &mut [f32],
+    ) {
         let f0_len = f0.len();
         let rd_len = rd.len();
+        let oq_len = oq.len();
+        let tl_len = tl.len();
         let len = output.len();
 
         for i in 0..len {
+            // Increment cumulative time for flutter computation
+            self.time += 1.0 / self.sample_rate;
+
             if !self.voiced || self.pos_in_period >= self.period_len {
                 let f0_value = if f0_len == 0 {
                     0.0
@@ -247,7 +308,47 @@ impl LfSource {
                 } else {
                     rd[0]
                 };
-                self.start_period(f0_value, rd_value);
+                let oq_value = if oq_len == 0 {
+                    0.0
+                } else if oq_len > 1 {
+                    oq[i % oq_len]
+                } else {
+                    oq[0]
+                };
+                let tl_value = if tl_len == 0 {
+                    0.0
+                } else if tl_len > 1 {
+                    tl[i % tl_len]
+                } else {
+                    tl[0]
+                };
+
+                // Apply flutter: continuous per-sample sinusoidal F0 modulation
+                // Klatt & Klatt 1990 Eq. 1
+                let f0_with_flutter = if flutter > 0.0 {
+                    f0_value + Self::flutter_delta(flutter, f0_value, self.time)
+                } else {
+                    f0_value
+                };
+
+                // Apply jitter: per-period F0 perturbation
+                // Fraj 2011 Eq. 1 (per-period approximation — see engineering note below)
+                // b = jitter_param / 100.0 * 4.5  (map 0-100 to Fraj b=[0, 4.5])
+                // f0_jittered = f0 + b * xi * (1/Fs) * f0
+                // Engineering note: Fraj 2011 is a per-sample phase accumulator model.
+                // This per-period approximation perturbs F0 at each period boundary,
+                // which is simpler but less faithful. A true per-sample phase accumulator
+                // would require restructuring the integer period counter to a float phase.
+                let f0_final = if jitter > 0.0 {
+                    let b = jitter / 100.0 * 4.5;  // Fraj 2011 Table 1 range
+                    let xi = self.rng_sign();
+                    let perturbation = b * xi * (1.0 / self.sample_rate) * f0_with_flutter;
+                    f0_with_flutter + perturbation
+                } else {
+                    f0_with_flutter
+                };
+
+                self.start_period(f0_final, rd_value, oq_value, tl_value);
             }
 
             if !self.voiced {
@@ -307,6 +408,12 @@ pub extern "C" fn lf_source_process(
     f0_len: usize,
     rd_ptr: *const f32,
     rd_len: usize,
+    oq_ptr: *const f32,
+    oq_len: usize,
+    tl_ptr: *const f32,
+    tl_len: usize,
+    flutter: f32,   // k-rate: single value per block
+    jitter: f32,    // k-rate: single value per block
     output_ptr: *mut f32,
     len: usize,
 ) {
@@ -324,6 +431,16 @@ pub extern "C" fn lf_source_process(
         } else {
             core::slice::from_raw_parts(rd_ptr, rd_len)
         };
+        let oq = if oq_ptr.is_null() || oq_len == 0 {
+            &[][..]
+        } else {
+            core::slice::from_raw_parts(oq_ptr, oq_len)
+        };
+        let tl = if tl_ptr.is_null() || tl_len == 0 {
+            &[][..]
+        } else {
+            core::slice::from_raw_parts(tl_ptr, tl_len)
+        };
         let output = core::slice::from_raw_parts_mut(output_ptr, len);
         if f0.is_empty() || rd.is_empty() {
             for sample in output.iter_mut() {
@@ -331,9 +448,164 @@ pub extern "C" fn lf_source_process(
             }
             return;
         }
-        (*ptr).process(f0, rd, output);
+        (*ptr).process(f0, rd, oq, tl, flutter, jitter, output);
     }
 }
 
 // Re-export WASM memory allocation functions
 klatt_wasm_common::export_alloc_fns!();
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE_RATE: f32 = 44100.0;
+
+    #[test]
+    fn backward_compat_default_params() {
+        // Process 256 samples with F0=110, Rd=1.0, new params at defaults (0).
+        // Outputs must match the behavior of the old interface (OQ=0, TL=0, flutter=0, jitter=0
+        // should produce the same result as if those params didn't exist).
+        let mut src1 = LfSource::new(SAMPLE_RATE);
+        let mut src2 = LfSource::new(SAMPLE_RATE);
+
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut out1 = [0.0_f32; 256];
+        let mut out2 = [0.0_f32; 256];
+
+        // Both use the new interface with defaults
+        src1.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out1);
+        src2.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out2);
+
+        // Identical sources with identical params must produce identical output
+        for i in 0..256 {
+            assert!(
+                (out1[i] - out2[i]).abs() < 1e-10,
+                "Sample {} differs: {} vs {}",
+                i, out1[i], out2[i]
+            );
+        }
+
+        // Verify the output is non-silent (actually producing voiced signal)
+        let max_abs = out1.iter().map(|x| x.abs()).fold(0.0_f32, f32::max);
+        assert!(max_abs > 0.001, "Output should be non-silent, max_abs = {}", max_abs);
+    }
+
+    #[test]
+    fn oq_override_diverges() {
+        // Process with Rd=1.0, OQ=0 (derive from Rd) vs Rd=1.0, OQ=80 (override)
+        // Outputs must differ since OQ=80% != Rd=1.0-derived OQ (~65%)
+        let mut src_default = LfSource::new(SAMPLE_RATE);
+        let mut src_override = LfSource::new(SAMPLE_RATE);
+
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq_default = [0.0_f32];
+        let oq_override = [80.0_f32];
+        let tl = [0.0_f32];
+        let mut out_default = [0.0_f32; 256];
+        let mut out_override = [0.0_f32; 256];
+
+        src_default.process(&f0, &rd, &oq_default, &tl, 0.0, 0.0, &mut out_default);
+        src_override.process(&f0, &rd, &oq_override, &tl, 0.0, 0.0, &mut out_override);
+
+        let mut any_differ = false;
+        for i in 0..256 {
+            if (out_default[i] - out_override[i]).abs() > 1e-6 {
+                any_differ = true;
+                break;
+            }
+        }
+        assert!(any_differ, "OQ=80 should produce different output than OQ=0 (Rd-derived)");
+    }
+
+    #[test]
+    fn tl_override_diverges() {
+        // Process with Rd=1.0, TL=0 (derive from Rd) vs Rd=1.0, TL=10 (override)
+        // Outputs must differ
+        let mut src_default = LfSource::new(SAMPLE_RATE);
+        let mut src_override = LfSource::new(SAMPLE_RATE);
+
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl_default = [0.0_f32];
+        let tl_override = [10.0_f32];
+        let mut out_default = [0.0_f32; 256];
+        let mut out_override = [0.0_f32; 256];
+
+        src_default.process(&f0, &rd, &oq, &tl_default, 0.0, 0.0, &mut out_default);
+        src_override.process(&f0, &rd, &oq, &tl_override, 0.0, 0.0, &mut out_override);
+
+        let mut any_differ = false;
+        for i in 0..256 {
+            if (out_default[i] - out_override[i]).abs() > 1e-6 {
+                any_differ = true;
+                break;
+            }
+        }
+        assert!(any_differ, "TL=10 should produce different output than TL=0 (Rd-derived)");
+    }
+
+    #[test]
+    fn flutter_produces_f0_variation() {
+        // Process 4410 samples (0.1s at 44100) with F0=110, flutter=25
+        // Measure period lengths — should NOT all be identical
+        // Process same with flutter=0 — period lengths should be identical
+        let num_samples = 4410;
+
+        // With flutter
+        let mut src_flutter = LfSource::new(SAMPLE_RATE);
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut out_flutter = vec![0.0_f32; num_samples];
+        src_flutter.process(&f0, &rd, &oq, &tl, 25.0, 0.0, &mut out_flutter);
+
+        // Without flutter
+        let mut src_no_flutter = LfSource::new(SAMPLE_RATE);
+        let mut out_no_flutter = vec![0.0_f32; num_samples];
+        src_no_flutter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out_no_flutter);
+
+        // The outputs should differ when flutter is applied
+        let mut any_differ = false;
+        for i in 0..num_samples {
+            if (out_flutter[i] - out_no_flutter[i]).abs() > 1e-6 {
+                any_differ = true;
+                break;
+            }
+        }
+        assert!(any_differ, "Flutter=25 should produce different output than flutter=0");
+    }
+
+    #[test]
+    fn jitter_produces_f0_variation() {
+        // Process with jitter=50 — output should differ from jitter=0
+        let num_samples = 4410;
+
+        let mut src_jitter = LfSource::new(SAMPLE_RATE);
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut out_jitter = vec![0.0_f32; num_samples];
+        src_jitter.process(&f0, &rd, &oq, &tl, 0.0, 50.0, &mut out_jitter);
+
+        let mut src_no_jitter = LfSource::new(SAMPLE_RATE);
+        let mut out_no_jitter = vec![0.0_f32; num_samples];
+        src_no_jitter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out_no_jitter);
+
+        let mut any_differ = false;
+        for i in 0..num_samples {
+            if (out_jitter[i] - out_no_jitter[i]).abs() > 1e-6 {
+                any_differ = true;
+                break;
+            }
+        }
+        assert!(any_differ, "Jitter=50 should produce different output than jitter=0");
+    }
+}

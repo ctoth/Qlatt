@@ -11,6 +11,12 @@ interface LfSourceWasmExports {
     f0Len: number,
     rdPtr: number,
     rdLen: number,
+    oqPtr: number,
+    oqLen: number,
+    tlPtr: number,
+    tlLen: number,
+    flutter: number,
+    jitter: number,
     outputPtr: number,
     blockSize: number
   ): void;
@@ -37,6 +43,8 @@ class LfSourceProcessor extends AudioWorkletProcessor {
   outputBuffer: WasmBuffer | null;
   f0Buffer: WasmBuffer | null;
   rdBuffer: WasmBuffer | null;
+  oqBuffer: WasmBuffer | null;
+  tlBuffer: WasmBuffer | null;
   ready: boolean;
   lastF0: number;
   lastRd: number;
@@ -51,6 +59,10 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" as const },
       { name: "rd", defaultValue: 1.0, minValue: 0.3, maxValue: 2.7, automationRate: "a-rate" as const },
       { name: "lfMode", defaultValue: 0, minValue: 0, maxValue: 2, automationRate: "k-rate" as const },
+      { name: "oq", defaultValue: 0, minValue: 0, maxValue: 99, automationRate: "a-rate" as const },       // Klatt 1990: OQ percentage. 0 = derive from Rd
+      { name: "tl", defaultValue: 0, minValue: 0, maxValue: 41, automationRate: "a-rate" as const },       // Klatt 1990: dB at 3 kHz. 0 = derive from Rd
+      { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const }, // Klatt & Klatt 1990 Eq. 1 scale
+      { name: "jitter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },  // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
     ];
   }
 
@@ -62,6 +74,8 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     this.outputBuffer = null;
     this.f0Buffer = null;
     this.rdBuffer = null;
+    this.oqBuffer = null;
+    this.tlBuffer = null;
     this.ready = false;
     this.lastF0 = 0;
     this.lastRd = 0;
@@ -85,6 +99,8 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       this.outputBuffer = new WasmBuffer(this.wasm);
       this.f0Buffer = new WasmBuffer(this.wasm);
       this.rdBuffer = new WasmBuffer(this.wasm);
+      this.oqBuffer = new WasmBuffer(this.wasm);
+      this.tlBuffer = new WasmBuffer(this.wasm);
       this.ready = true;
       this.port.postMessage({ type: "ready", node: this.nodeId });
     });
@@ -102,7 +118,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const outputChannel = output[0];
     const blockSize = outputChannel.length;
 
-    if (!this.ready || !this.wasm || !this.outputBuffer || !this.f0Buffer || !this.rdBuffer) {
+    if (!this.ready || !this.wasm || !this.outputBuffer || !this.f0Buffer || !this.rdBuffer || !this.oqBuffer || !this.tlBuffer) {
       outputChannel.fill(0);
       return true;
     }
@@ -110,8 +126,14 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const f0Values = parameters.f0;
     const rdValues = parameters.rd;
     const modeValues = parameters.lfMode;
+    const oqValues = parameters.oq;
+    const tlValues = parameters.tl;
+    const flutterValues = parameters.flutter;
+    const jitterValues = parameters.jitter;
     const f0Len = f0Values.length;
     const rdLen = rdValues.length;
+    const oqLen = oqValues ? oqValues.length : 0;
+    const tlLen = tlValues ? tlValues.length : 0;
 
     if (f0Len > 0) {
       let f0Sum = 0;
@@ -135,15 +157,23 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       this.lastMode = mode;
     }
 
+    // k-rate params: read first value
+    const flutter = flutterValues && flutterValues.length > 0 ? flutterValues[0] : 0;
+    const jitter = jitterValues && jitterValues.length > 0 ? jitterValues[0] : 0;
+
     this.outputBuffer.ensure(blockSize);
     this.f0Buffer.ensure(f0Len);
     this.rdBuffer.ensure(rdLen);
+    if (oqLen > 0) this.oqBuffer.ensure(oqLen);
+    if (tlLen > 0) this.tlBuffer.ensure(tlLen);
     if (!this.outputBuffer.view || !this.f0Buffer.view || !this.rdBuffer.view) {
       outputChannel.fill(0);
       return true;
     }
     this.f0Buffer.view.set(f0Values);
     this.rdBuffer.view.set(rdValues);
+    if (oqLen > 0 && this.oqBuffer.view) this.oqBuffer.view.set(oqValues);
+    if (tlLen > 0 && this.tlBuffer.view) this.tlBuffer.view.set(tlValues);
 
     this.wasm.lf_source_process(
       this.state,
@@ -151,6 +181,12 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       f0Len,
       this.rdBuffer.ptr,
       rdLen,
+      oqLen > 0 ? this.oqBuffer.ptr : 0,
+      oqLen,
+      tlLen > 0 ? this.tlBuffer.ptr : 0,
+      tlLen,
+      flutter,
+      jitter,
       this.outputBuffer.ptr,
       blockSize
     );

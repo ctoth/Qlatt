@@ -1,4 +1,25 @@
 version: v1
+patterns:
+  palatalization_dy_pattern:
+    stream: phone
+    sequence:
+      - capture: d_token
+        where: >-
+          current.phoneme == 'D' &&
+          has(current.word) && has(next.word) && current.word != next.word
+      - capture: y_token
+        where: >-
+          current.phoneme == 'Y'
+  palatalization_ty_pattern:
+    stream: phone
+    sequence:
+      - capture: t_token
+        where: >-
+          current.phoneme == 'T' &&
+          has(current.word) && has(next.word) && current.word != next.word
+      - capture: y_token
+        where: >-
+          current.phoneme == 'Y'
 rules:
   the_prevocalic_reduction:
     kind: postlexical
@@ -27,6 +48,34 @@ rules:
           params: ih_params
     citations:
       - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+  to_reduction:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'UW' && (has(current.stress) ? current.stress == 0 : false) &&
+        (has(current.word) ? current.word == 'to' : false) &&
+        next != null && next.type != 'vowel'
+    define:
+      schwa_target: target("AH0")
+      schwa_params: schwa_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+            - duration
+            - inherentDuration
+            - type
+          phoneme: "\"AH\""
+          params: schwa_params
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (function word reduction)
+      - Klatt 1979, Synthesis by Rule of Connected English (word-boundary rules)
   t_flapping:
     kind: postlexical
     select:
@@ -53,3 +102,146 @@ rules:
           params: dx_params
     citations:
       - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+  t_deletion:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'T' &&
+        prev != null && prev.type != 'vowel' &&
+        (has(current.word) && has(prev.word) ? current.word == prev.word : true) &&
+        next != null && next.type != 'vowel' &&
+        (has(current.word) && has(next.word) ? current.word != next.word : false)
+    apply:
+      - field: duration
+        op: set
+        value: 0
+        tag: t_deletion
+      - field: inherentDuration
+        op: set
+        value: 0
+        tag: t_deletion
+      - field: params.AV
+        op: set
+        value: 0
+        tag: t_deletion
+      - field: params.AF
+        op: set
+        value: 0
+        tag: t_deletion
+      - field: params.AH
+        op: set
+        value: 0
+        tag: t_deletion
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (t-deletion in coda clusters)
+      - Allen 1987, MITalk Ch.8 (PHONO2 rules)
+  t_glottalization:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'T' &&
+        next != null &&
+        (next.type == 'nasal' || next.type == 'liquid' || next.type == 'glide') &&
+        (has(current.word) && has(next.word) ? current.word == next.word : true)
+    define:
+      gs_target: target("GS")
+      gs_params: gs_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "\"GS\""
+          params: gs_params
+          duration: 30
+          inherentDuration: 30
+          type: "\"stop_closure\""
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (t-glottalization before sonorants)
+      - Allen 1987, MITalk Ch.8 (rule 3: TT -> TQ before sonorants)
+  palatalization_dy:
+    kind: postlexical
+    match: palatalization_dy_pattern
+    define:
+      jh_target: target("JH")
+      jh_params: jh_target.params
+    splice:
+      type: replace_range
+      range_left: d_token.sync_left
+      range_right: y_token.sync_right
+      suppress:
+        - d_token
+        - y_token
+      insert:
+        - copy_from: d_token
+          copy_fields:
+            - stress
+            - word
+          phoneme: "\"JH\""
+          params: jh_params
+          type: "\"affricate\""
+          duration: 80
+          inherentDuration: 80
+    citations:
+      - Klatt 1979, Synthesis by Rule of Connected English (cross-word palatalization /d#y/ -> /dZ/)
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis
+  palatalization_ty:
+    kind: postlexical
+    match: palatalization_ty_pattern
+    define:
+      ch_target: target("CH")
+      ch_params: ch_target.params
+    splice:
+      type: replace_range
+      range_left: t_token.sync_left
+      range_right: y_token.sync_right
+      suppress:
+        - t_token
+        - y_token
+      insert:
+        - copy_from: t_token
+          copy_fields:
+            - stress
+            - word
+          phoneme: "\"CH\""
+          params: ch_params
+          type: "\"affricate\""
+          duration: 90
+          inherentDuration: 90
+    citations:
+      - Klatt 1979, Synthesis by Rule of Connected English (cross-word palatalization)
+  glottal_stop_insertion:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' &&
+        (has(current.stress) ? current.stress >= 1 : false) &&
+        (prev == null || (has(current.word) && has(prev.word) ? current.word != prev.word : true)) &&
+        (prev == null || prev.type == 'vowel' || has(prev.boundary))
+    define:
+      gs_target: target("GS")
+      gs_params: gs_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - phoneme: "\"GS\""
+          params: gs_params
+          duration: 30
+          inherentDuration: 30
+          type: "\"stop_closure\""
+          voiceless: true
+          glottal: true
+          word: current.word
+        - copy_from: current
+    citations:
+      - Allen 1987, MITalk Ch.8 (rule 5: glottal stop insertion before word-initial stressed vowels)
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (21% glottalization rate)

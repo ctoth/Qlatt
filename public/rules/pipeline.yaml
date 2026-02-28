@@ -31,7 +31,13 @@ phases:
   - name: postlexical
     rules:
       - the_prevocalic_reduction
+      - to_reduction
       - t_flapping
+      - t_deletion
+      - t_glottalization
+      - palatalization_dy
+      - palatalization_ty
+      - glottal_stop_insertion
   - name: structural
     rules:
       - remap_stops_to_closures

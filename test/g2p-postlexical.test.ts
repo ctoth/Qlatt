@@ -224,7 +224,7 @@ describe("postlexical rules", () => {
       expect(tToken.phoneme).toBe("T");
     });
 
-    it("does NOT flap T before N in 'button'", () => {
+    it("does NOT flap T before N in 'button' (glottalizes instead)", () => {
       const s0 = startOrder();
       const s1 = finiteOrder(1);
       const s2 = finiteOrder(2);
@@ -246,9 +246,12 @@ describe("postlexical rules", () => {
       });
 
       const phoneTokens = getActivePhoneTokens(result);
+      // T before N (sonorant) is now glottalized to GS per Miller 1998 / Allen 1987
+      const gsToken = phoneTokens.find((t: any) => t.phoneme === "GS");
+      expect(gsToken).toBeDefined();
+      // Original T (ph2) should be suppressed
       const tToken = phoneTokens.find((t: any) => t.id === "ph2");
-      expect(tToken).toBeDefined();
-      expect(tToken.phoneme).toBe("T");
+      expect(tToken).toBeUndefined();
     });
   });
 });

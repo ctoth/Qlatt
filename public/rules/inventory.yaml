@@ -1170,3 +1170,19 @@ phoneme_targets:
     F0: 0
     dur: 100
     type: silence
+  GS:
+    F1: 500       # neutral vocal tract; Allen 1987 (glottal segments inherit context)
+    F2: 1500      # neutral
+    F3: 2500      # neutral
+    B1: 200       # wide bandwidth
+    B2: 100
+    B3: 150
+    AV: 0         # no voicing during closure
+    AF: 0
+    AH: 0
+    AVS: -70
+    dur: 30       # engineering estimate: brief glottal closure ~20-40 ms
+    type: stop_closure
+    voiceless: true
+    glottal: true
+    dac: 1        # Recasens 1997: glottal = minimal constraint

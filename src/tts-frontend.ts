@@ -8,7 +8,7 @@ import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack, PHONEME_TARGET_MAP } from "./track-assembler";
-import type { OutputConfig, VoiceQualityOverrides } from "./track-assembler";
+import type { OutputConfig, VoiceQualityOverrides, LayeredF0ModelConfig } from "./track-assembler";
 import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
   recordInventoryDecision,
@@ -522,6 +522,17 @@ export function textToKlattTrack(
       ? f0Policy.sag_min_span_ms.value
       : undefined;
 
+  // Read layered additive F0 model config from the frontend spec.
+  // When present, the track assembler uses the layered renderer instead of
+  // the declarative point-interpolation path.
+  // Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
+  //            Rabiner 1968 (three-component F0)
+  const f0ModelRaw = (frontendSpec as any)?.f0_model;
+  const f0Model: LayeredF0ModelConfig | undefined =
+    f0ModelRaw && typeof f0ModelRaw === "object" && f0ModelRaw.type === "layered_additive"
+      ? (f0ModelRaw as LayeredF0ModelConfig)
+      : undefined;
+
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
@@ -529,5 +540,6 @@ export function textToKlattTrack(
     voiceQuality: voiceQualityOverrides,
     sagDepthHz,
     sagMinSpanMs,
+    f0Model,
   });
 }

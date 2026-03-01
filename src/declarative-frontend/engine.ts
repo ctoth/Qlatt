@@ -1826,6 +1826,115 @@ function applyInsertPointSpec(
   sequence.push(pointToken);
 }
 
+/**
+ * Insert an F0 layer command token into the sequence.
+ *
+ * Handles the `kind: f0_layer` rule semantics, creating a token with
+ * `stream: "f0_layer"` that carries the layer name, value, and timing info.
+ * The track assembler's `extractLayerCommands()` reads these tokens.
+ *
+ * Citations:
+ *   Fujisaki, H. "Information, Prosody, and Modeling" -- command-response additive F0
+ *   Klatt, D. (1982) "KLATTalk" -- hat-pattern F0, STEP/IMPULSE commands
+ *   Rabiner, L. (1968) "Speech Synthesis by Rule" -- three-component F0
+ */
+function applyInsertF0LayerSpec(
+  layerSpec: TokenLike,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  params: RuntimeLike,
+  sequence: TokenLike[],
+  runtime: RuntimeLike,
+  defaultTargetName = "current",
+  extraContext: RuntimeLike | null = null
+) {
+  if (!layerSpec || typeof layerSpec !== "object") return;
+
+  const layerName = layerSpec.layer;
+  if (typeof layerName !== "string" || layerName.length === 0) {
+    throw new Error("E_F0_LAYER_NAME_INVALID: insert_f0_layer.layer must be a non-empty string");
+  }
+
+  const targetName = layerSpec.target ?? defaultTargetName;
+  const target = resolveTarget(targetName);
+  if (!target) {
+    throw new Error(`E_F0_LAYER_TARGET_UNKNOWN: unknown insert_f0_layer target '${targetName}'`);
+  }
+
+  // Build navigation functions for evaluating expressions.
+  const navFunctions = buildNavigationFunctions(sequence, runtime, {
+    currentToken: target,
+    pointCursorByStream: new Map(),
+  });
+
+  // Resolve the time anchor.
+  const anchor = layerSpec.at != null
+    ? evaluateAnchorExpression(layerSpec.at, target, params, navFunctions, extraContext)
+    : { anchor_left: target.sync_left, anchor_right: target.sync_left, ratio: 0 };
+
+  const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
+  const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);
+
+  // Evaluate the value expression.
+  const value =
+    layerSpec.value == null
+      ? 0
+      : evaluateValueExpression(layerSpec.value, target, params, navFunctions, extraContext);
+
+  // Evaluate optional duration_frames.
+  let durationFrames: number | undefined;
+  if (layerSpec.duration_frames != null) {
+    const df = evaluateValueExpression(layerSpec.duration_frames, target, params, navFunctions, extraContext);
+    if (typeof df === "number" && Number.isFinite(df)) {
+      durationFrames = df;
+    }
+  }
+
+  // Evaluate optional profile_points.
+  let profilePoints: number[] | undefined;
+  if (Array.isArray(layerSpec.profile_points)) {
+    profilePoints = layerSpec.profile_points
+      .map((expr: unknown) => {
+        if (typeof expr === "number") return expr;
+        if (typeof expr === "string") {
+          return evaluateValueExpression(expr, target, params, navFunctions, extraContext);
+        }
+        return null;
+      })
+      .filter((v: unknown): v is number => typeof v === "number" && Number.isFinite(v));
+  }
+
+  // Create the f0_layer token.
+  const tokenId = nextPointId(runtime, "f0_layer");
+
+  const layerToken: TokenLike = {
+    id: tokenId,
+    stream: "f0_layer",
+    status: TokenStatus.ACTIVE,
+    layer: layerName,
+    value,
+    ...buildRuntimeMarkProps(runtime, {
+      anchor_left: anchorLeftId ?? "",
+      anchor_right: anchorRightId ?? "",
+    }),
+    ratio: anchor.ratio,
+  };
+
+  if (anchorLeftId) writeTokenMarkId(layerToken, runtime, "anchor_left", anchorLeftId);
+  if (anchorRightId) writeTokenMarkId(layerToken, runtime, "anchor_right", anchorRightId);
+
+  if (durationFrames != null) {
+    layerToken.duration_frames = durationFrames;
+  }
+  if (profilePoints && profilePoints.length > 0) {
+    layerToken.profile_points = profilePoints;
+  }
+  if (layerSpec.tag != null) {
+    layerToken.tag = layerSpec.tag;
+  }
+
+  sequence.push(layerToken);
+}
+
 function evaluateRuleDefine(
   rule: TokenLike,
   token: TokenLike,
@@ -1931,11 +2040,20 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       "current",
       extraContext
     );
+    applyInsertF0LayerSpec(
+      rule.insert_f0_layer,
+      (targetName) => (targetName === "current" ? token : null),
+      runtime.params,
+      sequence,
+      runtime,
+      "current",
+      extraContext
+    );
 
     if (rule.suppress || rule.delete) {
       token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
     }
-    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete)
+    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete, insert_f0_layer)
     if (structural) {
       navigation.invalidateStreamCache();
     }
@@ -2056,13 +2174,22 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       defaultTarget,
       extraContext
     );
+    applyInsertF0LayerSpec(
+      rule.insert_f0_layer,
+      (targetName) => captures[targetName] ?? null,
+      runtime.params,
+      sequence,
+      runtime,
+      defaultTarget,
+      extraContext
+    );
 
     if (rule.suppress || rule.delete) {
       for (const token of Object.values(captures)) {
         token.status = joinTokenStatus(token.status, TokenStatus.SUPPRESSED);
       }
     }
-    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete)
+    // Invalidate caches after structural mutations (splice, insert_point, suppress, delete, insert_f0_layer)
     if (structural) {
       navigation.invalidateStreamCache();
     }
@@ -2094,6 +2221,7 @@ function isStructuralRule(rule: TokenLike | null | undefined): boolean {
   if (!rule || typeof rule !== "object") return false;
   if (rule.splice) return true;
   if (rule.insert_point) return true;
+  if (rule.insert_f0_layer) return true;
   if (rule.suppress || rule.delete) return true;
   if (Array.isArray(rule.associate) && rule.associate.length > 0) return true;
   if (Array.isArray(rule.disassociate) && rule.disassociate.length > 0) return true;

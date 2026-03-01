@@ -157,6 +157,9 @@ function normalizeRule(rule: unknown): PlainObject {
     apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
     insert_point: isPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
+    insert_f0_layer: isPlainObject(rule.insert) && asString(rule.kind, null) === "f0_layer"
+      ? cloneObject(rule.insert)
+      : null,
     suppress: Boolean(rule.suppress),
     delete: Boolean(rule.delete),
     associate: Array.isArray(rule.associate)
@@ -192,6 +195,7 @@ export function parseDslSpec(source: unknown): PlainObject {
     version: raw.version ?? null,
     inventory_path: asString(raw.inventory_path, null),
     lts_path: asString(raw.lts_path, null),
+    f0_model: isPlainObject(raw.f0_model) ? raw.f0_model : null,
     parameters,
     input_contract: cloneObject(raw.input_contract),
     streams: Object.fromEntries(

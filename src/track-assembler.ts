@@ -85,7 +85,467 @@ export type AssembleTrackOptions = {
   /** Minimum inter-accent span in ms for sag to apply (default 150).
    *  Citation: Pierrehumbert 1980 (closer H*s show less/no dipping) */
   sagMinSpanMs?: number;
+  /** Layered additive F0 model configuration from the frontend spec.
+   *  When present and type === "layered_additive", the layered renderer is
+   *  used instead of the declarative point-interpolation path.
+   *  Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
+   *  Rabiner 1968 (three-component F0) */
+  f0Model?: LayeredF0ModelConfig;
 };
+
+// ---------------------------------------------------------------------------
+// Layered Additive F0 Model
+// ---------------------------------------------------------------------------
+//
+// A generic additive F0 rendering mode where named layers with different
+// semantics (profile, persistent step, decaying impulse) are summed and
+// filtered.  DECtalk's hat-pattern model is the first consumer, but the
+// design supports Fujisaki command-response models or any additive F0
+// decomposition.
+//
+// Citations:
+//   Fujisaki, H. "Information, Prosody, and Modeling" -- command-response model
+//   Klatt, D. (1982) "The KLATTalk text-to-speech conversion system" -- hat-pattern
+//   Rabiner, L. (1968) "Speech Synthesis by Rule" -- three-component F0 model
+// ---------------------------------------------------------------------------
+
+/** Layer type semantics.
+ *  - `profile`: piecewise-linear shape mapped across phrase duration
+ *  - `persistent`: STEP semantics -- value persists until next command or reset
+ *  - `impulse`: decaying transient pulse */
+export type LayerType = "profile" | "persistent" | "impulse";
+
+/** Decay mode for impulse layers. */
+export type DecayMode = "halving" | "linear" | "exponential";
+
+/** Configuration for a single F0 layer, from the frontend YAML. */
+export type LayerConfig = {
+  type: LayerType;
+  decay?: DecayMode;
+};
+
+/** Low-pass filter configuration. */
+export type FilterConfig = {
+  type: "lowpass_2pole";
+  cutoff_param?: string;
+  default_cutoff?: number;
+};
+
+/** Speaker scaling configuration. */
+export type SpeakerScaleConfig = {
+  minimum_param?: string;
+  range_param?: string;
+  reference?: number;
+};
+
+/** Top-level layered additive F0 model config from frontend YAML.
+ *  Citations:
+ *    Fujisaki, H. "Information, Prosody, and Modeling" -- command-response additive F0
+ *    Klatt, D. (1982) "KLATTalk" -- hat-pattern F0 algorithm
+ *    Rabiner, L. (1968) "Speech Synthesis by Rule" -- three-component F0 */
+export type LayeredF0ModelConfig = {
+  type: "layered_additive";
+  citations?: string[];
+  filter?: FilterConfig;
+  layers: Record<string, LayerConfig>;
+  combine?: "sum";
+  speaker_scale?: SpeakerScaleConfig;
+};
+
+/** A command inserted into an F0 layer by a rule.
+ *  Stored as tokens with stream === "f0_layer" in the parameter sequence. */
+export type F0LayerCommand = {
+  /** Name of the target layer (must match a key in f0_model.layers). */
+  layer: string;
+  /** Absolute time in seconds when the command takes effect. */
+  time: number;
+  /** Value in Hz (or internal F0 units). */
+  value: number;
+  /** For impulse layers: duration in internal frames. */
+  durationFrames?: number;
+  /** For profile layers: array of control point values. */
+  profilePoints?: number[];
+  /** Provenance tag. */
+  tag?: string;
+};
+
+/** Internal frame rate for the IIR filter (seconds per frame).
+ *  5ms frames (200 Hz) -- close to DECtalk's 6.4ms but at a round number. */
+const LAYERED_F0_FRAME_PERIOD_SEC = 0.005;
+
+/** Minimum F0 output in Hz. */
+const LAYERED_F0_MIN_HZ = 50;
+/** Maximum F0 output in Hz. */
+const LAYERED_F0_MAX_HZ = 500;
+
+// ---------------------------------------------------------------------------
+// 2-Pole IIR Low-Pass Filter
+// ---------------------------------------------------------------------------
+//
+// Standard second-order IIR: y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2]
+//                                    - a1*y[n-1] - a2*y[n-2]
+//
+// DECtalk's filter uses coefficients derived from the speaker's QU parameter:
+// f0_lp_filter = 1500 + 15 * QU.  For Paul (QU=40), cutoff ~2100.
+// This controls smoothness of F0 transitions.
+//
+// Citation: Klatt 1982, Ph_drwt02.c filter_commands()
+// ---------------------------------------------------------------------------
+
+/** State for a 2-pole IIR low-pass filter. */
+export type IIRFilterState = {
+  y1: number;  // y[n-1]
+  y2: number;  // y[n-2]
+  x1: number;  // x[n-1]
+  x2: number;  // x[n-2]
+};
+
+/** Coefficients for a 2-pole Butterworth low-pass filter. */
+export type IIRFilterCoefficients = {
+  b0: number;
+  b1: number;
+  b2: number;
+  a1: number;
+  a2: number;
+};
+
+/**
+ * Compute 2-pole Butterworth low-pass filter coefficients.
+ *
+ * Uses the bilinear transform of a 2nd-order Butterworth prototype.
+ * Citation: Klatt 1982, Ph_drwt02.c (speaker-dependent F0 smoothing filter)
+ *
+ * @param cutoffHz  Cutoff frequency in Hz.
+ * @param sampleRate  Sample rate in Hz (1 / frame period).
+ */
+export function computeButterworth2Coefficients(
+  cutoffHz: number,
+  sampleRate: number
+): IIRFilterCoefficients {
+  const wc = Math.tan((Math.PI * cutoffHz) / sampleRate);
+  const wc2 = wc * wc;
+  const sqrt2 = Math.SQRT2;
+  const k = 1.0 / (1.0 + sqrt2 * wc + wc2);
+
+  return {
+    b0: wc2 * k,
+    b1: 2.0 * wc2 * k,
+    b2: wc2 * k,
+    a1: 2.0 * (wc2 - 1.0) * k,
+    a2: (1.0 - sqrt2 * wc + wc2) * k,
+  };
+}
+
+/**
+ * Apply one sample through the 2-pole IIR filter.
+ * Mutates state in-place for performance.
+ */
+export function iirFilter2Pole(
+  input: number,
+  state: IIRFilterState,
+  coeffs: IIRFilterCoefficients
+): number {
+  const output =
+    coeffs.b0 * input +
+    coeffs.b1 * state.x1 +
+    coeffs.b2 * state.x2 -
+    coeffs.a1 * state.y1 -
+    coeffs.a2 * state.y2;
+
+  state.x2 = state.x1;
+  state.x1 = input;
+  state.y2 = state.y1;
+  state.y1 = output;
+
+  return output;
+}
+
+/** Create a zeroed filter state. */
+export function createFilterState(): IIRFilterState {
+  return { y1: 0, y2: 0, x1: 0, x2: 0 };
+}
+
+// ---------------------------------------------------------------------------
+// Layer rendering helpers
+// ---------------------------------------------------------------------------
+
+/** State for a single active impulse. */
+type ActiveImpulse = {
+  value: number;
+  decay: number;
+  remainingFrames: number;
+};
+
+/**
+ * Extract F0 layer commands from the parameter sequence.
+ * These are tokens with `stream === "f0_layer"` inserted by `kind: f0_layer` rules.
+ */
+export function extractLayerCommands(
+  sequence: InputToken[]
+): F0LayerCommand[] {
+  const commands: F0LayerCommand[] = [];
+  for (const token of sequence) {
+    if (token?.stream !== "f0_layer") continue;
+    if (token?.status === 2) continue;
+    const cmd: F0LayerCommand = {
+      layer: typeof token.layer === "string" ? token.layer : "",
+      time: Number.isFinite(token.time) ? Number(token.time) / 1000 : 0,
+      value: Number.isFinite(token.value) ? Number(token.value) : 0,
+    };
+    if (Number.isFinite(token.duration_frames)) {
+      cmd.durationFrames = Number(token.duration_frames);
+    }
+    if (Array.isArray(token.profile_points)) {
+      cmd.profilePoints = (token.profile_points as unknown[])
+        .filter((v: unknown): v is number => typeof v === "number" && Number.isFinite(v))
+        .map(Number);
+    }
+    if (typeof token.tag === "string") {
+      cmd.tag = token.tag;
+    }
+    commands.push(cmd);
+  }
+  commands.sort((a, b) => a.time - b.time);
+  return commands;
+}
+
+/**
+ * Interpolate a piecewise-linear profile at a given normalized position [0, 1].
+ * The profile is defined by N equidistant control points spanning [0, 1].
+ */
+function interpolateProfile(
+  points: number[],
+  normalizedPosition: number
+): number {
+  if (points.length === 0) return 0;
+  if (points.length === 1) return points[0];
+
+  const t = Math.max(0, Math.min(1, normalizedPosition));
+  const maxIdx = points.length - 1;
+  const floatIdx = t * maxIdx;
+  const lowIdx = Math.floor(floatIdx);
+  const highIdx = Math.min(lowIdx + 1, maxIdx);
+
+  if (lowIdx === highIdx) return points[lowIdx];
+  const frac = floatIdx - lowIdx;
+  return points[lowIdx] + frac * (points[highIdx] - points[lowIdx]);
+}
+
+/**
+ * Render a layered additive F0 contour.
+ *
+ * Generates internal frames at the fixed LAYERED_F0_FRAME_PERIOD_SEC rate,
+ * processes layer commands, applies the 2-pole IIR filter, then builds
+ * an F0Point[] array that can be queried by getF0AtTime().
+ *
+ * Citations:
+ *   Fujisaki, H. "Information, Prosody, and Modeling" -- command-response additive F0
+ *   Klatt, D. (1982) "KLATTalk" -- hat-pattern F0, 2-pole low-pass filter
+ *   Rabiner, L. (1968) "Speech Synthesis by Rule" -- three-component F0
+ */
+export function renderLayeredF0(
+  commands: F0LayerCommand[],
+  modelConfig: LayeredF0ModelConfig,
+  totalDuration: number,
+  speakerParams?: Record<string, unknown>
+): F0Point[] {
+  if (totalDuration <= 0) return [{ time: 0, f0: 0 }];
+
+  const framePeriod = LAYERED_F0_FRAME_PERIOD_SEC;
+  const sampleRate = 1.0 / framePeriod;
+  const numFrames = Math.ceil(totalDuration / framePeriod) + 1;
+
+  // Resolve filter cutoff.
+  let cutoffHz = modelConfig.filter?.default_cutoff ?? 2700;
+  if (modelConfig.filter?.cutoff_param && speakerParams) {
+    const paramPath = modelConfig.filter.cutoff_param.split(".");
+    let val: unknown = speakerParams;
+    for (const key of paramPath) {
+      val = (val as Record<string, unknown>)?.[key];
+    }
+    if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+      cutoffHz = val;
+    }
+  }
+  cutoffHz = Math.max(1, Math.min(cutoffHz, sampleRate * 0.45));
+
+  const filterCoeffs = computeButterworth2Coefficients(cutoffHz, sampleRate);
+  const filterState = createFilterState();
+
+  // Resolve speaker scaling parameters.
+  const scaleConfig = modelConfig.speaker_scale;
+  let f0Minimum = 50;
+  let f0ScaleFactor = 1.0;
+  const f0Reference = scaleConfig?.reference ?? 130;
+
+  if (scaleConfig && speakerParams) {
+    if (scaleConfig.minimum_param) {
+      const paramPath = scaleConfig.minimum_param.split(".");
+      let val: unknown = speakerParams;
+      for (const key of paramPath) {
+        val = (val as Record<string, unknown>)?.[key];
+      }
+      if (typeof val === "number" && Number.isFinite(val)) {
+        f0Minimum = val;
+      }
+    }
+    if (scaleConfig.range_param) {
+      const paramPath = scaleConfig.range_param.split(".");
+      let val: unknown = speakerParams;
+      for (const key of paramPath) {
+        val = (val as Record<string, unknown>)?.[key];
+      }
+      if (typeof val === "number" && Number.isFinite(val)) {
+        f0ScaleFactor = val;
+      }
+    }
+  }
+
+  // Organize commands by layer.
+  const layerNames = Object.keys(modelConfig.layers);
+  const commandsByLayer = new Map<string, F0LayerCommand[]>();
+  for (const name of layerNames) {
+    commandsByLayer.set(name, []);
+  }
+  for (const cmd of commands) {
+    const existing = commandsByLayer.get(cmd.layer);
+    if (existing) {
+      existing.push(cmd);
+    }
+  }
+
+  // Per-layer state.
+  const persistentLevels = new Map<string, number>();
+  const activeImpulses = new Map<string, ActiveImpulse[]>();
+  const profileData = new Map<string, number[]>();
+
+  for (const name of layerNames) {
+    const cfg = modelConfig.layers[name];
+    if (cfg.type === "persistent") persistentLevels.set(name, 0);
+    if (cfg.type === "impulse") activeImpulses.set(name, []);
+    if (cfg.type === "profile") profileData.set(name, []);
+  }
+
+  // Per-layer command cursors.
+  const commandCursors = new Map<string, number>();
+  for (const name of layerNames) {
+    commandCursors.set(name, 0);
+  }
+
+  // Process frames.
+  const rawF0Values = new Float64Array(numFrames);
+
+  for (let frame = 0; frame < numFrames; frame++) {
+    const time = frame * framePeriod;
+
+    // Process pending commands for each layer up to current time.
+    for (const name of layerNames) {
+      const cfg = modelConfig.layers[name];
+      const cmds = commandsByLayer.get(name)!;
+      let cursor = commandCursors.get(name)!;
+
+      while (cursor < cmds.length && cmds[cursor].time <= time + framePeriod * 0.5) {
+        const cmd = cmds[cursor];
+
+        if (cfg.type === "persistent") {
+          const current = persistentLevels.get(name) ?? 0;
+          persistentLevels.set(name, current + cmd.value);
+        } else if (cfg.type === "impulse") {
+          const impulses = activeImpulses.get(name)!;
+          const durationFrames = cmd.durationFrames ?? 20;
+          impulses.push({
+            value: cmd.value,
+            decay: cmd.value / 4,
+            remainingFrames: durationFrames,
+          });
+        } else if (cfg.type === "profile") {
+          if (cmd.profilePoints && cmd.profilePoints.length > 0) {
+            profileData.set(name, cmd.profilePoints);
+          }
+        }
+
+        cursor++;
+      }
+      commandCursors.set(name, cursor);
+    }
+
+    // Sum all layers.
+    let total = 0;
+
+    for (const name of layerNames) {
+      const cfg = modelConfig.layers[name];
+
+      if (cfg.type === "profile") {
+        const points = profileData.get(name);
+        if (points && points.length > 0) {
+          const normalizedPos = totalDuration > 0 ? time / totalDuration : 0;
+          total += interpolateProfile(points, normalizedPos);
+        }
+      } else if (cfg.type === "persistent") {
+        total += persistentLevels.get(name) ?? 0;
+      } else if (cfg.type === "impulse") {
+        const impulses = activeImpulses.get(name)!;
+        for (const imp of impulses) {
+          total += imp.value;
+        }
+      }
+    }
+
+    // Apply IIR low-pass filter.
+    const filtered = iirFilter2Pole(total, filterState, filterCoeffs);
+
+    // Speaker scaling: only when speaker_scale is configured in the model.
+    // When speaker_scale is absent, the filtered value is used directly as Hz.
+    // When present: f0_hz = f0_minimum + (filtered - reference) * f0_scale_factor
+    let f0Hz: number;
+    if (scaleConfig) {
+      f0Hz = f0Minimum + (filtered - f0Reference) * f0ScaleFactor;
+    } else {
+      f0Hz = filtered;
+    }
+    f0Hz = Math.max(LAYERED_F0_MIN_HZ, Math.min(LAYERED_F0_MAX_HZ, f0Hz));
+    rawF0Values[frame] = f0Hz;
+
+    // Advance impulse decay for all impulse layers.
+    for (const name of layerNames) {
+      const cfg = modelConfig.layers[name];
+      if (cfg.type !== "impulse") continue;
+      const decayMode = cfg.decay ?? "halving";
+      const impulses = activeImpulses.get(name)!;
+
+      for (let i = impulses.length - 1; i >= 0; i--) {
+        const imp = impulses[i];
+        imp.remainingFrames--;
+
+        if (imp.remainingFrames <= 0 || Math.abs(imp.value) < 0.01) {
+          impulses.splice(i, 1);
+          continue;
+        }
+
+        if (decayMode === "halving") {
+          imp.value -= imp.decay;
+          imp.decay = imp.decay / 2;
+        } else if (decayMode === "linear") {
+          imp.value -= imp.decay;
+        } else if (decayMode === "exponential") {
+          imp.value *= 0.9;
+        }
+      }
+    }
+  }
+
+  // Convert to F0Point[] for the track assembler to query.
+  const contour: F0Point[] = [];
+  for (let frame = 0; frame < numFrames; frame++) {
+    contour.push({
+      time: frame * framePeriod,
+      f0: rawF0Values[frame],
+      tag: "layered_f0",
+    });
+  }
+
+  return contour;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers -- F0 contour construction
@@ -438,15 +898,41 @@ export function assembleKlattTrack(
     cfg?.min_duration?.default_ms ?? DEFAULT_MIN_DURATION_MS;
   const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
 
-  // Build the F0 contour from declarative points.
-  const rawF0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
+  // Build the F0 contour.
+  // If f0Model is present, use the layered additive renderer.
+  // Otherwise, use the existing declarative point-interpolation path.
+  // Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
+  //            Rabiner 1968 (three-component F0)
+  let f0Contour: F0Point[];
+  if (options.f0Model && options.f0Model.type === "layered_additive") {
+    // Compute total duration from phone sequence for the layered renderer.
+    let totalDuration = 0;
+    for (const ph of phoneSequence) {
+      const isStopRel = ph.type === "stop_release" || ph.type === "stop_aspiration";
+      const minDur = isStopRel ? minDurationStopReleaseMs : minDurationDefaultMs;
+      const tgtDur = isStopRel ? PHONEME_TARGET_MAP[ph.phoneme]?.dur : null;
+      const phDurationMs = Number.isFinite(tgtDur) ? tgtDur : (ph.duration || 100);
+      totalDuration += Math.max(minDur, phDurationMs) / 1000.0;
+    }
+    totalDuration += finalSilenceMs / 1000.0;
 
-  // Apply sagging transitions between consecutive H* accent peaks.
-  // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
-  // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-  const sagDepth = options.sagDepthHz ?? 12;
-  const sagMinSpan = options.sagMinSpanMs ?? 150;
-  const f0Contour = applySaggingTransitions(rawF0Contour, sagDepth, sagMinSpan);
+    const layerCommands = extractLayerCommands(parameterSequence);
+    f0Contour = renderLayeredF0(
+      layerCommands,
+      options.f0Model,
+      totalDuration,
+    );
+  } else {
+    // Existing declarative point-interpolation path.
+    const rawF0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
+
+    // Apply sagging transitions between consecutive H* accent peaks.
+    // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+    // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
+    const sagDepth = options.sagDepthHz ?? 12;
+    const sagMinSpan = options.sagMinSpanMs ?? 150;
+    f0Contour = applySaggingTransitions(rawF0Contour, sagDepth, sagMinSpan);
+  }
 
   const klattTrack: KlattFrame[] = [];
   let currentTime = 0;

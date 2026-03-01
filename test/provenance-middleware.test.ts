@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
+import { DEFAULT_FRONTEND_ID } from "../src/declarative-frontend/rule-pack";
 import { createProvenanceCollector } from "../src/provenance";
 import {
   collectTraceTokenIds,
@@ -23,6 +24,15 @@ describe("provenance middleware", () => {
     for (let i = 0; i < withoutProvenance.length; i++) {
       expect(withProvenance[i]).toEqual(withoutProvenance[i]);
     }
+  });
+
+  it("accepts the bundled qlatt-english frontend ID explicitly", () => {
+    const implicitDefault = textToKlattTrack("hello", 110, 30);
+    const explicitDefault = textToKlattTrack("hello", 110, 30, {
+      frontendId: DEFAULT_FRONTEND_ID,
+    });
+
+    expect(explicitDefault).toEqual(implicitDefault);
   });
 
   it("provenance collector records decisions for transcription and rules", () => {

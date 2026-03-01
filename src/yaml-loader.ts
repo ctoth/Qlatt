@@ -91,8 +91,8 @@ export function parseYamlString<T = unknown>(source: string, label: string = "ya
  * Absolute paths (starting with "/") are returned as-is.
  * Relative paths are resolved against the parent file's directory.
  *
- * @example resolveIncludePath("/rules/frontend.yaml", "duration.yaml") → "/rules/duration.yaml"
- * @example resolveIncludePath("/rules/frontend.yaml", "/shared/common.yaml") → "/shared/common.yaml"
+ * @example resolveIncludePath("/rules/frontends/qlatt-english/frontend.yaml", "phases/duration.yaml") → "/rules/frontends/qlatt-english/phases/duration.yaml"
+ * @example resolveIncludePath("/rules/frontends/qlatt-english/frontend.yaml", "/shared/common.yaml") → "/shared/common.yaml"
  */
 export function resolveIncludePath(parentPath: string, includePath: string): string {
   if (includePath.startsWith("/")) return includePath;

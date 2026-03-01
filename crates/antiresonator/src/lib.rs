@@ -30,7 +30,7 @@ impl AntiResonator {
             || !sample_rate.is_finite()
             || sample_rate <= 0.0
             || bw <= 0.0
-            || freq < 0.0
+            || freq <= 0.0
             || freq >= sample_rate * 0.5
         {
             self.bypass = true;
@@ -155,6 +155,13 @@ mod tests {
         let c_prime = -a * c;
         let b_prime = -a * b;
         (a, b_prime, c_prime)
+    }
+
+    #[test]
+    fn bypasses_at_freq_zero() {
+        let mut z = AntiResonator::new();
+        z.set_params(0.0, 100.0, 48000.0);
+        assert!(z.bypass, "freq=0 should trigger bypass");
     }
 
     #[test]

@@ -140,10 +140,12 @@ function isSuppressedToken(token: PipelineToken | null | undefined): boolean {
  * - isFunctionWord (boolean)
  * - isContentWord (boolean)
  * - isAccented (boolean)
+ * - isAccentCarrier (boolean)
  * - isNuclearAccent (boolean)
  * - accentType (string | null) — "H*", "L*", "L+H*", etc.
  * - accentIndexInPhrase (number) — 0-based index of accented token within phrase; -1 for non-accented
  * - breakIndex (number 0-4)
+ * - initialBoundaryTone (string | null) — "%H" when phrase-initial high edge is marked
  * - phraseAccent (string | null) — "H-" or "L-"
  * - boundaryTone (string | null) — "H%" or "L%"
  *
@@ -176,13 +178,12 @@ export function annotateProsody(
   // Step 5-6: Identify nuclear accent and assign accent types per phrase.
   for (let pi = 0; pi < phrases.length; pi++) {
     const phrase = phrases[pi];
-    const isQuestion = phrase.punctuation === "?";
 
     // Step 4 (nuclear accent): find last accented token in phrase.
     identifyNuclearAccent(result, phrase);
 
     // Step 5: Assign accent types.
-    assignAccentTypes(result, phrase, isQuestion);
+    assignAccentTypes(result, phrase, phrase.punctuation);
 
     // Step 7: Assign phrase accent and boundary tone on phrase boundary.
     assignPhraseEdgeTones(result, phrase);
@@ -262,6 +263,7 @@ function markFunctionWords(tokens: PipelineToken[]): void {
     // Reserved for future phrase accent rules (H-, L-)
     token.phraseAccent = null;
     token.boundaryTone = null;
+    token.initialBoundaryTone = null;
 
     if (token.phoneme === "SIL" || isSuppressedToken(token)) {
       // SIL and suppressed structural source tokens are not prosodic carriers.
@@ -299,12 +301,14 @@ function assignAccent(tokens: PipelineToken[]): void {
         currentWord = null;
       }
       token.isAccented = false;
+      token.isAccentCarrier = false;
       token.isNuclearAccent = false;
       token.accentType = null;
       continue;
     }
     if (isSuppressedToken(token)) {
       token.isAccented = false;
+      token.isAccentCarrier = false;
       token.isNuclearAccent = false;
       token.accentType = null;
       continue;
@@ -323,6 +327,7 @@ function assignAccent(tokens: PipelineToken[]): void {
 
     // Initialize defaults — will be overwritten below.
     token.isAccented = false;
+    token.isAccentCarrier = false;
     token.isNuclearAccent = false;
     token.accentType = null;
   }
@@ -335,8 +340,19 @@ function assignAccent(tokens: PipelineToken[]): void {
     const hasPrimaryStress = group.some((idx) => tokens[idx].stress === 1);
     const isContent = group.some((idx) => tokens[idx].isContentWord === true);
     const accented = hasPrimaryStress && isContent;
+    let carrierAssigned = false;
     for (const idx of group) {
       tokens[idx].isAccented = accented;
+      tokens[idx].isAccentCarrier = false;
+      if (
+        accented &&
+        !carrierAssigned &&
+        tokens[idx].stress === 1 &&
+        !isSuppressedToken(tokens[idx])
+      ) {
+        tokens[idx].isAccentCarrier = true;
+        carrierAssigned = true;
+      }
     }
   }
 }
@@ -346,12 +362,13 @@ function assignAccent(tokens: PipelineToken[]): void {
 // ---------------------------------------------------------------------------
 
 function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
-  // Nuclear accent = last accented token with stress==1 in the phrase.
-  // Set isNuclearAccent on the stressed vowel only (the token with stress==1).
+  // Nuclear accent = last accent carrier in the phrase.
+  // This is the first active stressed segment of the accented word, which keeps
+  // diphthong offglides from receiving separate pitch accents.
   let lastAccentedStressIndex = -1;
 
   for (const idx of phrase.tokenIndices) {
-    if (!isSuppressedToken(tokens[idx]) && tokens[idx].isAccented && tokens[idx].stress === 1) {
+    if (!isSuppressedToken(tokens[idx]) && tokens[idx].isAccentCarrier === true) {
       lastAccentedStressIndex = idx;
     }
   }
@@ -370,7 +387,9 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
  *
  * - Initial prenuclear accent: L+H* (common rising prenuclear default)
  * - Later prenuclear accents: H+!H* (MAE-ToBI downstepped prenuclear default)
- * - Nuclear accent in declarative (. or no punctuation): H*
+ * - Nuclear accent in declarative (. or no punctuation): H* or H*+L
+ * - Nuclear accent in continuation (, ; :): H+L*
+ * - Nuclear accent in exclamation (!): H*+L
  * - Nuclear accent in question (?): L* if lone accent, L*+H if postnuclear rise is available
  *
  * Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
@@ -378,29 +397,35 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
 function assignAccentTypes(
   tokens: PipelineToken[],
   phrase: Phrase,
-  isQuestion: boolean,
+  punctuation: string | null,
 ): void {
+  const isQuestion = punctuation === "?";
+  const isExclamation = punctuation === "!";
+  const isContinuation = punctuation != null && CLAUSE_PUNCTUATION.has(punctuation);
   const accentedIndices = phrase.tokenIndices.filter(
-    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].isAccented && tokens[idx].stress === 1,
+    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].isAccentCarrier === true,
   );
   const hasPrenuclearAccent = accentedIndices.some((idx) => !tokens[idx].isNuclearAccent);
   let prenuclearAccentCount = 0;
   for (const idx of phrase.tokenIndices) {
     const token = tokens[idx];
-    if (isSuppressedToken(token) || !(token.isAccented && token.stress === 1)) continue;
+    if (isSuppressedToken(token) || token.isAccentCarrier !== true) continue;
 
     if (token.isNuclearAccent) {
       // Nuclear accent: L* for short/simple questions; L*+H when there is
       // prenuclear material to support the characteristic question rise.
+      // Continuations expose H+L*, while broad-focus declaratives and
+      // exclamations with prenuclear material expose the falling H*+L family.
       // Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
       token.accentType = isQuestion
         ? (hasPrenuclearAccent ? "L*+H" : "L*")
-        : "H*";
+        : (isContinuation ? "H+L*" : ((isExclamation || hasPrenuclearAccent) ? "H*+L" : "H*"));
     } else if (prenuclearAccentCount === 0) {
       // Use a leading rise on the first prenuclear accent so the tune starts
       // from the phrase baseline and reaches the first accented peak locally.
-      // Citations: Pierrehumbert 1980, Ladd 2008 (prenuclear rising accents)
-      token.accentType = "L+H*";
+      // Continuation phrases instead use the sustained-high H*+H family.
+      // Citations: Pierrehumbert 1980, Ladd 2008
+      token.accentType = isContinuation ? "H*+H" : "L+H*";
     } else {
       // Later prenuclear accents use the revised MAE-ToBI H+!H* category:
       // an early H lead into a downstepped high starred target.
@@ -416,7 +441,7 @@ function assignAccentTypes(
 // ---------------------------------------------------------------------------
 
 /**
- * Assign a 0-based accent index to each accented stressed token within the
+ * Assign a 0-based accent index to each accent carrier within the
  * current intonational phrase. Non-accented tokens get accentIndexInPhrase = -1.
  *
  * The index is used by the ToBI downstep formula: H_n = V * k^n, where n is
@@ -430,7 +455,7 @@ function assignAccentTypes(
 function assignAccentIndices(tokens: PipelineToken[]): void {
   let accentCount = 0;
   for (const token of tokens) {
-    if (!isSuppressedToken(token) && token.isAccented && token.stress === 1) {
+    if (!isSuppressedToken(token) && token.isAccentCarrier === true) {
       token.accentIndexInPhrase = accentCount;
       accentCount++;
     } else {
@@ -530,6 +555,7 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
  * - Declarative (.): phraseAccent='L-', boundaryTone='L%'
  * - Question (?): phraseAccent='H-', boundaryTone='H%'
  * - Continuation (,, ;, :): phraseAccent='L-', boundaryTone='H%'
+ * - Question/Exclamation onset: initialBoundaryTone='%H'
  *
  * Set on the SIL token at the phrase boundary.
  *
@@ -540,6 +566,13 @@ function assignPhraseEdgeTones(tokens: PipelineToken[], phrase: Phrase): void {
 
   const silToken = tokens[phrase.trailingSilIndex];
   const punct = phrase.punctuation;
+  const firstTokenIndex = phrase.tokenIndices.find(
+    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].phoneme !== "SIL",
+  );
+
+  if (firstTokenIndex != null && firstTokenIndex >= 0 && (punct === "?" || punct === "!")) {
+    tokens[firstTokenIndex].initialBoundaryTone = "%H";
+  }
 
   if (punct === "?") {
     silToken.phraseAccent = "H-";

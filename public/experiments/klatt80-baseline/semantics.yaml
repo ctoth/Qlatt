@@ -132,6 +132,18 @@ params:
     default: 0.7
     range: [0.3, 2.7]
 
+  RdPhraseOffset:
+    description: "Connected-speech Rd offset (Fant 1997 phrase-final source softening proxy)"
+    type: float
+    default: 0
+    range: [-0.5, 0.5]
+
+  EePhraseDb:
+    description: "Connected-speech Ee contour offset in dB (Fant 1997 phrase rise/declination/final fall)"
+    type: float
+    default: 0
+    range: [-12, 6]
+
   Ra:
     description: "LF return phase ratio in percent (Fant 1997 Eq. A1)"
     type: float
@@ -355,10 +367,15 @@ realize:
   #
   # Refs: Fant (1997), Stevens (1998) Section 3.8-3.9
   # ---------------------------------------------------------------------------
+  effectiveRd:
+    expr: "min(2.7, max(0.3, Rd + RdPhraseOffset))"
+    deps: [Rd, RdPhraseOffset]
+    description: "Connected-speech Rd after applying phrase-level offset."
+
   Ra:
-    expr: "max(-1.0 + 4.8 * Rd, 0.0)"
-    deps: [Rd]
-    description: "LF return phase ratio from Rd (Fant 1997 Eq. A1). Ra is in percent."
+    expr: "max(-1.0 + 4.8 * effectiveRd, 0.0)"
+    deps: [effectiveRd]
+    description: "LF return phase ratio from effectiveRd (Fant 1997 Eq. A1). Ra is in percent."
 
   RaRef:
     expr: "max(-1.0 + 4.8 * RdRef, 0.0)"
@@ -378,10 +395,15 @@ realize:
   # Fant 1997 connected-speech covariation:
   # a 1 dB increase in 1/Rd corresponds to a 2 dB increase in Ee.
   # Convert the inverse-Rd ratio into dB, then double it for the excitation gain.
+  eeCovaryDb:
+    expr: "40.0 * log(max(RdRef, 0.3) / effectiveRd) / log(10.0)"
+    deps: [RdRef, effectiveRd]
+    description: "Fant 1997 Ee-to-1/Rd covariation (2:1 dB ratio) using effectiveRd."
+
   eeGainDb:
-    expr: "40.0 * log(max(RdRef, 0.3) / max(Rd, 0.3)) / log(10.0)"
-    deps: [Rd, RdRef]
-    description: "Fant 1997 Ee-to-1/Rd covariation (2:1 dB ratio)."
+    expr: "eeCovaryDb + EePhraseDb"
+    deps: [eeCovaryDb, EePhraseDb]
+    description: "Total Ee adjustment: Fant 1997 Rd covariation plus phrase contour."
 
   # Source gains (linear)
   voiceGain:

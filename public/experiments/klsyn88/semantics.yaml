@@ -171,6 +171,19 @@ params:
     default: 0.7
     description: "Reference Rd for Fant 1997 proxy covariation"
 
+  RdPhraseOffset:
+    type: float
+    range: [-0.5, 0.5]
+    default: 0
+    description: "Connected-speech Rd offset proxy for phrase-final source softening"
+
+  EePhraseDb:
+    type: float
+    range: [-12, 6]
+    default: 0
+    unit: dB
+    description: "Connected-speech Ee contour offset in dB"
+
   OQ:
     type: float
     range: [0, 99]
@@ -291,31 +304,39 @@ constants:
   B8: 600
 
 realize:
+  effectiveRd:
+    expr: "min(2.7, max(0.3, Rd + RdPhraseOffset))"
+    deps: [Rd, RdPhraseOffset]
+
   # Fant 1997: 1 dB increase in 1/Rd corresponds to a 2 dB increase in Ee.
   # We apply the same gain covariation here even though the backend source is
   # klsyn88's classic glottal model, so unified frontend voice-quality controls
   # continue to affect source strength across experiments.
+  eeCovaryDb:
+    expr: "40.0 * log(max(RdRef, 0.3) / effectiveRd) / log(10.0)"
+    deps: [RdRef, effectiveRd]
+
   eeGainDb:
-    expr: "40.0 * log(max(RdRef, 0.3) / max(Rd, 0.3)) / log(10.0)"
-    deps: [Rd, RdRef]
+    expr: "eeCovaryDb + EePhraseDb"
+    deps: [eeCovaryDb, EePhraseDb]
 
   # Fant 1997 Table 1 gives OQi values at discrete Rd samples. klsyn88 uses
   # Kopen as a percent open phase, so we interpolate those table points and let
   # an explicit OQ override take precedence.
   rdDerivedOpenQuotientPct:
     expr: >-
-      Rd <= 0.5
-        ? 35.0 + (max(Rd, 0.3) - 0.3) * 60.0
-        : (Rd <= 0.7
-            ? 47.0 + (Rd - 0.5) * 42.5
-            : (Rd <= 1.0
-                ? 55.5 + (Rd - 0.7) * 31.6666666667
-                : (Rd <= 1.4
-                    ? 65.0 + (Rd - 1.0) * 20.0
-                    : (Rd <= 2.0
-                        ? 73.0 + (Rd - 1.4) * 8.3333333333
-                        : 78.0 + (min(Rd, 2.7) - 2.0) * 1.4285714286))))
-    deps: [Rd]
+      effectiveRd <= 0.5
+        ? 35.0 + (effectiveRd - 0.3) * 60.0
+        : (effectiveRd <= 0.7
+            ? 47.0 + (effectiveRd - 0.5) * 42.5
+            : (effectiveRd <= 1.0
+                ? 55.5 + (effectiveRd - 0.7) * 31.6666666667
+                : (effectiveRd <= 1.4
+                    ? 65.0 + (effectiveRd - 1.0) * 20.0
+                    : (effectiveRd <= 2.0
+                        ? 73.0 + (effectiveRd - 1.4) * 8.3333333333
+                        : 78.0 + (effectiveRd - 2.0) * 1.4285714286))))
+    deps: [effectiveRd]
 
   effectiveKopen:
     expr: "min(99.0, max(5.0, OQ > 0 ? OQ : rdDerivedOpenQuotientPct))"
@@ -332,8 +353,8 @@ realize:
     deps: [TLTdb, TL, rdDerivedTiltDb]
 
   Ra:
-    expr: "max(-1.0 + 4.8 * Rd, 0.0)"
-    deps: [Rd]
+    expr: "max(-1.0 + 4.8 * effectiveRd, 0.0)"
+    deps: [effectiveRd]
 
   RaRef:
     expr: "max(-1.0 + 4.8 * RdRef, 0.0)"

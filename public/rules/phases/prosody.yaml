@@ -5,9 +5,9 @@ rules:
   #
   # Replaces the O'Shaughnessy 1976 exponential-declination F0 model with a
   # Pierrehumbert 1980 / Ladd 2008 pitch-range model using:
-  #   - Accent-type-specific F0 targets (H*, L*, L+H*, L*+H, H+!H*)
+  #   - Accent-type-specific F0 targets (H*, L*, L+H*, L*+H, H+!H*, H*+L, H+L*, H*+H)
   #   - Iterative downstep (k^n) instead of global declination
-  #   - Phrase accents (H-, L-) plus boundary tones (L%, H%)
+  #   - Initial boundary %H plus phrase accents (H-, L-) and boundary tones (L%, H%)
   #   - Register reset at IP boundaries (breakIndex >= 4)
   #
   # Citations:
@@ -32,6 +32,25 @@ rules:
     citations:
       - Pierrehumbert 1980 (baseline initialization)
       - Ladd 2008 Ch.5
+
+  # --------------------------------------------------------------------------
+  # Rule 2: Initial %H boundary tone
+  # --------------------------------------------------------------------------
+  tobi_initial_boundary_high:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.initialBoundaryTone) && current.initialBoundaryTone == '%H'
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      tag: f0_initial_boundary_high
+    citations:
+      - "Ladd 2008 Ch.3 (%H initial boundary tone in MAE-ToBI)"
+      - "Pierrehumbert 1980 (phrase-initial high edge tone inventory)"
 
   # --------------------------------------------------------------------------
   # Rule 2: H* accent targets with downstep and final lowering
@@ -69,7 +88,64 @@ rules:
       - "O'Shaughnessy 1976 (peak position at 45% of vowel)"
 
   # --------------------------------------------------------------------------
-  # Rule 3: Leading L for L+H* prenuclear accents
+  # Rule 3: H* peak for H*+L falling accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_star_plus_l_peak:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H*+L'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    define:
+      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
+      downstep_factor: >-
+        pow(params.policy.f0.downstep_k, accent_idx)
+      final_lower: >-
+        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? params.policy.f0.final_lowering_factor : 1.0
+      raw_height: >-
+        params.policy.f0.h_star_height * downstep_factor * final_lower
+      clamped_height: >-
+        max([raw_height, params.policy.f0.downstep_floor_fraction])
+      target_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+    insert_point:
+      stream: f0
+      at: at_ratio(current, 0.45)
+      value: target_hz
+      tag: f0_h_star_plus_l_peak
+    citations:
+      - "Pierrehumbert 1980 (H*+L falling accent family)"
+      - "Ladd 2008 Ch.3 (older Pierrehumbert inventory includes H*+L)"
+
+  # --------------------------------------------------------------------------
+  # Rule 4: Trailing L for H*+L falling accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_star_plus_l_tail:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H*+L'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+      tag: f0_h_star_plus_l_tail
+    citations:
+      - "Pierrehumbert 1980 (H*+L trailing low target)"
+      - "Ladd 2008 Ch.3 (falling accent reaches low target after the starred peak)"
+
+  # --------------------------------------------------------------------------
+  # Rule 5: Leading L for L+H* prenuclear accents
   # --------------------------------------------------------------------------
   tobi_accent_l_plus_h_star_lead:
     kind: point
@@ -94,7 +170,7 @@ rules:
       - "Ladd 2008 Ch.3 (prenuclear rising accent shape)"
 
   # --------------------------------------------------------------------------
-  # Rule 4: H* peak for L+H* prenuclear accents
+  # Rule 6: H* peak for L+H* prenuclear accents
   # --------------------------------------------------------------------------
   tobi_accent_l_plus_h_star_peak:
     kind: point
@@ -127,7 +203,7 @@ rules:
       - "Ladd 2008 Ch.2 (downstep still applies to successive H targets)"
 
   # --------------------------------------------------------------------------
-  # Rule 5: H lead for H+!H* downstepped prenuclear accents
+  # Rule 7: H lead for H+!H* downstepped prenuclear accents
   # --------------------------------------------------------------------------
   tobi_accent_h_plus_downstepped_h_star_lead:
     kind: point
@@ -155,7 +231,7 @@ rules:
       - "Pierrehumbert 1980 (leading H + local downstep implementation)"
 
   # --------------------------------------------------------------------------
-  # Rule 6: !H* peak for H+!H* prenuclear accents
+  # Rule 8: !H* peak for H+!H* prenuclear accents
   # --------------------------------------------------------------------------
   tobi_accent_h_plus_downstepped_h_star_peak:
     kind: point
@@ -187,7 +263,118 @@ rules:
       - "Pierrehumbert 1980 (downstepped H target uses k^n scaling)"
 
   # --------------------------------------------------------------------------
-  # Rule 7: L* accent targets (questions)
+  # Rule 9: H peak plus trailing H for H*+H sustained accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_star_plus_h_peak:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H*+H'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    define:
+      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
+      downstep_factor: >-
+        pow(params.policy.f0.downstep_k, accent_idx)
+      raw_height: >-
+        params.policy.f0.h_star_height * downstep_factor
+      clamped_height: >-
+        max([raw_height, params.policy.f0.downstep_floor_fraction])
+      target_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+    insert_point:
+      stream: f0
+      at: at_ratio(current, 0.45)
+      value: target_hz
+      tag: f0_h_star_plus_h_peak
+    citations:
+      - "Pierrehumbert 1980 (H*+H sustained high accent family)"
+      - "Ladd 2008 Ch.3 (older inventory includes H*+H)"
+
+  # --------------------------------------------------------------------------
+  # Rule 10: Trailing H for H*+H sustained accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_star_plus_h_tail:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H*+H'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    define:
+      prev_f0: prev_point('f0')
+      floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      target_hz: >-
+        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: target_hz
+      tag: f0_h_star_plus_h_tail
+    citations:
+      - "Pierrehumbert 1980 (H*+H trailing high target)"
+      - "Ladd 2008 Ch.3 (sustained high accent realization)"
+
+  # --------------------------------------------------------------------------
+  # Rule 11: Leading H for H+L* low-star accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_plus_l_star_lead:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H+L*'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    define:
+      prev_f0: prev_point('f0')
+      floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      target_hz: >-
+        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: target_hz
+      tag: f0_h_plus_l_star_lead
+    citations:
+      - "Pierrehumbert 1980 (H+L* leading high target)"
+      - "Ladd 2008 Ch.3 (older inventory includes H+L*)"
+
+  # --------------------------------------------------------------------------
+  # Rule 12: L* star for H+L* accents
+  # --------------------------------------------------------------------------
+  tobi_accent_h_plus_l_star_peak:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H+L*'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    insert_point:
+      stream: f0
+      at: at_ratio(current, 0.45)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+      tag: f0_h_plus_l_star
+    citations:
+      - "Pierrehumbert 1980 (H+L* low starred target)"
+      - "Ladd 2008 Ch.3 (low-star accent with leading H)"
+
+  # --------------------------------------------------------------------------
+  # Rule 13: L* accent targets (questions)
   # --------------------------------------------------------------------------
   tobi_accent_l_star:
     kind: point
@@ -212,7 +399,7 @@ rules:
       - Ladd 2008 Ch.3 (L* in questions)
 
   # --------------------------------------------------------------------------
-  # Rule 8: Trailing H for L*+H rising accents
+  # Rule 14: Trailing H for L*+H rising accents
   # --------------------------------------------------------------------------
   tobi_accent_l_star_plus_h_trailing:
     kind: point
@@ -237,7 +424,7 @@ rules:
       - "Pierrehumbert 1980 (L*+H low starred tone with trailing rise)"
 
   # --------------------------------------------------------------------------
-  # Rule 9: Unaccented voiced interpolation anchor
+  # Rule 15: Unaccented voiced interpolation anchor
   # --------------------------------------------------------------------------
   tobi_unaccented_declination:
     kind: point
@@ -265,7 +452,7 @@ rules:
       - "Ladd 2008 Ch.3 (local transitions between tonal targets)"
 
   # --------------------------------------------------------------------------
-  # Rule 10: Phrase accent H- at the start of phrase-final silence
+  # Rule 16: Phrase accent H- at the start of phrase-final silence
   # --------------------------------------------------------------------------
   tobi_phrase_accent_high:
     kind: point
@@ -290,7 +477,7 @@ rules:
       - "Ladd 2008 Ch.3 (H- maintained before H%)"
 
   # --------------------------------------------------------------------------
-  # Rule 11: Phrase accent L- at the start of phrase-final silence
+  # Rule 17: Phrase accent L- at the start of phrase-final silence
   # --------------------------------------------------------------------------
   tobi_phrase_accent_low:
     kind: point
@@ -310,7 +497,7 @@ rules:
       - "Ladd 2008 Ch.3 (L- followed by continued low contour)"
 
   # --------------------------------------------------------------------------
-  # Rule 12: L% boundary tone (declarative final fall)
+  # Rule 18: L% boundary tone (declarative final fall)
   # --------------------------------------------------------------------------
   tobi_boundary_low:
     kind: point
@@ -331,7 +518,7 @@ rules:
       - Ladd 2008 (L-L% declarative final lowering)
 
   # --------------------------------------------------------------------------
-  # Rule 13: H% boundary tone (question rise, continuation rise)
+  # Rule 19: H% boundary tone (question rise, continuation rise)
   # --------------------------------------------------------------------------
   tobi_boundary_rise:
     kind: point
@@ -364,7 +551,7 @@ rules:
       - "Ladd 2008 Ch.3 (H- plus H% produces a final rise, not a plateau)"
 
   # --------------------------------------------------------------------------
-  # Rule 14: Register reset at IP boundaries (breakIndex >= 4)
+  # Rule 20: Register reset at IP boundaries (breakIndex >= 4)
   # --------------------------------------------------------------------------
   tobi_register_reset:
     kind: point

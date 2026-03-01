@@ -110,3 +110,15 @@ tests:
         - "effectiveB2 > B2"
         - "effectiveB1p > B1p"
         - "effectiveB2p > B2p"
+
+  - name: phrase contour offsets modulate effective Rd and Ee
+    inputs:
+      Rd: 0.7
+      RdRef: 0.7
+      RdPhraseOffset: 0.1
+      EePhraseDb: -2
+    assert:
+      approx:
+        effectiveRd: 0.8
+      expr:
+        - "eeGainDb < 0"

@@ -155,8 +155,11 @@ export function buildF0ContourFromDeclarative(
       // Citation: Pierrehumbert 1980 (H* and L* tone distinction)
       let accentType: string | undefined;
       if (tag === "f0_h_star") accentType = "H*";
+      else if (tag === "f0_h_star_plus_l_peak") accentType = "H*+L";
       else if (tag === "f0_l_plus_h_star") accentType = "L+H*";
       else if (tag === "f0_h_plus_downstepped_h_star") accentType = "H+!H*";
+      else if (tag === "f0_h_star_plus_h_peak") accentType = "H*+H";
+      else if (tag === "f0_h_plus_l_star") accentType = "H+L*";
       else if (tag === "f0_l_star") accentType = "L*";
       else if (tag === "f0_l_star_plus_h") accentType = "L*+H";
       return {
@@ -261,7 +264,13 @@ const BOUNDARY_TAGS = new Set([
  *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
  */
 function isHighPeakAccent(accentType: string | undefined): boolean {
-  return accentType === "H*" || accentType === "L+H*" || accentType === "H+!H*";
+  return (
+    accentType === "H*" ||
+    accentType === "L+H*" ||
+    accentType === "H+!H*" ||
+    accentType === "H*+L" ||
+    accentType === "H*+H"
+  );
 }
 
 export function applySaggingTransitions(

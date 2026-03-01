@@ -156,6 +156,101 @@ function applySpeakerProfileToParams(
   }
 }
 
+function isActivePhoneToken(token: PipelineToken | null | undefined): boolean {
+  return !!token && token.stream !== "f0" && token.status !== 2;
+}
+
+function isVoicedPhoneToken(token: PipelineToken | null | undefined): boolean {
+  if (!isActivePhoneToken(token) || token?.phoneme === "SIL") return false;
+  const params = token?.params;
+  if (!params || typeof params !== "object" || Array.isArray(params)) return false;
+  const av = typeof params.AV === "number" ? params.AV : 0;
+  const avs = typeof params.AVS === "number" ? params.AVS : 0;
+  return av > 0 || avs > 0;
+}
+
+// Fant 1997 phrase-contour defaults for connected speech.
+// Ee onset rise ~50 ms; main declination ~2 dB/s; final 300-500 ms falls at ~6 dB/s.
+// The Rd phrase-final softening is an engineering companion to the documented Ee fall.
+const FANT_EE_ONSET_RISE_SEC = 0.05;
+const FANT_EE_DECLINATION_DB_PER_SEC = 2.0;
+const FANT_EE_FINAL_FALL_DB_PER_SEC = 6.0;
+const FANT_EE_FINAL_WINDOW_MIN_SEC = 0.3;
+const FANT_EE_FINAL_WINDOW_MAX_SEC = 0.5;
+const FANT_RD_FINAL_OFFSET = 0.18;
+
+function applyFantConnectedSpeechContour(tokens: PipelineToken[]): void {
+  const phraseTokenIndices: number[] = [];
+
+  const flushPhrase = (): void => {
+    if (phraseTokenIndices.length === 0) return;
+
+    const phraseDurationMs = phraseTokenIndices.reduce((sum, idx) => {
+      const duration = Number(tokens[idx]?.duration ?? 0);
+      return sum + (Number.isFinite(duration) && duration > 0 ? duration : 0);
+    }, 0);
+    if (phraseDurationMs <= 0) {
+      phraseTokenIndices.length = 0;
+      return;
+    }
+
+    const phraseDurationSec = phraseDurationMs / 1000;
+    const finalWindowSec = Math.min(
+      FANT_EE_FINAL_WINDOW_MAX_SEC,
+      Math.max(FANT_EE_FINAL_WINDOW_MIN_SEC, phraseDurationSec * 0.35),
+    );
+    const finalWindowStartSec = Math.max(
+      FANT_EE_ONSET_RISE_SEC,
+      phraseDurationSec - finalWindowSec,
+    );
+    const extraFinalFallDbPerSec = FANT_EE_FINAL_FALL_DB_PER_SEC - FANT_EE_DECLINATION_DB_PER_SEC;
+
+    let elapsedMs = 0;
+    for (const idx of phraseTokenIndices) {
+      const token = tokens[idx];
+      const durationMs = Number(token?.duration ?? 0);
+      const safeDurationMs = Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 0;
+      const midpointSec = (elapsedMs + safeDurationMs * 0.5) / 1000;
+      elapsedMs += safeDurationMs;
+
+      if (!isVoicedPhoneToken(token)) continue;
+      const params = token.params as Record<string, number>;
+
+      const onsetRiseDb = midpointSec < FANT_EE_ONSET_RISE_SEC
+        ? -1.0 * (1.0 - midpointSec / FANT_EE_ONSET_RISE_SEC)
+        : 0.0;
+      const declinationDb = -FANT_EE_DECLINATION_DB_PER_SEC * midpointSec;
+      const finalFallDb = midpointSec > finalWindowStartSec
+        ? -extraFinalFallDbPerSec * (midpointSec - finalWindowStartSec)
+        : 0.0;
+      const finalProgress = midpointSec <= finalWindowStartSec
+        ? 0.0
+        : Math.min(1.0, (midpointSec - finalWindowStartSec) / finalWindowSec);
+
+      params.EePhraseDb = (params.EePhraseDb ?? 0) + onsetRiseDb + declinationDb + finalFallDb;
+      params.RdPhraseOffset = (params.RdPhraseOffset ?? 0) + FANT_RD_FINAL_OFFSET * finalProgress;
+    }
+
+    phraseTokenIndices.length = 0;
+  };
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    const token = tokens[i];
+    if (!isActivePhoneToken(token)) continue;
+
+    if (token.phoneme === "SIL") {
+      if (token.breakIndex >= 4) {
+        flushPhrase();
+      }
+      continue;
+    }
+
+    phraseTokenIndices.push(i);
+  }
+
+  flushPhrase();
+}
+
 // Re-export normalizeText from g2p/text-normalize
 export { normalizeText } from "./g2p/text-normalize";
 
@@ -371,6 +466,7 @@ export function textToKlattTrack(
     applySpeakerProfileToParams(nextToken.params, resolvedSpeaker);
     return nextToken;
   });
+  applyFantConnectedSpeechContour(parameterSequence);
   const phoneSequence = parameterSequence.filter(
     (token: PipelineToken) => token?.stream !== "f0" && token?.status !== 2
   );

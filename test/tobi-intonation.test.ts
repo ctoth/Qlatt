@@ -162,6 +162,34 @@ describe("accentIndexInPhrase annotation", () => {
     expect(result[5].accentType).toBe("H+!H*");
     expect(result[10].accentType).toBe("L*+H");
   });
+
+  it("assigns legacy continuation accent families", () => {
+    // "Cat sat," -> sustained high prenuclear head, low-star continuation nucleus
+    const tokens = [
+      sil(),
+      phone("K", "cat"), phone("AE", "cat", 1), phone("T", "cat"),
+      phone("S", "sat"), phone("AE", "sat", 1), phone("T", "sat"),
+      sil(","),
+    ];
+
+    const result = annotateProsody(tokens);
+
+    expect(result[2].accentType).toBe("H*+H");
+    expect(result[5].accentType).toBe("H+L*");
+  });
+
+  it("marks exclamations with H*+L and initial %H", () => {
+    const tokens = [
+      sil(),
+      phone("W", "wow"), phone("AW", "wow", 1),
+      sil("!"),
+    ];
+
+    const result = annotateProsody(tokens);
+
+    expect(result[1].initialBoundaryTone).toBe("%H");
+    expect(result[2].accentType).toBe("H*+L");
+  });
 });
 
 // ---------------------------------------------------------------------------

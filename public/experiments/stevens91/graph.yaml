@@ -447,12 +447,10 @@ nodes:
     params:
       gain: 1.0
 
-  # Output lowpass filter
+  # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass
+  # after the D/A converter. This dedicated DSP node models that output stage.
   outputLp:
-    type: resonator
-    params:
-      frequency: { bind: outputLpFrequency }
-      bandwidth: { bind: outputLpBandwidth }
+    type: reconstruction-filter
 
   masterGain:
     type: gain

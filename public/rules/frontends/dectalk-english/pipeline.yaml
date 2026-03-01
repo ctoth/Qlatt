@@ -1,0 +1,26 @@
+version: v1
+predicates:
+  is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
+  is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
+streams:
+  phone:
+    type: base
+    features:
+      type: [vowel, stop_closure, fricative, affricate, silence, liquid, nasal, glide, flap]
+    scalars:
+      duration: { unit: ms, resolution: klatt, max: 500 }
+  f0:
+    type: point
+    value_type: number
+    unit: Hz
+phases:
+  - name: duration
+    rules: [dectalk_inherent_duration]
+    resolve_scalars: [duration]
+  - name: prosody
+    rules: [dectalk_base_f0]
+  - name: finalize
+    after: [duration, prosody]
+    rules: []
+    compute_times: true
+    resolve_points: [f0]

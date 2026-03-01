@@ -1,0 +1,16 @@
+{
+  "frontends": [
+    {
+      "id": "qlatt-english",
+      "name": "Qlatt English",
+      "description": "English TTS frontend with declarative rule phases",
+      "entryPoint": "frontend.yaml"
+    },
+    {
+      "id": "dectalk-english",
+      "name": "DECtalk 4.63 English",
+      "description": "DECtalk 4.63 English TTS frontend (extracted from C source)",
+      "entryPoint": "frontend.yaml"
+    }
+  ]
+}

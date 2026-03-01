@@ -1,0 +1,13 @@
+version: v1
+rules:
+  dectalk_base_f0:
+    kind: prosody
+    select:
+      stream: phone
+      where: 'current.type == "vowel" || current.type == "nasal" || current.type == "liquid" || current.type == "glide"'
+    insert:
+      stream: f0
+      at: start
+      value: 'policy.speaker.base_f0_hz.value'
+    citations:
+      - "DECtalk 4.63 ph_inton.c (simplified flat F0)"

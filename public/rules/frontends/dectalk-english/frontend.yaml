@@ -1,0 +1,101 @@
+version: v13-cel
+inventory_path: /rules/frontends/dectalk-english/inventory.yaml
+lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
+include:
+  - pipeline.yaml
+  - phases/duration.yaml
+  - phases/prosody.yaml
+parameters:
+  policy:
+    duration:
+      rate_scale: 1.0
+      stress_multipliers:
+        primary: 1.0
+        secondary: 0.9
+        unstressed: 0.7
+      boundary_lengthening:
+        phrase_final: 1.3
+        utterance_final: 1.5
+      citations:
+        - "DECtalk 4.63 ph_setar.c"
+    f0:
+      pitch_range:
+        hat_rise_semitones: 4
+        hat_fall_semitones: -6
+        baseline_declination_st_per_sec: -1.5
+      stress_f0_boost:
+        primary_semitones: 3
+        secondary_semitones: 1.5
+      question_final_rise_semitones: 6
+      citations:
+        - "DECtalk 4.63 ph_inton.c"
+    formant:
+      coarticulation_weight: 0.3
+      transition_time_ms: 30
+      citations:
+        - "DECtalk 4.63 ph_setar.c"
+    speaker:
+      base_f0_hz:
+        value: 122
+        citations: ["DECtalk 4.63 Paul default AP"]
+      formant_scale:
+        value: 1.0
+        citations: ["DECtalk 4.63"]
+      rd_default:
+        value: 0.7
+        citations: ["DECtalk 4.63"]
+      spectral_tilt_offset_db:
+        value: 0
+        citations: ["DECtalk 4.63"]
+output:
+  blend:
+    default_weight: 0.5
+  min_duration:
+    default: 30
+  transition_ms: 30
+  final_silence_ms: 100
+transcription:
+  diagnostic_symbols:
+    aa: [AA1]
+    ae: [AE1]
+    ah: [AH1]
+    ao: [AO1]
+    aw: [AW1]
+    ay: [AY1]
+    b: [B]
+    ch: [CH]
+    d: [D]
+    dh: [DH]
+    eh: [EH1]
+    el: [EL]
+    en: [EN]
+    er: [ER1]
+    ey: [EY1]
+    f: [F]
+    g: [G]
+    gs: [GS]
+    hh: [HH]
+    ih: [IH1]
+    iy: [IY1]
+    jh: [JH]
+    k: [K]
+    l: [L]
+    m: [M]
+    n: [N]
+    ng: [NG]
+    ow: [OW1]
+    oy: [OY1]
+    p: [P]
+    r: [R]
+    s: [S]
+    sh: [SH]
+    t: [T]
+    th: [TH]
+    uh: [UH1]
+    uw: [UW1]
+    v: [V]
+    w: [W]
+    y: [Y]
+    z: [Z]
+    zh: [ZH]
+  punctuation_tokens: [",", ".", "?", "!", ";", ":"]

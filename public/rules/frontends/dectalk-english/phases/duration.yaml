@@ -1,0 +1,11 @@
+version: v1
+rules:
+  dectalk_inherent_duration:
+    kind: duration
+    select:
+      stream: phone
+      where: 'true'
+    set:
+      duration: 'current.inherentDuration ?? 100.0'
+    citations:
+      - "DECtalk 4.63 inventory inherent durations"

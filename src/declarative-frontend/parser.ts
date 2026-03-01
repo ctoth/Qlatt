@@ -190,6 +190,8 @@ export function parseDslSpec(source: unknown): PlainObject {
 
   return {
     version: raw.version ?? null,
+    inventory_path: asString(raw.inventory_path, null),
+    lts_path: asString(raw.lts_path, null),
     parameters,
     input_contract: cloneObject(raw.input_contract),
     streams: Object.fromEntries(

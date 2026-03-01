@@ -1,6 +1,6 @@
 /**
  * Tests that verify the YAML frontend config sections (`output:` and
- * `transcription:`) in frontend.yaml contain the expected values, matching
+ * `transcription:`) in the default bundled frontend contain the expected values, matching
  * the hardcoded defaults in track-assembler.ts and transcribe-text.ts.
  */
 import { describe, expect, it } from "vitest";

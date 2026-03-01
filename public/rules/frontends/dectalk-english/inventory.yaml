@@ -51,7 +51,7 @@ base_params:
   BGZ: 6000
   BGS: 200
   NFC: 0
-  GO: 0
+  GO: 47
 phoneme_targets:
   SIL:
     AV: 0

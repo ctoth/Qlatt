@@ -40,13 +40,34 @@ parameters:
         citations: ["DECtalk 4.63 Paul default AP"]
       formant_scale:
         value: 1.0
-        citations: ["DECtalk 4.63"]
+        citations: ["DECtalk 4.63 Paul male"]
       rd_default:
         value: 0.7
-        citations: ["DECtalk 4.63"]
+        citations: ["DECtalk 4.63 Paul BR=0, male base 0.7"]
       spectral_tilt_offset_db:
         value: 0
-        citations: ["DECtalk 4.63"]
+        citations: ["DECtalk 4.63 Paul BR=0"]
+      f0_minimum:
+        value: 1100
+        citations: ["DECtalk 4.63 Paul (AP-12)*10, ph_vset.c general path"]
+      f0_scale_factor:
+        value: 4100
+        citations: ["DECtalk 4.63 Paul PR*41, ph_vset.c"]
+      f0_lp_filter:
+        value: 2100
+        citations: ["DECtalk 4.63 Paul 1500+15*QU, ph_vset.c general path"]
+      hat_rise_hz10:
+        value: 180
+        citations: ["DECtalk 4.63 Paul HR*10, ph_vset.c general path"]
+      scale_str_rise:
+        value: 32
+        citations: ["DECtalk 4.63 Paul SR direct"]
+      assertiveness:
+        value: 2870
+        citations: ["DECtalk 4.63 Paul AS*41, ph_vset.c"]
+      baseline_fall_hz10:
+        value: 180
+        citations: ["DECtalk 4.63 Paul BF*10"]
 output:
   blend:
     default_weight: 0.5

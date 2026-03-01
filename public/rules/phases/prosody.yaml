@@ -242,10 +242,9 @@ rules:
   # Rule 10: Continuation rise at clause boundaries
   #
   # Kept from O'Shaughnessy 1976 — applies at intermediate phrase boundaries
-  # (commas, semicolons, colons). The ToBI boundary tone rules handle H%
-  # at these same positions, but the continuation rise provides a simple
-  # additive boost. Both fire on the same SIL token: the boundary tone sets
-  # the target level, and the continuation rise nudges it up slightly.
+  # (commas, semicolons, colons) that the ToBI boundary tone system did NOT
+  # already handle.  Guarded by boundaryTone == null so it does not produce
+  # a second F0 target on tokens where tobi_boundary_rise already fired.
   # --------------------------------------------------------------------------
   f0_continuation_rise:
     kind: point
@@ -254,6 +253,7 @@ rules:
       where: >-
         current.phoneme == 'SIL' && (has(current.punctuationSymbol) ? current.punctuationSymbol in [',', ';', ':'] :
         false)
+        && (!has(current.boundaryTone) || current.boundaryTone == null)
     define:
       prev_f0: prev_point('f0')
       continuation_rise: >-

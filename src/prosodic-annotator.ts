@@ -257,6 +257,7 @@ function markFunctionWords(tokens: PipelineToken[]): void {
     // These are only set to non-null values on SIL tokens at phrase boundaries
     // (in assignPhraseEdgeTones), but initializing to null prevents undefined
     // in CEL expressions. Citation: Silverman et al. 1992 (ToBI tone tier).
+    // Reserved for future phrase accent rules (H-, L-)
     token.phraseAccent = null;
     token.boundaryTone = null;
 

@@ -249,4 +249,39 @@ describe("sagging transitions integration", () => {
       expect(track[i].time).toBeGreaterThanOrEqual(track[i - 1].time);
     }
   });
+
+  it("sag midpoint is below linear interpolation between H* peaks (unit contour)", () => {
+    // Build a contour with two well-separated H* peaks and verify the sag
+    // midpoint is depressed below what linear interpolation would give.
+    // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+    const contour: F0Point[] = [
+      { time: 0, f0: 110 },
+      { time: 0.3, f0: 180, tag: "f0_h_star", accentType: "H*" },
+      { time: 0.9, f0: 160, tag: "f0_h_star", accentType: "H*" },
+      { time: 1.1, f0: 100 },
+    ];
+
+    const sagged = applySaggingTransitions(contour, 12, 150);
+
+    // Find the two H* points
+    const hStarPoints = sagged.filter((p) => p.accentType === "H*");
+    expect(hStarPoints.length).toBe(2);
+
+    const left = hStarPoints[0];
+    const right = hStarPoints[1];
+
+    // Linear interpolation at midpoint
+    const midTime = (left.time + right.time) / 2;
+    const linearMid = left.f0 + (right.f0 - left.f0) * 0.5;
+
+    // Find the sag point nearest the midpoint
+    const sagMid = sagged
+      .filter((p) => p.tag === "f0_sag")
+      .reduce((closest, p) =>
+        Math.abs(p.time - midTime) < Math.abs(closest.time - midTime) ? p : closest
+      );
+
+    // Sag point should be at least 5 Hz below linear interpolation
+    expect(sagMid.f0).toBeLessThan(linearMid - 5);
+  });
 });

@@ -291,9 +291,11 @@ export function applySaggingTransitions(
       const time = left.time + span * t;
       const f0Linear = left.f0 + (right.f0 - left.f0) * t;
       const sagAmount = sagDepthHz * 4 * t * (1 - t);
+      // Floor clamp: prevent negative F0 from extreme downstep + sag.
+      const saggedF0 = Math.max(f0Linear - sagAmount, 0);
       sagPoints.push({
         time,
-        f0: f0Linear - sagAmount,
+        f0: saggedF0,
         tag: "f0_sag",
       });
     }

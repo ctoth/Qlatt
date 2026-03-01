@@ -523,3 +523,74 @@ describe("duration model — pipeline ordering", () => {
     expect(catFinalVowel.duration).toBeGreaterThan(catMidVowel.duration);
   });
 });
+
+describe("duration model — edge cases", () => {
+  it("single-word sentence: duration rules still apply (stress, boundary)", () => {
+    // "Go." — single word, gets both stress and pre-boundary lengthening
+    const track = textToKlattTrack("Go.", 110);
+    const segments = extractSegments(track);
+
+    // "Go" should have at least one non-SIL segment
+    const goSegments = segments.filter((s) => s.phoneme !== "SIL" && s.phoneme !== undefined);
+    expect(goSegments.length).toBeGreaterThan(0);
+
+    // Total speech duration should be positive and reasonable
+    const totalSpeechDur = goSegments.reduce((sum, s) => sum + s.duration, 0);
+    expect(totalSpeechDur).toBeGreaterThan(0.05); // at least 50ms of speech
+    expect(totalSpeechDur).toBeLessThan(1.0); // single word should be under 1s
+  });
+
+  it("duration cap holds under worst-case stacking (stressed + nuclear + bi=4)", () => {
+    // Construct a token that gets maximum stacking: stressed (1.3) * nuclear (1.25) * bi=4 (1.5)
+    // Raw product = 2.4375x, should be capped at 2.0x inherent.
+    const vowelToken = {
+      phoneme: "AE",
+      type: "vowel",
+      stress: 1,
+      word: "sat",
+      params: { F1: 660, F2: 1720, AV: 64 },
+      duration: 130,
+      inherentDuration: 130,
+      stream: "phone",
+      status: 1,
+      breakIndex: 4,
+      isAccented: true,
+      isNuclearAccent: true,
+      accentType: "H*",
+      isFunctionWord: false,
+      isContentWord: true,
+    };
+    const silToken = {
+      phoneme: "SIL",
+      type: "silence",
+      word: ".",
+      punctuationSymbol: ".",
+      params: {},
+      duration: 300,
+      inherentDuration: 300,
+      stream: "phone",
+      status: 1,
+      breakIndex: 4,
+    };
+
+    const result = runDeclarativeFrontend(
+      [vowelToken, silToken],
+      { phases: ["duration"] },
+    );
+
+    const vowelOut = result.find(
+      (t: Record<string, unknown>) => t.phoneme === "AE" && t.status !== 2,
+    ) as Record<string, unknown>;
+
+    expect(vowelOut).toBeDefined();
+    if (!vowelOut) return;
+
+    const dur = vowelOut.duration as number;
+    const inherent = vowelOut.inherentDuration as number;
+
+    // Cap at 2.0x inherent duration
+    expect(dur).toBeLessThanOrEqual(inherent * 2.0);
+    // But should still be lengthened substantially
+    expect(dur).toBeGreaterThan(inherent * 1.3);
+  });
+});

@@ -680,7 +680,9 @@ describe("declarative frontend rulepack prosody phase", () => {
 
   // --- Continuation rise ---
 
-  it("inserts continuation rise at comma boundary", () => {
+  it("inserts continuation rise at comma boundary when boundaryTone is null", () => {
+    // When the ToBI system has NOT set a boundary tone (boundaryTone=null),
+    // f0_continuation_rise should still fire on comma SIL tokens.
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = finiteOrder(2);
@@ -722,8 +724,8 @@ describe("declarative frontend rulepack prosody phase", () => {
         isNuclearAccent: false,
         accentType: null,
         accentIndexInPhrase: -1,
-        boundaryTone: "H%",
-        phraseAccent: "L-",
+        boundaryTone: null,
+        phraseAccent: null,
         breakIndex: 3,
       },
       {
@@ -776,5 +778,87 @@ describe("declarative frontend rulepack prosody phase", () => {
     expect(continuation).toBeTruthy();
     // The rise should be ~8 Hz above the previous F0 point
     expect(continuation!.value).toBeGreaterThan(110);
+  });
+
+  it("does NOT insert continuation rise when boundaryTone is already set (H%)", () => {
+    // When the ToBI system has already set boundaryTone='H%' on a comma SIL,
+    // f0_continuation_rise should NOT fire — tobi_boundary_rise handles it.
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
+    const sequence = [
+      {
+        id: "p1",
+        stream: "phone",
+        phoneme: "AE",
+        type: "vowel",
+        stress: 1,
+        duration: 170,
+        params: { AV: 64, AVS: 0 },
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        isAccented: true,
+        isNuclearAccent: true,
+        accentType: "H*",
+        accentIndexInPhrase: 0,
+        boundaryTone: null,
+        phraseAccent: null,
+        breakIndex: 1,
+      },
+      {
+        id: "p2",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 150,
+        punctuationSymbol: ",",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s1,
+        sync_right: s2,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "H%",
+        phraseAccent: "L-",
+        breakIndex: 3,
+      },
+      {
+        id: "p3",
+        stream: "phone",
+        phoneme: "SIL",
+        type: "silence",
+        duration: 300,
+        punctuationSymbol: ".",
+        params: { AV: 0, AVS: 0 },
+        sync_left: s2,
+        sync_right: s3,
+        status: 1,
+        isAccented: false,
+        isNuclearAccent: false,
+        accentType: null,
+        accentIndexInPhrase: -1,
+        boundaryTone: "L%",
+        phraseAccent: "L-",
+        breakIndex: 4,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["prosody", "finalize"],
+      parameters: TOBI_PARAMS,
+    });
+
+    const points = out.filter((t) => t.stream === "f0");
+    // tobi_boundary_rise should fire (boundaryTone == 'H%')
+    const boundaryRise = points.find((p) => p.tag === "f0_boundary_rise");
+    expect(boundaryRise).toBeTruthy();
+    // f0_continuation_rise should NOT fire (guarded by boundaryTone != null)
+    const continuation = points.find((p) => p.tag === "f0_continuation");
+    expect(continuation).toBeFalsy();
   });
 });

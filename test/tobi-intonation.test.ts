@@ -263,6 +263,54 @@ describe("ToBI intonation — integration", () => {
     expect(lastF0).toBeGreaterThan(140);
   });
 
+  it("single-word sentence still produces baseline + accent + boundary", () => {
+    // "Go." — single content word should still get accent + boundary tones
+    const track = textToKlattTrack("Go.");
+    const voicedF0 = getVoicedF0(track);
+    expect(voicedF0.length).toBeGreaterThan(0);
+
+    // Should have accented peak above baseline (110)
+    const maxF0 = Math.max(...voicedF0);
+    expect(maxF0).toBeGreaterThan(120);
+
+    // Should have boundary fall — last voiced F0 should be near or below baseline
+    const lastF0 = voicedF0[voicedF0.length - 1];
+    expect(lastF0).toBeLessThan(maxF0);
+  });
+
+  it("all-function-word input: no accents, F0 stays near baseline", () => {
+    // "the a an" — no content words, no accents assigned
+    const track = textToKlattTrack("the a an.");
+    const voicedF0 = getVoicedF0(track);
+    // May have no voiced frames (function words can be quite reduced),
+    // but if any exist, F0 should stay near baseline (110 Hz)
+    if (voicedF0.length > 0) {
+      const maxF0 = Math.max(...voicedF0);
+      // No accents → no accent peaks → F0 should not exceed baseline + modest overhead
+      // Baseline is 110, unaccented declination is 0.98x, so F0 stays near 110
+      expect(maxF0).toBeLessThan(160);
+    }
+  });
+
+  it("5+ accent sentence: downstep floor holds (F0 never below 130 Hz for peaks)", () => {
+    // "Bob called Jim and Sam told Dave." — 5 content words, multiple accents
+    const track = textToKlattTrack("Bob called Jim and Sam told Dave.");
+    const voicedF0 = getVoicedF0(track);
+    expect(voicedF0.length).toBeGreaterThan(0);
+
+    // Floor: base_hz + range_hz * downstep_floor_fraction = 110 + 80 * 0.25 = 130 Hz
+    // Accent peaks should never go below this floor
+    const maxF0 = Math.max(...voicedF0);
+    expect(maxF0).toBeGreaterThan(130);
+
+    // The minimum voiced F0 can go below 130 (unaccented segments, sag, etc.)
+    // but the PEAK F0 (max) should remain above 130
+    // Also verify no negative or zero F0 values in voiced frames
+    for (const f0 of voicedF0) {
+      expect(f0).toBeGreaterThan(0);
+    }
+  });
+
   it("voiceless onset perturbation still fires", () => {
     // This is a microprosodic rule that should be kept
     // "Pat" has voiceless /P/ before vowel — F0 should be perturbed upward

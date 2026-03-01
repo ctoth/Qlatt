@@ -432,6 +432,39 @@ export function renderLayeredF0(
     commandCursors.set(name, 0);
   }
 
+  // Pre-fill filter state to avoid startup transient.
+  // Compute the initial steady-state value from commands at time <= 0 and
+  // profile layers at normalized position 0.  This lets the IIR filter start
+  // converged instead of ramping from zero.
+  {
+    let initTotal = 0;
+    for (const name of layerNames) {
+      const cfg = modelConfig.layers[name];
+      const cmds = commandsByLayer.get(name)!;
+      if (cfg.type === "persistent") {
+        let level = 0;
+        for (const cmd of cmds) {
+          if (cmd.time <= framePeriod * 0.5) level += cmd.value;
+          else break;
+        }
+        initTotal += level;
+      } else if (cfg.type === "profile") {
+        for (const cmd of cmds) {
+          if (cmd.time <= framePeriod * 0.5 && cmd.profilePoints && cmd.profilePoints.length > 0) {
+            initTotal += interpolateProfile(cmd.profilePoints, 0);
+          }
+        }
+      }
+      // Impulses start at 0 and decay, so they don't contribute to the initial steady-state.
+    }
+    if (initTotal !== 0) {
+      filterState.y1 = initTotal;
+      filterState.y2 = initTotal;
+      filterState.x1 = initTotal;
+      filterState.x2 = initTotal;
+    }
+  }
+
   // Process frames.
   const rawF0Values = new Float64Array(numFrames);
 

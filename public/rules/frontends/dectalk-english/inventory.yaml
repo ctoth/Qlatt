@@ -18,7 +18,7 @@ base_params:
   AV: 0
   AF: 0
   AH: 0
-  AVS: 0
+  AVS: -70
   F0: 0
   sourceMode: 0
   lfMode: 0
@@ -665,6 +665,7 @@ phoneme_targets:
     B2: 200
     B3: 220
     AV: 0
+    AH: 40
     dur: 80
     minimumDuration: 60
     type: fricative
@@ -677,6 +678,11 @@ phoneme_targets:
     B2: 340
     B3: 250
     AV: 58
+    FNP: 270
+    FNZ: 480
+    BNP: 100
+    BNZ: 100
+    AN: 60
     dur: 80
     minimumDuration: 60
     type: nasal
@@ -690,6 +696,11 @@ phoneme_targets:
     B2: 200
     B3: 350
     AV: 60
+    FNP: 270
+    FNZ: 480
+    BNP: 100
+    BNZ: 100
+    AN: 60
     dur: 80
     minimumDuration: 50
     type: nasal
@@ -703,6 +714,11 @@ phoneme_targets:
     B2: 400
     B3: 500
     AV: 60
+    FNP: 270
+    FNZ: 480
+    BNP: 100
+    BNZ: 100
+    AN: 60
     dur: 120
     minimumDuration: 80
     type: nasal
@@ -728,6 +744,11 @@ phoneme_targets:
     B2: 120
     B3: 160
     AV: 60
+    FNP: 270
+    FNZ: 480
+    BNP: 100
+    BNZ: 100
+    AN: 60
     dur: 150
     minimumDuration: 100
     type: nasal
@@ -741,6 +762,7 @@ phoneme_targets:
     B2: 120
     B3: 150
     AV: 0
+    AF: 42
     dur: 100
     minimumDuration: 60
     type: fricative
@@ -754,6 +776,7 @@ phoneme_targets:
     B2: 120
     B3: 120
     AV: 53
+    AF: 32
     dur: 100
     minimumDuration: 70
     type: fricative
@@ -767,6 +790,7 @@ phoneme_targets:
     B2: 90
     B3: 150
     AV: 0
+    AF: 40
     dur: 85
     minimumDuration: 50
     type: fricative
@@ -780,6 +804,7 @@ phoneme_targets:
     B2: 120
     B3: 170
     AV: 53
+    AF: 30
     dur: 60
     minimumDuration: 35
     type: fricative
@@ -793,6 +818,7 @@ phoneme_targets:
     B2: 180
     B3: 300
     AV: 0
+    AF: 60
     dur: 125
     minimumDuration: 65
     type: fricative
@@ -806,6 +832,7 @@ phoneme_targets:
     B2: 140
     B3: 300
     AV: 35
+    AF: 50
     dur: 120
     minimumDuration: 70
     type: fricative
@@ -819,6 +846,7 @@ phoneme_targets:
     B2: 240
     B3: 300
     AV: 0
+    AF: 66
     dur: 125
     minimumDuration: 60
     type: fricative
@@ -832,6 +860,7 @@ phoneme_targets:
     B2: 160
     B3: 300
     AV: 53
+    AF: 56
     dur: 120
     minimumDuration: 70
     type: fricative
@@ -845,6 +874,7 @@ phoneme_targets:
     B2: 180
     B3: 180
     AV: 0
+    AH: 52
     dur: 95
     minimumDuration: 70
     type: stop_closure
@@ -857,7 +887,7 @@ phoneme_targets:
     B1: 90
     B2: 80
     B3: 130
-    AV: 0
+    AV: 47
     dur: 80
     minimumDuration: 50
     type: stop_closure
@@ -871,6 +901,7 @@ phoneme_targets:
     B2: 150
     B3: 240
     AV: 0
+    AH: 55
     dur: 85
     minimumDuration: 50
     type: stop_closure
@@ -883,7 +914,7 @@ phoneme_targets:
     B1: 90
     B2: 100
     B3: 240
-    AV: 0
+    AV: 47
     dur: 80
     minimumDuration: 40
     type: stop_closure
@@ -897,6 +928,7 @@ phoneme_targets:
     B2: 160
     B3: 280
     AV: 0
+    AH: 53
     dur: 99
     minimumDuration: 55
     type: stop_closure
@@ -909,7 +941,7 @@ phoneme_targets:
     B1: 90
     B2: 120
     B3: 180
-    AV: 0
+    AV: 47
     dur: 70
     minimumDuration: 30
     type: stop_closure
@@ -941,6 +973,7 @@ phoneme_targets:
     B2: 280
     B3: 250
     AV: 0
+    AF: 62
     dur: 160
     minimumDuration: 100
     type: affricate
@@ -953,7 +986,8 @@ phoneme_targets:
     B1: 70
     B2: 170
     B3: 250
-    AV: 0
+    AV: 47
+    AF: 52
     dur: 100
     minimumDuration: 75
     type: affricate

@@ -233,8 +233,10 @@ describe("track-assembler", () => {
       // Both should be finite and positive.
       expect(Number.isFinite(earlyF0)).toBe(true);
       expect(Number.isFinite(lateF0)).toBe(true);
-      // The late F0 should have risen toward the target; early is near minimum.
-      expect(lateF0).toBeGreaterThan(earlyF0);
+      // With filter pre-filling, the F0 should already be at (or near) the
+      // target from the start.  Both early and late values should be close to 120.
+      expect(earlyF0).toBeGreaterThanOrEqual(100);
+      expect(lateF0).toBeGreaterThanOrEqual(earlyF0);
     });
 
     it("impulse layer produces a transient that decays", () => {

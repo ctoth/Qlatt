@@ -10,7 +10,7 @@
  */
 
 import type { ProvenanceCollector } from "./provenance";
-import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import { runDeclarativeFrontend } from "./declarative-frontend";
 
 /**
@@ -32,14 +32,18 @@ export const INVENTORY_CITATION = "public/rules/inventory.yaml";
  * Map from rule name to its citation strings, built from the loaded rulepack.
  * Used to attach scholarly citations to provenance decision records.
  */
-export const RULE_CITATIONS = new Map<string, string[]>(
-  Object.entries((QLATT_V12_CEL_RULEPACK?.rules ?? {}) as Record<string, RuleSpec>).map(
-    ([ruleName, ruleDef]) => {
-      const citations = Array.isArray(ruleDef?.citations) ? ruleDef.citations : [];
-      return [ruleName, citations];
-    }
-  )
-);
+export function buildRuleCitationsMap(specSource: unknown): Map<string, string[]> {
+  return new Map<string, string[]>(
+    Object.entries(((specSource as { rules?: unknown })?.rules ?? {}) as Record<string, RuleSpec>).map(
+      ([ruleName, ruleDef]) => {
+        const citations = Array.isArray(ruleDef?.citations) ? ruleDef.citations : [];
+        return [ruleName, citations];
+      }
+    )
+  );
+}
+
+export const RULE_CITATIONS = buildRuleCitationsMap(QLATT_ENGLISH_RULEPACK);
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -72,7 +76,8 @@ export function collectTraceTokenIds(event: PipelineRecord): string[] {
 export function emitRuleTraceDecisions(
   trace: PipelineRecord[],
   provenance: ProvenanceCollector,
-  tokenDecisionIds: Map<string, string>
+  tokenDecisionIds: Map<string, string>,
+  ruleCitations: Map<string, string[]> = RULE_CITATIONS,
 ): void {
   for (const event of trace) {
     if (event?.type !== "match" && event?.type !== "rewrite") continue;
@@ -83,7 +88,7 @@ export function emitRuleTraceDecisions(
     const phaseName = typeof event?.phase === "string" && event.phase.length > 0
       ? event.phase
       : "<unknown-phase>";
-    const citations = RULE_CITATIONS.get(ruleName) ?? [];
+    const citations = ruleCitations.get(ruleName) ?? [];
     const decisionType = event.type === "match" ? "rule_matched" : "rule_rewrite_applied";
     const traceTokenIds = collectTraceTokenIds(event);
 
@@ -168,14 +173,17 @@ export function runPhasesWithProvenance(
   provenance: ProvenanceCollector | null,
   tokenDecisionIds: Map<string, string>,
   parameters?: Record<string, unknown>,
+  specSource?: unknown,
 ): PipelineRecord[] {
   const declarativeInventory = { inventoryResolver };
+  const resolvedSpec = specSource ?? QLATT_ENGLISH_RULEPACK;
 
   if (!provenance) {
     return runDeclarativeFrontend(sequence, {
       ...declarativeInventory,
       phases,
       parameters,
+      specSource: resolvedSpec,
     }) as PipelineRecord[];
   }
 
@@ -183,11 +191,17 @@ export function runPhasesWithProvenance(
     ...declarativeInventory,
     phases,
     parameters,
+    specSource: resolvedSpec,
     includeTrace: true as const,
   }) as { sequence: PipelineRecord[]; trace?: PipelineRecord[] };
 
   if (Array.isArray(result.trace)) {
-    emitRuleTraceDecisions(result.trace, provenance, tokenDecisionIds);
+    emitRuleTraceDecisions(
+      result.trace,
+      provenance,
+      tokenDecisionIds,
+      buildRuleCitationsMap(resolvedSpec),
+    );
   }
 
   return result.sequence;

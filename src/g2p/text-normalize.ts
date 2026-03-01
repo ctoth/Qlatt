@@ -367,6 +367,13 @@ export function normalizeText(text: string): string {
 
   let result = text.toLowerCase();
 
+  // Normalize typographic/smart quotes to ASCII equivalents so that
+  // apostrophe-protection logic (which matches ASCII ') works on text
+  // pasted from word processors, e-books, or web pages.
+  result = result.replace(/[\u2018\u2019\u201A\u2032]/g, "'");  // curly single → '
+  result = result.replace(/[\u201C\u201D\u201E]/g, '"');          // curly double → "
+  result = result.replace(/\u2026/g, "...");                      // … → ...
+
   // Expand abbreviations (must happen before punctuation stripping so we can
   // detect the trailing dot). We use a word-boundary-aware replacement to
   // avoid false positives inside longer words.

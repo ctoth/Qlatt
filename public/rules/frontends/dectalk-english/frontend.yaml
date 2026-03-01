@@ -5,10 +5,45 @@ include:
   - pipeline.yaml
   - phases/duration.yaml
   - phases/prosody.yaml
+f0_model:
+  type: layered_additive
+  citations:
+    - "Fujisaki (command-response model: additive phrase + accent layers)"
+    - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
+    - "Rabiner 1968 (three-component: archetypal + stress + consonant)"
+  filter:
+    type: lowpass_2pole
+    # Filter cutoff resolved from speaker params if available; fallback to default.
+    # DECtalk's f0_lp_filter=2100 is a coefficient (not Hz); the actual -3dB
+    # cutoff of DECtalk's 1-pole filter is ~6 Hz.  For qlatt's 2-pole
+    # Butterworth at 200 Hz frame rate, 10 Hz gives ~40ms rise time,
+    # matching DECtalk's prosodic smoothing behavior.
+    default_cutoff: 10
+  layers:
+    baseline:
+      type: profile
+    hat:
+      type: persistent
+    stress:
+      type: impulse
+      decay: halving
+    boundary:
+      type: impulse
+      decay: halving
+  combine: sum
+  # Speaker scaling is NOT enabled because tts-frontend.ts does not yet pass
+  # speakerParams to renderLayeredF0().  All values in the prosody rules are
+  # pre-scaled to direct Hz for Paul.  When speaker scaling is wired up,
+  # uncomment this block and switch rules to internal Hz*10 units.
+  # speaker_scale:
+  #   minimum_param: f0_minimum
+  #   range_param: f0_scale_factor
+  #   reference: 1300
 parameters:
   policy:
     duration:
       rate_scale: 1.0
+      stress_secondary_level: 2
       pause_comma_ms: 150
       pause_period_ms: 300
       pause_clause_initial_ms: 32
@@ -37,16 +72,55 @@ parameters:
         - "DECtalk 4.63 p_us_tim.c"
         - "DECtalk 4.63 ph_defs.h (NF*MS constants)"
     f0:
-      pitch_range:
-        hat_rise_semitones: 4
-        hat_fall_semitones: -6
-        baseline_declination_st_per_sec: -1.5
-      stress_f0_boost:
-        primary_semitones: 3
-        secondary_semitones: 1.5
-      question_final_rise_semitones: 6
+      # Baseline declination profiles (Hz, pre-scaled for Paul).
+      # Source: Ph_drwt02.c f0basetypes[0][] (declarative), mapped through
+      # speaker scaling formula: Hz = (f0min + (val - 1300) * PR*41/4096) / 10
+      # with Paul: f0min=1100, PR=100 (scale ~1.0).
+      baseline_declarative:
+        - 95.7
+        - 94.5
+        - 93.9
+        - 92.7
+        - 91.3
+        - 90.9
+        - 89.5
+        - 88.2
+        - 87.9
+        - 86.5
+        - 85.3
+        - 84.0
+        - 83.8
+        - 82.4
+        - 78.0
+        - 75.2
+        - 66.3
+      # Hat rise/fall in Hz (hat_rise_hz10 / 10 * scale).
+      # Paul: HR=18, general path -> size_hat_rise = 180 Hz*10 -> 18.0 Hz.
+      hat_rise_hz: 18.0
+      # Final fall below baseline at declarative sentence end.
+      # Source: F0_FINAL_FALL = 180 Hz*10 -> 18.0 Hz.
+      final_fall_hz: 18.0
+      # Non-final clause boundary fall.
+      non_final_fall_hz: 15.0
+      # Comma boundary fall.
+      comma_fall_hz: 12.0
+      # Question boundary fall (reduced).
+      question_fall_hz: 8.0
+      # Stress impulse magnitudes (Hz, from Hz*10 / 10).
+      # Source: f0_mstress_level[] = {1, 71, 31, 281} Hz*10.
+      stress_level_primary_hz: 7.1
+      stress_level_secondary_hz: 3.1
+      stress_level_emphasis_hz: 28.1
+      # Fixed phrase-position impulse component (Hz).
+      # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10} Hz*10.
+      # Using average of first 4 positions: (140+90+60+40)/4 = 82.5 Hz*10 = 8.25 Hz.
+      stress_phrase_position_hz: 8.25
+      # Stress impulse duration in 5ms frames (NF100MS at 5ms = 20 frames).
+      stress_impulse_duration_frames: 20
       citations:
-        - "DECtalk 4.63 ph_inton.c"
+        - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
+        - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"
+        - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
     formant:
       coarticulation_weight: 0.3
       transition_time_ms: 30

@@ -93,7 +93,7 @@ rules:
         dispatch:
           - when: stress_val == 1
             value: 1.0
-          - when: stress_val == 2
+          - when: stress_val == params.policy.duration.stress_secondary_level
             value: params.policy.duration.stress_secondary
           - default: params.policy.duration.stress_unstressed
         tag: stress
@@ -114,7 +114,7 @@ rules:
     define:
       same_word: current.word
       other_vowel: >-
-        look_back_where(current, 10, "current.type == 'vowel' && has(current.word) && current.word == same_word")
+        look_back_where(current, 10, "current.type == 'vowel' && has(current.word) && current.word == source.word")
     constraint: other_vowel != null
     apply:
       - field: duration

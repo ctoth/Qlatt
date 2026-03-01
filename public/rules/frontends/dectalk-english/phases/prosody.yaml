@@ -1,13 +1,245 @@
 version: v1
 rules:
-  dectalk_base_f0:
-    kind: prosody
+  # ==========================================================================
+  # DECtalk Hat-Pattern F0 Model (Klatt 1982)
+  #
+  # Generates F0 layer commands for the layered additive F0 engine.
+  # Five components:
+  #   1. Baseline declination (profile layer) -- 17-point piecewise-linear
+  #   2. Hat rise (persistent/hat layer) -- STEP at first stressed vowel
+  #   3. Hat fall (persistent/hat layer) -- negative STEP at last stressed vowel
+  #   4. Stress impulses (impulse/stress layer) -- at each stressed vowel
+  #   5. Boundary reset (persistent/hat layer) -- reset at SIL boundaries
+  #
+  # All values are in direct Hz (pre-scaled for Paul, PR=100).
+  # When speaker scaling is wired into the renderer, switch to internal Hz*10.
+  #
+  # Citations:
+  #   - Klatt 1982 "The KLATTalk text-to-speech conversion system"
+  #   - DECtalk 4.63 ph_inton1.c (hat-pattern command generation)
+  #   - DECtalk 4.63 Ph_drwt02.c (baseline profiles, frame-level realization)
+  #   - Fujisaki, H. "Information, Prosody, and Modeling" (additive F0 layers)
+  # ==========================================================================
+
+  # --------------------------------------------------------------------------
+  # Rule 1: Baseline Declination Profile
+  #
+  # Fires at the first phoneme of each phrase (first non-SIL after SIL, or
+  # the very first phoneme).  Inserts a 17-point piecewise-linear profile
+  # into the baseline layer that spans the entire utterance duration.
+  #
+  # Source: Ph_drwt02.c f0basetypes[0][] (declarative clause type).
+  # Values pre-scaled from Hz*10 to Hz for Paul (PR=100, scale ~1.0).
+  #
+  # Citations:
+  #   - DECtalk 4.63 Ph_drwt02.c (17-point baseline profile)
+  #   - Klatt 1982 (declination as baseline component)
+  # --------------------------------------------------------------------------
+  dectalk_baseline_declination:
+    kind: f0_layer
     select:
       stream: phone
-      where: 'current.type == "vowel" || current.type == "nasal" || current.type == "liquid" || current.type == "glide"'
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
     insert:
-      stream: f0
-      at: start
-      value: 'policy.speaker.base_f0_hz.value'
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points:
+        - 95.7
+        - 94.5
+        - 93.9
+        - 92.7
+        - 91.3
+        - 90.9
+        - 89.5
+        - 88.2
+        - 87.9
+        - 86.5
+        - 85.3
+        - 84.0
+        - 83.8
+        - 82.4
+        - 78.0
+        - 75.2
+        - 66.3
+      tag: f0_baseline
     citations:
-      - "DECtalk 4.63 ph_inton.c (simplified flat F0)"
+      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[0][] (declarative baseline)"
+      - "Klatt 1982 (baseline declination component)"
+
+  # --------------------------------------------------------------------------
+  # Rule 2: Hat Rise (STEP into hat layer)
+  #
+  # Fires at the first stressed vowel in each phrase.  Detection: current is
+  # a primary-stressed vowel AND looking backward, the nearest stressed vowel
+  # or SIL is either SIL or not found (meaning no prior stressed vowel in
+  # this phrase).
+  #
+  # Source: ph_inton1.c Rule 1 (FHAT_BEGINS -> STEP command).
+  # ph_aloph.c (FHAT_BEGINS placed on first stressed syllabic in phrase).
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c Rule 1 (hat rise generation)
+  #   - DECtalk 4.63 ph_aloph.c (FHAT_BEGINS placement)
+  #   - Klatt 1982 (hat-pattern: rise at first accent)
+  # --------------------------------------------------------------------------
+  dectalk_hat_rise:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      # Look backward for the nearest token that is either a stressed vowel
+      # or a SIL boundary.  If the result is SIL or null, current is the
+      # first stressed vowel in the phrase (hat begins).
+      nearest_back: >-
+        look_back_where(current, 100, '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
+      is_hat_begins: >-
+        nearest_back == null || nearest_back.phoneme == "SIL"
+      rise_hz: >-
+        params.policy.f0.hat_rise_hz
+    constraint: is_hat_begins
+    insert:
+      layer: hat
+      at: at_sync(current.sync_left)
+      value: rise_hz
+      tag: f0_hat_rise
+    citations:
+      - "DECtalk 4.63 ph_inton1.c Rule 1 (FHAT_BEGINS -> STEP hatsize)"
+      - "Klatt 1982 (hat rise at first accent in phrase)"
+
+  # --------------------------------------------------------------------------
+  # Rule 3: Hat Fall (negative STEP into hat layer)
+  #
+  # Fires at the last stressed vowel in each phrase.  Detection: current is
+  # a primary-stressed vowel AND looking forward, the nearest stressed vowel
+  # or SIL is either SIL or not found (meaning no later stressed vowel in
+  # this phrase).
+  #
+  # The fall magnitude = hat_rise + final_fall (returns to baseline AND goes
+  # below by final_fall amount).
+  #
+  # Source: ph_inton1.c Rule 3 (FHAT_ENDS -> negative STEP).
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c Rule 3 (hat fall generation)
+  #   - Klatt 1982 (hat fall at last accent + phrase-final lowering)
+  # --------------------------------------------------------------------------
+  dectalk_hat_fall:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      # Look forward for the nearest stressed vowel or SIL boundary.
+      # If the result is SIL or null, current is the last stressed vowel.
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_hat_ends: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      # Total fall: hat_rise (cancel the rise) + final_fall (below baseline).
+      fall_hz: >-
+        params.policy.f0.hat_rise_hz + params.policy.f0.final_fall_hz
+    constraint: is_hat_ends
+    insert:
+      layer: hat
+      at: at_sync(current.sync_right)
+      value: "-(fall_hz)"
+      tag: f0_hat_fall
+    citations:
+      - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS -> negative STEP)"
+      - "Klatt 1982 (hat fall: cancel rise + phrase-final lowering)"
+
+  # --------------------------------------------------------------------------
+  # Rule 4: Stress Impulse (decaying pulse into stress layer)
+  #
+  # Fires at every primary-stressed vowel.  Inserts an impulse whose magnitude
+  # is stress_level_primary + a fixed phrase-position component (simplified
+  # from the position-dependent f0_mphrase_position[] table).
+  #
+  # The impulse decays over stress_impulse_duration_frames (20 frames = 100ms)
+  # using halving decay (DECtalk style: value -= decay, decay /= 2).
+  #
+  # Simplification: DECtalk tracks nrises_sofar to index into
+  # f0_mphrase_position[], which requires stateful counting.  We use a fixed
+  # average of the first 4 entries: (14.0+9.0+6.0+4.0)/4 = 8.25 Hz.
+  #
+  # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1).
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse generation)
+  #   - Klatt 1982 (stress component: impulse at stressed syllables)
+  # --------------------------------------------------------------------------
+  dectalk_stress_impulse:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      # Impulse magnitude = stress level + phrase position component.
+      # Scaled by scale_str_rise / 32 (Paul: 32/32 = 1.0).
+      stress_component: >-
+        params.policy.f0.stress_level_primary_hz
+      position_component: >-
+        params.policy.f0.stress_phrase_position_hz
+      scale_factor: >-
+        params.policy.speaker.scale_str_rise / 32.0
+      impulse_hz: >-
+        (stress_component + position_component) * scale_factor
+    insert:
+      layer: stress
+      at: at_sync(current.sync_left)
+      value: impulse_hz
+      duration_frames: params.policy.f0.stress_impulse_duration_frames
+      tag: f0_stress_impulse
+    citations:
+      - "DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse)"
+      - "Klatt 1982 (stress-component F0 impulse)"
+
+  # --------------------------------------------------------------------------
+  # Rule 5: Boundary Reset (persistent hat layer reset at SIL)
+  #
+  # At phrase boundaries (SIL tokens), reset the hat layer to 0 by inserting
+  # a STEP that cancels the accumulated hat level.  In DECtalk this is handled
+  # by F0_RESET at clause boundaries (ph_inton1.c Rules 7-8).
+  #
+  # Implementation: emit a persistent hat command with value =
+  # -(hat_rise - (hat_rise + final_fall)) = final_fall.  This cancels the
+  # net hat fall that was applied: rise (+18) then fall (-36) = net -18,
+  # so a reset of +18 brings it back to 0.
+  #
+  # Source: ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL/FSENTENDS).
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c Rules 7-8 (boundary F0 reset)
+  #   - Klatt 1982 (hat state machine reset at clause boundaries)
+  # --------------------------------------------------------------------------
+  dectalk_boundary_reset:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == "SIL"
+        && prev != null && prev.phoneme != "SIL"
+    define:
+      # After a complete hat pattern (rise + fall), the persistent hat level is:
+      #   hat_rise_hz + (-(hat_rise_hz + final_fall_hz)) = -final_fall_hz
+      # To reset to 0, add +final_fall_hz.
+      reset_value: >-
+        params.policy.f0.final_fall_hz
+    insert:
+      layer: hat
+      at: at_sync(current.sync_left)
+      value: reset_value
+      tag: f0_boundary_reset
+    citations:
+      - "DECtalk 4.63 ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL)"
+      - "Klatt 1982 (hat state reset at clause boundaries)"

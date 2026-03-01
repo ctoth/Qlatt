@@ -2,6 +2,9 @@ version: v1
 predicates:
   is_question_boundary: 'current.phoneme == "SIL" && current.punctuationSymbol == "?"'
   is_stressed_vowel: 'current.type == "vowel" && has(current.stress) && current.stress == 1'
+  is_stressed_vowel_or_boundary: >-
+    (current.type == "vowel" && has(current.stress) && current.stress == 1)
+    || current.phoneme == "SIL"
 streams:
   phone:
     type: base
@@ -10,6 +13,10 @@ streams:
     scalars:
       duration: { unit: ms, resolution: klatt, max: 500, floor_field: minimumDuration }
   f0:
+    type: point
+    value_type: number
+    unit: Hz
+  f0_layer:
     type: point
     value_type: number
     unit: Hz
@@ -31,7 +38,12 @@ phases:
       - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: prosody
-    rules: [dectalk_base_f0]
+    rules:
+      - dectalk_baseline_declination
+      - dectalk_hat_rise
+      - dectalk_hat_fall
+      - dectalk_stress_impulse
+      - dectalk_boundary_reset
   - name: finalize
     after: [duration, prosody]
     rules: []

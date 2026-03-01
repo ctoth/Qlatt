@@ -2,10 +2,8 @@
  * Impulsive glottal source AudioWorklet processor
  * Wraps the impulsive-source WASM primitive
  */
-import { initWasmModule } from "./wasm-utils.js";
-const wasmUrl = typeof URL === "function"
-    ? new URL("./impulsive-source.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}impulsive-source.wasm`;
+import { initWasmModule, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./impulsive-source.wasm");
 class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
     wasm;
     state;
@@ -37,7 +35,7 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
             else if (event?.data?.type === "reset") {
@@ -85,16 +83,7 @@ class ImpulsiveSourceProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = {
             type: "metrics",
             node: this.nodeId,

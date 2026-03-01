@@ -1,7 +1,5 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
-const wasmUrl = typeof URL === "function"
-    ? new URL("./signal-switch.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}signal-switch.wasm`;
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./signal-switch.wasm");
 /**
  * Signal Switch AudioWorklet Processor
  *
@@ -47,7 +45,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
         };
@@ -119,16 +117,7 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = {
             type: "metrics",
             node: this.nodeId,
@@ -139,31 +128,15 @@ class SignalSwitchProcessor extends AudioWorkletProcessor {
         };
         // Report input0 metrics
         if (input0Buffer) {
-            let in0Sum = 0;
-            let in0Peak = 0;
-            for (let i = 0; i < input0Buffer.length; i += 1) {
-                const v = input0Buffer[i];
-                in0Sum += v * v;
-                const av = Math.abs(v);
-                if (av > in0Peak)
-                    in0Peak = av;
-            }
-            payload.in0Rms = Math.sqrt(in0Sum / input0Buffer.length);
-            payload.in0Peak = in0Peak;
+            const in0Metrics = computeRmsPeak(input0Buffer);
+            payload.in0Rms = in0Metrics.rms;
+            payload.in0Peak = in0Metrics.peak;
         }
         // Report input1 metrics
         if (input1Buffer) {
-            let in1Sum = 0;
-            let in1Peak = 0;
-            for (let i = 0; i < input1Buffer.length; i += 1) {
-                const v = input1Buffer[i];
-                in1Sum += v * v;
-                const av = Math.abs(v);
-                if (av > in1Peak)
-                    in1Peak = av;
-            }
-            payload.in1Rms = Math.sqrt(in1Sum / input1Buffer.length);
-            payload.in1Peak = in1Peak;
+            const in1Metrics = computeRmsPeak(input1Buffer);
+            payload.in1Rms = in1Metrics.rms;
+            payload.in1Peak = in1Metrics.peak;
         }
         this.port.postMessage(payload);
     }

@@ -1,13 +1,8 @@
 // Biquad notch (band-reject) filter worklet processor.
 // Numerically stable replacement for Klatt FIR antiresonator at high sample rates.
 // Reference: Bristow-Johnson, "Audio EQ Cookbook" (2005)
-
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
-
-const wasmUrl = typeof URL === "function"
-    ? new URL("./biquad-notch.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}biquad-notch.wasm`;
-
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./biquad-notch.wasm");
 class BiquadNotchProcessor extends AudioWorkletProcessor {
     wasm;
     state;
@@ -19,7 +14,6 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
     bypassAtZero;
     reportInterval;
     _reportCountdown;
-
     static get parameterDescriptors() {
         return [
             { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
@@ -27,7 +21,6 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
             { name: "gain", defaultValue: 1, minValue: 0, maxValue: 4, automationRate: "k-rate" },
         ];
     }
-
     constructor(options) {
         super(options);
         const opts = options;
@@ -42,7 +35,7 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
         };
@@ -57,7 +50,6 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
             this.port.postMessage({ type: "ready", node: this.nodeId });
         });
     }
-
     process(inputs, outputs, parameters) {
         const output = outputs[0];
         if (!output || !output[0]) {
@@ -78,7 +70,8 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         if (bypass) {
             if (inputChannel) {
                 outputChannel.set(inputChannel);
-            } else {
+            }
+            else {
                 outputChannel.fill(0);
             }
             this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
@@ -94,7 +87,8 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         }
         if (inputChannel) {
             inputView.set(inputChannel);
-        } else {
+        }
+        else {
             inputView.fill(0);
         }
         this.wasm.biquad_notch_set_params(this.state, freq, bw, sampleRate);
@@ -109,33 +103,19 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
         return true;
     }
-
     _reportMetrics(buffer, inputBuffer, params) {
-        if (!this.debug) return;
+        if (!this.debug)
+            return;
         this._reportCountdown -= 1;
-        if (this._reportCountdown > 0) return;
+        if (this._reportCountdown > 0)
+            return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak) peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = { type: "metrics", node: this.nodeId, rms, peak };
         if (inputBuffer) {
-            let inSum = 0;
-            let inPeak = 0;
-            for (let i = 0; i < inputBuffer.length; i += 1) {
-                const v = inputBuffer[i];
-                inSum += v * v;
-                const av = Math.abs(v);
-                if (av > inPeak) inPeak = av;
-            }
-            payload.inRms = Math.sqrt(inSum / inputBuffer.length);
-            payload.inPeak = inPeak;
+            const inMetrics = computeRmsPeak(inputBuffer);
+            payload.inRms = inMetrics.rms;
+            payload.inPeak = inMetrics.peak;
         }
         if (params) {
             payload.freq = params.freq;
@@ -145,5 +125,4 @@ class BiquadNotchProcessor extends AudioWorkletProcessor {
         this.port.postMessage(payload);
     }
 }
-
 registerProcessor("biquad-notch-processor", BiquadNotchProcessor);

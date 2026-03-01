@@ -1,4 +1,4 @@
-"use strict";
+import { computeRmsPeak } from "./wasm-utils.js";
 class NoiseSourceProcessor extends AudioWorkletProcessor {
     y1;
     alpha;
@@ -12,7 +12,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
         return [
             { name: "gain", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" },
-            { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 8000, automationRate: "k-rate" },
+            { name: "cutoff", defaultValue: 1000, minValue: 50, maxValue: 20000, automationRate: "k-rate" },
         ];
     }
     constructor(options) {
@@ -100,16 +100,7 @@ class NoiseSourceProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = { type: "metrics", node: this.nodeId, rms, peak };
         if (params) {
             payload.gainAvg = params.gainAvg;

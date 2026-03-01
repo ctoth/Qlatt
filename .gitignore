@@ -1,7 +1,35 @@
 .aider*
+.claude/
 node_modules/
 target/
 out/
 out
+dist/
+tmp/
+/worklets/
+
+# Build artifacts
 *.pdf
 *.png
+*.wasm.d.ts
+
+# Logs and temp output
+*.log
+*.cpuprofile
+stdout
+0$
+.tsc-errors*.txt
+explain-out.json
+
+# Ephemeral working artifacts
+reports/
+prompts/
+unused-papers/
+frontend-spec-feedback-*.md
+review.md
+synth.md
+procedure.md
+paper-quest.md
+papers-to-find.md
+papers-to-acquire-climate.md
+papers.md

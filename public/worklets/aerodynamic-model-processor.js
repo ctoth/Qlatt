@@ -16,17 +16,8 @@
  *   output[6] = open quotient ratio (0-1)
  *   output[7] = spectral tilt proxy (dB/oct)
  */
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
-const wasmUrl = typeof URL === "function"
-    ? new URL("./aerodynamic-model.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}aerodynamic-model.wasm`;
-const UNINITIALIZED_ALLOC = {
-    memory: new WebAssembly.Memory({ initial: 1 }),
-    alloc_f32: () => {
-        throw new Error("aerodynamic-model WASM not initialized");
-    },
-    dealloc_f32: () => { },
-};
+import { initWasmModule, WasmBuffer, resolveWasmUrl, UNINITIALIZED_ALLOC, fillParamBuffer } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./aerodynamic-model.wasm");
 class AerodynamicModelProcessor extends AudioWorkletProcessor {
     wasm;
     state;
@@ -77,7 +68,7 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
             ps: new WasmBuffer(UNINITIALIZED_ALLOC),
         };
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
             else if (event?.data?.type === "reset") {
@@ -106,20 +97,6 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
             this.ready = true;
             this.port.postMessage({ type: "ready", node: this.nodeId });
         });
-    }
-    _fillParamBuffer(buffer, values, blockSize) {
-        const len = values.length > 1 ? blockSize : 1;
-        buffer.ensure(len);
-        if (!buffer.view) {
-            return len;
-        }
-        if (values.length > 1 && values.length === blockSize) {
-            buffer.view.set(values);
-        }
-        else {
-            buffer.view[0] = values.length > 0 ? values[0] : 0;
-        }
-        return len;
     }
     process(_inputs, outputs, parameters) {
         const voicingOut = outputs[0];
@@ -176,13 +153,13 @@ class AerodynamicModelProcessor extends AudioWorkletProcessor {
         const stValues = parameters.st ?? new Float32Array([0]);
         const pmValues = parameters.pm ?? new Float32Array([0]);
         const psValues = parameters.ps ?? new Float32Array([8]);
-        const enableLen = this._fillParamBuffer(this.paramBuffers.enable, enableValues, blockSize);
-        const agLen = this._fillParamBuffer(this.paramBuffers.ag, agValues, blockSize);
-        const acLen = this._fillParamBuffer(this.paramBuffers.ac, acValues, blockSize);
-        const anLen = this._fillParamBuffer(this.paramBuffers.an, anValues, blockSize);
-        const stLen = this._fillParamBuffer(this.paramBuffers.st, stValues, blockSize);
-        const pmLen = this._fillParamBuffer(this.paramBuffers.pm, pmValues, blockSize);
-        const psLen = this._fillParamBuffer(this.paramBuffers.ps, psValues, blockSize);
+        const enableLen = fillParamBuffer(this.paramBuffers.enable, enableValues, blockSize);
+        const agLen = fillParamBuffer(this.paramBuffers.ag, agValues, blockSize);
+        const acLen = fillParamBuffer(this.paramBuffers.ac, acValues, blockSize);
+        const anLen = fillParamBuffer(this.paramBuffers.an, anValues, blockSize);
+        const stLen = fillParamBuffer(this.paramBuffers.st, stValues, blockSize);
+        const pmLen = fillParamBuffer(this.paramBuffers.pm, pmValues, blockSize);
+        const psLen = fillParamBuffer(this.paramBuffers.ps, psValues, blockSize);
         this.voicingBuffer.ensure(blockSize);
         this.aspirationBuffer.ensure(blockSize);
         this.fricationBuffer.ensure(blockSize);

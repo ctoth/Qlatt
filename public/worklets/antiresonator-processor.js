@@ -1,7 +1,5 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
-const wasmUrl = typeof URL === "function"
-    ? new URL("./antiresonator.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}antiresonator.wasm`;
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./antiresonator.wasm");
 class AntiResonatorProcessor extends AudioWorkletProcessor {
     wasm;
     state;
@@ -13,6 +11,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     bypassAtZero;
     reportInterval;
     _reportCountdown;
+    _explosionLogged;
     static get parameterDescriptors() {
         return [
             { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
@@ -33,8 +32,9 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
         this.bypassAtZero = Boolean(opts?.processorOptions?.bypassAtZero);
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
+        this._explosionLogged = false;
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
         };
@@ -99,6 +99,32 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
             return true;
         }
         outputChannel.set(this.outputBuffer.view);
+        // INSTRUMENTATION: detect explosion
+        if (!this._explosionLogged) {
+            let outSum = 0;
+            for (let i = 0; i < outputChannel.length; i++) {
+                outSum += outputChannel[i] * outputChannel[i];
+            }
+            const outRms = Math.sqrt(outSum / outputChannel.length);
+            if (outRms > 100) {
+                this._explosionLogged = true;
+                let inSum = 0;
+                if (inputChannel) {
+                    for (let i = 0; i < inputChannel.length; i++) {
+                        inSum += inputChannel[i] * inputChannel[i];
+                    }
+                }
+                const inRms = Math.sqrt(inSum / (inputChannel?.length || 1));
+                console.error(`[ANTIRESONATOR EXPLOSION] node=${this.nodeId} outRms=${outRms.toFixed(1)} inRms=${inRms.toFixed(4)} freq=${freq} bw=${bw} gain=${gain} bypassAtZero=${this.bypassAtZero} sampleRate=${sampleRate}`);
+                this.port.postMessage({
+                    type: "explosion",
+                    node: this.nodeId,
+                    outRms, inRms, freq, bw, gain,
+                    bypassAtZero: this.bypassAtZero,
+                    sampleRate,
+                });
+            }
+        }
         this._reportMetrics(outputChannel, inputChannel, { freq, bw, gain });
         return true;
     }
@@ -109,29 +135,12 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         const payload = { type: "metrics", node: this.nodeId, rms, peak };
         if (inputBuffer) {
-            let inSum = 0;
-            let inPeak = 0;
-            for (let i = 0; i < inputBuffer.length; i += 1) {
-                const v = inputBuffer[i];
-                inSum += v * v;
-                const av = Math.abs(v);
-                if (av > inPeak)
-                    inPeak = av;
-            }
-            payload.inRms = Math.sqrt(inSum / inputBuffer.length);
-            payload.inPeak = inPeak;
+            const inMetrics = computeRmsPeak(inputBuffer);
+            payload.inRms = inMetrics.rms;
+            payload.inPeak = inMetrics.peak;
         }
         if (params) {
             payload.freq = params.freq;

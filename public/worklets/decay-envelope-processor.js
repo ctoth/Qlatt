@@ -1,7 +1,5 @@
-import { initWasmModule, WasmBuffer } from "./wasm-utils.js";
-const wasmUrl = typeof URL === "function"
-    ? new URL("./decay-envelope.wasm", import.meta.url).toString()
-    : `${import.meta.url.replace(/[^/]*$/, "")}decay-envelope.wasm`;
+import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
+const wasmUrl = resolveWasmUrl("./decay-envelope.wasm");
 /**
  * Decay Envelope AudioWorklet Processor
  *
@@ -69,7 +67,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
         // (WASM also tracks this internally, but JS tracking enables metrics)
         this.lastTriggerAudio = 0;
         this.port.onmessage = (event) => {
-            if (event?.data?.type === "ping") {
+            if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
             }
             else if (event?.data?.type === "reset") {
@@ -182,16 +180,7 @@ class DecayEnvelopeProcessor extends AudioWorkletProcessor {
         if (this._reportCountdown > 0)
             return;
         this._reportCountdown = this.reportInterval;
-        let sum = 0;
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-            const v = buffer[i];
-            sum += v * v;
-            const av = Math.abs(v);
-            if (av > peak)
-                peak = av;
-        }
-        const rms = Math.sqrt(sum / buffer.length);
+        const { rms, peak } = computeRmsPeak(buffer);
         if (!this.wasm)
             return;
         const currentValue = this.wasm.decay_envelope_get_value(this.state);

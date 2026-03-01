@@ -51,7 +51,7 @@ export type OutputConfig = {
 };
 
 /** Voice quality parameter overrides injected into every frame.
- *  Resolved from voice_quality_presets in frontend.yaml.
+ *  Resolved from voice_quality_presets in the selected frontend spec.
  *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
 export type VoiceQualityOverrides = {
   /** Rd value for LF glottal source. Citation: Fant 1997 Table 1 */

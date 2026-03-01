@@ -1,61 +1,91 @@
-# QLATT
+# Qlatt
 
-WebAudio Klatt formant synthesizer with WASM-backed AudioWorklet DSP nodes.
+Explainable WebAudio Klatt formant synthesis with a declarative TTS frontend and WASM-backed AudioWorklet DSP.
 
-## Quick start
+## Quick Start
 
-1) Build the WASM modules:
-```
-./build.sh
-```
-or on Windows:
-```
-pwsh -File build.ps1
+1. Install dependencies:
+
+```bash
+npm install
 ```
 
-2) Run the dev server:
+2. Build the WASM modules:
+
+```bash
+npm run build:wasm
 ```
+
+On Windows, use:
+
+```powershell
+npm run build:wasm:ps
+```
+
+3. Start the dev server:
+
+```bash
 npm run dev
 ```
 
-3) Open the test harness:
-```
+`npm run dev` runs `predev`, which compiles `src/worklets/*-processor.ts` into `public/worklets/`. It does not build the Rust WASM crates, so step 2 is still required after DSP changes or on a fresh checkout.
+
+4. Open the browser harness:
+
+```text
 http://localhost:8000/test/test-harness.html
 ```
 
-## Notes
+The harness now exposes a `Frontend` selector. The default bundled frontend is `qlatt-english`, backed by `public/rules/frontends/qlatt-english/frontend.yaml`.
 
-- The LF source uses a natural glottal pulse with an Rd-driven open phase ratio and a simple spectral tilt mapping.
-- Resonator and antiresonator processors implement Klatt 1980 two-pole and two-zero sections.
-- `src/tts-frontend.ts` preloads `public/cmu-dictionary.json` at runtime (generate/update it with `npm run build:dict`).
-- The frontend runtime is declarative-first: `src/declarative-frontend/rule-pack.ts` + `src/declarative-frontend/engine.ts` drive structural, duration, prosody, and finalize phases.
-- Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`) are removed from runtime usage and module exports.
+## Common Commands
 
-## Declarative Validation
-
-- Run declarative frontend + frontend migration tests:
-```
-npx vitest run (Get-ChildItem -Path test -Filter 'declarative-frontend-*.test.ts' | ForEach-Object { $_.FullName }) test/tts-frontend-declarative-prosody.test.ts test/tts-frontend-declarative-corpus.test.ts test/tts-frontend-declarative-golden-summary.test.ts
+```bash
+npm test              # run the Vitest suite
+npm run test:golden   # run golden audio comparisons
+npm run build         # production build
+npm run build:dict    # rebuild public/cmu-dictionary.json
 ```
 
-- Regenerate locked declarative corpus golden summary:
-```
+## Architecture At A Glance
+
+- `src/tts-frontend.ts` normalizes text, transcribes it, applies declarative rule phases, and emits `KlattFrame[]`.
+- `public/rules/frontends/qlatt-english/` is the default declarative frontend package; `frontend.yaml`, `pipeline.yaml`, and `phases/*.yaml` live together there, while `public/rules/` keeps shared inventory and lexicon assets.
+- `public/experiments/klatt80-baseline/` contains the active synthesizer configuration: `registry.yaml`, `graph.yaml`, and `semantics.yaml`.
+- `src/semantics/` evaluates CEL expressions in dependency order to realize AudioParam values.
+- `src/worklets/` contains the TypeScript AudioWorklet sources; the compiled JavaScript and copied WASM artifacts land in `public/worklets/`.
+- `crates/` contains the Rust DSP primitives compiled to WebAssembly.
+- `papers/` contains the paper library and implementation notes that back the system's citations.
+
+## Project Conventions
+
+- Rules in `public/rules/frontends/<frontend-id>/phases/*.yaml` must carry `citations:` and should use `tag:` on each behavioral modification.
+- Non-trivial pipeline decisions should emit provenance records so frontend and runtime choices stay explainable.
+- Runtime clamps, defaults, and fallbacks should emit diagnostics.
+
+## Documentation
+
+- `docs/synthesizer-architecture.md`: runtime layers, YAML configuration, and DSP extension points.
+- `docs/parameter-scheduling.md`: how frame parameters become scheduled AudioParam changes.
+- `docs/adding-a-synthesizer.md`: end-to-end workflow for adding a new synthesizer configuration.
+- `docs/yaml-graph-tests.md`: YAML-first graph and semantics tests.
+
+## Validation Workflows
+
+- Declarative frontend regression summary:
+
+```bash
 npm run golden:declarative-summary
 ```
 
-- Run strict citation gate on a phrase corpus (CLI-first workflow):
-```
+- Strict citation gate over a phrase corpus:
+
+```bash
 node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/check-strict-citations.ts --corpus test/phrase-sets/linguistic.json
 ```
 
-- Export paired A/B listening manifest (for blind listening batches):
-```
+- Export an A/B listening manifest:
+
+```bash
 node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/export-listening-ab-manifest.ts --corpus test/phrase-sets/linguistic.json --out test/golden/listening-ab-manifest.json
 ```
-
-## Structure
-
-- `crates/`: Rust WASM DSP primitives.
-- `worklets/`: AudioWorklet processors and WASM outputs.
-- `src/`: Synth wrapper and TTS pipeline.
-- `test/`: Minimal UI harness.

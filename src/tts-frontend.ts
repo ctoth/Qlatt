@@ -533,6 +533,27 @@ export function textToKlattTrack(
       ? (f0ModelRaw as LayeredF0ModelConfig)
       : undefined;
 
+  // Build speakerParams for the layered F0 model's speaker scaling.
+  // Extracts numeric values from the frontend spec's speaker policy entries
+  // (which may be plain numbers or { value: N, citations: [...] } objects).
+  // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent F0 parameters)
+  let speakerParams: Record<string, unknown> | undefined;
+  if (f0Model) {
+    const speakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
+    if (speakerPolicy && typeof speakerPolicy === "object") {
+      const extracted: Record<string, unknown> = {};
+      for (const key of Object.keys(speakerPolicy)) {
+        const val = readPolicyNumber(speakerPolicy[key]);
+        if (val !== undefined) {
+          extracted[key] = val;
+        }
+      }
+      if (Object.keys(extracted).length > 0) {
+        speakerParams = extracted;
+      }
+    }
+  }
+
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
@@ -541,5 +562,6 @@ export function textToKlattTrack(
     sagDepthHz,
     sagMinSpanMs,
     f0Model,
+    speakerParams,
   });
 }

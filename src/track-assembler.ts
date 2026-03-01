@@ -91,6 +91,11 @@ export type AssembleTrackOptions = {
    *  Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
    *  Rabiner 1968 (three-component F0) */
   f0Model?: LayeredF0ModelConfig;
+  /** Speaker parameters for the layered F0 model's speaker scaling.
+   *  When present, these are passed to renderLayeredF0() so it can resolve
+   *  speaker-dependent scaling parameters (f0_minimum, f0_scale_factor, etc.).
+   *  Citations: DECtalk 4.63 ph_vset.c (speaker-dependent F0 scaling) */
+  speakerParams?: Record<string, unknown>;
 };
 
 // ---------------------------------------------------------------------------
@@ -529,10 +534,14 @@ export function renderLayeredF0(
 
     // Speaker scaling: only when speaker_scale is configured in the model.
     // When speaker_scale is absent, the filtered value is used directly as Hz.
-    // When present: f0_hz = f0_minimum + (filtered - reference) * f0_scale_factor
+    // When present, applies the DECtalk formula (Ph_drwt02.c line 2309):
+    //   f0prime = f0minimum + frac4mul(f0prime - 1300, f0scalefac)
+    // where frac4mul(x,y) = (x * y) >> 12 = x * y / 4096
+    // The result is in Hz*10, so divide by 10 for final Hz.
+    // Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
     let f0Hz: number;
     if (scaleConfig) {
-      f0Hz = f0Minimum + (filtered - f0Reference) * f0ScaleFactor;
+      f0Hz = (f0Minimum + (filtered - f0Reference) * f0ScaleFactor / 4096) / 10;
     } else {
       f0Hz = filtered;
     }
@@ -954,6 +963,7 @@ export function assembleKlattTrack(
       layerCommands,
       options.f0Model,
       totalDuration,
+      options.speakerParams,
     );
   } else {
     // Existing declarative point-interpolation path.

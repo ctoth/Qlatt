@@ -11,8 +11,9 @@ rules:
   #   4. Stress impulses (impulse/stress layer) -- at each stressed vowel
   #   5. Boundary reset (persistent/hat layer) -- reset at SIL boundaries
   #
-  # All values are in direct Hz (pre-scaled for Paul, PR=100).
-  # When speaker scaling is wired into the renderer, switch to internal Hz*10.
+  # All values are in DECtalk internal units (Hz*10).  Speaker scaling in
+  # renderLayeredF0() converts to final Hz via the DECtalk formula:
+  #   Hz = (f0minimum + (total - 1300) * f0scalefac / 4096) / 10
   #
   # Citations:
   #   - Klatt 1982 "The KLATTalk text-to-speech conversion system"
@@ -29,7 +30,8 @@ rules:
   # into the baseline layer that spans the entire utterance duration.
   #
   # Source: Ph_drwt02.c f0basetypes[0][] (declarative clause type).
-  # Values pre-scaled from Hz*10 to Hz for Paul (PR=100, scale ~1.0).
+  # Values are in DECtalk internal units (Hz*10); speaker scaling converts
+  # to final Hz.
   #
   # Citations:
   #   - DECtalk 4.63 Ph_drwt02.c (17-point baseline profile)
@@ -47,23 +49,23 @@ rules:
       at: at_sync(current.sync_left)
       value: 0
       profile_points:
-        - 95.7
-        - 94.5
-        - 93.9
-        - 92.7
-        - 91.3
-        - 90.9
-        - 89.5
-        - 88.2
-        - 87.9
-        - 86.5
-        - 85.3
-        - 84.0
-        - 83.8
-        - 82.4
-        - 78.0
-        - 75.2
-        - 66.3
+        - 1157
+        - 1145
+        - 1139
+        - 1127
+        - 1113
+        - 1109
+        - 1095
+        - 1082
+        - 1079
+        - 1065
+        - 1053
+        - 1040
+        - 1038
+        - 1024
+        - 980
+        - 952
+        - 863
       tag: f0_baseline
     citations:
       - "DECtalk 4.63 Ph_drwt02.c f0basetypes[0][] (declarative baseline)"
@@ -168,7 +170,7 @@ rules:
   #
   # Simplification: DECtalk tracks nrises_sofar to index into
   # f0_mphrase_position[], which requires stateful counting.  We use a fixed
-  # average of the first 4 entries: (14.0+9.0+6.0+4.0)/4 = 8.25 Hz.
+  # average of the first 4 entries: (140+90+60+40)/4 = 82.5 Hz*10.
   #
   # Source: ph_inton1.c Rule 2 (stress impulse at FSTRESS_1).
   #
@@ -213,8 +215,8 @@ rules:
   #
   # Implementation: emit a persistent hat command with value =
   # -(hat_rise - (hat_rise + final_fall)) = final_fall.  This cancels the
-  # net hat fall that was applied: rise (+18) then fall (-36) = net -18,
-  # so a reset of +18 brings it back to 0.
+  # net hat fall that was applied: rise (+180) then fall (-360) = net -180,
+  # so a reset of +180 brings it back to 0.
   #
   # Source: ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL/FSENTENDS).
   #

@@ -300,7 +300,6 @@ export function analyzeTrackGains(
 ): { ranges: any; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: any = { voiceGain: null, aspGain: null, fricGain: null, parallelVoiceGain: null, parallelBypassGain: null, parallelFormantGain: null, parallelNasalGain: null, masterGain: null, mix: null };
-  const outputScale = dbToLinear(ndbScale.AF + 44);
   const parallelScale = synthParams.parallelGainScale ?? 1.0;
   const baseBoost = synthParams.masterGain ?? 1.0;
   const state = { ...(track[0]?.params ?? {}) };
@@ -320,13 +319,14 @@ export function analyzeTrackGains(
     const mix = state.SW === 1 ? 1 : (synthParams.parallelMix ?? 0);
     const fricDbAdj = state.SW === 1 ? Math.max(state.AF ?? -70, state.AH ?? -70) : (state.AF ?? -70);
 
-    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear((state.AV ?? -70) + ndbScale.AV));
-    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear((state.AH ?? -70) + ndbScale.AH));
-    ranges.fricGain = updateRange(ranges.fricGain, dbToLinear(fricDbAdj + ndbScale.AF) * parallelScale);
-    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear((state.AVS ?? -70) + ndbScale.AVS) * 10);
+    const go = state.GO ?? 47;
+    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear(go + (state.AV ?? -70) + ndbScale.AV));
+    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear(go + (state.AH ?? -70) + ndbScale.AH));
+    ranges.fricGain = updateRange(ranges.fricGain, dbToLinear(go + fricDbAdj + ndbScale.AF) * parallelScale);
+    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear(go + (state.AVS ?? -70) + ndbScale.AVS) * 10);
     ranges.parallelBypassGain = updateRange(ranges.parallelBypassGain, dbToLinear((state.AB ?? -70) + ndbScale.AB) * parallelScale);
     ranges.parallelNasalGain = updateRange(ranges.parallelNasalGain, dbToLinear((state.AN ?? -70) + ndbScale.AN) * parallelScale);
-    ranges.masterGain = updateRange(ranges.masterGain, Math.min(5.0, dbToLinear(state.GO ?? 47) * baseBoost * outputScale));
+    ranges.masterGain = updateRange(ranges.masterGain, dbToLinear(go) * baseBoost);
     ranges.mix = updateRange(ranges.mix, mix);
 
     const parallelLinear = [

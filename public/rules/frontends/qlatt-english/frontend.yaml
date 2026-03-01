@@ -1,6 +1,7 @@
 version: v13-cel
 include:
   - pipeline.yaml
+  - phases/normalize.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml
   - phases/duration.yaml

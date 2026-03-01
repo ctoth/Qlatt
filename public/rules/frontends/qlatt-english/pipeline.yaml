@@ -28,6 +28,11 @@ streams:
     value_type: number
     unit: Hz
 phases:
+  - name: normalize
+    rules:
+      - normalize_schwa
+      - normalize_velar_nasal
+      - normalize_wh_merger
   - name: postlexical
     rules:
       - the_prevocalic_reduction

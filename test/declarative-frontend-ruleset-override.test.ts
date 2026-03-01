@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
-import { DEFAULT_RULEPACK_PATH } from "../src/declarative-frontend/rule-pack";
+import {
+  DEFAULT_FRONTEND_ID,
+  DEFAULT_RULEPACK_PATH,
+  resolveBundledRulepackPath,
+} from "../src/declarative-frontend/rule-pack";
 
 describe("declarative frontend ruleset override", () => {
   it("runs against a caller-provided specSource instead of the default rulepack", () => {
@@ -58,7 +62,9 @@ describe("declarative frontend ruleset override", () => {
     expect(out[0].duration).toBe(100);
   });
 
-  it("accepts a bundled specPath override", () => {
+  it("accepts a bundled frontendId override", () => {
+    expect(resolveBundledRulepackPath(DEFAULT_FRONTEND_ID)).toBe(DEFAULT_RULEPACK_PATH);
+
     const input = [
       {
         phoneme: "AE",
@@ -73,11 +79,16 @@ describe("declarative frontend ruleset override", () => {
     const outDefault = runDeclarativeFrontend(input, {
       phases: ["duration"],
     }) as Array<Record<string, unknown>>;
+    const outByFrontendId = runDeclarativeFrontend(input, {
+      phases: ["duration"],
+      frontendId: DEFAULT_FRONTEND_ID,
+    }) as Array<Record<string, unknown>>;
     const outByPath = runDeclarativeFrontend(input, {
       phases: ["duration"],
       specPath: DEFAULT_RULEPACK_PATH,
     }) as Array<Record<string, unknown>>;
 
+    expect(outByFrontendId).toEqual(outDefault);
     expect(outByPath).toEqual(outDefault);
   });
 });

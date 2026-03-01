@@ -4,7 +4,13 @@ import { loadYamlSource, loadYamlSourceSync, resolveIncludePath } from "../yaml-
 
 type PlainObject = Record<string, unknown>;
 
-export const DEFAULT_RULEPACK_PATH = "/rules/frontend.yaml";
+export const DEFAULT_FRONTEND_ID = "qlatt-english";
+export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
+  [DEFAULT_FRONTEND_ID]: "/rules/frontends/qlatt-english/frontend.yaml",
+} as const);
+
+export type BundledFrontendId = keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS;
+export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRONTEND_ID];
 
 // ---------------------------------------------------------------------------
 // Include resolution: load child specs and merge them into the root spec
@@ -120,8 +126,30 @@ async function resolveIncludesAsync(
 
 const BUNDLED_RULEPACK_CACHE = new Map<string, PlainObject>();
 
+export function listBundledFrontendIds(): string[] {
+  return Object.keys(BUNDLED_FRONTEND_RULEPACK_PATHS).sort();
+}
+
+export function resolveBundledRulepackPath(frontendId: string = DEFAULT_FRONTEND_ID): string {
+  const specPath =
+    BUNDLED_FRONTEND_RULEPACK_PATHS[
+      frontendId as keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS
+    ];
+  if (typeof specPath === "string" && specPath.length > 0) {
+    return specPath;
+  }
+  const known = listBundledFrontendIds();
+  throw new Error(
+    `E_FRONTEND_ID_UNKNOWN: '${frontendId}' is not a bundled frontend` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+  );
+}
+
 export function listBundledRulepackPaths(): string[] {
-  const known = new Set<string>([...BUNDLED_RULEPACK_CACHE.keys(), DEFAULT_RULEPACK_PATH]);
+  const known = new Set<string>([
+    ...BUNDLED_RULEPACK_CACHE.keys(),
+    ...Object.values(BUNDLED_FRONTEND_RULEPACK_PATHS),
+  ]);
   return [...known].sort();
 }
 
@@ -173,4 +201,17 @@ export async function preloadRulepackSpecFromPath(
   return spec;
 }
 
-export const QLATT_V12_CEL_RULEPACK = await preloadRulepackSpecFromPath(DEFAULT_RULEPACK_PATH);
+export function loadBundledRulepackSpec(
+  frontendId: string = DEFAULT_FRONTEND_ID
+): PlainObject {
+  return loadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
+}
+
+export async function preloadBundledRulepackSpec(
+  frontendId: string = DEFAULT_FRONTEND_ID
+): Promise<PlainObject> {
+  return preloadRulepackSpecFromPath(resolveBundledRulepackPath(frontendId));
+}
+
+export const QLATT_ENGLISH_RULEPACK = await preloadBundledRulepackSpec(DEFAULT_FRONTEND_ID);
+export const QLATT_V12_CEL_RULEPACK = QLATT_ENGLISH_RULEPACK;

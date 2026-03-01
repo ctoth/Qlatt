@@ -9,15 +9,33 @@ parameters:
   policy:
     duration:
       rate_scale: 1.0
-      stress_multipliers:
-        primary: 1.0
-        secondary: 0.9
-        unstressed: 0.7
-      boundary_lengthening:
-        phrase_final: 1.3
-        utterance_final: 1.5
+      pause_comma_ms: 150
+      pause_period_ms: 300
+      pause_clause_initial_ms: 32
+      clause_final_lengthening_ms: 38
+      clause_final_voiced_obstruent_ms: 19
+      non_final_shortening: 0.70
+      stress_secondary: 0.85
+      stress_unstressed: 0.70
+      medial_syllable_shortening: 0.85
+      polysyllabic_shortening: 0.80
+      non_initial_consonant_shortening: 0.85
+      word_final_obstruent_lengthening_ms: 19
+      unstressed_syllabic_shortening: 0.70
+      unstressed_consonant_shortening: 0.70
+      unstressed_glide_shortening: 0.50
+      emphasis_lengthening_ms: 19
+      emphasis_syllabic_extra_ms: 38
+      pre_voiceless_fricative_shortening: 0.80
+      pre_voiceless_plosive_shortening: 0.70
+      pre_voiced_obstruent_lengthening: 1.20
+      pre_nasal_shortening: 0.85
+      cluster_shortening: 0.70
+      post_voiceless_plosive_lengthening_ms: 19
+      phrase_initial_vowel_lengthening_ms: 19
       citations:
-        - "DECtalk 4.63 ph_setar.c"
+        - "DECtalk 4.63 p_us_tim.c"
+        - "DECtalk 4.63 ph_defs.h (NF*MS constants)"
     f0:
       pitch_range:
         hat_rise_semitones: 4

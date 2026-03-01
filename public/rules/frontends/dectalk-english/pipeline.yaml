@@ -8,14 +8,27 @@ streams:
     features:
       type: [vowel, stop_closure, fricative, affricate, silence, liquid, nasal, glide, flap]
     scalars:
-      duration: { unit: ms, resolution: klatt, max: 500 }
+      duration: { unit: ms, resolution: klatt, max: 500, floor_field: minimumDuration }
   f0:
     type: point
     value_type: number
     unit: Hz
 phases:
   - name: duration
-    rules: [dectalk_inherent_duration]
+    rules:
+      - dectalk_pause_duration
+      - dectalk_clause_final_lengthening
+      - dectalk_non_final_shortening
+      - dectalk_stress_shortening
+      - dectalk_polysyllabic_shortening
+      - dectalk_non_initial_consonant_shortening
+      - dectalk_unstressed_shortening
+      - dectalk_emphasis_lengthening
+      - dectalk_postvocalic_voiceless_shortening
+      - dectalk_postvocalic_voiced_lengthening
+      - dectalk_consonant_cluster_shortening
+      - dectalk_phrase_initial_vowel_lengthening
+      - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: prosody
     rules: [dectalk_base_f0]

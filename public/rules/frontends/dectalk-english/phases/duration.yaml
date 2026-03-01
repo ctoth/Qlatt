@@ -1,11 +1,351 @@
 version: v1
 rules:
-  dectalk_inherent_duration:
-    kind: duration
+  # ---------------------------------------------------------------------------
+  # Rule 1: Silence / Pause durations
+  # DECtalk sets pause length based on punctuation type.
+  # ---------------------------------------------------------------------------
+  dectalk_pause_duration:
+    kind: scalar
     select:
       stream: phone
-      where: 'true'
-    set:
-      duration: 'current.inherentDuration ?? 100.0'
+      where: current.phoneme == 'SIL' && has(current.punctuationSymbol)
+    apply:
+      - field: duration
+        op: set
+        value: >-
+          current.punctuationSymbol == ',' ? params.policy.duration.pause_comma_ms :
+          (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.pause_period_ms :
+          (current.punctuationSymbol in [';', ':'] ? params.policy.duration.pause_comma_ms :
+          params.policy.duration.pause_clause_initial_ms))
     citations:
-      - "DECtalk 4.63 inventory inherent durations"
+      - "DECtalk 4.63 p_us_tim.c Rule 1 (silence/pause durations)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 2: Clause-final lengthening
+  # Sonorants and vowels at phrase boundaries get additive lengthening.
+  # Voiced obstruents get less. Plosives get none.
+  # ---------------------------------------------------------------------------
+  dectalk_clause_final_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    define:
+      "n": next
+      at_boundary: "n == null ? true : n.phoneme == 'SIL'"
+      is_obstruent: >-
+        current.type in ['fricative', 'stop_closure', 'affricate']
+      is_plosive: current.type == 'stop_closure'
+      is_voiced_obstruent: >-
+        is_obstruent && (has(current.voiced) ? current.voiced == true : false)
+    constraint: at_boundary
+    apply:
+      - field: duration
+        op: add
+        dispatch:
+          - when: is_plosive
+            value: 0
+          - when: is_voiced_obstruent
+            value: params.policy.duration.clause_final_voiced_obstruent_ms
+          - default: params.policy.duration.clause_final_lengthening_ms
+        tag: clause_final
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 2 (clause-final lengthening)"
+      - "DECtalk 4.63 ph_defs.h NF40MS=38ms sonorant, NF20MS=19ms voiced obstruent"
+
+  # ---------------------------------------------------------------------------
+  # Rule 3: Non-phrase-final syllabic shortening
+  # Vowels not at a phrase boundary are shortened by 0.70.
+  # ---------------------------------------------------------------------------
+  dectalk_non_final_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+      at_boundary: "n == null ? true : n.phoneme == 'SIL'"
+    constraint: "!at_boundary"
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.non_final_shortening
+        tag: non_final
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 4: Stress-based duration scaling
+  # Primary stressed vowels: no change (1.0).
+  # Secondary stressed: *= 0.85.
+  # Unstressed: *= 0.70.
+  # ---------------------------------------------------------------------------
+  dectalk_stress_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      stress_val: "has(current.stress) ? current.stress : 0"
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: stress_val == 1
+            value: 1.0
+          - when: stress_val == 2
+            value: params.policy.duration.stress_secondary
+          - default: params.policy.duration.stress_unstressed
+        tag: stress
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 4 (stress-based shortening)"
+      - "DECtalk 4.63 ph_defs.h N85PRCNT=0.85 secondary, N70PRCNT=0.70 unstressed"
+
+  # ---------------------------------------------------------------------------
+  # Rule 5: Polysyllabic word shortening
+  # Vowels in multi-syllable words are shortened by 0.80.
+  # Detected by checking if prev in same word is a vowel.
+  # ---------------------------------------------------------------------------
+  dectalk_polysyllabic_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel' && has(current.word)
+    define:
+      same_word: current.word
+      other_vowel: >-
+        look_back_where(current, 10, "current.type == 'vowel' && has(current.word) && current.word == same_word")
+    constraint: other_vowel != null
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.polysyllabic_shortening
+        tag: polysyllabic
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 5 (polysyllabic shortening, N80PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 6: Non-word-initial consonant shortening
+  # Consonants that are not word-initial are shortened.
+  # Word-final obstruents (non-plosive) get additive lengthening instead.
+  # ---------------------------------------------------------------------------
+  dectalk_non_initial_consonant_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
+    define:
+      same_word_as_prev: >-
+        prev == null ? false :
+        (has(prev.word) && has(current.word) ? prev.word == current.word : false)
+      is_word_initial: "!same_word_as_prev"
+      "n": next
+      same_word_as_next: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? n.word == current.word : false)
+      is_word_final: "!same_word_as_next"
+      is_obstruent_non_plosive: >-
+        current.type in ['fricative', 'affricate']
+    constraint: "!is_word_initial"
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: is_word_final && is_obstruent_non_plosive
+            value: 1.0
+          - default: params.policy.duration.non_initial_consonant_shortening
+        tag: consonant_position
+      - field: duration
+        op: add
+        dispatch:
+          - when: is_word_final && is_obstruent_non_plosive
+            value: params.policy.duration.word_final_obstruent_lengthening_ms
+          - default: 0
+        tag: word_final_obstruent
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 6 (non-word-initial consonant shortening)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 7: Unstressed segment shortening
+  # Non-primary-stressed segments get additional shortening.
+  # ---------------------------------------------------------------------------
+  dectalk_unstressed_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    define:
+      stress_val: "has(current.stress) ? current.stress : 0"
+      is_primary: stress_val == 1
+      is_vowel: current.type == 'vowel'
+      is_glide: current.type == 'glide'
+    constraint: "!is_primary"
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: is_vowel
+            value: params.policy.duration.unstressed_syllabic_shortening
+          - when: is_glide
+            value: params.policy.duration.unstressed_glide_shortening
+          - default: params.policy.duration.unstressed_consonant_shortening
+        tag: unstressed
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 7 (unstressed shortening)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 8: Emphasis lengthening
+  # Emphasized segments get +19ms; vowels get an additional +38ms.
+  # ---------------------------------------------------------------------------
+  dectalk_emphasis_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    define:
+      is_emphasized: "has(current.isAccented) ? current.isAccented == true : false"
+      is_vowel: current.type == 'vowel'
+    constraint: is_emphasized
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.emphasis_lengthening_ms
+        tag: emphasis
+      - field: duration
+        op: add
+        dispatch:
+          - when: is_vowel
+            value: params.policy.duration.emphasis_syllabic_extra_ms
+          - default: 0
+        tag: emphasis_syllabic
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 8 (emphasis lengthening)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 9a: Postvocalic voiceless consonant shortening
+  # Vowels before voiceless consonants are shortened.
+  # ---------------------------------------------------------------------------
+  dectalk_postvocalic_voiceless_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+      next_voiceless: >-
+        n == null ? false :
+        (has(n.voiceless) ? n.voiceless == true : false)
+      next_is_fricative: "n == null ? false : n.type == 'fricative'"
+      next_is_plosive: "n == null ? false : n.type == 'stop_closure'"
+    constraint: next_voiceless
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: next_is_fricative
+            value: params.policy.duration.pre_voiceless_fricative_shortening
+          - when: next_is_plosive
+            value: params.policy.duration.pre_voiceless_plosive_shortening
+          - default: 1.0
+        tag: pre_voiceless
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 9 (postvocalic voiceless shortening)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 9b: Postvocalic voiced obstruent lengthening / pre-nasal shortening
+  # ---------------------------------------------------------------------------
+  dectalk_postvocalic_voiced_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+      next_voiced: >-
+        n == null ? false :
+        (has(n.voiced) ? n.voiced == true : false)
+      next_is_obstruent: >-
+        n == null ? false :
+        n.type in ['fricative', 'stop_closure', 'affricate']
+      next_is_nasal: "n == null ? false : n.type == 'nasal'"
+    constraint: "next_voiced && (next_is_obstruent || next_is_nasal)"
+    apply:
+      - field: duration
+        op: mul
+        dispatch:
+          - when: next_is_obstruent
+            value: params.policy.duration.pre_voiced_obstruent_lengthening
+          - when: next_is_nasal
+            value: params.policy.duration.pre_nasal_shortening
+          - default: 1.0
+        tag: pre_voiced
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 9 (voiced obstruent lengthening, pre-nasal shortening)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 13: Consonant cluster shortening
+  # Consonants adjacent to other consonants are shortened.
+  # ---------------------------------------------------------------------------
+  dectalk_consonant_cluster_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
+    define:
+      "n": next
+      "p": prev
+      prev_is_consonant: >-
+        p == null ? false :
+        p.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
+      next_is_consonant: >-
+        n == null ? false :
+        n.type in ['fricative', 'stop_closure', 'affricate', 'nasal', 'liquid', 'glide']
+      in_cluster: prev_is_consonant || next_is_consonant
+    constraint: in_cluster
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.cluster_shortening
+        tag: cluster
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 13 (consonant cluster shortening, N70PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 15: Phrase-initial vowel after silence
+  # ---------------------------------------------------------------------------
+  dectalk_phrase_initial_vowel_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "p": prev
+      prev_is_silence: "p == null ? true : p.phoneme == 'SIL'"
+    constraint: prev_is_silence
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.phrase_initial_vowel_lengthening_ms
+        tag: phrase_initial
+    citations:
+      - "DECtalk 4.63 p_us_tim.c Rule 15 (phrase-initial vowel after silence)"
+
+  # ---------------------------------------------------------------------------
+  # Rate scaling
+  # All non-silence durations are scaled by 1/rate_scale.
+  # ---------------------------------------------------------------------------
+  dectalk_rate_scaling:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    constraint: params.policy.duration.rate_scale != 1.0
+    apply:
+      - field: duration
+        op: mul
+        value: 1.0 / params.policy.duration.rate_scale
+        tag: rate
+    citations:
+      - "DECtalk 4.63 ph_timng.c (speaking rate calibration)"

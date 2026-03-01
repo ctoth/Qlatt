@@ -1,0 +1,195 @@
+/**
+ * End-to-end test of the dectalk-english frontend.
+ *
+ * Verifies that textToKlattTrack produces well-formed KlattFrame[] output
+ * with reasonable durations, non-trivial F0 contours, and formant movement
+ * when using the dectalk-english frontend.
+ */
+
+import { describe, expect, it, vi, afterAll } from "vitest";
+import { textToKlattTrack } from "../src/tts-frontend";
+import type { KlattFrame } from "../src/tts-frontend-types";
+
+// Suppress console.warn from the pipeline (missing inventory targets, etc.)
+const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+afterAll(() => warnSpy.mockRestore());
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+type SegmentInfo = {
+  phoneme: string;
+  word?: string;
+  startTime: number;
+  duration: number; // seconds
+};
+
+function extractSegments(track: KlattFrame[]): SegmentInfo[] {
+  if (track.length === 0) return [];
+
+  const segments: { phoneme: string; word?: string; startTime: number }[] = [];
+  let currentPhoneme = track[0].phoneme ?? "SIL";
+  let currentWord = track[0].word;
+  segments.push({ phoneme: currentPhoneme, word: currentWord, startTime: track[0].time });
+
+  for (let i = 1; i < track.length; i++) {
+    const ph = track[i].phoneme ?? "SIL";
+    if (ph !== currentPhoneme) {
+      currentPhoneme = ph;
+      currentWord = track[i].word;
+      segments.push({ phoneme: ph, word: currentWord, startTime: track[i].time });
+    }
+  }
+
+  return segments.map((seg, idx, arr) => {
+    const endTime = idx < arr.length - 1 ? arr[idx + 1].startTime : track[track.length - 1].time;
+    return { ...seg, duration: endTime - seg.startTime };
+  });
+}
+
+function getParamRange(track: KlattFrame[], param: string): { min: number; max: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const frame of track) {
+    const v = frame.params[param];
+    if (typeof v === "number" && Number.isFinite(v) && v > 0) {
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+  }
+  return { min, max };
+}
+
+function totalDurationMs(track: KlattFrame[]): number {
+  if (track.length === 0) return 0;
+  return (track[track.length - 1].time - track[0].time) * 1000;
+}
+
+// ---------------------------------------------------------------------------
+// Test phrases
+// ---------------------------------------------------------------------------
+
+const TEST_PHRASES = [
+  "hello world.",
+  "The quick brown fox jumps over the lazy dog.",
+  "How are you today?",
+  "This is a test of the DECtalk speech synthesis system.",
+  "One, two, three, four, five.",
+];
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+describe("dectalk-english end-to-end", () => {
+  for (const phrase of TEST_PHRASES) {
+    describe(`phrase: "${phrase}"`, () => {
+      let track: KlattFrame[];
+
+      it("produces a non-empty KlattFrame array", () => {
+        track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        expect(Array.isArray(track)).toBe(true);
+        expect(track.length).toBeGreaterThan(2);
+      });
+
+      it("has strictly non-decreasing time values", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        let prevTime = -1;
+        for (const frame of track) {
+          expect(Number.isFinite(frame.time)).toBe(true);
+          expect(frame.time).toBeGreaterThanOrEqual(prevTime);
+          prevTime = frame.time;
+        }
+      });
+
+      it("has all-finite params in every frame", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        for (const frame of track) {
+          expect(frame.params && typeof frame.params === "object").toBe(true);
+          for (const [key, val] of Object.entries(frame.params)) {
+            expect(Number.isFinite(val), `${key} is not finite in frame at t=${frame.time}`).toBe(true);
+          }
+        }
+      });
+
+      it("has reasonable total duration (200ms - 15s)", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        const dur = totalDurationMs(track);
+        expect(dur).toBeGreaterThan(200);
+        expect(dur).toBeLessThan(15000);
+      });
+
+      it("has non-trivial F0 contour (range > 5 Hz)", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        const f0Range = getParamRange(track, "F0");
+        // There should be at least some frames with F0 > 0 (voiced segments)
+        expect(f0Range.max).toBeGreaterThan(0);
+        // F0 range should show some variation (not flat)
+        if (f0Range.min < Infinity) {
+          expect(f0Range.max - f0Range.min).toBeGreaterThan(5);
+        }
+      });
+
+      it("has formant movement (F1 range > 50 Hz)", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        const f1Range = getParamRange(track, "F1");
+        expect(f1Range.max).toBeGreaterThan(0);
+        if (f1Range.min < Infinity) {
+          expect(f1Range.max - f1Range.min).toBeGreaterThan(50);
+        }
+      });
+
+      it("produces multiple distinct phoneme segments", () => {
+        if (!track) track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+        const segments = extractSegments(track);
+        // Even "hello world." should produce at least 5 distinct phoneme segments
+        expect(segments.length).toBeGreaterThan(4);
+      });
+    });
+  }
+
+  it("summary: logs quality metrics for all test phrases", () => {
+    const results: Array<{
+      phrase: string;
+      frames: number;
+      durationMs: number;
+      f0Min: number;
+      f0Max: number;
+      f1Min: number;
+      f1Max: number;
+      segments: number;
+    }> = [];
+
+    for (const phrase of TEST_PHRASES) {
+      const track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+      const f0 = getParamRange(track, "F0");
+      const f1 = getParamRange(track, "F1");
+      const segs = extractSegments(track);
+
+      results.push({
+        phrase,
+        frames: track.length,
+        durationMs: Math.round(totalDurationMs(track)),
+        f0Min: Math.round(f0.min * 10) / 10,
+        f0Max: Math.round(f0.max * 10) / 10,
+        f1Min: Math.round(f1.min),
+        f1Max: Math.round(f1.max),
+        segments: segs.length,
+      });
+    }
+
+    // Log the summary table
+    console.log("\n=== DECtalk E2E Quality Summary ===");
+    console.log("| Phrase | Frames | Duration(ms) | F0 min-max (Hz) | F1 min-max (Hz) | Segments |");
+    console.log("|--------|--------|-------------|-----------------|-----------------|----------|");
+    for (const r of results) {
+      console.log(
+        `| ${r.phrase.substring(0, 30).padEnd(30)} | ${String(r.frames).padStart(6)} | ${String(r.durationMs).padStart(11)} | ${String(r.f0Min).padStart(6)}-${String(r.f0Max).padEnd(6)} | ${String(r.f1Min).padStart(6)}-${String(r.f1Max).padEnd(6)} | ${String(r.segments).padStart(8)} |`
+      );
+    }
+
+    // This test always passes — it's for the summary log
+    expect(results.length).toBe(TEST_PHRASES.length);
+  });
+});

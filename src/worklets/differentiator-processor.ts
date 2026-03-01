@@ -1,4 +1,4 @@
-import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils";
+import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
 
 interface DifferentiatorMetricsMessage {
   type: "metrics";

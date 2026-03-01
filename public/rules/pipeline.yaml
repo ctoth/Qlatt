@@ -91,8 +91,15 @@ phases:
     rules:
       - tobi_baseline_init
       - tobi_accent_h_star
+      - tobi_accent_l_plus_h_star_lead
+      - tobi_accent_l_plus_h_star_peak
+      - tobi_accent_h_plus_downstepped_h_star_lead
+      - tobi_accent_h_plus_downstepped_h_star_peak
       - tobi_accent_l_star
+      - tobi_accent_l_star_plus_h_trailing
       - tobi_unaccented_declination
+      - tobi_phrase_accent_high
+      - tobi_phrase_accent_low
       - tobi_boundary_low
       - tobi_boundary_rise
       - tobi_register_reset

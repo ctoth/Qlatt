@@ -156,7 +156,9 @@ export function buildF0ContourFromDeclarative(
       let accentType: string | undefined;
       if (tag === "f0_h_star") accentType = "H*";
       else if (tag === "f0_l_plus_h_star") accentType = "L+H*";
+      else if (tag === "f0_h_plus_downstepped_h_star") accentType = "H+!H*";
       else if (tag === "f0_l_star") accentType = "L*";
+      else if (tag === "f0_l_star_plus_h") accentType = "L*+H";
       return {
         time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
         f0: Number(point.value),
@@ -208,6 +210,22 @@ function getF0AtTime(f0Contour: F0Point[], time: number): number {
   return f0Contour[f0Contour.length - 1].f0;
 }
 
+function getInteriorF0AnchorTimes(
+  f0Contour: F0Point[],
+  startTime: number,
+  endTime: number,
+): number[] {
+  if (!f0Contour || f0Contour.length === 0 || endTime <= startTime) return [];
+  const epsilon = 1e-6;
+  const anchors: number[] = [];
+  for (const point of f0Contour) {
+    if (point.time > startTime + epsilon && point.time < endTime - epsilon) {
+      anchors.push(point.time);
+    }
+  }
+  return anchors;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers -- sagging transitions (H*-H* interpolation)
 // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
@@ -243,7 +261,7 @@ const BOUNDARY_TAGS = new Set([
  *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
  */
 function isHighPeakAccent(accentType: string | undefined): boolean {
-  return accentType === "H*" || accentType === "L+H*";
+  return accentType === "H*" || accentType === "L+H*" || accentType === "H+!H*";
 }
 
 export function applySaggingTransitions(
@@ -464,13 +482,16 @@ export function assembleKlattTrack(
 
     // Determine and set F0.
     const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
-    const f0FromContour = getF0AtTime(f0Contour, targetTime);
+    const f0FromContour = getF0AtTime(f0Contour, segmentStart);
     let calculatedF0 = isTargetVoiced ? f0FromContour : 0;
     if (ph.phoneme === "SIL") calculatedF0 = 0;
     if (isTargetVoiced && calculatedF0 < 1) {
       calculatedF0 = baseF0 / 2;
     }
     finalParams.F0 = calculatedF0;
+    const interiorF0Anchors = isTargetVoiced
+      ? getInteriorF0AnchorTimes(f0Contour, segmentStart, targetTime)
+      : [];
 
     if (targetTime > segmentStart) {
       const nextPh = phoneSequence[i + 1] as InputToken | undefined;
@@ -489,6 +510,28 @@ export function assembleKlattTrack(
         params: finalParams,
       });
 
+      const pushAnchorFrame = (time: number, sourceParams: KlattParams): void => {
+        const anchorParams = { ...sourceParams, F0: ph.phoneme === "SIL" ? 0 : getF0AtTime(f0Contour, time) };
+        klattTrack.push({
+          time,
+          phoneme: ph.phoneme,
+          word: ph.word,
+          params: anchorParams,
+        });
+      };
+
+      const epsilon = 1e-6;
+      const preSteadyAnchors = steadyTime
+        ? interiorF0Anchors.filter((time) => time < steadyTime - epsilon)
+        : interiorF0Anchors;
+      const postSteadyAnchors = steadyTime
+        ? interiorF0Anchors.filter((time) => time > steadyTime + epsilon)
+        : [];
+
+      for (const anchorTime of preSteadyAnchors) {
+        pushAnchorFrame(anchorTime, finalParams);
+      }
+
       if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
         // blendParams copies from finalParams (already has vq applied) for non-blend keys.
         // Only F1-F3, B1-B3 are blended; Rd, OQ, TL, flutter, jitter, AH carry through.
@@ -501,6 +544,10 @@ export function assembleKlattTrack(
           word: ph.word,
           params: transitionParams,
         });
+
+        for (const anchorTime of postSteadyAnchors) {
+          pushAnchorFrame(anchorTime, transitionParams);
+        }
       }
       currentTime = targetTime;
     }

@@ -17,8 +17,8 @@ nodes:
       f0: { bind: F0 }
       av: { bind: avDb }
       aturb: { bind: Aturb }
-      tilt: { bind: TLTdb }
-      openQuotient: { bind: Kopen }
+      tilt: { bind: effectiveTiltDb }
+      openQuotient: { bind: effectiveKopen }
       skew: { bind: Kskew }
       asymmetry: { bind: as }
       source: { bind: ss }
@@ -143,9 +143,9 @@ nodes:
     type: pitch-sync-mod
     params:
       f0: { bind: F0 }
-      openQuotient: { bind: Kopen }
+      openQuotient: { bind: effectiveKopen }
       f1: { bind: F1 }
-      b1: { bind: B1 }
+      b1: { bind: effectiveB1 }
       dF1: { bind: dF1hz }
       dB1: { bind: dB1hz }
       skew: { bind: Kskew }
@@ -157,7 +157,7 @@ nodes:
       bypassAtZero: true
     params:
       frequency: { bind: F1 }
-      bandwidth: { bind: B1p }
+      bandwidth: { bind: effectiveB1p }
 
   parallelNasal:
     type: resonator
@@ -173,7 +173,7 @@ nodes:
       bypassAtZero: true
     params:
       frequency: { bind: F2 }
-      bandwidth: { bind: B2p }
+      bandwidth: { bind: effectiveB2p }
 
   parallelF3:
     type: resonator

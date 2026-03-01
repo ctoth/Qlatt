@@ -153,6 +153,37 @@ params:
     default: 0
     unit: dB
 
+  # Frontend-facing voice-quality controls. klsyn88 itself is not an LF-source
+  # synthesizer, so these are implemented as proxies onto its native Kopen/TLTdb
+  # and excitation gains rather than passed through directly.
+  # Citations:
+  # - Fant 1997 (Rd, Ee, B1/B2 leakage and OQ covariation)
+  # - Klatt & Klatt 1990 (OQ/TL as explicit source controls)
+  Rd:
+    type: float
+    range: [0.3, 2.7]
+    default: 0.7
+    description: "Fant 1997 voice-source shape proxy for klsyn88 backend"
+
+  RdRef:
+    type: float
+    range: [0.3, 2.7]
+    default: 0.7
+    description: "Reference Rd for Fant 1997 proxy covariation"
+
+  OQ:
+    type: float
+    range: [0, 99]
+    default: 0
+    description: "Klatt 1990 open quotient override in percent. 0 = derive proxy from Rd"
+
+  TL:
+    type: float
+    range: [0, 34]
+    default: 0
+    unit: dB
+    description: "Klatt 1990 spectral tilt override in dB at 3 kHz. 0 = derive proxy from Rd"
+
   A1:
     type: float
     range: [0, 80]
@@ -260,17 +291,89 @@ constants:
   B8: 600
 
 realize:
+  # Fant 1997: 1 dB increase in 1/Rd corresponds to a 2 dB increase in Ee.
+  # We apply the same gain covariation here even though the backend source is
+  # klsyn88's classic glottal model, so unified frontend voice-quality controls
+  # continue to affect source strength across experiments.
+  eeGainDb:
+    expr: "40.0 * log(max(RdRef, 0.3) / max(Rd, 0.3)) / log(10.0)"
+    deps: [Rd, RdRef]
+
+  # Fant 1997 Table 1 gives OQi values at discrete Rd samples. klsyn88 uses
+  # Kopen as a percent open phase, so we interpolate those table points and let
+  # an explicit OQ override take precedence.
+  rdDerivedOpenQuotientPct:
+    expr: >-
+      Rd <= 0.5
+        ? 35.0 + (max(Rd, 0.3) - 0.3) * 60.0
+        : (Rd <= 0.7
+            ? 47.0 + (Rd - 0.5) * 42.5
+            : (Rd <= 1.0
+                ? 55.5 + (Rd - 0.7) * 31.6666666667
+                : (Rd <= 1.4
+                    ? 65.0 + (Rd - 1.0) * 20.0
+                    : (Rd <= 2.0
+                        ? 73.0 + (Rd - 1.4) * 8.3333333333
+                        : 78.0 + (min(Rd, 2.7) - 2.0) * 1.4285714286))))
+    deps: [Rd]
+
+  effectiveKopen:
+    expr: "min(99.0, max(5.0, OQ > 0 ? OQ : rdDerivedOpenQuotientPct))"
+    deps: [OQ, rdDerivedOpenQuotientPct]
+
+  # klsyn88 exposes explicit spectral tilt (TLTdb) rather than LF Rd. Use an
+  # engineering proxy from the Fant 1997 Rd->OQ trend when TL is not supplied.
+  rdDerivedTiltDb:
+    expr: "min(34.0, max(0.0, (rdDerivedOpenQuotientPct - 50.0) * 0.6))"
+    deps: [rdDerivedOpenQuotientPct]
+
+  effectiveTiltDb:
+    expr: "min(34.0, max(0.0, TLTdb + (TL > 0 ? TL : rdDerivedTiltDb)))"
+    deps: [TLTdb, TL, rdDerivedTiltDb]
+
+  Ra:
+    expr: "max(-1.0 + 4.8 * Rd, 0.0)"
+    deps: [Rd]
+
+  RaRef:
+    expr: "max(-1.0 + 4.8 * RdRef, 0.0)"
+    deps: [RdRef]
+
+  deltaB1:
+    expr: "250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0"
+    deps: [F1, Ra, RaRef]
+
+  deltaB2:
+    expr: "deltaB1 * F1 / (2.0 * F2)"
+    deps: [deltaB1, F1, F2]
+
+  effectiveB1:
+    expr: "max(B1 + deltaB1, 40.0)"
+    deps: [B1, deltaB1]
+
+  effectiveB1p:
+    expr: "max(B1p + deltaB1, 40.0)"
+    deps: [B1p, deltaB1]
+
+  effectiveB2:
+    expr: "max(B2 + deltaB2, 40.0)"
+    deps: [B2, deltaB2]
+
+  effectiveB2p:
+    expr: "max(B2p + deltaB2, 40.0)"
+    deps: [B2p, deltaB2]
+
   avDb:
     expr: "max(AV - 7, 0)"
     deps: [AV]
 
   voiceGain:
-    expr: "dbToLinearKlsyn(avDb)"
-    deps: [avDb]
+    expr: "dbToLinearKlsyn(max(avDb + eeGainDb, 0))"
+    deps: [avDb, eeGainDb]
 
   parVoiceGain:
-    expr: "dbToLinearKlsyn(AVS)"
-    deps: [AVS]
+    expr: "dbToLinearKlsyn(max(AVS + eeGainDb, 0))"
+    deps: [AVS, eeGainDb]
 
   aspGain:
     expr: "dbToLinearKlsyn(AH) * 0.05"
@@ -336,8 +439,8 @@ realize:
     deps: [NFCASC, F2]
 
   cascadeF2Bw:
-    expr: "NFCASC >= 2 ? B2 : 0"
-    deps: [NFCASC, B2]
+    expr: "NFCASC >= 2 ? effectiveB2 : 0"
+    deps: [NFCASC, effectiveB2]
 
   cascadeF3Freq:
     expr: "NFCASC >= 3 ? F3 : 0"

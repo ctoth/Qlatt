@@ -125,6 +125,10 @@ interface Phrase {
 const TERMINAL_PUNCTUATION = new Set([".", "?", "!"]);
 const CLAUSE_PUNCTUATION = new Set([",", ";", ":"]);
 
+function isSuppressedToken(token: PipelineToken | null | undefined): boolean {
+  return token?.status === 2;
+}
+
 // ---------------------------------------------------------------------------
 // Main annotator
 // ---------------------------------------------------------------------------
@@ -214,7 +218,7 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     const isSilWithPunctuation =
-      token.phoneme === "SIL" && token.punctuationSymbol != null;
+      token.phoneme === "SIL" && token.punctuationSymbol != null && !isSuppressedToken(token);
 
     if (isSilWithPunctuation) {
       // End of a phrase — record it if we have any phone tokens.
@@ -226,7 +230,7 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
         });
       }
       currentIndices = [];
-    } else if (token.phoneme !== "SIL") {
+    } else if (token.phoneme !== "SIL" && !isSuppressedToken(token)) {
       // Non-SIL phone token — belongs to current phrase.
       currentIndices.push(i);
     }
@@ -259,8 +263,8 @@ function markFunctionWords(tokens: PipelineToken[]): void {
     token.phraseAccent = null;
     token.boundaryTone = null;
 
-    if (token.phoneme === "SIL") {
-      // SIL tokens are neither function nor content words.
+    if (token.phoneme === "SIL" || isSuppressedToken(token)) {
+      // SIL and suppressed structural source tokens are not prosodic carriers.
       token.isFunctionWord = false;
       token.isContentWord = false;
       continue;
@@ -294,6 +298,12 @@ function assignAccent(tokens: PipelineToken[]): void {
         currentGroup = [];
         currentWord = null;
       }
+      token.isAccented = false;
+      token.isNuclearAccent = false;
+      token.accentType = null;
+      continue;
+    }
+    if (isSuppressedToken(token)) {
       token.isAccented = false;
       token.isNuclearAccent = false;
       token.accentType = null;
@@ -341,7 +351,7 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
   let lastAccentedStressIndex = -1;
 
   for (const idx of phrase.tokenIndices) {
-    if (tokens[idx].isAccented && tokens[idx].stress === 1) {
+    if (!isSuppressedToken(tokens[idx]) && tokens[idx].isAccented && tokens[idx].stress === 1) {
       lastAccentedStressIndex = idx;
     }
   }
@@ -359,9 +369,9 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
  * Assign ToBI accent types within a phrase.
  *
  * - Initial prenuclear accent: L+H* (common rising prenuclear default)
- * - Later prenuclear accents: H* (allows H*-H* downstep/sag sequences)
+ * - Later prenuclear accents: H+!H* (MAE-ToBI downstepped prenuclear default)
  * - Nuclear accent in declarative (. or no punctuation): H*
- * - Nuclear accent in question (?): L*
+ * - Nuclear accent in question (?): L* if lone accent, L*+H if postnuclear rise is available
  *
  * Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
  */
@@ -370,27 +380,34 @@ function assignAccentTypes(
   phrase: Phrase,
   isQuestion: boolean,
 ): void {
-  let sawPrenuclearAccent = false;
+  const accentedIndices = phrase.tokenIndices.filter(
+    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].isAccented && tokens[idx].stress === 1,
+  );
+  const hasPrenuclearAccent = accentedIndices.some((idx) => !tokens[idx].isNuclearAccent);
+  let prenuclearAccentCount = 0;
   for (const idx of phrase.tokenIndices) {
     const token = tokens[idx];
-    if (!token.isAccented) continue;
+    if (isSuppressedToken(token) || !(token.isAccented && token.stress === 1)) continue;
 
     if (token.isNuclearAccent) {
-      // Nuclear accent: L* for questions, H* for declaratives.
-      // Citation: Pierrehumbert 1980, Ladd 2008
-      token.accentType = isQuestion ? "L*" : "H*";
-    } else if (!sawPrenuclearAccent) {
+      // Nuclear accent: L* for short/simple questions; L*+H when there is
+      // prenuclear material to support the characteristic question rise.
+      // Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
+      token.accentType = isQuestion
+        ? (hasPrenuclearAccent ? "L*+H" : "L*")
+        : "H*";
+    } else if (prenuclearAccentCount === 0) {
       // Use a leading rise on the first prenuclear accent so the tune starts
       // from the phrase baseline and reaches the first accented peak locally.
       // Citations: Pierrehumbert 1980, Ladd 2008 (prenuclear rising accents)
       token.accentType = "L+H*";
-      sawPrenuclearAccent = true;
     } else {
-      // Later prenuclear accents remain H* so subsequent accents participate
-      // in the standard H*-to-H* downstep and sagging interpolation regime.
-      // Citations: Pierrehumbert 1980, Ladd 2008
-      token.accentType = "H*";
+      // Later prenuclear accents use the revised MAE-ToBI H+!H* category:
+      // an early H lead into a downstepped high starred target.
+      // Citations: Ladd 2008 Ch.3, Pierrehumbert 1980 (downstep)
+      token.accentType = "H+!H*";
     }
+    prenuclearAccentCount += token.isNuclearAccent ? 0 : 1;
   }
 }
 
@@ -413,7 +430,7 @@ function assignAccentTypes(
 function assignAccentIndices(tokens: PipelineToken[]): void {
   let accentCount = 0;
   for (const token of tokens) {
-    if (token.isAccented && token.stress === 1) {
+    if (!isSuppressedToken(token) && token.isAccented && token.stress === 1) {
       token.accentIndexInPhrase = accentCount;
       accentCount++;
     } else {
@@ -448,6 +465,9 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
     if (token.breakIndex == null) {
       token.breakIndex = 0;
     }
+    if (isSuppressedToken(token)) {
+      token.breakIndex = 0;
+    }
   }
 
   // Assign break indices on SIL tokens at phrase boundaries.
@@ -477,6 +497,9 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
       }
       prevWord = null;
       lastPhoneOfWord = -1;
+      continue;
+    }
+    if (isSuppressedToken(token)) {
       continue;
     }
 

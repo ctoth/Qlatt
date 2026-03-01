@@ -144,6 +144,24 @@ describe("accentIndexInPhrase annotation", () => {
     // T at index 5: isAccented=true but stress!=null && stress!=1 -> -1
     expect(result[5].accentIndexInPhrase).toBe(-1);
   });
+
+  it("assigns expanded MAE-ToBI core accent types in multi-accent phrases", () => {
+    // "Cat sat on mats?" -> first prenuclear, later prenuclear, then nuclear question accent
+    const tokens = [
+      sil(),
+      phone("K", "cat"), phone("AE", "cat", 1), phone("T", "cat"),
+      phone("S", "sat"), phone("AE", "sat", 1), phone("T", "sat"),
+      phone("AA", "on"), phone("N", "on"),
+      phone("M", "mats"), phone("AE", "mats", 1), phone("T", "mats"), phone("S", "mats"),
+      sil("?"),
+    ];
+
+    const result = annotateProsody(tokens);
+
+    expect(result[2].accentType).toBe("L+H*");
+    expect(result[5].accentType).toBe("H+!H*");
+    expect(result[10].accentType).toBe("L*+H");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -266,6 +284,15 @@ describe("ToBI intonation — integration", () => {
     // The last voiced F0 should be elevated
     const lastF0 = voicedF0[voicedF0.length - 1];
     expect(lastF0).toBeGreaterThan(140);
+  });
+
+  it("question tails rise after the phrase accent instead of plateauing", () => {
+    const track = textToKlattTrack("Hello there?");
+    const voicedF0 = getVoicedF0(track);
+    expect(voicedF0.length).toBeGreaterThan(3);
+
+    const tail = voicedF0.slice(-3);
+    expect(tail[tail.length - 1]).toBeGreaterThanOrEqual(tail[0]);
   });
 
   it("single-word sentence still produces baseline + accent + boundary", () => {

@@ -260,6 +260,11 @@ parameters:
         value: 0.8
         citations:
           - "Pierrehumbert 1980 (H% near top of range)"
+      upstep_factor:
+        value: 0.2
+        citations:
+          - "Pierrehumbert 1980 Rule 9 / upstep formula (a ≈ 0.2)"
+          - "Ladd 2008 Ch.3 (H% final rise modeled as local upstep)"
       # --- Final lowering ---
       final_lowering_factor:
         value: 0.85

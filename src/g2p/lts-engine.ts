@@ -32,6 +32,7 @@ interface LtsRule {
 
 interface LtsRulesData {
   context_symbols: Record<string, string>;
+  raw_regex?: boolean;
   rules_by_letter: Record<string, LtsRule[]>;
 }
 
@@ -80,18 +81,30 @@ function compileContextPattern(
   anchor: 'left' | 'right',
   symbols: Record<string, string>,
   cache: Map<string, RegExp>,
+  rawRegex: boolean = false,
 ): RegExp {
-  const cacheKey = `${anchor}:${pattern}`;
+  const cacheKey = `${anchor}:${rawRegex ? 'R:' : ''}${pattern}`;
   const hit = cache.get(cacheKey);
   if (hit) return hit;
 
-  let regex = '';
-  for (const ch of pattern) {
-    if (ch in symbols) {
-      regex += symbols[ch];
-    } else {
-      // Literal character — escape regex metacharacters
-      regex += escapeRegex(ch);
+  let regex: string;
+  if (rawRegex) {
+    // Raw regex mode: expand context_symbols by string replacement,
+    // but leave all other characters (including regex metacharacters) as-is.
+    regex = pattern;
+    for (const [sym, expansion] of Object.entries(symbols)) {
+      regex = regex.split(sym).join(expansion);
+    }
+  } else {
+    // Classic mode: process character-by-character, escaping non-symbol chars.
+    regex = '';
+    for (const ch of pattern) {
+      if (ch in symbols) {
+        regex += symbols[ch];
+      } else {
+        // Literal character — escape regex metacharacters
+        regex += escapeRegex(ch);
+      }
     }
   }
 
@@ -130,6 +143,7 @@ function tryRule(
   pos: number,
   symbols: Record<string, string>,
   cache: Map<string, RegExp>,
+  rawRegex: boolean = false,
 ): number {
   const { left, letters, right } = rule;
 
@@ -141,14 +155,14 @@ function tryRule(
   // 2. Check left context
   if (left.length > 0) {
     const leftStr = input.substring(0, pos);
-    const leftRe = compileContextPattern(left, 'left', symbols, cache);
+    const leftRe = compileContextPattern(left, 'left', symbols, cache, rawRegex);
     if (!leftRe.test(leftStr)) return 0;
   }
 
   // 3. Check right context
   if (right.length > 0) {
     const rightStr = input.substring(pos + letters.length);
-    const rightRe = compileContextPattern(right, 'right', symbols, cache);
+    const rightRe = compileContextPattern(right, 'right', symbols, cache, rawRegex);
     if (!rightRe.test(rightStr)) return 0;
   }
 
@@ -168,7 +182,8 @@ export function applyLtsRules(word: string, rulesPath?: string): string[] {
   if (!word || word.length === 0) return [];
 
   const loaded = loadRules(rulesPath);
-  const { context_symbols, rules_by_letter } = loaded.data;
+  const { context_symbols, rules_by_letter, raw_regex } = loaded.data;
+  const rawRegex = raw_regex === true;
 
   // Pad with spaces (word boundary markers)
   const input = ' ' + word.toUpperCase() + ' ';
@@ -188,7 +203,7 @@ export function applyLtsRules(word: string, rulesPath?: string): string[] {
 
     let matched = false;
     for (const rule of rules) {
-      const consumed = tryRule(rule, input, pos, context_symbols, loaded.contextCache);
+      const consumed = tryRule(rule, input, pos, context_symbols, loaded.contextCache, rawRegex);
       if (consumed > 0) {
         elovitzPhonemes.push(...rule.phonemes);
         pos += consumed;

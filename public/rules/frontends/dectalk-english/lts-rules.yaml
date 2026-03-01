@@ -1,73 +1,524 @@
 version: v1
 citations:
 - DECtalk 4.63 (converted from l_us_rta.c)
+raw_regex: true
 # NOTE: 311 source rules had grapheme_rewrites (DECtalk grapheme rewrite instructions).
 # These are stripped because qlatt's LTS engine does not support grapheme rewriting.
 context_symbols:
-  '#': '[AEIOUY]+'
-  +: '[EIY]'
   '''': ''''
 rules_by_letter:
   A:
+  - left: ' '
+    letters: ANTHROPO
+    right: ''
+    phonemes: [AE2, N, TH, R, AH2, P, AA2]
+  - left: ''
+    letters: ATIONAL
+    right: ' '
+    phonemes: [EY1, SH, IH2, N, EL]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: ABILITY
+    right: ' '
+    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
+  - left: C(?:U|A|R|N)
+    letters: ABILITY
+    right: ' '
+    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
+  - left: (?:M|P)(?:A|U)
+    letters: ABILITY
+    right: ' '
+    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
+  - left: ''
+    letters: ABILITY
+    right: ' '
+    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
+  - left: ''
+    letters: ARCHAEO
+    right: ''
+    phonemes: [AA0, R, K, IY0, AA1]
+  - left: ''
+    letters: AGEOUS
+    right: ' '
+    phonemes: [EY1, JH, IH2, S]
+  - left: ''
+    letters: ARIOUS
+    right: ' '
+    phonemes: [EY1, R, IY2, IH2, S]
+  - left: ''
+    letters: ATIOUS
+    right: ' '
+    phonemes: [EY1, SH, IH2, S]
+  - left: ''
+    letters: ACEOUS
+    right: ''
+    phonemes: [EY1, SH, IH2, S]
+  - left: ''
+    letters: ACIOUS
+    right: ''
+    phonemes: [EY1, SH, IH2, S]
   - left: ''
     letters: AEMIA
-    right: +
+    right: ' '
     phonemes: [IY1, M, IY2, AH2]
+  - left: ''
+    letters: ATRIC
+    right: ' '
+    phonemes: [AE1, T, R, IH2, K]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ATIVE
+    right: ' '
+    phonemes: [EY0, T, IH0, V]
+  - left: ''
+    letters: ATIVE
+    right: ' '
+    phonemes: [IH2, T, IH2, V]
+  - left: ''
+    letters: ALSKI
+    right: ' '
+    phonemes: [AA0, L, S, K, IY0]
+  - left: ''
+    letters: AWSKI
+    right: ' '
+    phonemes: [AA1, F, S, K, IY0]
+  - left: ''
+    letters: ARIAN
+    right: ' '
+    phonemes: [EY1, R, IY2, AH2, N]
+  - left: ''
+    letters: ATION
+    right: ' '
+    phonemes: [EY1, SH, IH2, N]
+  - left: '[AEIOU]'
+    letters: ALITY
+    right: ' '
+    phonemes: [AE1, L, IH2, T, IY2]
+  - left: ''
+    letters: ANSKY
+    right: ' '
+    phonemes: [AE1, N, S, K, IY2]
+  - left: ''
+    letters: ARCHY
+    right: ' '
+    phonemes: [AA0, R, K, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ARILY
+    right: ' '
+    phonemes: [EY1, R, EL, IY2]
+  - left: ''
+    letters: ATORY
+    right: ' '
+    phonemes: [AH2, T, OW2, R, IY2]
   - left: ''
     letters: ALPHA
     right: ''
     phonemes: [AE0, L, F, AH0]
   - left: ''
-    letters: ANA
-    right: +
-    phonemes: [AE1, N, AH2]
+    letters: AFORE
+    right: ''
+    phonemes: [AH0, F, OW0, R]
+  - left: ''
+    letters: AMPHI
+    right: ''
+    phonemes: [AE0, M, F, IH1]
+  - left: ''
+    letters: ANGLO
+    right: ''
+    phonemes: [AE0, N, G, L, OW1]
+  - left: ''
+    letters: ASTRO
+    right: ''
+    phonemes: [AE1, S, T, R, AA1]
+  - left: ''
+    letters: AFTER
+    right: ''
+    phonemes: [AE0, F, T, ER0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ABLE
+    right: ' '
+    phonemes: [EY0, B, EL]
+  - left: (?:G|S|T|U|V|Z)[AEIOU]
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: C(?:U|A|R|N)
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: (?:M|P)(?:A|U)
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: ''
+    letters: ABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ACHE
+    right: ' '
+    phonemes: [EY2, K]
+  - left: ''
+    letters: ACLE
+    right: ' '
+    phonemes: [AH2, K, EL]
+  - left: ''
+    letters: AINE
+    right: ' '
+    phonemes: [EY1, N]
+  - left: ''
+    letters: AIRE
+    right: ' '
+    phonemes: [EY1, R]
+  - left: ''
+    letters: AISE
+    right: ' '
+    phonemes: [EY1, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ANCE
+    right: ' '
+    phonemes: [AE0, N, S]
+  - left: (?:D|N|R)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: ANCE
+    right: ' '
+    phonemes: [AH2, N, S]
+  - left: ''
+    letters: ANCE
+    right: ' '
+    phonemes: [AH2, N, S]
+  - left: ' '
+    letters: ANTE
+    right: ''
+    phonemes: [AE0, N, T, EH1]
+  - left: ' '
+    letters: ARCH
+    right: '[AEIOU]'
+    phonemes: [AA2, R, K]
+  - left: ' '
+    letters: ANTI
+    right: '[AEIOU]'
+    phonemes: [AE0, N, T, IY0]
+  - left: ' '
+    letters: ANTI
+    right: ''
+    phonemes: [AE0, N, T, IH1]
+  - left: ' '
+    letters: AERO
+    right: (?:P|S)
+    phonemes: [EY0, R, AA1]
+  - left: ' '
+    letters: ALLO
+    right: ''
+    phonemes: [AE0, L, OW0]
+  - left: ''
+    letters: ATOR
+    right: ' '
+    phonemes: [EY0, T, ER2]
+  - left: ''
+    letters: AULT
+    right: ' '
+    phonemes: [AO0, L, T]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: ABLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: C(?:U|A|R|N)
+    letters: ABLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: M(?:A|U)
+    letters: ABLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: ''
+    letters: ABLY
+    right: ' '
+    phonemes: [EY2, B, L, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ALLY
+    right: ' '
+    phonemes: [AE0, L, IY2]
+  - left: C
+    letters: ALLY
+    right: ' '
+    phonemes: [L, IY0]
+  - left: ''
+    letters: ALLY
+    right: ' '
+    phonemes: [AH0, L, IY0]
+  - left: ''
+    letters: ANCY
+    right: ' '
+    phonemes: [AE2, N, S, IY2]
   - left: ''
     letters: AQUA
     right: ''
-    phonemes: [AH0, K, W, AH0]
+    phonemes: [AE1, K, W, AE1]
+  - left: ''
+    letters: AUGH
+    right: ''
+    phonemes: [AO0]
+  - left: ''
+    letters: AUEN
+    right: ''
+    phonemes: [AW0, AH0, N]
+  - left: ''
+    letters: AUTO
+    right: ''
+    phonemes: [AO0, T, AA1]
+  - left: ''
+    letters: AIER
+    right: ''
+    phonemes: [AY0, ER0]
+  - left: ''
+    letters: AUER
+    right: ''
+    phonemes: [AW0, AH0, R]
+  - left: ''
+    letters: ANA
+    right: ' '
+    phonemes: [AE1, N, AH2]
   - left: ''
     letters: ARA
-    right: '#'
+    right: ' '
     phonemes: [AA1, R, AH2]
   - left: ''
     letters: ATA
-    right: '#'
+    right: ' '
     phonemes: [AA1, T, AH2]
   - left: ''
     letters: AWA
-    right: '#'
+    right: ' '
     phonemes: [AA1, W, AH2]
   - left: ''
     letters: AZA
-    right: '#'
+    right: ' '
     phonemes: [AA1, Z, AH2]
+  - left: ''
+    letters: AIC
+    right: ' '
+    phonemes: [EY1, IH2, K]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ARD
+    right: ' '
+    phonemes: [AA2, R, D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: AGE
+    right: ' '
+    phonemes: [EY0, JH]
+  - left: ''
+    letters: AGE
+    right: ' '
+    phonemes: [IH2, JH]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ATE
+    right: ' '
+    phonemes: [EY0, T]
+  - left: CI(?:F|L|R)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: G(?:O|I)[LR]
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: (?:M|N)I(?:L|T)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: (?:N|L)OI
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: N(?:U|E)(?:S|T)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: R[AEIOU](?:P|T|M|C|D)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: (?:QU|V)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: I(?:D|G|P)
+    letters: ATE
+    right: ' '
+    phonemes: [AH0, T]
+  - left: ''
+    letters: ATE
+    right: ' '
+    phonemes: [EY0, T]
+  - left: ' '
+    letters: AWE
+    right: ''
+    phonemes: [AO0]
+  - left: ''
+    letters: AKI
+    right: ' '
+    phonemes: [AA1, K, IY2]
+  - left: ''
+    letters: ATI
+    right: ' '
+    phonemes: [AA1, T, IY2]
+  - left: ''
+    letters: AHL
+    right: ' '
+    phonemes: [AA0, L]
+  - left: '[AEIOU]'
+    letters: ADO
+    right: ' '
+    phonemes: [AA1, D, OW2]
+  - left: ''
+    letters: ATO
+    right: ' '
+    phonemes: [AA1, T, OW2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ANT
+    right: ' '
+    phonemes: [AE0, N, T]
+  - left: ''
+    letters: ANT
+    right: ' '
+    phonemes: [AH0, N, T]
+  - left: ''
+    letters: AUX
+    right: ' '
+    phonemes: [OW0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ACY
+    right: ' '
+    phonemes: [EY0, S, IY0]
+  - left: (?:V|P|N|R)
+    letters: ACY
+    right: ' '
+    phonemes: [AH2, S, S, IY2]
+  - left: ''
+    letters: ACY
+    right: ' '
+    phonemes: [AH2, S, S, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: AMY
+    right: ' '
+    phonemes: [EY2, M, IY2]
+  - left: ' '
+    letters: ANY
+    right: ''
+    phonemes: [EH0, N, IY0]
+  - left: '[AEIOU]'
+    letters: ANY
+    right: ' '
+    phonemes: [AH2, N, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ARY
+    right: ' '
+    phonemes: [EY0, R, IY2]
+  - left: ''
+    letters: AE
+    right: ' '
+    phonemes: [AY0]
+  - left: ''
+    letters: AE
+    right: ' '
+    phonemes: [AY0]
+  - left: ''
+    letters: AE
+    right: (?:R|L)
+    phonemes: [EY0]
+  - left: ' '
+    letters: AE
+    right: STH
+    phonemes: [AH0]
+  - left: ''
+    letters: AH
+    right: ' '
+    phonemes: [AA1]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: AL
+    right: ' '
+    phonemes: [AE0, L]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ] '
+    letters: AL
+    right: ' '
+    phonemes: [AE2, L]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: AL
+    right: ' '
+    phonemes: [AE2, L]
+  - left: ''
+    letters: AO
+    right: ' '
+    phonemes: [AW0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    letters: AR
+    right: ' '
+    phonemes: [AA2, R]
+  - left: ''
+    letters: AU
+    right: (?:F|V|R)
+    phonemes: [OW0]
+  - left: ''
+    letters: AU
+    right: ' '
+    phonemes: [AW0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: AW
+    right: ''
+    phonemes: [AO0]
+  - left: ''
+    letters: AW
+    right: '(?:[BCDFGHJKLMNPQRSTVWXZ])? '
+    phonemes: [AO0]
   - left: ''
     letters: AA
     right: ''
     phonemes: [AA1]
+  - left: ''
+    letters: AE
+    right: ''
+    phonemes: [IY1]
+  - left: ''
+    letters: AI
+    right: ''
+    phonemes: [EY1]
+  - left: ''
+    letters: AU
+    right: ''
+    phonemes: [AO0]
+  - left: ''
+    letters: AY
+    right: ''
+    phonemes: [EY0]
   - left: (?:[AEIOU])?[BCDFGHJKLMNPQRSTVWXZ]+
     letters: A
-    right: LM+
+    right: 'LM '
     phonemes: [AA0]
-  - left: QU(?:S)?+
+  - left: 'QU(?:S)? '
     letters: A
     right: (?:SH|D|L|N|R|T)
     phonemes: [AO0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]*'
     letters: A
-    right: L(?:F|P)+
+    right: 'L(?:F|P) '
     phonemes: [AE0]
   - left: ''
     letters: A
-    right: L[BCDFGHJKLMNPQRSTVWXZ]+
-    phonemes: [AH0]
+    right: 'L[BCDFGHJKLMNPQRSTVWXZ] '
+    phonemes: [AO1]
   - left: QU
     letters: A
-    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]|#)
+    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]| )
     phonemes: [AO0]
   - left: ''
     letters: A
-    right: QUE+
+    right: 'QUE '
     phonemes: [AE0]
   - left: '[BCDFGHJKMNPQRSTVWXZ]'
     letters: A
@@ -77,27 +528,27 @@ rules_by_letter:
     letters: A
     right: (?:PS|DG|X)
     phonemes: [AE0]
-  - left: W#
+  - left: 'W '
     letters: A
     right: (?:F|N|D|V)[AEIOU]
     phonemes: [EY0]
-  - left: W(?:[BCDFGHJKLMNPQRSTVWXYZ]|#)
+  - left: W(?:[BCDFGHJKLMNPQRSTVWXYZ]| )
     letters: A
     right: '[BCDFHJLMNPQRSTVWXZ]'
     phonemes: [AO0]
   - left: ''
     letters: A
-    right: R(?:[BCDFGHJKLMNPQSTVWXZ]+|#|+)
+    right: R(?:[BCDFGHJKLMNPQSTVWXZ]+| | )
     phonemes: [AA0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: A
-    right: +
-    phonemes: [AH0]
+    right: ' '
+    phonemes: [AA1]
   - left: ''
     letters: A
-    right: '[BCDFGHJKLMNPQRSTVWXZ]LE+'
+    right: '[BCDFGHJKLMNPQRSTVWXZ]LE '
     phonemes: [EY0]
-  - left: '#'
+  - left: ' '
     letters: A
     right: (?:SY|TH)
     phonemes: [EY0]
@@ -111,489 +562,61 @@ rules_by_letter:
     phonemes: [EY0]
   - left: ''
     letters: A
-    right: '[MN][BCDFGHJKLMNPQRSTVWXZ][AEIOU]+'
-    phonemes: [IH0]
+    right: '[MN][BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    phonemes: [AE1]
   - left: ''
     letters: A
     right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [AH0]
+    phonemes: [AE1]
   - left: ''
     letters: A
-    right: '[BCDFGHJKLMNPQRSTVWXZ]A+'
-    phonemes: [AH0]
+    right: '[BCDFGHJKLMNPQRSTVWXZ]A '
+    phonemes: [AA1]
   - left: ''
     letters: A
-    right: (?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU]+
-    phonemes: [AH0]
+    right: '(?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU] '
+    phonemes: [EY1]
   - left: V
     letters: A
     right: R[AEIOU]
-    phonemes: [AH0]
+    phonemes: [EY1]
   - left: ''
     letters: A
-    right: '[BCDFGHJKLMNPQSTVWXZ]++'
-    phonemes: [AH0]
+    right: '[BCDFGHJKLMNPQSTVWXZ]+ '
+    phonemes: [AE1]
   - left: ''
     letters: A
     right: ''
-    phonemes: [AH0]
-  - left: ''
-    letters: ATRIC
-    right: +
-    phonemes: [AE1, T, R, IH2, K]
-  - left: ''
-    letters: AIC
-    right: +
-    phonemes: [EY1, IH2, K]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ARD
-    right: +
-    phonemes: [AA2, R, D]
-  - left: ''
-    letters: AFORE
-    right: ''
-    phonemes: [AH0, F, OW0, R]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ATIVE
-    right: +
-    phonemes: [EY0, T, IH0, V]
-  - left: ''
-    letters: ATIVE
-    right: +
-    phonemes: [IH2, T, IH2, V]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*+'
-    letters: ABLE
-    right: +
-    phonemes: [EY0, B, EL]
-  - left: (?:G|S|T|U|V|Z)[AEIOU]
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: C(?:U|A|R|N)
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: (?:M|P)(?:A|U)
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: ''
-    letters: ABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ACHE
-    right: +
-    phonemes: [EY2, K]
-  - left: ''
-    letters: ACLE
-    right: +
-    phonemes: [AH2, K, EL]
-  - left: ''
-    letters: AINE
-    right: +
-    phonemes: [EY1, N]
-  - left: ''
-    letters: AIRE
-    right: +
-    phonemes: [EY1, R]
-  - left: ''
-    letters: AISE
-    right: +
-    phonemes: [EY1, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ANCE
-    right: +
-    phonemes: [AE0, N, S]
-  - left: (?:D|N|R)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: ANCE
-    right: +
-    phonemes: [AH2, N, S]
-  - left: ''
-    letters: ANCE
-    right: +
-    phonemes: [AH2, N, S]
-  - left: '#'
-    letters: ANTE
-    right: ''
-    phonemes: [AE0, N, T, IH0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: AGE
-    right: +
-    phonemes: [EY0, JH]
-  - left: ''
-    letters: AGE
-    right: +
-    phonemes: [IH2, JH]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: ATE
-    right: +
-    phonemes: [EY0, T]
-  - left: CI(?:F|L|R)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: G(?:O|I)[LR]
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: (?:M|N)I(?:L|T)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: (?:N|L)OI
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: N(?:U|E)(?:S|T)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: R[AEIOU](?:P|T|M|C|D)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: (?:QU|V)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: I(?:D|G|P)
-    letters: ATE
-    right: +
-    phonemes: [AH0, T]
-  - left: ''
-    letters: ATE
-    right: +
-    phonemes: [EY0, T]
-  - left: '#'
-    letters: AWE
-    right: ''
-    phonemes: [AO0]
-  - left: ''
-    letters: AE
-    right: '#'
-    phonemes: [AY0]
-  - left: ''
-    letters: AE
-    right: '#'
-    phonemes: [AY0]
-  - left: ''
-    letters: AE
-    right: (?:R|L)
-    phonemes: [EY0]
-  - left: '#'
-    letters: AE
-    right: STH
-    phonemes: [AH0]
-  - left: ''
-    letters: AE
-    right: ''
-    phonemes: [AH0]
-  - left: '#'
-    letters: ARCH
-    right: '[AEIOU]'
-    phonemes: [AA2, R, K]
-  - left: ''
-    letters: AUGH
-    right: ''
-    phonemes: [AO0]
-  - left: ''
-    letters: AH
-    right: '#'
-    phonemes: [AH0]
-  - left: ''
-    letters: ALSKI
-    right: '#'
-    phonemes: [AA0, L, S, K, IY0]
-  - left: ''
-    letters: AMPHI
-    right: ''
-    phonemes: [AE0, M, F, IH0]
-  - left: ''
-    letters: AWSKI
-    right: '#'
-    phonemes: [AA1, F, S, K, IY0]
-  - left: '#'
-    letters: ANTI
-    right: '[AEIOU]'
-    phonemes: [AE0, N, T, IY0]
-  - left: '#'
-    letters: ANTI
-    right: ''
-    phonemes: [AE0, N, T, IH0]
-  - left: ''
-    letters: AKI
-    right: '#'
-    phonemes: [AA1, K, IY2]
-  - left: ''
-    letters: ATI
-    right: '#'
-    phonemes: [AA1, T, IY2]
-  - left: ''
-    letters: AI
-    right: ''
-    phonemes: [AH0]
-  - left: ''
-    letters: ATIONAL
-    right: +
-    phonemes: [EY1, SH, IH2, N, EL]
-  - left: ''
-    letters: AHL
-    right: '#'
-    phonemes: [AA0, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: AL
-    right: +
-    phonemes: [AE0, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ]#'
-    letters: AL
-    right: +
-    phonemes: [AE2, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: AL
-    right: +
-    phonemes: [AE2, L]
-  - left: ''
-    letters: ARIAN
-    right: +
-    phonemes: [EY1, R, IY2, AH2, N]
-  - left: ''
-    letters: ATION
-    right: +
-    phonemes: [EY1, SH, IH2, N]
-  - left: ''
-    letters: AUEN
-    right: ''
-    phonemes: [AW0, AH0, N]
-  - left: '#'
-    letters: ANTHROPO
-    right: ''
-    phonemes: [AE2, N, TH, R, AH2, P, AA2]
-  - left: ''
-    letters: ARCHAEO
-    right: ''
-    phonemes: [AA0, R, K, IY0, AH0]
-  - left: ''
-    letters: ANGLO
-    right: ''
-    phonemes: [AE0, N, G, L, AH0]
-  - left: ''
-    letters: ASTRO
-    right: ''
-    phonemes: [AH0, S, T, R, AH0]
-  - left: '#'
-    letters: AERO
-    right: (?:P|S)
-    phonemes: [EY0, R, OW0]
-  - left: '#'
-    letters: ALLO
-    right: ''
-    phonemes: [AE0, L, OW0]
-  - left: ''
-    letters: AUTO
-    right: ''
-    phonemes: [AO0, T, AH0]
-  - left: '[AEIOU]'
-    letters: ADO
-    right: +
-    phonemes: [AA1, D, OW2]
-  - left: ''
-    letters: ATO
-    right: '#'
-    phonemes: [AA1, T, OW2]
-  - left: ''
-    letters: AO
-    right: +
-    phonemes: [AW0]
-  - left: ''
-    letters: AFTER
-    right: ''
-    phonemes: [AE0, F, T, ER0]
-  - left: ''
-    letters: AIER
-    right: ''
-    phonemes: [AY0, ER0]
-  - left: ''
-    letters: ATOR
-    right: +
-    phonemes: [EY0, T, ER2]
-  - left: ''
-    letters: AUER
-    right: ''
-    phonemes: [AW0, AH0, R]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    letters: AR
-    right: +
-    phonemes: [AA2, R]
-  - left: ''
-    letters: ACEOUS
-    right: ''
-    phonemes: [EY1, SH, IH2, S]
-  - left: ''
-    letters: ACIOUS
-    right: ''
-    phonemes: [EY1, SH, IH2, S]
-  - left: ''
-    letters: AGEOUS
-    right: +
-    phonemes: [EY1, JH, IH2, S]
-  - left: ''
-    letters: ARIOUS
-    right: +
-    phonemes: [EY1, R, IY2, IH2, S]
-  - left: ''
-    letters: ATIOUS
-    right: +
-    phonemes: [EY1, SH, IH2, S]
-  - left: ''
-    letters: AULT
-    right: '#'
-    phonemes: [AO0, L, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: ANT
-    right: +
-    phonemes: [AE0, N, T]
-  - left: ''
-    letters: ANT
-    right: +
-    phonemes: [AH0, N, T]
-  - left: ''
-    letters: AU
-    right: (?:F|V|R)
-    phonemes: [OW0]
-  - left: ''
-    letters: AU
-    right: '#'
-    phonemes: [AW0]
-  - left: ''
-    letters: AU
-    right: ''
-    phonemes: [AO0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    letters: AW
-    right: ''
-    phonemes: [AO0]
-  - left: ''
-    letters: AW
-    right: (?:[BCDFGHJKLMNPQRSTVWXZ])?+
-    phonemes: [AO0]
-  - left: ''
-    letters: AUX
-    right: '#'
-    phonemes: [OW0]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: ABILITY
-    right: +
-    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
-  - left: C(?:U|A|R|N)
-    letters: ABILITY
-    right: +
-    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
-  - left: (?:M|P)(?:A|U)
-    letters: ABILITY
-    right: +
-    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
-  - left: ''
-    letters: ABILITY
-    right: +
-    phonemes: [AH2, B, IH1, L, IH2, T, IY2]
-  - left: '[AEIOU]'
-    letters: ALITY
-    right: +
-    phonemes: [AE1, L, IH2, T, IY2]
-  - left: ''
-    letters: ANSKY
-    right: '#'
-    phonemes: [AE1, N, S, K, IY2]
-  - left: ''
-    letters: ARCHY
-    right: +
-    phonemes: [AA0, R, K, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ARILY
-    right: +
-    phonemes: [EY1, R, EL, IY2]
-  - left: ''
-    letters: ATORY
-    right: +
-    phonemes: [AH2, T, OW2, R, IY2]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: ABLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: C(?:U|A|R|N)
-    letters: ABLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: M(?:A|U)
-    letters: ABLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: ''
-    letters: ABLY
-    right: +
-    phonemes: [EY2, B, L, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ALLY
-    right: +
-    phonemes: [AE0, L, IY2]
-  - left: C
-    letters: ALLY
-    right: +
-    phonemes: [L, IY0]
-  - left: ''
-    letters: ALLY
-    right: +
-    phonemes: [AH0, L, IY0]
-  - left: ''
-    letters: ANCY
-    right: +
-    phonemes: [AE2, N, S, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ACY
-    right: +
-    phonemes: [EY0, S, IY0]
-  - left: (?:V|P|N|R)
-    letters: ACY
-    right: +
-    phonemes: [AH2, S, S, IY2]
-  - left: ''
-    letters: ACY
-    right: +
-    phonemes: [AH2, S, S, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: AMY
-    right: +
-    phonemes: [EY2, M, IY2]
-  - left: '#'
-    letters: ANY
-    right: ''
-    phonemes: [EH0, N, IY0]
-  - left: '[AEIOU]'
-    letters: ANY
-    right: +
-    phonemes: [AH2, N, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ARY
-    right: +
-    phonemes: [EY0, R, IY2]
-  - left: ''
-    letters: AY
-    right: ''
-    phonemes: [EY0]
+    phonemes: [AE1]
   B:
   - left: ''
-    letters: B
+    letters: BOROUGH
+    right: ' '
+    phonemes: [B, ER2, OW2]
+  - left: ''
+    letters: BURGER
+    right: ' '
+    phonemes: [B, ER0, G, ER2]
+  - left: ''
+    letters: BRONCH
     right: ''
-    phonemes: [B]
+    phonemes: [B, R, AA0, NG, K]
+  - left: ''
+    letters: BECKER
+    right: ''
+    phonemes: [B, EH0, K, ER0]
+  - left: ''
+    letters: BERGER
+    right: ''
+    phonemes: [B, ER0, G, ER0]
+  - left: ''
+    letters: BREAST
+    right: ''
+    phonemes: [B, R, EH0, S, T]
+  - left: ''
+    letters: BERRY
+    right: ' '
+    phonemes: [B, EY2, R, IY2]
   - left: ''
     letters: BLOOD
     right: ''
@@ -606,10 +629,34 @@ rules_by_letter:
     letters: BROAD
     right: ''
     phonemes: [B, R, AO0, D]
-  - left: '#'
-    letters: BED
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [B, EH1, D]
+  - left: ''
+    letters: BAUGH
+    right: ''
+    phonemes: [B, AO0]
+  - left: ''
+    letters: BURGH
+    right: ''
+    phonemes: [B, ER0, G]
+  - left: ''
+    letters: BREAK
+    right: ''
+    phonemes: [B, R, EY0, K]
+  - left: ''
+    letters: BACH
+    right: ' '
+    phonemes: [B, AA0, K]
+  - left: ''
+    letters: BALL
+    right: ' '
+    phonemes: [B, AO2, L]
+  - left: ''
+    letters: BELL
+    right: ' '
+    phonemes: [B, EH2, L]
+  - left: ''
+    letters: BURY
+    right: ' '
+    phonemes: [B, EH0, R, IY2]
   - left: ''
     letters: BENE
     right: ''
@@ -627,42 +674,6 @@ rules_by_letter:
     right: ''
     phonemes: [B, ER0, G]
   - left: ''
-    letters: BAG
-    right: +
-    phonemes: [B, AE2, G]
-  - left: ''
-    letters: BOROUGH
-    right: +
-    phonemes: [B, ER2, OW2]
-  - left: ''
-    letters: BRONCH
-    right: ''
-    phonemes: [B, R, AA0, NG, K]
-  - left: ''
-    letters: BAUGH
-    right: ''
-    phonemes: [B, AO0]
-  - left: ''
-    letters: BURGH
-    right: ''
-    phonemes: [B, ER0, G]
-  - left: ''
-    letters: BACH
-    right: '#'
-    phonemes: [B, AA0, K]
-  - left: ''
-    letters: BUI
-    right: ''
-    phonemes: [B, IH0]
-  - left: '#'
-    letters: BI
-    right: (?:D|F|L|N|P|R|S)[AEIOU]
-    phonemes: [B, AY0]
-  - left: ''
-    letters: BREAK
-    right: ''
-    phonemes: [B, R, EY0, K]
-  - left: ''
     letters: BACK
     right: ''
     phonemes: [B, AE2, K]
@@ -674,14 +685,6 @@ rules_by_letter:
     letters: BOOK
     right: ''
     phonemes: [B, UH0, K]
-  - left: ''
-    letters: BALL
-    right: +
-    phonemes: [B, AO2, L]
-  - left: ''
-    letters: BELL
-    right: +
-    phonemes: [B, EH2, L]
   - left: ''
     letters: BAUM
     right: ''
@@ -695,83 +698,327 @@ rules_by_letter:
     right: ''
     phonemes: [B, ER0, OW2]
   - left: ''
-    letters: BIO
-    right: ''
-    phonemes: [B, AY0, AH0]
-  - left: ''
-    letters: BECKER
-    right: ''
-    phonemes: [B, EH0, K, ER0]
-  - left: ''
-    letters: BERGER
-    right: ''
-    phonemes: [B, ER0, G, ER0]
-  - left: ''
-    letters: BURGER
-    right: +
-    phonemes: [B, ER0, G, ER2]
-  - left: ''
-    letters: BREAST
-    right: ''
-    phonemes: [B, R, EH0, S, T]
-  - left: ''
     letters: BOAT
     right: ''
     phonemes: [B, OW0, T]
-  - left: ''
-    letters: BT
-    right: +
-    phonemes: [T]
-  - left: '#'
-    letters: BEW
-    right: ''
-    phonemes: [B, IH0, W]
-  - left: ''
-    letters: BOX
-    right: +
-    phonemes: [B, AA2, K, S]
-  - left: ''
-    letters: BERRY
-    right: +
-    phonemes: [B, EY2, R, IY2]
   - left: ''
     letters: BODY
     right: ''
     phonemes: [B, AA2, D, IY2]
   - left: ''
     letters: BURY
-    right: '#'
-    phonemes: [B, EH0, R, IY2]
-  - left: ''
-    letters: BURY
     right: ''
     phonemes: [B, ER0, IY2]
+  - left: ' '
+    letters: BED
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [B, EH1, D]
+  - left: ''
+    letters: BAG
+    right: ' '
+    phonemes: [B, AE2, G]
+  - left: ' '
+    letters: BEW
+    right: ''
+    phonemes: [B, IH0, W]
+  - left: ''
+    letters: BOX
+    right: ' '
+    phonemes: [B, AA2, K, S]
   - left: ''
     letters: BOY
-    right: +
+    right: ' '
     phonemes: [B, OY2]
-  - left: '#'
+  - left: ' '
     letters: BRZ
     right: ''
     phonemes: [B, R]
   - left: ''
+    letters: BUI
+    right: ''
+    phonemes: [B, IH0]
+  - left: ''
+    letters: BIO
+    right: ''
+    phonemes: [B, AY0, AA1]
+  - left: ''
     letters: BRZ
     right: ''
     phonemes: [B, R, ZH]
+  - left: ' '
+    letters: BI
+    right: (?:D|F|L|N|P|R|S)[AEIOU]
+    phonemes: [B, AY0]
+  - left: ''
+    letters: BT
+    right: ' '
+    phonemes: [T]
+  - left: ''
+    letters: B
+    right: ''
+    phonemes: [B]
   C:
+  - left: ''
+    letters: CULTURAL
+    right: ' '
+    phonemes: [K, AH1, L, CH, ER2, EL]
+  - left: ''
+    letters: CHILDREN
+    right: ''
+    phonemes: [CH, IH0, L, D, R, AH2, N]
+  - left: ''
+    letters: CULTURE
+    right: ' '
+    phonemes: [K, AH1, L, CH, ER2]
+  - left: ''
+    letters: CEPHALO
+    right: ''
+    phonemes: [S, EH1, F, AH2, L, AA2]
+  - left: ''
+    letters: COUNTER
+    right: ''
+    phonemes: [K, AW1, N, T, ER2]
+  - left: ''
+    letters: COUNTRY
+    right: ''
+    phonemes: [K, AH1, N, T, R, IY2]
+  - left: ''
+    letters: CHROME
+    right: ' '
+    phonemes: [K, R, OW2, M]
+  - left: ' '
+    letters: CARDIO
+    right: ''
+    phonemes: [K, AA1, R, D, IY2, OW2]
+  - left: ''
+    letters: COLOUR
+    right: ' '
+    phonemes: [K, AH2, L, ER2]
+  - left: ''
+    letters: CIALLY
+    right: ' '
+    phonemes: [SH, EL, IY2]
+  - left: ''
+    letters: CIRCUM
+    right: ''
+    phonemes: [S, ER0, K, AH1, M]
+  - left: ''
+    letters: COMMON
+    right: ''
+    phonemes: [K, AA1, M, AH2, N]
+  - left: ''
+    letters: CRIMIN
+    right: ''
+    phonemes: [K, R, IH0, M, IH2, N]
+  - left: ''
+    letters: CHOREO
+    right: ''
+    phonemes: [K, OW0, R, IY0, AA1]
+  - left: ''
+    letters: CRYPTO
+    right: ''
+    phonemes: [K, R, IH0, P, T, AA1]
+  - left: ''
+    letters: CREDIT
+    right: ''
+    phonemes: [K, R, EH0, D, IH2, T]
+  - left: ''
+    letters: CHORD
+    right: ' '
+    phonemes: [K, OW0, R, D]
+  - left: '[AEIOU] '
+    letters: CYCLE
+    right: ' '
+    phonemes: [S, IH0, K, EL]
+  - left: ''
+    letters: CYCLE
+    right: ' '
+    phonemes: [S, AY0, K, EL]
+  - left: ''
+    letters: COLOR
+    right: ' '
+    phonemes: [K, AH2, L, ER2]
+  - left: ''
+    letters: CIOUS
+    right: ' '
+    phonemes: [SH, IH2, S]
+  - left: ''
+    letters: CIENT
+    right: ' '
+    phonemes: [SH, IH2, N, T]
+  - left: ''
+    letters: COURT
+    right: E
+    phonemes: [K, ER1, T]
   - left: ''
     letters: CHARA
     right: ''
     phonemes: [K, AE0, R, AH0]
   - left: ''
+    letters: CHILD
+    right: ''
+    phonemes: [CH, AY0, L, D]
+  - left: ''
+    letters: CEIVE
+    right: ''
+    phonemes: [S, IY1, V]
+  - left: ''
+    letters: CLOSE
+    right: ''
+    phonemes: [K, L, OW1, Z]
+  - left: ''
+    letters: CENTI
+    right: ''
+    phonemes: [S, EH0, N, T, AH0]
+  - left: ''
+    letters: COEUR
+    right: ''
+    phonemes: [K, ER0]
+  - left: ''
+    letters: COVER
+    right: ''
+    phonemes: [K, AH1, V, ER2]
+  - left: ''
+    letters: COURT
+    right: ''
+    phonemes: [K, OW1, R, T]
+  - left: ''
+    letters: CRAFT
+    right: ''
+    phonemes: [K, R, AE0, F, T]
+  - left: ''
+    letters: CAKE
+    right: ' '
+    phonemes: [K, EY0, K]
+  - left: ''
+    letters: CZAK
+    right: ' '
+    phonemes: [CH, AE2, K]
+  - left: ''
+    letters: CZEK
+    right: ' '
+    phonemes: [CH, EH0, K]
+  - left: ''
+    letters: CZUK
+    right: ' '
+    phonemes: [CH, UH0, K]
+  - left: ''
+    letters: CZYK
+    right: ' '
+    phonemes: [CH, IH2, K]
+  - left: N
+    letters: CIAL
+    right: ' '
+    phonemes: [CH, EL]
+  - left: ''
+    letters: CIAL
+    right: ' '
+    phonemes: [SH, EL]
+  - left: ''
+    letters: CIAN
+    right: ' '
+    phonemes: [SH, IH2, N]
+  - left: ''
+    letters: CAST
+    right: ' '
+    phonemes: [K, AE2, S, T]
+  - left: ''
+    letters: CRAT
+    right: ' '
+    phonemes: [K, R, AE2, T]
+  - left: ''
     letters: CCIA
     right: ''
     phonemes: [CH, AH0]
   - left: ''
-    letters: C
-    right: E[BCDFGHJKLMNPQRSTVWXZ][BCDFGHJKLMNPQRSTVWXZ]O#
+    letters: CYTO
+    right: ''
+    phonemes: [S, AY0, T, AA1]
+  - left: ''
+    letters: CHAU
+    right: ''
+    phonemes: [SH, OW0]
+  - left: ''
+    letters: CUE
+    right: ' '
+    phonemes: [K, Y, UW0]
+  - left: ''
+    letters: CKI
+    right: ' '
+    phonemes: [T, S, K, IY2]
+  - left: ''
+    letters: CYK
+    right: ' '
+    phonemes: [CH, IH2, K]
+  - left: ''
+    letters: CAP
+    right: ' '
+    phonemes: [K, AE0, P]
+  - left: ''
+    letters: CAR
+    right: ' '
+    phonemes: [K, AA0, R]
+  - left: ' '
+    letters: CIR
+    right: ''
+    phonemes: [S, ER0]
+  - left: ' '
+    letters: COR
+    right: ''
+    phonemes: [K, OW1, R]
+  - left: ''
+    letters: CAT
+    right: ' '
+    phonemes: [K, AE2, T]
+  - left: ''
+    letters: CRU
+    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    phonemes: [K, R, UW0]
+  - left: (?:E|O)[BCDFGHJKLMNPQRSTVWXZ]+
+    letters: CH
+    right: ' '
+    phonemes: [K]
+  - left: ' '
+    letters: CH
+    right: O[LR]
+    phonemes: [K]
+  - left: ''
+    letters: CH
+    right: (?:L|N|R)
+    phonemes: [K]
+  - left: ' '
+    letters: CH
+    right: EM
+    phonemes: [K]
+  - left: 'RO '
+    letters: CH
+    right: ''
+    phonemes: [K]
+  - left: ' '
+    letters: CY
+    right: (?:A|C|P)
+    phonemes: [S, AY1]
+  - left: ' '
+    letters: CZ
+    right: ''
+    phonemes: [Z]
+  - left: ''
+    letters: CH
+    right: ''
     phonemes: [CH]
-  - left: '#'
+  - left: ''
+    letters: CK
+    right: ''
+    phonemes: [K]
+  - left: ''
+    letters: CZ
+    right: ''
+    phonemes: [CH]
+  - left: ''
+    letters: C
+    right: 'E[BCDFGHJKLMNPQRSTVWXZ][BCDFGHJKLMNPQRSTVWXZ]O '
+    phonemes: [CH]
+  - left: ' '
     letters: C
     right: AE
     phonemes: [S]
@@ -783,383 +1030,459 @@ rules_by_letter:
     letters: C
     right: ''
     phonemes: [K]
-  - left: ''
-    letters: CHILD
-    right: ''
-    phonemes: [CH, AY0, L, D]
-  - left: ''
-    letters: CHORD
-    right: +
-    phonemes: [K, OW0, R, D]
-  - left: ''
-    letters: CULTURE
-    right: +
-    phonemes: [K, AH0, L, CH, ER2]
-  - left: ''
-    letters: CHROME
-    right: +
-    phonemes: [K, R, OW2, M]
-  - left: ''
-    letters: CEIVE
-    right: ''
-    phonemes: [S, IY1, V]
-  - left: ''
-    letters: CLOSE
-    right: ''
-    phonemes: [K, L, OW1, Z]
-  - left: '[AEIOU]#'
-    letters: CYCLE
-    right: +
-    phonemes: [S, IH0, K, EL]
-  - left: ''
-    letters: CYCLE
-    right: +
-    phonemes: [S, AY0, K, EL]
-  - left: ''
-    letters: CAKE
-    right: +
-    phonemes: [K, EY0, K]
-  - left: ''
-    letters: CUE
-    right: +
-    phonemes: [K, Y, UW0]
-  - left: (?:E|O)[BCDFGHJKLMNPQRSTVWXZ]+
-    letters: CH
-    right: +
-    phonemes: [K]
-  - left: '#'
-    letters: CH
-    right: O[LR]
-    phonemes: [K]
-  - left: ''
-    letters: CH
-    right: (?:L|N|R)
-    phonemes: [K]
-  - left: '#'
-    letters: CH
-    right: EM
-    phonemes: [K]
-  - left: RO#
-    letters: CH
-    right: ''
-    phonemes: [K]
-  - left: ''
-    letters: CH
-    right: ''
-    phonemes: [CH]
-  - left: ''
-    letters: CENTI
-    right: ''
-    phonemes: [S, EH0, N, T, AH0]
-  - left: ''
-    letters: CKI
-    right: '#'
-    phonemes: [T, S, K, IY2]
-  - left: ''
-    letters: CZAK
-    right: '#'
-    phonemes: [CH, AE2, K]
-  - left: ''
-    letters: CZEK
-    right: '#'
-    phonemes: [CH, EH0, K]
-  - left: ''
-    letters: CZUK
-    right: '#'
-    phonemes: [CH, UH0, K]
-  - left: ''
-    letters: CZYK
-    right: '#'
-    phonemes: [CH, IH2, K]
-  - left: ''
-    letters: CYK
-    right: '#'
-    phonemes: [CH, IH2, K]
-  - left: ''
-    letters: CK
-    right: ''
-    phonemes: [K]
-  - left: ''
-    letters: CULTURAL
-    right: +
-    phonemes: [K, AH1, L, CH, ER2, EL]
-  - left: N
-    letters: CIAL
-    right: +
-    phonemes: [CH, EL]
-  - left: ''
-    letters: CIAL
-    right: +
-    phonemes: [SH, EL]
-  - left: ''
-    letters: CIRCUM
-    right: ''
-    phonemes: [S, ER0, K, AH0, M]
-  - left: ''
-    letters: CHILDREN
-    right: ''
-    phonemes: [CH, IH0, L, D, R, AH2, N]
-  - left: ''
-    letters: COMMON
-    right: ''
-    phonemes: [K, AA1, M, AH2, N]
-  - left: ''
-    letters: CRIMIN
-    right: ''
-    phonemes: [K, R, IH0, M, IH2, N]
-  - left: ''
-    letters: CIAN
-    right: +
-    phonemes: [SH, IH2, N]
-  - left: ''
-    letters: CEPHALO
-    right: ''
-    phonemes: [S, EH1, F, AH2, L, AA2]
-  - left: '#'
-    letters: CARDIO
-    right: ''
-    phonemes: [K, AA1, R, D, IY2, OW2]
-  - left: ''
-    letters: CHOREO
-    right: ''
-    phonemes: [K, OW0, R, IY0, AH0]
-  - left: ''
-    letters: CRYPTO
-    right: ''
-    phonemes: [K, R, IH0, P, T, AH0]
-  - left: ''
-    letters: CYTO
-    right: ''
-    phonemes: [S, AY0, T, AH0]
-  - left: ''
-    letters: CAP
-    right: +
-    phonemes: [K, AE0, P]
-  - left: ''
-    letters: COUNTER
-    right: ''
-    phonemes: [K, AW1, N, T, ER2]
-  - left: ''
-    letters: COLOUR
-    right: +
-    phonemes: [K, AH2, L, ER2]
-  - left: ''
-    letters: COEUR
-    right: ''
-    phonemes: [K, ER0]
-  - left: ''
-    letters: COLOR
-    right: +
-    phonemes: [K, AH2, L, ER2]
-  - left: ''
-    letters: COVER
-    right: ''
-    phonemes: [K, AH1, V, ER2]
-  - left: ''
-    letters: CAR
-    right: +
-    phonemes: [K, AA0, R]
-  - left: '#'
-    letters: CIR
-    right: ''
-    phonemes: [S, ER0]
-  - left: '#'
-    letters: COR
-    right: ''
-    phonemes: [K, OW1, R]
-  - left: ''
-    letters: CIOUS
-    right: +
-    phonemes: [SH, IH2, S]
-  - left: ''
-    letters: CREDIT
-    right: ''
-    phonemes: [K, R, EH0, D, IH2, T]
-  - left: ''
-    letters: CIENT
-    right: +
-    phonemes: [SH, IH2, N, T]
-  - left: ''
-    letters: COURT
-    right: E
-    phonemes: [K, ER1, T]
-  - left: ''
-    letters: COURT
-    right: ''
-    phonemes: [K, OW1, R, T]
-  - left: ''
-    letters: CRAFT
-    right: ''
-    phonemes: [K, R, AE0, F, T]
-  - left: ''
-    letters: CAST
-    right: +
-    phonemes: [K, AE2, S, T]
-  - left: ''
-    letters: CRAT
-    right: +
-    phonemes: [K, R, AE2, T]
-  - left: ''
-    letters: CAT
-    right: +
-    phonemes: [K, AE2, T]
-  - left: ''
-    letters: CHAU
-    right: ''
-    phonemes: [SH, OW0]
-  - left: ''
-    letters: CRU
-    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    phonemes: [K, R, UW0]
-  - left: ''
-    letters: COUNTRY
-    right: ''
-    phonemes: [K, AH1, N, T, R, IY2]
-  - left: ''
-    letters: CIALLY
-    right: +
-    phonemes: [SH, EL, IY2]
-  - left: '#'
-    letters: CY
-    right: (?:A|C|P)
-    phonemes: [S, AY1]
-  - left: +
-    letters: CZ
-    right: ''
-    phonemes: [Z]
-  - left: ''
-    letters: CZ
-    right: ''
-    phonemes: [CH]
   D:
-  - left: '#'
+  - left: ''
+    letters: DORFER
+    right: ''
+    phonemes: [D, AO0, R, F, ER0]
+  - left: ' '
     letters: DELLA
     right: ''
-    phonemes: [D, EH0, L, AH0]
-  - left: ''
-    letters: DYNA
-    right: ''
-    phonemes: [D, AY0, N, AH0]
-  - left: '#'
-    letters: DIA
-    right: ''
-    phonemes: [D, AY0, AH0]
-  - left: EE
-    letters: D
-    right: +
-    phonemes: [D]
-  - left: ''
-    letters: D
-    right: ''
-    phonemes: [D]
-  - left: '#'
+    phonemes: [D, EH0, L, AA1]
+  - left: ' '
     letters: DELLE
     right: ''
     phonemes: [D, EH0, L, AH0]
   - left: ''
     letters: DALE
-    right: +
+    right: ' '
     phonemes: [D, EY0, L]
-  - left: '#'
-    letters: DIE
-    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    phonemes: [D, AY2, AH2]
+  - left: ''
+    letters: DISH
+    right: 'ON'
+    phonemes: [D, IH1, S]
+  - left: ' '
+    letters: DEMI
+    right: '[AEIOU] '
+    phonemes: [D, EH0, M, IY0]
+  - left: ' '
+    letters: DEMO
+    right: ''
+    phonemes: [D, EH1, M, AA1]
+  - left: ''
+    letters: DYNA
+    right: ''
+    phonemes: [D, AY0, N, AE1]
   - left: ''
     letters: DORF
     right: ''
     phonemes: [D, OW0, R, F]
   - left: ''
-    letters: DG
-    right: ''
-    phonemes: [JH]
-  - left: ''
-    letters: DISH
-    right: 'ON'
-    phonemes: [D, IH0, S]
-  - left: '#'
-    letters: DEMI
-    right: '[AEIOU]+'
-    phonemes: [D, EH0, M, IY0]
-  - left: ''
-    letters: DJ
-    right: ''
-    phonemes: [JH]
-  - left: ''
-    letters: DOM
-    right: +
-    phonemes: [D, AH2, M]
-  - left: ''
     letters: DOWN
     right: ''
     phonemes: [D, AW0, N]
-  - left: '#'
-    letters: DEMO
+  - left: ' '
+    letters: DIA
     right: ''
-    phonemes: [D, AH0, M, AH0]
-  - left: '#'
+    phonemes: [D, AY0, AE1]
+  - left: ' '
+    letters: DIE
+    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    phonemes: [D, AY2, AH2]
+  - left: ''
+    letters: DOM
+    right: ' '
+    phonemes: [D, AH2, M]
+  - left: ' '
     letters: DUO
     right: ''
-    phonemes: [D, UW0, OW0]
-  - left: ''
-    letters: DORFER
-    right: ''
-    phonemes: [D, AO0, R, F, ER0]
-  - left: '#'
+    phonemes: [D, UW0, AA1]
+  - left: ' '
     letters: DIS
     right: ''
-    phonemes: [D, IH0, S]
-  - left: ''
-    letters: DT
-    right: '#'
-    phonemes: [T]
+    phonemes: [D, IH1, S]
   - left: ''
     letters: DAY
-    right: +
+    right: ' '
     phonemes: [D, EY2]
   - left: ''
     letters: DRZ
     right: ''
     phonemes: [JH]
   - left: ''
+    letters: DT
+    right: ' '
+    phonemes: [T]
+  - left: ''
+    letters: DG
+    right: ''
+    phonemes: [JH]
+  - left: ''
+    letters: DJ
+    right: ''
+    phonemes: [JH]
+  - left: ''
     letters: DZ
     right: ''
     phonemes: [JH]
+  - left: EE
+    letters: D
+    right: ' '
+    phonemes: [D]
+  - left: ''
+    letters: D
+    right: ''
+    phonemes: [D]
   E:
+  - left: ''
+    letters: ESCENCE
+    right: ' '
+    phonemes: [EH1, S, EN, S]
+  - left: ''
+    letters: EENING
+    right: ' '
+    phonemes: [IY0, N, IH0, NG]
+  - left: ''
+    letters: EVITCH
+    right: ' '
+    phonemes: [EY0, V, IH0, CH]
+  - left: ''
+    letters: ENNIAL
+    right: ' '
+    phonemes: [EH1, N, IY2, EL]
+  - left: ''
+    letters: ESCENT
+    right: ' '
+    phonemes: [EH1, S, EN, T]
+  - left: ''
+    letters: EMBRYO
+    right: ''
+    phonemes: [EH0, M, B, R, IY0, AA1]
+  - left: ''
+    letters: ESQUE
+    right: ' '
+    phonemes: [EH1, S, K]
+  - left: (?:V|D|K|P|R|M|T|S)[AEIOU]
+    letters: ENING
+    right: ' '
+    phonemes: [AH2, N, IH2, NG]
+  - left: ''
+    letters: EWSKI
+    right: ' '
+    phonemes: [EH1, F, S, K, IY0]
+  - left: ''
+    letters: ETION
+    right: ' '
+    phonemes: [IY1, SH, IH2, N]
+  - left: ''
+    letters: EAULT
+    right: ' '
+    phonemes: [OW1]
+  - left: ''
+    letters: ERITY
+    right: ' '
+    phonemes: [EH1, R, AH2, T, IY0]
   - left: ''
     letters: EXTRA
     right: ''
-    phonemes: [EH0, K, S, T, R, AH0]
+    phonemes: [EH0, K, S, T, R, AE1]
+  - left: ''
+    letters: EILLE
+    right: ''
+    phonemes: [EY0]
+  - left: ''
+    letters: ENING
+    right: ''
+    phonemes: [AH2, N, IH2, NG]
+  - left: ''
+    letters: EQUAL
+    right: ''
+    phonemes: [IY0, K, W, AA1, L]
+  - left: ''
+    letters: EVERY
+    right: ''
+    phonemes: [EH1, V, R, IY2]
   - left: ''
     letters: EIRA
-    right: '#'
+    right: ' '
     phonemes: [EY1, R, AH2]
   - left: ''
     letters: ELLA
-    right: +
+    right: ' '
     phonemes: [EH1, L, AH2]
   - left: ''
     letters: EMIA
-    right: +
+    right: ' '
     phonemes: [IY1, M, IY2, AH2]
   - left: ''
     letters: ESIA
-    right: +
+    right: ' '
     phonemes: [IY1, ZH, AH2]
   - left: ''
     letters: ESSA
-    right: '#'
+    right: ' '
     phonemes: [EH1, S, AH2]
   - left: ''
     letters: ETTA
-    right: +
+    right: ' '
     phonemes: [EH1, T, AH2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
+  - left: (?:L|C|R)
+    letters: EASE
+    right: ' '
+    phonemes: [IY1, S]
+  - left: ''
+    letters: ELLE
+    right: ' '
+    phonemes: [EH1, L]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ENCE
+    right: ' '
+    phonemes: [EH0, N, S]
+  - left: (?:U|D|T|C|L|R)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: ENCE
+    right: ' '
+    phonemes: [AH2, N, S]
+  - left: ''
+    letters: ENCE
+    right: ' '
+    phonemes: [EH2, N, S]
+  - left: ''
+    letters: ESCE
+    right: ' '
+    phonemes: [EH1, S]
+  - left: ''
+    letters: ESSE
+    right: ' '
+    phonemes: [EH1, S]
+  - left: ''
+    letters: ETTE
+    right: ' '
+    phonemes: [EH1, T]
+  - left: ''
+    letters: ELLI
+    right: ' '
+    phonemes: [EH1, L, IY2]
+  - left: ''
+    letters: ETTI
+    right: ' '
+    phonemes: [EH1, T, IY2]
+  - left: ''
+    letters: EIRO
+    right: ' '
+    phonemes: [EY1, R, OW2]
+  - left: ''
+    letters: ELLO
+    right: ' '
+    phonemes: [EH1, L, OW2]
+  - left: ''
+    letters: ENKO
+    right: ' '
+    phonemes: [EH1, NG, K, OW2]
+  - left: ''
+    letters: ETTO
+    right: ' '
+    phonemes: [EH1, T, OW2]
+  - left: '(?: |O|[BCDFGHJKLMNPQRSTVWXZ])'
+    letters: EVER
+    right: ' '
+    phonemes: [EH1, V, ER2]
+  - left: G
+    letters: EOUS
+    right: ' '
+    phonemes: [IH2, S]
+  - left: (?:N|C|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: EOUS
+    right: ' '
+    phonemes: [IY2, IH2, S]
+  - left: ''
+    letters: EDLY
+    right: ' '
+    phonemes: [IH2, D, L, IY2]
+  - left: ''
+    letters: EITY
+    right: ' '
+    phonemes: [IY1, IH2, T, IY0]
+  - left: ''
+    letters: ENCY
+    right: ' '
+    phonemes: [IY0]
+  - left: ''
+    letters: ENDO
+    right: ''
+    phonemes: [EH0, N, D, OW0]
+  - left: ''
+    letters: EIER
+    right: ''
+    phonemes: [AY0, ER0]
+  - left: ''
+    letters: EUER
+    right: ''
+    phonemes: [OY0, ER0]
+  - left: ''
+    letters: EOUS
+    right: ''
+    phonemes: [IY2, IH2, S]
+  - left: ''
+    letters: EAUX
+    right: ''
+    phonemes: [OW0]
+  - left: (?:G|D)
+    letters: END
+    right: ' '
+    phonemes: [IH2, N, D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: END
+    right: ' '
+    phonemes: [EH1, N, D]
+  - left: ''
+    letters: EME
+    right: ' '
+    phonemes: [IY0, M]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ENE
+    right: ' '
+    phonemes: [IY0, N]
+  - left: ''
+    letters: ENE
+    right: ' '
+    phonemes: [IY0, N]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ESE
+    right: ' '
+    phonemes: [IY1, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    letters: ETE
+    right: ' '
+    phonemes: [IY1, T]
+  - left: ''
+    letters: ENG
+    right: L
+    phonemes: [IH2, NG]
+  - left: ' '
+    letters: EPI
+    right: ''
+    phonemes: [EH1, P, IH1]
+  - left: R[AEIOU]
+    letters: EAL
+    right: ' '
+    phonemes: [IY2, EL]
+  - left: S
+    letters: EUM
+    right: ' '
+    phonemes: [IY1, AH2, M]
+  - left: ''
+    letters: EUM
+    right: ' '
+    phonemes: [IY2, AH2, M]
+  - left: ''
+    letters: EEN
+    right: ' '
+    phonemes: [IY1, N]
+  - left: ''
+    letters: EDO
+    right: ' '
+    phonemes: [EY1, D, OW2]
+  - left: ' '
+    letters: EAR
+    right: (?:N|L|TH)
+    phonemes: [ER0]
+  - left: ' '
+    letters: EAR
+    right: ''
+    phonemes: [IY0, R]
+  - left: ''
+    letters: EER
+    right: ' '
+    phonemes: [IY1, R]
+  - left: ''
+    letters: EUR
+    right: ' '
+    phonemes: [AH1, R]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ESS
+    right: ' '
+    phonemes: [EH0, S]
+  - left: ''
+    letters: ESS
+    right: ' '
+    phonemes: [EH2, S]
+  - left: ''
+    letters: ECT
+    right: ' '
+    phonemes: [EH1, K, T]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ENT
+    right: ' '
+    phonemes: [EH0, N, T]
+  - left: (?:C|L|D|G)[AEIOU]
+    letters: ENT
+    right: ' '
+    phonemes: [EN, T]
+  - left: ''
+    letters: ENT
+    right: ' '
+    phonemes: [EH2, N, T]
+  - left: K
+    letters: EST
+    right: ' '
+    phonemes: [AH2, S, T]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: EST
+    right: ' '
+    phonemes: [EH0, S, T]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: EST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: (?:C|S|U|V|Z)
+    letters: EST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: L(?:B|C|D|F|G|K|P|T|Z)
+    letters: EST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: (?:B|D|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: EST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: ''
+    letters: EST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: ''
+    letters: EAU
+    right: ' '
+    phonemes: [OW1]
+  - left: ' '
+    letters: EDU
+    right: ''
+    phonemes: [EH0, JH, IH0]
+  - left: ''
+    letters: EFY
+    right: ' '
+    phonemes: [IH0, F, AY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ERY
+    right: ' '
+    phonemes: [EH0, R, IY0]
+  - left: (?:V|N|C|P|K|D)[AEIOU]
+    letters: ERY
+    right: ' '
+    phonemes: [ER2, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ERY
+    right: ' '
+    phonemes: [ER2, IY2]
+  - left: ''
+    letters: EYE
+    right: ''
+    phonemes: [AY0]
+  - left: ''
+    letters: EAU
+    right: ''
+    phonemes: [Y, UW0]
+  - left: ''
+    letters: EUX
+    right: ''
+    phonemes: [OW0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: EA
-    right: +
+    right: ' '
     phonemes: [IY0]
   - left: '[AEIOU]'
     letters: EA
-    right: +
+    right: ' '
     phonemes: [IY0, AH0]
   - left: ''
     letters: EA
@@ -1167,15 +1490,15 @@ rules_by_letter:
     phonemes: [EH0]
   - left: ''
     letters: EA
-    right: D+
+    right: 'D '
     phonemes: [EH0]
   - left: (?:RB|TS)
     letters: EA
-    right: K+
+    right: 'K '
     phonemes: [EY0]
-  - left: (?:WS|B|P|T|W)+
+  - left: '(?:WS|B|P|T|W) '
     letters: EA
-    right: R+
+    right: 'R '
     phonemes: [EY0]
   - left: (?:QU|HS|RW)
     letters: EA
@@ -1189,11 +1512,11 @@ rules_by_letter:
     letters: EA
     right: (?:L)?TH
     phonemes: [EH0]
-  - left: H#
+  - left: 'H '
     letters: EA
     right: V
     phonemes: [EH0]
-  - left: (?:J|Z)#
+  - left: '(?:J|Z) '
     letters: EA
     right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
     phonemes: [EH0]
@@ -1201,226 +1524,62 @@ rules_by_letter:
     letters: EA
     right: R[BCDFGHJKLMNPQRSTVWXZ]
     phonemes: [AH0]
-  - left: ''
-    letters: EA
-    right: ''
-    phonemes: [AH0]
-  - left: (?:G|D)
-    letters: END
-    right: +
-    phonemes: [IH2, N, D]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: END
-    right: +
-    phonemes: [EH1, N, D]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*+'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
     letters: ED
-    right: +
+    right: ' '
     phonemes: [EH0, D]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GNE
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GNOPS
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GNU
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
-  - left: TSA(?:B|P|T|W)#
+  - left: 'TSA(?:B|P|T|W) '
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GNA(?:HC|LF|D|M|R)
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GNI(?:PMI|WT|RC|RE|RF|H|G|S|T)
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: GN
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: (?:C|G|S|U|V|Z)
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: L(?:B|C|D|F|G|K|P|T|Z)
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: (?:B|D|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
   - left: ''
     letters: ED
-    right: '#'
+    right: ' '
     phonemes: [D]
-  - left: ''
-    letters: ESCENCE
-    right: +
-    phonemes: [EH1, S, EN, S]
-  - left: ''
-    letters: EILLE
-    right: ''
-    phonemes: [EY0]
-  - left: (?:L|C|R)
-    letters: EASE
-    right: +
-    phonemes: [IY1, S]
-  - left: ''
-    letters: ELLE
-    right: '#'
-    phonemes: [EH1, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ENCE
-    right: +
-    phonemes: [EH0, N, S]
-  - left: (?:U|D|T|C|L|R)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: ENCE
-    right: +
-    phonemes: [AH2, N, S]
-  - left: ''
-    letters: ENCE
-    right: +
-    phonemes: [EH2, N, S]
-  - left: ''
-    letters: ESCE
-    right: +
-    phonemes: [EH1, S]
-  - left: ''
-    letters: ESQUE
-    right: +
-    phonemes: [EH1, S, K]
-  - left: ''
-    letters: ESSE
-    right: +
-    phonemes: [EH1, S]
-  - left: ''
-    letters: ETTE
-    right: +
-    phonemes: [EH1, T]
-  - left: ''
-    letters: EME
-    right: +
-    phonemes: [IY0, M]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ENE
-    right: +
-    phonemes: [IY0, N]
-  - left: ''
-    letters: ENE
-    right: +
-    phonemes: [IY0, N]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ESE
-    right: +
-    phonemes: [IY1, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    letters: ETE
-    right: +
-    phonemes: [IY1, T]
-  - left: ''
-    letters: EYE
-    right: ''
-    phonemes: [AY0]
   - left: (?:U|Y|C|N|R|S)
     letters: EE
-    right: +
+    right: ' '
     phonemes: [IY1]
-  - left: ''
-    letters: EE
-    right: ''
-    phonemes: [IY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: E
-    right: +
-    phonemes: [IY0]
-  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    letters: E
-    right: +
-    phonemes: []
-  - left: ''
-    letters: E
-    right: XE
-    phonemes: [AH0]
-  - left: Z#
-    letters: E
-    right: (?:R|N|B)
-    phonemes: [AH0]
-  - left: ''
-    letters: E
-    right: R[AEIOU](?:[AEIOU]|#|+)
-    phonemes: [AH0]
-  - left: ''
-    letters: E
-    right: QU[AEO]
-    phonemes: [IY0]
-  - left: ''
-    letters: E
-    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
-    phonemes: [AH0]
-  - left: ''
-    letters: E
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [IH0]
-  - left: ''
-    letters: E
-    right: R[BCDFGHJKLMNPQRSTVWXZ]
-    phonemes: [AH0]
-  - left: ''
-    letters: E
-    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]+'
-    phonemes: [IH0]
-  - left: ''
-    letters: E
-    right: ''
-    phonemes: [IH0]
-  - left: ''
-    letters: EENING
-    right: +
-    phonemes: [IY0, N, IH0, NG]
-  - left: (?:V|D|K|P|R|M|T|S)[AEIOU]
-    letters: ENING
-    right: +
-    phonemes: [AH2, N, IH2, NG]
-  - left: ''
-    letters: ENING
-    right: ''
-    phonemes: [AH2, N, IH2, NG]
-  - left: ''
-    letters: ENG
-    right: L
-    phonemes: [IH2, NG]
-  - left: ''
-    letters: EVITCH
-    right: '#'
-    phonemes: [EY0, V, IH0, CH]
-  - left: ''
-    letters: EWSKI
-    right: '#'
-    phonemes: [EH1, F, S, K, IY0]
-  - left: ''
-    letters: ELLI
-    right: '#'
-    phonemes: [EH1, L, IY2]
-  - left: ''
-    letters: ETTI
-    right: '#'
-    phonemes: [EH1, T, IY2]
-  - left: '#'
-    letters: EPI
-    right: ''
-    phonemes: [IH0, P, IH0]
   - left: H
     letters: EI
     right: ''
@@ -1428,392 +1587,268 @@ rules_by_letter:
   - left: (?:V|R)
     letters: EI
     right: (?:N|L)
-    phonemes: [AH0]
+    phonemes: [EY1]
   - left: ''
     letters: EI
     right: G(?:H|N)
-    phonemes: [AH0]
-  - left: ''
-    letters: EI
-    right: ''
-    phonemes: [AH0]
-  - left: ''
-    letters: ENNIAL
-    right: +
-    phonemes: [EH1, N, IY2, EL]
-  - left: ''
-    letters: EQUAL
-    right: ''
-    phonemes: [IY0, K, W, AH0, L]
-  - left: R[AEIOU]
-    letters: EAL
-    right: +
-    phonemes: [IY2, EL]
-  - left: S
-    letters: EUM
-    right: +
-    phonemes: [IY1, AH2, M]
-  - left: ''
-    letters: EUM
-    right: +
-    phonemes: [IY2, AH2, M]
-  - left: ''
-    letters: ETION
-    right: +
-    phonemes: [IY1, SH, IH2, N]
-  - left: ''
-    letters: EEN
-    right: +
-    phonemes: [IY1, N]
-  - left: '#'
+    phonemes: [EY1]
+  - left: ' '
     letters: EN
     right: ''
-    phonemes: [IH0, N]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+    phonemes: [EH1, N]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: EN
-    right: +
+    right: ' '
     phonemes: [EH0, N]
   - left: (?:V|D|K|P|R|M|T|S)[AEIOU]
     letters: EN
-    right: +
+    right: ' '
     phonemes: [EN]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: EN
-    right: +
+    right: ' '
     phonemes: [EN]
   - left: ''
-    letters: EMBRYO
-    right: ''
-    phonemes: [EH0, M, B, R, IY0, OW0]
-  - left: ''
-    letters: EIRO
-    right: '#'
-    phonemes: [EY1, R, OW2]
-  - left: ''
-    letters: ELLO
-    right: +
-    phonemes: [EH1, L, OW2]
-  - left: ''
-    letters: ENDO
-    right: ''
-    phonemes: [EH0, N, D, OW0]
-  - left: ''
-    letters: ENKO
-    right: '#'
-    phonemes: [EH1, NG, K, OW2]
-  - left: ''
-    letters: ETTO
-    right: +
-    phonemes: [EH1, T, OW2]
-  - left: ''
-    letters: EDO
-    right: '#'
-    phonemes: [EY1, D, OW2]
-  - left: ''
     letters: EO
-    right: +
+    right: ' '
     phonemes: [IY2, OW0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
     letters: EO
-    right: N#
+    right: 'N '
     phonemes: [IY0, AH0]
-  - left: (?:J|L)#
+  - left: '(?:J|L) '
     letters: EO
     right: ''
     phonemes: [EH0]
-  - left: (?:[BCDFGHJKLMNPQRSTVWXZ]){1,3}#
+  - left: '(?:[BCDFGHJKLMNPQRSTVWXZ]){1,3} '
     letters: EO
     right: N
     phonemes: [IY0, AA0]
-  - left: P#
+  - left: 'P '
     letters: EO
     right: ''
     phonemes: [IY0]
-  - left: ''
-    letters: EO
-    right: ''
-    phonemes: [IY0, AH0]
-  - left: ''
-    letters: EIER
-    right: ''
-    phonemes: [AY0, ER0]
-  - left: ''
-    letters: EUER
-    right: ''
-    phonemes: [OY0, ER0]
-  - left: (?:#|O|[BCDFGHJKLMNPQRSTVWXZ])
-    letters: EVER
-    right: +
-    phonemes: [EH1, V, ER2]
-  - left: '#'
-    letters: EAR
-    right: (?:N|L|TH)
-    phonemes: [ER0]
-  - left: '#'
-    letters: EAR
-    right: ''
-    phonemes: [IY0, R]
-  - left: ''
-    letters: EER
-    right: +
-    phonemes: [IY1, R]
-  - left: ''
-    letters: EUR
-    right: +
-    phonemes: [AH1, R]
   - left: HT
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH0, R]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH0, R]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: GNE
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: GNOPS
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: GNA(?:HC|LF|D|M|R)
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: GNI(?:PMI|WT|RC|RE|RF|H|G|S|T)
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: GN
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: (?:C|G|S|U|V|Z)
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: L(?:B|C|D|F|G|K|P|T|Z)
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: (?:B|D|F|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: ''
     letters: ER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
-  - left: G
-    letters: EOUS
-    right: +
-    phonemes: [IH2, S]
-  - left: (?:N|C|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: EOUS
-    right: +
-    phonemes: [IY2, IH2, S]
-  - left: ''
-    letters: EOUS
-    right: ''
-    phonemes: [IY2, IH2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ESS
-    right: +
-    phonemes: [EH0, S]
-  - left: ''
-    letters: ESS
-    right: +
-    phonemes: [EH2, S]
   - left: (?:S|Z)[AEIOU]
     letters: ES
-    right: '#'
+    right: ' '
     phonemes: [IH2, Z]
   - left: HS
     letters: ES
-    right: '#'
+    right: ' '
     phonemes: [Z]
   - left: O[BCDFGHJKLMNPQRSTVWXZ]+[AEIOU]
     letters: ES
-    right: '#'
+    right: ' '
     phonemes: [Z]
-  - left: ''
-    letters: ESCENT
-    right: +
-    phonemes: [EH1, S, EN, T]
-  - left: ''
-    letters: EAULT
-    right: '#'
-    phonemes: [OW1]
-  - left: ''
-    letters: ECT
-    right: +
-    phonemes: [EH1, K, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ENT
-    right: +
-    phonemes: [EH0, N, T]
-  - left: (?:C|L|D|G)[AEIOU]
-    letters: ENT
-    right: +
-    phonemes: [EN, T]
-  - left: ''
-    letters: ENT
-    right: +
-    phonemes: [EH2, N, T]
-  - left: K
-    letters: EST
-    right: '#'
-    phonemes: [AH2, S, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: EST
-    right: +
-    phonemes: [EH0, S, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: EST
-    right: '#'
-    phonemes: [IH2, S, T]
-  - left: (?:C|S|U|V|Z)
-    letters: EST
-    right: '#'
-    phonemes: [IH2, S, T]
-  - left: L(?:B|C|D|F|G|K|P|T|Z)
-    letters: EST
-    right: '#'
-    phonemes: [IH2, S, T]
-  - left: (?:B|D|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: EST
-    right: '#'
-    phonemes: [IH2, S, T]
-  - left: ''
-    letters: EST
-    right: '#'
-    phonemes: [IH2, S, T]
-  - left: ''
-    letters: EAU
-    right: +
-    phonemes: [OW1]
-  - left: ''
-    letters: EAU
-    right: ''
-    phonemes: [Y, UW0]
-  - left: '#'
-    letters: EDU
-    right: ''
-    phonemes: [EH0, JH, IH0]
-  - left: (?:H|P|F|#)
+  - left: (?:H|P|F| )
     letters: EU
     right: ''
     phonemes: [Y, UW0]
-  - left: ''
-    letters: EU
-    right: ''
-    phonemes: [UW0]
-  - left: S#
+  - left: 'S '
     letters: EW
-    right: +
+    right: ' '
     phonemes: [OW0]
-  - left: (?:#|F|H|K|M|P)
+  - left: '(?: |F|H|K|M|P)'
     letters: EW
     right: ''
     phonemes: [Y, UW0]
-  - left: ''
-    letters: EW
-    right: ''
-    phonemes: [UW0]
-  - left: ''
-    letters: EAUX
-    right: ''
-    phonemes: [OW0]
-  - left: ''
-    letters: EUX
-    right: ''
-    phonemes: [OW0]
   - left: (?:P|B|T|D|R)[AEIOU]
     letters: EX
-    right: +
+    right: ' '
     phonemes: [EH2, K, S]
   - left: ''
     letters: EX
-    right: +
+    right: ' '
     phonemes: [EH2, K, S]
-  - left: ''
-    letters: ERITY
-    right: +
-    phonemes: [EH1, R, AH2, T, IY0]
-  - left: ''
-    letters: EVERY
-    right: ''
-    phonemes: [EH1, V, R, IY2]
-  - left: ''
-    letters: EDLY
-    right: +
-    phonemes: [IH2, D, L, IY2]
-  - left: ''
-    letters: EITY
-    right: +
-    phonemes: [IY1, IH2, T, IY0]
-  - left: ''
-    letters: ENCY
-    right: +
-    phonemes: [IY0]
-  - left: ''
-    letters: EFY
-    right: +
-    phonemes: [IH0, F, AY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ERY
-    right: +
-    phonemes: [EH0, R, IY0]
-  - left: (?:V|N|C|P|K|D)[AEIOU]
-    letters: ERY
-    right: +
-    phonemes: [ER2, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ERY
-    right: +
-    phonemes: [ER2, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: EY
-    right: +
+    right: ' '
     phonemes: [EY0]
-  - left: (?:V|BO+)
+  - left: (?:V|BO )
     letters: EY
-    right: +
+    right: ' '
     phonemes: [EY1]
   - left: ''
     letters: EY
-    right: +
+    right: ' '
     phonemes: [IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: EY
-    right: '#'
+    right: ' '
     phonemes: [EY0]
   - left: ''
-    letters: EY
+    letters: EZ
+    right: ' '
+    phonemes: [EH2, Z]
+  - left: ''
+    letters: EA
+    right: ''
+    phonemes: [IY1]
+  - left: ''
+    letters: EE
     right: ''
     phonemes: [IY0]
   - left: ''
-    letters: EZ
-    right: '#'
-    phonemes: [EH2, Z]
+    letters: EI
+    right: ''
+    phonemes: [IY1]
+  - left: ''
+    letters: EO
+    right: ''
+    phonemes: [IY0, AA1]
+  - left: ''
+    letters: EU
+    right: ''
+    phonemes: [UW0]
+  - left: ''
+    letters: EW
+    right: ''
+    phonemes: [UW0]
+  - left: ''
+    letters: EY
+    right: ''
+    phonemes: [EY1]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: E
+    right: ' '
+    phonemes: [IY0]
+  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    letters: E
+    right: ' '
+    phonemes: []
+  - left: ''
+    letters: E
+    right: XE
+    phonemes: [EH1]
+  - left: 'Z '
+    letters: E
+    right: (?:R|N|B)
+    phonemes: [IY1]
+  - left: ''
+    letters: E
+    right: R[AEIOU](?:[AEIOU]| | )
+    phonemes: [IY1]
+  - left: ''
+    letters: E
+    right: QU[AEO]
+    phonemes: [IY0]
+  - left: ''
+    letters: E
+    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
+    phonemes: [EH1]
+  - left: ''
+    letters: E
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [EH1]
+  - left: ''
+    letters: E
+    right: R[BCDFGHJKLMNPQRSTVWXZ]
+    phonemes: [AH0]
+  - left: ''
+    letters: E
+    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    phonemes: [IY1]
+  - left: ''
+    letters: E
+    right: ''
+    phonemes: [EH1]
   F:
   - left: ''
-    letters: FELD
-    right: ''
-    phonemes: [F, EH0, L, D]
+    letters: FACTION
+    right: ' '
+    phonemes: [F, AE1, K, SH, IH2, N]
+  - left: ''
+    letters: FECTION
+    right: ' '
+    phonemes: [F, EH1, K, SH, IH2, N]
   - left: ''
     letters: FINKLE
     right: ''
     phonemes: [F, IH0, NG, K, EL]
   - left: ''
+    letters: FELDER
+    right: ''
+    phonemes: [F, EH0, L, D, ER0]
+  - left: ''
+    letters: FULLY
+    right: ' '
+    phonemes: [F, UH2, L, IY2]
+  - left: ''
     letters: FIBRE
     right: ''
     phonemes: [F, AY1, B, ER0]
+  - left: ''
+    letters: FIBER
+    right: ''
+    phonemes: [F, AY1, B, ER0]
+  - left: ''
+    letters: FLUOR
+    right: ''
+    phonemes: [F, L, UW1, R]
+  - left: ''
+    letters: FISH
+    right: ' '
+    phonemes: [F, IH1, SH]
+  - left: ''
+    letters: FLEX
+    right: ' '
+    phonemes: [F, L, EH0, K, S]
+  - left: ' '
+    letters: FITZ
+    right: ''
+    phonemes: [F, IH0, T, S]
+  - left: ''
+    letters: FELD
+    right: ''
+    phonemes: [F, EH0, L, D]
   - left: ''
     letters: FIRE
     right: ''
@@ -1823,42 +1858,6 @@ rules_by_letter:
     right: ''
     phonemes: [F, OW0, R]
   - left: ''
-    letters: F
-    right: ''
-    phonemes: [F]
-  - left: ''
-    letters: FISH
-    right: +
-    phonemes: [F, IH0, SH]
-  - left: ''
-    letters: FJ
-    right: ''
-    phonemes: [F, Y]
-  - left: ''
-    letters: FUL
-    right: +
-    phonemes: [F, EL]
-  - left: ''
-    letters: FACTION
-    right: +
-    phonemes: [F, AE1, K, SH, IH2, N]
-  - left: ''
-    letters: FECTION
-    right: +
-    phonemes: [F, EH1, K, SH, IH2, N]
-  - left: ''
-    letters: FELDER
-    right: ''
-    phonemes: [F, EH0, L, D, ER0]
-  - left: ''
-    letters: FIBER
-    right: ''
-    phonemes: [F, AY1, B, ER0]
-  - left: ''
-    letters: FLUOR
-    right: ''
-    phonemes: [F, L, AH0, R]
-  - left: ''
     letters: FALS
     right: ''
     phonemes: [F, AO2, L, S]
@@ -1867,42 +1866,78 @@ rules_by_letter:
     right: ''
     phonemes: [F, UH0, T]
   - left: ''
-    letters: FLEX
-    right: +
-    phonemes: [F, L, EH0, K, S]
-  - left: ''
-    letters: FULLY
-    right: +
-    phonemes: [F, UH2, L, IY2]
+    letters: FUL
+    right: ' '
+    phonemes: [F, EL]
   - left: ''
     letters: FLY
-    right: +
+    right: ' '
     phonemes: [F, L, AY0]
   - left: ''
     letters: FY
-    right: +
+    right: ' '
     phonemes: [F, IY2]
-  - left: '#'
-    letters: FITZ
+  - left: ''
+    letters: FJ
     right: ''
-    phonemes: [F, IH0, T, S]
+    phonemes: [F, Y]
+  - left: ''
+    letters: F
+    right: ''
+    phonemes: [F]
   G:
   - left: ''
-    letters: GHB
-    right: ''
-    phonemes: [B]
-  - left: ''
     letters: GRAPHIC
-    right: +
+    right: ' '
     phonemes: [G, R, AE1, F, IH2, K]
   - left: ''
+    letters: GRAPHER
+    right: ' '
+    phonemes: [G, R, AH2, F, AH2, R]
+  - left: ''
+    letters: GENESIS
+    right: ''
+    phonemes: [JH, EH1, N, AH2, S, IH2, S]
+  - left: ''
+    letters: GRAPHY
+    right: ' '
+    phonemes: [G, R, AH2, F, IY2]
+  - left: ''
+    letters: GYNECO
+    right: ''
+    phonemes: [G, AY0, N, AH0, K, AA1]
+  - left: ''
+    letters: GAMOUS
+    right: ''
+    phonemes: [G, AH2, M, AH2, S]
+  - left: ''
     letters: GENIC
-    right: +
+    right: ' '
     phonemes: [JH, EH1, N, IH2, K]
   - left: ''
     letters: GAARD
-    right: '#'
+    right: ' '
     phonemes: [G, AA0, R, D]
+  - left: ''
+    letters: GRADE
+    right: ' '
+    phonemes: [G, R, EY2, D]
+  - left: ''
+    letters: GOING
+    right: ' '
+    phonemes: [G, OW2, IH0, NG]
+  - left: ''
+    letters: GRAPH
+    right: ' '
+    phonemes: [G, R, AE0, F]
+  - left: ''
+    letters: GONAL
+    right: ' '
+    phonemes: [G, AH2, N, EL]
+  - left: ''
+    letters: GHLIN
+    right: ' '
+    phonemes: [K, L, IH0, N]
   - left: ''
     letters: GRAND
     right: ''
@@ -1912,129 +1947,9 @@ rules_by_letter:
     right: ''
     phonemes: [G, AA0, R, D]
   - left: ''
-    letters: GOOD
-    right: ''
-    phonemes: [G, UH0, D]
-  - left: ''
     letters: GIBLE
     right: ''
     phonemes: [JH, IH2, B, EL]
-  - left: ''
-    letters: GRADE
-    right: +
-    phonemes: [G, R, EY2, D]
-  - left: ''
-    letters: GUE
-    right: +
-    phonemes: [G]
-  - left: ''
-    letters: GOING
-    right: +
-    phonemes: [G, OW2, IH0, NG]
-  - left: US
-    letters: GG
-    right: ''
-    phonemes: [G, JH]
-  - left: AXE
-    letters: GG
-    right: ''
-    phonemes: [JH]
-  - left: ''
-    letters: GG
-    right: ''
-    phonemes: [G, G]
-  - left: '#'
-    letters: G
-    right: E(?:LD|A|E|T|Y)
-    phonemes: [G]
-  - left: '#'
-    letters: G
-    right: I(?:D|F|G|L|M|R|V|Z)
-    phonemes: [G]
-  - left: '#'
-    letters: G
-    right: YN
-    phonemes: [G]
-  - left: (?:G)?[AEIOU][BCDFGHJKLMNPQRSTVWXZ]+#
-    letters: G
-    right: Y+
-    phonemes: [G]
-  - left: ''
-    letters: G
-    right: (?:I|Y|E)
-    phonemes: [JH]
-  - left: ''
-    letters: G
-    right: ''
-    phonemes: [G]
-  - left: ''
-    letters: GRAPH
-    right: +
-    phonemes: [G, R, AE0, F]
-  - left: ''
-    letters: GHTH
-    right: ''
-    phonemes: [TH]
-  - left: +
-    letters: GH
-    right: ''
-    phonemes: [G]
-  - left: '[IU]'
-    letters: GH
-    right: +
-    phonemes: []
-  - left: ''
-    letters: GONAL
-    right: +
-    phonemes: [G, AH2, N, EL]
-  - left: ''
-    letters: GRAM
-    right: +
-    phonemes: [G, R, AE0, M]
-  - left: ''
-    letters: GM
-    right: '#'
-    phonemes: [M]
-  - left: ''
-    letters: GHLIN
-    right: '#'
-    phonemes: [K, L, IH0, N]
-  - left: ''
-    letters: GEON
-    right: +
-    phonemes: [JH, IH0, N]
-  - left: '#'
-    letters: GN
-    right: ''
-    phonemes: [N]
-  - left: ''
-    letters: GN
-    right: (?:E)?+
-    phonemes: [N]
-  - left: ''
-    letters: GYNECO
-    right: ''
-    phonemes: [G, AY0, N, AH0, K, AH0]
-  - left: ''
-    letters: GYRO
-    right: ''
-    phonemes: [JH, AY0, R, OW0]
-  - left: '#'
-    letters: GEO
-    right: ''
-    phonemes: [JH, IY0, AH0]
-  - left: ''
-    letters: GRAPHER
-    right: +
-    phonemes: [G, R, AH2, F, AH2, R]
-  - left: ''
-    letters: GENESIS
-    right: ''
-    phonemes: [JH, EH1, N, AH2, S, IH2, S]
-  - left: ''
-    letters: GAMOUS
-    right: ''
-    phonemes: [G, AH2, M, AH2, S]
   - left: ''
     letters: GLASS
     right: ''
@@ -2044,46 +1959,142 @@ rules_by_letter:
     right: ''
     phonemes: [G, R, EY0, T]
   - left: ''
+    letters: GRAM
+    right: ' '
+    phonemes: [G, R, AE0, M]
+  - left: ''
+    letters: GEON
+    right: ' '
+    phonemes: [JH, IH0, N]
+  - left: ''
+    letters: GOOD
+    right: ''
+    phonemes: [G, UH0, D]
+  - left: ''
+    letters: GHTH
+    right: ''
+    phonemes: [TH]
+  - left: ''
+    letters: GYRO
+    right: ''
+    phonemes: [JH, AY0, R, OW0]
+  - left: ''
+    letters: GUE
+    right: ' '
+    phonemes: [G]
+  - left: ' '
+    letters: GEO
+    right: ''
+    phonemes: [JH, IY0, AA1]
+  - left: ''
+    letters: GHB
+    right: ''
+    phonemes: [B]
+  - left: ''
     letters: GHT
     right: ''
     phonemes: [T]
+  - left: US
+    letters: GG
+    right: ''
+    phonemes: [G, JH]
+  - left: AXE
+    letters: GG
+    right: ''
+    phonemes: [JH]
+  - left: ' '
+    letters: GH
+    right: ''
+    phonemes: [G]
+  - left: '[IU]'
+    letters: GH
+    right: ' '
+    phonemes: []
   - left: ''
-    letters: GRAPHY
-    right: +
-    phonemes: [G, R, AH2, F, IY2]
+    letters: GM
+    right: ' '
+    phonemes: [M]
+  - left: ' '
+    letters: GN
+    right: ''
+    phonemes: [N]
+  - left: ''
+    letters: GN
+    right: '(?:E)? '
+    phonemes: [N]
   - left: (?:N|R)
     letters: GY
-    right: +
+    right: ' '
     phonemes: [JH, IY0]
-  - left: '#'
+  - left: ' '
     letters: GU
     right: ''
     phonemes: [G]
   - left: ''
     letters: GU
-    right: (?:ITY|OUS|MENT|+ED|R|L)
+    right: (?:ITY|OUS|MENT| ED|R|L)
     phonemes: [G, Y, UW0]
   - left: ''
     letters: GU
-    right: +
+    right: ' '
     phonemes: [G, W]
+  - left: ''
+    letters: GG
+    right: ''
+    phonemes: [G, G]
   - left: ''
     letters: GU
     right: ''
     phonemes: [G]
-  H:
+  - left: ' '
+    letters: G
+    right: E(?:LD|A|E|T|Y)
+    phonemes: [G]
+  - left: ' '
+    letters: G
+    right: I(?:D|F|G|L|M|R|V|Z)
+    phonemes: [G]
+  - left: ' '
+    letters: G
+    right: YN
+    phonemes: [G]
+  - left: '(?:G)?[AEIOU][BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: G
+    right: 'Y '
+    phonemes: [G]
   - left: ''
-    letters: HAND
-    right: +
-    phonemes: [HH, AE2, N, D]
+    letters: G
+    right: (?:I|Y|E)
+    phonemes: [JH]
   - left: ''
-    letters: HEAD
+    letters: G
     right: ''
-    phonemes: [HH, EH0, D]
+    phonemes: [G]
+  H:
+  - left: ' '
+    letters: HETERO
+    right: ''
+    phonemes: [HH, EH0, T, AH2, R, AA2]
   - left: ''
-    letters: HOOD
-    right: +
-    phonemes: [HH, UH2, D]
+    letters: HAUSEN
+    right: ''
+    phonemes: [HH, AW0, Z, AH0, N]
+  - left: ''
+    letters: HAUSER
+    right: ''
+    phonemes: [HH, AW0, Z, ER0]
+  - left: ''
+    letters: HOFFER
+    right: ''
+    phonemes: [HH, AO0, F, ER0]
+  - left: ' '
+    letters: HANDI
+    right: ''
+    phonemes: [HH, AE0, N, D, IY0]
+  - left: ''
+    letters: HOMEO
+    right: (?:P|S)
+    phonemes: [HH, OW0, M, IY0, OW0]
   - left: ''
     letters: HORSE
     right: ''
@@ -2092,51 +2103,63 @@ rules_by_letter:
     letters: HOUSE
     right: ''
     phonemes: [HH, AW0, S]
-  - left: '#'
+  - left: ''
+    letters: HUMAN
+    right: ''
+    phonemes: [HH, Y, UW0, M, AE1, N]
+  - left: ''
+    letters: HELIO
+    right: ''
+    phonemes: [HH, IY0, L, IY0, OW0]
+  - left: ''
+    letters: HYDRO
+    right: ''
+    phonemes: [HH, AY1, D, R, AA2]
+  - left: ''
+    letters: HYPNO
+    right: ''
+    phonemes: [HH, IH0, P, N, AA1]
+  - left: ''
+    letters: HONOR
+    right: ''
+    phonemes: [AA0, N, ER2]
+  - left: ''
+    letters: HYPER
+    right: ''
+    phonemes: [HH, AY0, P, AH0, R]
+  - left: ''
+    letters: HORST
+    right: ''
+    phonemes: [HH, OW0, R, S, T]
+  - left: ''
+    letters: HEART
+    right: ''
+    phonemes: [HH, AA0, R, T]
+  - left: ''
+    letters: HAND
+    right: ' '
+    phonemes: [HH, AE2, N, D]
+  - left: ''
+    letters: HOOD
+    right: ' '
+    phonemes: [HH, UH2, D]
+  - left: ' '
     letters: HERE
     right: (?:D|F|S)
-    phonemes: [HH, AH0, R, AH0]
-  - left: '#'
+    phonemes: [HH, EH1, R, EH1]
+  - left: ' '
     letters: HERE
     right: ''
     phonemes: [HH, IY0, R]
   - left: '[AEIOU]'
     letters: HOLE
-    right: +
+    right: ' '
     phonemes: [HH, OW2, L]
-  - left: ''
-    letters: HOME
-    right: ''
-    phonemes: [HH, OW0, M]
-  - left: ''
-    letters: HALF
-    right: ''
-    phonemes: [HH, AE0, F]
-  - left: ''
-    letters: HOFF
-    right: ''
-    phonemes: [HH, AO0, F]
-  - left: +
+  - left: ' '
     letters: HIGH
     right: ''
     phonemes: [HH, AY1]
-  - left: ''
-    letters: H
-    right: '#'
-    phonemes: []
-  - left: XE#
-    letters: H
-    right: ''
-    phonemes: []
-  - left: ''
-    letters: H
-    right: ''
-    phonemes: [HH]
-  - left: '#'
-    letters: HANDI
-    right: ''
-    phonemes: [HH, AE0, N, D, IY0]
-  - left: '#'
+  - left: ' '
     letters: HEMI
     right: ''
     phonemes: [HH, EH0, M, AH0]
@@ -2150,621 +2173,405 @@ rules_by_letter:
     phonemes: [HH, AO0, L]
   - left: ''
     letters: HILL
-    right: '#'
+    right: ' '
     phonemes: [HH, IH0, L]
+  - left: ' '
+    letters: HEMO
+    right: '[ABCDEFGHIJKLMNOPQSTUVWXYZ]'
+    phonemes: [HH, IY0, M, OW0]
+  - left: ' '
+    letters: HOMO
+    right: ''
+    phonemes: [HH, AA1, M, AA1]
+  - left: ' '
+    letters: HORO
+    right: ''
+    phonemes: [HH, AA1, R, AA1]
   - left: ''
-    letters: HL
-    right: '#'
-    phonemes: [L]
+    letters: HYPO
+    right: CR
+    phonemes: [HH, IH1, P, AA1]
+  - left: ' '
+    letters: HEIR
+    right: ''
+    phonemes: [EY1, R]
+  - left: ' '
+    letters: HIER
+    right: ''
+    phonemes: [HH, AY0, R]
+  - left: ''
+    letters: HEAD
+    right: ''
+    phonemes: [HH, EH0, D]
+  - left: ''
+    letters: HOME
+    right: ''
+    phonemes: [HH, OW0, M]
+  - left: ''
+    letters: HALF
+    right: ''
+    phonemes: [HH, AE0, F]
+  - left: ''
+    letters: HOFF
+    right: ''
+    phonemes: [HH, AO0, F]
   - left: ''
     letters: HEIM
     right: ''
     phonemes: [HH, AY0, M]
   - left: ''
-    letters: HUM
-    right: '[AEIOU]'
-    phonemes: [HH, Y, UW0, M]
-  - left: ''
-    letters: HAUSEN
-    right: ''
-    phonemes: [HH, AW0, Z, AH0, N]
-  - left: ''
-    letters: HUMAN
-    right: ''
-    phonemes: [HH, Y, UW0, M, AH0, N]
-  - left: ''
-    letters: HN
-    right: '#'
-    phonemes: [N]
-  - left: '#'
-    letters: HETERO
-    right: ''
-    phonemes: [HH, EH0, T, AH2, R, AA2]
-  - left: ''
-    letters: HELIO
-    right: ''
-    phonemes: [HH, IY0, L, IY0, OW0]
-  - left: ''
-    letters: HOMEO
-    right: (?:P|S)
-    phonemes: [HH, OW0, M, IY0, OW0]
-  - left: ''
-    letters: HYDRO
-    right: ''
-    phonemes: [HH, AY1, D, R, AA2]
-  - left: ''
-    letters: HYPNO
-    right: ''
-    phonemes: [HH, IH0, P, N, IH0]
-  - left: '#'
-    letters: HEMO
-    right: '[ABCDEFGHIJKLMNOPQSTUVWXYZ]'
-    phonemes: [HH, IY0, M, OW0]
-  - left: '#'
-    letters: HOMO
-    right: ''
-    phonemes: [HH, AH0, M, AH0]
-  - left: '#'
-    letters: HORO
-    right: ''
-    phonemes: [HH, AH0, R, AH0]
-  - left: ''
-    letters: HYPO
-    right: CR
-    phonemes: [HH, IH0, P, AH0]
-  - left: ''
     letters: HYPO
     right: ''
-    phonemes: [HH, AY0, P, AH0]
-  - left: ''
-    letters: HAUSER
-    right: ''
-    phonemes: [HH, AW0, Z, ER0]
-  - left: ''
-    letters: HOFFER
-    right: ''
-    phonemes: [HH, AO0, F, ER0]
-  - left: ''
-    letters: HONOR
-    right: ''
-    phonemes: [AA0, N, ER2]
-  - left: ''
-    letters: HYPER
-    right: ''
-    phonemes: [HH, AY0, P, AH0, R]
-  - left: '#'
-    letters: HEIR
-    right: ''
-    phonemes: [EY1, R]
-  - left: '#'
-    letters: HIER
-    right: ''
-    phonemes: [HH, AY0, R]
+    phonemes: [HH, AY0, P, AA1]
   - left: ''
     letters: HOUR
     right: ''
     phonemes: [AW0, R]
   - left: ''
-    letters: HORST
-    right: ''
-    phonemes: [HH, OW0, R, S, T]
+    letters: HUM
+    right: '[AEIOU]'
+    phonemes: [HH, Y, UW0, M]
   - left: ''
-    letters: HEART
+    letters: HL
+    right: ' '
+    phonemes: [L]
+  - left: ''
+    letters: HN
+    right: ' '
+    phonemes: [N]
+  - left: ''
+    letters: H
+    right: ' '
+    phonemes: []
+  - left: 'XE '
+    letters: H
     right: ''
-    phonemes: [HH, AA0, R, T]
+    phonemes: []
+  - left: ''
+    letters: H
+    right: ''
+    phonemes: [HH]
   I:
   - left: ''
-    letters: INTRA
-    right: ''
-    phonemes: [IH0, N, T, R, AH0]
-  - left: ''
-    letters: ILLA
-    right: +
-    phonemes: [IH1, L, AH2]
-  - left: '[AEIOU]'
-    letters: ICA
-    right: '#'
-    phonemes: [IH2, K, AH2]
-  - left: ''
-    letters: IA
-    right: +
-    phonemes: [IY0, AH0]
-  - left: (?:B|C|M|N|R|L|P|D|S)[AEIOU]
-    letters: IA
-    right: +
-    phonemes: [IY2, AH0]
-  - left: ''
-    letters: IA
-    right: +
-    phonemes: [IY2, AH0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: IA
-    right: '[BCDFGHJKLMNPQRSTVWXZ]+'
-    phonemes: [AY0, AH0]
-  - left: ''
-    letters: ISTIC
-    right: +
-    phonemes: [IH1, S, T, IH2, K]
-  - left: (?:D|N)[AEIOU]
-    letters: IAC
-    right: +
-    phonemes: [IY2, AE2, K]
-  - left: ''
-    letters: IAC
-    right: +
-    phonemes: [IY2, AE2, K]
-  - left: ''
-    letters: IC
-    right: +
-    phonemes: [IH2, K]
-  - left: ''
-    letters: IED
-    right: +
-    phonemes: [D]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ID
-    right: +
-    phonemes: [IH0, D]
-  - left: (?:M|R|HP)[AEIOU]
-    letters: ID
-    right: +
-    phonemes: [IH2, D]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ID
-    right: +
-    phonemes: [IH2, D]
-  - left: ''
-    letters: IFICENCE
-    right: +
-    phonemes: [IH1, F, AH2, S, IH2, N, S]
-  - left: ''
-    letters: IABLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: ''
-    letters: ICIDE
-    right: +
-    phonemes: [AH2, S, AY2, D]
-  - left: ''
-    letters: IELLE
-    right: '#'
-    phonemes: [IY2, EH1, L]
-  - left: (?:R|T|N|D)
-    letters: IENCE
-    right: +
-    phonemes: [IY2, AH0, N, S]
-  - left: ''
-    letters: IENCE
-    right: +
-    phonemes: [IY2, AH0, N, S]
-  - left: ''
-    letters: IENNE
-    right: +
-    phonemes: [IY2, EH1, N]
-  - left: ''
-    letters: ITIVE
-    right: +
-    phonemes: [IH2, T, IH2, V]
-  - left: ''
-    letters: IAGE
-    right: +
-    phonemes: [IH2, JH]
-  - left: (?:RP|G)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: IATE
-    right: +
-    phonemes: [IY2, AH2, T]
-  - left: (?:RB|C|V|R|D)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: IATE
-    right: +
-    phonemes: [IY2, EY2, T]
-  - left: ''
-    letters: IATE
-    right: +
-    phonemes: [IY2, EY2, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: IBLE
-    right: '#'
-    phonemes: [IH0, B, EL]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: IBLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: C(?:U|A|R|N)
-    letters: IBLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: M(?:A|U)
-    letters: IBLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: IBLE
-    right: +
-    phonemes: [AH2, B, EL]
-  - left: (?:H|B|T|C)[AEIOU]
-    letters: ICLE
-    right: +
-    phonemes: [IH2, K, EL]
-  - left: ''
-    letters: ICLE
-    right: +
-    phonemes: [IH2, K, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: ICE
-    right: +
-    phonemes: [AY0, S]
-  - left: (?:V|F)[AEIOU]
-    letters: ICE
-    right: +
-    phonemes: [AY2, S]
-  - left: (?:M|D|T)[AEIOU]
-    letters: ICE
-    right: +
-    phonemes: [IH2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ICE
-    right: +
-    phonemes: [IH2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: IDE
-    right: +
-    phonemes: [AY2, D]
-  - left: ''
-    letters: IGUE
-    right: +
-    phonemes: [IY1, G]
-  - left: ''
-    letters: IQUE
-    right: +
-    phonemes: [IY1, K]
-  - left: (?:T|B|G|R|C|S)[AEIOU]
-    letters: ILE
-    right: +
-    phonemes: [EL]
-  - left: ''
-    letters: ILE
-    right: +
-    phonemes: [AY2, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    letters: INE
-    right: +
-    phonemes: [AY0, N]
-  - left: (?:Z|T|R|S)
-    letters: INE
-    right: +
-    phonemes: [IY2, N]
-  - left: (?:M|G|C|N)
-    letters: INE
-    right: +
-    phonemes: [IH2, N]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: INE
-    right: +
-    phonemes: [AY2, N]
-  - left: M[AEIOU]
-    letters: ISE
-    right: +
-    phonemes: [IH2, S]
-  - left: (?:D|C)
-    letters: ISE
-    right: +
-    phonemes: [AY2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ISE
-    right: +
-    phonemes: [AY1, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]#'
-    letters: ISE
-    right: +
-    phonemes: [AY1, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ISE
-    right: +
-    phonemes: [AY2, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    letters: ITE
-    right: +
-    phonemes: [AY0, T]
-  - left: (?:S|N)(?:O|I)
-    letters: ITE
-    right: +
-    phonemes: [IH0, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ITE
-    right: +
-    phonemes: [AY0, T]
-  - left: (?:G|L|R)#
-    letters: IVE
-    right: +
-    phonemes: [IH0, V]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: IVE
-    right: +
-    phonemes: [AY0, V]
-  - left: T[AEIOU]
-    letters: IVE
-    right: ''
-    phonemes: [IH2, V]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: IVE
-    right: +
-    phonemes: [IH2, V]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    letters: IZE
-    right: +
-    phonemes: [AY2, Z]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+'
-    letters: IE
-    right: +
-    phonemes: [AY0]
-  - left: (?:G|N|V|R)[AEIOU]
-    letters: IE
-    right: +
-    phonemes: [IY2]
-  - left: ''
-    letters: IE
-    right: +
-    phonemes: [IY2]
-  - left: CS#
-    letters: IE
-    right: ''
-    phonemes: [AY0, IH0]
-  - left: ''
-    letters: IE
-    right: T+
-    phonemes: [IY0, IH0]
-  - left: RF
-    letters: IE
-    right: N
-    phonemes: [EH0]
-  - left: ''
-    letters: IE
-    right: N
-    phonemes: [AH0]
-  - left: H#
-    letters: IE
-    right: ''
-    phonemes: [AY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: IE
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [IY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: ING
-    right: +
-    phonemes: [IH0, NG]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: GNE
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: GNOPS
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: GNU
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: TSA(?:B|P|T|W)#
-    letters: ING
-    right: '#'
-    phonemes: [IH2, NG]
-  - left: GNA(?:HC|LF|D|M|R)
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: GNI(?:PMI|WT|RC|RE|RF|H|G|S|T)
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: GN
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: (?:C|G|S|U|V|Z)
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: L(?:B|C|D|F|G|K|P|T|Z)
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: (?:B|D|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: ''
-    letters: ING
-    right: +
-    phonemes: [IH2, NG]
-  - left: ''
-    letters: IETH
-    right: +
-    phonemes: [IH2, TH]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: ISH
-    right: +
-    phonemes: [IH0, SH]
-  - left: (?:V|D|P)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: ISH
-    right: +
-    phonemes: [IH2, SH]
-  - left: ''
-    letters: ISH
-    right: +
-    phonemes: [IH2, SH]
-  - left: ''
-    letters: ISHI
-    right: '#'
-    phonemes: [IY1, SH, IY2]
-  - left: ''
-    letters: INI
-    right: +
-    phonemes: [IY1, N, IY2]
-  - left: ''
-    letters: I
-    right: R[AEIOU](?:[AEIOU]|#|+)
-    phonemes: [AY0]
-  - left: '#'
-    letters: I
-    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
-    phonemes: [IH0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    letters: I
-    right: R#
-    phonemes: [IY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*'
-    letters: I
-    right: R[BCDFGHJKLMNPQRSTVWXZ]*
-    phonemes: [AH0]
-  - left: LC+
-    letters: I
-    right: M
-    phonemes: [AY0]
-  - left: ''
-    letters: I
-    right: (?:N|L)D+
-    phonemes: [IH0]
-  - left: ''
-    letters: I
-    right: G[MN]+
-    phonemes: [AY0]
-  - left: ''
-    letters: I
-    right: GH
-    phonemes: [AY0]
-  - left: (?:KS|S|M|T)+
-    letters: I
-    right: +
-    phonemes: [IY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: I
-    right: +
-    phonemes: [AY0]
-  - left: ''
-    letters: I
-    right: +
-    phonemes: [IY0]
-  - left: ''
-    letters: I
-    right: '[BCDFGHJKLMNPQRSTVWXZ][LR][AEIOU]+'
-    phonemes: [AY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: I
-    right: (?:TH|N)E+
-    phonemes: [AY0]
-  - left: ''
-    letters: I
-    right: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    phonemes: [IH0]
-  - left: ''
-    letters: I
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [IH0]
-  - left: ''
-    letters: I
-    right: '[BCDFGHJKLMNPQRSTVWXZ]I+'
-    phonemes: [IH0]
-  - left: ''
-    letters: I
-    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]+'
-    phonemes: [IH0]
-  - left: ''
-    letters: I
-    right: ''
-    phonemes: [IH0]
-  - left: ''
-    letters: IAK
-    right: '#'
-    phonemes: [IY2, AE2, K]
-  - left: ''
-    letters: IUK
-    right: '#'
-    phonemes: [IY2, UH2, K]
-  - left: ''
-    letters: ICIDAL
-    right: +
-    phonemes: [AH2, S, AY1, D, EL]
-  - left: ''
-    letters: ICAL
-    right: +
-    phonemes: [IH2, K, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: INAL
-    right: +
-    phonemes: [AY1, N, EL]
-  - left: ''
-    letters: INAL
-    right: +
-    phonemes: [IH2, N, EL]
-  - left: ''
-    letters: ITAL
-    right: +
-    phonemes: [AY2, T, EL]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    letters: IAL
-    right: +
-    phonemes: [AY0, L]
-  - left: (?:L|B|D|R|P|N)[AEIOU]
-    letters: IAL
-    right: +
-    phonemes: [IY2, EL]
-  - left: ''
-    letters: IAL
-    right: +
-    phonemes: [IY2, EL]
-  - left: ''
-    letters: INGHAM
-    right: +
-    phonemes: [IH2, NG, HH, AE2, M]
-  - left: ''
-    letters: ISM
-    right: +
-    phonemes: [IH2, Z, AH0, M]
-  - left: (?:M|N|L|D|P|S)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: IUM
-    right: +
-    phonemes: [IY2, AH2, M]
-  - left: ''
-    letters: IUM
-    right: +
-    phonemes: [IY2, AH2, M]
-  - left: ''
     letters: IFICATION
-    right: +
+    right: ' '
     phonemes: [IH2, F, IH2, K, EY1, SH, IH2, N]
   - left: ''
+    letters: IFICENCE
+    right: ' '
+    phonemes: [IH1, F, AH2, S, IH2, N, S]
+  - left: ''
     letters: IZATION
-    right: +
+    right: ' '
     phonemes: [IH2, Z, EY1, SH, IH2, N]
+  - left: ''
+    letters: IFEROUS
+    right: ' '
+    phonemes: [IH1, F, ER2, AH2, S]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: IBILITY
+    right: ' '
+    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+  - left: C(?:U|A|R|N)
+    letters: IBILITY
+    right: ' '
+    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+  - left: M(?:A|U)
+    letters: IBILITY
+    right: ' '
+    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+  - left: ''
+    letters: IBILITY
+    right: ' '
+    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+  - left: ''
+    letters: ICIENCY
+    right: ' '
+    phonemes: [IH1, SH, IH2, N, S, IY2]
+  - left: ''
+    letters: ICIDAL
+    right: ' '
+    phonemes: [AH2, S, AY1, D, EL]
+  - left: ''
+    letters: INGHAM
+    right: ' '
+    phonemes: [IH2, NG, HH, AE2, M]
   - left: (?:L|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
     letters: IATION
-    right: +
+    right: ' '
     phonemes: [IY2, EY1, SH, IH2, N]
   - left: ''
     letters: IATION
-    right: +
+    right: ' '
     phonemes: [IY2, EY1, SH, IH2, N]
   - left: ''
     letters: INGTON
-    right: +
+    right: ' '
     phonemes: [IH2, NG, T, AH2, N]
   - left: ''
+    letters: ISSIMO
+    right: ' '
+    phonemes: [IY1, S, IY2, M, OW2]
+  - left: ''
+    letters: ICIOUS
+    right: ' '
+    phonemes: [IH1, SH, IH2, S]
+  - left: ''
+    letters: IDIOUS
+    right: ' '
+    phonemes: [IH1, D, IY2, IH2, S]
+  - left: ''
+    letters: ILIOUS
+    right: ' '
+    phonemes: [IH1, L, IY2, IH2, S]
+  - left: ''
+    letters: ITIOUS
+    right: ' '
+    phonemes: [IH1, SH, IH2, S]
+  - left: ''
+    letters: IEWICZ
+    right: ' '
+    phonemes: [AH2, V, IH0, CH]
+  - left: ''
+    letters: ISTIC
+    right: ' '
+    phonemes: [IH1, S, T, IH2, K]
+  - left: ''
+    letters: IABLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: ''
+    letters: ICIDE
+    right: ' '
+    phonemes: [AH2, S, AY2, D]
+  - left: ''
+    letters: IELLE
+    right: ' '
+    phonemes: [IY2, EH1, L]
+  - left: (?:R|T|N|D)
+    letters: IENCE
+    right: ' '
+    phonemes: [IY2, AH0, N, S]
+  - left: ''
+    letters: IENCE
+    right: ' '
+    phonemes: [IY2, AH0, N, S]
+  - left: ''
+    letters: IENNE
+    right: ' '
+    phonemes: [IY2, EH1, N]
+  - left: ''
+    letters: ITIVE
+    right: ' '
+    phonemes: [IH2, T, IH2, V]
+  - left: ''
     letters: INTON
-    right: '#'
-    phonemes: [IH0, N, T, AH0, N]
+    right: ' '
+    phonemes: [IH1, N, T, AH0, N]
   - left: ''
     letters: ITION
-    right: +
+    right: ' '
     phonemes: [IH1, SH, IH2, N]
+  - left: '(?:V|C|D)[AEIOU][BCDFGHJKLMNPQRSTVWXZ] '
+    letters: IATOR
+    right: ' '
+    phonemes: [IY2, EY2, T, ER2]
+  - left: ''
+    letters: IATOR
+    right: ' '
+    phonemes: [IY2, EY2, T, ER2]
+  - left: ' '
+    letters: INTER
+    right: ''
+    phonemes: [IH1, N, T, ER0]
+  - left: ''
+    letters: INESS
+    right: ' '
+    phonemes: [N, IH2, S]
+  - left: ''
+    letters: ITOUS
+    right: ' '
+    phonemes: [IH2, T, IH2, S]
+  - left: ''
+    letters: IDENT
+    right: ' '
+    phonemes: [AH2, D, EN, T]
+  - left: ''
+    letters: IALLY
+    right: ' '
+    phonemes: [IY2, EL, IY2]
+  - left: ''
+    letters: ILITY
+    right: ' '
+    phonemes: [IH1, L, IH2, T, IY2]
+  - left: ''
+    letters: INTRA
+    right: ''
+    phonemes: [IH1, N, T, R, AE1]
+  - left: ''
+    letters: INTRO
+    right: ''
+    phonemes: [IH2, N, T, R, AH2]
+  - left: ''
+    letters: ILLA
+    right: ' '
+    phonemes: [IH1, L, AH2]
+  - left: ''
+    letters: IAGE
+    right: ' '
+    phonemes: [IH2, JH]
+  - left: (?:RP|G)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: IATE
+    right: ' '
+    phonemes: [IY2, AH2, T]
+  - left: (?:RB|C|V|R|D)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: IATE
+    right: ' '
+    phonemes: [IY2, EY2, T]
+  - left: ''
+    letters: IATE
+    right: ' '
+    phonemes: [IY2, EY2, T]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IBLE
+    right: ' '
+    phonemes: [IH0, B, EL]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: IBLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: C(?:U|A|R|N)
+    letters: IBLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: M(?:A|U)
+    letters: IBLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: IBLE
+    right: ' '
+    phonemes: [AH2, B, EL]
+  - left: (?:H|B|T|C)[AEIOU]
+    letters: ICLE
+    right: ' '
+    phonemes: [IH2, K, EL]
+  - left: ''
+    letters: ICLE
+    right: ' '
+    phonemes: [IH2, K, EL]
+  - left: ''
+    letters: IGUE
+    right: ' '
+    phonemes: [IY1, G]
+  - left: ''
+    letters: IQUE
+    right: ' '
+    phonemes: [IY1, K]
+  - left: ''
+    letters: IETH
+    right: ' '
+    phonemes: [IH2, TH]
+  - left: ''
+    letters: ISHI
+    right: ' '
+    phonemes: [IY1, SH, IY2]
+  - left: ''
+    letters: ICAL
+    right: ' '
+    phonemes: [IH2, K, EL]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: INAL
+    right: ' '
+    phonemes: [AY1, N, EL]
+  - left: ''
+    letters: INAL
+    right: ' '
+    phonemes: [IH2, N, EL]
+  - left: ''
+    letters: ITAL
+    right: ' '
+    phonemes: [AY2, T, EL]
   - left: ''
     letters: ICAN
-    right: +
+    right: ' '
     phonemes: [IH2, K, AH2, N]
+  - left: ''
+    letters: ILLO
+    right: ' '
+    phonemes: [IH1, L, OW2]
+  - left: ''
+    letters: IOUR
+    right: ' '
+    phonemes: [Y, ER0]
+  - left: ''
+    letters: ITOR
+    right: ' '
+    phonemes: [IH2, T, ER2]
+  - left: ''
+    letters: IZER
+    right: ' '
+    phonemes: [AY0, Z, AH2, R]
+  - left: (?:G|R|B|D|V|N)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: IOUS
+    right: ' '
+    phonemes: [IY2, IH2, S]
+  - left: ''
+    letters: IOUS
+    right: ' '
+    phonemes: [IY2, IH2, S]
+  - left: ''
+    letters: ITIS
+    right: ' '
+    phonemes: [AY1, T, IH2, S]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IANT
+    right: ' '
+    phonemes: [AY0, AH0, N, T]
+  - left: (?:V|R|D)[AEIOU]
+    letters: IANT
+    right: ' '
+    phonemes: [IY2, AH2, N, T]
+  - left: ''
+    letters: IANT
+    right: ' '
+    phonemes: [IY2, AH2, N, T]
+  - left: ''
+    letters: IENT
+    right: ' '
+    phonemes: [Y, IH2, N, T]
+  - left: ''
+    letters: IEST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: ''
+    letters: IETT
+    right: ' '
+    phonemes: [IY0, EH1, T]
+  - left: ''
+    letters: IEAU
+    right: ' '
+    phonemes: [IY0, OW0]
+  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
+    letters: IBLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: C(?:U|A|R|N)
+    letters: IBLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: M(?:A|U)
+    letters: IBLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: ''
+    letters: IBLY
+    right: ' '
+    phonemes: [AH2, B, L, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: IETY
+    right: ' '
+    phonemes: [AY1, AH2, T, IY2]
   - left: ''
     letters: IRON
     right: ''
@@ -2773,278 +2580,470 @@ rules_by_letter:
     letters: IZEN
     right: ''
     phonemes: [IH2, Z, EN]
+  - left: '[AEIOU]'
+    letters: ICA
+    right: ' '
+    phonemes: [IH2, K, AH2]
+  - left: (?:D|N)[AEIOU]
+    letters: IAC
+    right: ' '
+    phonemes: [IY2, AE2, K]
+  - left: ''
+    letters: IAC
+    right: ' '
+    phonemes: [IY2, AE2, K]
+  - left: ''
+    letters: IED
+    right: ' '
+    phonemes: [D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ICE
+    right: ' '
+    phonemes: [AY0, S]
+  - left: (?:V|F)[AEIOU]
+    letters: ICE
+    right: ' '
+    phonemes: [AY2, S]
+  - left: (?:M|D|T)[AEIOU]
+    letters: ICE
+    right: ' '
+    phonemes: [IH2, S]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ICE
+    right: ' '
+    phonemes: [IH2, S]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: IDE
+    right: ' '
+    phonemes: [AY2, D]
+  - left: (?:T|B|G|R|C|S)[AEIOU]
+    letters: ILE
+    right: ' '
+    phonemes: [EL]
+  - left: ''
+    letters: ILE
+    right: ' '
+    phonemes: [AY2, L]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: INE
+    right: ' '
+    phonemes: [AY0, N]
+  - left: (?:Z|T|R|S)
+    letters: INE
+    right: ' '
+    phonemes: [IY2, N]
+  - left: (?:M|G|C|N)
+    letters: INE
+    right: ' '
+    phonemes: [IH2, N]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: INE
+    right: ' '
+    phonemes: [AY2, N]
+  - left: M[AEIOU]
+    letters: ISE
+    right: ' '
+    phonemes: [IH2, S]
+  - left: (?:D|C)
+    letters: ISE
+    right: ' '
+    phonemes: [AY2, S]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ISE
+    right: ' '
+    phonemes: [AY1, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    letters: ISE
+    right: ' '
+    phonemes: [AY1, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ISE
+    right: ' '
+    phonemes: [AY2, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ITE
+    right: ' '
+    phonemes: [AY0, T]
+  - left: (?:S|N)(?:O|I)
+    letters: ITE
+    right: ' '
+    phonemes: [IH0, T]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ITE
+    right: ' '
+    phonemes: [AY0, T]
+  - left: '(?:G|L|R) '
+    letters: IVE
+    right: ' '
+    phonemes: [IH0, V]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IVE
+    right: ' '
+    phonemes: [AY0, V]
+  - left: T[AEIOU]
+    letters: IVE
+    right: ''
+    phonemes: [IH2, V]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: IVE
+    right: ' '
+    phonemes: [IH2, V]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    letters: IZE
+    right: ' '
+    phonemes: [AY2, Z]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ING
+    right: ' '
+    phonemes: [IH0, NG]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GNE
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GNOPS
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GNU
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: 'TSA(?:B|P|T|W) '
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GNA(?:HC|LF|D|M|R)
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GNI(?:PMI|WT|RC|RE|RF|H|G|S|T)
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: GN
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: (?:C|G|S|U|V|Z)
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: L(?:B|C|D|F|G|K|P|T|Z)
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: (?:B|D|K|L|M|N|P|R|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: ''
+    letters: ING
+    right: ' '
+    phonemes: [IH2, NG]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: ISH
+    right: ' '
+    phonemes: [IH0, SH]
+  - left: (?:V|D|P)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: ISH
+    right: ' '
+    phonemes: [IH2, SH]
+  - left: ''
+    letters: ISH
+    right: ' '
+    phonemes: [IH2, SH]
+  - left: ''
+    letters: INI
+    right: ' '
+    phonemes: [IY1, N, IY2]
+  - left: ''
+    letters: IAK
+    right: ' '
+    phonemes: [IY2, AE2, K]
+  - left: ''
+    letters: IUK
+    right: ' '
+    phonemes: [IY2, UH2, K]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IAL
+    right: ' '
+    phonemes: [AY0, L]
+  - left: (?:L|B|D|R|P|N)[AEIOU]
+    letters: IAL
+    right: ' '
+    phonemes: [IY2, EL]
+  - left: ''
+    letters: IAL
+    right: ' '
+    phonemes: [IY2, EL]
+  - left: ''
+    letters: ISM
+    right: ' '
+    phonemes: [IH2, Z, AH0, M]
+  - left: (?:M|N|L|D|P|S)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: IUM
+    right: ' '
+    phonemes: [IY2, AH2, M]
+  - left: ''
+    letters: IUM
+    right: ' '
+    phonemes: [IY2, AH2, M]
   - left: (?:P|R|D|V|B|G|[MN])[AEIOU]
     letters: IAN
-    right: +
+    right: ' '
     phonemes: [IY2, AH2, N]
   - left: ''
     letters: IAN
-    right: +
+    right: ' '
     phonemes: [IY2, AH2, N]
   - left: (?:L|N)
     letters: ION
-    right: +
+    right: ' '
     phonemes: [Y, AH2, N]
   - left: G
     letters: ION
-    right: +
+    right: ' '
     phonemes: [IH2, N]
   - left: H
     letters: ION
-    right: +
+    right: ' '
     phonemes: [IH2, N]
   - left: '[AEIOU]'
     letters: ION
     right: ''
     phonemes: [IY2, AH2, N]
   - left: ''
-    letters: ISSIMO
-    right: +
-    phonemes: [IY1, S, IY2, M, OW2]
-  - left: ''
-    letters: INTRO
-    right: ''
-    phonemes: [IH2, N, T, R, AH2]
-  - left: ''
-    letters: ILLO
-    right: '#'
-    phonemes: [IH1, L, OW2]
-  - left: ''
     letters: INO
-    right: '#'
+    right: ' '
     phonemes: [IY1, N, OW2]
-  - left: '#'
+  - left: ' '
     letters: ISO
     right: ''
-    phonemes: [AY0, S, AH0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: IO
-    right: '[BCDFGHJKLMNPQRSTVWXZ]+'
-    phonemes: [AY0, AH0]
-  - left: ''
-    letters: IO
-    right: +
-    phonemes: [IY0, OW0]
-  - left: (?:V|C|D)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]+
-    letters: IATOR
-    right: +
-    phonemes: [IY2, EY2, T, ER2]
-  - left: ''
-    letters: IATOR
-    right: +
-    phonemes: [IY2, EY2, T, ER2]
-  - left: '#'
-    letters: INTER
-    right: ''
-    phonemes: [IH0, N, T, ER0]
-  - left: ''
-    letters: IOUR
-    right: +
-    phonemes: [Y, ER0]
-  - left: ''
-    letters: ITOR
-    right: +
-    phonemes: [IH2, T, ER2]
-  - left: ''
-    letters: IZER
-    right: +
-    phonemes: [AY0, Z, AH2, R]
+    phonemes: [AY0, S, AA1]
   - left: '[AEIOU]'
     letters: IAR
-    right: +
+    right: ' '
     phonemes: [Y, ER2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: IOR
-    right: +
+    right: ' '
     phonemes: [AY0, ER0]
   - left: (?:V|N)[AEIOU]
     letters: IOR
-    right: +
+    right: ' '
     phonemes: [Y, ER2]
   - left: ''
     letters: IOR
-    right: +
+    right: ' '
     phonemes: [IY2, ER0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ] '
     letters: IER
-    right: +
+    right: ' '
     phonemes: [IY0, R]
   - left: ''
     letters: IER
-    right: +
+    right: ' '
     phonemes: [AH2, R]
   - left: ''
-    letters: IFEROUS
-    right: +
-    phonemes: [IH1, F, ER2, AH2, S]
-  - left: ''
-    letters: ICIOUS
-    right: +
-    phonemes: [IH1, SH, IH2, S]
-  - left: ''
-    letters: IDIOUS
-    right: +
-    phonemes: [IH1, D, IY2, IH2, S]
-  - left: ''
-    letters: ILIOUS
-    right: +
-    phonemes: [IH1, L, IY2, IH2, S]
-  - left: ''
-    letters: ITIOUS
-    right: +
-    phonemes: [IH1, SH, IH2, S]
-  - left: ''
-    letters: INESS
-    right: +
-    phonemes: [N, IH2, S]
-  - left: ''
-    letters: ITOUS
-    right: +
-    phonemes: [IH2, T, IH2, S]
-  - left: (?:G|R|B|D|V|N)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: IOUS
-    right: +
-    phonemes: [IY2, IH2, S]
-  - left: ''
-    letters: IOUS
-    right: +
-    phonemes: [IY2, IH2, S]
-  - left: ''
-    letters: ITIS
-    right: +
-    phonemes: [AY1, T, IH2, S]
-  - left: ''
     letters: IUS
-    right: +
+    right: ' '
     phonemes: [IY2, IH2, S]
   - left: ''
     letters: IES
-    right: '#'
+    right: ' '
     phonemes: [Z]
+  - left: ''
+    letters: IST
+    right: ' '
+    phonemes: [IH2, S, T]
+  - left: (?:R|N|T)[AEIOU]
+    letters: IFY
+    right: ' '
+    phonemes: [IH2, F, AY2]
+  - left: ''
+    letters: IFY
+    right: ' '
+    phonemes: [IH2, F, AY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ILY
+    right: ' '
+    phonemes: [IH0, L, IY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ILY
+    right: ' '
+    phonemes: [EL, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ITY
+    right: ' '
+    phonemes: [IH0, T, IY0]
+  - left: ''
+    letters: ITY
+    right: ' '
+    phonemes: [IH2, T, IY2]
+  - left: ''
+    letters: IA
+    right: ' '
+    phonemes: [IY0, AH0]
+  - left: (?:B|C|M|N|R|L|P|D|S)[AEIOU]
+    letters: IA
+    right: ' '
+    phonemes: [IY2, AH0]
+  - left: ''
+    letters: IA
+    right: ' '
+    phonemes: [IY2, AH0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IA
+    right: '[BCDFGHJKLMNPQRSTVWXZ] '
+    phonemes: [AY0, AH0]
+  - left: ''
+    letters: IC
+    right: ' '
+    phonemes: [IH2, K]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ID
+    right: ' '
+    phonemes: [IH0, D]
+  - left: (?:M|R|HP)[AEIOU]
+    letters: ID
+    right: ' '
+    phonemes: [IH2, D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: ID
+    right: ' '
+    phonemes: [IH2, D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ] '
+    letters: IE
+    right: ' '
+    phonemes: [AY0]
+  - left: (?:G|N|V|R)[AEIOU]
+    letters: IE
+    right: ' '
+    phonemes: [IY2]
+  - left: ''
+    letters: IE
+    right: ' '
+    phonemes: [IY2]
+  - left: 'CS '
+    letters: IE
+    right: ''
+    phonemes: [AY0, IH0]
+  - left: ''
+    letters: IE
+    right: 'T '
+    phonemes: [AY1, IH0]
+  - left: RF
+    letters: IE
+    right: N
+    phonemes: [EH0]
+  - left: ''
+    letters: IE
+    right: N
+    phonemes: [IY1]
+  - left: 'H '
+    letters: IE
+    right: ''
+    phonemes: [AY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: IE
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [IY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: IO
+    right: '[BCDFGHJKLMNPQRSTVWXZ] '
+    phonemes: [AY0, AH0]
+  - left: ''
+    letters: IO
+    right: ' '
+    phonemes: [IY0, OW0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
     letters: IS
-    right: '#'
+    right: ' '
     phonemes: [IH0, S]
   - left: S[AEIOU]
     letters: IS
-    right: '#'
+    right: ' '
     phonemes: [IH0, S]
-  - left: '#'
+  - left: ' '
     letters: IS
     right: L
     phonemes: [AY0]
   - left: ''
-    letters: IDENT
-    right: +
-    phonemes: [AH2, D, EN, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    letters: IANT
-    right: +
-    phonemes: [AY0, AH0, N, T]
-  - left: (?:V|R|D)[AEIOU]
-    letters: IANT
-    right: +
-    phonemes: [IY2, AH2, N, T]
+    letters: I
+    right: R[AEIOU](?:[AEIOU]| | )
+    phonemes: [AY0]
+  - left: ' '
+    letters: I
+    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
+    phonemes: [IH1]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    letters: I
+    right: 'R '
+    phonemes: [IY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]*'
+    letters: I
+    right: R[BCDFGHJKLMNPQRSTVWXZ]*
+    phonemes: [AH0]
+  - left: 'LC '
+    letters: I
+    right: M
+    phonemes: [AY0]
   - left: ''
-    letters: IANT
-    right: +
-    phonemes: [IY2, AH2, N, T]
+    letters: I
+    right: '(?:N|L)D '
+    phonemes: [AY1]
   - left: ''
-    letters: IENT
-    right: +
-    phonemes: [Y, IH2, N, T]
+    letters: I
+    right: 'G[MN] '
+    phonemes: [AY0]
   - left: ''
-    letters: IEST
-    right: +
-    phonemes: [IH2, S, T]
+    letters: I
+    right: GH
+    phonemes: [AY0]
+  - left: '(?:KS|S|M|T) '
+    letters: I
+    right: ' '
+    phonemes: [IY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: I
+    right: ' '
+    phonemes: [AY0]
   - left: ''
-    letters: IETT
-    right: '#'
-    phonemes: [IY0, EH1, T]
+    letters: I
+    right: ' '
+    phonemes: [IY0]
   - left: ''
-    letters: IST
-    right: +
-    phonemes: [IH2, S, T]
+    letters: I
+    right: '[BCDFGHJKLMNPQRSTVWXZ][LR][AEIOU] '
+    phonemes: [AY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: I
+    right: '(?:TH|N)E '
+    phonemes: [AY0]
   - left: ''
-    letters: IEAU
-    right: '#'
-    phonemes: [IY0, OW0]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: IBILITY
-    right: +
-    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
-  - left: C(?:U|A|R|N)
-    letters: IBILITY
-    right: +
-    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
-  - left: M(?:A|U)
-    letters: IBILITY
-    right: +
-    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+    letters: I
+    right: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    phonemes: [IH1]
   - left: ''
-    letters: IBILITY
-    right: +
-    phonemes: [IH2, B, IH1, L, IH2, T, IY2]
+    letters: I
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [IH1]
   - left: ''
-    letters: ICIENCY
-    right: +
-    phonemes: [IH1, SH, IH2, N, S, IY2]
+    letters: I
+    right: '[BCDFGHJKLMNPQRSTVWXZ]I '
+    phonemes: [IH1]
   - left: ''
-    letters: IALLY
-    right: +
-    phonemes: [IY2, EL, IY2]
+    letters: I
+    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    phonemes: [AY1]
   - left: ''
-    letters: ILITY
-    right: +
-    phonemes: [IH1, L, IH2, T, IY2]
-  - left: R(?:U|I|A)[BCDFGHJKLMNPQRSTVWXZ]
-    letters: IBLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: C(?:U|A|R|N)
-    letters: IBLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: M(?:A|U)
-    letters: IBLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: ''
-    letters: IBLY
-    right: +
-    phonemes: [AH2, B, L, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: IETY
-    right: +
-    phonemes: [AY1, AH2, T, IY2]
-  - left: (?:R|N|T)[AEIOU]
-    letters: IFY
-    right: +
-    phonemes: [IH2, F, AY2]
-  - left: ''
-    letters: IFY
-    right: +
-    phonemes: [IH2, F, AY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ILY
-    right: +
-    phonemes: [IH0, L, IY0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: ILY
-    right: +
-    phonemes: [EL, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ITY
-    right: +
-    phonemes: [IH0, T, IY0]
-  - left: ''
-    letters: ITY
-    right: +
-    phonemes: [IH2, T, IY2]
-  - left: ''
-    letters: IEWICZ
-    right: '#'
-    phonemes: [AH2, V, IH0, CH]
+    letters: I
+    right: ''
+    phonemes: [IH1]
   J:
   - left: ''
     letters: J
@@ -3052,207 +3051,219 @@ rules_by_letter:
     phonemes: [JH]
   K:
   - left: ''
+    letters: KIEWICZ
+    right: ' '
+    phonemes: [K, AH2, V, IH2, CH]
+  - left: ''
     letters: KOPF
-    right: '#'
+    right: ' '
     phonemes: [K, AO0, P, F]
-  - left: '#'
-    letters: KH
-    right: ''
-    phonemes: [K]
-  - left: ''
-    letters: KH
-    right: '#'
-    phonemes: [K]
-  - left: ''
-    letters: K
-    right: ''
-    phonemes: [K]
   - left: ''
     letters: KILL
-    right: '#'
+    right: ' '
     phonemes: [K, IH0, L]
-  - left: +
-    letters: KN
-    right: ''
-    phonemes: [N]
   - left: ''
     letters: KILO
     right: ''
-    phonemes: [K, IH0, L, AH0]
+    phonemes: [K, IH0, L, AA1]
+  - left: ' '
+    letters: KRZ
+    right: ''
+    phonemes: [K, R]
   - left: ''
     letters: KEY
     right: ''
     phonemes: [K, IY0]
-  - left: ''
-    letters: KIEWICZ
-    right: '#'
-    phonemes: [K, AH2, V, IH2, CH]
-  - left: '#'
-    letters: KRZ
+  - left: ' '
+    letters: KH
     right: ''
-    phonemes: [K, R]
+    phonemes: [K]
+  - left: ''
+    letters: KH
+    right: ' '
+    phonemes: [K]
+  - left: ' '
+    letters: KN
+    right: ''
+    phonemes: [N]
+  - left: ''
+    letters: K
+    right: ''
+    phonemes: [K]
   L:
   - left: ''
-    letters: LOGIC
-    right: +
-    phonemes: [L, AA1, JH, IH2, K]
+    letters: LATERAL
+    right: ' '
+    phonemes: [L, AE1, T, ER2, EL]
   - left: ''
-    letters: LAND
-    right: ''
-    phonemes: [L, AE2, N, D]
-  - left: U
-    letters: LD
-    right: +
-    phonemes: [D]
+    letters: LOGICAL
+    right: ' '
+    phonemes: [L, AA1, JH, IH2, K, EL]
   - left: ''
     letters: LOGIZE
-    right: +
+    right: ' '
     phonemes: [L, AH2, JH, AY2, Z]
   - left: ''
+    letters: LOGIST
+    right: ' '
+    phonemes: [L, AH2, JH, IH2, S, T]
+  - left: ''
+    letters: LOGIC
+    right: ' '
+    phonemes: [L, AA1, JH, IH2, K]
+  - left: ''
     letters: LITRE
-    right: +
+    right: ' '
     phonemes: [L, IY0, T, ER2]
-  - left: ''
-    letters: LIFE
-    right: '[ABCDEFGHIJKLMNOPQSTUVWXYZ]'
-    phonemes: [L, AY2, F]
-  - left: ''
-    letters: LIKE
-    right: ''
-    phonemes: [L, AY2, K]
   - left: '[AEIOU]'
     letters: LOGUE
-    right: +
+    right: ' '
     phonemes: [L, AO0, G]
-  - left: '[AEIOU]'
-    letters: LOG
-    right: '#'
-    phonemes: [L, AO0, G]
+  - left: ''
+    letters: LITER
+    right: ' '
+    phonemes: [L, IY0, T, ER2]
+  - left: ''
+    letters: LYSIS
+    right: ' '
+    phonemes: [L, IH2, S, IH2, S]
   - left: ''
     letters: LAUGH
     right: ''
     phonemes: [L, AE0, F]
-  - left: (?:A|O)
-    letters: LK
-    right: +
-    phonemes: [K]
-  - left: ''
-    letters: LATERAL
-    right: +
-    phonemes: [L, AE1, T, ER2, EL]
-  - left: ''
-    letters: LOGICAL
-    right: +
-    phonemes: [L, AA1, JH, IH2, K, EL]
   - left: ''
     letters: LEGAL
     right: ''
     phonemes: [L, IY0, G, EL]
-  - left: '[BCDFGHJKMNPQRSTVWXZ]'
-    letters: L
-    right: E+
-    phonemes: [EL]
-  - left: ''
-    letters: L
-    right: ''
-    phonemes: [L]
-  - left: (?:A|O)
-    letters: LM
-    right: +
-    phonemes: [M]
-  - left: ''
-    letters: LEIN
-    right: ''
-    phonemes: [L, AY0, N]
-  - left: ''
-    letters: LIAN
-    right: +
-    phonemes: [L, Y, AH1, N]
   - left: ''
     letters: LITHO
     right: ''
     phonemes: [L, IH2, TH, AA2]
   - left: ''
-    letters: LITER
-    right: +
-    phonemes: [L, IY0, T, ER2]
-  - left: ''
-    letters: LYSIS
-    right: +
-    phonemes: [L, IH2, S, IH2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: LESS
-    right: +
-    phonemes: [L, EH0, S]
-  - left: ''
-    letters: LESS
-    right: +
-    phonemes: [L, IH2, S]
-  - left: ''
-    letters: LOGIST
-    right: +
-    phonemes: [L, AH2, JH, IH2, S, T]
-  - left: ''
     letters: LIGHT
     right: ''
     phonemes: [L, AY0, T]
   - left: ''
-    letters: LET
-    right: +
-    phonemes: [L, EH2, T]
+    letters: LIFE
+    right: '[ABCDEFGHIJKLMNOPQSTUVWXYZ]'
+    phonemes: [L, AY2, F]
+  - left: ''
+    letters: LIAN
+    right: ' '
+    phonemes: [L, Y, AH1, N]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: LESS
+    right: ' '
+    phonemes: [L, EH0, S]
+  - left: ''
+    letters: LESS
+    right: ' '
+    phonemes: [L, IH2, S]
   - left: ''
     letters: LOGY
-    right: +
+    right: ' '
     phonemes: [L, AH2, JH, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+  - left: ''
+    letters: LAND
+    right: ''
+    phonemes: [L, AE2, N, D]
+  - left: ''
+    letters: LIKE
+    right: ''
+    phonemes: [L, AY2, K]
+  - left: ''
+    letters: LEIN
+    right: ''
+    phonemes: [L, AY0, N]
+  - left: '[AEIOU]'
+    letters: LOG
+    right: ' '
+    phonemes: [L, AO0, G]
+  - left: ''
+    letters: LET
+    right: ' '
+    phonemes: [L, EH2, T]
+  - left: U
+    letters: LD
+    right: ' '
+    phonemes: [D]
+  - left: (?:A|O)
+    letters: LK
+    right: ' '
+    phonemes: [K]
+  - left: (?:A|O)
+    letters: LM
+    right: ' '
+    phonemes: [M]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: LY
-    right: +
+    right: ' '
     phonemes: [L, AY0]
   - left: '[ABCDEFGHIJKMNOPQRSTUVWXYZ]'
     letters: LY
-    right: +
+    right: ' '
     phonemes: [L, IY2]
+  - left: '[BCDFGHJKMNPQRSTVWXZ]'
+    letters: L
+    right: 'E '
+    phonemes: [EL]
+  - left: ''
+    letters: L
+    right: ''
+    phonemes: [L]
   M:
   - left: ''
-    letters: MEGA
-    right: ''
-    phonemes: [M, EH0, G, AH0]
-  - left: ''
-    letters: MB
-    right: '#'
-    phonemes: [M]
-  - left: ''
-    letters: METRIC
-    right: +
-    phonemes: [M, EH1, T, R, IH2, K]
-  - left: '#'
-    letters: MAC
-    right: ''
-    phonemes: [M, IH0, K]
-  - left: '#'
-    letters: MC
-    right: (?:E|I)
-    phonemes: [M, AE0, K]
-  - left: '#'
-    letters: MC
-    right: ''
-    phonemes: [M, IH0, K]
+    letters: MENTALLY
+    right: ' '
+    phonemes: [M, EH1, N, T, EL, IY2]
   - left: ''
     letters: MACHINE
     right: ''
     phonemes: [M, AH2, SH, IY1, N]
   - left: ''
+    letters: MEISTER
+    right: ''
+    phonemes: [M, AY0, S, T, ER2]
+  - left: ''
+    letters: METRIC
+    right: ' '
+    phonemes: [M, EH1, T, R, IH2, K]
+  - left: ''
+    letters: MENTAL
+    right: ' '
+    phonemes: [M, EH1, N, T, EL]
+  - left: ''
+    letters: MASTER
+    right: ' '
+    phonemes: [M, AE1, S, T, ER2]
+  - left: ''
     letters: MIDDLE
     right: ''
     phonemes: [M, IH0, D, EL]
   - left: ''
+    letters: MECHAN
+    right: ''
+    phonemes: [M, EH1, K, AE1, N]
+  - left: ''
     letters: METRE
-    right: +
+    right: ' '
     phonemes: [M, IY2, T, AH2, R]
   - left: ''
-    letters: MORE
-    right: +
-    phonemes: [M, OW0, R]
+    letters: MYCIN
+    right: ' '
+    phonemes: [M, AY1, S, IH2, N]
+  - left: ''
+    letters: MAKER
+    right: ' '
+    phonemes: [M, EY2, K, ER2]
+  - left: ''
+    letters: METER
+    right: ' '
+    phonemes: [M, IY2, T, AH2, R]
+  - left: ''
+    letters: METRY
+    right: ' '
+    phonemes: [M, IH2, T, R, IY2]
   - left: ''
     letters: MILLI
     right: ''
@@ -3260,51 +3271,7 @@ rules_by_letter:
   - left: ''
     letters: MULTI
     right: ''
-    phonemes: [M, AH1, L, T, IH0]
-  - left: ''
-    letters: MENTAL
-    right: +
-    phonemes: [M, EH1, N, T, EL]
-  - left: ''
-    letters: MAIL
-    right: +
-    phonemes: [M, EY0, L]
-  - left: (?:HT|S)
-    letters: M
-    right: +
-    phonemes: [AH0, M]
-  - left: ''
-    letters: M
-    right: ''
-    phonemes: [M]
-  - left: ''
-    letters: MECHAN
-    right: ''
-    phonemes: [M, IH0, K, AH0, N]
-  - left: ''
-    letters: MYCIN
-    right: '#'
-    phonemes: [M, AY1, S, IH2, N]
-  - left: ''
-    letters: MANN
-    right: '#'
-    phonemes: [M, AH0, N]
-  - left: ''
-    letters: MAN
-    right: +
-    phonemes: [M, AE2, N]
-  - left: ''
-    letters: MEN
-    right: +
-    phonemes: [M, EH2, N]
-  - left: '#'
-    letters: MN
-    right: ''
-    phonemes: [N]
-  - left: ''
-    letters: MN
-    right: '#'
-    phonemes: [M]
+    phonemes: [M, AH1, L, T, IY1]
   - left: ''
     letters: MACRO
     right: ''
@@ -3312,39 +3279,15 @@ rules_by_letter:
   - left: ''
     letters: METRO
     right: ''
-    phonemes: [M, EH0, T, R, AH0]
+    phonemes: [M, EH0, T, R, AA1]
   - left: ''
     letters: MICRO
     right: ''
-    phonemes: [M, AY0, K, R, OW0]
-  - left: ''
-    letters: MONO
-    right: ''
-    phonemes: [M, AH0, N, AH0]
-  - left: ''
-    letters: MOTO
-    right: '#'
-    phonemes: [M, OW1, T, OW2]
-  - left: ''
-    letters: MEISTER
-    right: ''
-    phonemes: [M, AY0, S, T, ER2]
-  - left: ''
-    letters: MASTER
-    right: +
-    phonemes: [M, AE1, S, T, ER2]
-  - left: ''
-    letters: MAKER
-    right: +
-    phonemes: [M, EY2, K, ER2]
+    phonemes: [M, AY0, K, R, AA1]
   - left: ''
     letters: MEIER
     right: ''
     phonemes: [M, AY0, ER0]
-  - left: ''
-    letters: METER
-    right: +
-    phonemes: [M, IY2, T, AH2, R]
   - left: ''
     letters: MEYER
     right: ''
@@ -3353,67 +3296,91 @@ rules_by_letter:
     letters: MOTOR
     right: ''
     phonemes: [M, OW0, T, ER2]
-  - left: '#'
-    letters: MIS
-    right: ''
-    phonemes: [M, IH0, S]
+  - left: ''
+    letters: MORE
+    right: ' '
+    phonemes: [M, OW0, R]
+  - left: ''
+    letters: MAIL
+    right: ' '
+    phonemes: [M, EY0, L]
+  - left: ''
+    letters: MANN
+    right: ' '
+    phonemes: [M, AE1, N]
+  - left: ''
+    letters: MOTO
+    right: ' '
+    phonemes: [M, OW1, T, OW2]
   - left: ELP
     letters: MENT
-    right: +
+    right: ' '
     phonemes: [M, AH0, N, T]
   - left: ''
     letters: MENT
-    right: +
+    right: ' '
     phonemes: [M, EH2, N, T]
   - left: ''
-    letters: MENTALLY
-    right: +
-    phonemes: [M, EH1, N, T, EL, IY2]
-  - left: ''
-    letters: METRY
-    right: +
-    phonemes: [M, IH2, T, R, IY2]
-  - left: ''
     letters: MONY
-    right: +
+    right: ' '
     phonemes: [M, OW0, N, IY2]
+  - left: ''
+    letters: MEGA
+    right: ''
+    phonemes: [M, EH0, G, AH0]
+  - left: ''
+    letters: MONO
+    right: ''
+    phonemes: [M, AA1, N, AA1]
+  - left: ' '
+    letters: MAC
+    right: ''
+    phonemes: [M, IH0, K]
+  - left: ''
+    letters: MAN
+    right: ' '
+    phonemes: [M, AE2, N]
+  - left: ''
+    letters: MEN
+    right: ' '
+    phonemes: [M, EH2, N]
+  - left: ' '
+    letters: MIS
+    right: ''
+    phonemes: [M, IH1, S]
+  - left: ''
+    letters: MB
+    right: ' '
+    phonemes: [M]
+  - left: ' '
+    letters: MC
+    right: (?:E|I)
+    phonemes: [M, AE0, K]
+  - left: ' '
+    letters: MC
+    right: ''
+    phonemes: [M, IH0, K]
+  - left: ' '
+    letters: MN
+    right: ''
+    phonemes: [N]
+  - left: ''
+    letters: MN
+    right: ' '
+    phonemes: [M]
+  - left: (?:HT|S)
+    letters: M
+    right: ' '
+    phonemes: [AH0, M]
+  - left: ''
+    letters: M
+    right: ''
+    phonemes: [M]
   N:
-  - left: ''
-    letters: NOTE
-    right: ''
-    phonemes: [N, OW2, T]
-  - left: ''
-    letters: NGE
-    right: +
-    phonemes: [N, JH]
-  - left: ''
-    letters: NG
-    right: (?:+|TH)
-    phonemes: [NG]
-  - left: ''
-    letters: NG
-    right: ''
-    phonemes: [NG, G]
-  - left: ''
-    letters: NECK
-    right: +
-    phonemes: [N, EH2, K]
-  - left: ''
-    letters: NK
-    right: ''
-    phonemes: [NG, K]
   - left: ''
     letters: NATIONAL
     right: ''
     phonemes: [N, AE0, SH, IH0, N, AH0, L]
-  - left: '#'
-    letters: NON
-    right: ''
-    phonemes: [N, AA0, N]
-  - left: ''
-    letters: N
-    right: ''
-    phonemes: [N]
   - left: ''
     letters: NUCLEO
     right: ''
@@ -3422,131 +3389,127 @@ rules_by_letter:
     letters: NITRO
     right: ''
     phonemes: [N, AY0, T, R, OW0]
-  - left: '#'
-    letters: NEO
-    right: ''
-    phonemes: [N, IY0, OW0]
   - left: ''
     letters: NUMER
     right: ''
-    phonemes: [N, UW0, M, AH0, R]
+    phonemes: [N, UW0, M, EY1, R]
+  - left: ''
+    letters: NECK
+    right: ' '
+    phonemes: [N, EH2, K]
   - left: ''
     letters: NESS
-    right: +
+    right: ' '
     phonemes: [N, IH2, S]
+  - left: ''
+    letters: NOTE
+    right: ''
+    phonemes: [N, OW2, T]
   - left: ''
     letters: NEWS
     right: ''
     phonemes: [N, UW0, Z]
   - left: ''
+    letters: NGE
+    right: ' '
+    phonemes: [N, JH]
+  - left: ' '
+    letters: NON
+    right: ''
+    phonemes: [N, AA0, N]
+  - left: ' '
+    letters: NEO
+    right: ''
+    phonemes: [N, IY0, AA1]
+  - left: ''
     letters: NUT
-    right: +
+    right: ' '
     phonemes: [N, AH2, T]
+  - left: ''
+    letters: NG
+    right: '(?: |TH)'
+    phonemes: [NG]
+  - left: ''
+    letters: NG
+    right: ''
+    phonemes: [NG, G]
+  - left: ''
+    letters: NK
+    right: ''
+    phonemes: [NG, K]
+  - left: ''
+    letters: N
+    right: ''
+    phonemes: [N]
   O:
   - left: ''
-    letters: OEA
+    letters: OLENCE
+    right: ' '
+    phonemes: [EL, AH2, N, S]
+  - left: ''
+    letters: OCRACY
+    right: ' '
+    phonemes: [AA1, K, R, AH2, S, IY2]
+  - left: ''
+    letters: OMETER
     right: ''
-    phonemes: [IY1, AH2]
-  - left: ''
-    letters: OGA
-    right: '#'
-    phonemes: [OW1, G, AH2]
-  - left: ''
-    letters: OMA
-    right: +
-    phonemes: [OW1, M, AH2]
-  - left: ''
-    letters: OSA
-    right: '#'
-    phonemes: [OW1, S, AH2]
-  - left: ''
-    letters: OA
-    right: '#'
-    phonemes: [OW0, AH0]
-  - left: ''
-    letters: OA
-    right: ''
-    phonemes: [OW0]
+    phonemes: [AA1, M, AH2, T, ER2]
   - left: ''
     letters: OSTIC
-    right: +
+    right: ' '
     phonemes: [AA1, S, T, IH2, K]
   - left: ''
+    letters: OWSKI
+    right: ' '
+    phonemes: [AO1, F, S, K, IY0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: OTHER
+    right: ''
+    phonemes: [AH0, DH, ER0]
+  - left: ''
+    letters: OROUS
+    right: ' '
+    phonemes: [ER2, AH2, S]
+  - left: ''
+    letters: OLENT
+    right: ' '
+    phonemes: [EL, AH2, N, T]
+  - left: ''
+    letters: OCITY
+    right: ' '
+    phonemes: [AA1, S, IH2, T, IY2]
+  - left: ''
+    letters: OSITY
+    right: ' '
+    phonemes: [AA1, S, IH2, T, IY2]
+  - left: ''
+    letters: OTION
+    right: ''
+    phonemes: [OW1, SH, IH2, N]
+  - left: ''
+    letters: ORTHO
+    right: ''
+    phonemes: [AO0, R, TH, AO1]
+  - left: ''
     letters: OBIC
-    right: +
+    right: ' '
     phonemes: [OW1, B, IH2, K]
   - left: ''
     letters: OTIC
-    right: +
+    right: ' '
     phonemes: [AA1, T, IH2, K]
   - left: ''
-    letters: OIC
-    right: +
-    phonemes: [OW1, IH2, K]
-  - left: ''
-    letters: OID
-    right: +
-    phonemes: [OY0, D]
-  - left: ''
-    letters: OLENCE
-    right: +
-    phonemes: [EL, AH2, N, S]
-  - left: ''
     letters: OIRE
-    right: +
+    right: ' '
     phonemes: [W, AA0, R]
   - left: ''
     letters: OTTE
-    right: '#'
+    right: ' '
     phonemes: [AO1, T]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
-    letters: ODE
-    right: +
-    phonemes: [OW2, D]
   - left: '[AEIOU]'
     letters: OGUE
-    right: +
+    right: ' '
     phonemes: [AO0, G]
-  - left: ''
-    letters: OIE
-    right: '#'
-    phonemes: [W, AA0]
-  - left: +
-    letters: ONE
-    right: +
-    phonemes: [W, AH2, N]
-  - left: (?:NG|I|C|T|M|D)
-    letters: OSE
-    right: +
-    phonemes: [OW2, S]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*+'
-    letters: OTE
-    right: +
-    phonemes: [OW1, T]
-  - left: C#
-    letters: OE
-    right: ''
-    phonemes: [OW0, IH0]
-  - left: P#
-    letters: OE
-    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    phonemes: [OW0, AH0]
-  - left: HS
-    letters: OE
-    right: ''
-    phonemes: [UW0]
-  - left: F
-    letters: OE
-    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    phonemes: [IY0]
-  - left: ''
-    letters: OE
-    right: ''
-    phonemes: [OW0]
-  - left: ''
-    letters: 'OFF'
-    right: +
-    phonemes: [AO2, F]
   - left: RH
     letters: OUGH
     right: ''
@@ -3555,11 +3518,11 @@ rules_by_letter:
     letters: OUGH
     right: ''
     phonemes: [AH0, P]
-  - left: (?:C|RT)#
+  - left: '(?:C|RT) '
     letters: OUGH
     right: ''
     phonemes: [AO0, F]
-  - left: (?:N|R#|T|LS)
+  - left: (?:N|R |T|LS)
     letters: OUGH
     right: ''
     phonemes: [AH0, F]
@@ -3568,73 +3531,193 @@ rules_by_letter:
     right: ''
     phonemes: [OW0]
   - left: ''
+    letters: OLLI
+    right: ' '
+    phonemes: [OW1, L, IY2]
+  - left: ''
+    letters: OSKI
+    right: ' '
+    phonemes: [AW1, S, K, IY0]
+  - left: ' '
+    letters: OVER
+    right: ''
+    phonemes: [OW0, V, ER0]
+  - left: ''
+    letters: OSIS
+    right: ' '
+    phonemes: [OW1, S, IH2, S]
+  - left: ''
     letters: OUGH
     right: ''
     phonemes: [AW0]
   - left: ''
-    letters: OWSKI
-    right: '#'
-    phonemes: [AO1, F, S, K, IY0]
-  - left: ''
-    letters: OLLI
-    right: '#'
-    phonemes: [OW1, L, IY2]
-  - left: ''
     letters: OMNI
     right: ''
-    phonemes: [AA0, M, N, IH0]
+    phonemes: [AA0, M, N, IH1]
   - left: ''
-    letters: OSKI
-    right: '#'
-    phonemes: [AW1, S, K, IY0]
+    letters: OGA
+    right: ' '
+    phonemes: [OW1, G, AH2]
+  - left: ''
+    letters: OMA
+    right: ' '
+    phonemes: [OW1, M, AH2]
+  - left: ''
+    letters: OSA
+    right: ' '
+    phonemes: [OW1, S, AH2]
+  - left: ''
+    letters: OIC
+    right: ' '
+    phonemes: [OW1, IH2, K]
+  - left: ''
+    letters: OID
+    right: ' '
+    phonemes: [OY0, D]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
+    letters: ODE
+    right: ' '
+    phonemes: [OW2, D]
+  - left: ''
+    letters: OIE
+    right: ' '
+    phonemes: [W, AA0]
+  - left: ' '
+    letters: ONE
+    right: ' '
+    phonemes: [W, AH2, N]
+  - left: (?:NG|I|C|T|M|D)
+    letters: OSE
+    right: ' '
+    phonemes: [OW2, S]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: OTE
+    right: ' '
+    phonemes: [OW1, T]
+  - left: ''
+    letters: 'OFF'
+    right: ' '
+    phonemes: [AO2, F]
   - left: ''
     letters: ONI
-    right: '#'
+    right: ' '
     phonemes: [OW1, N, IY2]
   - left: ''
     letters: OSI
-    right: '#'
+    right: ' '
     phonemes: [OW1, S, IY2]
   - left: ''
-    letters: OI
-    right: ''
-    phonemes: [OY0]
-  - left: ''
     letters: OCK
-    right: +
+    right: ' '
     phonemes: [AO2, K]
-  - left: RT
-    letters: OL
-    right: +
-    phonemes: [OW1, L]
-  - left: (?:T|B|D)
-    letters: OL
-    right: '#'
-    phonemes: [AH0, L]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: OL
-    right: '#'
-    phonemes: [AO0, L]
-  - left: ''
-    letters: OTION
-    right: ''
-    phonemes: [OW1, SH, IH2, N]
   - left: ''
     letters: OON
-    right: +
+    right: ' '
     phonemes: [UW1, N]
   - left: ''
-    letters: ORTHO
-    right: ''
-    phonemes: [AO0, R, TH, AH0]
-  - left: ''
     letters: OTO
-    right: '#'
+    right: ' '
     phonemes: [OW1, T, OW2]
   - left: ''
     letters: OYO
-    right: '#'
+    right: ' '
     phonemes: [OW1, Y, OW2]
+  - left: ''
+    letters: OIR
+    right: ' '
+    phonemes: [W, AA0, R]
+  - left: (?:V|B|D|P)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
+    letters: OUR
+    right: ' '
+    phonemes: [ER2]
+  - left: '[AEIOU]'
+    letters: OUR
+    right: ' '
+    phonemes: [ER2]
+  - left: ''
+    letters: OIS
+    right: ' '
+    phonemes: [W, AA0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: OSS
+    right: ' '
+    phonemes: [AO2, S]
+  - left: ''
+    letters: OUS
+    right: ' '
+    phonemes: [AH2, S]
+  - left: ' '
+    letters: OUT
+    right: ''
+    phonemes: [AW0, T]
+  - left: ''
+    letters: OIX
+    right: ' '
+    phonemes: [W, AA0]
+  - left: ''
+    letters: OUX
+    right: ' '
+    phonemes: [UW1]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: OMY
+    right: ' '
+    phonemes: [AH2, M, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ONY
+    right: ' '
+    phonemes: [OW0, N, IY2]
+  - left: ''
+    letters: ONY
+    right: ' '
+    phonemes: [AH2, N, IY2]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: ORY
+    right: ' '
+    phonemes: [OW0, R, IY0]
+  - left: T[BCDFGHJKLMNPQRSTVWXZ]
+    letters: ORY
+    right: ' '
+    phonemes: [OW2, R, IY0]
+  - left: ''
+    letters: OEA
+    right: ''
+    phonemes: [IY1, AH2]
+  - left: ''
+    letters: ORY
+    right: ''
+    phonemes: [ER2, IY0]
+  - left: ''
+    letters: OA
+    right: ' '
+    phonemes: [OW0, AH0]
+  - left: 'C '
+    letters: OE
+    right: ''
+    phonemes: [OW0, IY1]
+  - left: 'P '
+    letters: OE
+    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    phonemes: [OW0, EH1]
+  - left: HS
+    letters: OE
+    right: ''
+    phonemes: [UW0]
+  - left: F
+    letters: OE
+    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    phonemes: [IY0]
+  - left: RT
+    letters: OL
+    right: ' '
+    phonemes: [OW1, L]
+  - left: (?:T|B|D)
+    letters: OL
+    right: ' '
+    phonemes: [AH0, L]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: OL
+    right: ' '
+    phonemes: [AO0, L]
   - left: (?:LF|D)
     letters: OO
     right: R
@@ -3645,219 +3728,35 @@ rules_by_letter:
     phonemes: [AH0]
   - left: (?:F|S)
     letters: OO
-    right: T+
+    right: 'T '
     phonemes: [UH0]
   - left: ''
     letters: OO
-    right: (?:K)+
+    right: '(?:K) '
     phonemes: [UH0]
   - left: (?:TS|W|G|H)
     letters: OO
-    right: D+
+    right: 'D '
     phonemes: [UH0]
   - left: (?:H|W)
     letters: OO
-    right: (?:F|L)+
+    right: '(?:F|L) '
     phonemes: [UH0]
-  - left: ''
-    letters: OO
-    right: ''
-    phonemes: [UW0]
-  - left: +
-    letters: O
-    right: N(?:C)?E+
-    phonemes: [W, AH0]
-  - left: (?:D|W)#
-    letters: O
-    right: N'T#
-    phonemes: [OW0]
-  - left: W
-    letters: O
-    right: L(?:F|V)
-    phonemes: [UH0]
-  - left: ''
-    letters: O
-    right: (?:LV|X)
-    phonemes: [AA0]
-  - left: (?:N|P|R|T)
-    letters: O
-    right: LL+
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: L[BCDFGHJKMNPQRSTVWXZ]
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: R[AEIOU](?:[AEIOU]|#|+)
-    phonemes: [AH0]
-  - left: '#'
-    letters: O
-    right: R
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]|#|+)
-    phonemes: [AH0]
-  - left: (?:HG|M|H|P)
-    letters: O
-    right: ST+
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: NG+
-    phonemes: [AO0]
-  - left: (?:L|B|D|H|G)
-    letters: O
-    right: VE
-    phonemes: [AH0]
-  - left: (?:C|S)+
-    letters: O
-    right: ME+
-    phonemes: [AH0]
-  - left: (?:D|N)+
-    letters: O
-    right: NE+
-    phonemes: [AH0]
-  - left: (?:M|RP)
-    letters: O
-    right: VE+
-    phonemes: [UW0]
-  - left: (?:L#|HW)
-    letters: O
-    right: (?:M|SE)+
-    phonemes: [UW0]
-  - left: (?:T|W)
-    letters: O
-    right: MB+
-    phonemes: [UW0]
-  - left: (?:WT|D|T)+
-    letters: O
-    right: +
-    phonemes: [UW0]
-  - left: (?:RT|B)
-    letters: O
-    right: TH+
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: DG
-    phonemes: [AA0]
-  - left: ''
-    letters: O
-    right: STLE+
-    phonemes: [AA0]
-  - left: ''
-    letters: O
-    right: GUE+
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: '[BCDFGHJKLMNPQRSTVWXZ]LE+'
-    phonemes: [OW0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: O
-    right: +
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: +
-    phonemes: [OW0]
-  - left: ''
-    letters: O
-    right: '[MN][BCDFGHJKLMNPQRSTVWXZ][AEIOU]+'
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ]+'
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: (?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU]+
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    phonemes: [AH0]
-  - left: ''
-    letters: O
-    right: ''
-    phonemes: [AH0]
-  - left: ''
-    letters: OMETER
-    right: ''
-    phonemes: [AA1, M, AH2, T, ER2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]*+'
-    letters: OTHER
-    right: ''
-    phonemes: [AH0, DH, ER0]
-  - left: '#'
-    letters: OVER
-    right: ''
-    phonemes: [OW0, V, ER0]
-  - left: ''
-    letters: OIR
-    right: +
-    phonemes: [W, AA0, R]
-  - left: (?:V|B|D|P)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
-    letters: OUR
-    right: +
-    phonemes: [ER2]
-  - left: '[AEIOU]'
-    letters: OUR
-    right: +
-    phonemes: [ER2]
   - left: (?:P|Z|D|R)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
     letters: OR
-    right: +
+    right: ' '
     phonemes: [ER2]
   - left: (?:J|B|V|T)[AEIOU][BCDFGHJKLMNPQRSTVWXZ]
     letters: OR
-    right: +
+    right: ' '
     phonemes: [ER2]
   - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
     letters: OR
-    right: +
+    right: ' '
     phonemes: [OW2, R]
   - left: ''
-    letters: OROUS
-    right: +
-    phonemes: [ER2, AH2, S]
-  - left: ''
-    letters: OSIS
-    right: +
-    phonemes: [OW1, S, IH2, S]
-  - left: ''
-    letters: OIS
-    right: '#'
-    phonemes: [W, AA0]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: OSS
-    right: +
-    phonemes: [AO2, S]
-  - left: ''
-    letters: OUS
-    right: +
-    phonemes: [AH2, S]
-  - left: ''
-    letters: OLENT
-    right: +
-    phonemes: [EL, AH2, N, T]
-  - left: '#'
-    letters: OUT
-    right: ''
-    phonemes: [AW0, T]
-  - left: ''
     letters: OU
-    right: '#'
+    right: ' '
     phonemes: [UW2]
   - left: ''
     letters: OU
@@ -3865,15 +3764,15 @@ rules_by_letter:
     phonemes: [UH0]
   - left: T
     letters: OU
-    right: R+
+    right: 'R '
     phonemes: [UW0]
   - left: ''
     letters: OU
-    right: +
+    right: ' '
     phonemes: [UW0]
   - left: (?:Y|C)
     letters: OU
-    right: TH+
+    right: 'TH '
     phonemes: [UW0]
   - left: (?:C|F|G|M|P|Y|S)
     letters: OU
@@ -3881,12 +3780,12 @@ rules_by_letter:
     phonemes: [OW0]
   - left: ''
     letters: OU
-    right: R[BDFGHJKLMNPQRSTVWXZ](?:[AEIOU]|+)
+    right: R[BDFGHJKLMNPQRSTVWXZ](?:[AEIOU]| )
     phonemes: [AH0]
   - left: ''
     letters: OU
     right: (?:B|P)LE
-    phonemes: [AH0]
+    phonemes: [AH1]
   - left: ''
     letters: OU
     right: P
@@ -3911,15 +3810,11 @@ rules_by_letter:
     letters: OU
     right: GHT
     phonemes: [AO0]
-  - left: ''
-    letters: OU
-    right: ''
-    phonemes: [AW0]
-  - left: R(?:HT|G|#)
+  - left: R(?:HT|G| )
     letters: OW
     right: ''
     phonemes: [OW0]
-  - left: L(?:B|S|#)
+  - left: L(?:B|S| )
     letters: OW
     right: ''
     phonemes: [OW0]
@@ -3933,101 +3828,281 @@ rules_by_letter:
     phonemes: [OW0]
   - left: (?:[BCDFGHJKLMNPQRSTVWXZ]){1,3}[AEIOU]
     letters: OW
-    right: +
+    right: ' '
     phonemes: [OW0]
+  - left: ' '
+    letters: OX
+    right: ''
+    phonemes: [AA1, K, S]
+  - left: ''
+    letters: OA
+    right: ''
+    phonemes: [OW0]
+  - left: ''
+    letters: OE
+    right: ''
+    phonemes: [OW0]
+  - left: ''
+    letters: OI
+    right: ''
+    phonemes: [OY0]
+  - left: ''
+    letters: OO
+    right: ''
+    phonemes: [UW0]
+  - left: ''
+    letters: OU
+    right: ''
+    phonemes: [AW0]
   - left: ''
     letters: OW
     right: ''
     phonemes: [AW0]
   - left: ''
-    letters: OIX
-    right: '#'
-    phonemes: [W, AA0]
-  - left: ''
-    letters: OUX
-    right: '#'
-    phonemes: [UW1]
-  - left: '#'
-    letters: OX
-    right: ''
-    phonemes: [AH0, K, S]
-  - left: ''
-    letters: OCRACY
-    right: +
-    phonemes: [AA1, K, R, AH2, S, IY2]
-  - left: ''
-    letters: OCITY
-    right: +
-    phonemes: [AA1, S, IH2, T, IY2]
-  - left: ''
-    letters: OSITY
-    right: +
-    phonemes: [AA1, S, IH2, T, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: OMY
-    right: +
-    phonemes: [AH2, M, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ONY
-    right: +
-    phonemes: [OW0, N, IY2]
-  - left: ''
-    letters: ONY
-    right: +
-    phonemes: [AH2, N, IY2]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
-    letters: ORY
-    right: +
-    phonemes: [OW0, R, IY0]
-  - left: T[BCDFGHJKLMNPQRSTVWXZ]
-    letters: ORY
-    right: +
-    phonemes: [OW2, R, IY0]
-  - left: ''
-    letters: ORY
-    right: ''
-    phonemes: [ER2, IY0]
-  - left: ''
     letters: OY
     right: ''
     phonemes: [OY0]
+  - left: ' '
+    letters: O
+    right: 'N(?:C)?E '
+    phonemes: [W, AH0]
+  - left: '(?:D|W) '
+    letters: O
+    right: 'N''T '
+    phonemes: [OW0]
+  - left: W
+    letters: O
+    right: L(?:F|V)
+    phonemes: [UH0]
+  - left: ''
+    letters: O
+    right: (?:LV|X)
+    phonemes: [AA0]
+  - left: (?:N|P|R|T)
+    letters: O
+    right: 'LL '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: L[BCDFGHJKMNPQRSTVWXZ]
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: R[AEIOU](?:[AEIOU]| | )
+    phonemes: [OW1]
+  - left: ' '
+    letters: O
+    right: R
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
+    phonemes: [AO1]
+  - left: ''
+    letters: O
+    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]| | )
+    phonemes: [AO1]
+  - left: (?:HG|M|H|P)
+    letters: O
+    right: 'ST '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: 'NG '
+    phonemes: [AO0]
+  - left: (?:L|B|D|H|G)
+    letters: O
+    right: VE
+    phonemes: [AH0]
+  - left: '(?:C|S) '
+    letters: O
+    right: 'ME '
+    phonemes: [AH0]
+  - left: '(?:D|N) '
+    letters: O
+    right: 'NE '
+    phonemes: [AH0]
+  - left: (?:M|RP)
+    letters: O
+    right: 'VE '
+    phonemes: [UW0]
+  - left: (?:L |HW)
+    letters: O
+    right: '(?:M|SE) '
+    phonemes: [UW0]
+  - left: (?:T|W)
+    letters: O
+    right: 'MB '
+    phonemes: [UW0]
+  - left: '(?:WT|D|T) '
+    letters: O
+    right: ' '
+    phonemes: [UW0]
+  - left: (?:RT|B)
+    letters: O
+    right: 'TH '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: DG
+    phonemes: [AA0]
+  - left: ''
+    letters: O
+    right: 'STLE '
+    phonemes: [AA0]
+  - left: ''
+    letters: O
+    right: 'GUE '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: '[BCDFGHJKLMNPQRSTVWXZ]LE '
+    phonemes: [OW0]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    letters: O
+    right: ' '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: ' '
+    phonemes: [OW0]
+  - left: ''
+    letters: O
+    right: '[MN][BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    phonemes: [AA1]
+  - left: ''
+    letters: O
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [AA1]
+  - left: ''
+    letters: O
+    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ] '
+    phonemes: [OW1]
+  - left: ''
+    letters: O
+    right: '(?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU] '
+    phonemes: [OW1]
+  - left: ''
+    letters: O
+    right: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    phonemes: [AA1]
+  - left: ''
+    letters: O
+    right: ''
+    phonemes: [AA1]
   P:
   - left: ''
     letters: PHOBIA
-    right: +
+    right: ' '
     phonemes: [F, OW1, B, IY2, AH2]
   - left: ''
-    letters: PARA
-    right: ''
-    phonemes: [P, AH0, R, AH0]
+    letters: POULOS
+    right: ' '
+    phonemes: [P, EL, IH2, S]
   - left: ''
-    letters: POD
-    right: +
-    phonemes: [P, AA2, D]
+    letters: PLICIT
+    right: ' '
+    phonemes: [P, L, IH1, S, IH2, T]
   - left: ''
     letters: POLICE
     right: ''
     phonemes: [P, EL, IY1, S]
   - left: ''
+    letters: PSEUDO
+    right: ''
+    phonemes: [S, UW0, D, OW0]
+  - left: ''
+    letters: PSYCHO
+    right: ''
+    phonemes: [S, AY0, K, AA1]
+  - left: ''
     letters: PLACE
-    right: +
+    right: ' '
     phonemes: [P, L, EY2, S]
   - left: ''
     letters: PHOBE
-    right: +
+    right: ' '
     phonemes: [F, OW0, B]
   - left: ''
     letters: PHONE
-    right: +
+    right: ' '
     phonemes: [F, OW0, N]
+  - left: ''
+    letters: PLANE
+    right: ' '
+    phonemes: [P, L, EY2, N]
+  - left: ''
+    letters: POLIS
+    right: ' '
+    phonemes: [P, EL, IH2, S]
+  - left: ''
+    letters: POLOS
+    right: ' '
+    phonemes: [P, EL, IH2, S]
+  - left: ''
+    letters: PATHY
+    right: ' '
+    phonemes: [P, AH2, TH, IY2]
+  - left: '[AEIOU]'
+    letters: PHONY
+    right: ' '
+    phonemes: [F, AH2, N, IY0]
   - left: ''
     letters: PIECE
     right: ''
     phonemes: [P, IY0, S]
   - left: ''
-    letters: PLANE
-    right: +
-    phonemes: [P, L, EY2, N]
+    letters: PSYCH
+    right: ''
+    phonemes: [S, AY0, K]
+  - left: ''
+    letters: PALEO
+    right: ''
+    phonemes: [P, EY0, L, IY0, AA1]
+  - left: ''
+    letters: PHONO
+    right: ''
+    phonemes: [F, OW0, N, AA1]
+  - left: ''
+    letters: PHOTO
+    right: ''
+    phonemes: [F, OW0, T, AA1]
+  - left: ''
+    letters: PROTO
+    right: ''
+    phonemes: [P, R, OW0, T, AH0]
+  - left: ''
+    letters: PAPER
+    right: ''
+    phonemes: [P, EY0, P, AH0, R]
+  - left: ' '
+    letters: POSE
+    right: ' '
+    phonemes: [P, OW1, Z]
+  - left: ''
+    letters: PATH
+    right: ' '
+    phonemes: [P, AE2, TH]
+  - left: ''
+    letters: PORT
+    right: ' '
+    phonemes: [P, OW0, R, T]
+  - left: ''
+    letters: POST
+    right: (?:U|E)
+    phonemes: [P, AA0, S, T]
+  - left: ' '
+    letters: POST
+    right: ''
+    phonemes: [P, OW0, S, T]
+  - left: ' '
+    letters: POLY
+    right: ''
+    phonemes: [P, AA1, L, IH1]
+  - left: ''
+    letters: PARA
+    right: ''
+    phonemes: [P, EY1, R, AE1]
   - left: ''
     letters: PIKE
     right: ''
@@ -4036,23 +4111,23 @@ rules_by_letter:
     letters: PIPE
     right: ''
     phonemes: [P, AY2, P]
-  - left: +
-    letters: POSE
-    right: +
-    phonemes: [P, OW1, Z]
+  - left: ''
+    letters: POD
+    right: ' '
+    phonemes: [P, AA2, D]
   - left: ''
     letters: PLE
-    right: +
+    right: ' '
     phonemes: [P, EL]
-  - left: ''
-    letters: PSYCH
+  - left: ' '
+    letters: PER
     right: ''
-    phonemes: [S, AY0, K]
+    phonemes: [P, ER0]
   - left: ''
-    letters: PATH
-    right: +
-    phonemes: [P, AE2, TH]
-  - left: U#
+    letters: POT
+    right: ' '
+    phonemes: [P, AA2, T]
+  - left: 'U '
     letters: PH
     right: ''
     phonemes: [P, HH]
@@ -4060,31 +4135,7 @@ rules_by_letter:
     letters: PH
     right: ''
     phonemes: [F]
-  - left: ''
-    letters: PSEUDO
-    right: ''
-    phonemes: [S, UW0, D, OW0]
-  - left: ''
-    letters: PSYCHO
-    right: ''
-    phonemes: [S, AY0, K, AH0]
-  - left: ''
-    letters: PALEO
-    right: ''
-    phonemes: [P, EY0, L, IY0, AH0]
-  - left: ''
-    letters: PHONO
-    right: ''
-    phonemes: [F, OW0, N, AH0]
-  - left: ''
-    letters: PHOTO
-    right: ''
-    phonemes: [F, OW0, T, AH0]
-  - left: ''
-    letters: PROTO
-    right: ''
-    phonemes: [P, R, OW0, T, AH0]
-  - left: '#'
+  - left: ' '
     letters: P
     right: (?:S|N|T)
     phonemes: []
@@ -4092,118 +4143,62 @@ rules_by_letter:
     letters: P
     right: ''
     phonemes: [P]
-  - left: ''
-    letters: PAPER
-    right: ''
-    phonemes: [P, EY0, P, AH0, R]
-  - left: '#'
-    letters: PER
-    right: ''
-    phonemes: [P, ER0]
-  - left: ''
-    letters: POULOS
-    right: '#'
-    phonemes: [P, EL, IH2, S]
-  - left: ''
-    letters: POLIS
-    right: +
-    phonemes: [P, EL, IH2, S]
-  - left: ''
-    letters: POLOS
-    right: '#'
-    phonemes: [P, EL, IH2, S]
-  - left: ''
-    letters: PLICIT
-    right: +
-    phonemes: [P, L, IH1, S, IH2, T]
-  - left: ''
-    letters: PORT
-    right: +
-    phonemes: [P, OW0, R, T]
-  - left: ''
-    letters: POST
-    right: (?:U|E)
-    phonemes: [P, AA0, S, T]
-  - left: '#'
-    letters: POST
-    right: ''
-    phonemes: [P, OW0, S, T]
-  - left: ''
-    letters: POT
-    right: +
-    phonemes: [P, AA2, T]
-  - left: ''
-    letters: PATHY
-    right: +
-    phonemes: [P, AH2, TH, IY2]
-  - left: '[AEIOU]'
-    letters: PHONY
-    right: +
-    phonemes: [F, AH2, N, IY0]
-  - left: '#'
-    letters: POLY
-    right: ''
-    phonemes: [P, AH0, L, IY0]
   Q:
   - left: ''
-    letters: QUOTED
-    right: '#'
-    phonemes: [D]
-  - left: ''
-    letters: QUENCE
-    right: +
-    phonemes: [K, W, AH0, N, S]
-  - left: ''
-    letters: QUE
-    right: +
-    phonemes: [K]
-  - left: ''
     letters: QUOTERE
-    right: '#'
+    right: ' '
     phonemes: [R]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: QUOTEVE
-    right: '#'
+    right: ' '
     phonemes: [AH0, V]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: QUOTELL
+    right: ' '
+    phonemes: [EL]
   - left: ''
     letters: QUOTEVE
     right: ''
     phonemes: [V]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: QUOTELL
-    right: '#'
-    phonemes: [EL]
   - left: ''
     letters: QUOTELL
     right: ''
     phonemes: [L]
   - left: ''
+    letters: QUOTED
+    right: ' '
+    phonemes: [D]
+  - left: ''
+    letters: QUENCE
+    right: ' '
+    phonemes: [K, W, AH0, N, S]
+  - left: ''
     letters: QUOTEM
-    right: '#'
+    right: ' '
     phonemes: [M]
   - left: ''
-    letters: Q
-    right: ''
-    phonemes: [K]
-  - left: ''
-    letters: QUER
-    right: +
-    phonemes: [K, ER0]
-  - left: ''
     letters: QUOTES
-    right: '#'
+    right: ' '
     phonemes: [Z]
   - left: ''
     letters: QUENT
-    right: +
+    right: ' '
     phonemes: [K, W, AH0, N, T]
   - left: ''
     letters: QUIST
-    right: +
+    right: ' '
     phonemes: [K, W, IH0, S, T]
   - left: ''
+    letters: QUER
+    right: ' '
+    phonemes: [K, ER0]
+  - left: ''
+    letters: QUE
+    right: ' '
+    phonemes: [K]
+  - left: ''
     letters: QU
-    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ][AEIOU]#'
+    right: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ][AEIOU] '
     phonemes: [K]
   - left: ''
     letters: QU
@@ -4213,24 +4208,40 @@ rules_by_letter:
     letters: QU
     right: ''
     phonemes: [K, W]
+  - left: ''
+    letters: Q
+    right: ''
+    phonemes: [K]
   R:
-  - left: '#'
+  - left: ''
+    letters: RATIONAL
+    right: ''
+    phonemes: [R, AE0, SH, EN, AH0, L]
+  - left: ''
+    letters: RETRO
+    right: ''
+    phonemes: [R, EH0, T, R, OW0]
+  - left: ' '
     letters: ROAD
     right: ''
     phonemes: [R, OW0, D]
-  - left: '#'
-    letters: RED
-    right: '[BCDFGHJKLMNPQSTVWXZ]'
-    phonemes: [R, EH0, D]
-  - left: '#'
+  - left: ' '
     letters: ROSE
     right: ''
     phonemes: [R, OW0, Z]
   - left: ''
+    letters: ROOM
+    right: ''
+    phonemes: [R, UW0, M]
+  - left: ' '
+    letters: RED
+    right: '[BCDFGHJKLMNPQSTVWXZ]'
+    phonemes: [R, EH0, D]
+  - left: ''
     letters: RRH
     right: ''
     phonemes: [R]
-  - left: '#'
+  - left: ' '
     letters: RH
     right: ''
     phonemes: [R]
@@ -4238,21 +4249,9 @@ rules_by_letter:
     letters: RH
     right: ''
     phonemes: [HH]
-  - left: ''
-    letters: RATIONAL
-    right: ''
-    phonemes: [R, AE0, SH, EN, AH0, L]
-  - left: ''
-    letters: ROOM
-    right: ''
-    phonemes: [R, UW0, M]
-  - left: ''
-    letters: RETRO
-    right: ''
-    phonemes: [R, EH0, T, R, OW0]
   - left: EE
     letters: R
-    right: +
+    right: ' '
     phonemes: [R]
   - left: ''
     letters: R
@@ -4260,41 +4259,89 @@ rules_by_letter:
     phonemes: [R]
   S:
   - left: ''
-    letters: SSIA
-    right: +
-    phonemes: [SH, AH2]
-  - left: '#'
-    letters: SEA
-    right: '[BCDFGHJKLMNPQSTVWXZ]'
-    phonemes: [S, IY0]
-  - left: ''
-    letters: SIA
-    right: +
-    phonemes: [ZH, AH2]
+    letters: SCHMIDT
+    right: ''
+    phonemes: [SH, M, IH0, T]
   - left: ''
     letters: SCOPIC
-    right: +
+    right: ' '
     phonemes: [S, K, AA1, P, IH2, K]
-  - left: '#'
-    letters: SAND
-    right: ''
-    phonemes: [S, AE2, N, D]
   - left: ''
     letters: SPHERE
-    right: +
+    right: ' '
     phonemes: [S, F, IY1, R]
+  - left: ''
+    letters: SOEVER
+    right: ' '
+    phonemes: [S, OW2, EH1, V, ER2]
+  - left: ''
+    letters: SAURUS
+    right: ' '
+    phonemes: [S, AO0, R, AH2, S]
+  - left: ''
+    letters: SCIOUS
+    right: ' '
+    phonemes: [SH, IH2, S]
+  - left: ''
+    letters: SELVES
+    right: ' '
+    phonemes: [S, EH1, L, V, Z]
+  - left: ''
+    letters: SUALLY
+    right: ' '
+    phonemes: [ZH, UW2, EL, IY2]
+  - left: ''
+    letters: SCHOOL
+    right: ''
+    phonemes: [S, K, UW0, L]
+  - left: ''
+    letters: SYMBOL
+    right: ''
+    phonemes: [S, IH1, M, B, AA1, L]
+  - left: ''
+    letters: SEISMO
+    right: ''
+    phonemes: [S, AY0, Z, M, AA1]
+  - left: ''
+    letters: STEREO
+    right: ''
+    phonemes: [S, T, EY0, R, IY2, AA2]
+  - left: ''
+    letters: SCOPE
+    right: ' '
+    phonemes: [S, K, OW2, P]
+  - left: ''
+    letters: SHIRE
+    right: ' '
+    phonemes: [SH, IY2, R]
+  - left: ''
+    letters: STONE
+    right: ' '
+    phonemes: [S, T, OW0, N]
+  - left: ''
+    letters: SOUTH
+    right: ER
+    phonemes: [S, AH0, DH]
+  - left: ''
+    letters: SUPER
+    right: (?:F|L|B)
+    phonemes: [S, UW2, P, ER1]
+  - left: ''
+    letters: SEOUS
+    right: ' '
+    phonemes: [SH, IH2, S]
+  - left: ''
+    letters: SIGHT
+    right: ' '
+    phonemes: [S, AY2, T]
+  - left: ''
+    letters: SCOPY
+    right: ' '
+    phonemes: [S, K, AA2, P, IY2]
   - left: ''
     letters: SCAPE
     right: ''
     phonemes: [S, K, EY0, P]
-  - left: ''
-    letters: SCOPE
-    right: +
-    phonemes: [S, K, OW2, P]
-  - left: ''
-    letters: SHIRE
-    right: '#'
-    phonemes: [SH, IY2, R]
   - left: ''
     letters: SPIKE
     right: ''
@@ -4304,81 +4351,9 @@ rules_by_letter:
     right: ''
     phonemes: [S, T, EY0, T]
   - left: ''
-    letters: STONE
-    right: +
-    phonemes: [S, T, OW0, N]
-  - left: ''
     letters: STORE
     right: ''
     phonemes: [S, T, OW2, R]
-  - left: ''
-    letters: SAFE
-    right: ''
-    phonemes: [S, EY0, F]
-  - left: ''
-    letters: SCLE
-    right: +
-    phonemes: [S, EL]
-  - left: ''
-    letters: SIDE
-    right: '[ABCDEFGHIJKLOPQSTUVWXYZ]'
-    phonemes: [S, AY0, D]
-  - left: ''
-    letters: SOME
-    right: ''
-    phonemes: [S, AH0, M]
-  - left: ''
-    letters: STLE
-    right: +
-    phonemes: [S, EL]
-  - left: ''
-    letters: SURE
-    right: +
-    phonemes: [SH, UW2, R]
-  - left: ''
-    letters: SLE
-    right: +
-    phonemes: [EL]
-  - left: ''
-    letters: SNE
-    right: +
-    phonemes: [N]
-  - left: '#'
-    letters: SELF
-    right: ''
-    phonemes: [S, EH0, L, F]
-  - left: ''
-    letters: SELF
-    right: +
-    phonemes: [S, EH1, L, F]
-  - left: ''
-    letters: SOUTH
-    right: ER
-    phonemes: [S, AH0, DH]
-  - left: ''
-    letters: SCH
-    right: +
-    phonemes: [SH]
-  - left: '#'
-    letters: SCH
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [SH]
-  - left: ''
-    letters: SCH
-    right: ''
-    phonemes: [S, K]
-  - left: ''
-    letters: SH
-    right: ''
-    phonemes: [SH]
-  - left: '#'
-    letters: SEMI
-    right: ''
-    phonemes: [S, EH0, M, IH0]
-  - left: ''
-    letters: SKI
-    right: +
-    phonemes: [S, K, IY2]
   - left: ''
     letters: STACK
     right: ''
@@ -4392,205 +4367,121 @@ rules_by_letter:
     right: ''
     phonemes: [S, T, AA0, K]
   - left: ''
-    letters: SZEK
-    right: '#'
-    phonemes: [SH, EH2, K]
-  - left: ''
-    letters: SCHOOL
-    right: ''
-    phonemes: [S, K, UW0, L]
-  - left: ''
-    letters: SYMBOL
-    right: ''
-    phonemes: [S, IH0, M, B, AH0, L]
-  - left: ''
-    letters: STYL
-    right: ''
-    phonemes: [S, T, AY0, L]
-  - left: ''
-    letters: SUAL
-    right: +
-    phonemes: [ZH, UW2, EL]
-  - left: ''
     letters: STEIN
     right: ''
     phonemes: [S, T, AY0, N]
   - left: ''
+    letters: SOCIO
+    right: ''
+    phonemes: [S, OW0, S, IY0, AA1]
+  - left: ''
+    letters: SUPER
+    right: ''
+    phonemes: [S, UW0, P, ER0]
+  - left: ''
+    letters: SALES
+    right: ''
+    phonemes: [S, EY0, L, Z]
+  - left: ''
+    letters: STADT
+    right: ''
+    phonemes: [SH, T, AE0, T]
+  - left: ''
+    letters: SSIA
+    right: ' '
+    phonemes: [SH, AH2]
+  - left: ' '
+    letters: SAND
+    right: ''
+    phonemes: [S, AE2, N, D]
+  - left: ''
+    letters: SCLE
+    right: ' '
+    phonemes: [S, EL]
+  - left: ''
+    letters: SIDE
+    right: '[ABCDEFGHIJKLOPQSTUVWXYZ]'
+    phonemes: [S, AY0, D]
+  - left: ''
+    letters: STLE
+    right: ' '
+    phonemes: [S, EL]
+  - left: ''
+    letters: SURE
+    right: ' '
+    phonemes: [SH, UW2, R]
+  - left: ' '
+    letters: SELF
+    right: ''
+    phonemes: [S, EH0, L, F]
+  - left: ''
+    letters: SELF
+    right: ' '
+    phonemes: [S, EH1, L, F]
+  - left: ' '
+    letters: SEMI
+    right: ''
+    phonemes: [S, EH0, M, IH1]
+  - left: ''
+    letters: SZEK
+    right: ' '
+    phonemes: [SH, EH2, K]
+  - left: ''
+    letters: SUAL
+    right: ' '
+    phonemes: [ZH, UW2, EL]
+  - left: ''
     letters: SIAN
-    right: +
+    right: ' '
     phonemes: [ZH, IH2, N]
   - left: (?:R|[AEIOU])
     letters: SION
     right: ''
     phonemes: [ZH, IH2, N]
   - left: ''
+    letters: SOHN
+    right: ' '
+    phonemes: [S, AH0, N]
+  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    letters: STEN
+    right: ' '
+    phonemes: [S, EN]
+  - left: ''
+    letters: SHIP
+    right: ' '
+    phonemes: [SH, IH2, P]
+  - left: ''
+    letters: SHOP
+    right: ' '
+    phonemes: [SH, AA0, P]
+  - left: ''
+    letters: STAT
+    right: ' '
+    phonemes: [S, T, AE0, T]
+  - left: ''
+    letters: SITY
+    right: ' '
+    phonemes: [S, IH2, T, IY2]
+  - left: ''
+    letters: SAFE
+    right: ''
+    phonemes: [S, EY0, F]
+  - left: ''
+    letters: SOME
+    right: ''
+    phonemes: [S, AH1, M]
+  - left: ''
+    letters: STYL
+    right: ''
+    phonemes: [S, T, AY0, L]
+  - left: ''
     letters: SION
     right: ''
     phonemes: [SH, IH2, N]
   - left: ''
-    letters: SOHN
-    right: '#'
-    phonemes: [S, AH0, N]
-  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    letters: STEN
-    right: +
-    phonemes: [S, EN]
-  - left: +
-    letters: SON
-    right: +
-    phonemes: [S, AH2, N]
-  - left: '[AEIOU][AEIOU]'
-    letters: SON
-    right: +
-    phonemes: [Z, EN]
-  - left: ''
-    letters: SON
-    right: +
-    phonemes: [S, EN]
-  - left: '#'
-    letters: SUN
-    right: ''
-    phonemes: [S, AH0, N]
-  - left: ''
-    letters: SEISMO
-    right: ''
-    phonemes: [S, AY0, Z, M, OW0]
-  - left: ''
-    letters: STEREO
-    right: ''
-    phonemes: [S, T, EY0, R, IY2, AA2]
-  - left: ''
-    letters: SOCIO
-    right: ''
-    phonemes: [S, OW0, S, IY0, AH0]
-  - left: ''
-    letters: SHIP
-    right: +
-    phonemes: [SH, IH2, P]
-  - left: ''
-    letters: SHOP
-    right: +
-    phonemes: [SH, AA0, P]
-  - left: ''
     letters: STEP
     right: ''
     phonemes: [S, T, EH0, P]
-  - left: ''
-    letters: SOEVER
-    right: +
-    phonemes: [S, OW2, EH1, V, ER2]
-  - left: ''
-    letters: SUPER
-    right: (?:F|L|B)
-    phonemes: [S, UW2, P, ER1]
-  - left: ''
-    letters: SUPER
-    right: ''
-    phonemes: [S, UW0, P, ER0]
-  - left: ''
-    letters: SAURUS
-    right: +
-    phonemes: [S, AO0, R, AH2, S]
-  - left: ''
-    letters: SCIOUS
-    right: +
-    phonemes: [SH, IH2, S]
-  - left: ''
-    letters: SELVES
-    right: +
-    phonemes: [S, EH1, L, V, Z]
-  - left: ''
-    letters: SALES
-    right: ''
-    phonemes: [S, EY0, L, Z]
-  - left: ''
-    letters: SEOUS
-    right: +
-    phonemes: [SH, IH2, S]
-  - left: ''
-    letters: SS
-    right: '#'
-    phonemes: [S]
-  - left: '[AEIOU][BCDFGHJKLMNPQRSTVWXZ]*#'
-    letters: S
-    right: +
-    phonemes: [S]
-  - left: ''
-    letters: S
-    right: '#'
-    phonemes: [Z]
-  - left: UB#
-    letters: S
-    right: (?:Y|I)
-    phonemes: [Z]
-  - left: '[AEIOU]'
-    letters: S
-    right: ERV
-    phonemes: [Z]
-  - left: ERP
-    letters: S
-    right: ER
-    phonemes: [Z]
-  - left: W
-    letters: S
-    right: (?:Y|E)+
-    phonemes: [Z]
-  - left: '[AEIOU]'
-    letters: S
-    right: M
-    phonemes: [Z]
-  - left: '[AEIOU](?:H#|F|P)'
-    letters: S
-    right: E+
-    phonemes: [Z]
-  - left: AE(?:F|M|P|T|N|#)
-    letters: S
-    right: ''
-    phonemes: [Z]
-  - left: EE
-    letters: S
-    right: E+
-    phonemes: [Z]
-  - left: I(?:O|U)
-    letters: S
-    right: ''
-    phonemes: [Z]
-  - left: UA(?:L)?(?:C|P)
-    letters: S
-    right: ''
-    phonemes: [Z]
-  - left: A(?:RHP|HP)
-    letters: S
-    right: E+
-    phonemes: [Z]
-  - left: E[MN]
-    letters: S
-    right: E+
-    phonemes: [Z]
-  - left: O(?:P|N|H|L|R)
-    letters: S
-    right: E+
-    phonemes: [Z]
-  - left: U(?:C|M|F)
-    letters: S
-    right: '[AEIOU]'
-    phonemes: [Z]
-  - left: ''
-    letters: S
-    right: ''
-    phonemes: [S]
-  - left: ''
-    letters: SCHMIDT
-    right: ''
-    phonemes: [SH, M, IH0, T]
-  - left: ''
-    letters: SIGHT
-    right: +
-    phonemes: [S, AY2, T]
-  - left: ''
-    letters: STADT
-    right: ''
-    phonemes: [SH, T, AE0, T]
   - left: ''
     letters: SALT
     right: ''
@@ -4604,54 +4495,278 @@ rules_by_letter:
     right: ''
     phonemes: [S, AO0, F, T]
   - left: ''
-    letters: STAT
-    right: +
-    phonemes: [S, T, AE0, T]
+    letters: SZCZ
+    right: ''
+    phonemes: [SH, CH]
+  - left: ' '
+    letters: SEA
+    right: '[BCDFGHJKLMNPQSTVWXZ]'
+    phonemes: [S, IY0]
+  - left: ''
+    letters: SIA
+    right: ' '
+    phonemes: [ZH, AH2]
+  - left: ''
+    letters: SLE
+    right: ' '
+    phonemes: [EL]
+  - left: ''
+    letters: SNE
+    right: ' '
+    phonemes: [N]
+  - left: ''
+    letters: SCH
+    right: ' '
+    phonemes: [SH]
+  - left: ' '
+    letters: SCH
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [SH]
+  - left: ''
+    letters: SKI
+    right: ' '
+    phonemes: [S, K, IY2]
+  - left: ' '
+    letters: SON
+    right: ' '
+    phonemes: [S, AH2, N]
+  - left: '[AEIOU][AEIOU]'
+    letters: SON
+    right: ' '
+    phonemes: [Z, EN]
+  - left: ''
+    letters: SON
+    right: ' '
+    phonemes: [S, EN]
+  - left: ' '
+    letters: SUN
+    right: ''
+    phonemes: [S, AH0, N]
+  - left: ' '
+    letters: SKY
+    right: ''
+    phonemes: [S, K, AY0]
+  - left: ''
+    letters: SCH
+    right: ''
+    phonemes: [S, K]
   - left: ''
     letters: SAW
     right: ''
     phonemes: [S, AO0]
   - left: ''
-    letters: SUALLY
-    right: +
-    phonemes: [ZH, UW2, EL, IY2]
+    letters: SS
+    right: ' '
+    phonemes: [S]
   - left: ''
-    letters: SCOPY
-    right: +
-    phonemes: [S, K, AA2, P, IY2]
-  - left: ''
-    letters: SITY
-    right: +
-    phonemes: [S, IH2, T, IY2]
-  - left: '#'
-    letters: SKY
+    letters: SH
     right: ''
-    phonemes: [S, K, AY0]
+    phonemes: [SH]
+  - left: '[AEIOU][BCDFGHJKLMNPQRSTVWXZ]* '
+    letters: S
+    right: ' '
+    phonemes: [S]
   - left: ''
-    letters: SZCZ
+    letters: S
+    right: ' '
+    phonemes: [Z]
+  - left: 'UB '
+    letters: S
+    right: (?:Y|I)
+    phonemes: [Z]
+  - left: '[AEIOU]'
+    letters: S
+    right: ERV
+    phonemes: [Z]
+  - left: ERP
+    letters: S
+    right: ER
+    phonemes: [Z]
+  - left: W
+    letters: S
+    right: '(?:Y|E) '
+    phonemes: [Z]
+  - left: '[AEIOU]'
+    letters: S
+    right: M
+    phonemes: [Z]
+  - left: '[AEIOU](?:H |F|P)'
+    letters: S
+    right: 'E '
+    phonemes: [Z]
+  - left: AE(?:F|M|P|T|N| )
+    letters: S
     right: ''
-    phonemes: [SH, CH]
+    phonemes: [Z]
+  - left: EE
+    letters: S
+    right: 'E '
+    phonemes: [Z]
+  - left: I(?:O|U)
+    letters: S
+    right: ''
+    phonemes: [Z]
+  - left: UA(?:L)?(?:C|P)
+    letters: S
+    right: ''
+    phonemes: [Z]
+  - left: A(?:RHP|HP)
+    letters: S
+    right: 'E '
+    phonemes: [Z]
+  - left: E[MN]
+    letters: S
+    right: 'E '
+    phonemes: [Z]
+  - left: O(?:P|N|H|L|R)
+    letters: S
+    right: 'E '
+    phonemes: [Z]
+  - left: U(?:C|M|F)
+    letters: S
+    right: '[AEIOU]'
+    phonemes: [Z]
+  - left: ''
+    letters: S
+    right: ''
+    phonemes: [S]
   T:
-  - left: ''
-    letters: TIC
-    right: +
-    phonemes: [T, IH2, K]
   - left: ''
     letters: TROUBLE
     right: ''
     phonemes: [T, R, AH1, B, EL]
-  - left: '#'
+  - left: ''
+    letters: TIATION
+    right: ''
+    phonemes: [SH, IY2, EY1, SH, IH2, N]
+  - left: ''
+    letters: THUNDER
+    right: ''
+    phonemes: [TH, AH0, N, D, ER2]
+  - left: ''
+    letters: THOUGHT
+    right: ''
+    phonemes: [TH, AO0, T]
+  - left: ''
+    letters: TAKING
+    right: ' '
+    phonemes: [T, EY2, K, IH2, NG]
+  - left: ''
+    letters: THESIS
+    right: ' '
+    phonemes: [TH, IY2, S, IH2, S]
+  - left: ''
+    letters: TIALLY
+    right: ' '
+    phonemes: [SH, EL, IY2]
+  - left: ''
+    letters: TUALLY
+    right: ' '
+    phonemes: [CH, UW2, EL, IY2]
+  - left: ''
+    letters: THERMO
+    right: ''
+    phonemes: [TH, ER0, M, AA1]
+  - left: ' '
     letters: TABLE
     right: ''
     phonemes: [T, EY0, B, EL]
-  - left: '#'
+  - left: ' '
     letters: THERE
     right: ''
     phonemes: [DH, EY0, R]
   - left: ''
+    letters: TURAL
+    right: ' '
+    phonemes: [CH, ER2, EL]
+  - left: ''
+    letters: TIOUS
+    right: ' '
+    phonemes: [SH, IH0, S]
+  - left: ''
+    letters: TRANS
+    right: (?:[MN]|[AEIOU])
+    phonemes: [T, R, AE0, N, Z]
+  - left: ''
+    letters: TUARY
+    right: ' '
+    phonemes: [CH, UW2, EY2, R, IY2]
+  - left: ''
     letters: TIATE
     right: ''
     phonemes: [SH, IY2, EY2, T]
+  - left: ''
+    letters: THERM
+    right: ''
+    phonemes: [TH, ER0, M]
+  - left: ''
+    letters: TOLER
+    right: ''
+    phonemes: [T, AO1, L, ER2]
+  - left: ''
+    letters: TRANS
+    right: ''
+    phonemes: [T, R, AE0, N, S]
+  - left: ''
+    letters: TIME
+    right: ' '
+    phonemes: [T, AY0, M]
+  - left: ''
+    letters: TUDE
+    right: ' '
+    phonemes: [T, UW0, D]
+  - left: ''
+    letters: TURE
+    right: ' '
+    phonemes: [CH, ER2]
+  - left: ''
+    letters: TYPE
+    right: ' '
+    phonemes: [T, AY2, P]
+  - left: ''
+    letters: TAIL
+    right: ' '
+    phonemes: [T, EY2, L]
+  - left: (?:N|S)
+    letters: TIAL
+    right: ' '
+    phonemes: [CH, EL]
+  - left: ''
+    letters: TIAL
+    right: ' '
+    phonemes: [SH, EL]
+  - left: ''
+    letters: TUAL
+    right: ' '
+    phonemes: [CH, UW2, EL]
+  - left: ''
+    letters: TEEN
+    right: ' '
+    phonemes: [T, IY1, N]
+  - left: (?:N|S)
+    letters: TIAN
+    right: ' '
+    phonemes: [CH, IH2, N]
+  - left: ''
+    letters: TIAN
+    right: ' '
+    phonemes: [SH, IH2, N]
+  - left: (?:N|S)
+    letters: TION
+    right: ''
+    phonemes: [CH, IH2, N]
+  - left: ''
+    letters: TOUR
+    right: ' '
+    phonemes: [T, UW2, R]
+  - left: (?:C|L|P|S)
+    letters: TORY
+    right: ' '
+    phonemes: [T, ER2, IY2]
+  - left: ''
+    letters: TORY
+    right: ' '
+    phonemes: [T, OW2, R, IY2]
   - left: ''
     letters: TAKE
     right: ''
@@ -4659,35 +4774,15 @@ rules_by_letter:
   - left: ''
     letters: TELE
     right: ''
-    phonemes: [T, EH0, L, AH0]
+    phonemes: [T, EH0, L, EH1]
   - left: ''
     letters: TIME
     right: ''
     phonemes: [T, AY0, M]
-  - left: ''
-    letters: TIME
-    right: +
-    phonemes: [T, AY0, M]
-  - left: ''
-    letters: TUDE
-    right: +
-    phonemes: [T, UW0, D]
-  - left: ''
-    letters: TURE
-    right: +
-    phonemes: [CH, ER2]
   - left: ''
     letters: TYPE
     right: ''
     phonemes: [T, AY0, P]
-  - left: ''
-    letters: TYPE
-    right: +
-    phonemes: [T, AY2, P]
-  - left: ''
-    letters: TAKING
-    right: +
-    phonemes: [T, EY2, K, IH2, NG]
   - left: ''
     letters: TECH
     right: ''
@@ -4697,85 +4792,9 @@ rules_by_letter:
     right: ''
     phonemes: [CH]
   - left: ''
-    letters: TCH
-    right: ''
-    phonemes: [CH]
-  - left: ''
-    letters: TH
-    right: ER(?:N)?+
-    phonemes: [DH]
-  - left: ''
-    letters: TH
-    right: OUGH+
-    phonemes: [DH]
-  - left: ''
-    letters: TH
-    right: '[AEIOU]++'
-    phonemes: [DH]
-  - left: OOM
-    letters: TH
-    right: +
-    phonemes: [DH]
-  - left: ''
-    letters: TH
-    right: '#'
-    phonemes: [TH]
-  - left: '#'
-    letters: TH
-    right: '[AEIOU](?:[BCDFGHJKLMNPQRSTVWXZ])?#'
-    phonemes: [DH]
-  - left: ''
-    letters: TH
-    right: ''
-    phonemes: [TH]
-  - left: ''
     letters: TALK
     right: ''
     phonemes: [T, AO0, K]
-  - left: ''
-    letters: TURAL
-    right: +
-    phonemes: [CH, ER2, EL]
-  - left: ''
-    letters: TAIL
-    right: +
-    phonemes: [T, EY2, L]
-  - left: (?:N|S)
-    letters: TIAL
-    right: +
-    phonemes: [CH, EL]
-  - left: ''
-    letters: TIAL
-    right: +
-    phonemes: [SH, EL]
-  - left: ''
-    letters: TUAL
-    right: +
-    phonemes: [CH, UW2, EL]
-  - left: ''
-    letters: THERM
-    right: ''
-    phonemes: [TH, ER0, M]
-  - left: ''
-    letters: TIATION
-    right: ''
-    phonemes: [SH, IY2, EY1, SH, IH2, N]
-  - left: ''
-    letters: TEEN
-    right: +
-    phonemes: [T, IY1, N]
-  - left: (?:N|S)
-    letters: TIAN
-    right: +
-    phonemes: [CH, IH2, N]
-  - left: ''
-    letters: TIAN
-    right: +
-    phonemes: [SH, IH2, N]
-  - left: (?:N|S)
-    letters: TION
-    right: ''
-    phonemes: [CH, IH2, N]
   - left: ''
     letters: TION
     right: ''
@@ -4785,195 +4804,219 @@ rules_by_letter:
     right: ''
     phonemes: [T, AW0, N]
   - left: ''
+    letters: TIC
+    right: ' '
+    phonemes: [T, IH2, K]
+  - left: ''
     letters: TON
-    right: +
+    right: ' '
     phonemes: [T, AH0, N]
   - left: ''
-    letters: THERMO
-    right: ''
-    phonemes: [TH, ER0, M, OW0]
-  - left: ''
-    letters: THUNDER
-    right: ''
-    phonemes: [TH, AH0, N, D, ER2]
-  - left: ''
-    letters: TOLER
-    right: ''
-    phonemes: [T, AO1, L, ER2]
-  - left: ''
-    letters: TOUR
-    right: +
-    phonemes: [T, UW2, R]
-  - left: ''
-    letters: THESIS
-    right: +
-    phonemes: [TH, IY2, S, IH2, S]
-  - left: ''
-    letters: TIOUS
-    right: +
-    phonemes: [SH, IH0, S]
-  - left: ''
-    letters: TRANS
-    right: (?:[MN]|[AEIOU])
-    phonemes: [T, R, AE0, N, Z]
-  - left: ''
-    letters: TRANS
-    right: ''
-    phonemes: [T, R, AE0, N, S]
-  - left: ''
-    letters: THOUGHT
-    right: ''
-    phonemes: [TH, AO0, T]
-  - left: ''
-    letters: T
-    right: ''
-    phonemes: [T]
-  - left: ''
-    letters: TIALLY
-    right: +
-    phonemes: [SH, EL, IY2]
-  - left: ''
-    letters: TUALLY
-    right: +
-    phonemes: [CH, UW2, EL, IY2]
-  - left: ''
-    letters: TUARY
-    right: +
-    phonemes: [CH, UW2, EY2, R, IY2]
-  - left: (?:C|L|P|S)
-    letters: TORY
-    right: +
-    phonemes: [T, ER2, IY2]
-  - left: ''
-    letters: TORY
-    right: +
-    phonemes: [T, OW2, R, IY2]
-  - left: ''
     letters: THY
-    right: +
+    right: ' '
     phonemes: [TH, IY0]
   - left: '[AEIOU]'
     letters: TRY
-    right: +
+    right: ' '
     phonemes: [T, R, IY0]
-  - left: '#'
+  - left: ''
+    letters: TCH
+    right: ''
+    phonemes: [CH]
+  - left: ''
+    letters: TH
+    right: 'ER(?:N)? '
+    phonemes: [DH]
+  - left: ''
+    letters: TH
+    right: 'OUGH '
+    phonemes: [DH]
+  - left: ''
+    letters: TH
+    right: '[AEIOU]+ '
+    phonemes: [DH]
+  - left: OOM
+    letters: TH
+    right: ' '
+    phonemes: [DH]
+  - left: ''
+    letters: TH
+    right: ' '
+    phonemes: [TH]
+  - left: ' '
+    letters: TH
+    right: '[AEIOU](?:[BCDFGHJKLMNPQRSTVWXZ])? '
+    phonemes: [DH]
+  - left: ' '
     letters: TY
     right: '[BCDFGHJKLPQRSTVWXZ]'
     phonemes: [T, AY0]
   - left: E(?:F|N|L)
     letters: TY
-    right: +
+    right: ' '
     phonemes: [T, IY2]
   - left: ''
     letters: TZ
-    right: '#'
+    right: ' '
     phonemes: [T, S]
+  - left: ''
+    letters: TH
+    right: ''
+    phonemes: [TH]
+  - left: ''
+    letters: T
+    right: ''
+    phonemes: [T]
   U:
+  - left: ''
+    letters: UALITY
+    right: ' '
+    phonemes: [UW2, AE1, L, IH2, T, IY2]
+  - left: ''
+    letters: UANCE
+    right: ' '
+    phonemes: [Y, UW2, AH2, N, S]
+  - left: ''
+    letters: UENCE
+    right: ' '
+    phonemes: [UW0, AH2, N, S]
+  - left: ''
+    letters: UTIVE
+    right: ' '
+    phonemes: [Y, UW2, T, IH2, V]
+  - left: F
+    letters: USION
+    right: ' '
+    phonemes: [Y, UW1, ZH, IH2, N]
+  - left: ''
+    letters: USION
+    right: ' '
+    phonemes: [UW1, ZH, IH2, N]
+  - left: (?:C|B)
+    letters: UTION
+    right: ' '
+    phonemes: [Y, UW1, SH, IH2, N]
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
+    letters: UTION
+    right: ' '
+    phonemes: [UW1, SH, IH2, N]
+  - left: ' '
+    letters: UNDER
+    right: ''
+    phonemes: [AH1, N, D, ER0]
+  - left: R
+    letters: ULOUS
+    right: ' '
+    phonemes: [EL, AH2, S]
+  - left: ''
+    letters: ULOUS
+    right: ' '
+    phonemes: [Y, EL, AH2, S]
+  - left: ''
+    letters: UPLET
+    right: ' '
+    phonemes: [AH1, P, L, IH2, T]
   - left: ''
     letters: ULTRA
     right: ''
     phonemes: [AH0, L, T, R, AH0]
   - left: ''
-    letters: UANCE
-    right: +
-    phonemes: [Y, UW2, AH2, N, S]
+    letters: UNANI
+    right: ''
+    phonemes: [Y, UW0, N, AE1, N, IH1]
   - left: ''
-    letters: UENCE
-    right: +
-    phonemes: [UW0, AH2, N, S]
-  - left: ''
-    letters: UTIVE
-    right: +
-    phonemes: [Y, UW2, T, IH2, V]
+    letters: UPPER
+    right: ''
+    phonemes: [AH1, P, ER2]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: UBLE
-    right: +
+    right: ' '
     phonemes: [Y, UW2, B, EL]
+  - left: ''
+    letters: UCHI
+    right: ' '
+    phonemes: [UW1, CH, IY2]
+  - left: '[BCDFGHJKMNPQRSTVWXZ]'
+    letters: ULAR
+    right: ' '
+    phonemes: [Y, EL, ER2]
+  - left: ''
+    letters: UOUS
+    right: ' '
+    phonemes: [Y, UW2, AH2, S]
+  - left: ''
+    letters: UANT
+    right: ' '
+    phonemes: [UW2, AH2, N, T]
+  - left: ''
+    letters: UENT
+    right: ' '
+    phonemes: [UW0, AH2, N, T]
+  - left: (?:G|C)
+    letters: UITY
+    right: ' '
+    phonemes: [Y, UW1, IH2, T, IY2]
+  - left: ''
+    letters: UITY
+    right: ' '
+    phonemes: [UW1, IH2, T, IY2]
   - left: (?:F|H|L)
     letters: UME
-    right: +
+    right: ' '
     phonemes: [Y, UW2, M]
   - left: ''
     letters: UME
-    right: +
+    right: ' '
     phonemes: [UW2, M]
-  - left: '[BCDFGHJKMNPQRSTVWXZ]#'
+  - left: '[BCDFGHJKMNPQRSTVWXZ] '
     letters: UTE
-    right: +
+    right: ' '
     phonemes: [Y, UW0, T]
-  - left: (?:B|C|P|M)[AEIOU]#
+  - left: '(?:B|C|P|M)[AEIOU] '
     letters: UTE
-    right: +
+    right: ' '
     phonemes: [Y, UW1, T]
   - left: (?:B|C|P|M)
     letters: UTE
-    right: +
+    right: ' '
     phonemes: [Y, UW2, T]
-  - left: '[AEIOU]#'
+  - left: '[AEIOU] '
     letters: UTE
-    right: +
+    right: ' '
     phonemes: [UW1, T]
   - left: ''
     letters: UTE
-    right: +
+    right: ' '
     phonemes: [UW2, T]
-  - left: (?:V|L|N|G|H)[AEIOU]
-    letters: UE
-    right: +
-    phonemes: [Y, UW2]
-  - left: ''
-    letters: UE
-    right: +
-    phonemes: [UW2]
-  - left: ''
-    letters: UE
-    right: ''
-    phonemes: [UW0]
-  - left: ''
-    letters: UNANI
-    right: ''
-    phonemes: [Y, UW0, N, IH0, N, AH0]
-  - left: ''
-    letters: UCHI
-    right: '#'
-    phonemes: [UW1, CH, IY2]
-  - left: '#'
+  - left: ' '
     letters: UNI
     right: '[ABCDEFGHIJKLOPQRSTUVWXYZ]'
     phonemes: [Y, UW0, N, IH0]
   - left: ''
+    letters: UAL
+    right: ' '
+    phonemes: [UW2, EL]
+  - left: ''
+    letters: UOY
+    right: ''
+    phonemes: [OY0]
+  - left: (?:V|L|N|G|H)[AEIOU]
+    letters: UE
+    right: ' '
+    phonemes: [Y, UW2]
+  - left: ''
+    letters: UE
+    right: ' '
+    phonemes: [UW2]
+  - left: ''
     letters: UI
-    right: (?:N|D|+)
-    phonemes: [UW0, IH0]
+    right: (?:N|D| )
+    phonemes: [UW0, IH1]
   - left: B
     letters: UI
     right: ''
     phonemes: [IH0]
-  - left: ''
-    letters: UI
-    right: ''
-    phonemes: [IH0]
-  - left: ''
-    letters: UAL
-    right: +
-    phonemes: [UW2, EL]
-  - left: F
-    letters: USION
-    right: +
-    phonemes: [Y, UW1, ZH, IH2, N]
-  - left: ''
-    letters: USION
-    right: +
-    phonemes: [UW1, ZH, IH2, N]
-  - left: (?:C|B)
-    letters: UTION
-    right: +
-    phonemes: [Y, UW1, SH, IH2, N]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]'
-    letters: UTION
-    right: +
-    phonemes: [UW1, SH, IH2, N]
-  - left: '#'
+  - left: ' '
     letters: UN
     right: ''
     phonemes: [AH0, N]
@@ -4983,7 +5026,7 @@ rules_by_letter:
     phonemes: [OW0]
   - left: ''
     letters: UO
-    right: '#'
+    right: ' '
     phonemes: [UW0, OW0]
   - left: D
     letters: UO
@@ -4991,52 +5034,16 @@ rules_by_letter:
     phonemes: [UW0, OW0]
   - left: (?:E|[BCDFGHJKLMNPQRSTVWXZ])[AEIOU]
     letters: UP
-    right: +
+    right: ' '
     phonemes: [AH2, P]
-  - left: '#'
-    letters: UNDER
-    right: ''
-    phonemes: [AH0, N, D, ER0]
-  - left: ''
-    letters: UPPER
-    right: ''
-    phonemes: [AH1, P, ER2]
-  - left: '[BCDFGHJKMNPQRSTVWXZ]'
-    letters: ULAR
-    right: +
-    phonemes: [Y, EL, ER2]
-  - left: R
-    letters: ULOUS
-    right: +
-    phonemes: [EL, AH2, S]
-  - left: ''
-    letters: ULOUS
-    right: +
-    phonemes: [Y, EL, AH2, S]
-  - left: ''
-    letters: UOUS
-    right: +
-    phonemes: [Y, UW2, AH2, S]
   - left: N
     letters: US
-    right: +
+    right: ' '
     phonemes: [IH0, S]
   - left: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
     letters: US
-    right: +
-    phonemes: [IH0, S]
-  - left: ''
-    letters: UPLET
-    right: +
-    phonemes: [AH1, P, L, IH2, T]
-  - left: ''
-    letters: UANT
-    right: +
-    phonemes: [UW2, AH2, N, T]
-  - left: ''
-    letters: UENT
-    right: +
-    phonemes: [UW0, AH2, N, T]
+    right: ' '
+    phonemes: [UW1, S]
   - left: C
     letters: UU
     right: ''
@@ -5045,54 +5052,66 @@ rules_by_letter:
     letters: UU
     right: ''
     phonemes: [Y, UW0, AH0]
-  - left: B#
+  - left: ''
+    letters: UE
+    right: ''
+    phonemes: [UW0]
+  - left: ''
+    letters: UI
+    right: ''
+    phonemes: [UW1]
+  - left: ''
+    letters: UY
+    right: ''
+    phonemes: [AY0]
+  - left: 'B '
     letters: U
     right: R(?:I|Y|E)
     phonemes: [EY0]
   - left: ''
     letters: U
-    right: R(?:E|Y)+
+    right: 'R(?:E|Y) '
     phonemes: [Y, UW0]
-  - left: '#'
+  - left: ' '
     letters: U
     right: R[BCDFGHJKLMNPQRSTVWXZ]
     phonemes: [AH0]
-  - left: '#'
+  - left: ' '
     letters: U
     right: (?:G|B|R|S|T)[AEIOU]
     phonemes: [Y, UW0]
-  - left: B+
+  - left: 'B '
     letters: U
     right: S[AEIOU]
     phonemes: [IH0]
   - left: ''
     letters: U
-    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]|#|+)
+    right: R(?:[BCDFGHJKLMNPQRSTVWXZ]| | )
     phonemes: [AH0]
   - left: ''
     letters: U
     right: (?:R[AEIOU][BCDFGHJKLMNPQRSTVWXZ]|RR)
-    phonemes: [AH0]
-  - left: (?:P|F|B)#
+    phonemes: [Y, UW1]
+  - left: '(?:P|F|B) '
     letters: U
     right: (?:LL|SH)
     phonemes: [UH0]
   - left: ''
     letters: U
     right: SCL
-    phonemes: [AH0]
+    phonemes: [AH1]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: U
-    right: TH#
+    right: 'TH '
     phonemes: [UW0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]'
     letters: U
-    right: (?:M|N|L)[BCDFGHJKLMNPQRSTVWXZ][AEIOU]+
-    phonemes: [AH0]
+    right: '(?:M|N|L)[BCDFGHJKLMNPQRSTVWXZ][AEIOU] '
+    phonemes: [AH1]
   - left: ''
     letters: U
     right: (?:X|DG)
-    phonemes: [AH0]
+    phonemes: [AH1]
   - left: ''
     letters: U
     right: '[BCDFGHJKLMNPQRSTVWXZ]LE'
@@ -5100,15 +5119,15 @@ rules_by_letter:
   - left: ''
     letters: U
     right: '[BCDFGHJKLMNPQRSTVWXZ][BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [AH0]
+    phonemes: [AH1]
   - left: ''
     letters: U
-    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ]#'
-    phonemes: [AH0]
+    right: '[BCDFGHJKLMNPQRSTVWXZ][AEIOU][BCDFGHJKLMNPQRSTVWXZ] '
+    phonemes: [UW1]
   - left: ''
     letters: U
     right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [AH0]
+    phonemes: [AH1]
   - left: (?:C|F|M|B|P)
     letters: U
     right: '[BCDFGHJKLMNPQRSTVWXZ](?:[AEIOU]){1,3}'
@@ -5119,102 +5138,78 @@ rules_by_letter:
     phonemes: [Y, UW0]
   - left: ''
     letters: U
-    right: (?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU]+
+    right: '(?:[BCDFGHJKLMNPQRSTVWXZ]){0,2}[AEIOU] '
     phonemes: [UW0]
   - left: ''
     letters: U
-    right: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    phonemes: [AH0]
+    right: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    phonemes: [AH1]
   - left: ''
     letters: U
-    right: +
+    right: ' '
     phonemes: [UW0]
   - left: ''
     letters: U
     right: ''
-    phonemes: [AH0]
-  - left: ''
-    letters: UALITY
-    right: +
-    phonemes: [UW2, AE1, L, IH2, T, IY2]
-  - left: (?:G|C)
-    letters: UITY
-    right: +
-    phonemes: [Y, UW1, IH2, T, IY2]
-  - left: ''
-    letters: UITY
-    right: +
-    phonemes: [UW1, IH2, T, IY2]
-  - left: ''
-    letters: UOY
-    right: ''
-    phonemes: [OY0]
-  - left: ''
-    letters: UY
-    right: ''
-    phonemes: [AY0]
+    phonemes: [AH1]
   V:
-  - left: '#'
+  - left: ' '
+    letters: VANDEN
+    right: ''
+    phonemes: [V, AE0, N, D, AH0, N]
+  - left: ' '
+    letters: VANDER
+    right: ''
+    phonemes: [V, AE0, N, D, ER0]
+  - left: ' '
     letters: VANDE
     right: ''
     phonemes: [V, AE0, N, D, AH0]
   - left: ''
     letters: VILLE
-    right: +
+    right: ' '
     phonemes: [V, IH2, L]
   - left: ''
     letters: VITCH
-    right: '#'
+    right: ' '
     phonemes: [V, IH0, CH]
-  - left: ''
-    letters: VICH
-    right: '#'
-    phonemes: [V, IH0, CH]
-  - left: '#'
-    letters: VANDEN
-    right: ''
-    phonemes: [V, AE0, N, D, AH0, N]
-  - left: '#'
-    letters: VANDER
-    right: ''
-    phonemes: [V, AE0, N, D, ER0]
   - left: ''
     letters: VELDT
     right: ''
     phonemes: [V, EH0, L, T]
   - left: ''
-    letters: V
-    right: ''
-    phonemes: [V]
+    letters: VICH
+    right: ' '
+    phonemes: [V, IH0, CH]
+  - left: ''
+    letters: VITZ
+    right: ' '
+    phonemes: [V, IH0, T, S]
   - left: ''
     letters: VIEW
     right: ''
     phonemes: [V, Y, UW0]
   - left: ''
-    letters: VITZ
-    right: '#'
-    phonemes: [V, IH0, T, S]
+    letters: V
+    right: ''
+    phonemes: [V]
   W:
   - left: ''
-    letters: WALD
+    letters: WEATHER
     right: ''
-    phonemes: [W, AO0, L, D]
-  - left: (?:ER|A)
-    letters: WARD
-    right: +
-    phonemes: [W, OW1, R, D]
-  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
-    letters: WARD
-    right: +
-    phonemes: [W, ER0, D]
+    phonemes: [W, EH1, DH, ER2]
   - left: ''
-    letters: WILD
-    right: ''
-    phonemes: [W, AY0, L, D]
+    letters: WORTHY
+    right: ' '
+    phonemes: [W, ER2, DH, IY2]
   - left: ''
-    letters: WOOD
-    right: ''
-    phonemes: [W, UH0, D]
+    letters: WOMAN
+    right: ' '
+    phonemes: [W, UH2, M, AH2, N]
+  - left: ''
+    letters: WOMEN
+    right: ' '
+    phonemes: [W, IH2, M, AH2, N]
   - left: ''
     letters: WHERE
     right: ''
@@ -5228,17 +5223,57 @@ rules_by_letter:
     right: ''
     phonemes: [HH, OW1, L]
   - left: ''
-    letters: WARE
-    right: +
-    phonemes: [W, EY0, R]
-  - left: ''
-    letters: WISE
-    right: +
-    phonemes: [W, AY2, Z]
-  - left: ''
     letters: WORTH
     right: ''
     phonemes: [W, ER0, TH]
+  - left: ''
+    letters: WATER
+    right: ''
+    phonemes: [W, AO0, T, ER0]
+  - left: (?:ER|A)
+    letters: WARD
+    right: ' '
+    phonemes: [W, OW1, R, D]
+  - left: '[ABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+    letters: WARD
+    right: ' '
+    phonemes: [W, ER0, D]
+  - left: ''
+    letters: WARE
+    right: ' '
+    phonemes: [W, EY0, R]
+  - left: ''
+    letters: WISE
+    right: ' '
+    phonemes: [W, AY2, Z]
+  - left: ''
+    letters: WILL
+    right: ' '
+    phonemes: [W, IH1, L]
+  - left: ''
+    letters: WELL
+    right: ' '
+    phonemes: [W, EH0, L]
+  - left: ''
+    letters: WICZ
+    right: ' '
+    phonemes: [V, IH0, CH]
+  - left: ''
+    letters: WITZ
+    right: ' '
+    phonemes: [W, IH0, T, S]
+  - left: ''
+    letters: WALD
+    right: ''
+    phonemes: [W, AO0, L, D]
+  - left: ''
+    letters: WILD
+    right: ''
+    phonemes: [W, AY0, L, D]
+  - left: ''
+    letters: WOOD
+    right: ''
+    phonemes: [W, UH0, D]
   - left: ''
     letters: WASH
     right: ''
@@ -5247,14 +5282,6 @@ rules_by_letter:
     letters: WITH
     right: ''
     phonemes: [W, IH0, TH]
-  - left: '#'
-    letters: WH
-    right: O
-    phonemes: [HH]
-  - left: ''
-    letters: WH
-    right: ''
-    phonemes: [W]
   - left: ''
     letters: WALK
     right: ''
@@ -5264,91 +5291,63 @@ rules_by_letter:
     right: ''
     phonemes: [W, ER0, K]
   - left: ''
-    letters: WILL
-    right: +
-    phonemes: [W, IH1, L]
-  - left: ''
-    letters: WELL
-    right: '#'
-    phonemes: [W, EH0, L]
-  - left: ''
     letters: WHOM
     right: ''
     phonemes: [HH, UW0, M]
   - left: ''
-    letters: WOMAN
-    right: +
-    phonemes: [W, UH2, M, AH2, N]
+    letters: WHAT
+    right: ''
+    phonemes: [W, AH1, T]
+  - left: ' '
+    letters: WAR
+    right: '[BCDFGHJKLMNPQRSTVWXZ]'
+    phonemes: [W, OW0, R]
   - left: ''
-    letters: WOMEN
-    right: +
-    phonemes: [W, IH2, M, AH2, N]
+    letters: WAY
+    right: ' '
+    phonemes: [W, EY0]
   - left: ''
     letters: WON
     right: ''
     phonemes: [W, AH0, N]
   - left: ''
-    letters: WEATHER
-    right: ''
-    phonemes: [W, EH1, DH, ER2]
-  - left: ''
-    letters: WATER
-    right: ''
-    phonemes: [W, AO0, T, ER0]
-  - left: '#'
-    letters: WAR
-    right: '[BCDFGHJKLMNPQRSTVWXZ]'
-    phonemes: [W, OW0, R]
-  - left: ''
     letters: WOR
     right: ''
     phonemes: [W, ER0]
-  - left: +
+  - left: ' '
+    letters: WH
+    right: O
+    phonemes: [HH]
+  - left: ' '
     letters: WR
     right: ''
     phonemes: [R]
   - left: ''
-    letters: WHAT
+    letters: WH
     right: ''
-    phonemes: [W, AH0, T]
+    phonemes: [W]
   - left: ''
     letters: W
     right: ''
     phonemes: [W]
-  - left: ''
-    letters: WORTHY
-    right: +
-    phonemes: [W, ER2, DH, IY2]
-  - left: ''
-    letters: WAY
-    right: +
-    phonemes: [W, EY0]
-  - left: ''
-    letters: WICZ
-    right: '#'
-    phonemes: [V, IH0, CH]
-  - left: ''
-    letters: WITZ
-    right: '#'
-    phonemes: [W, IH0, T, S]
   X:
   - left: ''
+    letters: XIOUS
+    right: ' '
+    phonemes: [SH, IH2, S]
+  - left: ''
     letters: XION
-    right: +
+    right: ' '
     phonemes: [K, SH, IH2, N]
-  - left: '#'
+  - left: ' '
     letters: XERO
     right: ''
-    phonemes: [Z, IY0, R, AH0]
-  - left: '#'
+    phonemes: [Z, IY0, R, AA1]
+  - left: ' '
     letters: XYLO
     right: ''
-    phonemes: [Z, AY0, L, AH0]
-  - left: ''
-    letters: XIOUS
-    right: +
-    phonemes: [SH, IH2, S]
-  - left: '#'
+    phonemes: [Z, AY0, L, AA1]
+  - left: ' '
     letters: X
     right: ''
     phonemes: [Z]
@@ -5358,44 +5357,44 @@ rules_by_letter:
     phonemes: [K, S]
   Y:
   - left: ''
-    letters: YAMA
-    right: '#'
-    phonemes: [Y, AA0, M, AH0]
-  - left: ''
-    letters: YARD
-    right: +
-    phonemes: [Y, AA2, R, D]
-  - left: ''
     letters: YOUNG
     right: ''
     phonemes: [Y, AH0, NG]
-  - left: +
+  - left: ''
+    letters: YAMA
+    right: ' '
+    phonemes: [Y, AA0, M, AA1]
+  - left: ''
+    letters: YARD
+    right: ' '
+    phonemes: [Y, AA2, R, D]
+  - left: ' '
     letters: Y
     right: ''
     phonemes: [Y]
-  - left: '[BCDFGHJKLMNPQRSTVWXZ]+#'
+  - left: '[BCDFGHJKLMNPQRSTVWXZ]+ '
     letters: Y
-    right: +
+    right: ' '
     phonemes: [AY0]
-  - left: (?:SP|HT|H|X|Z)#
+  - left: '(?:SP|HT|H|X|Z) '
     letters: Y
     right: ''
     phonemes: [AY0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ][BCDFGHJKLMNPQRSTVWXZ][AEIOU]'
     letters: Y
-    right: +
+    right: ' '
     phonemes: [IY2]
   - left: ''
     letters: Y
-    right: +
+    right: ' '
     phonemes: [IY0]
   - left: '[BCDFGHJKLMNPQRSTVWXZ]+'
     letters: Y
-    right: E+
+    right: 'E '
     phonemes: [AY0]
   - left: ''
     letters: Y
-    right: '[BCDFGHJKLMNPQRSTVWXZ]+[AEIOU]+'
+    right: '[BCDFGHJKLMNPQRSTVWXZ]+[AEIOU] '
     phonemes: [AY0]
   - left: ''
     letters: Y
@@ -5403,51 +5402,51 @@ rules_by_letter:
     phonemes: [IH0]
   - left: ''
     letters: Y
-    right: '[BCDFGHJKLMNPQRSTVWXZ]++'
-    phonemes: [IH0]
+    right: '[BCDFGHJKLMNPQRSTVWXZ]+ '
+    phonemes: [IH1]
   - left: ''
     letters: Y
     right: ''
-    phonemes: [IH0]
+    phonemes: [IH1]
   Z:
-  - left: '#'
+  - left: ' '
     letters: ZOO
     right: '[AEIOU]'
-    phonemes: [Z, OW0, AH0]
+    phonemes: [Z, OW0, AA1]
   - left: ''
     letters: ZZO
-    right: '#'
+    right: ' '
     phonemes: [Z, OW0]
   - left: ''
     letters: Z
     right: ''
     phonemes: [Z]
   PUNCT:
-  - left: '#'
+  - left: ' '
     letters: DELLQUOTE
     right: ''
     phonemes: [D, EH0, L]
   - left: ''
     letters: SQUOTE
-    right: '#'
+    right: ' '
     phonemes: [Z]
-  - left: '[AEIOU](?:[BCDFGHJKLMNPQRSTVWXZ]){1,3}#'
+  - left: '[AEIOU](?:[BCDFGHJKLMNPQRSTVWXZ]){1,3} '
     letters: NQUOTE
     right: ''
     phonemes: [N]
-  - left: ''
-    letters: NQUOTE
-    right: ''
-    phonemes: [EN]
-  - left: '#'
+  - left: ' '
     letters: OQUOTE
     right: ''
     phonemes: [OW0]
   - left: ''
-    letters: QUOTE
+    letters: NQUOTE
+    right: ''
+    phonemes: [EN]
+  - left: ''
+    letters: MBOUND
     right: ''
     phonemes: []
   - left: ''
-    letters: MBOUND
+    letters: QUOTE
     right: ''
     phonemes: []

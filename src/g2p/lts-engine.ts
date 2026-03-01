@@ -14,12 +14,11 @@
  *      c. Check right context (regex anchored at start of right substring)
  *      d. If all match: emit phonemes, advance by rule.letters.length
  *   5. If no rule matches: skip the character
- *   6. Map Elovitz notation to Qlatt ARPAbet via phoneme-map
+ *   6. Filter prosodic markers; symbol normalization (AX/NX/WH) deferred to normalize rule phase
  *
  * Citation: Elovitz, Johnson, McHugh & Shore (1976). NRL Report 7948.
  */
 
-import { mapElovitzToQlatt } from './phoneme-map';
 import { loadYamlDocumentSync } from '../yaml-loader';
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -188,5 +187,9 @@ export function applyLtsRules(word: string): string[] {
     }
   }
 
-  return mapElovitzToQlatt(elovitzPhonemes);
+  // Filter prosodic markers (not real phonemes).
+  // Symbol remapping (AX->AH, NX->NG, WH->W) is now handled by
+  // the normalize rule phase in public/rules/frontends/qlatt-english/phases/normalize.yaml.
+  const PROSODIC_MARKERS = new Set(['< >', '<,>', '<.>', '<?>', '<->']);
+  return elovitzPhonemes.filter(p => !PROSODIC_MARKERS.has(p));
 }

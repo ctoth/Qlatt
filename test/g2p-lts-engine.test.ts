@@ -1,39 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { mapElovitzToQlatt } from '../src/g2p/phoneme-map';
 import { applyLtsRules } from '../src/g2p/lts-engine';
 
-describe('phoneme mapping', () => {
-  it('maps AX to AH (schwa)', () => {
-    expect(mapElovitzToQlatt(['AX'])).toEqual(['AH']);
-  });
-
-  it('maps NX to NG (velar nasal)', () => {
-    expect(mapElovitzToQlatt(['NX'])).toEqual(['NG']);
-  });
-
-  it('maps WH to W (wh-merger)', () => {
-    expect(mapElovitzToQlatt(['WH'])).toEqual(['W']);
-  });
-
-  it('passes through standard phonemes unchanged', () => {
-    expect(mapElovitzToQlatt(['B', 'AE', 'T'])).toEqual(['B', 'AE', 'T']);
-  });
-
-  it('filters out prosodic markers', () => {
-    expect(mapElovitzToQlatt(['< >', 'B', 'AE', 'T', '<.>'])).toEqual(['B', 'AE', 'T']);
-    expect(mapElovitzToQlatt(['<,>'])).toEqual([]);
-    expect(mapElovitzToQlatt(['<?>'])).toEqual([]);
-    expect(mapElovitzToQlatt(['<->'])).toEqual([]);
-  });
-
-  it('maps multiple Elovitz phonemes in a sequence', () => {
-    expect(mapElovitzToQlatt(['DH', 'AX'])).toEqual(['DH', 'AH']);
-  });
-
-  it('handles empty input', () => {
-    expect(mapElovitzToQlatt([])).toEqual([]);
-  });
-});
+// Note: Symbol normalization (AX->AH, NX->NG, WH->W) is now handled by
+// the normalize rule phase (public/rules/frontends/qlatt-english/phases/normalize.yaml), not by
+// the LTS engine. Tests below expect raw Elovitz notation.
 
 describe('context pattern compilation', () => {
   // These are tested indirectly through rule application.
@@ -61,11 +31,11 @@ describe('context pattern compilation', () => {
 });
 
 describe('individual rule application', () => {
-  it('" THE " -> DH AH', () => {
+  it('" THE " -> DH AX', () => {
     // Rule: left=" " letters="THE" right=" " phonemes=["DH","AX"]
-    // AX maps to AH
+    // AX preserved; normalize phase maps to AH later
     const result = applyLtsRules('the');
-    expect(result).toEqual(['DH', 'AH']);
+    expect(result).toEqual(['DH', 'AX']);
   });
 
   it('"TO " -> T UW', () => {
@@ -92,11 +62,11 @@ describe('individual rule application', () => {
     expect(result).toEqual(['TH', 'R', 'UW']);
   });
 
-  it('" A " -> AH (isolated a)', () => {
+  it('" A " -> AX (isolated a)', () => {
     // Rule: left="" letters="A" right=" " phonemes=["AX"]
-    // AX maps to AH
+    // AX preserved; normalize phase maps to AH later
     const result = applyLtsRules('a');
-    expect(result).toEqual(['AH']);
+    expect(result).toEqual(['AX']);
   });
 
   it('[QU] -> K W in "quick"', () => {
@@ -113,9 +83,9 @@ describe('full word tests', () => {
     expect(result).toEqual(['K', 'AE', 'T']);
   });
 
-  it('"the" -> DH AH', () => {
+  it('"the" -> DH AX', () => {
     const result = applyLtsRules('the');
-    expect(result).toEqual(['DH', 'AH']);
+    expect(result).toEqual(['DH', 'AX']);
   });
 
   it('"phone" -> F OW N', () => {
@@ -166,9 +136,9 @@ describe('edge cases', () => {
     expect(result).toEqual([]);
   });
 
-  it('"a" -> single phoneme', () => {
+  it('"a" -> single phoneme (AX)', () => {
     const result = applyLtsRules('a');
-    expect(result).toEqual(['AH']);
+    expect(result).toEqual(['AX']);
   });
 });
 
@@ -200,10 +170,10 @@ describe('extended word tests', () => {
     expect(result).toEqual(['JH', 'AH', 'D', 'JH']);
   });
 
-  it('"nation" -> N EY SH AH N (via -TION -> SH)', () => {
-    // N -> N, A before ^+# -> EY, TI before O -> SH, ION -> AH N
+  it('"nation" -> N EY SH AX N (via -TION -> SH)', () => {
+    // N -> N, A before ^+# -> EY, TI before O -> SH, ION -> AX N
     const result = applyLtsRules('nation');
-    expect(result).toEqual(['N', 'EY', 'SH', 'AH', 'N']);
+    expect(result).toEqual(['N', 'EY', 'SH', 'AX', 'N']);
   });
 
   it('"enough" -> EH N AH F (OUGH -> AH F)', () => {
@@ -232,11 +202,11 @@ describe('extended word tests', () => {
     expect(result).toEqual(['P', 'S', 'IH', 'CH', 'AA', 'L', 'AA', 'JH', 'IY']);
   });
 
-  it('"pneumonia" -> P N Y UW M OW N IH AH', () => {
+  it('"pneumonia" -> P N Y UW M OW N IH AX', () => {
     // Note: Elovitz rules do not handle silent P before N —
     // this is a known limitation of the rule set
     const result = applyLtsRules('pneumonia');
-    expect(result).toEqual(['P', 'N', 'Y', 'UW', 'M', 'OW', 'N', 'IH', 'AH']);
+    expect(result).toEqual(['P', 'N', 'Y', 'UW', 'M', 'OW', 'N', 'IH', 'AX']);
   });
 
   it('"hello" -> HH EH L OW', () => {

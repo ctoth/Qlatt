@@ -12,7 +12,7 @@
 // ── Vowel set ───────────────────────────────────────────────────────────
 
 const VOWELS = new Set([
-  'AA', 'AE', 'AH', 'AO', 'AW', 'AY',
+  'AA', 'AE', 'AH', 'AO', 'AW', 'AX', 'AY', // AX: Elovitz schwa (Elovitz et al. 1976)
   'EH', 'ER', 'EY',
   'IH', 'IY',
   'OW', 'OY',

@@ -44,7 +44,9 @@ Text Input
 WebAudio destination -> Audio output
 ```
 
-`public/rules/inventory.yaml` is the inventory/default source; `src/declarative-frontend/inventory.ts` loads and exposes inventory helpers (`PHONEME_TARGETS`, defaults, materializers). Frontend behavioral rules are owned by the declarative rule pack.
+`public/rules/inventory.yaml` is the inventory/default source; `src/declarative-frontend/inventory.ts` loads and exposes inventory helpers (`PHONEME_TARGETS`, defaults, materializers). Frontend behavioral rules are owned by the declarative rule pack. The default bundled frontend entrypoint is `public/rules/frontends/qlatt-english/frontend.yaml`, which includes the frontend-local `pipeline.yaml` and `phases/*.yaml`.
+
+If you add another frontend, register it in `src/declarative-frontend/rule-pack.ts` so callers can select it by `frontendId` instead of hardcoding a path.
 
 ### File Relationships
 
@@ -186,7 +188,7 @@ a2Linear:
 
 ### Step 1: Define Parameters (semantics.yaml)
 
-Create `experiments/<synth-name>/semantics.yaml`:
+Create `public/experiments/<synth-name>/semantics.yaml`:
 
 ```yaml
 bacon: "0.1"
@@ -254,7 +256,7 @@ realize:
 
 ### Step 2: Define Topology (graph.yaml)
 
-Create `experiments/<synth-name>/graph.yaml`:
+Create `public/experiments/<synth-name>/graph.yaml`:
 
 ```yaml
 bacon: "0.1"
@@ -318,7 +320,7 @@ outputs:
 
 ### Step 3: Register Primitives (registry.yaml)
 
-Either extend `experiments/klatt80-baseline/registry.yaml` or create your own:
+Either extend `public/experiments/klatt80-baseline/registry.yaml` or create your own:
 
 ```yaml
 bacon: "0.1"
@@ -431,10 +433,10 @@ pub extern "C" fn my_primitive_process(
 klatt_wasm_common::export_alloc_fns!();
 ```
 
-2. Create worklet wrapper in `worklets/`:
+2. Create the worklet wrapper in `src/worklets/` and build it into `public/worklets/` with `npm run build:worklets`:
 
-```javascript
-// worklets/my-primitive-processor.js
+```typescript
+// src/worklets/my-primitive-processor.ts
 class MyPrimitiveProcessor extends AudioWorkletProcessor {
     constructor(options) {
         super();
@@ -469,8 +471,8 @@ my-primitive:
 
 For simpler primitives, skip WASM:
 
-```javascript
-// worklets/simple-processor.js
+```typescript
+// src/worklets/simple-processor.ts
 class SimpleProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
         return [
@@ -506,9 +508,9 @@ Wire your synthesizer into the TTS pipeline:
 import { createKlattRuntime } from './klatt-runtime.js';
 
 async function createMySynthRuntime(audioContext) {
-    const semantics = await loadYaml('experiments/my-synth/semantics.yaml');
-    const graph = await loadYaml('experiments/my-synth/graph.yaml');
-    const registry = await loadYaml('experiments/my-synth/registry.yaml');
+    const semantics = await loadYaml('public/experiments/my-synth/semantics.yaml');
+    const graph = await loadYaml('public/experiments/my-synth/graph.yaml');
+    const registry = await loadYaml('public/experiments/my-synth/registry.yaml');
 
     return createKlattRuntime({
         audioContext,
@@ -869,11 +871,11 @@ Use this checklist when adding a new synthesizer.
 
 ### Phase 2: YAML Definitions
 
-- [ ] Create `experiments/<synth-name>/semantics.yaml`
+- [ ] Create `public/experiments/<synth-name>/semantics.yaml`
   - [ ] Define all params with type/range/default/unit
   - [ ] Define constants section with lookup tables
   - [ ] Define realize rules with CEL expressions
-- [ ] Create `experiments/<synth-name>/graph.yaml`
+- [ ] Create `public/experiments/<synth-name>/graph.yaml`
   - [ ] Define all nodes with type and params
   - [ ] Define connections array
   - [ ] Define outputs array
@@ -914,16 +916,16 @@ Use this checklist when adding a new synthesizer.
 
 | File | Purpose |
 |------|---------|
-| `experiments/klatt80-baseline/semantics.yaml` | Parameter definitions, CEL rules |
-| `experiments/klatt80-baseline/graph.yaml` | Audio topology, bindings |
-| `experiments/klatt80-baseline/registry.yaml` | Primitive definitions |
+| `public/experiments/klatt80-baseline/semantics.yaml` | Parameter definitions, CEL rules |
+| `public/experiments/klatt80-baseline/graph.yaml` | Audio topology, bindings |
+| `public/experiments/klatt80-baseline/registry.yaml` | Primitive definitions |
 | `src/klatt-runtime.ts` | WebAudio graph builder |
 | `src/klatt-interpreter.ts` | Track scheduling, semantics evaluation |
 | `src/semantics/cel-evaluator.ts` | CEL expression parser |
 | `src/semantics/topological-evaluator.ts` | Dependency ordering |
 | `src/builtin-functions.ts` | dbToLinear, proximity, ndbScale |
 | `crates/*/src/lib.rs` | WASM primitive implementations |
-| `worklets/*.js` | AudioWorklet processors |
+| `src/worklets/*-processor.ts` | AudioWorklet processor sources (compiled to `public/worklets/`) |
 
 ### WASM Primitive API Pattern
 

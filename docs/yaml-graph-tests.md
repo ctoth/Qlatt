@@ -13,12 +13,12 @@ The current harness focuses on:
 Entry points:
 - Harness: `test/utils/yaml-graph-harness.ts:1`
 - Vitest loader: `test/yaml-graph.test.ts:1`
-- Example suite: `experiments/klsyn88/tests.yaml:1`
+- Example suite: `public/experiments/klsyn88/tests.yaml:1`
 
 ## Quick Start
 
 1. Create a suite YAML in your experiment folder:
-   - Example: `experiments/klsyn88/tests.yaml`
+   - Example: `public/experiments/klsyn88/tests.yaml`
 2. Point it at your experiment files:
    - `semantics`, `graph`, and (optionally) `registry`
 3. Add tests (see patterns below)
@@ -34,9 +34,9 @@ At the top level:
 
 ```yaml
 suite: klsyn88-semantics-and-schedule
-semantics: experiments/klsyn88/semantics.yaml
-graph: experiments/klsyn88/graph.yaml
-registry: experiments/klsyn88/registry.yaml
+semantics: public/experiments/klsyn88/semantics.yaml
+graph: public/experiments/klsyn88/graph.yaml
+registry: public/experiments/klsyn88/registry.yaml
 defaultTol: 1e-6
 
 tests:
@@ -191,4 +191,3 @@ This is intentional: they are fast, deterministic, and “math-first.”
 If you want waveform/spectral assertions, the next step is to add an
 offline rendering layer (likely via the existing Puppeteer offline render
 path) and compute audio fingerprints there.
-

@@ -10,7 +10,9 @@ Text -> preprocess -> declarative frontend -> Klatt track -> interpreter -> WebA
          src/tts-frontend.ts      src/declarative-frontend/*
 ```
 
-`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`.
+`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`. The default bundled frontend is `qlatt-english`, rooted at `public/rules/frontends/qlatt-english/frontend.yaml`.
+
+For graph topology and extension points, see `docs/synthesizer-architecture.md`. For the full authoring workflow, see `docs/adding-a-synthesizer.md`.
 
 ## Track Structure
 
@@ -43,7 +45,7 @@ interface KlattFrame {
 
 ### Default Values
 
-Defined in `experiments/klatt80-baseline/semantics.yaml` under `params:` section.
+Defined in `public/experiments/klatt80-baseline/semantics.yaml` under `params:` section.
 
 ## Frontend: Declarative Track Generation
 
@@ -59,6 +61,8 @@ Defined in `experiments/klatt80-baseline/semantics.yaml` under `params:` section
    - `prosody`
    - `finalize`
 4. final `KlattFrame[]` emission with F0 interpolation from resolved declarative point stream tokens
+
+The phase ordering and frontend-level policy defaults come from `public/rules/frontends/qlatt-english/frontend.yaml`, which includes `pipeline.yaml` and the frontend-local `phases/*.yaml` files in that same package.
 
 Legacy imperative frontend mutators (`rule_K_Context`, `rule_GenerateF0Contour`) are removed from runtime usage and exports.
 

@@ -22,8 +22,18 @@ type KlattParams = Record<string, number>;
 
 export const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 
-/** An F0 contour point (time in seconds, f0 in Hz). */
-export type F0Point = { time: number; f0: number };
+/** An F0 contour point (time in seconds, f0 in Hz).
+ *  Optional metadata for provenance and sag-injection passes.
+ *  Citations: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation),
+ *             Ladd 2008 pp.155-157 (sagging transition between H* accents) */
+export type F0Point = {
+  time: number;
+  f0: number;
+  /** Source rule tag, e.g. "f0_h_star", "f0_l_star", "f0_boundary_low". */
+  tag?: string;
+  /** ToBI accent type derived from tag, e.g. "H*", "L*". */
+  accentType?: string;
+};
 
 /** YAML-sourced output configuration for track assembly. */
 export type OutputConfig = {
@@ -69,6 +79,12 @@ export type AssembleTrackOptions = {
   /** Voice quality overrides applied to every frame's params.
    *  Citations: Fant 1997, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
   voiceQuality?: VoiceQualityOverrides;
+  /** Sagging transition depth in Hz between consecutive H* accents (default 12).
+   *  Citation: Pierrehumbert 1980, Ladd 2008 pp.155-157 */
+  sagDepthHz?: number;
+  /** Minimum inter-accent span in ms for sag to apply (default 150).
+   *  Citation: Pierrehumbert 1980 (closer H*s show less/no dipping) */
+  sagMinSpanMs?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -133,11 +149,21 @@ export function buildF0ContourFromDeclarative(
   }
 
   const contour = points
-    .map((point: InputToken) => ({
-      time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
-      f0: Number(point.value),
-    }))
-    .filter((point: { time: number; f0: number }) => point.time >= 0 && Number.isFinite(point.f0));
+    .map((point: InputToken): F0Point => {
+      const tag = typeof point.tag === "string" ? point.tag : undefined;
+      // Derive accentType from rule tag.
+      // Citation: Pierrehumbert 1980 (H* and L* tone distinction)
+      let accentType: string | undefined;
+      if (tag === "f0_h_star") accentType = "H*";
+      else if (tag === "f0_l_star") accentType = "L*";
+      return {
+        time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
+        f0: Number(point.value),
+        ...(tag != null ? { tag } : {}),
+        ...(accentType != null ? { accentType } : {}),
+      };
+    })
+    .filter((point: F0Point) => point.time >= 0 && Number.isFinite(point.f0));
 
   if (contour.length === 0) return [{ time: 0, f0: baseF0 }];
   if (contour[0].time > 0) {
@@ -152,6 +178,8 @@ export function buildF0ContourFromDeclarative(
       cleaned[cleaned.length - 1] = {
         time: prev.time,
         f0: curr.f0,
+        ...(curr.tag != null ? { tag: curr.tag } : {}),
+        ...(curr.accentType != null ? { accentType: curr.accentType } : {}),
       };
       continue;
     }
@@ -177,6 +205,106 @@ function getF0AtTime(f0Contour: F0Point[], time: number): number {
     }
   }
   return f0Contour[f0Contour.length - 1].f0;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers -- sagging transitions (H*-H* interpolation)
+// Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+// Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
+// ---------------------------------------------------------------------------
+
+/** Tags that indicate a phrase boundary, preventing sag across phrases. */
+const BOUNDARY_TAGS = new Set([
+  "f0_boundary_low",
+  "f0_boundary_rise",
+  "f0_register_reset",
+]);
+
+/**
+ * Insert parabolic sag points between consecutive H* accent peaks.
+ *
+ * Pure function: takes an F0 contour and returns a new contour with additional
+ * points that create the characteristic "dipping" shape between H*-H* pairs
+ * described by Pierrehumbert (1980) and Ladd (2008).
+ *
+ * Model: f0(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
+ * where t is normalized [0,1] between the two H* peaks.
+ *
+ * Three sag points are inserted at t=0.25, t=0.50, t=0.75 for smooth curvature.
+ *
+ * @param contour  Input F0 contour (sorted by time, with tag/accentType metadata).
+ * @param sagDepthHz  Maximum sag depth in Hz at midpoint (default 12).
+ * @param minSpanMs  Minimum inter-accent span in ms for sag to apply (default 150).
+ * @returns New contour with sag points inserted (sorted by time).
+ *
+ * Citations:
+ *   Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+ *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
+ */
+export function applySaggingTransitions(
+  contour: F0Point[],
+  sagDepthHz: number = 12,
+  minSpanMs: number = 150
+): F0Point[] {
+  if (contour.length < 2 || sagDepthHz <= 0) return [...contour];
+
+  // Collect indices of H* accent points.
+  const hStarIndices: number[] = [];
+  for (let i = 0; i < contour.length; i++) {
+    if (contour[i].accentType === "H*") {
+      hStarIndices.push(i);
+    }
+  }
+
+  if (hStarIndices.length < 2) return [...contour];
+
+  const minSpanSec = minSpanMs / 1000;
+  const sagPoints: F0Point[] = [];
+
+  // For each consecutive H*-H* pair, check eligibility and insert sag points.
+  for (let k = 0; k < hStarIndices.length - 1; k++) {
+    const leftIdx = hStarIndices[k];
+    const rightIdx = hStarIndices[k + 1];
+    const left = contour[leftIdx];
+    const right = contour[rightIdx];
+
+    // Check span threshold.
+    // Citation: Pierrehumbert 1980 (closer H*s show less/no dipping)
+    const span = right.time - left.time;
+    if (span < minSpanSec) continue;
+
+    // Check no phrase boundary between the two H* points.
+    let hasBoundary = false;
+    for (let j = leftIdx + 1; j < rightIdx; j++) {
+      if (contour[j].tag && BOUNDARY_TAGS.has(contour[j].tag!)) {
+        hasBoundary = true;
+        break;
+      }
+    }
+    if (hasBoundary) continue;
+
+    // Insert sag points at t=0.25, t=0.50, t=0.75.
+    // Formula: f0_sag(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
+    // where f0_linear(t) = left.f0 + (right.f0 - left.f0) * t
+    const tValues = [0.25, 0.5, 0.75];
+    for (const t of tValues) {
+      const time = left.time + span * t;
+      const f0Linear = left.f0 + (right.f0 - left.f0) * t;
+      const sagAmount = sagDepthHz * 4 * t * (1 - t);
+      sagPoints.push({
+        time,
+        f0: f0Linear - sagAmount,
+        tag: "f0_sag",
+      });
+    }
+  }
+
+  if (sagPoints.length === 0) return [...contour];
+
+  // Merge and sort by time.
+  const merged = [...contour, ...sagPoints];
+  merged.sort((a, b) => a.time - b.time);
+  return merged;
 }
 
 // Hardcoded defaults — overridden by YAML output config when available
@@ -272,7 +400,14 @@ export function assembleKlattTrack(
   const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
 
   // Build the F0 contour from declarative points.
-  const f0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
+  const rawF0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
+
+  // Apply sagging transitions between consecutive H* accent peaks.
+  // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+  // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
+  const sagDepth = options.sagDepthHz ?? 12;
+  const sagMinSpan = options.sagMinSpanMs ?? 150;
+  const f0Contour = applySaggingTransitions(rawF0Contour, sagDepth, sagMinSpan);
 
   const klattTrack: KlattFrame[] = [];
   let currentTime = 0;

@@ -266,6 +266,18 @@ parameters:
         citations:
           - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
           - "Pierrehumbert 1980 (final lowering as separate effect)"
+      # --- Sagging transitions (H*-H* interpolation) ---
+      sag_depth_hz:
+        value: 12
+        citations:
+          - "Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)"
+          - "Ladd 2008 pp.155-157 (sagging transition between H* accents)"
+          - "Engineering estimate: 12 Hz below linear midpoint"
+      sag_min_span_ms:
+        value: 150
+        citations:
+          - "Pierrehumbert 1980 (closer H* accents show less/no dipping)"
+          - "Engineering estimate: minimum span for audible sag"
       # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
         value: 1.2

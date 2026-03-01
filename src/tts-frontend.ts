@@ -283,10 +283,26 @@ export function textToKlattTrack(
   // --- Assemble final Klatt track (delegated to track-assembler) ---
   // Transition durations scale inversely with rate (Broad & Fertig 1970).
   // At rate=1.0: transitionMs/1.0 = transitionMs (unchanged).
+
+  // Read sagging transition parameters from policy.
+  // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+  // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
+  const f0Policy = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.f0;
+  const sagDepthHz: number | undefined =
+    typeof f0Policy?.sag_depth_hz?.value === "number"
+      ? f0Policy.sag_depth_hz.value
+      : undefined;
+  const sagMinSpanMs: number | undefined =
+    typeof f0Policy?.sag_min_span_ms?.value === "number"
+      ? f0Policy.sag_min_span_ms.value
+      : undefined;
+
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0,
     transitionMs: transitionMs / rate,
     outputConfig: RULEPACK_OUTPUT_CONFIG,
     voiceQuality: voiceQualityOverrides,
+    sagDepthHz,
+    sagMinSpanMs,
   });
 }

@@ -19,6 +19,7 @@ cargo build --release --target wasm32-unknown-unknown -p oversampled-glottal-sou
 cargo build --release --target wasm32-unknown-unknown -p fujisaki-resonator
 cargo build --release --target wasm32-unknown-unknown -p aerodynamic-model
 cargo build --release --target wasm32-unknown-unknown -p biquad-notch
+cargo build --release --target wasm32-unknown-unknown -p reconstruction-filter
 
 mkdir -p "${dest_dir}"
 cp "${target_dir}/resonator.wasm" "${dest_dir}/resonator.wasm"
@@ -36,5 +37,6 @@ cp "${target_dir}/oversampled_glottal_source.wasm" "${dest_dir}/oversampled-glot
 cp "${target_dir}/fujisaki_resonator.wasm" "${dest_dir}/fujisaki-resonator.wasm"
 cp "${target_dir}/aerodynamic_model.wasm" "${dest_dir}/aerodynamic-model.wasm"
 cp "${target_dir}/biquad_notch.wasm" "${dest_dir}/biquad-notch.wasm"
+cp "${target_dir}/reconstruction_filter.wasm" "${dest_dir}/reconstruction-filter.wasm"
 
 echo "WASM artifacts copied to ${dest_dir}."

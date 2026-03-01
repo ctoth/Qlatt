@@ -1,12 +1,17 @@
 import { materializePhonemeTarget } from "./inventory";
 import { runRuleEngine, type InventoryResolver } from "./engine";
-import { QLATT_V12_CEL_RULEPACK, loadRulepackSpecFromPath } from "./rule-pack";
+import {
+  QLATT_ENGLISH_RULEPACK,
+  loadBundledRulepackSpec,
+  loadRulepackSpecFromPath,
+} from "./rule-pack";
 
 type DeclarativeFrontendOptions = {
   includeTrace?: boolean;
   phases?: string[];
   parameters?: Record<string, unknown>;
   inventoryResolver?: InventoryResolver;
+  frontendId?: string;
   specSource?: unknown;
   specPath?: string;
 };
@@ -30,7 +35,9 @@ export function runDeclarativeFrontend(
     options.specSource ??
     (typeof options.specPath === "string" && options.specPath.length > 0
       ? loadRulepackSpecFromPath(options.specPath)
-      : QLATT_V12_CEL_RULEPACK);
+      : typeof options.frontendId === "string" && options.frontendId.length > 0
+        ? loadBundledRulepackSpec(options.frontendId)
+        : QLATT_ENGLISH_RULEPACK);
   const result = runRuleEngine(sequence, specSource, {
     phases: options.phases,
     parameters: options.parameters,
@@ -43,15 +50,6 @@ export function runDeclarativeFrontend(
 export { runRuleEngine } from "./engine";
 export { parseDslSpec } from "./parser";
 export { validateDslSpec } from "./validation";
-export {
-  RANK_LEN,
-  compareOrder,
-  midpointRank,
-  rebalanceRanks,
-  finiteOrder,
-  startOrder,
-  endOrder,
-} from "./order";
 export {
   TokenStatus,
   normalizeTokenStatus,

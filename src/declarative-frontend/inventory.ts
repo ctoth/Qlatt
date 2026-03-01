@@ -6,7 +6,7 @@ import {
   parseYamlString,
 } from "../yaml-loader";
 
-type InventorySpec = {
+export type InventorySpec = {
   base_params: Record<string, number>;
   phoneme_targets: Record<string, Record<string, unknown>>;
 };
@@ -124,13 +124,17 @@ export const BASE_PARAMS: Record<string, number> = INVENTORY.base_params;
 export const PHONEME_TARGETS: Record<string, Record<string, unknown>> = INVENTORY.phoneme_targets;
 
 // --- Rule Functions ---
-export function fillDefaultParams(target: Record<string, unknown> | null | undefined): Record<string, number> {
-  const filled: Record<string, number> = { ...BASE_PARAMS };
+export function fillDefaultParams(
+  target: Record<string, unknown> | null | undefined,
+  baseParams?: Record<string, number>,
+): Record<string, number> {
+  const effectiveBase = baseParams ?? BASE_PARAMS;
+  const filled: Record<string, number> = { ...effectiveBase };
 
   if (target) {
     // Override defaults with valid numeric values from the target.
     for (const [key, value] of Object.entries(target)) {
-      if (!Object.prototype.hasOwnProperty.call(BASE_PARAMS, key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(effectiveBase, key)) continue;
       if (typeof value === "number" && Number.isFinite(value)) {
         filled[key] = value;
       } else {
@@ -153,8 +157,10 @@ export function fillDefaultParams(target: Record<string, unknown> | null | undef
 
 export function materializePhonemeTarget(
   phoneme: unknown,
-  options?: { stress?: number | null },
+  options?: { stress?: number | null; inventorySpec?: InventorySpec },
 ) {
+  const effectiveTargets = options?.inventorySpec?.phoneme_targets ?? PHONEME_TARGETS;
+  const effectiveBase = options?.inventorySpec?.base_params ?? BASE_PARAMS;
   const baseKey = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
 
   // Resolve the actual lookup key, applying stress-aware vowel resolution when
@@ -166,19 +172,19 @@ export function materializePhonemeTarget(
     // Determine whether the base phoneme is a vowel by probing stressed variants
     // (vowels only exist in inventory as e.g. AH1/AH0, never bare AH).
     const probeTarget =
-      PHONEME_TARGETS[baseKey + "1"] ||
-      PHONEME_TARGETS[baseKey + "0"] ||
-      PHONEME_TARGETS[baseKey];
+      effectiveTargets[baseKey + "1"] ||
+      effectiveTargets[baseKey + "0"] ||
+      effectiveTargets[baseKey];
     const isVowel = (probeTarget as Record<string, unknown> | undefined)?.type === "vowel";
 
     if (isVowel) {
       const stressMarker = options.stress === 1 ? "1" : "0";
       const fallbackMarker = stressMarker === "1" ? "0" : "1";
-      target = PHONEME_TARGETS[baseKey + stressMarker] as Record<string, unknown> | undefined;
+      target = effectiveTargets[baseKey + stressMarker] as Record<string, unknown> | undefined;
       if (target) {
         resolvedKey = baseKey + stressMarker;
       } else {
-        target = PHONEME_TARGETS[baseKey + fallbackMarker] as Record<string, unknown> | undefined;
+        target = effectiveTargets[baseKey + fallbackMarker] as Record<string, unknown> | undefined;
         if (target) {
           resolvedKey = baseKey + fallbackMarker;
         }
@@ -186,9 +192,9 @@ export function materializePhonemeTarget(
     } else {
       // Consonant: try with suffixes then bare key (matches original frontend logic)
       target =
-        (PHONEME_TARGETS[baseKey + "1"] as Record<string, unknown> | undefined) ||
-        (PHONEME_TARGETS[baseKey + "0"] as Record<string, unknown> | undefined) ||
-        (PHONEME_TARGETS[baseKey] as Record<string, unknown> | undefined);
+        (effectiveTargets[baseKey + "1"] as Record<string, unknown> | undefined) ||
+        (effectiveTargets[baseKey + "0"] as Record<string, unknown> | undefined) ||
+        (effectiveTargets[baseKey] as Record<string, unknown> | undefined);
       if (target) {
         // resolvedKey stays baseKey for consonants (they don't rename)
         resolvedKey = baseKey;
@@ -196,15 +202,19 @@ export function materializePhonemeTarget(
     }
   } else {
     // No options: direct lookup (backward-compatible path)
-    target = PHONEME_TARGETS[resolvedKey] as Record<string, unknown> | undefined;
+    target = effectiveTargets[resolvedKey] as Record<string, unknown> | undefined;
   }
 
   // Final fallback to SIL
   if (!target) {
-    target = (PHONEME_TARGETS.SIL || {}) as Record<string, unknown>;
+    target = (effectiveTargets.SIL || {}) as Record<string, unknown>;
   }
 
   const targetDuration = typeof target.dur === "number" ? target.dur : undefined;
+
+  // Use the effective base params for filling defaults.
+  const filledParams = fillDefaultParams(target, effectiveBase);
+
   const payload: {
     phoneme: string;
     params: Record<string, number>;
@@ -213,7 +223,7 @@ export function materializePhonemeTarget(
     [key: string]: unknown;
   } = {
     phoneme: resolvedKey,
-    params: fillDefaultParams(target),
+    params: filledParams,
     duration: targetDuration || 30,
     inherentDuration: targetDuration,
   };
@@ -230,7 +240,7 @@ export function materializePhonemeTarget(
     }
     if (typeof value === "boolean") {
       payload[entryKey] = value;
-    } else if (typeof value === "number" && !Object.prototype.hasOwnProperty.call(BASE_PARAMS, entryKey)) {
+    } else if (typeof value === "number" && !Object.prototype.hasOwnProperty.call(effectiveBase, entryKey)) {
       payload[entryKey] = value;
     }
   }

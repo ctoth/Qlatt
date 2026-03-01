@@ -35,18 +35,33 @@ interface LtsRulesData {
   rules_by_letter: Record<string, LtsRule[]>;
 }
 
-const DEFAULT_LTS_RULES_PATH = "/rules/lts-rules.yaml";
+export const DEFAULT_LTS_RULES_PATH = "/rules/lts-rules.yaml";
 
 // ── Module-level state (lazy init) ─────────────────────────────────────
 
+const rulesCache = new Map<string, { data: LtsRulesData; contextCache: Map<string, RegExp> }>();
+
+// Legacy aliases for the default path entry (used by compileContextPattern).
 let rulesData: LtsRulesData | null = null;
 let compiledContextCache: Map<string, RegExp> | null = null;
 
-function loadRules(): LtsRulesData {
-  if (rulesData) return rulesData;
-  rulesData = loadYamlDocumentSync<LtsRulesData>(DEFAULT_LTS_RULES_PATH);
-  compiledContextCache = new Map();
-  return rulesData;
+function loadRules(rulesPath?: string): { data: LtsRulesData; contextCache: Map<string, RegExp> } {
+  const effectivePath = rulesPath ?? DEFAULT_LTS_RULES_PATH;
+  const cached = rulesCache.get(effectivePath);
+  if (cached) return cached;
+
+  const data = loadYamlDocumentSync<LtsRulesData>(effectivePath);
+  const contextCache = new Map<string, RegExp>();
+  const entry = { data, contextCache };
+  rulesCache.set(effectivePath, entry);
+
+  // Keep legacy module-level aliases in sync for the default path.
+  if (effectivePath === DEFAULT_LTS_RULES_PATH) {
+    rulesData = data;
+    compiledContextCache = contextCache;
+  }
+
+  return entry;
 }
 
 // ── Context pattern compilation ────────────────────────────────────────
@@ -63,12 +78,12 @@ function loadRules(): LtsRulesData {
 function compileContextPattern(
   pattern: string,
   anchor: 'left' | 'right',
-  symbols: Record<string, string>
+  symbols: Record<string, string>,
+  cache: Map<string, RegExp>,
 ): RegExp {
   const cacheKey = `${anchor}:${pattern}`;
-  if (compiledContextCache!.has(cacheKey)) {
-    return compiledContextCache!.get(cacheKey)!;
-  }
+  const hit = cache.get(cacheKey);
+  if (hit) return hit;
 
   let regex = '';
   for (const ch of pattern) {
@@ -84,7 +99,7 @@ function compileContextPattern(
   // Right context: pattern must match at the START of the right substring
   const anchored = anchor === 'left' ? `${regex}$` : `^${regex}`;
   const compiled = new RegExp(anchored);
-  compiledContextCache!.set(cacheKey, compiled);
+  cache.set(cacheKey, compiled);
   return compiled;
 }
 
@@ -113,7 +128,8 @@ function tryRule(
   rule: LtsRule,
   input: string,
   pos: number,
-  symbols: Record<string, string>
+  symbols: Record<string, string>,
+  cache: Map<string, RegExp>,
 ): number {
   const { left, letters, right } = rule;
 
@@ -125,14 +141,14 @@ function tryRule(
   // 2. Check left context
   if (left.length > 0) {
     const leftStr = input.substring(0, pos);
-    const leftRe = compileContextPattern(left, 'left', symbols);
+    const leftRe = compileContextPattern(left, 'left', symbols, cache);
     if (!leftRe.test(leftStr)) return 0;
   }
 
   // 3. Check right context
   if (right.length > 0) {
     const rightStr = input.substring(pos + letters.length);
-    const rightRe = compileContextPattern(right, 'right', symbols);
+    const rightRe = compileContextPattern(right, 'right', symbols, cache);
     if (!rightRe.test(rightStr)) return 0;
   }
 
@@ -148,11 +164,11 @@ function tryRule(
  *               Case-insensitive.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(word: string): string[] {
+export function applyLtsRules(word: string, rulesPath?: string): string[] {
   if (!word || word.length === 0) return [];
 
-  const data = loadRules();
-  const { context_symbols, rules_by_letter } = data;
+  const loaded = loadRules(rulesPath);
+  const { context_symbols, rules_by_letter } = loaded.data;
 
   // Pad with spaces (word boundary markers)
   const input = ' ' + word.toUpperCase() + ' ';
@@ -172,7 +188,7 @@ export function applyLtsRules(word: string): string[] {
 
     let matched = false;
     for (const rule of rules) {
-      const consumed = tryRule(rule, input, pos, context_symbols);
+      const consumed = tryRule(rule, input, pos, context_symbols, loaded.contextCache);
       if (consumed > 0) {
         elovitzPhonemes.push(...rule.phonemes);
         pos += consumed;

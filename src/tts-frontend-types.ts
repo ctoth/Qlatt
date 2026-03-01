@@ -33,6 +33,10 @@ export type TranscriptionOptions = {
   provenance?: ProvenanceCollector | null;
   /** Transcription config from YAML (overrides hardcoded defaults). */
   transcriptionConfig?: TranscriptionConfig;
+  /** Path to alternative LTS rules YAML. When set, applyLtsRules uses this file. */
+  ltsPath?: string;
+  /** Override the default CMU dictionary lookup function. */
+  dictLookup?: (word: string) => string[] | null;
 };
 
 // ---------------------------------------------------------------------------

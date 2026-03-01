@@ -1,5 +1,7 @@
 import {
   materializePhonemeTarget,
+  loadInventorySpecFromPath,
+  type InventorySpec,
 } from "./declarative-frontend/inventory";
 import { normalizeText } from "./g2p/text-normalize";
 import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
@@ -272,6 +274,18 @@ export function textToKlattTrack(
   const frontendSpec = loadBundledRulepackSpec(options.frontendId);
   const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
+
+  // Per-frontend inventory and LTS path overrides.
+  const inventoryPath = (frontendSpec as any)?.inventory_path as string | undefined;
+  const ltsPath = (frontendSpec as any)?.lts_path as string | undefined;
+  const customInventory: InventorySpec | undefined = inventoryPath
+    ? loadInventorySpecFromPath(inventoryPath)
+    : undefined;
+
+  // No-op dictionary lookup for frontends with custom LTS rules (their phoneme set
+  // won't match CMU dictionary entries).
+  const noOpDictLookup = (): null => null;
+
   const provenance = options.provenance ?? null;
   const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
   const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
@@ -341,6 +355,8 @@ export function textToKlattTrack(
   let parameterSequence: PipelineToken[] = transcribeText(normalized, {
     provenance,
     transcriptionConfig: rulepackTranscriptionConfig,
+    ltsPath,
+    dictLookup: ltsPath ? noOpDictLookup : undefined,
   });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
@@ -348,7 +364,10 @@ export function textToKlattTrack(
     let targetKeyBase = ph.phoneme;
 
     // Delegate stress-aware inventory lookup to materializePhonemeTarget
-    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
+    const materialized = materializePhonemeTarget(targetKeyBase, {
+      stress: ph.stress,
+      inventorySpec: customInventory,
+    });
 
     // Warn if phoneme was not found (materialized falls back to SIL internally)
     const isStructuralStopBase = STRUCTURAL_STOP_BASES.has(targetKeyBase);
@@ -388,6 +407,12 @@ export function textToKlattTrack(
   });
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
+  // When a custom inventory is active, wrap materializePhonemeTarget to inject it.
+  const effectiveMaterialize = customInventory
+    ? (phoneme: unknown, opts?: { stress?: number | null }) =>
+        materializePhonemeTarget(phoneme, { ...opts, inventorySpec: customInventory })
+    : materializePhonemeTarget;
+
   const runPhases = (
     sequence: PipelineToken[],
     phases: string[],
@@ -396,7 +421,7 @@ export function textToKlattTrack(
     runPhasesWithProvenance(
       sequence,
       phases,
-      materializePhonemeTarget,
+      effectiveMaterialize,
       provenance,
       tokenDecisionIds,
       parameters,

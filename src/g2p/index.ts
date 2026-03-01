@@ -28,7 +28,11 @@ import { assignStress } from './stress';
  * @param dictLookup - Injected dictionary lookup function.
  * @returns PronunciationResult with phonemes, source layer, and metadata.
  */
-export function pronounce(word: string, dictLookup: DictLookup): PronunciationResult {
+export function pronounce(
+  word: string,
+  dictLookup: DictLookup,
+  options?: { ltsPath?: string },
+): PronunciationResult {
   if (!word || word.trim().length === 0) {
     return { phonemes: [], source: 'lts-rules', word: word || '' };
   }
@@ -62,7 +66,7 @@ export function pronounce(word: string, dictLookup: DictLookup): PronunciationRe
   }
 
   // 4. Fall back to Elovitz LTS rules + Hunnicutt stress assignment
-  const ltsPhonemes = applyLtsRules(lowerWord);
+  const ltsPhonemes = applyLtsRules(lowerWord, options?.ltsPath);
   const stressHint = getStressHintForWord(lowerWord);
   const stressedPhonemes = assignStress(ltsPhonemes, stressHint);
   return { phonemes: stressedPhonemes, source: 'lts-rules', word: lowerWord };

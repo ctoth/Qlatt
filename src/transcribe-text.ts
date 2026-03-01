@@ -143,6 +143,8 @@ export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
 export function transcribeText(text: string, options: TranscriptionOptions = {}): TranscriptionToken[] {
   const provenance = options.provenance ?? null;
   const cfg = options.transcriptionConfig;
+  const effectiveDictLookup = options.dictLookup ?? cmuDictLookup;
+  const ltsPath = options.ltsPath;
 
   // Resolve effective lookup tables from YAML config, falling back to hardcoded defaults.
   const effectiveSymbols: Record<string, string[]> =
@@ -212,7 +214,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
       // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress.
       const pronResult: PronunciationResult =
         symbolPronunciation == null
-          ? pronounce(sourceWord, cmuDictLookup)
+          ? pronounce(sourceWord, effectiveDictLookup, { ltsPath })
           : {
               phonemes: symbolPronunciation,
               source: "unknown",

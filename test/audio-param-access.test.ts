@@ -145,4 +145,5 @@ describe('applyParamValue', () => {
     expect(result).toBe(true);
     expect(freqParam.setValueAtTime).toHaveBeenCalledWith(880, 3.0);
   });
+
 });

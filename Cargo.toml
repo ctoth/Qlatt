@@ -16,6 +16,7 @@ members = [
   "crates/fujisaki-resonator",
   "crates/aerodynamic-model",
   "crates/biquad-notch",
+  "crates/reconstruction-filter",
 ]
 resolver = "2"
 

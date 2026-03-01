@@ -77,6 +77,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "reconstruction-filter"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "resonator"
 version = "0.1.0"
 dependencies = [

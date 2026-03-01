@@ -229,15 +229,11 @@ export function textToKlattTrack(
   const speakerPolicy = options.speaker ? { policy: { ...speakerOverrides } } : undefined;
   parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
-  parameterSequence = runPhases(parameterSequence, ["duration"], {
-    policy: {
-      ...speakerOverrides,
-      duration: { rate_scale: rate },
-      // Vowel centralization increases at fast rates (Lindblom 1963).
-      // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
-      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
-    },
-  });
+  // Ensure id/stream/status fields exist before prosodic annotation.
+  // The annotator reads phoneme, word, stress, punctuationSymbol — all present
+  // after structural rules. It only ADDS new properties (breakIndex, isAccented,
+  // isNuclearAccent, accentType, isFunctionWord, isContentWord, phraseAccent,
+  // boundaryTone) so this is safe to run before duration rules.
   parameterSequence = parameterSequence.map((token: PipelineToken, index: number) => ({
     ...token,
     id: token.id ?? `ph_${index}`,
@@ -246,11 +242,22 @@ export function textToKlattTrack(
   }));
   // --- Prosodic Structure Annotation ---
   // Annotate tokens with prosodic structure (break indices, accent types,
-  // function/content word classification, nuclear accent) BEFORE prosody rules.
+  // function/content word classification, nuclear accent) BEFORE duration rules.
+  // Moved before duration phase so that breakIndex, isAccented, isNuclearAccent
+  // are available for break-index pre-boundary lengthening and accent lengthening.
   // Citations: Silverman 1992, Pierrehumbert 1980, O'Shaughnessy 1976, Allen 1987
   parameterSequence = annotateProsody(parameterSequence, {
     provenance: provenance ?? undefined,
     baseF0,
+  });
+  parameterSequence = runPhases(parameterSequence, ["duration"], {
+    policy: {
+      ...speakerOverrides,
+      duration: { rate_scale: rate },
+      // Vowel centralization increases at fast rates (Lindblom 1963).
+      // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
+      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
+    },
   });
   // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
   // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.

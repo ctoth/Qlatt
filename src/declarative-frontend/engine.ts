@@ -54,6 +54,7 @@ type NavigationBundle = {
     pointCursor?: Map<string, number> | null
   ) => void;
   invalidateStreamCache: () => void;
+  syncCursorView: (token: TokenLike, field: string, value: unknown) => void;
 };
 
 function isTokenLike(value: unknown): value is TokenLike {
@@ -779,7 +780,10 @@ function buildNavigationFunctions(
   const assocFn = (token: TokenLike, assocName: string) => {
     if (!token || typeof assocName !== "string" || assocName.length === 0) return [];
     ensureActiveIdIndex();
-    const entries = getAssociationEntries(token, assocName);
+    // Resolve through to the original token so we see associations added after
+    // the cursor view snapshot was created.
+    const original = viewToOriginal.get(token) ?? token;
+    const entries = getAssociationEntries(original, assocName);
     return entries
       .filter(
         (entry: { to: string; status: number }) =>
@@ -1016,12 +1020,21 @@ function buildNavigationFunctions(
     activeIdIndexComplete = false;
   };
 
+  // Sync a field value to the cached cursor view so that later CEL expressions
+  // within the same phase see the updated (preview) value instead of the stale
+  // snapshot. Called by applyEffectToToken after setField(preview).
+  const syncCursorView = (token: TokenLike, field: string, value: unknown): void => {
+    const view = viewCache.get(token);
+    if (view) view[field] = value;
+  };
+
   return {
     functions,
     buildContext,
     evaluateCondition: evaluateConditionForToken,
     rebindCurrentToken,
     invalidateStreamCache,
+    syncCursorView,
   };
 }
 
@@ -1263,20 +1276,30 @@ function applyEffectToToken(
       const preview = previewScalarEffect(state, op, value);
       state.preview = preview;
       setField(preview);
+      // Keep the cursor view in sync so later CEL expressions in the same
+      // phase see the updated preview, not the stale snapshot.
+      navigation.syncCursorView(token, scalarField, preview);
       return;
     }
   }
 
+  let nextValue: unknown;
   switch (op) {
     case "set":
-      setField(value);
+      nextValue = value;
       break;
     case "add":
-      setField(current + value);
+      nextValue = current + value;
       break;
     case "mul":
-      setField(current * value);
+      nextValue = current * value;
       break;
+  }
+  setField(nextValue);
+  // Sync top-level field writes to the cursor view so later expressions
+  // within the same phase observe the updated value.
+  if (fieldPath.length === 1) {
+    navigation.syncCursorView(token, fieldPath[0], nextValue);
   }
 }
 

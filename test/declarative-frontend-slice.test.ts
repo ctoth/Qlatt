@@ -75,7 +75,10 @@ describe("declarative frontend first migration slice", () => {
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
     // AE before voiceless stop: gets vowel_before_voiceless_stop_shortening (-15ms additive)
     expect(out[0].duration).toBe(80);
-    expect(out[2].duration).toBe(144);
+    // IY (stress=0): stress_duration(mul 0.8) → vowel_shortening(mul 1.2, next=SIL)
+    // With Klatt floor=50.4: 0.8*(120-50.4)+50.4=106, then 1.2*(106-50.4)+50.4=117
+    // Pre-boundary lengthening requires breakIndex (not set on these tokens) → factor=1.
+    expect(out[2].duration).toBe(117);
   });
 
   it("parses and validates phase/rule links", () => {
@@ -116,7 +119,10 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    expect(out[0].duration).toBe(168);
+    // AE (stress=1): stress_duration(mul 1.3) → vowel_shortening(mul 1.2, next=SIL skipping suppressed IY)
+    // With Klatt floor=42: 1.3*(100-42)+42=117, then 1.2*(117-42)+42=132
+    // Pre-boundary lengthening requires breakIndex (not set on these tokens) → factor=1.
+    expect(out[0].duration).toBe(132);
     expect(out[1].duration).toBe(100);
   });
 

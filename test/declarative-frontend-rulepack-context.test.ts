@@ -91,15 +91,9 @@ describe("declarative frontend rulepack context migration", () => {
   });
 
   it("applies weaker terminal pre-boundary lengthening to obstruents than sonorants", () => {
-    const baseParams = {
-      policy: {
-        duration: {
-          pre_boundary_terminal_multiplier: 1.4,
-          pre_boundary_terminal_obstruent_multiplier: 1.15,
-        },
-      },
-    };
-
+    // Pre-boundary lengthening uses break-index from the adjacent SIL token.
+    // Sonorants get bi4 multiplier (1.5), obstruents get bi4 obstruent multiplier (1.2).
+    // Tokens need stream/status/breakIndex for the rule to fire.
     const sonorant = runDeclarativeFrontend(
       [
         {
@@ -108,6 +102,9 @@ describe("declarative frontend rulepack context migration", () => {
           params: {},
           duration: 100,
           inherentDuration: 100,
+          stream: "phone",
+          status: 1,
+          word: "all",
         },
         {
           phoneme: "SIL",
@@ -116,9 +113,12 @@ describe("declarative frontend rulepack context migration", () => {
           punctuationSymbol: ".",
           duration: 300,
           inherentDuration: 300,
+          stream: "phone",
+          status: 1,
+          breakIndex: 4,
         },
       ],
-      { phases: ["duration"], parameters: baseParams }
+      { phases: ["duration"] }
     );
 
     const obstruent = runDeclarativeFrontend(
@@ -131,6 +131,9 @@ describe("declarative frontend rulepack context migration", () => {
           params: { AF: 60 },
           duration: 100,
           inherentDuration: 100,
+          stream: "phone",
+          status: 1,
+          word: "pass",
         },
         {
           phoneme: "SIL",
@@ -139,9 +142,12 @@ describe("declarative frontend rulepack context migration", () => {
           punctuationSymbol: ".",
           duration: 300,
           inherentDuration: 300,
+          stream: "phone",
+          status: 1,
+          breakIndex: 4,
         },
       ],
-      { phases: ["duration"], parameters: baseParams }
+      { phases: ["duration"] }
     );
 
     expect(sonorant[0].duration).toBeGreaterThan(100);

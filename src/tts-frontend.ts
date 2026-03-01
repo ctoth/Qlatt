@@ -2,7 +2,7 @@ import {
   materializePhonemeTarget,
 } from "./declarative-frontend/inventory";
 import { normalizeText } from "./g2p/text-normalize";
-import { QLATT_V12_CEL_RULEPACK } from "./declarative-frontend/rule-pack";
+import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import { assembleKlattTrack, PHONEME_TARGET_MAP } from "./track-assembler";
@@ -28,7 +28,7 @@ type PipelineToken = Record<string, any>;
  *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
 export type VoiceQuality = 'modal' | 'breathy' | 'pressed' | 'creaky' | 'whispery' | 'falsetto';
 
-/** Resolved voice quality preset values (from frontend.yaml voice_quality_presets). */
+/** Resolved voice quality preset values (from the selected frontend spec's voice_quality_presets). */
 export interface VoiceQualityPreset {
   rd: number;
   oq: number;
@@ -48,11 +48,12 @@ type ResolvedSpeakerProfile = {
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
+  frontendId?: string;
   /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
    *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
   rate?: number;
   /** Speaker profile overrides. Merged into params.policy.speaker in the CEL context.
-   *  Defaults are defined in frontend.yaml parameters.policy.speaker.
+   *  Defaults are defined in the selected frontend spec under parameters.policy.speaker.
    *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990 */
   speaker?: {
     /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
@@ -80,10 +81,13 @@ const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
 
 // Extract output and transcription configuration from the loaded YAML rulepack.
 // These override hardcoded defaults in track-assembler and transcribe-text.
-const RULEPACK_OUTPUT_CONFIG: OutputConfig | undefined =
-  (QLATT_V12_CEL_RULEPACK as any)?.output ?? undefined;
-const RULEPACK_TRANSCRIPTION_CONFIG: TranscriptionConfig | undefined =
-  (QLATT_V12_CEL_RULEPACK as any)?.transcription ?? undefined;
+function getRulepackOutputConfig(specSource: unknown): OutputConfig | undefined {
+  return (specSource as any)?.output ?? undefined;
+}
+
+function getRulepackTranscriptionConfig(specSource: unknown): TranscriptionConfig | undefined {
+  return (specSource as any)?.transcription ?? undefined;
+}
 
 function readPolicyNumber(entry: unknown): number | undefined {
   if (typeof entry === "number" && Number.isFinite(entry)) return entry;
@@ -100,9 +104,10 @@ function readPolicyNumber(entry: unknown): number | undefined {
 
 function resolveSpeakerProfile(
   baseF0: number,
-  speakerOverride: TextToKlattTrackOptions["speaker"]
+  speakerOverride: TextToKlattTrackOptions["speaker"],
+  specSource: unknown,
 ): ResolvedSpeakerProfile {
-  const speakerPolicy = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.speaker;
+  const speakerPolicy = (specSource as any)?.parameters?.policy?.speaker;
   const baseFromPolicy = readPolicyNumber(speakerPolicy?.base_f0_hz);
   const formantScaleFromPolicy = readPolicyNumber(speakerPolicy?.formant_scale);
   const rdFromPolicy = readPolicyNumber(speakerPolicy?.rd_default);
@@ -264,9 +269,12 @@ export function textToKlattTrack(
   transitionMs = 30,
   options: TextToKlattTrackOptions = {}
 ): KlattFrame[] {
+  const frontendSpec = loadBundledRulepackSpec(options.frontendId);
+  const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
+  const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
   const provenance = options.provenance ?? null;
   const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
-  const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker);
+  const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
   // Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990
@@ -274,12 +282,12 @@ export function textToKlattTrack(
 
   // --- Voice Quality Preset Resolution ---
   // Resolve voiceQuality preset BEFORE rule phases run.
-  // Presets are defined in frontend.yaml params.policy.speaker.voice_quality_presets.
+  // Presets are defined in the selected frontend spec under params.policy.speaker.voice_quality_presets.
   // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
   let voiceQualityOverrides: VoiceQualityOverrides | undefined;
   const requestedQuality = options.voiceQuality;
   if (requestedQuality && requestedQuality !== 'modal') {
-    const presetTable = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.speaker
+    const presetTable = (frontendSpec as any)?.parameters?.policy?.speaker
       ?.voice_quality_presets as Record<string, Record<string, unknown>> | undefined;
     const presetRaw = presetTable?.[requestedQuality];
     if (presetRaw) {
@@ -332,7 +340,7 @@ export function textToKlattTrack(
   // Transcribe returns a flat list of phoneme objects with word info
   let parameterSequence: PipelineToken[] = transcribeText(normalized, {
     provenance,
-    transcriptionConfig: RULEPACK_TRANSCRIPTION_CONFIG,
+    transcriptionConfig: rulepackTranscriptionConfig,
   });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
@@ -392,6 +400,7 @@ export function textToKlattTrack(
       provenance,
       tokenDecisionIds,
       parameters,
+      frontendSpec,
     );
 
   // Run postlexical rules first (t-flapping, the-reduction operate on raw phonemes).
@@ -478,7 +487,7 @@ export function textToKlattTrack(
   // Read sagging transition parameters from policy.
   // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
   // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-  const f0Policy = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.f0;
+  const f0Policy = (frontendSpec as any)?.parameters?.policy?.f0;
   const sagDepthHz: number | undefined =
     typeof f0Policy?.sag_depth_hz?.value === "number"
       ? f0Policy.sag_depth_hz.value
@@ -491,7 +500,7 @@ export function textToKlattTrack(
   return assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
-    outputConfig: RULEPACK_OUTPUT_CONFIG,
+    outputConfig: rulepackOutputConfig,
     voiceQuality: voiceQualityOverrides,
     sagDepthHz,
     sagMinSpanMs,

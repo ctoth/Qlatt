@@ -23,6 +23,12 @@
       "name": "Stevens 1991 HL Parameters",
       "extends": "klatt80-baseline",
       "description": "HL controls (f1-f4, f0, ag, ac, an, st, pm) mapped to KL controls"
+    },
+    {
+      "id": "dectalk-english",
+      "name": "DECtalk 4.63 English",
+      "extends": "klatt80-baseline",
+      "description": "Klatt 80 synthesizer configured for DECtalk 4.63 English frontend (impulse source, DECtalk defaults)"
     }
   ]
 }

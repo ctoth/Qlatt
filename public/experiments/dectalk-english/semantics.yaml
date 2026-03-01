@@ -1,0 +1,26 @@
+# DECtalk 4.63 English Experiment — Semantics Overrides
+#
+# Extends klatt80-baseline with defaults appropriate for the DECtalk 4.63
+# English frontend parameter set.
+#
+# DECtalk 4.63 uses an impulse-train glottal source (not LF model), so
+# sourceMode defaults to 0 (impulse) and lfMode to 0 (disabled).
+# The frontend's inventory.yaml already sets these per-frame, but
+# having the experiment default match avoids silent frames before the
+# first frontend frame arrives.
+#
+# Source: DECtalk 4.63 dapi/src (ph_vdef.c, phinton.c, COEWAV.FOR)
+
+params:
+  # DECtalk 4.63 uses impulse-train source, not LF model
+  sourceMode:
+    description: "Voice source selection (0=impulse for DECtalk)"
+    type: integer
+    default: 0
+    range: [0, 2]
+
+  lfMode:
+    description: "LF model mode (0=disabled for DECtalk impulse source)"
+    type: integer
+    default: 0
+    range: [0, 2]

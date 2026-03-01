@@ -52,9 +52,9 @@ export class KlattSynth {
   _defaultParams(): Record<string, number> {
     return {
       f0: 0,
-      rd: 1.0,
-      lfMode: 0,
-      sourceMode: 0, // 0 = impulse (classic Klatt), 1 = LF source
+      rd: 0.7,
+      lfMode: 1,
+      sourceMode: 1, // Default to LF so Fant 1997 / Klatt 1990 source controls are active
       openPhaseRatio: 0.7,
       voiceGain: 0.0,
       noiseGain: 0.0,

@@ -58,7 +58,7 @@ export type VoiceQualityOverrides = {
   rd: number;
   /** Open quotient override (0 = derive from Rd). Citation: Klatt & Klatt 1990 */
   oq: number;
-  /** Spectral tilt override in dB (0 = derive from Rd). Citation: Klatt & Klatt 1990 */
+  /** Additive spectral tilt contribution in dB at 3 kHz. Citation: Klatt & Klatt 1990 */
   tl: number;
   /** Additive AH offset in dB. Citation: Gobl 2003, Klatt & Klatt 1990 */
   ah_offset_db: number;
@@ -155,6 +155,7 @@ export function buildF0ContourFromDeclarative(
       // Citation: Pierrehumbert 1980 (H* and L* tone distinction)
       let accentType: string | undefined;
       if (tag === "f0_h_star") accentType = "H*";
+      else if (tag === "f0_l_plus_h_star") accentType = "L+H*";
       else if (tag === "f0_l_star") accentType = "L*";
       return {
         time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
@@ -241,6 +242,10 @@ const BOUNDARY_TAGS = new Set([
  *   Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
  *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
  */
+function isHighPeakAccent(accentType: string | undefined): boolean {
+  return accentType === "H*" || accentType === "L+H*";
+}
+
 export function applySaggingTransitions(
   contour: F0Point[],
   sagDepthHz: number = 12,
@@ -248,10 +253,10 @@ export function applySaggingTransitions(
 ): F0Point[] {
   if (contour.length < 2 || sagDepthHz <= 0) return [...contour];
 
-  // Collect indices of H* accent points.
+  // Collect indices of high accent peaks (H* and L+H*).
   const hStarIndices: number[] = [];
   for (let i = 0; i < contour.length; i++) {
-    if (contour[i].accentType === "H*") {
+    if (isHighPeakAccent(contour[i].accentType)) {
       hStarIndices.push(i);
     }
   }
@@ -350,12 +355,17 @@ function applyVoiceQualityOverrides(
   params: KlattParams,
   vq: VoiceQualityOverrides,
 ): void {
-  // Rd overrides the semantics default of 1.0
+  // Rd overrides the current speaker-default LF source shape.
   params.Rd = vq.rd;
-  // OQ and TL: 0 = derive from Rd in the LF WASM crate.
-  // Only set non-zero when the preset explicitly overrides (e.g. whispery TL=10).
-  params.OQ = vq.oq;
-  params.TL = vq.tl;
+  // OQ: 0 = derive from Rd in the LF WASM crate.
+  if (vq.oq !== 0) {
+    params.OQ = vq.oq;
+  }
+  // TL stacks on top of the speaker baseline tilt.
+  // Citations: Klatt & Klatt 1990; speaker sex differences from Fant 1997 / Kent & Vorperian 2018
+  if (vq.tl !== 0) {
+    params.TL = (params.TL ?? 0) + vq.tl;
+  }
   // Flutter and jitter override their semantics defaults of 0
   params.flutter = vq.flutter;
   params.jitter = vq.jitter;

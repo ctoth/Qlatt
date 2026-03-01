@@ -39,6 +39,13 @@ export interface VoiceQualityPreset {
   f0_scale: number;
 }
 
+type ResolvedSpeakerProfile = {
+  base_f0_hz: number;
+  formant_scale: number;
+  rd_default: number;
+  spectral_tilt_offset_db: number;
+};
+
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
   /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
@@ -78,6 +85,77 @@ const RULEPACK_OUTPUT_CONFIG: OutputConfig | undefined =
 const RULEPACK_TRANSCRIPTION_CONFIG: TranscriptionConfig | undefined =
   (QLATT_V12_CEL_RULEPACK as any)?.transcription ?? undefined;
 
+function readPolicyNumber(entry: unknown): number | undefined {
+  if (typeof entry === "number" && Number.isFinite(entry)) return entry;
+  if (
+    entry &&
+    typeof entry === "object" &&
+    typeof (entry as { value?: unknown }).value === "number" &&
+    Number.isFinite((entry as { value: number }).value)
+  ) {
+    return (entry as { value: number }).value;
+  }
+  return undefined;
+}
+
+function resolveSpeakerProfile(
+  baseF0: number,
+  speakerOverride: TextToKlattTrackOptions["speaker"]
+): ResolvedSpeakerProfile {
+  const speakerPolicy = (QLATT_V12_CEL_RULEPACK as any)?.parameters?.policy?.speaker;
+  const baseFromPolicy = readPolicyNumber(speakerPolicy?.base_f0_hz);
+  const formantScaleFromPolicy = readPolicyNumber(speakerPolicy?.formant_scale);
+  const rdFromPolicy = readPolicyNumber(speakerPolicy?.rd_default);
+  const tiltFromPolicy = readPolicyNumber(speakerPolicy?.spectral_tilt_offset_db);
+  const baseF0Override = speakerOverride?.base_f0_hz;
+  const formantScaleOverride = speakerOverride?.formant_scale;
+  const rdOverride = speakerOverride?.rd_default;
+  const tiltOverride = speakerOverride?.spectral_tilt_offset_db;
+
+  return {
+    base_f0_hz: typeof baseF0Override === "number" && Number.isFinite(baseF0Override)
+      ? baseF0Override
+      : (baseFromPolicy ?? baseF0),
+    formant_scale: typeof formantScaleOverride === "number" && Number.isFinite(formantScaleOverride)
+      ? formantScaleOverride
+      : (formantScaleFromPolicy ?? 1.0),
+    rd_default: typeof rdOverride === "number" && Number.isFinite(rdOverride)
+      ? rdOverride
+      : (rdFromPolicy ?? 0.7),
+    spectral_tilt_offset_db: typeof tiltOverride === "number" && Number.isFinite(tiltOverride)
+      ? tiltOverride
+      : (tiltFromPolicy ?? 0),
+  };
+}
+
+const SPEAKER_FORMANT_KEYS = [
+  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "FNP", "FNZ",
+] as const;
+
+function applySpeakerProfileToParams(
+  params: Record<string, number> | null | undefined,
+  speaker: ResolvedSpeakerProfile
+): void {
+  if (!params) return;
+
+  // Fant 1997 / Klatt & Klatt 1990 source controls only affect the LF source.
+  // The paper-backed frontend therefore makes LF the active default source.
+  params.sourceMode = 1;
+  params.Rd = speaker.rd_default;
+  params.RdRef = speaker.rd_default;
+  if (speaker.spectral_tilt_offset_db !== 0) {
+    params.TL = (params.TL ?? 0) + speaker.spectral_tilt_offset_db;
+  }
+  if (speaker.formant_scale !== 1.0) {
+    for (const key of SPEAKER_FORMANT_KEYS) {
+      const value = params[key];
+      if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+        params[key] = value * speaker.formant_scale;
+      }
+    }
+  }
+}
+
 // Re-export normalizeText from g2p/text-normalize
 export { normalizeText } from "./g2p/text-normalize";
 
@@ -93,11 +171,11 @@ export function textToKlattTrack(
 ): KlattFrame[] {
   const provenance = options.provenance ?? null;
   const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
+  const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker);
+  let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
   // Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990
-  const speakerOverrides = options.speaker
-    ? { speaker: options.speaker }
-    : {};
+  const speakerOverrides = { speaker: resolvedSpeaker };
 
   // --- Voice Quality Preset Resolution ---
   // Resolve voiceQuality preset BEFORE rule phases run.
@@ -111,7 +189,7 @@ export function textToKlattTrack(
     const presetRaw = presetTable?.[requestedQuality];
     if (presetRaw) {
       const preset: VoiceQualityPreset = {
-        rd: typeof presetRaw.rd === 'number' ? presetRaw.rd : 1.0,
+        rd: typeof presetRaw.rd === 'number' ? presetRaw.rd : resolvedSpeaker.rd_default,
         oq: typeof presetRaw.oq === 'number' ? presetRaw.oq : 0,
         tl: typeof presetRaw.tl === 'number' ? presetRaw.tl : 0,
         ah_offset_db: typeof presetRaw.ah_offset_db === 'number' ? presetRaw.ah_offset_db : 0,
@@ -123,7 +201,7 @@ export function textToKlattTrack(
       // Apply F0 scaling: multiply baseF0 by preset's f0_scale.
       // Citation: Burkhardt 2009 (falsetto F0 increase)
       if (preset.f0_scale !== 1.0) {
-        baseF0 = Math.round(baseF0 * preset.f0_scale);
+        effectiveBaseF0 = Math.round(effectiveBaseF0 * preset.f0_scale);
       }
 
       // Build voice quality overrides for the track assembler.
@@ -225,8 +303,9 @@ export function textToKlattTrack(
   // t_flapping must see raw T between vowels; structural would split T into
   // T_CL + T_REL + T_ASP, breaking the adjacency check.
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
-  // Speaker overrides flow into postlexical/structural only when present.
-  const speakerPolicy = options.speaker ? { policy: { ...speakerOverrides } } : undefined;
+  // Speaker defaults/overrides are always present so declarative rules can
+  // reference the same policy surface as the runtime defaults.
+  const speakerPolicy = { policy: { ...speakerOverrides } };
   parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
   // Ensure id/stream/status fields exist before prosodic annotation.
@@ -248,7 +327,7 @@ export function textToKlattTrack(
   // Citations: Silverman 1992, Pierrehumbert 1980, O'Shaughnessy 1976, Allen 1987
   parameterSequence = annotateProsody(parameterSequence, {
     provenance: provenance ?? undefined,
-    baseF0,
+    baseF0: effectiveBaseF0,
   });
   parameterSequence = runPhases(parameterSequence, ["duration"], {
     policy: {
@@ -266,7 +345,7 @@ export function textToKlattTrack(
     policy: {
       ...speakerOverrides,
       f0: {
-        base_hz: baseF0,
+        base_hz: effectiveBaseF0,
         fall_rate_hz: 20 * f0RangeFactor,
         declination_tau: 0.12 * f0RangeFactor,
         stress_rise: 1.0 + (0.15 * f0RangeFactor),
@@ -275,6 +354,22 @@ export function textToKlattTrack(
         continuation_minor_rise_hz: 5 * f0RangeFactor,
       },
     },
+  });
+  parameterSequence = parameterSequence.map((token: PipelineToken) => {
+    if (
+      token?.stream === "f0" ||
+      !token?.params ||
+      typeof token.params !== "object" ||
+      Array.isArray(token.params)
+    ) {
+      return token;
+    }
+    const nextToken = {
+      ...token,
+      params: { ...(token.params as Record<string, number>) },
+    };
+    applySpeakerProfileToParams(nextToken.params, resolvedSpeaker);
+    return nextToken;
   });
   const phoneSequence = parameterSequence.filter(
     (token: PipelineToken) => token?.stream !== "f0" && token?.status !== 2
@@ -298,7 +393,7 @@ export function textToKlattTrack(
       : undefined;
 
   return assembleKlattTrack(phoneSequence, parameterSequence, {
-    baseF0,
+    baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
     outputConfig: RULEPACK_OUTPUT_CONFIG,
     voiceQuality: voiceQualityOverrides,

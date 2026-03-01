@@ -5,9 +5,9 @@ rules:
   #
   # Replaces the O'Shaughnessy 1976 exponential-declination F0 model with a
   # Pierrehumbert 1980 / Ladd 2008 pitch-range model using:
-  #   - Accent-type-specific F0 targets (H*, L*)
+  #   - Accent-type-specific F0 targets (H*, L*, L+H*)
   #   - Iterative downstep (k^n) instead of global declination
-  #   - Boundary tones (L%, H%) for phrase-final contour
+  #   - Phrase accents (H-, L-) plus boundary tones (L%, H%)
   #   - Register reset at IP boundaries (breakIndex >= 4)
   #
   # Citations:
@@ -68,7 +68,63 @@ rules:
       - "O'Shaughnessy 1976 (peak position at 45% of vowel)"
 
   # --------------------------------------------------------------------------
-  # Rule 3: L* accent targets (questions)
+  # Rule 3: Leading L for L+H* prenuclear accents
+  # --------------------------------------------------------------------------
+  tobi_accent_l_plus_h_star_lead:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'L+H*'
+        && ((has(current.?params.AV) && current.params.AV > 0)
+            || (has(current.?params.AVS) && current.params.AVS > 0))
+    define:
+      target_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: target_hz
+      tag: f0_l_leading
+    citations:
+      - "Pierrehumbert 1980 (leading L tone in L+H*)"
+      - "Ladd 2008 Ch.3 (prenuclear rising accent shape)"
+
+  # --------------------------------------------------------------------------
+  # Rule 4: H* peak for L+H* prenuclear accents
+  # --------------------------------------------------------------------------
+  tobi_accent_l_plus_h_star_peak:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'L+H*'
+        && ((has(current.?params.AV) && current.params.AV > 0)
+            || (has(current.?params.AVS) && current.params.AVS > 0))
+    define:
+      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
+      downstep_factor: >-
+        pow(params.policy.f0.downstep_k, accent_idx)
+      raw_height: >-
+        params.policy.f0.h_star_height * downstep_factor
+      clamped_height: >-
+        max([raw_height, params.policy.f0.downstep_floor_fraction])
+      target_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+    insert_point:
+      stream: f0
+      at: at_ratio(current, 0.45)
+      value: target_hz
+      tag: f0_l_plus_h_star
+    citations:
+      - "Pierrehumbert 1980 (L+H* accent: leading L plus H* peak)"
+      - "Ladd 2008 Ch.3 (rising prenuclear accent)"
+      - "Ladd 2008 Ch.2 (downstep still applies to successive H targets)"
+
+  # --------------------------------------------------------------------------
+  # Rule 5: L* accent targets (questions)
   # --------------------------------------------------------------------------
   tobi_accent_l_star:
     kind: point
@@ -92,7 +148,7 @@ rules:
       - Ladd 2008 Ch.3 (L* in questions)
 
   # --------------------------------------------------------------------------
-  # Rule 4: Unaccented voiced segment declination (gentle sag)
+  # Rule 6: Unaccented voiced interpolation anchor
   # --------------------------------------------------------------------------
   tobi_unaccented_declination:
     kind: point
@@ -115,11 +171,56 @@ rules:
       value: target
       tag: f0_unaccented
     citations:
-      - "Pierrehumbert 1980 (inter-accent interpolation: sagging transition)"
-      - "Ladd 2008 pp.155-157 (sagging transition between H* accents)"
+      - "Pierrehumbert 1980 (intermediate interpolation between tonal events)"
+      - "Ladd 2008 Ch.3 (local transitions between tonal targets)"
 
   # --------------------------------------------------------------------------
-  # Rule 5: L% boundary tone (declarative final fall)
+  # Rule 7: Phrase accent H- at the start of phrase-final silence
+  # --------------------------------------------------------------------------
+  tobi_phrase_accent_high:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.phraseAccent) && current.phraseAccent == 'H-'
+    define:
+      prev_f0: prev_point('f0')
+      floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      target_hz: >-
+        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: target_hz
+      tag: f0_phrase_high
+    citations:
+      - "Pierrehumbert 1980 (H- phrase accent sustains/raises postnuclear pitch)"
+      - "Ladd 2008 Ch.3 (H- maintained before H%)"
+
+  # --------------------------------------------------------------------------
+  # Rule 8: Phrase accent L- at the start of phrase-final silence
+  # --------------------------------------------------------------------------
+  tobi_phrase_accent_low:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.phraseAccent) && current.phraseAccent == 'L-'
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
+      tag: f0_phrase_low
+    citations:
+      - "Pierrehumbert 1980 (L- phrase accent lowers postnuclear pitch)"
+      - "Ladd 2008 Ch.3 (L- followed by continued low contour)"
+
+  # --------------------------------------------------------------------------
+  # Rule 9: L% boundary tone (declarative final fall)
   # --------------------------------------------------------------------------
   tobi_boundary_low:
     kind: point
@@ -131,7 +232,7 @@ rules:
         && current.boundaryTone == 'L%'
     insert_point:
       stream: f0
-      at: at_sync(current.sync_left)
+      at: at_sync(current.sync_right)
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_boundary_low
@@ -140,7 +241,7 @@ rules:
       - Ladd 2008 (L-L% declarative final lowering)
 
   # --------------------------------------------------------------------------
-  # Rule 6: H% boundary tone (question rise, continuation rise)
+  # Rule 10: H% boundary tone (question rise, continuation rise)
   # --------------------------------------------------------------------------
   tobi_boundary_rise:
     kind: point
@@ -152,7 +253,7 @@ rules:
         && current.boundaryTone == 'H%'
     insert_point:
       stream: f0
-      at: at_sync(current.sync_left)
+      at: at_sync(current.sync_right)
       value: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       tag: f0_boundary_rise
@@ -161,7 +262,7 @@ rules:
       - Ladd 2008 Ch.3
 
   # --------------------------------------------------------------------------
-  # Rule 7: Register reset at IP boundaries (breakIndex >= 4)
+  # Rule 11: Register reset at IP boundaries (breakIndex >= 4)
   # --------------------------------------------------------------------------
   tobi_register_reset:
     kind: point
@@ -192,7 +293,7 @@ rules:
   # ==========================================================================
 
   # --------------------------------------------------------------------------
-  # Rule 8: Voiceless onset perturbation (+20% F0)
+  # Rule 12: Voiceless onset perturbation (+20% F0)
   # --------------------------------------------------------------------------
   f0_voiceless_onset_perturbation:
     kind: point
@@ -217,7 +318,7 @@ rules:
       - "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
 
   # --------------------------------------------------------------------------
-  # Rule 9: Voiced onset perturbation (-5% F0)
+  # Rule 13: Voiced onset perturbation (-5% F0)
   # --------------------------------------------------------------------------
   f0_voiced_onset_perturbation:
     kind: point
@@ -239,7 +340,7 @@ rules:
       - O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)
 
   # --------------------------------------------------------------------------
-  # Rule 10: Continuation rise at clause boundaries
+  # Rule 14: Continuation rise at clause boundaries
   #
   # Kept from O'Shaughnessy 1976 — applies at intermediate phrase boundaries
   # (commas, semicolons, colons) that the ToBI boundary tone system did NOT

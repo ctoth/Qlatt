@@ -98,7 +98,7 @@ describe("accentIndexInPhrase annotation", () => {
     expect(result[9].accentIndexInPhrase).toBe(-1); // "on"
   });
 
-  it("resets accent index per phrase", () => {
+  it("continues accent index across intermediate phrases and resets only at IP boundaries", () => {
     // "Cat sat, dog ran."
     const tokens = [
       sil(),
@@ -116,9 +116,10 @@ describe("accentIndexInPhrase annotation", () => {
     expect(result[2].accentIndexInPhrase).toBe(0); // cat
     expect(result[5].accentIndexInPhrase).toBe(1); // sat
 
-    // Second phrase: dog=0, ran=1
-    expect(result[9].accentIndexInPhrase).toBe(0);  // dog
-    expect(result[12].accentIndexInPhrase).toBe(1); // ran
+    // Intermediate phrase after comma stays in the same IP, so downstep keeps
+    // counting across the break. Citation: Pierrehumbert 1980, Ladd 2008.
+    expect(result[9].accentIndexInPhrase).toBe(2);  // dog
+    expect(result[12].accentIndexInPhrase).toBe(3); // ran
   });
 
   it("assigns -1 to non-accented tokens", () => {
@@ -242,14 +243,18 @@ describe("ToBI intonation — integration", () => {
     expect(maxF0).toBeGreaterThan(130);
   });
 
-  it("boundary L% is at baseline for declaratives", () => {
+  it("declarative phrase accent and boundary pull the tail down before final silence", () => {
     const track = textToKlattTrack("Hello.");
     const voicedF0 = getVoicedF0(track);
     expect(voicedF0.length).toBeGreaterThan(0);
 
-    // Last few voiced F0 values should approach baseline (110)
+    // The silent boundary itself is not voiced, so the last voiced sample will
+    // be above the final L% target. It should still sit below the sentence peak
+    // and in the low declarative tail region.
     const lastF0 = voicedF0[voicedF0.length - 1];
-    expect(lastF0).toBeLessThanOrEqual(130);
+    const peakF0 = Math.max(...voicedF0);
+    expect(lastF0).toBeLessThan(peakF0);
+    expect(lastF0).toBeLessThanOrEqual(150);
   });
 
   it("boundary H% produces rise for questions", () => {

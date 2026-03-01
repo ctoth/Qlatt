@@ -137,7 +137,7 @@ const CLAUSE_PUNCTUATION = new Set([",", ";", ":"]);
  * - isContentWord (boolean)
  * - isAccented (boolean)
  * - isNuclearAccent (boolean)
- * - accentType (string | null) — "H*", "L*", etc.
+ * - accentType (string | null) — "H*", "L*", "L+H*", etc.
  * - accentIndexInPhrase (number) — 0-based index of accented token within phrase; -1 for non-accented
  * - breakIndex (number 0-4)
  * - phraseAccent (string | null) — "H-" or "L-"
@@ -180,13 +180,6 @@ export function annotateProsody(
     // Step 5: Assign accent types.
     assignAccentTypes(result, phrase, isQuestion);
 
-    // Step 5b: Assign accentIndexInPhrase — sequential count of accented
-    // stressed tokens per phrase.  Reset at each phrase boundary (breakIndex=4).
-    // The counter continues across breakIndex=3 (intermediate phrases),
-    // matching Pierrehumbert 1980's downstep domain = IP.
-    // Citation: Pierrehumbert 1980 (downstep resets at IP boundaries)
-    assignAccentIndices(result, phrase);
-
     // Step 7: Assign phrase accent and boundary tone on phrase boundary.
     assignPhraseEdgeTones(result, phrase);
 
@@ -201,6 +194,11 @@ export function annotateProsody(
 
   // Step 6: Assign break indices.
   assignBreakIndices(result, phrases);
+
+  // Step 6b: Assign accentIndexInPhrase. This depends on break indices because
+  // downstep resets only at IP boundaries (breakIndex=4), not at ip boundaries
+  // (breakIndex=3). Citations: Pierrehumbert 1980, Ladd 2008
+  assignAccentIndices(result);
 
   return result;
 }
@@ -360,7 +358,8 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
 /**
  * Assign ToBI accent types within a phrase.
  *
- * - Prenuclear accents: H* (Pierrehumbert 1980 — most common default)
+ * - Initial prenuclear accent: L+H* (common rising prenuclear default)
+ * - Later prenuclear accents: H* (allows H*-H* downstep/sag sequences)
  * - Nuclear accent in declarative (. or no punctuation): H*
  * - Nuclear accent in question (?): L*
  *
@@ -371,6 +370,7 @@ function assignAccentTypes(
   phrase: Phrase,
   isQuestion: boolean,
 ): void {
+  let sawPrenuclearAccent = false;
   for (const idx of phrase.tokenIndices) {
     const token = tokens[idx];
     if (!token.isAccented) continue;
@@ -379,9 +379,16 @@ function assignAccentTypes(
       // Nuclear accent: L* for questions, H* for declaratives.
       // Citation: Pierrehumbert 1980, Ladd 2008
       token.accentType = isQuestion ? "L*" : "H*";
+    } else if (!sawPrenuclearAccent) {
+      // Use a leading rise on the first prenuclear accent so the tune starts
+      // from the phrase baseline and reaches the first accented peak locally.
+      // Citations: Pierrehumbert 1980, Ladd 2008 (prenuclear rising accents)
+      token.accentType = "L+H*";
+      sawPrenuclearAccent = true;
     } else {
-      // Prenuclear accent: H* (default).
-      // Citation: Pierrehumbert 1980
+      // Later prenuclear accents remain H* so subsequent accents participate
+      // in the standard H*-to-H* downstep and sagging interpolation regime.
+      // Citations: Pierrehumbert 1980, Ladd 2008
       token.accentType = "H*";
     }
   }
@@ -392,26 +399,28 @@ function assignAccentTypes(
 // ---------------------------------------------------------------------------
 
 /**
- * Assign a 0-based accent index to each accented stressed token within a phrase.
- * Non-accented tokens get accentIndexInPhrase = -1.
+ * Assign a 0-based accent index to each accented stressed token within the
+ * current intonational phrase. Non-accented tokens get accentIndexInPhrase = -1.
  *
  * The index is used by the ToBI downstep formula: H_n = V * k^n, where n is
- * accentIndexInPhrase.  The counter resets per phrase (naturally, since each
- * phrase iteration starts fresh).
+ * accentIndexInPhrase. The counter resets only at breakIndex=4 (IP boundary)
+ * and intentionally continues across breakIndex=3 (intermediate phrase).
  *
  * Citations:
  * - Pierrehumbert 1980 (downstep formula H_n = V * k^n)
  * - Ladd 2008 Ch.2 (constant-proportion downstep ratio)
  */
-function assignAccentIndices(tokens: PipelineToken[], phrase: Phrase): void {
+function assignAccentIndices(tokens: PipelineToken[]): void {
   let accentCount = 0;
-  for (const idx of phrase.tokenIndices) {
-    const token = tokens[idx];
+  for (const token of tokens) {
     if (token.isAccented && token.stress === 1) {
       token.accentIndexInPhrase = accentCount;
       accentCount++;
     } else {
       token.accentIndexInPhrase = -1;
+    }
+    if (token.breakIndex >= 4) {
+      accentCount = 0;
     }
   }
 }

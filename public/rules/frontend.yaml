@@ -598,7 +598,7 @@ parameters:
         # AH offset is additive to per-phoneme AH from inventory.
         # Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
         modal:
-          rd: 1.0          # Fant 1997 Table 1: relaxed modal
+          rd: 0.7          # Fant 1997 Table 1: male connected-speech modal default
           oq: 0            # derive from Rd
           tl: 0            # derive from Rd
           ah_offset_db: 0

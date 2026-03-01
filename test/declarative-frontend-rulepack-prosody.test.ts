@@ -16,7 +16,7 @@ import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
  * - O'Shaughnessy 1976 (microprosodic perturbation)
  */
 
-/** Default pitch range parameters matching frontend.yaml */
+/** Default pitch range parameters matching the default bundled frontend */
 const TOBI_PARAMS = {
   policy: {
     f0: {

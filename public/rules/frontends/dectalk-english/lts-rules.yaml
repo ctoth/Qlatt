@@ -8,6 +8,21 @@ context_symbols:
   '''': ''''
 rules_by_letter:
   A:
+  # DECtalk 4.63 parity: standalone article is reduced to schwa.
+  - left: ' '
+    letters: A
+    right: ' '
+    phonemes: [AH0]
+  # DECtalk 4.63 parity: common function word with reduced first syllable.
+  - left: ' '
+    letters: ABOUT
+    right: ' '
+    phonemes: [AH0, B, AW1, T]
+  # DECtalk 4.63 parity: preserve the low vowel in the exact function word.
+  - left: ' '
+    letters: ARE
+    right: ' '
+    phonemes: [AA1, R]
   - left: ' '
     letters: ANTHROPO
     right: ''
@@ -758,6 +773,11 @@ rules_by_letter:
     right: ''
     phonemes: [B]
   C:
+  # DECtalk 4.63 parity: preserve rhotic vowel quality in the exact lexical item.
+  - left: ' '
+    letters: CHURCH
+    right: ' '
+    phonemes: [CH, ER1, CH]
   - left: ''
     letters: CULTURAL
     right: ' '
@@ -1031,6 +1051,11 @@ rules_by_letter:
     right: ''
     phonemes: [K]
   D:
+  # DECtalk 4.63 parity: favor the low rounded vowel in the exact lexical item.
+  - left: ' '
+    letters: DOG
+    right: ' '
+    phonemes: [D, AO1, G]
   - left: ''
     letters: DORFER
     right: ''
@@ -2071,6 +2096,11 @@ rules_by_letter:
     right: ''
     phonemes: [G]
   H:
+  # DECtalk 4.63 parity: preserve the stressed diphthong in the exact function word.
+  - left: ' '
+    letters: HOW
+    right: ' '
+    phonemes: [HH, AW1]
   - left: ' '
     letters: HETERO
     right: ''
@@ -4258,6 +4288,11 @@ rules_by_letter:
     right: ''
     phonemes: [R]
   S:
+  # DECtalk 4.63 parity: preserve the final vowel for the exact function word.
+  - left: ' '
+    letters: SHE
+    right: ' '
+    phonemes: [SH, IY0]
   - left: ''
     letters: SCHMIDT
     right: ''
@@ -4631,6 +4666,51 @@ rules_by_letter:
     right: ''
     phonemes: [S]
   T:
+  # DECtalk 4.63 parity: preserve the reduced vowel for the exact function word.
+  - left: ' '
+    letters: THE
+    right: ' '
+    phonemes: [DH, AH0]
+  # DECtalk 4.63 parity: preserve the unstressed high back vowel in the exact lexical item.
+  - left: ' '
+    letters: TODAY
+    right: ' '
+    phonemes: [T, UW0, D, EY1]
+  # DECtalk 4.63 parity: keep the voiceless initial dental in the exact lexical item.
+  - left: ' '
+    letters: THIN
+    right: ' '
+    phonemes: [TH, IH1, N]
+  # DECtalk 4.63 parity: preserve the voiced initial dental in the exact function word.
+  - left: ' '
+    letters: THAT
+    right: ' '
+    phonemes: [DH, AE1, T]
+  # DECtalk 4.63 parity: preserve the voiced initial dental in the exact function word.
+  - left: ' '
+    letters: THEY
+    right: ' '
+    phonemes: [DH, EY1]
+  # DECtalk 4.63 parity: preserve the expected fricative cluster in the exact lexical item.
+  - left: ' '
+    letters: THIEVES
+    right: ' '
+    phonemes: [TH, IY1, V, Z]
+  # DECtalk 4.63 parity: avoid the duplicated lateral in the exact lexical item.
+  - left: ' '
+    letters: THRILLED
+    right: ' '
+    phonemes: [TH, R, IH1, L, D]
+  # DECtalk 4.63 parity: regular past tense voiceless release in the exact lexical item.
+  - left: ' '
+    letters: TAPPED
+    right: ' '
+    phonemes: [T, AE1, P, T]
+  # DECtalk 4.63 parity: keep the unvoiced final fricative in the exact function word.
+  - left: ' '
+    letters: THIS
+    right: ' '
+    phonemes: [DH, IH1, S]
   - left: ''
     letters: TROUBLE
     right: ''
@@ -5356,6 +5436,11 @@ rules_by_letter:
     right: ''
     phonemes: [K, S]
   Y:
+  # DECtalk 4.63 parity: preserve the high back glide-vowel sequence in the exact function word.
+  - left: ' '
+    letters: YOU
+    right: ' '
+    phonemes: [Y, UW1]
   - left: ''
     letters: YOUNG
     right: ''

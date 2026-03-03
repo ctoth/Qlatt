@@ -9,7 +9,7 @@ streams:
   phone:
     type: base
     features:
-      type: [vowel, stop_closure, fricative, affricate, silence, liquid, nasal, glide, flap]
+      type: [vowel, stop_closure, stop_release, stop_aspiration, fricative, affricate, silence, liquid, nasal, glide, flap]
     scalars:
       duration: { unit: ms, resolution: klatt, max: 500, floor_field: minimumDuration }
   f0:
@@ -37,6 +37,16 @@ phases:
       - dectalk_phrase_initial_vowel_lengthening
       - dectalk_rate_scaling
     resolve_scalars: [duration]
+  - name: structural
+    rules:
+      - dectalk_insert_voiceless_stop_release_and_aspiration
+      - dectalk_insert_voiceless_stop_release_and_aspiration_final
+      - dectalk_insert_voiced_stop_release
+      - dectalk_insert_voiced_stop_release_final
+  - name: formant
+    rules:
+      - dectalk_sw_explicit_override
+      - dectalk_sw_default_assignment
   - name: prosody
     rules:
       - dectalk_baseline_declination
@@ -45,7 +55,7 @@ phases:
       - dectalk_stress_impulse
       - dectalk_boundary_reset
   - name: finalize
-    after: [duration, prosody]
+    after: [duration, structural, formant, prosody]
     rules: []
     compute_times: true
     resolve_points: [f0]

@@ -232,3 +232,7 @@ This paper provides the theoretical framework for understanding:
 
 ### Supersedes or Recontextualizes
 - **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** extends and critically evaluates this 1992 overview with 30 years of subsequent research; this paper provides the original framework that Iskarous & Pouplier appraise
+
+---
+
+**See also:** Browman_1989_ArticulatoryGesturesPhonologicalUnits - the foundational 1989 paper that first proposed gestures as phonological units, with more detailed treatment of tube geometry, CD hierarchy, and comparison with feature geometry

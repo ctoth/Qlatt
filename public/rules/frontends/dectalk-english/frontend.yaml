@@ -3,7 +3,9 @@ inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
 include:
   - pipeline.yaml
+  - phases/structural.yaml
   - phases/duration.yaml
+  - phases/formant.yaml
   - phases/prosody.yaml
 f0_model:
   type: layered_additive
@@ -45,6 +47,30 @@ parameters:
   policy:
     duration:
       rate_scale: 1.0
+      # DECtalk external speaking rate values are centered around 180 WPM.
+      # The frontend normalizes user-provided rate against this reference before
+      # applying generic rate-based duration/F0 scaling.
+      # Citation: DECtalk 4.63 user-facing default rate (Paul sample CLI usage)
+      rate_reference: 180
+      vot_target_ms:
+        p: 58
+        t: 70
+        k: 80
+      voiceless_vot_base_ms: 60
+      voiceless_vot_unstressed_ms: 7
+      voiceless_vot_s_cluster_ms: 15
+      voiceless_vot_sonorant_consonant_bonus_ms: 5
+      # DECtalk 4.63 p_us_st1.c: dummy-vowel release into silence reduces burst
+      # amplitudes by 3 dB and aspiration by 6 dB.
+      dummy_vowel_burst_reduction_db: 3
+      dummy_vowel_aspiration_reduction_db: 6
+      # DECtalk 4.63 p_us_st1.c: open-glottis interval widens B1/B2 by +250/+70 Hz.
+      open_glottis_b1_widen_hz: 250
+      open_glottis_b2_widen_hz: 70
+      vot_split_fallback_share: 0.5
+      weak_release_min_ms: 15
+      weak_release_scale: 0.5
+      weak_release_amplitude_reduction_db: 10
       stress_secondary_level: 2
       pause_comma_ms: 150
       pause_period_ms: 300

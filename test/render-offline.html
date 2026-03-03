@@ -8,7 +8,7 @@
   <body>
     <script type="module">
       import { KlattSynth } from "../src/klatt-synth.ts";
-      import { textToKlattTrack } from "../src/tts-frontend.ts";
+      import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
 
       function summarizeTrack(track) {
         const totalTime = track.length ? track[track.length - 1].time : 0;
@@ -32,6 +32,9 @@
       async function renderOffline({
         phrase,
         baseF0 = 110,
+        frontendId = "qlatt-english",
+        rate = 1,
+        transitionMs = 30,
         sampleRate = 48000,
         leadTime = 0.05,
         tailTime = 0.2,
@@ -45,9 +48,13 @@
         openPhaseRatio,
         noiseSeed,
       }) {
-        const resolvedTrack = Array.isArray(track)
-          ? track
-          : textToKlattTrack(phrase, baseF0);
+        const frontend = Array.isArray(track)
+          ? { track, frontendPhones: [] }
+          : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {
+              frontendId,
+              rate,
+            });
+        const resolvedTrack = frontend.track;
         const totalTime =
           (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
           leadTime +
@@ -187,6 +194,9 @@
         return {
           phrase,
           baseF0,
+          frontendId,
+          rate,
+          transitionMs,
           sampleRate,
           leadTime,
           tailTime,
@@ -195,13 +205,83 @@
           metrics: { rms, peak },
           agc: applyAgc ? { target, scale: agcScale, mode: agcMode } : undefined,
           trackSummary: summarizeTrack(resolvedTrack),
+          frontendPhones: frontend.frontendPhones,
           track: includeTrack ? resolvedTrack : undefined,
           telemetry: includeTelemetry ? telemetry : undefined,
           samples,
         };
       }
 
+      const renderState = {
+        status: "idle",
+        phase: "ready",
+        error: null,
+        startedAt: null,
+        finishedAt: null,
+        result: null,
+        task: null,
+      };
+
+      function snapshotRenderState() {
+        return {
+          status: renderState.status,
+          phase: renderState.phase,
+          error: renderState.error,
+          startedAt: renderState.startedAt,
+          finishedAt: renderState.finishedAt,
+          hasResult: renderState.result != null,
+        };
+      }
+
+      function startOfflineRender(opts) {
+        if (renderState.status === "running") {
+          return snapshotRenderState();
+        }
+
+        renderState.status = "running";
+        renderState.phase = "rendering";
+        renderState.error = null;
+        renderState.startedAt = Date.now();
+        renderState.finishedAt = null;
+        renderState.result = null;
+        renderState.task = (async () => {
+          try {
+            const result = await renderOffline(opts);
+            renderState.result = result;
+            renderState.status = "complete";
+            renderState.phase = "complete";
+          } catch (error) {
+            renderState.error =
+              error instanceof Error ? error.stack || error.message : String(error);
+            renderState.status = "error";
+            renderState.phase = "error";
+          } finally {
+            renderState.finishedAt = Date.now();
+            renderState.task = null;
+          }
+        })();
+
+        return snapshotRenderState();
+      }
+
+      function consumeOfflineRenderResult() {
+        if (renderState.status !== "complete" || renderState.result == null) {
+          throw new Error("Offline render result is not ready.");
+        }
+        const result = renderState.result;
+        renderState.result = null;
+        renderState.status = "idle";
+        renderState.phase = "ready";
+        renderState.error = null;
+        return result;
+      }
+
       window.renderOffline = renderOffline;
+      window.offlineRenderDriver = {
+        startRender: startOfflineRender,
+        getStatus: snapshotRenderState,
+        consumeResult: consumeOfflineRenderResult,
+      };
     </script>
   </body>
 </html>

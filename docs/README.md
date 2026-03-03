@@ -7,8 +7,16 @@ Use these documents as the main entry points into the codebase:
 - `adding-a-synthesizer.md`: practical workflow for adding a new synthesizer configuration or primitive.
 - `yaml-graph-tests.md`: YAML-first test harness for semantics and scheduling assertions.
 
-Current path conventions:
+## Path Conventions
 
-- The checked-in synthesizer configs live under `public/experiments/`.
+- Synthesizer configs live under `public/experiments/` (e.g., `klatt80-baseline`, `dectalk-english`, `klsyn88`, `stevens91`).
+- Frontend rulepacks live under `public/rules/frontends/` (e.g., `qlatt-english`, `dectalk-english`).
 - AudioWorklet source files live under `src/worklets/`.
 - Built worklet JavaScript and copied WASM artifacts live under `public/worklets/`.
+
+## CLI Tools
+
+- `npm run explain -- "<phrase>"` — provenance trace of the full TTS pipeline.
+- `npm run tts-dsl -- <subcommand>` — rule engine inspector (run, validate, explain, diff, why-not).
+- `scripts/render-phrase.ts` — offline WAV rendering via node-web-audio-api or Playwright.
+- `scripts/oracle/` — DECtalk oracle pipeline: build reference binary, render corpora, compare audio.

@@ -97,9 +97,19 @@ These primitives use Rust/WASM for DSP with JavaScript worklet wrappers.
 | `resonator` | Two-pole bandpass (formant filter) | `frequency` (Hz), `bandwidth` (Hz) |
 | `antiresonator` | Two-zero notch (nasal zero) | `frequency` (Hz), `bandwidth` (Hz) |
 | `lf-source` | LF model glottal source | `f0` (Hz), `rd` (0.3-2.7), `lfMode` (int) |
+| `impulsive-source` | Doublet impulse glottal source (klsyn88) | `f0` (Hz), `oq` (%) |
+| `triangular-source` | Symmetric triangle glottal source (klsyn88) | `f0` (Hz), `oq` (%) |
+| `square-source` | Pulse waveform glottal source (klsyn88) | `f0` (Hz), `oq` (%) |
+| `oversampled-glottal-source` | 4x oversampled source with tilt | `f0` (Hz), `oq` (%), `tilt` (dB) |
 | `signal-switch` | N-to-1 signal selector for source selection | `selector` (0=input0, 1=input1, ...) |
 | `edge-detector` | PLSTEP trigger (delta detection) | `threshold` (dB), `input` (dB) |
 | `decay-envelope` | Exponential decay envelope | `trigger`, `amplitude`, `decay` |
+| `tilt-filter` | One-pole spectral tilt lowpass (klsyn88) | `tilt` (dB, 0-34) |
+| `biquad-notch` | Biquad band-reject filter (nasal antiformants) | `frequency` (Hz), `bandwidth` (Hz) |
+| `pitch-sync-mod` | Pitch-synchronous F1/B1 resonator | `frequency`, `bandwidth`, `dF`, `db` |
+| `fujisaki-resonator` | Resonator with Fujisaki history compensation | `frequency` (Hz), `bandwidth` (Hz) |
+| `reconstruction-filter` | Fixed output reconstruction lowpass | — |
+| `aerodynamic-model` | Stevens & Bickley 1991 aerodynamic coupling | (physical params) |
 
 **Note**: `signal-switch` is particularly useful for synthesizers with multiple source types (e.g., klsyn88's impulsive/natural/triangular sources). Wire all sources to the switch, bind the selector to a source-select parameter.
 
@@ -609,50 +619,43 @@ Note: `exp()` and `cos()` are needed if you want CEL transparency for coefficien
 
 ### Primitives Needed for klsyn88
 
-**Already Exists:**
-- `signal-switch` - N-to-1 selector for source selection (ss param)
+**All required primitives now exist as WASM crates in `crates/`:**
 
-**Required New Node Types:**
+| Primitive | Status | Crate |
+|-----------|--------|-------|
+| `signal-switch` | Done | `crates/signal-switch` |
+| `impulsive-source` | Done | `crates/impulsive-source` |
+| `triangular-source` | Done | `crates/triangular-source` |
+| `square-source` | Done | `crates/square-source` |
+| `tilt-filter` | Done | `crates/tilt-filter` |
+| `pitch-sync-mod` | Done | `crates/pitch-sync-mod` (pitch-synchronous F1/B1 modulation) |
+| `fujisaki-resonator` | Done | `crates/fujisaki-resonator` (Fujisaki history compensation) |
+| `oversampled-glottal-source` | Done | `crates/oversampled-glottal-source` (4x oversampled with tilt) |
 
-| Primitive | Purpose | Difficulty |
-|-----------|---------|------------|
-| `impulsive-source` | Doublet impulse glottal source | Easy |
-| `triangular-source` | Symmetric triangle with asymmetry param | Easy |
-| `square-source` | Pulse waveform | Easy |
-| `tilt-filter` | One-pole lowpass for spectral tilt | Easy |
-| `pitch-sync-resonator` | F1 with dF/db modulation during open phase | Medium |
-| `formant-compensator` | Fujisaki amplitude correction | Medium |
+### Primitive Registry Entries
 
-**Implementation Recommendation:** Start with JS worklets for simplicity, optimize to WASM if needed.
-
-### New Primitives Needed
+These primitives are registered in the klsyn88 experiment's registry. See `public/experiments/klsyn88/registry.yaml` for the active definitions. Example entries:
 
 ```yaml
-# registry.yaml additions
 impulsive-source:
   description: "Doublet impulse glottal source"
   worklet: "impulsive-source-processor.js"
+  wasm: "impulsive-source.wasm"
   params:
     f0: { type: float, unit: Hz, default: 120 }
     oq: { type: float, default: 50 }
 
-triangular-source:
-  description: "Symmetric triangle source"
-  worklet: "triangular-source-processor.js"
-  params:
-    f0: { type: float, unit: Hz, default: 120 }
-    asymmetry: { type: float, default: 0 }
-
 tilt-filter:
-  description: "One-pole lowpass for spectral tilt"
+  description: "One-pole lowpass for spectral tilt (klsyn88)"
   worklet: "tilt-filter-processor.js"
+  wasm: "tilt-filter.wasm"
   params:
     tilt: { type: float, unit: dB, default: 0 }
 
-pitch-sync-resonator:
-  description: "F1 with pitch-synchronous modulation"
-  worklet: "pitch-sync-resonator-processor.js"
-  wasm: "pitch-sync-resonator.wasm"
+pitch-sync-mod:
+  description: "Pitch-synchronous F1/B1 resonator"
+  worklet: "pitch-sync-mod-processor.js"
+  wasm: "pitch-sync-mod.wasm"
   params:
     frequency: { type: float, unit: Hz }
     bandwidth: { type: float, unit: Hz }

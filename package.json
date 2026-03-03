@@ -1,8 +1,23 @@
 {
   "name": "qlatt",
   "version": "0.1.0",
+  "description": "Explainable WebAudio Klatt formant synthesizer with declarative TTS frontend and WASM-backed AudioWorklet DSP",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctoth/Qlatt.git"
+  },
+  "keywords": [
+    "klatt",
+    "formant-synthesis",
+    "tts",
+    "text-to-speech",
+    "webaudio",
+    "wasm",
+    "speech-synthesis",
+    "dsp"
+  ],
   "scripts": {
     "predev": "npm run build:worklets",
     "dev": "vite",

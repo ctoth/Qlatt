@@ -181,13 +181,16 @@ High-value, stable assertions:
 
 ## Current Limits (Important)
 
-These tests **do not render audio** yet.
+These tests **do not render audio** — they assert realized values and scheduling intent only.
 
 They assert:
 - Realized values from semantics
 - Scheduling intent inferred from semantics + graph binds
 
 This is intentional: they are fast, deterministic, and “math-first.”
-If you want waveform/spectral assertions, the next step is to add an
-offline rendering layer (likely via the existing Puppeteer offline render
-path) and compute audio fingerprints there.
+
+For waveform-level validation, use the offline rendering pipeline (`scripts/render-phrase.ts`) which supports two backends:
+- **node-web-audio-api**: headless Node.js rendering (default)
+- **Playwright**: headless browser rendering via `scripts/rendering/backends/`
+
+The oracle comparison system (`scripts/oracle/`) renders phrases through both DECtalk and Qlatt and compares the audio output.

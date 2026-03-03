@@ -10,7 +10,10 @@ Text -> preprocess -> declarative frontend -> Klatt track -> interpreter -> WebA
          src/tts-frontend.ts      src/declarative-frontend/*
 ```
 
-`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`. The default bundled frontend is `qlatt-english`, rooted at `public/rules/frontends/qlatt-english/frontend.yaml`.
+`src/tts-frontend.ts` still owns text normalization/transcription and final frame emission. Rule behavior is owned by `src/declarative-frontend/rule-pack.ts` and executed by `src/declarative-frontend/engine.ts`. Available bundled frontends:
+
+- **qlatt-english** (default): `public/rules/frontends/qlatt-english/frontend.yaml` — CMU dictionary, Elovitz LTS, shared inventory (`public/rules/inventory.yaml`)
+- **dectalk-english**: `public/rules/frontends/dectalk-english/frontend.yaml` — DECtalk 4.63 duration/F0 models, own inventory and LTS rules
 
 For graph topology and extension points, see `docs/synthesizer-architecture.md`. For the full authoring workflow, see `docs/adding-a-synthesizer.md`.
 
@@ -54,7 +57,7 @@ Defined in `public/experiments/klatt80-baseline/semantics.yaml` under `params:` 
 `textToKlattTrack()` in `src/tts-frontend.ts` executes:
 
 1. `normalizeText()` and `transcribeText()`
-2. baseline inventory mapping from `public/rules/inventory.yaml` (loaded via `src/declarative-frontend/inventory.ts`)
+2. baseline inventory mapping (loaded via `src/declarative-frontend/inventory.ts`; `qlatt-english` uses `public/rules/inventory.yaml`, `dectalk-english` uses its own `inventory.yaml`)
 3. declarative phases via `runDeclarativeFrontend()`:
    - `structural`
    - `duration`
@@ -97,20 +100,27 @@ scheduleTrack(track, startTime)
 
 ### Ramp vs step decision
 
-Set `ramp: true` in `semantics.yaml` realization rules.
+The semantics document declares a `defaultScheduling` mode:
 
 ```yaml
-aspGain:
-  expr: "dbToLinear(GO + AH + ndbScale.AH)"
-  deps: [GO, AH]
-  ramp: true
-
-voiceGain:
-  expr: "dbToLinear(GO + AV + ndbScale.AV)"
-  deps: [GO, AV]
+defaultScheduling: ramp   # Klatt 1980: all params interpolated between frames
 ```
 
-Current ramped params are `aspGain`, `fricGain`, and `fricGainScaled`. Most other bindings remain step-scheduled.
+With `defaultScheduling: ramp`, all bindings (realized and passthrough) use
+`linearRampToValueAtTime` by default, matching Klatt 1980's sample-by-sample
+linear interpolation between update frames.
+
+Binary mode switches override with `step: true` to force `setValueAtTime`,
+since intermediate values (e.g., cascade gain at 0.5) are acoustically invalid:
+
+```yaml
+cascadeGain:
+  expr: "SW == 1 ? 0 : 1"
+  deps: [SW]
+  step: true
+```
+
+Precedence: `step: true` > `ramp: true` > `defaultScheduling`.
 
 ## Semantics Evaluation
 
@@ -138,15 +148,13 @@ Builtin functions (`src/builtin-functions.ts`) include `dbToLinear`, `proximity`
 1. No spectral-distance metric in frame blending (`blendFactor` is fixed)
 2. Limited smoothing coverage (mainly vowel/sonorant handoff)
 3. No explicit delta/delta-delta trajectory model
-4. Most formant/frequency controls remain step-scheduled
-5. Transition window is fixed by `transitionMs` (default 30 ms)
+4. Transition window is fixed by `transitionMs` (default 30 ms)
 
 ## Potential Improvements
 
 SPG-style trajectory smoothing (Hu 2012) remains a candidate:
 
 1. Track-level trajectory optimization before scheduling
-2. Wider ramp usage where acoustically safe
-3. Higher frame density where needed
+2. Higher frame density where needed
 
 See `plans/spg-trajectory-smoothing.md`.

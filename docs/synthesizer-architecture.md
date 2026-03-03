@@ -65,9 +65,19 @@ Full primitive list:
 | `resonator` | Two-pole formant filter (bandpass) |
 | `antiresonator` | Two-zero notch filter (nasal zeros) |
 | `lf-source` | Liljencrants-Fant glottal source |
+| `impulsive-source` | Doublet impulse glottal source (klsyn88) |
+| `triangular-source` | Symmetric triangle glottal source (klsyn88) |
+| `square-source` | Pulse waveform glottal source (klsyn88) |
+| `oversampled-glottal-source` | 4x oversampled glottal source with tilt |
 | `decay-envelope` | Exponential decay for PLSTEP bursts |
 | `edge-detector` | Threshold crossing detector |
 | `signal-switch` | N-to-1 selector (cascade/parallel) |
+| `tilt-filter` | One-pole spectral tilt lowpass (klsyn88) |
+| `biquad-notch` | Biquad band-reject filter (nasal antiformants) |
+| `pitch-sync-mod` | Pitch-synchronous F1/B1 modulation |
+| `fujisaki-resonator` | Resonator with Fujisaki history compensation |
+| `reconstruction-filter` | Fixed output reconstruction lowpass |
+| `aerodynamic-model` | Stevens & Bickley 1991 aerodynamic coupling |
 | `impulse-train` | Periodic impulse source at F0 |
 | `noise-source` | Filtered noise for aspiration/frication |
 | `differentiator` | First-difference filter (radiation) |
@@ -235,9 +245,19 @@ a2Linear:
 | `resonator` | Two-pole formant filter | frequency, bandwidth |
 | `antiresonator` | Two-zero notch filter | frequency, bandwidth |
 | `lf-source` | LF glottal source | f0, rd, lfMode |
+| `impulsive-source` | Doublet impulse source (klsyn88) | f0, oq |
+| `triangular-source` | Symmetric triangle source (klsyn88) | f0, oq |
+| `square-source` | Pulse waveform source (klsyn88) | f0, oq |
+| `oversampled-glottal-source` | 4x oversampled source with tilt | f0, oq, tilt |
 | `decay-envelope` | PLSTEP burst envelope | trigger, amplitude, decay |
 | `edge-detector` | PLSTEP trigger | threshold, input |
 | `signal-switch` | N-to-1 selector | selector |
+| `tilt-filter` | One-pole spectral tilt lowpass | tilt (dB) |
+| `biquad-notch` | Band-reject filter | frequency, bandwidth |
+| `pitch-sync-mod` | Pitch-synchronous F1/B1 resonator | frequency, bandwidth, dF, db |
+| `fujisaki-resonator` | Resonator with history compensation | frequency, bandwidth |
+| `reconstruction-filter` | Fixed output reconstruction lowpass | — |
+| `aerodynamic-model` | Stevens & Bickley 1991 coupling | (physical params) |
 
 WASM primitives live in `crates/`. Each has:
 - Rust implementation (`src/lib.rs`)

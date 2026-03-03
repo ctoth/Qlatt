@@ -251,6 +251,53 @@ describe("declarative frontend schema coverage", () => {
     expect(okCodes.includes("E_TOKEN_FIELD_UNDECLARED")).toBe(false);
   });
 
+  it("accepts control_windows with explicit ops and object-valued field expressions", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        good: {
+          select: { stream: "phone", where: "true" },
+          define: {
+            release_fields: "{'AH': 48, 'AV': 0}",
+          },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: "current.sync_right",
+            insert: [
+              {
+                copy_from: "current",
+                control_windows: [
+                  {
+                    target: "'current'",
+                    prefix_ms: "20",
+                    fields: "release_fields",
+                    tag: "'release'",
+                  },
+                  {
+                    target: "'next'",
+                    start_ratio: "0",
+                    end_ratio: "0.25",
+                    fields: {
+                      B1: { op: "'add'", value: "250" },
+                      AV: { op: "'set'", value: "0" },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      phases: [{ name: "structural", rules: ["good"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+    expect(codes.includes("E_CONTROL_WINDOW_SCHEMA")).toBe(false);
+    expect(codes.includes("E_CEL_INVALID")).toBe(false);
+  });
+
   it("accepts structural condition maps with predicate references", () => {
     const spec = parseDslSpec({
       streams: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },

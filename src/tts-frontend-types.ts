@@ -39,27 +39,57 @@ export type TranscriptionOptions = {
   dictLookup?: (word: string) => string[] | null;
 };
 
+/** The segment a control window applies to.
+ *  Generic timed control windows may affect the current segment or an adjacent
+ *  one, enabling overlap-style behavior without forcing synthetic extra tokens.
+ *  Citations: Abramson & Whalen 2017 (closure/release/aspiration subspans),
+ *  Volenec 2015 (window-model framing for overlap in frame-based synthesis) */
+export type ControlWindowTarget = "current" | "next" | "prev";
+
+/** Per-field operation inside a control window.
+ *  Field-wise ops generalize timed control from whole-object replacement to
+ *  additive/subtractive scaling and explicit clearing.
+ *  Citation: Burkhardt 2009 (additive/subtractive Klatt parameter modification) */
+export type ControlFieldOp = "set" | "add" | "mul" | "max" | "min" | "unset";
+
+/** A single field operation within a control window. */
+export interface ControlFieldSpec {
+  /** Operation to apply while the window is active. */
+  op: ControlFieldOp;
+  /** Numeric operand (not used for `unset`). */
+  value?: number;
+  [key: string]: unknown;
+}
+
 /**
- * A token-local timed parameter override window.
+ * A token-local timed control window.
  *
- * The track assembler treats each window as an in-segment hold region that
- * overrides the token's base params between the resolved start/end offsets.
- * Offsets may be expressed in milliseconds or as a ratio of the token duration.
+ * The track assembler resolves these into frame-local parameter operations over
+ * the addressed segment. Offsets may be expressed in milliseconds or as a
+ * ratio of the target segment duration, with optional prefix/suffix shorthands.
  *
- * This is the generic declarative primitive used for burst/VOT/voicebar-style
- * subsegment events without forcing them into separate synthetic segments.
+ * Citations:
+ * - Klatt 1980 (5 ms frame control parameters)
+ * - Allen 1977 (rule-driven control parameters every 5 ms)
+ * - Volenec 2015 (window-model overlap as a generic control concept)
  */
-export interface ParamWindowSpec {
-  /** Window start offset in milliseconds from the token onset. */
+export interface ControlWindowSpec {
+  /** Which segment this window applies to. Defaults to `current` if omitted. */
+  target?: ControlWindowTarget;
+  /** Window start offset in milliseconds from the target segment onset. */
   start_ms?: number;
-  /** Window end offset in milliseconds from the token onset. */
+  /** Window end offset in milliseconds from the target segment onset. */
   end_ms?: number;
-  /** Window start offset as a ratio of token duration [0,1]. */
+  /** Window start offset as a ratio of target duration [0,1]. */
   start_ratio?: number;
-  /** Window end offset as a ratio of token duration [0,1]. */
+  /** Window end offset as a ratio of target duration [0,1]. */
   end_ratio?: number;
-  /** Parameter overrides active within the window. */
-  params?: Record<string, number>;
+  /** Shorthand for a window spanning [0, prefix_ms]. */
+  prefix_ms?: number;
+  /** Shorthand for a window spanning [duration-suffix_ms, duration]. */
+  suffix_ms?: number;
+  /** Field-wise control operations active within the window. */
+  fields?: Record<string, ControlFieldSpec>;
   /** Optional diagnostic/provenance tag. */
   tag?: string;
   [key: string]: unknown;
@@ -101,8 +131,8 @@ export interface PhoneToken {
   punctuationSymbol?: string | null;
   /** Inventory-sourced SW (cascade/parallel switch) value */
   inventorySW?: unknown;
-  /** Token-local timed parameter override windows. */
-  param_windows?: ParamWindowSpec[];
+  /** Token-local timed control windows. */
+  control_windows?: ControlWindowSpec[];
   /** Sync axis left boundary mark */
   sync_left?: string;
   /** Sync axis right boundary mark */

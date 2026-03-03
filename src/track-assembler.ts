@@ -10,7 +10,13 @@ import {
   PHONEME_TARGETS,
   fillDefaultParams,
 } from "./declarative-frontend/inventory";
-import type { KlattFrame, ParamWindowSpec } from "./tts-frontend-types";
+import type {
+  KlattFrame,
+  ControlFieldOp,
+  ControlFieldSpec,
+  ControlWindowSpec,
+  ControlWindowTarget,
+} from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,10 +25,14 @@ import type { KlattFrame, ParamWindowSpec } from "./tts-frontend-types";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type InputToken = Record<string, any>;
 type KlattParams = Record<string, number>;
-type ResolvedParamWindow = {
+type ResolvedControlField = {
+  op: ControlFieldOp;
+  value?: number;
+};
+type ResolvedControlWindow = {
   startSec: number;
   endSec: number;
-  params: KlattParams;
+  fields: Record<string, ResolvedControlField>;
   tag?: string;
 };
 
@@ -105,11 +115,28 @@ export type AssembleTrackOptions = {
 };
 
 function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "bigint") {
+    const numericValue = Number(value);
+    return Number.isSafeInteger(numericValue) ? numericValue : null;
+  }
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function resolveTokenDurationMs(
+  token: InputToken,
+  minDurationMs: number,
+  fallbackInventoryDurationMs: number | null
+): number {
+  const configuredDuration = toFiniteNumber(token?.duration);
+  const fallbackDuration =
+    fallbackInventoryDurationMs != null && Number.isFinite(fallbackInventoryDurationMs)
+      ? fallbackInventoryDurationMs
+      : 100;
+  return Math.max(minDurationMs, configuredDuration ?? fallbackDuration);
+}
+
 function resolveWindowOffsetSec(
-  window: ParamWindowSpec,
+  window: ControlWindowSpec,
   durationSec: number,
   msField: "start_ms" | "end_ms",
   ratioField: "start_ratio" | "end_ratio",
@@ -124,55 +151,185 @@ function resolveWindowOffsetSec(
   return fallbackSec;
 }
 
-function resolveParamWindows(token: InputToken, durationSec: number): ResolvedParamWindow[] {
-  const rawWindows = Array.isArray(token?.param_windows)
-    ? (token.param_windows as ParamWindowSpec[])
-    : [];
-  if (rawWindows.length === 0 || durationSec <= 0) return [];
-
-  const windows: ResolvedParamWindow[] = [];
-  for (const rawWindow of rawWindows) {
-    if (!rawWindow || typeof rawWindow !== "object" || Array.isArray(rawWindow)) continue;
-    const rawStartSec = resolveWindowOffsetSec(rawWindow, durationSec, "start_ms", "start_ratio", 0);
-    const rawEndSec = resolveWindowOffsetSec(
-      rawWindow,
-      durationSec,
-      "end_ms",
-      "end_ratio",
-      durationSec
-    );
-    const startSec = Math.max(0, Math.min(durationSec, rawStartSec));
-    const endSec = Math.max(startSec, Math.min(durationSec, rawEndSec));
-    if (endSec <= startSec) continue;
-
-    const rawParams =
-      rawWindow.params && typeof rawWindow.params === "object" && !Array.isArray(rawWindow.params)
-        ? rawWindow.params
-        : null;
-    if (!rawParams) continue;
-
-    const params: KlattParams = {};
-    for (const [key, value] of Object.entries(rawParams)) {
-      const numericValue = toFiniteNumber(value);
-      if (numericValue == null) continue;
-      params[key] = numericValue;
-    }
-    if (Object.keys(params).length === 0) continue;
-
-    windows.push({
-      startSec,
-      endSec,
-      params,
-      tag: typeof rawWindow.tag === "string" ? rawWindow.tag : undefined,
-    });
+function resolveControlWindowSpan(
+  window: ControlWindowSpec,
+  durationSec: number
+): { startSec: number; endSec: number } | null {
+  const prefixMs = toFiniteNumber(window?.prefix_ms);
+  if (prefixMs != null) {
+    const endSec = Math.max(0, Math.min(durationSec, prefixMs / 1000));
+    return endSec > 0 ? { startSec: 0, endSec } : null;
   }
 
-  return windows;
+  const suffixMs = toFiniteNumber(window?.suffix_ms);
+  if (suffixMs != null) {
+    const spanSec = Math.max(0, Math.min(durationSec, suffixMs / 1000));
+    const startSec = Math.max(0, durationSec - spanSec);
+    return durationSec > startSec ? { startSec, endSec: durationSec } : null;
+  }
+
+  const rawStartSec = resolveWindowOffsetSec(window, durationSec, "start_ms", "start_ratio", 0);
+  const rawEndSec = resolveWindowOffsetSec(
+    window,
+    durationSec,
+    "end_ms",
+    "end_ratio",
+    durationSec
+  );
+  const startSec = Math.max(0, Math.min(durationSec, rawStartSec));
+  const endSec = Math.max(startSec, Math.min(durationSec, rawEndSec));
+  if (endSec <= startSec) return null;
+  return { startSec, endSec };
 }
 
-function segmentCanVoice(baseParams: KlattParams, windows: ResolvedParamWindow[]): boolean {
+function resolveControlFields(
+  rawFields: unknown
+): Record<string, ResolvedControlField> | null {
+  if (!rawFields || typeof rawFields !== "object" || Array.isArray(rawFields)) return null;
+
+  const fields: Record<string, ResolvedControlField> = {};
+  for (const [fieldName, rawSpec] of Object.entries(rawFields)) {
+    const shorthandValue = toFiniteNumber(rawSpec);
+    if (shorthandValue != null) {
+      fields[fieldName] = { op: "set", value: shorthandValue };
+      continue;
+    }
+    if (!rawSpec || typeof rawSpec !== "object" || Array.isArray(rawSpec)) continue;
+    const fieldSpec = rawSpec as ControlFieldSpec;
+    const op =
+      typeof fieldSpec.op === "string" &&
+      ["set", "add", "mul", "max", "min", "unset"].includes(
+        fieldSpec.op.replace(/^['"]|['"]$/g, "")
+      )
+        ? (fieldSpec.op.replace(/^['"]|['"]$/g, "") as ControlFieldOp)
+        : null;
+    if (op == null) continue;
+    const numericValue = toFiniteNumber(fieldSpec.value);
+    if (op !== "unset" && numericValue == null) continue;
+    fields[fieldName] =
+      op === "unset" ? { op } : { op, value: numericValue as number };
+  }
+
+  return Object.keys(fields).length > 0 ? fields : null;
+}
+
+function resolveControlWindow(
+  rawWindow: ControlWindowSpec,
+  durationSec: number
+): ResolvedControlWindow | null {
+  const span = resolveControlWindowSpan(rawWindow, durationSec);
+  if (span == null) return null;
+  const fields = resolveControlFields(rawWindow.fields);
+  if (fields == null) return null;
+  return {
+    startSec: span.startSec,
+    endSec: span.endSec,
+    fields,
+    tag: typeof rawWindow.tag === "string" ? rawWindow.tag : undefined,
+  };
+}
+
+function collectResolvedControlWindows(
+  phoneSequence: InputToken[],
+  minDurationStopReleaseMs: number,
+  minDurationDefaultMs: number
+): ResolvedControlWindow[][] {
+  const resolvedByIndex = phoneSequence.map(() => [] as ResolvedControlWindow[]);
+
+  for (let sourceIndex = 0; sourceIndex < phoneSequence.length; sourceIndex += 1) {
+    const sourceToken = phoneSequence[sourceIndex];
+    const rawWindows = Array.isArray(sourceToken?.control_windows)
+      ? (sourceToken.control_windows as ControlWindowSpec[])
+      : [];
+    if (rawWindows.length === 0) continue;
+
+    for (const rawWindow of rawWindows) {
+      if (!rawWindow || typeof rawWindow !== "object" || Array.isArray(rawWindow)) continue;
+      const rawTarget =
+        typeof rawWindow.target === "string"
+          ? rawWindow.target.replace(/^['"]|['"]$/g, "")
+          : "current";
+      const targetIndex =
+        rawTarget === "next"
+          ? sourceIndex + 1
+          : rawTarget === "prev"
+            ? sourceIndex - 1
+            : sourceIndex;
+      if (targetIndex < 0 || targetIndex >= phoneSequence.length) continue;
+
+      const targetToken = phoneSequence[targetIndex];
+      const isStopRelease =
+        targetToken.type === "stop_release" || targetToken.type === "stop_aspiration";
+      const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
+      const fallbackDurationMs = isStopRelease
+        ? toFiniteNumber(PHONEME_TARGET_MAP[targetToken.phoneme]?.dur)
+        : null;
+      const targetDurationSec =
+        resolveTokenDurationMs(targetToken, minDurationMs, fallbackDurationMs) / 1000;
+      const resolvedWindow = resolveControlWindow(rawWindow, targetDurationSec);
+      if (resolvedWindow == null) continue;
+      resolvedByIndex[targetIndex].push(resolvedWindow);
+    }
+  }
+
+  return resolvedByIndex;
+}
+
+function resolveFieldValue(
+  baseValue: number | undefined,
+  field: ResolvedControlField
+): number | undefined {
+  switch (field.op) {
+    case "unset":
+      return undefined;
+    case "set":
+      return field.value;
+    case "add":
+      return (baseValue ?? 0) + (field.value ?? 0);
+    case "mul":
+      return (baseValue ?? 0) * (field.value ?? 1);
+    case "max":
+      return Math.max(baseValue ?? Number.NEGATIVE_INFINITY, field.value ?? Number.NEGATIVE_INFINITY);
+    case "min":
+      return Math.min(baseValue ?? Number.POSITIVE_INFINITY, field.value ?? Number.POSITIVE_INFINITY);
+    default:
+      return baseValue;
+  }
+}
+
+function applyControlField(
+  params: KlattParams,
+  fieldName: string,
+  field: ResolvedControlField
+): void {
+  const nextValue = resolveFieldValue(params[fieldName], field);
+  if (nextValue == null || !Number.isFinite(nextValue)) {
+    delete params[fieldName];
+    return;
+  }
+  params[fieldName] = nextValue;
+}
+
+function applyControlFields(
+  params: KlattParams,
+  fields: Record<string, ResolvedControlField>
+): void {
+  for (const [fieldName, field] of Object.entries(fields)) {
+    applyControlField(params, fieldName, field);
+  }
+}
+
+function segmentCanVoice(baseParams: KlattParams, windows: ResolvedControlWindow[]): boolean {
   if ((baseParams.AV ?? 0) > 0 || (baseParams.AVS ?? 0) > 0) return true;
-  return windows.some((window) => (window.params.AV ?? 0) > 0 || (window.params.AVS ?? 0) > 0);
+  for (const window of windows) {
+    const av = window.fields.AV ? resolveFieldValue(baseParams.AV, window.fields.AV) : baseParams.AV;
+    if ((av ?? 0) > 0) return true;
+    const avs = window.fields.AVS
+      ? resolveFieldValue(baseParams.AVS, window.fields.AVS)
+      : baseParams.AVS;
+    if ((avs ?? 0) > 0) return true;
+  }
+  return false;
 }
 
 function buildSegmentEventTimes(
@@ -180,7 +337,7 @@ function buildSegmentEventTimes(
   segmentEnd: number,
   steadyTime: number | null,
   interiorF0Anchors: number[],
-  paramWindows: ResolvedParamWindow[],
+  controlWindows: ResolvedControlWindow[],
   includeSegmentEnd = false
 ): number[] {
   const epsilon = 1e-6;
@@ -196,7 +353,7 @@ function buildSegmentEventTimes(
     times.push(steadyTime);
   }
 
-  for (const window of paramWindows) {
+  for (const window of controlWindows) {
     const startTime = segmentStart + window.startSec;
     const endTime = segmentStart + window.endSec;
     if (startTime > segmentStart + epsilon && startTime < segmentEnd - epsilon) {
@@ -224,13 +381,13 @@ function buildSegmentEventTimes(
   return deduped;
 }
 
-function applyParamWindowsAtOffset(
+function applyControlWindowsAtOffset(
   baseParams: KlattParams,
   transitionParams: KlattParams | null,
   steadyTime: number | null,
   segmentStart: number,
   eventTime: number,
-  paramWindows: ResolvedParamWindow[]
+  controlWindows: ResolvedControlWindow[]
 ): KlattParams {
   const epsilon = 1e-6;
   const segmentOffset = Math.max(0, eventTime - segmentStart);
@@ -240,10 +397,10 @@ function applyParamWindowsAtOffset(
     ...(useTransitionParams ? transitionParams : baseParams),
   };
 
-  for (const window of paramWindows) {
+  for (const window of controlWindows) {
     if (segmentOffset + epsilon < window.startSec) continue;
     if (segmentOffset >= window.endSec - epsilon) continue;
-    Object.assign(resolved, window.params);
+    applyControlFields(resolved, window.fields);
   }
 
   return resolved;
@@ -1109,9 +1266,8 @@ export function assembleKlattTrack(
     for (const ph of phoneSequence) {
       const isStopRel = ph.type === "stop_release" || ph.type === "stop_aspiration";
       const minDur = isStopRel ? minDurationStopReleaseMs : minDurationDefaultMs;
-      const tgtDur = isStopRel ? PHONEME_TARGET_MAP[ph.phoneme]?.dur : null;
-      const phDurationMs = Number.isFinite(tgtDur) ? tgtDur : (ph.duration || 100);
-      totalDuration += Math.max(minDur, phDurationMs) / 1000.0;
+      const fallbackDur = isStopRel ? toFiniteNumber(PHONEME_TARGET_MAP[ph.phoneme]?.dur) : null;
+      totalDuration += resolveTokenDurationMs(ph, minDur, fallbackDur) / 1000.0;
     }
     totalDuration += finalSilenceMs / 1000.0;
 
@@ -1137,6 +1293,11 @@ export function assembleKlattTrack(
   const klattTrack: KlattFrame[] = [];
   let currentTime = 0;
   const transitionSec = Math.max(0, transitionMs) / 1000.0;
+  const resolvedControlWindowsByIndex = collectResolvedControlWindows(
+    phoneSequence,
+    minDurationStopReleaseMs,
+    minDurationDefaultMs
+  );
 
   // Start silent.
   const silParams = fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
@@ -1148,12 +1309,12 @@ export function assembleKlattTrack(
 
   for (let i = 0; i < phoneSequence.length; i++) {
     const ph = phoneSequence[i] as InputToken;
-    // Stop releases/aspiration must use their fixed MITalk durations (5-25ms)
+    // Respect explicit rule-assigned durations; fall back to inventory defaults only
+    // when a release/aspiration token did not receive a declarative duration.
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
     const minDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
-    const targetDur = isStopRelease ? PHONEME_TARGET_MAP[ph.phoneme]?.dur : null;
-    const phDurationMs = Number.isFinite(targetDur) ? targetDur : (ph.duration || 100);
-    const phDuration = Math.max(minDuration, phDurationMs) / 1000.0;
+    const fallbackDuration = isStopRelease ? toFiniteNumber(PHONEME_TARGET_MAP[ph.phoneme]?.dur) : null;
+    const phDuration = resolveTokenDurationMs(ph, minDuration, fallbackDuration) / 1000.0;
     const segmentStart = currentTime;
 
     if (phDuration <= 0) {
@@ -1174,10 +1335,10 @@ export function assembleKlattTrack(
     // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
     // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
     if (vq) applyVoiceQualityOverrides(finalParams, vq);
-    const paramWindows = resolveParamWindows(ph, phDuration);
+    const controlWindows = resolvedControlWindowsByIndex[i] ?? [];
 
     // Determine and set F0.
-    const segmentVoiced = segmentCanVoice(finalParams, paramWindows);
+    const segmentVoiced = segmentCanVoice(finalParams, controlWindows);
     const interiorF0Anchors = segmentVoiced
       ? getInteriorF0AnchorTimes(f0Contour, segmentStart, targetTime)
       : [];
@@ -1200,18 +1361,18 @@ export function assembleKlattTrack(
         targetTime,
         steadyTime,
         interiorF0Anchors,
-        paramWindows,
-        nextPh == null && paramWindows.length > 0
+        controlWindows,
+        nextPh == null && controlWindows.length > 0
       );
 
       for (const eventTime of eventTimes) {
-        const eventParams = applyParamWindowsAtOffset(
+        const eventParams = applyControlWindowsAtOffset(
           finalParams,
           transitionParams,
           steadyTime,
           segmentStart,
           eventTime,
-          paramWindows
+          controlWindows
         );
         const voicedAtEvent = (eventParams.AV ?? 0) > 0 || (eventParams.AVS ?? 0) > 0;
         let eventF0 =

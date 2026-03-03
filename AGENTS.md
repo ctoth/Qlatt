@@ -49,6 +49,16 @@ The paper library lives in `papers/`. Each paper has a `notes.md` with implement
 
 When you add new processing stages or error conditions, emit diagnostics. When a parameter is clamped, defaulted, or falls back — that's a diagnostic event.
 
+### 4. Script Repetitive Inspection And Migration Work
+
+Do not rely on long shell or Node one-liners for non-trivial repo analysis, migration, or data inspection. If a task needs more than a simple command, write an actual script in `scripts/` (or another appropriate checked-in location) so the logic is readable, reusable, and reviewable.
+
+**What this means for you as an agent:**
+- For repeatable searches, inspections, or report generation: prefer a real script over an inline one-liner.
+- For schema migrations or corpus analysis: write a dedicated script and run that script.
+- Use one-liners only for genuinely trivial commands (`rg`, `Get-Content`, `git status`, short smoke checks).
+- If a throwaway script is only needed temporarily, still make it a normal file first; delete it afterward if it should not stay in the repo.
+
 ## Build Commands
 
 ```bash

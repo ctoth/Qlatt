@@ -981,7 +981,7 @@ function validateTemplateNumericExpression(
   validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
 }
 
-function validateParamWindowTemplate(
+function validateControlWindowTemplate(
   value: unknown,
   streamByName: Map<string, any>,
   streamName: unknown,
@@ -995,8 +995,8 @@ function validateParamWindowTemplate(
   if (!Array.isArray(value)) {
     diagnostics.push(
       makeDiagnostic(
-        "E_PARAM_WINDOW_SCHEMA",
-        `${contextLabel} must be an array of window specs`,
+        "E_CONTROL_WINDOW_SCHEMA",
+        `${contextLabel} must be an array of control window specs`,
         path
       )
     );
@@ -1010,12 +1010,35 @@ function validateParamWindowTemplate(
     if (!isPlainObject(entry)) {
       diagnostics.push(
         makeDiagnostic(
-          "E_PARAM_WINDOW_SCHEMA",
+          "E_CONTROL_WINDOW_SCHEMA",
           `${entryLabel} must be an object`,
           entryPath
         )
       );
       continue;
+    }
+
+    if (entry.target != null) {
+      if (typeof entry.target !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CONTROL_WINDOW_SCHEMA",
+            `${entryLabel}.target must be a string expression`,
+            `${entryPath}.target`
+          )
+        );
+      } else if (!["current", "next", "prev"].includes(entry.target)) {
+        const syntaxError = validateExpressionSyntax(entry.target, { streamNames });
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `${entryLabel}.target has invalid CEL expression: ${syntaxError}`,
+              `${entryPath}.target`
+            )
+          );
+        }
+      }
     }
 
     validateTemplateNumericExpression(
@@ -1058,52 +1081,142 @@ function validateParamWindowTemplate(
       `${entryPath}.end_ratio`,
       `${entryLabel}.end_ratio`
     );
+    validateTemplateNumericExpression(
+      entry.prefix_ms,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.prefix_ms`,
+      `${entryLabel}.prefix_ms`
+    );
+    validateTemplateNumericExpression(
+      entry.suffix_ms,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.suffix_ms`,
+      `${entryLabel}.suffix_ms`
+    );
 
-    const paramsSpec = entry.params;
-    if (paramsSpec != null) {
-      if (typeof paramsSpec === "string") {
-        validateTemplateNumericExpression(
-          paramsSpec,
+    const fieldsSpec = entry.fields;
+    if (typeof fieldsSpec === "string") {
+      const syntaxError = validateExpressionSyntax(fieldsSpec, { streamNames });
+      if (syntaxError) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CEL_INVALID",
+            `${entryLabel}.fields has invalid CEL expression: ${syntaxError}`,
+            `${entryPath}.fields`
+          )
+        );
+      } else {
+        validateDeclaredTypeFieldUsage(
+          fieldsSpec,
           streamByName,
           streamName,
-          streamNames,
-          policyState,
           diagnostics,
-          `${entryPath}.params`,
-          `${entryLabel}.params`
+          `${entryPath}.fields`,
+          `${entryLabel}.fields`
         );
-      } else if (isPlainObject(paramsSpec)) {
-        validateTemplateDispatchExpressions(
-          paramsSpec,
-          streamByName,
-          streamName,
-          streamNames,
-          policyState,
+        validatePolicyReferencesAndLiterals(
+          fieldsSpec,
+          `${entryPath}.fields`,
+          `${entryLabel}.fields`,
           diagnostics,
-          `${entryPath}.params`,
-          `${entryLabel}.params`
+          policyState
         );
-        for (const [paramName, paramValue] of Object.entries(paramsSpec)) {
+      }
+    } else if (!isPlainObject(fieldsSpec)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_CONTROL_WINDOW_SCHEMA",
+          `${entryLabel}.fields must be an object`,
+          `${entryPath}.fields`
+        )
+      );
+    } else {
+      validateTemplateDispatchExpressions(
+        fieldsSpec,
+        streamByName,
+        streamName,
+        streamNames,
+        policyState,
+        diagnostics,
+        `${entryPath}.fields`,
+        `${entryLabel}.fields`
+      );
+      for (const [fieldName, fieldSpec] of Object.entries(fieldsSpec)) {
+        if (!isPlainObject(fieldSpec)) {
           validateTemplateNumericExpression(
-            paramValue,
+            fieldSpec,
             streamByName,
             streamName,
             streamNames,
             policyState,
             diagnostics,
-            `${entryPath}.params.${paramName}`,
-            `${entryLabel}.params.${paramName}`
+            `${entryPath}.fields.${fieldName}`,
+            `${entryLabel}.fields.${fieldName}`
+          );
+          continue;
+        }
+
+        const opSpec = fieldSpec.op;
+        if (typeof opSpec !== "string") {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CONTROL_WINDOW_SCHEMA",
+              `${entryLabel}.fields.${fieldName}.op must be a string expression`,
+              `${entryPath}.fields.${fieldName}.op`
+            )
+          );
+        } else if (!["set", "add", "mul", "max", "min", "unset"].includes(opSpec)) {
+          const syntaxError = validateExpressionSyntax(opSpec, { streamNames });
+          if (syntaxError) {
+            diagnostics.push(
+              makeDiagnostic(
+                "E_CEL_INVALID",
+                `${entryLabel}.fields.${fieldName}.op has invalid CEL expression: ${syntaxError}`,
+                `${entryPath}.fields.${fieldName}.op`
+              )
+            );
+          }
+        }
+
+        if (Object.prototype.hasOwnProperty.call(fieldSpec, "value")) {
+          validateTemplateNumericExpression(
+            fieldSpec.value,
+            streamByName,
+            streamName,
+            streamNames,
+            policyState,
+            diagnostics,
+            `${entryPath}.fields.${fieldName}.value`,
+            `${entryLabel}.fields.${fieldName}.value`
+          );
+        } else if (opSpec !== "unset") {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CONTROL_WINDOW_SCHEMA",
+              `${entryLabel}.fields.${fieldName}.value is required unless op is unset`,
+              `${entryPath}.fields.${fieldName}.value`
+            )
           );
         }
-      } else {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_PARAM_WINDOW_SCHEMA",
-            `${entryLabel}.params must be an object or expression`,
-            `${entryPath}.params`
-          )
-        );
       }
+    }
+
+    if (entry.params != null) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_CONTROL_WINDOW_SCHEMA",
+          `${entryLabel}.params is no longer supported; use .fields`,
+          `${entryPath}.params`
+        )
+      );
     }
 
     if (entry.tag != null) {
@@ -1357,16 +1470,16 @@ function validateRules(
           `Rule '${name}' splice.insert[${i}]`
         );
         const insertSpec = r.splice.insert[i];
-        if (isPlainObject(insertSpec) && Object.prototype.hasOwnProperty.call(insertSpec, "param_windows")) {
-          validateParamWindowTemplate(
-            insertSpec.param_windows,
+        if (isPlainObject(insertSpec) && Object.prototype.hasOwnProperty.call(insertSpec, "control_windows")) {
+          validateControlWindowTemplate(
+            insertSpec.control_windows,
             streamByName,
             ruleStreamName,
             streamNames,
             policyState,
             diagnostics,
-            `rules.${name}.splice.insert[${i}].param_windows`,
-            `Rule '${name}' splice.insert[${i}].param_windows`
+            `rules.${name}.splice.insert[${i}].control_windows`,
+            `Rule '${name}' splice.insert[${i}].control_windows`
           );
         }
       }

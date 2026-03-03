@@ -141,6 +141,47 @@ describe("track-assembler", () => {
       expect(track[0].time).toBe(0);
       expect(track[track.length - 1].phoneme).toBe("SIL");
     });
+
+    it("applies control_windows to the next segment with field-wise ops", () => {
+      const track = assembleKlattTrack(
+        [
+          {
+            phoneme: "T",
+            type: "stop_closure",
+            duration: 100,
+            params: { AV: 0, AH: 0, B1: 120, B2: 140, SW: 0 },
+            control_windows: [
+              {
+                target: "next",
+                prefix_ms: 20,
+                fields: {
+                  AH: { op: "set", value: 40 },
+                  AV: { op: "set", value: 0 },
+                  B1: { op: "add", value: 50 },
+                },
+              },
+            ],
+          },
+          {
+            phoneme: "AA",
+            type: "vowel",
+            duration: 100,
+            params: { AV: 60, AH: 0, B1: 200, B2: 220, SW: 0 },
+          },
+        ],
+        [],
+        { baseF0: 120, transitionMs: 0 }
+      );
+
+      const aaFrames = track.filter((frame) => frame.phoneme === "AA");
+      expect(aaFrames.length).toBeGreaterThanOrEqual(2);
+      expect(aaFrames[0].params.AH).toBe(40);
+      expect(aaFrames[0].params.AV).toBe(0);
+      expect(aaFrames[0].params.B1).toBe(250);
+      expect(aaFrames[1].params.AH ?? 0).toBe(0);
+      expect(aaFrames[1].params.AV).toBe(60);
+      expect(aaFrames[1].params.B1).toBe(200);
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -77,6 +77,19 @@ export type TextToKlattTrackOptions = {
   voiceQuality?: VoiceQuality;
 };
 
+export type FrontendPhoneSummary = {
+  index: number;
+  phoneme: string;
+  word?: string;
+  durationMs: number;
+  minimumDurationMs?: number;
+};
+
+export type TextToKlattTrackDetailedResult = {
+  track: KlattFrame[];
+  frontendPhones: FrontendPhoneSummary[];
+};
+
 // Plain stop symbols are intentionally rewritten in the structural phase
 // (Klatt 1980 stop model: closure + release).
 const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
@@ -105,7 +118,7 @@ function readPolicyNumber(entry: unknown): number | undefined {
 }
 
 function resolveSpeakerProfile(
-  baseF0: number,
+  baseF0: number | undefined,
   speakerOverride: TextToKlattTrackOptions["speaker"],
   specSource: unknown,
 ): ResolvedSpeakerProfile {
@@ -122,7 +135,9 @@ function resolveSpeakerProfile(
   return {
     base_f0_hz: typeof baseF0Override === "number" && Number.isFinite(baseF0Override)
       ? baseF0Override
-      : (baseFromPolicy ?? baseF0),
+      : (typeof baseF0 === "number" && Number.isFinite(baseF0)
+          ? baseF0
+          : (baseFromPolicy ?? 110)),
     formant_scale: typeof formantScaleOverride === "number" && Number.isFinite(formantScaleOverride)
       ? formantScaleOverride
       : (formantScaleFromPolicy ?? 1.0),
@@ -265,12 +280,12 @@ export { normalizeText } from "./g2p/text-normalize";
 export { transcribeText } from "./transcribe-text";
 
 // --- Main Pipeline ---
-export function textToKlattTrack(
+function buildTextToKlattTrackDetailed(
   inputText: string,
-  baseF0 = 110,
+  baseF0: number | undefined = undefined,
   transitionMs = 30,
   options: TextToKlattTrackOptions = {}
-): KlattFrame[] {
+): TextToKlattTrackDetailedResult {
   const frontendSpec = loadBundledRulepackSpec(options.frontendId);
   const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
@@ -287,7 +302,7 @@ export function textToKlattTrack(
   const noOpDictLookup = (): null => null;
 
   const provenance = options.provenance ?? null;
-  const rate = Math.max(0.5, Math.min(2.0, options.rate ?? 1.0));
+  const requestedRate = options.rate ?? 1.0;
   const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
@@ -428,6 +443,33 @@ export function textToKlattTrack(
       frontendSpec,
     );
 
+  const policyDefaults =
+    frontendSpec?.parameters &&
+    typeof frontendSpec.parameters === "object" &&
+    "policy" in frontendSpec.parameters &&
+    frontendSpec.parameters.policy &&
+    typeof frontendSpec.parameters.policy === "object"
+      ? (frontendSpec.parameters.policy as Record<string, unknown>)
+      : null;
+  const durationPolicyDefaults =
+    policyDefaults &&
+    "duration" in policyDefaults &&
+    policyDefaults.duration &&
+    typeof policyDefaults.duration === "object"
+      ? (policyDefaults.duration as Record<string, unknown>)
+      : null;
+  const rateReference =
+    durationPolicyDefaults &&
+    "rate_reference" in durationPolicyDefaults &&
+    typeof durationPolicyDefaults.rate_reference === "number"
+      ? durationPolicyDefaults.rate_reference
+      : null;
+  const normalizedRate =
+    rateReference != null && Number.isFinite(rateReference) && rateReference > 0
+      ? requestedRate / rateReference
+      : requestedRate;
+  const rate = Math.max(0.5, Math.min(2.0, normalizedRate));
+
   // Run postlexical rules first (t-flapping, the-reduction operate on raw phonemes).
   // t_flapping must see raw T between vowels; structural would split T into
   // T_CL + T_REL + T_ASP, breaking the adjacency check.
@@ -464,6 +506,12 @@ export function textToKlattTrack(
       duration: { rate_scale: rate },
       // Vowel centralization increases at fast rates (Lindblom 1963).
       // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
+      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
+    },
+  });
+  parameterSequence = runPhases(parameterSequence, ["formant"], {
+    policy: {
+      ...speakerOverrides,
       formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
     },
   });
@@ -548,13 +596,33 @@ export function textToKlattTrack(
           extracted[key] = val;
         }
       }
+      extracted.base_f0_hz = resolvedSpeaker.base_f0_hz;
       if (Object.keys(extracted).length > 0) {
         speakerParams = extracted;
       }
     }
   }
 
-  return assembleKlattTrack(phoneSequence, parameterSequence, {
+  const frontendPhones: FrontendPhoneSummary[] = phoneSequence.map(
+    (token: PipelineToken, index: number) => {
+      const duration = Number(token?.duration ?? 0);
+      const minimumDuration = Number(token?.minimumDuration ?? NaN);
+      const summary: FrontendPhoneSummary = {
+        index,
+        phoneme: String(token?.phoneme ?? ""),
+        durationMs: Number.isFinite(duration) ? duration : 0,
+      };
+      if (typeof token?.word === "string" && token.word.length > 0) {
+        summary.word = token.word;
+      }
+      if (Number.isFinite(minimumDuration)) {
+        summary.minimumDurationMs = minimumDuration;
+      }
+      return summary;
+    }
+  );
+
+  const track = assembleKlattTrack(phoneSequence, parameterSequence, {
     baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
     outputConfig: rulepackOutputConfig,
@@ -564,4 +632,27 @@ export function textToKlattTrack(
     f0Model,
     speakerParams,
   });
+
+  return {
+    track,
+    frontendPhones,
+  };
+}
+
+export function textToKlattTrackDetailed(
+  inputText: string,
+  baseF0: number | undefined = undefined,
+  transitionMs = 30,
+  options: TextToKlattTrackOptions = {}
+): TextToKlattTrackDetailedResult {
+  return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options);
+}
+
+export function textToKlattTrack(
+  inputText: string,
+  baseF0: number | undefined = undefined,
+  transitionMs = 30,
+  options: TextToKlattTrackOptions = {}
+): KlattFrame[] {
+  return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).track;
 }

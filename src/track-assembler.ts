@@ -10,7 +10,7 @@ import {
   PHONEME_TARGETS,
   fillDefaultParams,
 } from "./declarative-frontend/inventory";
-import type { KlattFrame } from "./tts-frontend-types";
+import type { KlattFrame, ParamWindowSpec } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,6 +19,12 @@ import type { KlattFrame } from "./tts-frontend-types";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type InputToken = Record<string, any>;
 type KlattParams = Record<string, number>;
+type ResolvedParamWindow = {
+  startSec: number;
+  endSec: number;
+  params: KlattParams;
+  tag?: string;
+};
 
 export const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
 
@@ -97,6 +103,151 @@ export type AssembleTrackOptions = {
    *  Citations: DECtalk 4.63 ph_vset.c (speaker-dependent F0 scaling) */
   speakerParams?: Record<string, unknown>;
 };
+
+function toFiniteNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function resolveWindowOffsetSec(
+  window: ParamWindowSpec,
+  durationSec: number,
+  msField: "start_ms" | "end_ms",
+  ratioField: "start_ratio" | "end_ratio",
+  fallbackSec: number
+): number {
+  const msValue = toFiniteNumber(window?.[msField]);
+  if (msValue != null) return msValue / 1000;
+
+  const ratioValue = toFiniteNumber(window?.[ratioField]);
+  if (ratioValue != null) return durationSec * Math.max(0, Math.min(1, ratioValue));
+
+  return fallbackSec;
+}
+
+function resolveParamWindows(token: InputToken, durationSec: number): ResolvedParamWindow[] {
+  const rawWindows = Array.isArray(token?.param_windows)
+    ? (token.param_windows as ParamWindowSpec[])
+    : [];
+  if (rawWindows.length === 0 || durationSec <= 0) return [];
+
+  const windows: ResolvedParamWindow[] = [];
+  for (const rawWindow of rawWindows) {
+    if (!rawWindow || typeof rawWindow !== "object" || Array.isArray(rawWindow)) continue;
+    const rawStartSec = resolveWindowOffsetSec(rawWindow, durationSec, "start_ms", "start_ratio", 0);
+    const rawEndSec = resolveWindowOffsetSec(
+      rawWindow,
+      durationSec,
+      "end_ms",
+      "end_ratio",
+      durationSec
+    );
+    const startSec = Math.max(0, Math.min(durationSec, rawStartSec));
+    const endSec = Math.max(startSec, Math.min(durationSec, rawEndSec));
+    if (endSec <= startSec) continue;
+
+    const rawParams =
+      rawWindow.params && typeof rawWindow.params === "object" && !Array.isArray(rawWindow.params)
+        ? rawWindow.params
+        : null;
+    if (!rawParams) continue;
+
+    const params: KlattParams = {};
+    for (const [key, value] of Object.entries(rawParams)) {
+      const numericValue = toFiniteNumber(value);
+      if (numericValue == null) continue;
+      params[key] = numericValue;
+    }
+    if (Object.keys(params).length === 0) continue;
+
+    windows.push({
+      startSec,
+      endSec,
+      params,
+      tag: typeof rawWindow.tag === "string" ? rawWindow.tag : undefined,
+    });
+  }
+
+  return windows;
+}
+
+function segmentCanVoice(baseParams: KlattParams, windows: ResolvedParamWindow[]): boolean {
+  if ((baseParams.AV ?? 0) > 0 || (baseParams.AVS ?? 0) > 0) return true;
+  return windows.some((window) => (window.params.AV ?? 0) > 0 || (window.params.AVS ?? 0) > 0);
+}
+
+function buildSegmentEventTimes(
+  segmentStart: number,
+  segmentEnd: number,
+  steadyTime: number | null,
+  interiorF0Anchors: number[],
+  paramWindows: ResolvedParamWindow[],
+  includeSegmentEnd = false
+): number[] {
+  const epsilon = 1e-6;
+  const times = [segmentStart];
+
+  for (const anchorTime of interiorF0Anchors) {
+    if (anchorTime > segmentStart + epsilon && anchorTime < segmentEnd - epsilon) {
+      times.push(anchorTime);
+    }
+  }
+
+  if (steadyTime != null && steadyTime > segmentStart + epsilon && steadyTime < segmentEnd - epsilon) {
+    times.push(steadyTime);
+  }
+
+  for (const window of paramWindows) {
+    const startTime = segmentStart + window.startSec;
+    const endTime = segmentStart + window.endSec;
+    if (startTime > segmentStart + epsilon && startTime < segmentEnd - epsilon) {
+      times.push(startTime);
+    }
+    if (endTime > segmentStart + epsilon && endTime < segmentEnd - epsilon) {
+      times.push(endTime);
+    }
+  }
+
+  if (includeSegmentEnd) {
+    times.push(segmentEnd);
+  }
+
+  times.sort((left, right) => left - right);
+
+  const deduped: number[] = [];
+  for (const time of times) {
+    const last = deduped[deduped.length - 1];
+    if (last == null || Math.abs(last - time) > epsilon) {
+      deduped.push(time);
+    }
+  }
+
+  return deduped;
+}
+
+function applyParamWindowsAtOffset(
+  baseParams: KlattParams,
+  transitionParams: KlattParams | null,
+  steadyTime: number | null,
+  segmentStart: number,
+  eventTime: number,
+  paramWindows: ResolvedParamWindow[]
+): KlattParams {
+  const epsilon = 1e-6;
+  const segmentOffset = Math.max(0, eventTime - segmentStart);
+  const useTransitionParams =
+    steadyTime != null && eventTime >= steadyTime - epsilon && transitionParams != null;
+  const resolved: KlattParams = {
+    ...(useTransitionParams ? transitionParams : baseParams),
+  };
+
+  for (const window of paramWindows) {
+    if (segmentOffset + epsilon < window.startSec) continue;
+    if (segmentOffset >= window.endSec - epsilon) continue;
+    Object.assign(resolved, window.params);
+  }
+
+  return resolved;
+}
 
 // ---------------------------------------------------------------------------
 // Layered Additive F0 Model
@@ -382,6 +533,7 @@ export function renderLayeredF0(
   let f0Minimum = 50;
   let f0ScaleFactor = 1.0;
   const f0Reference = scaleConfig?.reference ?? 130;
+  let baseF0BiasHz = 0;
 
   if (scaleConfig && speakerParams) {
     if (scaleConfig.minimum_param) {
@@ -403,6 +555,10 @@ export function renderLayeredF0(
       if (typeof val === "number" && Number.isFinite(val)) {
         f0ScaleFactor = val;
       }
+    }
+    const baseF0Hz = (speakerParams as Record<string, unknown>)?.base_f0_hz;
+    if (typeof baseF0Hz === "number" && Number.isFinite(baseF0Hz)) {
+      baseF0BiasHz = baseF0Hz - f0Minimum / 10;
     }
   }
 
@@ -542,6 +698,7 @@ export function renderLayeredF0(
     let f0Hz: number;
     if (scaleConfig) {
       f0Hz = (f0Minimum + (filtered - f0Reference) * f0ScaleFactor / 4096) / 10;
+      f0Hz += baseF0BiasHz;
     } else {
       f0Hz = filtered;
     }
@@ -1017,17 +1174,11 @@ export function assembleKlattTrack(
     // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
     // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
     if (vq) applyVoiceQualityOverrides(finalParams, vq);
+    const paramWindows = resolveParamWindows(ph, phDuration);
 
     // Determine and set F0.
-    const isTargetVoiced = finalParams.AV > 0 || finalParams.AVS > 0;
-    const f0FromContour = getF0AtTime(f0Contour, segmentStart);
-    let calculatedF0 = isTargetVoiced ? f0FromContour : 0;
-    if (ph.phoneme === "SIL") calculatedF0 = 0;
-    if (isTargetVoiced && calculatedF0 < 1) {
-      calculatedF0 = baseF0 / 2;
-    }
-    finalParams.F0 = calculatedF0;
-    const interiorF0Anchors = isTargetVoiced
+    const segmentVoiced = segmentCanVoice(finalParams, paramWindows);
+    const interiorF0Anchors = segmentVoiced
       ? getInteriorF0AnchorTimes(f0Contour, segmentStart, targetTime)
       : [];
 
@@ -1040,53 +1191,44 @@ export function assembleKlattTrack(
       const steadyTime = canSmooth
         ? Math.max(segmentStart + 0.02, targetTime - transitionSec)
         : null;
+      const transitionParams =
+        steadyTime && steadyTime > segmentStart && steadyTime < targetTime
+          ? blendParams(finalParams, nextPh?.params, blendKeys, blendFactor)
+          : null;
+      const eventTimes = buildSegmentEventTimes(
+        segmentStart,
+        targetTime,
+        steadyTime,
+        interiorF0Anchors,
+        paramWindows,
+        nextPh == null && paramWindows.length > 0
+      );
 
-      klattTrack.push({
-        time: segmentStart,
-        phoneme: ph.phoneme,
-        word: ph.word,
-        params: finalParams,
-      });
-
-      const pushAnchorFrame = (time: number, sourceParams: KlattParams): void => {
-        const anchorParams = { ...sourceParams, F0: ph.phoneme === "SIL" ? 0 : getF0AtTime(f0Contour, time) };
-        klattTrack.push({
-          time,
-          phoneme: ph.phoneme,
-          word: ph.word,
-          params: anchorParams,
-        });
-      };
-
-      const epsilon = 1e-6;
-      const preSteadyAnchors = steadyTime
-        ? interiorF0Anchors.filter((time) => time < steadyTime - epsilon)
-        : interiorF0Anchors;
-      const postSteadyAnchors = steadyTime
-        ? interiorF0Anchors.filter((time) => time > steadyTime + epsilon)
-        : [];
-
-      for (const anchorTime of preSteadyAnchors) {
-        pushAnchorFrame(anchorTime, finalParams);
-      }
-
-      if (steadyTime && steadyTime > segmentStart && steadyTime < targetTime) {
-        // blendParams copies from finalParams (already has vq applied) for non-blend keys.
-        // Only F1-F3, B1-B3 are blended; Rd, OQ, TL, flutter, jitter, AH carry through.
-        const transitionParams = blendParams(finalParams, nextPh?.params, blendKeys, blendFactor);
-        const transitionF0 = isTargetVoiced ? getF0AtTime(f0Contour, steadyTime) : 0;
-        transitionParams.F0 = ph.phoneme === "SIL" ? 0 : transitionF0;
-        klattTrack.push({
-          time: steadyTime,
-          phoneme: ph.phoneme,
-          word: ph.word,
-          params: transitionParams,
-        });
-
-        for (const anchorTime of postSteadyAnchors) {
-          pushAnchorFrame(anchorTime, transitionParams);
+      for (const eventTime of eventTimes) {
+        const eventParams = applyParamWindowsAtOffset(
+          finalParams,
+          transitionParams,
+          steadyTime,
+          segmentStart,
+          eventTime,
+          paramWindows
+        );
+        const voicedAtEvent = (eventParams.AV ?? 0) > 0 || (eventParams.AVS ?? 0) > 0;
+        let eventF0 =
+          ph.phoneme === "SIL" || !voicedAtEvent ? 0 : getF0AtTime(f0Contour, eventTime);
+        if (voicedAtEvent && eventF0 < 1) {
+          eventF0 = baseF0 / 2;
         }
+        eventParams.F0 = eventF0;
+
+        klattTrack.push({
+          time: eventTime,
+          phoneme: ph.phoneme,
+          word: ph.word,
+          params: eventParams,
+        });
       }
+
       currentTime = targetTime;
     }
   }

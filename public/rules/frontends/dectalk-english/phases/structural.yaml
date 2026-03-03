@@ -1,0 +1,497 @@
+version: v1
+rules:
+  dectalk_insert_voiceless_stop_release_into_silence:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme in ['P', 'T', 'K'] && next != null && next.phoneme == 'SIL'
+    define:
+      rel: "current.phoneme + \"_REL\""
+      asp: "current.phoneme + \"_ASP\""
+      weak: "true"
+      next_token: next
+      rel_target: target(rel)
+      asp_target: target(asp)
+      silence_target: "target('SIL')"
+      dummy_duration: params.policy.duration.voiceless_vot_base_ms
+      vot_target: dummy_duration
+      vot_sum: rel_target.duration + asp_target.duration
+      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
+      rel_duration: "vot_target * rel_share"
+      asp_duration: "vot_target - rel_duration"
+      current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
+      next_min_duration: "has(next_token.minimumDuration) ? next_token.minimumDuration : 0"
+      closure_duration: "max([current_min_duration, current.duration - rel_duration])"
+      silence_tail_duration: "max([next_min_duration, next_token.duration - dummy_duration])"
+      open_glottis_b1: "silence_target.params.B1 + params.policy.duration.open_glottis_b1_widen_hz"
+      open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
+      carrier_params: "merge(silence_target.params, {'SW': 0})"
+      rel_window_params: >-
+        merge(rel_target.params, {'A2': max([0, rel_target.params.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_target.params.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A4': max([0, rel_target.params.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_target.params.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A6': max([0, rel_target.params.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_target.params.AB - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+      asp_window_params: >-
+        merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
+        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          duration: closure_duration
+        - phoneme: "'SIL'"
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          weak: weak
+          dummy_vowel: true
+          params: carrier_params
+          duration: dummy_duration
+          inherentDuration: dummy_duration
+          minimumDuration: 0
+          type: "'silence'"
+          control_windows:
+            - start_ms: 0
+              target: "'current'"
+              end_ms: rel_duration
+              fields: rel_window_params
+              tag: "'stop_burst'"
+            - start_ms: rel_duration
+              target: "'current'"
+              end_ms: dummy_duration
+              fields: asp_window_params
+              tag: "'stop_aspiration'"
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          duration: silence_tail_duration
+    citations:
+      - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
+      - "DECtalk 4.63 p_us_st1.c Special Rule 2 (a dummy vowel releases a final voiceless plosive into silence)"
+      - "DECtalk 4.63 p_us_st1.c (dummy-vowel release reduces burst by 3 dB, aspiration by 6 dB, and widens B1/B2 during the open-glottis interval)"
+      - "Engineering approximation: split explicit silence into a dummy-vowel carrier plus remaining silence tail"
+
+  dectalk_insert_voiceless_stop_release_and_aspiration:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['P', 'T', 'K'] && (next != null ? !(next.type in ['stop_closure',
+        'stop_release', 'stop_aspiration']) : false) && (next != null ? next.phoneme != 'SIL' : false)
+    define:
+      rel: "current.phoneme + \"_REL\""
+      asp: "current.phoneme + \"_ASP\""
+      next_token: next
+      weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
+      rel_target: target(rel)
+      asp_target: target(asp)
+      prev_token: prev
+      next_unstressed: >-
+        has(next_token.stress) ? next_token.stress != 1 :
+        (next_token.type == 'vowel' ? true : false)
+      next_is_sonorant_consonant: "next_token.type in ['liquid', 'nasal', 'glide']"
+      next_is_front_vowel: "next_token.phoneme in ['IY', 'IH', 'IX', 'EY', 'EH', 'AE']"
+      in_s_cluster: >-
+        prev_token != null && prev_token.phoneme == 'S' &&
+        (has(prev_token.word) && has(current.word) ? prev_token.word == current.word : false)
+      vot_target: >-
+        next_is_sonorant_consonant ?
+        ((next_unstressed ? params.policy.duration.voiceless_vot_unstressed_ms : params.policy.duration.voiceless_vot_base_ms) +
+        params.policy.duration.voiceless_vot_sonorant_consonant_bonus_ms) :
+        (in_s_cluster ? params.policy.duration.voiceless_vot_s_cluster_ms :
+        (next_unstressed ? params.policy.duration.voiceless_vot_unstressed_ms :
+        params.policy.duration.voiceless_vot_base_ms))
+      vot_sum: rel_target.duration + asp_target.duration
+      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
+      rel_duration_base: vot_target * rel_share
+      asp_duration_base: vot_target - rel_duration_base
+      asp_window_ah: >-
+        (next_is_front_vowel ? params.policy.duration.voiceless_vot_aspiration_front_db :
+        params.policy.duration.voiceless_vot_aspiration_nonfront_db) -
+        (next_unstressed ? params.policy.duration.voiceless_vot_aspiration_unstressed_reduction_db : 0) +
+        (next_is_sonorant_consonant || next_token.phoneme in ['ER', 'RR'] ? params.policy.duration.voiceless_vot_aspiration_sonorant_bonus_db : 0)
+      rel_params: >-
+        merge(rel_target.params, {'AF': weak ? max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]) : rel_target.params.AF,
+        'AH': max([0, asp_window_ah])})
+      asp_window_params: >-
+        {'AH': max([0, asp_window_ah]), 'AV': 0, 'B1': next_token.params.B1 + params.policy.duration.open_glottis_b1_widen_hz,
+        'B2': next_token.params.B2 + params.policy.duration.open_glottis_b2_widen_hz}
+      rel_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms, rel_duration_base *
+        params.policy.duration.weak_release_scale]) : rel_duration_base
+      asp_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms, asp_duration_base *
+        params.policy.duration.weak_release_scale]) : asp_duration_base
+      current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
+      closure_duration: "max([current_min_duration, current.duration - rel_duration])"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          duration: closure_duration
+        - phoneme: rel
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          weak: weak
+          params: rel_params
+          duration: rel_duration
+          inherentDuration: rel_target.inherentDuration
+          minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
+          type: rel_target.type
+          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+          control_windows:
+            - start_ms: 0
+              target: "'next'"
+              end_ms: asp_duration
+              fields: asp_window_params
+              tag: "'stop_aspiration'"
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+    citations:
+      - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
+      - "DECtalk 4.63 p_us_st1.c Special Rule 2 (aspiration/VOT extends into the following sonorant)"
+      - "DECtalk 4.63 ph_defs.h (NF60MS, NF15MS, NF7MS constants)"
+      - "Engineering approximation: represent DECtalk's PAV/PAP/PB1/PB2 timed overrides as a timed prefix window on the following segment without shortening that segment"
+
+  dectalk_insert_voiceless_stop_release_and_aspiration_final:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme in ['P', 'T', 'K'] && next == null
+    define:
+      rel: "current.phoneme + \"_REL\""
+      asp: "current.phoneme + \"_ASP\""
+      weak: "true"
+      rel_target: target(rel)
+      asp_target: target(asp)
+      silence_target: "target('SIL')"
+      dummy_duration: params.policy.duration.voiceless_vot_base_ms
+      vot_target: dummy_duration
+      vot_sum: rel_target.duration + asp_target.duration
+      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
+      rel_duration: "vot_target * rel_share"
+      asp_duration: "vot_target - rel_duration"
+      current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
+      closure_duration: "max([current_min_duration, current.duration - rel_duration])"
+      open_glottis_b1: "silence_target.params.B1 + params.policy.duration.open_glottis_b1_widen_hz"
+      open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
+      carrier_params: "merge(silence_target.params, {'SW': 0})"
+      rel_window_params: >-
+        merge(rel_target.params, {'A2': max([0, rel_target.params.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_target.params.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A4': max([0, rel_target.params.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_target.params.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A6': max([0, rel_target.params.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_target.params.AB - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+      asp_window_params: >-
+        merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
+        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          duration: closure_duration
+        - phoneme: "'SIL'"
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          weak: weak
+          dummy_vowel: true
+          params: carrier_params
+          duration: dummy_duration
+          inherentDuration: dummy_duration
+          minimumDuration: 0
+          type: "'silence'"
+          control_windows:
+            - start_ms: 0
+              target: "'current'"
+              end_ms: rel_duration
+              fields: rel_window_params
+              tag: "'stop_burst'"
+            - start_ms: rel_duration
+              target: "'current'"
+              end_ms: dummy_duration
+              fields: asp_window_params
+              tag: "'stop_aspiration'"
+    citations:
+      - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
+      - "DECtalk 4.63 p_us_st1.c Special Rule 2 (a dummy vowel releases a final voiceless plosive into silence)"
+      - "DECtalk 4.63 p_us_st1.c (dummy-vowel release reduces burst by 3 dB, aspiration by 6 dB, and widens B1/B2 during the open-glottis interval)"
+      - "Engineering approximation: model DECtalk's dummy-vowel carrier as a SIL token with timed parameter windows"
+
+  dectalk_insert_voiced_stop_release:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['B', 'D', 'G'] && (next != null ? !(next.type in ['stop_closure',
+        'stop_release', 'stop_aspiration']) : false)
+    define:
+      rel: "current.phoneme + \"_REL\""
+      next_token: next
+      weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
+      rel_target: target(rel)
+      rel_params: >-
+        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
+      rel_duration: >-
+        weak ? max([params.policy.duration.weak_release_min_ms, rel_target.duration *
+        params.policy.duration.weak_release_scale]) : rel_target.duration
+      current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
+      closure_duration: "max([current_min_duration, current.duration - rel_duration])"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          duration: closure_duration
+        - phoneme: rel
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          weak: weak
+          params: rel_params
+          duration: rel_duration
+          inherentDuration: rel_target.inherentDuration
+          minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
+          type: rel_target.type
+          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+    citations:
+      - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
+      - "DECtalk 4.63 p_us_st1.c Special Rule 3 (voiced stop burst/voicebar is realized within the burst interval, not as added segment time)"
+      - "Engineering approximation: represent DECtalk's in-stop burst by reallocating closure time to an inserted release segment"
+
+  dectalk_insert_voiced_stop_release_final:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme in ['B', 'D', 'G'] && next == null
+    define:
+      rel: "current.phoneme + \"_REL\""
+      weak: "true"
+      rel_target: target(rel)
+      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
+      rel_duration: >-
+        max([params.policy.duration.weak_release_min_ms, rel_target.duration *
+        params.policy.duration.weak_release_scale])
+    splice:
+      type: replace_range
+      range_left: current.sync_right
+      range_right: current.sync_right
+      insert:
+        - phoneme: rel
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          weak: weak
+          params: rel_params
+          duration: rel_duration
+          inherentDuration: rel_target.inherentDuration
+          minimumDuration: "has(rel_target.minimumDuration) ? rel_target.minimumDuration : null"
+          type: rel_target.type
+          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+    citations:
+      - "Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)"
+      - "Engineering bridge: reuse qlatt structural weak-release policy until DECtalk p_us_st1 is ported"
+
+  dectalk_weaken_interdental_frication:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme in ['TH', 'DH']
+    define:
+      next_token: next
+      quiet_params: "merge(current.params, {'AF': 0, 'SW': 0})"
+      active_tail_window: >-
+        {'AF': has(current.?params.AF) ? current.params.AF : 0,
+        'SW': 1}
+      breathy_next_ms: >-
+        current.phoneme == 'TH' &&
+        (next_token != null ? (next_token.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
+        (next_token != null ? (has(next_token.voiced) ? next_token.voiced == true : false) : false) ?
+        params.policy.formant.voiceless_open_tract_breathy_onset_ms : 0
+      breathy_window: "{'AH': params.policy.formant.voiceless_open_tract_breathy_onset_db}"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - voiceless
+            - dental
+          params: quiet_params
+          inventorySW: 0
+          control_windows:
+            - suffix_ms: params.policy.formant.weak_interdental_fricative_tail_ms
+              target: "'current'"
+              fields: active_tail_window
+              tag: "'weak_dental_frication'"
+            - start_ms: 0
+              target: "'next'"
+              end_ms: breathy_next_ms
+              fields: breathy_window
+              tag: "'breathy_onset'"
+    citations:
+      - "DECtalk 4.63 p_us_st1.c (special hack: /th, dh/ fric gains suppressed until durfon - 3)"
+      - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: onset of a vowel from /th/ is breathy)"
+      - "Klatt 1980 (SW controls cascade/parallel branch routing)"
+      - "Engineering approximation: model the remaining /th, dh/ frication as a 30 ms suffix window"
+
+  dectalk_add_voiceless_fricative_breathy_onset:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['F', 'S', 'SH'] &&
+        (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
+        (next != null ? (has(next.voiced) ? next.voiced == true : false) : false)
+    define:
+      next_token: next
+      breathy_window: "{'AH': params.policy.formant.voiceless_open_tract_breathy_onset_db}"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - voiceless
+            - dental
+            - labiodental
+            - alveolar
+            - postalveolar
+          control_windows:
+            - start_ms: 0
+              target: "'next'"
+              end_ms: params.policy.formant.voiceless_open_tract_breathy_onset_ms
+              fields: breathy_window
+              tag: "'breathy_onset'"
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - voiceless
+            - dental
+            - labiodental
+            - alveolar
+            - postalveolar
+            - nasal
+            - liquid
+            - glide
+            - hi
+            - mid
+            - low
+            - front
+            - back
+            - rhotic
+    citations:
+      - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: onset of a vowel from voiceless open vocal tract is breathy)"
+      - "DECtalk 4.63 ph_defs.h (NF40MS breathy onset span)"
+      - "Klatt 1980 (AH/AP aspiration control during open-glottis intervals)"

@@ -1,0 +1,29 @@
+version: v1
+rules:
+  dectalk_sw_explicit_override:
+    kind: scalar
+    select:
+      stream: phone
+      where: has(current.inventorySW)
+    apply:
+      - field: params.SW
+        op: set
+        value: current.inventorySW
+        tag: source_routing
+    citations:
+      - "Klatt 1980 (SW cascade/parallel routing switch)"
+      - "DECtalk 4.63 p_us_st1.c (stop releases explicitly drive parallel excitation)"
+
+  dectalk_sw_default_assignment:
+    kind: scalar
+    select:
+      stream: phone
+      where: "!has(current.inventorySW)"
+    apply:
+      - field: params.SW
+        op: set
+        value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
+        tag: source_routing
+    citations:
+      - "Klatt 1980 (cascade/parallel source routing)"
+      - "DECtalk 4.63 p_us_st1.c"

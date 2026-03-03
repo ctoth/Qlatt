@@ -60,6 +60,14 @@ parameters:
       voiceless_vot_unstressed_ms: 7
       voiceless_vot_s_cluster_ms: 15
       voiceless_vot_sonorant_consonant_bonus_ms: 5
+      # DECtalk 4.63 p_us_st1.c Special Rule 2:
+      # PAP.pspesh defaults to 48 dB, rises to 50 dB before non-front targets,
+      # drops by 3 dB when the following sonorant is unstressed, and rises by
+      # 5 dB when the following sonorant is a consonant (/r, l, m, n, w, y/).
+      voiceless_vot_aspiration_front_db: 48
+      voiceless_vot_aspiration_nonfront_db: 50
+      voiceless_vot_aspiration_unstressed_reduction_db: 3
+      voiceless_vot_aspiration_sonorant_bonus_db: 5
       # DECtalk 4.63 p_us_st1.c: dummy-vowel release into silence reduces burst
       # amplitudes by 3 dB and aspiration by 6 dB.
       dummy_vowel_burst_reduction_db: 3
@@ -158,8 +166,20 @@ parameters:
     formant:
       coarticulation_weight: 0.3
       transition_time_ms: 30
+      # DECtalk 4.63 p_us_st1.c Special Rule 2:
+      # PAP.pspesh = 52 for onset of a voiced non-obstruent from silence or
+      # a voiceless open-vocal-tract fricative (/f, th, s, sh/), with a
+      # 40 ms backward smoothing span.
+      voiceless_open_tract_breathy_onset_ms: 40
+      voiceless_open_tract_breathy_onset_db: 52
+      # DECtalk 4.63 p_us_st1.c special hack for /th, dh/:
+      # fric gains are suppressed until durfon - 3, leaving only a weak final
+      # frication tail. Qlatt models this as a 30 ms suffix window at the
+      # 100 Hz frame cadence used by the runtime. # engineering approximation
+      weak_interdental_fricative_tail_ms: 30
       citations:
         - "DECtalk 4.63 ph_setar.c"
+        - "DECtalk 4.63 p_us_st1.c (source-amplitude special rules)"
     speaker:
       base_f0_hz:
         value: 122

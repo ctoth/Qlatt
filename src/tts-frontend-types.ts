@@ -39,6 +39,32 @@ export type TranscriptionOptions = {
   dictLookup?: (word: string) => string[] | null;
 };
 
+/**
+ * A token-local timed parameter override window.
+ *
+ * The track assembler treats each window as an in-segment hold region that
+ * overrides the token's base params between the resolved start/end offsets.
+ * Offsets may be expressed in milliseconds or as a ratio of the token duration.
+ *
+ * This is the generic declarative primitive used for burst/VOT/voicebar-style
+ * subsegment events without forcing them into separate synthetic segments.
+ */
+export interface ParamWindowSpec {
+  /** Window start offset in milliseconds from the token onset. */
+  start_ms?: number;
+  /** Window end offset in milliseconds from the token onset. */
+  end_ms?: number;
+  /** Window start offset as a ratio of token duration [0,1]. */
+  start_ratio?: number;
+  /** Window end offset as a ratio of token duration [0,1]. */
+  end_ratio?: number;
+  /** Parameter overrides active within the window. */
+  params?: Record<string, number>;
+  /** Optional diagnostic/provenance tag. */
+  tag?: string;
+  [key: string]: unknown;
+}
+
 // ---------------------------------------------------------------------------
 // Engine token types (Phase 8)
 // ---------------------------------------------------------------------------
@@ -75,6 +101,8 @@ export interface PhoneToken {
   punctuationSymbol?: string | null;
   /** Inventory-sourced SW (cascade/parallel switch) value */
   inventorySW?: unknown;
+  /** Token-local timed parameter override windows. */
+  param_windows?: ParamWindowSpec[];
   /** Sync axis left boundary mark */
   sync_left?: string;
   /** Sync axis right boundary mark */

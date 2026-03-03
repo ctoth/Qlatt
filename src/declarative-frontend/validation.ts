@@ -929,6 +929,208 @@ function validateTemplateDispatchExpressions(
   }
 }
 
+function validateTemplateNumericExpression(
+  value: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  policyState: PolicyValidationState,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (value == null || typeof value === "number") return;
+  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
+    validateDispatchSpec(
+      value.dispatch,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      false,
+      diagnostics,
+      `${path}.dispatch`,
+      contextLabel
+    );
+    return;
+  }
+  if (typeof value !== "string") {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_RULE_EXPRESSION_INVALID",
+        `${contextLabel} must be a number, string expression, or dispatch block`,
+        path
+      )
+    );
+    return;
+  }
+
+  const syntaxError = validateExpressionSyntax(value, { streamNames });
+  if (syntaxError) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_CEL_INVALID",
+        `${contextLabel} has invalid CEL expression: ${syntaxError}`,
+        path
+      )
+    );
+    return;
+  }
+
+  validateDeclaredTypeFieldUsage(value, streamByName, streamName, diagnostics, path, contextLabel);
+  validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
+}
+
+function validateParamWindowTemplate(
+  value: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  policyState: PolicyValidationState,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (value == null) return;
+  if (!Array.isArray(value)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_PARAM_WINDOW_SCHEMA",
+        `${contextLabel} must be an array of window specs`,
+        path
+      )
+    );
+    return;
+  }
+
+  for (let i = 0; i < value.length; i += 1) {
+    const entry = value[i];
+    const entryPath = `${path}[${i}]`;
+    const entryLabel = `${contextLabel}[${i}]`;
+    if (!isPlainObject(entry)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_PARAM_WINDOW_SCHEMA",
+          `${entryLabel} must be an object`,
+          entryPath
+        )
+      );
+      continue;
+    }
+
+    validateTemplateNumericExpression(
+      entry.start_ms,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.start_ms`,
+      `${entryLabel}.start_ms`
+    );
+    validateTemplateNumericExpression(
+      entry.end_ms,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.end_ms`,
+      `${entryLabel}.end_ms`
+    );
+    validateTemplateNumericExpression(
+      entry.start_ratio,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.start_ratio`,
+      `${entryLabel}.start_ratio`
+    );
+    validateTemplateNumericExpression(
+      entry.end_ratio,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${entryPath}.end_ratio`,
+      `${entryLabel}.end_ratio`
+    );
+
+    const paramsSpec = entry.params;
+    if (paramsSpec != null) {
+      if (typeof paramsSpec === "string") {
+        validateTemplateNumericExpression(
+          paramsSpec,
+          streamByName,
+          streamName,
+          streamNames,
+          policyState,
+          diagnostics,
+          `${entryPath}.params`,
+          `${entryLabel}.params`
+        );
+      } else if (isPlainObject(paramsSpec)) {
+        validateTemplateDispatchExpressions(
+          paramsSpec,
+          streamByName,
+          streamName,
+          streamNames,
+          policyState,
+          diagnostics,
+          `${entryPath}.params`,
+          `${entryLabel}.params`
+        );
+        for (const [paramName, paramValue] of Object.entries(paramsSpec)) {
+          validateTemplateNumericExpression(
+            paramValue,
+            streamByName,
+            streamName,
+            streamNames,
+            policyState,
+            diagnostics,
+            `${entryPath}.params.${paramName}`,
+            `${entryLabel}.params.${paramName}`
+          );
+        }
+      } else {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_PARAM_WINDOW_SCHEMA",
+            `${entryLabel}.params must be an object or expression`,
+            `${entryPath}.params`
+          )
+        );
+      }
+    }
+
+    if (entry.tag != null) {
+      if (typeof entry.tag !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_EXPRESSION_INVALID",
+            `${entryLabel}.tag must be a string expression`,
+            `${entryPath}.tag`
+          )
+        );
+      } else {
+        const syntaxError = validateExpressionSyntax(entry.tag, { streamNames });
+        if (syntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `${entryLabel}.tag has invalid CEL expression: ${syntaxError}`,
+              `${entryPath}.tag`
+            )
+          );
+        }
+      }
+    }
+  }
+}
+
 function validateRules(
   spec: PlainObject,
   streamByName: Map<string, any>,
@@ -1154,6 +1356,19 @@ function validateRules(
           `rules.${name}.splice.insert[${i}]`,
           `Rule '${name}' splice.insert[${i}]`
         );
+        const insertSpec = r.splice.insert[i];
+        if (isPlainObject(insertSpec) && Object.prototype.hasOwnProperty.call(insertSpec, "param_windows")) {
+          validateParamWindowTemplate(
+            insertSpec.param_windows,
+            streamByName,
+            ruleStreamName,
+            streamNames,
+            policyState,
+            diagnostics,
+            `rules.${name}.splice.insert[${i}].param_windows`,
+            `Rule '${name}' splice.insert[${i}].param_windows`
+          );
+        }
       }
     }
 

@@ -55,10 +55,12 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "playwright-core": "^1.58.2",
-    "puppeteer-core": "^23.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "rollup": "^4.59.0"
   }
 }

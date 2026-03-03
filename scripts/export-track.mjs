@@ -3,7 +3,7 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { once } from "node:events";
-import puppeteer from "puppeteer-core";
+import { chromium } from "playwright-core";
 
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 1) {
@@ -82,14 +82,14 @@ server.listen(0);
 await once(server, "listening");
 const { port } = server.address();
 
-const browser = await puppeteer.launch({
-  headless: "new",
+const browser = await chromium.launch({
+  headless: true,
   executablePath: chromePath,
   args: ["--autoplay-policy=no-user-gesture-required"],
 });
 const page = await browser.newPage();
 await page.goto(`http://localhost:${port}/test/render-offline.html`, {
-  waitUntil: "networkidle0",
+  waitUntil: "networkidle",
 });
 
 const payload = await page.evaluate(async (opts) => {

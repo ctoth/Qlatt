@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer-core";
+import { chromium } from "playwright-core";
 
 const CHROME_PATH = process.env.CHROME_PATH ||
   "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
@@ -8,7 +8,7 @@ function sleep(ms) {
 }
 
 async function main() {
-  const browser = await puppeteer.launch({
+  const browser = await chromium.launch({
     executablePath: CHROME_PATH,
     headless: false,
     args: ["--autoplay-policy=no-user-gesture-required"],
@@ -27,7 +27,7 @@ async function main() {
   });
 
   await page.goto("http://localhost:8000/test/test-harness.html", {
-    waitUntil: "networkidle2",
+    waitUntil: "networkidle",
   });
 
   console.log("Page loaded, waiting for worklets to initialize...");

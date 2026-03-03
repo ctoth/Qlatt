@@ -219,3 +219,7 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 
 ### Supersedes or Recontextualizes
 - This is the published JASA paper version of the analysis in **Hanson_1995_GlottalCharacteristicsFemale** (the PhD thesis). The thesis contains more detail; this paper provides the condensed, peer-reviewed findings with corrected measures and group classification.
+
+---
+
+**See also:** Hanson_1999_GlottalMaleSpeakers - extends this study to 21 male speakers with direct gender comparison; spectral tilt (H1*-A3*) found to be the strongest gender differentiator (~9.6 dB).

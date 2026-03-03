@@ -327,3 +327,7 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 - **Ladd et al. (1985)** - "Evidence for the independent function of intonation contour type, voice quality, and F0 range in signaling speaker affect" - Key empirical work on which acoustic parameters independently signal emotion.
 - **Scherer, Banse, Wallbott & Goldbeck (1991)** - "Vocal cues in emotion encoding and decoding" - Earlier work by same authors with related methodology; useful for understanding the research program.
 - **Hammarberg et al. (1980)** - "Perceptual and acoustic correlates of abnormal voice qualities" - Source of the Hammarberg index (spectral slope measure) used in this study; important for understanding spectral energy measures.
+
+---
+
+**See also:** Belyk_2014_AcousticValenceEmotion - recontextualizes the inconsistent valence effects in this paper's 14-emotion data by showing that valence interacts with emotion family (motivational/moral/aesthetic), explaining why only elation showed the expected high-loud positive pattern.

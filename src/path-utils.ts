@@ -32,16 +32,14 @@ export function isNodeRuntime(): boolean {
 }
 
 /**
- * Attempt to read a file from the filesystem synchronously.
+ * Resolve a resource path to an actual filesystem path when running under Node.
  *
- * Probes several candidate paths derived from the given specPath:
+ * Probes:
  * 1. The raw specPath itself (if absolute)
- * 2. Resolved under `cwd()/public/<relativePath>`
- * 3. Resolved under `cwd()/<relativePath>`
- *
- * Returns null in non-Node environments or when no candidate exists.
+ * 2. `cwd()/public/<relativePath>`
+ * 3. `cwd()/<relativePath>`
  */
-export function readFileFromFsSync(specPath: string): string | null {
+export function resolveFileFromFsSync(specPath: string): string | null {
   if (!isNodeRuntime()) return null;
 
   const normalized = normalizePath(specPath);
@@ -58,12 +56,49 @@ export function readFileFromFsSync(specPath: string): string | null {
 
   for (const candidate of candidates) {
     try {
-      if (!fs.existsSync(candidate)) continue;
-      return fs.readFileSync(candidate, "utf8");
+      if (fs.existsSync(candidate)) return candidate;
     } catch {
       // Ignore individual filesystem probe failures.
     }
   }
 
   return null;
+}
+
+/**
+ * Attempt to read a file from the filesystem synchronously.
+ *
+ * Probes several candidate paths derived from the given specPath:
+ * 1. The raw specPath itself (if absolute)
+ * 2. Resolved under `cwd()/public/<relativePath>`
+ * 3. Resolved under `cwd()/<relativePath>`
+ *
+ * Returns null in non-Node environments or when no candidate exists.
+ */
+export function readFileFromFsSync(specPath: string): string | null {
+  const resolved = resolveFileFromFsSync(specPath);
+  if (!resolved) return null;
+  try {
+    return fs.readFileSync(resolved, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Attempt to read a binary file from the filesystem synchronously.
+ *
+ * Uses the same path probing strategy as `readFileFromFsSync`, but returns the
+ * raw bytes as an ArrayBuffer for WASM and other binary assets.
+ */
+export function readBinaryFromFsSync(specPath: string): ArrayBuffer | null {
+  const resolved = resolveFileFromFsSync(specPath);
+  if (!resolved) return null;
+  try {
+    const bytes = fs.readFileSync(resolved);
+    const offset = bytes.byteOffset;
+    return bytes.buffer.slice(offset, offset + bytes.byteLength);
+  } catch {
+    return null;
+  }
 }

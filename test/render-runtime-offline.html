@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QLATT Runtime Offline Renderer</title>
+  </head>
+  <body>
+    <script type="module">
+      import { loadExperimentConfig } from "../src/experiments/load-experiment-config.ts";
+      import { createKlattRuntime } from "../src/klatt-runtime.ts";
+      import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
+      import { summarizeTrack } from "../src/rendering/track-summary.ts";
+      import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
+
+      async function renderOfflineRuntime({
+        phrase,
+        baseF0 = 110,
+        frontendId = "qlatt-english",
+        experimentId = "klatt80-baseline",
+        rate = 1,
+        transitionMs = 30,
+        sampleRate = 48000,
+        leadTime = 0.05,
+        tailTime = 0.2,
+        track,
+        includeTrack = false,
+      }) {
+        const frontend = Array.isArray(track)
+          ? { track, frontendPhones: [] }
+          : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {
+              frontendId,
+              rate,
+            });
+        const resolvedTrack = frontend.track;
+        const totalTime =
+          (resolvedTrack.length ? resolvedTrack[resolvedTrack.length - 1].time : 0) +
+          leadTime +
+          tailTime;
+        const length = Math.max(1, Math.ceil(totalTime * sampleRate));
+
+        const ctx = new OfflineAudioContext(1, length, sampleRate);
+        const config = await loadExperimentConfig(experimentId);
+        const runtime = await createKlattRuntime({
+          audioContext: ctx,
+          graph: config.graph,
+          semantics: config.semantics,
+          registry: config.registry,
+          workletBasePath: `${import.meta.env.BASE_URL}worklets/`,
+        });
+        runtime.connectToDestination();
+
+        const interpreter = createKlattInterpreter({
+          audioContext: ctx,
+          runtime,
+          semantics: config.semantics,
+          bindingMap: runtime.getBindingMap(),
+        });
+        interpreter.scheduleTrack(resolvedTrack, leadTime);
+
+        const buffer = await ctx.startRendering();
+        runtime.disconnect();
+
+        const channel = new Float32Array(buffer.length);
+        buffer.copyFromChannel(channel, 0);
+        let rms = 0;
+        let peak = 0;
+        const samples = new Array(channel.length);
+        for (let i = 0; i < channel.length; i += 1) {
+          const value = channel[i];
+          samples[i] = value;
+          rms += value * value;
+          const absValue = Math.abs(value);
+          if (absValue > peak) peak = absValue;
+        }
+        rms = channel.length ? Math.sqrt(rms / channel.length) : 0;
+
+        return {
+          phrase,
+          baseF0,
+          frontendId,
+          experimentId,
+          rate,
+          transitionMs,
+          sampleRate,
+          leadTime,
+          tailTime,
+          length,
+          metrics: { rms, peak },
+          trackSummary: summarizeTrack(resolvedTrack),
+          frontendPhones: frontend.frontendPhones,
+          track: includeTrack ? resolvedTrack : undefined,
+          samples,
+        };
+      }
+
+      const renderState = {
+        status: "idle",
+        phase: "ready",
+        error: null,
+        startedAt: null,
+        finishedAt: null,
+        result: null,
+        task: null,
+      };
+
+      function snapshotRenderState() {
+        return {
+          status: renderState.status,
+          phase: renderState.phase,
+          error: renderState.error,
+          startedAt: renderState.startedAt,
+          finishedAt: renderState.finishedAt,
+          hasResult: renderState.result != null,
+        };
+      }
+
+      function startOfflineRenderRuntime(opts) {
+        if (renderState.status === "running") {
+          return snapshotRenderState();
+        }
+
+        renderState.status = "running";
+        renderState.phase = "rendering";
+        renderState.error = null;
+        renderState.startedAt = Date.now();
+        renderState.finishedAt = null;
+        renderState.result = null;
+        renderState.task = (async () => {
+          try {
+            const result = await renderOfflineRuntime(opts);
+            renderState.result = result;
+            renderState.status = "complete";
+            renderState.phase = "complete";
+          } catch (error) {
+            renderState.error =
+              error instanceof Error ? error.stack || error.message : String(error);
+            renderState.status = "error";
+            renderState.phase = "error";
+          } finally {
+            renderState.finishedAt = Date.now();
+            renderState.task = null;
+          }
+        })();
+
+        return snapshotRenderState();
+      }
+
+      function consumeOfflineRenderRuntimeResult() {
+        if (renderState.status !== "complete" || renderState.result == null) {
+          throw new Error("Offline render result is not ready.");
+        }
+        const result = renderState.result;
+        renderState.result = null;
+        renderState.status = "idle";
+        renderState.phase = "ready";
+        renderState.error = null;
+        return result;
+      }
+
+      window.renderOfflineRuntime = renderOfflineRuntime;
+      window.offlineRenderDriver = {
+        startRender: startOfflineRenderRuntime,
+        getStatus: snapshotRenderState,
+        consumeResult: consumeOfflineRenderRuntimeResult,
+      };
+    </script>
+  </body>
+</html>

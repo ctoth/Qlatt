@@ -94,13 +94,17 @@ const request = buildRequest();
 const backend = selectRenderBackend(request);
 const payload = await backend.render(request);
 
+function jsonSafeReplacer(_key: string, value: unknown): unknown {
+  return typeof value === "bigint" ? Number(value) : value;
+}
+
 payload.engine = engine;
 payload.frontendId = frontendId;
 payload.experimentId = experimentId;
 
 if (persistJson) {
   fs.mkdirSync(path.dirname(outJson), { recursive: true });
-  fs.writeFileSync(outJson, JSON.stringify(payload, null, 2));
+  fs.writeFileSync(outJson, JSON.stringify(payload, jsonSafeReplacer, 2));
 }
 
 if (persistWav) {

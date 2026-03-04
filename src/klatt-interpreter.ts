@@ -43,17 +43,19 @@ interface ResolvedBinding {
 type ResolvedBindingList = ResolvedBinding[];
 
 /**
- * Tagged union for binding categorization.
- * Makes the mutual-exclusion invariant structural and compiler-checked:
- * - 'realized': has a realize rule, uses setValueAtTime every frame
- * - 'ramp': has a realize rule with ramp: true, uses setValueAtTime at frame 0
- *           and linearRampToValueAtTime for subsequent frames
- * - 'passthrough': no realize rule, raw param value passed through with setValueAtTime
+ * Categorized binding with two independent axes:
+ * - source: where to read the value ('realized' from semantics eval, 'passthrough' from frame params)
+ * - ramp: whether to use linearRampToValueAtTime (true) or setValueAtTime (false)
+ *
+ * The scheduling default comes from semantics.defaultScheduling (Klatt 1980: 'ramp').
+ * Individual realize rules can override with step: true or ramp: true.
+ * Citation: Klatt 1980 — all parameters linearly interpolated between update frames.
  */
 type CategorizedBinding = {
   name: string;
   param: AudioParam;
-  type: 'realized' | 'ramp' | 'passthrough';
+  source: 'realized' | 'passthrough';
+  ramp: boolean;
 };
 
 // Schedule entry for pre-compiled parameter automation
@@ -193,12 +195,24 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   // Multiple nodes can bind to the same semantic name (e.g., F0 -> lfSource.f0, impulseSource.f0)
   const bindings = new Map<string, ResolvedBindingList>();
 
-  // Derive ramp params from semantics (replaces hardcoded set)
+  // Default scheduling mode from semantics document.
+  // 'ramp' = Klatt 1980 inter-frame linear interpolation (linearRampToValueAtTime).
+  // 'step' = legacy behavior (setValueAtTime).
+  const defaultRamp = semantics.defaultScheduling === 'ramp';
+
+  // Build per-rule scheduling overrides from semantics realize rules.
+  // step: true forces setValueAtTime (binary switches).
+  // ramp: true forces linearRamp (explicit override when default is step).
+  const stepParams = new Set<string>();
   const rampParams = new Set<string>();
   if (semantics.realize) {
     for (const [name, rule] of Object.entries(semantics.realize)) {
-      if (typeof rule === 'object' && rule !== null && (rule as { ramp?: boolean }).ramp === true) {
-        rampParams.add(name);
+      if (typeof rule === 'object' && rule !== null) {
+        if ((rule as { step?: boolean }).step === true) {
+          stepParams.add(name);
+        } else if ((rule as { ramp?: boolean }).ramp === true) {
+          rampParams.add(name);
+        }
       }
     }
   }
@@ -223,34 +237,29 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     }
   }
 
-  // Categorize all bindings into a single tagged-union list.
-  // Each binding gets exactly one discriminant: 'ramp', 'realized', or 'passthrough'.
-  // This makes the mutual-exclusion invariant structural — no procedural if/continue logic.
+  // Categorize all bindings along two axes: source (realized/passthrough) and scheduling (ramp/step).
+  // Scheduling precedence: step: true > ramp: true > defaultScheduling.
   const realizedNames = new Set(Object.keys(semantics.realize || {}));
   const allBindings: CategorizedBinding[] = [];
 
-  let realizedCount = 0;
   let rampCount = 0;
-  let passthroughCount = 0;
+  let stepCount = 0;
 
   for (const [name, bindingList] of bindings) {
-    let type: CategorizedBinding['type'];
-    if (rampParams.has(name)) {
-      type = 'ramp';
-      rampCount++;
-    } else if (realizedNames.has(name)) {
-      type = 'realized';
-      realizedCount++;
-    } else {
-      type = 'passthrough';
-      passthroughCount++;
-    }
+    const source: CategorizedBinding['source'] = realizedNames.has(name) ? 'realized' : 'passthrough';
+    // step: true on a rule wins over everything, then ramp: true, then the document default
+    const useRamp = stepParams.has(name) ? false
+      : rampParams.has(name) ? true
+      : defaultRamp;
+
+    if (useRamp) rampCount++; else stepCount++;
+
     for (const binding of bindingList) {
-      allBindings.push({ name, param: binding.param, type });
+      allBindings.push({ name, param: binding.param, source, ramp: useRamp });
     }
   }
 
-  log(`Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${realizedCount} realized, ${rampCount} ramp, ${passthroughCount} passthrough`);
+  log(`Built ${bindings.size} unique bindings (${allBindings.length} total targets), ${rampCount} ramp, ${stepCount} step (default: ${defaultRamp ? 'ramp' : 'step'})`);
 
   // Track duration for getTrackDuration()
   let trackDuration = 0;
@@ -368,32 +377,20 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       prevAF = currentAF;
       prevAH = currentAH;
 
-      // Schedule all bindings via tagged-union discriminant
+      // Schedule all bindings: read from realized or frame.params, ramp or step.
       for (const binding of allBindings) {
-        switch (binding.type) {
-          case 'realized': {
-            const value = realized[binding.name];
-            if (typeof value === 'number') {
-              schedule.push({ time: t, param: binding.param, value, ramp: false });
-            }
-            break;
-          }
-          case 'passthrough': {
-            const value = frame.params[binding.name];
-            if (typeof value === 'number') {
-              schedule.push({ time: t, param: binding.param, value, ramp: false });
-            }
-            break;
-          }
-          case 'ramp': {
-            // Ramp params: setValueAtTime at frame 0, linearRampToValueAtTime thereafter
-            // This prevents double-write that would collapse ramps to steps
-            const value = realized[binding.name];
-            if (typeof value === 'number') {
-              schedule.push({ time: t, param: binding.param, value, ramp: i > 0 });
-            }
-            break;
-          }
+        const value = binding.source === 'realized'
+          ? realized[binding.name]
+          : frame.params[binding.name];
+        if (typeof value === 'number') {
+          // Ramp bindings: setValueAtTime at frame 0, linearRamp thereafter.
+          // Frame 0 must use setValueAtTime to establish the automation anchor.
+          schedule.push({
+            time: t,
+            param: binding.param,
+            value,
+            ramp: binding.ramp && i > 0,
+          });
         }
       }
     }

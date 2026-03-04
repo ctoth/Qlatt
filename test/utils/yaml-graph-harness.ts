@@ -111,16 +111,35 @@ function getParamDefaults(semantics: SemanticsDocument): Record<string, number> 
   return defaults;
 }
 
-function getRampParams(semantics: SemanticsDocument): Set<string> {
-  const ramps = new Set<string>();
+/** Scheduling metadata from semantics: document default + per-rule overrides. */
+interface SchedulingInfo {
+  defaultRamp: boolean;
+  stepParams: Set<string>;
+  rampParams: Set<string>;
+}
+
+function getSchedulingInfo(semantics: SemanticsDocument): SchedulingInfo {
+  const defaultRamp = semantics.defaultScheduling === 'ramp';
+  const stepParams = new Set<string>();
+  const rampParams = new Set<string>();
   for (const [name, rule] of Object.entries(semantics.realize ?? {})) {
     if (typeof rule === 'object' && rule !== null && (rule as RealizationRule).expr) {
-      if ((rule as { ramp?: boolean }).ramp === true) {
-        ramps.add(name);
+      if ((rule as { step?: boolean }).step === true) {
+        stepParams.add(name);
+      } else if ((rule as { ramp?: boolean }).ramp === true) {
+        rampParams.add(name);
       }
     }
   }
-  return ramps;
+  return { defaultRamp, stepParams, rampParams };
+}
+
+/** Determine whether a named binding should use ramp scheduling.
+ *  Precedence: step: true > ramp: true > defaultScheduling. */
+function shouldRamp(name: string, info: SchedulingInfo): boolean {
+  if (info.stepParams.has(name)) return false;
+  if (info.rampParams.has(name)) return true;
+  return info.defaultRamp;
 }
 
 function buildBindingTargets(graph: BaconGraph): Map<string, MockAudioParam[]> {
@@ -198,7 +217,7 @@ function createSemanticsHarness(
 ): {
   evaluate(inputs: Record<string, number> | undefined, testSampleRate?: number): Record<string, ParamValue>;
   evalExpr(expr: string, values: Record<string, ParamValue>): ParamValue;
-  rampParams: Set<string>;
+  scheduling: SchedulingInfo;
 } {
   const celEvaluator = createCelEvaluator();
   celEvaluator.registerFunction('dbToLinear', (...args: ParamValue[]): ParamValue => {
@@ -246,7 +265,7 @@ function createSemanticsHarness(
   const topoEvaluator = createTopologicalEvaluator(celEvaluator);
   const defaults = getParamDefaults(semantics);
   const constants = semantics.constants ?? {};
-  const rampParams = getRampParams(semantics);
+  const scheduling = getSchedulingInfo(semantics);
 
   function resolveSampleRate(inputs: Record<string, number>, testSampleRate?: number): number {
     const fromInputs = resolveNumber(inputs.sampleRate, NaN);
@@ -298,7 +317,7 @@ function createSemanticsHarness(
     return celEvaluator.evaluate(expr, { params: values, constants });
   }
 
-  return { evaluate, evalExpr, rampParams };
+  return { evaluate, evalExpr, scheduling };
 }
 
 function evaluateTrack(
@@ -407,38 +426,23 @@ function compileSchedule(
   frames: FrameSpec[],
   evaluate: (inputs: Record<string, number> | undefined, testSampleRate?: number) => Record<string, ParamValue>,
   bindingTargets: Map<string, MockAudioParam[]>,
-  rampParams: Set<string>,
+  scheduling: SchedulingInfo,
   testSampleRate?: number
 ): ScheduleEntry[] {
   const entries: ScheduleEntry[] = [];
-  const realizedNames = new Set<string>(rampParams);
-  for (const name of Object.keys(bindingTargets)) {
-    // If a binding has a realize rule, it will be in semantics.realize.
-    // We infer this by checking ramp params and frame evaluation output later.
-    // This set is used only to split passthrough vs realized; ramp params
-    // are always treated as realized.
-    realizedNames.add(name);
-  }
 
-  // We need the actual set of realized names to separate passthrough params.
-  // Evaluate once to discover which realized keys exist.
+  // Discover which keys come from realize rules vs passthrough.
   const probe = frames[0]?.params ?? {};
   const probeValues = evaluate(probe, testSampleRate);
   const realizedKeys = new Set(Object.keys(probeValues));
 
-  const rampBindings = new Set<string>();
-  for (const name of rampParams) {
-    if (bindingTargets.has(name)) {
-      rampBindings.add(name);
-    }
-  }
-
-  const realizedBindings = new Set<string>();
-  const passthroughBindings = new Set<string>();
+  // Categorize bindings: source (realized/passthrough) + scheduling (ramp/step).
+  // Mirrors the interpreter's categorization logic.
+  const bindingCategories = new Map<string, { source: 'realized' | 'passthrough'; ramp: boolean }>();
   for (const name of bindingTargets.keys()) {
-    if (rampBindings.has(name)) continue;
-    if (realizedKeys.has(name)) realizedBindings.add(name);
-    else passthroughBindings.add(name);
+    const source = realizedKeys.has(name) ? 'realized' as const : 'passthrough' as const;
+    const useRamp = shouldRamp(name, scheduling);
+    bindingCategories.set(name, { source, ramp: useRamp });
   }
 
   for (let i = 0; i < frames.length; i += 1) {
@@ -446,24 +450,13 @@ function compileSchedule(
     const t = frame.time;
     const realized = evaluate(frame.params, testSampleRate);
 
-    for (const bind of realizedBindings) {
-      const value = realized[bind];
+    for (const [bind, cat] of bindingCategories) {
+      const value = cat.source === 'realized'
+        ? realized[bind]
+        : frame.params[bind];
       if (typeof value === 'number' && Number.isFinite(value)) {
-        entries.push({ bind, time: t, value, ramp: false });
+        entries.push({ bind, time: t, value, ramp: cat.ramp && i > 0 });
       }
-    }
-
-    for (const bind of passthroughBindings) {
-      const value = frame.params[bind];
-      if (typeof value === 'number' && Number.isFinite(value)) {
-        entries.push({ bind, time: t, value, ramp: false });
-      }
-    }
-
-    for (const bind of rampBindings) {
-      const value = realized[bind];
-      if (typeof value !== 'number' || !Number.isFinite(value)) continue;
-      entries.push({ bind, time: t, value, ramp: i > 0 });
     }
   }
 
@@ -543,7 +536,7 @@ export function defineYamlGraphSuite(yamlPath: string): void {
   const graph = readYamlFile<BaconGraph>(suite.graph);
   const defaultTol = suite.defaultTol ?? 1e-6;
 
-  const { evaluate, evalExpr, rampParams } = createSemanticsHarness(semantics, suite.sampleRate);
+  const { evaluate, evalExpr, scheduling } = createSemanticsHarness(semantics, suite.sampleRate);
 
   const suiteName = suite.suite ?? path.basename(yamlPath, path.extname(yamlPath));
 
@@ -558,7 +551,7 @@ export function defineYamlGraphSuite(yamlPath: string): void {
             testSpec.frames,
             evaluate,
             bindingTargets,
-            rampParams,
+            scheduling,
             testSpec.sampleRate
           );
           executeSchedule(entries, bindingTargets);

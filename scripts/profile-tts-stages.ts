@@ -14,8 +14,9 @@ import { performance } from "node:perf_hooks";
 import { normalizeText } from "../src/g2p/text-normalize";
 import { transcribeText } from "../src/tts-frontend";
 import {
-  PHONEME_TARGETS,
   materializePhonemeTarget,
+  loadInventorySpecFromPath,
+  type InventorySpec,
 } from "../src/declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { assembleKlattTrack } from "../src/track-assembler";
@@ -28,7 +29,11 @@ import {
 // Suppress console.warn spam
 console.warn = () => {};
 
-const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
+// Load inventory from the qlatt-english frontend spec.
+const INVENTORY: InventorySpec = loadInventorySpecFromPath(
+  "/rules/frontends/qlatt-english/inventory.yaml"
+);
+const PHONEME_TARGET_MAP = INVENTORY.phoneme_targets as Record<string, Record<string, any> | undefined>;
 
 type FrontendToken = Record<string, any>;
 
@@ -42,7 +47,7 @@ const RULEPACK_OUTPUT_CONFIG = (QLATT_V12_CEL_RULEPACK as any)?.output ?? undefi
 function buildParameterSequence(phonemeList: FrontendToken[]): FrontendToken[] {
   return phonemeList.map((ph, index) => {
     const targetKeyBase = ph.phoneme;
-    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
+    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress, inventorySpec: INVENTORY });
     return {
       id: `ph_${index}`,
       ...materialized,
@@ -69,7 +74,9 @@ async function main() {
       const normalized = normalizeText(testWords[i]);
       const phonemes = transcribeText(normalized);
       const paramSeq = buildParameterSequence(phonemes);
-      const inventory = { inventoryResolver: materializePhonemeTarget };
+      const inventoryResolver = (phoneme: string) =>
+  materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+const inventory = { inventoryResolver };
       runDeclarativeFrontend(paramSeq, { ...inventory, phases: ["structural"] });
     } catch {}
   }
@@ -88,7 +95,9 @@ async function main() {
     assembleKlattTrack: 0,
   };
   let errorCount = 0;
-  const inventory = { inventoryResolver: materializePhonemeTarget };
+  const inventoryResolver = (phoneme: string) =>
+  materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+const inventory = { inventoryResolver };
 
   const totalStart = performance.now();
 
@@ -171,6 +180,7 @@ async function main() {
       // Stage 10: assembleKlattTrack
       t = performance.now();
       assembleKlattTrack(phoneSequence, parameterSequence, {
+        inventorySpec: INVENTORY,
         baseF0: 110,
         transitionMs: 30,
         outputConfig: RULEPACK_OUTPUT_CONFIG,

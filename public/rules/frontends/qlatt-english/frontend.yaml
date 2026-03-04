@@ -1,4 +1,7 @@
 version: v13-cel
+inventory_path: /rules/frontends/qlatt-english/inventory.yaml
+lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
+morphology_path: /rules/frontends/qlatt-english/morphology.yaml
 include:
   - pipeline.yaml
   - phases/normalize.yaml

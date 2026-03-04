@@ -1,7 +1,8 @@
 import {
   materializePhonemeTarget,
-  loadInventorySpecFromPath,
+  loadFrontendResources,
   type InventorySpec,
+  type FrontendResources,
 } from "./declarative-frontend/inventory";
 import { normalizeText } from "./g2p/text-normalize";
 import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
@@ -11,7 +12,6 @@ import {
   assembleKlattTrack,
   buildSyncTimeMap,
   extractLayerCommands,
-  PHONEME_TARGET_MAP,
 } from "./track-assembler";
 import type {
   OutputConfig,
@@ -302,12 +302,11 @@ function buildTextToKlattTrackDetailed(
   const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
 
-  // Per-frontend inventory and LTS path overrides.
-  const inventoryPath = (frontendSpec as any)?.inventory_path as string | undefined;
-  const ltsPath = (frontendSpec as any)?.lts_path as string | undefined;
-  const customInventory: InventorySpec | undefined = inventoryPath
-    ? loadInventorySpecFromPath(inventoryPath)
-    : undefined;
+  // Load inventory, LTS, and morphology paths from the frontend spec.
+  // Every resource path originates in frontend.yaml — no hardcoded defaults.
+  const resources = loadFrontendResources(frontendSpec as Record<string, unknown>);
+  const { inventory: frontendInventory, ltsPath, morphologyPath } = resources;
+  const inventoryCitation = resources.inventoryPath;
 
   // No-op dictionary lookup for frontends with custom LTS rules (their phoneme set
   // won't match CMU dictionary entries).
@@ -383,7 +382,8 @@ function buildTextToKlattTrackDetailed(
     provenance,
     transcriptionConfig: rulepackTranscriptionConfig,
     ltsPath,
-    dictLookup: ltsPath ? noOpDictLookup : undefined,
+    morphologyPath,
+    dictLookup: (frontendSpec as Record<string, unknown>).skip_dictionary ? noOpDictLookup : undefined,
   });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---
@@ -393,15 +393,16 @@ function buildTextToKlattTrackDetailed(
     // Delegate stress-aware inventory lookup to materializePhonemeTarget
     const materialized = materializePhonemeTarget(targetKeyBase, {
       stress: ph.stress,
-      inventorySpec: customInventory,
+      inventorySpec: frontendInventory,
     });
 
     // Warn if phoneme was not found (materialized falls back to SIL internally)
+    const phonemeTargets = frontendInventory.phoneme_targets;
     const isStructuralStopBase = STRUCTURAL_STOP_BASES.has(targetKeyBase);
     if (
       !isStructuralStopBase &&
-      !PHONEME_TARGET_MAP[materialized.phoneme] &&
-      !PHONEME_TARGET_MAP[targetKeyBase]
+      !phonemeTargets[materialized.phoneme] &&
+      !phonemeTargets[targetKeyBase]
     ) {
       console.warn(
         `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
@@ -415,6 +416,7 @@ function buildTextToKlattTrackDetailed(
       targetKeyBase,
       ph.phoneme,
       ph._pronDecisionId,
+      inventoryCitation,
     );
     if (decisionId) {
       tokenDecisionIds.set(tokenId, decisionId);
@@ -434,11 +436,9 @@ function buildTextToKlattTrackDetailed(
   });
 
   // --- Apply Rules (Rules operate on the enriched parameterSequence) ---
-  // When a custom inventory is active, wrap materializePhonemeTarget to inject it.
-  const effectiveMaterialize = customInventory
-    ? (phoneme: unknown, opts?: { stress?: number | null }) =>
-        materializePhonemeTarget(phoneme, { ...opts, inventorySpec: customInventory })
-    : materializePhonemeTarget;
+  // Wrap materializePhonemeTarget to always inject the frontend inventory.
+  const effectiveMaterialize = (phoneme: unknown, opts?: { stress?: number | null }) =>
+    materializePhonemeTarget(phoneme, { ...opts, inventorySpec: frontendInventory });
 
   const runPhases = (
     sequence: PipelineToken[],
@@ -670,6 +670,7 @@ function buildTextToKlattTrackDetailed(
   );
 
   const track = assembleKlattTrack(phoneSequence, parameterSequence, {
+    inventorySpec: frontendInventory,
     baseF0: effectiveBaseF0,
     transitionMs: transitionMs / rate,
     outputConfig: rulepackOutputConfig,
@@ -684,6 +685,7 @@ function buildTextToKlattTrackDetailed(
     phoneSequence,
     rulepackOutputConfig?.min_duration?.stop_release_ms ?? 5,
     rulepackOutputConfig?.min_duration?.default_ms ?? 20,
+    frontendInventory.phoneme_targets,
   );
 
   return {

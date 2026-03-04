@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
+import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 describe("declarative frontend rulepack structural impact", () => {
   it("keeps active phone order stable while retaining suppressed provenance tokens", () => {
@@ -9,7 +10,7 @@ describe("declarative frontend rulepack structural impact", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const activePhones = out.filter((token) => token.status !== 2).map((token) => token.phoneme);
     const suppressedOriginalVowel = out.find((token) => token.phoneme === "AE" && token.status === 2);
     const activeReplacementVowel = out.find((token) => token.phoneme === "AE" && token.status !== 2);
@@ -26,7 +27,7 @@ describe("declarative frontend rulepack structural impact", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const rel = out.find((token) => token.phoneme === "T_REL" && token.status !== 2);
     const asp = out.find((token) => token.phoneme === "T_ASP" && token.status !== 2);
 

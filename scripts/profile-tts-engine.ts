@@ -16,7 +16,14 @@ import { performance } from "node:perf_hooks";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack, normalizeText, transcribeText } from "../src/tts-frontend";
-import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import {
+  materializePhonemeTarget,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/inventory";
+
+const INVENTORY = loadInventorySpecFromPath(
+  "/rules/frontends/qlatt-english/inventory.yaml"
+);
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import {
   getCelEvalCount,
@@ -40,7 +47,7 @@ type FrontendToken = Record<string, any>;
 function buildParameterSequence(phonemeList: FrontendToken[]): FrontendToken[] {
   return phonemeList.map((ph, index) => {
     const targetKeyBase = ph.phoneme;
-    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
+    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress, inventorySpec: INVENTORY });
     return {
       id: `ph_${index}`,
       ...materialized,
@@ -114,7 +121,9 @@ async function main() {
   let totalCelHits = 0;
   let totalCelMisses = 0;
 
-  const inventory = { inventoryResolver: materializePhonemeTarget };
+  const inventoryResolver = (phoneme: string) =>
+    materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+  const inventory = { inventoryResolver };
   const totalStart = performance.now();
 
   for (const word of testWords) {

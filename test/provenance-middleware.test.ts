@@ -6,7 +6,6 @@ import {
   collectTraceTokenIds,
   emitRuleTraceDecisions,
   recordInventoryDecision,
-  INVENTORY_CITATION,
   RULE_CITATIONS,
 } from "../src/tts-frontend-provenance";
 
@@ -52,7 +51,9 @@ describe("provenance middleware", () => {
     );
     expect(inventoryDecisions.length).toBeGreaterThan(0);
     for (const d of inventoryDecisions) {
-      expect(d.citations).toContain(INVENTORY_CITATION);
+      // Citation is now derived from the loaded inventory path, not a hardcoded constant.
+      expect(d.citations.length).toBeGreaterThan(0);
+      expect(typeof d.citations[0]).toBe("string");
     }
 
     // Should have rule decisions
@@ -181,7 +182,8 @@ describe("provenance middleware", () => {
 
     it("records a decision and returns its ID when provenance is active", () => {
       const provenance = createProvenanceCollector();
-      const id = recordInventoryDecision(provenance, 3, "AH", "AH", undefined);
+      const testCitation = "/rules/frontends/qlatt-english/inventory.yaml";
+      const id = recordInventoryDecision(provenance, 3, "AH", "AH", undefined, testCitation);
 
       expect(id).toBeTruthy();
       expect(typeof id).toBe("string");
@@ -190,7 +192,7 @@ describe("provenance middleware", () => {
       expect(decisions.length).toBe(1);
       expect(decisions[0].type).toBe("inventory_target_selected");
       expect(decisions[0].subject).toBe("token:3:AH");
-      expect(decisions[0].citations).toContain(INVENTORY_CITATION);
+      expect(decisions[0].citations).toContain(testCitation);
     });
 
     it("links parent pronunciation decision when provided", () => {
@@ -215,11 +217,6 @@ describe("provenance middleware", () => {
   // -----------------------------------------------------------------------
 
   describe("constants", () => {
-    it("INVENTORY_CITATION is a non-empty string", () => {
-      expect(typeof INVENTORY_CITATION).toBe("string");
-      expect(INVENTORY_CITATION.length).toBeGreaterThan(0);
-    });
-
     it("RULE_CITATIONS is a Map with string keys and string[] values", () => {
       expect(RULE_CITATIONS).toBeInstanceOf(Map);
       for (const [key, value] of RULE_CITATIONS) {

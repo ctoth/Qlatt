@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
+import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 describe("declarative frontend first migration slice", () => {
   it("applies structural stop release insertion via declarative engine", () => {
@@ -12,7 +13,7 @@ describe("declarative frontend first migration slice", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
 
     expect(phones).toEqual(["P_CL", "P_REL", "P_ASP", "AE", "T_CL", "T_REL", "T_ASP", "SIL"]);
@@ -29,7 +30,7 @@ describe("declarative frontend first migration slice", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
 
     expect(phones).toEqual(["B_CL", "B_REL", "AE", "SIL"]);
@@ -133,7 +134,7 @@ describe("declarative frontend first migration slice", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const phones = out.filter((t) => t.status !== 2).map((t) => t.phoneme);
     expect(phones).toEqual(["AE", "SIL"]);
   });
@@ -144,7 +145,7 @@ describe("declarative frontend first migration slice", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const rel = out.find((t) => t.phoneme === "K_REL");
     const asp = out.find((t) => t.phoneme === "K_ASP");
 
@@ -174,7 +175,7 @@ describe("declarative frontend first migration slice", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const phones = out.filter((token) => (token.stream ?? "phone") === "phone");
     expect(phones.length).toBeGreaterThan(0);
     expect(

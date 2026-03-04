@@ -36,31 +36,18 @@ interface LtsRulesData {
   rules_by_letter: Record<string, LtsRule[]>;
 }
 
-export const DEFAULT_LTS_RULES_PATH = "/rules/lts-rules.yaml";
-
 // ── Module-level state (lazy init) ─────────────────────────────────────
 
 const rulesCache = new Map<string, { data: LtsRulesData; contextCache: Map<string, RegExp> }>();
 
-// Legacy aliases for the default path entry (used by compileContextPattern).
-let rulesData: LtsRulesData | null = null;
-let compiledContextCache: Map<string, RegExp> | null = null;
-
-function loadRules(rulesPath?: string): { data: LtsRulesData; contextCache: Map<string, RegExp> } {
-  const effectivePath = rulesPath ?? DEFAULT_LTS_RULES_PATH;
-  const cached = rulesCache.get(effectivePath);
+function loadRules(rulesPath: string): { data: LtsRulesData; contextCache: Map<string, RegExp> } {
+  const cached = rulesCache.get(rulesPath);
   if (cached) return cached;
 
-  const data = loadYamlDocumentSync<LtsRulesData>(effectivePath);
+  const data = loadYamlDocumentSync<LtsRulesData>(rulesPath);
   const contextCache = new Map<string, RegExp>();
   const entry = { data, contextCache };
-  rulesCache.set(effectivePath, entry);
-
-  // Keep legacy module-level aliases in sync for the default path.
-  if (effectivePath === DEFAULT_LTS_RULES_PATH) {
-    rulesData = data;
-    compiledContextCache = contextCache;
-  }
+  rulesCache.set(rulesPath, entry);
 
   return entry;
 }
@@ -178,7 +165,7 @@ function tryRule(
  *               Case-insensitive.
  * @returns Array of Qlatt ARPAbet phoneme strings (no stress digits).
  */
-export function applyLtsRules(word: string, rulesPath?: string): string[] {
+export function applyLtsRules(word: string, rulesPath: string = '/rules/frontends/qlatt-english/lts-rules.yaml'): string[] {
   if (!word || word.length === 0) return [];
 
   const loaded = loadRules(rulesPath);

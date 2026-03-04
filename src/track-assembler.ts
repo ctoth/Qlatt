@@ -7,8 +7,11 @@
  * Extracted from tts-frontend.ts (Phase 5 refactor).
  */
 import {
-  PHONEME_TARGETS,
   fillDefaultParams,
+  loadInventorySpecFromPath,
+} from "./declarative-frontend/inventory";
+import type {
+  InventorySpec,
 } from "./declarative-frontend/inventory";
 import type {
   KlattFrame,
@@ -36,7 +39,7 @@ type ResolvedControlWindow = {
   tag?: string;
 };
 
-export const PHONEME_TARGET_MAP = PHONEME_TARGETS as Record<string, Record<string, any> | undefined>;
+// Removed: PHONEME_TARGET_MAP global — callers must provide inventorySpec via options.
 
 /** An F0 contour point (time in seconds, f0 in Hz).
  *  Optional metadata for provenance and sag-injection passes.
@@ -86,6 +89,8 @@ export type VoiceQualityOverrides = {
 
 /** Options passed to {@link assembleKlattTrack}. */
 export type AssembleTrackOptions = {
+  /** Inventory spec providing phoneme targets and base params. Defaults to qlatt-english. */
+  inventorySpec?: InventorySpec;
   /** Base F0 in Hz (default 110). */
   baseF0?: number;
   /** Transition duration in milliseconds (default 30). */
@@ -149,6 +154,7 @@ export function buildSyncTimeMap(
   phoneSequence: InputToken[],
   minDurationStopReleaseMs: number,
   minDurationDefaultMs: number,
+  phonemeTargets?: Record<string, Record<string, unknown>>,
 ): Map<string, number> {
   const syncTimeByKey = new Map<string, number>();
   let cursorSec = 0;
@@ -157,7 +163,7 @@ export function buildSyncTimeMap(
     const isStopRelease = token.type === "stop_release" || token.type === "stop_aspiration";
     const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
     const fallbackDurationMs = isStopRelease
-      ? toFiniteNumber(PHONEME_TARGET_MAP[token.phoneme]?.dur)
+      ? toFiniteNumber((phonemeTargets?.[token.phoneme] as Record<string, unknown> | undefined)?.dur)
       : null;
     const durationSec =
       resolveTokenDurationMs(token, minDurationMs, fallbackDurationMs) / 1000;
@@ -338,7 +344,8 @@ function resolveControlWindow(
 function collectResolvedControlWindows(
   phoneSequence: InputToken[],
   minDurationStopReleaseMs: number,
-  minDurationDefaultMs: number
+  minDurationDefaultMs: number,
+  phonemeTargetMap: Record<string, Record<string, any> | undefined>,
 ): ResolvedControlWindow[][] {
   const resolvedByIndex = phoneSequence.map(() => [] as ResolvedControlWindow[]);
 
@@ -368,7 +375,7 @@ function collectResolvedControlWindows(
         targetToken.type === "stop_release" || targetToken.type === "stop_aspiration";
       const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
       const fallbackDurationMs = isStopRelease
-        ? toFiniteNumber(PHONEME_TARGET_MAP[targetToken.phoneme]?.dur)
+        ? toFiniteNumber(phonemeTargetMap[targetToken.phoneme]?.dur)
         : null;
       const targetDurationSec =
         resolveTokenDurationMs(targetToken, minDurationMs, fallbackDurationMs) / 1000;
@@ -1425,8 +1432,11 @@ function applyVoiceQualityOverrides(
 export function assembleKlattTrack(
   phoneSequence: InputToken[],
   parameterSequence: InputToken[],
-  options: AssembleTrackOptions = {}
+  options: AssembleTrackOptions,
 ): KlattFrame[] {
+  const inventorySpec = options.inventorySpec ?? loadInventorySpecFromPath('/rules/frontends/qlatt-english/inventory.yaml');
+  const phonemeTargetMap = inventorySpec.phoneme_targets as Record<string, Record<string, any> | undefined>;
+  const baseParams = inventorySpec.base_params;
   const baseF0 = options.baseF0 ?? 110;
   const cfg = options.outputConfig;
   const vq = options.voiceQuality;
@@ -1447,6 +1457,7 @@ export function assembleKlattTrack(
     phoneSequence,
     minDurationStopReleaseMs,
     minDurationDefaultMs,
+    inventorySpec.phoneme_targets,
   );
 
   // Build the F0 contour.
@@ -1461,7 +1472,7 @@ export function assembleKlattTrack(
     for (const ph of phoneSequence) {
       const isStopRel = ph.type === "stop_release" || ph.type === "stop_aspiration";
       const minDur = isStopRel ? minDurationStopReleaseMs : minDurationDefaultMs;
-      const fallbackDur = isStopRel ? toFiniteNumber(PHONEME_TARGET_MAP[ph.phoneme]?.dur) : null;
+      const fallbackDur = isStopRel ? toFiniteNumber(phonemeTargetMap[ph.phoneme]?.dur) : null;
       totalDuration += resolveTokenDurationMs(ph, minDur, fallbackDur) / 1000.0;
     }
     totalDuration += finalSilenceMs / 1000.0;
@@ -1495,11 +1506,12 @@ export function assembleKlattTrack(
   const resolvedControlWindowsByIndex = collectResolvedControlWindows(
     phoneSequence,
     minDurationStopReleaseMs,
-    minDurationDefaultMs
+    minDurationDefaultMs,
+    phonemeTargetMap,
   );
 
   // Start silent.
-  const silParams = fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+  const silParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
   if (vq) applyVoiceQualityOverrides(silParams, vq);
   klattTrack.push({
     time: 0,
@@ -1512,7 +1524,7 @@ export function assembleKlattTrack(
     // when a release/aspiration token did not receive a declarative duration.
     const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
     const minDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
-    const fallbackDuration = isStopRelease ? toFiniteNumber(PHONEME_TARGET_MAP[ph.phoneme]?.dur) : null;
+    const fallbackDuration = isStopRelease ? toFiniteNumber(phonemeTargetMap[ph.phoneme]?.dur) : null;
     const phDuration = resolveTokenDurationMs(ph, minDuration, fallbackDuration) / 1000.0;
     const segmentStart = currentTime;
 
@@ -1529,7 +1541,7 @@ export function assembleKlattTrack(
     // Use the params object directly from the sequence (already filled and potentially modified by rules)
     const finalParams: KlattParams = ph.params
       ? { ...ph.params }
-      : fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+      : fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
 
     // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
     // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
@@ -1595,7 +1607,7 @@ export function assembleKlattTrack(
 
   // Add final silence.
   const finalTime = currentTime + finalSilenceMs / 1000.0;
-  const finalSilParams = fillDefaultParams(PHONEME_TARGET_MAP["SIL"]);
+  const finalSilParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
   if (vq) applyVoiceQualityOverrides(finalSilParams, vq);
   klattTrack.push({
     time: finalTime,

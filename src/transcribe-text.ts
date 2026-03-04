@@ -145,6 +145,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
   const cfg = options.transcriptionConfig;
   const effectiveDictLookup = options.dictLookup ?? cmuDictLookup;
   const ltsPath = options.ltsPath;
+  const morphologyPath = options.morphologyPath;
 
   // Resolve effective lookup tables from YAML config, falling back to hardcoded defaults.
   const effectiveSymbols: Record<string, string[]> =
@@ -214,7 +215,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
       // Use the multi-layer G2P pipeline: dict -> morphology -> LTS + stress.
       const pronResult: PronunciationResult =
         symbolPronunciation == null
-          ? pronounce(sourceWord, effectiveDictLookup, { ltsPath })
+          ? pronounce(sourceWord, effectiveDictLookup, { ltsPath, morphologyPath })
           : {
               phonemes: symbolPronunciation,
               source: "unknown",

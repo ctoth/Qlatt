@@ -26,7 +26,8 @@ type RuleSpec = { citations?: string[] };
 // Constants
 // ---------------------------------------------------------------------------
 
-export const INVENTORY_CITATION = "public/rules/inventory.yaml";
+// Removed: INVENTORY_CITATION hardcoded constant.
+// Callers must derive the citation from the loaded inventory path.
 
 /**
  * Map from rule name to its citation strings, built from the loaded rulepack.
@@ -139,15 +140,17 @@ export function recordInventoryDecision(
   targetKeyBase: string,
   sourcePhoneme: string,
   pronDecisionId: string | undefined,
+  inventoryCitation?: string,
 ): string | undefined {
   if (!provenance) return undefined;
 
+  const citation = inventoryCitation ?? "inventory.yaml";
   const decision = provenance.add({
     stage: "transcribe",
     type: "inventory_target_selected",
     subject: `token:${tokenIndex}:${targetKeyBase}`,
     reason: `Selected inventory target '${targetKeyBase}' for source phoneme '${sourcePhoneme}'`,
-    citations: [INVENTORY_CITATION],
+    citations: [citation],
     parents:
       typeof pronDecisionId === "string" && pronDecisionId.length > 0
         ? [pronDecisionId]

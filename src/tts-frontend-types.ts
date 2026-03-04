@@ -33,8 +33,10 @@ export type TranscriptionOptions = {
   provenance?: ProvenanceCollector | null;
   /** Transcription config from YAML (overrides hardcoded defaults). */
   transcriptionConfig?: TranscriptionConfig;
-  /** Path to alternative LTS rules YAML. When set, applyLtsRules uses this file. */
+  /** Path to LTS rules YAML. Required for G2P LTS fallback. */
   ltsPath?: string;
+  /** Path to morphology YAML. When undefined, morphological decomposition is skipped. */
+  morphologyPath?: string;
   /** Override the default CMU dictionary lookup function. */
   dictLookup?: (word: string) => string[] | null;
 };

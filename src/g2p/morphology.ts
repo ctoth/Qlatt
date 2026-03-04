@@ -36,12 +36,14 @@ interface MorphologyData {
 
 // --- Load affix tables from YAML ---
 
-let morphologyData: MorphologyData | null = null;
+const morphologyCache = new Map<string, MorphologyData>();
 
-function getMorphologyData(): MorphologyData {
-  if (morphologyData) return morphologyData;
-  morphologyData = loadYamlDocumentSync<MorphologyData>('/rules/morphology.yaml');
-  return morphologyData;
+function getMorphologyData(path: string): MorphologyData {
+  const cached = morphologyCache.get(path);
+  if (cached) return cached;
+  const data = loadYamlDocumentSync<MorphologyData>(path);
+  morphologyCache.set(path, data);
+  return data;
 }
 
 // --- Voicing classification for -ed and -s ---
@@ -166,11 +168,12 @@ function trySuffixDecomposition(
 export function decomposeWord(
   word: string,
   dictLookup: DictLookup,
+  morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml',
 ): PronunciationResult | null {
   if (!word || word.length < 4) return null;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData();
+  const data = getMorphologyData(morphologyPath);
 
   // Try suffixes first (already ordered longest-first in YAML).
   const suffixOnly = trySuffixDecomposition(lowerWord, data.suffixes, dictLookup);
@@ -221,11 +224,11 @@ export function decomposeWord(
  *
  * Citation: Hunnicutt 1976; Allen, Hunnicutt & Klatt 1987 Ch.4-5
  */
-export function getStressHintForWord(word: string): StressHint | undefined {
+export function getStressHintForWord(word: string, morphologyPath: string = '/rules/frontends/qlatt-english/morphology.yaml'): StressHint | undefined {
   if (!word || word.length < 4) return undefined;
 
   const lowerWord = word.toLowerCase();
-  const data = getMorphologyData();
+  const data = getMorphologyData(morphologyPath);
 
   for (const suffix of data.suffixes) {
     if (!lowerWord.endsWith(suffix.affix)) continue;

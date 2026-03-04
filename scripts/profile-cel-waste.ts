@@ -11,7 +11,14 @@
 
 import { performance } from "node:perf_hooks";
 import { textToKlattTrack, normalizeText, transcribeText } from "../src/tts-frontend";
-import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import {
+  materializePhonemeTarget,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/inventory";
+
+const INVENTORY = loadInventorySpecFromPath(
+  "/rules/frontends/qlatt-english/inventory.yaml"
+);
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
@@ -32,7 +39,7 @@ type FrontendToken = Record<string, any>;
 function buildParameterSequence(phonemeList: FrontendToken[]): FrontendToken[] {
   return phonemeList.map((ph, index) => {
     const targetKeyBase = ph.phoneme;
-    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
+    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress, inventorySpec: INVENTORY });
     return {
       id: `ph_${index}`,
       ...materialized,
@@ -65,7 +72,9 @@ function analyzePhaseGroup(
   phaseKey: string,
   extraParams?: Record<string, unknown>
 ): { stats: RuleStats[]; outputSeq: FrontendToken[] } {
-  const inventory = { inventoryResolver: materializePhonemeTarget };
+  const inventoryResolver = (phoneme: string) =>
+  materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+const inventory = { inventoryResolver };
 
   resetCelCounters();
   let prevCelCount = 0;
@@ -129,7 +138,9 @@ async function main() {
     try { textToKlattTrack(testWords[i]); } catch {}
   }
 
-  const inventory = { inventoryResolver: materializePhonemeTarget };
+  const inventoryResolver = (phoneme: string) =>
+  materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+const inventory = { inventoryResolver };
 
   // Accumulate per-rule stats across all words
   const ruleAccum: Map<string, {

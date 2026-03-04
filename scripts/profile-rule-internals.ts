@@ -12,7 +12,14 @@
 
 import { performance } from "node:perf_hooks";
 import { textToKlattTrack, normalizeText, transcribeText } from "../src/tts-frontend";
-import { materializePhonemeTarget } from "../src/declarative-frontend/inventory";
+import {
+  materializePhonemeTarget,
+  loadInventorySpecFromPath,
+} from "../src/declarative-frontend/inventory";
+
+const INVENTORY = loadInventorySpecFromPath(
+  "/rules/frontends/qlatt-english/inventory.yaml"
+);
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import {
   getCelEvalCount,
@@ -38,7 +45,7 @@ type FrontendToken = Record<string, any>;
 function buildParameterSequence(phonemeList: FrontendToken[]): FrontendToken[] {
   return phonemeList.map((ph, index) => {
     const targetKeyBase = ph.phoneme;
-    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress });
+    const materialized = materializePhonemeTarget(targetKeyBase, { stress: ph.stress, inventorySpec: INVENTORY });
     return {
       id: `ph_${index}`,
       ...materialized,
@@ -85,7 +92,9 @@ async function main() {
   const dict = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
   const testWords = Object.keys(dict).slice(0, 200);
   const wordCount = testWords.length;
-  const inventory = { inventoryResolver: materializePhonemeTarget };
+  const inventoryResolver = (phoneme: string) =>
+    materializePhonemeTarget(phoneme, { inventorySpec: INVENTORY });
+  const inventory = { inventoryResolver };
 
   // Warmup: run 5 words to populate caches + JIT
   for (let i = 0; i < 5; i++) {

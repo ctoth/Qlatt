@@ -1,10 +1,20 @@
-import { materializePhonemeTarget } from "./inventory";
-import { runRuleEngine, type InventoryResolver } from "./engine";
+import { runRuleEngine } from "./engine";
 import {
   QLATT_ENGLISH_RULEPACK,
   loadBundledRulepackSpec,
   loadRulepackSpecFromPath,
 } from "./rule-pack";
+import { loadInventorySpecFromPath, materializePhonemeTarget } from "./inventory";
+import type { InventoryResolver } from "./engine";
+
+let _defaultResolver: InventoryResolver | undefined;
+function defaultInventoryResolver(): InventoryResolver {
+  if (!_defaultResolver) {
+    const spec = loadInventorySpecFromPath('/rules/frontends/qlatt-english/inventory.yaml');
+    _defaultResolver = (phoneme: string) => materializePhonemeTarget(phoneme, { inventorySpec: spec });
+  }
+  return _defaultResolver;
+}
 
 type DeclarativeFrontendOptions = {
   includeTrace?: boolean;
@@ -41,7 +51,7 @@ export function runDeclarativeFrontend(
   const result = runRuleEngine(sequence, specSource, {
     phases: options.phases,
     parameters: options.parameters,
-    inventoryResolver: options.inventoryResolver ?? materializePhonemeTarget,
+    inventoryResolver: options.inventoryResolver ?? defaultInventoryResolver(),
   });
   if (options.includeTrace) return result;
   return result.sequence;

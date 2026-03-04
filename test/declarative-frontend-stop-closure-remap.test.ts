@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
+import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 function getActivePhoneTokens(result: Record<string, unknown>[]) {
   return result
@@ -15,7 +16,7 @@ describe("remap_stops_to_closures structural rule", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const active = getActivePhoneTokens(out);
     // P should become P_CL (stop_closure), and then stop release/aspiration rules fire too
     const closure = active.find((t) => t.phoneme === "P_CL");
@@ -34,7 +35,7 @@ describe("remap_stops_to_closures structural rule", () => {
         { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
       ];
 
-      const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+      const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
       const active = out.filter((t) => t.status !== 2);
       const closure = active.find((t) => t.phoneme === `${stop}_CL`);
       expect(closure, `${stop} should be remapped to ${stop}_CL`).toBeTruthy();
@@ -50,7 +51,7 @@ describe("remap_stops_to_closures structural rule", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const active = getActivePhoneTokens(out);
     const vowel = active.find((t) => t.phoneme === "AE");
     expect(vowel).toBeTruthy();
@@ -64,7 +65,7 @@ describe("remap_stops_to_closures structural rule", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const active = out.filter((t) => t.status !== 2);
     // P_CL should still be present
     const closure = active.find((t) => t.phoneme === "P_CL");
@@ -82,7 +83,7 @@ describe("remap_stops_to_closures structural rule", () => {
       { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence" },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["structural"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["structural"], inventoryResolver: qlattInventoryResolver });
     const active = out.filter((t) => t.status !== 2);
     const closure = active.find((t) => t.phoneme === "T_CL");
     expect(closure).toBeTruthy();

@@ -11,17 +11,21 @@ export type InventorySpec = {
   phoneme_targets: Record<string, Record<string, unknown>>;
 };
 
-// Source-of-truth inventory data lives in /public/rules/inventory.yaml.
-export const DEFAULT_INVENTORY_PATH = "/rules/inventory.yaml";
+/**
+ * Resources loaded from a frontend.yaml spec.
+ * Every path originates in the frontend spec — no hardcoded defaults.
+ */
+export type FrontendResources = {
+  inventory: InventorySpec;
+  inventoryPath: string;
+  ltsPath?: string;
+  morphologyPath?: string;
+};
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
 
 export function listBundledInventoryPaths(): string[] {
-  const known = new Set<string>([
-    ...BUNDLED_INVENTORY_CACHE.keys(),
-    DEFAULT_INVENTORY_PATH,
-  ]);
-  return [...known].sort();
+  return [...BUNDLED_INVENTORY_CACHE.keys()].sort();
 }
 
 function normalizeBaseParams(node: unknown): Record<string, number> {
@@ -76,7 +80,7 @@ function parseInventorySpec(source: string): InventorySpec {
   };
 }
 
-export function loadInventorySpecFromPath(specPath: string = DEFAULT_INVENTORY_PATH): InventorySpec {
+export function loadInventorySpecFromPath(specPath: string): InventorySpec {
   const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
   if (cached) return cached;
 
@@ -97,7 +101,7 @@ export function loadInventorySpecFromPath(specPath: string = DEFAULT_INVENTORY_P
 }
 
 export async function preloadInventorySpecFromPath(
-  specPath: string = DEFAULT_INVENTORY_PATH
+  specPath: string,
 ): Promise<InventorySpec> {
   const cached = BUNDLED_INVENTORY_CACHE.get(specPath);
   if (cached) return cached;
@@ -118,17 +122,12 @@ export async function preloadInventorySpecFromPath(
   return spec;
 }
 
-const INVENTORY = await preloadInventorySpecFromPath(DEFAULT_INVENTORY_PATH);
-
-export const BASE_PARAMS: Record<string, number> = INVENTORY.base_params;
-export const PHONEME_TARGETS: Record<string, Record<string, unknown>> = INVENTORY.phoneme_targets;
-
 // --- Rule Functions ---
 export function fillDefaultParams(
   target: Record<string, unknown> | null | undefined,
-  baseParams?: Record<string, number>,
+  baseParams: Record<string, number>,
 ): Record<string, number> {
-  const effectiveBase = baseParams ?? BASE_PARAMS;
+  const effectiveBase = baseParams;
   const filled: Record<string, number> = { ...effectiveBase };
 
   if (target) {
@@ -157,10 +156,10 @@ export function fillDefaultParams(
 
 export function materializePhonemeTarget(
   phoneme: unknown,
-  options?: { stress?: number | null; inventorySpec?: InventorySpec },
+  options: { stress?: number | null; inventorySpec: InventorySpec },
 ) {
-  const effectiveTargets = options?.inventorySpec?.phoneme_targets ?? PHONEME_TARGETS;
-  const effectiveBase = options?.inventorySpec?.base_params ?? BASE_PARAMS;
+  const effectiveTargets = options.inventorySpec.phoneme_targets;
+  const effectiveBase = options.inventorySpec.base_params;
   const baseKey = typeof phoneme === "string" && phoneme.length > 0 ? phoneme : "SIL";
 
   // Resolve the actual lookup key, applying stress-aware vowel resolution when
@@ -246,4 +245,27 @@ export function materializePhonemeTarget(
   }
 
   return payload;
+}
+
+// ---------------------------------------------------------------------------
+// FrontendResources loader
+// ---------------------------------------------------------------------------
+
+/**
+ * Load inventory and resource paths from a parsed frontend.yaml spec.
+ * Every resource path originates in the spec — no hardcoded defaults.
+ */
+export function loadFrontendResources(
+  spec: Record<string, unknown>,
+): FrontendResources {
+  const inventoryPath = spec.inventory_path as string | undefined;
+  if (!inventoryPath) {
+    throw new Error("E_FRONTEND_SPEC: inventory_path is required");
+  }
+  return {
+    inventory: loadInventorySpecFromPath(inventoryPath),
+    inventoryPath,
+    ltsPath: (spec.lts_path as string) || undefined,
+    morphologyPath: (spec.morphology_path as string) || undefined,
+  };
 }

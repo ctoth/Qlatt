@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
+import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 describe("declarative frontend integration phases", () => {
   it("executes structural->duration->prosody->finalize with resolved point timing trace", () => {
@@ -54,6 +55,7 @@ describe("declarative frontend integration phases", () => {
     const result = runDeclarativeFrontend(sequence, {
       includeTrace: true,
       phases: ["structural", "duration", "prosody", "finalize"],
+      inventoryResolver: qlattInventoryResolver,
       parameters: {
         policy: {
           f0: {

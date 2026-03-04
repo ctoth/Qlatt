@@ -1,6 +1,7 @@
 version: v13-cel
 inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
+skip_dictionary: true
 include:
   - pipeline.yaml
   - phases/structural.yaml

@@ -31,7 +31,10 @@ import { assignStress } from './stress';
 export function pronounce(
   word: string,
   dictLookup: DictLookup,
-  options?: { ltsPath?: string },
+  options: { ltsPath?: string; morphologyPath?: string } = {
+    ltsPath: '/rules/frontends/qlatt-english/lts-rules.yaml',
+    morphologyPath: '/rules/frontends/qlatt-english/morphology.yaml',
+  },
 ): PronunciationResult {
   if (!word || word.trim().length === 0) {
     return { phonemes: [], source: 'lts-rules', word: word || '' };
@@ -60,14 +63,19 @@ export function pronounce(
   }
 
   // 3. Try morphological decomposition (affix stripping + dict root)
-  const morphResult = decomposeWord(lowerWord, dictLookup);
+  const morphResult = decomposeWord(lowerWord, dictLookup, options.morphologyPath);
   if (morphResult) {
     return morphResult;
   }
 
   // 4. Fall back to Elovitz LTS rules + Hunnicutt stress assignment
-  const ltsPhonemes = applyLtsRules(lowerWord, options?.ltsPath);
-  const stressHint = getStressHintForWord(lowerWord);
+  if (!options.ltsPath) {
+    throw new Error(
+      `E_LTS_PATH_MISSING: word '${word}' not in dictionary and no ltsPath configured`
+    );
+  }
+  const ltsPhonemes = applyLtsRules(lowerWord, options.ltsPath);
+  const stressHint = getStressHintForWord(lowerWord, options.morphologyPath);
   const stressedPhonemes = assignStress(ltsPhonemes, stressHint);
   return { phonemes: stressedPhonemes, source: 'lts-rules', word: lowerWord };
 }

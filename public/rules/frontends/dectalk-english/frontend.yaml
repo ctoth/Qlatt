@@ -9,18 +9,20 @@ include:
   - phases/prosody.yaml
 f0_model:
   type: layered_additive
+  # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.
+  # Citation: DECtalk 4.63 ph_claus.c ("For each 6.4 msec frame of current clause")
+  frame_period_sec: 0.0064
   citations:
     - "Fujisaki (command-response model: additive phrase + accent layers)"
     - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
     - "Rabiner 1968 (three-component: archetypal + stress + consonant)"
   filter:
-    type: lowpass_2pole
-    # Filter cutoff resolved from speaker params if available; fallback to default.
-    # DECtalk's f0_lp_filter=2100 is a coefficient (not Hz); the actual -3dB
-    # cutoff of DECtalk's 1-pole filter is ~6 Hz.  For qlatt's 2-pole
-    # Butterworth at 200 Hz frame rate, 10 Hz gives ~40ms rise time,
-    # matching DECtalk's prosodic smoothing behavior.
-    default_cutoff: 10
+    type: lowpass_1pole
+    # Generic first-order low-pass smoothing. For DECtalk 4.63 this uses the
+    # speaker's native F0 smoothing coefficient directly, normalized to [0, 1].
+    # Citation: DECtalk 4.63 Ph_drwt02.c filter_commands()
+    alpha_param: policy.speaker.f0_lp_filter_alpha.value
+    default_alpha: 0.5126953125
   layers:
     baseline:
       type: profile
@@ -139,6 +141,14 @@ parameters:
       # Final fall below baseline at declarative sentence end (internal Hz*10).
       # Source: ph_inton1.c F0_FINAL_FALL = 180.
       final_fall_hz: 180
+      # DECtalk 4.63 ph_inton1.c Rule 3:
+      # hat fall starts dur - 180 ms from the stressed vowel onset, with a
+      # minimum onset delay of 25 ms.
+      hat_fall_early_offset_ms: 180
+      hat_fall_min_delay_ms: 25
+      # DECtalk 4.63 ph_inton1.c Rule 3:
+      # if sonorants follow the nucleus, delay the fall by 90 ms instead.
+      hat_fall_following_sonorant_delay_ms: 90
       # Non-final clause boundary fall (internal Hz*10).
       # Source: ph_inton1.c F0_NON_FINAL_FALL = 150.
       non_final_fall_hz: 150
@@ -157,7 +167,9 @@ parameters:
       # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10}.
       # Using average of first 4 positions: (140+90+60+40)/4 = 82.5.
       stress_phrase_position_hz: 82.5
-      # Stress impulse duration in 5ms frames (NF100MS at 5ms = 20 frames).
+      # Stress impulse duration in native DECtalk control frames.
+      # The source IMPULSE path is a longer step-plus-ramp; Qlatt keeps a
+      # 20-frame declarative approximation here. # engineering approximation
       stress_impulse_duration_frames: 20
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
@@ -172,6 +184,18 @@ parameters:
       # 40 ms backward smoothing span.
       voiceless_open_tract_breathy_onset_ms: 40
       voiceless_open_tract_breathy_onset_db: 52
+      # DECtalk 4.63 p_us_st1.c backward smoothing uses a boundary value of
+      # target-10 dB when source amplitude is increasing.
+      source_onset_boundary_drop_db: 10
+      # DECtalk 4.63 p_us_st1.c keeps voicing onset non-abrupt after a voiced
+      # fricative. The original code uses the normal source-smoothing path;
+      # Qlatt approximates that with a 40 ms prefix window. # engineering approximation
+      voiced_fricative_voicing_onset_ms: 40
+      # DECtalk 4.63 p_us_st1.c backward smoothing:
+      # a syllabic voiced non-nasal segment offsets into silence with a long
+      # breathy tail (PAP.pspesh = 52, NF130MS).
+      vowel_breathy_offset_ms: 130
+      vowel_breathy_offset_db: 52
       # DECtalk 4.63 p_us_st1.c special hack for /th, dh/:
       # fric gains are suppressed until durfon - 3, leaving only a weak final
       # frication tail. Qlatt models this as a 30 ms suffix window at the
@@ -202,6 +226,9 @@ parameters:
       f0_lp_filter:
         value: 2100
         citations: ["DECtalk 4.63 Paul 1500+15*QU, ph_vset.c general path"]
+      f0_lp_filter_alpha:
+        value: 0.5126953125
+        citations: ["DECtalk 4.63 Ph_drwt02.c filter coefficient 2100/4096 (Paul)"]
       hat_rise_hz10:
         value: 180
         citations: ["DECtalk 4.63 Paul HR*10, ph_vset.c general path"]

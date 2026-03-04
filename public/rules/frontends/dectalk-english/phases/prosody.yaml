@@ -145,17 +145,31 @@ rules:
         look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
       is_hat_ends: >-
         nearest_forward == null || nearest_forward.phoneme == "SIL"
+      has_following_sonorant: >-
+        next != null
+        && (next.type == "vowel" || next.type == "liquid" || next.type == "nasal" || next.type == "glide")
+      fall_delay_ms: >-
+        has_following_sonorant
+        ? params.policy.f0.hat_fall_following_sonorant_delay_ms
+        : (
+            current.duration - params.policy.f0.hat_fall_early_offset_ms < params.policy.f0.hat_fall_min_delay_ms
+            ? params.policy.f0.hat_fall_min_delay_ms
+            : current.duration - params.policy.f0.hat_fall_early_offset_ms
+          )
+      fall_ratio: >-
+        current.duration > 0 ? fall_delay_ms / current.duration : 0
       # Total fall: hat_rise (cancel the rise) + final_fall (below baseline).
       fall_hz: >-
         params.policy.f0.hat_rise_hz + params.policy.f0.final_fall_hz
     constraint: is_hat_ends
     insert:
       layer: hat
-      at: at_sync(current.sync_right)
+      at: >-
+        merge(current, {"ratio": fall_ratio})
       value: "-(fall_hz)"
       tag: f0_hat_fall
     citations:
-      - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS -> negative STEP)"
+      - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS timing and negative STEP)"
       - "Klatt 1982 (hat fall: cancel rise + phrase-final lowering)"
 
   # --------------------------------------------------------------------------

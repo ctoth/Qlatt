@@ -4,6 +4,11 @@
 bacon: "0.1"
 name: klatt80
 
+# Klatt 1980: all parameters are linearly interpolated between update frames
+# at the 5 ms update rate.  WebAudio's linearRampToValueAtTime implements this.
+# Binary switches (cascade/parallel, source mode) override with step: true.
+defaultScheduling: ramp
+
 # Input parameters - what the TTS frontend provides
 params:
   # Fundamental frequency
@@ -413,7 +418,6 @@ realize:
   aspGain:
     expr: "dbToLinear(GO + AH + ndbScale.AH)"
     deps: [GO, AH]
-    ramp: true
 
   # Klatt 80 COEWAV/PARCOE behavior: when SW=1, frication uses max(AF, AH)
   # to prevent aspiration from being masked by lower AF values.
@@ -424,7 +428,6 @@ realize:
   fricGain:
     expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF)"
     deps: [GO, fricDbAdjusted]
-    ramp: true
 
   avsGain:
     expr: "dbToLinear(GO + AVS + eeGainDb + ndbScale.AVS) * 10"
@@ -446,34 +449,41 @@ realize:
   cascadeGain:
     expr: "SW == 1 ? 0 : 1"
     deps: [SW]
+    step: true
     description: "Gates cascade branch (off when SW=1 parallel mode)"
 
   # Parallel voicing gain - gates AVS path only, frication always flows through
   parallelVoiceGain:
     expr: "SW == 1 ? 1 : 0"
     deps: [SW]
+    step: true
     description: "Controls voicing into parallel (AVS path), frication always flows through"
 
   # Source mode switching
   lfSourceSwitch:
     expr: "sourceMode == 1 ? 1.0 : 0.0"
     deps: [sourceMode]
+    step: true
 
   impulseSourceSwitch:
     expr: "sourceMode != 1 ? 1.0 : 0.0"
     deps: [sourceMode]
+    step: true
 
   sourceBypassSwitch:
     expr: "sourceMode == 2 ? 1.0 : 0.0"
     deps: [sourceMode]
+    step: true
 
   sourceDirectSwitch:
     expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 1.0 : 0.0)"
     deps: [sourceMode]
+    step: true
 
   sourceDiffSwitch:
     expr: "sourceMode == 2 ? 0.0 : (sourceMode == 1 ? 0.0 : 1.0)"
     deps: [sourceMode]
+    step: true
 
   anGainScaled:
     expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
@@ -486,7 +496,6 @@ realize:
   fricGainScaled:
     expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF) * parallelScale"
     deps: [GO, fricDbAdjusted, parallelScale]
-    ramp: true
 
   # System constant
   nyquistFrequency:

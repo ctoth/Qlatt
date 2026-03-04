@@ -386,7 +386,18 @@ rules:
         (next_token != null ? (next_token.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
         (next_token != null ? (has(next_token.voiced) ? next_token.voiced == true : false) : false) ?
         params.policy.formant.voiceless_open_tract_breathy_onset_ms : 0
+      voiced_onset_ms: >-
+        current.phoneme == 'DH' &&
+        (next_token != null ? (next_token.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
+        (next_token != null ? (has(next_token.voiced) ? next_token.voiced == true : false) : false) ?
+        params.policy.formant.voiced_fricative_voicing_onset_ms : 0
+      voiced_onset_av: >-
+        max([
+          has(current.?params.AV) ? current.params.AV : 0,
+          (has(next_token.?params.AV) ? next_token.params.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
+        ])
       breathy_window: "{'AH': params.policy.formant.voiceless_open_tract_breathy_onset_db}"
+      voiced_onset_window: "{'AV': voiced_onset_av}"
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -418,11 +429,89 @@ rules:
               end_ms: breathy_next_ms
               fields: breathy_window
               tag: "'breathy_onset'"
+            - start_ms: 0
+              target: "'next'"
+              end_ms: voiced_onset_ms
+              fields: voiced_onset_window
+              tag: "'soft_voicing_onset'"
     citations:
       - "DECtalk 4.63 p_us_st1.c (special hack: /th, dh/ fric gains suppressed until durfon - 3)"
       - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: onset of a vowel from /th/ is breathy)"
+      - "DECtalk 4.63 p_us_st1.c (PAV onset is not made abrupt after /dh/)"
       - "Klatt 1980 (SW controls cascade/parallel branch routing)"
       - "Engineering approximation: model the remaining /th, dh/ frication as a 30 ms suffix window"
+
+  dectalk_add_voiced_fricative_soft_voicing_onset:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['V', 'Z', 'ZH', 'JH'] &&
+        (next != null ? (next.type in ['vowel', 'liquid', 'nasal', 'glide']) : false) &&
+        (next != null ? (has(next.voiced) ? next.voiced == true : false) : false)
+    define:
+      next_token: next
+      voiced_onset_av: >-
+        max([
+          has(current.?params.AV) ? current.params.AV : 0,
+          (has(next_token.?params.AV) ? next_token.params.AV : 0) - params.policy.formant.source_onset_boundary_drop_db
+        ])
+      voiced_onset_window: "{'AV': voiced_onset_av}"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - voiceless
+            - labiodental
+            - alveolar
+            - postalveolar
+          control_windows:
+            - start_ms: 0
+              target: "'next'"
+              end_ms: params.policy.formant.voiced_fricative_voicing_onset_ms
+              fields: voiced_onset_window
+              tag: "'soft_voicing_onset'"
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - voiceless
+            - nasal
+            - liquid
+            - glide
+            - hi
+            - mid
+            - low
+            - front
+            - back
+            - rhotic
+    citations:
+      - "DECtalk 4.63 p_us_st1.c (PAV onset is abrupt except after a voiced fricative)"
+      - "DECtalk 4.63 p_us_st1.c (source onset boundary value is target-10 dB when amplitude is increasing)"
+      - "Engineering approximation: represent DECtalk's non-abrupt voiced-fricative voicing onset as a 40 ms prefix window on the following voiced sonorant"
 
   dectalk_add_voiceless_fricative_breathy_onset:
     kind: structural
@@ -494,4 +583,62 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: onset of a vowel from voiceless open vocal tract is breathy)"
       - "DECtalk 4.63 ph_defs.h (NF40MS breathy onset span)"
+      - "Klatt 1980 (AH/AP aspiration control during open-glottis intervals)"
+
+  dectalk_add_vowel_breathy_offset:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' &&
+        (has(current.voiced) ? current.voiced == true : true) &&
+        (next != null ? next.phoneme == 'SIL' : false)
+    define:
+      next_token: next
+      breathy_window: "{'AH': params.policy.formant.vowel_breathy_offset_db}"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: next_token.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - hi
+            - mid
+            - low
+            - front
+            - back
+            - rhotic
+        - copy_from: next_token
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - params
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+          control_windows:
+            - start_ms: 0
+              target: "'current'"
+              end_ms: params.policy.formant.vowel_breathy_offset_ms
+              fields: breathy_window
+              tag: "'breathy_offset'"
+    citations:
+      - "DECtalk 4.63 p_us_st1.c (PAP backward smoothing: offset of a vowel into silence is breathy)"
+      - "DECtalk 4.63 ph_defs.h (NF130MS breathy offset span)"
       - "Klatt 1980 (AH/AP aspiration control during open-glottis intervals)"

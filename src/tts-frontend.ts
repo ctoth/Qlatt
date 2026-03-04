@@ -7,8 +7,18 @@ import { normalizeText } from "./g2p/text-normalize";
 import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
-import { assembleKlattTrack, PHONEME_TARGET_MAP } from "./track-assembler";
-import type { OutputConfig, VoiceQualityOverrides, LayeredF0ModelConfig } from "./track-assembler";
+import {
+  assembleKlattTrack,
+  buildSyncTimeMap,
+  extractLayerCommands,
+  PHONEME_TARGET_MAP,
+} from "./track-assembler";
+import type {
+  OutputConfig,
+  VoiceQualityOverrides,
+  LayeredF0ModelConfig,
+  F0LayerCommand,
+} from "./track-assembler";
 import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
   recordInventoryDecision,
@@ -80,6 +90,7 @@ export type TextToKlattTrackOptions = {
 export type FrontendPhoneSummary = {
   index: number;
   phoneme: string;
+  stress?: number | null;
   word?: string;
   durationMs: number;
   minimumDurationMs?: number;
@@ -88,6 +99,7 @@ export type FrontendPhoneSummary = {
 export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
   frontendPhones: FrontendPhoneSummary[];
+  f0LayerCommands?: F0LayerCommand[];
 };
 
 // Plain stop symbols are intentionally rewritten in the structural phase
@@ -458,6 +470,38 @@ function buildTextToKlattTrackDetailed(
     typeof policyDefaults.duration === "object"
       ? (policyDefaults.duration as Record<string, unknown>)
       : null;
+
+  const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
+    !!value && typeof value === "object" && !Array.isArray(value);
+
+  const mergePhaseParameters = (
+    overrides?: Record<string, unknown>,
+  ): Record<string, unknown> | undefined => {
+    if (!isPlainRecord(overrides) && !isPlainRecord(policyDefaults)) {
+      return overrides;
+    }
+
+    const next: Record<string, unknown> = isPlainRecord(overrides) ? { ...overrides } : {};
+    const overridePolicy = isPlainRecord(next.policy) ? next.policy : {};
+    const mergedPolicy: Record<string, unknown> = isPlainRecord(policyDefaults)
+      ? { ...policyDefaults }
+      : {};
+
+    for (const [key, value] of Object.entries(overridePolicy)) {
+      const baseValue = mergedPolicy[key];
+      if (isPlainRecord(baseValue) && isPlainRecord(value)) {
+        mergedPolicy[key] = { ...baseValue, ...value };
+        continue;
+      }
+      mergedPolicy[key] = value;
+    }
+
+    if (Object.keys(mergedPolicy).length > 0) {
+      next.policy = mergedPolicy;
+    }
+
+    return next;
+  };
   const rateReference =
     durationPolicyDefaults &&
     "rate_reference" in durationPolicyDefaults &&
@@ -476,7 +520,7 @@ function buildTextToKlattTrackDetailed(
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
   // Speaker defaults/overrides are always present so declarative rules can
   // reference the same policy surface as the runtime defaults.
-  const speakerPolicy = { policy: { ...speakerOverrides } };
+  const speakerPolicy = mergePhaseParameters({ policy: { ...speakerOverrides } });
   parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
   // Ensure id/stream/status fields exist before prosodic annotation.
@@ -500,7 +544,7 @@ function buildTextToKlattTrackDetailed(
     provenance: provenance ?? undefined,
     baseF0: effectiveBaseF0,
   });
-  parameterSequence = runPhases(parameterSequence, ["duration"], {
+  parameterSequence = runPhases(parameterSequence, ["duration"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
       duration: { rate_scale: rate },
@@ -508,17 +552,17 @@ function buildTextToKlattTrackDetailed(
       // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
       formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
     },
-  });
-  parameterSequence = runPhases(parameterSequence, ["formant"], {
+  }));
+  parameterSequence = runPhases(parameterSequence, ["formant"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
       formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
     },
-  });
+  }));
   // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
   // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
   const f0RangeFactor = 1.0 / Math.sqrt(rate);
-  parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], {
+  parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
       f0: {
@@ -531,7 +575,7 @@ function buildTextToKlattTrackDetailed(
         continuation_minor_rise_hz: 5 * f0RangeFactor,
       },
     },
-  });
+  }));
   parameterSequence = parameterSequence.map((token: PipelineToken) => {
     if (
       token?.stream === "f0" ||
@@ -612,6 +656,9 @@ function buildTextToKlattTrackDetailed(
         phoneme: String(token?.phoneme ?? ""),
         durationMs: Number.isFinite(duration) ? duration : 0,
       };
+      if (typeof token?.stress === "number" && Number.isFinite(token.stress)) {
+        summary.stress = token.stress;
+      }
       if (typeof token?.word === "string" && token.word.length > 0) {
         summary.word = token.word;
       }
@@ -633,9 +680,18 @@ function buildTextToKlattTrackDetailed(
     speakerParams,
   });
 
+  const syncTimeByKey = buildSyncTimeMap(
+    phoneSequence,
+    rulepackOutputConfig?.min_duration?.stop_release_ms ?? 5,
+    rulepackOutputConfig?.min_duration?.default_ms ?? 20,
+  );
+
   return {
     track,
     frontendPhones,
+    ...(f0Model
+      ? { f0LayerCommands: extractLayerCommands(parameterSequence, syncTimeByKey) }
+      : {}),
   };
 }
 

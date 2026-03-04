@@ -866,6 +866,8 @@ phoneme_targets:
     type: fricative
     postalveolar: true
     voiced: true
+  # DECtalk 4.63 us_gettar(): AP is 0 for stop closures; aspiration is added
+  # later by p_us_st1.c Special Rule 2 (PAP.pspesh over the following sonorant).
   P:
     F1: 350
     F2: 1051
@@ -874,7 +876,7 @@ phoneme_targets:
     B2: 180
     B3: 180
     AV: 0
-    AH: 52
+    AH: 0
     dur: 95
     minimumDuration: 70
     type: stop_closure
@@ -901,7 +903,7 @@ phoneme_targets:
     B2: 150
     B3: 240
     AV: 0
-    AH: 55
+    AH: 0
     dur: 85
     minimumDuration: 50
     type: stop_closure
@@ -928,7 +930,7 @@ phoneme_targets:
     B2: 160
     B3: 280
     AV: 0
-    AH: 53
+    AH: 0
     dur: 99
     minimumDuration: 55
     type: stop_closure
@@ -957,7 +959,7 @@ phoneme_targets:
     B2: 150
     B3: 220
     AF: 55
-    AH: 52
+    AH: 0
     AB: 63
     A7: 40
     A8: 45
@@ -977,7 +979,7 @@ phoneme_targets:
     B2: 120
     B3: 250
     AF: 58
-    AH: 55
+    AH: 0
     A3: 30
     A4: 45
     A5: 57
@@ -1000,7 +1002,7 @@ phoneme_targets:
     B2: 160
     B3: 330
     AF: 55
-    AH: 53
+    AH: 0
     A3: 53
     A4: 43
     A5: 45

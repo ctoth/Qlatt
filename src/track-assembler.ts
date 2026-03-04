@@ -122,6 +122,112 @@ function toFiniteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function getSyncMarkerKey(markLike: unknown): string | null {
+  if (typeof markLike === "string" && markLike.length > 0) {
+    return markLike;
+  }
+  if (typeof markLike === "number" && Number.isFinite(markLike)) {
+    return `num:${markLike}`;
+  }
+  if (typeof markLike === "bigint") {
+    return `num:${markLike.toString()}`;
+  }
+  if (markLike && typeof markLike === "object" && !Array.isArray(markLike)) {
+    const source = markLike as Record<string, unknown>;
+    if (typeof source.id === "string" && source.id.length > 0) {
+      return source.id;
+    }
+    if (typeof source.rank === "string" && source.rank.length > 0) {
+      const kind = typeof source.kind === "string" ? source.kind : "RANK";
+      return `${kind}:${source.rank}`;
+    }
+  }
+  return null;
+}
+
+export function buildSyncTimeMap(
+  phoneSequence: InputToken[],
+  minDurationStopReleaseMs: number,
+  minDurationDefaultMs: number,
+): Map<string, number> {
+  const syncTimeByKey = new Map<string, number>();
+  let cursorSec = 0;
+
+  for (const token of phoneSequence) {
+    const isStopRelease = token.type === "stop_release" || token.type === "stop_aspiration";
+    const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
+    const fallbackDurationMs = isStopRelease
+      ? toFiniteNumber(PHONEME_TARGET_MAP[token.phoneme]?.dur)
+      : null;
+    const durationSec =
+      resolveTokenDurationMs(token, minDurationMs, fallbackDurationMs) / 1000;
+    const leftKey = getSyncMarkerKey(token?.sync_left);
+    const rightKey = getSyncMarkerKey(token?.sync_right);
+
+    if (leftKey) syncTimeByKey.set(leftKey, cursorSec);
+    cursorSec += durationSec;
+    if (rightKey) syncTimeByKey.set(rightKey, cursorSec);
+  }
+
+  return syncTimeByKey;
+}
+
+function resolveAnchorEndpointSeconds(
+  primary: unknown,
+  secondary: unknown,
+  tertiary: unknown,
+  syncTimeByKey?: Map<string, number>,
+): number | null {
+  const key =
+    getSyncMarkerKey(primary) ??
+    getSyncMarkerKey(secondary) ??
+    getSyncMarkerKey(tertiary);
+  if (key && syncTimeByKey?.has(key)) {
+    return syncTimeByKey.get(key) ?? null;
+  }
+
+  const numeric =
+    toFiniteNumber(primary) ??
+    toFiniteNumber(secondary) ??
+    toFiniteNumber(tertiary);
+  return numeric != null ? numeric / 1000 : null;
+}
+
+function resolveAnchoredTimeSeconds(
+  token: InputToken,
+  syncTimeByKey?: Map<string, number>,
+): number {
+  const explicitTime = toFiniteNumber(token?.time);
+  if (explicitTime != null) {
+    return explicitTime / 1000;
+  }
+
+  const anchorLeft = resolveAnchorEndpointSeconds(
+    token?.anchor_left,
+    token?.left,
+    token?.sync_left,
+    syncTimeByKey,
+  );
+  const anchorRight = resolveAnchorEndpointSeconds(
+    token?.anchor_right,
+    token?.right,
+    token?.sync_right,
+    syncTimeByKey,
+  );
+  if (anchorLeft == null || anchorRight == null) {
+    return 0;
+  }
+
+  const rawRatio = toFiniteNumber(token?.ratio);
+  const ratio =
+    rawRatio == null
+      ? anchorLeft === anchorRight
+        ? 0
+        : 0.5
+      : Math.max(0, Math.min(1, rawRatio));
+  return anchorLeft + (anchorRight - anchorLeft) * ratio;
+}
+
 function resolveTokenDurationMs(
   token: InputToken,
   minDurationMs: number,
@@ -442,6 +548,10 @@ export type FilterConfig = {
   type: "lowpass_2pole";
   cutoff_param?: string;
   default_cutoff?: number;
+} | {
+  type: "lowpass_1pole";
+  alpha_param?: string;
+  default_alpha?: number;
 };
 
 /** Speaker scaling configuration. */
@@ -459,6 +569,10 @@ export type SpeakerScaleConfig = {
 export type LayeredF0ModelConfig = {
   type: "layered_additive";
   citations?: string[];
+  /** Internal control-frame cadence in seconds.
+   *  When omitted, the generic renderer uses the historical 5 ms default.
+   *  Citation: DECtalk 4.63 ph_claus.c (6.4 ms frame cadence) */
+  frame_period_sec?: number;
   filter?: FilterConfig;
   layers: Record<string, LayerConfig>;
   combine?: "sum";
@@ -472,6 +586,10 @@ export type F0LayerCommand = {
   layer: string;
   /** Absolute time in seconds when the command takes effect. */
   time: number;
+  /** Optional debug-only anchor geometry carried through from declarative rules. */
+  anchorLeftMs?: number;
+  anchorRightMs?: number;
+  ratio?: number;
   /** Value in Hz (or internal F0 units). */
   value: number;
   /** For impulse layers: duration in internal frames. */
@@ -482,8 +600,8 @@ export type F0LayerCommand = {
   tag?: string;
 };
 
-/** Internal frame rate for the IIR filter (seconds per frame).
- *  5ms frames (200 Hz) -- close to DECtalk's 6.4ms but at a round number. */
+/** Default internal frame rate for the layered F0 renderer (seconds per frame).
+ *  5 ms is the legacy generic default; frontends can override it declaratively. */
 const LAYERED_F0_FRAME_PERIOD_SEC = 0.005;
 
 /** Minimum F0 output in Hz. */
@@ -511,6 +629,11 @@ export type IIRFilterState = {
   y2: number;  // y[n-2]
   x1: number;  // x[n-1]
   x2: number;  // x[n-2]
+};
+
+/** State for a 1-pole low-pass filter. */
+export type OnePoleFilterState = {
+  y: number;
 };
 
 /** Coefficients for a 2-pole Butterworth low-pass filter. */
@@ -578,6 +701,31 @@ export function createFilterState(): IIRFilterState {
   return { y1: 0, y2: 0, x1: 0, x2: 0 };
 }
 
+/** Create a zeroed 1-pole filter state. */
+export function createOnePoleFilterState(): OnePoleFilterState {
+  return { y: 0 };
+}
+
+/**
+ * Apply one sample through a 1-pole low-pass filter.
+ *
+ * Standard exponential smoother:
+ *   y[n] = y[n-1] + alpha * (x[n] - y[n-1])
+ *
+ * With alpha in [0, 1], larger alpha tracks changes faster.
+ * This is a generic first-order control smoother and is also a good fit for
+ * DECtalk's speaker-driven F0 smoothing coefficient path.
+ */
+export function onePoleLowpass(
+  input: number,
+  state: OnePoleFilterState,
+  alpha: number,
+): number {
+  const clampedAlpha = Math.max(0, Math.min(1, alpha));
+  state.y += clampedAlpha * (input - state.y);
+  return state.y;
+}
+
 // ---------------------------------------------------------------------------
 // Layer rendering helpers
 // ---------------------------------------------------------------------------
@@ -594,7 +742,8 @@ type ActiveImpulse = {
  * These are tokens with `stream === "f0_layer"` inserted by `kind: f0_layer` rules.
  */
 export function extractLayerCommands(
-  sequence: InputToken[]
+  sequence: InputToken[],
+  syncTimeByKey?: Map<string, number>,
 ): F0LayerCommand[] {
   const commands: F0LayerCommand[] = [];
   for (const token of sequence) {
@@ -602,7 +751,16 @@ export function extractLayerCommands(
     if (token?.status === 2) continue;
     const cmd: F0LayerCommand = {
       layer: typeof token.layer === "string" ? token.layer : "",
-      time: Number.isFinite(token.time) ? Number(token.time) / 1000 : 0,
+      time: resolveAnchoredTimeSeconds(token, syncTimeByKey),
+      ...(toFiniteNumber(token?.anchor_left) != null
+        ? { anchorLeftMs: toFiniteNumber(token.anchor_left) as number }
+        : {}),
+      ...(toFiniteNumber(token?.anchor_right) != null
+        ? { anchorRightMs: toFiniteNumber(token.anchor_right) as number }
+        : {}),
+      ...(toFiniteNumber(token?.ratio) != null
+        ? { ratio: toFiniteNumber(token.ratio) as number }
+        : {}),
       value: Number.isFinite(token.value) ? Number(token.value) : 0,
     };
     if (Number.isFinite(token.duration_frames)) {
@@ -647,7 +805,7 @@ function interpolateProfile(
 /**
  * Render a layered additive F0 contour.
  *
- * Generates internal frames at the fixed LAYERED_F0_FRAME_PERIOD_SEC rate,
+ * Generates internal frames at the configured frame cadence,
  * processes layer commands, applies the 2-pole IIR filter, then builds
  * an F0Point[] array that can be queried by getF0AtTime().
  *
@@ -664,26 +822,51 @@ export function renderLayeredF0(
 ): F0Point[] {
   if (totalDuration <= 0) return [{ time: 0, f0: 0 }];
 
-  const framePeriod = LAYERED_F0_FRAME_PERIOD_SEC;
+  const framePeriod =
+    typeof modelConfig.frame_period_sec === "number" &&
+    Number.isFinite(modelConfig.frame_period_sec) &&
+    modelConfig.frame_period_sec > 0
+      ? modelConfig.frame_period_sec
+      : LAYERED_F0_FRAME_PERIOD_SEC;
   const sampleRate = 1.0 / framePeriod;
   const numFrames = Math.ceil(totalDuration / framePeriod) + 1;
 
-  // Resolve filter cutoff.
-  let cutoffHz = modelConfig.filter?.default_cutoff ?? 2700;
-  if (modelConfig.filter?.cutoff_param && speakerParams) {
-    const paramPath = modelConfig.filter.cutoff_param.split(".");
+  // Resolve control smoothing filter.
+  const filterConfig = modelConfig.filter;
+  const usesOnePoleFilter = filterConfig?.type === "lowpass_1pole";
+  let onePoleAlpha = usesOnePoleFilter ? filterConfig.default_alpha ?? 0.5 : 0.5;
+  if (usesOnePoleFilter && filterConfig.alpha_param && speakerParams) {
+    const paramPath = filterConfig.alpha_param.split(".");
     let val: unknown = speakerParams;
     for (const key of paramPath) {
       val = (val as Record<string, unknown>)?.[key];
     }
-    if (typeof val === "number" && Number.isFinite(val) && val > 0) {
-      cutoffHz = val;
+    if (typeof val === "number" && Number.isFinite(val)) {
+      onePoleAlpha = val;
     }
   }
-  cutoffHz = Math.max(1, Math.min(cutoffHz, sampleRate * 0.45));
 
-  const filterCoeffs = computeButterworth2Coefficients(cutoffHz, sampleRate);
-  const filterState = createFilterState();
+  let cutoffHz = 2700;
+  if (!usesOnePoleFilter) {
+    cutoffHz = filterConfig?.type === "lowpass_2pole" ? filterConfig.default_cutoff ?? 2700 : 2700;
+    if (filterConfig?.type === "lowpass_2pole" && filterConfig.cutoff_param && speakerParams) {
+      const paramPath = filterConfig.cutoff_param.split(".");
+      let val: unknown = speakerParams;
+      for (const key of paramPath) {
+        val = (val as Record<string, unknown>)?.[key];
+      }
+      if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+        cutoffHz = val;
+      }
+    }
+    cutoffHz = Math.max(1, Math.min(cutoffHz, sampleRate * 0.45));
+  }
+
+  const filterCoeffs = usesOnePoleFilter
+    ? null
+    : computeButterworth2Coefficients(cutoffHz, sampleRate);
+  const filterState = usesOnePoleFilter ? null : createFilterState();
+  const onePoleState = usesOnePoleFilter ? createOnePoleFilterState() : null;
 
   // Resolve speaker scaling parameters.
   const scaleConfig = modelConfig.speaker_scale;
@@ -776,10 +959,14 @@ export function renderLayeredF0(
       // Impulses start at 0 and decay, so they don't contribute to the initial steady-state.
     }
     if (initTotal !== 0) {
-      filterState.y1 = initTotal;
-      filterState.y2 = initTotal;
-      filterState.x1 = initTotal;
-      filterState.x2 = initTotal;
+      if (usesOnePoleFilter) {
+        onePoleState!.y = initTotal;
+      } else {
+        filterState!.y1 = initTotal;
+        filterState!.y2 = initTotal;
+        filterState!.x1 = initTotal;
+        filterState!.x2 = initTotal;
+      }
     }
   }
 
@@ -843,7 +1030,9 @@ export function renderLayeredF0(
     }
 
     // Apply IIR low-pass filter.
-    const filtered = iirFilter2Pole(total, filterState, filterCoeffs);
+    const filtered = usesOnePoleFilter
+      ? onePoleLowpass(total, onePoleState!, onePoleAlpha)
+      : iirFilter2Pole(total, filterState!, filterCoeffs!);
 
     // Speaker scaling: only when speaker_scale is configured in the model.
     // When speaker_scale is absent, the filtered value is used directly as Hz.
@@ -929,7 +1118,8 @@ export function parseTrailingInteger(value: unknown): number | null {
 
 export function buildF0ContourFromDeclarative(
   sequence: InputToken[],
-  baseF0: number
+  baseF0: number,
+  syncTimeByKey?: Map<string, number>,
 ): F0Point[] {
   const points = sequence
     .filter(
@@ -979,7 +1169,7 @@ export function buildF0ContourFromDeclarative(
       else if (tag === "f0_l_star") accentType = "L*";
       else if (tag === "f0_l_star_plus_h") accentType = "L*+H";
       return {
-        time: Number.isFinite(point.time) ? Number(point.time) / 1000 : 0,
+        time: resolveAnchoredTimeSeconds(point, syncTimeByKey),
         f0: Number(point.value),
         ...(tag != null ? { tag } : {}),
         ...(accentType != null ? { accentType } : {}),
@@ -1253,6 +1443,11 @@ export function assembleKlattTrack(
   const minDurationDefaultMs =
     cfg?.min_duration?.default_ms ?? DEFAULT_MIN_DURATION_MS;
   const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
+  const syncTimeByKey = buildSyncTimeMap(
+    phoneSequence,
+    minDurationStopReleaseMs,
+    minDurationDefaultMs,
+  );
 
   // Build the F0 contour.
   // If f0Model is present, use the layered additive renderer.
@@ -1271,7 +1466,7 @@ export function assembleKlattTrack(
     }
     totalDuration += finalSilenceMs / 1000.0;
 
-    const layerCommands = extractLayerCommands(parameterSequence);
+    const layerCommands = extractLayerCommands(parameterSequence, syncTimeByKey);
     f0Contour = renderLayeredF0(
       layerCommands,
       options.f0Model,
@@ -1280,7 +1475,11 @@ export function assembleKlattTrack(
     );
   } else {
     // Existing declarative point-interpolation path.
-    const rawF0Contour = buildF0ContourFromDeclarative(parameterSequence, baseF0);
+    const rawF0Contour = buildF0ContourFromDeclarative(
+      parameterSequence,
+      baseF0,
+      syncTimeByKey,
+    );
 
     // Apply sagging transitions between consecutive H* accent peaks.
     // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)

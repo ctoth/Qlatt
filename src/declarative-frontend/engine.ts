@@ -339,6 +339,40 @@ function getOrderForMarkId(runtime: RuntimeLike | null | undefined, markId: unkn
   return mark ? mark.order : null;
 }
 
+function resolveMarkOrder(runtime: RuntimeLike | null | undefined, markLike: unknown): number | null {
+  if (typeof markLike === "number" && Number.isFinite(markLike)) {
+    return markLike;
+  }
+  if (typeof markLike === "bigint") {
+    const numericValue = Number(markLike);
+    return Number.isSafeInteger(numericValue) ? numericValue : null;
+  }
+  if (markLike && typeof markLike === "object" && !Array.isArray(markLike)) {
+    const source = markLike as TokenLike;
+    const nestedLeft =
+      source.anchor_left ?? source.left ?? source.sync_left ?? null;
+    const nestedRight =
+      source.anchor_right ?? source.right ?? source.sync_right ?? null;
+    if (nestedLeft != null || nestedRight != null) {
+      const left = nestedLeft != null ? resolveMarkOrder(runtime, nestedLeft) : null;
+      const right = nestedRight != null ? resolveMarkOrder(runtime, nestedRight) : left;
+      if (left != null && right != null) {
+        const rawRatio =
+          typeof source.ratio === "number" && Number.isFinite(source.ratio)
+            ? source.ratio
+            : left === right
+              ? 0
+              : 0.5;
+        const ratio = Math.max(0, Math.min(1, rawRatio));
+        return left + (right - left) * ratio;
+      }
+    }
+  }
+  const markId = resolveMarkId(runtime, markLike);
+  const order = getOrderForMarkId(runtime, markId);
+  return typeof order === "number" && Number.isFinite(order) ? order : null;
+}
+
 function compareMarkIds(runtime: RuntimeLike, leftId: unknown, rightId: unknown): number {
   if (leftId === rightId) return 0;
   return runtime.axis.compareMarkIds(leftId, rightId);
@@ -1799,7 +1833,7 @@ function applyInsertPointSpec(
   const anchor = evaluateAnchorExpression(pointSpec.at, target, params, pointFunctions, extraContext);
   const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
   const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);
-  if (!anchorLeftId || !anchorRightId) {
+  if (anchor.anchor_left == null || anchor.anchor_right == null) {
     throw new Error("E_POINT_ANCHOR_UNKNOWN: insert_point.at resolved to unknown sync marks");
   }
   const value =
@@ -1811,10 +1845,8 @@ function applyInsertPointSpec(
     id: nextPointId(runtime, stream),
     stream,
     status: TokenStatus.ACTIVE,
-    ...buildRuntimeMarkProps(runtime, {
-      anchor_left: anchorLeftId,
-      anchor_right: anchorRightId,
-    }),
+    anchor_left: anchor.anchor_left,
+    anchor_right: anchor.anchor_right,
     ratio: anchor.ratio,
     value,
   };
@@ -1912,10 +1944,8 @@ function applyInsertF0LayerSpec(
     status: TokenStatus.ACTIVE,
     layer: layerName,
     value,
-    ...buildRuntimeMarkProps(runtime, {
-      anchor_left: anchorLeftId ?? "",
-      anchor_right: anchorRightId ?? "",
-    }),
+    ...(anchor.anchor_left != null ? { anchor_left: anchor.anchor_left } : {}),
+    ...(anchor.anchor_right != null ? { anchor_right: anchor.anchor_right } : {}),
     ratio: anchor.ratio,
   };
 

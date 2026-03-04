@@ -44,7 +44,9 @@ phases:
       - dectalk_insert_voiced_stop_release
       - dectalk_insert_voiced_stop_release_final
       - dectalk_weaken_interdental_frication
+      - dectalk_add_voiced_fricative_soft_voicing_onset
       - dectalk_add_voiceless_fricative_breathy_onset
+      - dectalk_add_vowel_breathy_offset
   - name: formant
     rules:
       - dectalk_sw_explicit_override

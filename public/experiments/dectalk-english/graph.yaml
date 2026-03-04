@@ -1,0 +1,545 @@
+bacon: "0.1"
+name: dectalk-463-synth
+meta:
+  primitives: ./registry.yaml
+  semantics: ./semantics.yaml
+  description: |
+    DECtalk 4.63-oriented cascade/parallel formant topology.
+    Derived from the klatt80-baseline graph, but trimmed to the core
+    DECtalk-style path: impulse-first source defaults, eight-formant bank,
+    and direct output summing without the baseline reconstruction filter.
+    Citations: Klatt 1980; DECtalk 4.63 COEWAV/PARWAV descendants.
+
+formantBanks:
+  main:
+    cascade:
+      input: np
+      output: cascadeOutGain
+    parallel:
+      output: parallelSum
+    proximity:
+      - { pair: [1, 2], offset: 0 }
+      - { pair: [2, 3], offset: 50 }
+      - { pair: [3, 4], offset: 150 }
+    formants:
+      - index: 1
+        freqRange: [200, 1000]
+        freqDefault: 500
+        bwRange: [40, 1000]
+        bwDefault: 60
+        ndbScale: -58
+        sign: 1
+        parallelSource: parallelSourceGain
+        bypassAtZero: true
+      - index: 2
+        freqRange: [500, 3000]
+        freqDefault: 1500
+        bwRange: [40, 1000]
+        bwDefault: 90
+        ndbScale: -65
+        sign: -1
+        parallelSource: parallelDiffSum
+      - index: 3
+        freqRange: [1500, 4000]
+        freqDefault: 2500
+        bwRange: [40, 1000]
+        bwDefault: 150
+        ndbScale: -73
+        sign: 1
+        parallelSource: parallelDiffSum
+      - index: 4
+        freqRange: [2500, 5000]
+        freqDefault: 3500
+        bwRange: [100, 1000]
+        bwDefault: 200
+        ndbScale: -78
+        sign: -1
+        parallelSource: parallelDiffSum
+      - index: 5
+        freqRange: [3500, 6000]
+        freqDefault: 4500
+        bwRange: [100, 1000]
+        bwDefault: 200
+        ndbScale: -79
+        sign: 1
+        parallelSource: parallelFricGain
+      - index: 6
+        freqRange: [4000, 7000]
+        freqDefault: 5500
+        bwRange: [100, 1000]
+        bwDefault: 500
+        ndbScale: -80
+        sign: -1
+        parallelSource: parallelFricGain
+      # F7-F8: Keep the first two high-formant slots for fricative coloration.
+      # Engineering choice: the DECtalk experiment stays on the core eight-band
+      # path here so we do not inherit the full ten-formant baseline voicing tail.
+      # Citations: Klatt 1980 cascade/parallel topology;
+      # DECtalk 4.63 COEWAV/PARWAV family; Rabiner (1968) Q-factor bandwidths.
+      - index: 7
+        freqRange: [5000, 8000]
+        freqDefault: 6500
+        bwRange: [200, 2000]
+        bwDefault: 722
+        parallelSource: parallelFricGain
+        ndbScale: -81
+        sign: 1
+        # Rabiner (1968) Q=9; parallel source: frication only (same as F5-F6)
+      - index: 8
+        freqRange: [6000, 9000]
+        freqDefault: 7500
+        bwRange: [400, 3000]
+        bwDefault: 1250
+        parallelSource: parallelFricGain
+        ndbScale: -82
+        sign: -1
+        # Rabiner (1968) Q=6; parallel source: frication only (same as F5-F6)
+
+nodes:
+  # ---------------------------------------------------------------------------
+  # SOURCE NODES
+  # ---------------------------------------------------------------------------
+  # Source selection (impulse vs LF vs bypass) is implemented via gain gates.
+  # Semantics.yaml computes lfSourceSwitch/impulseSourceSwitch from sourceMode.
+
+  lfSource:
+    type: lf-source
+    params:
+      f0: { bind: F0 }
+      rd: { bind: Rd }
+      lfMode: { bind: lfMode }
+      oq: { bind: OQ }
+      tl: { bind: TL }
+      flutter: { bind: flutter }
+      jitter: { bind: jitter }
+
+  impulseSource:
+    type: impulse-train
+    params:
+      f0: { bind: F0 }
+      gain: 1.0
+      openPhaseRatio: { bind: openPhaseRatio }
+
+  noiseSource:
+    type: noise-source
+    params:
+      gain: 1.0
+      cutoff: { bind: noiseCutoff }
+
+  fricationSource:
+    type: noise-source
+    params:
+      gain: 1.0
+      cutoff: { bind: fricationCutoff }
+
+  # Glottal modulation - 50% square wave synchronized to glottal cycle
+  glottalMod:
+    type: glottal-mod
+    params:
+      f0: { bind: F0 }
+
+  # ---------------------------------------------------------------------------
+  # PLSTEP BURST MECHANISM
+  # ---------------------------------------------------------------------------
+  # Klatt 80 PLSTEP: DC step injection triggered by AF or AH rise >= 49 dB
+  # Creates transient rarefaction pulse at stop/fricative onsets
+  #
+  # From PARCOE.FOR:
+  #   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  #   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  # Decay: 0.995 per sample at 10kHz (~92ms time constant)
+
+  # Edge detector for AF (frication amplitude)
+  afEdgeDetector:
+    type: edge-detector
+    params:
+      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
+      input: { bind: AF }  # Monitor frication amplitude
+
+  # Edge detector for AH (aspiration amplitude)
+  ahEdgeDetector:
+    type: edge-detector
+    params:
+      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
+      input: { bind: AH }  # Monitor aspiration amplitude
+
+  # Sum triggers (OR gate - either AF or AH trigger fires the envelope)
+  plstepTriggerSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Decay envelope - exponential decay starting at -amplitude (rarefaction)
+  plstepEnvelope:
+    type: decay-envelope
+    params:
+      trigger: 0  # Driven by audio connection from trigger sum
+      amplitude: { bind: plstepAmplitude }  # From semantics: dbToLinear(G0 - 75)
+      decay: 0  # Auto-calculate from sample rate
+
+  # ---------------------------------------------------------------------------
+  # SOURCE ROUTING/MIXING
+  # ---------------------------------------------------------------------------
+  # Gain gates implement conditional switching based on sourceMode parameter.
+  # Values computed in semantics.yaml: lfSourceSwitch, impulseSourceSwitch, etc.
+
+  lfSourceGain:
+    type: gain
+    params:
+      gain: { bind: lfSourceSwitch }
+
+  impulseGain:
+    type: gain
+    params:
+      gain: { bind: impulseSourceSwitch }
+
+  sourceSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Source mode switching for cascade path
+  sourceBypassGain:
+    type: gain
+    params:
+      gain: { bind: sourceBypassSwitch }
+
+  sourceDirectGain:
+    type: gain
+    params:
+      gain: { bind: sourceDirectSwitch }
+
+  sourceDiffGain:
+    type: gain
+    params:
+      gain: { bind: sourceDiffSwitch }
+
+  # ---------------------------------------------------------------------------
+  # GLOTTAL SHAPING - CASCADE PATH (RGP/RGZ)
+  # ---------------------------------------------------------------------------
+
+  # Glottal resonator pole (RGP)
+  rgp:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGP }
+      bandwidth: { bind: BGP }
+
+  # Glottal resonator zero (RGZ) - antiresonator
+  rgz:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGZ }
+      bandwidth: { bind: BGZ }
+
+  # Glottal source resonator (RGS) - for AVS path
+  rgs:
+    type: resonator
+    params:
+      frequency: 0
+      bandwidth: { bind: BGS }
+
+  # ---------------------------------------------------------------------------
+  # GLOTTAL SHAPING - PARALLEL PATH (RGP_AVS/RGZ_AVS)
+  # ---------------------------------------------------------------------------
+  # Separate filter instances from cascade path (rgp/rgz) to maintain
+  # independent filter states. Both paths share FGP/BGP parameters.
+
+  rgpAvs:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGP }
+      bandwidth: { bind: BGP }
+
+  rgzAvs:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGZ }
+      bandwidth: { bind: BGZ }
+
+  # ---------------------------------------------------------------------------
+  # DIFFERENTIATORS (Radiation characteristic)
+  # ---------------------------------------------------------------------------
+
+  # First difference for radiation
+  radiationDiff:
+    type: differentiator
+
+  radiationDiffAvs:
+    type: differentiator
+
+  # Differentiator for parallel branch (UGLOT1 = first diff of UGLOT)
+  diff:
+    type: differentiator
+
+  # ---------------------------------------------------------------------------
+  # VOICE/ASPIRATION GAIN NODES
+  # ---------------------------------------------------------------------------
+
+  voiceGain:
+    type: gain
+    params:
+      gain: { bind: voiceGain }
+
+  avsGain:
+    type: gain
+    params:
+      gain: { bind: avsGain }
+
+  noiseGain:
+    type: gain
+    params:
+      gain: { bind: aspGain }
+
+  # ---------------------------------------------------------------------------
+  # PARALLEL VOICE PATH GAINS
+  # ---------------------------------------------------------------------------
+
+  # AVS path source mode switching (reuses same switches as cascade)
+  avsBypassGain:
+    type: gain
+    params:
+      gain: { bind: sourceBypassSwitch }
+
+  avsDirectGain:
+    type: gain
+    params:
+      gain: { bind: sourceDirectSwitch }
+
+  avsDiffGain:
+    type: gain
+    params:
+      gain: { bind: sourceDiffSwitch }
+
+  # ---------------------------------------------------------------------------
+  # NASAL RESONATORS
+  # ---------------------------------------------------------------------------
+
+  # Nasal antiresonator (zero) — biquad notch filter
+  # Replaces Klatt FIR antiresonator which is numerically unstable at 48 kHz.
+  # Bristow-Johnson Audio EQ Cookbook biquad notch: same spectral zero,
+  # coefficients near unity at any sample rate.
+  nz:
+    type: biquad-notch
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FNZ }
+      bandwidth: { bind: BNZ }
+
+  # Nasal resonator (pole)
+  np:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FNP }
+      bandwidth: { bind: BNP }
+
+  # Parallel nasal resonator
+  parallelNasal:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FNP }
+      bandwidth: { bind: BNP }
+
+  parallelNasalGain:
+    type: gain
+    params:
+      gain: { bind: anLinear }  # was anGainScaled
+
+  parallelBypassGain:
+    type: gain
+    params:
+      gain: { bind: abLinear }  # was abGainScaled
+
+  # ---------------------------------------------------------------------------
+  # PARALLEL MIXING
+  # ---------------------------------------------------------------------------
+
+  mixer:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelMixer:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelSourceGain:
+    type: gain
+    params:
+      gain: { bind: parallelVoiceGain }
+
+  parallelDiffGain:
+    type: gain
+    params:
+      gain: { bind: parallelVoiceGain }
+
+  parallelFricGain:
+    type: gain
+    params:
+      gain: { bind: fricGainScaled }
+
+  parallelDiffSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # ---------------------------------------------------------------------------
+  # OUTPUT MIXING
+  # ---------------------------------------------------------------------------
+
+  # Cascade output gain - gates cascade branch based on SW
+  # SW=0 (cascade): cascadeGain=1, SW=1 (parallel): cascadeGain=0
+  # NOTE: Both cascade and parallel are SUMMED (per COEWAV.FOR line 251)
+  # Parallel voicing is gated by parallelVoiceGain, frication always flows through
+  cascadeOutGain:
+    type: gain
+    params:
+      gain: { bind: cascadeGain }
+
+  outputSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Direct output sum for the DECtalk experiment.
+  # Engineering choice: keep the summed source/cascade/parallel signal visible
+  # without the baseline reconstruction-filter stage while we align the core
+  # cascade/parallel path to DECtalk's actual output behavior.
+  masterGain:
+    type: gain
+    params:
+      gain: { bind: masterGain }
+
+  outputGain:
+    type: gain
+    params:
+      gain: { bind: outputGain }
+
+# =============================================================================
+# CONNECTIONS
+# =============================================================================
+connections:
+  # ---------------------------------------------------------------------------
+  # Source routing
+  # ---------------------------------------------------------------------------
+  - [lfSource, lfSourceGain]
+  - [lfSourceGain, sourceSum]
+  - [impulseSource, impulseGain]
+  - [impulseGain, sourceSum]
+
+  # ---------------------------------------------------------------------------
+  # Glottal shaping - cascade path
+  # ---------------------------------------------------------------------------
+  - [sourceSum, rgp]
+  - [sourceSum, rgs]
+  - [rgs, rgpAvs]
+
+  # Voice cascade path - three parallel routes merged at voiceGain
+  - [sourceSum, sourceBypassGain]
+  - [sourceBypassGain, voiceGain]
+  - [rgp, sourceDirectGain]
+  - [sourceDirectGain, voiceGain]
+  - [rgp, rgz]
+  - [rgz, radiationDiff]
+  - [radiationDiff, sourceDiffGain]
+  - [sourceDiffGain, voiceGain]
+  - [voiceGain, mixer]
+
+  # ---------------------------------------------------------------------------
+  # Glottal shaping - parallel AVS path
+  # ---------------------------------------------------------------------------
+  - [sourceSum, avsBypassGain]
+  - [avsBypassGain, avsGain]
+  - [rgpAvs, avsDirectGain]
+  - [avsDirectGain, avsGain]
+  - [rgpAvs, rgzAvs]
+  - [rgzAvs, radiationDiffAvs]
+  - [radiationDiffAvs, avsDiffGain]
+  - [avsDiffGain, avsGain]
+  - [avsGain, parallelMixer]
+
+  # ---------------------------------------------------------------------------
+  # Aspiration/frication routing
+  # ---------------------------------------------------------------------------
+  - [glottalMod, noiseSource]
+  - [glottalMod, fricationSource]
+  - [noiseSource, noiseGain]
+  - [noiseGain, mixer]
+  - [noiseGain, parallelMixer]
+
+  # ---------------------------------------------------------------------------
+  # Cascade branch: NZ -> NP -> F1 -> F2 -> F3 -> F4 -> F5 -> F6
+  # ---------------------------------------------------------------------------
+  # NOTE: This matches Figure 6's conceptual diagram from Klatt 1980.
+  # COEWAV.FOR processes in reverse order (F6->F5->F4->F3->F2->F1->NZ->NP)
+  # "to minimize transients" (line 175), but the transfer function is
+  # mathematically equivalent since cascaded filters commute.
+  # ---------------------------------------------------------------------------
+  - [mixer, nz]
+  - [nz, np]
+  # Cascade formant chain (np -> F1..F6 -> cascadeOutGain) generated by formantBanks
+  - [cascadeOutGain, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # Parallel branch routing
+  # ---------------------------------------------------------------------------
+  - [parallelMixer, parallelSourceGain]
+  - [parallelMixer, diff]
+  - [diff, parallelDiffGain]
+  - [parallelDiffGain, parallelDiffSum]
+  - [fricationSource, parallelFricGain]
+  - [parallelFricGain, parallelDiffSum]
+
+  # Parallel formant channels (source -> F{N} -> F{N}Gain -> parallelSum) generated by formantBanks
+
+  # Parallel nasal uses UGLOT
+  - [parallelSourceGain, parallelNasal]
+  - [parallelNasal, parallelNasalGain]
+  - [parallelNasalGain, parallelSum]
+
+  # Parallel bypass
+  - [parallelFricGain, parallelBypassGain]
+  - [parallelBypassGain, parallelSum]
+
+  # Parallel output - summed with cascade (per COEWAV.FOR line 251: ULIPS=(ULIPSV+ULIPSF+STEP)*(170.))
+  # Parallel voicing gated by parallelVoiceGain, frication always flows through
+  - [parallelSum, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # PLSTEP burst - edge detection triggers decay envelope
+  # ---------------------------------------------------------------------------
+  - [afEdgeDetector, plstepTriggerSum]
+  - [ahEdgeDetector, plstepTriggerSum]
+  - [plstepTriggerSum, plstepEnvelope]  # Connect sum output to trigger input
+  - [plstepEnvelope, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # Output chain
+  # ---------------------------------------------------------------------------
+  - [outputSum, masterGain]
+  - [masterGain, outputGain]
+
+# =============================================================================
+# OUTPUTS
+# =============================================================================
+outputs:
+  - outputGain

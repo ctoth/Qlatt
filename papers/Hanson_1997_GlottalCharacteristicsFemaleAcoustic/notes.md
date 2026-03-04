@@ -223,3 +223,7 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 ---
 
 **See also:** Hanson_1999_GlottalMaleSpeakers - extends this study to 21 male speakers with direct gender comparison; spectral tilt (H1*-A3*) found to be the strongest gender differentiator (~9.6 dB).
+
+---
+
+**See also:** Hanson_2001_ModelsPhonation - Extends this work by combining the female data with male speaker data (21M+22F), connecting the acoustic measures to the HLsyn synthesizer framework, and applying the models to disordered speech.

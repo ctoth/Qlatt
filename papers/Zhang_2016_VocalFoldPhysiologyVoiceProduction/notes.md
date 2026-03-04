@@ -179,7 +179,7 @@ This paper provides the physiological grounding for voice quality control in the
 
 ## Open Questions
 - [ ] How do the R-parameter values in Table II compare to the presets currently used in Qlatt's voice quality system?
-- [ ] Can the medial surface thickness concept be directly mapped to Burkhardt's "rate" parameter for voice quality modification?
+- [ ] Can the medial surface thickness concept be directly mapped to Burkhardt's "rate" parameter for voice quality modification? [See Burkhardt_2009_VoiceQualityFormantSynthesis — provides explicit formulas using rate (0-100%) for breathy, tense, whispery, creaky, falsetto phonation types]
 - [ ] How should source-tract interaction effects be handled when F0 approaches a formant frequency?
 - [ ] The paper shows H1-H2 depends on both physiology AND acoustic coupling - how much does the vocal tract correction matter for Qlatt?
 

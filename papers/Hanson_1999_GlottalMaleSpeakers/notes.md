@@ -243,3 +243,7 @@ This paper provides quantitative targets for setting voice quality parameters wh
 
 ### Supersedes or Recontextualizes
 - This paper extends Hanson_1997_GlottalCharacteristicsFemaleAcoustic to male speakers and provides the first direct gender comparison using these five measures.
+
+---
+
+**See also:** Hanson_2001_ModelsPhonation - Combines this male speaker data with female data into a unified 43-speaker analysis, introduces the HLsyn synthesizer, and applies phonation models to disordered speech populations.

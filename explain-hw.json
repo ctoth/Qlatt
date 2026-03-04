@@ -1,0 +1,2255 @@
+{
+  "phrase": "hello world",
+  "whyDecisionId": null,
+  "totalDecisionCount": 151,
+  "rangeApplied": null,
+  "rangeMatchedCount": 151,
+  "subjectFilterApplied": null,
+  "decisions": [
+    {
+      "id": "d000001",
+      "seq": 1,
+      "stage": "transcribe",
+      "type": "dictionary_pronunciation_selected",
+      "subject": "word:hello",
+      "reason": "Used CMU dictionary pronunciation for 'hello'",
+      "citations": [
+        "CMU Pronouncing Dictionary"
+      ]
+    },
+    {
+      "id": "d000002",
+      "seq": 2,
+      "stage": "transcribe",
+      "type": "dictionary_pronunciation_selected",
+      "subject": "word:world",
+      "reason": "Used CMU dictionary pronunciation for 'world'",
+      "citations": [
+        "CMU Pronouncing Dictionary"
+      ]
+    },
+    {
+      "id": "d000003",
+      "seq": 3,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:0:HH",
+      "reason": "Selected inventory target 'HH' for source phoneme 'HH'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000004",
+      "seq": 4,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:1:AH",
+      "reason": "Selected inventory target 'AH' for source phoneme 'AH'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000005",
+      "seq": 5,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:2:L",
+      "reason": "Selected inventory target 'L' for source phoneme 'L'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000006",
+      "seq": 6,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:3:OW",
+      "reason": "Selected inventory target 'OW' for source phoneme 'OW'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000007",
+      "seq": 7,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:4:W",
+      "reason": "Selected inventory target 'W' for source phoneme 'W'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000002"
+      ]
+    },
+    {
+      "id": "d000008",
+      "seq": 8,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:5:ER",
+      "reason": "Selected inventory target 'ER' for source phoneme 'ER'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000002"
+      ]
+    },
+    {
+      "id": "d000009",
+      "seq": 9,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:6:L",
+      "reason": "Selected inventory target 'L' for source phoneme 'L'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000002"
+      ]
+    },
+    {
+      "id": "d000010",
+      "seq": 10,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:7:D",
+      "reason": "Selected inventory target 'D' for source phoneme 'D'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000002"
+      ]
+    },
+    {
+      "id": "d000011",
+      "seq": 11,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_7",
+      "reason": "remap_stops_to_closures match in phase structural",
+      "citations": [
+        "Klatt 1980 (stop consonants modeled as closure + release phases)"
+      ],
+      "parents": [
+        "d000010"
+      ]
+    },
+    {
+      "id": "d000012",
+      "seq": 12,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_7",
+      "reason": "remap_stops_to_closures rewrite in phase structural",
+      "citations": [
+        "Klatt 1980 (stop consonants modeled as closure + release phases)"
+      ],
+      "parents": [
+        "d000011"
+      ]
+    },
+    {
+      "id": "d000013",
+      "seq": 13,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_3",
+      "reason": "expand_diphthongs match in phase structural",
+      "citations": [
+        "Standard diphthong decomposition for formant synthesis (nucleus + offglide)"
+      ],
+      "parents": [
+        "d000006"
+      ]
+    },
+    {
+      "id": "d000014",
+      "seq": 14,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_3",
+      "reason": "expand_diphthongs rewrite in phase structural",
+      "citations": [
+        "Standard diphthong decomposition for formant synthesis (nucleus + offglide)"
+      ],
+      "parents": [
+        "d000013"
+      ]
+    },
+    {
+      "id": "d000015",
+      "seq": 15,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "insert_voiced_stop_release_final match in phase structural",
+      "citations": [
+        "Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)",
+        "Stevens 1998 Ch.8"
+      ]
+    },
+    {
+      "id": "d000016",
+      "seq": 16,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "insert_voiced_stop_release_final rewrite in phase structural",
+      "citations": [
+        "Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)",
+        "Stevens 1998 Ch.8"
+      ],
+      "parents": [
+        "d000015"
+      ]
+    },
+    {
+      "id": "d000017",
+      "seq": 17,
+      "stage": "prosody",
+      "type": "prosodic_annotation",
+      "subject": "phrase:0",
+      "reason": "Identified phrase with 2 content words, nuclear accent on \"world\"",
+      "citations": [
+        "Silverman 1992",
+        "O'Shaughnessy 1976",
+        "Allen 1987"
+      ]
+    },
+    {
+      "id": "d000018",
+      "seq": 18,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "alveolar_f2_locus match in phase duration",
+      "citations": [
+        "Stevens & House 1956 (formant transitions)",
+        "Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)"
+      ],
+      "parents": [
+        "d000016"
+      ]
+    },
+    {
+      "id": "d000019",
+      "seq": 19,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "alveolar_f2_locus rewrite in phase duration",
+      "citations": [
+        "Stevens & House 1956 (formant transitions)",
+        "Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)"
+      ],
+      "parents": [
+        "d000018"
+      ]
+    },
+    {
+      "id": "d000020",
+      "seq": 20,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "alveolar_rel_copy match in phase duration",
+      "citations": [
+        "Stevens & House 1956",
+        "Allen et al. 1987 Ch.11 (alveolar locus transitions)"
+      ]
+    },
+    {
+      "id": "d000021",
+      "seq": 21,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "alveolar_rel_copy rewrite in phase duration",
+      "citations": [
+        "Stevens & House 1956",
+        "Allen et al. 1987 Ch.11 (alveolar locus transitions)"
+      ],
+      "parents": [
+        "d000020"
+      ]
+    },
+    {
+      "id": "d000022",
+      "seq": 22,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "dark_l_allophony match in phase duration",
+      "citations": [
+        "Recasens 2012 (lateral allophones)",
+        "Sproat & Fujimura 1993 (syllable-final /l/ darkening)"
+      ],
+      "parents": [
+        "d000005"
+      ]
+    },
+    {
+      "id": "d000023",
+      "seq": 23,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "dark_l_allophony rewrite in phase duration",
+      "citations": [
+        "Recasens 2012 (lateral allophones)",
+        "Sproat & Fujimura 1993 (syllable-final /l/ darkening)"
+      ],
+      "parents": [
+        "d000022"
+      ]
+    },
+    {
+      "id": "d000024",
+      "seq": 24,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "dark_l_allophony match in phase duration",
+      "citations": [
+        "Recasens 2012 (lateral allophones)",
+        "Sproat & Fujimura 1993 (syllable-final /l/ darkening)"
+      ],
+      "parents": [
+        "d000009"
+      ]
+    },
+    {
+      "id": "d000025",
+      "seq": 25,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "dark_l_allophony rewrite in phase duration",
+      "citations": [
+        "Recasens 2012 (lateral allophones)",
+        "Sproat & Fujimura 1993 (syllable-final /l/ darkening)"
+      ],
+      "parents": [
+        "d000024"
+      ]
+    },
+    {
+      "id": "d000026",
+      "seq": 26,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "f1_stop_onset match in phase duration",
+      "citations": [
+        "Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)"
+      ],
+      "parents": [
+        "d000021"
+      ]
+    },
+    {
+      "id": "d000027",
+      "seq": 27,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "f1_stop_onset rewrite in phase duration",
+      "citations": [
+        "Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)"
+      ],
+      "parents": [
+        "d000026"
+      ]
+    },
+    {
+      "id": "d000028",
+      "seq": 28,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "burst_spectral_template match in phase duration",
+      "citations": [
+        "Blumstein & Stevens 1979 (burst spectral invariance)",
+        "Zue 1976 (burst amplitude by place)",
+        "Shadle et al. 2023 (fricative HF spectra above 7 kHz)",
+        "Monson et al. 2014 (perceptual significance of HF energy)"
+      ],
+      "parents": [
+        "d000027"
+      ]
+    },
+    {
+      "id": "d000029",
+      "seq": 29,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "burst_spectral_template rewrite in phase duration",
+      "citations": [
+        "Blumstein & Stevens 1979 (burst spectral invariance)",
+        "Zue 1976 (burst amplitude by place)",
+        "Shadle et al. 2023 (fricative HF spectra above 7 kHz)",
+        "Monson et al. 2014 (perceptual significance of HF energy)"
+      ],
+      "parents": [
+        "d000028"
+      ]
+    },
+    {
+      "id": "d000030",
+      "seq": 30,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "vcv_coarticulation match in phase duration",
+      "citations": [
+        "Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)",
+        "Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)",
+        "Allen et al. 1987 Ch.11"
+      ],
+      "parents": [
+        "d000023"
+      ]
+    },
+    {
+      "id": "d000031",
+      "seq": 31,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "vcv_coarticulation rewrite in phase duration",
+      "citations": [
+        "Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)",
+        "Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)",
+        "Allen et al. 1987 Ch.11"
+      ],
+      "parents": [
+        "d000030"
+      ]
+    },
+    {
+      "id": "d000032",
+      "seq": 32,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_4",
+      "reason": "vcv_coarticulation match in phase duration",
+      "citations": [
+        "Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)",
+        "Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)",
+        "Allen et al. 1987 Ch.11"
+      ],
+      "parents": [
+        "d000007"
+      ]
+    },
+    {
+      "id": "d000033",
+      "seq": 33,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_4",
+      "reason": "vcv_coarticulation rewrite in phase duration",
+      "citations": [
+        "Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)",
+        "Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)",
+        "Allen et al. 1987 Ch.11"
+      ],
+      "parents": [
+        "d000032"
+      ]
+    },
+    {
+      "id": "d000034",
+      "seq": 34,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "vowel_reduction match in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.9 (unstressed vowel centralization)",
+        "Klatt 1976 (unstressed shortening)",
+        "Peterson & Barney 1952 (schwa formants)"
+      ],
+      "parents": [
+        "d000004"
+      ]
+    },
+    {
+      "id": "d000035",
+      "seq": 35,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "vowel_reduction rewrite in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.9 (unstressed vowel centralization)",
+        "Klatt 1976 (unstressed shortening)",
+        "Peterson & Barney 1952 (schwa formants)"
+      ],
+      "parents": [
+        "d000034"
+      ]
+    },
+    {
+      "id": "d000036",
+      "seq": 36,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "non_word_initial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000031"
+      ]
+    },
+    {
+      "id": "d000037",
+      "seq": 37,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "non_word_initial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000036"
+      ]
+    },
+    {
+      "id": "d000038",
+      "seq": 38,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "non_word_initial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000025"
+      ]
+    },
+    {
+      "id": "d000039",
+      "seq": 39,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "non_word_initial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000038"
+      ]
+    },
+    {
+      "id": "d000040",
+      "seq": 40,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "non_word_initial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000019"
+      ]
+    },
+    {
+      "id": "d000041",
+      "seq": 41,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "non_word_initial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (non-word-initial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000040"
+      ]
+    },
+    {
+      "id": "d000042",
+      "seq": 42,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "word_medial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000037"
+      ]
+    },
+    {
+      "id": "d000043",
+      "seq": 43,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "word_medial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000042"
+      ]
+    },
+    {
+      "id": "d000044",
+      "seq": 44,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "word_medial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000039"
+      ]
+    },
+    {
+      "id": "d000045",
+      "seq": 45,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "word_medial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000044"
+      ]
+    },
+    {
+      "id": "d000046",
+      "seq": 46,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "word_medial_consonant_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000041"
+      ]
+    },
+    {
+      "id": "d000047",
+      "seq": 47,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "word_medial_consonant_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 Table III (word-medial consonant K=0.7)"
+      ],
+      "parents": [
+        "d000046"
+      ]
+    },
+    {
+      "id": "d000048",
+      "seq": 48,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "word_initial_lengthening match in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000003"
+      ]
+    },
+    {
+      "id": "d000049",
+      "seq": 49,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "word_initial_lengthening rewrite in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000048"
+      ]
+    },
+    {
+      "id": "d000050",
+      "seq": 50,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_4",
+      "reason": "word_initial_lengthening match in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000033"
+      ]
+    },
+    {
+      "id": "d000051",
+      "seq": 51,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_4",
+      "reason": "word_initial_lengthening rewrite in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000050"
+      ]
+    },
+    {
+      "id": "d000052",
+      "seq": 52,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "stress_duration match in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000035"
+      ]
+    },
+    {
+      "id": "d000053",
+      "seq": 53,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "stress_duration rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000052"
+      ]
+    },
+    {
+      "id": "d000054",
+      "seq": 54,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "stress_duration match in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ]
+    },
+    {
+      "id": "d000055",
+      "seq": 55,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "stress_duration rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000054"
+      ]
+    },
+    {
+      "id": "d000056",
+      "seq": 56,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "stress_duration match in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ]
+    },
+    {
+      "id": "d000057",
+      "seq": 57,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "stress_duration rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000056"
+      ]
+    },
+    {
+      "id": "d000058",
+      "seq": 58,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "stress_duration match in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000008"
+      ]
+    },
+    {
+      "id": "d000059",
+      "seq": 59,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "stress_duration rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000058"
+      ]
+    },
+    {
+      "id": "d000060",
+      "seq": 60,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "accent_vowel_lengthening match in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000053"
+      ]
+    },
+    {
+      "id": "d000061",
+      "seq": 61,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "accent_vowel_lengthening rewrite in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000060"
+      ]
+    },
+    {
+      "id": "d000062",
+      "seq": 62,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "accent_vowel_lengthening match in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000055"
+      ]
+    },
+    {
+      "id": "d000063",
+      "seq": 63,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "accent_vowel_lengthening rewrite in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000062"
+      ]
+    },
+    {
+      "id": "d000064",
+      "seq": 64,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "accent_vowel_lengthening match in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000057"
+      ]
+    },
+    {
+      "id": "d000065",
+      "seq": 65,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "accent_vowel_lengthening rewrite in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000064"
+      ]
+    },
+    {
+      "id": "d000066",
+      "seq": 66,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "accent_vowel_lengthening match in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000059"
+      ]
+    },
+    {
+      "id": "d000067",
+      "seq": 67,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "accent_vowel_lengthening rewrite in phase duration",
+      "citations": [
+        "van Santen 1994 (pitch accent x stress amplificatory interaction)",
+        "White 2014 (phrasal accent lengthening distributed across accented word)",
+        "Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)"
+      ],
+      "parents": [
+        "d000066"
+      ]
+    },
+    {
+      "id": "d000068",
+      "seq": 68,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "vowel_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000061"
+      ]
+    },
+    {
+      "id": "d000069",
+      "seq": 69,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "vowel_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000068"
+      ]
+    },
+    {
+      "id": "d000070",
+      "seq": 70,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "vowel_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000063"
+      ]
+    },
+    {
+      "id": "d000071",
+      "seq": 71,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "vowel_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000070"
+      ]
+    },
+    {
+      "id": "d000072",
+      "seq": 72,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "vowel_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000065"
+      ]
+    },
+    {
+      "id": "d000073",
+      "seq": 73,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "vowel_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000072"
+      ]
+    },
+    {
+      "id": "d000074",
+      "seq": 74,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "vowel_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000067"
+      ]
+    },
+    {
+      "id": "d000075",
+      "seq": 75,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "vowel_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000074"
+      ]
+    },
+    {
+      "id": "d000076",
+      "seq": 76,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000049"
+      ]
+    },
+    {
+      "id": "d000077",
+      "seq": 77,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000076"
+      ]
+    },
+    {
+      "id": "d000078",
+      "seq": 78,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000069"
+      ]
+    },
+    {
+      "id": "d000079",
+      "seq": 79,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000078"
+      ]
+    },
+    {
+      "id": "d000080",
+      "seq": 80,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000043"
+      ]
+    },
+    {
+      "id": "d000081",
+      "seq": 81,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000080"
+      ]
+    },
+    {
+      "id": "d000082",
+      "seq": 82,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000071"
+      ]
+    },
+    {
+      "id": "d000083",
+      "seq": 83,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000082"
+      ]
+    },
+    {
+      "id": "d000084",
+      "seq": 84,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000073"
+      ]
+    },
+    {
+      "id": "d000085",
+      "seq": 85,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000084"
+      ]
+    },
+    {
+      "id": "d000086",
+      "seq": 86,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_4",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000051"
+      ]
+    },
+    {
+      "id": "d000087",
+      "seq": 87,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_4",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000086"
+      ]
+    },
+    {
+      "id": "d000088",
+      "seq": 88,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000075"
+      ]
+    },
+    {
+      "id": "d000089",
+      "seq": 89,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000088"
+      ]
+    },
+    {
+      "id": "d000090",
+      "seq": 90,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000045"
+      ]
+    },
+    {
+      "id": "d000091",
+      "seq": 91,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000090"
+      ]
+    },
+    {
+      "id": "d000092",
+      "seq": 92,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000047"
+      ]
+    },
+    {
+      "id": "d000093",
+      "seq": 93,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000092"
+      ]
+    },
+    {
+      "id": "d000094",
+      "seq": 94,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000029"
+      ]
+    },
+    {
+      "id": "d000095",
+      "seq": 95,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000094"
+      ]
+    },
+    {
+      "id": "d000096",
+      "seq": 96,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000077"
+      ]
+    },
+    {
+      "id": "d000097",
+      "seq": 97,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000096"
+      ]
+    },
+    {
+      "id": "d000098",
+      "seq": 98,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000079"
+      ]
+    },
+    {
+      "id": "d000099",
+      "seq": 99,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000098"
+      ]
+    },
+    {
+      "id": "d000100",
+      "seq": 100,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000081"
+      ]
+    },
+    {
+      "id": "d000101",
+      "seq": 101,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000100"
+      ]
+    },
+    {
+      "id": "d000102",
+      "seq": 102,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000083"
+      ]
+    },
+    {
+      "id": "d000103",
+      "seq": 103,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000102"
+      ]
+    },
+    {
+      "id": "d000104",
+      "seq": 104,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000085"
+      ]
+    },
+    {
+      "id": "d000105",
+      "seq": 105,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000104"
+      ]
+    },
+    {
+      "id": "d000106",
+      "seq": 106,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_4",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000087"
+      ]
+    },
+    {
+      "id": "d000107",
+      "seq": 107,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_4",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000106"
+      ]
+    },
+    {
+      "id": "d000108",
+      "seq": 108,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000089"
+      ]
+    },
+    {
+      "id": "d000109",
+      "seq": 109,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000108"
+      ]
+    },
+    {
+      "id": "d000110",
+      "seq": 110,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000091"
+      ]
+    },
+    {
+      "id": "d000111",
+      "seq": 111,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000110"
+      ]
+    },
+    {
+      "id": "d000112",
+      "seq": 112,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000093"
+      ]
+    },
+    {
+      "id": "d000113",
+      "seq": 113,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000112"
+      ]
+    },
+    {
+      "id": "d000114",
+      "seq": 114,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000095"
+      ]
+    },
+    {
+      "id": "d000115",
+      "seq": 115,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000114"
+      ]
+    },
+    {
+      "id": "d000116",
+      "seq": 116,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "fricative_minimum_duration match in phase duration",
+      "citations": [
+        "Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full duration; glottal /hh/ not tested -- value is engineering estimate)"
+      ],
+      "parents": [
+        "d000097"
+      ]
+    },
+    {
+      "id": "d000117",
+      "seq": 117,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "fricative_minimum_duration rewrite in phase duration",
+      "citations": [
+        "Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full duration; glottal /hh/ not tested -- value is engineering estimate)"
+      ],
+      "parents": [
+        "d000116"
+      ]
+    },
+    {
+      "id": "d000118",
+      "seq": 118,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "lock_stop_release_duration match in phase duration",
+      "citations": [
+        "Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)"
+      ],
+      "parents": [
+        "d000115"
+      ]
+    },
+    {
+      "id": "d000119",
+      "seq": 119,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "lock_stop_release_duration rewrite in phase duration",
+      "citations": [
+        "Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)"
+      ],
+      "parents": [
+        "d000118"
+      ]
+    },
+    {
+      "id": "d000120",
+      "seq": 120,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "sw_explicit_override match in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000117"
+      ]
+    },
+    {
+      "id": "d000121",
+      "seq": 121,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "sw_explicit_override rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000120"
+      ]
+    },
+    {
+      "id": "d000122",
+      "seq": 122,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_0",
+      "reason": "sw_explicit_override match in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000113"
+      ]
+    },
+    {
+      "id": "d000123",
+      "seq": 123,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_0",
+      "reason": "sw_explicit_override rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000122"
+      ]
+    },
+    {
+      "id": "d000124",
+      "seq": 124,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_3",
+      "reason": "sw_explicit_override match in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000119"
+      ]
+    },
+    {
+      "id": "d000125",
+      "seq": 125,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_3",
+      "reason": "sw_explicit_override rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (SW switch)",
+        "Allen et al. 1987 Table 12-1"
+      ],
+      "parents": [
+        "d000124"
+      ]
+    },
+    {
+      "id": "d000126",
+      "seq": 126,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000099"
+      ]
+    },
+    {
+      "id": "d000127",
+      "seq": 127,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000126"
+      ]
+    },
+    {
+      "id": "d000128",
+      "seq": 128,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000101"
+      ]
+    },
+    {
+      "id": "d000129",
+      "seq": 129,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000128"
+      ]
+    },
+    {
+      "id": "d000130",
+      "seq": 130,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000103"
+      ]
+    },
+    {
+      "id": "d000131",
+      "seq": 131,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000130"
+      ]
+    },
+    {
+      "id": "d000132",
+      "seq": 132,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_2",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000105"
+      ]
+    },
+    {
+      "id": "d000133",
+      "seq": 133,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_2",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000132"
+      ]
+    },
+    {
+      "id": "d000134",
+      "seq": 134,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_4",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000107"
+      ]
+    },
+    {
+      "id": "d000135",
+      "seq": 135,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_4",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000134"
+      ]
+    },
+    {
+      "id": "d000136",
+      "seq": 136,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000109"
+      ]
+    },
+    {
+      "id": "d000137",
+      "seq": 137,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000136"
+      ]
+    },
+    {
+      "id": "d000138",
+      "seq": 138,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_6",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000111"
+      ]
+    },
+    {
+      "id": "d000139",
+      "seq": 139,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_6",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000138"
+      ]
+    },
+    {
+      "id": "d000140",
+      "seq": 140,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "tobi_baseline_init match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (baseline initialization)",
+        "Ladd 2008 Ch.5"
+      ],
+      "parents": [
+        "d000121"
+      ]
+    },
+    {
+      "id": "d000141",
+      "seq": 141,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "tobi_baseline_init rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (baseline initialization)",
+        "Ladd 2008 Ch.5"
+      ],
+      "parents": [
+        "d000140"
+      ]
+    },
+    {
+      "id": "d000142",
+      "seq": 142,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "tobi_accent_h_star_plus_l_peak match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (H*+L falling accent family)",
+        "Ladd 2008 Ch.3 (older Pierrehumbert inventory includes H*+L)"
+      ],
+      "parents": [
+        "d000137"
+      ]
+    },
+    {
+      "id": "d000143",
+      "seq": 143,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "tobi_accent_h_star_plus_l_peak rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (H*+L falling accent family)",
+        "Ladd 2008 Ch.3 (older Pierrehumbert inventory includes H*+L)"
+      ],
+      "parents": [
+        "d000142"
+      ]
+    },
+    {
+      "id": "d000144",
+      "seq": 144,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_5",
+      "reason": "tobi_accent_h_star_plus_l_tail match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (H*+L trailing low target)",
+        "Ladd 2008 Ch.3 (falling accent reaches low target after the starred peak)"
+      ],
+      "parents": [
+        "d000143"
+      ]
+    },
+    {
+      "id": "d000145",
+      "seq": 145,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_5",
+      "reason": "tobi_accent_h_star_plus_l_tail rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (H*+L trailing low target)",
+        "Ladd 2008 Ch.3 (falling accent reaches low target after the starred peak)"
+      ],
+      "parents": [
+        "d000144"
+      ]
+    },
+    {
+      "id": "d000146",
+      "seq": 146,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "tobi_accent_l_plus_h_star_lead match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (leading L tone in L+H*)",
+        "Ladd 2008 Ch.3 (prenuclear rising accent shape)"
+      ],
+      "parents": [
+        "d000131"
+      ]
+    },
+    {
+      "id": "d000147",
+      "seq": 147,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "tobi_accent_l_plus_h_star_lead rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (leading L tone in L+H*)",
+        "Ladd 2008 Ch.3 (prenuclear rising accent shape)"
+      ],
+      "parents": [
+        "d000146"
+      ]
+    },
+    {
+      "id": "d000148",
+      "seq": 148,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:phone_ins_1",
+      "reason": "tobi_accent_l_plus_h_star_peak match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (L+H* accent: leading L plus H* peak)",
+        "Ladd 2008 Ch.3 (rising prenuclear accent)",
+        "Ladd 2008 Ch.2 (downstep still applies to successive H targets)"
+      ],
+      "parents": [
+        "d000147"
+      ]
+    },
+    {
+      "id": "d000149",
+      "seq": 149,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:phone_ins_1",
+      "reason": "tobi_accent_l_plus_h_star_peak rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (L+H* accent: leading L plus H* peak)",
+        "Ladd 2008 Ch.3 (rising prenuclear accent)",
+        "Ladd 2008 Ch.2 (downstep still applies to successive H targets)"
+      ],
+      "parents": [
+        "d000148"
+      ]
+    },
+    {
+      "id": "d000150",
+      "seq": 150,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "f0_voiceless_onset_perturbation match in phase prosody",
+      "citations": [
+        "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)",
+        "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
+      ],
+      "parents": [
+        "d000127"
+      ]
+    },
+    {
+      "id": "d000151",
+      "seq": 151,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "f0_voiceless_onset_perturbation rewrite in phase prosody",
+      "citations": [
+        "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)",
+        "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
+      ],
+      "parents": [
+        "d000150"
+      ]
+    }
+  ],
+  "summary": {
+    "decisionCount": 151,
+    "uncitedCount": 0,
+    "byStage": {
+      "transcribe": 10,
+      "rules": 140,
+      "prosody": 1
+    },
+    "byType": {
+      "dictionary_pronunciation_selected": 2,
+      "inventory_target_selected": 8,
+      "rule_matched": 70,
+      "rule_rewrite_applied": 70,
+      "prosodic_annotation": 1
+    },
+    "uncitedByStage": {},
+    "uncitedByType": {}
+  }
+}

@@ -178,7 +178,7 @@ Focus on:
 
 ### Already in Collection
 - **Blumstein_Stevens_1979_AcousticInvariance**
-- **Elovitz_1976_NRL_LTS**
+- **Elovitz_1976_NRL_LTS** — cited for LTS rules in context of practical speech synthesis systems
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Hawkins_Stevens_1985_NasalVowelCorrelates**
 - **Hertz_1985_DeltaRuleSystem**

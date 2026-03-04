@@ -391,6 +391,7 @@ F6 = 2×F4, A6 = -15 dB, B6 = 150 Hz (constant)
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Fant_1985_LFModelGlottalFlow**
 - **Hanson_1995_GlottalCharacteristicsFemale**
+- **Henrich_2003_JND_OpenQuotient** — cited (ref 40) for perceptual resolution of open quotient (~10-14% relative JND) and asymmetry coefficient (~4% relative JND) in singing voice
 - **Henrich_2005_GlottalOpenQuotientSinging**
 - **Holmes_1983_FormantSynthesizersCascadeParallel**
 - **Klatt_1980_CascadeParallelFormantSynthesizer**

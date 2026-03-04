@@ -279,3 +279,11 @@ AerodynamicState {
 - **Klatt_1990_VoiceQualityVariations**
 - **Shadle_1985_FricativeAcoustics**
 - **Stevens_1971_AirflowTurbulenceNoise**
+
+---
+
+**See also:** Hanson_2001_ModelsPhonation - Extends this 10-parameter system to 13-parameter HLsyn with posterior glottal opening (ap) parameter for breathy voice quality modeling, and demonstrates copy synthesis of nonmodal phonation phenomena.
+
+---
+
+**See also:** Hanson_2002_HLsynSourceParameters - Provides the complete, detailed source parameter mapping equations (Eqs. 23-37) that implement and extend this paper's 10-parameter HL framework to 13 parameters, with full aerodynamic circuit model, speaker constants tables, and worked synthesis examples for fricatives, stops, and liquids.

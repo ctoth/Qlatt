@@ -185,7 +185,7 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 - Klatt and Klatt (1990) - Voice quality variations (already in collection)
 - Puts et al. (2012) - Vocal tract length and dominance judgments
 - Bruckert et al. (2010) - Voice averaging and attractiveness
-- Feinberg et al. (2008) - Manipulating f0 and vocal tract for attractiveness
+- Feinberg et al. (2008) - F0 manipulation (PSOLA) and female voice attractiveness (now in collection: **Feinberg_2008_FemininityAveragenessVoicePitch**)
 
 ## Collection Cross-References
 
@@ -196,7 +196,9 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ### New Leads (Not Yet in Collection)
 - Puts, D. A., Gaulin, S. J. C., Verdolini, K. (2006) - "Dominance and the evolution of sexual dimorphism in human voice pitch" - vocal tract length and dominance
 - Bruckert, L. et al. (2010) - "Vocal Attractiveness Increases by Averaging" - voice merging and HNR
-- Feinberg, D. R. et al. (2008) - "The role of femininity and averageness of voice pitch in aesthetic judgments of women's voices" - f0 manipulation and attractiveness
+
+### Now in Collection (previously listed as leads)
+- **Feinberg_2008_FemininityAveragenessVoicePitch** — F0 manipulation via PSOLA (not vocal tract) shows linear pitch–attractiveness relationship (r = 0.341). Note tension with Babel's finding: Feinberg finds higher F0 = more attractive (zero-order correlation), while Babel's full model shows slightly lower F0 preferred (β = -0.02) once voice quality (breathiness) is controlled. This suggests breathiness covaries with F0 and may mediate the relationship — when you control for breathiness, the residual F0 effect reverses.
 
 ### Supersedes or Recontextualizes
 - None — this paper complements rather than supersedes existing collection entries.

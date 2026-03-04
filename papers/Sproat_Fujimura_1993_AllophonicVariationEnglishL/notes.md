@@ -175,6 +175,7 @@ For the Qlatt declarative frontend, the key implementation is:
 - **Dalston_1975_SonorantAcoustics** - Provides acoustic data on /l/ including formant frequencies and transition durations. Sproat & Fujimura extends this with articulatory data and the gradient allophony finding.
 - **Volenec_2015_Coarticulation** - Reviews coarticulation frameworks. Sproat & Fujimura's /l/ data exemplifies how coarticulation interacts with allophonic variation.
 - **Recasens_1997_LingualCoarticulationDAC** - DAC model predicts coarticulation based on tongue dorsum involvement. Dark /l/ has high DAC value, explaining its strong coarticulatory resistance.
+- **Hertz_1991_StreamsPhonesTransitions** - Referenced for multi-stream phonological representation
 
 ### New Leads (Not Yet in Collection)
 - Giles & Moll (1975) - Cinefluorographic /l/ study, foundational articulatory data

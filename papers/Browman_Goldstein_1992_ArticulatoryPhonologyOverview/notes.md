@@ -230,6 +230,9 @@ This paper provides the theoretical framework for understanding:
 - Byrd (1992) - "Perception of assimilation in consonant clusters: a gestural model" - Links overlap to perceptual assimilation
 - Krakow (1989) - "The articulatory organization of syllables" - Kinematic analysis of labial and velar gestures; details nasal timing data cited in Section 2.2
 
+### Conceptual Links (not citation-based)
+- **Hertz_1991_StreamsPhonesTransitions** — Hertz's multi-stream delta framework independently converges on the same insight: formant transitions are independent temporal units with stable durations, while steady-state portions stretch. Hertz formalizes this with synchronized parallel streams; AP formalizes it with gestural overlap and stiffness parameters. The two frameworks are complementary implementations of the same observation.
+
 ### Supersedes or Recontextualizes
 - **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** extends and critically evaluates this 1992 overview with 30 years of subsequent research; this paper provides the original framework that Iskarous & Pouplier appraise
 

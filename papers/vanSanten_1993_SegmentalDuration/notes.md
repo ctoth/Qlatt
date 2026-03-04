@@ -193,6 +193,9 @@ Linguistic Space
 - **[11] van Santen & Olive (1990)** - Earlier analysis of contextual effects on segmental duration. Establishes the problem space and sparsity challenges that motivate sums-of-products approach.
 - **[19] Krantz et al. (1971)** - Foundations of Measurement. Provides mathematical basis for ordinal patterns and why sums-of-products models work well for this domain.
 
+### Cited By (in Collection)
+- **vanSanten_1997_ProsodicModeling** — cites this for the sums-of-products mathematical framework (Ref 16); places it in broader context of TTS prosodic quality obstacles
+
 ---
 
 **See also:** vanSanten_1994_SegmentalDurationTTS - the full journal version of this work with complete statistical methodology description and perceptual evaluation results.

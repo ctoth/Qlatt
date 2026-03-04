@@ -243,10 +243,10 @@ const PATTERNS = {
 ```
 
 ## Open Questions
-- [ ] How to handle stress assignment (paper notes this as major limitation)
+- [ ] How to handle stress assignment (paper notes this as major limitation) [Addressed by Hunnicutt_1976_PhonologicalRules — presents cyclic stress rules using suffix/prefix classification, achieving 67-72% accuracy]
 - [ ] Rule priority when multiple rules could match?
-- [ ] Optimal exception dictionary size vs rule complexity tradeoff?
-- [ ] How do NRL rules compare to MITalk rules for same words?
+- [ ] Optimal exception dictionary size vs rule complexity tradeoff? [Context in Allen_1987_MITalk_TTS — uses 11,000-word morph dictionary + ~400 rules]
+- [ ] How do NRL rules compare to MITalk rules for same words? [Context in Allen_1987_MITalk_TTS — documents mature MITalk with morphological analysis achieving lower error rates]
 
 ## Related Work Worth Reading
 - Ainsworth (1973) - Keele LTS rules (British English)
@@ -260,11 +260,15 @@ const PATTERNS = {
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- **Allen_1987_MITalk_TTS** — cited as the contemporary MIT System (Allen & Lee) using ~400 LTS rules + 11,000-word morph dictionary + morphological analysis; represents the more complex alternative approach to Elovitz's pure rule-based method
+- **Hunnicutt_1976_PhonologicalRules** — related phonological rules approach for G2P conversion with stress assignment (noted in Related Work)
 
 ### New Leads (Not Yet in Collection)
-- **Dudley (1939) - The Synthesizer** - The foundational hardware speech synthesizer that motivated computer-based TTS research and established the practical need for automatic pronunciation generation.
-- **Ainsworth (University of Keele)** - Context-sensitive letter-to-sound rule system that provided the starting point for the NRL system's rule development methodology.
-- **McIlroy (Bell Telephone Laboratories)** - Demonstrates the state-of-the-art in commercial letter-to-sound rule systems (750+ rules) and provides comparison for evaluating the NRL system's efficiency (329 rules achieving 90% accuracy).
-- **Brown Corpus** - The standard evaluation dataset (50,000 words of Present-Day Edited American English) used to measure rule performance, establishing the benchmark for modern TTS systems.
-- **MIT System (Allen & Lee)** - Contemporary research effort combining automatic text translation, parts-of-speech analysis, and speech synthesizer control, representing an alternative more complex approach to the simpler letter-to-sound rule method.
+- **Dudley (1939) - The Synthesizer** — foundational hardware speech synthesizer that motivated computer-based TTS research
+- **Ainsworth (University of Keele)** — context-sensitive LTS rule system that provided the starting point for NRL's rule development methodology
+- **McIlroy (Bell Telephone Laboratories)** — 750+ LTS rules with higher accuracy, comparison point for NRL's 329-rule system
+
+### Cited By (in Collection)
+- **Allen_1987_MITalk_TTS** — cites Elovitz for LTS rules as a contemporary approach to grapheme-to-phoneme conversion
+- **Hertz_1985_DeltaRuleSystem** — cites as "classic letter-to-sound rules providing foundational approach to grapheme-to-phoneme conversion"; Delta was designed as a more sophisticated rule development environment
+- **Liberman_Mattingly_1985_MotorTheory** — cites for text-to-phoneme conversion in the context of speech synthesis systems

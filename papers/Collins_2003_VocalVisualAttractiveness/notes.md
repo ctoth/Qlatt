@@ -148,3 +148,7 @@ This paper provides empirical data on the relationship between female voice acou
 
 ### Supersedes or Recontextualizes
 None - this paper extends prior work on vocal attractiveness but does not correct or supersede existing collection papers.
+
+---
+
+**See also:** Feinberg_2008_FemininityAveragenessVoicePitch - extends Collins 2003 by showing F0 alone (via PSOLA manipulation) drives vocal attractiveness, not just correlated vocal qualities. Linear pitch-attractiveness relationship confirmed.

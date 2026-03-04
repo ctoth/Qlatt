@@ -221,5 +221,10 @@ This paper is directly relevant to the Qlatt voice quality synthesis work in sev
 - Veldhuis 1998 - "The spectral relevance of glottal-pulse parameters" -- theoretical framework for parameter perception
 - Rao, van Dinther, Veldhuis, Kohlrausch 2001 - "A measure for predicting audibility discrimination thresholds for spectral envelope distortions in vowel sounds" - JASA 109:2085-2097
 
+### Cited By (in Collection)
+- **Doval_2006_SpectrumGlottalFlowModels** — cites this (ref 31) for JND data on Oq and αm, validating their spectral parameter framework against perceptual thresholds
+- **Feugere_2017_CantorDigitalis** — cites this (ref 40) for perceptual resolution of open quotient in singing voice synthesis
+- **vanDinther_2004_PerceptualGlottalPulse** — compares EPD-based perceptual model predictions against the psychoacoustic JND data from this study
+
 ### Supersedes or Recontextualizes
 - **vanDinther_2004_PerceptualGlottalPulse** - This Henrich 2003 study provides complementary psychoacoustic JND data that validates and extends van Dinther's EPD-based perceptual model. Van Dinther found Ra (return phase) most perceptible; Henrich found Oq follows Weber's law at ~10-14%. Together they establish the full perceptual resolution landscape for LF parameters.

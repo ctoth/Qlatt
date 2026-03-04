@@ -237,6 +237,7 @@ This paper is directly applicable to Qlatt's duration assignment system. The key
 - **vanSanten_1993_SegmentalDuration** - Earlier version of this work (speaker-dependent system)
 - **vanSanten_1997_ProsodicModeling** - Later paper discussing obstacles to prosodic quality including duration
 - **Crystal_House_1988_StopConsonantDuration** - Referenced for connected speech duration data
+- **Hertz_1991_StreamsPhonesTransitions** - Referenced for alternative duration modeling via phone-and-transition segmentation
 
 ### New Leads (Not Yet in Collection)
 - Umeda (1977) - "Consonant duration in American English" - JASA 61, 846-858 -- comprehensive consonant duration data

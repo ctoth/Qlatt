@@ -268,6 +268,9 @@ VCV utterance = V1-to-V2 diphthongal gesture + superimposed C gesture
 ### Already in Collection
 - **Fant_1960_AcousticTheorySpeechProduction**
 
+### Conceptual Links (not citation-based)
+- **Hertz_1991_StreamsPhonesTransitions** — Ohman's model of VCV as a consonant gesture superimposed on a vowel-to-vowel diphthongal substrate is structurally very close to Hertz's parallel streams where transitions and phones occupy separate tiers. Both frameworks factor consonants as overlays on vocalic continuity rather than treating speech as a linear sequence of discrete segments.
+
 ### New Leads (Not Yet in Collection)
 - **Delattre, Liberman, & Cooper (1955) - Acoustic Loci**: The classical "locus theory" paper that Ohman critiques. Directly relevant for understanding static vs. dynamic models of stop consonant synthesis.
 - **House & Stevens (1963) - Consonantal Perturbation of Vowels**: Complementary work on coarticulation effects showing how consonants influence vowel acoustics, the flip side of Ohman's vowel-on-consonant analysis.

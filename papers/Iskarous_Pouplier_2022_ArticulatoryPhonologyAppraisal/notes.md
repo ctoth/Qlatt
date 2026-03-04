@@ -132,6 +132,9 @@ Speech planning modeled as activation fields over gestural representations:
 - **Liberman_Mattingly_1985_MotorTheory**: Motor theory validated by AP's gesture-based phonology
 - **Sering_2020_AnticipatoryCoarticulation**: Neural network coarticulation maps to AP gestural overlap
 
+### Conceptual Links (not citation-based)
+- **Hertz_1991_StreamsPhonesTransitions** — Hertz's observation that only steady states lengthen phrase-finally while transitions remain durationally stable maps to AP's π-gesture mechanism: prosodic clock-slowing at boundaries affects low-stiffness gestures (steady states) but high-stiffness gestures (transitions) resist stretching. Hertz provides the empirical data; AP provides the dynamical mechanism.
+
 ## Key Terminology
 
 | AP Term | Qlatt Equivalent |

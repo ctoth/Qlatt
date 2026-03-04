@@ -226,6 +226,9 @@ This dissertation provides the **theoretical foundation** for implementing tone 
 - Liberman, Mark. 1975. *The Intonational System of English* -- parallel work on English prosody
 - Clements, G.N. 1976. "Vowel Harmony in Non-linear Generative Phonology" -- extending autosegmental theory to vowel harmony
 
+### Cited By (in Collection)
+- **Hertz_1991_StreamsPhonesTransitions** — cites this as inspiration for the multi-tiered parallel stream structure of the Delta framework; Hertz's synchronized streams are a practical implementation of autosegmental multi-tier representation
+
 ### Supersedes or Recontextualizes
 - This is the **foundational text** of autosegmental phonology; Pierrehumbert (1980) and Ladd (2008) build directly on it
 - The AM (Autosegmental-Metrical) framework in our ToBI and intonation papers is a direct descendant of this work

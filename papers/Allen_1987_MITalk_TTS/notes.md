@@ -754,7 +754,7 @@ SIL and glottal segments have no inherent targets - inherit from context.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Elovitz_1976_NRL_LTS**
+- **Elovitz_1976_NRL_LTS** — cited for 329 context-sensitive LTS rules achieving 90% accuracy; NRL's simpler rule-only approach contrasts with MITalk's morphological analysis + dictionary
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Fant_1988_LFFrequencyDomainInterpretation**
 - **Fujimura_1962_NasalConsonantAnalysis**

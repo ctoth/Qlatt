@@ -185,8 +185,11 @@ b10: Die wird auf dem Platz sein, wo wir sie immer hinlegen.
 ### Already in Collection
 - **Banse_1996_VocalEmotionAcousticProfiles**
 
+### Cited By (in Collection)
+- **Burkhardt_2009_VoiceQualityFormantSynthesis** — cites this as ref [16] for the EmoDB corpus; builds on this work's emotional speech data to develop rule-based phonation type formulas for Klatt synthesis
+
 ### New Leads (Not Yet in Collection)
 - **Laver 1980 [11]** - "The Phonetic Description of Voice Quality" - Canonical reference for voice quality terminology and classification; essential for understanding the articulatory settings labels used in emotional speech annotation.
 - **Burkhardt 2001 [3]** - "Simulation emotionaler Sprechweise mit Sprachsyntheseverfahren" - Direct application of emotional speech simulation using speech synthesis; highly relevant for implementing expressive TTS.
-- **Burkhardt & Sendlmeier 2000 [14]** - "Verification of Acoustical Correlates of Emotional Speech Using Formant Synthesis" - Validates acoustic correlates of emotion using formant synthesis; directly applicable to Klatt synthesizer parameter manipulation for emotional speech.
+- **Burkhardt & Sendlmeier 2000 [14]** - "Verification of Acoustical Correlates of Emotional Speech Using Formant Synthesis" - Validates acoustic correlates of emotion using formant synthesis; directly applicable to Klatt synthesizer parameter manipulation for emotional speech. [Superseded by Burkhardt_2009_VoiceQualityFormantSynthesis — provides mature rule-based formulas with perceptual validation for 5 phonation types]
 - **Sendlmeier & Klasmeyer 2000 [6]** - "Voice and Emotional States" - Covers relationship between voice quality and emotional states; useful for understanding which synthesis parameters to modify for different emotions.

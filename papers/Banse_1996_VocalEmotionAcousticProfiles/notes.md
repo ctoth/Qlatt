@@ -331,3 +331,7 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 ---
 
 **See also:** Belyk_2014_AcousticValenceEmotion - recontextualizes the inconsistent valence effects in this paper's 14-emotion data by showing that valence interacts with emotion family (motivational/moral/aesthetic), explaining why only elation showed the expected high-loud positive pattern.
+
+---
+
+**See also:** Goudbeek_2010_ValencePotencyVocalEmotion - Extends this work by adding potency/control as a third emotion dimension and demonstrating that spectral balance (not just F0/intensity) specifically encodes valence, using the French GEMEP corpus with cross-cultural validation against this Munich data.

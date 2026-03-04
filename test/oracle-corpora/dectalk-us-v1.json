@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "v1",
+  "corpusId": "dectalk-us-v1",
+  "defaults": {
+    "voiceId": "paul",
+    "rate": 180,
+    "sampleRate": 22050,
+    "frontendId": "dectalk-english",
+    "transitionMs": 30
+  },
+  "entries": [
+    {
+      "id": "g2p-the",
+      "text": "the.",
+      "group": "g2p",
+      "tags": ["function-word", "schwa"],
+      "expectedFocus": "LTS and unstressed vowel realization"
+    },
+    {
+      "id": "g2p-she",
+      "text": "she.",
+      "group": "g2p",
+      "tags": ["digraph", "final-vowel"],
+      "expectedFocus": "SH plus final vowel handling"
+    },
+    {
+      "id": "g2p-dog",
+      "text": "dog.",
+      "group": "g2p",
+      "tags": ["vowel-quality", "content-word"],
+      "expectedFocus": "Low rounded vowel realization in a simple lexical item"
+    },
+    {
+      "id": "g2p-this",
+      "text": "this.",
+      "group": "g2p",
+      "tags": ["function-word", "final-fricative"],
+      "expectedFocus": "Final voicing choice for the exact function word"
+    },
+    {
+      "id": "g2p-church",
+      "text": "church.",
+      "group": "g2p",
+      "tags": ["rhotic-vowel", "affricate"],
+      "expectedFocus": "Rhotic vowel selection inside an affricate frame"
+    },
+    {
+      "id": "g2p-about",
+      "text": "about.",
+      "group": "g2p",
+      "tags": ["function-word", "reduced-vowel", "diphthong"],
+      "expectedFocus": "Reduced onset vowel and stressed diphthong handling"
+    },
+    {
+      "id": "stops-pat-tapped",
+      "text": "Pat tapped a pot.",
+      "group": "stops",
+      "tags": ["plosives", "burst", "closure"],
+      "expectedFocus": "Stop timing, burst timing, and release behavior"
+    },
+    {
+      "id": "fric-thin-thieves",
+      "text": "Thin thieves thought that they thrilled.",
+      "group": "fricatives",
+      "tags": ["th", "dh", "cluster"],
+      "expectedFocus": "Dental frication and voiced fricative behavior"
+    },
+    {
+      "id": "prosody-hello-world",
+      "text": "Hello world.",
+      "group": "prosody",
+      "tags": ["declarative", "hat-pattern"],
+      "expectedFocus": "Baseline hat-pattern contour and final fall"
+    },
+    {
+      "id": "prosody-how-are-you",
+      "text": "How are you today?",
+      "group": "prosody",
+      "tags": ["question", "terminal-rise"],
+      "expectedFocus": "Question contour behavior"
+    }
+  ]
+}

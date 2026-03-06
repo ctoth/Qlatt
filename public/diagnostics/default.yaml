@@ -1,0 +1,54 @@
+# Default diagnostics configuration for the Qlatt synthesizer.
+# Taps are attached to graph nodes; checks run each poll tick.
+
+taps:
+  post-output:
+    node: [outputLp, masterGain, outputGain]
+    fftSize: 2048
+
+poll:
+  interval_ms: 20
+  guard_ms: 50
+
+checks:
+  output_no_clip:
+    tap: post-output
+    measure: peak
+    assert: { max: 1.0 }
+    severity: warn
+    message: "Output clipping detected"
+    collect: true
+    max_collected: 6
+    cooldown_ms: 200
+
+  output_signal:
+    tap: post-output
+    when: { voiced: true }
+    measure: rms
+    assert: { min: 0.001 }
+    severity: warn
+    message: "No signal during voiced segment"
+
+  f0_range:
+    type: param_range
+    param: F0
+    assert: { range_min: 10 }
+    severity: info
+    message: "F0 range is narrow — may sound monotone"
+
+  state_leak:
+    tap: post-output
+    type: across_plays
+    plays: 3
+    measure: peak
+    assert: { cv_max: 0.10 }
+    severity: error
+    message: "State leak — peak varies across plays"
+
+display:
+  sections:
+    - { id: session, source: session_info }
+    - { id: track, source: track_summary }
+    - { id: checks, source: check_results }
+    - { id: head, source: track_events, range: [0, 8] }
+    - { id: tail, source: track_events, range: [-6, null] }

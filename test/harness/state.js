@@ -72,3 +72,6 @@ export const state = {
 };
 
 state.specCtx = state.specCanvas?.getContext("2d");
+
+// Expose for console debugging
+window.__qlatt = state;

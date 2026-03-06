@@ -60,8 +60,6 @@ describe("declarative frontend integration phases", () => {
         policy: {
           f0: {
             base_hz: 110,
-            fall_rate_hz: 20,
-            question_rise_hz: 30,
           },
         },
       },

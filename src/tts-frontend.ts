@@ -147,21 +147,14 @@ function resolveSpeakerProfile(
   const rdOverride = speakerOverride?.rd_default;
   const tiltOverride = speakerOverride?.spectral_tilt_offset_db;
 
+  const fin = (v: number | undefined): number | undefined =>
+    typeof v === "number" && Number.isFinite(v) ? v : undefined;
+
   return {
-    base_f0_hz: typeof baseF0Override === "number" && Number.isFinite(baseF0Override)
-      ? baseF0Override
-      : (typeof baseF0 === "number" && Number.isFinite(baseF0)
-          ? baseF0
-          : (baseFromPolicy ?? 110)),
-    formant_scale: typeof formantScaleOverride === "number" && Number.isFinite(formantScaleOverride)
-      ? formantScaleOverride
-      : (formantScaleFromPolicy ?? 1.0),
-    rd_default: typeof rdOverride === "number" && Number.isFinite(rdOverride)
-      ? rdOverride
-      : (rdFromPolicy ?? 0.7),
-    spectral_tilt_offset_db: typeof tiltOverride === "number" && Number.isFinite(tiltOverride)
-      ? tiltOverride
-      : (tiltFromPolicy ?? 0),
+    base_f0_hz: fin(baseF0Override) ?? fin(baseF0) ?? baseFromPolicy ?? 110,
+    formant_scale: fin(formantScaleOverride) ?? formantScaleFromPolicy ?? 1.0,
+    rd_default: fin(rdOverride) ?? rdFromPolicy ?? 0.7,
+    spectral_tilt_offset_db: fin(tiltOverride) ?? tiltFromPolicy ?? 0,
   };
 }
 
@@ -223,6 +216,7 @@ function buildTextToKlattTrackDetailed(
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
+  const frontendSpeakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
   const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
@@ -236,7 +230,7 @@ function buildTextToKlattTrackDetailed(
   let voiceQualityOverrides: VoiceQualityOverrides | undefined;
   const requestedQuality = options.voiceQuality;
   if (requestedQuality && requestedQuality !== 'modal') {
-    const presetTable = (frontendSpec as any)?.parameters?.policy?.speaker
+    const presetTable = frontendSpeakerPolicy
       ?.voice_quality_presets as Record<string, Record<string, unknown>> | undefined;
     const presetRaw = presetTable?.[requestedQuality];
     if (presetRaw) {
@@ -278,8 +272,10 @@ function buildTextToKlattTrackDetailed(
         parents: [],
       });
     } else {
-      console.warn(
-        `[TTS Frontend] Unknown voice quality preset '${requestedQuality}'. Using modal defaults.`
+      diagnostics?.warn(
+        `Unknown voice quality preset '${requestedQuality}'. Using modal defaults.`,
+        { requestedQuality },
+        "W_UNKNOWN_VOICE_QUALITY",
       );
     }
   }
@@ -313,8 +309,10 @@ function buildTextToKlattTrackDetailed(
       !phonemeTargets[materialized.phoneme] &&
       !phonemeTargets[targetKeyBase]
     ) {
-      console.warn(
-        `[TTS Frontend] No baseline target found for ${targetKeyBase} (Stress: ${ph.stress}, Word: ${ph.word}). Using SIL.`
+      diagnostics?.warn(
+        `No baseline target found for phoneme '${targetKeyBase}'. Using SIL.`,
+        { phoneme: targetKeyBase, stress: ph.stress, word: ph.word },
+        "W_PHONEME_NOT_IN_INVENTORY",
       );
     }
 
@@ -471,17 +469,14 @@ function buildTextToKlattTrackDetailed(
   // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
   // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
   const f0RangeFactor = 1.0 / Math.sqrt(rate);
+  const f0Policy = (frontendSpec as any)?.parameters?.policy?.f0;
   parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
       f0: {
         base_hz: effectiveBaseF0,
-        fall_rate_hz: 20 * f0RangeFactor,
-        declination_tau: 0.12 * f0RangeFactor,
-        stress_rise: 1.0 + (0.15 * f0RangeFactor),
-        question_rise_hz: 30 * f0RangeFactor,
-        continuation_rise_hz: 8 * f0RangeFactor,
-        continuation_minor_rise_hz: 5 * f0RangeFactor,
+        continuation_rise_hz: (readPolicyNumber(f0Policy?.continuation_rise_hz) ?? 8) * f0RangeFactor,
+        continuation_minor_rise_hz: (readPolicyNumber(f0Policy?.continuation_minor_rise_hz) ?? 5) * f0RangeFactor,
       },
     },
   }));
@@ -512,15 +507,8 @@ function buildTextToKlattTrackDetailed(
   // Read sagging transition parameters from policy.
   // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
   // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-  const f0Policy = (frontendSpec as any)?.parameters?.policy?.f0;
-  const sagDepthHz: number | undefined =
-    typeof f0Policy?.sag_depth_hz?.value === "number"
-      ? f0Policy.sag_depth_hz.value
-      : undefined;
-  const sagMinSpanMs: number | undefined =
-    typeof f0Policy?.sag_min_span_ms?.value === "number"
-      ? f0Policy.sag_min_span_ms.value
-      : undefined;
+  const sagDepthHz = readPolicyNumber(f0Policy?.sag_depth_hz);
+  const sagMinSpanMs = readPolicyNumber(f0Policy?.sag_min_span_ms);
 
   // Read layered additive F0 model config from the frontend spec.
   // When present, the track assembler uses the layered renderer instead of
@@ -539,11 +527,10 @@ function buildTextToKlattTrackDetailed(
   // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent F0 parameters)
   let speakerParams: Record<string, unknown> | undefined;
   if (f0Model) {
-    const speakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
-    if (speakerPolicy && typeof speakerPolicy === "object") {
+    if (frontendSpeakerPolicy && typeof frontendSpeakerPolicy === "object") {
       const extracted: Record<string, unknown> = {};
-      for (const key of Object.keys(speakerPolicy)) {
-        const val = readPolicyNumber(speakerPolicy[key]);
+      for (const key of Object.keys(frontendSpeakerPolicy)) {
+        const val = readPolicyNumber(frontendSpeakerPolicy[key]);
         if (val !== undefined) {
           extracted[key] = val;
         }

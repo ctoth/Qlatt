@@ -74,9 +74,6 @@ const PHASE_SPECS: PhaseSpec[] = [
       policy: {
         f0: {
           base_hz: 110,
-          fall_rate_hz: 20,
-          stress_rise: 1.15,
-          question_rise_hz: 30,
         },
       },
     },

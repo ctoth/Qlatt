@@ -20,7 +20,7 @@ import {
 } from "../src/declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
 import { assembleKlattTrack } from "../src/track-assembler";
-import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import {
   preloadCmuDictionaryFromPath,
   DEFAULT_CMU_DICTIONARY_PATH,
@@ -38,7 +38,7 @@ const PHONEME_TARGET_MAP = INVENTORY.phoneme_targets as Record<string, Record<st
 type FrontendToken = Record<string, any>;
 
 // Extract output config from rulepack (mirrors tts-frontend.ts)
-const RULEPACK_OUTPUT_CONFIG = (QLATT_V12_CEL_RULEPACK as any)?.output ?? undefined;
+const RULEPACK_OUTPUT_CONFIG = (QLATT_ENGLISH_RULEPACK as any)?.output ?? undefined;
 
 /**
  * Build parameter sequence using materializePhonemeTarget -- mirrors the
@@ -161,9 +161,6 @@ const inventory = { inventoryResolver };
           policy: {
             f0: {
               base_hz: 110,
-              fall_rate_hz: 20,
-              stress_rise: 1.15,
-              question_rise_hz: 30,
             },
           },
         },
@@ -236,7 +233,7 @@ const inventory = { inventoryResolver };
         ? {
             parameters: {
               policy: {
-                f0: { base_hz: 110, fall_rate_hz: 20, stress_rise: 1.15, question_rise_hz: 30 },
+                f0: { base_hz: 110 },
               },
             },
           }

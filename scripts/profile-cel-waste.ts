@@ -20,7 +20,7 @@ const INVENTORY = loadInventorySpecFromPath(
   "/rules/frontends/qlatt-english/inventory.yaml"
 );
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
-import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import {
   getCelEvalCount,
@@ -126,7 +126,7 @@ async function main() {
   await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
 
   // Get spec for rule analysis
-  const spec = parseDslSpec(QLATT_V12_CEL_RULEPACK);
+  const spec = parseDslSpec(QLATT_ENGLISH_RULEPACK);
 
   // Sample words
   const dict = await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
@@ -204,9 +204,6 @@ const inventory = { inventoryResolver };
         policy: {
           f0: {
             base_hz: 110,
-            fall_rate_hz: 20,
-            stress_rise: 1.15,
-            question_rise_hz: 30,
           },
         },
       });

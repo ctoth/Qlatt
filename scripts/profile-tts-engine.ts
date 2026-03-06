@@ -14,7 +14,7 @@
 
 import { performance } from "node:perf_hooks";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
-import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack, normalizeText, transcribeText } from "../src/tts-frontend";
 import {
   materializePhonemeTarget,
@@ -63,7 +63,7 @@ async function main() {
   console.log("=== Engine-Level Profiling ===\n");
 
   await preloadCmuDictionaryFromPath(DEFAULT_CMU_DICTIONARY_PATH);
-  const spec = parseDslSpec(QLATT_V12_CEL_RULEPACK);
+  const spec = parseDslSpec(QLATT_ENGLISH_RULEPACK);
 
   // --- Section 1: Spec Metadata ---
   console.log("=== Spec Metadata ===\n");
@@ -181,9 +181,6 @@ async function main() {
           policy: {
             f0: {
               base_hz: 110,
-              fall_rate_hz: 20,
-              stress_rise: 1.15,
-              question_rise_hz: 30,
             },
           },
         },
@@ -326,9 +323,6 @@ async function main() {
       policy: {
         f0: {
           base_hz: 110,
-          fall_rate_hz: 20,
-          stress_rise: 1.15,
-          question_rise_hz: 30,
         },
       },
     },

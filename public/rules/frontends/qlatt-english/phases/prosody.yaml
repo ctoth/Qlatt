@@ -657,3 +657,73 @@ rules:
     citations:
       - O'Shaughnessy 1976 (continuation rise at non-terminal boundaries)
       - "Engineering estimate: semicolon/colon rise magnitude"
+
+  # --------------------------------------------------------------------------
+  # Rule 25: Connected-speech source contour (Fant 1997)
+  #
+  # Applies phrase-local Ee/Rd source shaping on voiced segments:
+  # - slight onset rise
+  # - slow declination
+  # - stronger final-window fall
+  # - phrase-final Rd softening
+  # --------------------------------------------------------------------------
+  connected_speech_source_contour:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    contour:
+      domain: phrase
+      # Silverman et al. 1992 ToBI: BI=3 marks intermediate phrase boundaries.
+      reset_break_index: 3
+      apply:
+        - field: params.EePhraseDb
+          op: add
+          value: ee_total_db
+          tag: source_contour
+        - field: params.RdPhraseOffset
+          op: add
+          value: "params.policy.source_contour.rd_final_offset * final_progress"
+          tag: source_contour
+    define:
+      onset_rise_db: >-
+        contour.elapsed_sec < params.policy.source_contour.ee_onset_rise_sec
+        ? -params.policy.source_contour.ee_onset_rise_db
+          * (1.0 - contour.elapsed_sec / params.policy.source_contour.ee_onset_rise_sec)
+        : 0.0
+      declination_db: >-
+        -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
+      final_window_sec: >-
+        min([
+          params.policy.source_contour.ee_final_window_max_sec,
+          max([
+            params.policy.source_contour.ee_final_window_min_sec,
+            contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
+          ])
+        ])
+      final_window_start_sec: >-
+        max([
+          params.policy.source_contour.ee_onset_rise_sec,
+          contour.phrase_duration_sec - final_window_sec
+        ])
+      final_fall_db: >-
+        contour.elapsed_sec > final_window_start_sec
+        ? -(params.policy.source_contour.ee_final_fall_db_per_sec
+            - params.policy.source_contour.ee_declination_db_per_sec)
+          * (contour.elapsed_sec - final_window_start_sec)
+        : 0.0
+      final_progress: >-
+        contour.elapsed_sec <= final_window_start_sec
+        ? 0.0
+        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+      ee_total_db: >-
+        onset_rise_db + declination_db + final_fall_db
+    citations:
+      - Fant 1997 (connected-speech source contour: onset rise, declination, phrase-final fall)
+      - Hanson et al. 2001 (phrase-final and reduced-vowel spectral tilt changes imply source softening toward boundaries)
+      - Silverman et al. 1992 (ToBI break index tier; BI>=3 used for phrase-local contour reset)
+      - "Engineering estimate: conservative qlatt contour magnitudes for stable long-phrase loudness"

@@ -159,6 +159,24 @@ parameters:
         value: 10
         citations:
           - Zue 1976
+      aspiration_frication_t_af_db:
+        value: 18
+        citations:
+          - Hanson & Stevens 2003 (alveolar /t/ often shows frication dominance into aspiration interval)
+          - "Engineering estimate: conservative AF carryover level for /t/ aspiration segment"
+      aspiration_frication_k_af_db:
+        value: 10
+        citations:
+          - Hanson & Stevens 2003 (velar /k/ can show extended frication during aspiration for some speakers)
+          - "Engineering estimate: weaker AF carryover than /t/ due speaker-dependent effect"
+      aspiration_frication_p_af_db:
+        value: 0
+        citations:
+          - Hanson & Stevens 2003 (labial /p/ follows classical aspiration model in all subjects)
+      aspiration_frication_weak_scale:
+        value: 0.5
+        citations:
+          - "Engineering estimate: weak/final stop releases reduce non-modal noise sources"
       non_word_initial_consonant_multiplier:
         value: 0.7
         citations:
@@ -289,12 +307,11 @@ parameters:
           - "Engineering estimate: minimum span for audible sag"
       # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
-        value: 1.2
+        value: 1.1
         citations:
           - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
-          - >-
-            Hombert et al. 1979 (empirical: ~8% perturbation; 1.2 follows O'Shaughnessy's synthesis heuristic, not
-            Hombert's measured value)
+          - "Hombert et al. 1979 (empirical perturbation is closer to ~8%)"
+          - "Engineering estimate: 1.1 balances classic synthesis cue strength with reduced overshoot"
       voiced_onset_lower:
         value: 0.95
         citations:
@@ -309,6 +326,46 @@ parameters:
         citations:
           - O'Shaughnessy 1976
           - "Engineering estimate: semicolon/colon continuation rise is milder than comma rise"
+    source_contour:
+      # Fant 1997 Fig. 10 contour shape, with conservative magnitude scaling for qlatt.
+      ee_onset_rise_sec:
+        value: 0.05
+        citations:
+          - Fant 1997 (connected-speech source contour onset rise)
+      ee_onset_rise_db:
+        value: 0.4
+        citations:
+          - Fant 1997 (small early phrase rise in source effort)
+          - "Engineering estimate: conservative rise for qlatt to avoid exaggerated onset contrast"
+      ee_declination_db_per_sec:
+        value: 0.5
+        citations:
+          - Fant 1997 (phrase-level source declination)
+          - "Engineering estimate: reduced declination slope for stable long-utterance level"
+      ee_final_fall_db_per_sec:
+        value: 1.5
+        citations:
+          - Fant 1997 (stronger final phrase fall than mid-phrase declination)
+          - "Engineering estimate: mild final fall for qlatt baseline voice"
+      ee_final_window_min_sec:
+        value: 0.25
+        citations:
+          - Fant 1997 (phrase-final source fall localized to a short terminal window)
+      ee_final_window_max_sec:
+        value: 0.45
+        citations:
+          - Fant 1997 (terminal window upper bound on source-fall region)
+      ee_final_window_ratio:
+        value: 0.3
+        citations:
+          - Fant 1997 (terminal source shaping scales with phrase duration)
+          - "Engineering estimate: conservative fraction for intelligibility-first contouring"
+      rd_final_offset:
+        value: 0.06
+        citations:
+          - Fant 1997 (phrase-final source softening)
+          - Hanson et al. 2001 (phrase-final spectral tilt/breathiness increases in connected speech)
+          - "Engineering estimate: reduced Rd softening magnitude for qlatt"
     formant:
       rate_undershoot_factor:
         value: 0
@@ -677,6 +734,7 @@ output:
     citations:
       - Allen et al. 1987 Ch.8
   transition_ms: 30
+  initial_silence_ms: 30
   final_silence_ms: 100
 transcription:
   diagnostic_symbols:

@@ -320,6 +320,28 @@ rules:
     citations:
       - Lisker & Abramson 1964 (s-cluster VOT)
       - Zue 1976 (s-clusters reduce VOT to voice-like values)
+  aspiration_frication_carryover:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_aspiration'
+    define:
+      place_af: >-
+        (has(current.alveolar) && current.alveolar == true) ? params.policy.duration.aspiration_frication_t_af_db :
+        ((has(current.velar) && current.velar == true) ? params.policy.duration.aspiration_frication_k_af_db :
+        ((has(current.bilabial) && current.bilabial == true) ? params.policy.duration.aspiration_frication_p_af_db :
+        0))
+      weak_scale: >-
+        (has(current.weak) && current.weak == true) ? params.policy.duration.aspiration_frication_weak_scale : 1.0
+    apply:
+      - field: params.AF
+        op: set
+        value: "max([0, place_af * weak_scale])"
+        tag: aspiration_frication
+    citations:
+      - Hanson & Stevens 2003 (place-dependent frication can extend into aspiration for /t/ and /k/)
+      - Stevens 1998 Ch.8 (stop release acoustics with place-dependent noise shaping)
+      - "Engineering estimate: AF carryover magnitudes and weak-scale defaults"
   speech_rate_scaling:
     kind: scalar
     select:

@@ -88,6 +88,7 @@ phases:
       - lock_stop_release_duration
       - stop_unreleasing
       - s_cluster_aspiration_reduction
+      - aspiration_frication_carryover
       - sw_explicit_override
       - sw_default_assignment
     resolve_scalars:
@@ -115,6 +116,7 @@ phases:
       - tobi_boundary_low
       - tobi_boundary_rise
       - tobi_register_reset
+      - connected_speech_source_contour
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation
       - f0_continuation_rise

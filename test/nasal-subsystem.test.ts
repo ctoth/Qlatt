@@ -18,6 +18,9 @@ describe("nasal subsystem semantics", () => {
     expect(result.values.nasalCoreFnp).toBe(250);
     expect(result.values.nasalCoreFnzTarget).toBe(475);
     expect(result.values.nasalCoreFnz).toBe(250);
+    expect(result.values.nasalRuntimeActive).toBe(0);
+    expect(result.values.nasalCoreFnpBound).toBe(0);
+    expect(result.values.nasalCoreFnzBound).toBe(0);
   });
 
   it("derives coupled nasal targets and place antiformants from high-level controls", async () => {
@@ -37,13 +40,38 @@ describe("nasal subsystem semantics", () => {
     expect(result.values.nasalCoreFnz).toBe(475);
     expect(result.values.nasalPlaceFnz).toBe(3000);
     expect(result.values.nasalPlaceBnz).toBe(100);
+    expect(result.values.nasalRuntimeActive).toBe(1);
+    expect(result.values.nasalCoreFnpBound).toBe(250);
+    expect(result.values.nasalCoreFnzBound).toBe(475);
     expect(Number(result.values.anLinear)).toBeGreaterThan(0.5);
   });
 
-  it("keeps the core nasal path active in the graph and adds a separate place antiformant node", async () => {
+  it("keeps the parallel nasal branch silent for oral defaults", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
+    const { topoEvaluator } = createConfiguredEvaluator();
+    const result = topoEvaluator.evaluate(semantics, {
+      params: {
+        F1: 700,
+        AN: 0,
+        nasalCoupling: 0,
+        nasalPlaceIndex: 0,
+        nasalMurmurStrength: 0,
+      },
+      constants: semantics.constants ?? {},
+    });
+
+    expect(result.values.nasalParallelDb).toBe(0);
+    expect(Number(result.values.anLinear)).toBe(0);
+    expect(result.values.nasalRuntimeActive).toBe(0);
+    expect(result.values.nasalCoreBnpBound).toBe(0);
+    expect(result.values.nasalCoreBnzBound).toBe(0);
+  });
+
+  it("bypasses the core nasal graph in oral speech and keeps a separate place antiformant node", async () => {
     const { graph } = await loadExperimentConfig("klatt80-baseline");
-    expect(graph.nodes.nz?.options?.bypassAtZero).toBeUndefined();
-    expect(graph.nodes.np?.options?.bypassAtZero).toBeUndefined();
+    expect(graph.nodes.nz?.options?.bypassAtZero).toBe(true);
+    expect(graph.nodes.np?.options?.bypassAtZero).toBe(true);
+    expect(graph.nodes.parallelNasal?.options?.bypassAtZero).toBe(true);
     expect(graph.nodes.nzPlace?.options?.bypassAtZero).toBe(true);
   });
 });

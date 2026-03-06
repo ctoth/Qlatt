@@ -344,9 +344,11 @@ nodes:
   # FNZ = FNP rather than bypassing the tract section.
   nz:
     type: biquad-notch
+    options:
+      bypassAtZero: true
     params:
-      frequency: { bind: nasalCoreFnz }
-      bandwidth: { bind: nasalCoreBnz }
+      frequency: { bind: nasalCoreFnzBound }
+      bandwidth: { bind: nasalCoreBnzBound }
 
   # Place-specific oral cavity antiformant for nasal murmur.
   nzPlace:
@@ -360,16 +362,20 @@ nodes:
   # Nasal resonator (pole)
   np:
     type: resonator
+    options:
+      bypassAtZero: true
     params:
-      frequency: { bind: nasalCoreFnp }
-      bandwidth: { bind: nasalCoreBnp }
+      frequency: { bind: nasalCoreFnpBound }
+      bandwidth: { bind: nasalCoreBnpBound }
 
   # Parallel nasal resonator
   parallelNasal:
     type: resonator
+    options:
+      bypassAtZero: true
     params:
-      frequency: { bind: nasalCoreFnp }
-      bandwidth: { bind: nasalCoreBnp }
+      frequency: { bind: nasalCoreFnpBound }
+      bandwidth: { bind: nasalCoreBnpBound }
 
   parallelNasalGain:
     type: gain

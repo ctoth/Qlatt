@@ -24,7 +24,14 @@
 - Large papers (>100 pages) require foreman to dispatch chunk readers directly
 - Skill: research-papers:paper-reader via Skill tool
 
-## Session ended early
+## Session 2 (2026-03-05) — 4 papers processed
+- [x] 000789.pdf → Hartenstein_2025_VoiceDirectivityHELS (voice directivity, HELS method)
+- [x] 10.2307@4615399.pdf → Beddor_1986_NasalVowelHeight (nasal vowel perception, pole-zero model)
+- [x] 3_Chapter_Acoustic_Radiation_Fundamentals.pdf → Richards_1968_AcousticRadiationFundamentals (aeroacoustics, NOT relevant)
+- [x] 978-981-15-6627-1_9.pdf → Quene_2021_PitchTempoAttractiveness (pitch/tempo attractiveness)
+- Duplicates identified: Cooper_et_al_1952 copy.pdf, Henrich_JASA_2005_oq.pdf
+- 43 loose PDFs still remaining in papers/
+
+## Session 1 ended early
 - reader-4 was mid-work on browman1989.pdf (may or may not have finished)
 - Holmes book: PNGs converted (317 pages), chunk tasks created but not executed
-- ~33 loose PDFs remaining in papers/

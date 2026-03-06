@@ -389,21 +389,6 @@ parameters:
         value: 1700
         citations:
           - Stevens & House 1956
-      nasal_fnz_m:
-        value: 900
-        citations:
-          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
-          - Fujimura 1962 (nasal consonant antiresonances by place)
-      nasal_fnz_n:
-        value: 1700
-        citations:
-          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
-          - Fujimura 1962 (nasal consonant antiresonances by place)
-      nasal_fnz_ng:
-        value: 2800
-        citations:
-          - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
-          - Fujimura 1962 (nasal consonant antiresonances by place)
       dark_l_f2:
         value: 900
         citations:
@@ -445,10 +430,6 @@ parameters:
         value: 0.4
         citations:
           - Allen et al. 1987 Ch.9
-      nasalization_b1_multiplier:
-        value: 2
-        citations:
-          - Chen 1997
       palatal_f2_locus:
         value: 2600
         citations:
@@ -483,10 +464,6 @@ parameters:
         value: 1100
         citations:
           - Stevens & House 1956 (bilabial locus, back vowel context)
-      nasal_fnz_default:
-        value: 480
-        citations:
-          - Stevens 1998 Ch.10 (nasal consonant antiformant fallback)
       nasal_n_f2_default:
         value: 1400
         citations:
@@ -640,6 +617,108 @@ parameters:
         value: 2500
         citations:
           - Peterson & Barney 1952 (midrange F3 default)
+    nasal:
+      pole_base_hz:
+        value: 250
+        citations:
+          - Klatt 1980 Table I
+      pole_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      zero_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      place_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      vowel_onset_delay_ms:
+        value: 40
+        citations:
+          - Hawkins & Stevens 1985
+      vowel_ramp_ms:
+        value: 40
+        citations:
+          - Hawkins & Stevens 1985
+      vowel_decay_ms:
+        value: 30
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: decay is slightly shorter than the anticipatory rise for cleaner oral release"
+      murmur_fnz_m_hz:
+        value: 1000
+        citations:
+          - Fujimura 1962
+      murmur_fnz_n_hz:
+        value: 1700
+        citations:
+          - Fujimura 1962
+      murmur_fnz_ng_hz:
+        value: 3000
+        citations:
+          - Fujimura 1962
+      murmur_strength:
+        value: 1.0
+        citations:
+          - Fujimura 1962
+          - Stevens 1998 Ch.10
+      anticipatory_peak:
+        value: 0.85
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: strong but not fully closed anticipatory coupling"
+      anticipatory_stage_1_fraction:
+        value: 0.33
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: first anticipatory subwindow ramps toward nasality gently"
+      anticipatory_midpoint_fraction:
+        value: 0.5
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: midpoint used to split the anticipatory nasal ramp into two equal subwindows"
+      anticipatory_stage_2_fraction:
+        value: 0.66
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: second anticipatory subwindow approaches full nasal coupling"
+      carryover_peak:
+        value: 0.55
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: short post-nasal carryover is weaker than nasal murmur"
+      carryover_stage_2_fraction:
+        value: 0.5
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: second carryover subwindow halves the residual nasal coupling"
+      b1_stage_1_fraction:
+        value: 0.33
+        citations:
+          - Chen 1997
+          - "Engineering estimate: early anticipatory B1 cue scales with the first coupling stage"
+      b1_stage_2_fraction:
+        value: 0.66
+        citations:
+          - Chen 1997
+          - "Engineering estimate: later anticipatory B1 cue scales with the second coupling stage"
+      b1_carryover_fraction:
+        value: 0.5
+        citations:
+          - Chen 1997
+          - "Engineering estimate: early carryover B1 cue is half-strength"
+      b1_carryover_tail_fraction:
+        value: 0.25
+        citations:
+          - Chen 1997
+          - "Engineering estimate: final carryover B1 cue decays to one quarter strength"
+      b1_addition_hz:
+        value: 107
+        citations:
+          - Chen 1997
+          - Hawkins & Stevens 1985
     speaker:
       base_f0_hz:
         value: 110

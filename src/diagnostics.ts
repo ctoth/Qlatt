@@ -4,6 +4,7 @@ export interface DiagnosticEntry {
   time: Date;
   level: DiagnosticsLevel;
   message: string;
+  code?: string;
   data?: unknown;
 }
 
@@ -13,9 +14,9 @@ export type DiagnosticsListener = (
 ) => void;
 
 export interface Diagnostics {
-  info(message: string, data?: unknown): void;
-  warn(message: string, data?: unknown): void;
-  error(message: string, data?: unknown): void;
+  info(message: string, data?: unknown, code?: string): void;
+  warn(message: string, data?: unknown, code?: string): void;
+  error(message: string, data?: unknown, code?: string): void;
   clear(): void;
   getEntries(): DiagnosticEntry[];
   format(): string;
@@ -32,11 +33,12 @@ export function createDiagnostics(
   const entries: DiagnosticEntry[] = [];
   const listeners = new Set<DiagnosticsListener>();
 
-  function push(level: DiagnosticsLevel, message: string, data?: unknown): void {
+  function push(level: DiagnosticsLevel, message: string, data?: unknown, code?: string): void {
     const entry: DiagnosticEntry = {
       time: new Date(),
       level,
       message,
+      code,
       data,
     };
     entries.push(entry);
@@ -50,19 +52,20 @@ export function createDiagnostics(
 
   function formatEntry(entry: DiagnosticEntry): string {
     const time = entry.time.toLocaleTimeString();
+    const code = entry.code ? ` ${entry.code}` : "";
     const data = entry.data === undefined ? "" : ` ${JSON.stringify(entry.data)}`;
-    return `[${time}] ${entry.level}: ${entry.message}${data}`;
+    return `[${time}] ${entry.level}${code}: ${entry.message}${data}`;
   }
 
   return {
-    info(message: string, data?: unknown): void {
-      push("info", message, data);
+    info(message: string, data?: unknown, code?: string): void {
+      push("info", message, data, code);
     },
-    warn(message: string, data?: unknown): void {
-      push("warn", message, data);
+    warn(message: string, data?: unknown, code?: string): void {
+      push("warn", message, data, code);
     },
-    error(message: string, data?: unknown): void {
-      push("error", message, data);
+    error(message: string, data?: unknown, code?: string): void {
+      push("error", message, data, code);
     },
     clear(): void {
       entries.length = 0;

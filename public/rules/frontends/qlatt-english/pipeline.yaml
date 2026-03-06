@@ -61,8 +61,9 @@ phases:
       - alveolar_f2_locus
       - alveolar_rel_copy
       - palatal_f2_locus
-      - nasal_antiformant_by_place
+      - nasal_place_assignment
       - nasal_place_assimilation
+      - nasal_windows
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset
@@ -70,7 +71,6 @@ phases:
       - vcv_coarticulation
       - vowel_reduction
       - vowel_rate_undershoot
-      - anticipatory_nasalization
       - non_word_initial_consonant_shortening
       - word_medial_consonant_shortening
       - unstressed_consonant_shortening

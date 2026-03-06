@@ -117,25 +117,38 @@ rules:
     citations:
       - Stevens & House 1956 (formant transitions)
       - Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
-  nasal_antiformant_by_place:
+  nasal_place_assignment:
     kind: scalar
     select:
       stream: phone
       where: current.type == 'nasal'
     apply:
-      - field: params.FNZ
+      - field: params.nasalPlaceIndex
         op: set
         dispatch:
           - when: current.phoneme == 'M'
-            value: params.policy.formant.nasal_fnz_m
+            value: 1
           - when: current.phoneme == 'N'
-            value: params.policy.formant.nasal_fnz_n
+            value: 2
           - when: current.phoneme == 'NG'
-            value: params.policy.formant.nasal_fnz_ng
-          - default: "has(current.?params.FNZ) ? current.params.FNZ : params.policy.formant.nasal_fnz_default"
+            value: 3
+          - default: 0
+        tag: nasal_place
+      - field: params.nasalMurmurStrength
+        op: set
+        value: params.policy.nasal.murmur_strength
+        tag: nasal_murmur
+      - field: params.nasalCoupling
+        op: set
+        value: 1
+        tag: nasal_coupling
+      - field: params.nasalB1AdditionHz
+        op: set
+        value: params.policy.nasal.b1_addition_hz
+        tag: nasalization_secondary_cue
     citations:
-      - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
       - Fujimura 1962 (nasal consonant antiresonances by place)
+      - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
   nasal_place_assimilation:
     kind: scalar
     select:
@@ -148,14 +161,15 @@ rules:
       next_velar: "next_is_obstruent ? (has(n.velar) ? n.velar == true : false) : false"
     constraint: next_is_obstruent
     apply:
-      - field: params.FNZ
+      - field: params.nasalPlaceIndex
         op: set
         dispatch:
           - when: next_bilabial
-            value: params.policy.formant.nasal_fnz_m
+            value: 1
           - when: next_velar
-            value: params.policy.formant.nasal_fnz_ng
-          - default: "has(current.?params.FNZ) ? current.params.FNZ : params.policy.formant.nasal_fnz_n"
+            value: 3
+          - default: 2
+        tag: nasal_place
       - field: params.F2
         op: set
         dispatch:
@@ -168,6 +182,60 @@ rules:
       - Allen et al. 1987 Ch.10 (nasal place assimilation)
       - Fujimura 1962 (nasal consonant place acoustics)
       - Stevens 1998 Ch.10
+  anticipatory_nasalization:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && next != null && next.type == 'nasal'"
+    apply:
+      - field: params.nasalCoupling
+        op: set
+        value: params.policy.nasal.anticipatory_peak
+        tag: nasal_coupling
+      - field: params.nasalB1AdditionHz
+        op: set
+        value: params.policy.nasal.b1_addition_hz
+        tag: nasalization_secondary_cue
+    citations:
+      - Hawkins & Stevens 1985 (time-varying nasalization trajectory)
+      - Chen 1997 (nasalized vowel secondary cues)
+  nasal_murmur_windows:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'nasal'
+    apply:
+      - field: params.nasalCoupling
+        op: set
+        value: 1
+        tag: nasal_coupling
+      - field: params.nasalMurmurStrength
+        op: set
+        value: params.policy.nasal.murmur_strength
+        tag: nasal_murmur
+      - field: params.nasalB1AdditionHz
+        op: set
+        value: params.policy.nasal.b1_addition_hz
+        tag: nasalization_secondary_cue
+    citations:
+      - Fujimura 1962 (nasal murmur interval)
+      - Stevens 1998 Ch.10
+  nasal_carryover:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && prev != null && prev.type == 'nasal'"
+    apply:
+      - field: params.nasalCoupling
+        op: set
+        value: params.policy.nasal.carryover_peak
+        tag: nasal_coupling
+      - field: params.nasalB1AdditionHz
+        op: set
+        value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
+        tag: nasalization_secondary_cue
+    citations:
+      - Hawkins & Stevens 1985 (carryover nasalization)
   dark_l_allophony:
     kind: scalar
     select:
@@ -420,18 +488,6 @@ rules:
     citations:
       - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
       - Moon & Lindblom 1994 (rate-dependent formant undershoot)
-  anticipatory_nasalization:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.type == 'vowel' && (next != null ? next.type == 'nasal' : false)"
-    apply:
-      - field: params.B1
-        op: mul
-        value: params.policy.formant.nasalization_b1_multiplier
-    citations:
-      - Chen 1997 (nasalized vowel acoustics -- B1 increase 1.5-3x)
-      - Hawkins & Stevens 1985 (nasal vowel correlates)
   sw_explicit_override:
     kind: scalar
     select:

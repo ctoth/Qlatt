@@ -25,6 +25,8 @@ import {
   runPhasesWithProvenance,
 } from "./tts-frontend-provenance";
 import { annotateProsody } from "./prosodic-annotator";
+import type { Diagnostics } from "./diagnostics";
+import { emitNasalSubsystemExplainability } from "./nasal-subsystem";
 
 /**
  * Loose token type for intermediate pipeline stages.
@@ -85,6 +87,7 @@ export type TextToKlattTrackOptions = {
    *  spectral tilt (TL), flutter, and jitter. 'modal' or undefined = no change.
    *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
   voiceQuality?: VoiceQuality;
+  diagnostics?: Diagnostics | null;
 };
 
 export type FrontendPhoneSummary = {
@@ -163,7 +166,7 @@ function resolveSpeakerProfile(
 }
 
 const SPEAKER_FORMANT_KEYS = [
-  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "FNP", "FNZ",
+  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
 ] as const;
 
 function applySpeakerProfileToParams(
@@ -219,6 +222,7 @@ function buildTextToKlattTrackDetailed(
 
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
+  const diagnostics = options.diagnostics ?? null;
   const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
@@ -584,6 +588,14 @@ function buildTextToKlattTrackDetailed(
     f0Model,
     speakerParams,
   });
+
+  emitNasalSubsystemExplainability(
+    phoneSequence,
+    track,
+    provenance,
+    diagnostics,
+    tokenDecisionIds,
+  );
 
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,

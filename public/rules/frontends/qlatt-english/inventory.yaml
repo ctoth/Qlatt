@@ -46,11 +46,18 @@ base_params:
   # Fant 1997 connected-speech contour offsets (default neutral).
   EePhraseDb: 0
   RdPhraseOffset: 0
-  FNZ: 0
-  FNP: 0
-  BNP: 0
-  BNZ: 0
   AN: 0
+  nasalCoupling: 0
+  nasalPlaceIndex: 0
+  nasalMurmurStrength: 0
+  nasalPoleBaseHz: 250
+  nasalPoleBwHz: 100
+  nasalZeroBwHz: 100
+  nasalPlaceBwHz: 100
+  nasalPlaceMFnzHz: 1000
+  nasalPlaceNFnzHz: 1700
+  nasalPlaceNgFnzHz: 3000
+  nasalB1AdditionHz: 107
   A1: 0
   A2: 0
   A3: 0
@@ -671,15 +678,12 @@ phoneme_targets:
     B2: 100
     B3: 150
     AV: 58
-    FNP: 270
-    FNZ: 480
-    BNP: 100
-    BNZ: 100
-    AN: 60
     dur: 80
     type: nasal
     voiced: true
     bilabial: true
+    nasal_segment: true
+    nasal_place: m
     dac: 1  # Recasens 1997
   'N':
     F1: 250
@@ -689,15 +693,12 @@ phoneme_targets:
     B2: 100
     B3: 150
     AV: 58
-    FNP: 270
-    FNZ: 480
-    BNP: 100
-    BNZ: 100
-    AN: 60
     dur: 70
     type: nasal
     voiced: true
     alveolar: true
+    nasal_segment: true
+    nasal_place: n
     dac: 2  # Recasens 1997
   NG:
     F1: 250
@@ -707,15 +708,12 @@ phoneme_targets:
     B2: 100
     B3: 150
     AV: 58
-    FNP: 270
-    FNZ: 480
-    BNP: 100
-    BNZ: 100
-    AN: 60
     dur: 90
     type: nasal
     voiced: true
     velar: true
+    nasal_segment: true
+    nasal_place: ng
     dac: 3  # Recasens 1997
   L:
     F1: 310

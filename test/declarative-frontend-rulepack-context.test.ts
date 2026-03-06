@@ -414,15 +414,15 @@ describe("declarative frontend rulepack context migration", () => {
     expect(out[0].params.F2).toBe(1800);
   });
 
-  // --- Nasal antiformant rules ---
+  // --- Nasal subsystem rules ---
 
-  it("sets nasal antiformant FNZ by place of articulation", () => {
+  it("assigns nasal place and murmur controls declaratively", () => {
     const sequence = [
       {
         phoneme: "M",
         type: "nasal",
         bilabial: true,
-        params: { F2: 1100, FNZ: 480 },
+        params: { F2: 1100 },
         duration: 80,
         inherentDuration: 80,
       },
@@ -430,7 +430,7 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "N",
         type: "nasal",
         alveolar: true,
-        params: { F2: 1400, FNZ: 480 },
+        params: { F2: 1400 },
         duration: 70,
         inherentDuration: 70,
       },
@@ -438,19 +438,18 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "NG",
         type: "nasal",
         velar: true,
-        params: { F2: 1700, FNZ: 480 },
+        params: { F2: 1700 },
         duration: 90,
         inherentDuration: 90,
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // /m/: FNZ = 900 (Hawkins & Stevens 1985)
-    expect(out[0].params.FNZ).toBe(900);
-    // /n/: FNZ = 1700
-    expect(out[1].params.FNZ).toBe(1700);
-    // /ng/: FNZ = 2800
-    expect(out[2].params.FNZ).toBe(2800);
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
+    expect(out[0].params.nasalPlaceIndex).toBe(1);
+    expect(out[1].params.nasalPlaceIndex).toBe(2);
+    expect(out[2].params.nasalPlaceIndex).toBe(3);
+    expect(out[0].params.nasalMurmurStrength).toBe(1);
+    expect(out[1].params.nasalCoupling).toBe(1);
   });
 
   // --- Dark /l/ allophony ---
@@ -899,7 +898,7 @@ describe("declarative frontend rulepack context migration", () => {
 
   // --- Anticipatory nasalization ---
 
-  it("widens B1 bandwidth on vowels before nasals", () => {
+  it("applies anticipatory nasal coupling windows on vowels before nasals", () => {
     const sequence = [
       {
         phoneme: "AE",
@@ -914,15 +913,17 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "M",
         type: "nasal",
         bilabial: true,
-        params: { FNZ: 480 },
+        params: {},
         duration: 80,
         inherentDuration: 80,
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // B1 doubled: 70 * 2.0 = 140
-    expect(out[0].params.B1).toBe(140);
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
+    expect(Array.isArray(out[1].control_windows)).toBe(true);
+    const anticipatory = out[1].control_windows.filter((window: any) => window.target === "prev");
+    expect(anticipatory.length).toBe(3);
+    expect(anticipatory[0].fields.nasalCoupling.value).toBeCloseTo(0.2805, 4);
   });
 
   it("does not nasalize vowels not followed by nasal", () => {
@@ -947,9 +948,8 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // B1 unchanged (next is not nasal)
-    expect(out[0].params.B1).toBe(70);
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
+    expect(out[0].control_windows).toBeUndefined();
   });
 
   // --- Non-word-initial consonant shortening ---
@@ -1365,7 +1365,7 @@ describe("declarative frontend rulepack context migration", () => {
         type: "nasal",
         alveolar: true,
         voiced: true,
-        params: { F2: 1400, FNZ: 480 },
+        params: { F2: 1400 },
         duration: 70,
         inherentDuration: 70,
       },
@@ -1380,11 +1380,10 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const n = out.find((t) => t.phoneme === "N");
     expect(n).toBeTruthy();
-    // N before bilabial: FNZ = 900 (like /M/), F2 = 1200 (bilabial locus)
-    expect(n!.params.FNZ).toBe(900);
+    expect(n!.params.nasalPlaceIndex).toBe(1);
     expect(n!.params.F2).toBe(1200);
   });
 
@@ -1395,7 +1394,7 @@ describe("declarative frontend rulepack context migration", () => {
         type: "nasal",
         alveolar: true,
         voiced: true,
-        params: { F2: 1400, FNZ: 480 },
+        params: { F2: 1400 },
         duration: 70,
         inherentDuration: 70,
       },
@@ -1410,11 +1409,10 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const n = out.find((t) => t.phoneme === "N");
     expect(n).toBeTruthy();
-    // N before velar: FNZ = 2800 (like /NG/)
-    expect(n!.params.FNZ).toBe(2800);
+    expect(n!.params.nasalPlaceIndex).toBe(3);
   });
 
   it("does not assimilate N before alveolar stop (same place)", () => {
@@ -1424,7 +1422,7 @@ describe("declarative frontend rulepack context migration", () => {
         type: "nasal",
         alveolar: true,
         voiced: true,
-        params: { F2: 1400, FNZ: 480 },
+        params: { F2: 1400 },
         duration: 70,
         inherentDuration: 70,
       },
@@ -1439,11 +1437,10 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const n = out.find((t) => t.phoneme === "N");
     expect(n).toBeTruthy();
-    // N before alveolar: nasal_antiformant_by_place sets FNZ=1700, assimilation keeps it (no change)
-    expect(n!.params.FNZ).toBe(1700);
+    expect(n!.params.nasalPlaceIndex).toBe(2);
   });
 
   // --- Stop unreleasing ---

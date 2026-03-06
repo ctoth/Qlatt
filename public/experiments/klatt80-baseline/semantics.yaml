@@ -237,27 +237,94 @@ params:
     default: 200
     unit: Hz
 
-  # Nasal resonator parameters
+  # Declarative nasal subsystem controls
+  nasalCoupling:
+    description: "Velopharyngeal coupling ratio d = An / (An + Aoral)"
+    type: float
+    default: 0
+    range: [0, 1]
+
+  nasalPlaceIndex:
+    description: "0=none, 1=/m/, 2=/n/, 3=/ng/"
+    type: integer
+    default: 0
+    range: [0, 3]
+
+  nasalMurmurStrength:
+    description: "Continuous murmur prominence control"
+    type: float
+    default: 0
+    range: [0, 1]
+
+  nasalPoleBaseHz:
+    description: "Core nasal pole frequency"
+    type: float
+    default: 250
+    unit: Hz
+
+  nasalPoleBwHz:
+    description: "Core nasal pole bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  nasalZeroBwHz:
+    description: "Core nasal zero bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  nasalPlaceBwHz:
+    description: "Place antiformant bandwidth"
+    type: float
+    default: 100
+    unit: Hz
+
+  nasalPlaceMFnzHz:
+    description: "Bilabial murmur antiformant frequency"
+    type: float
+    default: 1000
+    unit: Hz
+
+  nasalPlaceNFnzHz:
+    description: "Alveolar murmur antiformant frequency"
+    type: float
+    default: 1700
+    unit: Hz
+
+  nasalPlaceNgFnzHz:
+    description: "Velar murmur antiformant frequency"
+    type: float
+    default: 3000
+    unit: Hz
+
+  nasalB1AdditionHz:
+    description: "Secondary B1 widening cue added by nasal coupling"
+    type: float
+    default: 107
+    unit: Hz
+
+  # Deprecated raw nasal parameters kept temporarily for compatibility.
   FNZ:
-    description: "Nasal zero frequency (0 = bypass)"
+    description: "Deprecated raw nasal zero frequency"
     type: float
     default: 0
     unit: Hz
 
   BNZ:
-    description: "Nasal zero bandwidth (0 = bypass)"
+    description: "Deprecated raw nasal zero bandwidth"
     type: float
     default: 0
     unit: Hz
 
   FNP:
-    description: "Nasal pole frequency (0 = bypass)"
+    description: "Deprecated raw nasal pole frequency"
     type: float
     default: 0
     unit: Hz
 
   BNP:
-    description: "Nasal pole bandwidth (0 = bypass)"
+    description: "Deprecated raw nasal pole bandwidth"
     type: float
     default: 0
     unit: Hz
@@ -387,46 +454,60 @@ realize:
     deps: [RdRef]
     description: "Reference LF return phase ratio from RdRef (Fant 1997 Eq. A1)."
 
+  nasalCouplingClamped:
+    expr: "min(1.0, max(0.0, nasalCoupling))"
+    deps: [nasalCoupling]
+    description: "Clamp velopharyngeal coupling to [0,1]."
+
+  nasalLegacyParamUsed:
+    expr: "(FNP > 0 || FNZ > 0 || BNP > 0 || BNZ > 0) ? 1 : 0"
+    deps: [FNP, FNZ, BNP, BNZ]
+    description: "Detect deprecated raw nasal parameter usage during migration."
+
+  nasalCoreFnp:
+    expr: "nasalLegacyParamUsed == 1 && FNP > 0 ? FNP : nasalPoleBaseHz"
+    deps: [nasalLegacyParamUsed, FNP, nasalPoleBaseHz]
+    description: "Core nasal pole frequency. Klatt 1980 Table I baseline."
+
+  nasalCoreBnp:
+    expr: "nasalLegacyParamUsed == 1 && BNP > 0 ? BNP : nasalPoleBwHz"
+    deps: [nasalLegacyParamUsed, BNP, nasalPoleBwHz]
+    description: "Core nasal pole bandwidth. Klatt 1980 Table I baseline."
+
+  nasalCoreBnz:
+    expr: "nasalLegacyParamUsed == 1 && BNZ > 0 ? BNZ : nasalZeroBwHz"
+    deps: [nasalLegacyParamUsed, BNZ, nasalZeroBwHz]
+    description: "Core nasal zero bandwidth. Klatt 1980 Table I baseline."
+
+  nasalCoreFnzTarget:
+    expr: "F1 > 0 ? (nasalCoreFnp + F1) / 2.0 : nasalCoreFnp"
+    deps: [F1, nasalCoreFnp]
+    description: "Hawkins & Stevens 1985: vowel nasalization target zero sits midway between the nasal pole and F1."
+
+  nasalCoreFnz:
+    expr: "nasalLegacyParamUsed == 1 && FNZ > 0 ? FNZ : nasalCoreFnp + (nasalCoreFnzTarget - nasalCoreFnp) * nasalCouplingClamped"
+    deps: [nasalLegacyParamUsed, FNZ, nasalCoreFnp, nasalCoreFnzTarget, nasalCouplingClamped]
+    description: "Klatt 1980 oral cancellation baseline plus Hawkins & Stevens 1985 coupling interpolation."
+
+  nasalPlaceFnz:
+    expr: "nasalPlaceIndex == 1 ? nasalPlaceMFnzHz : (nasalPlaceIndex == 2 ? nasalPlaceNFnzHz : (nasalPlaceIndex == 3 ? nasalPlaceNgFnzHz : 0.0))"
+    deps: [nasalPlaceIndex, nasalPlaceMFnzHz, nasalPlaceNFnzHz, nasalPlaceNgFnzHz]
+    description: "Fujimura 1962 place-specific oral-cavity antiformant selection."
+
+  nasalPlaceBnz:
+    expr: "nasalPlaceIndex > 0 && nasalMurmurStrength > 0 ? nasalPlaceBwHz : 0.0"
+    deps: [nasalPlaceIndex, nasalMurmurStrength, nasalPlaceBwHz]
+    description: "Enable the place antiformant only during nasal murmur."
+
   B1:
-    expr: "max(B1 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0, 40.0)"
-    deps: [F1, Ra, RaRef]
+    expr: "max(B1 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0 + nasalB1AdditionHz * nasalCouplingClamped, 40.0)"
+    deps: [F1, Ra, RaRef, nasalB1AdditionHz, nasalCouplingClamped]
     description: "Adjust B1 for glottal leakage relative to RdRef (Fant 1997). Floor 40 Hz."
 
   B2:
     expr: "max(B2 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0 * F1 / (2.0 * F2), 40.0)"
     deps: [F1, F2, Ra, RaRef]
     description: "Adjust B2 for glottal leakage relative to RdRef (Fant 1997). Floor 40 Hz."
-
-  # ---------------------------------------------------------------------------
-  # Nasal resonator step scheduling
-  #
-  # The cascade nasal pole (np) and nasal zero (nz) use bypassAtZero: when
-  # FNP/FNZ are 0 the node is bypassed entirely.  With the default ramp
-  # scheduling, transitions between 0 and the target frequency create a
-  # frequency sweep through the cascade chain, coloring all voiced signal
-  # with a moving notch/peak.  Step scheduling eliminates this artifact —
-  # the resonators switch on/off instantaneously at frame boundaries.
-  # ---------------------------------------------------------------------------
-  FNP:
-    expr: "FNP"
-    deps: []
-    step: true
-    description: "Nasal pole frequency — step to avoid sweep artifacts through cascade"
-  FNZ:
-    expr: "FNZ"
-    deps: []
-    step: true
-    description: "Nasal zero frequency — step to avoid sweep artifacts through cascade"
-  BNP:
-    expr: "BNP"
-    deps: []
-    step: true
-    description: "Nasal pole bandwidth — step (paired with FNP)"
-  BNZ:
-    expr: "BNZ"
-    deps: []
-    step: true
-    description: "Nasal zero bandwidth — step (paired with FNZ)"
 
   # Fant 1997 connected-speech covariation:
   # a 1 dB increase in 1/Rd corresponds to a 2 dB increase in Ee.
@@ -468,8 +549,8 @@ realize:
 
   # Nasal and bypass gains
   anLinear:
-    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
-    deps: [AN, parallelScale]
+    expr: "dbToLinear(AN + 60.0 * nasalMurmurStrength + ndbScale.AN) * parallelScale"
+    deps: [AN, nasalMurmurStrength, parallelScale]
 
   abLinear:
     expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"
@@ -517,8 +598,8 @@ realize:
     step: true
 
   anGainScaled:
-    expr: "dbToLinear(AN + ndbScale.AN) * parallelScale"
-    deps: [AN, parallelScale]
+    expr: "dbToLinear(AN + 60.0 * nasalMurmurStrength + ndbScale.AN) * parallelScale"
+    deps: [AN, nasalMurmurStrength, parallelScale]
 
   abGainScaled:
     expr: "-dbToLinear(AB + ndbScale.AB) * parallelScale"

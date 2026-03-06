@@ -136,7 +136,6 @@ function emitFrameStageEvents(
     const clampedCoupling = Math.max(0, Math.min(1, coupling));
     const coreFnp = Number(params.nasalCoreFnp ?? params.nasalPoleBaseHz ?? 250);
     const coreFnz = Number(params.nasalCoreFnz ?? coreFnp);
-    const coreFnzTarget = Number(params.nasalCoreFnzTarget ?? coreFnp);
     const placeFnz = Number(params.nasalPlaceFnz ?? 0);
     const placeBnz = Number(params.nasalPlaceBnz ?? 0);
     const placeIndex = Number(params.nasalPlaceIndex ?? 0);
@@ -204,7 +203,6 @@ function emitFrameStageEvents(
       });
     }
 
-    void coreFnzTarget;
   }
 }
 

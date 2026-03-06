@@ -169,26 +169,26 @@ export function annotateProsody(
   // Step 1: Identify phrases by splitting at SIL tokens with punctuation.
   const phrases = identifyPhrases(result);
 
-  // Step 2-3: Mark function/content words.
+  // Step 2: Mark function/content words.
   markFunctionWords(result);
 
-  // Step 4: Assign accent (stress==1 AND content word).
+  // Step 3: Assign accent (stress==1 AND content word).
   assignAccent(result);
 
-  // Step 5-6: Identify nuclear accent and assign accent types per phrase.
+  // Steps 4-7: Per-phrase passes (nuclear accent, accent types, edge tones, long-phrase breaking).
   for (let pi = 0; pi < phrases.length; pi++) {
     const phrase = phrases[pi];
 
-    // Step 4 (nuclear accent): find last accented token in phrase.
+    // Step 4: find last accented token in phrase (nuclear accent).
     identifyNuclearAccent(result, phrase);
 
     // Step 5: Assign accent types.
     assignAccentTypes(result, phrase, phrase.punctuation);
 
-    // Step 7: Assign phrase accent and boundary tone on phrase boundary.
+    // Step 6: Assign phrase accent and boundary tone on phrase boundary.
     assignPhraseEdgeTones(result, phrase);
 
-    // Step 8: Long phrase breaking heuristic.
+    // Step 7: Long phrase breaking heuristic.
     applyLongPhraseBreaking(result, phrase);
 
     // Provenance
@@ -197,10 +197,10 @@ export function annotateProsody(
     }
   }
 
-  // Step 6: Assign break indices.
+  // Step 8: Assign break indices.
   assignBreakIndices(result, phrases);
 
-  // Step 6b: Assign accentIndexInPhrase. This depends on break indices because
+  // Step 9: Assign accentIndexInPhrase. This depends on break indices because
   // downstep resets only at IP boundaries (breakIndex=4), not at ip boundaries
   // (breakIndex=3). Citations: Pierrehumbert 1980, Ladd 2008
   assignAccentIndices(result);
@@ -251,7 +251,7 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
 }
 
 // ---------------------------------------------------------------------------
-// Step 2-3: Mark function/content words
+// Step 2: Mark function/content words
 // ---------------------------------------------------------------------------
 
 function markFunctionWords(tokens: PipelineToken[]): void {
@@ -279,7 +279,7 @@ function markFunctionWords(tokens: PipelineToken[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 4: Assign accent
+// Step 3: Assign accent
 // ---------------------------------------------------------------------------
 
 function assignAccent(tokens: PipelineToken[]): void {
@@ -358,7 +358,7 @@ function assignAccent(tokens: PipelineToken[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 5: Identify nuclear accent (per phrase)
+// Step 4: Identify nuclear accent (per phrase)
 // ---------------------------------------------------------------------------
 
 function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
@@ -379,7 +379,7 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 5: Assign accent types
+// Step 5: Assign accent types (per phrase)
 // ---------------------------------------------------------------------------
 
 /**
@@ -437,7 +437,7 @@ function assignAccentTypes(
 }
 
 // ---------------------------------------------------------------------------
-// Step 5b: Assign accentIndexInPhrase
+// Step 9: Assign accentIndexInPhrase
 // ---------------------------------------------------------------------------
 
 /**
@@ -468,7 +468,7 @@ function assignAccentIndices(tokens: PipelineToken[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 6: Assign break indices
+// Step 8: Assign break indices
 // ---------------------------------------------------------------------------
 
 /**
@@ -546,7 +546,7 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 7: Assign phrase accent and boundary tone
+// Step 6: Assign phrase accent and boundary tone
 // ---------------------------------------------------------------------------
 
 /**
@@ -587,7 +587,7 @@ function assignPhraseEdgeTones(tokens: PipelineToken[], phrase: Phrase): void {
 }
 
 // ---------------------------------------------------------------------------
-// Step 8: Long phrase breaking
+// Step 7: Long phrase breaking
 // ---------------------------------------------------------------------------
 
 /**

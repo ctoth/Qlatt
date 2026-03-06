@@ -606,6 +606,27 @@ parameters:
         value: 13
         citations:
           - "Shadle et al. (2023)"
+      schwa_coronal_f2_target:
+        value: 1600
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (schwa fronts to [ɨ] in coronal contexts)
+          - "Engineering estimate: midpoint between schwa F2 (~1190 Hz) and [ɨ] F2 (~1800 Hz)"
+      schwa_coronal_fronting_rate:
+        value: 0.5
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (67-83% of schwas front in coronal contexts)
+          - "Engineering estimate: moderate blending rate matching observed frequency"
+      uw_coronal_f2_target:
+        value: 1500
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (/u/ fronting in coronal environments)
+          - Harrington et al. 2011 (fronted SSBE /u/ F2 ~2050-2250 Hz; American English less extreme)
+          - "Engineering estimate: conservative target well below SSBE values for General American"
+      uw_coronal_fronting_rate:
+        value: 0.4
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (86% accuracy with both-side coronals)
+          - "Engineering estimate: moderate blending, less than schwa due to stronger /u/ identity"
       default_f1_fallback:
         value: 500
         citations:

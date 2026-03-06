@@ -38,7 +38,9 @@ phases:
       - the_prevocalic_reduction
       - to_reduction
       - t_flapping
+      - d_flapping
       - t_deletion
+      - d_deletion
       - t_glottalization
       - palatalization_dy
       - palatalization_ty
@@ -67,6 +69,8 @@ phases:
       - burst_spectral_template
       - vcv_coarticulation
       - vowel_reduction
+      - schwa_coronal_fronting
+      - uw_coronal_fronting
       - vowel_rate_undershoot
       - non_word_initial_consonant_shortening
       - word_medial_consonant_shortening

@@ -165,6 +165,66 @@ rules:
     citations:
       - Miller 1998, Pronunciation Modeling in Speech Synthesis (t-glottalization before sonorants)
       - Allen 1987, MITalk Ch.8 (rule 3: TT -> TQ before sonorants)
+  d_flapping:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'D' && prev != null && prev.type == 'vowel' && (has(prev.stress) ? prev.stress == 1 : false)
+        && next != null && next.type == 'vowel' && (has(next.stress) ? next.stress == 0 : false)
+    define:
+      dx_target: target("DX")
+      dx_params: dx_target.params
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "\"DX\""
+          type: "\"flap\""
+          duration: "params.policy.duration.flap_duration_ms"
+          inherentDuration: "params.policy.duration.flap_duration_ms"
+          params: dx_params
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory -- /d/ flapping mirrors /t/ flapping)
+  d_deletion:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'D' &&
+        prev != null && prev.type != 'vowel' &&
+        (has(current.word) && has(prev.word) ? current.word == prev.word : true) &&
+        next != null && next.type != 'vowel' &&
+        (has(current.word) && has(next.word) ? current.word != next.word : false)
+    apply:
+      - field: duration
+        op: set
+        value: 0
+        tag: d_deletion
+      - field: inherentDuration
+        op: set
+        value: 0
+        tag: d_deletion
+      - field: params.AV
+        op: set
+        value: 0
+        tag: d_deletion
+      - field: params.AF
+        op: set
+        value: 0
+        tag: d_deletion
+      - field: params.AH
+        op: set
+        value: 0
+        tag: d_deletion
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (d-deletion in coda clusters, mirrors t-deletion)
+      - Allen 1987, MITalk Ch.8 (PHONO2 rules)
   palatalization_dy:
     kind: postlexical
     match: palatalization_dy_pattern

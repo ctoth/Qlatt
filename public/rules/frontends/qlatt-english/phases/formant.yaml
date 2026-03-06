@@ -542,6 +542,67 @@ rules:
     citations:
       - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
       - Moon & Lindblom 1994 (rate-dependent formant undershoot)
+  schwa_coronal_fronting:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
+        (has(current.stress) ? current.stress == 0 : true)
+    define:
+      prev_coronal: >-
+        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
+        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
+      next_coronal: >-
+        next != null ? (has(next.alveolar) ? next.alveolar == true :
+        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
+      both_coronal: "prev_coronal && next_coronal"
+      one_coronal: "prev_coronal || next_coronal"
+    constraint: one_coronal
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: both_coronal
+            value: >-
+              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              params.policy.formant.schwa_coronal_fronting_rate
+          - default: >-
+              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              params.policy.formant.schwa_coronal_fronting_rate * 0.5
+        tag: coronal_fronting
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (schwa fronting to [ɨ] in coronal environments, 67-83% accuracy, both-side coronal strongest predictor)
+  uw_coronal_fronting:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
+    define:
+      prev_coronal: >-
+        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
+        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
+      next_coronal: >-
+        next != null ? (has(next.alveolar) ? next.alveolar == true :
+        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
+      both_coronal: "prev_coronal && next_coronal"
+      one_coronal: "prev_coronal || next_coronal"
+    constraint: one_coronal
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: both_coronal
+            value: >-
+              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              params.policy.formant.uw_coronal_fronting_rate
+          - default: >-
+              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              params.policy.formant.uw_coronal_fronting_rate * 0.5
+        tag: coronal_fronting
+    citations:
+      - Miller 1998, Pronunciation Modeling in Speech Synthesis (/u/ fronting in coronal environments, 86% accuracy with coronals on both sides)
+      - Harrington et al. 2011 (tongue advancement, not lip unrounding, drives /u/ fronting)
   sw_explicit_override:
     kind: scalar
     select:

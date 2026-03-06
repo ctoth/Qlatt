@@ -215,4 +215,3 @@ export async function preloadBundledRulepackSpec(
 }
 
 export const QLATT_ENGLISH_RULEPACK = await preloadBundledRulepackSpec(DEFAULT_FRONTEND_ID);
-export const QLATT_V12_CEL_RULEPACK = QLATT_ENGLISH_RULEPACK;

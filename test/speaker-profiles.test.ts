@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
-import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import { textToKlattTrack } from "../src/tts-frontend";
 
-const spec = QLATT_V12_CEL_RULEPACK as Record<string, any>;
+const spec = QLATT_ENGLISH_RULEPACK as Record<string, any>;
 
 describe("speaker profile context", () => {
   describe("YAML configuration", () => {

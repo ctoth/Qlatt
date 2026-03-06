@@ -4,9 +4,9 @@
  * the hardcoded defaults in track-assembler.ts and transcribe-text.ts.
  */
 import { describe, expect, it } from "vitest";
-import { QLATT_V12_CEL_RULEPACK } from "../src/declarative-frontend/rule-pack";
+import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 
-const spec = QLATT_V12_CEL_RULEPACK as Record<string, any>;
+const spec = QLATT_ENGLISH_RULEPACK as Record<string, any>;
 
 describe("YAML frontend config — output section", () => {
   const output = spec.output;

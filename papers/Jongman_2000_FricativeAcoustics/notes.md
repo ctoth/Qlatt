@@ -268,7 +268,7 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 ### Already in Collection
 - **Behrens_Blumstein_1988_FricativeAmplitude**
 - **Crystal_House_1988_StopConsonantDuration**
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited for foundational work on perception of synthetic speech sounds and consonant acoustic cues
 - **Jongman_1989_FricativeDuration**
 - **Stevens_1971_AirflowTurbulenceNoise**
 - **Stevens_1998_AcousticPhonetics**

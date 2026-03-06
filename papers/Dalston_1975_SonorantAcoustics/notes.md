@@ -195,7 +195,7 @@ Key acoustic cues that distinguish sonorants:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited for pattern playback experiments on perception of synthetic speech sounds including consonant-vowel syllable cues
 - **Fant_1960_AcousticTheorySpeechProduction**
 
 ### New Leads (Not Yet in Collection)

@@ -195,6 +195,6 @@ For velar stops (/g,k/):
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited for the original burst and formant transition perception experiments using pattern playback; this paper directly builds on Cooper et al.'s findings
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Zue_1976_StopConsonantAcoustics**

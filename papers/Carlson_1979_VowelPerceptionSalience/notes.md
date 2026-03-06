@@ -178,3 +178,6 @@ Linear interpolation between control points.
 - Establishes just-noticeable-difference (JND) thresholds for vowel parameters, crucial for understanding perceptual salience of acoustic manipulations.
 - **Zwicker, E. & Feldtkeller, R. (1967)** - Das Ohr als Nachrichtenempfänger
 - Comprehensive auditory system modeling for understanding critical band analysis and psychoacoustic principles underlying vowel perception.
+
+### Conceptual Links (not citation-based)
+- **Peterson_Barney_1952_VowelControl** — P&B established the canonical F1/F2/F3 vowel space and documented which vowels are confused; Carlson's perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) explains *why* formant frequency is the primary dimension of vowel identity and why P&B's F1-F2 plot captures the dominant perceptual structure

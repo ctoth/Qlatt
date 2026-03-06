@@ -326,7 +326,8 @@ Fant's empirical attenuation formula ($a = 0.007 \cdot (\pi/A)^{1/2}$) provides 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited as foundational perception study validating formant synthesis; systematic experiments on stop consonant cues using pattern playback
+- **Delattre_1952_AcousticDeterminantsVowelColor** — cited for two-formant vowel synthesis and acoustic determinants of vowel color (Word 8:195-210)
 - **House_Stevens_1956_NasalizationVowels**
 - **Peterson_Barney_1952_VowelControl**
 

@@ -340,7 +340,7 @@ When spacing > 3.5 Bark:
 
 ### Already in Collection
 - **Carlson_1975_RuleBasedTTS**
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited for stop consonant perception experiments demonstrating acoustic cues (burst frequency, F2 transitions) for place of articulation
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Hawkins_Stevens_1985_NasalVowelCorrelates**
 - **House_Stevens_1956_NasalizationVowels**
@@ -351,3 +351,6 @@ When spacing > 3.5 Bark:
 - **Chistovich & Lublinskaya (1979) - Center of Gravity Effect**: Critical auditory perception experiments on formant spacing and vowel quality perception; demonstrates perceptual thresholds in the auditory domain.
 - **Jakobson, Fant & Halle (1963) - Preliminaries to Speech Analysis**: Classic distinctive feature theory reference; provides the theoretical context for understanding how quantal relations map to phonological features.
 - **Delgutte & Kiang (1984a, 1984b) - Speech Coding in the Auditory Nerve**: Foundational auditory physiology work examining how auditory-nerve responses encode acoustic information; directly supports Stevens' claims about auditory-acoustic quantal relations.
+
+### Conceptual Links (not citation-based)
+- **Peterson_Barney_1952_VowelControl** — P&B's empirical vowel space (Fig. 8) shows clear clusters with overlap between adjacent vowels; quantal theory provides the articulatory-acoustic mechanism explaining this pattern — stable articulatory plateaus produce well-separated acoustic clusters (the clear vowel regions), while transition zones between plateaus produce the overlapping regions where listeners confuse adjacent vowels

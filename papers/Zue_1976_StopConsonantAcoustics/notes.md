@@ -270,7 +270,7 @@ Parameters:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited as foundational Haskins work on perception of synthetic speech sounds; Zue extends with comprehensive natural speech measurements of VOT, burst frequency, and burst amplitude
 - **Stevens_1971_AirflowTurbulenceNoise**
 - **Sundberg_1972_SingingFormant**
 

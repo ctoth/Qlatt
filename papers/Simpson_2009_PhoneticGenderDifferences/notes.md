@@ -160,3 +160,6 @@ For Qlatt's voice preset system, this paper establishes that:
 
 ### Supersedes or Recontextualizes
 None -- this is a review that synthesizes existing work without correcting prior collection papers.
+
+### Conceptual Links (not citation-based)
+- **Peterson_Barney_1952_VowelControl** — P&B's Table II provides male/female/children formant data with implicit non-uniform scaling ratios (F1 Ch/M ~1.4-1.5, F2 Ch/M ~1.3-1.4); Simpson documents that this non-uniformity is vowel-dependent and cannot be reduced to a single scaling constant, and that children's formant differences from adults emerge before puberty as learned sociophonetic behavior rather than purely anatomical scaling — directly addressing P&B's open question about speaker normalization for synthesis

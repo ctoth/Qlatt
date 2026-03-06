@@ -179,7 +179,7 @@ COMPACT (Velar):
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor**
+- **Cooper_1952_PerceptionSyntheticSpeech** — cited for the original synthetic speech perception experiments on stop consonant burst and transition cues; Blumstein & Stevens extend with invariant spectral templates
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Klatt_1976_SegmentalDuration**
 - **Sundberg_1972_SingingFormant**

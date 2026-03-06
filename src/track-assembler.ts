@@ -66,6 +66,7 @@ export type OutputConfig = {
     default_ms?: number;
   };
   transition_ms?: number;
+  initial_silence_ms?: number;
   final_silence_ms?: number;
 };
 
@@ -125,6 +126,17 @@ function toFiniteNumber(value: unknown): number | null {
     return Number.isSafeInteger(numericValue) ? numericValue : null;
   }
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function coerceKlattParams(params: Record<string, unknown>): KlattParams {
+  const coerced: KlattParams = {};
+  for (const [key, value] of Object.entries(params)) {
+    const numericValue = toFiniteNumber(value);
+    if (numericValue != null) {
+      coerced[key] = numericValue;
+    }
+  }
+  return coerced;
 }
 
 function getSyncMarkerKey(markLike: unknown): string | null {
@@ -1360,6 +1372,7 @@ const DEFAULT_SMOOTH_TYPES = new Set(["vowel", "nasal", "liquid", "glide"]);
 const DEFAULT_BLEND_KEYS = ["F1", "F2", "F3", "B1", "B2", "B3"];
 const DEFAULT_MIN_DURATION_STOP_RELEASE_MS = 5;
 const DEFAULT_MIN_DURATION_MS = 20;
+const DEFAULT_INITIAL_SILENCE_MS = 30;
 const DEFAULT_FINAL_SILENCE_MS = 100;
 
 function blendParams(
@@ -1452,6 +1465,7 @@ export function assembleKlattTrack(
     cfg?.min_duration?.stop_release_ms ?? DEFAULT_MIN_DURATION_STOP_RELEASE_MS;
   const minDurationDefaultMs =
     cfg?.min_duration?.default_ms ?? DEFAULT_MIN_DURATION_MS;
+  const initialSilenceMs = cfg?.initial_silence_ms ?? DEFAULT_INITIAL_SILENCE_MS;
   const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,
@@ -1475,6 +1489,7 @@ export function assembleKlattTrack(
       const fallbackDur = isStopRel ? toFiniteNumber(phonemeTargetMap[ph.phoneme]?.dur) : null;
       totalDuration += resolveTokenDurationMs(ph, minDur, fallbackDur) / 1000.0;
     }
+    totalDuration += initialSilenceMs / 1000.0;
     totalDuration += finalSilenceMs / 1000.0;
 
     const layerCommands = extractLayerCommands(parameterSequence, syncTimeByKey);
@@ -1501,7 +1516,7 @@ export function assembleKlattTrack(
   }
 
   const klattTrack: KlattFrame[] = [];
-  let currentTime = 0;
+  let currentTime = Math.max(0, initialSilenceMs) / 1000.0;
   const transitionSec = Math.max(0, transitionMs) / 1000.0;
   const resolvedControlWindowsByIndex = collectResolvedControlWindows(
     phoneSequence,
@@ -1515,7 +1530,7 @@ export function assembleKlattTrack(
   if (vq) applyVoiceQualityOverrides(silParams, vq);
   klattTrack.push({
     time: 0,
-    params: silParams,
+    params: coerceKlattParams(silParams),
   });
 
   for (let i = 0; i < phoneSequence.length; i++) {
@@ -1540,7 +1555,7 @@ export function assembleKlattTrack(
 
     // Use the params object directly from the sequence (already filled and potentially modified by rules)
     const finalParams: KlattParams = ph.params
-      ? { ...ph.params }
+      ? coerceKlattParams(ph.params)
       : fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
 
     // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
@@ -1597,7 +1612,7 @@ export function assembleKlattTrack(
           time: eventTime,
           phoneme: ph.phoneme,
           word: ph.word,
-          params: eventParams,
+          params: coerceKlattParams(eventParams),
         });
       }
 
@@ -1612,7 +1627,7 @@ export function assembleKlattTrack(
   klattTrack.push({
     time: finalTime,
     phoneme: "SIL",
-    params: finalSilParams,
+    params: coerceKlattParams(finalSilParams),
   });
 
   return klattTrack;

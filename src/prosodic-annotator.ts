@@ -555,7 +555,7 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
  * - Declarative (.): phraseAccent='L-', boundaryTone='L%'
  * - Question (?): phraseAccent='H-', boundaryTone='H%'
  * - Continuation (,, ;, :): phraseAccent='L-', boundaryTone='H%'
- * - Question/Exclamation onset: initialBoundaryTone='%H'
+ * - Question onset: initialBoundaryTone='%H'
  *
  * Set on the SIL token at the phrase boundary.
  *
@@ -570,7 +570,7 @@ function assignPhraseEdgeTones(tokens: PipelineToken[], phrase: Phrase): void {
     (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].phoneme !== "SIL",
   );
 
-  if (firstTokenIndex != null && firstTokenIndex >= 0 && (punct === "?" || punct === "!")) {
+  if (firstTokenIndex != null && firstTokenIndex >= 0 && punct === "?") {
     tokens[firstTokenIndex].initialBoundaryTone = "%H";
   }
 

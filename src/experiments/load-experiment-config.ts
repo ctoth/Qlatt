@@ -47,14 +47,19 @@ function mergeSemantics(
   child: SemanticsDocument | null,
 ): SemanticsDocument {
   if (!child) return parent;
-  return {
-    params: { ...(parent.params || {}), ...(child.params || {}) },
-    constants: deepMerge(
-      (parent.constants as Record<string, unknown>) || {},
-      (child.constants as Record<string, unknown>) || {},
-    ),
-    realize: { ...(parent.realize || {}), ...(child.realize || {}) },
-  };
+  const merged = {
+    ...parent,
+    ...child,
+  } as SemanticsDocument;
+
+  merged.params = { ...(parent.params || {}), ...(child.params || {}) };
+  merged.constants = deepMerge(
+    (parent.constants as Record<string, unknown>) || {},
+    (child.constants as Record<string, unknown>) || {},
+  );
+  merged.realize = { ...(parent.realize || {}), ...(child.realize || {}) };
+
+  return merged;
 }
 
 async function loadJsonDocument<T>(specPath: string): Promise<T> {

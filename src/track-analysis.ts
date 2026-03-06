@@ -4,7 +4,8 @@
 import { dbToLinear, proximity, ndbScale } from './builtin-functions';
 
 type Range = { min: number; max: number };
-type TrackParams = Record<string, number | undefined>;
+type TrackNumeric = number | bigint | undefined;
+type TrackParams = Record<string, TrackNumeric>;
 type TrackEvent = { time: number; phoneme?: string; params?: TrackParams };
 type TelemetryLike = { get?: (key: string) => any } | Map<string, any> | null | undefined;
 type StopReleaseExpected = {
@@ -21,6 +22,18 @@ type StopReleaseExpected = {
   A5?: number;
   A6?: number;
 };
+
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "bigint") {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  }
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function getParam(params: TrackParams | undefined, key: string, fallback = 0): number {
+  return toFiniteNumber(params?.[key], fallback);
+}
 
 // Klatt 80 Table III expected values for stop releases
 export const KLATT80_EXPECTED: Record<string, StopReleaseExpected> = {
@@ -155,8 +168,8 @@ export function summarizeTrack(track: TrackEvent[]): {
   f0Max: number;
 } {
   const totalTime = track.length ? track[track.length - 1].time : 0;
-  const voiced = track.filter((e) => (e.params?.AV ?? 0) > 0 || (e.params?.AVS ?? 0) > 0);
-  const f0Values = track.map((e) => e.params?.F0 ?? 0).filter((v) => v > 0);
+  const voiced = track.filter((e) => getParam(e.params, "AV") > 0 || getParam(e.params, "AVS") > 0);
+  const f0Values = track.map((e) => getParam(e.params, "F0")).filter((v) => v > 0);
   return {
     events: track.length,
     totalTime,
@@ -177,20 +190,22 @@ export function summarizeParallel(track: TrackEvent[]): {
   for (const event of track) {
     const params = event.params;
     if (!params) continue;
-    if (params.SW === 1) swOn += 1;
-    else if (Number.isFinite(params.SW)) swOff += 1;
-    const hasParallel = (params.AN ?? 0) > 0 || (params.AB ?? 0) > 0 ||
-      [params.A1, params.A2, params.A3, params.A4, params.A5, params.A6].some((v) => (v ?? 0) > 0) ||
-      (params.AVS ?? 0) > 0 || (params.AF ?? 0) > 0;
+    const sw = getParam(params, "SW", Number.NaN);
+    if (sw === 1) swOn += 1;
+    else if (Number.isFinite(sw)) swOff += 1;
+    const hasParallel = getParam(params, "AN") > 0 || getParam(params, "AB") > 0 ||
+      ["A1", "A2", "A3", "A4", "A5", "A6"].some((key) => getParam(params, key) > 0) ||
+      getParam(params, "AVS") > 0 || getParam(params, "AF") > 0;
     if (hasParallel) parallelEvents += 1;
   }
   for (let i = 0; i < track.length - 1; i += 1) {
     const params = track[i]?.params;
     const duration = track[i + 1].time - track[i].time;
     if (!Number.isFinite(duration) || duration <= 0) continue;
-    if (params && Number.isFinite(params.SW)) {
+    const sw = getParam(params, "SW", Number.NaN);
+    if (Number.isFinite(sw)) {
       swTotalSeconds += duration;
-      if (params.SW === 1) swOnSeconds += duration;
+      if (sw === 1) swOnSeconds += duration;
     }
   }
   return { swOn, swOff, parallelEvents, swOnSeconds, swOnShare: swTotalSeconds > 0 ? (swOnSeconds / swTotalSeconds) * 100 : 0 };
@@ -202,8 +217,8 @@ export function summarizeLfMode(track: TrackEvent[], fallbackMode = 0): { counts
   let current = Number.isFinite(fallbackMode) ? Math.round(fallbackMode) : 0;
   for (let i = 0; i < track.length; i += 1) {
     const event = track[i];
-    const lfMode = event.params?.lfMode;
-    if (typeof lfMode === 'number' && Number.isFinite(lfMode)) current = Math.round(lfMode);
+    const lfMode = getParam(event.params, "lfMode", Number.NaN);
+    if (Number.isFinite(lfMode)) current = Math.round(lfMode);
     counts[current] = (counts[current] || 0) + 1;
     const duration = i < track.length - 1 ? track[i + 1].time - event.time : 0;
     if (Number.isFinite(duration) && duration > 0) seconds[current] = (seconds[current] || 0) + duration;
@@ -214,8 +229,8 @@ export function summarizeLfMode(track: TrackEvent[], fallbackMode = 0): { counts
 export function collectParamRange(track: TrackEvent[], key: string, fallback: number): Range | null {
   let min = Infinity, max = -Infinity, current = fallback;
   for (const event of track) {
-    const next = event?.params?.[key];
-    if (typeof next === 'number' && Number.isFinite(next)) current = next;
+    const next = getParam(event?.params, key, Number.NaN);
+    if (Number.isFinite(next)) current = next;
     if (Number.isFinite(current)) { min = Math.min(min, current); max = Math.max(max, current); }
   }
   return (!Number.isFinite(min) || !Number.isFinite(max)) ? null : { min, max };
@@ -228,8 +243,8 @@ export function findVoicingIssues(track: TrackEvent[], fallback: Partial<Record<
     const event = track[i];
     if (event?.params) {
       for (const key of Object.keys(state)) {
-        const value = event.params[key];
-        if (typeof value === 'number' && Number.isFinite(value)) state[key] = value;
+        const value = getParam(event.params, key, Number.NaN);
+        if (Number.isFinite(value)) state[key] = value;
       }
     }
     const voiced = (state.AV ?? 0) > 0 || (state.AVS ?? 0) > 0;
@@ -295,47 +310,50 @@ export function updateRange(range: Range | null, value: number): Range | null {
 
 export function analyzeTrackGains(
   track: TrackEvent[],
-  synthParams: Record<string, number | undefined>,
+  synthParams: Record<string, TrackNumeric>,
   sampleRate = 48000,
 ): { ranges: any; warnings: string[]; parallelScale: number } | null {
   if (!track || track.length === 0) return null;
   const ranges: any = { voiceGain: null, aspGain: null, fricGain: null, parallelVoiceGain: null, parallelBypassGain: null, parallelFormantGain: null, parallelNasalGain: null, masterGain: null, mix: null };
-  const parallelScale = synthParams.parallelGainScale ?? 1.0;
-  const baseBoost = synthParams.masterGain ?? 1.0;
+  const parallelScale = toFiniteNumber(synthParams.parallelGainScale, 1.0);
+  const baseBoost = toFiniteNumber(synthParams.masterGain, 1.0);
   const state = { ...(track[0]?.params ?? {}) };
 
   for (const event of track) {
     if (event?.params) Object.assign(state, event.params);
-    const f1 = state.F1 ?? synthParams.F1 ?? 0;
-    const f2 = state.F2 ?? synthParams.F2 ?? 0;
-    const f3 = state.F3 ?? synthParams.F3 ?? 0;
-    const f4 = state.F4 ?? synthParams.F4 ?? 0;
-    const f5 = state.F5 ?? synthParams.F5 ?? 0;
-    const f6 = state.F6 ?? synthParams.F6 ?? 0;
+    const f1 = toFiniteNumber(state.F1, toFiniteNumber(synthParams.F1));
+    const f2 = toFiniteNumber(state.F2, toFiniteNumber(synthParams.F2));
+    const f3 = toFiniteNumber(state.F3, toFiniteNumber(synthParams.F3));
+    const f4 = toFiniteNumber(state.F4, toFiniteNumber(synthParams.F4));
+    const f5 = toFiniteNumber(state.F5, toFiniteNumber(synthParams.F5));
+    const f6 = toFiniteNumber(state.F6, toFiniteNumber(synthParams.F6));
     const delF1 = f1 > 0 ? f1 / 500 : 1, delF2 = f2 > 0 ? f2 / 1500 : 1;
     let a2Cor = delF1 * delF1; const a2Skrt = delF2 * delF2; const a3Cor = a2Cor * a2Skrt;
     a2Cor = delF2 !== 0 ? a2Cor / delF2 : a2Cor;
     const n12Cor = proximity(f2 - f1), n23Cor = proximity(f3 - f2 - 50), n34Cor = proximity(f4 - f3 - 150);
-    const mix = state.SW === 1 ? 1 : (synthParams.parallelMix ?? 0);
-    const fricDbAdj = state.SW === 1 ? Math.max(state.AF ?? -70, state.AH ?? -70) : (state.AF ?? -70);
+    const sw = toFiniteNumber(state.SW);
+    const af = toFiniteNumber(state.AF, -70);
+    const ah = toFiniteNumber(state.AH, -70);
+    const mix = sw === 1 ? 1 : toFiniteNumber(synthParams.parallelMix);
+    const fricDbAdj = sw === 1 ? Math.max(af, ah) : af;
 
-    const go = state.GO ?? 47;
-    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear(go + (state.AV ?? -70) + ndbScale.AV));
-    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear(go + (state.AH ?? -70) + ndbScale.AH));
+    const go = toFiniteNumber(state.GO, 47);
+    ranges.voiceGain = updateRange(ranges.voiceGain, dbToLinear(go + toFiniteNumber(state.AV, -70) + ndbScale.AV));
+    ranges.aspGain = updateRange(ranges.aspGain, dbToLinear(go + ah + ndbScale.AH));
     ranges.fricGain = updateRange(ranges.fricGain, dbToLinear(go + fricDbAdj + ndbScale.AF) * parallelScale);
-    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear(go + (state.AVS ?? -70) + ndbScale.AVS) * 10);
-    ranges.parallelBypassGain = updateRange(ranges.parallelBypassGain, dbToLinear((state.AB ?? -70) + ndbScale.AB) * parallelScale);
-    ranges.parallelNasalGain = updateRange(ranges.parallelNasalGain, dbToLinear((state.AN ?? -70) + ndbScale.AN) * parallelScale);
+    ranges.parallelVoiceGain = updateRange(ranges.parallelVoiceGain, dbToLinear(go + toFiniteNumber(state.AVS, -70) + ndbScale.AVS) * 10);
+    ranges.parallelBypassGain = updateRange(ranges.parallelBypassGain, dbToLinear(toFiniteNumber(state.AB, -70) + ndbScale.AB) * parallelScale);
+    ranges.parallelNasalGain = updateRange(ranges.parallelNasalGain, dbToLinear(toFiniteNumber(state.AN, -70) + ndbScale.AN) * parallelScale);
     ranges.masterGain = updateRange(ranges.masterGain, dbToLinear(go) * baseBoost);
     ranges.mix = updateRange(ranges.mix, mix);
 
     const parallelLinear = [
-      dbToLinear((state.A1 ?? -70) + n12Cor + ndbScale.A1),
-      dbToLinear((state.A2 ?? -70) + n12Cor * 2 + n23Cor + ndbScale.A2) * a2Cor,
-      dbToLinear((state.A3 ?? -70) + n23Cor * 2 + n34Cor + ndbScale.A3) * a3Cor,
-      dbToLinear((state.A4 ?? -70) + n34Cor * 2 + ndbScale.A4) * a3Cor,
-      dbToLinear((state.A5 ?? -70) + ndbScale.A5) * a3Cor,
-      dbToLinear((state.A6 ?? -70) + ndbScale.A6) * a3Cor,
+      dbToLinear(toFiniteNumber(state.A1, -70) + n12Cor + ndbScale.A1),
+      dbToLinear(toFiniteNumber(state.A2, -70) + n12Cor * 2 + n23Cor + ndbScale.A2) * a2Cor,
+      dbToLinear(toFiniteNumber(state.A3, -70) + n23Cor * 2 + n34Cor + ndbScale.A3) * a3Cor,
+      dbToLinear(toFiniteNumber(state.A4, -70) + n34Cor * 2 + ndbScale.A4) * a3Cor,
+      dbToLinear(toFiniteNumber(state.A5, -70) + ndbScale.A5) * a3Cor,
+      dbToLinear(toFiniteNumber(state.A6, -70) + ndbScale.A6) * a3Cor,
     ];
     const freqs = [f1, f2, f3, f4, f5, f6];
     for (let idx = 0; idx < parallelLinear.length; idx++) {

@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "g2p-this",
+  "phrase": "this.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 779,
+    "lagMs": 77.89999999999999
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.trace.jsonl",
+      "frameCount": 159,
+      "durationFrames": 159,
+      "durationSec": 1.0176,
+      "voicedFrameCount": 34,
+      "voicedRatio": 0.2138364779874214,
+      "f0MinHz": 97.8,
+      "f0MaxHz": 144.5,
+      "f0MeanHz": 125.7970588235294,
+      "meanAv": 12.528301886792454,
+      "meanAp": 1.0125786163522013
+    },
+    "symbolic": {
+      "rawPhonemeLog": "dhihs .",
+      "phonemeTokens": [
+        "dh",
+        "ih",
+        "s",
+        "."
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ih",
+        "s"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 38,
+      "totalTime": 1.2080000000000002,
+      "voicedEvents": 29,
+      "voicedTime": 0.161,
+      "silenceTime": 0.3,
+      "unvoicedNonsilenceTime": 0.7470000000000002,
+      "voicedRatio": 0.13327814569536423,
+      "f0Min": 95.4860329754068,
+      "f0Max": 132.80923543323354,
+      "f0Mean": 106.51865922205303,
+      "f0Span": 37.32320245782674
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 3,
+      "segments": [
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "this",
+          "startMs": 0,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "this",
+          "startMs": 53,
+          "durationMs": 108
+        },
+        {
+          "rawPhoneme": "S",
+          "phoneme": "S",
+          "word": "this",
+          "startMs": 161,
+          "durationMs": 147
+        }
+      ],
+      "phonemeSequence": [
+        "DH",
+        "IH",
+        "S"
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ih",
+        "s"
+      ],
+      "swRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30
+        },
+        {
+          "startMs": 161,
+          "durationMs": 147
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30,
+          "phoneme": "DH",
+          "kind": "release"
+        },
+        {
+          "startMs": 161,
+          "durationMs": 147,
+          "phoneme": "S",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.00001,
+      "estoi": 0.00001
+    },
+    "acoustic": {
+      "rmsError": 0.12250430676528387,
+      "maxAbsError": 0.4277302784705382,
+      "correlation": 0.1697743206652574
+    },
+    "temporal": {
+      "oracleDurationSec": 1.0239455782312925,
+      "qlattDurationSec": 1.4580045351473923,
+      "alignedDurationSec": 0.1346,
+      "lagMs": 77.89999999999999
+    },
+    "track": {
+      "events": 38,
+      "totalTime": 1.2080000000000002,
+      "voicedEvents": 29,
+      "voicedTime": 0.161,
+      "silenceTime": 0.3,
+      "unvoicedNonsilenceTime": 0.7470000000000002,
+      "voicedRatio": 0.13327814569536423,
+      "f0Min": 95.4860329754068,
+      "f0Max": 132.80923543323354,
+      "f0Mean": 106.51865922205303,
+      "f0Span": 37.32320245782674
+    },
+    "internal": {
+      "oracleTraceDurationSec": 1.0176,
+      "qlattTrackDurationSec": 1.2080000000000002,
+      "durationDeltaSec": 0.19040000000000012,
+      "oracleTraceF0MinHz": 97.8,
+      "oracleTraceF0MaxHz": 144.5,
+      "oracleTraceF0MeanHz": 125.7970588235294,
+      "qlattTrackF0MinHz": 95.4860329754068,
+      "qlattTrackF0MaxHz": 132.80923543323354,
+      "qlattTrackF0MeanHz": 106.51865922205303,
+      "f0MinDeltaHz": -2.3139670245931967,
+      "f0MaxDeltaHz": -11.690764566766461,
+      "f0MeanDeltaHz": -19.278399601476366,
+      "oracleTraceVoicedRatio": 0.2138364779874214,
+      "qlattTrackVoicedRatio": 0.13327814569536423,
+      "voicedRatioDelta": -0.08055833229205717,
+      "oracleTraceMeanAv": 12.528301886792454,
+      "oracleTraceMeanAp": 1.0125786163522013,
+      "qlattTrackMeanAv": 7.80546357615894,
+      "qlattTrackMeanAh": 0,
+      "avDelta": -4.722838310633514,
+      "apToAhDelta": -1.0125786163522013
+    },
+    "symbolic": {
+      "oracleTokenCount": 3,
+      "qlattTokenCount": 3,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 3,
+      "qlattSwRegionCount": 2,
+      "qlattBurstCount": 2
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "dhihs .",
+      "phonemeTokens": [
+        "dh",
+        "ih",
+        "s",
+        "."
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ih",
+        "s"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 3,
+      "segments": [
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "this",
+          "startMs": 0,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "this",
+          "startMs": 53,
+          "durationMs": 108
+        },
+        {
+          "rawPhoneme": "S",
+          "phoneme": "S",
+          "word": "this",
+          "startMs": 161,
+          "durationMs": 147
+        }
+      ],
+      "phonemeSequence": [
+        "DH",
+        "IH",
+        "S"
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ih",
+        "s"
+      ],
+      "swRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30
+        },
+        {
+          "startMs": 161,
+          "durationMs": 147
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30,
+          "phoneme": "DH",
+          "kind": "release"
+        },
+        {
+          "startMs": 161,
+          "durationMs": 147,
+          "phoneme": "S",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low STOI (0.000)",
+      "Low ESTOI (0.000)",
+      "Duration ratio out of range (1.424)"
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "engineId": "dectalk-463",
+  "adapterId": "render-dectalk",
+  "phraseId": "g2p-this",
+  "phrase": "this.",
+  "voiceId": "paul",
+  "rate": 180,
+  "sampleRate": 22050,
+  "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.wav",
+  "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.json",
+  "stdoutPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.stdout.log",
+  "stderrPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.stderr.log",
+  "durationMs": 129,
+  "exitCode": 0,
+  "command": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-w",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.wav",
+    "-lt",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.trace.jsonl",
+    "[:np] [:ra 180] this."
+  ],
+  "notes": [
+    "DECtalk CLI sample rate is adapter-controlled externally; requested sampleRate recorded only."
+  ],
+  "symbolic": {
+    "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phonemes.txt",
+    "rawPhonemeLog": "dhihs .",
+    "phonemeTokens": [
+      "dh",
+      "ih",
+      "s",
+      "."
+    ],
+    "comparisonTokens": [
+      "dh",
+      "ih",
+      "s"
+    ]
+  },
+  "trace": {
+    "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.trace.jsonl",
+    "frameCount": 159,
+    "durationFrames": 159,
+    "durationSec": 1.0176,
+    "voicedFrameCount": 34,
+    "voicedRatio": 0.2138364779874214,
+    "f0MinHz": 97.8,
+    "f0MaxHz": 144.5,
+    "f0MeanHz": 125.7970588235294,
+    "meanAv": 12.528301886792454,
+    "meanAp": 1.0125786163522013
+  },
+  "extraPaths": {
+    "stdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.stdout.log",
+    "stderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.stderr.log",
+    "cwd": "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic",
+    "trace": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.trace.jsonl",
+    "phonemeLog": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phonemes.txt",
+    "phonemeStdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phoneme.stdout.log",
+    "phonemeStderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phoneme.stderr.log"
+  },
+  "spokenText": "[:np] [:ra 180] this.",
+  "phonemeCommand": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-lp",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-this\\oracle\\oracle.phonemes.txt",
+    "this."
+  ]
+}

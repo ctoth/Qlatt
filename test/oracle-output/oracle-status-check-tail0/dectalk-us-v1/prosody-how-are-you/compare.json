@@ -1,0 +1,469 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "prosody-how-are-you",
+  "phrase": "How are you today?",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 1049,
+    "lagMs": 104.89999999999999
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\oracle\\oracle.trace.jsonl",
+      "frameCount": 238,
+      "durationFrames": 238,
+      "durationSec": 1.5232,
+      "voicedFrameCount": 105,
+      "voicedRatio": 0.4411764705882353,
+      "f0MinHz": 92.9,
+      "f0MaxHz": 135.5,
+      "f0MeanHz": 110.25047619047622,
+      "meanAv": 26.99579831932773,
+      "meanAp": 6.605042016806722
+    },
+    "symbolic": {
+      "rawPhonemeLog": "hxaw  aar   yu  t uwd ' ey.",
+      "phonemeTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "'",
+        "ey",
+        "."
+      ],
+      "comparisonTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "ey"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 225,
+      "totalTime": 2.6600000000000006,
+      "voicedEvents": 208,
+      "voicedTime": 1.2444788732394365,
+      "silenceTime": 0.30000000000000004,
+      "unvoicedNonsilenceTime": 1.115521126760564,
+      "voicedRatio": 0.46784920046595346,
+      "f0Min": 80.87700093102049,
+      "f0Max": 133.41284799720137,
+      "f0Mean": 119.46995655661281,
+      "f0Span": 52.53584706618088
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 12,
+      "segments": [
+        {
+          "rawPhoneme": "HH",
+          "phoneme": "HH",
+          "word": "how",
+          "startMs": 0,
+          "durationMs": 93
+        },
+        {
+          "rawPhoneme": "AW",
+          "phoneme": "AW",
+          "word": "how",
+          "startMs": 93,
+          "durationMs": 272
+        },
+        {
+          "rawPhoneme": "AA",
+          "phoneme": "AA",
+          "word": "are",
+          "startMs": 365,
+          "durationMs": 195
+        },
+        {
+          "rawPhoneme": "R",
+          "phoneme": "R",
+          "word": "are",
+          "startMs": 560,
+          "durationMs": 49
+        },
+        {
+          "rawPhoneme": "Y",
+          "phoneme": "Y",
+          "word": "you",
+          "startMs": 609,
+          "durationMs": 46
+        },
+        {
+          "rawPhoneme": "UW",
+          "phoneme": "UW",
+          "word": "you",
+          "startMs": 655,
+          "durationMs": 158
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "today",
+          "startMs": 813,
+          "durationMs": 92
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "today",
+          "startMs": 905,
+          "durationMs": 25
+        },
+        {
+          "rawPhoneme": "UW",
+          "phoneme": "UW",
+          "word": "today",
+          "startMs": 930,
+          "durationMs": 149
+        },
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "today",
+          "startMs": 1079,
+          "durationMs": 77
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "today",
+          "startMs": 1156,
+          "durationMs": 29
+        },
+        {
+          "rawPhoneme": "EY",
+          "phoneme": "EY",
+          "word": "today",
+          "startMs": 1185,
+          "durationMs": 275
+        }
+      ],
+      "phonemeSequence": [
+        "HH",
+        "AW",
+        "AA",
+        "R",
+        "Y",
+        "UW",
+        "T",
+        "T",
+        "UW",
+        "D",
+        "D",
+        "EY"
+      ],
+      "comparisonTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "ey"
+      ],
+      "swRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 93
+        },
+        {
+          "startMs": 905.0000000000001,
+          "durationMs": 25.00000000000002
+        },
+        {
+          "startMs": 1156.0000000000002,
+          "durationMs": 28.999999999999915
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 905,
+          "durationMs": 25,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 1156,
+          "durationMs": 29,
+          "phoneme": "D_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.27881836108995917,
+      "estoi": 0.0996354201380186
+    },
+    "acoustic": {
+      "rmsError": 0.11834516399248687,
+      "maxAbsError": 0.5477306051757814,
+      "correlation": 0.07623800521848641
+    },
+    "temporal": {
+      "oracleDurationSec": 1.5326984126984127,
+      "qlattDurationSec": 2.7100226757369614,
+      "alignedDurationSec": 0.8415,
+      "lagMs": 104.89999999999999
+    },
+    "track": {
+      "events": 225,
+      "totalTime": 2.6600000000000006,
+      "voicedEvents": 208,
+      "voicedTime": 1.2444788732394365,
+      "silenceTime": 0.30000000000000004,
+      "unvoicedNonsilenceTime": 1.115521126760564,
+      "voicedRatio": 0.46784920046595346,
+      "f0Min": 80.87700093102049,
+      "f0Max": 133.41284799720137,
+      "f0Mean": 119.46995655661281,
+      "f0Span": 52.53584706618088
+    },
+    "internal": {
+      "oracleTraceDurationSec": 1.5232,
+      "qlattTrackDurationSec": 2.6600000000000006,
+      "durationDeltaSec": 1.1368000000000005,
+      "oracleTraceF0MinHz": 92.9,
+      "oracleTraceF0MaxHz": 135.5,
+      "oracleTraceF0MeanHz": 110.25047619047622,
+      "qlattTrackF0MinHz": 80.87700093102049,
+      "qlattTrackF0MaxHz": 133.41284799720137,
+      "qlattTrackF0MeanHz": 119.46995655661281,
+      "f0MinDeltaHz": -12.022999068979516,
+      "f0MaxDeltaHz": -2.087152002798632,
+      "f0MeanDeltaHz": 9.219480366136594,
+      "oracleTraceVoicedRatio": 0.4411764705882353,
+      "qlattTrackVoicedRatio": 0.46784920046595346,
+      "voicedRatioDelta": 0.026672729877718182,
+      "oracleTraceMeanAv": 26.99579831932773,
+      "oracleTraceMeanAp": 6.605042016806722,
+      "qlattTrackMeanAv": 29.373747749655806,
+      "qlattTrackMeanAh": 4.479132690882133,
+      "avDelta": 2.3779494303280764,
+      "apToAhDelta": -2.1259093259245896
+    },
+    "symbolic": {
+      "oracleTokenCount": 9,
+      "qlattTokenCount": 9,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 12,
+      "qlattSwRegionCount": 3,
+      "qlattBurstCount": 2
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "hxaw  aar   yu  t uwd ' ey.",
+      "phonemeTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "'",
+        "ey",
+        "."
+      ],
+      "comparisonTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "ey"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-how-are-you\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 12,
+      "segments": [
+        {
+          "rawPhoneme": "HH",
+          "phoneme": "HH",
+          "word": "how",
+          "startMs": 0,
+          "durationMs": 93
+        },
+        {
+          "rawPhoneme": "AW",
+          "phoneme": "AW",
+          "word": "how",
+          "startMs": 93,
+          "durationMs": 272
+        },
+        {
+          "rawPhoneme": "AA",
+          "phoneme": "AA",
+          "word": "are",
+          "startMs": 365,
+          "durationMs": 195
+        },
+        {
+          "rawPhoneme": "R",
+          "phoneme": "R",
+          "word": "are",
+          "startMs": 560,
+          "durationMs": 49
+        },
+        {
+          "rawPhoneme": "Y",
+          "phoneme": "Y",
+          "word": "you",
+          "startMs": 609,
+          "durationMs": 46
+        },
+        {
+          "rawPhoneme": "UW",
+          "phoneme": "UW",
+          "word": "you",
+          "startMs": 655,
+          "durationMs": 158
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "today",
+          "startMs": 813,
+          "durationMs": 92
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "today",
+          "startMs": 905,
+          "durationMs": 25
+        },
+        {
+          "rawPhoneme": "UW",
+          "phoneme": "UW",
+          "word": "today",
+          "startMs": 930,
+          "durationMs": 149
+        },
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "today",
+          "startMs": 1079,
+          "durationMs": 77
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "today",
+          "startMs": 1156,
+          "durationMs": 29
+        },
+        {
+          "rawPhoneme": "EY",
+          "phoneme": "EY",
+          "word": "today",
+          "startMs": 1185,
+          "durationMs": 275
+        }
+      ],
+      "phonemeSequence": [
+        "HH",
+        "AW",
+        "AA",
+        "R",
+        "Y",
+        "UW",
+        "T",
+        "T",
+        "UW",
+        "D",
+        "D",
+        "EY"
+      ],
+      "comparisonTokens": [
+        "hx",
+        "aw",
+        "aa",
+        "r",
+        "yu",
+        "t",
+        "uw",
+        "d",
+        "ey"
+      ],
+      "swRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 93
+        },
+        {
+          "startMs": 905.0000000000001,
+          "durationMs": 25.00000000000002
+        },
+        {
+          "startMs": 1156.0000000000002,
+          "durationMs": 28.999999999999915
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 905,
+          "durationMs": 25,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 1156,
+          "durationMs": 29,
+          "phoneme": "D_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low STOI (0.279)",
+      "Low ESTOI (0.100)",
+      "Low waveform correlation (0.076)",
+      "Duration ratio out of range (1.768)"
+    ]
+  }
+}

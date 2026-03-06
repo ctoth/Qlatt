@@ -1,0 +1,432 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "stops-pat-tapped",
+  "phrase": "Pat tapped a pot.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 10,
+    "lagMs": 1
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.json",
+    "symbolic": {
+      "rawPhonemeLog": "p ' aet   t ' aep t   ^ ax  p ' aat .",
+      "phonemeTokens": [
+        "p",
+        "'",
+        "ae",
+        "t",
+        "t",
+        "'",
+        "ae",
+        "p",
+        "t",
+        "^",
+        "ax",
+        "p",
+        "'",
+        "aa",
+        "t",
+        "."
+      ],
+      "comparisonTokens": [
+        "p",
+        "ae",
+        "t",
+        "t",
+        "ae",
+        "p",
+        "t",
+        "ah",
+        "p",
+        "aa",
+        "t"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 110,
+      "totalTime": 1.9560000000000006,
+      "voicedEvents": 94,
+      "f0Min": 88.15064326379442,
+      "f0Max": 110.61251577289552
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\check-stops-track.json",
+    "symbolic": {
+      "segmentCount": 11,
+      "segments": [
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "pat",
+          "startMs": 0,
+          "durationMs": 89
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "pat",
+          "startMs": 89,
+          "durationMs": 137
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "pat",
+          "startMs": 226,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "tapped",
+          "startMs": 290,
+          "durationMs": 66
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "tapped",
+          "startMs": 356,
+          "durationMs": 137
+        },
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "tapped",
+          "startMs": 493,
+          "durationMs": 82
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "tapped",
+          "startMs": 575,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "AH",
+          "phoneme": "AH",
+          "word": "a",
+          "startMs": 639,
+          "durationMs": 75
+        },
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "pot",
+          "startMs": 714,
+          "durationMs": 79
+        },
+        {
+          "rawPhoneme": "AA",
+          "phoneme": "AA",
+          "word": "pot",
+          "startMs": 793,
+          "durationMs": 102
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "pot",
+          "startMs": 895,
+          "durationMs": 61
+        }
+      ],
+      "phonemeSequence": [
+        "P",
+        "AE",
+        "T",
+        "T",
+        "AE",
+        "P",
+        "T",
+        "AH",
+        "P",
+        "AA",
+        "T"
+      ],
+      "comparisonTokens": [
+        "p",
+        "ae",
+        "t",
+        "t",
+        "ae",
+        "p",
+        "t",
+        "ah",
+        "p",
+        "aa",
+        "t"
+      ],
+      "swRegions": [],
+      "burstRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 89,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 226,
+          "durationMs": 130.00000000000003,
+          "phoneme": "T",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 493.00000000000006,
+          "durationMs": 145.99999999999997,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 714,
+          "durationMs": 78.99999999999996,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 894.9999999999999,
+          "durationMs": 61.00000000000006,
+          "phoneme": "T",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.4766481064510279,
+      "estoi": -0.04824503421788288
+    },
+    "acoustic": {
+      "rmsError": 0.11217674191986196,
+      "maxAbsError": 0.5889412499129935,
+      "correlation": 0.03198671410358017
+    },
+    "temporal": {
+      "oracleDurationSec": 1.7709750566893423,
+      "qlattDurationSec": 2.421043083900227,
+      "alignedDurationSec": 1.031,
+      "lagMs": 1
+    },
+    "track": {
+      "events": 110,
+      "totalTime": 1.9560000000000006,
+      "voicedEvents": 94,
+      "f0Min": 88.15064326379442,
+      "f0Max": 110.61251577289552
+    },
+    "symbolic": {
+      "oracleTokenCount": 11,
+      "qlattTokenCount": 11,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 11,
+      "qlattSwRegionCount": 0,
+      "qlattBurstCount": 5
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "p ' aet   t ' aep t   ^ ax  p ' aat .",
+      "phonemeTokens": [
+        "p",
+        "'",
+        "ae",
+        "t",
+        "t",
+        "'",
+        "ae",
+        "p",
+        "t",
+        "^",
+        "ax",
+        "p",
+        "'",
+        "aa",
+        "t",
+        "."
+      ],
+      "comparisonTokens": [
+        "p",
+        "ae",
+        "t",
+        "t",
+        "ae",
+        "p",
+        "t",
+        "ah",
+        "p",
+        "aa",
+        "t"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 11,
+      "segments": [
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "pat",
+          "startMs": 0,
+          "durationMs": 89
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "pat",
+          "startMs": 89,
+          "durationMs": 137
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "pat",
+          "startMs": 226,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "tapped",
+          "startMs": 290,
+          "durationMs": 66
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "tapped",
+          "startMs": 356,
+          "durationMs": 137
+        },
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "tapped",
+          "startMs": 493,
+          "durationMs": 82
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "tapped",
+          "startMs": 575,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "AH",
+          "phoneme": "AH",
+          "word": "a",
+          "startMs": 639,
+          "durationMs": 75
+        },
+        {
+          "rawPhoneme": "P",
+          "phoneme": "P",
+          "word": "pot",
+          "startMs": 714,
+          "durationMs": 79
+        },
+        {
+          "rawPhoneme": "AA",
+          "phoneme": "AA",
+          "word": "pot",
+          "startMs": 793,
+          "durationMs": 102
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "pot",
+          "startMs": 895,
+          "durationMs": 61
+        }
+      ],
+      "phonemeSequence": [
+        "P",
+        "AE",
+        "T",
+        "T",
+        "AE",
+        "P",
+        "T",
+        "AH",
+        "P",
+        "AA",
+        "T"
+      ],
+      "comparisonTokens": [
+        "p",
+        "ae",
+        "t",
+        "t",
+        "ae",
+        "p",
+        "t",
+        "ah",
+        "p",
+        "aa",
+        "t"
+      ],
+      "swRegions": [],
+      "burstRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 89,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 226,
+          "durationMs": 130.00000000000003,
+          "phoneme": "T",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 493.00000000000006,
+          "durationMs": 145.99999999999997,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 714,
+          "durationMs": 78.99999999999996,
+          "phoneme": "P",
+          "kind": "aspiration"
+        },
+        {
+          "startMs": 894.9999999999999,
+          "durationMs": 61.00000000000006,
+          "phoneme": "T",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low ESTOI (-0.048)",
+      "Low waveform correlation (0.032)",
+      "Duration ratio out of range (1.367)"
+    ]
+  }
+}

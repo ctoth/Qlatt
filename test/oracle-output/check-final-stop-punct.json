@@ -1,0 +1,79 @@
+{
+  "phrase": "pot.",
+  "baseF0": 110,
+  "engine": "runtime",
+  "frontendId": "dectalk-english",
+  "experimentId": "dectalk-english",
+  "rate": 1,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 27254,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 36,
+    "totalTime": 0.9859999999999999,
+    "voicedEvents": 27,
+    "f0Min": 109.14202725735763,
+    "f0Max": 111.58704230363068
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "P",
+      "durationMs": 104,
+      "word": "pot",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 1,
+      "phoneme": "P_REL",
+      "durationMs": 5,
+      "word": "pot",
+      "minimumDurationMs": 5
+    },
+    {
+      "index": 2,
+      "phoneme": "P_ASP",
+      "durationMs": 15,
+      "word": "pot",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 3,
+      "phoneme": "AA",
+      "durationMs": 132,
+      "word": "pot",
+      "minimumDurationMs": 90
+    },
+    {
+      "index": 4,
+      "phoneme": "T",
+      "durationMs": 92,
+      "word": "pot",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 5,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": ".",
+      "minimumDurationMs": 7
+    },
+    {
+      "index": 6,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 7,
+      "phoneme": "",
+      "durationMs": 0
+    }
+  ],
+  "samples": []
+}

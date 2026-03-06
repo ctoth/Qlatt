@@ -146,4 +146,35 @@ describe("materializePhonemeTarget – stress-aware lookup", () => {
     expect(result0.phoneme).toBe("IY0");
     expect(result0.params.F1).toBe(iy0.F1);
   });
+
+  it("preserves declarative array/object metadata from inventory entries", () => {
+    const customInventory = {
+      base_params: { F1: 500, AV: 0 },
+      phoneme_targets: {
+        SIL: { dur: 30, type: "silence" },
+        AY1: {
+          F1: 700,
+          AV: 60,
+          dur: 100,
+          type: "vowel",
+          diph: ["AA1", "IH1"],
+          trajectory: {
+            F1: [
+              { value: 700, time: 0 },
+              { value: 320, time: 64 },
+            ],
+          },
+        },
+      },
+    };
+
+    const result = materializePhonemeTarget("AY1", { inventorySpec: customInventory });
+    expect((result as Record<string, unknown>).diph).toEqual(["AA1", "IH1"]);
+    expect((result as Record<string, unknown>).trajectory).toEqual({
+      F1: [
+        { value: 700, time: 0 },
+        { value: 320, time: 64 },
+      ],
+    });
+  });
 });

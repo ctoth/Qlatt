@@ -1,0 +1,313 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "g2p-dog",
+  "phrase": "dog.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 887,
+    "lagMs": 88.7
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.trace.jsonl",
+      "frameCount": 174,
+      "durationFrames": 174,
+      "durationSec": 1.1136000000000001,
+      "voicedFrameCount": 54,
+      "voicedRatio": 0.3103448275862069,
+      "f0MinHz": 100,
+      "f0MaxHz": 139.7,
+      "f0MeanHz": 120.48703703703707,
+      "meanAv": 18.982758620689655,
+      "meanAp": 2.5402298850574714
+    },
+    "symbolic": {
+      "rawPhonemeLog": "d ' aog .",
+      "phonemeTokens": [
+        "d",
+        "'",
+        "ao",
+        "g",
+        "."
+      ],
+      "comparisonTokens": [
+        "d",
+        "ao",
+        "g"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 89,
+      "totalTime": 1.3900000000000003,
+      "voicedEvents": 81,
+      "voicedTime": 0.49,
+      "silenceTime": 0.30000000000000004,
+      "unvoicedNonsilenceTime": 0.6000000000000003,
+      "voicedRatio": 0.3525179856115107,
+      "f0Min": 84.12247887374205,
+      "f0Max": 132.38954110672222,
+      "f0Mean": 98.96177719161595,
+      "f0Span": 48.267062232980166
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 5,
+      "segments": [
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "dog",
+          "startMs": 0,
+          "durationMs": 80
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "dog",
+          "startMs": 80,
+          "durationMs": 29
+        },
+        {
+          "rawPhoneme": "AO",
+          "phoneme": "AO",
+          "word": "dog",
+          "startMs": 109,
+          "durationMs": 255
+        },
+        {
+          "rawPhoneme": "G",
+          "phoneme": "G",
+          "word": "dog",
+          "startMs": 364,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "G_REL",
+          "phoneme": "G",
+          "word": "dog",
+          "startMs": 428,
+          "durationMs": 62
+        }
+      ],
+      "phonemeSequence": [
+        "D",
+        "D",
+        "AO",
+        "G",
+        "G"
+      ],
+      "comparisonTokens": [
+        "d",
+        "ao",
+        "g"
+      ],
+      "swRegions": [
+        {
+          "startMs": 80,
+          "durationMs": 28.999999999999996
+        },
+        {
+          "startMs": 428,
+          "durationMs": 62
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 80,
+          "durationMs": 29,
+          "phoneme": "D_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 428,
+          "durationMs": 62,
+          "phoneme": "G_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.33428491839219626,
+      "estoi": 0.10700428931882042
+    },
+    "acoustic": {
+      "rmsError": 0.11459434184938666,
+      "maxAbsError": 0.4627226698357907,
+      "correlation": 0.07868692648021614
+    },
+    "temporal": {
+      "oracleDurationSec": 1.1205442176870748,
+      "qlattDurationSec": 1.6400453514739228,
+      "alignedDurationSec": 0.4279,
+      "lagMs": 88.7
+    },
+    "track": {
+      "events": 89,
+      "totalTime": 1.3900000000000003,
+      "voicedEvents": 81,
+      "voicedTime": 0.49,
+      "silenceTime": 0.30000000000000004,
+      "unvoicedNonsilenceTime": 0.6000000000000003,
+      "voicedRatio": 0.3525179856115107,
+      "f0Min": 84.12247887374205,
+      "f0Max": 132.38954110672222,
+      "f0Mean": 98.96177719161595,
+      "f0Span": 48.267062232980166
+    },
+    "internal": {
+      "oracleTraceDurationSec": 1.1136000000000001,
+      "qlattTrackDurationSec": 1.3900000000000003,
+      "durationDeltaSec": 0.2764000000000002,
+      "oracleTraceF0MinHz": 100,
+      "oracleTraceF0MaxHz": 139.7,
+      "oracleTraceF0MeanHz": 120.48703703703707,
+      "qlattTrackF0MinHz": 84.12247887374205,
+      "qlattTrackF0MaxHz": 132.38954110672222,
+      "qlattTrackF0MeanHz": 98.96177719161595,
+      "f0MinDeltaHz": -15.877521126257946,
+      "f0MaxDeltaHz": -7.310458893277769,
+      "f0MeanDeltaHz": -21.525259845421118,
+      "oracleTraceVoicedRatio": 0.3103448275862069,
+      "qlattTrackVoicedRatio": 0.3525179856115107,
+      "voicedRatioDelta": 0.0421731580253038,
+      "oracleTraceMeanAv": 18.982758620689655,
+      "oracleTraceMeanAp": 2.5402298850574714,
+      "qlattTrackMeanAv": 19.68705035971224,
+      "qlattTrackMeanAh": 0,
+      "avDelta": 0.7042917390225867,
+      "apToAhDelta": -2.5402298850574714
+    },
+    "symbolic": {
+      "oracleTokenCount": 3,
+      "qlattTokenCount": 3,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 5,
+      "qlattSwRegionCount": 2,
+      "qlattBurstCount": 2
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "d ' aog .",
+      "phonemeTokens": [
+        "d",
+        "'",
+        "ao",
+        "g",
+        "."
+      ],
+      "comparisonTokens": [
+        "d",
+        "ao",
+        "g"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 5,
+      "segments": [
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "dog",
+          "startMs": 0,
+          "durationMs": 80
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "dog",
+          "startMs": 80,
+          "durationMs": 29
+        },
+        {
+          "rawPhoneme": "AO",
+          "phoneme": "AO",
+          "word": "dog",
+          "startMs": 109,
+          "durationMs": 255
+        },
+        {
+          "rawPhoneme": "G",
+          "phoneme": "G",
+          "word": "dog",
+          "startMs": 364,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "G_REL",
+          "phoneme": "G",
+          "word": "dog",
+          "startMs": 428,
+          "durationMs": 62
+        }
+      ],
+      "phonemeSequence": [
+        "D",
+        "D",
+        "AO",
+        "G",
+        "G"
+      ],
+      "comparisonTokens": [
+        "d",
+        "ao",
+        "g"
+      ],
+      "swRegions": [
+        {
+          "startMs": 80,
+          "durationMs": 28.999999999999996
+        },
+        {
+          "startMs": 428,
+          "durationMs": 62
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 80,
+          "durationMs": 29,
+          "phoneme": "D_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 428,
+          "durationMs": 62,
+          "phoneme": "G_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low STOI (0.334)",
+      "Low ESTOI (0.107)",
+      "Low waveform correlation (0.079)",
+      "Duration ratio out of range (1.464)"
+    ]
+  }
+}

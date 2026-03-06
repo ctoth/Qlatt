@@ -1,0 +1,159 @@
+{
+  "phrase": "Pat tapped a pot.",
+  "baseF0": 110,
+  "engine": "runtime",
+  "frontendId": "qlatt-english",
+  "experimentId": "klatt80-baseline",
+  "rate": 1,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 40771,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 29,
+    "totalTime": 1.5990000000000002,
+    "voicedEvents": 9,
+    "f0Min": 122,
+    "f0Max": 178
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "P_CL",
+      "durationMs": 54,
+      "word": "pat"
+    },
+    {
+      "index": 1,
+      "phoneme": "P_REL",
+      "durationMs": 5,
+      "word": "pat"
+    },
+    {
+      "index": 2,
+      "phoneme": "P_ASP",
+      "durationMs": 53,
+      "word": "pat"
+    },
+    {
+      "index": 3,
+      "phoneme": "AE",
+      "durationMs": 160,
+      "word": "pat"
+    },
+    {
+      "index": 4,
+      "phoneme": "T_CL",
+      "durationMs": 36,
+      "word": "pat"
+    },
+    {
+      "index": 5,
+      "phoneme": "T_CL",
+      "durationMs": 43,
+      "word": "tapped"
+    },
+    {
+      "index": 6,
+      "phoneme": "T_REL",
+      "durationMs": 15,
+      "word": "tapped"
+    },
+    {
+      "index": 7,
+      "phoneme": "T_ASP",
+      "durationMs": 56,
+      "word": "tapped"
+    },
+    {
+      "index": 8,
+      "phoneme": "AE",
+      "durationMs": 160,
+      "word": "tapped"
+    },
+    {
+      "index": 9,
+      "phoneme": "P_CL",
+      "durationMs": 42,
+      "word": "tapped"
+    },
+    {
+      "index": 10,
+      "phoneme": "T_CL",
+      "durationMs": 33,
+      "word": "tapped"
+    },
+    {
+      "index": 11,
+      "phoneme": "T_REL",
+      "durationMs": 15,
+      "word": "tapped"
+    },
+    {
+      "index": 12,
+      "phoneme": "T_ASP",
+      "durationMs": 56,
+      "word": "tapped"
+    },
+    {
+      "index": 13,
+      "phoneme": "AH",
+      "durationMs": 22,
+      "word": "a"
+    },
+    {
+      "index": 14,
+      "phoneme": "P_CL",
+      "durationMs": 54,
+      "word": "pot"
+    },
+    {
+      "index": 15,
+      "phoneme": "P_REL",
+      "durationMs": 5,
+      "word": "pot"
+    },
+    {
+      "index": 16,
+      "phoneme": "P_ASP",
+      "durationMs": 53,
+      "word": "pot"
+    },
+    {
+      "index": 17,
+      "phoneme": "AA",
+      "durationMs": 231,
+      "word": "pot"
+    },
+    {
+      "index": 18,
+      "phoneme": "T_CL",
+      "durationMs": 35,
+      "word": "pot"
+    },
+    {
+      "index": 19,
+      "phoneme": "T_REL",
+      "durationMs": 15,
+      "word": "pot"
+    },
+    {
+      "index": 20,
+      "phoneme": "T_ASP",
+      "durationMs": 56,
+      "word": "pot"
+    },
+    {
+      "index": 21,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": "."
+    }
+  ],
+  "samples": []
+}

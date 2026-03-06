@@ -350,6 +350,33 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.includes("E_PREDICATE_CYCLE")).toBe(true);
   });
 
+  it("validates contour schema and select-only usage", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      patterns: {
+        p: { stream: "phone", sequence: [{ capture: "x", where: "true" }] },
+      },
+      rules: {
+        bad_contour_shape: {
+          match: "p",
+          contour: {
+            domain: "word",
+            reset_break_index: 0,
+            apply: [],
+          },
+        },
+      },
+      phases: [{ name: "duration", rules: ["bad_contour_shape"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+    expect(codes.includes("E_CONTOUR_SELECT_REQUIRED")).toBe(true);
+    expect(codes.includes("E_CONTOUR_DOMAIN_INVALID")).toBe(true);
+    expect(codes.includes("E_CONTOUR_RESET_BREAK_INVALID")).toBe(true);
+    expect(codes.includes("E_CONTOUR_APPLY_REQUIRED")).toBe(true);
+  });
+
   it("enforces policy-path references and critical literal bans", () => {
     const spec = parseDslSpec({
       parameters: {

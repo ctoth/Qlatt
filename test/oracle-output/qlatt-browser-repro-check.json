@@ -1,0 +1,96 @@
+{
+  "phrase": "hello world",
+  "engine": "runtime",
+  "frontendId": "qlatt-english",
+  "experimentId": "klatt80-baseline",
+  "rate": 1,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 25556,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 23,
+    "totalTime": 0.9089999999999999,
+    "voicedEvents": 20,
+    "voicedTime": 0.823,
+    "silenceTime": 0,
+    "unvoicedNonsilenceTime": 0.086,
+    "voicedRatio": 0.9053905390539054,
+    "f0Min": 122,
+    "f0Max": 178,
+    "f0Mean": 142.0997298292809,
+    "f0Span": 56
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "HH",
+      "durationMs": 86,
+      "word": "hello"
+    },
+    {
+      "index": 1,
+      "phoneme": "AH",
+      "durationMs": 45,
+      "stress": 0,
+      "word": "hello"
+    },
+    {
+      "index": 2,
+      "phoneme": "L",
+      "durationMs": 67,
+      "word": "hello"
+    },
+    {
+      "index": 3,
+      "phoneme": "AO1",
+      "durationMs": 119,
+      "stress": 1,
+      "word": "hello"
+    },
+    {
+      "index": 4,
+      "phoneme": "UH1",
+      "durationMs": 81,
+      "stress": 1,
+      "word": "hello"
+    },
+    {
+      "index": 5,
+      "phoneme": "W",
+      "durationMs": 86,
+      "word": "world"
+    },
+    {
+      "index": 6,
+      "phoneme": "ER",
+      "durationMs": 218,
+      "stress": 1,
+      "word": "world"
+    },
+    {
+      "index": 7,
+      "phoneme": "L",
+      "durationMs": 67,
+      "word": "world"
+    },
+    {
+      "index": 8,
+      "phoneme": "D_CL",
+      "durationMs": 30,
+      "word": "world"
+    },
+    {
+      "index": 9,
+      "phoneme": "D_REL",
+      "durationMs": 10,
+      "word": "world"
+    }
+  ],
+  "samples": []
+}

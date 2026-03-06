@@ -1,0 +1,71 @@
+{
+  "engineId": "dectalk-463",
+  "adapterId": "render-dectalk",
+  "phraseId": "g2p-dog",
+  "phrase": "dog.",
+  "voiceId": "paul",
+  "rate": 180,
+  "sampleRate": 22050,
+  "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.wav",
+  "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.json",
+  "stdoutPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.stdout.log",
+  "stderrPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.stderr.log",
+  "durationMs": 198,
+  "exitCode": 0,
+  "command": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-w",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.wav",
+    "-lt",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.trace.jsonl",
+    "[:np] [:ra 180] dog."
+  ],
+  "notes": [
+    "DECtalk CLI sample rate is adapter-controlled externally; requested sampleRate recorded only."
+  ],
+  "symbolic": {
+    "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phonemes.txt",
+    "rawPhonemeLog": "d ' aog .",
+    "phonemeTokens": [
+      "d",
+      "'",
+      "ao",
+      "g",
+      "."
+    ],
+    "comparisonTokens": [
+      "d",
+      "ao",
+      "g"
+    ]
+  },
+  "trace": {
+    "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.trace.jsonl",
+    "frameCount": 174,
+    "durationFrames": 174,
+    "durationSec": 1.74,
+    "voicedFrameCount": 54,
+    "voicedRatio": 0.3103448275862069,
+    "f0MinHz": 100,
+    "f0MaxHz": 139.7,
+    "f0MeanHz": 120.48703703703707,
+    "meanAv": 18.982758620689655,
+    "meanAp": 2.5402298850574714
+  },
+  "extraPaths": {
+    "stdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.stdout.log",
+    "stderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.stderr.log",
+    "cwd": "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic",
+    "trace": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.trace.jsonl",
+    "phonemeLog": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phonemes.txt",
+    "phonemeStdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phoneme.stdout.log",
+    "phonemeStderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phoneme.stderr.log"
+  },
+  "spokenText": "[:np] [:ra 180] dog.",
+  "phonemeCommand": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-lp",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\g2p-dog\\oracle\\oracle.phonemes.txt",
+    "dog."
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "smoke",
+  "phrase": "hello world.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 0,
+    "lagMs": 0
+  },
+  "oracle": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\_smoke\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\_smoke\\qlatt.artifact.json"
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\_smoke\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\_smoke\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 156,
+      "totalTime": 1.6900000000000006,
+      "voicedEvents": 147,
+      "f0Min": 88.09948832937039,
+      "f0Max": 102.6294350084895
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\_smoke\\qlatt.json"
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.9999999999999997,
+      "estoi": 1.0000000000000013
+    },
+    "acoustic": {
+      "rmsError": 0,
+      "maxAbsError": 0,
+      "correlation": 1
+    },
+    "temporal": {
+      "oracleDurationSec": 1.9400453514739229,
+      "qlattDurationSec": 1.9400453514739229,
+      "alignedDurationSec": 0.7364,
+      "lagMs": 0
+    },
+    "track": {
+      "events": 156,
+      "totalTime": 1.6900000000000006,
+      "voicedEvents": 147,
+      "f0Min": 88.09948832937039,
+      "f0Max": 102.6294350084895
+    }
+  },
+  "verdict": {
+    "status": "pass",
+    "reasons": []
+  }
+}

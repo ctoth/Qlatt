@@ -1,0 +1,248 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "g2p-the",
+  "phrase": "the.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 167,
+    "lagMs": 16.7
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\oracle\\oracle.trace.jsonl",
+      "frameCount": 139,
+      "durationFrames": 139,
+      "durationSec": 0.8896000000000001,
+      "voicedFrameCount": 42,
+      "voicedRatio": 0.302158273381295,
+      "f0MinHz": 97.8,
+      "f0MaxHz": 140.3,
+      "f0MeanHz": 121.78809523809525,
+      "meanAv": 17.136690647482013,
+      "meanAp": 5.64748201438849
+    },
+    "symbolic": {
+      "rawPhonemeLog": "dhax.",
+      "phonemeTokens": [
+        "dh",
+        "ax",
+        "."
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ah"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 35,
+      "totalTime": 0.7619999999999999,
+      "voicedEvents": 29,
+      "voicedTime": 0.162,
+      "silenceTime": 0.29999999999999993,
+      "unvoicedNonsilenceTime": 0.29999999999999993,
+      "voicedRatio": 0.21259842519685043,
+      "f0Min": 104.53826127901314,
+      "f0Max": 113.59170100522783,
+      "f0Mean": 106.48403044469352,
+      "f0Span": 9.053439726214691
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 2,
+      "segments": [
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "the",
+          "startMs": 0,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "AH",
+          "phoneme": "AH",
+          "word": "the",
+          "startMs": 53,
+          "durationMs": 109
+        }
+      ],
+      "phonemeSequence": [
+        "DH",
+        "AH"
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ah"
+      ],
+      "swRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30,
+          "phoneme": "DH",
+          "kind": "release"
+        },
+        {
+          "startMs": 162,
+          "durationMs": 130.00000000000003,
+          "phoneme": "SIL",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.00001,
+      "estoi": 0.00001
+    },
+    "acoustic": {
+      "rmsError": 0.10926988375755346,
+      "maxAbsError": 0.43923039321665097,
+      "correlation": 0.08593189707228419
+    },
+    "temporal": {
+      "oracleDurationSec": 0.8951473922902494,
+      "qlattDurationSec": 1.0120181405895692,
+      "alignedDurationSec": 0.2612,
+      "lagMs": 16.7
+    },
+    "track": {
+      "events": 35,
+      "totalTime": 0.7619999999999999,
+      "voicedEvents": 29,
+      "voicedTime": 0.162,
+      "silenceTime": 0.29999999999999993,
+      "unvoicedNonsilenceTime": 0.29999999999999993,
+      "voicedRatio": 0.21259842519685043,
+      "f0Min": 104.53826127901314,
+      "f0Max": 113.59170100522783,
+      "f0Mean": 106.48403044469352,
+      "f0Span": 9.053439726214691
+    },
+    "internal": {
+      "oracleTraceDurationSec": 0.8896000000000001,
+      "qlattTrackDurationSec": 0.7619999999999999,
+      "durationDeltaSec": -0.12760000000000016,
+      "oracleTraceF0MinHz": 97.8,
+      "oracleTraceF0MaxHz": 140.3,
+      "oracleTraceF0MeanHz": 121.78809523809525,
+      "qlattTrackF0MinHz": 104.53826127901314,
+      "qlattTrackF0MaxHz": 113.59170100522783,
+      "qlattTrackF0MeanHz": 106.48403044469352,
+      "f0MinDeltaHz": 6.738261279013145,
+      "f0MaxDeltaHz": -26.70829899477218,
+      "f0MeanDeltaHz": -15.304064793401736,
+      "oracleTraceVoicedRatio": 0.302158273381295,
+      "qlattTrackVoicedRatio": 0.21259842519685043,
+      "voicedRatioDelta": -0.08955984818444454,
+      "oracleTraceMeanAv": 17.136690647482013,
+      "oracleTraceMeanAp": 5.64748201438849,
+      "qlattTrackMeanAv": 12.082677165354328,
+      "qlattTrackMeanAh": 8.871391076115488,
+      "avDelta": -5.054013482127685,
+      "apToAhDelta": 3.2239090617269985
+    },
+    "symbolic": {
+      "oracleTokenCount": 2,
+      "qlattTokenCount": 2,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 2,
+      "qlattSwRegionCount": 1,
+      "qlattBurstCount": 2
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "dhax.",
+      "phonemeTokens": [
+        "dh",
+        "ax",
+        "."
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ah"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\g2p-the\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 2,
+      "segments": [
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "the",
+          "startMs": 0,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "AH",
+          "phoneme": "AH",
+          "word": "the",
+          "startMs": 53,
+          "durationMs": 109
+        }
+      ],
+      "phonemeSequence": [
+        "DH",
+        "AH"
+      ],
+      "comparisonTokens": [
+        "dh",
+        "ah"
+      ],
+      "swRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 23,
+          "durationMs": 30,
+          "phoneme": "DH",
+          "kind": "release"
+        },
+        {
+          "startMs": 162,
+          "durationMs": 130.00000000000003,
+          "phoneme": "SIL",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low STOI (0.000)",
+      "Low ESTOI (0.000)",
+      "Low waveform correlation (0.086)"
+    ]
+  }
+}

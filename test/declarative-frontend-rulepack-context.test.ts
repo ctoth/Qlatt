@@ -676,6 +676,183 @@ describe("declarative frontend rulepack context migration", () => {
     expect(asp!.params.AH).toBe(45);
   });
 
+  // --- Aspiration frication carryover (Hanson & Stevens 2003) ---
+
+  it("applies place-dependent AF carryover on stop aspiration", () => {
+    const sequence = [
+      {
+        phoneme: "P_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        bilabial: true,
+        params: { AH: 52 },
+        duration: 53,
+        inherentDuration: 53,
+      },
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        alveolar: true,
+        params: { AH: 55 },
+        duration: 56,
+        inherentDuration: 56,
+      },
+      {
+        phoneme: "K_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        velar: true,
+        params: { AH: 53 },
+        duration: 48,
+        inherentDuration: 48,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const pAsp = out.find((t) => t.phoneme === "P_ASP");
+    const tAsp = out.find((t) => t.phoneme === "T_ASP");
+    const kAsp = out.find((t) => t.phoneme === "K_ASP");
+
+    expect(pAsp).toBeTruthy();
+    expect(tAsp).toBeTruthy();
+    expect(kAsp).toBeTruthy();
+
+    // Planned defaults: p=0, t=18, k=10
+    expect(pAsp!.params.AF).toBe(0);
+    expect(tAsp!.params.AF).toBe(18);
+    expect(kAsp!.params.AF).toBe(10);
+    expect(tAsp!.params.AF).toBeGreaterThan(kAsp!.params.AF);
+    expect(kAsp!.params.AF).toBeGreaterThan(pAsp!.params.AF);
+  });
+
+  it("scales aspiration frication for weak aspiration tokens", () => {
+    const sequence = [
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        alveolar: true,
+        weak: true,
+        params: { AH: 55 },
+        duration: 56,
+        inherentDuration: 56,
+      },
+      {
+        phoneme: "K_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        velar: true,
+        weak: true,
+        params: { AH: 53 },
+        duration: 48,
+        inherentDuration: 48,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const tAsp = out.find((t) => t.phoneme === "T_ASP");
+    const kAsp = out.find((t) => t.phoneme === "K_ASP");
+
+    expect(tAsp).toBeTruthy();
+    expect(kAsp).toBeTruthy();
+
+    // Planned weak_scale=0.5: t=18->9, k=10->5
+    expect(tAsp!.params.AF).toBe(9);
+    expect(kAsp!.params.AF).toBe(5);
+  });
+
+  it("does not modify AH when applying aspiration frication carryover", () => {
+    const sequence = [
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        alveolar: true,
+        params: { AH: 55 },
+        duration: 56,
+        inherentDuration: 56,
+      },
+      {
+        phoneme: "K_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        velar: true,
+        params: { AH: 53 },
+        duration: 48,
+        inherentDuration: 48,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const tAsp = out.find((t) => t.phoneme === "T_ASP");
+    const kAsp = out.find((t) => t.phoneme === "K_ASP");
+
+    expect(tAsp).toBeTruthy();
+    expect(kAsp).toBeTruthy();
+    expect(tAsp!.params.AH).toBe(55);
+    expect(kAsp!.params.AH).toBe(53);
+  });
+
+  it("coexists with s-cluster aspiration reduction (AH reduction plus AF carryover)", () => {
+    const sequence = [
+      {
+        phoneme: "S",
+        type: "fricative",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 60 },
+        duration: 100,
+        inherentDuration: 100,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        voiceless: true,
+        alveolar: true,
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+      },
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        voiceless: true,
+        alveolar: true,
+        params: { AF: 58, AH: 55 },
+        duration: 15,
+        inherentDuration: 15,
+      },
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        voiceless: true,
+        alveolar: true,
+        params: { AH: 55 },
+        duration: 56,
+        inherentDuration: 56,
+      },
+      {
+        phoneme: "AA",
+        type: "vowel",
+        low: true,
+        params: { F1: 700, F2: 1220, AV: 64 },
+        duration: 180,
+        inherentDuration: 180,
+      },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const asp = out.find((t) => t.phoneme === "T_ASP");
+
+    expect(asp).toBeTruthy();
+    // Existing s-cluster behavior preserved.
+    expect(asp!.duration).toBeLessThanOrEqual(34);
+    expect(asp!.params.AH).toBe(45);
+    // New carryover behavior.
+    expect(asp!.params.AF).toBe(18);
+  });
+
   // --- Vowel reduction ---
 
   it("centralizes formants of unstressed vowels toward schwa", () => {

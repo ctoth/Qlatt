@@ -1,0 +1,269 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "trace-smoke",
+  "phrase": "hello",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": -611,
+    "lagMs": -61.1
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\oracle\\oracle.trace.jsonl",
+      "frameCount": 169,
+      "durationFrames": 169,
+      "durationSec": 1.69,
+      "voicedFrameCount": 60,
+      "voicedRatio": 0.35502958579881655,
+      "f0MinHz": 94.4,
+      "f0MaxHz": 128.8,
+      "f0MeanHz": 107.58000000000006,
+      "meanAv": 21.674556213017752,
+      "meanAp": 9.059171597633137
+    },
+    "symbolic": {
+      "rawPhonemeLog": "hxehll' ow  .",
+      "phonemeTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "'",
+        "ow",
+        "."
+      ],
+      "comparisonTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "ow"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 143,
+      "totalTime": 1.2920000000000003,
+      "voicedEvents": 136,
+      "f0Min": 79.84697529872851,
+      "f0Max": 90.9657472517848
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 4,
+      "segments": [
+        {
+          "rawPhoneme": "HH",
+          "phoneme": "HH",
+          "word": "hello",
+          "startMs": 0,
+          "durationMs": 126
+        },
+        {
+          "rawPhoneme": "EH",
+          "phoneme": "EH",
+          "word": "hello",
+          "startMs": 126,
+          "durationMs": 250
+        },
+        {
+          "rawPhoneme": "L",
+          "phoneme": "L",
+          "word": "hello",
+          "startMs": 376,
+          "durationMs": 114
+        },
+        {
+          "rawPhoneme": "OW",
+          "phoneme": "OW",
+          "word": "hello",
+          "startMs": 490,
+          "durationMs": 302
+        }
+      ],
+      "phonemeSequence": [
+        "HH",
+        "EH",
+        "L",
+        "OW"
+      ],
+      "comparisonTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "ow"
+      ],
+      "swRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 126
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 126,
+          "phoneme": "HH",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.00001,
+      "estoi": 0.00001
+    },
+    "acoustic": {
+      "rmsError": 0.12007522195370371,
+      "maxAbsError": 0.4323422747096974,
+      "correlation": 0.08722302536957059
+    },
+    "temporal": {
+      "oracleDurationSec": 1.088344671201814,
+      "qlattDurationSec": 1.5420408163265307,
+      "alignedDurationSec": 0.3627,
+      "lagMs": -61.1
+    },
+    "track": {
+      "events": 143,
+      "totalTime": 1.2920000000000003,
+      "voicedEvents": 136,
+      "f0Min": 79.84697529872851,
+      "f0Max": 90.9657472517848
+    },
+    "internal": {
+      "oracleTraceDurationSec": 1.69,
+      "qlattTrackDurationSec": 1.2920000000000003,
+      "durationDeltaSec": -0.3979999999999997,
+      "oracleTraceF0MinHz": 94.4,
+      "oracleTraceF0MaxHz": 128.8,
+      "oracleTraceF0MeanHz": 107.58000000000006,
+      "qlattTrackF0MinHz": 79.84697529872851,
+      "qlattTrackF0MaxHz": 90.9657472517848,
+      "f0MinDeltaHz": -14.553024701271497,
+      "f0MaxDeltaHz": -37.83425274821521,
+      "oracleTraceVoicedRatio": 0.35502958579881655,
+      "qlattTrackVoicedRatio": 0.951048951048951,
+      "voicedRatioDelta": 0.5960193652501344,
+      "oracleTraceMeanAv": 21.674556213017752,
+      "oracleTraceMeanAp": 9.059171597633137,
+      "qlattTrackMeanAv": 32.47523219814237,
+      "qlattTrackMeanAh": 3.9009287925696587,
+      "avDelta": 10.80067598512462,
+      "apToAhDelta": -5.1582428050634785
+    },
+    "symbolic": {
+      "oracleTokenCount": 4,
+      "qlattTokenCount": 4,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 4,
+      "qlattSwRegionCount": 1,
+      "qlattBurstCount": 1
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "hxehll' ow  .",
+      "phonemeTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "'",
+        "ow",
+        "."
+      ],
+      "comparisonTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "ow"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\trace-smoke\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 4,
+      "segments": [
+        {
+          "rawPhoneme": "HH",
+          "phoneme": "HH",
+          "word": "hello",
+          "startMs": 0,
+          "durationMs": 126
+        },
+        {
+          "rawPhoneme": "EH",
+          "phoneme": "EH",
+          "word": "hello",
+          "startMs": 126,
+          "durationMs": 250
+        },
+        {
+          "rawPhoneme": "L",
+          "phoneme": "L",
+          "word": "hello",
+          "startMs": 376,
+          "durationMs": 114
+        },
+        {
+          "rawPhoneme": "OW",
+          "phoneme": "OW",
+          "word": "hello",
+          "startMs": 490,
+          "durationMs": 302
+        }
+      ],
+      "phonemeSequence": [
+        "HH",
+        "EH",
+        "L",
+        "OW"
+      ],
+      "comparisonTokens": [
+        "hx",
+        "eh",
+        "ll",
+        "ow"
+      ],
+      "swRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 126
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 0,
+          "durationMs": 126,
+          "phoneme": "HH",
+          "kind": "aspiration"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low STOI (0.000)",
+      "Low ESTOI (0.000)",
+      "Low waveform correlation (0.087)",
+      "Duration ratio out of range (1.417)"
+    ]
+  }
+}

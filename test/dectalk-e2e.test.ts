@@ -192,4 +192,18 @@ describe("dectalk-english end-to-end", () => {
     // This test always passes — it's for the summary log
     expect(results.length).toBe(TEST_PHRASES.length);
   });
+
+  it("treats rate as a multiplier on the frontend API", () => {
+    const phrase = "Perfect Paul sees six snakes.";
+    const slow = textToKlattTrack(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+      rate: 0.5,
+    });
+    const fast = textToKlattTrack(phrase, 110, 30, {
+      frontendId: "dectalk-english",
+      rate: 2.0,
+    });
+
+    expect(totalDurationMs(fast)).toBeLessThan(totalDurationMs(slow));
+  });
 });

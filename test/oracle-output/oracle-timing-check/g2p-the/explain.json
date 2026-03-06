@@ -1,0 +1,625 @@
+{
+  "phrase": "the.",
+  "whyDecisionId": null,
+  "totalDecisionCount": 41,
+  "rangeApplied": null,
+  "rangeMatchedCount": 41,
+  "subjectFilterApplied": null,
+  "decisions": [
+    {
+      "id": "d000001",
+      "seq": 1,
+      "stage": "transcribe",
+      "type": "dictionary_pronunciation_selected",
+      "subject": "word:the",
+      "reason": "Used CMU dictionary pronunciation for 'the'",
+      "citations": [
+        "CMU Pronouncing Dictionary"
+      ]
+    },
+    {
+      "id": "d000002",
+      "seq": 2,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:0:DH",
+      "reason": "Selected inventory target 'DH' for source phoneme 'DH'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000003",
+      "seq": 3,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:1:AH",
+      "reason": "Selected inventory target 'AH' for source phoneme 'AH'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ],
+      "parents": [
+        "d000001"
+      ]
+    },
+    {
+      "id": "d000004",
+      "seq": 4,
+      "stage": "transcribe",
+      "type": "inventory_target_selected",
+      "subject": "token:2:SIL",
+      "reason": "Selected inventory target 'SIL' for source phoneme 'SIL'",
+      "citations": [
+        "public/rules/inventory.yaml"
+      ]
+    },
+    {
+      "id": "d000005",
+      "seq": 5,
+      "stage": "prosody",
+      "type": "prosodic_annotation",
+      "subject": "phrase:0",
+      "reason": "Identified phrase with 0 content words, no nuclear accent",
+      "citations": [
+        "Silverman 1992",
+        "O'Shaughnessy 1976",
+        "Allen 1987"
+      ]
+    },
+    {
+      "id": "d000006",
+      "seq": 6,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "vowel_reduction match in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.9 (unstressed vowel centralization)",
+        "Klatt 1976 (unstressed shortening)",
+        "Peterson & Barney 1952 (schwa formants)"
+      ],
+      "parents": [
+        "d000003"
+      ]
+    },
+    {
+      "id": "d000007",
+      "seq": 7,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "vowel_reduction rewrite in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.9 (unstressed vowel centralization)",
+        "Klatt 1976 (unstressed shortening)",
+        "Peterson & Barney 1952 (schwa formants)"
+      ],
+      "parents": [
+        "d000006"
+      ]
+    },
+    {
+      "id": "d000008",
+      "seq": 8,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "word_initial_lengthening match in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000002"
+      ]
+    },
+    {
+      "id": "d000009",
+      "seq": 9,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "word_initial_lengthening rewrite in phase duration",
+      "citations": [
+        "White 2014 (localized word-initial lengthening +20-30% on onset consonants)"
+      ],
+      "parents": [
+        "d000008"
+      ]
+    },
+    {
+      "id": "d000010",
+      "seq": 10,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "punctuation_pause match in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.8 (pause insertion)",
+        "semicolon/colon mapping is engineering estimate"
+      ],
+      "parents": [
+        "d000004"
+      ]
+    },
+    {
+      "id": "d000011",
+      "seq": 11,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "punctuation_pause rewrite in phase duration",
+      "citations": [
+        "Allen et al. 1987 Ch.8 (pause insertion)",
+        "semicolon/colon mapping is engineering estimate"
+      ],
+      "parents": [
+        "d000010"
+      ]
+    },
+    {
+      "id": "d000012",
+      "seq": 12,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "stress_duration match in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000007"
+      ]
+    },
+    {
+      "id": "d000013",
+      "seq": 13,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "stress_duration rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 §III.B"
+      ],
+      "parents": [
+        "d000012"
+      ]
+    },
+    {
+      "id": "d000014",
+      "seq": 14,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "vowel_shortening match in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000013"
+      ]
+    },
+    {
+      "id": "d000015",
+      "seq": 15,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "vowel_shortening rewrite in phase duration",
+      "citations": [
+        "Klatt 1976",
+        "Allen et al. 1987 Ch.9 (postvocalic context duration factors)"
+      ],
+      "parents": [
+        "d000014"
+      ]
+    },
+    {
+      "id": "d000016",
+      "seq": 16,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000009"
+      ]
+    },
+    {
+      "id": "d000017",
+      "seq": 17,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000016"
+      ]
+    },
+    {
+      "id": "d000018",
+      "seq": 18,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "pre_boundary_lengthening match in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000015"
+      ]
+    },
+    {
+      "id": "d000019",
+      "seq": 19,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "pre_boundary_lengthening rewrite in phase duration",
+      "citations": [
+        "Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)",
+        "Klatt 1976 §III.A (phrase-final lengthening)",
+        "Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)"
+      ],
+      "parents": [
+        "d000018"
+      ]
+    },
+    {
+      "id": "d000020",
+      "seq": 20,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000017"
+      ]
+    },
+    {
+      "id": "d000021",
+      "seq": 21,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000020"
+      ]
+    },
+    {
+      "id": "d000022",
+      "seq": 22,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "duration_cap match in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000019"
+      ]
+    },
+    {
+      "id": "d000023",
+      "seq": 23,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "duration_cap rewrite in phase duration",
+      "citations": [
+        "Klatt 1976 (incompressibility principle implies bounded expansion)",
+        "Engineering estimate: cap prevents absurd durations from stacking multiple rules"
+      ],
+      "parents": [
+        "d000022"
+      ]
+    },
+    {
+      "id": "d000024",
+      "seq": 24,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "fricative_minimum_duration match in phase duration",
+      "citations": [
+        "Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full duration; glottal /hh/ not tested -- value is engineering estimate)"
+      ],
+      "parents": [
+        "d000021"
+      ]
+    },
+    {
+      "id": "d000025",
+      "seq": 25,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "fricative_minimum_duration rewrite in phase duration",
+      "citations": [
+        "Jongman 1989 (sibilant/labiodental identification thresholds; dental fricatives poorly identified even at full duration; glottal /hh/ not tested -- value is engineering estimate)"
+      ],
+      "parents": [
+        "d000024"
+      ]
+    },
+    {
+      "id": "d000026",
+      "seq": 26,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000025"
+      ]
+    },
+    {
+      "id": "d000027",
+      "seq": 27,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000026"
+      ]
+    },
+    {
+      "id": "d000028",
+      "seq": 28,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000023"
+      ]
+    },
+    {
+      "id": "d000029",
+      "seq": 29,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000028"
+      ]
+    },
+    {
+      "id": "d000030",
+      "seq": 30,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "sw_default_assignment match in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000011"
+      ]
+    },
+    {
+      "id": "d000031",
+      "seq": 31,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "sw_default_assignment rewrite in phase duration",
+      "citations": [
+        "Klatt 1980 (cascade/parallel source routing)"
+      ],
+      "parents": [
+        "d000030"
+      ]
+    },
+    {
+      "id": "d000032",
+      "seq": 32,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "tobi_baseline_init match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (baseline initialization)",
+        "Ladd 2008 Ch.5"
+      ],
+      "parents": [
+        "d000027"
+      ]
+    },
+    {
+      "id": "d000033",
+      "seq": 33,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "tobi_baseline_init rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (baseline initialization)",
+        "Ladd 2008 Ch.5"
+      ],
+      "parents": [
+        "d000032"
+      ]
+    },
+    {
+      "id": "d000034",
+      "seq": 34,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_0",
+      "reason": "tobi_unaccented_declination match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (intermediate interpolation between tonal events)",
+        "Ladd 2008 Ch.3 (local transitions between tonal targets)"
+      ],
+      "parents": [
+        "d000033"
+      ]
+    },
+    {
+      "id": "d000035",
+      "seq": 35,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_0",
+      "reason": "tobi_unaccented_declination rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (intermediate interpolation between tonal events)",
+        "Ladd 2008 Ch.3 (local transitions between tonal targets)"
+      ],
+      "parents": [
+        "d000034"
+      ]
+    },
+    {
+      "id": "d000036",
+      "seq": 36,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_1",
+      "reason": "tobi_unaccented_declination match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (intermediate interpolation between tonal events)",
+        "Ladd 2008 Ch.3 (local transitions between tonal targets)"
+      ],
+      "parents": [
+        "d000029"
+      ]
+    },
+    {
+      "id": "d000037",
+      "seq": 37,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_1",
+      "reason": "tobi_unaccented_declination rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (intermediate interpolation between tonal events)",
+        "Ladd 2008 Ch.3 (local transitions between tonal targets)"
+      ],
+      "parents": [
+        "d000036"
+      ]
+    },
+    {
+      "id": "d000038",
+      "seq": 38,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "tobi_phrase_accent_low match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (L- phrase accent lowers postnuclear pitch)",
+        "Ladd 2008 Ch.3 (L- followed by continued low contour)"
+      ],
+      "parents": [
+        "d000031"
+      ]
+    },
+    {
+      "id": "d000039",
+      "seq": 39,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "tobi_phrase_accent_low rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 (L- phrase accent lowers postnuclear pitch)",
+        "Ladd 2008 Ch.3 (L- followed by continued low contour)"
+      ],
+      "parents": [
+        "d000038"
+      ]
+    },
+    {
+      "id": "d000040",
+      "seq": 40,
+      "stage": "rules",
+      "type": "rule_matched",
+      "subject": "token:ph_2",
+      "reason": "tobi_boundary_low match in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)",
+        "Ladd 2008 (L-L% declarative final lowering)"
+      ],
+      "parents": [
+        "d000039"
+      ]
+    },
+    {
+      "id": "d000041",
+      "seq": 41,
+      "stage": "rules",
+      "type": "rule_rewrite_applied",
+      "subject": "token:ph_2",
+      "reason": "tobi_boundary_low rewrite in phase prosody",
+      "citations": [
+        "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)",
+        "Ladd 2008 (L-L% declarative final lowering)"
+      ],
+      "parents": [
+        "d000040"
+      ]
+    }
+  ],
+  "summary": {
+    "decisionCount": 41,
+    "uncitedCount": 0,
+    "byStage": {
+      "transcribe": 4,
+      "prosody": 1,
+      "rules": 36
+    },
+    "byType": {
+      "dictionary_pronunciation_selected": 1,
+      "inventory_target_selected": 3,
+      "prosodic_annotation": 1,
+      "rule_matched": 18,
+      "rule_rewrite_applied": 18
+    },
+    "uncitedByStage": {},
+    "uncitedByType": {}
+  }
+}

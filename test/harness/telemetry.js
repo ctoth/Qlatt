@@ -152,16 +152,17 @@ export function attachMetersNewRuntime(runtime) {
 
   // Map from legacy meter names to new graph node IDs
   const outputTargets = [
-    { name: "cascade-out", nodeId: "cascadeOutGain" },
-    { name: "parallel-out", nodeId: "parallelSum" },
-    { name: "pre-output-lp", nodeId: "outputSum" },
-    { name: "post-output-lp", nodeId: "outputLp" },
+    { name: "cascade-out", nodeIds: ["cascadeOutGain"] },
+    { name: "parallel-out", nodeIds: ["parallelSum"] },
+    { name: "pre-output-lp", nodeIds: ["outputSum"] },
+    { name: "post-output-lp", nodeIds: ["outputLp", "masterGain", "outputGain"] },
   ];
 
   for (const target of outputTargets) {
-    const node = runtime.getNode(target.nodeId);
+    const nodeId = target.nodeIds.find((candidate) => runtime.getNode(candidate));
+    const node = nodeId ? runtime.getNode(nodeId) : null;
     if (!node) {
-      console.warn(`[QLATT] Meter node ${target.nodeId} not found`);
+      console.warn(`[QLATT] Meter nodes ${target.nodeIds.join(", ")} not found`);
       continue;
     }
 
@@ -170,9 +171,9 @@ export function attachMetersNewRuntime(runtime) {
     try {
       node.connect(analyser);
       state.meters.set(target.name, analyser);
-      console.log(`[QLATT] Attached meter to ${target.nodeId} as ${target.name}`);
+      console.log(`[QLATT] Attached meter to ${nodeId} as ${target.name}`);
     } catch (e) {
-      console.warn(`[QLATT] Failed to attach meter to ${target.nodeId}:`, e);
+      console.warn(`[QLATT] Failed to attach meter to ${nodeId}:`, e);
     }
   }
 

@@ -112,6 +112,14 @@ describe("track-assembler", () => {
       expect(track[0].params.F0).toBe(0);
     });
 
+    it("adds initial lead-in silence before first non-silence phone", () => {
+      const track = textToKlattTrack("hello", 120, 30);
+      const firstPhone = track.find((f) => f.phoneme && f.phoneme !== "SIL");
+      expect(firstPhone).toBeTruthy();
+      // qlatt-english output.initial_silence_ms defaults to 30 ms.
+      expect(firstPhone!.time).toBeGreaterThanOrEqual(0.03);
+    });
+
     it("last frame is silence with phoneme SIL", () => {
       const track = textToKlattTrack("hello", 120, 30);
       const last = track[track.length - 1];
@@ -181,6 +189,24 @@ describe("track-assembler", () => {
       expect(aaFrames[1].params.AH ?? 0).toBe(0);
       expect(aaFrames[1].params.AV).toBe(60);
       expect(aaFrames[1].params.B1).toBe(200);
+    });
+
+    it("respects output.initial_silence_ms override when assembling", () => {
+      const track = assembleKlattTrack(
+        [
+          {
+            phoneme: "AA",
+            type: "vowel",
+            duration: 100,
+            params: { AV: 60, AH: 0, B1: 100, B2: 120, F1: 700, F2: 1200, F3: 2500 },
+          },
+        ],
+        [],
+        { baseF0: 120, transitionMs: 0, outputConfig: { initial_silence_ms: 40, final_silence_ms: 0 } }
+      );
+      const firstPhone = track.find((f) => f.phoneme === "AA");
+      expect(firstPhone).toBeTruthy();
+      expect(firstPhone!.time).toBeCloseTo(0.04, 6);
     });
   });
 

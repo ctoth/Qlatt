@@ -1,0 +1,165 @@
+{
+  "phrase": "How are you today?",
+  "baseF0": 110,
+  "engine": "runtime",
+  "frontendId": "dectalk-english",
+  "experimentId": "dectalk-english",
+  "rate": 180,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 64717,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 265,
+    "totalTime": 2.685000000000001,
+    "voicedEvents": 250,
+    "f0Min": 86.9162697712243,
+    "f0Max": 126.16184992380893
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "HH",
+      "durationMs": 93,
+      "word": "how",
+      "minimumDurationMs": 60
+    },
+    {
+      "index": 1,
+      "phoneme": "AW",
+      "durationMs": 272,
+      "word": "how",
+      "minimumDurationMs": 110
+    },
+    {
+      "index": 2,
+      "phoneme": "AA",
+      "durationMs": 195,
+      "word": "are",
+      "minimumDurationMs": 90
+    },
+    {
+      "index": 3,
+      "phoneme": "R",
+      "durationMs": 49,
+      "word": "are",
+      "minimumDurationMs": 30
+    },
+    {
+      "index": 4,
+      "phoneme": "Y",
+      "durationMs": 46,
+      "word": "you",
+      "minimumDurationMs": 30
+    },
+    {
+      "index": 5,
+      "phoneme": "UW",
+      "durationMs": 132,
+      "word": "you",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 6,
+      "phoneme": "T",
+      "durationMs": 94,
+      "word": "today",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 7,
+      "phoneme": "T_REL",
+      "durationMs": 34,
+      "word": "today",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 8,
+      "phoneme": "T_ASP",
+      "durationMs": 62,
+      "word": "today",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 9,
+      "phoneme": "UW",
+      "durationMs": 165,
+      "word": "today",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 10,
+      "phoneme": "D",
+      "durationMs": 83,
+      "word": "today",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 11,
+      "phoneme": "D_REL",
+      "durationMs": 29,
+      "word": "today",
+      "minimumDurationMs": 10
+    },
+    {
+      "index": 12,
+      "phoneme": "EY",
+      "durationMs": 275,
+      "word": "today",
+      "minimumDurationMs": 140
+    },
+    {
+      "index": 13,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": "?",
+      "minimumDurationMs": 7
+    },
+    {
+      "index": 14,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 15,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 16,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 17,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 18,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 19,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 20,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 21,
+      "phoneme": "",
+      "durationMs": 0
+    }
+  ],
+  "samples": []
+}

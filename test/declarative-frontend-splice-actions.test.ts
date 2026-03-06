@@ -541,4 +541,81 @@ describe("declarative frontend splice actions", () => {
 
     expect(() => runRuleEngine(input, spec)).toThrow("E_BASE_OVERLAP");
   });
+
+  it("preserves copied control_windows when a splice template adds more", () => {
+    const s0 = startOrder();
+    const s1 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        rewrite: {
+          select: { stream: "phone", where: "current.id == 'p1'" },
+          splice: {
+            type: "replace_range",
+            range_left: "current.sync_left",
+            range_right: "current.sync_right",
+            insert: [
+              {
+                copy_from: "current",
+                copy_fields: ["name", "control_windows"],
+                control_windows: [
+                  {
+                    start_ms: 10,
+                    end_ms: 20,
+                    fields: {
+                      F2: { op: "'set'", value: 1200 },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["rewrite"] }],
+    };
+
+    const input = [
+      {
+        id: "p1",
+        stream: "phone",
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        name: "seed",
+        control_windows: [
+          {
+            start_ms: 0,
+            end_ms: 10,
+            fields: {
+              F1: { op: "set", value: 500 },
+            },
+          },
+        ],
+      },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const inserted = out.find((token) => token.status === 1 && token.id !== "p1");
+
+    expect(inserted?.control_windows).toEqual([
+      {
+        start_ms: 0,
+        end_ms: 10,
+        fields: {
+          F1: { op: "set", value: 500 },
+        },
+      },
+      {
+        start_ms: 10,
+        end_ms: 20,
+        fields: {
+          F2: { op: "set", value: 1200 },
+        },
+      },
+    ]);
+  });
 });

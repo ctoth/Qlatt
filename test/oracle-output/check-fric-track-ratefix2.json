@@ -1,0 +1,254 @@
+{
+  "phrase": "Thin thieves thought that they thrilled.",
+  "baseF0": 110,
+  "engine": "runtime",
+  "frontendId": "dectalk-english",
+  "experimentId": "dectalk-english",
+  "rate": 180,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 82908,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 357,
+    "totalTime": 3.51,
+    "voicedEvents": 335,
+    "f0Min": 85.33613025362521,
+    "f0Max": 133.9687645417655
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "TH",
+      "durationMs": 94,
+      "word": "thin",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 1,
+      "phoneme": "IH",
+      "durationMs": 158,
+      "word": "thin",
+      "minimumDurationMs": 80
+    },
+    {
+      "index": 2,
+      "phoneme": "N",
+      "durationMs": 76,
+      "word": "thin",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 3,
+      "phoneme": "TH",
+      "durationMs": 81,
+      "word": "thieves",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 4,
+      "phoneme": "IY",
+      "durationMs": 224,
+      "word": "thieves",
+      "minimumDurationMs": 80
+    },
+    {
+      "index": 5,
+      "phoneme": "V",
+      "durationMs": 96,
+      "word": "thieves",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 6,
+      "phoneme": "Z",
+      "durationMs": 117,
+      "word": "thieves",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 7,
+      "phoneme": "TH",
+      "durationMs": 68,
+      "word": "thought",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 8,
+      "phoneme": "AO",
+      "durationMs": 117,
+      "word": "thought",
+      "minimumDurationMs": 100
+    },
+    {
+      "index": 9,
+      "phoneme": "T",
+      "durationMs": 71,
+      "word": "thought",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 10,
+      "phoneme": "T_REL",
+      "durationMs": 15,
+      "word": "thought",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 11,
+      "phoneme": "T_ASP",
+      "durationMs": 43,
+      "word": "thought",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 12,
+      "phoneme": "DH",
+      "durationMs": 53,
+      "word": "that",
+      "minimumDurationMs": 35
+    },
+    {
+      "index": 13,
+      "phoneme": "AE",
+      "durationMs": 154,
+      "word": "that",
+      "minimumDurationMs": 80
+    },
+    {
+      "index": 14,
+      "phoneme": "T",
+      "durationMs": 71,
+      "word": "that",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 15,
+      "phoneme": "T_REL",
+      "durationMs": 15,
+      "word": "that",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 16,
+      "phoneme": "T_ASP",
+      "durationMs": 43,
+      "word": "that",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 17,
+      "phoneme": "DH",
+      "durationMs": 53,
+      "word": "they",
+      "minimumDurationMs": 35
+    },
+    {
+      "index": 18,
+      "phoneme": "EY",
+      "durationMs": 174,
+      "word": "they",
+      "minimumDurationMs": 140
+    },
+    {
+      "index": 19,
+      "phoneme": "TH",
+      "durationMs": 81,
+      "word": "thrilled",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 20,
+      "phoneme": "R",
+      "durationMs": 62,
+      "word": "thrilled",
+      "minimumDurationMs": 30
+    },
+    {
+      "index": 21,
+      "phoneme": "IH",
+      "durationMs": 172,
+      "word": "thrilled",
+      "minimumDurationMs": 80
+    },
+    {
+      "index": 22,
+      "phoneme": "L",
+      "durationMs": 66,
+      "word": "thrilled",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 23,
+      "phoneme": "D",
+      "durationMs": 70,
+      "word": "thrilled",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 24,
+      "phoneme": "D_REL",
+      "durationMs": 59,
+      "word": "thrilled",
+      "minimumDurationMs": 10
+    },
+    {
+      "index": 25,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": ".",
+      "minimumDurationMs": 7
+    },
+    {
+      "index": 26,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 27,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 28,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 29,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 30,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 31,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 32,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 33,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 34,
+      "phoneme": "",
+      "durationMs": 0
+    }
+  ],
+  "samples": []
+}

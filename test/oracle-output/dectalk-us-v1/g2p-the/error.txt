@@ -1,0 +1,1 @@
+DECTALK_SAY_EXE is not set and no --exe path was provided

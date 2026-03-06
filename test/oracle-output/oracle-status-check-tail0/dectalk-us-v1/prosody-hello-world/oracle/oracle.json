@@ -1,0 +1,82 @@
+{
+  "engineId": "dectalk-463",
+  "adapterId": "render-dectalk",
+  "phraseId": "prosody-hello-world",
+  "phrase": "Hello world.",
+  "voiceId": "paul",
+  "rate": 180,
+  "sampleRate": 22050,
+  "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.wav",
+  "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.json",
+  "stdoutPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.stdout.log",
+  "stderrPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.stderr.log",
+  "durationMs": 137,
+  "exitCode": 0,
+  "command": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-w",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.wav",
+    "-lt",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.trace.jsonl",
+    "[:np] [:ra 180] Hello world."
+  ],
+  "notes": [
+    "DECtalk CLI sample rate is adapter-controlled externally; requested sampleRate recorded only."
+  ],
+  "symbolic": {
+    "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.phonemes.txt",
+    "rawPhonemeLog": "hxehll' ow  w ' rrlld .",
+    "phonemeTokens": [
+      "hx",
+      "eh",
+      "ll",
+      "'",
+      "ow",
+      "w",
+      "'",
+      "rr",
+      "ll",
+      "d",
+      "."
+    ],
+    "comparisonTokens": [
+      "hx",
+      "eh",
+      "ll",
+      "ow",
+      "w",
+      "er",
+      "ll",
+      "d"
+    ]
+  },
+  "trace": {
+    "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.trace.jsonl",
+    "frameCount": 217,
+    "durationFrames": 217,
+    "durationSec": 1.3888,
+    "voicedFrameCount": 99,
+    "voicedRatio": 0.45622119815668205,
+    "f0MinHz": 92.2,
+    "f0MaxHz": 140.6,
+    "f0MeanHz": 114.94848484848487,
+    "meanAv": 27.474654377880185,
+    "meanAp": 5.2304147465437785
+  },
+  "extraPaths": {
+    "stdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.stdout.log",
+    "stderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.stderr.log",
+    "cwd": "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic",
+    "trace": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.trace.jsonl",
+    "phonemeLog": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.phonemes.txt",
+    "phonemeStdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.phoneme.stdout.log",
+    "phonemeStderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.phoneme.stderr.log"
+  },
+  "spokenText": "[:np] [:ra 180] Hello world.",
+  "phonemeCommand": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-lp",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\prosody-hello-world\\oracle\\oracle.phonemes.txt",
+    "Hello world."
+  ]
+}

@@ -47,6 +47,15 @@ describe("analyzeTrackGains", () => {
     const result = analyzeTrackGains([], {});
     expect(result).toBeNull();
   });
+
+  it("coerces bigint-valued params for diagnostics", () => {
+    const result = analyzeTrackGains(
+      [{ time: 0, phoneme: "S", params: { AF: 55n, GO: 47n, SW: 1n, F1: 300n, F2: 1500n, F3: 2500n } }],
+      { parallelGainScale: 1n },
+    );
+    expect(result).not.toBeNull();
+    expect(result!.ranges.fricGain!.max).toBeGreaterThan(0);
+  });
 });
 
 describe("HH aspiration in track", () => {

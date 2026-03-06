@@ -1,0 +1,90 @@
+{
+  "engineId": "dectalk-463",
+  "adapterId": "render-dectalk",
+  "phraseId": "stops-pat-tapped",
+  "phrase": "Pat tapped a pot.",
+  "voiceId": "paul",
+  "rate": 180,
+  "sampleRate": 22050,
+  "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.wav",
+  "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.json",
+  "stdoutPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.stdout.log",
+  "stderrPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.stderr.log",
+  "durationMs": 124,
+  "exitCode": 0,
+  "command": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-w",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.wav",
+    "-lt",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.trace.jsonl",
+    "[:np] [:ra 180] Pat tapped a pot."
+  ],
+  "notes": [
+    "DECtalk CLI sample rate is adapter-controlled externally; requested sampleRate recorded only."
+  ],
+  "symbolic": {
+    "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phonemes.txt",
+    "rawPhonemeLog": "p ' aet   t ' aep t   ^ ax  p ' aat .",
+    "phonemeTokens": [
+      "p",
+      "'",
+      "ae",
+      "t",
+      "t",
+      "'",
+      "ae",
+      "p",
+      "t",
+      "^",
+      "ax",
+      "p",
+      "'",
+      "aa",
+      "t",
+      "."
+    ],
+    "comparisonTokens": [
+      "p",
+      "ae",
+      "t",
+      "t",
+      "ae",
+      "p",
+      "t",
+      "ah",
+      "p",
+      "aa",
+      "t"
+    ]
+  },
+  "trace": {
+    "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.trace.jsonl",
+    "frameCount": 275,
+    "durationFrames": 275,
+    "durationSec": 1.76,
+    "voicedFrameCount": 67,
+    "voicedRatio": 0.24363636363636362,
+    "f0MinHz": 102.4,
+    "f0MaxHz": 147.5,
+    "f0MeanHz": 123.06417910447763,
+    "meanAv": 15.207272727272727,
+    "meanAp": 6.989090909090909
+  },
+  "extraPaths": {
+    "stdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.stdout.log",
+    "stderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.stderr.log",
+    "cwd": "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic",
+    "trace": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.trace.jsonl",
+    "phonemeLog": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phonemes.txt",
+    "phonemeStdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phoneme.stdout.log",
+    "phonemeStderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phoneme.stderr.log"
+  },
+  "spokenText": "[:np] [:ra 180] Pat tapped a pot.",
+  "phonemeCommand": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-lp",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check\\dectalk-us-v1\\stops-pat-tapped\\oracle\\oracle.phonemes.txt",
+    "Pat tapped a pot."
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "engineId": "dectalk-463",
+  "adapterId": "render-dectalk",
+  "phraseId": "g2p-church",
+  "phrase": "church.",
+  "voiceId": "paul",
+  "rate": 180,
+  "sampleRate": 22050,
+  "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.wav",
+  "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.json",
+  "stdoutPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.stdout.log",
+  "stderrPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.stderr.log",
+  "durationMs": 125,
+  "exitCode": 0,
+  "command": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-w",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.wav",
+    "-lt",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.trace.jsonl",
+    "[:np] [:ra 180] church."
+  ],
+  "notes": [
+    "DECtalk CLI sample rate is adapter-controlled externally; requested sampleRate recorded only."
+  ],
+  "symbolic": {
+    "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.phonemes.txt",
+    "rawPhonemeLog": "ch' rrch.",
+    "phonemeTokens": [
+      "ch",
+      "'",
+      "rr",
+      "ch",
+      "."
+    ],
+    "comparisonTokens": [
+      "ch",
+      "er",
+      "ch"
+    ]
+  },
+  "trace": {
+    "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.trace.jsonl",
+    "frameCount": 186,
+    "durationFrames": 186,
+    "durationSec": 1.1904000000000001,
+    "voicedFrameCount": 29,
+    "voicedRatio": 0.15591397849462366,
+    "f0MinHz": 116.2,
+    "f0MaxHz": 138.9,
+    "f0MeanHz": 130.28275862068966,
+    "meanAv": 10.080645161290322,
+    "meanAp": 0
+  },
+  "extraPaths": {
+    "stdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.stdout.log",
+    "stderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.stderr.log",
+    "cwd": "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic",
+    "trace": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.trace.jsonl",
+    "phonemeLog": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.phonemes.txt",
+    "phonemeStdout": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.phoneme.stdout.log",
+    "phonemeStderr": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.phoneme.stderr.log"
+  },
+  "spokenText": "[:np] [:ra 180] church.",
+  "phonemeCommand": [
+    "C:\\Users\\Q\\src\\dectalk\\463\\samples\\SAY\\build\\us\\static\\say.exe",
+    "-lp",
+    "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\oracle-status-check-tail0\\dectalk-us-v1\\g2p-church\\oracle\\oracle.phonemes.txt",
+    "church."
+  ]
+}

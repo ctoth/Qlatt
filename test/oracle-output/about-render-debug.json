@@ -1,0 +1,158 @@
+{
+  "phrase": "about.",
+  "engine": "runtime",
+  "frontendId": "dectalk-english",
+  "experimentId": "dectalk-english",
+  "rate": 1,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 37287,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 102,
+    "totalTime": 1.4410000000000003,
+    "voicedEvents": 93,
+    "voicedTime": 0.44900000000000007,
+    "silenceTime": 0.29999999999999993,
+    "unvoicedNonsilenceTime": 0.6920000000000003,
+    "voicedRatio": 0.31158917418459403,
+    "f0Min": 84.908515279469,
+    "f0Max": 131.3622657612725,
+    "f0Mean": 102.41679697485222,
+    "f0Span": 46.45375048180351
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "AH",
+      "durationMs": 136,
+      "stress": 0,
+      "word": "about",
+      "minimumDurationMs": 70
+    },
+    {
+      "index": 1,
+      "phoneme": "B",
+      "durationMs": 80,
+      "word": "about",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 2,
+      "phoneme": "B_REL",
+      "durationMs": 5,
+      "word": "about",
+      "minimumDurationMs": 5
+    },
+    {
+      "index": 3,
+      "phoneme": "AW",
+      "durationMs": 228,
+      "stress": 1,
+      "word": "about",
+      "minimumDurationMs": 110
+    },
+    {
+      "index": 4,
+      "phoneme": "T",
+      "durationMs": 92,
+      "word": "about",
+      "minimumDurationMs": 50
+    },
+    {
+      "index": 5,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": ".",
+      "minimumDurationMs": 7
+    },
+    {
+      "index": 6,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 7,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 8,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 9,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 10,
+      "phoneme": "",
+      "durationMs": 0
+    }
+  ],
+  "f0LayerCommands": [
+    {
+      "layer": "baseline",
+      "time": 0,
+      "ratio": 0,
+      "value": 0,
+      "profilePoints": [
+        1157,
+        1145,
+        1139,
+        1127,
+        1113,
+        1109,
+        1095,
+        1082,
+        1079,
+        1065,
+        1053,
+        1040,
+        1038,
+        1024,
+        980,
+        952,
+        863
+      ],
+      "tag": "f0_baseline"
+    },
+    {
+      "layer": "hat",
+      "time": 0.22100000000000003,
+      "ratio": 0,
+      "value": 180,
+      "tag": "f0_hat_rise"
+    },
+    {
+      "layer": "stress",
+      "time": 0.22100000000000003,
+      "ratio": 0,
+      "value": 153.5,
+      "durationFrames": 20,
+      "tag": "f0_stress_impulse"
+    },
+    {
+      "layer": "hat",
+      "time": 0.269,
+      "ratio": 0.21052631578947367,
+      "value": -360,
+      "tag": "f0_hat_fall"
+    },
+    {
+      "layer": "hat",
+      "time": 0.541,
+      "ratio": 0,
+      "value": 180,
+      "tag": "f0_boundary_reset"
+    }
+  ],
+  "samples": []
+}

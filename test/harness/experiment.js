@@ -70,6 +70,8 @@ function mergeRegistry(parent, child) {
 function mergeSemantics(parent, child) {
   if (!child) return parent;
   return {
+    ...parent,
+    ...child,
     params: { ...parent.params, ...(child.params || {}) },
     constants: deepMerge(parent.constants || {}, child.constants || {}),
     realize: { ...parent.realize, ...(child.realize || {}) },

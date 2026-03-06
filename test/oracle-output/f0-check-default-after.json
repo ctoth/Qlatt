@@ -1,0 +1,121 @@
+{
+  "phrase": "Hello world.",
+  "engine": "runtime",
+  "frontendId": "dectalk-english",
+  "experimentId": "dectalk-english",
+  "rate": 180,
+  "transitionMs": 30,
+  "sampleRate": 22050,
+  "leadTime": 0.05,
+  "tailTime": 0.2,
+  "length": 42866,
+  "metrics": {
+    "rms": 0,
+    "peak": 0
+  },
+  "trackSummary": {
+    "events": 158,
+    "totalTime": 1.6940000000000006,
+    "voicedEvents": 149,
+    "f0Min": 100.08928539107667,
+    "f0Max": 114.63132805922751
+  },
+  "frontendPhones": [
+    {
+      "index": 0,
+      "phoneme": "HH",
+      "durationMs": 93,
+      "word": "hello",
+      "minimumDurationMs": 60
+    },
+    {
+      "index": 1,
+      "phoneme": "EH",
+      "durationMs": 165,
+      "word": "hello",
+      "minimumDurationMs": 80
+    },
+    {
+      "index": 2,
+      "phoneme": "L",
+      "durationMs": 77,
+      "word": "hello",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 3,
+      "phoneme": "OW",
+      "durationMs": 168,
+      "word": "hello",
+      "minimumDurationMs": 90
+    },
+    {
+      "index": 4,
+      "phoneme": "W",
+      "durationMs": 38,
+      "word": "world",
+      "minimumDurationMs": 15
+    },
+    {
+      "index": 5,
+      "phoneme": "ER",
+      "durationMs": 139,
+      "word": "world",
+      "minimumDurationMs": 120
+    },
+    {
+      "index": 6,
+      "phoneme": "L",
+      "durationMs": 53,
+      "word": "world",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 7,
+      "phoneme": "D",
+      "durationMs": 51,
+      "word": "world",
+      "minimumDurationMs": 40
+    },
+    {
+      "index": 8,
+      "phoneme": "D_REL",
+      "durationMs": 40,
+      "word": "world",
+      "minimumDurationMs": 10
+    },
+    {
+      "index": 9,
+      "phoneme": "SIL",
+      "durationMs": 300,
+      "word": ".",
+      "minimumDurationMs": 7
+    },
+    {
+      "index": 10,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 11,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 12,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 13,
+      "phoneme": "",
+      "durationMs": 0
+    },
+    {
+      "index": 14,
+      "phoneme": "",
+      "durationMs": 0
+    }
+  ],
+  "samples": []
+}

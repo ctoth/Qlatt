@@ -178,7 +178,7 @@ describe("accentIndexInPhrase annotation", () => {
     expect(result[5].accentType).toBe("H+L*");
   });
 
-  it("marks exclamations with H*+L and initial %H", () => {
+  it("marks exclamations with H*+L and no initial %H", () => {
     const tokens = [
       sil(),
       phone("W", "wow"), phone("AW", "wow", 1),
@@ -187,7 +187,7 @@ describe("accentIndexInPhrase annotation", () => {
 
     const result = annotateProsody(tokens);
 
-    expect(result[1].initialBoundaryTone).toBe("%H");
+    expect(result[1].initialBoundaryTone).toBeNull();
     expect(result[2].accentType).toBe("H*+L");
   });
 });

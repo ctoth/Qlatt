@@ -1,0 +1,784 @@
+{
+  "schemaVersion": "v1",
+  "phraseId": "fric-thin-thieves",
+  "phrase": "Thin thieves thought that they thrilled.",
+  "normalization": {
+    "comparisonSampleRate": 10000,
+    "trimThresholdRatio": 0.02,
+    "trimWindowMs": 10,
+    "targetRms": 0.08,
+    "maxLagMs": 120
+  },
+  "alignment": {
+    "lagSamples": 1179,
+    "lagMs": 117.9
+  },
+  "oracle": {
+    "engineId": "dectalk-463",
+    "adapterId": "render-dectalk",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\oracle\\oracle.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\oracle\\oracle.json",
+    "trace": {
+      "tracePath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\oracle\\oracle.trace.jsonl",
+      "frameCount": 370,
+      "durationFrames": 370,
+      "durationSec": 3.7,
+      "voicedFrameCount": 198,
+      "voicedRatio": 0.5351351351351351,
+      "f0MinHz": 50.7,
+      "f0MaxHz": 153.3,
+      "f0MeanHz": 113.27929292929292,
+      "meanAv": 30.143243243243244,
+      "meanAp": 3.437837837837838
+    },
+    "symbolic": {
+      "rawPhonemeLog": "th' ihn   th' iyv z   th' aot   dhaet   dhey  thr ' ihlld .",
+      "phonemeTokens": [
+        "th",
+        "'",
+        "ih",
+        "n",
+        "th",
+        "'",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "'",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "'",
+        "ih",
+        "ll",
+        "d",
+        "."
+      ],
+      "comparisonTokens": [
+        "th",
+        "ih",
+        "n",
+        "th",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "ih",
+        "ll",
+        "d"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\oracle\\oracle.phonemes.txt"
+    }
+  },
+  "qlatt": {
+    "engineId": "qlatt",
+    "adapterId": "render-qlatt",
+    "wavPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\qlatt\\qlatt.wav",
+    "metadataPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\qlatt\\qlatt.artifact.json",
+    "trackSummary": {
+      "events": 390,
+      "totalTime": 3.4770000000000003,
+      "voicedEvents": 362,
+      "voicedTime": 1.6719577464788726,
+      "silenceTime": 0.2999999999999998,
+      "unvoicedNonsilenceTime": 1.5050422535211276,
+      "voicedRatio": 0.4808621646473605,
+      "f0Min": 79.30184217186795,
+      "f0Max": 133.71616718778353,
+      "f0Mean": 117.01838018651885,
+      "f0Span": 54.41432501591558
+    },
+    "renderPayloadPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\qlatt\\qlatt.json",
+    "symbolic": {
+      "segmentCount": 23,
+      "segments": [
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thin",
+          "startMs": 0,
+          "durationMs": 94
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "thin",
+          "startMs": 94,
+          "durationMs": 158
+        },
+        {
+          "rawPhoneme": "N",
+          "phoneme": "N",
+          "word": "thin",
+          "startMs": 252,
+          "durationMs": 76
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thieves",
+          "startMs": 328,
+          "durationMs": 81
+        },
+        {
+          "rawPhoneme": "IY",
+          "phoneme": "IY",
+          "word": "thieves",
+          "startMs": 409,
+          "durationMs": 224
+        },
+        {
+          "rawPhoneme": "V",
+          "phoneme": "V",
+          "word": "thieves",
+          "startMs": 633,
+          "durationMs": 96
+        },
+        {
+          "rawPhoneme": "Z",
+          "phoneme": "Z",
+          "word": "thieves",
+          "startMs": 729,
+          "durationMs": 117
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thought",
+          "startMs": 846,
+          "durationMs": 68
+        },
+        {
+          "rawPhoneme": "AO",
+          "phoneme": "AO",
+          "word": "thought",
+          "startMs": 914,
+          "durationMs": 124
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "thought",
+          "startMs": 1038,
+          "durationMs": 70
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "thought",
+          "startMs": 1108,
+          "durationMs": 15
+        },
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "that",
+          "startMs": 1123,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "that",
+          "startMs": 1176,
+          "durationMs": 185
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "that",
+          "startMs": 1361,
+          "durationMs": 70
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "that",
+          "startMs": 1431,
+          "durationMs": 15
+        },
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "they",
+          "startMs": 1446,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "EY",
+          "phoneme": "EY",
+          "word": "they",
+          "startMs": 1499,
+          "durationMs": 174
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thrilled",
+          "startMs": 1673,
+          "durationMs": 81
+        },
+        {
+          "rawPhoneme": "R",
+          "phoneme": "R",
+          "word": "thrilled",
+          "startMs": 1754,
+          "durationMs": 62
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "thrilled",
+          "startMs": 1816,
+          "durationMs": 172
+        },
+        {
+          "rawPhoneme": "L",
+          "phoneme": "L",
+          "word": "thrilled",
+          "startMs": 1988,
+          "durationMs": 66
+        },
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "thrilled",
+          "startMs": 2054,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "thrilled",
+          "startMs": 2118,
+          "durationMs": 59
+        }
+      ],
+      "phonemeSequence": [
+        "TH",
+        "IH",
+        "N",
+        "TH",
+        "IY",
+        "V",
+        "Z",
+        "TH",
+        "AO",
+        "T",
+        "T",
+        "DH",
+        "AE",
+        "T",
+        "T",
+        "DH",
+        "EY",
+        "TH",
+        "R",
+        "IH",
+        "L",
+        "D",
+        "D"
+      ],
+      "comparisonTokens": [
+        "th",
+        "ih",
+        "n",
+        "th",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "ih",
+        "ll",
+        "d"
+      ],
+      "swRegions": [
+        {
+          "startMs": 64,
+          "durationMs": 30
+        },
+        {
+          "startMs": 379,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 633,
+          "durationMs": 212.99999999999997
+        },
+        {
+          "startMs": 884,
+          "durationMs": 29.999999999999915
+        },
+        {
+          "startMs": 1107.9999999999998,
+          "durationMs": 14.999999999999902
+        },
+        {
+          "startMs": 1145.9999999999998,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 1430.9999999999998,
+          "durationMs": 14.999999999999902
+        },
+        {
+          "startMs": 1468.9999999999995,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 1723.9999999999995,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 2117.9999999999995,
+          "durationMs": 59.00000000000016
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 1108,
+          "durationMs": 15,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 1431,
+          "durationMs": 15,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 2118,
+          "durationMs": 59,
+          "phoneme": "D_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "intelligibility": {
+      "stoi": 0.36009799781460644,
+      "estoi": 0.09779054941390872
+    },
+    "acoustic": {
+      "rmsError": 0.1099294180526526,
+      "maxAbsError": 0.6477959361473753,
+      "correlation": 0.06331855447661922
+    },
+    "temporal": {
+      "oracleDurationSec": 2.382766439909297,
+      "qlattDurationSec": 3.72702947845805,
+      "alignedDurationSec": 1.6021,
+      "lagMs": 117.9
+    },
+    "track": {
+      "events": 390,
+      "totalTime": 3.4770000000000003,
+      "voicedEvents": 362,
+      "voicedTime": 1.6719577464788726,
+      "silenceTime": 0.2999999999999998,
+      "unvoicedNonsilenceTime": 1.5050422535211276,
+      "voicedRatio": 0.4808621646473605,
+      "f0Min": 79.30184217186795,
+      "f0Max": 133.71616718778353,
+      "f0Mean": 117.01838018651885,
+      "f0Span": 54.41432501591558
+    },
+    "internal": {
+      "oracleTraceDurationSec": 3.7,
+      "qlattTrackDurationSec": 3.4770000000000003,
+      "durationDeltaSec": -0.22299999999999986,
+      "oracleTraceF0MinHz": 50.7,
+      "oracleTraceF0MaxHz": 153.3,
+      "oracleTraceF0MeanHz": 113.27929292929292,
+      "qlattTrackF0MinHz": 79.30184217186795,
+      "qlattTrackF0MaxHz": 133.71616718778353,
+      "qlattTrackF0MeanHz": 117.01838018651885,
+      "f0MinDeltaHz": 28.601842171867943,
+      "f0MaxDeltaHz": -19.583832812216485,
+      "f0MeanDeltaHz": 3.7390872572259326,
+      "oracleTraceVoicedRatio": 0.5351351351351351,
+      "qlattTrackVoicedRatio": 0.4808621646473605,
+      "voicedRatioDelta": -0.05427297048777463,
+      "oracleTraceMeanAv": 30.143243243243244,
+      "oracleTraceMeanAp": 3.437837837837838,
+      "qlattTrackMeanAv": 28.277756848829455,
+      "qlattTrackMeanAh": 2.947651974544998,
+      "avDelta": -1.8654863944137894,
+      "apToAhDelta": -0.49018586329283975
+    },
+    "symbolic": {
+      "oracleTokenCount": 20,
+      "qlattTokenCount": 20,
+      "tokenEdits": 0,
+      "tokenSimilarity": 1,
+      "tokenLengthDelta": 0,
+      "qlattSegmentCount": 23,
+      "qlattSwRegionCount": 10,
+      "qlattBurstCount": 3
+    }
+  },
+  "symbolic": {
+    "oracle": {
+      "rawPhonemeLog": "th' ihn   th' iyv z   th' aot   dhaet   dhey  thr ' ihlld .",
+      "phonemeTokens": [
+        "th",
+        "'",
+        "ih",
+        "n",
+        "th",
+        "'",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "'",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "'",
+        "ih",
+        "ll",
+        "d",
+        "."
+      ],
+      "comparisonTokens": [
+        "th",
+        "ih",
+        "n",
+        "th",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "ih",
+        "ll",
+        "d"
+      ],
+      "phonemeLogPath": "C:\\Users\\Q\\code\\Qlatt\\test\\oracle-output\\dectalk-us-v1\\fric-thin-thieves\\oracle\\oracle.phonemes.txt"
+    },
+    "qlatt": {
+      "segmentCount": 23,
+      "segments": [
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thin",
+          "startMs": 0,
+          "durationMs": 94
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "thin",
+          "startMs": 94,
+          "durationMs": 158
+        },
+        {
+          "rawPhoneme": "N",
+          "phoneme": "N",
+          "word": "thin",
+          "startMs": 252,
+          "durationMs": 76
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thieves",
+          "startMs": 328,
+          "durationMs": 81
+        },
+        {
+          "rawPhoneme": "IY",
+          "phoneme": "IY",
+          "word": "thieves",
+          "startMs": 409,
+          "durationMs": 224
+        },
+        {
+          "rawPhoneme": "V",
+          "phoneme": "V",
+          "word": "thieves",
+          "startMs": 633,
+          "durationMs": 96
+        },
+        {
+          "rawPhoneme": "Z",
+          "phoneme": "Z",
+          "word": "thieves",
+          "startMs": 729,
+          "durationMs": 117
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thought",
+          "startMs": 846,
+          "durationMs": 68
+        },
+        {
+          "rawPhoneme": "AO",
+          "phoneme": "AO",
+          "word": "thought",
+          "startMs": 914,
+          "durationMs": 124
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "thought",
+          "startMs": 1038,
+          "durationMs": 70
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "thought",
+          "startMs": 1108,
+          "durationMs": 15
+        },
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "that",
+          "startMs": 1123,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "AE",
+          "phoneme": "AE",
+          "word": "that",
+          "startMs": 1176,
+          "durationMs": 185
+        },
+        {
+          "rawPhoneme": "T",
+          "phoneme": "T",
+          "word": "that",
+          "startMs": 1361,
+          "durationMs": 70
+        },
+        {
+          "rawPhoneme": "T_REL",
+          "phoneme": "T",
+          "word": "that",
+          "startMs": 1431,
+          "durationMs": 15
+        },
+        {
+          "rawPhoneme": "DH",
+          "phoneme": "DH",
+          "word": "they",
+          "startMs": 1446,
+          "durationMs": 53
+        },
+        {
+          "rawPhoneme": "EY",
+          "phoneme": "EY",
+          "word": "they",
+          "startMs": 1499,
+          "durationMs": 174
+        },
+        {
+          "rawPhoneme": "TH",
+          "phoneme": "TH",
+          "word": "thrilled",
+          "startMs": 1673,
+          "durationMs": 81
+        },
+        {
+          "rawPhoneme": "R",
+          "phoneme": "R",
+          "word": "thrilled",
+          "startMs": 1754,
+          "durationMs": 62
+        },
+        {
+          "rawPhoneme": "IH",
+          "phoneme": "IH",
+          "word": "thrilled",
+          "startMs": 1816,
+          "durationMs": 172
+        },
+        {
+          "rawPhoneme": "L",
+          "phoneme": "L",
+          "word": "thrilled",
+          "startMs": 1988,
+          "durationMs": 66
+        },
+        {
+          "rawPhoneme": "D",
+          "phoneme": "D",
+          "word": "thrilled",
+          "startMs": 2054,
+          "durationMs": 64
+        },
+        {
+          "rawPhoneme": "D_REL",
+          "phoneme": "D",
+          "word": "thrilled",
+          "startMs": 2118,
+          "durationMs": 59
+        }
+      ],
+      "phonemeSequence": [
+        "TH",
+        "IH",
+        "N",
+        "TH",
+        "IY",
+        "V",
+        "Z",
+        "TH",
+        "AO",
+        "T",
+        "T",
+        "DH",
+        "AE",
+        "T",
+        "T",
+        "DH",
+        "EY",
+        "TH",
+        "R",
+        "IH",
+        "L",
+        "D",
+        "D"
+      ],
+      "comparisonTokens": [
+        "th",
+        "ih",
+        "n",
+        "th",
+        "iy",
+        "v",
+        "z",
+        "th",
+        "ao",
+        "t",
+        "dh",
+        "ae",
+        "t",
+        "dh",
+        "ey",
+        "th",
+        "r",
+        "ih",
+        "ll",
+        "d"
+      ],
+      "swRegions": [
+        {
+          "startMs": 64,
+          "durationMs": 30
+        },
+        {
+          "startMs": 379,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 633,
+          "durationMs": 212.99999999999997
+        },
+        {
+          "startMs": 884,
+          "durationMs": 29.999999999999915
+        },
+        {
+          "startMs": 1107.9999999999998,
+          "durationMs": 14.999999999999902
+        },
+        {
+          "startMs": 1145.9999999999998,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 1430.9999999999998,
+          "durationMs": 14.999999999999902
+        },
+        {
+          "startMs": 1468.9999999999995,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 1723.9999999999995,
+          "durationMs": 30.00000000000003
+        },
+        {
+          "startMs": 2117.9999999999995,
+          "durationMs": 59.00000000000016
+        }
+      ],
+      "burstRegions": [
+        {
+          "startMs": 1108,
+          "durationMs": 15,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 1431,
+          "durationMs": 15,
+          "phoneme": "T_REL",
+          "kind": "release"
+        },
+        {
+          "startMs": 2118,
+          "durationMs": 59,
+          "phoneme": "D_REL",
+          "kind": "release"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "Low ESTOI (0.098)",
+      "Low waveform correlation (0.063)",
+      "Duration ratio out of range (1.564)"
+    ]
+  }
+}

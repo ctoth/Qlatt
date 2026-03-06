@@ -41,20 +41,18 @@ document.getElementById("copyDiagBtn").addEventListener("click", async () => {
 document.getElementById("clearSpecBtn").addEventListener("click", () => {
   clearSpectrogram();
 });
+document.getElementById("diagEngineToggle")?.addEventListener("change", (e) => {
+  state.useEngineOutput = e.target.checked;
+  if (state.lastRun) updateDiagnostics();
+});
 document.getElementById("clearDiagBtn").addEventListener("click", () => {
   state.diagnosticsEl.value = "";
   state.lastDiagnostics = "";
   state.lastRun = null;
   state.runStartTime = 0;
-  state.spikeEvents.length = 0;
   state.plstepEvents.length = 0;
   state.plstepTotalCount = 0;
-  state.lastSpikeAt.clear();
   state.telemetry.clear();
   state.telemetryMax.clear();
-  state.meterValues.clear();
-  state.meterMax.clear();
-  state.swWindowMax.clear();
-  state.swWindowMaxTime.clear();
   state.playHistory.length = 0; // P7: Clear play history
 });

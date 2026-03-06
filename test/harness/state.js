@@ -41,30 +41,17 @@ export const state = {
   telemetryMax: new Map(),
   telemetryTimer: null,
 
-  // Meters
-  meters: new Map(),
-  meterValues: new Map(),
-  meterMax: new Map(),
-  meterTimer: null,
-  meterBindingMode: null,
-  meterBindingOwner: null,
-
-  // Spikes
-  spikeEvents: [],
-  lastSpikeAt: new Map(),
-  spikeThreshold: 1.0,
-  spikeCooldown: 0.2,
-
   // PLSTEP
   plstepEvents: [],
   plstepTotalCount: 0,
 
-  // SW window tracking
-  swWindowMax: new Map(),
-  swWindowMaxTime: new Map(),
-
   // Diagnostics
   lastDiagnostics: "",
+
+  // Diagnostics engine
+  diagEngine: null,
+  diagConfig: null,
+  useEngineOutput: false,
 
   // Play history
   playHistory: [],

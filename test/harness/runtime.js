@@ -2,7 +2,7 @@
 
 import { state } from "./state.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
-import { handleTelemetry, attachTelemetryNewRuntime, attachMetersNewRuntime } from "./telemetry.js";
+import { handleTelemetry, attachTelemetryNewRuntime } from "./telemetry.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { updateDiagnostics } from "./diagnostics.js";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
@@ -12,6 +12,8 @@ import {
   summarizeTrack,
   summarizeParallel,
 } from "../../src/track-analysis.ts";
+import { parseDiagConfig } from "../../src/harness-diagnostics/schema.ts";
+import { createDiagnosticsEngine } from "../../src/harness-diagnostics/index.ts";
 
 export async function start() {
   await state.ctx.resume();
@@ -62,6 +64,29 @@ export async function initializeNewRuntime() {
     attachTelemetryNewRuntime(state.newRuntime);  // Attach additional port listeners
     state.status.textContent = "Status: new runtime initialized";
     console.log("[QLATT] New runtime initialized");
+
+    // Create diagnostics engine
+    try {
+      const configResp = await fetch(`${import.meta.env.BASE_URL}diagnostics/default.yaml`);
+      const configYaml = await configResp.text();
+      state.diagConfig = parseDiagConfig(configYaml);
+      state.diagEngine = createDiagnosticsEngine(
+        state.diagConfig,
+        state.ctx,
+        state.newRuntime,
+      );
+      state.diagEngine.subscribe((output) => {
+        if (state.useEngineOutput) {
+          state.lastDiagnostics = output;
+          state.diagnosticsEl.value = output;
+        }
+      });
+      state.diagEngine.start();
+      console.log("[QLATT] Diagnostics engine initialized");
+    } catch (err) {
+      console.warn("[QLATT] Diagnostics engine failed to initialize:", err);
+    }
+
     return state.newRuntime;
   } catch (err) {
     state.status.textContent = "Status: failed to initialize new runtime";
@@ -72,7 +97,6 @@ export async function initializeNewRuntime() {
 
 export async function speakWithNewRuntime(track) {
   const runtime = await initializeNewRuntime();
-  attachMetersNewRuntime(runtime);  // Attach meters for new runtime
 
   if (!track || track.length === 0) {
     state.status.textContent = "Status: new runtime - no track to play";
@@ -90,17 +114,22 @@ export async function speakWithNewRuntime(track) {
   // Clear state BEFORE scheduling (matching speak())
   state.plstepEvents.length = 0;
   state.plstepTotalCount = 0;
-  state.spikeEvents.length = 0;
-  state.lastSpikeAt.clear();
-  state.swWindowMax.clear();
-  state.swWindowMaxTime.clear();
   state.telemetry.clear();
   state.telemetryMax.clear();
-  state.meterMax.clear();
 
   // Set run context BEFORE scheduling so telemetry handler can use it
   state.lastRun = { phrase, baseF0, track, sessionId: currentSessionId, startTime };
   state.runStartTime = startTime;
+
+  if (state.diagEngine) {
+    state.diagEngine.onPlayStart({
+      phrase,
+      baseF0,
+      track,
+      sessionId: currentSessionId,
+      startTime,
+    });
+  }
 
   state.status.textContent = `Status: speaking "${phrase}" (new runtime)`;
 
@@ -161,6 +190,7 @@ export async function speakWithNewRuntime(track) {
   // Auto-copy diagnostics to clipboard after audio finishes (matching speak())
   setTimeout(() => {
     updateDiagnostics();
+    if (state.diagEngine) state.diagEngine.onPlayEnd();
     navigator.clipboard.writeText(state.diagnosticsEl.value).catch(() => {});
     // Record play history for warmup tracking
     const outputMax = state.meterMax.get("post-output-lp");

@@ -1,9 +1,20 @@
-# Default diagnostics configuration for the Qlatt synthesizer.
-# Taps are attached to graph nodes; checks run each poll tick.
+# public/diagnostics/default.yaml
 
 taps:
+  cascade-out:
+    node: cascadeOutGain
+    fftSize: 2048
+  parallel-out:
+    node: parallelSum
+    fftSize: 2048
+  pre-output:
+    node: outputSum
+    fftSize: 2048
   post-output:
     node: [outputLp, masterGain, outputGain]
+    fftSize: 2048
+  cascade-f2:
+    node: cascadeF2
     fftSize: 2048
 
 poll:
@@ -11,44 +22,100 @@ poll:
   guard_ms: 50
 
 checks:
+  parallel_audible:
+    tap: parallel-out
+    when: { SW: 1 }
+    measure: rms
+    assert: { min: 0.01 }
+    severity: warn
+    message: "Parallel branch inaudible during SW=1"
+
+  cascade_no_leak:
+    tap: cascade-out
+    when: { SW: 1 }
+    measure: rms
+    assert: { max: 0.01 }
+    severity: info
+    message: "Cascade leaking during SW=1"
+
   output_no_clip:
     tap: post-output
     measure: peak
     assert: { max: 1.0 }
     severity: warn
-    message: "Output clipping detected"
+    message: "Output clipping"
     collect: true
     max_collected: 6
     cooldown_ms: 200
 
-  output_signal:
+  output_not_silent:
     tap: post-output
     when: { voiced: true }
     measure: rms
-    assert: { min: 0.001 }
+    assert: { min: 0.0001 }
+    severity: error
+    message: "Output silent during voiced segment"
+
+  f2_spectral_peak:
+    tap: cascade-f2
+    when: { phoneme: "IY*" }
+    measure: fft_peak_freq
+    measure_params: { band: [2000, 2800] }
+    assert: { min: 2200 }
     severity: warn
-    message: "No signal during voiced segment"
+    message: "F2 spectral peak below target for IY"
+
+  branch_balance:
+    taps: [cascade-out, parallel-out]
+    when: { SW: 1 }
+    measure: rms_ratio_db
+    assert: { max: 20 }
+    severity: warn
+    message: "Parallel >20dB below cascade"
 
   f0_range:
     type: param_range
     param: F0
-    assert: { range_min: 10 }
+    assert: { range_min: 80 }
     severity: info
-    message: "F0 range is narrow — may sound monotone"
+    message: "F0 dynamic range narrow"
+
+  f2_ceiling:
+    type: param_range
+    param: F2
+    assert: { max_min: 2400 }
+    severity: warn
+    message: "F2 never reaches 2400 Hz"
+
+  plstep_variation:
+    type: event_check
+    event: plstep
+    field: amplitudeLinear
+    assert: { distinct_min: 3 }
+    severity: info
+    message: "All PLSTEP bursts identical amplitude"
 
   state_leak:
     tap: post-output
     type: across_plays
     plays: 3
     measure: peak
-    assert: { cv_max: 0.10 }
+    assert: { cv_max: 0.05 }
     severity: error
-    message: "State leak — peak varies across plays"
+    message: "Output varies across identical plays (state leak)"
 
 display:
   sections:
     - { id: session, source: session_info }
     - { id: track, source: track_summary }
     - { id: checks, source: check_results }
-    - { id: head, source: track_events, range: [0, 8] }
-    - { id: tail, source: track_events, range: [-6, null] }
+    - { id: formants, source: formant_tracking }
+    - { id: signal_flow, source: signal_flow }
+    - { id: telemetry, source: worklet_telemetry }
+    - { id: meters, source: meter_readings }
+    - { id: gains, source: gain_derivation }
+    - { id: plstep, source: plstep_events }
+    - { id: events_head, source: track_events, range: [0, 8] }
+    - { id: events_tail, source: track_events, range: [-6, null] }
+    - { id: voicing, source: voicing_issues }
+    - { id: history, source: play_history }

@@ -38,6 +38,14 @@ function toDecisionId(seq: number): string {
   return `d${String(seq).padStart(6, "0")}`;
 }
 
+function normalizeCitation(value: unknown): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  return value == null ? null : String(value);
+}
+
 export function createProvenanceCollector(): ProvenanceCollector {
   const decisions: DecisionRecord[] = [];
   let seq = 0;
@@ -52,7 +60,11 @@ export function createProvenanceCollector(): ProvenanceCollector {
         type: input.type,
         subject: input.subject,
         reason: input.reason,
-        citations: Array.isArray(input.citations) ? [...input.citations] : [],
+        citations: Array.isArray(input.citations)
+          ? input.citations
+            .map((citation) => normalizeCitation(citation))
+            .filter((citation): citation is string => typeof citation === "string" && citation.length > 0)
+          : [],
         parents: Array.isArray(input.parents) && input.parents.length > 0
           ? [...input.parents]
           : undefined,

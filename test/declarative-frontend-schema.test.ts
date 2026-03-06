@@ -358,6 +358,28 @@ describe("declarative frontend schema coverage", () => {
     ).toBe(true);
   });
 
+  it("normalizes citation entries that YAML parses as mapping objects", () => {
+    const spec = parseDslSpec(`
+version: v1
+rules:
+  citation_fixture:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'AA'
+    apply:
+      - field: duration
+        op: set
+        value: 100
+    citations:
+      - Fant 1997 (connected-speech source contour: onset rise, declination, phrase-final fall)
+`);
+
+    expect(spec.rules.citation_fixture.citations).toEqual([
+      "Fant 1997 (connected-speech source contour: onset rise, declination, phrase-final fall)",
+    ]);
+  });
+
   it("accepts structural condition maps with predicate references", () => {
     const spec = parseDslSpec({
       streams: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },

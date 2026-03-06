@@ -142,6 +142,17 @@ describe("explain phrase cli", () => {
     expect(payload.summary.uncitedCount).toBe(0);
   });
 
+  it("renders citations without object coercion artifacts", async () => {
+    const result = await runCli([
+      "--phrase",
+      "Well, they have older ones of course. But the current options actual users see is \"Auto\" or \"Instant (5.3)\" or \"Thinking (5.4)\". Not that complicated really.",
+      "--stage",
+      "rules",
+    ]);
+    expect(result.code).toBe(0);
+    expect(result.stdout).not.toContain("[object Object]");
+  });
+
   it("returns code 1 for invalid range syntax", async () => {
     const result = await runCli([
       "--phrase",

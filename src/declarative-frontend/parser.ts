@@ -30,6 +30,32 @@ function asStringArray(value: unknown): string[] {
   return value.filter((item: unknown): item is string => typeof item === "string");
 }
 
+function normalizeCitationEntry(value: unknown): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    const normalized = value
+      .map((entry) => normalizeCitationEntry(entry))
+      .filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+    return normalized.length > 0 ? normalized.join("; ") : null;
+  }
+  if (isPlainObject(value)) {
+    const normalized = Object.entries(value)
+      .map(([key, entry]) => {
+        const rendered = normalizeCitationEntry(entry);
+        return rendered ? `${key}: ${rendered}` : null;
+      })
+      .filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+    return normalized.length > 0 ? normalized.join("; ") : null;
+  }
+  return null;
+}
+
 function cloneObject(value: unknown): PlainObject {
   return isPlainObject(value) ? { ...value } : {};
 }
@@ -134,7 +160,9 @@ function normalizeRule(rule: unknown): PlainObject {
   return {
     ...rule,
     citations: Array.isArray(rule.citations)
-      ? rule.citations.map((c: any) => String(c).trim()).filter(Boolean)
+      ? rule.citations
+        .map((c: any) => normalizeCitationEntry(c))
+        .filter((entry): entry is string => typeof entry === "string" && entry.length > 0)
       : typeof rule.citation === "string"
         ? [rule.citation.trim()].filter(Boolean)
         : [],

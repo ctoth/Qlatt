@@ -1544,11 +1544,6 @@ export function assembleKlattTrack(
     const segmentStart = currentTime;
 
     if (phDuration <= 0) {
-      console.warn(
-        `[TTS Frontend DEBUG] Calculated duration is non-positive (${phDuration.toFixed(
-          4
-        )}s) for ${ph.phoneme}. Original duration: ${ph.duration}ms. Skipping.`
-      );
       continue;
     }
     const targetTime = segmentStart + phDuration;

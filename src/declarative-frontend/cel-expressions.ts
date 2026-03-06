@@ -55,6 +55,8 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "look_back_where",
   "look_back_pred",
   "look_ahead_pred",
+  "trajectory_to_windows",
+  "dectalk_obstruent_profile",
 ]);
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
@@ -105,12 +107,13 @@ function createCelEnvironment(): Environment {
   // re-registered. Our codebase's double(x) => Number(x) and string(x) =>
   // String(x) are functionally identical to the CEL builtins.
   // Register all known custom function names with overloads for arities
-  // 1, 2, and 3. This covers all call patterns used in YAML rule expressions.
+  // 1, 2, 3, and 4. This covers all call patterns used in YAML rule expressions.
   const knownFunctionNames = [
     "midpoint", "at_ratio", "at_sync", "prev_point",
     "ahead", "behind", "total", "target", "assoc",
     "max", "min", "exp", "sqrt", "abs", "log", "pow", "contains", "merge",
     "look_back_where", "look_back_pred", "look_ahead_pred",
+    "trajectory_to_windows", "dectalk_obstruent_profile",
   ];
 
   const knownFunctions: Array<[string, string[]]> = knownFunctionNames.map((name) => [
@@ -119,6 +122,7 @@ function createCelEnvironment(): Environment {
       `${name}(dyn): dyn`,
       `${name}(dyn, dyn): dyn`,
       `${name}(dyn, dyn, dyn): dyn`,
+      `${name}(dyn, dyn, dyn, dyn): dyn`,
     ],
   ]);
 

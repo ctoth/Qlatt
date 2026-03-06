@@ -992,6 +992,35 @@ function validateControlWindowTemplate(
   contextLabel: string
 ): void {
   if (value == null) return;
+  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
+    validateDispatchSpec(
+      value.dispatch,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      false,
+      diagnostics,
+      `${path}.dispatch`,
+      contextLabel
+    );
+    return;
+  }
+  if (typeof value === "string") {
+    const syntaxError = validateExpressionSyntax(value, { streamNames });
+    if (syntaxError) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_CEL_INVALID",
+          `${contextLabel} has invalid CEL expression: ${syntaxError}`,
+          path
+        )
+      );
+      return;
+    }
+    validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
+    return;
+  }
   if (!Array.isArray(value)) {
     diagnostics.push(
       makeDiagnostic(
@@ -1451,6 +1480,140 @@ function validateRules(
                 policyState,
                 criticalContext
               );
+            }
+          }
+        }
+      }
+    }
+
+    if (isPlainObject(r.contour)) {
+      if (!hasSelect) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CONTOUR_SELECT_REQUIRED",
+            `Rule '${name}' contour requires a select rule shape`,
+            `rules.${name}.contour`
+          )
+        );
+      }
+
+      if (
+        Object.prototype.hasOwnProperty.call(r.contour, "domain") &&
+        r.contour.domain !== "phrase"
+      ) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CONTOUR_DOMAIN_INVALID",
+            `Rule '${name}' contour.domain must be 'phrase'`,
+            `rules.${name}.contour.domain`
+          )
+        );
+      }
+
+      if (Object.prototype.hasOwnProperty.call(r.contour, "reset_break_index")) {
+        const breakIndex = Number(r.contour.reset_break_index);
+        if (!Number.isFinite(breakIndex) || breakIndex < 1) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CONTOUR_RESET_BREAK_INVALID",
+              `Rule '${name}' contour.reset_break_index must be a finite number >= 1`,
+              `rules.${name}.contour.reset_break_index`
+            )
+          );
+        }
+      }
+
+      if (!Array.isArray(r.contour.apply) || r.contour.apply.length === 0) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_CONTOUR_APPLY_REQUIRED",
+            `Rule '${name}' contour.apply must be a non-empty array`,
+            `rules.${name}.contour.apply`
+          )
+        );
+      } else {
+        for (let i = 0; i < r.contour.apply.length; i += 1) {
+          const effect = r.contour.apply[i];
+          const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
+          const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
+          if (hasValue && hasDispatch) {
+            diagnostics.push(
+              makeDiagnostic(
+                "E_DISPATCH_AND_VALUE",
+                `Rule '${name}' contour.apply[${i}] cannot specify both value and dispatch`,
+                `rules.${name}.contour.apply[${i}]`
+              )
+            );
+          }
+          if (hasDispatch) {
+            const criticalContext = isCriticalScalarField(effect?.field);
+            validateDispatchSpec(
+              effect?.dispatch,
+              streamByName,
+              ruleStreamName,
+              streamNames,
+              policyState,
+              criticalContext,
+              diagnostics,
+              `rules.${name}.contour.apply[${i}].dispatch`,
+              `Rule '${name}' contour.apply[${i}] dispatch`
+            );
+          } else if (hasValue) {
+            const criticalContext = isCriticalScalarField(effect?.field);
+            if (
+              effect?.value != null &&
+              typeof effect.value !== "string" &&
+              typeof effect.value !== "number"
+            ) {
+              diagnostics.push(
+                makeDiagnostic(
+                  "E_RULE_EXPRESSION_INVALID",
+                  `Rule '${name}' contour.apply[${i}] has non-string/non-number value expression`,
+                  `rules.${name}.contour.apply[${i}].value`
+                )
+              );
+            }
+            if (typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
+              if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
+                diagnostics.push(
+                  makeDiagnostic(
+                    "E_POLICY_LITERAL_CRITICAL",
+                    `Rule '${name}' contour.apply[${i}] value uses inline critical numeric literal '${String(
+                      effect.value
+                    )}'; use params.policy.*`,
+                    `rules.${name}.contour.apply[${i}].value`
+                  )
+                );
+              }
+            }
+            if (typeof effect?.value === "string" && effect.value.length > 0) {
+              const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
+              if (syntaxError) {
+                diagnostics.push(
+                  makeDiagnostic(
+                    "E_CEL_INVALID",
+                    `Rule '${name}' contour.apply[${i}] has invalid CEL value expression: ${syntaxError}`,
+                    `rules.${name}.contour.apply[${i}].value`
+                  )
+                );
+              } else {
+                validateDeclaredTypeFieldUsage(
+                  effect.value,
+                  streamByName,
+                  ruleStreamName,
+                  diagnostics,
+                  `rules.${name}.contour.apply[${i}].value`,
+                  `Rule '${name}' contour.apply[${i}] value`
+                );
+                validatePolicyReferencesAndLiterals(
+                  effect.value,
+                  `rules.${name}.contour.apply[${i}].value`,
+                  `Rule '${name}' contour.apply[${i}] value`,
+                  diagnostics,
+                  policyState,
+                  criticalContext
+                );
+              }
             }
           }
         }

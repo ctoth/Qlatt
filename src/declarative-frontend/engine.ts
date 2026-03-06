@@ -18,6 +18,10 @@ import {
   isStartOrder,
   toNumericOrder,
 } from "./axis";
+import {
+  buildTrajectoryControlWindows,
+  selectDectalkObstruentProfile,
+} from "./dectalk-helpers";
 
 /**
  * Internal engine token type. Intentionally loose (`any` index) because the
@@ -1038,6 +1042,20 @@ function buildNavigationFunctions(
     look_back_where: lookBackWhereFn,
     look_back_pred: lookBackPredFn,
     look_ahead_pred: lookAheadPredFn,
+    trajectory_to_windows: (trajectory: unknown, durationMs: unknown) =>
+      buildTrajectoryControlWindows(trajectory, durationMs),
+    dectalk_obstruent_profile: (
+      profiles: unknown,
+      current: unknown,
+      previous: unknown,
+      next: unknown
+    ) =>
+      selectDectalkObstruentProfile(
+        profiles,
+        current as Record<string, any> | null | undefined,
+        previous as Record<string, any> | null | undefined,
+        next as Record<string, any> | null | undefined
+      ),
   };
 
   const rebindCurrentToken = (
@@ -1539,6 +1557,12 @@ function buildSpliceInsertions(
       status: TokenStatus.ACTIVE,
       ...markProps,
     };
+    if (Array.isArray(copiedFields.control_windows) && Array.isArray(evaluatedObject.control_windows)) {
+      token.control_windows = [
+        ...copiedFields.control_windows,
+        ...evaluatedObject.control_windows,
+      ];
+    }
     if (typeof token.id !== "string" || token.id.length === 0) {
       token.id = nextInsertedTokenId(runtime, token.stream);
     } else {
@@ -1990,6 +2014,105 @@ function evaluateRuleDefine(
   return resolved;
 }
 
+function asFinitePositiveDurationMs(value: unknown): number {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+}
+
+function buildContourContexts(
+  rule: TokenLike,
+  sequence: TokenLike[],
+  selected: TokenLike[]
+): WeakMap<TokenLike, TokenLike> | null {
+  const contour = rule?.contour;
+  if (!contour || typeof contour !== "object" || Array.isArray(contour)) return null;
+
+  const domain = contour.domain ?? "phrase";
+  if (domain !== "phrase") {
+    throw new Error(`E_CONTOUR_DOMAIN_UNSUPPORTED: unsupported contour domain '${String(domain)}'`);
+  }
+
+  const rawResetBreak = Number(contour.reset_break_index);
+  // Default to BI>=4 (major intonational phrase boundary) when unspecified.
+  // Citation: Silverman et al. 1992 ToBI break index tier.
+  const resetBreakIndex =
+    Number.isFinite(rawResetBreak) && rawResetBreak >= 1 ? Math.floor(rawResetBreak) : 4;
+
+  const selectedSet = new Set(selected);
+  const stream =
+    typeof rule?.select?.stream === "string" && rule.select.stream.length > 0
+      ? rule.select.stream
+      : "phone";
+  const activeStreamTokens = sequence.filter(
+    (token) => isActiveToken(token) && getTokenStream(token) === stream
+  );
+
+  const phraseBuckets: TokenLike[][] = [];
+  let bucket: TokenLike[] = [];
+  for (const token of activeStreamTokens) {
+    if (selectedSet.has(token)) {
+      bucket.push(token);
+    }
+    const breakIndex = Number(token?.breakIndex);
+    const boundary =
+      stream === "phone" &&
+      token?.phoneme === "SIL" &&
+      Number.isFinite(breakIndex) &&
+      breakIndex >= resetBreakIndex;
+    if (boundary) {
+      if (bucket.length > 0) {
+        phraseBuckets.push(bucket);
+        bucket = [];
+      }
+    }
+  }
+  if (bucket.length > 0) {
+    phraseBuckets.push(bucket);
+  }
+  if (phraseBuckets.length === 0 && selected.length > 0) {
+    phraseBuckets.push([...selected]);
+  }
+
+  const contexts = new WeakMap<TokenLike, TokenLike>();
+  for (let phraseIndex = 0; phraseIndex < phraseBuckets.length; phraseIndex += 1) {
+    const phrase = phraseBuckets[phraseIndex];
+    const durations = phrase.map((token) => asFinitePositiveDurationMs(token?.duration));
+    let phraseDurationMs = durations.reduce((sum, value) => sum + value, 0);
+    if (phraseDurationMs <= 0) {
+      phraseDurationMs = phrase.length;
+      for (let i = 0; i < durations.length; i += 1) {
+        durations[i] = 1;
+      }
+    }
+
+    let elapsedMs = 0;
+    for (let tokenIndex = 0; tokenIndex < phrase.length; tokenIndex += 1) {
+      const token = phrase[tokenIndex];
+      const durationMs = durations[tokenIndex];
+      const midpointMs = elapsedMs + durationMs * 0.5;
+      elapsedMs += durationMs;
+      const progressRaw = phraseDurationMs > 0 ? midpointMs / phraseDurationMs : 0;
+      const progress = Math.max(0, Math.min(1, progressRaw));
+      contexts.set(token, {
+        domain: "phrase",
+        phrase_index: phraseIndex,
+        phrase_total: phraseBuckets.length,
+        token_index: tokenIndex,
+        token_total: phrase.length,
+        duration_ms: durationMs,
+        duration_sec: durationMs / 1000,
+        elapsed_ms: midpointMs,
+        elapsed_sec: midpointMs / 1000,
+        phrase_duration_ms: phraseDurationMs,
+        phrase_duration_sec: phraseDurationMs / 1000,
+        progress,
+      });
+    }
+  }
+
+  return contexts;
+}
+
 function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike, navigation: NavigationBundle): TokenLike[] {
   const select = rule.select ?? {};
   const stream = select.stream;
@@ -2008,11 +2131,18 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
   }
 
   const structural = isStructuralRule(rule);
+  const contourContexts = buildContourContexts(rule, sequence, selected);
+  const contourSpec =
+    rule?.contour && typeof rule.contour === "object" && !Array.isArray(rule.contour)
+      ? rule.contour
+      : null;
 
   for (const token of selected) {
     // Rebind currentToken instead of rebuilding the entire bundle
     navigation.rebindCurrentToken(token);
-    const baseContext = { current: token };
+    const contour = contourContexts?.get(token) ?? null;
+    const baseContext =
+      contour != null ? { current: token, contour } : { current: token };
     const defineContext = evaluateRuleDefine(
       rule,
       token,
@@ -2045,6 +2175,17 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       "current",
       extraContext
     );
+    if (contourSpec && Array.isArray(contourSpec.apply) && contourSpec.apply.length > 0) {
+      applyEffectsToTargets(
+        { apply: contourSpec.apply },
+        (targetName) => (targetName === "current" ? token : null),
+        runtime.params,
+        navigation,
+        runtime,
+        "current",
+        extraContext
+      );
+    }
     applyAssociationSpecs(rule.associate, (targetName) => (targetName === "current" ? token : null), TokenStatus.ACTIVE);
     applyAssociationSpecs(
       rule.disassociate,
@@ -2242,6 +2383,9 @@ function applyRule(rule: TokenLike, sequence: TokenLike[], runtime: RuntimeLike,
     return applySelectRule(rule, sequence, runtime, navigation);
   }
   if (rule.match) {
+    if (rule.contour) {
+      throw new Error("E_CONTOUR_RULE_SHAPE: contour is only supported on select rules");
+    }
     return applyPatternRule(rule, sequence, runtime, navigation);
   }
   throw new Error(`E_RULE_SHAPE: unsupported declarative slice rule op '${rule?.op}'`);

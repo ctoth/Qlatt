@@ -241,6 +241,8 @@ export function materializePhonemeTarget(
       payload[entryKey] = value;
     } else if (typeof value === "number" && !Object.prototype.hasOwnProperty.call(effectiveBase, entryKey)) {
       payload[entryKey] = value;
+    } else if ((Array.isArray(value) || isPlainObject(value)) && !Object.prototype.hasOwnProperty.call(effectiveBase, entryKey)) {
+      payload[entryKey] = cloneValue(value);
     }
   }
 

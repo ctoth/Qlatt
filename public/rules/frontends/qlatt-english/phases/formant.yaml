@@ -142,10 +142,6 @@ rules:
         op: set
         value: 1
         tag: nasal_coupling
-      - field: params.nasalB1AdditionHz
-        op: set
-        value: params.policy.nasal.b1_addition_hz
-        tag: nasalization_secondary_cue
     citations:
       - Fujimura 1962 (nasal consonant antiresonances by place)
       - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
@@ -212,9 +208,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_1_fraction"
                 tag: "'nasal_coupling'"
               - target: "'prev'"
                 start_ms: anticipatory_stage_1_end_ms
@@ -223,9 +216,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_2_fraction"
                 tag: "'nasal_coupling'"
               - target: "'prev'"
                 start_ms: anticipatory_midpoint_ms
@@ -234,9 +224,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: params.policy.nasal.b1_addition_hz
                 tag: "'nasal_coupling'"
               - target: "'next'"
                 start_ms: 0
@@ -245,9 +232,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: params.policy.nasal.carryover_peak
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
                 tag: "'nasal_coupling'"
               - target: "'next'"
                 start_ms: carryover_stage_1_end_ms
@@ -256,9 +240,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_tail_fraction"
                 tag: "'nasal_coupling'"
           - when: "prev != null && prev.type == 'vowel'"
             value:
@@ -269,9 +250,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_1_fraction"
                 tag: "'nasal_coupling'"
               - target: "'prev'"
                 start_ms: anticipatory_stage_1_end_ms
@@ -280,9 +258,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_2_fraction"
                 tag: "'nasal_coupling'"
               - target: "'prev'"
                 start_ms: anticipatory_midpoint_ms
@@ -291,9 +266,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: params.policy.nasal.b1_addition_hz
                 tag: "'nasal_coupling'"
           - when: "next != null && next.type == 'vowel'"
             value:
@@ -304,9 +276,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: params.policy.nasal.carryover_peak
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
                 tag: "'nasal_coupling'"
               - target: "'next'"
                 start_ms: carryover_stage_1_end_ms
@@ -315,9 +284,6 @@ rules:
                   nasalCoupling:
                     op: "'set'"
                     value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
-                  nasalB1AdditionHz:
-                    op: "'set'"
-                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_tail_fraction"
                 tag: "'nasal_coupling'"
           - default: []
     citations:

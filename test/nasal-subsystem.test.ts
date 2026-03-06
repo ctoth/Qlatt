@@ -40,6 +40,7 @@ describe("nasal subsystem semantics", () => {
     expect(result.values.nasalCoreFnz).toBe(475);
     expect(result.values.nasalPlaceFnz).toBe(3000);
     expect(result.values.nasalPlaceBnz).toBe(100);
+    expect(Number(result.values.nasalSecondaryCueScale)).toBe(1);
     expect(result.values.nasalRuntimeActive).toBe(1);
     expect(result.values.nasalCoreFnpBound).toBe(250);
     expect(result.values.nasalCoreFnzBound).toBe(475);
@@ -61,10 +62,30 @@ describe("nasal subsystem semantics", () => {
     });
 
     expect(result.values.nasalParallelDb).toBe(0);
+    expect(Number(result.values.nasalSecondaryCueScale)).toBe(0);
     expect(Number(result.values.anLinear)).toBe(0);
     expect(result.values.nasalRuntimeActive).toBe(0);
     expect(result.values.nasalCoreBnpBound).toBe(0);
     expect(result.values.nasalCoreBnzBound).toBe(0);
+  });
+
+  it("tapers B1 widening nonlinearly for partial coupling", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
+    const { topoEvaluator } = createConfiguredEvaluator();
+    const result = topoEvaluator.evaluate(semantics, {
+      params: {
+        F0: 100,
+        F1: 700,
+        B1: 100,
+        nasalCoupling: 0.5,
+        nasalB1AdditionHz: 107,
+      },
+      constants: semantics.constants ?? {},
+    });
+
+    expect(Number(result.values.nasalSecondaryCueScale)).toBeCloseTo(0.25, 6);
+    expect(Number(result.values.B1)).toBeGreaterThan(120);
+    expect(Number(result.values.B1)).toBeLessThan(130);
   });
 
   it("bypasses the core nasal graph in oral speech and keeps a separate place antiformant node", async () => {

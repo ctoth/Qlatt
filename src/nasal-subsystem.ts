@@ -103,12 +103,12 @@ function emitRulesStageEvents(
     }
 
     const hasSecondaryCue =
-      (token?.params?.nasalB1AdditionHz ?? 0) > 0 ||
+      (token?.params?.nasalCoupling ?? 0) > 0 ||
       (token?.params?.nasalMurmurStrength ?? 0) > 0 ||
       windows.some((window) =>
         window?.fields &&
         typeof window.fields === "object" &&
-        (Object.prototype.hasOwnProperty.call(window.fields, "B1") ||
+        (Object.prototype.hasOwnProperty.call(window.fields, "nasalCoupling") ||
           Object.prototype.hasOwnProperty.call(window.fields, "nasalMurmurStrength"))
       );
     if (hasSecondaryCue) {

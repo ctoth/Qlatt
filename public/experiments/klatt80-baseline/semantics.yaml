@@ -423,21 +423,31 @@ realize:
     description: "Derive B10 from F10/Q where Q=2 (Rabiner 1968)"
 
   # ---------------------------------------------------------------------------
-  # Bandwidth adjustment for glottal leakage — Fant (1997)
+  # Bandwidth adjustment — Fant (1997) + F0-proximity widening
   #
   # Per-phoneme B values from inventory.yaml represent the speaker's reference
-  # modal voice. These realize rules ADD the glottal leakage delta relative to
-  # RdRef, so DeltaB=0 when Rd == RdRef. Breathy voice
-  # (higher Rd) widens bandwidth; pressed voice (lower Rd) narrows it,
-  # clamped at a 40 Hz floor (radiation + wall losses alone ~ 15-20 Hz;
-  # Stevens 1998 Table 3.8).
+  # modal voice. These realize rules ADD two corrections:
   #
+  # 1. Glottal leakage delta relative to RdRef (Fant 1997):
+  #    DeltaB1 = 250 * (F1/500)^2 * (Ra - RaRef) / 12
+  #    DeltaB2 = DeltaB1 * F1 / (2*F2)
+  #    DeltaB=0 when Rd == RdRef. Breathy voice (higher Rd) widens
+  #    bandwidth; pressed voice (lower Rd) narrows it.
+  #
+  # 2. F0-proximity widening (Stevens 1998 §3.8-3.9):
+  #    When F0 approaches F1, harmonics under-sample the formant peak
+  #    and perceived bandwidth widens. High vowels in female/child
+  #    voices (F0/F1 > 0.5) sound buzzy without compensation.
+  #    DeltaB1_f0 = 200 * max(0, F0/F1 - 0.5)^2
+  #    Effect: 0 Hz at F0/F1=0.5, ~8 Hz at 0.7, ~32 Hz at 0.9.
+  #    B2 unaffected (F0 never approaches F2).
+  #
+  # Both corrections clamped at a 40 Hz floor (radiation + wall losses
+  # alone ~ 15-20 Hz; Stevens 1998 Table 3.8).
   # Ra is in PERCENT (range 0.44-12.0), NOT fraction.
-  # DeltaB1 = 250 * (F1/500)^2 * (Ra - 3.8) / 12  [Fant 1997]
-  # DeltaB2 = DeltaB1 * F1 / (2*F2)                 [Fant 1997]
   # B3+ glottal contribution is negligible.
   #
-  # Refs: Fant (1997), Stevens (1998) Section 3.8-3.9
+  # Refs: Fant (1997), Stevens (1998) Section 3.8-3.9, §6.10
   # ---------------------------------------------------------------------------
   effectiveRd:
     expr: "min(2.7, max(0.3, Rd + RdPhraseOffset))"
@@ -499,6 +509,11 @@ realize:
     deps: [nasalPlaceIndex, nasalMurmurStrength, nasalPlaceBwHz]
     description: "Enable the place antiformant only during nasal murmur."
 
+  nasalSecondaryCueScale:
+    expr: "pow(nasalCouplingClamped, 2.0)"
+    deps: [nasalCouplingClamped]
+    description: "Secondary vowel nasalization cues track coupling with a conservative nonlinear taper."
+
   nasalRuntimeActive:
     expr: "(nasalCouplingClamped > 0 || nasalMurmurStrengthClamped > 0) ? 1.0 : 0.0"
     deps: [nasalCouplingClamped, nasalMurmurStrengthClamped]
@@ -530,9 +545,18 @@ realize:
     description: "Runtime-bound nasal zero bandwidth. Zero bypasses the core nasal tract in oral speech."
 
   B1:
-    expr: "max(B1 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0 + nasalB1AdditionHz * nasalCouplingClamped, 40.0)"
-    deps: [F1, Ra, RaRef, nasalB1AdditionHz, nasalCouplingClamped]
-    description: "Adjust B1 for glottal leakage relative to RdRef (Fant 1997). Floor 40 Hz."
+    expr: >-
+      max(B1
+        + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0
+        + nasalB1AdditionHz * nasalSecondaryCueScale
+        + (F0 > 0.0 && F1 > 0.0 ? 200.0 * pow(max(0.0, F0 / F1 - 0.5), 2.0) : 0.0),
+      40.0)
+    deps: [F0, F1, Ra, RaRef, nasalB1AdditionHz, nasalSecondaryCueScale]
+    description: >-
+      B1 adjustment: (1) Fant 1997 glottal leakage delta relative to RdRef,
+      (2) nasal coupling B1 addition (Chen 1997),
+      (3) F0-proximity widening when F0/F1 > 0.5 (Stevens 1998 §3.8-3.9).
+      Floor 40 Hz.
 
   B2:
     expr: "max(B2 + 250.0 * pow(F1 / 500.0, 2.0) * (Ra - RaRef) / 12.0 * F1 / (2.0 * F2), 40.0)"

@@ -441,9 +441,10 @@ parameters:
           - Stevens & House 1956
           - Allen et al. 1987 Ch.11
       vcv_coarticulation_rate:
-        value: 0.3
+        value: 0.2
         citations:
           - Ohman 1966
+          - "Engineering estimate: conservative DAC weight to avoid over-compressing F2 after explicit consonant locus assignment"
       velar_f2_locus:
         value: 1500
         citations:

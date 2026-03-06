@@ -1585,10 +1585,10 @@ describe("declarative frontend rulepack context migration", () => {
     const m = out.find((t) => t.phoneme === "M");
     expect(m).toBeTruthy();
     // bilabial_f2_locus sets M's F2 to 1200 (default bilabial locus before non-front non-back vowel AA)
-    // Then vcv_coarticulation: flanking avg = (2020 + 1220) / 2 = 1620
-    // adjusted = 1200 + (1620 - 1200) * 0.3 = 1200 + 126 = 1326
-    expect(m!.params.F2).toBeGreaterThan(1200);
-    expect(m!.params.F2).toBeLessThan(1620);
+    // Then vcv_coarticulation uses DAC weight = 0.2 * (1 - 1/3) = 0.1333...
+    // flanking avg = (2020 + 1220) / 2 = 1620
+    // adjusted = 1200 + (1620 - 1200) * 0.1333... = 1256
+    expect(m!.params.F2).toBeCloseTo(1256, 0);
   });
 
   it("does not apply VCV coarticulation when not flanked by vowels", () => {

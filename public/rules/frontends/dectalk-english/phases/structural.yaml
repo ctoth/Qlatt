@@ -1,5 +1,22 @@
 version: v1
 rules:
+  dectalk_apply_diphthong_trajectories:
+    kind: structural
+    select:
+      stream: phone
+      where: current.type == 'vowel' && has(current.trajectory)
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          control_windows: "trajectory_to_windows(current.trajectory, current.duration)"
+    citations:
+      - "DECtalk 4.63 p_us_rom.h (us_maltar/us_maldip male diphthong trajectories)"
+      - "DECtalk 4.63 ph_setar.c set_trans() (trajectory points are realized as time-ordered target transitions across the vowel)"
+      - "Engineering approximation: render DECtalk ramp targets as piecewise control windows so the frontend stays declarative"
+
   dectalk_insert_voiceless_stop_release_into_silence:
     kind: structural
     select:
@@ -15,9 +32,9 @@ rules:
       silence_target: "target('SIL')"
       dummy_duration: params.policy.duration.voiceless_vot_base_ms
       vot_target: dummy_duration
-      vot_sum: rel_target.duration + asp_target.duration
-      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
-      rel_duration: "vot_target * rel_share"
+      rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
+      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      rel_duration: "min([vot_target, rel_burst_duration])"
       asp_duration: "vot_target - rel_duration"
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
       next_min_duration: "has(next_token.minimumDuration) ? next_token.minimumDuration : 0"
@@ -27,10 +44,10 @@ rules:
       open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
       carrier_params: "merge(silence_target.params, {'SW': 0})"
       rel_window_params: >-
-        merge(rel_target.params, {'A2': max([0, rel_target.params.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_target.params.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A4': max([0, rel_target.params.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_target.params.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A6': max([0, rel_target.params.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_target.params.AB - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+        merge(rel_target.params, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A4': max([0, rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A6': max([0, rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db])},
+        {'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1}))
       asp_window_params: >-
         merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
         'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
@@ -46,6 +63,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -115,6 +133,8 @@ rules:
       in_s_cluster: >-
         prev_token != null && prev_token.phoneme == 'S' &&
         (has(prev_token.word) && has(current.word) ? prev_token.word == current.word : false)
+      rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
+      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev_token, next_token)"
       vot_target: >-
         next_is_sonorant_consonant ?
         ((next_unstressed ? params.policy.duration.voiceless_vot_unstressed_ms : params.policy.duration.voiceless_vot_base_ms) +
@@ -122,9 +142,7 @@ rules:
         (in_s_cluster ? params.policy.duration.voiceless_vot_s_cluster_ms :
         (next_unstressed ? params.policy.duration.voiceless_vot_unstressed_ms :
         params.policy.duration.voiceless_vot_base_ms))
-      vot_sum: rel_target.duration + asp_target.duration
-      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
-      rel_duration_base: vot_target * rel_share
+      rel_duration_base: "min([vot_target, rel_burst_duration])"
       asp_duration_base: vot_target - rel_duration_base
       asp_window_ah: >-
         (next_is_front_vowel ? params.policy.duration.voiceless_vot_aspiration_front_db :
@@ -132,8 +150,8 @@ rules:
         (next_unstressed ? params.policy.duration.voiceless_vot_aspiration_unstressed_reduction_db : 0) +
         (next_is_sonorant_consonant || next_token.phoneme in ['ER', 'RR'] ? params.policy.duration.voiceless_vot_aspiration_sonorant_bonus_db : 0)
       rel_params: >-
-        merge(rel_target.params, {'AF': weak ? max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]) : rel_target.params.AF,
-        'AH': max([0, asp_window_ah])})
+        merge(rel_target.params, merge(rel_profile, {'AF': weak ? max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]) : rel_target.params.AF,
+        'AH': max([0, asp_window_ah])}))
       asp_window_params: >-
         {'AH': max([0, asp_window_ah]), 'AV': 0, 'B1': next_token.params.B1 + params.policy.duration.open_glottis_b1_widen_hz,
         'B2': next_token.params.B2 + params.policy.duration.open_glottis_b2_widen_hz}
@@ -157,6 +175,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -186,6 +205,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -194,6 +214,7 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 2 (aspiration/VOT extends into the following sonorant)"
+      - "DECtalk 4.63 p_us_rom.h (us_burdr and us_ptram/us_malamp stop burst timing + spectra)"
       - "DECtalk 4.63 ph_defs.h (NF60MS, NF15MS, NF7MS constants)"
       - "Engineering approximation: represent DECtalk's PAV/PAP/PB1/PB2 timed overrides as a timed prefix window on the following segment without shortening that segment"
 
@@ -211,9 +232,9 @@ rules:
       silence_target: "target('SIL')"
       dummy_duration: params.policy.duration.voiceless_vot_base_ms
       vot_target: dummy_duration
-      vot_sum: rel_target.duration + asp_target.duration
-      rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
-      rel_duration: "vot_target * rel_share"
+      rel_burst_duration: "has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration"
+      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      rel_duration: "min([vot_target, rel_burst_duration])"
       asp_duration: "vot_target - rel_duration"
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
       closure_duration: "max([current_min_duration, current.duration - rel_duration])"
@@ -221,10 +242,10 @@ rules:
       open_glottis_b2: "silence_target.params.B2 + params.policy.duration.open_glottis_b2_widen_hz"
       carrier_params: "merge(silence_target.params, {'SW': 0})"
       rel_window_params: >-
-        merge(rel_target.params, {'A2': max([0, rel_target.params.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_target.params.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A4': max([0, rel_target.params.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_target.params.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'A6': max([0, rel_target.params.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_target.params.AB - params.policy.duration.dummy_vowel_burst_reduction_db]),
-        'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
+        merge(rel_target.params, merge({'A2': max([0, rel_profile.A2 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A3': max([0, rel_profile.A3 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A4': max([0, rel_profile.A4 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'A5': max([0, rel_profile.A5 - params.policy.duration.dummy_vowel_burst_reduction_db]),
+        'A6': max([0, rel_profile.A6 - params.policy.duration.dummy_vowel_burst_reduction_db]), 'AB': max([0, rel_profile.AB - params.policy.duration.dummy_vowel_burst_reduction_db])},
+        {'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1}))
       asp_window_params: >-
         merge(asp_target.params, {'AH': max([0, asp_target.params.AH - params.policy.duration.dummy_vowel_aspiration_reduction_db]),
         'AV': 0, 'B1': open_glottis_b1, 'B2': open_glottis_b2, 'SW': 1})
@@ -240,6 +261,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -271,6 +293,7 @@ rules:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 2 (a dummy vowel releases a final voiceless plosive into silence)"
       - "DECtalk 4.63 p_us_st1.c (dummy-vowel release reduces burst by 3 dB, aspiration by 6 dB, and widens B1/B2 during the open-glottis interval)"
+      - "DECtalk 4.63 p_us_rom.h (us_burdr and us_ptram/us_malamp stop burst timing + spectra)"
       - "Engineering approximation: model DECtalk's dummy-vowel carrier as a SIL token with timed parameter windows"
 
   dectalk_insert_voiced_stop_release:
@@ -285,12 +308,13 @@ rules:
       next_token: next
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
+      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, next_token)"
       rel_params: >-
-        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
-        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
+        weak ? merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
+        params.policy.duration.weak_release_amplitude_reduction_db])})) : merge(rel_target.params, rel_profile)
       rel_duration: >-
-        weak ? max([params.policy.duration.weak_release_min_ms, rel_target.duration *
-        params.policy.duration.weak_release_scale]) : rel_target.duration
+        weak ? max([params.policy.duration.weak_release_min_ms, (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration) *
+        params.policy.duration.weak_release_scale]) : (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration)
       current_min_duration: "has(current.minimumDuration) ? current.minimumDuration : 0"
       closure_duration: "max([current_min_duration, current.duration - rel_duration])"
     splice:
@@ -305,6 +329,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -328,6 +353,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -336,6 +362,7 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
       - "DECtalk 4.63 p_us_st1.c Special Rule 3 (voiced stop burst/voicebar is realized within the burst interval, not as added segment time)"
+      - "DECtalk 4.63 p_us_rom.h (us_burdr and us_ptram/us_malamp stop burst timing + spectra)"
       - "Engineering approximation: represent DECtalk's in-stop burst by reallocating closure time to an inserted release segment"
 
   dectalk_insert_voiced_stop_release_final:
@@ -347,9 +374,10 @@ rules:
       rel: "current.phoneme + \"_REL\""
       weak: "true"
       rel_target: target(rel)
-      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
+      rel_profile: "dectalk_obstruent_profile(rel_target.stopReleaseProfiles, current, prev, null)"
+      rel_params: "merge(rel_target.params, merge(rel_profile, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}))"
       rel_duration: >-
-        max([params.policy.duration.weak_release_min_ms, rel_target.duration *
+        max([params.policy.duration.weak_release_min_ms, (has(rel_target.burstDuration) ? rel_target.burstDuration : rel_target.duration) *
         params.policy.duration.weak_release_scale])
     splice:
       type: replace_range
@@ -368,7 +396,8 @@ rules:
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
     citations:
       - "Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)"
-      - "Engineering bridge: reuse qlatt structural weak-release policy until DECtalk p_us_st1 is ported"
+      - "DECtalk 4.63 p_us_rom.h (us_burdr and us_ptram/us_malamp stop burst timing + spectra)"
+      - "Engineering bridge: reuse qlatt structural weak-release policy for the final-release attenuation shape while using DECtalk burst timing"
 
   dectalk_weaken_interdental_frication:
     kind: structural
@@ -417,6 +446,7 @@ rules:
             - voiced
             - voiceless
             - dental
+            - control_windows
           params: quiet_params
           inventorySW: 0
           control_windows:
@@ -469,6 +499,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -492,6 +523,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -536,6 +568,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -560,6 +593,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -608,6 +642,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration
@@ -627,6 +662,7 @@ rules:
             - word
             - weak
             - params
+            - control_windows
             - duration
             - inherentDuration
             - minimumDuration

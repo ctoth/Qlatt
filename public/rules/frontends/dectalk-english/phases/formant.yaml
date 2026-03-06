@@ -27,3 +27,121 @@ rules:
     citations:
       - "Klatt 1980 (cascade/parallel source routing)"
       - "DECtalk 4.63 p_us_st1.c"
+
+  dectalk_obstruent_parallel_amplitudes:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'F' || current.phoneme == 'V' ||
+        current.phoneme == 'TH' || current.phoneme == 'DH' ||
+        current.phoneme == 'S' || current.phoneme == 'Z' ||
+        current.phoneme == 'SH' || current.phoneme == 'ZH' ||
+        current.phoneme == 'CH' || current.phoneme == 'JH'
+    define:
+      phoneme: current.phoneme
+      ref: "(next == null || next.phoneme == 'SIL') ? prev : next"
+      ref_phoneme: "ref == null ? '' : ref.phoneme"
+      ref_is_obstruent: >-
+        ref != null &&
+        ref.type in ['fricative', 'affricate', 'stop_closure', 'stop_release', 'stop_aspiration']
+      ref_is_front_vowel: >-
+        ref != null &&
+        ref.type == 'vowel' &&
+        has(ref.front) &&
+        ref.front == true
+      ref_is_back_rounded: >-
+        ref != null &&
+        ref_phoneme in ['AO0', 'AO1', 'OW0', 'OW1', 'OY0', 'OY1', 'UH0', 'UH1', 'UW0', 'UW1', 'OR0', 'OR1', 'UR0', 'UR1', 'W']
+      following_class: >-
+        ref_is_obstruent ? 'obstruent' :
+        (ref_is_back_rounded ? 'back_rounded' :
+        (ref_is_front_vowel ? 'front' : 'back_unrounded'))
+    apply:
+      - field: params.A3
+        op: set
+        dispatch:
+          - when: phoneme == 'SH'
+            value: 48
+          - when: phoneme == 'ZH'
+            value: 43
+          - when: phoneme == 'CH'
+            value: >-
+              following_class == 'front' ? 50 :
+              (following_class == 'obstruent' ? 43 : 45)
+          - when: phoneme == 'JH'
+            value: >-
+              following_class == 'front' ? 42 : 45
+          - default: "has(current.?params.A3) ? current.params.A3 : 0"
+        tag: fricative_spectrum
+      - field: params.A4
+        op: set
+        dispatch:
+          - when: phoneme == 'S'
+            value: >-
+              following_class == 'front' ? 40 : 45
+          - when: phoneme == 'SH'
+            value: >-
+              following_class in ['front', 'back_unrounded'] ? 55 : 50
+          - when: phoneme == 'ZH'
+            value: >-
+              following_class in ['front', 'back_unrounded'] ? 49 : 44
+          - when: phoneme == 'CH'
+            value: >-
+              following_class == 'front' ? 45 : 50
+          - when: phoneme == 'JH'
+            value: >-
+              following_class == 'front' ? 42 :
+              (following_class == 'back_unrounded' ? 51 : 46)
+          - default: "has(current.?params.A4) ? current.params.A4 : 0"
+        tag: fricative_spectrum
+      - field: params.A5
+        op: set
+        dispatch:
+          - when: phoneme == 'S'
+            value: 50
+          - default: "has(current.?params.A5) ? current.params.A5 : 0"
+        tag: fricative_spectrum
+      - field: params.A6
+        op: set
+        dispatch:
+          - when: phoneme == 'TH'
+            value: 43
+          - when: phoneme == 'DH'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 43 : 46
+          - when: phoneme == 'Z'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 49 : 48
+          - when: phoneme == 'SH'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 36 : 42
+          - when: phoneme == 'ZH'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 36 : 42
+          - when: phoneme == 'JH'
+            value: >-
+              following_class == 'front' ? 42 :
+              (following_class == 'back_unrounded' ? 44 : 38)
+          - default: "has(current.?params.A6) ? current.params.A6 : 0"
+        tag: fricative_spectrum
+      - field: params.AB
+        op: set
+        dispatch:
+          - when: phoneme == 'F'
+            value: >-
+              following_class == 'front' ? 50 :
+              (following_class == 'back_unrounded' ? 51 : 49)
+          - when: phoneme == 'V'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 43 : 45
+          - when: phoneme == 'TH'
+            value: 46
+          - when: phoneme == 'DH'
+            value: >-
+              following_class in ['back_rounded', 'obstruent'] ? 43 : 46
+          - default: "has(current.?params.AB) ? current.params.AB : 0"
+        tag: fricative_spectrum
+    citations:
+      - "DECtalk 4.63 p_us_st1.c (A2-A6/AB selected through ptram + p_amp by following segment class)"
+      - "DECtalk 4.63 p_us_rom.h (us_ptram/us_malamp US obstruent amplitude tables)"

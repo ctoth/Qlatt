@@ -50,11 +50,12 @@ parameters:
   policy:
     duration:
       rate_scale: 1.0
-      # DECtalk external speaking rate values are centered around 180 WPM.
-      # The frontend normalizes user-provided rate against this reference before
-      # applying generic rate-based duration/F0 scaling.
-      # Citation: DECtalk 4.63 user-facing default rate (Paul sample CLI usage)
-      rate_reference: 180
+      # Qlatt's frontend API already passes a normalized rate multiplier
+      # (textToKlattTrack options.rate), not DECtalk's raw WPM control value.
+      # Keep the reference at 1.0 so UI sliders and script callers behave as
+      # documented; DECtalk WPM mapping belongs in an adapter layer instead.
+      # Engineering boundary: multiplier normalization happens before frontend rules.
+      rate_reference: 1.0
       vot_target_ms:
         p: 58
         t: 70
@@ -176,6 +177,41 @@ parameters:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"
         - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
+    source_contour:
+      # Fant 1997 Fig. 10 contour defaults for connected speech source dynamics.
+      ee_onset_rise_sec:
+        value: 0.05
+        citations:
+          - Fant 1997 (connected-speech source contour onset rise)
+      ee_onset_rise_db:
+        value: 1.0
+        citations:
+          - Fant 1997 (phrase-initial source effort rise)
+      ee_declination_db_per_sec:
+        value: 2.0
+        citations:
+          - Fant 1997 (connected-speech declination slope)
+      ee_final_fall_db_per_sec:
+        value: 6.0
+        citations:
+          - Fant 1997 (enhanced phrase-final source fall)
+      ee_final_window_min_sec:
+        value: 0.3
+        citations:
+          - Fant 1997 (terminal source-fall window lower bound)
+      ee_final_window_max_sec:
+        value: 0.5
+        citations:
+          - Fant 1997 (terminal source-fall window upper bound)
+      ee_final_window_ratio:
+        value: 0.35
+        citations:
+          - Fant 1997 (terminal source window scales with phrase duration)
+      rd_final_offset:
+        value: 0.18
+        citations:
+          - Fant 1997 (phrase-final Rd softening companion to Ee fall)
+          - Hanson et al. 2001 (phrase-final spectral tilt and nonmodal events motivate increased final softness)
     formant:
       coarticulation_weight: 0.3
       transition_time_ms: 30

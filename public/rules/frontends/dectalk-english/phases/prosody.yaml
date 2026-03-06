@@ -259,3 +259,69 @@ rules:
     citations:
       - "DECtalk 4.63 ph_inton1.c Rules 7-8 (F0_RESET at GEN_SIL)"
       - "Klatt 1982 (hat state reset at clause boundaries)"
+
+  # --------------------------------------------------------------------------
+  # Rule 6: Connected-speech source contour (Fant 1997)
+  #
+  # Applies phrase-level Ee/Rd shaping on voiced segments to preserve
+  # connected-speech source dynamics in the Klatt parameter stream.
+  # --------------------------------------------------------------------------
+  dectalk_connected_speech_source_contour:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    contour:
+      domain: phrase
+      # Silverman et al. 1992 ToBI: BI=4 marks intonational phrase boundaries.
+      reset_break_index: 4
+      apply:
+        - field: params.EePhraseDb
+          op: add
+          value: ee_total_db
+          tag: source_contour
+        - field: params.RdPhraseOffset
+          op: add
+          value: "params.policy.source_contour.rd_final_offset * final_progress"
+          tag: source_contour
+    define:
+      onset_rise_db: >-
+        contour.elapsed_sec < params.policy.source_contour.ee_onset_rise_sec
+        ? -params.policy.source_contour.ee_onset_rise_db
+          * (1.0 - contour.elapsed_sec / params.policy.source_contour.ee_onset_rise_sec)
+        : 0.0
+      declination_db: >-
+        -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
+      final_window_sec: >-
+        min([
+          params.policy.source_contour.ee_final_window_max_sec,
+          max([
+            params.policy.source_contour.ee_final_window_min_sec,
+            contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
+          ])
+        ])
+      final_window_start_sec: >-
+        max([
+          params.policy.source_contour.ee_onset_rise_sec,
+          contour.phrase_duration_sec - final_window_sec
+        ])
+      final_fall_db: >-
+        contour.elapsed_sec > final_window_start_sec
+        ? -(params.policy.source_contour.ee_final_fall_db_per_sec
+            - params.policy.source_contour.ee_declination_db_per_sec)
+          * (contour.elapsed_sec - final_window_start_sec)
+        : 0.0
+      final_progress: >-
+        contour.elapsed_sec <= final_window_start_sec
+        ? 0.0
+        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+      ee_total_db: >-
+        onset_rise_db + declination_db + final_fall_db
+    citations:
+      - Fant 1997 (connected-speech source contour model for Ee and Rd shaping)
+      - Hanson et al. 2001 (phrase-final spectral tilt and breathiness support Rd softening near boundaries)
+      - Silverman et al. 1992 (ToBI break index tier; BI>=4 reset for major phrase boundaries)

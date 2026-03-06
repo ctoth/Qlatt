@@ -24,3 +24,31 @@ params:
     type: integer
     default: 0
     range: [0, 2]
+
+  # The DECtalk experiment trims the graph to eight formants, but it still
+  # inherits the baseline high-formant helper realize rules. Keep the baseline
+  # sentinel defaults defined so those inherited rules evaluate cleanly even
+  # though no nodes bind F9/F10/B9/B10 in this graph.
+  F9:
+    description: "Unbound compatibility sentinel for inherited F9 realize rule"
+    type: float
+    default: 8500
+    range: [7000, 12000]
+
+  F10:
+    description: "Unbound compatibility sentinel for inherited F10 realize rule"
+    type: float
+    default: 9500
+    range: [8000, 14000]
+
+  B9:
+    description: "Unbound compatibility sentinel for inherited B9 realize rule"
+    type: float
+    default: 2125
+    range: [100, 6000]
+
+  B10:
+    description: "Unbound compatibility sentinel for inherited B10 realize rule"
+    type: float
+    default: 4750
+    range: [100, 8000]

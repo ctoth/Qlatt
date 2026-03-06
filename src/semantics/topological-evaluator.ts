@@ -42,8 +42,16 @@ function getAllNodes(realize: Record<string, RealizationRule | string>): string[
 export function createTopologicalEvaluator(celEvaluator: CelEvaluator): TopologicalEvaluator {
   return {
     evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult {
+      const seededParams: Record<string, ParamValue> = {};
+      if (semantics.params) {
+        for (const [name, def] of Object.entries(semantics.params)) {
+          if (def.default !== undefined) {
+            seededParams[name] = def.default;
+          }
+        }
+      }
       const result: EvaluationResult = {
-        values: { ...context.params } as Record<string, ParamValue>,
+        values: { ...seededParams, ...context.params } as Record<string, ParamValue>,
         errors: [],
       };
 

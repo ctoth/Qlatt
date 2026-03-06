@@ -186,4 +186,61 @@ describe("declarative frontend first migration slice", () => {
     expect(phones[0]?.sync_left?.kind).toBe("START");
     expect(phones[phones.length - 1]?.sync_right?.kind).toBe("END");
   });
+
+  it("lets set write structured values to non-scalar fields", () => {
+    const out = runDeclarativeFrontend(
+      [
+        {
+          phoneme: "M",
+          type: "nasal",
+          duration: 80,
+          inherentDuration: 80,
+          params: {},
+        },
+      ],
+      {
+        specSource: {
+          version: "v1",
+          streams: {
+            phone: {
+              type: "base",
+              scalars: { duration: { unit: "ms", resolution: "klatt" } },
+            },
+          },
+          rules: {
+            structured_set: {
+              select: { stream: "phone", where: "true" },
+              apply: [
+                {
+                  field: "control_windows",
+                  op: "set",
+                  value: [
+                    {
+                      target: "'current'",
+                      prefix_ms: 20,
+                      fields: {
+                        nasalCoupling: { op: "'set'", value: "0.5" },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          phases: [{ name: "formant", rules: ["structured_set"] }],
+        },
+        phases: ["formant"],
+      }
+    );
+
+    expect(out[0].control_windows).toEqual([
+      {
+        target: "current",
+        prefix_ms: 20,
+        fields: {
+          nasalCoupling: { op: "set", value: 0.5 },
+        },
+      },
+    ]);
+  });
 });

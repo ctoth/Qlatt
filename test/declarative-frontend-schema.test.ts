@@ -298,6 +298,66 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.includes("E_CEL_INVALID")).toBe(false);
   });
 
+  it("accepts structured apply values for set while keeping numeric ops numeric-only", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base", scalars: { duration: {} } } },
+      rules: {
+        good_set: {
+          select: { stream: "phone", where: "true" },
+          apply: [
+            {
+              field: "control_windows",
+              op: "set",
+              value: [
+                {
+                  target: "'prev'",
+                  suffix_ms: "params.policy.nasal.vowel_ramp_ms",
+                  fields: {
+                    nasalCoupling: {
+                      op: "set",
+                      value: "params.policy.nasal.anticipatory_peak",
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        bad_add: {
+          select: { stream: "phone", where: "true" },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: { bad: "1" },
+            },
+          ],
+        },
+      },
+      parameters: {
+        policy: {
+          nasal: {
+            vowel_ramp_ms: { value: 40, citations: ["Hawkins & Stevens 1985"] },
+            anticipatory_peak: { value: 0.85, citations: ["Hawkins & Stevens 1985"] },
+          },
+        },
+      },
+      phases: [{ name: "formant", rules: ["good_set", "bad_add"] }],
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    expect(
+      diagnostics.some(
+        (d) => d.path === "rules.good_set.apply[0].value" && d.severity === "error"
+      )
+    ).toBe(false);
+    expect(
+      diagnostics.some(
+        (d) => d.path === "rules.bad_add.apply[0].value" && d.code === "E_RULE_EXPRESSION_INVALID"
+      )
+    ).toBe(true);
+  });
+
   it("accepts structural condition maps with predicate references", () => {
     const spec = parseDslSpec({
       streams: { phone: { type: "base", features: { type: ["vowel", "stop"] } } },

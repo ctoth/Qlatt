@@ -61,9 +61,6 @@ phases:
       - alveolar_f2_locus
       - alveolar_rel_copy
       - palatal_f2_locus
-      - nasal_place_assignment
-      - nasal_place_assimilation
-      - nasal_windows
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset
@@ -93,6 +90,13 @@ phases:
       - sw_default_assignment
     resolve_scalars:
       - duration
+  - name: formant
+    after:
+      - duration
+    rules:
+      - nasal_place_assignment
+      - nasal_place_assimilation
+      - nasal_windows
   - name: prosody
     rules:
       - tobi_baseline_init

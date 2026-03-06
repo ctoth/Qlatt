@@ -1090,7 +1090,7 @@ function buildNavigationFunctions(
   };
 }
 
-function evaluateValueExpression(
+function evaluateNumericExpression(
   expr: unknown,
   token: TokenLike,
   params: RuntimeLike,
@@ -1306,7 +1306,6 @@ function applyEffectToToken(
 
   const currentValue = getField();
   const current = Number.isFinite(currentValue) ? Number(currentValue) : 0;
-  const value = evaluateValueExpression(valueExpr, token, params, navigation, extraContext);
   const op = effect.op;
   if (op !== "set" && op !== "add" && op !== "mul") {
     throw new Error(`E_EFFECT_OP_UNSUPPORTED: unsupported effect op '${op}' in slice engine`);
@@ -1316,6 +1315,7 @@ function applyEffectToToken(
     const scalarField = fieldPath[0];
     const state = getOrCreateScalarState(runtime, token, scalarField, current);
     if (state) {
+      const value = evaluateNumericExpression(valueExpr, token, params, navigation, extraContext);
       const order = runtime.scalarEffectOrder++;
       state.effects.push({
         field: scalarField,
@@ -1338,13 +1338,17 @@ function applyEffectToToken(
   let nextValue: unknown;
   switch (op) {
     case "set":
-      nextValue = value;
+      nextValue = evaluateActionExpression(
+        valueExpr,
+        navigation.buildContext(token, params, extraContext),
+        navigation
+      );
       break;
     case "add":
-      nextValue = current + value;
+      nextValue = current + evaluateNumericExpression(valueExpr, token, params, navigation, extraContext);
       break;
     case "mul":
-      nextValue = current * value;
+      nextValue = current * evaluateNumericExpression(valueExpr, token, params, navigation, extraContext);
       break;
   }
   setField(nextValue);
@@ -1426,6 +1430,9 @@ function evaluateActionExpression(
   }
   if (typeof expr === "string") {
     return evaluateExpression(expr, context, navigation.functions);
+  }
+  if (Array.isArray(expr) || (expr && typeof expr === "object")) {
+    return deepEvaluateTemplate(expr, context, navigation);
   }
   return expr;
 }
@@ -1863,7 +1870,7 @@ function applyInsertPointSpec(
   const value =
     pointSpec.value == null
       ? null
-      : evaluateValueExpression(pointSpec.value, target, params, pointFunctions, extraContext);
+      : evaluateNumericExpression(pointSpec.value, target, params, pointFunctions, extraContext);
 
   const pointToken: TokenLike = {
     id: nextPointId(runtime, stream),
@@ -1934,12 +1941,12 @@ function applyInsertF0LayerSpec(
   const value =
     layerSpec.value == null
       ? 0
-      : evaluateValueExpression(layerSpec.value, target, params, navFunctions, extraContext);
+      : evaluateNumericExpression(layerSpec.value, target, params, navFunctions, extraContext);
 
   // Evaluate optional duration_frames.
   let durationFrames: number | undefined;
   if (layerSpec.duration_frames != null) {
-    const df = evaluateValueExpression(layerSpec.duration_frames, target, params, navFunctions, extraContext);
+    const df = evaluateNumericExpression(layerSpec.duration_frames, target, params, navFunctions, extraContext);
     if (typeof df === "number" && Number.isFinite(df)) {
       durationFrames = df;
     }
@@ -1952,7 +1959,7 @@ function applyInsertF0LayerSpec(
       .map((expr: unknown) => {
         if (typeof expr === "number") return expr;
         if (typeof expr === "string") {
-          return evaluateValueExpression(expr, target, params, navFunctions, extraContext);
+          return evaluateNumericExpression(expr, target, params, navFunctions, extraContext);
         }
         return null;
       })

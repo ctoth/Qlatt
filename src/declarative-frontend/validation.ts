@@ -9,6 +9,7 @@ type ValidationDiagnostic = {
   severity: DiagnosticSeverity;
 };
 type PlainObject = Record<string, any>;
+const ALLOWED_CUSTOM_RULE_OPS = new Set(["noop"]);
 
 function makeDiagnostic(
   code: string,
@@ -712,10 +713,24 @@ function validateDispatchValueExpression(
   streamNames: Set<string>,
   policyState: PolicyValidationState,
   criticalContext: boolean,
+  valueMode: "numeric" | "set",
   diagnostics: ValidationDiagnostic[],
   path: string,
   contextLabel: string
 ): void {
+  if (valueMode === "set") {
+    validateSetValueExpression(
+      expr,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      path,
+      contextLabel
+    );
+    return;
+  }
   if (typeof expr === "number") {
     if (policyState.policyTree && criticalContext && !isAllowedInlinePolicyLiteral(String(expr))) {
       diagnostics.push(
@@ -764,6 +779,7 @@ function validateDispatchSpec(
   streamNames: Set<string>,
   policyState: PolicyValidationState,
   criticalContext: boolean,
+  valueMode: "numeric" | "set",
   diagnostics: ValidationDiagnostic[],
   path: string,
   contextLabel: string
@@ -832,17 +848,18 @@ function validateDispatchSpec(
           )
         );
       } else {
-        validateDispatchValueExpression(
-          row.value,
-          streamByName,
-          streamName,
-          streamNames,
-          policyState,
-          criticalContext,
-          diagnostics,
-          `${rowPath}.value`,
-          `${contextLabel} row ${i} value`
-        );
+      validateDispatchValueExpression(
+        row.value,
+        streamByName,
+        streamName,
+        streamNames,
+        policyState,
+        criticalContext,
+        valueMode,
+        diagnostics,
+        `${rowPath}.value`,
+        `${contextLabel} row ${i} value`
+      );
       }
     }
 
@@ -855,6 +872,7 @@ function validateDispatchSpec(
         streamNames,
         policyState,
         criticalContext,
+        valueMode,
         diagnostics,
         `${rowPath}.default`,
         `${contextLabel} row ${i} default`
@@ -869,6 +887,95 @@ function validateDispatchSpec(
         `${contextLabel} is missing required default dispatch row`,
         path
       )
+    );
+  }
+}
+
+function validateSetValueExpression(
+  value: unknown,
+  streamByName: Map<string, any>,
+  streamName: unknown,
+  streamNames: Set<string>,
+  policyState: PolicyValidationState,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  contextLabel: string
+): void {
+  if (
+    value == null ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return;
+  }
+
+  if (typeof value === "string") {
+    if (value.length === 0) return;
+    const syntaxError = validateExpressionSyntax(value, { streamNames });
+    if (syntaxError) {
+      diagnostics.push(
+        makeDiagnostic("E_CEL_INVALID", `${contextLabel} has invalid CEL expression: ${syntaxError}`, path)
+      );
+      return;
+    }
+    validateDeclaredTypeFieldUsage(value, streamByName, streamName, diagnostics, path, contextLabel);
+    validatePolicyReferencesAndLiterals(value, path, contextLabel, diagnostics, policyState);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i += 1) {
+      validateSetValueExpression(
+        value[i],
+        streamByName,
+        streamName,
+        streamNames,
+        policyState,
+        diagnostics,
+        `${path}[${i}]`,
+        contextLabel
+      );
+    }
+    return;
+  }
+
+  if (isPlainObject(value) && Object.prototype.hasOwnProperty.call(value, "dispatch")) {
+    validateDispatchSpec(
+      value.dispatch,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      false,
+      "set",
+      diagnostics,
+      `${path}.dispatch`,
+      contextLabel
+    );
+    return;
+  }
+
+  if (!isPlainObject(value)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_RULE_EXPRESSION_INVALID",
+        `${contextLabel} must be a CEL expression, literal, array, object, or dispatch block`,
+        path
+      )
+    );
+    return;
+  }
+
+  for (const [key, nested] of Object.entries(value)) {
+    validateSetValueExpression(
+      nested,
+      streamByName,
+      streamName,
+      streamNames,
+      policyState,
+      diagnostics,
+      `${path}.${key}`,
+      contextLabel
     );
   }
 }
@@ -908,6 +1015,7 @@ function validateTemplateDispatchExpressions(
       streamNames,
       policyState,
       false,
+      "numeric",
       diagnostics,
       `${path}.dispatch`,
       contextLabel
@@ -948,6 +1056,7 @@ function validateTemplateNumericExpression(
       streamNames,
       policyState,
       false,
+      "numeric",
       diagnostics,
       `${path}.dispatch`,
       contextLabel
@@ -1000,6 +1109,7 @@ function validateControlWindowTemplate(
       streamNames,
       policyState,
       false,
+      "set",
       diagnostics,
       `${path}.dispatch`,
       contextLabel
@@ -1295,18 +1405,28 @@ function validateRules(
 
     const hasSelect = isPlainObject(r.select);
     const hasMatch = typeof r.match === "string" && r.match.length > 0;
+    const hasCustomOp = typeof r.op === "string" && r.op.length > 0;
     const matchPattern = hasMatch ? patterns[r.match] : null;
     const ruleStreamName = hasSelect
       ? r.select.stream
       : isPlainObject(matchPattern)
         ? matchPattern.stream
         : null;
-    if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !r.op)) {
+    if ((hasSelect && hasMatch) || (!hasSelect && !hasMatch && !hasCustomOp)) {
       diagnostics.push(
         makeDiagnostic(
           "E_RULE_SHAPE",
           `Rule '${name}' must define exactly one of select or match`,
           `rules.${name}`
+        )
+      );
+    }
+    if (hasCustomOp && !ALLOWED_CUSTOM_RULE_OPS.has(String(r.op))) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_RULE_OP_UNKNOWN",
+          `Rule '${name}' uses unsupported custom op '${String(r.op)}'`,
+          `rules.${name}.op`
         )
       );
     }
@@ -1421,13 +1541,16 @@ function validateRules(
             streamNames,
             policyState,
             criticalContext,
+            effect?.op === "set" ? "set" : "numeric",
             diagnostics,
             `rules.${name}.apply[${i}].dispatch`,
             `Rule '${name}' apply[${i}] dispatch`
           );
         } else if (hasValue) {
           const criticalContext = isCriticalScalarField(effect?.field);
+          const valueMode = effect?.op === "set" ? "set" : "numeric";
           if (
+            valueMode === "numeric" &&
             effect?.value != null &&
             typeof effect.value !== "string" &&
             typeof effect.value !== "number"
@@ -1440,7 +1563,7 @@ function validateRules(
               )
             );
           }
-          if (typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
+          if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
             if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
               diagnostics.push(
                 makeDiagnostic(
@@ -1453,7 +1576,18 @@ function validateRules(
               );
             }
           }
-          if (typeof effect?.value === "string" && effect.value.length > 0) {
+          if (valueMode === "set") {
+            validateSetValueExpression(
+              effect?.value,
+              streamByName,
+              ruleStreamName,
+              streamNames,
+              policyState,
+              diagnostics,
+              `rules.${name}.apply[${i}].value`,
+              `Rule '${name}' apply[${i}] value`
+            );
+          } else if (typeof effect?.value === "string" && effect.value.length > 0) {
             const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
             if (syntaxError) {
               diagnostics.push(
@@ -1554,13 +1688,16 @@ function validateRules(
               streamNames,
               policyState,
               criticalContext,
+              effect?.op === "set" ? "set" : "numeric",
               diagnostics,
               `rules.${name}.contour.apply[${i}].dispatch`,
               `Rule '${name}' contour.apply[${i}] dispatch`
             );
           } else if (hasValue) {
             const criticalContext = isCriticalScalarField(effect?.field);
+            const valueMode = effect?.op === "set" ? "set" : "numeric";
             if (
+              valueMode === "numeric" &&
               effect?.value != null &&
               typeof effect.value !== "string" &&
               typeof effect.value !== "number"
@@ -1573,7 +1710,7 @@ function validateRules(
                 )
               );
             }
-            if (typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
+            if (valueMode === "numeric" && typeof effect?.value === "number" && policyState.policyTree && criticalContext) {
               if (!isAllowedInlinePolicyLiteral(String(effect.value))) {
                 diagnostics.push(
                   makeDiagnostic(
@@ -1586,7 +1723,18 @@ function validateRules(
                 );
               }
             }
-            if (typeof effect?.value === "string" && effect.value.length > 0) {
+            if (valueMode === "set") {
+              validateSetValueExpression(
+                effect?.value,
+                streamByName,
+                ruleStreamName,
+                streamNames,
+                policyState,
+                diagnostics,
+                `rules.${name}.contour.apply[${i}].value`,
+                `Rule '${name}' contour.apply[${i}] value`
+              );
+            } else if (typeof effect?.value === "string" && effect.value.length > 0) {
               const syntaxError = validateExpressionSyntax(effect.value, { streamNames });
               if (syntaxError) {
                 diagnostics.push(

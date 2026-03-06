@@ -182,60 +182,148 @@ rules:
       - Allen et al. 1987 Ch.10 (nasal place assimilation)
       - Fujimura 1962 (nasal consonant place acoustics)
       - Stevens 1998 Ch.10
-  anticipatory_nasalization:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.type == 'vowel' && next != null && next.type == 'nasal'"
-    apply:
-      - field: params.nasalCoupling
-        op: set
-        value: params.policy.nasal.anticipatory_peak
-        tag: nasal_coupling
-      - field: params.nasalB1AdditionHz
-        op: set
-        value: params.policy.nasal.b1_addition_hz
-        tag: nasalization_secondary_cue
-    citations:
-      - Hawkins & Stevens 1985 (time-varying nasalization trajectory)
-      - Chen 1997 (nasalized vowel secondary cues)
-  nasal_murmur_windows:
+  nasal_windows:
     kind: scalar
     select:
       stream: phone
       where: current.type == 'nasal'
+    define:
+      anticipatory_window_ms: >-
+        params.policy.nasal.vowel_onset_delay_ms + params.policy.nasal.vowel_ramp_ms
+      anticipatory_start_ms: "max((prev != null ? prev.duration : 0) - anticipatory_window_ms, 0)"
+      anticipatory_stage_1_end_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_stage_1_fraction
+      anticipatory_midpoint_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_midpoint_fraction
+      anticipatory_stage_2_end_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_stage_2_fraction
+      carryover_stage_1_end_ms: >-
+        params.policy.nasal.vowel_decay_ms * params.policy.nasal.carryover_stage_2_fraction
     apply:
-      - field: params.nasalCoupling
+      - field: control_windows
         op: set
-        value: 1
-        tag: nasal_coupling
-      - field: params.nasalMurmurStrength
-        op: set
-        value: params.policy.nasal.murmur_strength
-        tag: nasal_murmur
-      - field: params.nasalB1AdditionHz
-        op: set
-        value: params.policy.nasal.b1_addition_hz
-        tag: nasalization_secondary_cue
+        dispatch:
+          - when: "prev != null && prev.type == 'vowel' && next != null && next.type == 'vowel'"
+            value:
+              - target: "'prev'"
+                start_ms: anticipatory_start_ms
+                end_ms: anticipatory_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_1_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_stage_1_end_ms
+                end_ms: anticipatory_midpoint_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_2_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_midpoint_ms
+                end_ms: "prev != null ? prev.duration : 0"
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: params.policy.nasal.b1_addition_hz
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: 0
+                end_ms: carryover_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: params.policy.nasal.carryover_peak
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: carryover_stage_1_end_ms
+                end_ms: params.policy.nasal.vowel_decay_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_tail_fraction"
+                tag: "'nasal_coupling'"
+          - when: "prev != null && prev.type == 'vowel'"
+            value:
+              - target: "'prev'"
+                start_ms: anticipatory_start_ms
+                end_ms: anticipatory_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_1_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_stage_1_end_ms
+                end_ms: anticipatory_midpoint_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_stage_2_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_midpoint_ms
+                end_ms: "prev != null ? prev.duration : 0"
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: params.policy.nasal.b1_addition_hz
+                tag: "'nasal_coupling'"
+          - when: "next != null && next.type == 'vowel'"
+            value:
+              - target: "'next'"
+                start_ms: 0
+                end_ms: carryover_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: params.policy.nasal.carryover_peak
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: carryover_stage_1_end_ms
+                end_ms: params.policy.nasal.vowel_decay_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
+                  nasalB1AdditionHz:
+                    op: "'set'"
+                    value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_tail_fraction"
+                tag: "'nasal_coupling'"
+          - default: []
     citations:
+      - Hawkins & Stevens 1985 (time-varying anticipatory and carryover nasalization)
+      - Chen 1997 (nasalized vowel secondary cues)
       - Fujimura 1962 (nasal murmur interval)
-      - Stevens 1998 Ch.10
-  nasal_carryover:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.type == 'vowel' && prev != null && prev.type == 'nasal'"
-    apply:
-      - field: params.nasalCoupling
-        op: set
-        value: params.policy.nasal.carryover_peak
-        tag: nasal_coupling
-      - field: params.nasalB1AdditionHz
-        op: set
-        value: "params.policy.nasal.b1_addition_hz * params.policy.nasal.b1_carryover_fraction"
-        tag: nasalization_secondary_cue
-    citations:
-      - Hawkins & Stevens 1985 (carryover nasalization)
   dark_l_allophony:
     kind: scalar
     select:

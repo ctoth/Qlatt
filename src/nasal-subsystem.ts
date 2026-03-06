@@ -265,13 +265,20 @@ function emitDiagnostics(
         "W_NASAL_F1_MISSING",
       );
     }
-    if (Number(params.nasalCoreFnz ?? 0) > 0 || Number(params.nasalPlaceFnz ?? 0) > 0) {
+    if (
+      Number(params.nasalCoreFnz ?? 0) > 0 ||
+      Number(params.nasalPlaceFnz ?? 0) > 0 ||
+      Number(params.nasalCoupling ?? 0) > 0 ||
+      Number(params.nasalPlaceIndex ?? 0) > 0
+    ) {
       diagnostics.info(
         "Realized nasal values were bound onto the runtime path",
         {
           frame: i,
           nasalCoreFnz: params.nasalCoreFnz ?? null,
           nasalPlaceFnz: params.nasalPlaceFnz ?? null,
+          nasalCoupling: params.nasalCoupling ?? null,
+          nasalPlaceIndex: params.nasalPlaceIndex ?? null,
         },
         "I_NASAL_RUNTIME_BOUND",
       );

@@ -358,7 +358,7 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: current.type == 'stop_release'
+      where: current.type in ['stop_release', 'stop_aspiration']
     apply:
       - field: params.A2
         op: set
@@ -453,6 +453,7 @@ rules:
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
       - Zue 1976 (burst amplitude by place)
+      - Klatt 1980 Table III (aspiration carries same place-based spectral shape as release)
       - Shadle et al. 2023 (fricative HF spectra above 7 kHz)
       - Monson et al. 2014 (perceptual significance of HF energy)
   vcv_coarticulation:

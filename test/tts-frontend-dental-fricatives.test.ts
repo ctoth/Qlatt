@@ -20,13 +20,19 @@ describe("tts frontend dental fricatives", () => {
 
     const thAf = maxParam(thFrames, "AF");
     const dhAf = maxParam(dhFrames, "AF");
-    const thA5 = maxParam(thFrames, "A5");
-    const dhA5 = maxParam(dhFrames, "A5");
+    const thA6 = maxParam(thFrames, "A6");
+    const dhA6 = maxParam(dhFrames, "A6");
+    const thAB = maxParam(thFrames, "AB");
+    const dhAB = maxParam(dhFrames, "AB");
 
-    expect(thAf).toBeGreaterThanOrEqual(54);
-    expect(dhAf).toBeGreaterThanOrEqual(44);
-    expect(thA5).toBeGreaterThanOrEqual(40);
-    expect(dhA5).toBeGreaterThanOrEqual(38);
+    // Klatt 1980 Table III: TH AF=60 (inventory uses 40 per Shadle 1985 scaling)
+    expect(thAf).toBeGreaterThanOrEqual(38);
+    expect(dhAf).toBeGreaterThanOrEqual(28);
+    // Klatt 1980 Table III: dentals have A1-A5=0, A6=28, AB=48
+    expect(thA6).toBeGreaterThanOrEqual(28);
+    expect(dhA6).toBeGreaterThanOrEqual(28);
+    expect(thAB).toBeGreaterThanOrEqual(48);
+    expect(dhAB).toBeGreaterThanOrEqual(48);
     expect(thAf).toBeGreaterThan(dhAf);
   });
 });

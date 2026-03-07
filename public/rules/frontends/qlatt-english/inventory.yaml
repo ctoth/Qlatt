@@ -16,6 +16,7 @@ citations:
   - Zue 1976
   - Fant 1997
   - Hanson et al. 2001
+  - Klatt 1980
 base_params:
   F1: 500
   F2: 1500
@@ -472,8 +473,8 @@ phoneme_targets:
     AF: 60 # Klatt 1980 Table III
     AH: 0
     AVS: -70
-    A5: 52
-    A6: 55
+    # A1-A5 all 0: alveolar sibilant energy at A6 only (Klatt 1980 Table III)
+    A6: 52  # Klatt 1980 Table III
     A7: 50
     A8: 45
     A9: 38
@@ -494,8 +495,8 @@ phoneme_targets:
     AF: 50 # 10 dB below S (Klatt 1980)
     AH: 0
     AVS: 47
-    A5: 52
-    A6: 52
+    # A1-A5 all 0: alveolar sibilant energy at A6 only (Klatt 1980 Table III)
+    A6: 52  # Klatt 1980 Table III
     A7: 48
     A8: 43
     A9: 36
@@ -540,10 +541,10 @@ phoneme_targets:
     AF: 56 # 10 dB below SH (Klatt 1980)
     AH: 0
     AVS: 47
-    A3: 44
-    A4: 60
-    A5: 53
-    A6: 53
+    A3: 57  # Inferred from /sh/, Klatt 1980 Table III
+    A4: 48  # Inferred from /sh/, Klatt 1980 Table III
+    A5: 48  # Inferred from /sh/, Klatt 1980 Table III
+    A6: 46  # Inferred from /sh/, Klatt 1980 Table III
     A7: 33
     A8: 26
     A9: 20
@@ -564,15 +565,12 @@ phoneme_targets:
     AF: 42 # Shadle 1985: 18 dB below /s/; Behrens & Blumstein 1988
     AH: 0
     AVS: -70
-    A3: 40
-    A4: 45
-    A5: 48
-    A6: 55
+    # A1-A6 all 0: labiodentals are flat-spectrum bypass-only (Klatt 1980 Table III)
+    AB: 57  # Klatt 1980 Table III
     A7: 50
     A8: 55
     A9: 52
     A10: 45
-    AB: 55
     dur: 90
     type: fricative
     voiceless: true
@@ -589,15 +587,12 @@ phoneme_targets:
     AF: 32 # 10 dB below F (Klatt 1980 voiced convention)
     AH: 0
     AVS: 47
-    A3: 40
-    A4: 45
-    A5: 48
-    A6: 55
+    # A1-A6 all 0: labiodentals are flat-spectrum bypass-only (Klatt 1980 Table III)
+    AB: 57  # Klatt 1980 Table III
     A7: 48
     A8: 52
     A9: 48
     A10: 40
-    AB: 55
     dur: 80
     type: fricative
     voiced: true
@@ -614,15 +609,13 @@ phoneme_targets:
     AF: 40 # Shadle 1985: /theta/ weakest voiceless fricative (A_S=50 dB SPL); 20 dB below /s/
     AH: 0
     AVS: -70
-    A3: 36
-    A4: 40
-    A5: 40
-    A6: 50
+    # A1-A5 all 0: dentals have energy only at A6 and bypass (Klatt 1980 Table III)
+    A6: 28  # Klatt 1980 Table III
+    AB: 48  # Klatt 1980 Table III
     A7: 45
     A8: 50
     A9: 46
     A10: 38
-    AB: 50
     dur: 80
     type: fricative
     voiceless: true
@@ -639,15 +632,13 @@ phoneme_targets:
     AF: 30 # 10 dB below TH (Klatt 1980 voiced convention)
     AH: 0
     AVS: 47
-    A3: 32
-    A4: 36
-    A5: 38
-    A6: 48
+    # A1-A5 all 0: dentals have energy only at A6 and bypass (Klatt 1980 Table III)
+    A6: 28  # Klatt 1980 Table III
+    AB: 48  # Klatt 1980 Table III
     A7: 42
     A8: 46
     A9: 42
     A10: 34
-    AB: 48
     dur: 70
     type: fricative
     voiced: true
@@ -1139,12 +1130,10 @@ phoneme_targets:
     AH: 0
     AVS: 47
     A2: 0
-    A3: 44
-    A4: 60
-    # Voiced affricate keeps a mild high-band lift over /zh/ to avoid merger.
-    # Citation: Stevens 1998 Ch.8, Ch.10.
-    A5: 57
-    A6: 57
+    A3: 57  # Inferred from /sh/, Klatt 1980 Table III
+    A4: 48  # Inferred from /sh/, Klatt 1980 Table III
+    A5: 48  # Inferred from /sh/, Klatt 1980 Table III
+    A6: 46  # Inferred from /sh/, Klatt 1980 Table III
     A7: 38
     A8: 30
     A9: 23

@@ -847,7 +847,7 @@ phoneme_targets:
     B2: 150
     B3: 220
     AF: 55
-    AH: 52
+    AH: 0  # Stevens 1998 — burst is supraglottal; aspiration starts at P_ASP
     AB: 63
     A7: 40
     A8: 45
@@ -867,7 +867,7 @@ phoneme_targets:
     B2: 120
     B3: 250
     AF: 58
-    AH: 55
+    AH: 0  # Stevens 1998 — burst is supraglottal; aspiration starts at T_ASP
     A3: 30
     A4: 45
     A5: 57
@@ -891,7 +891,7 @@ phoneme_targets:
     B2: 160
     B3: 330
     AF: 55
-    AH: 53
+    AH: 0  # Stevens 1998 — burst is supraglottal; aspiration starts at K_ASP
     A3: 53
     A4: 43
     A5: 45
@@ -902,7 +902,7 @@ phoneme_targets:
     A10: 15
     AB: 0
     SW: 1
-    dur: 25
+    dur: 15  # Stevens 1998 — velar burst 5-15ms
     type: stop_release
     voiceless: true
     velar: true

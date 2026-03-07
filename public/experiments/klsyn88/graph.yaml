@@ -250,7 +250,9 @@ nodes:
   parallelSum:
     type: gain
     params:
-      gain: 1.0
+      # klsyn88 inherits Klatt 80 gain structure. COEWAV.FOR line 251.
+      # Compensates for double-attenuation in parallel branch (source * per-formant gains).
+      gain: 170.0
 
   outputSum:
     type: gain

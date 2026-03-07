@@ -1005,8 +1005,10 @@ export class KlattSynth {
     }
     // Klatt 80 sums cascade and parallel outputs (ULIPSV + ULIPSF).
     // SW=1 disables cascade entirely; SW=0 keeps both branches active.
-    // See COEWAV.FOR lines 430-450 and ULIPS sum.
-    const parallelGain = 1;
+    // COEWAV.FOR line 251: ULIPS = (ULIPSV + ULIPSF + STEP) * 170.
+    // The 170x compensates for double-attenuation in the parallel branch
+    // (source amplitude * per-formant amplitude both produce small values).
+    const parallelGain = 170;
     const cascadeGain = allParallel ? 0 : 1;
     // CRITICAL: Always use setValueAtTime for cascade/parallel output gains.
     // These are controlled by SW (source switch) which must transition

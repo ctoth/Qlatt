@@ -424,7 +424,13 @@ nodes:
   parallelSum:
     type: gain
     params:
-      gain: 1.0
+      # Klatt 80 COEWAV.FOR line 251: ULIPS = (ULIPSV + ULIPSF + STEP) * 170.
+      # The 170x output scale compensates for the double-attenuation inherent in
+      # the parallel branch: source amplitude (GETAMP(AF)) * per-formant amplitude
+      # (GETAMP(A{N})) both produce small values whose product is near-zero without
+      # this compensation.  The cascade branch does not need it because its gain is
+      # concentrated in a single stage (voiceGain).
+      gain: 170.0
 
   # ---------------------------------------------------------------------------
   # OUTPUT MIXING

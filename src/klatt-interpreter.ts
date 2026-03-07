@@ -362,10 +362,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
           const burstDb = goDb - PLSTEP_BURST_OFFSET_DB;  // Klatt80 PLSTEP amplitude formula
           const burstAmplitude = dbToLinear(burstDb);
 
-          // Use the previous frame's phoneme for burst labels: the burst
-          // is the *release* of the preceding stop consonant, not the onset
-          // of the following segment where AF/AH becomes nonzero.
-          const burstPhoneme = (i > 0 ? track[i - 1]?.phoneme : frame.phoneme) ?? '';
+          const burstPhoneme = frame.phoneme ?? '';
 
           telemetryHandler({
             type: 'plstep',

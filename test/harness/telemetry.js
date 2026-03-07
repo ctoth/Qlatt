@@ -25,7 +25,7 @@ export function handleTelemetry(data) {
         amplitudeDb: data.amplitudeDb,
         trigger: data.trigger,
         delta: data.delta,
-        phoneme: event?.phoneme ?? '',
+        phoneme: data.phoneme ?? event?.phoneme ?? '',
         sessionId: state.lastRun?.sessionId ?? state.sessionId, // P1: Track session
       });
       // Keep only last 50 PLSTEP events

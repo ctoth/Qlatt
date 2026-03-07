@@ -165,10 +165,10 @@ parameters:
           - Hanson & Stevens 2003 (alveolar /t/ often shows frication dominance into aspiration interval)
           - "Engineering estimate: conservative AF carryover level for /t/ aspiration segment"
       aspiration_frication_k_af_db:
-        value: 10
+        value: 0
         citations:
-          - Hanson & Stevens 2003 (velar /k/ can show extended frication during aspiration for some speakers)
-          - "Engineering estimate: weaker AF carryover than /t/ due speaker-dependent effect"
+          - Stevens 1998 (voiceless stop aspiration is glottal source, not supraglottal frication)
+          - Klatt 1980 (AF is zero during aspiration interval; only AH is nonzero)
       aspiration_frication_p_af_db:
         value: 0
         citations:

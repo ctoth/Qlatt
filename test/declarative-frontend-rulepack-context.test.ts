@@ -717,12 +717,13 @@ describe("declarative frontend rulepack context migration", () => {
     expect(tAsp).toBeTruthy();
     expect(kAsp).toBeTruthy();
 
-    // Planned defaults: p=0, t=18, k=10
+    // Planned defaults: p=0, t=18, k=0
+    // K aspiration is pure glottal noise (AH only), no frication (AF=0).
+    // Citation: Stevens 1998, Klatt 1980
     expect(pAsp!.params.AF).toBe(0);
     expect(tAsp!.params.AF).toBe(18);
-    expect(kAsp!.params.AF).toBe(10);
+    expect(kAsp!.params.AF).toBe(0);
     expect(tAsp!.params.AF).toBeGreaterThan(kAsp!.params.AF);
-    expect(kAsp!.params.AF).toBeGreaterThan(pAsp!.params.AF);
   });
 
   it("scales aspiration frication for weak aspiration tokens", () => {
@@ -756,9 +757,10 @@ describe("declarative frontend rulepack context migration", () => {
     expect(tAsp).toBeTruthy();
     expect(kAsp).toBeTruthy();
 
-    // Planned weak_scale=0.5: t=18->9, k=10->5
+    // Planned weak_scale=0.5: t=18->9, k=0->0 (k has no AF carryover)
+    // Citation: Stevens 1998, Klatt 1980
     expect(tAsp!.params.AF).toBe(9);
-    expect(kAsp!.params.AF).toBe(5);
+    expect(kAsp!.params.AF).toBe(0);
   });
 
   it("does not modify AH when applying aspiration frication carryover", () => {

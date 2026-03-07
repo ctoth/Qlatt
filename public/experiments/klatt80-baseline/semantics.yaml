@@ -583,7 +583,7 @@ realize:
   # to F0 = 2^(47/6) ≈ 228 Hz. Dividing by 228 restores F0 dependence:
   #   F0=110 → cascade 6 dB quieter, F0=228 → unchanged, F0=300 → 2.4 dB louder
   voiceGain:
-    expr: "dbToLinear(GO + AV + eeGainDb + ndbScale.AV) * (F0 > 0 ? F0 / 228.0 : 0.0)"
+    expr: "dbToLinear(GO + AV + eeGainDb + ndbScale.AV) * (F0 > 0 ? min(F0, 500) / 228.0 : 0.0)"
     deps: [GO, AV, eeGainDb, F0]
 
   aspGain:

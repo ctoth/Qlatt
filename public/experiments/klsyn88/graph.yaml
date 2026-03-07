@@ -250,9 +250,11 @@ nodes:
   parallelSum:
     type: gain
     params:
-      # klsyn88 inherits Klatt 80 gain structure. COEWAV.FOR line 251.
-      # Compensates for double-attenuation in parallel branch (source * per-formant gains).
-      gain: 170.0
+      # No branch-specific scale needed: parallel-to-cascade balance matches
+      # Klatt 1980 COEWAV.FOR when both branches share the same output path.
+      # The FORTRAN's 170x (line 251) is a global 16-bit DAC scale, not a
+      # parallel correction.
+      gain: 1.0
 
   outputSum:
     type: gain

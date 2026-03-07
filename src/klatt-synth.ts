@@ -1006,9 +1006,10 @@ export class KlattSynth {
     // Klatt 80 sums cascade and parallel outputs (ULIPSV + ULIPSF).
     // SW=1 disables cascade entirely; SW=0 keeps both branches active.
     // COEWAV.FOR line 251: ULIPS = (ULIPSV + ULIPSF + STEP) * 170.
-    // The 170x compensates for double-attenuation in the parallel branch
-    // (source amplitude * per-formant amplitude both produce small values).
-    const parallelGain = 170;
+    // The 170x is a global 16-bit DAC output scale, not a parallel-only
+    // correction. Applying it only here made fricatives 170x too loud
+    // relative to vowels. Citation: Klatt 1980 COEWAV.FOR line 251.
+    const parallelGain = 1;
     const cascadeGain = allParallel ? 0 : 1;
     // CRITICAL: Always use setValueAtTime for cascade/parallel output gains.
     // These are controlled by SW (source switch) which must transition

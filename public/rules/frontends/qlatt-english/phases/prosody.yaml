@@ -600,11 +600,14 @@ rules:
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise"
+      value: >-
+        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
+             params.policy.f0.base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
       - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
       - "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
+      - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
 
   # --------------------------------------------------------------------------
   # Rule 13: Voiced onset perturbation (-5% F0)
@@ -623,10 +626,13 @@ rules:
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower"
+      value: >-
+        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
+             params.policy.f0.base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
-      - O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)
+      - "O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)"
+      - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
 
   # --------------------------------------------------------------------------
   # Rule 14: Continuation rise at clause boundaries

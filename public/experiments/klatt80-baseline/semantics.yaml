@@ -333,7 +333,7 @@ params:
   masterGain:
     description: "Master output gain"
     type: float
-    default: 1.0
+    default: 2.0
 
   outputGain:
     description: "Final output gain"

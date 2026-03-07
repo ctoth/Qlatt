@@ -37,6 +37,37 @@ primitives:
     inputs: 0
     outputs: 1
 
+  dynamics-compressor:
+    description: "WebAudio DynamicsCompressorNode - mimics FORTRAN 16-bit hard clipping. Klatt 1980 COEWAV.FOR line 251 scales by 170x then truncates to [-32767,32767]; in float audio the compressor serves the same role, taming cascade peaks while preserving quieter parallel-branch fricatives."
+    native: DynamicsCompressorNode
+    params:
+      threshold:
+        type: float
+        unit: "dB"
+        default: -24
+        description: "Level above which compression begins"
+      knee:
+        type: float
+        unit: "dB"
+        default: 12
+        description: "Soft knee width for smooth onset of compression"
+      ratio:
+        type: float
+        default: 12
+        description: "Input/output ratio above threshold"
+      attack:
+        type: float
+        unit: "s"
+        default: 0.003
+        description: "Time to reach full compression after threshold crossing"
+      release:
+        type: float
+        unit: "s"
+        default: 0.1
+        description: "Time to release compression after signal drops below threshold"
+    inputs: 1
+    outputs: 1
+
   # ===========================================================================
   # WASM-backed AudioWorklet Nodes
   # ===========================================================================

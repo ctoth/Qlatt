@@ -37,6 +37,15 @@ export function getAudioParam(node: AudioNode, paramName: string): AudioParam | 
     if (param) return param;
   }
 
+  // Handle native nodes with named AudioParam properties (e.g., DynamicsCompressorNode
+  // exposes threshold, knee, ratio, attack, release as AudioParam properties)
+  if (anyNode[paramName] && typeof anyNode[paramName] === 'object') {
+    const candidate = anyNode[paramName] as Record<string, unknown>;
+    if ('value' in candidate && typeof candidate.value === 'number') {
+      return anyNode[paramName] as AudioParam;
+    }
+  }
+
   return null;
 }
 

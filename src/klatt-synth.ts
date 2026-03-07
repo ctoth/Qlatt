@@ -60,7 +60,7 @@ export class KlattSynth {
       noiseGain: 0.0,
       noiseCutoff: 1000,
       fricationCutoff: 3000,
-      masterGain: 2.0,
+      masterGain: 10.0,
       outputGain: 1.0, // Global output gain (can boost if needed)
       rgpFrequency: 0,
       rgpBandwidth: 100,
@@ -690,7 +690,7 @@ export class KlattSynth {
     // G0 is now correctly incorporated in individual source amplitudes above
     const masterGain = Number.isFinite(this.params.masterGain)
       ? this.params.masterGain
-      : 2.0;
+      : 10.0;
 
     const mix = this.params.parallelMix;
     const allParallel = params.SW === 1;

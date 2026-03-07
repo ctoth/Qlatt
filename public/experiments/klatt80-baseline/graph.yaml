@@ -458,6 +458,22 @@ nodes:
     params:
       gain: { bind: masterGain }
 
+  # DynamicsCompressorNode — mimics FORTRAN 16-bit hard clipping.
+  # Klatt 1980 COEWAV.FOR line 251 scales output by 170x then truncates
+  # to [-32767, 32767]; cascade peaks clip while quieter parallel-branch
+  # fricatives (~1870 counts) survive.  In float audio the full 40 dB gap
+  # is preserved, making fricatives inaudible.  The compressor tames
+  # boosted cascade peaks while the raised masterGain lifts the parallel
+  # above the perceptual floor.
+  outputCompressor:
+    type: dynamics-compressor
+    params:
+      threshold: -24    # dB — compress above ~0.063 amplitude
+      knee: 12          # dB — soft transition
+      ratio: 12         # aggressive compression above threshold
+      attack: 0.003     # 3 ms — fast enough for transients
+      release: 0.1      # 100 ms — faster than default 250 ms for speech
+
   outputGain:
     type: gain
     params:
@@ -567,7 +583,8 @@ connections:
   # ---------------------------------------------------------------------------
   - [outputSum, outputLp]
   - [outputLp, masterGain]
-  - [masterGain, outputGain]
+  - [masterGain, outputCompressor]
+  - [outputCompressor, outputGain]
 
 # =============================================================================
 # OUTPUTS

@@ -789,6 +789,8 @@ function createNativeNode(
       cs.start();
       return cs;
     }
+    case 'dynamics-compressor':
+      return ctx.createDynamicsCompressor();
     default:
       log(`Warning: Unknown native node type '${type}'`);
       return null;

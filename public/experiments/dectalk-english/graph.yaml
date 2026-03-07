@@ -433,6 +433,17 @@ nodes:
     params:
       gain: { bind: masterGain }
 
+  # DynamicsCompressorNode — mimics FORTRAN 16-bit hard clipping.
+  # See klatt80-baseline/graph.yaml for rationale.
+  outputCompressor:
+    type: dynamics-compressor
+    params:
+      threshold: -24
+      knee: 12
+      ratio: 12
+      attack: 0.003
+      release: 0.1
+
   outputGain:
     type: gain
     params:
@@ -540,7 +551,8 @@ connections:
   # Output chain
   # ---------------------------------------------------------------------------
   - [outputSum, masterGain]
-  - [masterGain, outputGain]
+  - [masterGain, outputCompressor]
+  - [outputCompressor, outputGain]
 
 # =============================================================================
 # OUTPUTS

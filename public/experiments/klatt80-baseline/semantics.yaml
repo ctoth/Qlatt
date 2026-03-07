@@ -577,9 +577,14 @@ realize:
     description: "Total Ee adjustment: Fant 1997 Rd covariation plus phrase contour."
 
   # Source gains (linear)
+  # Klatt 1980 PARCOE.FOR line 184: IMPULS = IMPULS * NNF0
+  # Voice amplitude scales with F0 to maintain constant glottal source power.
+  # ndbScale.AV = -119 = -72 - 47 was calibrated for a fixed level equivalent
+  # to F0 = 2^(47/6) ≈ 228 Hz. Dividing by 228 restores F0 dependence:
+  #   F0=110 → cascade 6 dB quieter, F0=228 → unchanged, F0=300 → 2.4 dB louder
   voiceGain:
-    expr: "dbToLinear(GO + AV + eeGainDb + ndbScale.AV)"
-    deps: [GO, AV, eeGainDb]
+    expr: "dbToLinear(GO + AV + eeGainDb + ndbScale.AV) * (F0 > 0 ? F0 / 228.0 : 0.0)"
+    deps: [GO, AV, eeGainDb, F0]
 
   aspGain:
     expr: "dbToLinear(GO + AH + ndbScale.AH)"

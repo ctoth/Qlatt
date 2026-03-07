@@ -669,7 +669,10 @@ export class KlattSynth {
 
     // PARCOE.FOR lines 117-135: G0 is added to each source amplitude before GETAMP conversion
     // Formula: NDBAV = NNG0 + NNAV + NDBSCA(9), then IMPULS = GETAMP(NDBAV)
-    const voiceGain = dbToLinear(goDb + voiceDb + ndbScale.AV);
+    // PARCOE.FOR line 184: IMPULS = IMPULS * NNF0 — F0-dependent voice amplitude scaling.
+    // ndbScale.AV = -119 was calibrated at F0 ≈ 228 Hz (2^(47/6)). Scale by F0/228.
+    const f0 = params.F0 ?? 0;
+    const voiceGain = dbToLinear(goDb + voiceDb + ndbScale.AV) * (f0 > 0 ? f0 / 228 : 0);
     const parallelScale = Number.isFinite(this.params.parallelGainScale)
       ? this.params.parallelGainScale
       : 1.0;

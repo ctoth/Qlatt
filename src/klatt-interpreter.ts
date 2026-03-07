@@ -326,9 +326,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
   function compileSchedule(track: KlattFrame[], baseTime: number): ScheduleEntry[] {
     const schedule: ScheduleEntry[] = [];
 
-    // PLSTEP detection state
-    let prevAF = -70;
-    let prevAH = -70;
+    // PLSTEP detection state — initial 0 means "off/silent".
+    // Missing AF/AH in a frame means "not set" = silent (0 dB), not -70 dB.
+    // Using -70 caused spurious 70 dB deltas when frames omitted AF/AH.
+    let prevAF = 0;
+    let prevAH = 0;
     // Read threshold from semantics constant (single source of truth), fallback to 49
     const PLSTEP_THRESHOLD = (typeof constants['plstepThreshold'] === 'number')
       ? constants['plstepThreshold']
@@ -346,8 +348,8 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const realized = evaluateSemantics(frame.params);
 
       // PLSTEP detection: track AF/AH state unconditionally, emit telemetry if handler present
-      const currentAF = frame.params.AF ?? -70;
-      const currentAH = frame.params.AH ?? -70;
+      const currentAF = frame.params.AF ?? 0;
+      const currentAH = frame.params.AH ?? 0;
 
       if (telemetryHandler) {
         const deltaAF = currentAF - prevAF;

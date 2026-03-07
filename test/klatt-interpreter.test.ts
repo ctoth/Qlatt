@@ -259,10 +259,10 @@ describe('PLSTEP state tracking', () => {
       telemetryHandler,
     });
 
-    // Frame 0: AF=-70 (same as prevAF init, delta=0, no trigger)
-    // Frame 1: AF=60 (delta=60-(-70)=130, >49 threshold => triggers)
+    // Frame 0: AF=0 (same as prevAF init, delta=0, no trigger)
+    // Frame 1: AF=60 (delta=60-0=60, >49 threshold => triggers)
     const track: KlattFrame[] = [
-      { time: 0.0, params: { AF: -70 } },
+      { time: 0.0, params: { AF: 0 } },
       { time: 0.005, params: { AF: 60 } },
     ];
 
@@ -271,7 +271,7 @@ describe('PLSTEP state tracking', () => {
     const plstepEvents = events.filter(e => e.type === 'plstep');
     expect(plstepEvents.length).toBe(1);
     expect(plstepEvents[0].trigger).toBe('AF');
-    expect(plstepEvents[0].delta).toBe(130);
+    expect(plstepEvents[0].delta).toBe(60);
   });
 
   it('does NOT fire PLSTEP for small delta when state is correctly tracked', () => {
@@ -285,14 +285,14 @@ describe('PLSTEP state tracking', () => {
       telemetryHandler,
     });
 
-    // Frame 0: AF=-70 (same as prevAF init, delta=0 => no trigger)
-    // Frame 1: AF=60 (delta=60-(-70)=130 => triggers)
+    // Frame 0: AF=0 (same as prevAF init, delta=0 => no trigger)
+    // Frame 1: AF=60 (delta=60-0=60 => triggers)
     // Frame 2: AF=55 (delta=55-60=-5 => should NOT trigger)
     //
-    // If prevAF were stuck at -70 (the bug), frame 2 would see:
-    //   delta = 55-(-70) = 125 => would trigger (WRONG)
+    // If prevAF were stuck at 0 (a bug), frame 2 would see:
+    //   delta = 55-0 = 55 => would trigger (WRONG)
     const track: KlattFrame[] = [
-      { time: 0.0, params: { AF: -70 } },
+      { time: 0.0, params: { AF: 0 } },
       { time: 0.005, params: { AF: 60 } },
       { time: 0.010, params: { AF: 55 } },
     ];
@@ -300,8 +300,8 @@ describe('PLSTEP state tracking', () => {
     interpreter.scheduleTrack(track, 0);
 
     const plstepEvents = events.filter(e => e.type === 'plstep');
-    // Frame 0: AF=-70 vs prevAF=-70 => delta=0 => no trigger
-    // Frame 1: AF=60 vs prevAF=-70 => delta=130 => triggers (1)
+    // Frame 0: AF=0 vs prevAF=0 => delta=0 => no trigger
+    // Frame 1: AF=60 vs prevAF=0 => delta=60 => triggers (1)
     // Frame 2: AF=55 vs prevAF=60 => delta=-5 => does NOT trigger
     expect(plstepEvents.length).toBe(1);
   });
@@ -334,18 +334,18 @@ describe('PLSTEP state tracking', () => {
       telemetryHandler,
     });
 
-    // Frame 0: AH=-70 (same as prevAH init, delta=0 => no trigger)
-    // Frame 1: AH=55 (delta=55-(-70)=125, >49 threshold => triggers)
+    // Frame 0: AH=0 (same as prevAH init, delta=0 => no trigger)
+    // Frame 1: AH=55 (delta=55-0=55, >49 threshold => triggers)
     const track: KlattFrame[] = [
-      { time: 0.0, params: { AH: -70 } },
+      { time: 0.0, params: { AH: 0 } },
       { time: 0.005, params: { AH: 55 } },
     ];
 
     interpreter.scheduleTrack(track, 0);
 
     const plstepEvents = events.filter(e => e.type === 'plstep');
-    // Frame 0: AH=-70 vs prevAH=-70 => delta=0 => no trigger
-    // Frame 1: AH=55 vs prevAH=-70 => delta=125 => triggers
+    // Frame 0: AH=0 vs prevAH=0 => delta=0 => no trigger
+    // Frame 1: AH=55 vs prevAH=0 => delta=55 => triggers
     expect(plstepEvents.length).toBe(1);
     expect(plstepEvents[0].trigger).toBe('AH');
   });

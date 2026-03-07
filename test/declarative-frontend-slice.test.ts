@@ -74,8 +74,8 @@ describe("declarative frontend first migration slice", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // AE before voiceless stop: gets vowel_before_voiceless_stop_shortening (-15ms additive)
-    expect(out[0].duration).toBe(80);
+    // AE before voiceless stop: stress*1.3=130, vowel_shortening_voiceless*0.7=91, Klatt floor adjustments → 95
+    expect(out[0].duration).toBe(95);
     // IY (stress=0): stress_duration(mul 0.8) → vowel_shortening(mul 1.2, next=SIL)
     // With Klatt floor=50.4: 0.8*(120-50.4)+50.4=106, then 1.2*(106-50.4)+50.4=117
     // Pre-boundary lengthening requires breakIndex (not set on these tokens) → factor=1.

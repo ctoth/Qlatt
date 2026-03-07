@@ -27,7 +27,6 @@ const DURATION_RULES = new Set([
   "word_initial_lengthening",
   "punctuation_pause",
   "vowel_shortening",
-  "vowel_before_voiceless_stop_shortening",
   "pre_boundary_lengthening",
   "fricative_minimum_duration",
   "lock_stop_release_duration",

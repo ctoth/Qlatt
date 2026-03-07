@@ -210,14 +210,6 @@ parameters:
         citations:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8
-      vowel_vl_stop_shortening_phrasefinal_ms:
-        value: -45
-        citations:
-          - Klatt 1976 Table I
-      vowel_vl_stop_shortening_other_ms:
-        value: -15
-        citations:
-          - Klatt 1976 Table I
       word_medial_consonant_multiplier:
         value: 0.85
         citations:

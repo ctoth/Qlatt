@@ -113,28 +113,6 @@ rules:
     citations:
       - Klatt 1976
       - Allen et al. 1987 Ch.9 (postvocalic context duration factors)
-  vowel_before_voiceless_stop_shortening:
-    kind: scalar
-    select:
-      stream: phone
-      where: |-
-        current.type == 'vowel' && (next != null ? (next.type == 'stop_closure'
-            ? (has(next.voiceless) ? next.voiceless == true : false)
-            : false)
-           : false)
-    define:
-      nn: ahead(current, 2)
-      phrase_final: "nn == null ? true : nn.phoneme == 'SIL'"
-    apply:
-      - field: duration
-        op: add
-        dispatch:
-          - when: phrase_final
-            value: params.policy.duration.vowel_vl_stop_shortening_phrasefinal_ms
-          - default: params.policy.duration.vowel_vl_stop_shortening_other_ms
-        tag: voiceless_context
-    citations:
-      - Klatt 1976 Table I (vowel shortening before voiceless stops)
   accent_vowel_lengthening:
     kind: scalar
     select:

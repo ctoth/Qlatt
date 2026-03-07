@@ -81,7 +81,6 @@ phases:
       - stress_duration
       - accent_vowel_lengthening
       - vowel_shortening
-      - vowel_before_voiceless_stop_shortening
       - pre_boundary_lengthening
       - speech_rate_scaling
       - duration_cap

@@ -1211,13 +1211,10 @@ describe("declarative frontend rulepack context migration", () => {
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
     const ae = out.find((t) => t.phoneme === "AE");
     expect(ae).toBeTruthy();
-    // AE is before voiceless T_CL and next-next is T_REL (not null, not SIL)
-    // so non-phrase-final shortening applies: -15ms additive
-    // The vowel should be shorter than if the -15 were not applied
-    // Exact value depends on other multipliers, but the shortening should be present
-    // Base: 170ms, stress*1.3=221, vowel_shortening_voiceless*0.7=154.7, minus 15=~139.7
+    // AE is before voiceless T_CL: vowel_shortening applies 0.7x multiplier
+    // Base: 170ms, stress*1.3=221, vowel_shortening_voiceless*0.7=154.7
     // plus pre_boundary and incompressibility adjustments
-    expect(ae!.duration).toBeLessThan(155);
+    expect(ae!.duration).toBeLessThan(170);
   });
 
   it("shortens vowel more before voiceless stop at phrase end", () => {

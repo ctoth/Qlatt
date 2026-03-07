@@ -250,6 +250,96 @@ display:
       vi.useRealTimers();
     }
   });
+
+  it("preserves last active results after playback window ends", () => {
+    const ctx = mockAudioContext();
+    const runtime = mockRuntime(["outputGain"]);
+    const config = parseDiagConfig(`
+taps:
+  post-output:
+    node: outputGain
+    fftSize: 2048
+poll:
+  interval_ms: 20
+  guard_ms: 50
+checks:
+  output_rms:
+    tap: post-output
+    measure: rms
+    assert: { min: 0.001 }
+    severity: warn
+    message: "No signal"
+display:
+  sections:
+    - { id: checks, source: check_results }
+`);
+
+    const tapManager = new TapManager({
+      audioContext: ctx,
+      runtime,
+      taps: config.taps,
+    });
+    tapManager.connect();
+
+    const acrossPlays = new AcrossPlaysAccumulator();
+    let receivedResults: Map<string, any> = new Map();
+
+    const track: TrackEvent[] = [
+      { time: 0, phoneme: "HH", params: { F0: 110, AV: 60, SW: 0 } },
+      { time: 0.5, phoneme: "AH1", params: { F0: 120, AV: 60, SW: 0 } },
+    ];
+
+    let currentTime = 0.25; // mid-playback
+
+    const pollLoop = new PollLoop({
+      config,
+      tapManager,
+      acrossPlays,
+      getRunInfo: () => ({
+        phrase: "test",
+        baseF0: 110,
+        track,
+        sessionId: 1,
+        startTime: 0,
+      }),
+      getRunStartTime: () => 0,
+      getAudioTime: () => currentTime,
+      getSampleRate: () => 48000,
+      getDisplayState: () => ({
+        run: { phrase: "test", baseF0: 110, track, sessionId: 1, startTime: 0 },
+        checkResults: new Map(),
+        telemetry: new Map(),
+        telemetryMax: new Map(),
+        meterValues: new Map(),
+        meterMax: new Map(),
+        plstepEvents: [],
+        plstepTotalCount: 0,
+        playHistory: [],
+        sessionId: 1,
+        sliderParams: {},
+      }),
+      onResults: (results) => {
+        receivedResults = results;
+      },
+    });
+
+    // Tick during playback — should get a non-skip result
+    pollLoop.tick();
+    const duringPlayback = receivedResults.get("output_rms");
+    expect(duringPlayback).toBeDefined();
+    expect(duringPlayback!.status).not.toBe("skip");
+
+    // Advance time past end of track + 0.5s guard
+    currentTime = 5.0;
+    pollLoop.tick();
+
+    // Should still show the last active result, NOT skip
+    const afterPlayback = receivedResults.get("output_rms");
+    expect(afterPlayback).toBeDefined();
+    expect(afterPlayback!.status).not.toBe("skip");
+    // Should preserve the value from during-playback
+    expect(afterPlayback!.status).toBe(duringPlayback!.status);
+  });
 });
 
 describe("createDiagnosticsEngine", () => {

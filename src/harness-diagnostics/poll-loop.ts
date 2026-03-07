@@ -25,6 +25,7 @@ export interface PollLoopOptions {
 export class PollLoop {
   private timer: ReturnType<typeof setInterval> | null = null;
   private checkStates: Map<string, CheckState>;
+  private lastActiveResults: Map<string, CheckResult> = new Map();
   private config: DiagConfig;
   private tapManager: TapManager;
   private acrossPlays: AcrossPlaysAccumulator;
@@ -129,13 +130,30 @@ export class PollLoop {
       results.set(checkName, result);
     }
 
+    // Preserve last active (non-skip) results so they survive after playback ends
+    for (const [name, result] of results) {
+      if (result.status !== "skip") {
+        this.lastActiveResults.set(name, result);
+      }
+    }
+
+    // Merge: prefer current non-skip, fall back to last active
+    const mergedResults = new Map<string, CheckResult>();
+    for (const [name, result] of results) {
+      if (result.status !== "skip") {
+        mergedResults.set(name, result);
+      } else {
+        mergedResults.set(name, this.lastActiveResults.get(name) ?? result);
+      }
+    }
+
     // Format display
     const displayState = this.getDisplayState();
-    displayState.checkResults = results;
+    displayState.checkResults = mergedResults;
     const output = formatDisplay(this.config.display, displayState);
 
     // Deliver results
-    this.onResults(results, output);
+    this.onResults(mergedResults, output);
   }
 
   private readMeasurement(

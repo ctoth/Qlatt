@@ -9,10 +9,22 @@ import { AcrossPlaysAccumulator } from "./across-plays";
 import { updateParamRange } from "./check-evaluator";
 import { createCheckState } from "./check-evaluator";
 
+/** External state provider — lets the harness pass live references into the engine. */
+export interface ExternalState {
+  telemetry: Map<string, any>;
+  telemetryMax: Map<string, any>;
+  plstepEvents: any[];
+  plstepTotalCount: number;
+  playHistory: any[];
+  sessionId: number;
+  sliderParams: Record<string, number>;
+}
+
 export function createDiagnosticsEngine(
   config: DiagConfig,
   audioContext: AudioContext,
   runtime: any,
+  externalState?: ExternalState,
 ): DiagnosticsEngine {
   const subscribers: Set<(output: string) => void> = new Set();
   let currentRun: RunInfo | null = null;
@@ -45,15 +57,15 @@ export function createDiagnosticsEngine(
     getDisplayState: (): DisplayState => ({
       run: currentRun,
       checkResults: currentResults,
-      telemetry: new Map(),
-      telemetryMax: new Map(),
+      telemetry: externalState?.telemetry ?? new Map(),
+      telemetryMax: externalState?.telemetryMax ?? new Map(),
       meterValues: new Map(),
       meterMax: new Map(),
-      plstepEvents: [],
-      plstepTotalCount: 0,
-      playHistory: [],
-      sessionId: currentRun?.sessionId ?? 0,
-      sliderParams: {},
+      plstepEvents: externalState?.plstepEvents ?? [],
+      plstepTotalCount: externalState?.plstepTotalCount ?? 0,
+      playHistory: externalState?.playHistory ?? [],
+      sessionId: externalState?.sessionId ?? currentRun?.sessionId ?? 0,
+      sliderParams: externalState?.sliderParams ?? {},
     }),
     onResults: (results, output) => {
       currentResults = results;

@@ -74,6 +74,15 @@ export async function initializeNewRuntime() {
         state.diagConfig,
         state.ctx,
         state.newRuntime,
+        {
+          telemetry: state.telemetry,
+          telemetryMax: state.telemetryMax,
+          plstepEvents: state.plstepEvents,
+          plstepTotalCount: state.plstepTotalCount,
+          playHistory: state.playHistory,
+          sessionId: state.sessionId,
+          sliderParams: {},
+        },
       );
       state.diagEngine.subscribe((output) => {
         if (state.useEngineOutput) {

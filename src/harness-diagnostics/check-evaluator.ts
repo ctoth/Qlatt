@@ -21,6 +21,8 @@ export interface CheckState {
   lastCollectedAt: number;
   /** For param_range checks — accumulated min/max. */
   paramRange: ParamRangeAccum | null;
+  /** For peak checks — maximum peak observed across all ticks. */
+  maxPeak: number;
 }
 
 /** Create initial state for a check. */
@@ -29,6 +31,7 @@ export function createCheckState(): CheckState {
     collected: [],
     lastCollectedAt: -Infinity,
     paramRange: null,
+    maxPeak: 0,
   };
 }
 
@@ -167,6 +170,16 @@ function evaluateTapCheck(
   } else {
     const tapName = def.tap ?? "";
     value = measurements.get(tapName) ?? 0;
+  }
+
+  // For peak measurements, track the maximum observed value across all ticks.
+  // Report maxPeak instead of instantaneous value so the result survives
+  // post-playback polling (where the buffer decays to near-zero).
+  if (def.measure === "peak") {
+    if (value > state.maxPeak) {
+      state.maxPeak = value;
+    }
+    value = state.maxPeak;
   }
 
   const failed = checkAssert(value, def.assert);

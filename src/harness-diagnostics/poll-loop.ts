@@ -72,6 +72,7 @@ export class PollLoop {
       state.collected = [];
       state.lastCollectedAt = -Infinity;
       state.paramRange = null;
+      state.maxPeak = 0;
     }
   }
 

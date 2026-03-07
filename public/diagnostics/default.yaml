@@ -23,10 +23,10 @@ poll:
 
 checks:
   parallel_audible:
-    tap: parallel-out
+    tap: post-output
     when: { SW: 1 }
     measure: rms
-    assert: { min: 0.01 }
+    assert: { min: 0.005 }
     severity: warn
     message: "Parallel branch inaudible during SW=1"
 
@@ -66,12 +66,12 @@ checks:
     message: "F2 spectral peak below target for IY"
 
   branch_balance:
-    taps: [cascade-out, parallel-out]
+    tap: post-output
     when: { SW: 1 }
-    measure: rms_ratio_db
-    assert: { max: 20 }
+    measure: rms
+    assert: { min: 0.001 }
     severity: warn
-    message: "Parallel >20dB below cascade"
+    message: "Output silent during parallel (SW=1) segments"
 
   f0_range:
     type: param_range

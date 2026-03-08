@@ -219,14 +219,14 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1975_RuleBasedTTS**
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Cummings_1995_GlottalExcitationEmotionalSpeech**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1997_VoiceSourceConnectedSpeech**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Klatt_1990_VoiceQualityVariations**
-- **Mozziconacci_1998_SpeechEmotionProsody**
+- [[Carlson_1975_RuleBasedTTS]]
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1997_VoiceSourceConnectedSpeech]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Mozziconacci_1998_SpeechEmotionProsody]]
 
 ### New Leads (Not Yet in Collection)
 - **Laver, J., 1980** - The Phonetic Description of Voice Quality - provides the comprehensive physiological framework (adductive tension, medial compression, longitudinal tension) that underpins voice quality classification throughout this paper.

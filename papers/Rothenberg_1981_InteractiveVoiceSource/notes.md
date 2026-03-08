@@ -173,16 +173,16 @@ This paper is foundational for the Qlatt project's aerodynamic model and LF voic
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction** - cited as foundational source-filter theory; Rothenberg extends it with interaction
-- **Fant_1985_LFModelGlottalFlow** - the LF model that succeeds Rothenberg's parameterization
-- **Doval_2003_VoiceSourceCALM** - CALM model builds on this interaction concept
-- **Doval_2006_SpectrumGlottalFlowModels** - spectral analysis of glottal models including interaction effects
-- **Childers_Lee_1991_VoiceQualityFactors** - voice quality parameterization that follows from Rothenberg's framework
-- **Klatt_1990_VoiceQualityVariations** - KLSYN88 voice source relates to these interaction parameters
-- **Hanson_1995_GlottalCharacteristicsFemale** - female voice quality measures trace back to Rothenberg's B2 (chink) parameter
-- **Stevens_1991_HL_Parameters** - higher-level parameters include aerodynamic calculations inspired by this work
-- **Plumpe_1999_GlottalFlowDerivativeModeling** - LF parameter extraction relates to Rothenberg's model
-- **Perrotin_2021_LF_LinearFilter_Equivalence** - efficient LF implementations descend from this theoretical framework
+- [[Fant_1960_AcousticTheorySpeechProduction]] - cited as foundational source-filter theory; Rothenberg extends it with interaction
+- [[Fant_1985_LFModelGlottalFlow]] - the LF model that succeeds Rothenberg's parameterization
+- [[Doval_2003_VoiceSourceCALM]] - CALM model builds on this interaction concept
+- [[Doval_2006_SpectrumGlottalFlowModels]] - spectral analysis of glottal models including interaction effects
+- [[Childers_Lee_1991_VoiceQualityFactors]] - voice quality parameterization that follows from Rothenberg's framework
+- [[Klatt_1990_VoiceQualityVariations]] - KLSYN88 voice source relates to these interaction parameters
+- [[Hanson_1995_GlottalCharacteristicsFemale]] - female voice quality measures trace back to Rothenberg's B2 (chink) parameter
+- [[Stevens_1991_HL_Parameters]] - higher-level parameters include aerodynamic calculations inspired by this work
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] - LF parameter extraction relates to Rothenberg's model
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] - efficient LF implementations descend from this theoretical framework
 
 ### New Leads (Not Yet in Collection)
 - Flanagan & Landgraf (1968) "Self oscillating source for vocal tract synthesizers" - early self-oscillating source model

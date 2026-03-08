@@ -216,10 +216,10 @@ Invariants derived from this paper's empirical data that should hold in any voic
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hanson_1995_GlottalCharacteristicsFemale**
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Klatt_1990_VoiceQualityVariations**
-- **Lienard_1999_VocalEffortVowelSpectral**
+- [[Hanson_1995_GlottalCharacteristicsFemale]]
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Lienard_1999_VocalEffortVowelSpectral]]
 
 ### New Leads (Not Yet in Collection)
 - **Henrich et al. (2004)** - DECOM method paper. Essential for understanding the open quotient measurement technique used throughout this study.

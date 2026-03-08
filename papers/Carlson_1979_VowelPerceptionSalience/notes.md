@@ -165,9 +165,9 @@ Linear interpolation between control points.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Klatt_1976_SegmentalDuration**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
 
 ### New Leads (Not Yet in Collection)
 - Foundational acoustic theory referenced for understanding spectral tilt and voicing source characteristics essential to formant synthesis.
@@ -180,4 +180,4 @@ Linear interpolation between control points.
 - Comprehensive auditory system modeling for understanding critical band analysis and psychoacoustic principles underlying vowel perception.
 
 ### Conceptual Links (not citation-based)
-- **Peterson_Barney_1952_VowelControl** — P&B established the canonical F1/F2/F3 vowel space and documented which vowels are confused; Carlson's perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) explains *why* formant frequency is the primary dimension of vowel identity and why P&B's F1-F2 plot captures the dominant perceptual structure
+- [[Peterson_Barney_1952_VowelControl]] — P&B established the canonical F1/F2/F3 vowel space and documented which vowels are confused; Carlson's perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) explains *why* formant frequency is the primary dimension of vowel identity and why P&B's F1-F2 plot captures the dominant perceptual structure

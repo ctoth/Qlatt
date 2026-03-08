@@ -156,9 +156,9 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 ## Collection Cross-References
 
 ### Already in Collection
-- **Zue_1976_StopConsonantAcoustics** — cited as [5], the most detailed controlled study of stop consonant acoustics; provides VOT, burst frequency, and burst amplitude data that this paper builds upon
-- **Fant_1960_AcousticTheorySpeechProduction** — cited as [2], p. 185 discusses aspiration phase as possible mix of fricative and aspirated sound, which this paper empirically investigates
-- **Lisker_Abramson_1964_CrossLanguageVoicingStops** — cited as [3], provides the VOT measurement framework used to define the aspiration phase duration
+- [[Zue_1976_StopConsonantAcoustics]] — cited as [5], the most detailed controlled study of stop consonant acoustics; provides VOT, burst frequency, and burst amplitude data that this paper builds upon
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited as [2], p. 185 discusses aspiration phase as possible mix of fricative and aspirated sound, which this paper empirically investigates
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — cited as [3], provides the VOT measurement framework used to define the aspiration phase duration
 
 ### New Leads (Not Yet in Collection)
 - Stevens (1993) — "Models for the production and acoustics of stop consonants," Speech Commun. 13:367-375 — source of the classical three-phase model (Fig. 1) that this paper challenges; directly relevant to stop synthesis
@@ -166,7 +166,7 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 - Stevens, Manuel & Matthies (1999) — "Revisiting place of articulation measures for stop consonants," ICPhS 99, pp. 1117-1120 — complementary burst spectra analysis
 
 ### Conceptual Links (not citation-based)
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz treats aspiration as an independent stream overlaying the CV transition after voiceless stops. Hanson & Stevens' finding that /t/ and /k/ releases contain supraglottal frication (not just glottal aspiration) complicates this model: the AF parameter may need place-dependent extension into what Hertz models as the aspiration interval, rather than a clean AH overlay.
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz treats aspiration as an independent stream overlaying the CV transition after voiceless stops. Hanson & Stevens' finding that /t/ and /k/ releases contain supraglottal frication (not just glottal aspiration) complicates this model: the AF parameter may need place-dependent extension into what Hertz models as the aspiration interval, rather than a clean AH overlay.
 
 ### Cited By (in Collection)
 - (none found)

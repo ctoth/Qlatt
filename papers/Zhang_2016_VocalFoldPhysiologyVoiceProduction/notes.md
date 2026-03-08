@@ -197,11 +197,11 @@ This paper provides the physiological grounding for voice quality control in the
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow**
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
-- **Kreiman_2012_VoiceQualityHarmonicOQ**
-- **Scherer_2001_VocalEmotionCrossCultural**
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]]
+- [[Scherer_2001_VocalEmotionCrossCultural]]
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1995) - LF model revisited** - Defines the R-parameters (Rd, Ra, Rk, Rg) used in Table II of this paper; essential for implementing LF source control

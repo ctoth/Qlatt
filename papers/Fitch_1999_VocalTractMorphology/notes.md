@@ -222,26 +222,26 @@ This paper provides the empirical foundation for parameterizing vocal tract leng
 - Titze (1989) - "Physiologic and acoustic differences between male and female voices" JASA 85, 1699-1707 - acoustic correlates of the anatomical sex differences documented here
 
 ### Cited By (in Collection)
-- **Collins_2003_VocalVisualAttractiveness** - cites this for vocal tract morphology and formant dispersion-body size relationship
-- **Feinberg_2011_IntegratingF0FormantPreferences** - cites this for VTL measurement via MRI; height explains >70% of VTL variance
-- **Cartei_2014_VoiceMasculinity** - cites this for vocal tract length sex differences
-- **Borkowska_2011_F0DominanceAttractiveness** - cites this for body size-VTL correlation
-- **HodgesSimeon_2010_DominanceAttractiveness** - cites this for vocal tract morphology
-- **Chen_2022_AcousticMasculinityFemininity** - cites this for VTL sex differences
-- **Nygren_2016_TransVoiceF0Testosterone** - cites this for vocal tract morphology and development
-- **Karthikeyan_2023_ArticulatoryStatusAttractiveness** - cites this for vocal tract anatomy
-- **Babel_2014_VocalAttractiveness** - cites this for VTL-body size relationship
-- **Barreda_2015_FormantSpeakerSize** - cites this for formant-speaker size perception
+- [[Collins_2003_VocalVisualAttractiveness]] - cites this for vocal tract morphology and formant dispersion-body size relationship
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] - cites this for VTL measurement via MRI; height explains >70% of VTL variance
+- [[Cartei_2014_VoiceMasculinity]] - cites this for vocal tract length sex differences
+- [[Borkowska_2011_F0DominanceAttractiveness]] - cites this for body size-VTL correlation
+- [[HodgesSimeon_2010_DominanceAttractiveness]] - cites this for vocal tract morphology
+- [[Chen_2022_AcousticMasculinityFemininity]] - cites this for VTL sex differences
+- [[Nygren_2016_TransVoiceF0Testosterone]] - cites this for vocal tract morphology and development
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] - cites this for vocal tract anatomy
+- [[Babel_2014_VocalAttractiveness]] - cites this for VTL-body size relationship
+- [[Barreda_2015_FormantSpeakerSize]] - cites this for formant-speaker size perception
 
 ### Conceptual Links (not citation-based)
 **Vocal anatomy and sex differences:**
-- **Zhang_2021_LaryngealSizeSexDifferences** - This paper documents the supralaryngeal (vocal tract) sex differences while Zhang documents the laryngeal (vocal fold) sex differences. Together they provide the complete anatomical basis for male-female voice differences: Fitch shows the pharyngeal elongation that lowers formant frequencies, Zhang shows the fold length/thickness differences that lower F0 and alter voice quality. Both find that sex differences emerge at puberty and go beyond simple body-size scaling.
-- **Stathopoulos_2011_VoiceAcrossLifespan** - Stathopoulos provides the acoustic measurements (F0, SPL, SNR) across the full lifespan (ages 4-93) that should correlate with the anatomical growth curves documented here. Fitch's VTL data covers ages 2-25; Stathopoulos extends the acoustic picture through aging and decline.
-- **Iseli_2007_VoiceSourceAgeSexVowel** - Iseli documents age/sex effects on voice source parameters (H1*-H2*, H1*-A3*) in speakers ages 8-39, providing the source-side complement to this paper's filter-side (vocal tract) age/sex data.
+- [[Zhang_2021_LaryngealSizeSexDifferences]] - This paper documents the supralaryngeal (vocal tract) sex differences while Zhang documents the laryngeal (vocal fold) sex differences. Together they provide the complete anatomical basis for male-female voice differences: Fitch shows the pharyngeal elongation that lowers formant frequencies, Zhang shows the fold length/thickness differences that lower F0 and alter voice quality. Both find that sex differences emerge at puberty and go beyond simple body-size scaling.
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] - Stathopoulos provides the acoustic measurements (F0, SPL, SNR) across the full lifespan (ages 4-93) that should correlate with the anatomical growth curves documented here. Fitch's VTL data covers ages 2-25; Stathopoulos extends the acoustic picture through aging and decline.
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] - Iseli documents age/sex effects on voice source parameters (H1*-H2*, H1*-A3*) in speakers ages 8-39, providing the source-side complement to this paper's filter-side (vocal tract) age/sex data.
 
 **Formant-body size perception:**
-- **Barreda_2015_FormantSpeakerSize** - Barreda tests the perceptual consequences of the VTL-body size correlation documented here, finding that listeners use formant frequencies (including F4, F5) for speaker-size judgments but with phoneme-specific biases, suggesting the mapping from VTL to perceived size is not straightforward uniform scaling.
-- **Cartei_2014_VoiceMasculinity** - Cartei shows that perceived masculinity is mediated by both F0 and formant spacing (deltaF), with F0 as the stronger cue. This paper provides the anatomical explanation: the male pharyngeal elongation produces the lower formant spacing, while the laryngeal changes produce lower F0.
+- [[Barreda_2015_FormantSpeakerSize]] - Barreda tests the perceptual consequences of the VTL-body size correlation documented here, finding that listeners use formant frequencies (including F4, F5) for speaker-size judgments but with phoneme-specific biases, suggesting the mapping from VTL to perceived size is not straightforward uniform scaling.
+- [[Cartei_2014_VoiceMasculinity]] - Cartei shows that perceived masculinity is mediated by both F0 and formant spacing (deltaF), with F0 as the stronger cue. This paper provides the anatomical explanation: the male pharyngeal elongation produces the lower formant spacing, while the laryngeal changes produce lower F0.
 
 ## Related Work Worth Reading
 - Lee, S., Potamianos, A., and Narayanan, S. (1999). Acoustics of children's speech. JASA 105, 1455-1468. — Formant frequency data for 436 children ages 5-17

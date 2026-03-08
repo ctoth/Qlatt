@@ -236,7 +236,7 @@ function getTransitionDirection(consonant) {
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **Browman, C. P., and Goldstein, L. (1986). "Towards an articulatory phonology"** - Theoretical framework for understanding articulatory gestures and constraints, directly underlying the DAC model presented in this paper.

@@ -290,26 +290,26 @@ Seven acoustic factors (57% variance explained):
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — the foundational paper this review builds on; provides acoustic profiles for 14 emotions with 29 parameters
-- **Gobl_2003_VoiceQualityEmotion** — cited for voice quality types (harsh, tense, breathy, whispery, creaky, lax-creaky) and their emotional associations
-- **Burkhardt_2005_GermanEmotionalSpeechDatabase** — cited as a key emotional speech corpus (EmoDB) used in many reviewed studies
-- **Burkhardt_2009_VoiceQualityFormantSynthesis** — provides Klatt parameter formulas for voice quality types discussed in this review
-- **Eyben_2015_GeMAPS_AcousticParameters** — cited as the standardized 62-parameter set (GeMAPS/eGeMAPS) recommended for emotion research
-- **Mozziconacci_1998_SpeechEmotionProsody** — cited via Mozziconacci & Hermes (1999) for intonation pattern categorization of emotions
-- **Mozziconacci_2002_ProsodyEmotions** — related work on separating pitch contour type from pitch implementation for emotion
-- **Scherer_2001_VocalEmotionCrossCultural** — cited for cross-cultural emotion recognition findings (66% mean accuracy, 9 countries)
-- **Goudbeek_2010_ValencePotencyVocalEmotion** — cited for arousal/valence/potency dimensional analysis showing spectral slope encodes valence
-- **ZeiPollermann_2002_AcousticPatternsEmotions** — cited for French emotion acoustics showing arousal-dominance in F0/energy but valence in LTAS
-- **Laukka_2011_SpontaneousAffectIrritation** — relevant to the review's discussion of authenticity: spontaneous vs. acted emotional speech
-- **Belyk_2014_AcousticValenceEmotion** — relevant to the review's point that valence encoding depends on emotion family (motivational vs. moral vs. aesthetic)
-- **Szameitat_2011_LaughterEmotionAcoustics** — relevant to non-verbal emotional vocalizations discussed in the review
-- **VanZant_Berger_2019_VoicePersuades** — relevant to the broader context of vocal affect influencing perception
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — the foundational paper this review builds on; provides acoustic profiles for 14 emotions with 29 parameters
+- [[Gobl_2003_VoiceQualityEmotion]] — cited for voice quality types (harsh, tense, breathy, whispery, creaky, lax-creaky) and their emotional associations
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — cited as a key emotional speech corpus (EmoDB) used in many reviewed studies
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — provides Klatt parameter formulas for voice quality types discussed in this review
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — cited as the standardized 62-parameter set (GeMAPS/eGeMAPS) recommended for emotion research
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — cited via Mozziconacci & Hermes (1999) for intonation pattern categorization of emotions
+- [[Mozziconacci_2002_ProsodyEmotions]] — related work on separating pitch contour type from pitch implementation for emotion
+- [[Scherer_2001_VocalEmotionCrossCultural]] — cited for cross-cultural emotion recognition findings (66% mean accuracy, 9 countries)
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cited for arousal/valence/potency dimensional analysis showing spectral slope encodes valence
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — cited for French emotion acoustics showing arousal-dominance in F0/energy but valence in LTAS
+- [[Laukka_2011_SpontaneousAffectIrritation]] — relevant to the review's discussion of authenticity: spontaneous vs. acted emotional speech
+- [[Belyk_2014_AcousticValenceEmotion]] — relevant to the review's point that valence encoding depends on emotion family (motivational vs. moral vs. aesthetic)
+- [[Szameitat_2011_LaughterEmotionAcoustics]] — relevant to non-verbal emotional vocalizations discussed in the review
+- [[VanZant_Berger_2019_VoicePersuades]] — relevant to the broader context of vocal affect influencing perception
 
 ### Cited By (in Collection)
-- **Sporer_2006_ParaverbalDeceptionMetaAnalysis** — conceptual link to arousal/pitch findings
-- **Szameitat_2011_LaughterEmotionAcoustics** — cites this for speech arousal correlates that converge with laughter findings
-- **VanZant_Berger_2019_VoicePersuades** — cites this for emotional prosody dimension overlap
-- **ZeiPollermann_2002_AcousticPatternsEmotions** — cites this as a comprehensive review synthesizing 30 years including their own work
+- [[Sporer_2006_ParaverbalDeceptionMetaAnalysis]] — conceptual link to arousal/pitch findings
+- [[Szameitat_2011_LaughterEmotionAcoustics]] — cites this for speech arousal correlates that converge with laughter findings
+- [[VanZant_Berger_2019_VoicePersuades]] — cites this for emotional prosody dimension overlap
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — cites this as a comprehensive review synthesizing 30 years including their own work
 
 ### New Leads (Not Yet in Collection)
 - Cowen et al. (2019) — "The primacy of categories in the recognition of 12 emotions in speech prosody across two cultures" — 12-emotion taxonomy with acoustic features across 5 cultures
@@ -321,14 +321,14 @@ Seven acoustic factors (57% variance explained):
 ### Conceptual Links (not citation-based)
 
 **Voice quality parameterization for emotion:**
-- **Klatt_1990_VoiceQualityVariations** — this review identifies voice quality (breathy, tense, harsh) as critical for emotion beyond F0; Klatt 1990 provides the KLSYN88 parameter set (AH, TL, OQ) that implements these qualities. The review's gap ("what makes synthetic emotional voices sound unnatural?") likely involves inadequate voice source control, which Klatt 1990 directly addresses.
-- **Childers_Lee_1991_VoiceQualityFactors** — provides the physiological glottal source parameters (open quotient, speed quotient, closure abruptness, noise) underlying the voice quality categories this review associates with emotions. The review treats voice quality as an acoustic feature; Childers & Lee provide the production mechanism.
-- **Kreiman_2007_GlottalSourceSpectrum** — PCA of 78 source measures reveals only 4 independent factors; this constrains the review's recommendation to use more voice quality features by showing most measures are redundant. H1-H2 and spectral slope emerge as the independent axes, matching the review's key emotion-discriminating features.
-- **Hanson_2001_ModelsPhonation** — provides HLsyn quasi-articulatory control linking physiological voice configurations to spectral measures (H1*-H2*, H1*-A3*) that this review identifies as emotion-relevant. The finding that reduced vowels show 7-13 dB greater spectral tilt connects prosodic prominence to voice quality changes the review discusses.
+- [[Klatt_1990_VoiceQualityVariations]] — this review identifies voice quality (breathy, tense, harsh) as critical for emotion beyond F0; Klatt 1990 provides the KLSYN88 parameter set (AH, TL, OQ) that implements these qualities. The review's gap ("what makes synthetic emotional voices sound unnatural?") likely involves inadequate voice source control, which Klatt 1990 directly addresses.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — provides the physiological glottal source parameters (open quotient, speed quotient, closure abruptness, noise) underlying the voice quality categories this review associates with emotions. The review treats voice quality as an acoustic feature; Childers & Lee provide the production mechanism.
+- [[Kreiman_2007_GlottalSourceSpectrum]] — PCA of 78 source measures reveals only 4 independent factors; this constrains the review's recommendation to use more voice quality features by showing most measures are redundant. H1-H2 and spectral slope emerge as the independent axes, matching the review's key emotion-discriminating features.
+- [[Hanson_2001_ModelsPhonation]] — provides HLsyn quasi-articulatory control linking physiological voice configurations to spectral measures (H1*-H2*, H1*-A3*) that this review identifies as emotion-relevant. The finding that reduced vowels show 7-13 dB greater spectral tilt connects prosodic prominence to voice quality changes the review discusses.
 
 **Dimensional emotion encoding:**
-- **Cui_2006_PleasureAcousticFeaturesAffectiveSpeech** — converges with this review's finding that F0 primarily encodes arousal while spectral features (rolloff, low-high ratio) carry valence; different language (Mandarin), same conclusion.
-- **Starr_2015_SweetVoiceJapaneseFeminine** — demonstrates that distinct vocal styles arise from specific phonation configurations (H1-H2, HNR) rather than F0 alone, supporting this review's argument that voice quality is underexplored in emotion research.
+- [[Cui_2006_PleasureAcousticFeaturesAffectiveSpeech]] — converges with this review's finding that F0 primarily encodes arousal while spectral features (rolloff, low-high ratio) carry valence; different language (Mandarin), same conclusion.
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — demonstrates that distinct vocal styles arise from specific phonation configurations (H1-H2, HNR) rather than F0 alone, supporting this review's argument that voice quality is underexplored in emotion research.
 
 **Cross-cultural and perception:**
-- **Scherer_2001_VocalEmotionCrossCultural** — directly supports the review's discussion of universal vs. culture-specific emotion recognition patterns; both converge on anger being most reliably recognized across cultures.
+- [[Scherer_2001_VocalEmotionCrossCultural]] — directly supports the review's discussion of universal vs. culture-specific emotion recognition patterns; both converge on anger being most reliably recognized across cultures.

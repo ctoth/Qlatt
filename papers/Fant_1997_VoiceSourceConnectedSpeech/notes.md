@@ -268,21 +268,21 @@ Ee(t) contour:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow** — the original LF model paper; this paper extends it with the Rd unified parameter
-- **Fant_1986_GlottalFlowModelsInteraction** — source-tract interaction; this paper builds on its interaction framework
-- **Fant_1988_LFFrequencyDomainInterpretation** — frequency domain LF analysis; this paper uses its derivation approach for Rd
-- **Klatt_1990_VoiceQualityVariations** — defines OQi used here; this paper extends voice quality continuum with Rd
+- [[Fant_1985_LFModelGlottalFlow]] — the original LF model paper; this paper extends it with the Rd unified parameter
+- [[Fant_1986_GlottalFlowModelsInteraction]] — source-tract interaction; this paper builds on its interaction framework
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — frequency domain LF analysis; this paper uses its derivation approach for Rd
+- [[Klatt_1990_VoiceQualityVariations]] — defines OQi used here; this paper extends voice quality continuum with Rd
 
 ### Now in Collection (previously listed as leads)
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — corrected spectral measures (H1*-H2*, H1*-A1, H1*-A3*) for female speakers. Complements this paper's male-focused Rd analysis by quantifying female voice quality differences. The ~9.6 dB gender gap in H1*-A3* maps to the Rd range differences (male 0.5-1.5, female 0.8-2.5) described here.
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — corrected spectral measures (H1*-H2*, H1*-A1, H1*-A3*) for female speakers. Complements this paper's male-focused Rd analysis by quantifying female voice quality differences. The ~9.6 dB gender gap in H1*-A3* maps to the Rd range differences (male 0.5-1.5, female 0.8-2.5) described here.
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1995)** — "The LF-model revisited" — More detailed treatment of transformed parameters and frequency domain analysis. Provides deeper background for Rd parameter.
 - **Gobl (1988)** — "Voice source dynamics in connected speech" — Detailed data on glottal parameter variations across segments. Source for much of the coarticulation data.
 
 ### Cited By (in Collection)
-- **Gobl_2003_VoiceQualityEmotion** — uses Rd framework for characterizing voice quality in emotional speech
-- **Gobl_2021_LFModelFrequencyDomain** — extends the Rd-based LF model to frequency domain with alias-free digital implementation
-- **Kreiman_2007_GlottalSourceSpectrum** — uses Rd/R parameters from this paper for PCA of glottal source measures
-- **Kreiman_2012_VoiceQualityHarmonicOQ** — builds on Rd parameter framework for voice quality characterization
-- **Lu_Smith_GlottalSourceSingingVoice** — applies Rd voice source parameterization to singing voice analysis
+- [[Gobl_2003_VoiceQualityEmotion]] — uses Rd framework for characterizing voice quality in emotional speech
+- [[Gobl_2021_LFModelFrequencyDomain]] — extends the Rd-based LF model to frequency domain with alias-free digital implementation
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses Rd/R parameters from this paper for PCA of glottal source measures
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — builds on Rd parameter framework for voice quality characterization
+- [[Lu_Smith_GlottalSourceSingingVoice]] — applies Rd voice source parameterization to singing voice analysis

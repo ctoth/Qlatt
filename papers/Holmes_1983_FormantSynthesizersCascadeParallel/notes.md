@@ -156,11 +156,11 @@ The JSRU synthesizer block diagram (Fig. 23) is essentially what Klatt88 impleme
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1975_RuleBasedTTS**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Rabiner_1968_SynthesisByRule**
+- [[Carlson_1975_RuleBasedTTS]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Rabiner_1968_SynthesisByRule]]
 
 ### New Leads (Not Yet in Collection)
 - **Holmes [17] 1973** - "The influence of glottal waveform on the naturalness of speech from a parallel formant synthesizer" - Details on glottal source modeling and the original JSRU parallel synthesizer design.

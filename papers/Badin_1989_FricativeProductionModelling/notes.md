@@ -215,10 +215,10 @@ SPL = G_0 + p * 20 * log10(Δp) + q * 20 * log10(A_c)
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1988_LFFrequencyDomainInterpretation**
-- **Shadle_1985_FricativeAcoustics**
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1988_LFFrequencyDomainInterpretation]]
+- [[Shadle_1985_FricativeAcoustics]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ### New Leads (Not Yet in Collection)
 - **Badin & Fant (1984)** - Technical details on vocal tract computation using electric quadrupole representation. Relevant for implementing acoustic transfer function calculations.

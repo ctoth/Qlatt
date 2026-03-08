@@ -195,8 +195,8 @@ Previous research (Heinz & Stevens 1961; McCasland 1979a,b) suggested that frica
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1987_TTS_Review**
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Klatt_1987_TTS_Review]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ### New Leads (Not Yet in Collection)
 - **Heinz & Stevens (1961)** - "On the properties of voiceless fricative consonants" - foundational acoustic analysis of fricative properties including amplitude characteristics.

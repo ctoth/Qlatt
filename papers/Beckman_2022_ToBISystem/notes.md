@@ -223,7 +223,7 @@ function tobiToF0Target(label, pitchRange, register) {
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation**
+- [[Pierrehumbert_1980_EnglishIntonation]]
 
 ### New Leads (Not Yet in Collection)
 - **Beckman & Ayers-Elam (1997)** - "Guidelines for ToBI Labeling" - The official ToBI labeling guidelines document that provides practical annotation conventions. Critical for implementing ToBI-based prosody generation.

@@ -450,10 +450,10 @@ Qlatt's current linear phoneme representation could be enhanced with:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Hertz_1985_DeltaRuleSystem**
-- **Pierrehumbert_1980_EnglishIntonation**
-- **Stevens_1989_QuantalNatureSpeech**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Hertz_1985_DeltaRuleSystem]]
+- [[Pierrehumbert_1980_EnglishIntonation]]
+- [[Stevens_1989_QuantalNatureSpeech]]
 
 ### New Leads (Not Yet in Collection)
 - **Holmes, Mattingly, & Shearme (1964) - Speech synthesis by rule** - Early formant synthesis work establishing target-and-transition model used throughout Hertz's paper

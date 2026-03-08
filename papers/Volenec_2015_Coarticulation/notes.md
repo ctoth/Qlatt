@@ -178,14 +178,14 @@ This chapter provides the theoretical framework for implementing coarticulation 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Ohman_1966_CoarticulationVCV** — cited extensively for V-to-V transconsonantal coarticulation and the VCV model
-- **Recasens_1997_LingualCoarticulationDAC** — cited as the primary DAC model paper
-- **Recasens_2003_ArticulationSoundChangeRomance** — cited for coarticulation-driven sound change
-- **Recasens_2012_LateralAllophones** — relevant to lateral coarticulation (not directly cited but Recasens' work pervades)
-- **Fowler_2006_CoarticulationGesturePerception** — cited for coproduction theory and gesture perception
-- **Sering_2020_AnticipatoryCoarticulation** — relevant to anticipatory coarticulation in synthesis
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** — related to AP/coproduction framework
-- **Liberman_Mattingly_1985_MotorTheory** — related to gesture-based perception
+- [[Ohman_1966_CoarticulationVCV]] — cited extensively for V-to-V transconsonantal coarticulation and the VCV model
+- [[Recasens_1997_LingualCoarticulationDAC]] — cited as the primary DAC model paper
+- [[Recasens_2003_ArticulationSoundChangeRomance]] — cited for coarticulation-driven sound change
+- [[Recasens_2012_LateralAllophones]] — relevant to lateral coarticulation (not directly cited but Recasens' work pervades)
+- [[Fowler_2006_CoarticulationGesturePerception]] — cited for coproduction theory and gesture perception
+- [[Sering_2020_AnticipatoryCoarticulation]] — relevant to anticipatory coarticulation in synthesis
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — related to AP/coproduction framework
+- [[Liberman_Mattingly_1985_MotorTheory]] — related to gesture-based perception
 
 ### New Leads (Not Yet in Collection)
 - Keating (1990b) "The window model of coarticulation" — primary theoretical framework for grammar-based coarticulation

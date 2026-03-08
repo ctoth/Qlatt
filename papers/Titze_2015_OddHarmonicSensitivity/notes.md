@@ -131,9 +131,9 @@ Where $t_m$ is the time of peak flow (detected numerically).
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Stevens_1998_AcousticPhonetics**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Stevens_1998_AcousticPhonetics]]
 
 ### New Leads (Not Yet in Collection)
 - **Ananthapadmanabha & Fant (1982)** — More sophisticated calculation of true glottal flow components. Would inform a higher-fidelity source model than the simplified truncated sinusoid used here.

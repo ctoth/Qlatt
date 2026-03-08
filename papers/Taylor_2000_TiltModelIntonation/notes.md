@@ -296,7 +296,7 @@ Finding: In natural speech, ~79% of accents are H*, ~15% are L+H*. This uneven d
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation**
+- [[Pierrehumbert_1980_EnglishIntonation]]
 
 ### New Leads (Not Yet in Collection)
 - **Ladd, D. R. (1996)** - Comprehensive review of intonational phonology covering declination, pitch range, and linguistic representations; directly relevant to Tilt's positioning within intonation theory.

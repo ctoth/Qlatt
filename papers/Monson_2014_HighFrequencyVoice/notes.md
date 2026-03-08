@@ -249,10 +249,10 @@ Directly relevant to Qlatt's recently added F7-F10 cascade formants. The paper e
 ## Collection Cross-References
 
 ### Already in Collection
-- **Jongman_2000_FricativeAcoustics** - cited extensively for spectral peak data and fricative classification
-- **Shadle_1985_FricativeAcoustics** - cited for fricative generation mechanisms and spectral characteristics
-- **Klatt_1980_CascadeParallelFormantSynthesizer** - mentioned in context of DSP advances
-- **Klatt_1990_VoiceQualityVariations** - mentioned in context of HFE neglect in synthesis research
+- [[Jongman_2000_FricativeAcoustics]] - cited extensively for spectral peak data and fricative classification
+- [[Shadle_1985_FricativeAcoustics]] - cited for fricative generation mechanisms and spectral characteristics
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] - mentioned in context of DSP advances
+- [[Klatt_1990_VoiceQualityVariations]] - mentioned in context of HFE neglect in synthesis research
 
 ### New Leads (Not Yet in Collection)
 - Tabain (1998) - "Non-sibilant fricatives in English: spectral information above 10 kHz" - directly relevant for /f/ and /theta/ HFE targets

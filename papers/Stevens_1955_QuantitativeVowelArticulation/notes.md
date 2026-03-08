@@ -148,14 +148,14 @@ This paper provides the foundational articulatory-to-acoustic mapping for vowels
 ## Collection Cross-References
 
 ### Already in Collection
-- **Peterson_Barney_1952_VowelControl** -- canonical F1-F2 vowel data used directly in this paper's Fig. 6-7
-- **Fant_1960_AcousticTheorySpeechProduction** -- Fant's foundational text; this 1955 paper predates it but Fant was a co-author on the analog (ref 12)
-- **Fant_1985_LFModelGlottalFlow** -- later Fant work, not directly related
-- **Delattre_1952_AcousticDeterminantsVowelColor** -- Delattre's vowel work; the 1951 Delattre citation in this paper is a predecessor
-- **Stevens_1989_QuantalNatureSpeech** -- Stevens' later quantal theory builds conceptually on the crossover-point findings here
-- **Stevens_1998_AcousticPhonetics** -- Stevens' textbook incorporates and extends this work
-- **House_Stevens_1956_NasalizationVowels** -- same authors, nasalization study from the following year
-- **Blumstein_Stevens_1979_AcousticInvariance** -- Stevens' later work on acoustic invariance for consonants
+- [[Peterson_Barney_1952_VowelControl]] -- canonical F1-F2 vowel data used directly in this paper's Fig. 6-7
+- [[Fant_1960_AcousticTheorySpeechProduction]] -- Fant's foundational text; this 1955 paper predates it but Fant was a co-author on the analog (ref 12)
+- [[Fant_1985_LFModelGlottalFlow]] -- later Fant work, not directly related
+- [[Delattre_1952_AcousticDeterminantsVowelColor]] -- Delattre's vowel work; the 1951 Delattre citation in this paper is a predecessor
+- [[Stevens_1989_QuantalNatureSpeech]] -- Stevens' later quantal theory builds conceptually on the crossover-point findings here
+- [[Stevens_1998_AcousticPhonetics]] -- Stevens' textbook incorporates and extends this work
+- [[House_Stevens_1956_NasalizationVowels]] -- same authors, nasalization study from the following year
+- [[Blumstein_Stevens_1979_AcousticInvariance]] -- Stevens' later work on acoustic invariance for consonants
 
 ### New Leads (Not Yet in Collection)
 - Stevens & House (1956) "Studies of formant transitions using a vocal tract analog" JASA 28:578-585 -- THIS is likely the paper with the formant locus values (bilabial 1200 Hz, alveolar 1800 Hz, palatal 2600 Hz) cited in our frontend.yaml coarticulation rules

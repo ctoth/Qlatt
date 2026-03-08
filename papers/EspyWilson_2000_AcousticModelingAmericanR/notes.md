@@ -251,8 +251,8 @@ Both lower F3 by ~200-300 Hz compared to supralingual-only model.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Maeda_1982_VowelNasalizationCues**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Maeda_1982_VowelNasalizationCues]]
 
 ### New Leads (Not Yet in Collection)
 - **Stevens, K. N. (1999). Acoustic Phonetics** - Foundational acoustic theory for understanding formant cavity affiliations and provides the baseline tube model for /r/ that this paper builds upon and critiques.

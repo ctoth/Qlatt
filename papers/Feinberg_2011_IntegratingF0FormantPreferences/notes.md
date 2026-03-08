@@ -106,11 +106,11 @@ For Qlatt's voice preset system, this paper establishes that F0 and formant freq
 ## Collection Cross-References
 
 ### Already in Collection
-- **Feinberg_2008_FemininityAveragenessVoicePitch** — cited extensively as review of pitch manipulation methods and prior attractiveness findings; this paper extends Feinberg 2008 by testing F0 × formant interaction (which Feinberg 2008 did not)
-- **Collins_2003_VocalVisualAttractiveness** — cited for foundational finding that women prefer lower-pitched male voices (correlational, pre-manipulation)
-- **Fant_1960_AcousticTheorySpeechProduction** — cited for source-filter theory framework (independent source and filter)
-- **Babel_2014_VocalAttractiveness** — in collection, studies vocal attractiveness with breathiness controls; note Babel found F0 effect reversed when breathiness was controlled, whereas this paper found robust low-F0 preference when VTL was large
-- **Zuta_2007_AttractiveMaleVoices** — in collection, models attractive male voice parameters; predates this work
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited extensively as review of pitch manipulation methods and prior attractiveness findings; this paper extends Feinberg 2008 by testing F0 × formant interaction (which Feinberg 2008 did not)
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for foundational finding that women prefer lower-pitched male voices (correlational, pre-manipulation)
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for source-filter theory framework (independent source and filter)
+- [[Babel_2014_VocalAttractiveness]] — in collection, studies vocal attractiveness with breathiness controls; note Babel found F0 effect reversed when breathiness was controlled, whereas this paper found robust low-F0 preference when VTL was large
+- [[Zuta_2007_AttractiveMaleVoices]] — in collection, models attractive male voice parameters; predates this work
 
 ### New Leads (Not Yet in Collection)
 - Feinberg et al. (2005) — "Manipulations of fundamental and formant frequencies influence the attractiveness of human male voices" — original F0+formant manipulation method, precursor to this study
@@ -119,10 +119,10 @@ For Qlatt's voice preset system, this paper establishes that F0 and formant freq
 - Candolin (2003) — Theoretical framework: cue amplification vs backup signaling — key for interpreting interaction results
 
 ### Cited By (in Collection)
-- **Belin_2017_SoundOfTrustworthiness** — cites this for F0 × formant interaction in voice attractiveness
+- [[Belin_2017_SoundOfTrustworthiness]] — cites this for F0 × formant interaction in voice attractiveness
 
 ### Supersedes or Recontextualizes
-- **Feinberg_2008_FemininityAveragenessVoicePitch** — this paper extends Feinberg 2008 by demonstrating that F0 and formant preferences are not independent (as Feinberg 2008 treated them) but interact via cue amplification
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — this paper extends Feinberg 2008 by demonstrating that F0 and formant preferences are not independent (as Feinberg 2008 treated them) but interact via cue amplification
 
 ## Related Work Worth Reading
 - Feinberg et al. 2005 — Original manipulation method for F0 + formants; establishes preferences

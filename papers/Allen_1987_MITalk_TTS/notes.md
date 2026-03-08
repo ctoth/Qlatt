@@ -754,15 +754,15 @@ SIL and glottal segments have no inherent targets - inherit from context.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Elovitz_1976_NRL_LTS** — cited for 329 context-sensitive LTS rules achieving 90% accuracy; NRL's simpler rule-only approach contrasts with MITalk's morphological analysis + dictionary
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1988_LFFrequencyDomainInterpretation**
-- **Fujimura_1962_NasalConsonantAnalysis**
-- **House_Stevens_1956_NasalizationVowels**
-- **Hunnicutt_1976_PhonologicalRules**
-- **Klatt_1976_SegmentalDuration**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Rabiner_1968_SynthesisByRule**
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Elovitz_1976_NRL_LTS]] — cited for 329 context-sensitive LTS rules achieving 90% accuracy; NRL's simpler rule-only approach contrasts with MITalk's morphological analysis + dictionary
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1988_LFFrequencyDomainInterpretation]]
+- [[Fujimura_1962_NasalConsonantAnalysis]]
+- [[House_Stevens_1956_NasalizationVowels]]
+- [[Hunnicutt_1976_PhonologicalRules]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Rabiner_1968_SynthesisByRule]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]

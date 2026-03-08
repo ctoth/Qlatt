@@ -213,8 +213,8 @@ The functional framework offers:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1976_SegmentalDuration**
-- **Recasens_2003_ArticulationSoundChangeRomance**
+- [[Klatt_1976_SegmentalDuration]]
+- [[Recasens_2003_ArticulationSoundChangeRomance]]
 
 ### New Leads (Not Yet in Collection)
 - **Turk, A.E., & Shattuck-Hufnagel, S., 2000** - "Word-boundary-related duration patterns in English" - Critical for understanding domain-edge (word-initial and phrase-final) lengthening effects that are implementable in TTS.

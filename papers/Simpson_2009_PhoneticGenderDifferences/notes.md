@@ -145,11 +145,11 @@ For Qlatt's voice preset system, this paper establishes that:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1990_VoiceQualityVariations** - cited as Klatt & Klatt 1990 for voice quality differences between male and female speakers
-- **Hillenbrand_1995_VowelAcoustics** - cited for male vs female vowel formant data and vowel space comparison (Fig 2)
-- **Fant_1960_AcousticTheorySpeechProduction** - foundational source-filter theory referenced throughout
-- **Koenig_LaryngealFactors** - cited as Koenig 2000 for VOT differences in men, women, and children
-- **Childers_Lee_1991_VoiceQualityFactors** - related to voice quality parameterization
+- [[Klatt_1990_VoiceQualityVariations]] - cited as Klatt & Klatt 1990 for voice quality differences between male and female speakers
+- [[Hillenbrand_1995_VowelAcoustics]] - cited for male vs female vowel formant data and vowel space comparison (Fig 2)
+- [[Fant_1960_AcousticTheorySpeechProduction]] - foundational source-filter theory referenced throughout
+- [[Koenig_LaryngealFactors]] - cited as Koenig 2000 for VOT differences in men, women, and children
+- [[Childers_Lee_1991_VoiceQualityFactors]] - related to voice quality parameterization
 
 ### New Leads (Not Yet in Collection)
 - Titze (1989) - "Physiologic and acoustic differences between male and female voices" JASA 85:1699-1707 - computational model predicting female breathiness from vocal fold geometry
@@ -162,5 +162,5 @@ For Qlatt's voice preset system, this paper establishes that:
 None -- this is a review that synthesizes existing work without correcting prior collection papers.
 
 ### Conceptual Links (not citation-based)
-- **Peterson_Barney_1952_VowelControl** — P&B's Table II provides male/female/children formant data with implicit non-uniform scaling ratios (F1 Ch/M ~1.4-1.5, F2 Ch/M ~1.3-1.4); Simpson documents that this non-uniformity is vowel-dependent and cannot be reduced to a single scaling constant, and that children's formant differences from adults emerge before puberty as learned sociophonetic behavior rather than purely anatomical scaling — directly addressing P&B's open question about speaker normalization for synthesis
-- **Titze_1989_MaleFemaleVoices** — Titze's two anatomical scale factors (alpha=1.2 for general size, beta=1.6 for membranous length) provide the physiological basis for the biophysical inevitabilities that Simpson distinguishes from learned sociophonetic behaviors; Titze's prediction of female breathiness from vocal fold geometry is exactly the computational model Simpson cites when discussing posterior glottal chink
+- [[Peterson_Barney_1952_VowelControl]] — P&B's Table II provides male/female/children formant data with implicit non-uniform scaling ratios (F1 Ch/M ~1.4-1.5, F2 Ch/M ~1.3-1.4); Simpson documents that this non-uniformity is vowel-dependent and cannot be reduced to a single scaling constant, and that children's formant differences from adults emerge before puberty as learned sociophonetic behavior rather than purely anatomical scaling — directly addressing P&B's open question about speaker normalization for synthesis
+- [[Titze_1989_MaleFemaleVoices]] — Titze's two anatomical scale factors (alpha=1.2 for general size, beta=1.6 for membranous length) provide the physiological basis for the biophysical inevitabilities that Simpson distinguishes from learned sociophonetic behaviors; Titze's prediction of female breathiness from vocal fold geometry is exactly the computational model Simpson cites when discussing posterior glottal chink

@@ -140,7 +140,7 @@ This is a social psychology paper about persuasion, not acoustic phonetics or sp
 ## Collection Cross-References
 
 ### Already in Collection
-- **Jiang_2017_SoundOfConfidenceDoubt**
+- [[Jiang_2017_SoundOfConfidenceDoubt]]
 
 ### New Leads (Not Yet in Collection)
 - **Guyer, Fabrigar, & Vaughan-Johnston (2019)** - "Speech rate, intonation, and pitch: Investigating the bias and cue effects of vocal confidence on persuasion" - Core prior work on vocal confidence and persuasion under high/low elaboration conditions.

@@ -266,12 +266,12 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 ## Collection Cross-References
 
 ### Already in Collection
-- **Behrens_Blumstein_1988_FricativeAmplitude**
-- **Crystal_House_1988_StopConsonantDuration**
-- **Cooper_1952_PerceptionSyntheticSpeech** — cited for foundational work on perception of synthetic speech sounds and consonant acoustic cues
-- **Jongman_1989_FricativeDuration**
-- **Stevens_1971_AirflowTurbulenceNoise**
-- **Stevens_1998_AcousticPhonetics**
+- [[Behrens_Blumstein_1988_FricativeAmplitude]]
+- [[Crystal_House_1988_StopConsonantDuration]]
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — cited for foundational work on perception of synthetic speech sounds and consonant acoustic cues
+- [[Jongman_1989_FricativeDuration]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
+- [[Stevens_1998_AcousticPhonetics]]
 
 ### New Leads (Not Yet in Collection)
 - **Shadle (1990) - Articulatory-Acoustic Relationships in Fricatives** — Directly addresses the connection between articulation and acoustic output for fricatives, providing essential context for understanding which acoustic properties are controllable in synthesis.

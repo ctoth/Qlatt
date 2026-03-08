@@ -177,11 +177,11 @@ However, the paper's primary contribution is psychological mechanism (confidence
 ## Collection Cross-References
 
 ### Already in Collection
-- **Eyben_2015_GeMAPS_AcousticParameters** — GeMAPS includes volume/loudness and F0 parameters used in this paper
-- **Banse_1996_VocalEmotionAcousticProfiles** — Emotion profiles overlap with confidence cues (high activation emotions share elevated F0 and intensity)
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — GeMAPS includes volume/loudness and F0 parameters used in this paper
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Emotion profiles overlap with confidence cues (high activation emotions share elevated F0 and intensity)
 - **Larrouy-Maestri_2024_EmotionalProsody** — Emotional prosody review covers similar acoustic dimensions
-- **ZeiPollermann_2002_AcousticPatternsEmotions** — F0 and energy patterns for emotion overlap with persuasion cues
-- **Sporer_2006_ParaverbalDeceptionMetaAnalysis** — Deception paralinguistic cues; this paper explicitly distinguishes persuasion from deception
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — F0 and energy patterns for emotion overlap with persuasion cues
+- [[Sporer_2006_ParaverbalDeceptionMetaAnalysis]] — Deception paralinguistic cues; this paper explicitly distinguishes persuasion from deception
 
 ### New Leads (Not Yet in Collection)
 - Schroeder & Epley (2015, 2016) — Voice evaluations and mind perception; relevant for voice quality perception
@@ -189,4 +189,4 @@ However, the paper's primary contribution is psychological mechanism (confidence
 - Packwood (1974) — Volume and perceived counselor persuasiveness; quantitative volume-persuasion data
 
 ### Supersedes or Recontextualizes
-- Provides confidence-based explanation that recontextualizes **Sporer_2006_ParaverbalDeceptionMetaAnalysis**: where Sporer found pitch elevation for deception, Van Zant & Berger show pitch elevation for persuasion occurs via confidence rather than deception signaling
+- Provides confidence-based explanation that recontextualizes [[Sporer_2006_ParaverbalDeceptionMetaAnalysis]]: where Sporer found pitch elevation for deception, Van Zant & Berger show pitch elevation for persuasion occurs via confidence rather than deception signaling

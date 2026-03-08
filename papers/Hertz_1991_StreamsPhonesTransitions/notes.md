@@ -257,35 +257,35 @@ The multi-stream delta architecture could inform Qlatt's internal representation
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS**
-- **Carlson_1975_RuleBasedTTS**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Hertz_1982_SRS_TextToSpeech**
-- **Hertz_1985_DeltaRuleSystem**
-- **Klatt_1976_SegmentalDuration**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
-- **Klatt_1987_TTS_Review**
+- [[Allen_1987_MITalk_TTS]]
+- [[Carlson_1975_RuleBasedTTS]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Hertz_1982_SRS_TextToSpeech]]
+- [[Hertz_1985_DeltaRuleSystem]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
+- [[Klatt_1987_TTS_Review]]
 
 ### Now in Collection (previously listed as leads)
-- **Goldsmith_1976_AutosegmentalPhonology** — Autosegmental phonology framework that inspired the multi-tiered parallel structure of Delta. Goldsmith's multi-tier representation with association lines maps directly to Hertz's synchronized streams. The Well-formedness Condition (association lines must not cross) formalizes the temporal alignment constraints that Hertz implements with sync marks.
+- [[Goldsmith_1976_AutosegmentalPhonology]] — Autosegmental phonology framework that inspired the multi-tiered parallel structure of Delta. Goldsmith's multi-tier representation with association lines maps directly to Hertz's synchronized streams. The Well-formedness Condition (association lines must not cross) formalizes the temporal alignment constraints that Hertz implements with sync marks.
 
 ### New Leads (Not Yet in Collection)
 - **Gay (1968)** - Critical for understanding diphthong behavior in fast speech and the undershoot phenomenon that Hertz's model elegantly explains through the "fast_speech" stream concept.
 - **Chen (1970)** - Original observation of sonorant sequence lengthening before voiced obstruents (beyond simple vowel lengthening), which motivates Hertz's nucleus-level representation.
 
 ### Conceptual Links (not citation-based)
-- **Browman_1989_ArticulatoryGesturesPhonologicalUnits** / **Browman_Goldstein_1992_ArticulatoryPhonologyOverview** — Articulatory Phonology models speech as overlapping gestures where duration = 1/stiffness. Hertz's "stable transition phenomenon" (transitions hold at ~65ms while steady states stretch) is exactly what AP predicts for a gesture with high stiffness superimposed on a lower-stiffness vocalic gesture. Different formalisms, same empirical convergence.
-- **Campbell_Isard_1991_SegmentDurationsSyllable** — Campbell & Isard's syllable-level duration model with differential rhyme lengthening (exponential weight 0.75^(n-i)) solves the same problem as Hertz's nucleus stream: lengthening isn't per-segment, it affects the entire sonorant sequence in the rhyme.
-- **Ohman_1966_CoarticulationVCV** — Ohman's VCV model treats consonants as gestures superimposed on a vowel-to-vowel diphthongal substrate. Structurally very close to Hertz's parallel streams where transitions and phones occupy separate tiers — both factor consonants as overlays on vocalic continuity.
-- **Hanson_2003_AspiratedStopsModels** — Hertz treats aspiration as an independent stream overlaying the CV transition. Hanson & Stevens later showed that for /t/ and /k/, the "aspiration" phase contains supraglottal frication (not just glottal noise), complicating Hertz's simple AH overlay — place-dependent AF may need to extend into the aspiration interval.
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** — AP's π-gestures (prosodic clock-slowing at boundaries) provide a mechanism for Hertz's observation that only steady states stretch: boundary lengthening slows the planning oscillator, but high-stiffness gestures (transitions) resist stretching while low-stiffness gestures (steady states) absorb it.
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] / [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — Articulatory Phonology models speech as overlapping gestures where duration = 1/stiffness. Hertz's "stable transition phenomenon" (transitions hold at ~65ms while steady states stretch) is exactly what AP predicts for a gesture with high stiffness superimposed on a lower-stiffness vocalic gesture. Different formalisms, same empirical convergence.
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — Campbell & Isard's syllable-level duration model with differential rhyme lengthening (exponential weight 0.75^(n-i)) solves the same problem as Hertz's nucleus stream: lengthening isn't per-segment, it affects the entire sonorant sequence in the rhyme.
+- [[Ohman_1966_CoarticulationVCV]] — Ohman's VCV model treats consonants as gestures superimposed on a vowel-to-vowel diphthongal substrate. Structurally very close to Hertz's parallel streams where transitions and phones occupy separate tiers — both factor consonants as overlays on vocalic continuity.
+- [[Hanson_2003_AspiratedStopsModels]] — Hertz treats aspiration as an independent stream overlaying the CV transition. Hanson & Stevens later showed that for /t/ and /k/, the "aspiration" phase contains supraglottal frication (not just glottal noise), complicating Hertz's simple AH overlay — place-dependent AF may need to extend into the aspiration interval.
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — AP's π-gestures (prosodic clock-slowing at boundaries) provide a mechanism for Hertz's observation that only steady states stretch: boundary lengthening slows the planning oscillator, but high-stiffness gestures (transitions) resist stretching while low-stiffness gestures (steady states) absorb it.
 
 ### Cited By (in Collection)
 - **Hertz_1999_ETI-Eloquence_MultiLanguage** — cites this as the phone-and-transition model central to the ETI-Eloquence timing system
-- **Hertz_2002_HybridFormantConcatenation** — cites this as the core phone-and-transition model underlying the ETI-Eloquence approach
-- **Hertz_2006_HybridSynthesisRegularities** — cites this as the theoretical foundation for the phone-and-transition model underlying the hybrid model
-- **Carlson_1995_ModelsOfSpeechSynthesis** — cites this in survey of synthesis models
+- [[Hertz_2002_HybridFormantConcatenation]] — cites this as the core phone-and-transition model underlying the ETI-Eloquence approach
+- [[Hertz_2006_HybridSynthesisRegularities]] — cites this as the theoretical foundation for the phone-and-transition model underlying the hybrid model
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — cites this in survey of synthesis models
 - **vanSanten_1993_SegmentalDuration** — cites this for duration modeling
 - **vanSanten_1994_SegmentalDurationTTS** — cites this in references
 - **vanSanten_1997_ProsodicModeling** — cites this as directly instantiating the sub-segmental non-uniform stretching van Santen identifies as an open problem
-- **Sproat_Fujimura_1993_AllophonicVariationEnglishL** — cites this in references
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cites this in references

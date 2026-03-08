@@ -194,9 +194,9 @@ Where $f_s$ = sampling frequency
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Rabiner_1968_SynthesisByRule**
-- **Strong_1967_MachineAidedFormantDetermination**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Rabiner_1968_SynthesisByRule]]
+- [[Strong_1967_MachineAidedFormantDetermination]]
 
 ### New Leads (Not Yet in Collection)
 - **Flanagan 1957** - Foundational work on terminal-analog synthesizer design principles

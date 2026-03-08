@@ -169,7 +169,7 @@ $$
 ## Collection Cross-References
 
 ### Already in Collection
-- **Jiang_2017_SoundOfConfidenceDoubt**
+- [[Jiang_2017_SoundOfConfidenceDoubt]]
 
 ### New Leads (Not Yet in Collection)
 - **Kimble & Seidel (1991)** - "Vocal signs of confidence" - Foundational work showing prosodic markers present without audience; only measured loudness and speech rate, not intonation

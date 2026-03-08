@@ -133,8 +133,8 @@ Concrete applications:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cummings_1995_GlottalExcitationEmotionalSpeech** - [5] in paper, the manual technique this algorithm automates
-- **Plumpe_1999_GlottalFlowDerivativeModeling** - [3] in paper, glottal flow derivative modeling with speaker ID application
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]] - [5] in paper, the manual technique this algorithm automates
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] - [3] in paper, glottal flow derivative modeling with speaker ID application
 
 ### New Leads (Not Yet in Collection)
 - Kounoudes, Naylor & Brookes (2002) - DYPSA algorithm for GCI estimation - relevant for comparison

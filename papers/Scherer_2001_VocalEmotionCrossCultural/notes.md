@@ -175,7 +175,7 @@ The paper cites Banse & Scherer (1996) for emotion-specific vocal profiles:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
 
 ### New Leads (Not Yet in Collection)
 - **Williams & Stevens (1972)** - Emotions and speech: Some acoustical correlates. Foundational work establishing systematic relationships between emotional expression and acoustic parameters; essential for understanding the physical basis of emotional prosody.

@@ -926,11 +926,11 @@ const actionDictionary = {
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1979_VowelPerceptionSalience**
-- **Elovitz_1976_NRL_LTS**
-- **Hertz_1982_SRS_TextToSpeech**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
-- **Klatt_1982_KlattalkTTS**
+- [[Carlson_1979_VowelPerceptionSalience]]
+- [[Elovitz_1976_NRL_LTS]]
+- [[Hertz_1982_SRS_TextToSpeech]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
+- [[Klatt_1982_KlattalkTTS]]
 
 ### New Leads (Not Yet in Collection)
 - **Allen et al. 1979 [2]**: MITalk system reference - one of the main competing synthesis rule development systems that Delta was designed to improve upon

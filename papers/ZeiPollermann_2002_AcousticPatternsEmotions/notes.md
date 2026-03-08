@@ -167,12 +167,12 @@ This paper provides concrete numerical targets for implementing emotion presets 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — cited for acoustic profiles of 14 emotions (broader emotion set, more parameters)
-- **Scherer_2001_VocalEmotionCrossCultural** — cited for cross-cultural emotion recognition (tests universality of these patterns)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cited for acoustic profiles of 14 emotions (broader emotion set, more parameters)
+- [[Scherer_2001_VocalEmotionCrossCultural]] — cited for cross-cultural emotion recognition (tests universality of these patterns)
 - **Larrouy-Maestri_2024_EmotionalProsody** — comprehensive review synthesizing 30 years including this work
-- **Burkhardt_2005_GermanEmotionalSpeechDatabase** — German emotion corpus with EGG data (complementary dataset)
-- **Gobl_2003_VoiceQualityEmotion** — voice quality parameter trajectories for emotional expression via KLSYN88
-- **Eyben_2015_GeMAPS_AcousticParameters** — standardized acoustic parameter set overlapping with measures here
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — German emotion corpus with EGG data (complementary dataset)
+- [[Gobl_2003_VoiceQualityEmotion]] — voice quality parameter trajectories for emotional expression via KLSYN88
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — standardized acoustic parameter set overlapping with measures here
 
 ### New Leads (Not Yet in Collection)
 - Williams & Stevens (1972) — "Emotion and speech" — foundational activation-vocal expression model

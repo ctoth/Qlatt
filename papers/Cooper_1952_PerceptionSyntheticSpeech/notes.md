@@ -135,24 +135,24 @@ This paper is foundational for understanding the acoustic cues that Qlatt must g
 ## Collection Cross-References
 
 ### Already in Collection
-- **Delattre_1952_AcousticDeterminantsVowelColor** -- same Haskins group; the two-formant vowel targets used in Cooper 1952's experiments (Fig. 2B) were derived from this body of work on acoustic determinants of vowel color
-- **Fant_1960_AcousticTheorySpeechProduction** -- formalizes the source-filter theory underlying the pattern playback methodology; Fant cites this paper as foundational perception work validating formant synthesis
+- [[Delattre_1952_AcousticDeterminantsVowelColor]] -- same Haskins group; the two-formant vowel targets used in Cooper 1952's experiments (Fig. 2B) were derived from this body of work on acoustic determinants of vowel color
+- [[Fant_1960_AcousticTheorySpeechProduction]] -- formalizes the source-filter theory underlying the pattern playback methodology; Fant cites this paper as foundational perception work validating formant synthesis
 
 ### Cited By (in Collection)
-- **Blumstein_Stevens_1979_AcousticInvariance** -- cites for the original burst perception findings; extends the work by proposing invariant spectral templates rather than context-dependent burst frequencies
-- **Haskins_StopRecognition** -- directly builds on this paper's burst and transition experiments to investigate trading relations between the two cue types
-- **Stevens_House_1956_FormantTransitionsVocalTract** -- cites for the transition perception findings; uses a vocal tract analog to measure the actual formant frequencies during transitions that Cooper et al. studied perceptually
-- **Zue_1976_StopConsonantAcoustics** -- cites as foundational Haskins burst/transition work; extends with comprehensive natural speech measurements of VOT, burst frequency, and burst amplitude
-- **Stevens_1989_QuantalNatureSpeech** -- cites in the context of stop consonant perception and quantal acoustic-perceptual mappings
-- **Stevens_1955_QuantitativeVowelArticulation** -- cites for the vowel perception and two-formant sufficiency findings
-- **Dalston_1975_SonorantAcoustics** -- cites for the nasal/lateral consonant perception findings (m, n, l distinctions)
-- **Jongman_2000_FricativeAcoustics** -- cites as foundational work on consonant acoustic cues
-- **Fant_1960_AcousticTheorySpeechProduction** -- cites as foundational perception study validating formant synthesis
-- **Liberman_Mattingly_1985_MotorTheory** -- cites as early synthetic speech evidence showing acoustic variability in consonant cues, motivating the motor theory argument
+- [[Blumstein_Stevens_1979_AcousticInvariance]] -- cites for the original burst perception findings; extends the work by proposing invariant spectral templates rather than context-dependent burst frequencies
+- [[Haskins_StopRecognition]] -- directly builds on this paper's burst and transition experiments to investigate trading relations between the two cue types
+- [[Stevens_House_1956_FormantTransitionsVocalTract]] -- cites for the transition perception findings; uses a vocal tract analog to measure the actual formant frequencies during transitions that Cooper et al. studied perceptually
+- [[Zue_1976_StopConsonantAcoustics]] -- cites as foundational Haskins burst/transition work; extends with comprehensive natural speech measurements of VOT, burst frequency, and burst amplitude
+- [[Stevens_1989_QuantalNatureSpeech]] -- cites in the context of stop consonant perception and quantal acoustic-perceptual mappings
+- [[Stevens_1955_QuantitativeVowelArticulation]] -- cites for the vowel perception and two-formant sufficiency findings
+- [[Dalston_1975_SonorantAcoustics]] -- cites for the nasal/lateral consonant perception findings (m, n, l distinctions)
+- [[Jongman_2000_FricativeAcoustics]] -- cites as foundational work on consonant acoustic cues
+- [[Fant_1960_AcousticTheorySpeechProduction]] -- cites as foundational perception study validating formant synthesis
+- [[Liberman_Mattingly_1985_MotorTheory]] -- cites as early synthetic speech evidence showing acoustic variability in consonant cues, motivating the motor theory argument
 
 ### Conceptual Links (not citation-based)
-- **Ohman_1966_CoarticulationVCV** -- extends the formant transition framework by showing that transitions are not fixed locus-based but depend on both preceding and following vowels, refining Cooper et al.'s vowel-dependent transition findings
-- **Klatt_1987_TTS_Review** -- the synthesis-by-rule approach demonstrated in Cooper et al.'s Fig. 10 is the direct ancestor of the rule-based formant synthesis approach reviewed by Klatt
+- [[Ohman_1966_CoarticulationVCV]] -- extends the formant transition framework by showing that transitions are not fixed locus-based but depend on both preceding and following vowels, refining Cooper et al.'s vowel-dependent transition findings
+- [[Klatt_1987_TTS_Review]] -- the synthesis-by-rule approach demonstrated in Cooper et al.'s Fig. 10 is the direct ancestor of the rule-based formant synthesis approach reviewed by Klatt
 
 ### New Leads (Not Yet in Collection)
 - Delattre, Liberman, and Cooper (1955) -- "Acoustic loci and transitional cues for consonants" -- the follow-up that formalized the locus theory hinted at in this paper

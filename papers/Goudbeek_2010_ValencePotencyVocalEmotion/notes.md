@@ -197,18 +197,18 @@ This paper provides the empirical basis for implementing emotional speech synthe
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — Munich corpus used as cross-cultural comparison; 3/8 parameters and 5/9 emotions showed significant positive profile correlations between French GEMEP and German Munich data
-- **Gobl_2003_VoiceQualityEmotion** — Voice quality and emotion; Goudbeek references Hanson (1997) on glottal tension and spectral shape, complementing Gobl's voice quality parameter trajectories
-- **Burkhardt_2005_GermanEmotionalSpeechDatabase** — EmoDB cited as comparable emotion corpus
-- **Mozziconacci_1998_SpeechEmotionProsody** — Emotional prosody in Dutch; Mozziconacci (2002) cited for prosodic contour analysis
-- **Mozziconacci_2002_ProsodyEmotions** — Cited for methodology of isolating F0 contour from implementation
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — Referenced in discussion for relationship between glottal tension and spectral shape
-- **Eyben_2015_GeMAPS_AcousticParameters** — Goudbeek's composite scores and dimensional approach directly informed GeMAPS parameter selection
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Munich corpus used as cross-cultural comparison; 3/8 parameters and 5/9 emotions showed significant positive profile correlations between French GEMEP and German Munich data
+- [[Gobl_2003_VoiceQualityEmotion]] — Voice quality and emotion; Goudbeek references Hanson (1997) on glottal tension and spectral shape, complementing Gobl's voice quality parameter trajectories
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — EmoDB cited as comparable emotion corpus
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Emotional prosody in Dutch; Mozziconacci (2002) cited for prosodic contour analysis
+- [[Mozziconacci_2002_ProsodyEmotions]] — Cited for methodology of isolating F0 contour from implementation
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — Referenced in discussion for relationship between glottal tension and spectral shape
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — Goudbeek's composite scores and dimensional approach directly informed GeMAPS parameter selection
 
 ### Cited By (in Collection)
-- **Eyben_2015_GeMAPS_AcousticParameters** — cites this as foundational for understanding which acoustic features correlate with emotional dimensions
-- **Belyk_2014_AcousticValenceEmotion** — cites this for the dimensional approach to vocal emotion; Belyk's family-specific valence rules extend Goudbeek's finding that valence is reflected in spectral slope
-- **Kamiloglu_2021_VoiceProductionPerception** — cites this in the context of vocal emotion perception research
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — cites this as foundational for understanding which acoustic features correlate with emotional dimensions
+- [[Belyk_2014_AcousticValenceEmotion]] — cites this for the dimensional approach to vocal emotion; Belyk's family-specific valence rules extend Goudbeek's finding that valence is reflected in spectral slope
+- [[Kamiloglu_2021_VoiceProductionPerception]] — cites this in the context of vocal emotion perception research
 
 ### New Leads (Not Yet in Collection)
 - Fontaine et al. (2007) — "The world of emotions is not two-dimensional" — establishes potency/control as a necessary third dimension; theoretical foundation for this paper's design
@@ -216,4 +216,4 @@ This paper provides the empirical basis for implementing emotional speech synthe
 - Tamarit, Goudbeek & Scherer (2008) — "Spectral slope measurements in emotionally expressive speech" — more detailed spectral analysis using the same GEMEP corpus
 
 ### Supersedes or Recontextualizes
-- **Banse_1996_VocalEmotionAcousticProfiles** — Goudbeek extends the Banse & Scherer (1996) Munich corpus work by adding the potency/control dimension and demonstrating that spectral balance specifically encodes valence beyond arousal, which the Munich analysis did not examine separately
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Goudbeek extends the Banse & Scherer (1996) Munich corpus work by adding the potency/control dimension and demonstrating that spectral balance specifically encodes valence beyond arousal, which the Munich analysis did not examine separately

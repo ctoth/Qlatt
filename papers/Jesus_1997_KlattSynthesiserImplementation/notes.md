@@ -564,8 +564,8 @@ Conversion from volume velocity to pressure at lips:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1990_VoiceQualityVariations]]

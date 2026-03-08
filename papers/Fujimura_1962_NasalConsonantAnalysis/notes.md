@@ -195,7 +195,7 @@ Combined effect: even distribution of sound energy in the 800-2300 cps range wit
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **Bell, Fujisaki, Heinz, Stevens, and House (1961)** [Ref 2] - Analysis-by-synthesis method for obtaining pole-zero distributions from natural speech. Defines the methodology used in this paper.

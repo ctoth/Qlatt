@@ -215,11 +215,11 @@ Provides empirically grounded acoustic targets for synthesizing mild, realistic 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — cited for posed emotion acoustic profiles; Table 1 directions based on this work
-- **Laukka_2008_AnxietyVocalExpression** — same first author, different paper (anxiety in social phobics' speech)
-- **Burkhardt_2005_GermanEmotionalSpeechDatabase** — cited for EmoDB call-center emotion detection work
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — cited for voice source spectral correlates
-- **Scherer_2001_VocalEmotionCrossCultural** — same research group, cross-cultural vocal emotion
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cited for posed emotion acoustic profiles; Table 1 directions based on this work
+- [[Laukka_2008_AnxietyVocalExpression]] — same first author, different paper (anxiety in social phobics' speech)
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — cited for EmoDB call-center emotion detection work
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for voice source spectral correlates
+- [[Scherer_2001_VocalEmotionCrossCultural]] — same research group, cross-cultural vocal emotion
 
 ### New Leads (Not Yet in Collection)
 - Juslin & Laukka (2003) — "Communication of emotions in vocal expression and music performance" — comprehensive review, frequently cited throughout

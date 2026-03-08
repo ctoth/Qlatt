@@ -135,8 +135,8 @@ The PFE method naturally accounts for the proximity correction (NDBCOR) that Kla
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
-- **Lalwani_1992_FlexibleFormantSynthesizer**
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
+- [[Lalwani_1992_FlexibleFormantSynthesizer]]
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]

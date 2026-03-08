@@ -370,8 +370,8 @@ The thesis uses the reduced 49-phone TIMIT set with folding rules:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1987_TTS_Review**
-- **Peterson_Barney_1952_VowelControl**
+- [[Klatt_1987_TTS_Review]]
+- [[Peterson_Barney_1952_VowelControl]]
 
 ### New Leads (Not Yet in Collection)
 - Holmes & Holmes (2001) - "Speech synthesis and recognition"**

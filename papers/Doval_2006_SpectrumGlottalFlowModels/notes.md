@@ -346,19 +346,19 @@ $$T_a = \frac{\sqrt{10^{TL/10} - 1}}{2\pi \times 3000}$$
 ## Collection Cross-References
 
 ### Already in Collection
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Doval_2003_VoiceSourceCALM**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1988_LFFrequencyDomainInterpretation**
-- **Hanson_1995_GlottalCharacteristicsFemale**
-- **Henrich_2001_SpectralOqAsymmetry** — cited (ref 18) as conference predecessor; derives the H1*-H2* domain analysis for LF, R++, KLGLOTT88 models that this paper extends
-- **Henrich_2003_JND_OpenQuotient** — cited (ref 31) for JND data on Oq and αm; provides perceptual resolution limits that validate the spectral parameter framework
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Doval_2003_VoiceSourceCALM]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1988_LFFrequencyDomainInterpretation]]
+- [[Hanson_1995_GlottalCharacteristicsFemale]]
+- [[Henrich_2001_SpectralOqAsymmetry]] — cited (ref 18) as conference predecessor; derives the H1*-H2* domain analysis for LF, R++, KLGLOTT88 models that this paper extends
+- [[Henrich_2003_JND_OpenQuotient]] — cited (ref 31) for JND data on Oq and αm; provides perceptual resolution limits that validate the spectral parameter framework
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### Now in Collection (previously listed as leads)
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — defines five corrected acoustic parameters (H1*-H2*, H1*-A1, H1*-A3*, B1, noise) for quantifying female glottal voice quality; two speaker groups distinguished by spectral tilt threshold at ~23 dB H1*-A3*
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — defines five corrected acoustic parameters (H1*-H2*, H1*-A1, H1*-A3*, B1, noise) for quantifying female glottal voice quality; two speaker groups distinguished by spectral tilt threshold at ~23 dB H1*-A3*
 
 ### New Leads (Not Yet in Collection)
 - **[15] Fant (1995)** - LF model revisited with transformations and frequency domain analysis; theoretical foundation for spectral methods.

@@ -152,10 +152,10 @@ The study validates that:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hertz_1991_StreamsPhonesTransitions**
+- [[Hertz_1991_StreamsPhonesTransitions]]
 - **Hertz_1999_ETI-Eloquence_MultiLanguage**
-- **Hertz_2002_HybridFormantConcatenation**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Hertz_2002_HybridFormantConcatenation]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **[4] Hertz & Huffman 1992 (Nucleus-based timing model)** — Directly relevant for understanding timing patterns in consonant and vowel structure, foundational to the hybrid model framework.

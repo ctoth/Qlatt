@@ -228,12 +228,12 @@ This paper provides quantitative targets for setting voice quality parameters wh
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1990_VoiceQualityVariations** - cited extensively; KLGLOTT88 model used for predictions in Table II/III
-- **Hanson_1995_GlottalCharacteristicsFemale** - Ph.D. thesis with full theoretical derivations for all five measures
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** - the direct female comparison dataset (22 speakers)
-- **Stevens_1998_AcousticPhonetics** - theoretical framework for spectral effects of glottal configuration
-- **Fant_1985_LFModelGlottalFlow** - LF model basis (Fant 1995 LF-model-revisited paper not in collection but 1985 version is)
-- **Fant_1960_AcousticTheorySpeechProduction** - foundational acoustic theory
+- [[Klatt_1990_VoiceQualityVariations]] - cited extensively; KLGLOTT88 model used for predictions in Table II/III
+- [[Hanson_1995_GlottalCharacteristicsFemale]] - Ph.D. thesis with full theoretical derivations for all five measures
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] - the direct female comparison dataset (22 speakers)
+- [[Stevens_1998_AcousticPhonetics]] - theoretical framework for spectral effects of glottal configuration
+- [[Fant_1985_LFModelGlottalFlow]] - LF model basis (Fant 1995 LF-model-revisited paper not in collection but 1985 version is)
+- [[Fant_1960_AcousticTheorySpeechProduction]] - foundational acoustic theory
 
 ### New Leads (Not Yet in Collection)
 - Holmberg, E. B. et al. (1988) - "Glottal airflow and transglottal air pressure measurements" JASA 84, 511-529 - source for airflow data used in chink area estimates

@@ -270,9 +270,9 @@ Parameters:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cooper_1952_PerceptionSyntheticSpeech** — cited as foundational Haskins work on perception of synthetic speech sounds; Zue extends with comprehensive natural speech measurements of VOT, burst frequency, and burst amplitude
-- **Stevens_1971_AirflowTurbulenceNoise**
-- **Sundberg_1972_SingingFormant**
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — cited as foundational Haskins work on perception of synthetic speech sounds; Zue extends with comprehensive natural speech measurements of VOT, burst frequency, and burst amplitude
+- [[Stevens_1971_AirflowTurbulenceNoise]]
+- [[Sundberg_1972_SingingFormant]]
 
 ### New Leads (Not Yet in Collection)
 - **Stevens K. N., Blumstein S. E. (1975)** - "Dynamic Aspects of Consonant Production and Perception: A Study of Retroflex Stop Consonants" - Foundational work on how stop place of articulation is distinguished through acoustic cues; directly relevant for stop consonant synthesis rules and burst spectrum design.

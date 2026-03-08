@@ -198,14 +198,14 @@ This paper is the strongest empirical anchor for Fowler's coproduction theory, w
 ## Collection Cross-References
 
 ### Already in Collection
-- **Ohman_1966_CoarticulationVCV** — Foundational VCV coarticulation measurements; Fowler's stimuli are VCV/VCCV sequences in the same tradition
-- **Liberman_Mattingly_1985_MotorTheory** — Motor theory of speech perception, one of the three theories Fowler evaluates
-- **EspyWilson_2000_AcousticModelingAmericanR** — /r/ acoustic modeling; Fowler's F3 data for /r/ contexts is consistent
-- **Recasens_1997_LingualCoarticulationDAC** — DAC model for coarticulation degree; Fowler's data shows /l/ and /r/ have different coarticulatory reach
-- **Sering_2020_AnticipatoryCoarticulation** — Neural network coarticulation; Fowler shows carryover (not just anticipatory) matters
-- **Recasens_2012_LateralAllophones** — /l/ formant targets; Fowler's /l/ context data is complementary
-- **Dalston_1975_SonorantAcoustics** — Sonorant formant measurements; Fowler provides VCV transition data for /l/ and /r/
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** — AP framework for gestural theory; Fowler's direct realism is a related theoretical position
+- [[Ohman_1966_CoarticulationVCV]] — Foundational VCV coarticulation measurements; Fowler's stimuli are VCV/VCCV sequences in the same tradition
+- [[Liberman_Mattingly_1985_MotorTheory]] — Motor theory of speech perception, one of the three theories Fowler evaluates
+- [[EspyWilson_2000_AcousticModelingAmericanR]] — /r/ acoustic modeling; Fowler's F3 data for /r/ contexts is consistent
+- [[Recasens_1997_LingualCoarticulationDAC]] — DAC model for coarticulation degree; Fowler's data shows /l/ and /r/ have different coarticulatory reach
+- [[Sering_2020_AnticipatoryCoarticulation]] — Neural network coarticulation; Fowler shows carryover (not just anticipatory) matters
+- [[Recasens_2012_LateralAllophones]] — /l/ formant targets; Fowler's /l/ context data is complementary
+- [[Dalston_1975_SonorantAcoustics]] — Sonorant formant measurements; Fowler provides VCV transition data for /l/ and /r/
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — AP framework for gestural theory; Fowler's direct realism is a related theoretical position
 
 ### New Leads (Not Yet in Collection)
 - Mann (1980) — "Influence of preceding liquid on stop-consonant perception" — the original compensation finding

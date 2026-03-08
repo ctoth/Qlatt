@@ -139,8 +139,8 @@ Directly relevant to nasal consonant synthesis in Qlatt:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fujimura_1962_NasalConsonantAnalysis**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fujimura_1962_NasalConsonantAnalysis]]
 
 ### New Leads (Not Yet in Collection)
 - **Hecker (1962)** — Nasal consonant synthesis using an articulatory speech synthesizer; directly relevant to how we set formant synth parameters for nasals.

@@ -202,9 +202,9 @@ The paper does NOT provide:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Saltzman_1989_DynamicalGesturalPatterning** — The original task-dynamic model that this paper tests and extends; Kirkham finds it is under-damped rather than critically damped
-- **Recasens_1997_LingualCoarticulationDAC** — DAC model of coarticulation; Kirkham's dynamical approach offers an alternative mechanism
-- **Sering_2020_AnticipatoryCoarticulation** — Uses VocalTractLab articulatory synthesis; Kirkham's model provides the underlying gestural dynamics
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — The original task-dynamic model that this paper tests and extends; Kirkham finds it is under-damped rather than critically damped
+- [[Recasens_1997_LingualCoarticulationDAC]] — DAC model of coarticulation; Kirkham's dynamical approach offers an alternative mechanism
+- [[Sering_2020_AnticipatoryCoarticulation]] — Uses VocalTractLab articulatory synthesis; Kirkham's model provides the underlying gestural dynamics
 
 ### New Leads (Not Yet in Collection)
 - Sorensen & Gafos (2016) — "The gesture as an autonomous nonlinear dynamical system" — the cubic model validated here
@@ -214,4 +214,4 @@ The paper does NOT provide:
 - Iskarous, Cole, & Steffman (2024) — Minimal dynamical model of intonation
 
 ### Supersedes or Recontextualizes
-- **Saltzman_1989_DynamicalGesturalPatterning** — Kirkham's data-driven approach provides empirical evidence that the critical damping assumption in Saltzman & Munhall (1989) is incorrect; the actual dynamics are under-damped with $b \ll 2\sqrt{k}$
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — Kirkham's data-driven approach provides empirical evidence that the critical damping assumption in Saltzman & Munhall (1989) is incorrect; the actual dynamics are under-damped with $b \ll 2\sqrt{k}$

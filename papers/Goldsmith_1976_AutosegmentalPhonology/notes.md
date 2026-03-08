@@ -215,10 +215,10 @@ This dissertation provides the **theoretical foundation** for implementing tone 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation** -- builds on Goldsmith's accentual analysis; the ToBI system is the modern descendant of Goldsmith's star convention
-- **Ladd_2008_IntonationalPhonology** -- comprehensive modern treatment of the AM (Autosegmental-Metrical) framework that Goldsmith initiated
-- **Beckman_2022_ToBISystem** -- the ToBI annotation system directly derives from autosegmental theory
-- **Hombert_1979_PhoneticToneDevelopment** -- discusses tonal phenomena that autosegmental theory addresses
+- [[Pierrehumbert_1980_EnglishIntonation]] -- builds on Goldsmith's accentual analysis; the ToBI system is the modern descendant of Goldsmith's star convention
+- [[Ladd_2008_IntonationalPhonology]] -- comprehensive modern treatment of the AM (Autosegmental-Metrical) framework that Goldsmith initiated
+- [[Beckman_2022_ToBISystem]] -- the ToBI annotation system directly derives from autosegmental theory
+- [[Hombert_1979_PhoneticToneDevelopment]] -- discusses tonal phenomena that autosegmental theory addresses
 
 ### New Leads (Not Yet in Collection)
 - Leben, William. 1973. *Suprasegmental Phonology* -- the direct precursor to autosegmental phonology
@@ -227,7 +227,7 @@ This dissertation provides the **theoretical foundation** for implementing tone 
 - Clements, G.N. 1976. "Vowel Harmony in Non-linear Generative Phonology" -- extending autosegmental theory to vowel harmony
 
 ### Cited By (in Collection)
-- **Hertz_1991_StreamsPhonesTransitions** — cites this as inspiration for the multi-tiered parallel stream structure of the Delta framework; Hertz's synchronized streams are a practical implementation of autosegmental multi-tier representation
+- [[Hertz_1991_StreamsPhonesTransitions]] — cites this as inspiration for the multi-tiered parallel stream structure of the Delta framework; Hertz's synchronized streams are a practical implementation of autosegmental multi-tier representation
 
 ### Supersedes or Recontextualizes
 - This is the **foundational text** of autosegmental phonology; Pierrehumbert (1980) and Ladd (2008) build directly on it

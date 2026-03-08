@@ -203,13 +203,13 @@ This paper establishes the relative perceptual importance of acoustic parameters
 ## Collection Cross-References
 
 ### Already in Collection
-- **Feinberg_2008_FemininityAveragenessVoicePitch** — cited as Feinberg et al. [2] (2006) and [3] (2005) for F0 manipulation studies on femininity preferences; Chen confirms F0 dominance with quantified importance weights
-- **Feinberg_2011_IntegratingF0FormantPreferences** — cited for F0 × formant interaction in attractiveness; Chen's clustering confirms F0 and VTL estimators are independent factors
-- **Fant_1960_AcousticTheorySpeechProduction** — cited for acoustic theory foundations; provides the source-filter framework underlying the 23 acoustic measures used
-- **Babel_2014_VocalAttractiveness** — related work on vocal attractiveness using overlapping acoustic features (F0, formants, spectral tilt, jitter, shimmer); Babel finds breathiness matters for female attractiveness, while Chen finds perturbation measures least important for masculinity/femininity
-- **Collins_2003_VocalVisualAttractiveness** — related work on vocal attractiveness and formant frequencies in women; both studies confirm higher formant frequencies relate to perceived femininity
-- **Simpson_2009_PhoneticGenderDifferences** — related review of phonetic gender differences; Chen's clustering importance weights quantify the relative contribution of each acoustic dimension Simpson surveys qualitatively
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** / **Hanson_1999_GlottalMaleSpeakers** — related work on gender-specific voice source parameters; Hanson's spectral tilt measures relate to Chen's perturbation cluster but Chen finds these are least important for gender perception
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited as Feinberg et al. [2] (2006) and [3] (2005) for F0 manipulation studies on femininity preferences; Chen confirms F0 dominance with quantified importance weights
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — cited for F0 × formant interaction in attractiveness; Chen's clustering confirms F0 and VTL estimators are independent factors
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory foundations; provides the source-filter framework underlying the 23 acoustic measures used
+- [[Babel_2014_VocalAttractiveness]] — related work on vocal attractiveness using overlapping acoustic features (F0, formants, spectral tilt, jitter, shimmer); Babel finds breathiness matters for female attractiveness, while Chen finds perturbation measures least important for masculinity/femininity
+- [[Collins_2003_VocalVisualAttractiveness]] — related work on vocal attractiveness and formant frequencies in women; both studies confirm higher formant frequencies relate to perceived femininity
+- [[Simpson_2009_PhoneticGenderDifferences]] — related review of phonetic gender differences; Chen's clustering importance weights quantify the relative contribution of each acoustic dimension Simpson surveys qualitatively
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] / [[Hanson_1999_GlottalMaleSpeakers]] — related work on gender-specific voice source parameters; Hanson's spectral tilt measures relate to Chen's perturbation cluster but Chen finds these are least important for gender perception
 
 ### New Leads (Not Yet in Collection)
 - Cartei et al. (2014) — "Vocal communication of body size in women" — F0 and ΔF correlates of women's ratings of vocal masculinity
@@ -218,7 +218,7 @@ This paper establishes the relative perceptual importance of acoustic parameters
 - Biemans (2000) — "Gender variation in voice quality" — PhD thesis on gender and voice quality
 
 ### Supersedes or Recontextualizes
-- Partially supersedes individual findings in **Feinberg_2008** and **Feinberg_2011** by providing quantified importance weights for each acoustic factor, whereas Feinberg studies manipulated F0 and formants in isolation without addressing multicollinearity
+- Partially supersedes individual findings in [[Feinberg_2008]] and [[Feinberg_2011]] by providing quantified importance weights for each acoustic factor, whereas Feinberg studies manipulated F0 and formants in isolation without addressing multicollinearity
 
 ### Cited By (in Collection)
 - (none found)

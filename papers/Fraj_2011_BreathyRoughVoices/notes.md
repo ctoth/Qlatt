@@ -240,7 +240,7 @@ Pulsatile noise >> constant aspiration for natural breathiness:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 
 ### New Leads (Not Yet in Collection)
 - **Schoentgen, J. (2001, 2003a, 2003b)** - Multiple papers on stochastic jitter models, shaping function models, and spectral models of noise in phonatory signals; directly addresses the theoretical framework for this jitter/noise synthesis approach.
@@ -249,4 +249,4 @@ Pulsatile noise >> constant aspiration for natural breathiness:
 - **Yiu et al. (2002)** - Perception of synthesized voice quality in connected speech; demonstrates that listeners evaluate synthetic voice quality similarly to natural speech, validating the relevance of their dysphonia synthesis corpus.
 
 ### Conceptual Links (not citation-based)
-- **Titze_1991_NeurologicAperiodicity** — Fraj provides a practical jitter synthesis algorithm (sample-by-sample phase perturbation) that implements jitter as a signal-level effect, while Titze provides the physiological model predicting what jitter magnitude should be based on motor unit count, firing rate, and ISI variability. Titze predicts 0.2-1.2% F0 perturbation for normal-to-mild voices; Fraj's corpus maps control parameter b to measured jitter% (2.6-35.8% for mild-to-severe dysphonia). The two papers are mechanism (Titze) and implementation (Fraj) for the same phenomenon.
+- [[Titze_1991_NeurologicAperiodicity]] — Fraj provides a practical jitter synthesis algorithm (sample-by-sample phase perturbation) that implements jitter as a signal-level effect, while Titze provides the physiological model predicting what jitter magnitude should be based on motor unit count, firing rate, and ISI variability. Titze predicts 0.2-1.2% F0 perturbation for normal-to-mild voices; Fraj's corpus maps control parameter b to measured jitter% (2.6-35.8% for mild-to-severe dysphonia). The two papers are mechanism (Titze) and implementation (Fraj) for the same phenomenon.

@@ -204,8 +204,8 @@ This directly complements van Santen (1993) sums-of-products models and Klatt (1
 ## Collection Cross-References
 
 ### Already in Collection
-- **Crystal_House_1988_StopConsonantDuration** - cited for segmental durations in connected speech
-- **Klatt_1976_SegmentalDuration** - cited as the foundational segment-level duration rules that this syllable-level model complements
+- [[Crystal_House_1988_StopConsonantDuration]] - cited for segmental durations in connected speech
+- [[Klatt_1976_SegmentalDuration]] - cited as the foundational segment-level duration rules that this syllable-level model complements
 - **vanSanten_1993_SegmentalDuration** - related work on sums-of-products duration models (not cited but directly comparable)
 - **vanSanten_1997_ProsodicModeling** - related work on prosodic modeling obstacles (not cited but addresses same problems)
 
@@ -217,7 +217,7 @@ This directly complements van Santen (1993) sums-of-products models and Klatt (1
 - Bartkova & Sorin (1987) - "A model of segmental duration for French" - French duration rules for cross-language comparison
 
 ### Conceptual Links (not citation-based)
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz's nucleus stream and the observation that lengthening affects the entire sonorant sequence (vowel + /l/, /r/, /n/) solve the same problem as Campbell & Isard's syllable-level rhyme lengthening. Hertz provides a representational solution (nucleus stream); Campbell & Isard provide a computational one (z-score elasticity with exponential weighting). Both reject purely segment-level duration models.
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's nucleus stream and the observation that lengthening affects the entire sonorant sequence (vowel + /l/, /r/, /n/) solve the same problem as Campbell & Isard's syllable-level rhyme lengthening. Hertz provides a representational solution (nucleus stream); Campbell & Isard provide a computational one (z-score elasticity with exponential weighting). Both reject purely segment-level duration models.
 
 ### Supersedes or Recontextualizes
-- Provides a higher-level framework that sits above **Klatt_1976_SegmentalDuration** -- Klatt's segment-level rules predict inherent durations and contextual modifications, while Campbell & Isard add a syllable-level timing layer that accommodates segments within a prosodically-determined syllable duration. The two are complementary rather than competing.
+- Provides a higher-level framework that sits above [[Klatt_1976_SegmentalDuration]] -- Klatt's segment-level rules predict inherent durations and contextual modifications, while Campbell & Isard add a syllable-level timing layer that accommodates segments within a prosodically-determined syllable duration. The two are complementary rather than competing.

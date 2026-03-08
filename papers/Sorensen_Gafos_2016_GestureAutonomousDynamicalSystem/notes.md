@@ -228,10 +228,10 @@ This paper provides the theoretical foundation for **how articulatory gestures e
 ## Collection Cross-References
 
 ### Already in Collection
-- **Saltzman_1989_DynamicalGesturalPatterning** — This is THE paper being revised/extended. Sorensen & Gafos keep the same framework but replace the harmonic potential with an anharmonic one.
-- **Fant_1960_AcousticTheorySpeechProduction** — Cited for acoustic theory context
-- **Stevens_2000_AcousticPhonetics** — Cited for acoustic theory context
-- **Sering_2020_AnticipatoryCoarticulation** — Uses the same task-dynamic framework for coarticulation modeling
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — This is THE paper being revised/extended. Sorensen & Gafos keep the same framework but replace the harmonic potential with an anharmonic one.
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Cited for acoustic theory context
+- [[Stevens_2000_AcousticPhonetics]] — Cited for acoustic theory context
+- [[Sering_2020_AnticipatoryCoarticulation]] — Uses the same task-dynamic framework for coarticulation modeling
 
 ### New Leads (Not Yet in Collection)
 - Browman & Goldstein (1990) — "Gestural specification using dynamically-defined articulatory structures" — foundational for gestural phonology
@@ -241,4 +241,4 @@ This paper provides the theoretical foundation for **how articulatory gestures e
 - Kröger et al. (1995) — Continuous activation function (the nonautonomous alternative this paper argues against)
 
 ### Supersedes or Recontextualizes
-- **Saltzman_1989_DynamicalGesturalPatterning** — This paper proposes a revision to the core dynamical law. The linear harmonic oscillator of Saltzman & Munhall is replaced with a nonlinear anharmonic oscillator. The gestural score concept and blending equations remain unchanged.
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — This paper proposes a revision to the core dynamical law. The linear harmonic oscillator of Saltzman & Munhall is replaced with a nonlinear anharmonic oscillator. The gestural score concept and blending equations remain unchanged.

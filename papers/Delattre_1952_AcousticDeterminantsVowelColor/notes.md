@@ -177,22 +177,22 @@ The synthetic F2 values are generally higher, compensating for missing F3.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Peterson_Barney_1952_VowelControl** — concurrent study measuring natural speech formants; Delattre's synthetic F2 values are systematically higher to compensate for missing F3, providing a direct synthetic-vs-natural comparison
-- **Stevens_1955_QuantitativeVowelArticulation** — explicitly cites this paper (Delattre et al., Word 8, 195-210); uses the two-formant vowel targets as validation for articulatory-to-acoustic mapping from the 35-section vocal tract analog
+- [[Peterson_Barney_1952_VowelControl]] — concurrent study measuring natural speech formants; Delattre's synthetic F2 values are systematically higher to compensate for missing F3, providing a direct synthetic-vs-natural comparison
+- [[Stevens_1955_QuantitativeVowelArticulation]] — explicitly cites this paper (Delattre et al., Word 8, 195-210); uses the two-formant vowel targets as validation for articulatory-to-acoustic mapping from the 35-section vocal tract analog
 
 ### Cited By (in Collection)
-- **Stevens_1955_QuantitativeVowelArticulation** — cites for empirical vowel formant targets from synthesis
-- **Peterson_Barney_1952_VowelControl** — cross-referenced as complementary synthetic-vs-natural vowel data
-- **Cooper_1952_PerceptionSyntheticSpeech** — uses two-formant vowel targets derived from this body of work (Fig. 2B) for systematic stop consonant perception experiments
+- [[Stevens_1955_QuantitativeVowelArticulation]] — cites for empirical vowel formant targets from synthesis
+- [[Peterson_Barney_1952_VowelControl]] — cross-referenced as complementary synthetic-vs-natural vowel data
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — uses two-formant vowel targets derived from this body of work (Fig. 2B) for systematic stop consonant perception experiments
 
 ### Conceptual Links (not citation-based)
-- **Hillenbrand_1995_VowelAcoustics** — updated American English vowel formant measurements (F0-F4) for 139 speakers; extends the P&B/Delattre vowel space with modern digital analysis and dynamic formant trajectory data
-- **Kent_Vorperian_2018_VowelFormantBandwidths** — comprehensive lifespan vowel formant review; provides bandwidth data that Delattre's study lacked
-- **Fant_1960_AcousticTheorySpeechProduction** — formalizes the source-filter theory underlying Delattre's pattern playback methodology; provides the mathematical framework for the perceptual averaging phenomenon observed here
-- **Barreda_2015_FormantSpeakerSize** — investigates how formant frequencies map to perceived speaker size; relevant to Delattre's finding that F2 position is the primary carrier of vowel identity
+- [[Hillenbrand_1995_VowelAcoustics]] — updated American English vowel formant measurements (F0-F4) for 139 speakers; extends the P&B/Delattre vowel space with modern digital analysis and dynamic formant trajectory data
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — comprehensive lifespan vowel formant review; provides bandwidth data that Delattre's study lacked
+- [[Fant_1960_AcousticTheorySpeechProduction]] — formalizes the source-filter theory underlying Delattre's pattern playback methodology; provides the mathematical framework for the perceptual averaging phenomenon observed here
+- [[Barreda_2015_FormantSpeakerSize]] — investigates how formant frequencies map to perceived speaker size; relevant to Delattre's finding that F2 position is the primary carrier of vowel identity
 
 ### New Leads (Not Yet in Collection)
 - **Chiba & Kajiyama (1941)** - Early foundational work on vowel nature and structure; historical reference for two-formant vowel synthesis.
-- **Cooper et al. (1951)** - Pattern playback methodology and technique development; essential for understanding the experimental instrumentation and broader research program on synthetic speech perception. [Related: **Cooper_1952_PerceptionSyntheticSpeech** now in collection -- the full 1952 JASA paper expanding on the 1951 PNAS preliminary results]
+- **Cooper et al. (1951)** - Pattern playback methodology and technique development; essential for understanding the experimental instrumentation and broader research program on synthetic speech perception. [Related: [[Cooper_1952_PerceptionSyntheticSpeech]] now in collection -- the full 1952 JASA paper expanding on the 1951 PNAS preliminary results]
 - **Joos (1948)** - Acoustic phonetics framework; establishes the theoretical context that two formants can produce reasonable vowel approximations.
 - **Fletcher (1929)** - Early observations on single-formant vowel behavior in back vowels; provides historical context for perceptual averaging phenomenon.

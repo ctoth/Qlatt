@@ -260,8 +260,8 @@ const PATTERNS = {
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS** — cited as the contemporary MIT System (Allen & Lee) using ~400 LTS rules + 11,000-word morph dictionary + morphological analysis; represents the more complex alternative approach to Elovitz's pure rule-based method
-- **Hunnicutt_1976_PhonologicalRules** — related phonological rules approach for G2P conversion with stress assignment (noted in Related Work)
+- [[Allen_1987_MITalk_TTS]] — cited as the contemporary MIT System (Allen & Lee) using ~400 LTS rules + 11,000-word morph dictionary + morphological analysis; represents the more complex alternative approach to Elovitz's pure rule-based method
+- [[Hunnicutt_1976_PhonologicalRules]] — related phonological rules approach for G2P conversion with stress assignment (noted in Related Work)
 
 ### New Leads (Not Yet in Collection)
 - **Dudley (1939) - The Synthesizer** — foundational hardware speech synthesizer that motivated computer-based TTS research
@@ -269,6 +269,6 @@ const PATTERNS = {
 - **McIlroy (Bell Telephone Laboratories)** — 750+ LTS rules with higher accuracy, comparison point for NRL's 329-rule system
 
 ### Cited By (in Collection)
-- **Allen_1987_MITalk_TTS** — cites Elovitz for LTS rules as a contemporary approach to grapheme-to-phoneme conversion
-- **Hertz_1985_DeltaRuleSystem** — cites as "classic letter-to-sound rules providing foundational approach to grapheme-to-phoneme conversion"; Delta was designed as a more sophisticated rule development environment
-- **Liberman_Mattingly_1985_MotorTheory** — cites for text-to-phoneme conversion in the context of speech synthesis systems
+- [[Allen_1987_MITalk_TTS]] — cites Elovitz for LTS rules as a contemporary approach to grapheme-to-phoneme conversion
+- [[Hertz_1985_DeltaRuleSystem]] — cites as "classic letter-to-sound rules providing foundational approach to grapheme-to-phoneme conversion"; Delta was designed as a more sophisticated rule development environment
+- [[Liberman_Mattingly_1985_MotorTheory]] — cites for text-to-phoneme conversion in the context of speech synthesis systems

@@ -292,11 +292,11 @@ Output: Sampled LF pulse (N samples)
 ## Collection Cross-References
 
 ### Already in Collection
-- **Doval_2003_VoiceSourceCALM**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1997_VoiceSourceConnectedSpeech**
-- **Gobl_2003_VoiceQualityEmotion**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+- [[Doval_2003_VoiceSourceCALM]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1997_VoiceSourceConnectedSpeech]]
+- [[Gobl_2003_VoiceQualityEmotion]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
 
 ### New Leads (Not Yet in Collection)
 - **[12] Kawahara et al. 2015** - Direct competitor approach to aliasing-free glottal source implementation using anti-aliasing functions; important for understanding alternative solutions

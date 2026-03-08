@@ -121,8 +121,8 @@ This paper is tangentially relevant to a Klatt formant synthesizer. The key insi
 ## Collection Cross-References
 
 ### Already in Collection
-- **Feng_1996_NasalVowelTarget** — cited as source of the area ratio parameter d = An/(An+Aoral) and nasal tract area functions used in the simulation databases
-- **Maeda_1982_VowelNasalizationCues** — cited as Maeda 1984 (spectral peak pair as acoustic correlate of nasalization); the collection entry is the 1982 paper on vowel nasalization cues which addresses the same spectral-flattening phenomenon
+- [[Feng_1996_NasalVowelTarget]] — cited as source of the area ratio parameter d = An/(An+Aoral) and nasal tract area functions used in the simulation databases
+- [[Maeda_1982_VowelNasalizationCues]] — cited as Maeda 1984 (spectral peak pair as acoustic correlate of nasalization); the collection entry is the 1982 paper on vowel nasalization cues which addresses the same spectral-flattening phenomenon
 
 ### Cited By (in Collection)
 - (none found)

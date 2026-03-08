@@ -234,10 +234,10 @@ The pole-zero model (pairing each resonator with a wide-bandwidth antiresonator)
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction** -- cited for HPC derivation (Ch. 2.33), vocal tract acoustics (Ch. 2.2), and area function data (Appendix C)
-- **Fant_1985_LFModelGlottalFlow** -- related work on glottal source (not directly cited, but same author)
-- **Rabiner_1968_DigitalFormantSynthesizer** -- the Gold & Rabiner (1968) paper that this work corrects regarding digital HPC
-- **Maeda_1982_VowelNasalizationCues** -- same author as the digital simulation method cited (though different paper topic)
+- [[Fant_1960_AcousticTheorySpeechProduction]] -- cited for HPC derivation (Ch. 2.33), vocal tract acoustics (Ch. 2.2), and area function data (Appendix C)
+- [[Fant_1985_LFModelGlottalFlow]] -- related work on glottal source (not directly cited, but same author)
+- [[Rabiner_1968_DigitalFormantSynthesizer]] -- the Gold & Rabiner (1968) paper that this work corrects regarding digital HPC
+- [[Maeda_1982_VowelNasalizationCues]] -- same author as the digital simulation method cited (though different paper topic)
 
 ### New Leads (Not Yet in Collection)
 - Fant, G. (1959) "Acoustic analysis and synthesis of speech" -- original HPC derivation in Ericsson Technics (distinct from the 1960 book)

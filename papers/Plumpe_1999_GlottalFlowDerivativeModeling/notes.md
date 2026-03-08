@@ -272,16 +272,16 @@ This paper provides:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow** — cited as [14] for the LF model definition; Plumpe fits this model per-pitch-period
-- **Childers_Lee_1991_VoiceQualityFactors** — cited as [7] for prior iterative LF parameter estimation approach
-- **Klatt_1990_VoiceQualityVariations** — related to voice quality characterization; Plumpe provides automatic extraction of the source features Klatt characterized manually
-- **Doval_2003_VoiceSourceCALM** — not cited but closely related; CALM provides an alternative filter-based view of the same LF decomposition
-- **Doval_2006_SpectrumGlottalFlowModels** — relates to spectral interpretation of the LF parameters that Plumpe estimates in the time domain
-- **Hanson_1995_GlottalCharacteristicsFemale** — relates to female glottal characteristics; Plumpe's system handles male/female separately
-- **Gobl_2003_VoiceQualityEmotion** — related voice quality work using KLSYN88
+- [[Fant_1985_LFModelGlottalFlow]] — cited as [14] for the LF model definition; Plumpe fits this model per-pitch-period
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cited as [7] for prior iterative LF parameter estimation approach
+- [[Klatt_1990_VoiceQualityVariations]] — related to voice quality characterization; Plumpe provides automatic extraction of the source features Klatt characterized manually
+- [[Doval_2003_VoiceSourceCALM]] — not cited but closely related; CALM provides an alternative filter-based view of the same LF decomposition
+- [[Doval_2006_SpectrumGlottalFlowModels]] — relates to spectral interpretation of the LF parameters that Plumpe estimates in the time domain
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — relates to female glottal characteristics; Plumpe's system handles male/female separately
+- [[Gobl_2003_VoiceQualityEmotion]] — related voice quality work using KLSYN88
 - **vanDinther_2001_PerceptualGlottalPulse** and **vanDinther_2004_PerceptualGlottalPulse** — perceptual relevance of the LF parameters that Plumpe extracts
-- **Perrotin_2021_LF_LinearFilter_Equivalence** — efficient filter implementation of the LF model that Plumpe fits in time domain
-- **Yegnanarayana_1998_VocalTractExtraction** — cited as [35] for independent development of multi-pitch-period analysis
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — efficient filter implementation of the LF model that Plumpe fits in time domain
+- [[Yegnanarayana_1998_VocalTractExtraction]] — cited as [35] for independent development of multi-pitch-period analysis
 
 ### New Leads (Not Yet in Collection)
 - Ananthapadmanabha & Fant (1982) — "Calculation of true glottal flow and its components" — foundational source-filter interaction theory used throughout
@@ -291,5 +291,5 @@ This paper provides:
 - Reynolds (1995) — "Speaker identification and verification using Gaussian mixture models" — the GMM-SID system used
 
 ### Supersedes or Recontextualizes
-- Provides automated extraction pipeline for the LF parameters that **Fant_1985_LFModelGlottalFlow** defines theoretically
-- Quantifies the source-filter interaction that **Doval_2003_VoiceSourceCALM** models analytically
+- Provides automated extraction pipeline for the LF parameters that [[Fant_1985_LFModelGlottalFlow]] defines theoretically
+- Quantifies the source-filter interaction that [[Doval_2003_VoiceSourceCALM]] models analytically

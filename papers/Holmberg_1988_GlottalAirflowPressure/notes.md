@@ -216,7 +216,7 @@ Key mappings to Klatt/LF parameters:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1987_TTS_Review**
+- [[Klatt_1987_TTS_Review]]
 
 ### New Leads (Not Yet in Collection)
 - **Rothenberg (1973)** — Foundational inverse-filtering technique used in this study; essential for understanding glottal airflow waveform derivation

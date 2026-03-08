@@ -101,11 +101,11 @@ The F0 modulation finding (σ ≈ 24 Hz for attractive vs 18 Hz for unattractive
 ## Collection Cross-References
 
 ### Already in Collection
-- **Babel_2014_VocalAttractiveness** — directly related: investigates similar question (acoustic predictors of attractiveness) with larger sample, English speakers, both genders. Finds F0 alone is poor predictor (consistent with Zuta), but identifies spectral tilt and breathiness as key.
-- **Collins_2003_VocalVisualAttractiveness** — related: female vocal attractiveness, but provides formant-attractiveness correlations
-- **Gobl_2003_VoiceQualityEmotion** — tangentially related: voice quality perception, Ní Chasaide & Gobl cited in Zuta [6]
-- **Hanson_1999_GlottalMaleSpeakers** — related: male glottal characteristics, relevant to the nasality/voice quality findings
-- **Simpson_2009_PhoneticGenderDifferences** — related: gender differences in phonetic parameters
+- [[Babel_2014_VocalAttractiveness]] — directly related: investigates similar question (acoustic predictors of attractiveness) with larger sample, English speakers, both genders. Finds F0 alone is poor predictor (consistent with Zuta), but identifies spectral tilt and breathiness as key.
+- [[Collins_2003_VocalVisualAttractiveness]] — related: female vocal attractiveness, but provides formant-attractiveness correlations
+- [[Gobl_2003_VoiceQualityEmotion]] — tangentially related: voice quality perception, Ní Chasaide & Gobl cited in Zuta [6]
+- [[Hanson_1999_GlottalMaleSpeakers]] — related: male glottal characteristics, relevant to the nasality/voice quality findings
+- [[Simpson_2009_PhoneticGenderDifferences]] — related: gender differences in phonetic parameters
 
 ### New Leads (Not Yet in Collection)
 - Nolan, F. 1983 — *The phonetic bases of speaker recognition* — relevant for LTAS nasality interpretation
@@ -114,4 +114,4 @@ The F0 modulation finding (σ ≈ 24 Hz for attractive vs 18 Hz for unattractive
 - Koreman 2006 — perceived speech rate effects
 
 ### Supersedes or Recontextualizes
-- **Babel_2014_VocalAttractiveness** — Babel's larger study (60 speakers, English) largely supersedes Zuta's findings with better statistical power, but Zuta's LTAS nasality finding and pause/hesitation analysis provide unique contributions not in Babel.
+- [[Babel_2014_VocalAttractiveness]] — Babel's larger study (60 speakers, English) largely supersedes Zuta's findings with better statistical power, but Zuta's LTAS nasality finding and pause/hesitation analysis provide unique contributions not in Babel.

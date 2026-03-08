@@ -200,7 +200,7 @@ F0 and duration are the most robust parameters for speaker age synthesis - they 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow**
+- [[Fant_1985_LFModelGlottalFlow]]
 
 ### New Leads (Not Yet in Collection)
 - **[11] Linville (2001)** - Comprehensive book on vocal aging; primary reference for understanding acoustic age cues across voice quality dimensions.

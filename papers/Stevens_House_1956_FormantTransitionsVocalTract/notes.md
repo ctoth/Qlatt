@@ -174,7 +174,7 @@ This paper provides the articulatory-acoustic foundation for our coarticulation 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Peterson_Barney_1952_VowelControl** — cited for vowel formant frequency ranges used to map articulatory regions to vowels
+- [[Peterson_Barney_1952_VowelControl]] — cited for vowel formant frequency ranges used to map articulatory regions to vowels
 
 ### New Leads (Not Yet in Collection)
 - Delattre, Liberman, and Cooper (1955) "Acoustic Loci and Transitional Cues for Consonants" JASA 27, 769 - the original locus hypothesis; essential companion to this paper

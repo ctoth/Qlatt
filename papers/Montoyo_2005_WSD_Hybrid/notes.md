@@ -233,7 +233,7 @@ Upper bound precision: 0.798 (combining both methods optimally)
 ## Collection Cross-References
 
 ### Already in Collection
-- **Miller_1998_PronunciationModelingSpeechSynthesis**
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]]
 
 ### New Leads (Not Yet in Collection)
 - **Agirre & Rigau (1996)** - Conceptual Density method: Original knowledge-based WSD approach that inspired the Specification Marks method used in this paper; foundational for taxonomy-based word sense resolution.

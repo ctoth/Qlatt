@@ -263,7 +263,7 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **Conkie & Isard (1997)** - Introduces optimal coupling technique for improving segment concatenation by adjusting boundaries for better spectral match

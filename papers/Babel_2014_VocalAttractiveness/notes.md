@@ -190,15 +190,15 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1990_VoiceQualityVariations** - cited as ref [43]; voice quality analysis framework
-- **Lisker_Abramson_1964_CrossLanguageVoicingStops** - VOT framework referenced in introduction
+- [[Klatt_1990_VoiceQualityVariations]] - cited as ref [43]; voice quality analysis framework
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - VOT framework referenced in introduction
 
 ### New Leads (Not Yet in Collection)
 - Puts, D. A., Gaulin, S. J. C., Verdolini, K. (2006) - "Dominance and the evolution of sexual dimorphism in human voice pitch" - vocal tract length and dominance
 - Bruckert, L. et al. (2010) - "Vocal Attractiveness Increases by Averaging" - voice merging and HNR
 
 ### Now in Collection (previously listed as leads)
-- **Feinberg_2008_FemininityAveragenessVoicePitch** — F0 manipulation via PSOLA (not vocal tract) shows linear pitch–attractiveness relationship (r = 0.341). Note tension with Babel's finding: Feinberg finds higher F0 = more attractive (zero-order correlation), while Babel's full model shows slightly lower F0 preferred (β = -0.02) once voice quality (breathiness) is controlled. This suggests breathiness covaries with F0 and may mediate the relationship — when you control for breathiness, the residual F0 effect reverses.
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — F0 manipulation via PSOLA (not vocal tract) shows linear pitch–attractiveness relationship (r = 0.341). Note tension with Babel's finding: Feinberg finds higher F0 = more attractive (zero-order correlation), while Babel's full model shows slightly lower F0 preferred (β = -0.02) once voice quality (breathiness) is controlled. This suggests breathiness covaries with F0 and may mediate the relationship — when you control for breathiness, the residual F0 effect reverses.
 
 ### Supersedes or Recontextualizes
 - None — this paper complements rather than supersedes existing collection entries.

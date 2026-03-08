@@ -196,8 +196,8 @@ Input includes: phonemes, vowel stress marks (1-4), word/sentence markers, pause
 ## Collection Cross-References
 
 ### Already in Collection
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Strong_1967_MachineAidedFormantDetermination**
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Strong_1967_MachineAidedFormantDetermination]]
 
 ### New Leads (Not Yet in Collection)
 - **[7] Flanagan (1965)** - Comprehensive theory of speech analysis, synthesis and perception; foundational source for source-filter theory and acoustic phonetics underlying the synthesis strategy.

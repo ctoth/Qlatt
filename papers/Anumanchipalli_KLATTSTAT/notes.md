@@ -280,9 +280,9 @@ The paper's parameter numbering maps to standard Klatt parameters. Key observati
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Klatt_1987_TTS_Review**
+- [[Allen_1987_MITalk_TTS]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1987_TTS_Review]]
 
 ### New Leads (Not Yet in Collection)
 - **[12] Metze 2007 - Discriminative Articulatory Features** - Describes the GMM-based discriminative approach used for detecting nasality, aspiration, and frication. Useful technique for automatic parameter extraction.

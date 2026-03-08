@@ -305,12 +305,12 @@ Key findings:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
-- **Burkhardt_2005_GermanEmotionalSpeechDatabase**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
 
 ### Now in Collection (previously listed as leads)
-- **Goudbeek_2010_ValencePotencyVocalEmotion** — Analyzes GEMEP corpus showing arousal dominates via F0/intensity (R²=0.82), but valence is encoded in spectral slope and intensity variability (R²=0.22-0.49), and potency/control in F0 level, HNR, and low spectral dominance (R²=0.23-0.38). Directly informed GeMAPS's inclusion of spectral slope and HNR parameters.
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — Analyzes GEMEP corpus showing arousal dominates via F0/intensity (R²=0.82), but valence is encoded in spectral slope and intensity variability (R²=0.22-0.49), and potency/control in F0 level, HNR, and low spectral dominance (R²=0.23-0.38). Directly informed GeMAPS's inclusion of spectral slope and HNR parameters.
 
 ### New Leads (Not Yet in Collection)
 - [23] Schuller et al. (2007) - The Relevance of Feature Type**: Early work demonstrating which low-level descriptors vs. functionals matter most for emotion classification, directly guiding the minimalistic feature set design.

@@ -156,9 +156,9 @@ Verify `tts-frontend-rules.js` fricative durations meet minimums:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Behrens_Blumstein_1988_FricativeAmplitude**
-- **Blumstein_Stevens_1979_AcousticInvariance**
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Behrens_Blumstein_1988_FricativeAmplitude]]
+- [[Blumstein_Stevens_1979_AcousticInvariance]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ### New Leads (Not Yet in Collection)
 - **Stevens & Blumstein (1978-1980)**: Invariant cue theory for stop consonants; provides theoretical framework for understanding how place of articulation is extracted from spectral properties, applicable to fricatives.

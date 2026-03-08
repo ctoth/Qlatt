@@ -301,17 +301,17 @@ Key insight: Tenseness and loudness can be varied **independently** in both mode
 ## Collection Cross-References
 
 ### Already in Collection
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Fant_1985_LFModelGlottalFlow**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **[9] Fant 1995** - LF-model revisited with frequency domain analysis; essential for spectral tilt and phase understanding
 - **[5] Bozkurt & Dutoit 2003** - Mixed-phase speech modeling using differential phase spectrums; contemporary approach to phase separation
 
 ### Now in Collection (previously listed as leads)
-- **Henrich_2001_SpectralOqAsymmetry** -- Derives analytical spectral formulas for LF, R++, and KLGLOTT88 models, showing that H1*-H2* depends on both Oq and asymmetry coefficient in 5-parameter models. Key finding: only the simpler KLGLOTT88 model gives a unique Oq-to-H1*-H2* mapping. Experimental speech and singing data often falls outside any model's predicted H1*-H2* range.
+- [[Henrich_2001_SpectralOqAsymmetry]] -- Derives analytical spectral formulas for LF, R++, and KLGLOTT88 models, showing that H1*-H2* depends on both Oq and asymmetry coefficient in 5-parameter models. Key finding: only the simpler KLGLOTT88 model gives a unique Oq-to-H1*-H2* mapping. Experimental speech and singing data often falls outside any model's predicted H1*-H2* range.
 
 ### Cited By (in Collection)
-- **Henrich_2003_JND_OpenQuotient** -- uses the CALM-compatible (Oq, alpha_m) parameterization for perceptual JND measurements
-- **Doval_2006_SpectrumGlottalFlowModels** -- extends the spectral framework to a full model
+- [[Henrich_2003_JND_OpenQuotient]] -- uses the CALM-compatible (Oq, alpha_m) parameterization for perceptual JND measurements
+- [[Doval_2006_SpectrumGlottalFlowModels]] -- extends the spectral framework to a full model

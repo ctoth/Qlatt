@@ -192,4 +192,4 @@ These can be varied independently without acoustic interaction artifacts.
 ## Collection Cross-References
 
 ### Conceptual Links (not citation-based)
-- **Bjorklund_2016_SubglottalPressureSPL** — Bjorklund's finding that males produce ~2 dB higher SPL at equivalent subglottal pressure provides empirical validation for Zhang's simulation result that female vocal folds require higher contact pressure to achieve equivalent SPL, attributable to the length/thickness differences this paper quantifies.
+- [[Bjorklund_2016_SubglottalPressureSPL]] — Bjorklund's finding that males produce ~2 dB higher SPL at equivalent subglottal pressure provides empirical validation for Zhang's simulation result that female vocal folds require higher contact pressure to achieve equivalent SPL, attributable to the length/thickness differences this paper quantifies.

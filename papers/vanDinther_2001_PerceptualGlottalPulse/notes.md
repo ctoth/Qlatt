@@ -170,8 +170,8 @@ For $\sqrt{\lambda_1} > 1000$:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **Veldhuis 1998** [2] - Precursor to this perceptual study, examining spectral consequences of glottal parameter variations

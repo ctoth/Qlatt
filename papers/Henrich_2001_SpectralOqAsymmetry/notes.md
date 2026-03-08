@@ -156,27 +156,27 @@ When comparing synthesized output against natural speech measurements, H1*-H2* a
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow** -- cited as [1]; the LF model whose spectrum is derived here
-- **Fant_1988_LFFrequencyDomainInterpretation** -- cited as [2]; frequency domain interpretation of LF parameters
-- **Klatt_1990_VoiceQualityVariations** -- cited as [3]; defines KLGLOTT88 model analyzed here
-- **Hanson_1995_GlottalCharacteristicsFemale** -- cited as [4]; uses KLGLOTT88-based H1*-H2* estimation
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** -- cited as [7]; acoustic correlates using KLGLOTT88
-- **Fant_1997_VoiceSourceConnectedSpeech** -- cited as [8]; empiric Oq-H1*-H2* formula for LF model
-- **Doval_2003_VoiceSourceCALM** -- closely related (same group, addresses spectral parameterization)
-- **Doval_2006_SpectrumGlottalFlowModels** -- extends the spectral analysis from this paper
-- **Henrich_2003_JND_OpenQuotient** -- follow-up perceptual study by same first author
-- **Henrich_2005_GlottalOpenQuotientSinging** -- follow-up empirical study by same first author
+- [[Fant_1985_LFModelGlottalFlow]] -- cited as [1]; the LF model whose spectrum is derived here
+- [[Fant_1988_LFFrequencyDomainInterpretation]] -- cited as [2]; frequency domain interpretation of LF parameters
+- [[Klatt_1990_VoiceQualityVariations]] -- cited as [3]; defines KLGLOTT88 model analyzed here
+- [[Hanson_1995_GlottalCharacteristicsFemale]] -- cited as [4]; uses KLGLOTT88-based H1*-H2* estimation
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] -- cited as [7]; acoustic correlates using KLGLOTT88
+- [[Fant_1997_VoiceSourceConnectedSpeech]] -- cited as [8]; empiric Oq-H1*-H2* formula for LF model
+- [[Doval_2003_VoiceSourceCALM]] -- closely related (same group, addresses spectral parameterization)
+- [[Doval_2006_SpectrumGlottalFlowModels]] -- extends the spectral analysis from this paper
+- [[Henrich_2003_JND_OpenQuotient]] -- follow-up perceptual study by same first author
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- follow-up empirical study by same first author
 
 ### New Leads (Not Yet in Collection)
 - Veldhuis (1998) "A computationally efficient alternative for the Liljencrants-Fant model and its perceptual evaluation" JASA 103, 566-571 -- R++ model definition
 - Sundberg, Andersson, Hultqvist (1999) "Effects of subglottal pressure variation on professional baritone singers' voice sources" JASA 105, 1965-1971 -- cited for Oq-H1*-H2* correlation in singing
 
 ### Cited By (in Collection)
-- **Doval_2006_SpectrumGlottalFlowModels** -- extends the spectral formulas derived here to a complete spectral model
-- **Henrich_2003_JND_OpenQuotient** -- uses the same parameterization framework (Oq, alpha_m) for perceptual testing
-- **Henrich_2005_GlottalOpenQuotientSinging** -- empirical measurements building on the theoretical framework here
+- [[Doval_2006_SpectrumGlottalFlowModels]] -- extends the spectral formulas derived here to a complete spectral model
+- [[Henrich_2003_JND_OpenQuotient]] -- uses the same parameterization framework (Oq, alpha_m) for perceptual testing
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- empirical measurements building on the theoretical framework here
 
 ### Conceptual Links (not citation-based)
-- **Kreiman_2012_VoiceQualityHarmonicOQ** -- addresses the same fundamental question of how harmonic measures relate to open quotient, from a perceptual perspective
-- **Iseli_2007_VoiceSourceAgeSexVowel** -- uses a formant correction formula similar to Hanson's (analyzed here) for H1*-H2* estimation across speakers
-- **Hanson_2001_ModelsPhonation** -- extends Hanson's approach to phonation modeling, directly relevant to the KLGLOTT88 limitation documented here
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] -- addresses the same fundamental question of how harmonic measures relate to open quotient, from a perceptual perspective
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] -- uses a formant correction formula similar to Hanson's (analyzed here) for H1*-H2* estimation across speakers
+- [[Hanson_2001_ModelsPhonation]] -- extends Hanson's approach to phonation modeling, directly relevant to the KLGLOTT88 limitation documented here

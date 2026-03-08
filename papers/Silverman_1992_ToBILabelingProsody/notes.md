@@ -170,10 +170,10 @@ ToBI is the standard prosodic annotation framework. For the Qlatt TTS frontend, 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation** -- the foundational phonological model for the ToBI tonal tier; defines H/L tones, pitch accents, phrase accents, boundary tones, downstep rules
-- **Beckman_2022_ToBISystem** -- later comprehensive description of the MAE_ToBI system with AM+ theoretical extension (5 pitch levels)
-- **Ladd_2008_IntonationalPhonology** -- the definitive AM theory textbook that builds on Pierrehumbert and uses ToBI as annotation framework
-- **OShaughnessy_1976_F0_Prosody** -- F0 generation rules for TTS that implement prosodic structure similar to what ToBI annotates
+- [[Pierrehumbert_1980_EnglishIntonation]] -- the foundational phonological model for the ToBI tonal tier; defines H/L tones, pitch accents, phrase accents, boundary tones, downstep rules
+- [[Beckman_2022_ToBISystem]] -- later comprehensive description of the MAE_ToBI system with AM+ theoretical extension (5 pitch levels)
+- [[Ladd_2008_IntonationalPhonology]] -- the definitive AM theory textbook that builds on Pierrehumbert and uses ToBI as annotation framework
+- [[OShaughnessy_1976_F0_Prosody]] -- F0 generation rules for TTS that implement prosodic structure similar to what ToBI annotates
 
 ### New Leads (Not Yet in Collection)
 - Price, Ostendorf, Shattuck-Hufnagel & Fong (1991) - "The Use of Prosody in Syntactic Disambiguation" (J. Acoust. Soc. Am.) -- origin of break indices concept

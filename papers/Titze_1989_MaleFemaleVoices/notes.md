@@ -190,13 +190,13 @@ This paper provides the physiological foundation for parameterizing male-female 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Holmberg_1988_GlottalAirflowPressure** — cited as the primary empirical source for male/female airflow and pressure data; Titze uses their average-flow to peak-flow ratios (0.52 male, 0.62 female) and dc flow scale factor of 1.5 to derive the aerodynamic scale factors in Eqs. 6-9
-- **Zhang_2021_LaryngealSizeSexDifferences** — cites this paper (ref 33); Zhang's 3D body-cover simulation extends Titze's two-scale-factor approach by systematically isolating length, thickness, and depth effects on voice production using 216,000 simulations
+- [[Holmberg_1988_GlottalAirflowPressure]] — cited as the primary empirical source for male/female airflow and pressure data; Titze uses their average-flow to peak-flow ratios (0.52 male, 0.62 female) and dc flow scale factor of 1.5 to derive the aerodynamic scale factors in Eqs. 6-9
+- [[Zhang_2021_LaryngealSizeSexDifferences]] — cites this paper (ref 33); Zhang's 3D body-cover simulation extends Titze's two-scale-factor approach by systematically isolating length, thickness, and depth effects on voice production using 216,000 simulations
 
 ### Cited By (in Collection)
-- **Zhang_2021_LaryngealSizeSexDifferences** — cites this for the theoretical framework of male/female voice differences based on scale factors
-- **Simpson_2009_PhoneticGenderDifferences** — cites this for the computational model predicting female breathiness from vocal fold geometry (posterior glottal chink)
-- **Hanson_1995_GlottalCharacteristicsFemale** — cites this (as Titze 1989a) for establishing physiologic and acoustic differences between male and female voices relevant to sex-specific synthesis
+- [[Zhang_2021_LaryngealSizeSexDifferences]] — cites this for the theoretical framework of male/female voice differences based on scale factors
+- [[Simpson_2009_PhoneticGenderDifferences]] — cites this for the computational model predicting female breathiness from vocal fold geometry (posterior glottal chink)
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — cites this (as Titze 1989a) for establishing physiologic and acoustic differences between male and female voices relevant to sex-specific synthesis
 
 ### New Leads (Not Yet in Collection)
 - Bickley, C. and Brown, K. (1987) — "Bending-beam model of vocal-fold vibration" — proposed improvement over string model for small vocal fold lengths (children, females)
@@ -204,8 +204,8 @@ This paper provides the physiological foundation for parameterizing male-female 
 - Titze, I. (1988a) — "A four-parameter model of the glottis and vocal fold contact area" — the Q_a/Q_s/Q_b/Q_p parameterization used in the simulation
 
 ### Conceptual Links (not citation-based)
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — Hanson's corrected spectral measures (H1*-H2*, H1*-A3*) for female speakers provide the acoustic consequence of Titze's physiological predictions: the linearly convergent female glottis with posterior chink produces the incomplete closure and gradual closing patterns that Hanson measures as elevated H1*-H2* and spectral tilt
-- **Iseli_2007_VoiceSourceAgeSexVowel** — Iseli's age/sex-dependent H1*-H2* and H1*-A3* measurements across 335 speakers provide empirical validation targets for the voice source differences Titze predicts from anatomy; the 4 dB male H1*-H2* drop from childhood to adulthood corresponds to the development of medial surface bulging (Q_b increasing)
-- **Fant_1985_LFModelGlottalFlow** — the LF model provides the glottal flow parameterization that could express Titze's glottal shape differences acoustically; mapping Q_b to Rd/Ra/Rk would connect the physiological model to the synthesis source
-- **Herbst_2015_GlottalAdductionSubglottalPressure** — addresses the interaction between adduction and subglottal pressure that Titze's Q_a parameter controls; provides empirical grounding for the prephonatory configuration model
-- **Titze_1992_VocalIntensity** — the 1992 paper measures the acoustic intensity consequences of the male-female physiological differences predicted here; the different empirical constants in Table I (tenors vs male/female nonsingers) reflect the scale factor differences in airflow and glottal efficiency that the 1989 paper derives from anatomy
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — Hanson's corrected spectral measures (H1*-H2*, H1*-A3*) for female speakers provide the acoustic consequence of Titze's physiological predictions: the linearly convergent female glottis with posterior chink produces the incomplete closure and gradual closing patterns that Hanson measures as elevated H1*-H2* and spectral tilt
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — Iseli's age/sex-dependent H1*-H2* and H1*-A3* measurements across 335 speakers provide empirical validation targets for the voice source differences Titze predicts from anatomy; the 4 dB male H1*-H2* drop from childhood to adulthood corresponds to the development of medial surface bulging (Q_b increasing)
+- [[Fant_1985_LFModelGlottalFlow]] — the LF model provides the glottal flow parameterization that could express Titze's glottal shape differences acoustically; mapping Q_b to Rd/Ra/Rk would connect the physiological model to the synthesis source
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] — addresses the interaction between adduction and subglottal pressure that Titze's Q_a parameter controls; provides empirical grounding for the prephonatory configuration model
+- [[Titze_1992_VocalIntensity]] — the 1992 paper measures the acoustic intensity consequences of the male-female physiological differences predicted here; the different empirical constants in Table I (tenors vs male/female nonsingers) reflect the scale factor differences in airflow and glottal efficiency that the 1989 paper derives from anatomy

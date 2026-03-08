@@ -230,8 +230,8 @@ The statistical disambiguation approach could be directly applied to English hom
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hanson_1995_GlottalCharacteristicsFemale**
-- **Harrington_2011_HighBackVowelFronting**
+- [[Hanson_1995_GlottalCharacteristicsFemale]]
+- [[Harrington_2011_HighBackVowelFronting]]
 
 ### New Leads (Not Yet in Collection)
 - **Rezáčková et al. (2024a,b)** - T5 transformer-based G2P for multilingual conversion with cross-word context modeling; directly relevant to neural approach validation in Qlatt

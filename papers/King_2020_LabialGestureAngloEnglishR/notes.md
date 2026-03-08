@@ -189,10 +189,10 @@ Is tongue tip up?
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Harrington_2011_HighBackVowelFronting**
-- **Recasens_2003_ArticulationSoundChangeRomance**
-- **Stevens_1998_AcousticPhonetics**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Harrington_2011_HighBackVowelFronting]]
+- [[Recasens_2003_ArticulationSoundChangeRomance]]
+- [[Stevens_1998_AcousticPhonetics]]
 
 ### New Leads (Not Yet in Collection)
 - **Espy-Wilson et al. (2000)** - Foundational work on acoustic modeling of American English /r/, directly relevant to understanding formant values and front cavity contributions to F3 lowering.

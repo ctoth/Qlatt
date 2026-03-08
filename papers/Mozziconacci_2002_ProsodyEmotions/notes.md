@@ -222,9 +222,9 @@ For `tts-frontend-rules.js`:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
-- **France_2000_SpeechDepressionSuicideAcoustics**
-- **Mozziconacci_1998_SpeechEmotionProsody**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[France_2000_SpeechDepressionSuicideAcoustics]]
+- [[Mozziconacci_1998_SpeechEmotionProsody]]
 
 ### New Leads (Not Yet in Collection)
 - **[24] Ladd et al., 1985** - Foundational work on F0 range and voice quality as independent carriers of speaker affect

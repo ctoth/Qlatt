@@ -248,8 +248,8 @@ This paper provides quantitative acoustic profiles for emotional dimensions in n
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — cited for acoustic profiles of 14 emotions in speech; this paper extends the dimensional approach to laughter
-- **Belyk_2014_AcousticValenceEmotion** — cited indirectly; provides complementary valence-coding framework (Pitch × Loudness expression rules) that could integrate with laughter findings
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cited for acoustic profiles of 14 emotions in speech; this paper extends the dimensional approach to laughter
+- [[Belyk_2014_AcousticValenceEmotion]] — cited indirectly; provides complementary valence-coding framework (Pitch × Loudness expression rules) that could integrate with laughter findings
 - **Larrouy-Maestri_2024_EmotionalProsody** — comprehensive review of emotional prosody parameters in speech; laughter findings here converge with speech arousal correlates
 
 ### New Leads (Not Yet in Collection)

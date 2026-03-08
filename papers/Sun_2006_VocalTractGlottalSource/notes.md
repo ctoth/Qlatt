@@ -171,8 +171,8 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Fant_1985_LFModelGlottalFlow**
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Fant_1985_LFModelGlottalFlow]]
 
 ### New Leads (Not Yet in Collection)
 - **[2] Moore & Clements 2004 - Glottal Waveform Estimation**: The automatic glottal extraction algorithm used by this paper; critical for understanding the analysis methodology

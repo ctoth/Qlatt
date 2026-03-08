@@ -177,14 +177,14 @@ Focus on:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Blumstein_Stevens_1979_AcousticInvariance**
-- **Elovitz_1976_NRL_LTS** — cited for LTS rules in context of practical speech synthesis systems
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Hawkins_Stevens_1985_NasalVowelCorrelates**
-- **Hertz_1985_DeltaRuleSystem**
-- **Hillenbrand_1995_VowelAcoustics**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
+- [[Blumstein_Stevens_1979_AcousticInvariance]]
+- [[Elovitz_1976_NRL_LTS]] — cited for LTS rules in context of practical speech synthesis systems
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]]
+- [[Hertz_1985_DeltaRuleSystem]]
+- [[Hillenbrand_1995_VowelAcoustics]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
 
 ### New Leads (Not Yet in Collection)
 - **Cutting, J.E. & Eimas, P.D. (1975)** - Phonetic feature analyzers and the processing of speech in infants. Establishes foundations for phonetic feature-based perception that the motor theory extends.

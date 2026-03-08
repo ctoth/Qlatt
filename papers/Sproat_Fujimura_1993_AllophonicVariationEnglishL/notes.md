@@ -170,12 +170,12 @@ For the Qlatt declarative frontend, the key implementation is:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Recasens_2012_LateralAllophones** - Cross-language acoustic study of /l/ allophones, provides complementary F2 data (threshold ~1300-1400 Hz for clear/dark distinction). Sproat & Fujimura provides articulatory grounding for the acoustic patterns Recasens documents.
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** - Reviews Articulatory Phonology framework that Sproat & Fujimura apply. The two-gesture model for /l/ is an example of the gestural overlap discussed there.
-- **Dalston_1975_SonorantAcoustics** - Provides acoustic data on /l/ including formant frequencies and transition durations. Sproat & Fujimura extends this with articulatory data and the gradient allophony finding.
-- **Volenec_2015_Coarticulation** - Reviews coarticulation frameworks. Sproat & Fujimura's /l/ data exemplifies how coarticulation interacts with allophonic variation.
-- **Recasens_1997_LingualCoarticulationDAC** - DAC model predicts coarticulation based on tongue dorsum involvement. Dark /l/ has high DAC value, explaining its strong coarticulatory resistance.
-- **Hertz_1991_StreamsPhonesTransitions** - Referenced for multi-stream phonological representation
+- [[Recasens_2012_LateralAllophones]] - Cross-language acoustic study of /l/ allophones, provides complementary F2 data (threshold ~1300-1400 Hz for clear/dark distinction). Sproat & Fujimura provides articulatory grounding for the acoustic patterns Recasens documents.
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] - Reviews Articulatory Phonology framework that Sproat & Fujimura apply. The two-gesture model for /l/ is an example of the gestural overlap discussed there.
+- [[Dalston_1975_SonorantAcoustics]] - Provides acoustic data on /l/ including formant frequencies and transition durations. Sproat & Fujimura extends this with articulatory data and the gradient allophony finding.
+- [[Volenec_2015_Coarticulation]] - Reviews coarticulation frameworks. Sproat & Fujimura's /l/ data exemplifies how coarticulation interacts with allophonic variation.
+- [[Recasens_1997_LingualCoarticulationDAC]] - DAC model predicts coarticulation based on tongue dorsum involvement. Dark /l/ has high DAC value, explaining its strong coarticulatory resistance.
+- [[Hertz_1991_StreamsPhonesTransitions]] - Referenced for multi-stream phonological representation
 
 ### New Leads (Not Yet in Collection)
 - Giles & Moll (1975) - Cinefluorographic /l/ study, foundational articulatory data
@@ -185,4 +185,4 @@ For the Qlatt declarative frontend, the key implementation is:
 - Hardcastle & Barry (1985) - Articulatory/electropalatographic data on /l/
 
 ### Supersedes or Recontextualizes
-- **Recasens_2012_LateralAllophones**: Sproat & Fujimura provides the articulatory mechanism underlying Recasens' acoustic observations. The two-gesture timing model explains WHY F2 varies with syllable position.
+- [[Recasens_2012_LateralAllophones]]: Sproat & Fujimura provides the articulatory mechanism underlying Recasens' acoustic observations. The two-gesture timing model explains WHY F2 varies with syllable position.

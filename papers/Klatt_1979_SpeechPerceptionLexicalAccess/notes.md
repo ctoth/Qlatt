@@ -280,10 +280,10 @@ Two approaches:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1975_RuleBasedTTS**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Klatt_1976_SegmentalDuration**
-- **Zue_1976_StopConsonantAcoustics**
+- [[Carlson_1975_RuleBasedTTS]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Zue_1976_StopConsonantAcoustics]]
 
 ### New Leads (Not Yet in Collection)
 - **Blumstein, Stevens & Nigro (1977). Property detectors for bursts and transitions.** - Describes acoustic-phonetic invariants that can inform synthesis target selection.

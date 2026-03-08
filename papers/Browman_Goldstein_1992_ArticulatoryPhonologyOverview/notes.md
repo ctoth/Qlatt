@@ -210,17 +210,17 @@ This paper provides the theoretical framework for understanding:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** - A comprehensive 21st-century appraisal of AP and Task Dynamics; extends this paper's framework with coupled oscillator timing, pi-gestures, and acoustic phonology proposals
-- **Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem** - Extends the task-dynamic gesture model with nonlinear anharmonic potential, predicting sigmoid transition profiles
-- **Lisker_Abramson_1964_CrossLanguageVoicingStops** - Cited in this paper for VOT measurements; the gestural account of aspiration in Section 2.3 builds directly on their VOT framework
-- **Stevens_1989_QuantalNatureSpeech** - Cited for quantal theory; this paper's gestural approach offers a complementary articulatory perspective on phonological contrast
-- **Liberman_Mattingly_1985_MotorTheory** - Cited for motor theory of speech perception; gestural primitives in AP are the "intended gestures" that motor theory posits listeners recover
-- **Ohman_1966_CoarticulationVCV** - Cited for X-ray data showing vowel-dependent consonant variation; this paper's gestural overlap model explains Ohman's observations
-- **Recasens_1997_LingualCoarticulationDAC** - The DAC model quantifies coarticulation resistance that this paper explains through gestural overlap on same vs. different tract variables
-- **Recasens_2012_LateralAllophones** - Provides acoustic data for the clear/dark /l/ allophony that this paper explains through gestural timing (TB leading vs. lagging TT)
-- **Volenec_2015_Coarticulation** - Reviews coarticulation theory including the coproduction/AP framework presented in this paper
-- **Fowler_2006_CoarticulationGesturePerception** - Perceptual evidence supporting the gesture-based view of coarticulation advocated here
-- **Sproat_Fujimura_1993_AllophonicVariationEnglishL** - Cited (as "submitted") in this paper; provides articulatory/acoustic data for English /l/ allophony that validates the gestural timing account
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] - A comprehensive 21st-century appraisal of AP and Task Dynamics; extends this paper's framework with coupled oscillator timing, pi-gestures, and acoustic phonology proposals
+- [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] - Extends the task-dynamic gesture model with nonlinear anharmonic potential, predicting sigmoid transition profiles
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - Cited in this paper for VOT measurements; the gestural account of aspiration in Section 2.3 builds directly on their VOT framework
+- [[Stevens_1989_QuantalNatureSpeech]] - Cited for quantal theory; this paper's gestural approach offers a complementary articulatory perspective on phonological contrast
+- [[Liberman_Mattingly_1985_MotorTheory]] - Cited for motor theory of speech perception; gestural primitives in AP are the "intended gestures" that motor theory posits listeners recover
+- [[Ohman_1966_CoarticulationVCV]] - Cited for X-ray data showing vowel-dependent consonant variation; this paper's gestural overlap model explains Ohman's observations
+- [[Recasens_1997_LingualCoarticulationDAC]] - The DAC model quantifies coarticulation resistance that this paper explains through gestural overlap on same vs. different tract variables
+- [[Recasens_2012_LateralAllophones]] - Provides acoustic data for the clear/dark /l/ allophony that this paper explains through gestural timing (TB leading vs. lagging TT)
+- [[Volenec_2015_Coarticulation]] - Reviews coarticulation theory including the coproduction/AP framework presented in this paper
+- [[Fowler_2006_CoarticulationGesturePerception]] - Perceptual evidence supporting the gesture-based view of coarticulation advocated here
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] - Cited (as "submitted") in this paper; provides articulatory/acoustic data for English /l/ allophony that validates the gestural timing account
 
 ### New Leads (Not Yet in Collection)
 - Saltzman & Munhall (1989) - "A dynamical approach to gestural patterning" - The computational engine behind AP; essential for numerical implementation
@@ -231,10 +231,10 @@ This paper provides the theoretical framework for understanding:
 - Krakow (1989) - "The articulatory organization of syllables" - Kinematic analysis of labial and velar gestures; details nasal timing data cited in Section 2.2
 
 ### Conceptual Links (not citation-based)
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz's multi-stream delta framework independently converges on the same insight: formant transitions are independent temporal units with stable durations, while steady-state portions stretch. Hertz formalizes this with synchronized parallel streams; AP formalizes it with gestural overlap and stiffness parameters. The two frameworks are complementary implementations of the same observation.
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's multi-stream delta framework independently converges on the same insight: formant transitions are independent temporal units with stable durations, while steady-state portions stretch. Hertz formalizes this with synchronized parallel streams; AP formalizes it with gestural overlap and stiffness parameters. The two frameworks are complementary implementations of the same observation.
 
 ### Supersedes or Recontextualizes
-- **Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal** extends and critically evaluates this 1992 overview with 30 years of subsequent research; this paper provides the original framework that Iskarous & Pouplier appraise
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] extends and critically evaluates this 1992 overview with 30 years of subsequent research; this paper provides the original framework that Iskarous & Pouplier appraise
 
 ---
 

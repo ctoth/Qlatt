@@ -208,10 +208,10 @@ This is unavoidable - if F0 > F1, there are no harmonics to represent F1.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Herbst_2015_GlottalAdductionSubglottalPressure**
-- **Peterson_Barney_1952_VowelControl**
-- **Titze_2015_OddHarmonicSensitivity**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]]
+- [[Peterson_Barney_1952_VowelControl]]
+- [[Titze_2015_OddHarmonicSensitivity]]
 
 ### New Leads (Not Yet in Collection)
 - **Monsen & Engebretson (1983)** - Foundational comparison of manual formant tracking vs. automatic LPC estimation; provides historical baseline for evaluating formant estimation accuracy.

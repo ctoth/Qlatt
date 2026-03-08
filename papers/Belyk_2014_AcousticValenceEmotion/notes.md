@@ -192,9 +192,9 @@ This paper is directly relevant for implementing **emotion-dependent prosody rul
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — cited as ref [5]; provides detailed acoustic profiles for 14 emotions including the four positive emotions discussed in this paper
-- **Gobl_2003_VoiceQualityEmotion** — cited as ref [17]; complements this paper's pitch/amplitude focus with voice quality (spectral tilt, breathiness) data for emotional expression
-- **Scherer_2001_VocalEmotionCrossCultural** — related to refs [28, 50]; cross-cultural emotion recognition data that contextualizes these family-specific findings
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cited as ref [5]; provides detailed acoustic profiles for 14 emotions including the four positive emotions discussed in this paper
+- [[Gobl_2003_VoiceQualityEmotion]] — cited as ref [17]; complements this paper's pitch/amplitude focus with voice quality (spectral tilt, breathiness) data for emotional expression
+- [[Scherer_2001_VocalEmotionCrossCultural]] — related to refs [28, 50]; cross-cultural emotion recognition data that contextualizes these family-specific findings
 
 ### New Leads (Not Yet in Collection)
 - Juslin & Laukka (2003) — "Communication of emotions in vocal expression and music performance" — comprehensive review of emotion coding in voice and music
@@ -203,4 +203,4 @@ This paper is directly relevant for implementing **emotion-dependent prosody rul
 - Belin et al (2008) — "The Montreal Affective Voices" — validated nonverbal affect burst corpus; potential evaluation data
 
 ### Supersedes or Recontextualizes
-- **Banse_1996_VocalEmotionAcousticProfiles** — Belyk & Brown 2014 recontextualizes the Banse & Scherer data by showing that emotion-family grouping explains why their 14-emotion acoustic profiles showed inconsistent valence effects (only elation showed high-loud among positive emotions, because the others belonged to different families)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Belyk & Brown 2014 recontextualizes the Banse & Scherer data by showing that emotion-family grouping explains why their 14-emotion acoustic profiles showed inconsistent valence effects (only elation showed high-loud among positive emotions, because the others belonged to different families)

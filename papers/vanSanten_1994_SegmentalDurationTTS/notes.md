@@ -231,13 +231,13 @@ This paper is directly applicable to Qlatt's duration assignment system. The key
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1976_SegmentalDuration** - The baseline multiplicative duration rules this paper improves upon
-- **Allen_1987_MITalk_TTS** - The MITalk system whose duration module is being replaced
-- **Klatt_1987_TTS_Review** - Comprehensive review including duration rules (Klatt's 11 rules)
+- [[Klatt_1976_SegmentalDuration]] - The baseline multiplicative duration rules this paper improves upon
+- [[Allen_1987_MITalk_TTS]] - The MITalk system whose duration module is being replaced
+- [[Klatt_1987_TTS_Review]] - Comprehensive review including duration rules (Klatt's 11 rules)
 - **vanSanten_1993_SegmentalDuration** - Earlier version of this work (speaker-dependent system)
 - **vanSanten_1997_ProsodicModeling** - Later paper discussing obstacles to prosodic quality including duration
-- **Crystal_House_1988_StopConsonantDuration** - Referenced for connected speech duration data
-- **Hertz_1991_StreamsPhonesTransitions** - Referenced for alternative duration modeling via phone-and-transition segmentation
+- [[Crystal_House_1988_StopConsonantDuration]] - Referenced for connected speech duration data
+- [[Hertz_1991_StreamsPhonesTransitions]] - Referenced for alternative duration modeling via phone-and-transition segmentation
 
 ### New Leads (Not Yet in Collection)
 - Umeda (1977) - "Consonant duration in American English" - JASA 61, 846-858 -- comprehensive consonant duration data
@@ -246,5 +246,5 @@ This paper is directly applicable to Qlatt's duration assignment system. The key
 - Lindblom & Rapp (1973) - "Some temporal properties of spoken Swedish" -- cross-linguistic duration
 
 ### Supersedes or Recontextualizes
-- **Klatt_1976_SegmentalDuration**: Van Santen demonstrates that Klatt's pure multiplicative model is a special case of sums-of-products, and that key interactions (especially pitch accent x syllabic stress) are not properly captured by multiplication alone. The new system is perceptually preferred 73% of the time.
+- [[Klatt_1976_SegmentalDuration]]: Van Santen demonstrates that Klatt's pure multiplicative model is a special case of sums-of-products, and that key interactions (especially pitch accent x syllabic stress) are not properly captured by multiplication alone. The new system is perceptually preferred 73% of the time.
 - **vanSanten_1993_SegmentalDuration**: This 1994 paper is the full journal version of the earlier work, with more complete description of the statistical methodology and perceptual evaluation.

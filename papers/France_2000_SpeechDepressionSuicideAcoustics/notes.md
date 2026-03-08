@@ -183,7 +183,7 @@ This paper provides empirical acoustic profiles for different emotional/psycholo
 ## Collection Cross-References
 
 ### Already in Collection
-- **Stevens_1989_QuantalNatureSpeech**
+- [[Stevens_1989_QuantalNatureSpeech]]
 
 ### New Leads (Not Yet in Collection)
 - **Scherer (1986) [37]** - "Vocal affect expression: A review and a model for future research" - Comprehensive theoretical framework for how emotion affects voice production. Essential for understanding the mechanisms behind the acoustic changes observed.

@@ -163,9 +163,9 @@ Four theoretical approaches predict different paraverbal changes when lying:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles** — provides much larger emotion-driven acoustic effects (hot anger: elevated F0, energy) that dwarf the deception effects found here
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — provides much larger emotion-driven acoustic effects (hot anger: elevated F0, energy) that dwarf the deception effects found here
 - **Larrouy-Maestri_2024_EmotionalProsody** — comprehensive review of emotion-prosody mapping, overlaps with arousal/pitch findings
-- **Scherer_2001_VocalEmotionCrossCultural** — cross-cultural emotion recognition; deception arousal likely related
+- [[Scherer_2001_VocalEmotionCrossCultural]] — cross-cultural emotion recognition; deception arousal likely related
 
 ### New Leads (Not Yet in Collection)
 - DePaulo et al. (2003) — comprehensive 158-cue deception meta-analysis, much broader scope

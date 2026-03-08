@@ -230,7 +230,7 @@ elif word_final:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Zue_1976_StopConsonantAcoustics**
+- [[Zue_1976_StopConsonantAcoustics]]
 
 ### New Leads (Not Yet in Collection)
 - **Klatt (1973)** - Durational characteristics of stop consonants in clusters; directly relevant for understanding consonant shortening in initial /st/ combinations

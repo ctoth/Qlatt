@@ -201,15 +201,15 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hanson_1995_GlottalCharacteristicsFemale** - The PhD thesis this paper summarizes; contains the full theoretical development and additional data
-- **Klatt_1990_VoiceQualityVariations** - Klatt and Klatt (1990) cited for H1-H2 gender differences and KLGLOTT88 source model
-- **Fant_1960_AcousticTheorySpeechProduction** - Fant (1960) cited for vocal tract area, glottis thickness, bandwidth formulas
-- **Shadle_1985_FricativeAcoustics** - Shadle (1985) cited for turbulence noise source models
-- **Childers_Lee_1991_VoiceQualityFactors** - Related voice quality factor analysis
-- **Gobl_2003_VoiceQualityEmotion** - Voice quality parameter trajectories for emotion (uses similar measures)
-- **Stevens_1998_AcousticPhonetics** - Stevens (to appear) cited extensively for theoretical framework
-- **Stevens_1991_HL_Parameters** - Stevens (in preparation) cited for higher-level parameter framework
-- **House_Stevens_1956_NasalizationVowels** - House and Stevens (1958) cited for F1 bandwidth measurements
+- [[Hanson_1995_GlottalCharacteristicsFemale]] - The PhD thesis this paper summarizes; contains the full theoretical development and additional data
+- [[Klatt_1990_VoiceQualityVariations]] - Klatt and Klatt (1990) cited for H1-H2 gender differences and KLGLOTT88 source model
+- [[Fant_1960_AcousticTheorySpeechProduction]] - Fant (1960) cited for vocal tract area, glottis thickness, bandwidth formulas
+- [[Shadle_1985_FricativeAcoustics]] - Shadle (1985) cited for turbulence noise source models
+- [[Childers_Lee_1991_VoiceQualityFactors]] - Related voice quality factor analysis
+- [[Gobl_2003_VoiceQualityEmotion]] - Voice quality parameter trajectories for emotion (uses similar measures)
+- [[Stevens_1998_AcousticPhonetics]] - Stevens (to appear) cited extensively for theoretical framework
+- [[Stevens_1991_HL_Parameters]] - Stevens (in preparation) cited for higher-level parameter framework
+- [[House_Stevens_1956_NasalizationVowels]] - House and Stevens (1958) cited for F1 bandwidth measurements
 
 ### New Leads (Not Yet in Collection)
 - Holmberg et al. (1995) - "Comparisons among aerodynamic, EGG, and acoustic spectral measures of female voice" - J. Speech Hear. Res. 38, 1212-1223 - directly relevant for validating acoustic measures against physiological data
@@ -218,7 +218,7 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 - Södersten & Lindestad (1990) - "Glottal closure and perceived breathiness" - direct physiological validation
 
 ### Supersedes or Recontextualizes
-- This is the published JASA paper version of the analysis in **Hanson_1995_GlottalCharacteristicsFemale** (the PhD thesis). The thesis contains more detail; this paper provides the condensed, peer-reviewed findings with corrected measures and group classification.
+- This is the published JASA paper version of the analysis in [[Hanson_1995_GlottalCharacteristicsFemale]] (the PhD thesis). The thesis contains more detail; this paper provides the condensed, peer-reviewed findings with corrected measures and group classification.
 
 ---
 

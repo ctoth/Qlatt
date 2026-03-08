@@ -147,11 +147,11 @@ This paper provides acoustic correlates of a specific feminine voice quality sty
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hanson_1995_GlottalCharacteristicsFemale** — cited for H1-H2, H1-A1, H1-A3 voice quality measures and female glottal source characteristics; Starr uses Hanson's corrected spectral measures as her primary analysis framework
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — cited for correction formulas applied to H1-H2, H1-A1, H1-A3 measures; provides the acoustic parameter definitions Starr adopts
-- **Burkhardt_2009_VoiceQualityFormantSynthesis** — cited for voice quality phonation types in Klatt synthesis; Starr's sweet voice findings complement Burkhardt's breathy/tense/falsetto parameter rules
-- **Gobl_2003_VoiceQualityEmotion** — cited for voice quality and emotion via KLSYN88; both papers analyze voice quality through spectral tilt and HNR measures
-- **Sundberg_1972_SingingFormant** — cited for the singing formant / Actor's Formant concept; Starr uses the 2k-4k measure as an Actor's Formant proxy
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — cited for H1-H2, H1-A1, H1-A3 voice quality measures and female glottal source characteristics; Starr uses Hanson's corrected spectral measures as her primary analysis framework
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for correction formulas applied to H1-H2, H1-A1, H1-A3 measures; provides the acoustic parameter definitions Starr adopts
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — cited for voice quality phonation types in Klatt synthesis; Starr's sweet voice findings complement Burkhardt's breathy/tense/falsetto parameter rules
+- [[Gobl_2003_VoiceQualityEmotion]] — cited for voice quality and emotion via KLSYN88; both papers analyze voice quality through spectral tilt and HNR measures
+- [[Sundberg_1972_SingingFormant]] — cited for the singing formant / Actor's Formant concept; Starr uses the 2k-4k measure as an Actor's Formant proxy
 
 ### New Leads (Not Yet in Collection)
 - Campbell & Mokhtari (2003) — "Voice quality: The 4th prosodic dimension" — establishes voice quality as an independent prosodic dimension in Japanese, directly relevant to our voice quality parameter controls

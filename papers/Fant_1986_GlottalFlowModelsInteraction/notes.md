@@ -148,7 +148,7 @@ Adding constant glottal shunt (1/5 peak area):
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow**
+- [[Fant_1985_LFModelGlottalFlow]]
 
 ### New Leads (Not Yet in Collection)
 - *Critical*: This is THE primary LF model paper. Contains full mathematical specification and parameter definitions. Essential for implementing or validating an LF source.

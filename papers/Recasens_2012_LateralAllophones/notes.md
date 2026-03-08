@@ -210,9 +210,9 @@ Need for cross-linguistic acoustic data on /l/ formant frequencies to understand
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Recasens_2003_ArticulationSoundChangeRomance**
-- **Stevens_1998_AcousticPhonetics**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Recasens_2003_ArticulationSoundChangeRomance]]
+- [[Stevens_1998_AcousticPhonetics]]
 
 ### New Leads (Not Yet in Collection)
 - **Recasens, D., Espinosa, A., 2005** - Articulatory, positional and coarticulatory characteristics for clear /l/ and dark /l/: Detailed articulatory-acoustic mapping for lateral consonants including coarticulation patterns directly applicable to synthesis rules.

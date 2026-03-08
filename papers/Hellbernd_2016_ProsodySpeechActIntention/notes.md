@@ -180,10 +180,10 @@ Key insight for Qlatt: The paper suggests "conventionalized" prosodic patterns e
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
-- **Kim_Snyder_2012_UniversalG2P**
-- **Pierrehumbert_1980_EnglishIntonation**
-- **White_2014_ProsodicTimingFunction**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[Kim_Snyder_2012_UniversalG2P]]
+- [[Pierrehumbert_1980_EnglishIntonation]]
+- [[White_2014_ProsodicTimingFunction]]
 
 ### New Leads (Not Yet in Collection)
 - **Morlec, Bailly, & Aubergé (2001)** - "Generating prosodic attitudes in French" - Directly relevant to synthesis: describes a computational model for generating attitude-specific prosody in French TTS.

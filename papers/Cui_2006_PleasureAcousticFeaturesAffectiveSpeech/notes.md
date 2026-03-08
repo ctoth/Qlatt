@@ -166,11 +166,11 @@ This paper provides modest support for the principle that valence/pleasure in em
 ## Collection Cross-References
 
 ### Already in Collection
-- **Ladd_2008_IntonationalPhonology** — cited as Ladd et al. 1985 (different work by same author); the 1985 JASA paper on independent function of intonation contour type, voice quality, and F0 is not in the collection, but Ladd's 2008 book is
-- **ZeiPollermann_2002_AcousticPatternsEmotions** — complementary finding: F0/energy/rate differentiate arousal but not valence, while LTAS spectral energy in 300-3400 Hz differentiates anger from joy. Directly supports Cui's conclusion that spectral features carry valence
-- **Belyk_2014_AcousticValenceEmotion** — demonstrates valence coding depends on emotion family (motivational vs moral vs aesthetic), with different Pitch x Loudness rules per family. Extends Cui's finding that valence is not simply one acoustic dimension
-- **Gobl_2003_VoiceQualityEmotion** — voice quality primarily signals arousal/activation rather than valence. Consistent with Cui's finding that spectral balance (not voice quality parameters per se) carries pleasure information
-- **Banse_1996_VocalEmotionAcousticProfiles** — comprehensive emotion profiles; high-arousal emotions show elevated F0 and energy, confirming Cui's F0-arousal association
+- [[Ladd_2008_IntonationalPhonology]] — cited as Ladd et al. 1985 (different work by same author); the 1985 JASA paper on independent function of intonation contour type, voice quality, and F0 is not in the collection, but Ladd's 2008 book is
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — complementary finding: F0/energy/rate differentiate arousal but not valence, while LTAS spectral energy in 300-3400 Hz differentiates anger from joy. Directly supports Cui's conclusion that spectral features carry valence
+- [[Belyk_2014_AcousticValenceEmotion]] — demonstrates valence coding depends on emotion family (motivational vs moral vs aesthetic), with different Pitch x Loudness rules per family. Extends Cui's finding that valence is not simply one acoustic dimension
+- [[Gobl_2003_VoiceQualityEmotion]] — voice quality primarily signals arousal/activation rather than valence. Consistent with Cui's finding that spectral balance (not voice quality parameters per se) carries pleasure information
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — comprehensive emotion profiles; high-arousal emotions show elevated F0 and energy, confirming Cui's F0-arousal association
 
 ### New Leads (Not Yet in Collection)
 - Cook et al. (2006) — "Evaluation of the affective valence of speech using pitch substructure" IEEE TASLP — complementary approach using pitch distribution structure for valence detection

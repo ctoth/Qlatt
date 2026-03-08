@@ -176,8 +176,8 @@ This paper is about **analysis** (depression classification) rather than **synth
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cummings_1995_GlottalExcitationEmotionalSpeech**
-- **France_2000_SpeechDepressionSuicideAcoustics**
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]]
+- [[France_2000_SpeechDepressionSuicideAcoustics]]
 
 ### New Leads (Not Yet in Collection)
 - **Cummings (1992) [7]** - Ph.D. thesis on stressed speech analysis/synthesis. Source of the glottal extraction algorithm used in this paper. Directly relevant for understanding how to extract glottal features and potentially for stress-related voice synthesis.

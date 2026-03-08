@@ -303,14 +303,14 @@ For nasalized vowels compared to oral:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Feng_1996_NasalVowelTarget**
-- **Hawkins_Stevens_1985_NasalVowelCorrelates**
-- **Hillenbrand_1995_VowelAcoustics**
-- **House_Stevens_1956_NasalizationVowels**
-- **Klatt_1990_VoiceQualityVariations**
-- **Maeda_1982_VowelNasalizationCues**
-- **Sundberg_1972_SingingFormant**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Feng_1996_NasalVowelTarget]]
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]]
+- [[Hillenbrand_1995_VowelAcoustics]]
+- [[House_Stevens_1956_NasalizationVowels]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Maeda_1982_VowelNasalizationCues]]
+- [[Sundberg_1972_SingingFormant]]
 
 ### New Leads (Not Yet in Collection)
 - **Stevens, K. N. (in press). Acoustic Phonetics** - Theoretical framework for how velopharyngeal coupling affects vocal tract acoustics; directly cited for predictions in this paper.

@@ -187,13 +187,13 @@ The four-piece noise spectral model with independent HNR control validates:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Kreiman_2007_GlottalSourceSpectrum** — PCA of source measures yielding four factors; this paper validates those factors perceptually
-- **Kreiman_2012_VoiceQualityHarmonicOQ** — Speaker-dependent H1*-H2* vs OQ relationship; complements this paper's finding that H1-H2 alone is insufficient
-- **Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment** — Perceptual framework for voice quality; precursor to this validation
-- **Gobl_2003_VoiceQualityEmotion** — KLSYN88 parameters for voice qualities; this paper's model offers an alternative parameterization
-- **Klatt_1990_VoiceQualityVariations** — KLGLOTT88/KLSYN88 source model; this paper's four-piece model is a different approach to the same problem
-- **Childers_Lee_1991_VoiceQualityFactors** — Voice quality factors including OQ, SQ, closure abruptness; complements this model's source decomposition
-- **Hanson_2001_ModelsPhonation** — HLsyn quasi-articulatory controller; alternative high-level parameterization approach
+- [[Kreiman_2007_GlottalSourceSpectrum]] — PCA of source measures yielding four factors; this paper validates those factors perceptually
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — Speaker-dependent H1*-H2* vs OQ relationship; complements this paper's finding that H1-H2 alone is insufficient
+- [[Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment]] — Perceptual framework for voice quality; precursor to this validation
+- [[Gobl_2003_VoiceQualityEmotion]] — KLSYN88 parameters for voice qualities; this paper's model offers an alternative parameterization
+- [[Klatt_1990_VoiceQualityVariations]] — KLGLOTT88/KLSYN88 source model; this paper's four-piece model is a different approach to the same problem
+- [[Childers_Lee_1991_VoiceQualityFactors]] — Voice quality factors including OQ, SQ, closure abruptness; complements this model's source decomposition
+- [[Hanson_2001_ModelsPhonation]] — HLsyn quasi-articulatory controller; alternative high-level parameterization approach
 
 ### New Leads (Not Yet in Collection)
 - **Garellek, Samlan, Gerratt, and Kreiman (2016)** — "Modeling the voice source in terms of spectral slopes," JASA 139, 1404-1410. Provides the spectral slope framework underlying the four-piece source model. Essential companion paper.
@@ -201,6 +201,6 @@ The four-piece noise spectral model with independent HNR control validates:
 - **Signorello, Rhee, Gerratt, and Kreiman (2016)** — Psychoacoustic model of spectral noise in the voice source. Complements the inharmonic source component of this model.
 
 ### Conceptual Links (not citation-based)
-- **Fant_1985_LFModelGlottalFlow** — The LF model parameterizes the glottal pulse shape; this paper's four-piece harmonic model parameterizes the resulting spectrum directly. Different levels of description for the same phenomenon.
-- **Doval_2003_VoiceSourceCALM** / **Doval_2006_SpectrumGlottalFlowModels** — Analytical spectral formulas for glottal models; could be used to derive the four-piece spectral slopes from LF parameters.
-- **Burkhardt_2009_VoiceQualityFormantSynthesis** — Rule-based voice quality modification using Klatt parameters; this paper's model provides a validated target space for those modifications.
+- [[Fant_1985_LFModelGlottalFlow]] — The LF model parameterizes the glottal pulse shape; this paper's four-piece harmonic model parameterizes the resulting spectrum directly. Different levels of description for the same phenomenon.
+- [[Doval_2003_VoiceSourceCALM]] / [[Doval_2006_SpectrumGlottalFlowModels]] — Analytical spectral formulas for glottal models; could be used to derive the four-piece spectral slopes from LF parameters.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Rule-based voice quality modification using Klatt parameters; this paper's model provides a validated target space for those modifications.

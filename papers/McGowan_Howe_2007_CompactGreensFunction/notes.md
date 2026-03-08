@@ -154,9 +154,9 @@ This paper provides the theoretical foundation for understanding *why* different
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction** — cited as the foundation of the acoustic theory that this paper extends; the classical source-filter model is the g_o component of the compact Green's function
-- **Stevens_1998_AcousticPhonetics** — cited for comprehensive acoustic phonetics framework; Stevens' treatment of turbulence noise and fricative sources is contextualized by this paper's geometric coupling analysis
-- **Shadle_1985_FricativeAcoustics** — cited for experimental validation of fricative source mechanisms; Shadle's obstacle-source vs. surface-source classification is explained physically by the compact Green's function theory (sharp edges = obstacle sources = efficient coupling; distributed surfaces = weak coupling)
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited as the foundation of the acoustic theory that this paper extends; the classical source-filter model is the g_o component of the compact Green's function
+- [[Stevens_1998_AcousticPhonetics]] — cited for comprehensive acoustic phonetics framework; Stevens' treatment of turbulence noise and fricative sources is contextualized by this paper's geometric coupling analysis
+- [[Shadle_1985_FricativeAcoustics]] — cited for experimental validation of fricative source mechanisms; Shadle's obstacle-source vs. surface-source classification is explained physically by the compact Green's function theory (sharp edges = obstacle sources = efficient coupling; distributed surfaces = weak coupling)
 
 ### Cited By (in Collection)
 - (none found)
@@ -167,9 +167,9 @@ This paper provides the theoretical foundation for understanding *why* different
 - McGowan (1988) — "An aeroacoustic approach to phonation" — JASA 83, 696-704 — applies aeroacoustic framework to voicing rather than frication
 
 ### Conceptual Links (not citation-based)
-- **Hanson_2003_AspiratedStopsModels** — Hanson & Stevens found that /t/ aspiration contains frication noise from supraglottal constriction rather than pure glottal aspiration. This is explained by McGowan & Howe's theory: the alveolar ridge provides a sharper edge for aeroacoustic coupling than the false folds, so the "aspiration" phase of /t/ is actually more effective as a frication source than a true aspiration source.
-- **Monson_2014_HighFrequencyVoice** — Monson documents that fricatives /f/, /theta/, /s/ have primary spectral peaks at 7-9 kHz. McGowan & Howe's theory predicts that rounded-edge sources (aspiration) lose effectiveness exponentially above V/r, while sharp-edge sources (sibilants) maintain effectiveness to much higher frequencies.
-- **Shadle_2023_FricativeSpectraHighFreq** — Shadle's finding that non-sibilants have flat/rising high-frequency spectra while sibilants have peaked spectra is consistent with the compact Green's function theory: different source geometries produce different frequency-dependent coupling efficiencies.
+- [[Hanson_2003_AspiratedStopsModels]] — Hanson & Stevens found that /t/ aspiration contains frication noise from supraglottal constriction rather than pure glottal aspiration. This is explained by McGowan & Howe's theory: the alveolar ridge provides a sharper edge for aeroacoustic coupling than the false folds, so the "aspiration" phase of /t/ is actually more effective as a frication source than a true aspiration source.
+- [[Monson_2014_HighFrequencyVoice]] — Monson documents that fricatives /f/, /theta/, /s/ have primary spectral peaks at 7-9 kHz. McGowan & Howe's theory predicts that rounded-edge sources (aspiration) lose effectiveness exponentially above V/r, while sharp-edge sources (sibilants) maintain effectiveness to much higher frequencies.
+- [[Shadle_2023_FricativeSpectraHighFreq]] — Shadle's finding that non-sibilants have flat/rising high-frequency spectra while sibilants have peaked spectra is consistent with the compact Green's function theory: different source geometries produce different frequency-dependent coupling efficiencies.
 
 ## Related Work Worth Reading
 - Howe, M.S. (1975). Contributions to the theory of aerodynamic sound — foundational aeroacoustics

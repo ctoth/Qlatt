@@ -227,10 +227,10 @@ Note: Higher EPDs in other studies may be due to vibrato, amplitude constraints,
 ## Collection Cross-References
 
 ### Already in Collection
-- **Childers_Lee_1991_VoiceQualityFactors**
-- **Doval_2003_VoiceSourceCALM**
-- **Fant_1985_LFModelGlottalFlow**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Childers_Lee_1991_VoiceQualityFactors]]
+- [[Doval_2003_VoiceSourceCALM]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **Moore et al. (1997)** and **Rao et al. (2001)** - Provide the auditory perception model (excitation patterns, loudness) that underpins the perceptual distance measure used in this paper; critical for understanding how to map acoustic variations to perceived differences.

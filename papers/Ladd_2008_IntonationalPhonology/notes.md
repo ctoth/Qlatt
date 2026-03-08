@@ -422,11 +422,11 @@ For Qlatt's TTS frontend, this book motivates:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation** — foundation of AM theory; Ladd's book is the mature theoretical exposition of Pierrehumbert's framework
-- **Beckman_2022_ToBISystem** — the MAE_ToBI inventory that Ladd presents and provides deeper theoretical motivation for
-- **OShaughnessy_1976_F0_Prosody** — practical F0 generation rules; Ladd's framework supersedes but the implementation concerns remain relevant
-- **Taylor_2000_TiltModelIntonation** — Tilt model's continuous accent parameters as phonetic realization under Ladd's categorical AM system
-- **Fujisaki_InformationProsodyModeling** — Fujisaki's F0 model (block diagram shown in Fig 1.3); Ladd contrasts the IPO/Fujisaki superpositional approach with the AM sequential approach
+- [[Pierrehumbert_1980_EnglishIntonation]] — foundation of AM theory; Ladd's book is the mature theoretical exposition of Pierrehumbert's framework
+- [[Beckman_2022_ToBISystem]] — the MAE_ToBI inventory that Ladd presents and provides deeper theoretical motivation for
+- [[OShaughnessy_1976_F0_Prosody]] — practical F0 generation rules; Ladd's framework supersedes but the implementation concerns remain relevant
+- [[Taylor_2000_TiltModelIntonation]] — Tilt model's continuous accent parameters as phonetic realization under Ladd's categorical AM system
+- [[Fujisaki_InformationProsodyModeling]] — Fujisaki's F0 model (block diagram shown in Fig 1.3); Ladd contrasts the IPO/Fujisaki superpositional approach with the AM sequential approach
 
 ### New Leads (Not Yet in Collection)
 - Anderson, Pierrehumbert, and Liberman (1984) — "Synthesis by rule of English intonation patterns" — direct TTS F0 synthesis
@@ -439,8 +439,8 @@ For Qlatt's TTS frontend, this book motivates:
 - Monaghan (1991/1992) — "Intonation in a text to speech conversion system"
 
 ### Supersedes or Recontextualizes
-- **Pierrehumbert_1980_EnglishIntonation**: Ladd's 2008 treatment refines and extends the original 1980 framework — the 7-accent inventory is reduced to 5 in MAE_ToBI, alignment is treated more carefully, and cross-linguistic validation is provided. The original remains essential for the formal finite-state grammar and implementation rules.
-- **OShaughnessy_1976_F0_Prosody**: Ladd provides a more principled phonological basis for accent placement and declination modeling, though O'Shaughnessy's practical word-class accent hierarchy and phonetic adjustment rules remain implementationally useful.
+- [[Pierrehumbert_1980_EnglishIntonation]]: Ladd's 2008 treatment refines and extends the original 1980 framework — the 7-accent inventory is reduced to 5 in MAE_ToBI, alignment is treated more carefully, and cross-linguistic validation is provided. The original remains essential for the formal finite-state grammar and implementation rules.
+- [[OShaughnessy_1976_F0_Prosody]]: Ladd provides a more principled phonological basis for accent placement and declination modeling, though O'Shaughnessy's practical word-class accent hierarchy and phonetic adjustment rules remain implementationally useful.
 
 ## Related Work Worth Reading
 

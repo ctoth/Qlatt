@@ -134,9 +134,9 @@ Code and recordings: https://github.com/seantrott/pros_scaled
 ## Collection Cross-References
 
 ### Already in Collection
-- **Caballero_2018_SoundOfImpoliteness**
-- **Hellbernd_2016_ProsodySpeechActIntention**
-- **Jiang_2017_SoundOfConfidenceDoubt**
+- [[Caballero_2018_SoundOfImpoliteness]]
+- [[Hellbernd_2016_ProsodySpeechActIntention]]
+- [[Jiang_2017_SoundOfConfidenceDoubt]]
 
 ### New Leads (Not Yet in Collection)
 - **Pierrehumbert & Hirschberg (1990)** - "The meaning of intonational contours in the interpretation of discourse" - Foundational work on how intonation patterns map to pragmatic meaning. Essential for understanding question vs. statement prosody.

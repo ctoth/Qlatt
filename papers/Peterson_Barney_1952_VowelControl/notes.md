@@ -189,25 +189,25 @@ const vowelTargets = {
 - (none of Peterson & Barney's cited references are in the collection)
 
 ### Cited By (in Collection)
-- **Hillenbrand_1995_VowelAcoustics** — explicitly replicates and extends this study with 139 speakers, 12 vowels, F0-F4, and duration data; the primary modernization of the P&B dataset
-- **Kent_Vorperian_2018_VowelFormantBandwidths** — uses P&B as baseline for lifespan formant frequency and bandwidth review
-- **Barreda_2015_FormantSpeakerSize** — analyzes P&B data for VTL scaling patterns across speaker groups
-- **Delattre_1952_AcousticDeterminantsVowelColor** — compares synthetic vowel targets against P&B natural speech measurements
-- **Fant_1960_AcousticTheorySpeechProduction** — uses P&B formant data as empirical foundation for source-filter theory
-- **Stevens_1955_QuantitativeVowelArticulation** — maps P&B's acoustic vowel data into articulatory coordinates (Fig. 6-7)
-- **Stevens_House_1956_FormantTransitionsVocalTract** — uses P&B vowel formant ranges to map articulatory configurations
-- **Stevens_1998_AcousticPhonetics** — reproduces P&B Table II as Table 6.2 for vowel formant reference
-- **Klatt_1987_TTS_Review** — cites P&B for canonical vowel formant measurements in TTS specification
-- **Klatt_1990_VoiceQualityVariations** — references P&B vowel data for voice quality analysis
-- **Hombert_1979_PhoneticToneDevelopment** — uses P&B's intrinsic F0 data (Table 3) for vowel-F0 interaction analysis
-- **Ericsson_2020_FormantEstimationEvaluation** — references P&B as ground-truth vowel formant data for evaluating estimation methods
-- **Feugere_2017_CantorDigitalis** — uses P&B formant targets in singing synthesis
-- **Jesus_1997_KlattSynthesiserImplementation** — compares Portuguese vowel formants against P&B English data
-- **Lalwani_1992_FlexibleFormantSynthesizer** — uses P&B as reference for vowel synthesis evaluation
-- **Pierrehumbert_1980_EnglishIntonation** — references P&B for vowel formant data
+- [[Hillenbrand_1995_VowelAcoustics]] — explicitly replicates and extends this study with 139 speakers, 12 vowels, F0-F4, and duration data; the primary modernization of the P&B dataset
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — uses P&B as baseline for lifespan formant frequency and bandwidth review
+- [[Barreda_2015_FormantSpeakerSize]] — analyzes P&B data for VTL scaling patterns across speaker groups
+- [[Delattre_1952_AcousticDeterminantsVowelColor]] — compares synthetic vowel targets against P&B natural speech measurements
+- [[Fant_1960_AcousticTheorySpeechProduction]] — uses P&B formant data as empirical foundation for source-filter theory
+- [[Stevens_1955_QuantitativeVowelArticulation]] — maps P&B's acoustic vowel data into articulatory coordinates (Fig. 6-7)
+- [[Stevens_House_1956_FormantTransitionsVocalTract]] — uses P&B vowel formant ranges to map articulatory configurations
+- [[Stevens_1998_AcousticPhonetics]] — reproduces P&B Table II as Table 6.2 for vowel formant reference
+- [[Klatt_1987_TTS_Review]] — cites P&B for canonical vowel formant measurements in TTS specification
+- [[Klatt_1990_VoiceQualityVariations]] — references P&B vowel data for voice quality analysis
+- [[Hombert_1979_PhoneticToneDevelopment]] — uses P&B's intrinsic F0 data (Table 3) for vowel-F0 interaction analysis
+- [[Ericsson_2020_FormantEstimationEvaluation]] — references P&B as ground-truth vowel formant data for evaluating estimation methods
+- [[Feugere_2017_CantorDigitalis]] — uses P&B formant targets in singing synthesis
+- [[Jesus_1997_KlattSynthesiserImplementation]] — compares Portuguese vowel formants against P&B English data
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — uses P&B as reference for vowel synthesis evaluation
+- [[Pierrehumbert_1980_EnglishIntonation]] — references P&B for vowel formant data
 
 ### Supersedes or Recontextualizes
-- **Hillenbrand_1995_VowelAcoustics** — directly extends P&B with modern digital recording, LPC analysis, duration measurements, and spectral change data that P&B lacked; shows F1-F2 crowding and lower children's F0 than P&B reported
+- [[Hillenbrand_1995_VowelAcoustics]] — directly extends P&B with modern digital recording, LPC analysis, duration measurements, and spectral change data that P&B lacked; shows F1-F2 crowding and lower children's F0 than P&B reported
 
 ### New Leads (Not Yet in Collection)
 - **Potter & Steinberg (1950)**: Foundational work on the sound spectrograph - the measurement instrument used throughout this paper. Essential for understanding the acoustic measurement methodology.
@@ -219,9 +219,9 @@ const vowelTargets = {
 ### Conceptual Links (not citation-based)
 
 **Vowel perception and acoustic space:**
-- **Carlson_1979_VowelPerceptionSalience** — establishes the perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) that explains why P&B's F1/F2 data captures the primary dimensions of vowel identity; Carlson quantifies *why* formant frequency dominates perception, while P&B documents *where* vowels sit in formant space
-- **Stevens_1989_QuantalNatureSpeech** — quantal theory provides the articulatory-acoustic mechanism explaining why P&B found clear vowel regions with overlap between adjacent vowels: stable articulatory plateaus produce well-separated acoustic clusters, while transition zones between plateaus produce the overlapping regions P&B observed in Fig. 8
+- [[Carlson_1979_VowelPerceptionSalience]] — establishes the perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) that explains why P&B's F1/F2 data captures the primary dimensions of vowel identity; Carlson quantifies *why* formant frequency dominates perception, while P&B documents *where* vowels sit in formant space
+- [[Stevens_1989_QuantalNatureSpeech]] — quantal theory provides the articulatory-acoustic mechanism explaining why P&B found clear vowel regions with overlap between adjacent vowels: stable articulatory plateaus produce well-separated acoustic clusters, while transition zones between plateaus produce the overlapping regions P&B observed in Fig. 8
 
 **Speaker variation and normalization:**
-- **Simpson_2009_PhoneticGenderDifferences** — directly addresses P&B's open question about speaker normalization by documenting that male-to-female formant scaling is non-uniform and vowel-dependent (not a single scaling constant), with children's differences emerging before puberty as learned sociophonetic behavior rather than purely anatomical scaling
-- **Harrington_2011_HighBackVowelFronting** — demonstrates that P&B's 1952 /u/ formant targets may not hold for modern speakers: SSBE young speakers show /u/ F2 values near /i/ territory due to diachronic fronting, challenging the stability of P&B's vowel space for contemporary synthesis
+- [[Simpson_2009_PhoneticGenderDifferences]] — directly addresses P&B's open question about speaker normalization by documenting that male-to-female formant scaling is non-uniform and vowel-dependent (not a single scaling constant), with children's differences emerging before puberty as learned sociophonetic behavior rather than purely anatomical scaling
+- [[Harrington_2011_HighBackVowelFronting]] — demonstrates that P&B's 1952 /u/ formant targets may not hold for modern speakers: SSBE young speakers show /u/ F2 values near /i/ territory due to diachronic fronting, challenging the stability of P&B's vowel space for contemporary synthesis

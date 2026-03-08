@@ -199,10 +199,10 @@ This validates the approach used in the current project's Klatt synthesizer for 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hillenbrand_1995_VowelAcoustics**
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Peterson_Barney_1952_VowelControl**
+- [[Hillenbrand_1995_VowelAcoustics]]
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Peterson_Barney_1952_VowelControl]]
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1970)** - "Acoustic Theory of Speech Production" - Foundational source-filter theory that underlies all formant synthesis, explaining VTL-formant relationships.

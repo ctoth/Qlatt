@@ -137,8 +137,8 @@ This paper provides empirical data on the relationship between female voice acou
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction** - cited for formant frequency theory and vocal tract dimensions
-- **Childers_Lee_1991_VoiceQualityFactors** - cited as Childers & Wu 1991 for gender recognition from speech
+- [[Fant_1960_AcousticTheorySpeechProduction]] - cited for formant frequency theory and vocal tract dimensions
+- [[Childers_Lee_1991_VoiceQualityFactors]] - cited as Childers & Wu 1991 for gender recognition from speech
 
 ### New Leads (Not Yet in Collection)
 - Fitch (1997) - "Vocal tract length and formant frequency dispersion" in rhesus macaques - body size to formant dispersion relationship
@@ -146,7 +146,7 @@ This paper provides empirical data on the relationship between female voice acou
 - Abitbol et al. (1999) - "Sex hormones and the female voice" - hormonal modulation of F0 and formant production
 
 ### Now in Collection (previously listed as leads)
-- **Fitch_1999_VocalTractMorphology** - MRI study of 129 subjects ages 2-25 establishing VTL-body size regressions (height r=0.926, log weight r=0.941) and documenting that male-female VTL differences arise at puberty through disproportionate pharyngeal elongation. Provides the anatomical basis for the formant dispersion-height relationship that Collins 2003 confirmed acoustically.
+- [[Fitch_1999_VocalTractMorphology]] - MRI study of 129 subjects ages 2-25 establishing VTL-body size regressions (height r=0.926, log weight r=0.941) and documenting that male-female VTL differences arise at puberty through disproportionate pharyngeal elongation. Provides the anatomical basis for the formant dispersion-height relationship that Collins 2003 confirmed acoustically.
 
 ### Supersedes or Recontextualizes
 None - this paper extends prior work on vocal attractiveness but does not correct or supersede existing collection papers.

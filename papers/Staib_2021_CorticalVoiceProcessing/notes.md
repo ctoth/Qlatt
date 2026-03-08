@@ -197,7 +197,7 @@ For loudness: 20th, 50th, 80th percentiles; range 20-80th; mean/SD of rising/fal
 ## Collection Cross-References
 
 ### Already in Collection
-- **Belin_2017_SoundOfTrustworthiness**
+- [[Belin_2017_SoundOfTrustworthiness]]
 
 ### New Leads (Not Yet in Collection)
 - **Belin et al., 2000** - Foundational work establishing the temporal voice area (TVA) as a voice-selective region in human auditory cortex; essential reference for understanding the classical voice selectivity hypothesis that this paper challenges.

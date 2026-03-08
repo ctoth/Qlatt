@@ -192,27 +192,27 @@ This review provides the physiological grounding for voice source control in the
 ## Collection Cross-References
 
 ### Already in Collection
-- **Zhang_2016_VocalFoldPhysiologyVoiceProduction** — Companion paper by same author, same year. That paper presents NEW computational results from a 3D continuum model with parameter sweeps and R-parameter table. This paper is the REVIEW providing the broader theoretical and physiological framework. They are complementary: the review (this paper) provides context, the computational paper provides quantitative data.
-- **Fant_1985_LFModelGlottalFlow** — LF model parameters (To, Te, Ta, Ee) discussed in Sec. III.A of this review as the standard voice source parameterization.
-- **Childers_Lee_1991_VoiceQualityFactors** — Voice quality factors (OQ, speed quotient, closure abruptness, noise) that this review contextualizes within the eigenmode framework.
-- **Klatt_1980_CascadeParallelFormantSynthesizer** — Formant synthesis approach critiqued in Sec. V.B as having "primitive" source controls.
-- **Klatt_1990_VoiceQualityVariations** — KLSYN88/KLGLOTT88 source model discussed as representative of parametric time-domain approaches.
-- **Gobl_2003_VoiceQualityEmotion** — Voice quality parameter trajectories that this review grounds in physiology.
-- **Hanson_2001_ModelsPhonation** — HLsyn quasi-articulatory controller directly relevant to bridging the gap Zhang identifies between physiology and synthesis.
-- **Hanson_2002_HLsynSourceParameters** — Higher-level control equations that address the source parameter co-variation problem Zhang highlights.
-- **Rothenberg_1981_InteractiveVoiceSource** — Source-tract interaction model; Zhang discusses this interaction as a significant factor in voice production physics.
-- **Stevens_1991_HL_Parameters** — Higher-level parameter system that maps articulatory controls to Klatt parameters, directly addressing the control complexity Zhang critiques.
-- **Burkhardt_2009_VoiceQualityFormantSynthesis** — Voice quality modification rules for Klatt; Zhang's review provides the physiological basis for why these rules work.
-- **Kreiman_2021_ValidatingVoiceQuality** — Spectral-domain voice source model Zhang advocates as superior; validates four-piece spectral decomposition.
-- **Kreiman_2007_GlottalSourceSpectrum** — PCA of source spectrum measures; Zhang notes the redundancy and gaps in current parameterization.
+- [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] — Companion paper by same author, same year. That paper presents NEW computational results from a 3D continuum model with parameter sweeps and R-parameter table. This paper is the REVIEW providing the broader theoretical and physiological framework. They are complementary: the review (this paper) provides context, the computational paper provides quantitative data.
+- [[Fant_1985_LFModelGlottalFlow]] — LF model parameters (To, Te, Ta, Ee) discussed in Sec. III.A of this review as the standard voice source parameterization.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — Voice quality factors (OQ, speed quotient, closure abruptness, noise) that this review contextualizes within the eigenmode framework.
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — Formant synthesis approach critiqued in Sec. V.B as having "primitive" source controls.
+- [[Klatt_1990_VoiceQualityVariations]] — KLSYN88/KLGLOTT88 source model discussed as representative of parametric time-domain approaches.
+- [[Gobl_2003_VoiceQualityEmotion]] — Voice quality parameter trajectories that this review grounds in physiology.
+- [[Hanson_2001_ModelsPhonation]] — HLsyn quasi-articulatory controller directly relevant to bridging the gap Zhang identifies between physiology and synthesis.
+- [[Hanson_2002_HLsynSourceParameters]] — Higher-level control equations that address the source parameter co-variation problem Zhang highlights.
+- [[Rothenberg_1981_InteractiveVoiceSource]] — Source-tract interaction model; Zhang discusses this interaction as a significant factor in voice production physics.
+- [[Stevens_1991_HL_Parameters]] — Higher-level parameter system that maps articulatory controls to Klatt parameters, directly addressing the control complexity Zhang critiques.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Voice quality modification rules for Klatt; Zhang's review provides the physiological basis for why these rules work.
+- [[Kreiman_2021_ValidatingVoiceQuality]] — Spectral-domain voice source model Zhang advocates as superior; validates four-piece spectral decomposition.
+- [[Kreiman_2007_GlottalSourceSpectrum]] — PCA of source spectrum measures; Zhang notes the redundancy and gaps in current parameterization.
 
 ### Cited By (in Collection)
-- **Kamiloglu_2021_VoiceProductionPerception** — cites this review (as Zhang 2016a) for its coverage of voice physiology and biomechanics in their comprehensive review of voice production and perception
+- [[Kamiloglu_2021_VoiceProductionPerception]] — cites this review (as Zhang 2016a) for its coverage of voice physiology and biomechanics in their comprehensive review of voice production and perception
 
 ### Conceptual Links (not citation-based)
-- **Doval_2003_VoiceSourceCALM** — CALM model provides the spectral-domain source approach Zhang advocates, treating the voice source as a mixed causal-anticausal filter rather than a time-domain waveform.
-- **Doval_2006_SpectrumGlottalFlowModels** — Analytical spectral formulas for glottal models that formalize the two-slope spectral structure Zhang describes in Sec. III.A.
-- **Perrotin_2021_LF_LinearFilter_Equivalence** — Efficient linear-filter LF implementations relevant to Zhang's call for computationally efficient reduced-order models.
+- [[Doval_2003_VoiceSourceCALM]] — CALM model provides the spectral-domain source approach Zhang advocates, treating the voice source as a mixed causal-anticausal filter rather than a time-domain waveform.
+- [[Doval_2006_SpectrumGlottalFlowModels]] — Analytical spectral formulas for glottal models that formalize the two-slope spectral structure Zhang describes in Sec. III.A.
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — Efficient linear-filter LF implementations relevant to Zhang's call for computationally efficient reduced-order models.
 
 ### New Leads (Not Yet in Collection)
 - **Kreiman et al. (2014)** — "Foundations of Voice Studies" — Comprehensive reference for voice perception and source characteristics

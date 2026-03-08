@@ -181,12 +181,12 @@ Linguistic Space
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS**
-- **Crystal_House_1988_StopConsonantDuration**
-- **Hertz_1991_StreamsPhonesTransitions**
-- **Klatt_1976_SegmentalDuration**
-- **Klatt_1987_TTS_Review**
-- **Stevens_1991_HL_Parameters**
+- [[Allen_1987_MITalk_TTS]]
+- [[Crystal_House_1988_StopConsonantDuration]]
+- [[Hertz_1991_StreamsPhonesTransitions]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Klatt_1987_TTS_Review]]
+- [[Stevens_1991_HL_Parameters]]
 
 ### New Leads (Not Yet in Collection)
 - **[12] van Santen (1992)** - Detailed study of contextual effects on vowel duration. Full-length version of this ACL paper with expanded results and analysis.

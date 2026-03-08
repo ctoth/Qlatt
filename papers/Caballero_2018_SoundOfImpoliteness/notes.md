@@ -171,11 +171,11 @@ $$
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
-- **Fish_2017_SoundOfInsincerity**
-- **Hellbernd_2016_ProsodySpeechActIntention**
-- **Jiang_2017_SoundOfConfidenceDoubt**
-- **Scherer_2001_VocalEmotionCrossCultural**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[Fish_2017_SoundOfInsincerity]]
+- [[Hellbernd_2016_ProsodySpeechActIntention]]
+- [[Jiang_2017_SoundOfConfidenceDoubt]]
+- [[Scherer_2001_VocalEmotionCrossCultural]]
 
 ### New Leads (Not Yet in Collection)
 - **Scherer, K.R., Ladd, D.R., Silverman, K.E., 1984** - "Vocal cues to speaker affect: testing two models" - Foundational paper on covariance vs configuration models for how acoustic cues encode affect. Critical for understanding categorical vs graded prosodic distinctions.

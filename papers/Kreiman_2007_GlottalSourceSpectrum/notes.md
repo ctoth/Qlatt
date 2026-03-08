@@ -200,16 +200,16 @@ This paper is highly relevant for voice quality parameter design in the Klatt sy
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow** -- cited for the LF model definition and R parameter framework; this paper uses the LF model directly for pulse fitting
-- **Childers_Lee_1991_VoiceQualityFactors** -- cited for the harmonic richness factor (HRF) measure; this paper evaluates HRF as one of the 78 spectral measures
-- **Klatt_1990_VoiceQualityVariations** -- cited for KLSYN88 and the voice quality continuum; the synthesizer used in this study is based on Klatt's architecture
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** -- cited for the corrected H1*-H2*, H1*-A1, H1*-A3* measures; these are among the measures evaluated
-- **Hanson_1999_GlottalMaleSpeakers** -- cited for male speaker glottal data; provides the gender comparison context
-- **Hanson_1995_GlottalCharacteristicsFemale** -- the thesis behind the corrected spectral measures used here
-- **Gobl_2003_VoiceQualityEmotion** -- related through Ni Chasaide & Gobl's R parameter work cited here
-- **Doval_2003_VoiceSourceCALM** -- cited as Doval & d'Alessandro 1999 for glottal flow spectrum models
-- **Doval_2006_SpectrumGlottalFlowModels** -- related; proves H1-H2 depends on both OQ and asymmetry, consistent with this paper's finding that H1-H2 is the most robust measure
-- **Fant_1997_VoiceSourceConnectedSpeech** -- cited for Rd parameter definitions and R parameter framework used in Table 1 of this paper; provides the unified waveshape parameter and covariation rules
+- [[Fant_1985_LFModelGlottalFlow]] -- cited for the LF model definition and R parameter framework; this paper uses the LF model directly for pulse fitting
+- [[Childers_Lee_1991_VoiceQualityFactors]] -- cited for the harmonic richness factor (HRF) measure; this paper evaluates HRF as one of the 78 spectral measures
+- [[Klatt_1990_VoiceQualityVariations]] -- cited for KLSYN88 and the voice quality continuum; the synthesizer used in this study is based on Klatt's architecture
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] -- cited for the corrected H1*-H2*, H1*-A1, H1*-A3* measures; these are among the measures evaluated
+- [[Hanson_1999_GlottalMaleSpeakers]] -- cited for male speaker glottal data; provides the gender comparison context
+- [[Hanson_1995_GlottalCharacteristicsFemale]] -- the thesis behind the corrected spectral measures used here
+- [[Gobl_2003_VoiceQualityEmotion]] -- related through Ni Chasaide & Gobl's R parameter work cited here
+- [[Doval_2003_VoiceSourceCALM]] -- cited as Doval & d'Alessandro 1999 for glottal flow spectrum models
+- [[Doval_2006_SpectrumGlottalFlowModels]] -- related; proves H1-H2 depends on both OQ and asymmetry, consistent with this paper's finding that H1-H2 is the most robust measure
+- [[Fant_1997_VoiceSourceConnectedSpeech]] -- cited for Rd parameter definitions and R parameter framework used in Table 1 of this paper; provides the unified waveshape parameter and covariation rules
 
 ### New Leads (Not Yet in Collection)
 - Alku, Strik, & Vilkman (1997) -- "Parabolic spectral parameter" -- alternative to H1-H2 for quantifying glottal source spectral shape
@@ -217,8 +217,8 @@ This paper is highly relevant for voice quality parameter design in the Klatt sy
 - de Krom (1993) -- cepstral-domain harmonics-to-noise ratio technique for separating harmonic/noise source components
 
 ### Cited By (in Collection)
-- **Zhang_2016_VocalFoldPhysiologyVoiceProduction** -- cites this paper in the context of voice source measurement and spectral characterization
-- **Zhang_2016_MechanicsVoiceProductionControl** — cites Kreiman's work on source spectrum redundancy and the gap in mid-frequency parameterization; advocates spectral-domain source models over time-domain
+- [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] -- cites this paper in the context of voice source measurement and spectral characterization
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — cites Kreiman's work on source spectrum redundancy and the gap in mid-frequency parameterization; advocates spectral-domain source models over time-domain
 
 ### Supersedes or Recontextualizes
 - This paper's finding that H1-H2 is uniquely robust across measurement techniques strongly supports Hanson_1997_GlottalCharacteristicsFemaleAcoustic's choice of corrected spectral measures as primary voice quality descriptors

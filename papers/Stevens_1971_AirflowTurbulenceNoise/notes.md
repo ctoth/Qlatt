@@ -223,7 +223,7 @@ Where $V$ is flow velocity and $D$ is characteristic dimension of constriction.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **Heinz & Stevens (1961, ref 15)** — "On the Properties of Voiceless Fricative Consonants" — direct acoustic measurements of fricative spectra that complement this aerodynamic analysis. Relevant for setting parallel branch amplitudes.

@@ -408,7 +408,7 @@ Compare synthesized fricative spectra against:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ### New Leads (Not Yet in Collection)
 - For fricative aeroacoustics modeling:**

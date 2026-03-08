@@ -229,13 +229,13 @@ Emotion → SNS/ANS changes → Muscle tension changes → Vocal apparatus modif
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **France_2000_SpeechDepressionSuicideAcoustics**
-- **Kim_Snyder_2012_UniversalG2P**
-- **Moore_2003_GlottalFeaturesDepression**
-- **Zhang_2016_VocalFoldPhysiologyVoiceProduction**
-- **Zhang_2016_MechanicsVoiceProductionControl** — cited as Zhang (2016a); comprehensive review of voice physiology, biomechanics, and the physics of vocal fold vibration that this paper draws on for its source-filter production overview
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[France_2000_SpeechDepressionSuicideAcoustics]]
+- [[Kim_Snyder_2012_UniversalG2P]]
+- [[Moore_2003_GlottalFeaturesDepression]]
+- [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]]
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — cited as Zhang (2016a); comprehensive review of voice physiology, biomechanics, and the physics of vocal fold vibration that this paper draws on for its source-filter production overview
 
 ### New Leads (Not Yet in Collection)
 - Scherer, K. R. (2003). Vocal communication of emotion - Comprehensive review of how emotions map to acoustic parameters; directly applicable to emotional speech synthesis

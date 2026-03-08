@@ -270,17 +270,17 @@ Directly relevant to Qlatt's intensity/loudness control system. The paper provid
 ## Collection Cross-References
 
 ### Already in Collection
-- **Titze_1989_MaleFemaleVoices** -- cited as Titze 1988 (same author); this 1989 paper provides the physiological scale factors (alpha, beta) for male-female differences that inform the different empirical constants in Table I
-- **Holmberg_1988_GlottalAirflowPressure** -- primary empirical data source for airflow and pressure measurements across loudness levels; the Table I constants are derived from this dataset
-- **Lucero_2005_VocalFoldBifurcations** -- analyzes bifurcation behavior of the Titze mucosal wave model; provides the mathematical framework for the phonation onset/offset behavior that $P_{th}$ approximates empirically
+- [[Titze_1989_MaleFemaleVoices]] -- cited as Titze 1988 (same author); this 1989 paper provides the physiological scale factors (alpha, beta) for male-female differences that inform the different empirical constants in Table I
+- [[Holmberg_1988_GlottalAirflowPressure]] -- primary empirical data source for airflow and pressure measurements across loudness levels; the Table I constants are derived from this dataset
+- [[Lucero_2005_VocalFoldBifurcations]] -- analyzes bifurcation behavior of the Titze mucosal wave model; provides the mathematical framework for the phonation onset/offset behavior that $P_{th}$ approximates empirically
 
 ### Cited By (in Collection)
-- **Sundberg_2005_GlottalSourceLoudness** -- cites this as ref [#17] for the vocal intensity model and PSEN (excess pressure over threshold) normalization
-- **Hanson_2002_HLsynSourceParameters** -- cites the companion phonation threshold paper (same volume) for the $P_{th}$ equation used in HLsyn
-- **Hanson_2001_ModelsPhonation** -- references Titze 1992 in context of phonation models
-- **Zhang_2016_VocalFoldPhysiologyVoiceProduction** -- cites in context of vocal fold physiology and voice production modeling
-- **Henrich_2005_GlottalOpenQuotientSinging** -- cites in context of glottal parameters in singing
-- **Drugman_2020_GlottalSourceEstimation** -- cites in context of glottal source estimation methods
+- [[Sundberg_2005_GlottalSourceLoudness]] -- cites this as ref [#17] for the vocal intensity model and PSEN (excess pressure over threshold) normalization
+- [[Hanson_2002_HLsynSourceParameters]] -- cites the companion phonation threshold paper (same volume) for the $P_{th}$ equation used in HLsyn
+- [[Hanson_2001_ModelsPhonation]] -- references Titze 1992 in context of phonation models
+- [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] -- cites in context of vocal fold physiology and voice production modeling
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- cites in context of glottal parameters in singing
+- [[Drugman_2020_GlottalSourceEstimation]] -- cites in context of glottal source estimation methods
 
 ### New Leads (Not Yet in Collection)
 - Titze, I. R. (1992) "Phonation threshold pressure: A missing link in glottal aerodynamics" JASA 91:2926-2935 -- companion paper in same volume; defines $P_{th}$ derivation from first principles
@@ -289,15 +289,15 @@ Directly relevant to Qlatt's intensity/loudness control system. The paper provid
 
 ### Conceptual Links (not citation-based)
 **Intensity and effort modeling:**
-- **Sundberg_2005_GlottalSourceLoudness** -- directly extends this work: uses the same PSEN normalization (Eq. 33's excess pressure concept) to study loudness-dependent source changes in untrained voices; provides empirical data on how $Q_o$, spectral slope, and MFDR vary with effort level, validating and refining the empirical relations in our Eqs. 33-38
-- **Lienard_1999_VocalEffortVowelSpectral** -- studies how vocal effort changes spectral characteristics of vowels; provides complementary perceptual/acoustic data on the intensity-spectral slope relationship modeled analytically here (Eq. 38)
-- **Herbst_2015_GlottalAdductionSubglottalPressure** -- empirically measures the interaction between glottal adduction and subglottal pressure that this paper models through the $u_{ac}$ and $Q_o$ equations; provides direct experimental grounding for the Table I constants
-- **Isshiki_1964_VoiceIntensityRegulation** -- early foundational study on voice intensity regulation mechanisms; Titze & Sundberg cite this lineage (Ladefoged & McKinney 1963, Isshiki 1964) as establishing lung pressure as the primary intensity control variable
+- [[Sundberg_2005_GlottalSourceLoudness]] -- directly extends this work: uses the same PSEN normalization (Eq. 33's excess pressure concept) to study loudness-dependent source changes in untrained voices; provides empirical data on how $Q_o$, spectral slope, and MFDR vary with effort level, validating and refining the empirical relations in our Eqs. 33-38
+- [[Lienard_1999_VocalEffortVowelSpectral]] -- studies how vocal effort changes spectral characteristics of vowels; provides complementary perceptual/acoustic data on the intensity-spectral slope relationship modeled analytically here (Eq. 38)
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] -- empirically measures the interaction between glottal adduction and subglottal pressure that this paper models through the $u_{ac}$ and $Q_o$ equations; provides direct experimental grounding for the Table I constants
+- [[Isshiki_1964_VoiceIntensityRegulation]] -- early foundational study on voice intensity regulation mechanisms; Titze & Sundberg cite this lineage (Ladefoged & McKinney 1963, Isshiki 1964) as establishing lung pressure as the primary intensity control variable
 
 **Source-filter interaction and spectral modeling:**
-- **Henrich_2001_SpectralOqAsymmetry** -- derives analytical spectral formulas for LF and other glottal models that provide a more rigorous version of the one-parameter source spectrum (Eq. 23) used here; shows that $Q_o$ and asymmetry coefficient jointly determine H1-H2, relevant to mapping between this paper's waveform parameters and spectral measures
-- **Fant_1985_LFModelGlottalFlow** -- the LF four-parameter model provides the standard parameterization for the glottal waveform features ($\dot{u}_m$, $Q_o$, $Q_s$) that this paper relates to lung pressure; mapping LF parameters (Ee, Ra, Rk, Rg) to the empirical relations in Eqs. 33-36 would connect the two frameworks
+- [[Henrich_2001_SpectralOqAsymmetry]] -- derives analytical spectral formulas for LF and other glottal models that provide a more rigorous version of the one-parameter source spectrum (Eq. 23) used here; shows that $Q_o$ and asymmetry coefficient jointly determine H1-H2, relevant to mapping between this paper's waveform parameters and spectral measures
+- [[Fant_1985_LFModelGlottalFlow]] -- the LF four-parameter model provides the standard parameterization for the glottal waveform features ($\dot{u}_m$, $Q_o$, $Q_s$) that this paper relates to lung pressure; mapping LF parameters (Ee, Ra, Rk, Rg) to the empirical relations in Eqs. 33-36 would connect the two frameworks
 
 **Speaker type differences:**
-- **Titze_1989_MaleFemaleVoices** -- provides the physiological explanation (scale factors alpha, beta) for why male and female empirical constants differ in Table I; the 1989 paper predicts the anatomical basis, the 1992 paper measures the acoustic consequence
-- **Zhang_2021_LaryngealSizeSexDifferences** -- extends Titze 1989's two-scale-factor approach with 3D simulations; the thickness parameter's effect on MFDR and spectral tilt directly connects to the singer/nonsinger intensity differences observed here
+- [[Titze_1989_MaleFemaleVoices]] -- provides the physiological explanation (scale factors alpha, beta) for why male and female empirical constants differ in Table I; the 1989 paper predicts the anatomical basis, the 1992 paper measures the acoustic consequence
+- [[Zhang_2021_LaryngealSizeSexDifferences]] -- extends Titze 1989's two-scale-factor approach with 3D simulations; the thickness parameter's effect on MFDR and spectral tilt directly connects to the singer/nonsinger intensity differences observed here

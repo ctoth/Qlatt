@@ -333,16 +333,16 @@ This paper is directly relevant to Qlatt. It provides the complete mathematical 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Stevens_1991_HL_Parameters** — cited as the original 10-parameter HL system that this paper extends to 13 parameters with full source equation derivations
-- **Rothenberg_1981_InteractiveVoiceSource** — cited for the equivalent-circuit model of the vocal tract that forms the aerodynamic basis of HLsyn
-- **Klatt_1990_VoiceQualityVariations** — cited for the KLSYN88 synthesizer and KLGLOTT88 source model that HLsyn maps to
-- **Hanson_1995_GlottalCharacteristicsFemale** — cited for glottal voice quality measures in female speakers that inform the gender-specific speaker constants
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — cited for corrected acoustic measures (H1*-H2*, H1*-A3*) linking to glottal configurations
-- **Hanson_1999_GlottalMaleSpeakers** — cited for male speaker glottal characteristics informing the male speaker constants
-- **Stevens_1998_AcousticPhonetics** — cited extensively for acoustic theory underlying the derivation equations
-- **Fant_1960_AcousticTheorySpeechProduction** — cited for vocal tract resonance theory and minimum formant frequency ($f1_{min}$)
-- **Shadle_1985_FricativeAcoustics** — cited for turbulence noise generation theory underlying the AF equation
-- **EspyWilson_2000_AcousticModelingAmericanR** — cited (as Espy-Wilson 1992) for liquid consonant formant frequency data
+- [[Stevens_1991_HL_Parameters]] — cited as the original 10-parameter HL system that this paper extends to 13 parameters with full source equation derivations
+- [[Rothenberg_1981_InteractiveVoiceSource]] — cited for the equivalent-circuit model of the vocal tract that forms the aerodynamic basis of HLsyn
+- [[Klatt_1990_VoiceQualityVariations]] — cited for the KLSYN88 synthesizer and KLGLOTT88 source model that HLsyn maps to
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — cited for glottal voice quality measures in female speakers that inform the gender-specific speaker constants
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for corrected acoustic measures (H1*-H2*, H1*-A3*) linking to glottal configurations
+- [[Hanson_1999_GlottalMaleSpeakers]] — cited for male speaker glottal characteristics informing the male speaker constants
+- [[Stevens_1998_AcousticPhonetics]] — cited extensively for acoustic theory underlying the derivation equations
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for vocal tract resonance theory and minimum formant frequency ($f1_{min}$)
+- [[Shadle_1985_FricativeAcoustics]] — cited for turbulence noise generation theory underlying the AF equation
+- [[EspyWilson_2000_AcousticModelingAmericanR]] — cited (as Espy-Wilson 1992) for liquid consonant formant frequency data
 
 ### New Leads (Not Yet in Collection)
 - Titze (1992) — "Phonation threshold pressure: A missing link in glottal aerodynamics" JASA 91:2926-2935 — key paper for phonation threshold equation (Eq. 25)
@@ -351,9 +351,9 @@ This paper is directly relevant to Qlatt. It provides the complete mathematical 
 - Svirsky et al. (1997) — "Tongue surface displacement during bilabial stops" JASA 102:562-571 — vocal-tract wall effects at stop release
 
 ### Supersedes or Recontextualizes
-- **Stevens_1991_HL_Parameters** — This 2002 paper provides the complete, detailed source parameter equations that Stevens & Bickley (1991) proposed conceptually. The 1991 paper had 10 parameters; this paper uses 13. The equation set here (Eqs. 23-37 plus the aerodynamic circuit Eqs. 15-22) is the definitive implementation reference.
-- **Hanson_2001_ModelsPhonation** — The 2001 paper described HLsyn qualitatively and referenced this paper (then "submitted") for the full equations. This 2002 paper delivers those equations.
+- [[Stevens_1991_HL_Parameters]] — This 2002 paper provides the complete, detailed source parameter equations that Stevens & Bickley (1991) proposed conceptually. The 1991 paper had 10 parameters; this paper uses 13. The equation set here (Eqs. 23-37 plus the aerodynamic circuit Eqs. 15-22) is the definitive implementation reference.
+- [[Hanson_2001_ModelsPhonation]] — The 2001 paper described HLsyn qualitatively and referenced this paper (then "submitted") for the full equations. This 2002 paper delivers those equations.
 
 ### Cited By (in Collection)
-- **Hanson_2001_ModelsPhonation** — cites this paper (as "Hanson & Stevens, submitted") for the full HLsyn mapping equations from HL to KL parameters
-- **Hanson_2003_AspiratedStopsModels** — uses HLsyn for synthesis examples of stop consonant releases
+- [[Hanson_2001_ModelsPhonation]] — cites this paper (as "Hanson & Stevens, submitted") for the full HLsyn mapping equations from HL to KL parameters
+- [[Hanson_2003_AspiratedStopsModels]] — uses HLsyn for synthesis examples of stop consonant releases

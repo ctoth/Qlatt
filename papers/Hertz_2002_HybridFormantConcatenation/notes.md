@@ -160,9 +160,9 @@ Systems used:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hertz_1991_StreamsPhonesTransitions**
+- [[Hertz_1991_StreamsPhonesTransitions]]
 - **Hertz_1999_ETI-Eloquence_MultiLanguage**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **[2] Verhelst 2000** - Describes the WSOLA join technique used to splice waveform fragments in the hybrid utterances; technically important for understanding the concatenation methodology.

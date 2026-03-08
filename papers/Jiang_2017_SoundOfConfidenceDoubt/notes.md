@@ -171,7 +171,7 @@ Normalized duration = utterance_duration / mean_duration_neutral
 ## Collection Cross-References
 
 ### Already in Collection
-- **Hellbernd_2016_ProsodySpeechActIntention**
+- [[Hellbernd_2016_ProsodySpeechActIntention]]
 
 ### New Leads (Not Yet in Collection)
 - **Scherer, London, Wolf (1973)** - "The voice of confidence" - Foundational paper on paralinguistic cues for confidence perception. Direct precursor to this work.

@@ -199,7 +199,7 @@ ESTOI provides an objective intelligibility metric for evaluating Qlatt synthesi
 ## Collection Cross-References
 
 ### Already in Collection
-- **Taal_2011_STOI** -- STOI is the predecessor algorithm that ESTOI extends. ESTOI shares the same preprocessing (10 kHz resampling, 1/3-octave bands, 384 ms segments, row normalization) but adds column normalization to capture spectral correlation.
+- [[Taal_2011_STOI]] -- STOI is the predecessor algorithm that ESTOI extends. ESTOI shares the same preprocessing (10 kHz resampling, 1/3-octave bands, 384 ms segments, row normalization) but adds column normalization to capture spectral correlation.
 
 ### New Leads (Not Yet in Collection)
 - Rhebergen et al. (2006) -- Extended SII (ESII) for fluctuating noise maskers, a Class-1 method
@@ -208,4 +208,4 @@ ESTOI provides an objective intelligibility metric for evaluating Qlatt synthesi
 - Jensen and Taal (2014) -- SIMI: speech intelligibility based on mutual information
 
 ### Supersedes or Recontextualizes
-- **Taal_2011_STOI** -- ESTOI is the direct extension of STOI. Where STOI fails (modulated maskers, rho=0.47), ESTOI succeeds (rho=0.92). ESTOI should be preferred when modulated noise sources are present. However, both metrics are useful: STOI for standard conditions (simpler, well-validated), ESTOI for robustness.
+- [[Taal_2011_STOI]] -- ESTOI is the direct extension of STOI. Where STOI fails (modulated maskers, rho=0.47), ESTOI succeeds (rho=0.92). ESTOI should be preferred when modulated noise sources are present. However, both metrics are useful: STOI for standard conditions (simpler, well-validated), ESTOI for robustness.

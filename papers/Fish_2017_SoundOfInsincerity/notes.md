@@ -144,8 +144,8 @@ Different acoustic features marked differently in each position.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Jiang_2017_SoundOfConfidenceDoubt**
-- **White_2014_ProsodicTimingFunction**
+- [[Jiang_2017_SoundOfConfidenceDoubt]]
+- [[White_2014_ProsodicTimingFunction]]
 
 ### New Leads (Not Yet in Collection)
 - **Cheang & Pell (2008) - "The sound of sarcasm"** - Related work on acoustic markers of non-literal speech from the same lab; likely provides complementary parameters for sarcasm that could be contrasted with sincerity cues.

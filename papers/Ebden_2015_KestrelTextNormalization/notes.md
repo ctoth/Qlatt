@@ -353,8 +353,8 @@ https://doi.org/10.1017/S1351324914000175
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS**
-- **Klatt_1987_TTS_Review**
+- [[Allen_1987_MITalk_TTS]]
+- [[Klatt_1987_TTS_Review]]
 
 ### New Leads (Not Yet in Collection)
 - **Sproat (1996, 1997)** - Bell Labs multilingual text-to-speech system: The foundational architecture that Kestrel improves upon; essential for understanding the evolution from single-phase to two-phase normalization.

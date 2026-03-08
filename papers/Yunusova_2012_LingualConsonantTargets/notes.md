@@ -228,7 +228,7 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Recasens_1997_LingualCoarticulationDAC**
+- [[Recasens_1997_LingualCoarticulationDAC]]
 
 ### New Leads (Not Yet in Collection)
 - **Recasens & Espinosa (2009)** - Foundational degree of articulatory constraints (DAC) model using electromagnetic articulography to examine coarticulation and tongue position variability in multiple languages.

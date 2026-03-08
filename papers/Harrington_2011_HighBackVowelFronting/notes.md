@@ -205,7 +205,7 @@ This represents a massive ~1000+ Hz shift in F2 while maintaining lip rounding.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **Lindblom & Sundberg (1971)** - Acoustic consequences of lip, tongue, jaw, and larynx movement. Foundational work establishing how formant changes result from different articulatory movements, directly relevant to understanding F2 changes in vowel fronting.
@@ -214,4 +214,4 @@ This represents a massive ~1000+ Hz shift in F2 while maintaining lip rounding.
 - **Hawkins & Midgley (2005)** - Formant frequencies of RP monophthongs in four age groups. Provides comprehensive formant target data for British English vowels across different speaker ages, essential reference for speech synthesis targeting in SSBE.
 
 ### Conceptual Links (not citation-based)
-- **Miller_1998_PronunciationModelingSpeechSynthesis** — Miller documents /u/ fronting in a Chicago male speaker as coronal-conditioned allophony (fronted [u] in coronal environments, unfronted [barred-u] elsewhere). Harrington demonstrates that SSBE /u/ fronting involves tongue advancement with maintained lip rounding. Different dialects and different explanatory frameworks (contextual allophony vs. diachronic sound change), but the same acoustic phenomenon of F2 raising in high back vowels
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — Miller documents /u/ fronting in a Chicago male speaker as coronal-conditioned allophony (fronted [u] in coronal environments, unfronted [barred-u] elsewhere). Harrington demonstrates that SSBE /u/ fronting involves tongue advancement with maintained lip rounding. Different dialects and different explanatory frameworks (contextual allophony vs. diachronic sound change), but the same acoustic phenomenon of F2 raising in high back vowels

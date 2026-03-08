@@ -176,10 +176,10 @@ LSP+LF optimization produces smoother speech but affects durations.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1988_LFFrequencyDomainInterpretation**
-- **Gobl_2003_VoiceQualityEmotion**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1988_LFFrequencyDomainInterpretation]]
+- [[Gobl_2003_VoiceQualityEmotion]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
 
 ### New Leads (Not Yet in Collection)
 - **Raitio et al. 2011 [2]** - Comprehensive IAIF + HMM synthesis paper. Details the inverse filtering method used here and its integration with statistical synthesis.

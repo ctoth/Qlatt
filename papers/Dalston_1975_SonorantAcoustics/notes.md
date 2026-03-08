@@ -195,8 +195,8 @@ Key acoustic cues that distinguish sonorants:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cooper_1952_PerceptionSyntheticSpeech** — cited for pattern playback experiments on perception of synthetic speech sounds including consonant-vowel syllable cues
-- **Fant_1960_AcousticTheorySpeechProduction**
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — cited for pattern playback experiments on perception of synthetic speech sounds including consonant-vowel syllable cues
+- [[Fant_1960_AcousticTheorySpeechProduction]]
 
 ### New Leads (Not Yet in Collection)
 - **O'Connor et al. (1957)** - Seminal work on acoustic cues for perception of initial sonorants; provides synthetic speech validation of spectrographic findings

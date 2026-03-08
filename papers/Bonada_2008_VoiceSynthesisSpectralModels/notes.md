@@ -353,7 +353,7 @@ Where $A$ = phase excursion (~$\pi$), $W$ = formant bandwidth, $v$ = formant mov
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1986_GlottalFlowModelsInteraction**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Sun_2006_VocalTractGlottalSource**
-- **Yegnanarayana_1998_VocalTractExtraction**
+- [[Fant_1986_GlottalFlowModelsInteraction]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Sun_2006_VocalTractGlottalSource]]
+- [[Yegnanarayana_1998_VocalTractExtraction]]

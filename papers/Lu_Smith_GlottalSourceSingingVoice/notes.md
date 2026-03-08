@@ -217,10 +217,10 @@ Gaussian Noise → Amplitude Modulation → Spectral Shaping → Noise Residual
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cummings_1995_GlottalExcitationEmotionalSpeech**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1997_VoiceSourceConnectedSpeech**
-- **Klatt_1990_VoiceQualityVariations**
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1997_VoiceSourceConnectedSpeech]]
+- [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
 - **Fant 1995 [12]** - LF-model revisited. Contains the prediction equations for deriving Ra, Rg, Rk from Rd. Critical for implementation.

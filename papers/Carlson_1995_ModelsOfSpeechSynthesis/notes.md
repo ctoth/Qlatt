@@ -140,21 +140,21 @@ No empirical results - this is a survey paper. Key observations:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS**
-- **Badin_1989_FricativeProductionModelling**
-- **Carlson_1975_RuleBasedTTS**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Hertz_1985_DeltaRuleSystem**
-- **Hertz_1991_StreamsPhonesTransitions**
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
-- **Klatt_1976_SegmentalDuration**
-- **Klatt_1987_TTS_Review**
-- **Klatt_1990_VoiceQualityVariations**
-- **Liberman_Mattingly_1985_MotorTheory**
-- **Shadle_1985_FricativeAcoustics**
-- **Stevens_1971_AirflowTurbulenceNoise**
-- **Stevens_1991_HL_Parameters**
+- [[Allen_1987_MITalk_TTS]]
+- [[Badin_1989_FricativeProductionModelling]]
+- [[Carlson_1975_RuleBasedTTS]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Hertz_1985_DeltaRuleSystem]]
+- [[Hertz_1991_StreamsPhonesTransitions]]
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Klatt_1987_TTS_Review]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Liberman_Mattingly_1985_MotorTheory]]
+- [[Shadle_1985_FricativeAcoustics]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
+- [[Stevens_1991_HL_Parameters]]
 
 ### New Leads (Not Yet in Collection)
 - **Gobl & Karlsson (1991) [ref 25]** - Source of Figure 2 showing LF parameter effects on spectrum. Useful for voice quality tuning.

@@ -450,8 +450,8 @@ Papers cited that may be worth reading:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Rabiner_1968_SynthesisByRule**
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Rabiner_1968_SynthesisByRule]]
 
 ### New Leads (Not Yet in Collection)
 - **Bolinger, Dwight (1951-1972)** - Seminal work on English intonation levels, accent patterns, and grammatical intonation. Multiple publications establishing foundational concepts of pitch accents and their linguistic functions.

@@ -210,11 +210,11 @@ This paper is directly relevant to the Qlatt voice quality synthesis work in sev
 ## Collection Cross-References
 
 ### Already in Collection
-- **Doval_2003_VoiceSourceCALM** - cited indirectly (ref 14, Doval & d'Alessandro 1999 is a predecessor); provides the spectral framework for understanding Oq and alpha_m effects
-- **Doval_2006_SpectrumGlottalFlowModels** - extends the spectral analysis of glottal parameters used here
-- **Fant_1985_LFModelGlottalFlow** - the LF model used in this study (ref 19)
+- [[Doval_2003_VoiceSourceCALM]] - cited indirectly (ref 14, Doval & d'Alessandro 1999 is a predecessor); provides the spectral framework for understanding Oq and alpha_m effects
+- [[Doval_2006_SpectrumGlottalFlowModels]] - extends the spectral analysis of glottal parameters used here
+- [[Fant_1985_LFModelGlottalFlow]] - the LF model used in this study (ref 19)
 - **vanDinther_2004_PerceptualGlottalPulse** - companion study using excitation pattern distance to quantify perceptual relevance of LF parameter variations; complements the psychoacoustic JND data here
-- **Henrich_2005_GlottalOpenQuotientSinging** - follow-up by same first author measuring Oq in real singers across laryngeal mechanisms
+- [[Henrich_2005_GlottalOpenQuotientSinging]] - follow-up by same first author measuring Oq in real singers across laryngeal mechanisms
 
 ### New Leads (Not Yet in Collection)
 - Scherer, Arehart, Gent Guo, Milstein, Horii 1998 - "Just Noticeable Differences for glottal flow waveform characteristics" - J Voice 12(1):21-30 -- predecessor study with single Oq/Sq values
@@ -222,8 +222,8 @@ This paper is directly relevant to the Qlatt voice quality synthesis work in sev
 - Rao, van Dinther, Veldhuis, Kohlrausch 2001 - "A measure for predicting audibility discrimination thresholds for spectral envelope distortions in vowel sounds" - JASA 109:2085-2097
 
 ### Cited By (in Collection)
-- **Doval_2006_SpectrumGlottalFlowModels** — cites this (ref 31) for JND data on Oq and αm, validating their spectral parameter framework against perceptual thresholds
-- **Feugere_2017_CantorDigitalis** — cites this (ref 40) for perceptual resolution of open quotient in singing voice synthesis
+- [[Doval_2006_SpectrumGlottalFlowModels]] — cites this (ref 31) for JND data on Oq and αm, validating their spectral parameter framework against perceptual thresholds
+- [[Feugere_2017_CantorDigitalis]] — cites this (ref 40) for perceptual resolution of open quotient in singing voice synthesis
 - **vanDinther_2004_PerceptualGlottalPulse** — compares EPD-based perceptual model predictions against the psychoacoustic JND data from this study
 
 ### Supersedes or Recontextualizes

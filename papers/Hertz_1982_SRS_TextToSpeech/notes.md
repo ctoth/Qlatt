@@ -236,11 +236,11 @@ FR  AV  AH  F1    F2    F3   DU
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1979_VowelPerceptionSalience**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Rabiner_1968_DigitalFormantSynthesizer**
-- **Rabiner_1968_SynthesisByRule**
+- [[Carlson_1979_VowelPerceptionSalience]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Rabiner_1968_DigitalFormantSynthesizer]]
+- [[Rabiner_1968_SynthesisByRule]]
 
 ### New Leads (Not Yet in Collection)
 - **Hertz (1979b)** - Ph.D. dissertation - Contains more detailed information about the SRS rule language, contour definition system, and implementation details not fully covered in this JASA paper.

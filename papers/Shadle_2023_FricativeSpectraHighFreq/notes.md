@@ -264,11 +264,11 @@ This paper is highly relevant to Qlatt's recent addition of F7-F10 cascade forma
 ## Collection Cross-References
 
 ### Already in Collection
-- **Shadle_1985_FricativeAcoustics** - Shadle's PhD thesis; this 2023 paper extends those mechanical model findings with human speech data up to 15 kHz
-- **Jongman_2000_FricativeAcoustics** - Comprehensive fricative acoustic analysis; this paper extends Jongman's work into the high-frequency range
-- **Stevens_1998_AcousticPhonetics** - Referenced for fricative source-filter theory and front-cavity resonance predictions
-- **Fant_1960_AcousticTheorySpeechProduction** - Referenced for the acoustic theory underlying front-cavity resonance frequency predictions
-- **Behrens_Blumstein_1988_FricativeAmplitude** - Referenced for spectral characteristics of voiceless fricatives
+- [[Shadle_1985_FricativeAcoustics]] - Shadle's PhD thesis; this 2023 paper extends those mechanical model findings with human speech data up to 15 kHz
+- [[Jongman_2000_FricativeAcoustics]] - Comprehensive fricative acoustic analysis; this paper extends Jongman's work into the high-frequency range
+- [[Stevens_1998_AcousticPhonetics]] - Referenced for fricative source-filter theory and front-cavity resonance predictions
+- [[Fant_1960_AcousticTheorySpeechProduction]] - Referenced for the acoustic theory underlying front-cavity resonance frequency predictions
+- [[Behrens_Blumstein_1988_FricativeAmplitude]] - Referenced for spectral characteristics of voiceless fricatives
 
 ### New Leads (Not Yet in Collection)
 - Tabain (1998) - "Non-sibilant fricatives in English: Spectral information above 10 kHz" - Directly relevant for A8-A10 targets
@@ -278,5 +278,5 @@ This paper is highly relevant to Qlatt's recent addition of F7-F10 cascade forma
 - Koenig et al. (2013) - "Toward improved spectral measures of /s/" - Previous F_M and Amp_D definitions refined here
 
 ### Supersedes or Recontextualizes
-- **Shadle_1985_FricativeAcoustics** - This 2023 paper extends the 1985 mechanical model findings with human speech data recorded at high sampling rates, providing empirical validation that non-sibilant spectra are indeed flat/rising at high frequencies as predicted by the tube models
-- **Jongman_2000_FricativeAcoustics** - This paper effectively extends Jongman 2000 into the high-frequency range and introduces superior measures (HighLevelD) for capturing fricative spectral dynamics
+- [[Shadle_1985_FricativeAcoustics]] - This 2023 paper extends the 1985 mechanical model findings with human speech data recorded at high sampling rates, providing empirical validation that non-sibilant spectra are indeed flat/rising at high frequencies as predicted by the tube models
+- [[Jongman_2000_FricativeAcoustics]] - This paper effectively extends Jongman 2000 into the high-frequency range and introduces superior measures (HighLevelD) for capturing fricative spectral dynamics

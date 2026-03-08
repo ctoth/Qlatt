@@ -179,11 +179,11 @@ COMPACT (Velar):
 ## Collection Cross-References
 
 ### Already in Collection
-- **Cooper_1952_PerceptionSyntheticSpeech** — cited for the original synthetic speech perception experiments on stop consonant burst and transition cues; Blumstein & Stevens extend with invariant spectral templates
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Klatt_1976_SegmentalDuration**
-- **Sundberg_1972_SingingFormant**
-- **Zue_1976_StopConsonantAcoustics**
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — cited for the original synthetic speech perception experiments on stop consonant burst and transition cues; Blumstein & Stevens extend with invariant spectral templates
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Klatt_1976_SegmentalDuration]]
+- [[Sundberg_1972_SingingFormant]]
+- [[Zue_1976_StopConsonantAcoustics]]
 
 ### New Leads (Not Yet in Collection)
 - **Stevens & Blumstein (1978) - "Invariant cues for place of articulation in stop consonants"**: The companion perceptual study that provides the theoretical basis for this paper's templates. Critical for understanding how burst spectra relate to perception.

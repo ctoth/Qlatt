@@ -249,7 +249,7 @@ Key quantitative findings:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ### New Leads (Not Yet in Collection)
 - **Peterson & Lehiste (1960)** - Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.

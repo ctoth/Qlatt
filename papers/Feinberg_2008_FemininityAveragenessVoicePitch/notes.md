@@ -117,8 +117,8 @@ Provides empirical F0 targets for an attractive female voice preset: higher is b
 ## Collection Cross-References
 
 ### Already in Collection
-- **Collins_2003_VocalVisualAttractiveness** — cited for positive correlation between voice pitch and attractiveness in unmanipulated voices; this paper extends those findings with manipulation experiments
-- **Childers_Lee_1991_VoiceQualityFactors** — cited for reference female F0 value of ~220 Hz used as "average" baseline
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for positive correlation between voice pitch and attractiveness in unmanipulated voices; this paper extends those findings with manipulation experiments
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cited for reference female F0 value of ~220 Hz used as "average" baseline
 
 ### New Leads (Not Yet in Collection)
 - Feinberg et al (2005b) — "Manipulations of fundamental and formant frequencies influence the attractiveness of human male voices" — relevant for male voice preset design
@@ -126,11 +126,11 @@ Provides empirical F0 targets for an attractive female voice preset: higher is b
 - Fitch (1997) — formant dispersion measure (Fdisp) used here, relevant for vocal tract length estimation
 
 ### Cited By (in Collection)
-- **Babel_2014_VocalAttractiveness** — cites this for F0 manipulation and attractiveness findings
-- **Belin_2017_SoundOfTrustworthiness** — cites this in trustworthiness-voice quality context
-- **Feinberg_2011_IntegratingF0FormantPreferences** — extends this work by showing F0 and formant preferences interact (cue amplification), not independent as treated here
+- [[Babel_2014_VocalAttractiveness]] — cites this for F0 manipulation and attractiveness findings
+- [[Belin_2017_SoundOfTrustworthiness]] — cites this in trustworthiness-voice quality context
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — extends this work by showing F0 and formant preferences interact (cue amplification), not independent as treated here
 
 ### Supersedes or Recontextualizes
-- **Collins_2003_VocalVisualAttractiveness** — Feinberg 2008 extends Collins 2003 by showing pitch alone (via PSOLA manipulation) drives attractiveness, not just correlated vocal qualities
+- [[Collins_2003_VocalVisualAttractiveness]] — Feinberg 2008 extends Collins 2003 by showing pitch alone (via PSOLA manipulation) drives attractiveness, not just correlated vocal qualities
 
 **See also:** Chen_2022_AcousticMasculinityFemininity — quantifies F0 mean as 23.8% (females) and 43.5% (males) of perceived masculinity/femininity importance using hierarchical clustering on 23 acoustic measures, providing weighted importance context for Feinberg's F0 manipulation findings

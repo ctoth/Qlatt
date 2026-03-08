@@ -386,16 +386,16 @@ F6 = 2×F4, A6 = -15 dB, B6 = 150 Hz (constant)
 ## Collection Cross-References
 
 ### Already in Collection
-- **Doval_2003_VoiceSourceCALM**
-- **Doval_2006_SpectrumGlottalFlowModels**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Hanson_1995_GlottalCharacteristicsFemale**
-- **Henrich_2003_JND_OpenQuotient** — cited (ref 40) for perceptual resolution of open quotient (~10-14% relative JND) and asymmetry coefficient (~4% relative JND) in singing voice
-- **Henrich_2005_GlottalOpenQuotientSinging**
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Peterson_Barney_1952_VowelControl**
+- [[Doval_2003_VoiceSourceCALM]]
+- [[Doval_2006_SpectrumGlottalFlowModels]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Hanson_1995_GlottalCharacteristicsFemale]]
+- [[Henrich_2003_JND_OpenQuotient]] — cited (ref 40) for perceptual resolution of open quotient (~10-14% relative JND) and asymmetry coefficient (~4% relative JND) in singing voice
+- [[Henrich_2005_GlottalOpenQuotientSinging]]
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Peterson_Barney_1952_VowelControl]]
 
 ### New Leads (Not Yet in Collection)
 - **Sundberg 2001** (Reference 31) - Singing formant; directly applicable to soprano and higher voice formant clustering techniques described in the paper

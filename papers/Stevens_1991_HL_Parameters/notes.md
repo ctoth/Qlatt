@@ -270,15 +270,15 @@ AerodynamicState {
 ## Collection Cross-References
 
 ### Already in Collection
-- **Badin_1989_FricativeProductionModelling**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fujimura_1962_NasalConsonantAnalysis**
-- **Hawkins_Stevens_1985_NasalVowelCorrelates**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Klatt_1990_VoiceQualityVariations**
-- **Shadle_1985_FricativeAcoustics**
-- **Stevens_1971_AirflowTurbulenceNoise**
+- [[Badin_1989_FricativeProductionModelling]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fujimura_1962_NasalConsonantAnalysis]]
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Shadle_1985_FricativeAcoustics]]
+- [[Stevens_1971_AirflowTurbulenceNoise]]
 
 ---
 

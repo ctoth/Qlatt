@@ -213,7 +213,7 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 ## Collection Cross-References
 
 ### Already in Collection
-- **Browman_Goldstein_1992_ArticulatoryPhonologyOverview** - extends and elaborates this 1989 framework with additional data and refinements
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] - extends and elaborates this 1989 framework with additional data and refinements
 
 ### New Leads (Not Yet in Collection)
 - Saltzman & Kelso (1987) "Skilled actions: a task dynamic approach" - the formal dynamical model underlying gesture definitions
@@ -222,7 +222,7 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 - Stevens (1972) "The quantal nature of speech" - basis for CD categorical distinctions
 
 ### Conceptual Links (not citation-based)
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz's "stable transition phenomenon" (formant transitions hold at ~65ms while steady states stretch) is exactly what AP predicts for a high-stiffness gesture superimposed on a lower-stiffness vocalic gesture. Different formalisms (multi-stream deltas vs. gestural scores), same empirical convergence on transitions as independent temporal units.
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's "stable transition phenomenon" (formant transitions hold at ~65ms while steady states stretch) is exactly what AP predicts for a high-stiffness gesture superimposed on a lower-stiffness vocalic gesture. Different formalisms (multi-stream deltas vs. gestural scores), same empirical convergence on transitions as independent temporal units.
 
 ### Supersedes or Recontextualizes
 - This 1989 paper is the foundational version; the 1992 paper (already in collection) is the more accessible overview that extends it

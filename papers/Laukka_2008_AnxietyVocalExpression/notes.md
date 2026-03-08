@@ -163,7 +163,7 @@ This paper provides **empirically validated targets** for synthesizing anxious/n
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
 
 ### New Leads (Not Yet in Collection)
 - **Juslin, P. N., & Laukka, P. (2003)** - "Communication of emotions in vocal expression and music performance: Different channels, same code?" *Psychological Bulletin*

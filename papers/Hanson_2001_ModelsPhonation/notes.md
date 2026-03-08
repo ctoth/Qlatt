@@ -188,14 +188,14 @@ This paper is directly relevant to the Qlatt Klatt synthesizer in several ways:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Stevens_1991_HL_Parameters** — cited as the earlier version of higher-level Klatt parameter control (10 parameters). This paper extends it to 13 parameters as HLsyn.
-- **Hanson_1995_GlottalCharacteristicsFemale** — Hanson's PhD thesis developing the acoustic measures (H1*-A3*, B1, noise ratings) that this paper applies to a larger population and extends to males.
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** — The journal paper version of the female acoustic measures; this 2001 paper combines those results with the male data (Hanson & Chuang 1999) and new synthesis work.
-- **Hanson_1999_GlottalMaleSpeakers** — The companion male speaker study; this 2001 paper presents the combined 43-speaker dataset (21M+22F) and cross-gender analysis.
-- **Klatt_1990_VoiceQualityVariations** — cited for KLGLOTT88 model and KLSYN88 synthesizer, which HLsyn extends with quasi-articulatory control.
-- **Fant_1985_LFModelGlottalFlow** — cited for the LF model as one of the first phonation models to include nonmodal effects (nonabrupt return phase).
-- **Fant_1960_AcousticTheorySpeechProduction** — cited for the formant boosting correction formulas used to compute H1*, H2*, A3* corrected measures.
-- **Childers_Lee_1991_VoiceQualityFactors** — related work on voice quality parameterization; this 2001 paper takes a more acoustic-model-driven approach vs Childers & Lee's EGG-based approach.
+- [[Stevens_1991_HL_Parameters]] — cited as the earlier version of higher-level Klatt parameter control (10 parameters). This paper extends it to 13 parameters as HLsyn.
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — Hanson's PhD thesis developing the acoustic measures (H1*-A3*, B1, noise ratings) that this paper applies to a larger population and extends to males.
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — The journal paper version of the female acoustic measures; this 2001 paper combines those results with the male data (Hanson & Chuang 1999) and new synthesis work.
+- [[Hanson_1999_GlottalMaleSpeakers]] — The companion male speaker study; this 2001 paper presents the combined 43-speaker dataset (21M+22F) and cross-gender analysis.
+- [[Klatt_1990_VoiceQualityVariations]] — cited for KLGLOTT88 model and KLSYN88 synthesizer, which HLsyn extends with quasi-articulatory control.
+- [[Fant_1985_LFModelGlottalFlow]] — cited for the LF model as one of the first phonation models to include nonmodal effects (nonabrupt return phase).
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for the formant boosting correction formulas used to compute H1*, H2*, A3* corrected measures.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — related work on voice quality parameterization; this 2001 paper takes a more acoustic-model-driven approach vs Childers & Lee's EGG-based approach.
 
 ### New Leads (Not Yet in Collection)
 - Kuo (1998) — "Voice source modeling and analysis of speakers with vocal-fold nodules" PhD thesis, MIT — two-mass model with nodule modifications, aerodynamic equations
@@ -204,8 +204,8 @@ This paper is directly relevant to the Qlatt Klatt synthesizer in several ways:
 - Story & Titze (1995) — "Voice simulation with a body-cover model of the vocal folds" JASA 97:1249-1260 — body-cover vocal fold model for more realistic fold vibration
 
 ### Supersedes or Recontextualizes
-- **Stevens_1991_HL_Parameters** — This 2001 paper describes HLsyn as an extension of the Stevens & Bickley (1991) system, adding 3 parameters (for a total of 13) including posterior glottal opening (**ap**) which is critical for modeling breathy voice quality. HLsyn is the successor system.
-- **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** and **Hanson_1999_GlottalMaleSpeakers** — This paper synthesizes and extends both studies by presenting the combined male+female dataset, adding cross-gender comparisons, and connecting the acoustic measures to the HLsyn synthesizer framework.
+- [[Stevens_1991_HL_Parameters]] — This 2001 paper describes HLsyn as an extension of the Stevens & Bickley (1991) system, adding 3 parameters (for a total of 13) including posterior glottal opening (**ap**) which is critical for modeling breathy voice quality. HLsyn is the successor system.
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] and [[Hanson_1999_GlottalMaleSpeakers]] — This paper synthesizes and extends both studies by presenting the combined male+female dataset, adding cross-gender comparisons, and connecting the acoustic measures to the HLsyn synthesizer framework.
 
 ### Conceptual Links (not citation-based)
 - **Larrouy-Maestri_2024_EmotionalProsody** — emotional prosody review identifies voice quality as critical for emotion encoding (especially valence), but notes the field lacks mechanistic understanding. HLsyn's 13-parameter quasi-articulatory control provides exactly this mechanism: linking physiological configurations (subglottal pressure, glottal area, posterior opening) to the spectral measures (H1*-H2*, H1*-A3*) the review identifies as emotion-discriminating. The finding that reduced vowels show 7-13 dB greater spectral tilt connects prosodic prominence to voice quality, a dimension the review argues is underexplored.

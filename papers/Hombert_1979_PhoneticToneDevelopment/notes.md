@@ -167,9 +167,9 @@ This paper provides the empirical basis for the F0 microprosody rule in Qlatt's 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Peterson_Barney_1952_VowelControl** - cited for intrinsic vowel F0 data (Table 3)
-- **Lisker_Abramson_1964_CrossLanguageVoicingStops** - cited for VOT and voicing framework
-- **OShaughnessy_1976_F0_Prosody** - related F0 generation work
+- [[Peterson_Barney_1952_VowelControl]] - cited for intrinsic vowel F0 data (Table 3)
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - cited for VOT and voicing framework
+- [[OShaughnessy_1976_F0_Prosody]] - related F0 generation work
 
 ### New Leads (Not Yet in Collection)
 - Hombert 1975a - "Towards a theory of tonogenesis" - primary source for the English F0 perturbation data used in our rule

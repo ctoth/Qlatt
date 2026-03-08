@@ -174,12 +174,12 @@ The cue weighting framework connects to several aspects of the soliton-gestures 
 ## Collection Cross-References
 
 ### Already in Collection
-- **Blumstein_Stevens_1979_AcousticInvariance** - cited indirectly via spectral invariance concept; the invariant spectral templates for stop place may be robust cues precisely because of low within-category variance
-- **Haskins_StopRecognition** - cited for burst vs transition cue trading; this paper's framework explains the weighting mechanism
-- **Zue_1976_StopConsonantAcoustics** - provides distributional data on stop consonant acoustics that feeds into cue weighting
-- **Hillenbrand_1995_VowelAcoustics** - cited directly for vowel formant weighting (formants weighted more than duration for tense/lax)
-- **Abramson_Whalen_2017_VOTat50** - VOT as a heavily weighted cue relates to its distributional properties
-- **Liberman_Mattingly_1985_MotorTheory** - cited (as Liberman 1996) for the "lack of invariance" problem that cue weighting addresses
+- [[Blumstein_Stevens_1979_AcousticInvariance]] - cited indirectly via spectral invariance concept; the invariant spectral templates for stop place may be robust cues precisely because of low within-category variance
+- [[Haskins_StopRecognition]] - cited for burst vs transition cue trading; this paper's framework explains the weighting mechanism
+- [[Zue_1976_StopConsonantAcoustics]] - provides distributional data on stop consonant acoustics that feeds into cue weighting
+- [[Hillenbrand_1995_VowelAcoustics]] - cited directly for vowel formant weighting (formants weighted more than duration for tense/lax)
+- [[Abramson_Whalen_2017_VOTat50]] - VOT as a heavily weighted cue relates to its distributional properties
+- [[Liberman_Mattingly_1985_MotorTheory]] - cited (as Liberman 1996) for the "lack of invariance" problem that cue weighting addresses
 
 ### New Leads (Not Yet in Collection)
 - Francis, A. L., et al. (2000) - "Selective attention and the acquisition of new phoneme categories" - J. Exp. Psych: HPP - directly relevant to L2 acquisition

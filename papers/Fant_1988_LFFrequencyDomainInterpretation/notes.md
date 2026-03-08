@@ -241,10 +241,10 @@ Despite similar Uo/Ee ratios:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Fant_1985_LFModelGlottalFlow**
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Sundberg_1972_SingingFormant**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Sundberg_1972_SingingFormant]]
 
 ### New Leads (Not Yet in Collection)
 - **Gobl (1988) - "Voice Source Dynamics in Connected Speech"** - Studies temporal variation of LF parameters in running speech. Important for understanding how parameters change during coarticulation.

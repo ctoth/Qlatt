@@ -206,11 +206,11 @@ The paper explains why traditional nasal synthesis sounds poor: modeling just ad
 ## Collection Cross-References
 
 ### Already in Collection
-- **Badin_1989_FricativeProductionModelling**
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Hawkins_Stevens_1985_NasalVowelCorrelates**
-- **House_Stevens_1956_NasalizationVowels**
-- **Maeda_1982_VowelNasalizationCues**
+- [[Badin_1989_FricativeProductionModelling]]
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]]
+- [[House_Stevens_1956_NasalizationVowels]]
+- [[Maeda_1982_VowelNasalizationCues]]
 
 ### New Leads (Not Yet in Collection)
 - **Lindqvist-Gauffin, J., and Sundberg, J. (1976) - Acoustic Properties of the Nasal Tract** - Provides sweep-tone measurements crucial for validating the pharyngonasal tract model.

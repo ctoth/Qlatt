@@ -731,31 +731,31 @@ Including: orthographic word, lexical phone, postlexical phone, preceding/follow
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS** — cited as foundational TTS system; Miller builds on the MITalk pipeline architecture
-- **Elovitz_1976_NRL_LTS** — cited for the 329-rule LTS system establishing practical G2P conversion
-- **Klatt_1976_SegmentalDuration** — cited for segmental duration rules; Miller's duration module extends this approach
-- **Klatt_1979_SpeechPerceptionLexicalAccess** — cited for SCRIBER/LAFS diphone-based acoustic decoding
-- **Klatt_1980_CascadeParallelFormantSynthesizer** — foundational synthesizer architecture
-- **Klatt_1987_TTS_Review** — cited for TTS pipeline review and Klattalk specification
-- **Klatt_1990_VoiceQualityVariations** — cited for KLSYN88 voice quality framework
-- **OShaughnessy_1976_F0_Prosody** — cited for the 0-14 word prominence scale used in neural network input encoding
-- **Pierrehumbert_1980_EnglishIntonation** — cited for ToBI pitch accent notation (H*, L*) used in boundary features
-- **Silverman_1992_ToBILabelingProsody** — cited for ToBI transcription conventions used in corpus labeling
-- **Beckman_2022_ToBISystem** — ToBI conventions referenced for prosodic labeling tiers
-- **Black_1998_LTS_Rules** — cited for CART-based letter-to-sound rules as alternative G2P approach
-- **Hunnicutt_1976_PhonologicalRules** — cited for MITalk phonological rule system
-- **Sproat_Fujimura_1993_AllophonicVariationEnglishL** — cited extensively for gradient light/dark /l/ allophony and the two-gesture model
-- **Browman_1989_ArticulatoryGesturesPhonologicalUnits** — cited for gestural approach to deletion (remnants of deleted gestures)
-- **Browman_Goldstein_1992_ArticulatoryPhonologyOverview** — cited for "targetless" schwa concept and gestural overlap model of coarticulation
-- **Goldsmith_1976_AutosegmentalPhonology** — cited for autosegmental phonological theory underlying multi-tier representations
-- **Ohman_1966_CoarticulationVCV** — cited for coarticulation in VCV utterances
-- **Recasens_1997_LingualCoarticulationDAC** — related coarticulation framework (DAC model)
+- [[Allen_1987_MITalk_TTS]] — cited as foundational TTS system; Miller builds on the MITalk pipeline architecture
+- [[Elovitz_1976_NRL_LTS]] — cited for the 329-rule LTS system establishing practical G2P conversion
+- [[Klatt_1976_SegmentalDuration]] — cited for segmental duration rules; Miller's duration module extends this approach
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]] — cited for SCRIBER/LAFS diphone-based acoustic decoding
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — foundational synthesizer architecture
+- [[Klatt_1987_TTS_Review]] — cited for TTS pipeline review and Klattalk specification
+- [[Klatt_1990_VoiceQualityVariations]] — cited for KLSYN88 voice quality framework
+- [[OShaughnessy_1976_F0_Prosody]] — cited for the 0-14 word prominence scale used in neural network input encoding
+- [[Pierrehumbert_1980_EnglishIntonation]] — cited for ToBI pitch accent notation (H*, L*) used in boundary features
+- [[Silverman_1992_ToBILabelingProsody]] — cited for ToBI transcription conventions used in corpus labeling
+- [[Beckman_2022_ToBISystem]] — ToBI conventions referenced for prosodic labeling tiers
+- [[Black_1998_LTS_Rules]] — cited for CART-based letter-to-sound rules as alternative G2P approach
+- [[Hunnicutt_1976_PhonologicalRules]] — cited for MITalk phonological rule system
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cited extensively for gradient light/dark /l/ allophony and the two-gesture model
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] — cited for gestural approach to deletion (remnants of deleted gestures)
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — cited for "targetless" schwa concept and gestural overlap model of coarticulation
+- [[Goldsmith_1976_AutosegmentalPhonology]] — cited for autosegmental phonological theory underlying multi-tier representations
+- [[Ohman_1966_CoarticulationVCV]] — cited for coarticulation in VCV utterances
+- [[Recasens_1997_LingualCoarticulationDAC]] — related coarticulation framework (DAC model)
 - **vanSanten_1993_SegmentalDuration** — cited for sums-of-products duration models outperforming Klatt-style multiplicative rules
 - **vanSanten_1994_SegmentalDurationTTS** — cited for advanced duration prediction framework
-- **Hombert_1979_PhoneticToneDevelopment** — cited for consonant voicing effects on F0
+- [[Hombert_1979_PhoneticToneDevelopment]] — cited for consonant voicing effects on F0
 
 ### Cited By (in Collection)
-- **Montoyo_2005_WSD_Hybrid** — lists Miller 1998 in its "Already in Collection" cross-references (WSD for homograph disambiguation relevant to TTS)
+- [[Montoyo_2005_WSD_Hybrid]] — lists Miller 1998 in its "Already in Collection" cross-references (WSD for homograph disambiguation relevant to TTS)
 
 ### New Leads (Not Yet in Collection)
 - Pierrehumbert & Frisch (1997) — "Synthesizing allophonic glottalization" — directly relevant to Qlatt's postlexical glottalization rules; establishes that glottalization requires parsed prosodic structure up to intonational phrase level
@@ -768,14 +768,14 @@ Including: orthographic word, lexical phone, postlexical phone, preceding/follow
 ### Conceptual Links (not citation-based)
 
 **Allophony and coarticulation:**
-- **Recasens_2012_LateralAllophones** — Miller cites Sproat & Fujimura 1993 for /l/ allophony but not Recasens 2012, which provides the comprehensive cross-language F2 data (clear ~1300 Hz, dark ~900 Hz) that would ground Miller's observation that dark /l/ does NOT count as coronal for vowel fronting purposes — the dorsal retraction gesture dominates acoustically
-- **Harrington_2011_HighBackVowelFronting** — Miller documents /u/ fronting in his Chicago speaker as coronal-conditioned allophony; Harrington demonstrates that SSBE /u/ fronting involves tongue advancement with maintained lip rounding. Different dialects, same phenomenon, complementary articulatory explanation
+- [[Recasens_2012_LateralAllophones]] — Miller cites Sproat & Fujimura 1993 for /l/ allophony but not Recasens 2012, which provides the comprehensive cross-language F2 data (clear ~1300 Hz, dark ~900 Hz) that would ground Miller's observation that dark /l/ does NOT count as coronal for vowel fronting purposes — the dorsal retraction gesture dominates acoustically
+- [[Harrington_2011_HighBackVowelFronting]] — Miller documents /u/ fronting in his Chicago speaker as coronal-conditioned allophony; Harrington demonstrates that SSBE /u/ fronting involves tongue advancement with maintained lip rounding. Different dialects, same phenomenon, complementary articulatory explanation
 - **vanSon_1997_ConsonantReduction** — Miller focuses on vowel reduction and stop allophony; van Son extends reduction analysis to consonants, showing parallel acoustic reduction (duration, spectral center of gravity, coarticulation) in informal speech. Together they suggest reduction is a unified phenomenon across segment types
 
 **Duration and prosody:**
-- **Klatt_1976_SegmentalDuration** — Miller's TTS pipeline uses a separate duration module; Klatt 1976 provides the incompressibility principle and multiplicative rules that van Santen's sums-of-products models later improved upon. Miller's prosodic hierarchy conditioning of allophony (P1/P2 rules) interacts with Klatt's phrase-final lengthening
+- [[Klatt_1976_SegmentalDuration]] — Miller's TTS pipeline uses a separate duration module; Klatt 1976 provides the incompressibility principle and multiplicative rules that van Santen's sums-of-products models later improved upon. Miller's prosodic hierarchy conditioning of allophony (P1/P2 rules) interacts with Klatt's phrase-final lengthening
 - **vanSanten_1997_ProsodicModeling** — van Santen identifies the "concatenative assumption" and spectral coarticulation effects across boundaries; Miller's cross-word flapping failures (64% accuracy, failures in "that heavy", "brought out") are exactly the kind of cross-boundary phenomenon van Santen warns about
 
 **TTS architecture:**
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz proposes treating formant transitions as independent temporal units with stable durations; Miller's postlexical module operates at the phone level. The two approaches address different layers of the same problem: Hertz handles acoustic realization, Miller handles phonological surface form selection
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz proposes treating formant transitions as independent temporal units with stable durations; Miller's postlexical module operates at the phone level. The two approaches address different layers of the same problem: Hertz handles acoustic realization, Miller handles phonological surface form selection
 - **Hertz_1999_ETI-Eloquence_MultiLanguage** — Hertz's multi-language TTS architecture separates language-universal from language-specific components; Miller's postlexical module is inherently speaker-specific, but the general architecture of phonemic dictionary → postlexical rules → acoustic realization parallels Hertz's pipeline

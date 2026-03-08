@@ -163,16 +163,16 @@ This paper is directly relevant to Qlatt's voice quality synthesis:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Doval_2006_SpectrumGlottalFlowModels**
-- **Fant_1985_LFModelGlottalFlow**
-- **Fant_1997_VoiceSourceConnectedSpeech**
-- **Klatt_1990_VoiceQualityVariations**
-- **Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment**
-- **Stevens_1998_AcousticPhonetics**
+- [[Doval_2006_SpectrumGlottalFlowModels]]
+- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1997_VoiceSourceConnectedSpeech]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment]]
+- [[Stevens_1998_AcousticPhonetics]]
 
 ### New Leads (Not Yet in Collection)
 - **Hawks & Miller (1995)** - Formant frequency-to-bandwidth mapping function. Used as baseline for bandwidth estimation in synthesis when OQ <= 0.7.
 
 ### Now in Collection (previously listed as leads)
-- **Henrich_2001_SpectralOqAsymmetry** -- Derives analytical spectral formulas showing H1*-H2* depends on both Oq and asymmetry coefficient in the LF model. Confirms this paper's finding that OQ alone cannot determine H1-H2, and shows the KLGLOTT88 model's unique monotonic relationship is an artifact of its reduced parameter count.
-- **Iseli_2007_VoiceSourceAgeSexVowel** -- Provides the spectral magnitude correction formula for removing vocal tract effects from harmonic amplitude measurements (H1*-H2*, H1*-A3*), validated across 335 speakers ages 8-39.
+- [[Henrich_2001_SpectralOqAsymmetry]] -- Derives analytical spectral formulas showing H1*-H2* depends on both Oq and asymmetry coefficient in the LF model. Confirms this paper's finding that OQ alone cannot determine H1-H2, and shows the KLGLOTT88 model's unique monotonic relationship is an artifact of its reduced parameter count.
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] -- Provides the spectral magnitude correction formula for removing vocal tract effects from harmonic amplitude measurements (H1*-H2*, H1*-A3*), validated across 335 speakers ages 8-39.

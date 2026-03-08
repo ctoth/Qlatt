@@ -200,9 +200,9 @@ One female speaker (AF6) produced /h/ with minimal flow increase but clear breat
 ## Collection Cross-References
 
 ### Already in Collection
-- **Holmberg_1988_GlottalAirflowPressure**
-- **Klatt_1990_VoiceQualityVariations**
-- **Stevens_1989_QuantalNatureSpeech**
+- [[Holmberg_1988_GlottalAirflowPressure]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Stevens_1989_QuantalNatureSpeech]]
 
 ### New Leads (Not Yet in Collection)
 - **Titze (1988)** - Fundamental physics and physiology of phonation threshold pressure (Pth), critical for understanding gender and age differences in voicing control

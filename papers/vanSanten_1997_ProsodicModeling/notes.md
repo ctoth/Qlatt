@@ -227,12 +227,12 @@ Where:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Allen_1987_MITalk_TTS** — cited as the classic MITalk system description motivating design decisions (Ref 1)
-- **Klatt_1987_TTS_Review** — foundational TTS review; directly relevant to Klatt-based synthesis (Ref 6)
+- [[Allen_1987_MITalk_TTS]] — cited as the classic MITalk system description motivating design decisions (Ref 1)
+- [[Klatt_1987_TTS_Review]] — foundational TTS review; directly relevant to Klatt-based synthesis (Ref 6)
 - **vanSanten_1993_SegmentalDuration** — own prior work; the sums-of-products mathematical framework central to this paper's duration modeling arguments (Ref 16)
 - **vanSanten_1994_SegmentalDurationTTS** — full TTS implementation of the duration models discussed here; extends the 1993 framework to speaker-independent prediction
-- **Klatt_1976_SegmentalDuration** — the multiplicative duration rules (Eq. 3) that this paper critiques and shows sums-of-products models improve upon
-- **Klatt_1980_CascadeParallelFormantSynthesizer** — rule-based synthesis system placed in Figure 2's rules-vs-units taxonomy
+- [[Klatt_1976_SegmentalDuration]] — the multiplicative duration rules (Eq. 3) that this paper critiques and shows sums-of-products models improve upon
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — rule-based synthesis system placed in Figure 2's rules-vs-units taxonomy
 
 ### New Leads (Not Yet in Collection)
 - **Fujisaki 1983 (Ref 3)**: Seminal work on F0 contour modeling via the Fujisaki model; essential for understanding intonation generation discussed throughout this paper.
@@ -243,28 +243,28 @@ Where:
 
 ### Cited By (in Collection)
 - **vanSanten_1994_SegmentalDurationTTS** — lists this as a later paper discussing obstacles to prosodic quality including duration
-- **Campbell_Isard_1991_SegmentDurationsSyllable** — cross-referenced as related work addressing same prosodic modeling problems (not directly cited; 1991 predates 1997)
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — cross-referenced as related work addressing same prosodic modeling problems (not directly cited; 1991 predates 1997)
 
 ### Conceptual Links (not citation-based)
 
 **Duration modeling — competing/complementary approaches:**
-- **Campbell_Isard_1991_SegmentDurationsSyllable** — proposes syllable-level timing frame as alternative to pure segment-level multiplication; both papers reject naive multiplicative rules but from different angles (van Santen: interaction terms via sums-of-products; Campbell & Isard: hierarchical syllable→segment decomposition with z-score elasticity)
-- **White_2014_ProsodicTimingFunction** — quotes van Santen 1997 ("for temporal units, the smaller the better"); reinterprets polysyllabic shortening as attenuated lengthening, complementing van Santen's directional invariance argument by showing apparent shortening effects are actually the absence of lengthening
-- **Anumanchipalli_KLATTSTAT** — uses CART for all Klatt parameters including duration; embodies the approach van Santen argues against, demonstrating the lopsided sparsity problem in practice
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — proposes syllable-level timing frame as alternative to pure segment-level multiplication; both papers reject naive multiplicative rules but from different angles (van Santen: interaction terms via sums-of-products; Campbell & Isard: hierarchical syllable→segment decomposition with z-score elasticity)
+- [[White_2014_ProsodicTimingFunction]] — quotes van Santen 1997 ("for temporal units, the smaller the better"); reinterprets polysyllabic shortening as attenuated lengthening, complementing van Santen's directional invariance argument by showing apparent shortening effects are actually the absence of lengthening
+- [[Anumanchipalli_KLATTSTAT]] — uses CART for all Klatt parameters including duration; embodies the approach van Santen argues against, demonstrating the lopsided sparsity problem in practice
 
 **Sub-segmental timing — the non-uniform stretching problem:**
-- **Hertz_1991_StreamsPhonesTransitions** — directly instantiates the sub-segmental non-uniform stretching van Santen identifies as an open problem: CV transitions hold at ~65ms while steady-state vowel interiors stretch 1.5x before voiced obstruents; the multi-stream delta model is the implementation van Santen gestures toward
-- **Hertz_1987_DeltaNonLinearPhonology** — precursor establishing formant transitions as durational units (40ms sonorant-obstruent, 90ms sonorant-sonorant), providing the temporal granularity van Santen argues is needed below the segment level
-- **Crystal_House_1988_StopConsonantDuration** — empirical data showing stop hold vs. release durations behave independently in connected speech (only 59% of stops are "complete"), supporting van Santen's argument that sub-segmental timing cannot be captured by segment-level models
+- [[Hertz_1991_StreamsPhonesTransitions]] — directly instantiates the sub-segmental non-uniform stretching van Santen identifies as an open problem: CV transitions hold at ~65ms while steady-state vowel interiors stretch 1.5x before voiced obstruents; the multi-stream delta model is the implementation van Santen gestures toward
+- [[Hertz_1987_DeltaNonLinearPhonology]] — precursor establishing formant transitions as durational units (40ms sonorant-obstruent, 90ms sonorant-sonorant), providing the temporal granularity van Santen argues is needed below the segment level
+- [[Crystal_House_1988_StopConsonantDuration]] — empirical data showing stop hold vs. release durations behave independently in connected speech (only 59% of stops are "complete"), supporting van Santen's argument that sub-segmental timing cannot be captured by segment-level models
 - **vanSon_1997_ConsonantReduction** — documents that F2 slope (coarticulation strength) decreases in spontaneous speech even as duration decreases proportionally, showing sub-segmental acoustic changes are not uniform scaling
 
 **The concatenative assumption — spectral coarticulation beyond diphone boundaries:**
-- **Ohman_1966_CoarticulationVCV** — provides the empirical evidence underlying van Santen's refutation: F2 varies ~280 Hz in stop consonants depending on both preceding and following vowels, meaning diphone boundaries cannot capture the full spectral context
-- **Recasens_1997_LingualCoarticulationDAC** — quantifies how far coarticulation extends across segment boundaries via the DAC model; dorsals and dark /l/ produce coarticulation spanning multiple segments, exactly the effect the concatenative assumption ignores
-- **Browman_Goldstein_1992_ArticulatoryPhonologyOverview** — provides theoretical grounding: coarticulation as gestural overlap with intrinsic duration means spectral effects propagate across arbitrary segment boundaries, not just adjacent ones; stiffness parameter directly links to why transitions don't scale with segment duration
+- [[Ohman_1966_CoarticulationVCV]] — provides the empirical evidence underlying van Santen's refutation: F2 varies ~280 Hz in stop consonants depending on both preceding and following vowels, meaning diphone boundaries cannot capture the full spectral context
+- [[Recasens_1997_LingualCoarticulationDAC]] — quantifies how far coarticulation extends across segment boundaries via the DAC model; dorsals and dark /l/ produce coarticulation spanning multiple segments, exactly the effect the concatenative assumption ignores
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — provides theoretical grounding: coarticulation as gestural overlap with intrinsic duration means spectral effects propagate across arbitrary segment boundaries, not just adjacent ones; stiffness parameter directly links to why transitions don't scale with segment duration
 
 **Intonation — pitch accent alignment and F0 modeling:**
-- **Pierrehumbert_1980_EnglishIntonation** — provides the phonological framework (H/L tones, downstep, boundary tones) within which van Santen's alignment problem is defined; van Santen argues that the phonetic realization of these abstract targets needs explicit alignment models tied to syllable structure
-- **Ladd_2008_IntonationalPhonology** — develops the "segmental anchoring hypothesis" for tonal alignment, providing theoretical machinery for the pitch-peak-to-syllable alignment problem van Santen identifies (100–150ms peak shifts altering meaning)
-- **Taylor_2000_TiltModelIntonation** — offers continuous-parameter accent curve description (amplitude, duration, tilt) as alternative to van Santen's superpositional time-warped templates
-- **OShaughnessy_1976_F0_Prosody** — the two-level F0 rule system that represents the baseline approach van Santen argues needs improvement with explicit alignment models
+- [[Pierrehumbert_1980_EnglishIntonation]] — provides the phonological framework (H/L tones, downstep, boundary tones) within which van Santen's alignment problem is defined; van Santen argues that the phonetic realization of these abstract targets needs explicit alignment models tied to syllable structure
+- [[Ladd_2008_IntonationalPhonology]] — develops the "segmental anchoring hypothesis" for tonal alignment, providing theoretical machinery for the pitch-peak-to-syllable alignment problem van Santen identifies (100–150ms peak shifts altering meaning)
+- [[Taylor_2000_TiltModelIntonation]] — offers continuous-parameter accent curve description (amplitude, duration, tilt) as alternative to van Santen's superpositional time-warped templates
+- [[OShaughnessy_1976_F0_Prosody]] — the two-level F0 rule system that represents the baseline approach van Santen argues needs improvement with explicit alignment models

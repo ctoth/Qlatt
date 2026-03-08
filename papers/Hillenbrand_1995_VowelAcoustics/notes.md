@@ -256,7 +256,7 @@ Black (1949) correlation suggests: connected speech duration ≈ 0.6 × /hVd/ du
 ## Collection Cross-References
 
 ### Already in Collection
-- **Peterson_Barney_1952_VowelControl**
+- [[Peterson_Barney_1952_VowelControl]]
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1973)**: Speech theory and spectral characteristics; fundamental reference for formant-based synthesis

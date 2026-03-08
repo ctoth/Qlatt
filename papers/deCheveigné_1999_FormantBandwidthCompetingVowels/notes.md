@@ -144,7 +144,7 @@ Quantitative equivalences:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1982_KlattalkTTS**
+- [[Klatt_1982_KlattalkTTS]]
 
 ### New Leads (Not Yet in Collection)
 - **Assmann & Summerfield (1990) [1]** - Foundation for concurrent vowel research; provides the "normal bandwidth" values used in this experiment. Essential for understanding baseline bandwidth parameters.

@@ -143,9 +143,9 @@ This paper provides the concrete mapping tables needed if Qlatt's prosody system
 ## Collection Cross-References
 
 ### Already in Collection
-- **Pierrehumbert_1980_EnglishIntonation** — cited as the foundational phonological model underlying ToBI; the H*+L tone removed from ToBI is discussed as a potential solution for non-final fall-rises
-- **Silverman_1992_ToBILabelingProsody** — cited as the ToBI standard definition paper; Roach's mapping tables convert SEC tones into the pitch accent and boundary tone inventory defined here
-- **Ladd_2008_IntonationalPhonology** — not directly cited (published after this paper), but provides the definitive AM theory exposition that contextualizes both the British and ToBI traditions discussed here
+- [[Pierrehumbert_1980_EnglishIntonation]] — cited as the foundational phonological model underlying ToBI; the H*+L tone removed from ToBI is discussed as a potential solution for non-final fall-rises
+- [[Silverman_1992_ToBILabelingProsody]] — cited as the ToBI standard definition paper; Roach's mapping tables convert SEC tones into the pitch accent and boundary tone inventory defined here
+- [[Ladd_2008_IntonationalPhonology]] — not directly cited (published after this paper), but provides the definitive AM theory exposition that contextualizes both the British and ToBI traditions discussed here
 
 ### New Leads (Not Yet in Collection)
 - De Pijper and Sanderman (1993) — "Prosodic cues to the perception of constituent boundaries" — perceptual boundary strength methodology that Roach's experiment follows; relevant for validating break-index assignment

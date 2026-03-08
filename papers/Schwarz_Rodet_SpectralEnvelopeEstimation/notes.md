@@ -176,7 +176,7 @@ The Qlatt project uses a formant synthesizer (Klatt model) which directly specif
 ## Collection Cross-References
 
 ### Already in Collection
-- **Holmes_1983_FormantSynthesizersCascadeParallel**
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]]
 
 ### New Leads (Not Yet in Collection)
 - **Rodet (1984) [7]** - FOF (Forme d'Onde Formantique) synthesis - An alternative time-domain formant synthesis technique used in CHANT. Worth understanding as a different approach to formant-based voice synthesis.

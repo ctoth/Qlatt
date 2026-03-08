@@ -123,7 +123,7 @@ Time-frequency landmarks for morphing: first 3 formant frequencies at onset/offs
 ## Collection Cross-References
 
 ### Already in Collection
-- **Feinberg_2008_FemininityAveragenessVoicePitch** [ref 5] — cited for pitch–attractiveness relationship; now provides full linear model details and PSOLA manipulation parameters
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] [ref 5] — cited for pitch–attractiveness relationship; now provides full linear model details and PSOLA manipulation parameters
 
 ### New Leads (Not Yet in Collection)
 - **McAleer et al. (2014) [ref 4]** - The prior study that generated the original trustworthiness ratings for the 32 voices. Essential for understanding the full methodology and seeing the original "social voice space" dimensions.
@@ -133,4 +133,4 @@ Time-frequency landmarks for morphing: first 3 formant frequencies at onset/offs
 - **Shue et al. (2011) [ref 21]** - VoiceSauce voice analysis software. Useful tool reference for extracting acoustic parameters from voice recordings.
 
 ### Now in Collection (previously listed as leads)
-- **Feinberg_2011_IntegratingF0FormantPreferences** [ref 17] — Demonstrates F0 × formant frequency interaction in voice attractiveness: low pitch amplifies preference for large vocal tracts and vice versa (cue amplification model). Manipulation method: ±0.5 ERB pitch shift, ±15% formant shift via resampling. Directly relevant to understanding how pitch and formant cues combine in social voice perception.
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] [ref 17] — Demonstrates F0 × formant frequency interaction in voice attractiveness: low pitch amplifies preference for large vocal tracts and vice versa (cue amplification model). Manipulation method: ±0.5 ERB pitch shift, ±15% formant shift via resampling. Directly relevant to understanding how pitch and formant cues combine in social voice perception.

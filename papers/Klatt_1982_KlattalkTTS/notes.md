@@ -226,9 +226,9 @@ Phenomena covered:
 ## Collection Cross-References
 
 ### Already in Collection
-- **Carlson_1979_VowelPerceptionSalience**
-- **Klatt_1979_SpeechPerceptionLexicalAccess**
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
+- [[Carlson_1979_VowelPerceptionSalience]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 
 ### New Leads (Not Yet in Collection)
 - **Maeda (1974) [6]** - Source of the "hat-pattern" F0 contour strategy. Important for implementing prosodic F0 rules.

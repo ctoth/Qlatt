@@ -205,8 +205,8 @@ $$
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1980_CascadeParallelFormantSynthesizer**
-- **Klatt_1987_TTS_Review**
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1987_TTS_Review]]
 
 ### New Leads (Not Yet in Collection)
 - **Tokuda et al. (1995, 1996, 2000)** [9, 10, 11] - Core HMM-based speech synthesis methodology; essential for understanding the statistical parametric synthesis framework used in this paper.

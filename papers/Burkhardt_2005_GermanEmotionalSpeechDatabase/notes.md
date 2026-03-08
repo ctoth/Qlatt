@@ -183,10 +183,10 @@ b10: Die wird auf dem Platz sein, wo wir sie immer hinlegen.
 ## Collection Cross-References
 
 ### Already in Collection
-- **Banse_1996_VocalEmotionAcousticProfiles**
+- [[Banse_1996_VocalEmotionAcousticProfiles]]
 
 ### Cited By (in Collection)
-- **Burkhardt_2009_VoiceQualityFormantSynthesis** — cites this as ref [16] for the EmoDB corpus; builds on this work's emotional speech data to develop rule-based phonation type formulas for Klatt synthesis
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — cites this as ref [16] for the EmoDB corpus; builds on this work's emotional speech data to develop rule-based phonation type formulas for Klatt synthesis
 
 ### New Leads (Not Yet in Collection)
 - **Laver 1980 [11]** - "The Phonetic Description of Voice Quality" - Canonical reference for voice quality terminology and classification; essential for understanding the articulatory settings labels used in emotional speech annotation.

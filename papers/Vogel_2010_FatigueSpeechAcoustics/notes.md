@@ -220,9 +220,9 @@ Peak fatigue effect at **22h post-baseline (06:00, pre-dawn)** with partial reco
 ## Collection Cross-References
 
 ### Already in Collection
-- **Klatt_1990_VoiceQualityVariations**
-- **Laukka_2008_AnxietyVocalExpression**
-- **Sun_2006_VocalTractGlottalSource**
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Laukka_2008_AnxietyVocalExpression]]
+- [[Sun_2006_VocalTractGlottalSource]]
 
 ### New Leads (Not Yet in Collection)
 - **Gauffin & Sundberg (1980, 1989)** - Glottal source waveform characteristics and spectral correlates - Fundamental for understanding how source modifications (like those during fatigue) affect the output spectrum.

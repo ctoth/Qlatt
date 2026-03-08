@@ -128,11 +128,11 @@ This paper provides empirical evidence for how the three main voice control dime
 ## Collection Cross-References
 
 ### Already in Collection
-- **Fant_1960_AcousticTheorySpeechProduction**
-- **Hu_2012_DynamicsModelSpeechRecognitionSynthesis**
-- **Klatt_1990_VoiceQualityVariations**
-- **Stevens_1998_AcousticPhonetics**
-- **Sun_2006_VocalTractGlottalSource**
+- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
+- [[Klatt_1990_VoiceQualityVariations]]
+- [[Stevens_1998_AcousticPhonetics]]
+- [[Sun_2006_VocalTractGlottalSource]]
 
 ### New Leads (Not Yet in Collection)
 - **Laver 1980 (ref 9)** - The Phonetic Description of Voice Quality. Foundational framework for the Breathy-Flow-Neutral-Pressed continuum used in this paper.

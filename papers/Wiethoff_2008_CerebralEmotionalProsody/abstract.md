@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The human brain has a preference for processing of emotionally salient stimuli. In the auditory modality, emotional prosody can induce such involuntary biasing of processing resources. To investigate the neural correlates underlying automatic processing of emotional information in the voice, words spoken in neutral, happy, erotic, angry, and fearful prosody were presented in a passive-listening functional magnetic resonance imaging (fMRI) experiment. Hemodynamic responses in right mid superior temporal gyrus (STG) were significantly stronger for all emotional than for neutral intonations. To disentangle the contribution of basic acoustic features and emotional arousal to this activation, the relation between event-related responses and these parameters was evaluated by means of regression analyses. A significant linear dependency between hemodynamic responses of right mid STG and mean intensity, mean fundamental frequency, variability of fundamental frequency, duration, and arousal of the stimuli was observed. While none of the acoustic parameters alone explained the stronger responses of right mid STG to emotional relative to neutral prosody, this stronger responsiveness was abolished both by correcting for arousal or the conjoint effect of the acoustic parameters. In conclusion, our results demonstrate that right mid STG is sensitive to various emotions conveyed by prosody, an effect which is driven by a combination of acoustic features that express the emotional arousal in the speaker's voice.
+
+---
+
+## Our Interpretation
+
+This fMRI study shows that the brain's right mid superior temporal gyrus responds more strongly to emotionally spoken words (happy, erotic, angry, fearful) than neutral ones, and that this enhanced response is explained by the combined effect of multiple acoustic parameters — intensity, F0, F0 variability, and duration — rather than any single feature. For speech synthesis, this validates the approach of modifying multiple prosodic parameters simultaneously to convey emotion, and the paper's Table 1 provides concrete acoustic targets for five prosodic categories that could inform emotion preset design.

@@ -217,3 +217,6 @@ This paper provides the empirical basis for implementing emotional speech synthe
 
 ### Supersedes or Recontextualizes
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — Goudbeek extends the Banse & Scherer (1996) Munich corpus work by adding the potency/control dimension and demonstrating that spectral balance specifically encodes valence beyond arousal, which the Munich analysis did not examine separately
+
+### Conceptual Links (not citation-based)
+- [[Wiethoff_2008_CerebralEmotionalProsody]] — Wiethoff's fMRI study shows that the brain's right mid STG responds to the conjoint effect of F0, intensity, and duration (the arousal-correlated parameters). Goudbeek's work explains why: these parameters primarily encode arousal, while valence requires spectral measures that Wiethoff did not include. Together they suggest the brain region Wiethoff identified is an arousal detector, not a full emotion discriminator.

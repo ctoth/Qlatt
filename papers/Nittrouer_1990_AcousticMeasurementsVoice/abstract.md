@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Several acoustic measures of laryngeal activity were made on adult speech to help answer two questions left unresolved by previous work: (1) how each measure varies, if at all, with phonetic structure, and (2) what aspect of laryngeal activity each measure specifies. Speech samples of 15 syllables (three vowels in five prevocalic consonantal contexts) were collected from men and women at two times of the day (early morning and late afternoon). Eight measurements were made, mainly on slices extracted from the middle of the vocalic portions, and inferential and correlational statistics were applied to these measures. Results of the inferential tests indicated differences between men and women in how laryngeal adjustments are made, affecting relative amounts of vocal jitter and spectral tilt of the voicing source. In addition, the voicing and manner characteristics of the prevocalic consonant were found to affect fundamental frequency, cycle-to-cycle perturbations, and amount of aspiration noise. To a lesser extent, vowel height and front/back tongue placement also affected these acoustic source characteristics. Results of the correlational tests showed that different laryngeal mechanisms contributed differentially to signal-to-noise ratios for men and women, and these mechanisms were more greatly affected by fundamental frequency for men's samples. Finally, various acoustic measures of laryngeal noise were found to be related to the same underlying mechanism.
+
+---
+
+## Our Interpretation
+
+This paper systematically measures how the voice source changes with consonant context and vowel identity, filling a gap in normative data for coarticulatory effects on laryngeal parameters. The key finding for synthesis is that voiceless consonants perturb multiple source parameters (F0, jitter, shimmer, aspiration noise) well into the following vowel, and that men's and women's voices achieve similar overall SNR through fundamentally different mechanisms (jitter vs. aspiration noise). This directly informs how the Qlatt synthesizer should model consonantal context effects on voice source parameters and differentiate male/female speaker presets.

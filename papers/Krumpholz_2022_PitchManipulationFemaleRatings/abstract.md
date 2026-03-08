@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Vocal and facial cues typically co-occur in natural settings, and multisensory processing of voice and face relies on their synchronous presentation. Psychological research has examined various facial and vocal cues to attractiveness as well as to judgements of sexual dimorphism, health, and age. However, few studies have investigated the interaction of vocal and facial cues in attractiveness judgments under naturalistic conditions using dynamic, ecologically valid stimuli. Here, we used short videos or audio tracks of females speaking full sentences and used a manipulation of voice pitch to investigate cross-modal interactions of voice pitch on facial attractiveness and related ratings. Male participants had to rate attractiveness, femininity, age, and health of synchronized audio-video recordings or voices only, with either original or modified voice pitch. We expected audio stimuli with increased voice pitch to be rated as more attractive, more feminine, healthier, and younger. If auditory judgements cross-modally influence judgements of facial attributes, we additionally expected the voice pitch manipulation to affect ratings of audiovisual stimulus material. We tested 106 male participants in a within-subject design in two sessions. Analyses revealed that voice recordings with increased voice pitch were perceived to be more feminine and younger, but not more attractive or healthier. When coupled with video recordings, increased pitch lowered perceived age of faces, but did not significantly influence perceived attractiveness, femininity, or health. Our results suggest that our manipulation of voice pitch has a measurable impact on judgements of femininity and age, but does not measurably influence vocal and facial attractiveness in naturalistic conditions.
+
+---
+
+## Our Interpretation
+
+This study tests whether raising female voice pitch by ~20 Hz affects how men rate voices and faces for attractiveness, femininity, health, and age. The main result is that modest pitch increases change femininity and age perception but not attractiveness or health, contradicting earlier vowel-based studies. For Qlatt, this means small F0 adjustments in female voice presets will shift perceived femininity and age without reliably changing attractiveness ratings.

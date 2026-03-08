@@ -204,6 +204,7 @@ Tracheal/nasal coupling (FTP, FTZ, FNP, FNZ, BTP, BNP) may need addition for bre
 
 ### Cited By (in Collection)
 - **Zhang_2016_VocalFoldPhysiologyVoiceProduction** — references this paper's "rate" parameter concept in an open question about mapping medial surface thickness to voice quality modification
+- **Zhang_2016_MechanicsVoiceProductionControl** — this review provides the physiological grounding for why Burkhardt's voice quality modification rules work: medial surface thickness (controlled by CT/TA balance) is the primary voice quality controller
 
 ### Supersedes or Recontextualizes
 - Extends **Burkhardt & Sendlmeier 2000** (ref [3]) — the 2000 paper verified acoustic correlates of emotional speech using formant synthesis; this 2009 paper provides the mature, explicit rule-based formulas with perceptual validation. Burkhardt_2005 lists the 2000 paper as a new lead; this paper covers that ground more comprehensively.

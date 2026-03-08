@@ -222,3 +222,5 @@ Need for cross-linguistic acoustic data on /l/ formant frequencies to understand
 ---
 
 **See also:** Sproat_Fujimura_1993_AllophonicVariationEnglishL - provides articulatory (X-ray microbeam) evidence for the two-gesture timing model underlying the acoustic F2 patterns documented here, explaining WHY syllable-final /l/ has lower F2 through earlier dorsal retraction gesture timing
+
+**See also:** Miller_1998_PronunciationModelingSpeechSynthesis - documents that dark /l/ does NOT count as coronal for vowel fronting purposes (schwa → [i] and /u/ fronting) despite its apical gesture, consistent with Recasens's finding that dorsal retraction dominates the acoustic output of dark /l/

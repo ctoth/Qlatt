@@ -236,7 +236,14 @@ This paper provides the quantitative mapping from vocal effort (subglottal press
 - **Fant_1960_AcousticTheorySpeechProduction**
 - **Hanson_1995_GlottalCharacteristicsFemale**
 - **Holmberg_1988_GlottalAirflowPressure**
+- **Titze_1992_VocalIntensity** — cited as ref [#17]; provides the analytical-empirical vocal intensity model and excess pressure over threshold concept that this paper's PSEN normalization is based on
+
+### Cited By (in Collection)
+- **Titze_1992_VocalIntensity** — this paper extends the 1992 analytical model with new empirical data on untrained voices
 
 ### New Leads (Not Yet in Collection)
 - **Titze (1992)** [#16] — Defines phonation threshold pressure and the PSEN normalization used throughout this paper; essential for implementing effort-based control
 - **Sundberg et al. (1999)** [#14] — Same methodology on professional baritone singers; useful for comparing trained vs. untrained voice source behavior
+
+### Conceptual Links (not citation-based)
+- **Bjorklund_2016_SubglottalPressureSPL** — Uses the identical /pae/ protocol on a similar untrained population but measures the Ps-to-SPL transfer function rather than voice source parameters. Together, Sundberg 2005 (Ps -> voice quality) and Bjorklund 2016 (Ps -> SPL) provide the complete effort-to-output mapping needed for synthesis.

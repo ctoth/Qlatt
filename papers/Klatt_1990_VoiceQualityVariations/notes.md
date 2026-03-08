@@ -455,3 +455,6 @@ Ug(t) = at² - bt³   (open phase)
 - Establishes acoustic stability regions and perceptual constraints that inform synthesis targets
 - **Laver, J. (1980). The Phonetic Description of Voice Quality.** Cambridge University Press.
 - Comprehensive framework for voice quality taxonomy and perceptual evaluation methodology
+
+### Conceptual Links (not citation-based)
+- **Larrouy-Maestri_2024_EmotionalProsody** — 30-year review of emotional prosody identifies voice quality (breathy, tense, harsh) as critical for emotion encoding beyond F0 alone; Klatt 1990's KLSYN88 parameters (AH, TL, OQ) are the implementation mechanism for these emotion-linked voice qualities. The review's open question about what makes synthetic emotional speech sound unnatural likely involves inadequate voice source control.

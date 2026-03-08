@@ -207,5 +207,8 @@ This paper is directly relevant to the Qlatt Klatt synthesizer in several ways:
 - **Stevens_1991_HL_Parameters** — This 2001 paper describes HLsyn as an extension of the Stevens & Bickley (1991) system, adding 3 parameters (for a total of 13) including posterior glottal opening (**ap**) which is critical for modeling breathy voice quality. HLsyn is the successor system.
 - **Hanson_1997_GlottalCharacteristicsFemaleAcoustic** and **Hanson_1999_GlottalMaleSpeakers** — This paper synthesizes and extends both studies by presenting the combined male+female dataset, adding cross-gender comparisons, and connecting the acoustic measures to the HLsyn synthesizer framework.
 
+### Conceptual Links (not citation-based)
+- **Larrouy-Maestri_2024_EmotionalProsody** — emotional prosody review identifies voice quality as critical for emotion encoding (especially valence), but notes the field lacks mechanistic understanding. HLsyn's 13-parameter quasi-articulatory control provides exactly this mechanism: linking physiological configurations (subglottal pressure, glottal area, posterior opening) to the spectral measures (H1*-H2*, H1*-A3*) the review identifies as emotion-discriminating. The finding that reduced vowels show 7-13 dB greater spectral tilt connects prosodic prominence to voice quality, a dimension the review argues is underexplored.
+
 ### Cited By (in Collection)
 - (none found)

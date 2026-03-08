@@ -218,7 +218,11 @@ This paper is highly relevant for voice quality parameter design in the Klatt sy
 
 ### Cited By (in Collection)
 - **Zhang_2016_VocalFoldPhysiologyVoiceProduction** -- cites this paper in the context of voice source measurement and spectral characterization
+- **Zhang_2016_MechanicsVoiceProductionControl** — cites Kreiman's work on source spectrum redundancy and the gap in mid-frequency parameterization; advocates spectral-domain source models over time-domain
 
 ### Supersedes or Recontextualizes
 - This paper's finding that H1-H2 is uniquely robust across measurement techniques strongly supports Hanson_1997_GlottalCharacteristicsFemaleAcoustic's choice of corrected spectral measures as primary voice quality descriptors
 - The finding that existing measures fail to capture mid-frequency (1.5-4 kHz) spectral variability suggests that neither the Hanson corrected measures nor the Klatt TL parameter fully characterize voice quality -- an open gap in the field
+
+### Conceptual Links (not citation-based)
+- **Larrouy-Maestri_2024_EmotionalProsody** — emotional prosody review recommends using more voice quality features for emotion research; Kreiman's PCA shows most measures are redundant, reducing to 4 factors (H1-H2, spectral slope, high-frequency noise, H2-H4). This constrains emotion research: the many spectral features proposed for emotion recognition likely collapse to these same factors, and the mid-frequency gap Kreiman identifies may explain why valence remains hard to capture acoustically.

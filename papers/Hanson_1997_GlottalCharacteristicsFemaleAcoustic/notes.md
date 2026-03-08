@@ -227,3 +227,7 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 ---
 
 **See also:** Hanson_2001_ModelsPhonation - Extends this work by combining the female data with male speaker data (21M+22F), connecting the acoustic measures to the HLsyn synthesizer framework, and applying the models to disordered speech.
+
+---
+
+**See also:** Titze_1989_MaleFemaleVoices - provides the physiological model (linearly convergent female glottis, medial surface bulging in males) that explains the acoustic patterns Hanson measures: incomplete closure and gradual closing producing elevated H1*-H2* and spectral tilt in female voices.

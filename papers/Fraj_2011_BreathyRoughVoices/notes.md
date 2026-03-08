@@ -247,3 +247,6 @@ Pulsatile noise >> constant aspiration for natural breathiness:
 - **Titze, I. (2006)** - Myoelastic aerodynamic theory of phonation; provides the physiological foundation for understanding how aerodynamic conditions generate jitter and noise at the glottis.
 - **Story, B. H., Titze, I. R., and Hoffman, E. A. (1996)** - Vocal tract area functions from MRI; critical for the vocal tract modeling component (40-45 cylindrical sections) used in their synthesis pipeline.
 - **Yiu et al. (2002)** - Perception of synthesized voice quality in connected speech; demonstrates that listeners evaluate synthetic voice quality similarly to natural speech, validating the relevance of their dysphonia synthesis corpus.
+
+### Conceptual Links (not citation-based)
+- **Titze_1991_NeurologicAperiodicity** — Fraj provides a practical jitter synthesis algorithm (sample-by-sample phase perturbation) that implements jitter as a signal-level effect, while Titze provides the physiological model predicting what jitter magnitude should be based on motor unit count, firing rate, and ISI variability. Titze predicts 0.2-1.2% F0 perturbation for normal-to-mild voices; Fraj's corpus maps control parameter b to measured jitter% (2.6-35.8% for mild-to-severe dysphonia). The two papers are mechanism (Titze) and implementation (Fraj) for the same phenomenon.

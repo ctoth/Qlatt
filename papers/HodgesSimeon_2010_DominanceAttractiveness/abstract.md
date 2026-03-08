@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Low mean fundamental frequency (F0) in men's voices has been found to positively influence perceptions of dominance by men and attractiveness by women using standardized speech. Using natural speech obtained during an ecologically valid social interaction, we examined relationships between multiple vocal parameters and dominance and attractiveness judgments. Male voices from an unscripted dating game were judged by men for physical and social dominance and by women in fertile and non-fertile menstrual cycle phases for desirability in short-term and long-term relationships. Five vocal parameters were analyzed: mean F0 (an acoustic correlate of vocal fold size), F0 variation, intensity (loudness), utterance duration, and formant dispersion (Df, an acoustic correlate of vocal tract length). Parallel but separate ratings of speech transcripts served as controls for content. Multiple regression analyses were used to examine the independent contributions of each of the predictors. Physical dominance was predicted by low F0 variation and physically dominant word content. Social dominance was predicted only by socially dominant word content. Ratings of attractiveness by women were predicted by low mean F0, low Df, high intensity, and attractive word content across cycle phase and mating context. Low Df was perceived as attractive by fertile-phase women only. We hypothesize that competitors and potential mates may attend more strongly to different components of men's voices because of the different types of information these vocal parameters provide.
+
+---
+
+## Our Interpretation
+
+This study reveals that male vocal dominance and attractiveness are predicted by different acoustic parameters in natural speech: F0 variation predicts dominance while mean F0, intensity, and formant dispersion predict attractiveness. The critical implication for synthesis is that creating a "dominant" voice requires different parameter adjustments (reduced pitch variation) than creating an "attractive" voice (lower pitch, higher intensity, compressed formant spacing), and these dimensions can be controlled independently.

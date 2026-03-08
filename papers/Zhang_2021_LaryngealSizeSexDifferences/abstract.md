@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+In this study we investigated the effect of sex- and age-related differences in vocal fold length, thickness, and depth on voice production in a three-dimensional vocal fold model. The results showed that the cause-effect relationships between vocal fold physiology and voice production previously identified in an adult male-like vocal fold geometry remained qualitatively the same in vocal folds with geometry representative of adult females and children. We further showed that the often-observed differences in voice production between adult males, adult females, and children can be explained by differences in length and thickness. The lower F0, higher flow rate, larger vocal fold vibration amplitude, and higher sound pressure level (SPL) in adult males as compared to adult females and children can be explained by differences in vocal fold length. In contrast, the thickness effect dominated and contributed to the larger closed quotient of vocal fold vibration, larger normalized maximum flow declination rate, and lower H1-H2 in adult males as compared to adult females and children. The effect of differences in vocal fold depth was generally small. When targeting a specific SPL, adult males experienced a lower peak vocal fold contact pressure during phonation than adult females and children.
+
+---
+
+## Our Interpretation
+
+This computational study systematically disentangles how the three geometric dimensions of vocal folds (length, thickness, depth) independently contribute to observed sex and age differences in voice production, using 216,000 simulations of a 3D finite-element model. The central finding is that length and thickness operate on different voice dimensions: length controls pitch and loudness (F0, SPL) while thickness controls voice quality (closed quotient, spectral tilt, H1-H2). For formant synthesis, this validates modeling male-female-child voice differences as two orthogonal parameter axes rather than a single "size" scaling, and provides the physical basis for why female voices at equivalent loudness experience higher vocal fold contact stress — a finding relevant to modeling vocal effort and fatigue effects.

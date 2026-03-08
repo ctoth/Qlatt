@@ -177,5 +177,8 @@ This paper provides modest support for the principle that valence/pleasure in em
 - Schroder et al. (2001) — "Acoustic correlates of emotion dimensions in view of speech synthesis" Eurospeech — directly relevant for mapping emotion dimensions to synthesis parameters
 - Chuenwattanapranithi et al. (2006) — "Expressing anger and joy with the size code" — F0 manipulation for emotion expression
 
+### Conceptual Links (not citation-based)
+- **Larrouy-Maestri_2024_EmotionalProsody** — comprehensive review reaching the same conclusion as Cui from a broader evidence base: F0 primarily encodes arousal while spectral/voice quality features carry valence. The review's call for more attention to spectral dynamics and contour features aligns with Cui's finding that spectral rolloff and low-high ratio outperform F0 for pleasure discrimination.
+
 ### Cited By (in Collection)
 - (none found)

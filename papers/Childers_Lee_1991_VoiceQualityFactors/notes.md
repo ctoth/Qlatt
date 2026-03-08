@@ -224,3 +224,6 @@ Random Noise → HP Filter → Amplitude Modulation
 - **Flanagan (1972)** - Fundamental speech analysis and synthesis theory establishing source-filter model principles
 - **Holmes (1973)** - Original work on glottal waveform influence on parallel formant synthesizer naturalness
 - **Isshiki et al. (1978)** - Turbulent noise characteristics in dysphonia, directly cited for breathiness modeling approach
+
+### Conceptual Links (not citation-based)
+- **Larrouy-Maestri_2024_EmotionalProsody** — 30-year emotional prosody review identifies voice quality categories (breathy, tense, harsh, creaky) as critical for encoding emotion, particularly valence. Childers & Lee provide the physiological glottal parameters (OQ, SQ, closure abruptness, noise) that produce these voice qualities, connecting emotion-level descriptions to source-level production mechanisms.

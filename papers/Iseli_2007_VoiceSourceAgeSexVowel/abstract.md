@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The effects of age, sex, and vocal tract configuration on the glottal excitation signal in speech are only partially understood, yet understanding these effects is important for both recognition and synthesis of speech as well as for medical purposes. In this paper, three acoustic measures related to the voice source are analyzed for five vowels from 3145 CVC utterances spoken by 335 talkers (8-39 years old) from the CID database [Miller et al., Proceedings of ICASSP, 1996, Vol. 2, pp. 849-852]. The measures are: the fundamental frequency (F0), the difference between the "corrected" (denoted by an asterisk) first two spectral harmonic magnitudes, H1*-H2* (related to the open quotient), and the difference between the "corrected" magnitudes of the first spectral harmonic and that of the third formant peak, H1*-A3* (related to source spectral tilt). The correction refers to compensating for the influence of formant frequencies on spectral magnitude estimation. Experimental results show that the three acoustic measures are dependent on age to varying degrees on age for male talkers, while vowel dependencies are more prominent for female talkers suggesting a greater vocal tract-source interaction. All talkers show a dependency of F0 on sex and on F3, and of H1*-A3* on vowel type. For low-pitched talkers (F0 <= 175 Hz), H1*-H2* is positively correlated with F0 while for high-pitched talkers, H1*-H2* is dependent on F1 or vowel height. For high-pitched talkers there were no significant sex dependencies of H1*-H2* and H1*-A3*. The statistical significance of these results is shown.
+
+---
+
+## Our Interpretation
+
+This paper solves the critical problem of measuring voice source characteristics from speech signals by providing a correction formula that removes formant frequency contamination. The key finding for synthesis is that voice source measures (open quotient and spectral tilt) vary systematically with age, sex, and vowel, with males showing much larger age-related changes than females. These quantitative targets are directly useful for setting Klatt synthesizer voice quality parameters across different speaker profiles.

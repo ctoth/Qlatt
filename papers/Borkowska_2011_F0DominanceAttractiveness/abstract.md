@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+Human voice pitch is sexually dimorphic and therefore conveys important information about its owner's sex. Since people often associate voice pitch with age, body size, attractiveness and, in the case of men, level of dominance, it is assumed that voice pitch signals biological condition. We tested (1) how female voice pitch is related to perceptions of dominance and (2) whether female voice pitch correlates linearly with its attractiveness assessment. We recorded five vowels {A [a], E [ɛ], I [i], O [ɔ], U [u]} and measured the voice fundamental frequency (F0) of 58 young women. The following voices of four women were selected: low (184.6 Hz), medium (223.7 Hz), high (261.9 Hz) and very high (310.3 Hz). Each of these voices was lowered and raised by 20 Hz. The modified voices and the original voices were rated for attractiveness by men, and were rated for dominance by both men and women. We found that women with lower voices were perceived as more dominant and that this relationship was linear. An interaction between the sexes in the dominance assessment indicates that women are more sensitive than men to the dominance cues present in female voices. We also found that, contrary to other studies, the relationship between female voice pitch and its attractiveness is not linear. Higher pitched voices were assessed as more attractive up to an optimal pitch; female voices above ca. 280 Hz were rated as less attractive. We suggest that female voices that have too high a pitch sound babyish and are associated with sexual immaturity.
+
+---
+
+## Our Interpretation
+
+This study dissociates the F0-dominance and F0-attractiveness functions for female voices: dominance follows a simple linear rule (lower = more dominant) while attractiveness follows an inverted-U curve peaking around 280 Hz. The practical implication is that female voice presets cannot use the same "lower pitch = better" heuristic that works for male attractiveness; instead, an optimal F0 target near 260-280 Hz maximizes perceived attractiveness while remaining well below the "babyish" threshold. Combined with Hodges-Simeon (2010) for male voices, this completes the sex-specific mapping between F0 and social perception dimensions needed for the speaker personality system.

@@ -327,10 +327,11 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     const schedule: ScheduleEntry[] = [];
 
     // PLSTEP detection state — initial 0 means "off/silent".
-    // Missing AF/AH in a frame means "not set" = silent (0 dB), not -70 dB.
-    // Using -70 caused spurious 70 dB deltas when frames omitted AF/AH.
+    // Missing AF in a frame means "not set" = silent (0 dB), not -70 dB.
+    // Using -70 caused spurious 70 dB deltas when frames omitted AF.
+    // Only AF (frication) triggers PLSTEP — AH (aspiration) is gradual glottal
+    // noise, not a burst transient (Klatt 1980 PARCOE.FOR).
     let prevAF = 0;
-    let prevAH = 0;
     // Read threshold from semantics constant (single source of truth), fallback to 49
     const PLSTEP_THRESHOLD = (typeof constants['plstepThreshold'] === 'number')
       ? constants['plstepThreshold']
@@ -347,17 +348,17 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
       const t = baseTime + frame.time;
       const realized = evaluateSemantics(frame.params);
 
-      // PLSTEP detection: track AF/AH state unconditionally, emit telemetry if handler present
+      // PLSTEP detection: track AF state unconditionally, emit telemetry if handler present.
+      // Only AF (supraglottal frication) triggers PLSTEP — aspiration (AH) is gradual
+      // glottal noise onset, not a burst transient (Klatt 1980 PARCOE.FOR).
       const currentAF = frame.params.AF ?? 0;
-      const currentAH = frame.params.AH ?? 0;
 
       if (telemetryHandler) {
         const deltaAF = currentAF - prevAF;
-        const deltaAH = currentAH - prevAH;
 
-        if (deltaAF >= PLSTEP_THRESHOLD || deltaAH >= PLSTEP_THRESHOLD) {
-          const trigger = deltaAF >= deltaAH ? 'AF' : 'AH';
-          const delta = Math.max(deltaAF, deltaAH);
+        if (deltaAF >= PLSTEP_THRESHOLD) {
+          const trigger = 'AF';
+          const delta = deltaAF;
           const goDb = frame.params.GO ?? 47;
           const burstDb = goDb - PLSTEP_BURST_OFFSET_DB;  // Klatt80 PLSTEP amplitude formula
           const burstAmplitude = dbToLinear(burstDb);
@@ -379,7 +380,6 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
 
       // Always update state — delta tracking must not depend on telemetry being enabled
       prevAF = currentAF;
-      prevAH = currentAH;
 
       // Schedule all bindings: read from realized or frame.params, ramp or step.
       for (const binding of allBindings) {

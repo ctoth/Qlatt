@@ -2,10 +2,11 @@
  * Tests for PLSTEP state tracking in klatt-interpreter.ts
  *
  * Verifies:
- * 1. prevAF/prevAH are tracked unconditionally (not gated on telemetryHandler)
- * 2. PLSTEP telemetry fires correctly for >49 dB AF/AH jumps
+ * 1. prevAF is tracked unconditionally (not gated on telemetryHandler)
+ * 2. PLSTEP telemetry fires correctly for >49 dB AF jumps (frication onset)
  * 3. PLSTEP telemetry does NOT fire for small deltas (state tracked frame-to-frame)
- * 4. No errors when telemetryHandler is not provided
+ * 4. PLSTEP telemetry does NOT fire for AH jumps (aspiration is not a burst)
+ * 5. No errors when telemetryHandler is not provided
  */
 import { describe, it, expect, vi } from 'vitest';
 import {
@@ -323,7 +324,7 @@ describe('PLSTEP state tracking', () => {
     expect(() => interpreter.scheduleTrack(track, 0)).not.toThrow();
   });
 
-  it('tracks AH state independently from AF', () => {
+  it('does NOT fire PLSTEP for AH-only jump (aspiration is not a burst)', () => {
     const events: TelemetryEvent[] = [];
     const telemetryHandler = (event: TelemetryEvent) => events.push(event);
 
@@ -334,8 +335,9 @@ describe('PLSTEP state tracking', () => {
       telemetryHandler,
     });
 
-    // Frame 0: AH=0 (same as prevAH init, delta=0 => no trigger)
-    // Frame 1: AH=55 (delta=55-0=55, >49 threshold => triggers)
+    // AH jumps from 0 to 55 (>49 threshold) but PLSTEP should NOT fire.
+    // Aspiration onset is gradual glottal noise, not a burst transient.
+    // Only AF (supraglottal frication) triggers PLSTEP (Klatt 1980 PARCOE.FOR).
     const track: KlattFrame[] = [
       { time: 0.0, params: { AH: 0 } },
       { time: 0.005, params: { AH: 55 } },
@@ -344,9 +346,6 @@ describe('PLSTEP state tracking', () => {
     interpreter.scheduleTrack(track, 0);
 
     const plstepEvents = events.filter(e => e.type === 'plstep');
-    // Frame 0: AH=0 vs prevAH=0 => delta=0 => no trigger
-    // Frame 1: AH=55 vs prevAH=0 => delta=55 => triggers
-    expect(plstepEvents.length).toBe(1);
-    expect(plstepEvents[0].trigger).toBe('AH');
+    expect(plstepEvents.length).toBe(0);
   });
 });

@@ -131,12 +131,12 @@ This thesis provides limited but interesting descriptive data on F0 variation ac
 - (none of the key citations are in the collection)
 
 ### New Leads (Not Yet in Collection)
-- Xue & Hao (2006) — "Normative standards for vocal tract dimensions by race" — physical vocal tract measurements (n=120) across Caucasian, African American, and Chinese speakers; found significant racial differences in oral volume and total tract volume
 - Andrianopoulos, Darrow, & Chen (2001) — "Multimodal standardization of voice among four multicultural populations" — F0 and spectral characteristics across populations
 - Cox & Mueller (2004) — "Ethnographic factors in voice: A review of the literature" — comprehensive review concluding data inconclusive but suggesting possible F0 differences
 
 ### Now in Collection (previously listed as leads)
 - [[Walton_1994_SpeakerRaceVocalAcoustics]] — 100 adult males (50 black, 50 white), found significantly greater shimmer and lower H/N ratio in black speakers' sustained /a/ vowels. Listeners identified race at 60% (above chance) from 1-second samples. Complements Meek's smaller study: Walton found perturbation differences where Meek did not, likely due to larger sample size (100 vs 15). Both agree that F0 and formant differences were not significant.
+- [[Xue_2006_VocalTractDimensionsRace]] — Normative vocal tract dimensions (oral/pharyngeal length and volume) for 120 speakers across three racial groups (White American, African American, Chinese), controlled for age/height/weight. Found significant racial effects on oral volume and total vocal tract volume (Chinese > WA and AA), and significant gender effects on all length parameters. Complements Meek's acoustic parameter approach with anatomical measurements; both studies converge on the finding that racial differences exist in vocal anatomy even when acoustic differences are subtle.
 
 ### Cited By (in Collection)
 - (none found)

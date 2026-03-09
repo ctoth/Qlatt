@@ -1,0 +1,4 @@
+---
+tags: [vocal-tract, speaker-characteristics, formant-scaling, gender-differences]
+---
+This paper provides normative vocal tract dimensional measurements (oral length/volume, pharyngeal length/volume, total length/volume) for 120 speakers across three racial groups (White American, African American, Chinese) and both genders, using acoustic pharyngometry. Key findings include significant gender effects on all length parameters (males ~17 cm total VTL vs females ~15.5 cm) and significant racial effects on oral and total vocal tract volume, with Chinese males having the largest oral and total volumes. These normative data are relevant for calibrating speaker-specific vocal tract length scaling in formant synthesis and for establishing realistic ranges of vocal tract dimensions across demographic groups.

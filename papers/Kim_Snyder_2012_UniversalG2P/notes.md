@@ -206,6 +206,13 @@ Where:
 ### Already in Collection
 - (none found)
 
+### Cited By (in Collection)
+- [[Kamiloglu_2021_VoiceProductionPerception]] — lists Kim & Snyder 2012 in its collection cross-references
+
+### Conceptual Links (not citation-based)
+- [[Allen_1987_MITalk_TTS]] — Allen's MITalk system implements the English-specific G2P pipeline (morphological decomposition + letter-to-sound rules) that Kim & Snyder's universal approach aims to generalize across languages. Allen provides the single-language gold standard; Kim & Snyder addresses the cross-lingual scaling problem (Moderate)
+- [[Elovitz_1976_LTS_Rules]] — Elovitz's letter-to-sound rules for English exemplify the language-specific rule engineering approach. Kim & Snyder's phonotactic context features (manner, place, voicing) are a statistical abstraction of the same phonological knowledge encoded manually in Elovitz-style rules (Moderate)
+
 ### New Leads (Not Yet in Collection)
 - **Clements, G.N. (2003)** - Feature economy in sound systems: Foundational work on how natural languages organize phoneme inventories with feature-based constraints, directly relevant to predicting valid phonemic systems across language families.
 - **Kenstowicz, M.J. and Kisseberth, C.W. (1979)** - Generative phonology: Essential background on phonotactic constraints and how languages sequence phonemes, which the paper's model learns to exploit for cross-linguistic generalization.

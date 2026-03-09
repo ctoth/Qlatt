@@ -184,7 +184,11 @@ This paper provides the physiological basis for how voice intensity is controlle
 - Flanagan (1958) — "Some properties of the glottal sound source" — opening quotient effects on intensity and efficiency; explains the mechanism behind Isshiki's efficiency findings
 
 ### Cited By (in Collection)
-- (none found)
+- [[Titze_1992_VocalIntensity]] — cites Isshiki 1964 as establishing lung pressure as the primary intensity control variable; builds on this to derive analytical intensity equations
+- [[Holmberg_1988_GlottalAirflowPressure]] — cites for vocal efficiency and intensity regulation data; uses ac/dc ratio from Isshiki 1981
+- [[Alku_1999_SPL_DpeakLinearity]] — references Isshiki's finding that intensity mechanism shifts from laryngeal to respiratory with pitch; interprets the dpeak-SPL "knee" as reflecting this same transition
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] — cross-referenced for SPL measurements across ages
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cites Isshiki et al. 1978 for turbulent noise characteristics in breathiness modeling
 
 ### Conceptual Links (not citation-based)
 - [[Bjorklund_2016_SubglottalPressureSPL]] — Directly extends Isshiki's core finding 50 years later with 31 speakers (vs Isshiki's 1). Bjorklund establishes SPL = a + b*log2(Ps) with gender-specific slopes (11.1 dB/doubling female, 9.3 dB/doubling male), and reports pitch has no significant effect on the Ps-SPL slope. This is consistent with Isshiki's finding that the power law exponent (~3.3) is similar across registers, but Bjorklund's log2 formulation obscures the mechanism shift Isshiki identified (resistance-dominant at low pitch, flow-dominant at high pitch). Bjorklund's finding that females gain more SPL per pressure doubling may relate to Isshiki's efficiency expression E_g*E_tr = KU^1.3 and sex-dependent glottal resistance.

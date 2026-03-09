@@ -238,6 +238,9 @@ function getTransitionDirection(consonant) {
 ### Already in Collection
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 
+### Conceptual Links (not citation-based)
+- [[Kaburagi_2007_VocalTractSpectrum]] — Recasens' DAC model predicts coarticulation magnitude from tongue-dorsum involvement; Kaburagi's model shows different task dimensions per phoneme, and phonemes with higher DAC values would correspond to higher task dimensions (more articulatory constraints), providing a complementary formal explanation for the same coarticulatory patterns
+
 ### New Leads (Not Yet in Collection)
 - **Browman, C. P., and Goldstein, L. (1986). "Towards an articulatory phonology"** - Theoretical framework for understanding articulatory gestures and constraints, directly underlying the DAC model presented in this paper.
 - **Kent, R. D., and Moll, K. L. (1972). "Cinefluorographic analyses of selected lingual consonants"** - Empirical data on consonant articulation that provides baseline measurements for understanding coarticulation effects.

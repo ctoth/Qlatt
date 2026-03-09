@@ -233,6 +233,9 @@ None of the key citations from this paper are currently in the collection.
 - Hu & Loizou (2008) - "Evaluation of objective quality measures for speech enhancement" - comprehensive comparison of objective quality measures
 - ANSI S3.5-1997 - "Methods for the calculation of the speech intelligibility index" - the SII standard that STOI improves upon
 
+### Cited By (in Collection)
+- [[Jensen_2016_ESTOI]] — ESTOI directly extends STOI by adding column normalization to capture spectral correlation; shares preprocessing pipeline but dramatically outperforms STOI for modulated noise maskers
+
 ### Supersedes or Recontextualizes
 None -- this paper introduces a new metric rather than extending or correcting existing collection papers.
 

@@ -237,7 +237,17 @@ Emotion → SNS/ANS changes → Muscle tension changes → Vocal apparatus modif
 - [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]]
 - [[Zhang_2016_MechanicsVoiceProductionControl]] — cited as Zhang (2016a); comprehensive review of voice physiology, biomechanics, and the physics of vocal fold vibration that this paper draws on for its source-filter production overview
 
+### Cited By (in Collection)
+- (none found)
+
 ### New Leads (Not Yet in Collection)
 - Scherer, K. R. (2003). Vocal communication of emotion - Comprehensive review of how emotions map to acoustic parameters; directly applicable to emotional speech synthesis
 - Titze, I. R. (1994). Principles of voice production - Physical foundation for voice quality and glottal control mechanisms
 - Laver, J. (1980). The phonetic description of voice quality - Systematic classification of voice quality types essential for quality simulation
+
+### Conceptual Links (not citation-based)
+- [[Gobl_2003_VoiceQualityEmotion]] — Both review how voice quality maps to emotional expression; Gobl provides specific synthesis parameter values (OQ, SQ, tilt) for each voice quality type, while Kamiloglu provides the perceptual and physiological framework connecting these parameters to emotion perception (Strong)
+- [[Klatt_1990_VoiceQualityVariations]] — Kamiloglu's review of modal/creaky/breathy voice quality types maps directly to Klatt & Klatt 1990's analysis of voice quality variation in synthesis; the voice quality parameters (adductive tension, medial compression, longitudinal tension) correspond to Klatt's OQ, AV, and TL parameters (Strong)
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt implements the voice quality types Kamiloglu describes (modal, breathy, tense) in a formant synthesizer; Kamiloglu's physiological framework provides the theoretical grounding for Burkhardt's parameter choices (Moderate)
+- [[Jiang_2017_SoundOfConfidenceDoubt]] — Kamiloglu's arousal-valence framework predicts the acoustic patterns Jiang documents for confidence (high arousal: louder, wider F0 range) and doubt (low arousal: slower, narrower range); the voice quality dimension (HNR differences) maps to Kamiloglu's modal-to-tense continuum (Moderate)
+- [[KaczmarekMajer_2024_AcousticMarkersBipolar]] — Kamiloglu's emotion-acoustic mappings predict Kaczmarek-Majer's clinical findings: mania maps to high-arousal patterns (louder, higher F0, faster) and depression to low-arousal patterns (quieter, slower), consistent with the arousal-dominance principle (Moderate)

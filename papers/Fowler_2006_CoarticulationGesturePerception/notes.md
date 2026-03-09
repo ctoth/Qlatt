@@ -218,5 +218,8 @@ This paper is the strongest empirical anchor for Fowler's coproduction theory, w
 - [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — references this paper as demonstrating coarticulation compensation (cue weighting in action); published as companion/commentary in same issue
 - [[Volenec_2015_Coarticulation]] — cites Fowler's gestural account of coarticulation perception
 
+### Conceptual Links (not citation-based)
+- [[Kaburagi_2007_VocalTractSpectrum]] — Fowler's direct-realist account of coarticulation perception aligns with Kaburagi's demonstration that listeners can recover phonemic identity from coarticulated segments because invariant articulatory targets persist through dynamic variation
+
 ### Supersedes or Recontextualizes
 - None directly — this paper operates in a different domain (perception) from most of our implementation papers

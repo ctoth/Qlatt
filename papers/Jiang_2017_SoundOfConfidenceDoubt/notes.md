@@ -183,3 +183,9 @@ Normalized duration = utterance_duration / mean_duration_neutral
 - **Cheang & Pell (2008)** - "The sound of sarcasm" - Same methodology applied to different pragmatic meaning. Good comparison for voice quality measures.
 - **Patel et al. (2011)** - Mapping emotions into acoustic space via voice production. Links acoustic features to phonation mechanisms relevant for Klatt source modeling.
 - **Pell (2001)** - Influence of emotion and focus on prosody. Shows constituent-level prosodic variation methodology that could inform local prosody control in synthesis.
+
+### Conceptual Links (not citation-based)
+- [[Caballero_2018_SoundOfImpoliteness]] — Both study prosodic encoding of pragmatic attitudes using similar methodology (same lab tradition). Caballero's impoliteness cues (higher F0, louder) partially overlap with Jiang's confident speech cues, suggesting a shared acoustic profile for assertive/dominant social signals (Moderate)
+- [[VaughanJohnston_2024_VocalIntonationPersuasion]] — Vaughan-Johnston studies how intonation signals persuasiveness; Jiang's finding that falling F0 signals confidence while rising F0 signals doubt provides the mechanism: listeners infer speaker certainty from intonation, which then drives persuasion (Strong)
+- [[Trott_2022_ProsodyIndirectRequests]] — Both papers examine how prosodic features signal speaker epistemic state; Trott's indirect requests use rising intonation (uncertainty marker) that maps to Jiang's unconfident profile (Moderate)
+- [[Kamiloglu_2021_VoiceProductionPerception]] — Kamiloglu's arousal-valence framework predicts Jiang's findings: confident speech maps to moderate arousal (loud, varied) while unconfident speech shows the tense voice quality (high HNR) characteristic of high arousal without positive valence (Moderate)

@@ -160,8 +160,16 @@ Verify `tts-frontend-rules.js` fricative durations meet minimums:
 - [[Blumstein_Stevens_1979_AcousticInvariance]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 
+### Cited By (in Collection)
+- [[Jongman_2000_FricativeAcoustics]] — extends this perceptual work with comprehensive acoustic analysis of all four English fricative places of articulation
+
 ### New Leads (Not Yet in Collection)
 - **Stevens & Blumstein (1978-1980)**: Invariant cue theory for stop consonants; provides theoretical framework for understanding how place of articulation is extracted from spectral properties, applicable to fricatives.
 - **Klatt (1986)**: Unpublished analysis of fricative spectral properties; relevant for modern formant synthesis models needing fricative acoustic parameters.
 - **LaRiviere et al. (1975)**: Earlier perceptual study establishing role of vowel vs. frication noise in fricative identification; foundational for current work.
 - **Soli (1981)**: Fricative-vowel coarticulation effects on spectral characteristics; important for understanding context-dependent acoustic variation in fricative synthesis.
+
+### Conceptual Links (not citation-based)
+- [[Badin_1989_FricativeProductionModelling]] — Badin's aerodynamic model explains *why* the minimum durations Jongman found differ by place: sibilants have stronger, more localized spectral peaks (identifiable faster) while non-sibilants have flatter spectra requiring more temporal integration for place identification (Strong)
+- [[Shadle_2023_FricativeSpectraHighFreq]] — Shadle's high-frequency fricative analysis extends above 7 kHz, showing that non-sibilant [f, θ] spectral characteristics above Jongman's analysis bandwidth may contribute to the longer identification times Jongman found for these sounds (Moderate)
+- [[Crystal_House_1988_StopConsonantDuration]] — Crystal & House's duration data for connected speech provides the phonetic context for Jongman's isolated-syllable thresholds; connected-speech fricative durations may approach Jongman's minimum perceptual thresholds, especially in fast speech (Moderate)

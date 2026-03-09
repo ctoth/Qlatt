@@ -569,3 +569,12 @@ Conversion from volume velocity to pressure at lips:
 - [[Holmes_1983_FormantSynthesizersCascadeParallel]]
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Klatt_1990_VoiceQualityVariations]]
+
+### Cited By (in Collection)
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — lists Jesus 1997 in Cited By as a cascade vs parallel implementation
+- [[Peterson_Barney_1952_VowelControl]] — lists Jesus 1997 as comparing Portuguese vowel formants against P&B English data
+
+### Conceptual Links (not citation-based)
+- [[Anumanchipalli_KLATTSTAT]] — Both are didactic Klatt synthesizer implementations (KLATTSTAT in MATLAB, Jesus in MATLAB) designed to make the Klatt 1980 architecture accessible for teaching and experimentation; share parameter tables and GUI-driven workflows (Strong)
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — Lalwani's flexible formant synthesizer addresses the same cascade vs parallel architecture choice, proposing a unified approach. Jesus provides the standard dual-branch implementation that Lalwani sought to improve (Moderate)
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Both implement Klatt-family synthesizers with voice quality control; Burkhardt extends the basic architecture with emotional voice quality modifications that Jesus's MATLAB implementation could serve as a testbed for (Moderate)

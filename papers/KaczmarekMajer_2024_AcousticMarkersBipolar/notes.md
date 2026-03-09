@@ -185,7 +185,17 @@ For Qlatt speech synthesis:
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — uses the eGeMAPS feature set defined by Eyben et al. for acoustic parameter extraction via openSMILE
+- [[Weninger_2013_AcousticsEmotionAudio]] — uses the openSMILE tool co-developed by Weninger/Eyben for feature extraction
+
+### Cited By (in Collection)
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — lists KaczmarekMajer 2024 as using eGeMAPS for bipolar disorder acoustic marker analysis
+
+### Conceptual Links (not citation-based)
+- [[France_2000_SpeechDepressionSuicideAcoustics]] — Both study acoustic correlates of mood disorders; France examines depression/suicidal risk with F0 and power spectral density, while Kaczmarek-Majer provides larger-scale prospective data with sex-differentiated patterns. The sex differences Kaczmarek-Majer found (male and female patterns often opposite) may explain inconsistencies in France's single-sex-pooled analysis (Strong)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Banse provides acoustic profiles for discrete emotions; Kaczmarek-Majer's mania/depression markers overlap substantially with Banse's anger/sadness profiles (high F0 + loudness for mania/anger, low energy for depression/sadness), suggesting clinical mood states map onto the same acoustic dimensions as posed emotional expressions (Moderate)
+- [[Moore_2003_GlottalFeaturesDepression]] — Moore uses glottal features for depression classification; Kaczmarek-Majer's jitter/shimmer findings complement this with voice quality markers from naturalistic phone calls rather than controlled recordings (Moderate)
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — Goudbeek's finding that arousal dominates acoustic variation (R²=0.82) aligns with Kaczmarek-Majer's strongest correlates being loudness/energy (arousal-related), while valence markers (spectral slope) are weaker in both studies (Moderate)
 
 ### New Leads (Not Yet in Collection)
 - **Eyben et al. (2016) - GeMAPS feature set** - Defines the standard acoustic feature set used in this study. Essential for understanding what parameters to extract and how they're computed. Directly relevant for implementing voice quality analysis.

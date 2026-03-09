@@ -89,6 +89,11 @@ This paper provides cross-cultural data on voice quality preferences, with direc
 - [ ] How does tone language background affect pitch range preferences?
 - [ ] What specific H1-A3* threshold separates attractive from unattractive voice quality?
 
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [[Liu_2011_FemaleVoiceAttractiveness]] — Earlier ICPhS 2011 paper by the same research group (Liu & Xu) testing the size projection hypothesis on English listeners with natural speech manipulated in Praat. Liu finds voice quality (breathy > normal > pressed) is the dominant cue (F = 73.71), with formant condensation and pitch as secondary factors — the same ordering this paper validates cross-culturally with Mandarin listeners and VocalTractLab synthesis. Together the two papers establish that the voice quality preference ordering is robust across language backgrounds and synthesis methods.
+
 ## Related Work Worth Reading
 - Xu, Y., A. Lee, W. Wu, X. Liu and P. Birkholz (2013). Human vocal attractiveness as signaled by body size projection. PLoS ONE 8(4): e62397.
 - Gobl, C. & Ni Chasaide, A. (2003). The role of voice quality in communicating emotion, mood and attitude. Already in collection.

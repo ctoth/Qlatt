@@ -1,0 +1,4 @@
+---
+tags: [vocal-attractiveness, voice-quality, breathiness, size-projection, emotion]
+---
+This paper investigates which acoustic features make a female voice attractive to male listeners, testing voice quality, formant shift (vocal tract length), pitch height, and final F0 slope in a full factorial perception experiment with 81 stimuli. The key finding is that voice quality is by far the most important cue (F(2,18) = 73.71), with breathy voice always rated most attractive, followed by formant condensation (shorter apparent vocal tract) and higher pitch, all consistent with a "small body size projection" hypothesis derived from Morton's motivational-structural rules. For speech synthesis, this provides empirical guidance on which Klatt parameters (spectral tilt, formant spacing, F0) to manipulate for designing attractive female voice presets, with breathiness being the dominant factor.

@@ -203,5 +203,8 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ### Cited By (in Collection)
 - [[Schild_2019_AttractiveVoiceFormantF0]] — large-sample (N=450) pre-registered replication of Babel's PCA methodology, testing whether the data-driven model outpredicting F0+formants holds at scale (Stage 1 Registered Report)
 
+### Conceptual Links (not citation-based)
+- [[Liu_2011_FemaleVoiceAttractiveness]] — Perception experiment independently confirms breathiness as the dominant attractiveness cue for female voices (F(2,18) = 73.71), with voice quality effect size far exceeding formant shift and pitch. Both papers converge on voice quality > F0 > formants as the effect size ordering for female vocal attractiveness.
+
 ### Supersedes or Recontextualizes
 - None — this paper complements rather than supersedes existing collection entries.

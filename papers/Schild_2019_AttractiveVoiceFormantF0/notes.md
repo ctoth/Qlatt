@@ -124,6 +124,11 @@ This paper provides methodological detail on how to measure and compare acoustic
 - [[Borkowska_2011_F0DominanceAttractiveness]] — Borkowska found a nonlinear (inverted-U) F0-attractiveness relationship for female voices peaking ~280 Hz; Schild's H1 tests whether F0 is even a reliable predictor at all when broader voice quality is controlled — potential convergence if Schild's data-driven model subsumes the nonlinear F0 effect
 - [[Weiss_2020_VoiceAttractiveness]] — comprehensive edited volume consolidating voice attractiveness research including chapters by Babel and others; provides broader context for the theory-driven vs data-driven debate Schild addresses
 - [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — found that jitter (not F0/formants) differentiated attractive male speakers, paralleling Schild's hypothesis that voice quality measures beyond F0/formants matter more for attractiveness
+- [[Quene_2021_PitchTempoAttractiveness]] — Quene manipulates F0 and tempo in male speakers and finds pitch has a larger effect than tempo, with an asymmetric pattern (only negative deviations reduce ratings). Consistent with Schild's finding that the F0-loaded PCA component is a strong predictor. (Moderate)
 
 **Voice source and spectral measures:**
 - [[Iseli_2007_VoiceSourceAgeSexVowel]] — provides age- and sex-specific norms for the spectral tilt measures (H1-H2, H1-A1, etc.) that Schild uses as predictors via PCA; the sex differences in spectral tilt documented by Iseli are exactly the kind of "other acoustic characteristics" Schild hypothesizes drive attractiveness
+
+**Speaker discrimination and voice variability:**
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — Keating identifies CPP, SHR, F3, F4, and energy as the top discriminators of individual female voices via LDA; these overlap with the spectral measures Schild uses in PCA for attractiveness prediction, suggesting the same acoustic dimensions that make voices distinct also relate to attractiveness judgments
+- [[Lee_2019_AcousticVoiceVariation]] — Lee's PCA on voice variability (same measures, same database) identifies harmonic/inharmonic balance and formant dispersion as the dominant axes, providing context for which of Schild's PCA dimensions reflect within-speaker versus between-speaker variation

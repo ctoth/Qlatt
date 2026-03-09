@@ -96,6 +96,23 @@ For the Qlatt speaker personality system, this work identifies which acoustic pa
 - [ ] Would including temporal/dynamic parameters change the ranking?
 - [ ] Is F4 currently modeled with enough precision in Qlatt for speaker discrimination?
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment]] — cited as [2]; the psychoacoustic model whose parameters are tested here for speaker discrimination
+- [[Kreiman_2007_GlottalSourceSpectrum]] — Kreiman et al.'s source spectral model whose parameters (H1*-H2*, H2*-H4*, etc.) were tested here and found surprisingly unimportant for speaker discrimination
+
+### Cited By (in Collection)
+- [[Lee_2019_AcousticVoiceVariation]] — extends this work with full PCA on the same UCLA Speaker Variability Database (100 speakers vs. 50 here), finding that F0 is a major discriminator (confirming this paper's LDA finding) but not a major axis of variability
+
+### Conceptual Links (not citation-based)
+- [[Lee_2019_AcousticVoiceVariation]] — **Strong.** Same research group (Keating, Kreiman), same database. This poster identifies F0, SHR, F3, F4, CPP as top discriminators via LDA; Lee 2019 extends with PCA showing harmonic/inharmonic balance (PC1) and formant dispersion (PC2) as the dominant variability axes. The apparent tension — F0 is the top discriminator here but not a major variability axis in Lee 2019 — is resolved by recognizing that discrimination and variability are different analyses.
+- [[Cartei_2014_VoiceMasculinity]] — **Moderate.** Cartei identifies F0 and formant spacing as independent dimensions of voice gender perception; this paper's finding that F3, F4, and F0 are top discriminators among female speakers aligns with Cartei's identification of these as independent voice identity cues.
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — **Moderate.** Iseli provides harmonic correction formulas (H1*, H2*, etc.) used in this study's measurements; the corrected source spectral measures' poor discriminative power here challenges the assumption that corrected spectral tilt is a strong individual marker.
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — **Moderate.** GeMAPS standardizes many of the same acoustic measures (F0, formants, spectral tilt, loudness); this paper's ranking of discriminative value informs which GeMAPS features to prioritize for speaker profiling.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — **Moderate.** Childers' voice quality factors (OQ, spectral tilt) are among the source parameters tested here; the finding that these are weak individual discriminators suggests they characterize voice quality class rather than individual identity.
+- [[Schild_2019_AttractiveVoiceFormantF0]] — **Moderate.** Schild's PCA-based approach to voice attractiveness uses many of the same spectral measures; this paper's finding that CPP and energy are strong discriminators provides context for which voice quality dimensions vary most across speakers.
+
 ## Related Work Worth Reading
 - Kreiman & Sidtis (2011) — Foundations of voice studies (cited as [1])
 - Kreiman & Gerratt (1996) — Perceptual structure of pathologic voice quality; no acoustic parameters mapped to MDS of 80 voices (cited as [2])

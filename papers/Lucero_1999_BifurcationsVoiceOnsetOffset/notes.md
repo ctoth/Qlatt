@@ -94,4 +94,20 @@ For threshold equations, see Titze 1988 and Lucero's JASA paper (ref 6, later pu
 
 ---
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Lucero_2005_VocalFoldBifurcations]] — cited as [6] (in press at time of this publication); provides analytical proof using the mucosal wave model. Partially corrects this paper: for typical parameters the Hopf bifurcation is supercritical (soft onset), not subcritical as found here in the two-mass model. The 2005 paper's extended model with quartic damping recovers the subcritical behavior demonstrated here.
+
+### Cited By (in Collection)
+- [[Lucero_2005_VocalFoldBifurcations]] — cites this as [10]; the 2005 paper provides the analytical treatment that this paper's numerical simulations motivated
+
+### Conceptual Links (not citation-based)
+- [[Steinecke_1995_BifurcationsVocalFold]] — **Strong.** Both analyze bifurcations in the Ishizaka-Flanagan two-mass model family. Steinecke maps bifurcation diagrams for left-right vocal fold asymmetry (producing subharmonics, chaos, diplophonia), while this paper maps the onset/offset hysteresis under symmetric conditions. Together they characterize the full bifurcation landscape: symmetric onset/offset (this paper) and asymmetric pathological regimes (Steinecke).
+- [[Herzel_1994_VocalDisordersNonlinearDynamics]] — **Strong.** Herzel catalogs empirical acoustic signatures of bifurcations (period-doubling, tori, chaos) in 95 dysphonic patients. This paper provides the mathematical framework for onset-type bifurcations that produce some of those signatures. Herzel's observation that tiny parameter changes cause abrupt regime transitions maps directly to the bifurcation diagrams here.
+- [[Titze_1992_VocalIntensity]] — **Moderate.** Titze derives SPL as a function of excess pressure over phonation threshold pressure. This paper's hysteresis result (onset pressure > offset pressure) means the "excess pressure" concept must account for which threshold applies — onset or offset — depending on direction of pressure change.
+- [[Titze_2014_BistableVocalFoldAdduction]] — **Moderate.** Titze 2014 describes bistability in modal-falsetto register transitions arising from adductory geometry. This paper describes bistability in phonation onset/offset. Both involve coexisting stable states (oscillating/non-oscillating here, convergent/divergent glottis there) with hysteresis, but through different mechanisms.
+- [[Titze_1989_MaleFemaleVoices]] — **Moderate.** Titze 1989 derives male-female F0 differences from vocal fold geometry. This paper's bifurcation analysis uses the Ishizaka-Flanagan model with parameter scaling for F0 control, and the onset/offset pressure ratios may differ between male and female vocal fold configurations due to the size/length scaling factors Titze identifies.
+- [[Fant_1985_LFModelGlottalFlow]] — **Moderate.** The LF model parameterizes glottal flow waveform shape; the limit cycle amplitude and shape in this paper's bifurcation analysis determine the resulting glottal waveform. The abrupt onset (subcritical Hopf) means the initial LF waveform parameters should jump to finite values rather than grow gradually.
+
 **See also:** Lucero_2005_VocalFoldBifurcations - Analytical bifurcation analysis of the mucosal wave model showing that for typical parameters the Hopf bifurcation is supercritical (soft onset), partially correcting this paper's finding of subcritical onset in the two-mass model. The 2005 paper introduces an extended model with quartic nonlinear damping that can recover subcritical behavior and hysteresis.

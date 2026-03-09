@@ -129,6 +129,7 @@ Provides empirical F0 targets for an attractive female voice preset: higher is b
 - [[Babel_2014_VocalAttractiveness]] — cites this for F0 manipulation and attractiveness findings
 - [[Belin_2017_SoundOfTrustworthiness]] — cites this in trustworthiness-voice quality context
 - [[Feinberg_2011_IntegratingF0FormantPreferences]] — extends this work by showing F0 and formant preferences interact (cue amplification), not independent as treated here
+- [[Krumpholz_2022_PitchManipulationFemaleRatings]] — cites this for prior finding that higher pitch = more attractive; Krumpholz's null attractiveness result with ~20 Hz PSOLA manipulation using naturalistic sentences challenges the linear relationship at small effect sizes
 
 ### Supersedes or Recontextualizes
 - [[Collins_2003_VocalVisualAttractiveness]] — Feinberg 2008 extends Collins 2003 by showing pitch alone (via PSOLA manipulation) drives attractiveness, not just correlated vocal qualities

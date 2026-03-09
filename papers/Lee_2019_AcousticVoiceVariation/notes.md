@@ -141,11 +141,22 @@ This paper directly informs which acoustic parameters matter most for creating d
 2. How does acoustic variability structure differ across age groups, languages, or vocal pathologies?
 3. Can the idiosyncratic PC3-PC6 dimensions be predicted from physiological speaker characteristics?
 
-## Related Work in Collection
-- [[Keating_2016_AcousticSimilarityFemaleVoices]] — earlier LDA study by same group, same database; F0 matters more for discrimination than for variability
+## Collection Cross-References
+
+### Already in Collection
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — earlier LDA study by same group, same database (50 female speakers); identifies F0, SHR, F3, F4, CPP as top speaker discriminators. This paper extends to 100 speakers (50F+50M) and shows F0 is not a major variability axis despite being a strong discriminator.
 - [[Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment]] — the psychoacoustic model whose 13 measures are used here
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for formant frequencies being independent of vowel quality (formant dispersion interpretation)
 - [[Childers_Lee_1991_VoiceQualityFactors]] — source spectral measures and voice quality
-- [[Cartei_2014_VoiceMasculinity]] — F0 and formant spacing as voice identity cues
-- [[Iseli_2007_VoiceSourceAgeSexVowel]] — harmonic correction formulas (H1*-H2* etc.) used in this study
-- [[Eyben_2015_GeMAPS_AcousticParameters]] — standardized acoustic parameter set including many of the same measures
-- [[Stathopoulos_2011_VoiceAcrossLifespan]] — voice acoustics across age (relevant to limitation #2)
+
+### Cited By (in Collection)
+- [[Kreiman_2021_ValidatingVoiceQuality]] — cites this paper as ref [25] for acoustic voice variation structure
+
+### Conceptual Links (not citation-based)
+- [[Cartei_2014_VoiceMasculinity]] — **Strong.** Cartei identifies F0 and formant spacing (deltaF) as independent voice gender perception dimensions. This paper's PC2 (formant dispersion: F3, F4, FD) aligns with Cartei's deltaF pathway, and the finding that F0 is a weak variability axis supports their independence.
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — **Strong.** Provides the harmonic correction formulas (H1*, H2*, etc.) for the spectral measures used here. The sex-specific correction norms from Iseli are critical to interpreting this paper's between-sex PCA differences.
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — **Moderate.** Standardized acoustic feature set with substantial overlap in spectral and prosodic measures used here.
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] — **Moderate.** Voice acoustics across lifespan; relevant context for this paper's age-homogeneous sample limitation.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — **Moderate.** Voice quality variation in formant synthesis; the spectral tilt and noise dimensions identified here (PC1) map to Klatt parameters TL and AH.
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — **Moderate.** Emotional speech acoustics; the within-speaker variability dimensions here overlap with emotion-related acoustic changes in Banse's profiles.
+- [[Schild_2019_AttractiveVoiceFormantF0]] — **Moderate.** Schild's PCA-based approach to voice attractiveness uses many of the same spectral measures; the variability structure identified here provides context for which dimensions separate speakers versus which vary within speakers.

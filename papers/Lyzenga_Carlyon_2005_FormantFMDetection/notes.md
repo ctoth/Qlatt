@@ -132,6 +132,21 @@ Three sub-models combined by summing d' values in quadrature (square root of sum
 3. **Spectral slope matters**: Broader formants (lower spectral slopes) are more robustly perceived via place cues and more susceptible to FMDI. Narrow formants rely on less reliable temporal cues.
 4. **Transition direction is free**: For well-resolved formants, direction discrimination comes "for free" with detection -- no extra acoustic contrast needed to signal transition direction.
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Hillenbrand_1995_VowelAcoustics]] — Hillenbrand provides updated formant measurements (F0-F4) for 12 American English vowels across 139 speakers; this paper's FMT data provides the perceptual lower bounds on formant frequency change detection that complement Hillenbrand's production data.
+- [[Peterson_Barney_1952_VowelControl]] — canonical vowel formant measurements; this paper's finding that formant direction discrimination is "free" for well-resolved harmonics applies to the formant regions Peterson & Barney documented.
+
+### Cited By (in Collection)
+- (none found)
+
+### Conceptual Links (not citation-based)
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — **Strong.** Kent provides formant bandwidth data that directly affects this paper's predictions: wider bandwidths (shallower spectral slopes) mean more harmonics within formant peaks, favoring place-of-excitation cues and making direction discrimination easier but also increasing FMDI susceptibility.
+- [[Ohman_1966_CoarticulationVCV]] — **Moderate.** Ohman's locus theory of coarticulation involves F2 transitions between consonant loci and vowel targets. This paper shows that such transitions are vulnerable to interference from simultaneous formant movements (FMDI), suggesting coarticulatory cues may be degraded in contexts with concurrent F3/F4 changes.
+- [[Fant_1960_AcousticTheorySpeechProduction]] — **Moderate.** Fant's acoustic theory provides the formant structure that this paper's psychoacoustic model analyzes. The spectral slope parameter (50 vs 200 dB/oct) directly relates to Fant's formant bandwidth predictions.
+- [[Stevens_House_1956_FormantTransitionsVocalTract]] — **Moderate.** Stevens & House analyze how vocal tract configuration produces formant transitions; this paper quantifies the perceptual limits on detecting and discriminating those transitions.
+
 ## References Worth Following
 
 - **Lyzenga & Carlyon (1999)** - JASA 105: Original FMDI study for vowel formants. Establishes the interference phenomenon and the hybrid model.

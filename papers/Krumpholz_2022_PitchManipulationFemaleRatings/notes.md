@@ -74,6 +74,22 @@ This paper provides evidence that voice pitch manipulation has asymmetric effect
 - [ ] Do the null attractiveness results replicate with non-European listeners?
 - [ ] How do breathiness and formant dispersion interact with pitch for attractiveness?
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for positive correlation between voice pitch and attractiveness in unmanipulated voices
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited as key prior finding that higher female pitch increases attractiveness; this paper's null attractiveness result at 20 Hz manipulation challenges Feinberg's linear relationship at small effect sizes
+
+### Cited By (in Collection)
+- (none found)
+
+### Conceptual Links (not citation-based)
+- [[Borkowska_2011_F0DominanceAttractiveness]] — **Strong.** Borkowska found an inverted-U relationship between F0 and female attractiveness peaking at ~280 Hz. Krumpholz's null attractiveness result with ~20 Hz increase (speakers mostly at 200-240 Hz) is consistent with a plateau in the 200-260 Hz range before the peak. Together they suggest attractiveness sensitivity to F0 is nonlinear and region-dependent.
+- [[Liu_2011_FemaleVoiceAttractiveness]] — **Moderate.** Liu found no significant difference between original and raised (+2 st) female pitch for attractiveness, consistent with Krumpholz's null result at 0.5 ERB. Both papers converge on the finding that modest upward pitch shifts do not reliably increase attractiveness.
+- [[Schild_2019_AttractiveVoiceFormantF0]] — **Moderate.** Schild tests whether F0 or broader voice quality better predicts attractiveness; Krumpholz's null F0-attractiveness result with naturalistic speech supports Schild's hypothesis that voice quality measures beyond F0 are needed to predict attractiveness.
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — **Moderate.** Feinberg 2011 shows F0 and formant preferences interact (cue amplification); Krumpholz manipulated only F0 without formants, which may explain the null attractiveness result if coherent size cues are needed.
+- [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — **Moderate.** Cumbers shows pitch variability (SdF0) is the strongest correlate of perceived vocal variability; Krumpholz's manipulation of mean F0 affected femininity/age perception but not attractiveness, suggesting mean pitch and pitch variability serve different perceptual functions.
+
 ## Related Work Worth Reading
 - Collins, S. A. & Missing, C. (2003). Vocal and visual attractiveness are related in women. Already in collection.
 - Feinberg, D. R. et al. (2008). The role of femininity and averageness of voice pitch in aesthetic judgments of women's voices.

@@ -150,6 +150,7 @@ This paper provides empirical data on the relationship between female voice acou
 
 ### Cited By (in Collection)
 - [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — cites Collins 2003 for the vocal-body size relationship; refines the finding by showing the relationship is driven by WHR (not BMI) and extends to males (SHR) and sexual behavior outcomes
+- [[Krumpholz_2022_PitchManipulationFemaleRatings]] — cites Collins 2003 for positive pitch-attractiveness correlation in unmanipulated voices; Krumpholz extends with PSOLA manipulation finding that ~20 Hz increases affect femininity/age but not attractiveness
 
 ### Supersedes or Recontextualizes
 None - this paper extends prior work on vocal attractiveness but does not correct or supersede existing collection papers.

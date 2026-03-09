@@ -204,3 +204,6 @@ This paper is directly relevant for implementing **emotion-dependent prosody rul
 
 ### Supersedes or Recontextualizes
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — Belyk & Brown 2014 recontextualizes the Banse & Scherer data by showing that emotion-family grouping explains why their 14-emotion acoustic profiles showed inconsistent valence effects (only elation showed high-loud among positive emotions, because the others belonged to different families)
+
+### Conceptual Links (not citation-based)
+- [[Grollero_2023_CoreAffectVocalBursts]] — Grollero demonstrates a V-shaped valence-arousal relationship in vocal bursts (quadratic R^2=0.38 vs linear R^2=0.17), which may emerge from the family-specific expression rules identified here: different emotion families use different pitch-loudness strategies for positive and negative valence, converging on similar arousal ratings at extreme valences

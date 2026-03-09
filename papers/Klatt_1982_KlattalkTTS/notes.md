@@ -226,9 +226,20 @@ Phenomena covered:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Carlson_1979_VowelPerceptionSalience]]
-- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
-- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Carlson_1979_VowelPerceptionSalience]] — referenced for vowel perception work
+- [[Klatt_1976_SegmentalDuration]] — duration model foundation for Klattalk's timing rules
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]] — SCRIBER/LAFS perception framework informing synthesis targets
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the synthesizer engine used by Klattalk
+- [[Hunnicutt_1976_PhonologicalRules]] — Hunnicutt's letter-to-sound rules used in Klattalk (referenced as Hunnicutt 1980)
+
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — MITalk extends the Klattalk TTS approach
+- [[Hertz_1985_DeltaRuleSystem]] — references Klattalk system
+- [[Rutledge_1995_SynthesizingStyledSpeechKlatt]] — extends Klattalk with styled speech
+- [[Anumanchipalli_KLATTSTAT]] — statistical extension of Klattalk approach
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — references Klattalk system
+- [[deCheveigné_1999_FormantBandwidthCompetingVowels]] — references Klattalk
+- [[Carlson_1979_VowelPerceptionSalience]] — references Klattalk system
 
 ### New Leads (Not Yet in Collection)
 - **Maeda (1974) [6]** - Source of the "hat-pattern" F0 contour strategy. Important for implementing prosodic F0 rules.

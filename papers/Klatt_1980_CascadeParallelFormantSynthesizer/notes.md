@@ -379,12 +379,41 @@ A3COR = A2COR * A2SKRT
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Allen_1977_ModularAudioResponse]]
-- [[Carlson_1979_VowelPerceptionSalience]]
-- [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Fujimura_1962_NasalConsonantAnalysis]]
-- [[Klatt_1976_SegmentalDuration]]
-- [[Klatt_1979_SpeechPerceptionLexicalAccess]]
-- [[Rabiner_1968_DigitalFormantSynthesizer]]
-- [[Rabiner_1968_SynthesisByRule]]
-- [[Stevens_1971_AirflowTurbulenceNoise]]
+- [[Allen_1977_ModularAudioResponse]] — Allen's modular TTS system that uses this synthesizer
+- [[Carlson_1979_VowelPerceptionSalience]] — vowel perception work referenced for spectral analysis
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational acoustic theory underlying cascade/parallel model
+- [[Fujimura_1962_NasalConsonantAnalysis]] — nasal consonant analysis informing nasal pole-zero modeling
+- [[Klatt_1976_SegmentalDuration]] — duration rules that drive synthesis parameter timing
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]] — SCRIBER/LAFS perception model that motivates synthesis targets
+- [[Rabiner_1968_DigitalFormantSynthesizer]] — digital resonator design foundation
+- [[Rabiner_1968_SynthesisByRule]] — synthesis-by-rule framework
+- [[Stevens_1971_AirflowTurbulenceNoise]] — airflow and noise models for fricative/stop synthesis
+
+### Cited By (in Collection)
+- [[Klatt_1982_KlattalkTTS]] — Klattalk uses this synthesizer directly
+- [[Klatt_1990_VoiceQualityVariations]] — KLSYN88 extends this synthesizer with voice quality controls
+- [[Jesus_1997_KlattSynthesiserImplementation]] — reimplementation of this synthesizer
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — comparison of cascade/parallel synthesizer designs
+- [[Childers_Lee_1991_VoiceQualityFactors]] — uses Klatt synthesizer for voice quality experiments
+- [[Gobl_2003_VoiceQualityEmotion]] — uses Klatt synthesizer for voice quality/emotion synthesis
+- [[Hertz_1982_SRS_TextToSpeech]] — SRS system uses Klatt synthesizer
+- [[Hertz_1999_ETI-Eloquence_MultiLanguage]] — ETI-Eloquence uses Klatt synthesizer
+- [[Rutledge_1995_SynthesizingStyledSpeechKlatt]] — extends Klatt synthesizer for styled speech
+- [[Allen_1987_MITalk_TTS]] — MITalk system uses this synthesizer
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — references Klatt synthesizer in spectral models context
+- [[Barreda_2015_FormantSpeakerSize]] — references Klatt synthesizer for formant analysis
+- [[Anumanchipalli_KLATTSTAT]] — statistical extension of Klatt synthesizer
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — references Klatt synthesizer architecture
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — extends/modifies Klatt synthesizer design
+- [[Lin_1995_CascadeIntoParallel]] — converts cascade to parallel Klatt topology
+- [[Feugere_2017_CantorDigitalis]] — references Klatt synthesizer in digital instrument context
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — references Klatt synthesizer in synthesis models review
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — uses Klatt synthesizer for nasal vowel experiments
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references Klatt synthesizer
+- [[Monson_2014_HighFrequencyVoice]] — references Klatt synthesizer for high-frequency voice analysis
+- [[vanSanten_1997_ProsodicModeling]] — references Klatt synthesizer in prosodic modeling
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — references Klatt synthesizer
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational theory that Klatt implements
+- [[Stevens_1991_HL_Parameters]] — HL parameters relate to Klatt synthesizer parameters
+- [[Fraj_2011_BreathyRoughVoices]] — uses Klatt synthesizer for breathy/rough voice synthesis
+- [[Ronanki_2013_SyllableProsodyHTS]] — references Klatt synthesizer

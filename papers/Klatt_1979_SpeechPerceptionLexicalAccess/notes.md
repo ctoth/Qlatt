@@ -280,10 +280,20 @@ Two approaches:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Carlson_1975_RuleBasedTTS]]
-- [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Klatt_1976_SegmentalDuration]]
-- [[Zue_1976_StopConsonantAcoustics]]
+- [[Carlson_1979_VowelPerceptionSalience]] — Carlson et al. 1975 vowel perception work referenced for spectral analysis
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational vocal tract acoustics
+- [[Klatt_1976_SegmentalDuration]] — cites for duration model used in prosodic constraints
+- [[Zue_1976_StopConsonantAcoustics]] — cites for stop consonant acoustic characteristics
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the synthesizer that implements SCRIBER's spectral analysis; cites this paper
+- [[Klatt_1982_KlattalkTTS]] — Klattalk system builds on SCRIBER/LAFS framework; cites this paper
+
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — references SCRIBER/LAFS perception model
+- [[Hertz_1982_SRS_TextToSpeech]] — references Klatt's perception model in SRS context
+- [[Hertz_1985_DeltaRuleSystem]] — references Klatt's perception model
+- [[Hertz_1991_StreamsPhonesTransitions]] — references Klatt's perception model
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references Klatt's perception model
+- [[Liberman_Mattingly_1985_MotorTheory]] — references Klatt's perception model in motor theory discussion
 
 ### New Leads (Not Yet in Collection)
 - **Blumstein, Stevens & Nigro (1977). Property detectors for bursts and transitions.** - Describes acoustic-phonetic invariants that can inform synthesis target selection.

@@ -250,6 +250,29 @@ Key quantitative findings:
 
 ### Already in Collection
 - [[Stevens_1971_AirflowTurbulenceNoise]]
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]] — cites this paper for duration model; references "Klatt (1976b)" for linguistic uses of segmental duration
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — cites this paper; duration rules inform synthesis parameter update timing
+- [[Klatt_1982_KlattalkTTS]] — references the segmental duration model as foundation for Klattalk's duration rules
+- [[Klatt_1990_VoiceQualityVariations]] — cites for segmental duration context in voice quality analysis
+- [[Allen_1977_ModularAudioResponse]] — Allen's PROSOD module implements these duration rules in the MIT TTS pipeline
+- [[Allen_1987_MITalk_TTS]] — MITalk system uses these duration rules in synthesis-by-rule
+- [[Carlson_1979_VowelPerceptionSalience]] — references duration as factor in vowel perception
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — references Klatt's duration rules in synthesis model review
+- [[Crystal_House_1988_StopConsonantDuration]] — extends Klatt's duration framework to stop consonants in connected speech
+- [[Blumstein_Stevens_1979_AcousticInvariance]] — references durational cues in acoustic invariance context
+
+### Cited By (in Collection)
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — extends Klatt's segment-level rules with syllable-level timing framework
+- [[vanSanten_1993_SegmentalDuration]] — builds on Klatt's duration model with sums-of-products formulation
+- [[vanSanten_1994_SegmentalDurationTTS]] — demonstrates Klatt's multiplicative model is a special case; perceptually preferred 73% of the time
+- [[vanSanten_1997_ProsodicModeling]] — references Klatt's duration rules in prosodic modeling context
+- [[Hertz_1987_DeltaNonLinearPhonology]] — uses Klatt's duration framework in Delta phonological system
+- [[Hertz_1991_StreamsPhonesTransitions]] — references Klatt's duration model
+- [[DeTournemire_1998_ProsodicAlphabetTranscription]] — references Klatt's duration work in prosodic transcription
+- [[White_2014_ProsodicTimingFunction]] — references Klatt's duration model
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — references Klatt's duration rules
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — references duration model in emotion/prosody context
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references Klatt's duration model
 
 ### New Leads (Not Yet in Collection)
 - **Peterson & Lehiste (1960)** - Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.
@@ -257,15 +280,3 @@ Key quantitative findings:
 - **Fry (1958)** - Experiments in the Perception of Stress: Demonstrates that duration changes perception of stress patterns in English.
 - **Oller (1973)** - The Effect of Position in Utterance on Speech Segment Duration: Provides complementary empirical data on positional effects that validate the rule framework.
 - **Umeda (1975a)** - Vowel Duration in American English: Contemporary alternative vowel duration modeling approach with continuous discourse validation.
-
----
-
-**See also:** Campbell_Isard_1991_SegmentDurationsSyllable - extends Klatt's segment-level duration rules with a higher-level syllable timing framework where syllable duration is predicted first, then segment durations are accommodated within the syllable frame using an elasticity measure. Complementary rather than competing: Klatt provides inherent durations and contextual factors, Campbell & Isard add syllable-level prosodic timing.
-
----
-
-**See also:** vanSanten_1994_SegmentalDurationTTS - demonstrates that Klatt's pure multiplicative duration model is a special case of sums-of-products, and that key interactions (pitch accent x syllabic stress) are not properly captured by multiplication alone. The new system is perceptually preferred 73% of the time.
-
----
-
-**See also:** Allen_1977_ModularAudioResponse - Allen's modular TTS architecture describes the PROSOD module that implements Klatt's duration rules as part of the MIT system pipeline; these rules feed directly into the synthesis-by-rule framework Allen documents.

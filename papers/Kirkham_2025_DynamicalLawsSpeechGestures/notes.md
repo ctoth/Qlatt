@@ -213,5 +213,8 @@ The paper does NOT provide:
 - Elie, Lee, & Turk (2023) — Modeling articulatory trajectories using general tau theory
 - Iskarous, Cole, & Steffman (2024) — Minimal dynamical model of intonation
 
+### Conceptual Links (not citation-based)
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — Moderate. Iskarous & Pouplier appraise the theoretical foundations of articulatory phonology; Kirkham's empirical finding that gestures are under-damped (not critically damped) provides data-driven evidence relevant to the dynamical primitives discussed in their appraisal.
+
 ### Supersedes or Recontextualizes
 - [[Saltzman_1989_DynamicalGesturalPatterning]] — Kirkham's data-driven approach provides empirical evidence that the critical damping assumption in Saltzman & Munhall (1989) is incorrect; the actual dynamics are under-damped with $b \ll 2\sqrt{k}$

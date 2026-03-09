@@ -200,12 +200,20 @@ One female speaker (AF6) produced /h/ with minimal flow increase but clear breat
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Holmberg_1988_GlottalAirflowPressure]]
-- [[Klatt_1990_VoiceQualityVariations]]
-- [[Stevens_1989_QuantalNatureSpeech]]
+- [[Holmberg_1988_GlottalAirflowPressure]] — cited for glottal airflow and pressure measurements across genders
+- [[Klatt_1990_VoiceQualityVariations]] — cited for voice quality variations in male and female speakers; KLSYN88 provides the synthesis framework
+- [[Stevens_1989_QuantalNatureSpeech]] — cited for quantal nature of speech and laryngeal behavior
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for female voice quality acoustic correlates; directly relevant to gender-specific synthesis
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — cited for foundational VOT cross-language study
+
+### Cited By (in Collection)
+- [[Simpson_2009_PhoneticGenderDifferences]] — references Koenig's gender differences in laryngeal control
+
+### Conceptual Links (not citation-based)
+- [[Abramson_Whalen_2017_VOTat50]] — Strong. Abramson & Whalen provide the 50-year retrospective on VOT measurement; Koenig's finding that VOT variability in children reflects laryngeal control (not just timing) adds a developmental dimension to VOT interpretation.
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — Strong. Hanson's thesis on female glottal characteristics complements Koenig's airflow-based analysis of gender differences in voicing control.
 
 ### New Leads (Not Yet in Collection)
 - **Titze (1988)** - Fundamental physics and physiology of phonation threshold pressure (Pth), critical for understanding gender and age differences in voicing control
 - **Fant (1993, 1995)** - Voice source modeling and the LF model, essential for understanding how laryngeal factors affect glottal source characteristics and voice quality
-- **Hanson (1997)** - Quantitative acoustic measures of female voice quality and breathiness, directly applicable to understanding gender-specific synthesis strategies
 - **Stevens (1977, 1988)** - Physics of laryngeal behavior and vocal fold vibration modes, theoretical foundation for understanding how anatomical differences affect acoustic output

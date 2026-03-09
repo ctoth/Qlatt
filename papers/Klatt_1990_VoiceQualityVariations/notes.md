@@ -448,17 +448,42 @@ Ug(t) = at² - bt³   (open phase)
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 - [[Stevens_1989_QuantalNatureSpeech]]
 
+### Cited By (in Collection)
+- [[Kreiman_2007_GlottalSourceSpectrum]] — cites for KLSYN88 and voice quality continuum; synthesizer used in study is based on Klatt's architecture
+- [[Koenig_LaryngealFactors]] — cites for voice quality variations across male and female speakers
+- [[Jesus_1997_KlattSynthesiserImplementation]] — reimplements KLSYN88
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — extends Klatt & Klatt's female voice quality analysis with corrected spectral measures
+- [[Hanson_1999_GlottalMaleSpeakers]] — extends Klatt & Klatt's analysis to male speakers
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — thesis building on Klatt & Klatt's voice quality framework
+- [[Hanson_2001_ModelsPhonation]] — references KLSYN88 voice source model
+- [[Hanson_2002_HLsynSourceParameters]] — extends KLSYN88 source model with HL parameters
+- [[Gobl_2003_VoiceQualityEmotion]] — uses Klatt synthesizer for voice quality/emotion experiments
+- [[Childers_Lee_1991_VoiceQualityFactors]] — compares voice quality factors with Klatt & Klatt's findings
+- [[Doval_2003_VoiceSourceCALM]] — references KLSYN88 in voice source modeling context
+- [[Fant_1985_LFModelGlottalFlow]] — LF model that KLSYN88 implements as source option
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — R parameters relating to KLSYN88 source controls
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] — references voice quality variations
+- [[Henrich_2001_SpectralOqAsymmetry]] — references Klatt & Klatt's OQ findings
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — references Klatt & Klatt's OQ framework
+- [[Hertz_2006_HybridSynthesisRegularities]] — references KLSYN88
+- [[Hertz_1999_ETI-Eloquence_MultiLanguage]] — references KLSYN88
+- [[Hertz_2002_HybridFormantConcatenation]] — references KLSYN88
+- [[Hillenbrand_1995_VowelAcoustics]] — references Klatt & Klatt's voice quality work
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — references Klatt & Klatt's gender differences
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — references Klatt & Klatt's voice quality framework
+- [[Kreiman_2021_ValidatingVoiceQuality]] — references KLSYN88
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — uses Klatt synthesizer for voice quality synthesis
+- [[Rutledge_1995_SynthesizingStyledSpeechKlatt]] — extends KLSYN88 for styled speech
+- [[Simpson_2009_PhoneticGenderDifferences]] — references Klatt & Klatt's gender difference findings
+- [[Nittrouer_1990_AcousticMeasurementsVoice]] — references voice quality measurements
+- [[Rothenberg_1981_InteractiveVoiceSource]] — related voice source interaction work
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — references KLSYN88 in voice production mechanics
+
 ### Conceptual Links (not citation-based)
 - [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Klatt 1990 documents voice quality variations including register transitions; Titze 2014 provides the biomechanical explanation (bistable glottal geometry) for why those transitions can be abrupt rather than gradual.
 - [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos's SNR and F0 lifespan data extend Klatt & Klatt's voice quality observations (particularly female breathiness) across the full age range, showing how the voice quality parameters documented here change with aging.
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — Moderate. 30-year review of emotional prosody identifies voice quality (breathy, tense, harsh) as critical for emotion encoding beyond F0 alone; KLSYN88 parameters (AH, TL, OQ) are the implementation mechanism for these emotion-linked voice qualities.
 
 ### New Leads (Not Yet in Collection)
-- Essential reference for the original cascade/parallel architecture that forms the foundation of KLSYN88
-- Directly relevant to understanding voice quality variations and parametric voice source modeling
-- Foundational theoretical work on source-filter model and vocal tract acoustics underlying formant synthesis
-- Establishes acoustic stability regions and perceptual constraints that inform synthesis targets
 - **Laver, J. (1980). The Phonetic Description of Voice Quality.** Cambridge University Press.
 - Comprehensive framework for voice quality taxonomy and perceptual evaluation methodology
-
-### Conceptual Links (not citation-based)
-- **Larrouy-Maestri_2024_EmotionalProsody** — 30-year review of emotional prosody identifies voice quality (breathy, tense, harsh) as critical for emotion encoding beyond F0 alone; Klatt 1990's KLSYN88 parameters (AH, TL, OQ) are the implementation mechanism for these emotion-linked voice qualities. The review's open question about what makes synthetic emotional speech sound unnatural likely involves inadequate voice source control.

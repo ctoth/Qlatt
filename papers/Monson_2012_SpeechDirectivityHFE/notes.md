@@ -158,3 +158,7 @@ This paper provides empirical directivity data relevant to understanding how spe
 - [[Hartenstein_2025_VoiceDirectivityHELS]] - measures full 3D voice directivity using HELS with 588-mic array; extends the 2D horizontal-plane measurements of this paper to 3D, finding complex off-axis lobes invisible in 2D
 - [[Badin_1989_FricativeProductionModelling]] - provides aeroacoustic modeling of fricative source mechanisms that produce the phoneme-specific spectral distributions whose directivity this paper measures
 - [[Behrens_Blumstein_1988_FricativeAmplitude]] - characterizes fricative amplitude properties that interact with directivity effects
+
+---
+
+**See also:** [[Kocon_2018_VowelDirectivityRunningSpeech]] - Extends the Monson 2012 corpus analysis from fricative directivity to vowel-specific directivity in running speech, finding /a/ most directional (DI=3.9 dB) and /o/ least (DI=2.8 dB).

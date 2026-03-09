@@ -138,3 +138,9 @@ The proposed two-term approximation would improve spectral accuracy of higher fo
 - [ ] What radiation model does Qlatt currently use? (Likely Flanagan-equivalent first-order)
 - [ ] Is the high-frequency reactance error audible for the formant range Qlatt targets?
 - [ ] Would a second-order radiation filter improve perceived naturalness for open vowels?
+
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon observes that vowel-dependent aperture/vocal tract changes during running speech produce measurably different directivity patterns; Chalker's radiation impedance models (aperture-dependent) provide the theoretical mechanism for these empirical observations.

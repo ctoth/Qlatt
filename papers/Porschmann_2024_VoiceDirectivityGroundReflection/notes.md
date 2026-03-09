@@ -121,3 +121,9 @@ This paper is primarily about **room acoustics and spatial sound propagation**, 
 2. Unvoiced fricatives [f, s, ʃ] should show less ground-reflection amplification than vowels under the same conditions
 3. Nasals should show the strongest ground-reflection amplification above 4 kHz
 4. The 700 Hz MRDG peak should appear regardless of phoneme, since it's caused by torso geometry not articulation
+
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon measures horizontal vowel-specific directivity; Porschmann measures vertical phoneme-class directivity. Together they provide complementary axes of 3D directivity, both demonstrating phoneme-dependent radiation patterns.

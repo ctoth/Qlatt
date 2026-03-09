@@ -119,3 +119,9 @@ The frequency-dependent directivity patterns provide empirical data for acoustic
 - Pörschmann & Arend 2021 — phoneme-dependent voice directivity
 - Pörschmann & Arend 2024 — downward-directed voice radiation and ground reflections
 - Leishman et al. 2021 — high-resolution live speech directivity
+
+
+## Collection Cross-References
+
+### Conceptual Links (not citation-based)
+- [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon provides empirical 2D half-plane vowel directivity data (5 vowels, 13 angles, up to 20 kHz); Hartenstein's 3D spherical harmonic approach captures the full directivity picture that Kocon's half-plane may underestimate, especially for off-axis lobes above 2 kHz.

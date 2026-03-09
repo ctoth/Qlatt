@@ -1,0 +1,4 @@
+---
+tags: [vocal-attractiveness, voice-quality, formants, f0, pca]
+---
+This Stage 1 Registered Report describes a large-sample (N=450) replication of Babel et al. (2014), comparing theory-driven models (F0 + formant position) against data-driven PCA models of broader voice quality measures (HNR, spectral tilt, jitter, shimmer, CPP, energy) as predictors of women's vocal attractiveness. The study provides detailed operationalizations of standardized formant position, voice quality PCA decomposition, and cross-validated model comparison methodology, along with complete Praat/VoiceSauce measurement protocols for 14 acoustic parameters. For speech synthesis, the acoustic parameter definitions and their decomposition into orthogonal voice quality dimensions could inform speaker personality preset design, though the paper's primary contribution is to voice perception methodology rather than synthesis implementation.

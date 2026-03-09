@@ -200,5 +200,8 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ### Now in Collection (previously listed as leads)
 - [[Feinberg_2008_FemininityAveragenessVoicePitch]] — F0 manipulation via PSOLA (not vocal tract) shows linear pitch–attractiveness relationship (r = 0.341). Note tension with Babel's finding: Feinberg finds higher F0 = more attractive (zero-order correlation), while Babel's full model shows slightly lower F0 preferred (β = -0.02) once voice quality (breathiness) is controlled. This suggests breathiness covaries with F0 and may mediate the relationship — when you control for breathiness, the residual F0 effect reverses.
 
+### Cited By (in Collection)
+- [[Schild_2019_AttractiveVoiceFormantF0]] — large-sample (N=450) pre-registered replication of Babel's PCA methodology, testing whether the data-driven model outpredicting F0+formants holds at scale (Stage 1 Registered Report)
+
 ### Supersedes or Recontextualizes
 - None — this paper complements rather than supersedes existing collection entries.

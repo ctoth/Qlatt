@@ -1,0 +1,4 @@
+---
+tags: [prosody, intonation, tobi, phrasing, typology]
+---
+This edited volume presents the intonational phonology and ToBI transcription systems of thirteen typologically diverse languages within the Autosegmental-Metrical framework, providing complete tone inventories, break index scales, and alignment conventions for each language. The key contributions are the definitive specification of the MAE_ToBI system for English (pitch accents, phrase accents, boundary tones, break indices 0-4), a cross-linguistic comparison of all eleven ToBI systems (Table 16.1), and a prosodic typology model classifying 21 languages by Prominence and Rhythmic/Prosodic Unit dimensions (Table 16.2). For speech synthesis, this is the foundational reference for mapping phonological prosodic labels to F0 targets, phrase boundary effects, and duration rules, providing the standard notation and theoretical framework that Qlatt's prosody rules are designed to implement.

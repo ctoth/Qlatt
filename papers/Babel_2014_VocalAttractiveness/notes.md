@@ -192,6 +192,7 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ### Already in Collection
 - [[Klatt_1990_VoiceQualityVariations]] - cited as ref [43]; voice quality analysis framework
 - [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - VOT framework referenced in introduction
+- [[Walton_1994_SpeakerRaceVocalAcoustics]] — cited as ref [4]; race identification from perturbation measures. Both studies show within-normal-range jitter/shimmer/HNR differences are perceptually salient for speaker differentiation.
 
 ### New Leads (Not Yet in Collection)
 - Puts, D. A., Gaulin, S. J. C., Verdolini, K. (2006) - "Dominance and the evolution of sexual dimorphism in human voice pitch" - vocal tract length and dominance

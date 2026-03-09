@@ -1,0 +1,4 @@
+---
+tags: [voice-quality, jitter, shimmer, harmonics-to-noise-ratio, speaker-identification]
+---
+This paper investigates whether listeners can identify speaker race from 1-second sustained /a/ vowels produced by 50 black and 50 white adult males, finding 60% accuracy significantly above chance using a forced-choice paired comparison paradigm. The key finding is that amplitude perturbation (shimmer) and harmonics-to-noise ratio were the significant acoustic discriminators, while fundamental frequency and formant structure showed no significant differences between groups; listeners succeeded when perturbation differences were large and failed when they were minimal. For speech synthesis, this provides normative jitter, shimmer, and H/N ratio ranges for adult male voices and demonstrates that spectral noise parameters are perceptually salient for voice quality differentiation, informing the setting of turbulence and perturbation parameters in Klatt-based synthesis.

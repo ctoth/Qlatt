@@ -131,10 +131,12 @@ This thesis provides limited but interesting descriptive data on F0 variation ac
 - (none of the key citations are in the collection)
 
 ### New Leads (Not Yet in Collection)
-- Walton & Orlikoff (1994) — "Speaker race identification from acoustic cues in the vocal signal" — the most directly relevant prior work; 100 speakers, found perturbation and shimmer differ by race, listeners above chance at identification
 - Xue & Hao (2006) — "Normative standards for vocal tract dimensions by race" — physical vocal tract measurements (n=120) across Caucasian, African American, and Chinese speakers; found significant racial differences in oral volume and total tract volume
 - Andrianopoulos, Darrow, & Chen (2001) — "Multimodal standardization of voice among four multicultural populations" — F0 and spectral characteristics across populations
 - Cox & Mueller (2004) — "Ethnographic factors in voice: A review of the literature" — comprehensive review concluding data inconclusive but suggesting possible F0 differences
+
+### Now in Collection (previously listed as leads)
+- [[Walton_1994_SpeakerRaceVocalAcoustics]] — 100 adult males (50 black, 50 white), found significantly greater shimmer and lower H/N ratio in black speakers' sustained /a/ vowels. Listeners identified race at 60% (above chance) from 1-second samples. Complements Meek's smaller study: Walton found perturbation differences where Meek did not, likely due to larger sample size (100 vs 15). Both agree that F0 and formant differences were not significant.
 
 ### Cited By (in Collection)
 - (none found)

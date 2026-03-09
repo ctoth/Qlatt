@@ -1,0 +1,4 @@
+---
+tags: [voice-quality, speaking-style, klatt, glottal-source, lf-model, duration]
+---
+This paper presents a method for synthesizing eleven speaking styles (normal, angry, clear, fast, slow, loud, soft, Lombard, question, and two tasking levels) using the KLSYN88A Klatt synthesizer by applying multiplicative scaling factors to L-F glottal source parameters (F0, AV, OQ, SQ, TL) and acoustic waveform parameters (vowel duration, word duration, consonant duration, consonant intensity). Listening tests with 20 subjects show that synthetic styled speech is identified as accurately as natural speech, with confusion patterns matching those of human listeners. The style-specific scaling factors are directly applicable to Qlatt's declarative rule system for implementing speaking style presets via scalar rules on existing L-F source and duration parameters.

@@ -220,7 +220,8 @@ Units: durations in samples (8 kHz), slopes in (normalized amplitude)/samples
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Fant_1960_AcousticTheorySpeechProduction]] — source-filter model underlying the glottal extraction method
+- [[Fant_1985_LFModelGlottalFlow]] — the LF model that Cummings' waveform parameters relate to
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1979)** - "Glottal source and excitation analysis" - Foundational work on glottal modeling from Fant's STL lab; essential for understanding glottal parametrization approaches that preceded the LF model.
@@ -229,6 +230,19 @@ Units: durations in samples (8 kHz), slopes in (normalized amplitude)/samples
 - **Wong et al. (1979)** - "Least squares glottal inverse filtering" - The closed-phase inverse filtering method used in this paper; useful for implementing glottal extraction to validate synthesis.
 - **Cummings (1992)** - PhD thesis - More complete discussion of the work, likely contains additional detail on the extraction method and style definitions not in the JASA paper.
 
+### Cited By (in Collection)
+- [[Gobl_2003_VoiceQualityEmotion]] — cites for glottal excitation in emotional speech
+- [[Moore_2004_AutomatedGlottalWaveformEstimation]] — cites as the manual glottal extraction technique this paper automates
+- [[Moore_2003_GlottalFeaturesDepression]] — cites for glottal feature extraction methodology
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — cites as complementary voice source data for emotional speech
+- [[Wiethoff_2008_CerebralEmotionalProsody]] — cites for glottal waveform variation across emotional styles
+- [[Lu_Smith_GlottalSourceSingingVoice]] — cites for glottal source analysis methodology
+- [[Balasubramanium_2012_CepstralSexuallyAppealingVoice]] — cites for glottal excitation characteristics
+- [[Weninger_2013_AcousticsEmotionAudio]] — related work on acoustic emotion features
+
 ### Conceptual Links (not citation-based)
 - [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci provides the suprasegmental prosodic parameters for emotional synthesis (pitch, rate, intonation patterns) while Cummings provides the voice source parameters. Together they cover complementary aspects of emotional speech: Mozziconacci's prosody-only approach achieves 63% recognition, and she explicitly notes that sadness/fear require the voice source cues that Cummings documents. (Strong)
 - [[Weninger_2013_AcousticsEmotionAudio]] — Moderate. Weninger's feature set includes voicing-related features (HNR, jitter, shimmer) but finds these less predictive than energy/spectral features for arousal; Cummings's glottal source parameters (open quotient, slope, asymmetry) may better capture the voice quality variation that Weninger's feature set underrepresents.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — Strong. Childers & Lee provide the glottal source model parameters (OQ, SQ, closure abruptness, noise) that Cummings then measures across emotional styles. Childers & Lee characterize voice quality types; Cummings shows how emotional states modulate the same parameters.
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Strong. Banse provides comprehensive prosodic profiles for 14 emotions using F0, intensity, and rate; Cummings provides the complementary glottal source parameters for 11 speech styles. Together they span both suprasegmental and source-level acoustic correlates of emotion.
+- [[Rutledge_1995_SynthesizingStyledSpeechKlatt]] — Strong. Rutledge (same research group: Cummings is co-author) takes the glottal waveshape measurements from Cummings and applies them to KLSYN88A synthesis, providing multiplicative scaling factors for L-F parameters (F0, AV, OQ, SQ, TL) plus duration/intensity across the same 11 styles. This is the direct synthesis application of Cummings' analysis data.

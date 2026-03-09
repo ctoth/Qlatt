@@ -13,18 +13,18 @@ Many acoustic parameters characterize voices, but it is unclear which few parame
 
 ## Key Contributions
 - MDS analysis of perceptual voice similarity space (2D solution, R²=.88)
-- LDA of 50 voices achieving 49.2% correct classification (chance ~2%) using acoustic variables
+- LDA of 50 voices: 3 eigenfunctions for 49.2% of variance, 68.3% correct token classification
 - Identifies top discriminating parameters: F0, SHR, F3, F4, CPP
 - Shows that most acoustic variables are only useful for distinguishing a voice from one or two others, not broadly
 
 ## Methodology
 - **Speakers**: 50 women from UCLA Speaker Variability Database, ages 18-29 (mean 20, SD=1.9), native English, fairly homogeneous group
-- **Speech recordings**: 5 Harvard sentences read 3 times each, recorded in soundbooth with B&K mic at 22k SR
-- **Speech processing**: VoiceSauce (v1.41), 42 acoustic parameters mapped to Multi-Dimensional Scaling of perceived similarity of 80 voices
+- **Speech recordings**: 5 Harvard sentences read 6x each over 3 sessions (=30/speaker, total 1475 tokens), recorded in soundbooth with B&K mic at 22k SR
+- **Speech processing**: Only vowel and approximant intervals; VoiceSauce [3,4], 42 acoustic parameters every 5 ms in 1475 tokens (~588k data frames); removed missing/extreme values -> ~193k frames (~0.65 sec speech/token); mean and SD of each parameter per token
 - **Parameters measured** (26 retained after trimming):
   - F0 (from STRAIGHT)
-  - H1*-H2*, H2*-H4*, H1*-H2K*, H2K*-H5K, H1*-A3*
-  - (the * parameters of the source spectral model of [1])
+  - H1*-H2*, H2*-H4*, H4*-H2k*, H2k*-H5k*
+  - (the parameters of the source spectrum model of [5])
   - F1, F2, F3, F4 (from Snack)
   - Cepstral Peak Prominence (CPP)
   - Means only; Energy, Subharmonic-to-harmonic ratio (SHR)
@@ -39,7 +39,7 @@ No formal equations — poster-format study.
 ### MDS Results (2D solution)
 - R² = .88
 - Dimension 1 correlates with: F0, SHR, F3
-- Dimension 2 correlates with: F0, F3 (re-ordered)
+- Dimension 2 correlates with: F4, H1*-H2*, CPP
 - Red = acoustic center; Blue = voices most distinguishable below; Black = voice least distinguishable from below; White = other voices
 
 ### LDA Results (50 speakers)
@@ -71,9 +71,8 @@ No formal equations — poster-format study.
 ## Results Summary
 1. Voice space is primarily pitch (F0), higher formants (F3, F4), creak/breathiness (SHR, CPP)
 2. Distinctiveness depends on more than just these — but these do "most of the work"
-3. Most voice-distinguishing parameters [5] are not important here
-4. All parameters contribute to characterizing the full set of voices — many voices require many parameters
-5. Surprisingly, the voice source spectral model parameters [5] are not important here
+3. All parameters contribute to characterizing the full set of voices — many voices require many parameters
+4. Surprisingly, the voice source spectrum model parameters [5] (H1*-H2*, H2*-H4*, etc.) are not important for speaker discrimination
 
 ## Limitations
 - Poster format — limited methodological detail
@@ -99,5 +98,6 @@ For the Qlatt speaker personality system, this work identifies which acoustic pa
 
 ## Related Work Worth Reading
 - Kreiman & Sidtis (2011) — Foundations of voice studies (cited as [1])
-- Kreiman, Iseli, Shue & Alwan (2008) — Source spectral model parameters
-- Kreiman, Park, Keating & Alwan (2015) — "The perceptual structure of pathological voice quality"
+- Kreiman & Gerratt (1996) — Perceptual structure of pathologic voice quality; no acoustic parameters mapped to MDS of 80 voices (cited as [2])
+- Shue (2010) / Shue et al. (2011) — VoiceSauce voice analysis tool (cited as [3,4])
+- Kreiman et al. (2014) — Perceptual evaluation of voice source models; source spectrum parameters tested here (cited as [5])

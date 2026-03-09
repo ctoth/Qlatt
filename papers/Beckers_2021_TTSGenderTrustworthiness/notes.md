@@ -79,3 +79,21 @@ This thesis demonstrates that TTS voice gender and accent have measurable effect
 ## Related Work Worth Reading
 - Nass, C. & Lee, K. M. (2001). Does computer-synthesized speech manifest personality? Experimental tests of recognition, similarity-attraction, and consistency-attraction.
 - Lee, K. M., Nass, C., & Brave, S. (2000). Can computer-generated speech have gender? An experimental test of gender stereotype.
+
+## Collection Cross-References
+
+### Already in Collection
+- (none of the directly cited papers are in the collection)
+
+### Cited By (in Collection)
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- Nass, C. & Lee, K. M. (2001) — "Does computer-synthesized speech manifest personality?" — foundational CASA study for TTS voice personality perception
+- Lee, K. M., Nass, C., & Brave, S. (2000) — "Can computer-generated speech have gender?" — tests gender stereotype application to TTS voices
+- Mullennix, J. W. et al. (2003) — "Social perception of male and female computer synthesized speech" — direct predecessor comparing gender effects on TTS perception
+
+### Conceptual Links (not citation-based)
+- [[Belin_2017_SoundOfTrustworthiness]] — (Strong) Belin establishes the acoustic dimensions underlying trustworthiness perception in human voices; Beckers tests the same trustworthiness construct but with TTS voices and adds gender as a factor. Together they span natural-to-synthetic voice trustworthiness.
+- [[Klofstad_2012_VoicePitchLeadership]] — (Strong) Klofstad finds lower-pitched voices perceived as more competent and trustworthy for leadership; Beckers finds male TTS voices (typically lower-pitched) rated more trustworthy for news. The gender-trustworthiness effect may be partially mediated by pitch.
+- [[McAleer_2014_PersonalityVoiceImpressions]] — (Moderate) McAleer maps a two-dimensional social voice space (Valence/Trust and Dominance) from brief utterances; Beckers tests a specific cell in that space (trustworthiness of TTS voices by gender), providing a synthetic-voice extension of McAleer's natural-voice framework.

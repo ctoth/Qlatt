@@ -280,4 +280,7 @@ $$F2_{onset} = k \cdot F2_{mid} + c$$
 
 ---
 
+### Conceptual Links (not citation-based)
+- [[Deloche_2020_StatisticalStructureSpeech]] — Deloche's Gabor dictionary analysis independently confirms the sibilant vs non-sibilant spectral structure distinction: sibilants [s], [ʃ] have the highest β values (~1.1-1.2, frequency-localized) while non-sibilants [f], [θ] have lower β (~0.4-0.5), providing statistical-structure validation for Jongman's acoustic characterizations
+
 **See also:** Shadle_2023_FricativeSpectraHighFreq - Extends Jongman 2000 into the 7-15 kHz high-frequency range with recordings at 44.1 kHz, introducing HighLevelD as a superior measure to spectral moments for capturing fricative dynamics, and providing empirical data on non-sibilant spectral characteristics above 7 kHz

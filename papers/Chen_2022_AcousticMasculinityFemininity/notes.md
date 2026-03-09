@@ -210,9 +210,9 @@ This paper establishes the relative perceptual importance of acoustic parameters
 - [[Collins_2003_VocalVisualAttractiveness]] — related work on vocal attractiveness and formant frequencies in women; both studies confirm higher formant frequencies relate to perceived femininity
 - [[Simpson_2009_PhoneticGenderDifferences]] — related review of phonetic gender differences; Chen's clustering importance weights quantify the relative contribution of each acoustic dimension Simpson surveys qualitatively
 - [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] / [[Hanson_1999_GlottalMaleSpeakers]] — related work on gender-specific voice source parameters; Hanson's spectral tilt measures relate to Chen's perturbation cluster but Chen finds these are least important for gender perception
+- [[Cartei_2014_VoiceMasculinity]] — cited as [1]; direct predecessor showing F0 and deltaF mediate perceived vocal masculinity via path analysis; Chen confirms F0 dominance with quantified importance weights from random forests
 
 ### New Leads (Not Yet in Collection)
-- Cartei et al. (2014) — "Vocal communication of body size in women" — F0 and ΔF correlates of women's ratings of vocal masculinity
 - Pisanski & Rendall (2011) — "The prioritization of voice fundamental frequency or formants in listeners' assessments of speaker size, masculinity, and attractiveness" — tests F0 vs formant weighting directly
 - Munson (2007) — "The acoustic correlates of perceived masculinity, perceived femininity, and perceived sexual orientation" — extends to sexual orientation dimension
 - Biemans (2000) — "Gender variation in voice quality" — PhD thesis on gender and voice quality

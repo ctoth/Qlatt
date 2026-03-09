@@ -206,3 +206,6 @@ This validates the approach used in the current project's Klatt synthesizer for 
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1970)** - "Acoustic Theory of Speech Production" - Foundational source-filter theory that underlies all formant synthesis, explaining VTL-formant relationships.
+
+### Conceptual Links (not citation-based)
+- [[Cartei_2014_VoiceMasculinity]] — Cartei shows deltaF (formant spacing) mediates perceived masculinity; Barreda tests whether listeners use formant spacing for speaker size judgments, connecting body size and gender perception through the same acoustic cue

@@ -207,6 +207,9 @@ This is relatively vowel-independent.
 ### Already in Collection
 - (none found)
 
+### Cited By (in Collection)
+- [[Beddor_1986_NasalVowelHeight]] — cites this for foundational analog synthesis studies of nasal vowel spectra; extends those findings with articulatory synthesis and perceptual experiments
+
 ### New Leads (Not Yet in Collection)
 - **STEVENS, K. N., KASOWSKI, S. and FANT, C. G. M. (1953)** - Describes the electrical vocal tract analog methodology used throughout this paper; essential for understanding the experimental apparatus and acoustic modeling approach.
 - **FANT, C. G. M. (1952)** - Transmission properties of the vocal tract with acoustic specification; foundational work on formant theory and vocal tract acoustics directly applicable to synthesizer design.

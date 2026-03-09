@@ -125,3 +125,30 @@ For the Qlatt speaker personality system, this paper establishes that female voi
 - Collins & Missing (2003) — Vocal and visual attractiveness in women
 - Jones et al. (2010) — Voice pitch preferences
 - Puts et al. (2006, 2007) — Dominance and male voice pitch
+
+## Collection Cross-References
+
+### Already in Collection
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — cited as complementary study on male voice F0/dominance/attractiveness; provides the male counterpart data
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited for linear pitch-attractiveness relationship in female voices; this paper demonstrates the relationship is actually nonlinear
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for vocal and visual attractiveness correlation in women
+- [[Fitch_1999_VocalTractMorphology]] — cited for body size-VTL correlation
+- [[Puts_2006_DominanceVoicePitch]] — cited for dominance and male voice pitch evolution
+
+### Cited By (in Collection)
+- [[Xu_2013_VocalAttractivenessBodySizeProjection]] — cites this for F0 and dominance/attractiveness
+- [[Busquet_2023_VoiceAnalyticsRecordingDevices]] — cites this for F0 and perceived dominance/attractiveness; notes that smartphone F0 inflation (~11 Hz) is relevant to voice attractiveness studies
+- [[Liu_2011_FemaleVoiceAttractiveness]] — discusses the inverted-U relationship found here vs Liu's plateau finding
+- [[Schild_2019_AttractiveVoiceFormantF0]] — discusses whether the nonlinear F0 effect is subsumed when broader voice quality is controlled
+- [[Fitch_1999_VocalTractMorphology]] — cites this for body size-VTL correlation
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — cites this as extending F0-dominance analysis to female voices
+
+### New Leads (Not Yet in Collection)
+- Jones, B. C. et al. (2010) — "Voice pitch and dominance perception with raised/lowered pitch pairs" — methodological comparison
+- Puts, D. A. et al. (2007) — "Men's voices as dominance signals" — male counterpart to female dominance findings
+
+### Conceptual Links (not citation-based)
+- [[Klofstad_2012_VoicePitchLeadership]] — (Strong) Klofstad tests voice pitch preferences for leadership selection; Borkowska provides the dominance perception data (lower F0 = more dominant) that explains why lower-pitched candidates are preferred as leaders
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — (Moderate) Keating characterizes acoustic similarity among female voices; Borkowska's F0 categories (185-310 Hz) provide a perceptual framework for interpreting how F0 variation within the female range maps to social judgments
+- [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — (Moderate) Cumbers examines how pitch variability affects perception; Borkowska focuses on mean F0, and together they suggest both pitch level and pitch dynamics contribute to voice social perception
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — (Moderate) Karthikeyan's finding that dominance and attractiveness/prestige are predicted by different vocal cues (articulatory precision) parallels Borkowska's F0-based dissociation between dominance and attractiveness for female voices

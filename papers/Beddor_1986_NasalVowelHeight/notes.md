@@ -126,3 +126,30 @@ Directly relevant to nasalisation modeling in the Klatt synthesiser. The pole-ze
 - Feng 1996 — Nasal vowel target (already in collection)
 - Chistovich & Lublinskaya 1979 — Centre of gravity in vowel perception
 - Wright 1980 — Behavior of nasalized vowels in perceptual vowel space
+
+## Collection Cross-References
+
+### Already in Collection
+- [[House_Stevens_1956_NasalizationVowels]] — cited for foundational analog synthesis studies of nasal vowel spectra; this paper extends those findings with perceptual experiments
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — cited for acoustic and perceptual correlates of nasal-non-nasal distinction; Beddor builds on Hawkins & Stevens' spectral analysis with articulatory synthesis
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory of pole-zero pairs in nasal coupling
+- [[Maeda_1982_VowelNasalizationCues]] — cited for computational model of nasal coupling effects
+- [[Fujimura_1962_NasalConsonantAnalysis]] — cited for nasal formant frequency data
+- [[Chen_1997_NasalizedVowelAcoustics]] — related work on nasalized vowel acoustics
+- [[Feng_1996_NasalVowelTarget]] — related work on nasal vowel targets
+
+### Cited By (in Collection)
+- [[Ruhlen_1973_NasalVowels]] — cites Beddor 1986 for perceptual experiments showing how nasal coupling shifts perceived vowel height
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — cites Beddor 1982/1983 (dissertation version) for centre-of-gravity analysis
+- [[Rossato_1998_RecoveringGesturesNasalVowels]] — cites Beddor 1982 for cross-language perception of oral-nasal distinction
+- [[Recasens_2003_ArticulationSoundChangeRomance]] — cites Beddor 1983 for nasalization effects on vowel spectra and sound change
+- [[Feng_1996_NasalVowelTarget]] — cites Beddor 1982 for cross-language perception study
+- [[Fowler_2006_CoarticulationGesturePerception]] — cites Beddor 2002 for language-specific coarticulation patterns
+
+### New Leads (Not Yet in Collection)
+- Chistovich, L. A. & Lublinskaya, V. V. (1979) — "The 'center of gravity' effect in vowel spectra and critical distance between the formants" — foundational for the centre-of-gravity model used here
+- Wright, J. (1980) — "The behavior of nasalized vowels in the perceptual vowel space" — directly tests perceptual space distortions caused by nasalisation
+
+### Conceptual Links (not citation-based)
+- [[Ruhlen_1973_NasalVowels]] — (Strong) Ruhlen documents the cross-linguistic typological patterns of nasal vowel inventories; Beddor provides the acoustic and perceptual explanation for why those patterns exist (centre-of-gravity shifts from nasal coupling)
+- [[Rossato_1998_RecoveringGesturesNasalVowels]] — (Strong) Rossato attempts to recover articulatory gestures from nasal vowel acoustics; Beddor's pole-zero model of nasal coupling provides the acoustic theory underlying Rossato's inverse problem

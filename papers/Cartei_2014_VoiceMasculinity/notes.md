@@ -92,3 +92,29 @@ For the Qlatt speaker personality system, this paper establishes the acoustic pa
 - Feinberg et al. (2005, 2008) — Voice pitch preferences (already in collection)
 - Puts et al. (2012) — Testosterone and vocal parameters
 - Hodges-Simeon et al. (2010) — Dominance vs attractiveness (next paper in batch)
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for source-filter theory underlying the independence of F0 and formant spacing
+- [[Fitch_1999_VocalTractMorphology]] — cited for vocal tract length sex differences and body size correlation
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited for F0 manipulation and attractiveness studies
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — cited for F0 x formant interaction in attractiveness
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for voice and attractiveness in women
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — cited for dominance/attractiveness and voice
+- [[Titze_1989_MaleFemaleVoices]] — cited for vocal fold physiology underlying F0 sex differences
+- [[Puts_2006_DominanceVoicePitch]] — cited for dominance and voice pitch evolution
+
+### Cited By (in Collection)
+- [[Chen_2022_AcousticMasculinityFemininity]] — cites Cartei as [1]; confirms F0 and deltaF independence with quantified importance weights
+- [[Lee_2019_AcousticVoiceVariation]] — cites this for F0 and formant spacing as independent voice identity dimensions
+- [[Fitch_1999_VocalTractMorphology]] — lists this in Cited By section for vocal tract length sex differences
+
+### New Leads (Not Yet in Collection)
+- Puts, D. A. et al. (2012) — "Testosterone and vocal parameters in competitive contexts" — provides testosterone-voice link data
+- Pisanski, K. & Feinberg, D. R. (2013) — "Cross-modal size signaling" — comprehensive review of voice-body relationships
+
+### Conceptual Links (not citation-based)
+- [[Chen_2022_AcousticMasculinityFemininity]] — (Strong) Chen extends Cartei's finding by using 23 acoustic measures and random forests to quantify the relative importance of each parameter for masculinity/femininity perception; confirms F0 as the dominant predictor and F0-deltaF independence
+- [[Barreda_2015_FormantSpeakerSize]] — (Moderate) Barreda tests whether listeners use formant spacing for speaker size judgments; Cartei shows deltaF also mediates masculinity perception, connecting body size and gender perception through the same acoustic cue
+- [[Borkowska_2011_F0DominanceAttractiveness]] — (Moderate) Borkowska provides the female counterpart: while Cartei shows lower F0 = more masculine in male voices, Borkowska shows lower F0 = more dominant in female voices. Together they establish F0 as a cross-sex dominance/masculinity cue

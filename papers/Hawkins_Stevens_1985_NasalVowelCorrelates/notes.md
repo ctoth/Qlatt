@@ -231,5 +231,8 @@ With at least 100 Hz separation between the zero and each pole (FNP and F1).
 - [[Maeda_1982_VowelNasalizationCues]]
 - [[Sundberg_1972_SingingFormant]]
 
+### Cited By (in Collection)
+- [[Beddor_1986_NasalVowelHeight]] — cites Beddor 1982/1983 (dissertation) and Beddor & Hawkins 1984 for centre-of-gravity analysis; extends Hawkins & Stevens' spectral analysis with articulatory synthesis and perceptual experiments
+
 ### New Leads (Not Yet in Collection)
 - **Delattre (1954, 1968)** - Early pattern-playback synthesis studies showing that pole-zero pairs can modify vowel spectra; precursor to modern Klatt-based nasal synthesis.

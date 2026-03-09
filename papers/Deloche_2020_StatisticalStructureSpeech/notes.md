@@ -220,3 +220,23 @@ This paper provides a principled, data-driven characterization of how different 
 - Fant G (1972) — Vocal tract wall effects, losses, and resonance bandwidths [Ref 32]
 - Stevens KN (1998) — Acoustic Phonetics [Ref 33]
 - Hanna et al. (2016) — Frequencies, bandwidths and magnitudes of vocal tract resonances measured through lips [Ref 28]
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Stevens_1998_AcousticPhonetics]] — cited as [33] for acoustic phonetic framework; Deloche's statistical results quantitatively validate Stevens' phoneme-level descriptions
+
+### Cited By (in Collection)
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- Stilp, C. E. & Lewicki, M. S. (2013) — "Statistical structure of speech sound classes is congruent with cochlear nucleus response properties" — direct predecessor with broad phonetic class β values
+- Lewicki, M. S. (2002) — "Efficient coding of natural sounds" — foundational paper establishing Q₁₀/f_c power law for ICA-learned filters
+- Erra, R. G. & Gervain, J. (2016) — "The efficient coding of speech: Cross-linguistic differences" — extends Deloche's approach cross-linguistically
+- Hanna, N. et al. (2016) — "Frequencies, bandwidths and magnitudes of vocal tract resonances measured through lips" — lip radiation measurements connecting to Deloche's vowel β findings
+
+### Conceptual Links (not citation-based)
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — (Strong) Kent & Vorperian provide comprehensive formant bandwidth data; Deloche's finding that vowel β is governed by formant bandwidths and lip radiation provides independent statistical validation that bandwidth parameters are acoustically critical
+- [[Jongman_2000_FricativeAcoustics]] — (Strong) Jongman provides detailed acoustic characterization of English fricatives; Deloche's statistical analysis independently confirms the sibilant vs non-sibilant spectral structure distinction (sibilants β > 1, non-sibilants lower β)
+- [[Shadle_1985_FricativeAcoustics]] — (Moderate) Shadle's fricative acoustic theory explains why sibilants have sharper spectral structure; Deloche's β values quantify this distinction in terms of optimal time-frequency representation
+- [[Badin_1989_FricativeProductionModelling]] — (Moderate) Badin models fricative production with source-filter approach; Deloche's biphasic stop/affricate finding (burst = time-localized, opening = frequency-localized like fricatives) validates the distinct source mechanisms

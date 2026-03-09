@@ -272,3 +272,6 @@ const PATTERNS = {
 - [[Allen_1987_MITalk_TTS]] — cites Elovitz for LTS rules as a contemporary approach to grapheme-to-phoneme conversion
 - [[Hertz_1985_DeltaRuleSystem]] — cites as "classic letter-to-sound rules providing foundational approach to grapheme-to-phoneme conversion"; Delta was designed as a more sophisticated rule development environment
 - [[Liberman_Mattingly_1985_MotorTheory]] — cites for text-to-phoneme conversion in the context of speech synthesis systems
+
+### Conceptual Links (not citation-based)
+- [[Black_1998_LTS_Rules]] — Strong. Black's CART-based LTS rules represent the data-driven successor to Elovitz's hand-crafted rules. Comparing the two illustrates the evolution from manually engineered rules (329 context-sensitive patterns) to automatically learned decision trees (75% word accuracy from lexicon training).

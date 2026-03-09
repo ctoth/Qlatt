@@ -185,6 +185,18 @@ COMPACT (Velar):
 - [[Sundberg_1972_SingingFormant]]
 - [[Zue_1976_StopConsonantAcoustics]]
 
+### Cited By (in Collection)
+- [[Klatt_1990_VoiceQualityVariations]] — references Blumstein & Stevens 1979 for stop consonant spectral characteristics
+- [[Jongman_1989_FricativeDuration]] — cites in context of spectral cue analysis for consonant place
+- [[Liberman_Mattingly_1985_MotorTheory]] — cites as evidence for invariant acoustic properties of speech
+- [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — references for acoustic invariance in stop perception
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — the original synthetic speech perception study that Blumstein & Stevens extend
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — referenced in VOT context; provides voicing dimension that complements the place dimension studied here
+
 ### New Leads (Not Yet in Collection)
 - **Stevens & Blumstein (1978) - "Invariant cues for place of articulation in stop consonants"**: The companion perceptual study that provides the theoretical basis for this paper's templates. Critical for understanding how burst spectra relate to perception.
 - **Jakobson, Fant, & Halle (1963) - Preliminaries to Speech Analysis**: Classic work on distinctive features including the diffuse/compact distinction that underlies this paper's template approach.
+
+### Conceptual Links (not citation-based)
+- [[Jongman_2000_FricativeAcoustics]] — Strong. Jongman applies similar spectral-template thinking to fricatives that Blumstein & Stevens applied to stops. Both establish that spectral shape at consonant onset/noise is the primary cue for place of articulation, suggesting a unified approach to consonant burst/noise synthesis in Klatt.
+- [[Behrens_Blumstein_1988_FricativeAmplitude]] — Strong. The same first author (Blumstein) extends the invariance program from stops to fricatives, showing that spectral properties dominate amplitude cues for fricative place perception -- a finding parallel to the spectral template approach here.

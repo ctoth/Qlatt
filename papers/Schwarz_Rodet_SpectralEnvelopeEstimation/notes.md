@@ -183,3 +183,6 @@ The Qlatt project uses a formant synthesizer (Klatt model) which directly specif
 - **Stylianou et al. (1995) [4]** - Harmonic+Noise model for speech modification - Relevant for understanding how to separate and manipulate voiced/unvoiced components, which relates to Klatt's parallel/cascade handling.
 - **Galas & Rodet (1991) [3]** - Discrete cepstrum method - The technical foundation for the discrete cepstrum estimation approach highlighted as superior for sinusoidal analysis.
 - **Schwarz (1998) [2]** - Full thesis by first author - Contains much more detail on spectral envelope methods than this conference paper; primary source if deeper implementation details needed.
+
+### Conceptual Links (not citation-based)
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — Moderate. Bonada's EpR (Excitation plus Resonances) model decomposes the spectral envelope into source curve + formant resonances + residual, providing an alternative to Schwarz's cepstral approach. Both solve the same problem (robust spectral envelope estimation for voice synthesis) but for different synthesis architectures.

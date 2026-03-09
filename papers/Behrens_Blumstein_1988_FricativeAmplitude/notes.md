@@ -198,7 +198,18 @@ Previous research (Heinz & Stevens 1961; McCasland 1979a,b) suggested that frica
 - [[Klatt_1987_TTS_Review]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 
+### Cited By (in Collection)
+- [[Jongman_2000_FricativeAcoustics]] — cites Behrens & Blumstein 1988 for evidence that spectral properties dominate over amplitude in fricative place perception
+- [[Jongman_1989_FricativeDuration]] — cites this study in the context of fricative perceptual cues
+- [[Badin_1989_FricativeProductionModelling]] — references the amplitude findings in the context of fricative production modeling
+- [[Shadle_2023_FricativeSpectraHighFreq]] — cites this study for amplitude-spectral cue hierarchy in fricative perception
+- [[Monson_2012_SpeechDirectivityHFE]] — references in context of high-frequency energy in fricatives
+
 ### New Leads (Not Yet in Collection)
 - **Heinz & Stevens (1961)** - "On the properties of voiceless fricative consonants" - foundational acoustic analysis of fricative properties including amplitude characteristics.
 - **Hughes & Halle (1956)** - "Spectral properties of fricative consonants" - key reference for fricative spectral characteristics that distinguish place of articulation.
 - **Schadle (1985)** - *The Acoustics of Fricative Consonants* - comprehensive MIT technical report on fricative acoustics, likely contains detailed parameters for synthesis.
+
+### Conceptual Links (not citation-based)
+- [[Jongman_2000_FricativeAcoustics]] — Strong. Jongman's comprehensive acoustic analysis of English fricatives provides the detailed spectral measurements (spectral peak location, spectral moments, dynamic amplitude) that complement Behrens & Blumstein's perceptual finding that spectral cues dominate amplitude cues. Together they establish that synthesis should prioritize spectral accuracy over amplitude matching.
+- [[Shadle_2023_FricativeSpectraHighFreq]] — Strong. Shadle's high-frequency spectral analysis of fricatives extends the spectral characterization to frequencies above the 4.8 kHz cutoff used in this study, showing additional spectral detail that distinguishes fricative place above 8 kHz.

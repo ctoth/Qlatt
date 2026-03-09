@@ -125,6 +125,11 @@ Time-frequency landmarks for morphing: first 3 formant frequencies at onset/offs
 ### Already in Collection
 - [[Feinberg_2008_FemininityAveragenessVoicePitch]] [ref 5] — cited for pitch–attractiveness relationship; now provides full linear model details and PSOLA manipulation parameters
 
+### Cited By (in Collection)
+- [[Beckers_2021_TTSGenderTrustworthiness]] — extends trustworthiness perception to TTS voices and adds gender as a factor
+- [[Xu_2013_VocalAttractivenessBodySizeProjection]] — references Belin 2017 for voice perception and social judgments
+- [[Staib_2021_CorticalVoiceProcessing]] — cites for acoustic-based voice personality perception
+
 ### New Leads (Not Yet in Collection)
 - **McAleer et al. (2014) [ref 4]** - The prior study that generated the original trustworthiness ratings for the 32 voices. Essential for understanding the full methodology and seeing the original "social voice space" dimensions.
 - **Scherer (1972, 1978) [refs 2, 6]** - Foundational work on voice-personality relationships. Important for understanding the broader context of what acoustic parameters correlate with which personality dimensions.

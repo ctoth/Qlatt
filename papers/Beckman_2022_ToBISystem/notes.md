@@ -230,5 +230,14 @@ function tobiToF0Target(label, pitchRange, register) {
 - **Pierrehumbert & Beckman (1988)** - *Japanese Tone Structure* - Extends the AM framework to Japanese, demonstrating cross-linguistic applicability of the prosodic hierarchy (IP > ip > AP).
 - **Hirst & Di Cristo (1998)** - *Intonation Systems: A Survey of Twenty Languages* - Comparative survey of intonation across languages, useful for understanding cross-linguistic prosodic variation in TTS.
 
+### Cited By (in Collection)
+- [[Silverman_1992_ToBILabelingProsody]] — earlier ToBI labeling work; Beckman 2022 is cited as the later comprehensive description of MAE_ToBI with AM+ extension
+- [[Beckman_2005_ToBISystemEvolution]] — the 2005 chapter that this 2022 paper extends with the AM+ five-pitch-level framework
+- [[Ladd_2008_IntonationalPhonology]] — cites Beckman 2022 for the MAE_ToBI inventory and provides deeper theoretical motivation
+
 ### Now in Collection (previously listed as leads)
 - [[Beckman_2005_ToBISystemEvolution]] — The definitive account of MAE_ToBI by its creators. Provides complete tone inventory (H*, L*, L+H*, L*+H, H+!H*), phrase accents (H-, L-), boundary tones (H%, L%), break indices (0-4), alignment rules, and design principles for cross-linguistic extension. This 2005 chapter is the detailed specification that the 2022 paper (Beckman_2022) summarizes and extends with the AM+ five-level framework.
+
+### Conceptual Links (not citation-based)
+- [[Goldsmith_1976_AutosegmentalPhonology]] — Strong. Goldsmith's autosegmental phonology provides the theoretical foundation (tonal tiers, association, spreading) on which the entire ToBI framework is built. The H/L tonal primitives and their association to prosodic positions derive directly from autosegmental theory.
+- [[Pierrehumbert_1980_EnglishIntonation]] — Strong. Pierrehumbert's AM model of English intonation is the direct theoretical precursor to ToBI. The pitch accent inventory (H*, L*, L+H*, etc.) and boundary tone system that Beckman 2022 describes were first formalized in Pierrehumbert 1980.

@@ -216,6 +216,12 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 - [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] - extends and elaborates this 1989 framework with additional data and refinements
 - [[Saltzman_1989_DynamicalGesturalPatterning]] — the computational engine for AP; formalizes the task-dynamic model with tract-variable dynamics, gestural blending, and transformation gating that implements the gestural primitives defined in this paper
 
+### Cited By (in Collection)
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — cites as the foundational AP paper defining gestures as phonological primitives
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — lists as companion paper defining gestures as phonological primitives
+- [[Hertz_1991_StreamsPhonesTransitions]] — conceptual link to the "stable transition phenomenon"
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references articulatory phonology in context of pronunciation modeling
+
 ### New Leads (Not Yet in Collection)
 - Saltzman & Kelso (1987) "Skilled actions: a task dynamic approach" - the formal dynamical model underlying gesture definitions
 - Sagey (1986) "The representation of features and relations in non-linear phonology" - the primary feature geometry comparison

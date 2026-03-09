@@ -394,7 +394,9 @@ This thesis provides the foundation for the ToBI (Tones and Break Indices) annot
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Beckman_2022_ToBISystem]] — the ToBI annotation system that operationalized Pierrehumbert's AM framework for prosodic labeling, with AM+ five-level extension
+- [[Ladd_2008_IntonationalPhonology]] — the mature theoretical exposition of Pierrehumbert's AM framework with cross-linguistic extensions
+- [[Goldsmith_1976_AutosegmentalPhonology]] — the autosegmental framework Pierrehumbert's theory builds upon
 
 ### New Leads (Not Yet in Collection)
 - **Liberman, M.Y. (1975). The Intonational System of English.** — Foundational work on metrical grids and intonational representations that Pierrehumbert extends; essential for understanding the theoretical framework.

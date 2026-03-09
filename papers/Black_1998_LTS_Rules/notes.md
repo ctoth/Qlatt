@@ -246,10 +246,19 @@ For the JavaScript Klatt synthesizer:
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Elovitz_1976_NRL_LTS]] — the NRL letter-to-sound rules that represent an earlier, hand-crafted approach to the same G2P problem this paper solves with CART trees
+- [[Allen_1987_MITalk_TTS]] — MITalk's G2P system used manually constructed rules; Black's CART approach automates this
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — comprehensive review of pronunciation modeling including CART-based LTS rules
+
+### Cited By (in Collection)
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — cites Black 1998 for CART-based letter-to-sound rules as alternative G2P approach
 
 ### New Leads (Not Yet in Collection)
 - **Daelemans & van den Bosch (1996)** [#6] - Alternative language-independent G2P approach; useful for comparing methodologies and understanding the state-of-the-art baseline this paper improves upon.
 - **van den Bosch, Weijters & Daelemans (1998)** [#12] - Demonstrates that joint phone+stress prediction outperforms modular approaches; directly validates the paper's stress assignment findings.
 - **Luk & Damper (1996)** [#8] - Stochastic G2P approach for comparison; represents an alternative statistical framework to the CART-based method presented here.
 - **Breiman et al. (1984)** [#3] - The foundational CART book; essential reference for understanding the decision tree methodology underlying the LTS rule generation.
+
+### Conceptual Links (not citation-based)
+- [[Elovitz_1976_NRL_LTS]] — Strong. Elovitz's hand-crafted NRL LTS rules represent the manual-engineering approach that Black's CART-based method replaces. Comparing the two approaches shows the accuracy/maintenance tradeoff: NRL rules are interpretable but brittle; CART trees are automatically generated from lexicons but opaque.
+- [[Hunnicutt_1976_PhonologicalRules]] — Moderate. Hunnicutt's phonological rules for MITalk address a related but distinct level of the G2P pipeline -- morphological and phonological transformations vs. Black's grapheme-to-phone mapping. Together they cover the full text-to-phoneme pipeline.

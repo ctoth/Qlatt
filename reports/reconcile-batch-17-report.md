@@ -51,4 +51,4 @@ All major referencing papers were checked for reciprocal entries. The following 
 The Klatt papers (1976, 1979, 1980, 1982, 1990) are the backbone of this collection. Klatt_1980 alone is referenced by 35+ papers. Their cross-reference sections were significantly under-populated relative to their actual citation density in the collection. This batch corrects that gap.
 
 ## Commit
-See git log for commit hash.
+`3357df5` — Reconcile batch 17: King through Kreiman_2007

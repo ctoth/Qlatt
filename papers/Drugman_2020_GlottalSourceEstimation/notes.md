@@ -223,7 +223,12 @@ Source-tract separation quality depends on:
 - [[Gobl_2003_VoiceQualityEmotion]]
 - [[Hanson_1995_GlottalCharacteristicsFemale]]
 - [[Klatt_1990_VoiceQualityVariations]]
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] — cited for glottal flow derivative modeling with application to speaker identification
+- [[Titze_1992_VocalIntensity]] — cited (as Titze & Sundberg 1992) for vocal intensity measurements
 - [[Yegnanarayana_1998_VocalTractExtraction]]
+
+### Conceptual Links (not citation-based)
+- [[Henrich_2001_SpectralOqAsymmetry]] — Strong. Both analyze the relationship between time-domain glottal parameters (Oq, αm) and spectral measures (H1-H2); Drugman's NAQ feature captures effects of both Oq and αm that Henrich shows are inseparable from H1-H2 alone.
 
 ### New Leads (Not Yet in Collection)
 - **Alku et al. (2002)** - "Normalized amplitude quotient for parametrization of the glottal flow" - Defines NAQ, the most discriminative voice quality feature

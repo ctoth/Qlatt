@@ -181,9 +181,13 @@ The synthetic F2 values are generally higher, compensating for missing F3.
 - [[Stevens_1955_QuantitativeVowelArticulation]] — explicitly cites this paper (Delattre et al., Word 8, 195-210); uses the two-formant vowel targets as validation for articulatory-to-acoustic mapping from the 35-section vocal tract analog
 
 ### Cited By (in Collection)
-- [[Stevens_1955_QuantitativeVowelArticulation]] — cites for empirical vowel formant targets from synthesis
-- [[Peterson_Barney_1952_VowelControl]] — cross-referenced as complementary synthetic-vs-natural vowel data
 - [[Cooper_1952_PerceptionSyntheticSpeech]] — uses two-formant vowel targets derived from this body of work (Fig. 2B) for systematic stop consonant perception experiments
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for two-formant vowel synthesis and acoustic determinants of vowel color (Word 8:195-210)
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — references for foundational acoustic phonetics work
+- [[Ohman_1966_CoarticulationVCV]] — references for vowel formant framework used in coarticulation analysis
+- [[Peterson_Barney_1952_VowelControl]] — cross-referenced as complementary synthetic-vs-natural vowel data
+- [[Stevens_1955_QuantitativeVowelArticulation]] — cites for empirical vowel formant targets from synthesis
+- [[Stevens_House_1956_FormantTransitionsVocalTract]] — references for vowel formant targets
 
 ### Conceptual Links (not citation-based)
 - [[Hillenbrand_1995_VowelAcoustics]] — updated American English vowel formant measurements (F0-F4) for 139 speakers; extends the P&B/Delattre vowel space with modern digital analysis and dynamic formant trajectory data

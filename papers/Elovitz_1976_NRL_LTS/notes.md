@@ -269,9 +269,12 @@ const PATTERNS = {
 - **McIlroy (Bell Telephone Laboratories)** — 750+ LTS rules with higher accuracy, comparison point for NRL's 329-rule system
 
 ### Cited By (in Collection)
+- [[Allen_1977_ModularAudioResponse]] — references for LTS rules in TTS pipeline context
 - [[Allen_1987_MITalk_TTS]] — cites Elovitz for LTS rules as a contemporary approach to grapheme-to-phoneme conversion
 - [[Hertz_1985_DeltaRuleSystem]] — cites as "classic letter-to-sound rules providing foundational approach to grapheme-to-phoneme conversion"; Delta was designed as a more sophisticated rule development environment
 - [[Liberman_Mattingly_1985_MotorTheory]] — cites for text-to-phoneme conversion in the context of speech synthesis systems
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references for foundational LTS rules in pronunciation modeling
 
 ### Conceptual Links (not citation-based)
 - [[Black_1998_LTS_Rules]] — Strong. Black's CART-based LTS rules represent the data-driven successor to Elovitz's hand-crafted rules. Comparing the two illustrates the evolution from manually engineered rules (329 context-sensitive patterns) to automatically learned decision trees (75% word accuracy from lexicon training).
+- [[Ebden_2015_KestrelTextNormalization]] — Moderate. Both address the TTS text-to-phoneme pipeline; Elovitz handles grapheme-to-phoneme conversion while Ebden handles the upstream text normalization stage (number/date/currency expansion). Together they cover the full text processing chain.

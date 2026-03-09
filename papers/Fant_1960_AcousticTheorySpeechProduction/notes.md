@@ -331,11 +331,46 @@ Fant's empirical attenuation formula ($a = 0.007 \cdot (\pi/A)^{1/2}$) provides 
 - [[House_Stevens_1956_NasalizationVowels]]
 - [[Peterson_Barney_1952_VowelControl]]
 
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — cites for acoustic theory underlying synthesis
+- [[Badin_1989_FricativeProductionModelling]] — uses source-filter framework for fricative modeling
+- [[Blumstein_Stevens_1979_AcousticInvariance]] — builds on Fant's stop consonant acoustic theory
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — references for formant synthesis fundamentals
+- [[Carlson_1979_VowelPerceptionSalience]] — uses Fant's vowel formant theory
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — references as foundational synthesis model
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cites for source-filter model
+- [[Doval_2006_SpectrumGlottalFlowModels]] — builds on source-filter theory for glottal models
+- [[Ericsson_2020_FormantEstimationEvaluation]] — references for formant estimation fundamentals
+- [[EspyWilson_2000_AcousticModelingAmericanR]] — uses double-Helmholtz resonator equations for /r/ modeling
+- [[Fant_1985_LFModelGlottalFlow]] — extends Fant's own source model
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — frequency domain analysis of source model
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — uses source-filter framework
+- [[Hanson_2002_HLsynSourceParameters]] — extends source-filter model for HLsyn
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — uses nasalization theory from Ch. 2.4
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] — references for glottal adduction theory
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — direct implementation of cascade formant synthesis
+- [[Klatt_1990_VoiceQualityVariations]] — extends source model for voice quality
+- [[Laine_1988_HigherPoleCorrection]] — validates and extends HPC formula (Ch. 2.33)
+- [[Ohman_1966_CoarticulationVCV]] — uses formant transition framework
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — extends LF source model linearly
+- [[Rabiner_1968_DigitalFormantSynthesizer]] — implements digital cascade formant synthesis
+- [[Recasens_1997_LingualCoarticulationDAC]] — references for articulatory-acoustic mapping
+- [[Rothenberg_1981_InteractiveVoiceSource]] — extends source-filter interaction model
+- [[Shadle_1985_FricativeAcoustics]] — uses fricative source theory
+- [[Shadle_2023_FricativeSpectraHighFreq]] — extends high-frequency fricative analysis
+- [[Stevens_1955_QuantitativeVowelArticulation]] — validates vowel tube model
+- [[Stevens_1971_AirflowTurbulenceNoise]] — extends noise source theory
+- [[Stevens_1989_QuantalNatureSpeech]] — builds on articulatory-acoustic quantal relationships
+- [[Stevens_1991_HL_Parameters]] — extends to Hanson-Stevens parameterization
+- [[Sundberg_2005_GlottalSourceLoudness]] — references source spectrum model
+- [[Titze_2015_OddHarmonicSensitivity]] — references formant sensitivity theory
+
+### Conceptual Links (not citation-based)
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — Strong. Provides modern lifespan bandwidth data that updates Fant's Table 2.34-1 bandwidth measurements with contemporary statistical analysis across age and sex.
+- [[Hillenbrand_1995_VowelAcoustics]] — Strong. Updated American English vowel formant measurements extending Fant's Russian vowel data to modern English with dynamic trajectory information.
+- [[Lin_1995_CascadeIntoParallel]] — Strong. Derives cascade-to-parallel conversion that bridges Fant's cascade formant synthesis with parallel branch requirements.
+
 ### New Leads (Not Yet in Collection)
 - **Fant, C. G. M. (1952)** - "Transmission properties of the vocal tract with application to the acoustic specification of phonemes". This is Fant's own M.I.T. technical report that forms the core of the acoustic theory presented in this book.
 - **Delattre, P. C., Liberman, A. M., and Cooper, F. S. (1951, 1955)** - Multiple papers on synthetic vowels, acoustic loci, and transitional cues for consonants. These are key experimental validations of the acoustic theory with pattern playback.
 - **van den Berg, Jw. (1950s)** - Multiple papers on vocal fold mechanics, subglottic pressure, and laryngeal function. Essential for understanding the physiological basis of the voice source model.
-
----
-
-**See also:** Laine_1988_HigherPoleCorrection - validates and extends Fant's 1959 HPC formula (Ch. 2.33), showing it is insensitive to vocal tract profile variations and depends only on effective length; derives practical all-zero HPC filter models

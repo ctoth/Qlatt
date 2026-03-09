@@ -314,6 +314,15 @@ Key findings:
 ### Now in Collection (previously listed as leads)
 - [[Goudbeek_2010_ValencePotencyVocalEmotion]] — Analyzes GEMEP corpus showing arousal dominates via F0/intensity (R²=0.82), but valence is encoded in spectral slope and intensity variability (R²=0.22-0.49), and potency/control in F0 level, HNR, and low spectral dominance (R²=0.23-0.38). Directly informed GeMAPS's inclusion of spectral slope and HNR parameters.
 
+### Cited By (in Collection)
+- [[KaczmarekMajer_2024_AcousticMarkersBipolar]] — uses eGeMAPS feature set for bipolar disorder acoustic marker analysis
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — ranking of discriminative acoustic features informed by GeMAPS parameters
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites as standardized 62-parameter set recommended for emotion research
+- [[Lee_2019_AcousticVoiceVariation]] — substantial overlap in spectral and prosodic measures
+- [[Staib_2021_CorticalVoiceProcessing]] — uses GeMAPS acoustic features for cortical voice processing analysis
+- [[VanZant_Berger_2019_VoicePersuades]] — uses GeMAPS volume/loudness and F0 parameters
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — measures many of the same acoustic parameters for emotion analysis
+
 ### New Leads (Not Yet in Collection)
 - [23] Schuller et al. (2007) - The Relevance of Feature Type**: Early work demonstrating which low-level descriptors vs. functionals matter most for emotion classification, directly guiding the minimalistic feature set design.
 - [29] Tamarit et al. (2008) - Spectral slope measurements**: Validates spectral slope parameters as emotionally significant, supporting inclusion in GeMAPS.

@@ -251,8 +251,17 @@ Both lower F3 by ~200-300 Hz compared to supralingual-only model.
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Maeda_1982_VowelNasalizationCues]]
+- [[Fant_1960_AcousticTheorySpeechProduction]] — uses double-Helmholtz resonator equations for cavity analysis
+- [[Maeda_1982_VowelNasalizationCues]] — VTCALCS software used for vocal tract simulation
+
+### Cited By (in Collection)
+- [[Fowler_2006_CoarticulationGesturePerception]] — /r/ acoustic modeling; uses F3 data for /r/ contexts
+- [[Hanson_2002_HLsynSourceParameters]] — cited (as Espy-Wilson 1992) for liquid consonant formant frequency data
+- [[King_2020_LabialGestureAngloEnglishR]] — references for /r/ articulation and acoustic modeling
+
+### Conceptual Links (not citation-based)
+- [[Recasens_2012_LateralAllophones]] — Moderate. Both analyze liquid consonant acoustics with MRI/articulatory data; Recasens' lateral allophone analysis complements Espy-Wilson's rhotic analysis for understanding liquid consonant formant patterns.
+- [[Dalston_1975_SonorantAcoustics]] — Moderate. Dalston's sonorant acoustic measurements provide complementary formant data for liquids and nasals that contextualize Espy-Wilson's /r/ formant targets.
 
 ### New Leads (Not Yet in Collection)
 - **Stevens, K. N. (1999). Acoustic Phonetics** - Foundational acoustic theory for understanding formant cavity affiliations and provides the baseline tube model for /r/ that this paper builds upon and critiques.

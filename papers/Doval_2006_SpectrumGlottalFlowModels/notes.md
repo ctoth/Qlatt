@@ -360,5 +360,16 @@ $$T_a = \frac{\sqrt{10^{TL/10} - 1}}{2\pi \times 3000}$$
 ### Now in Collection (previously listed as leads)
 - [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — defines five corrected acoustic parameters (H1*-H2*, H1*-A1, H1*-A3*, B1, noise) for quantifying female glottal voice quality; two speaker groups distinguished by spectral tilt threshold at ~23 dB H1*-A3*
 
+### Cited By (in Collection)
+- [[Drugman_2020_GlottalSourceEstimation]] — uses spectral framework for evaluating glottal source estimation methods
+- [[Feugere_2017_CantorDigitalis]] — uses CALM/spectrum model details for real-time voice synthesis
+- [[Kreiman_2007_GlottalSourceSpectrum]] — proves H1-H2 depends on both OQ and asymmetry, consistent with this paper's finding
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — references spectral model for voice quality analysis
+- [[Kreiman_2021_ValidatingVoiceQuality]] — references analytical spectral formulas for deriving spectral slopes from LF parameters
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — extends unified GFM framework
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] — relates to spectral interpretation of LF parameters estimated in time domain
+- [[Rothenberg_1981_InteractiveVoiceSource]] — spectral analysis of glottal models including interaction effects
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — analytical spectral formulas formalize the two-slope spectral structure Zhang describes
+
 ### New Leads (Not Yet in Collection)
 - **[15] Fant (1995)** - LF model revisited with transformations and frequency domain analysis; theoretical foundation for spectral methods.

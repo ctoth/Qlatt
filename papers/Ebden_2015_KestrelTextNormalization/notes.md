@@ -356,6 +356,9 @@ https://doi.org/10.1017/S1351324914000175
 - [[Allen_1987_MITalk_TTS]]
 - [[Klatt_1987_TTS_Review]]
 
+### Conceptual Links (not citation-based)
+- [[Elovitz_1976_NRL_LTS]] — Moderate. Elovitz handles grapheme-to-phoneme conversion downstream of Kestrel's text normalization; together they cover the full text-to-phoneme pipeline from raw text through NSW expansion to phonetic transcription.
+
 ### New Leads (Not Yet in Collection)
 - **Sproat (1996, 1997)** - Bell Labs multilingual text-to-speech system: The foundational architecture that Kestrel improves upon; essential for understanding the evolution from single-phase to two-phase normalization.
 - **Sproat et al. (2001)** - Normalization of non-standard words: Establishes the taxonomy of semiotic classes (currency, dates, times, etc.) that Kestrel implements; critical reference for NSW classification.

@@ -305,13 +305,28 @@ Key insight: Tenseness and loudness can be varied **independently** in both mode
 - [[Fant_1985_LFModelGlottalFlow]]
 - [[Klatt_1990_VoiceQualityVariations]]
 
-### New Leads (Not Yet in Collection)
-- **[9] Fant 1995** - LF-model revisited with frequency domain analysis; essential for spectral tilt and phase understanding
-- **[5] Bozkurt & Dutoit 2003** - Mixed-phase speech modeling using differential phase spectrums; contemporary approach to phase separation
-
 ### Now in Collection (previously listed as leads)
 - [[Henrich_2001_SpectralOqAsymmetry]] -- Derives analytical spectral formulas for LF, R++, and KLGLOTT88 models, showing that H1*-H2* depends on both Oq and asymmetry coefficient in 5-parameter models. Key finding: only the simpler KLGLOTT88 model gives a unique Oq-to-H1*-H2* mapping. Experimental speech and singing data often falls outside any model's predicted H1*-H2* range.
 
 ### Cited By (in Collection)
-- [[Henrich_2003_JND_OpenQuotient]] -- uses the CALM-compatible (Oq, alpha_m) parameterization for perceptual JND measurements
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — EpR source curve parallels CALM's spectral-domain representation of the voice source
 - [[Doval_2006_SpectrumGlottalFlowModels]] -- extends the spectral framework to a full model
+- [[Drugman_2020_GlottalSourceEstimation]] — uses CALM parameterization for glottal source evaluation
+- [[Feugere_2017_CantorDigitalis]] — uses CALM model for real-time voice synthesis
+- [[Gobl_2021_LFModelFrequencyDomain]] — similar treatment of causal/anticausal filter decomposition
+- [[Henrich_2003_JND_OpenQuotient]] -- uses the CALM-compatible (Oq, alpha_m) parameterization for perceptual JND measurements
+- [[Kreiman_2007_GlottalSourceSpectrum]] — cited as Doval & d'Alessandro 1999 for glottal flow spectrum models
+- [[Kreiman_2021_ValidatingVoiceQuality]] — references analytical spectral formulas for deriving spectral slopes from LF parameters
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — builds on LFCALM introduction
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] — closely related; CALM provides an alternative filter-based view of the same LF decomposition
+- [[Rothenberg_1981_InteractiveVoiceSource]] — CALM model builds on this interaction concept
+- [[Titze_2014_BistableVocalFoldAdduction]] — bistability framework constrains which CALM parameter combinations are physically realizable
+- [[vanDinther_2004_PerceptualGlottalPulse]] — uses CALM parameterization
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — CALM provides the spectral-domain source approach Zhang advocates
+
+### Conceptual Links (not citation-based)
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — Strong. Hanson's glottal characteristics analysis measures the same source properties (OQ, spectral tilt) that CALM parameterizes; CALM provides the theoretical framework for understanding Hanson's empirical measurements.
+
+### New Leads (Not Yet in Collection)
+- **[9] Fant 1995** - LF-model revisited with frequency domain analysis; essential for spectral tilt and phase understanding
+- **[5] Bozkurt & Dutoit 2003** - Mixed-phase speech modeling using differential phase spectrums; contemporary approach to phase separation

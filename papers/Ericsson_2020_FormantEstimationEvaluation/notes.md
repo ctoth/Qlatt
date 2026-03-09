@@ -213,6 +213,10 @@ This is unavoidable - if F0 > F1, there are no harmonics to represent F1.
 - [[Peterson_Barney_1952_VowelControl]]
 - [[Titze_2015_OddHarmonicSensitivity]]
 
+### Conceptual Links (not citation-based)
+- [[Hillenbrand_1995_VowelAcoustics]] — Moderate. Hillenbrand's extensive vowel formant measurements provide ground-truth formant data that could validate the estimation methods Ericsson evaluates; both address the accuracy of formant frequency measurement.
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — Moderate. Kent's comprehensive formant bandwidth data complements Ericsson's focus on formant frequency estimation accuracy; bandwidth affects the LPC estimation Ericsson evaluates.
+
 ### New Leads (Not Yet in Collection)
 - **Monsen & Engebretson (1983)** - Foundational comparison of manual formant tracking vs. automatic LPC estimation; provides historical baseline for evaluating formant estimation accuracy.
 - **Escudero et al. (2009)** - Introduces the optimized formant ceiling procedure being evaluated; critical for understanding the optimization strategy based on variance minimization.

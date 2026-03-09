@@ -198,3 +198,14 @@ For velar stops (/g,k/):
 - [[Cooper_1952_PerceptionSyntheticSpeech]] — cited for the original burst and formant transition perception experiments using pattern playback; this paper directly builds on Cooper et al.'s findings
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 - [[Zue_1976_StopConsonantAcoustics]]
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — Lisker & Abramson's VOT framework defines the temporal structure within which burst and transition cues operate
+
+### Cited By (in Collection)
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — this paper directly builds on Cooper et al.'s burst and transition experiments
+- [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — burst vs transition cue trading aligns with Holt & Lotto's cue weighting framework
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — examines burst and transition cues complementary to Lisker & Abramson's VOT production data
+
+### Conceptual Links (not citation-based)
+- [[Blumstein_Stevens_1979_AcousticInvariance]] — Strong. Blumstein & Stevens argue for acoustic invariance in stop burst spectra; Dorman et al. show bursts are functionally invariant within place class (Kendall's W = .72-.79) but context-dependent in perceptual weight, a refinement of the invariance claim.
+- [[Abramson_Whalen_2017_VOTat50]] — Moderate. The VOT framework defines the temporal interval during which burst and transition cues operate; Dorman et al.'s finding that longer VOT shifts cue weight from transitions to bursts connects VOT measurement to perceptual mechanism.
+- [[Hanson_2003_AspiratedStopsModels]] — Moderate. Hanson & Stevens' finding that aspiration phase contains place-specific frication extends Dorman et al.'s three-phase model; the "frication" cue Dorman identifies may persist longer than classically assumed.

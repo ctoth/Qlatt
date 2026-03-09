@@ -219,6 +219,14 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 
 ### Cited By (in Collection)
 - [[Iseli_2007_VoiceSourceAgeSexVowel]] — extends Hanson's correction formula for harmonic magnitudes; provides systematic age/sex/vowel data using the corrected measures across 335 speakers
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — references Hanson (1997) on glottal tension and spectral shape in the context of vocal emotion
+- [[Chen_2022_AcousticMasculinityFemininity]] — related work on gender-specific voice source parameters; Hanson's spectral tilt measures relate to Chen's perturbation clusters
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses Hanson (1997) corrections with Iseli & Alwan modifications for spectral measures
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — cites Hanson 1997 for corrected acoustic correlates using KLGLOTT88
+- [[Laukka_2011_SpontaneousAffectIrritation]] — cites Hanson for voice source spectral correlates
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — corrected spectral measures complement Fant's Rd analysis; the ~9.6 dB gender gap in H1*-A3* maps to Rd range differences
+- [[Koenig_LaryngealFactors]] — references Hanson (1997) for acoustic measures of female voice quality and breathiness
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — cites Hanson for correction formulas applied to H1-H2, H1-A1, H1-A3 measures
 
 ### Supersedes or Recontextualizes
 - This is the published JASA paper version of the analysis in [[Hanson_1995_GlottalCharacteristicsFemale]] (the PhD thesis). The thesis contains more detail; this paper provides the condensed, peer-reviewed findings with corrected measures and group classification.

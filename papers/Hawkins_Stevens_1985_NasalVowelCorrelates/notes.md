@@ -233,6 +233,10 @@ With at least 100 Hz separation between the zero and each pole (FNP and F1).
 
 ### Cited By (in Collection)
 - [[Beddor_1986_NasalVowelHeight]] — cites Beddor 1982/1983 (dissertation) and Beddor & Hawkins 1984 for centre-of-gravity analysis; extends Hawkins & Stevens' spectral analysis with articulatory synthesis and perceptual experiments
+- [[Stevens_1989_QuantalNatureSpeech]] — cites Hawkins & Stevens for nasalization correlates in the context of quantal theory
+- [[Stevens_1991_HL_Parameters]] — cites Hawkins & Stevens for nasal vowel synthesis parameters
+- [[Feng_1996_NasalVowelTarget]] — cites Hawkins & Stevens for perceptual correlates of nasality; provides validation criteria
+- [[Chen_1997_NasalizedVowelAcoustics]] — cites Hawkins & Stevens for perceptual correlates of nasalization
 
 ### New Leads (Not Yet in Collection)
 - **Delattre (1954, 1968)** - Early pattern-playback synthesis studies showing that pole-zero pairs can modify vowel spectra; precursor to modern Klatt-based nasal synthesis.

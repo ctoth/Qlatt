@@ -213,5 +213,10 @@ This represents a massive ~1000+ Hz shift in F2 while maintaining lip rounding.
 - **Perkell et al. (1993)** - Trading relations between tongue-body raising and lip rounding in /u/ production. Motor equivalence study showing articulatory flexibility in achieving equivalent acoustic targets, directly applicable to modeling /u/ synthesis variations.
 - **Hawkins & Midgley (2005)** - Formant frequencies of RP monophthongs in four age groups. Provides comprehensive formant target data for British English vowels across different speaker ages, essential reference for speech synthesis targeting in SSBE.
 
+### Cited By (in Collection)
+- [[King_2020_LabialGestureAngloEnglishR]] — cites Harrington for /u/ fronting in SSBE
+- [[Peterson_Barney_1952_VowelControl]] — Harrington demonstrates that P&B's 1952 /u/ formant targets may not hold for modern speakers due to diachronic fronting
+- [[Qharabagh_2025_FastNotFancy]] — cites Harrington for vowel fronting data
+
 ### Conceptual Links (not citation-based)
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — Miller documents /u/ fronting in a Chicago male speaker as coronal-conditioned allophony (fronted [u] in coronal environments, unfronted [barred-u] elsewhere). Harrington demonstrates that SSBE /u/ fronting involves tongue advancement with maintained lip rounding. Different dialects and different explanatory frameworks (contextual allophony vs. diachronic sound change), but the same acoustic phenomenon of F2 raising in high back vowels

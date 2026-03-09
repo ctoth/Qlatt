@@ -363,6 +363,22 @@ The four key KLSYN88 parameters for female voice quality control:
 - [[Shadle_1985_FricativeAcoustics]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 
+### Cited By (in Collection)
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — extends Hanson's correction formula for harmonic magnitudes; provides systematic age/sex/vowel data using the corrected measures across 335 speakers
+- [[Doval_2003_VoiceSourceCALM]] — Hanson's glottal characteristics analysis measures the same source properties (OQ, spectral tilt) that CALM parameterizes
+- [[Keating_2015_CreakyVoiceAcoustics]] — references the formant-corrected H1*-H2* measure from Hanson 1995
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — uses Hanson's corrected spectral measures (H1-H2, H1-A1, H1-A3) as the primary analysis framework
+- [[Drugman_2020_GlottalSourceEstimation]] — cites Hanson for female glottal characteristics
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] — relates to female glottal characteristics; Plumpe's system handles male/female separately
+- [[Sundberg_2005_GlottalSourceLoudness]] — cites Hanson for glottal characteristics and H1-H2 measurements
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — cites Hanson for glottal open quotient measures
+- [[Henrich_2001_SpectralOqAsymmetry]] — uses Hanson's formant-based correction method for spectral measures
+- [[Qharabagh_2025_FastNotFancy]] — cites Hanson for female glottal characteristics
+- [[Feugere_2017_CantorDigitalis]] — cites Hanson for glottal characteristics
+- [[Fant_1986_GlottalFlowModelsInteraction]] — Hanson documents female voice source characteristics using spectral measures; this paper provides the LF model framework for interpreting those measures
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses Hanson (1997) corrections with Iseli & Alwan modifications for H1-A1, H1-A3 calculation
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — cites Hanson 1995/1997 for the KLGLOTT88-based H1*-H2* estimation approach
+
 ### New Leads (Not Yet in Collection)
 - **Titze, I. R. (1989a, 1989b)** - Establishes physiologic and acoustic differences between male and female voices, directly relevant to sex-specific synthesis parameter selection.
 - **Gobl, C. and Ní Chasaide, A. (1988, 1993)** - Provides methods for analyzing voice source variation and consonant-dependent effects on voice quality, essential for contextual parameter modification in synthesis.

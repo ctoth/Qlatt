@@ -209,6 +209,7 @@ This is relatively vowel-independent.
 
 ### Cited By (in Collection)
 - [[Beddor_1986_NasalVowelHeight]] — cites this for foundational analog synthesis studies of nasal vowel spectra; extends those findings with articulatory synthesis and perceptual experiments
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — builds on House & Stevens' nasalization synthesis work to establish pole-zero pair as the perceptual correlate of vowel nasality
 
 ### New Leads (Not Yet in Collection)
 - **STEVENS, K. N., KASOWSKI, S. and FANT, C. G. M. (1953)** - Describes the electrical vocal tract analog methodology used throughout this paper; essential for understanding the experimental apparatus and acoustic modeling approach.

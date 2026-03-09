@@ -211,4 +211,8 @@ This paper is directly relevant to the Qlatt Klatt synthesizer in several ways:
 - **Larrouy-Maestri_2024_EmotionalProsody** — emotional prosody review identifies voice quality as critical for emotion encoding (especially valence), but notes the field lacks mechanistic understanding. HLsyn's 13-parameter quasi-articulatory control provides exactly this mechanism: linking physiological configurations (subglottal pressure, glottal area, posterior opening) to the spectral measures (H1*-H2*, H1*-A3*) the review identifies as emotion-discriminating. The finding that reduced vowels show 7-13 dB greater spectral tilt connects prosodic prominence to voice quality, a dimension the review argues is underexplored.
 
 ### Cited By (in Collection)
-- (none found)
+- [[Kreiman_2021_ValidatingVoiceQuality]] — HLsyn quasi-articulatory controller referenced as alternative high-level parameterization approach
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — HLsyn quasi-articulatory controller directly relevant to bridging the gap Zhang identifies between physiology and synthesis
+- [[Lucero_2005_VocalFoldBifurcations]] — Hanson's models of nonmodal phonation describe the acoustic consequences of different glottal configurations, while Lucero's bifurcation analysis describes the dynamical mechanisms
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — extends Hanson's phonation modeling approach with systematic age/sex/vowel correction formulas
+- [[Henrich_2001_SpectralOqAsymmetry]] — uses Hanson's approach to phonation modeling, directly relevant to the KLGLOTT88 limitation documented

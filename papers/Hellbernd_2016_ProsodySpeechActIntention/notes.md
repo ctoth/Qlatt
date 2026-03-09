@@ -188,9 +188,12 @@ Key insight for Qlatt: The paper suggests "conventionalized" prosodic patterns e
 ### Cited By (in Collection)
 - [[Caballero_2018_SoundOfImpoliteness]] — cites Hellbernd for speech act-prosody mapping
 - [[Trott_2022_ProsodyIndirectRequests]] — cites Hellbernd for prosodic encoding of speaker intentions
+- [[Jiang_2017_SoundOfConfidenceDoubt]] — cites Hellbernd for prosodic correlates of speech act intentions
+- [[Breen_InPress_ToBIRaPReliability]] — Hellbernd's work on prosodic correlates of speech act intentions relies on consistent prosodic annotation validated by Breen's reliability data
 
 ### Conceptual Links (not citation-based)
-- [[Caballero_2018_SoundOfImpoliteness]] — both papers demonstrate that prosody conveys speaker intentions, with overlapping parameter spaces (F0 contour, duration); Hellbernd focuses on speech act categorization while Caballero focuses on the politeness dimension within requests. (Strong)
+- [[Caballero_2018_SoundOfImpoliteness]] — Strong. Both papers demonstrate that prosody conveys speaker intentions, with overlapping parameter spaces (F0 contour, duration); Hellbernd focuses on speech act categorization while Caballero focuses on the politeness dimension within requests.
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — Strong. Hellbernd shows that prosodic patterns encode communicative intentions (speech acts) distinguishable from emotions; Larrouy-Maestri's review of emotional prosody identifies the same acoustic parameters (F0, intensity, duration) but notes the field lacks clear separation between emotion and intention encoding.
 
 ### New Leads (Not Yet in Collection)
 - **Morlec, Bailly, & Aubergé (2001)** - "Generating prosodic attitudes in French" - Directly relevant to synthesis: describes a computational model for generating attitude-specific prosody in French TTS.

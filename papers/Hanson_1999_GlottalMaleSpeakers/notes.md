@@ -241,6 +241,10 @@ This paper provides quantitative targets for setting voice quality parameters wh
 - Fant, G. (1995) - "The LF-model revisited" - frequency domain analysis of LF model (we have 1985 but not 1995 revision)
 - Titze, I. R. (1989) - "Physiologic and acoustic differences between male and female voices" JASA 85, 1699-1707 - gender voice differences
 
+### Cited By (in Collection)
+- [[Chen_2022_AcousticMasculinityFemininity]] — related work on gender-specific voice source parameters
+- [[Zuta_2007_AttractiveMaleVoices]] — related: male glottal characteristics relevant to voice attractiveness findings
+
 ### Conceptual Links (not citation-based)
 - [[Titze_2014_BistableVocalFoldAdduction]] — Moderate. Hanson's glottal source measurements (OQ, H1-H2) for male speakers reflect the convergent-glottis modal configuration described by Titze; the bistability framework explains why these parameters cluster into distinct modal/falsetto groups rather than varying continuously.
 - [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos's male SNR findings across ages 4-93 extend Hanson's glottal characteristics data (for young adult males) to the full lifespan.

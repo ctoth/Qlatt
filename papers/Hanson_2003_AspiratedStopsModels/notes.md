@@ -169,7 +169,7 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 - [[Hertz_1991_StreamsPhonesTransitions]] — Hertz treats aspiration as an independent stream overlaying the CV transition after voiceless stops. Hanson & Stevens' finding that /t/ and /k/ releases contain supraglottal frication (not just glottal aspiration) complicates this model: the AF parameter may need place-dependent extension into what Hertz models as the aspiration interval, rather than a clean AH overlay.
 
 ### Cited By (in Collection)
-- (none found)
+- [[McGowan_Howe_2007_CompactGreensFunction]] — Hanson & Stevens' finding that /t/ aspiration contains frication noise from supraglottal constriction is explained by McGowan & Howe's aeroacoustic coupling theory
 
 ### Conceptual Links (not citation-based — added during reconciliation)
 - [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — Karthikeyan shows that fully released/aspirated word-final /t/ increases perceived prestige and long-term attractiveness; Hanson & Stevens' acoustic models of aspiration (supraglottal frication + glottal noise) describe exactly the acoustic properties that distinguish Karthikeyan's two speaker groups

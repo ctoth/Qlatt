@@ -357,3 +357,6 @@ This paper is directly relevant to Qlatt. It provides the complete mathematical 
 ### Cited By (in Collection)
 - [[Hanson_2001_ModelsPhonation]] — cites this paper (as "Hanson & Stevens, submitted") for the full HLsyn mapping equations from HL to KL parameters
 - [[Hanson_2003_AspiratedStopsModels]] — uses HLsyn for synthesis examples of stop consonant releases
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — higher-level control equations address the source parameter co-variation problem Zhang highlights
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — HLsyn uses parameters (OQ, TL) directly related to the H1*-H2* and H1*-A3* measures Iseli characterizes; age/sex norms could parameterize HLsyn speaker profiles
+- [[Titze_1992_VocalIntensity]] — cites the companion phonation threshold paper for the phonation threshold pressure equation used in HLsyn

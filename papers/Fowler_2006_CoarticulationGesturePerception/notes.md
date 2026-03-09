@@ -214,5 +214,9 @@ This paper is the strongest empirical anchor for Fowler's coproduction theory, w
 - Fowler, Brown, & Mann (2000) — Audiovisual compensation experiments
 - Whalen (1984) — Subcategorical phonetic mismatches
 
+### Cited By (in Collection)
+- [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — references this paper as demonstrating coarticulation compensation (cue weighting in action); published as companion/commentary in same issue
+- [[Volenec_2015_Coarticulation]] — cites Fowler's gestural account of coarticulation perception
+
 ### Supersedes or Recontextualizes
 - None directly — this paper operates in a different domain (perception) from most of our implementation papers

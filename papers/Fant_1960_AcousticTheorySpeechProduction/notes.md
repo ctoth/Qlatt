@@ -343,7 +343,13 @@ Fant's empirical attenuation formula ($a = 0.007 \cdot (\pi/A)^{1/2}$) provides 
 - [[Ericsson_2020_FormantEstimationEvaluation]] — references for formant estimation fundamentals
 - [[EspyWilson_2000_AcousticModelingAmericanR]] — uses double-Helmholtz resonator equations for /r/ modeling
 - [[Fant_1985_LFModelGlottalFlow]] — extends Fant's own source model
+- [[Fant_1986_GlottalFlowModelsInteraction]] — extends source-filter interaction analysis
 - [[Fant_1988_LFFrequencyDomainInterpretation]] — frequency domain analysis of source model
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — extends source model to connected speech with Rd parameter
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — cites for source-filter theory framework
+- [[Feng_1996_NasalVowelTarget]] — uses vocal tract modeling and nasal area functions from Ch. 2.4
+- [[Feugere_2017_CantorDigitalis]] — cites for foundational source-filter theory
+- [[Fitch_1999_VocalTractMorphology]] — cites for VTL-formant theory and vocal tract size factors
 - [[Hanson_1995_GlottalCharacteristicsFemale]] — uses source-filter framework
 - [[Hanson_2002_HLsynSourceParameters]] — extends source-filter model for HLsyn
 - [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — uses nasalization theory from Ch. 2.4

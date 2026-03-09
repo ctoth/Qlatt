@@ -173,6 +173,9 @@ Normalized duration = utterance_duration / mean_duration_neutral
 ### Already in Collection
 - [[Hellbernd_2016_ProsodySpeechActIntention]]
 
+### Cited By (in Collection)
+- [[Fish_2017_SoundOfInsincerity]] — from same lab (Pell); cites this paper for prosodic cues of confidence/uncertainty that interact with sincerity perception
+
 ### New Leads (Not Yet in Collection)
 - **Scherer, London, Wolf (1973)** - "The voice of confidence" - Foundational paper on paralinguistic cues for confidence perception. Direct precursor to this work.
 - **Bänziger, Patel, Scherer (2014)** - Voice quality in emotion communication. Methodology for HNR/jitter/shimmer analysis applicable to synthesis.

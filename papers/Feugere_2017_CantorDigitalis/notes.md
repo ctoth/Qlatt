@@ -397,5 +397,12 @@ F6 = 2×F4, A6 = -15 dB, B6 = 150 Hz (constant)
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Peterson_Barney_1952_VowelControl]]
 
+### Cited By (in Collection)
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — by same group; extends the LFLM model used in Cantor Digitalis with formal linear-filter equivalence proofs
+
 ### New Leads (Not Yet in Collection)
-- **Sundberg 2001** (Reference 31) - Singing formant; directly applicable to soprano and higher voice formant clustering techniques described in the paper
+- **Sundberg 2001** (Reference 31) — Singing formant; directly applicable to soprano and higher voice formant clustering techniques described in the paper
+
+### Conceptual Links (not citation-based)
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — Fant's Rd parameter and six-stage production model map directly to this paper's open quotient/tension/effort parameterization; the covariation rules (1 dB in 1/Rd = 2 dB in Ee) correspond to the effort-dependent spectral tilt equations here. (Strong)
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — Both implement parallel formant synthesizer architectures with explicit formant amplitude control; Lalwani's flexible cascade/parallel switching contrasts with Cantor Digitalis's parallel-only approach. (Moderate)

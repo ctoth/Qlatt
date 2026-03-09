@@ -317,11 +317,13 @@ $$
 - [[Doval_2006_SpectrumGlottalFlowModels]]
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 - [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1986_GlottalFlowModelsInteraction]] — source-filter interaction analysis relevant to LF model
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — frequency-domain LF analysis; this paper builds on its spectral derivations
+- [[Feugere_2017_CantorDigitalis]] — by same group; implements LFLM model in real-time Cantor Digitalis singing synthesizer
 - [[Gobl_2003_VoiceQualityEmotion]]
 - [[Holmes_1983_FormantSynthesizersCascadeParallel]]
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Klatt_1990_VoiceQualityVariations]]
 
 ### New Leads (Not Yet in Collection)
-- **Feugère et al. (2017)** - "Cantor Digitalis: Chironomic parametric synthesis of singing" - Implements LFLM model in real-time musical context, demonstrates practical application of the linear-filter glottal models.
 - **Fant (1995)** - "The LF-model revisited: Transformations and frequency domain analysis" - Derives the Rd parameter transformation equations that unify time-domain and spectral interpretations of the LF model.

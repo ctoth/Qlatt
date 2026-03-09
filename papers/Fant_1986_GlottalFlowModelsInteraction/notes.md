@@ -148,14 +148,25 @@ Adding constant glottal shunt (1/5 peak area):
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1985_LFModelGlottalFlow]] — the original LF model paper; this paper applies and extends it with source-filter interaction analysis
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — extends this paper's LF framework into the frequency domain with normalized parameters (Rg, Rk, Ra)
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — builds on this paper's interaction framework for connected speech source variation
+
+### Cited By (in Collection)
+- [[Gobl_2021_LFModelFrequencyDomain]] — extends LF model to alias-free digital implementation, building on the LF equations presented here
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses LF parameters from this paper for PCA of glottal source measures
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — builds on LF framework for voice quality characterization
+- [[Lu_Smith_GlottalSourceSingingVoice]] — applies LF model parameterization to singing voice analysis
+- [[Muthukumar_2013_IterativeLFParameterFitting]] — uses LF model for iterative parameter fitting from inverse-filtered signals
+- [[Doval_2006_SpectrumGlottalFlowModels]] — analyzes spectral properties of glottal flow models including LF
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — references LF model in context of spectral voice synthesis
 
 ### New Leads (Not Yet in Collection)
-- *Critical*: This is THE primary LF model paper. Contains full mathematical specification and parameter definitions. Essential for implementing or validating an LF source.
-- *Important*: Detailed analysis of source-filter interaction. Useful if trying to model more realistic voice source behavior beyond basic LF.
-- **Ananthapadmanabha & Fant (1982)** - "Calculation of true glottal flow and its components"
-- *Useful*: Foundation for understanding how to decompose glottal flow. Published in Speech Communication journal (more accessible than QPSR).
-- **Fant (1979)** - "Glottal source and excitation analysis"
-- *Background*: The earlier model that LF improves upon. Useful for understanding the evolution of glottal source modeling.
-- **Ananthapadmanabha (1984)** - "Acoustic analysis of voice source dynamics"
-- *Background*: Five-parameter predecessor to LF model. May contain useful analysis techniques.
+- **Ananthapadmanabha & Fant (1982)** — "Calculation of true glottal flow and its components" — Foundation for glottal flow decomposition
+- **Fant (1979)** — "Glottal source and excitation analysis" — The earlier model that LF improves upon
+- **Ananthapadmanabha (1984)** — "Acoustic analysis of voice source dynamics" — Five-parameter predecessor to LF model
+- **Rothenberg (1985)** — "Cosi fan tutte and what it means" — F0/F1 coincidence theory for soprano singing
+
+### Conceptual Links (not citation-based)
+- [[Badin_1989_FricativeProductionModelling]] — Badin models source-tract interaction for fricatives; this paper models it for voicing. Both address how the vocal tract load modifies the source signal. (Moderate)
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — Hanson documents female voice source characteristics using spectral measures; this paper provides the LF model framework for interpreting those measures, particularly the role of ta in spectral tilt. (Moderate)

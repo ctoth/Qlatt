@@ -206,11 +206,20 @@ The paper explains why traditional nasal synthesis sounds poor: modeling just ad
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Badin_1989_FricativeProductionModelling]]
-- [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Hawkins_Stevens_1985_NasalVowelCorrelates]]
-- [[House_Stevens_1956_NasalizationVowels]]
-- [[Maeda_1982_VowelNasalizationCues]]
+- [[Badin_1989_FricativeProductionModelling]] — cited for vocal tract transfer function measurement methodology
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational vocal tract modeling and nasal consonant area functions
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — perceptual correlates of nasality; provides validation criteria referenced here
+- [[House_Stevens_1956_NasalizationVowels]] — seminal nasal vowel acoustics that this paper builds upon and improves
+- [[Maeda_1982_VowelNasalizationCues]] — spectral correlates of nasalization and sinus cavity effects; directly relevant to the target hypothesis
+
+### Cited By (in Collection)
+- [[Chen_1997_NasalizedVowelAcoustics]] — uses this paper's nasal target framework for nasalized vowel analysis
+- [[Rossato_1998_RecoveringGesturesNasalVowels]] — applies the pharyngonasal target concept to gesture recovery from nasal vowels
 
 ### New Leads (Not Yet in Collection)
-- **Lindqvist-Gauffin, J., and Sundberg, J. (1976) - Acoustic Properties of the Nasal Tract** - Provides sweep-tone measurements crucial for validating the pharyngonasal tract model.
+- **Lindqvist-Gauffin, J., and Sundberg, J. (1976)** — "Acoustic Properties of the Nasal Tract" — Sweep-tone measurements crucial for validating the pharyngonasal tract model
+- **Dang, Honda, & Suzuki (1994)** — "Morphological and acoustical analysis of the nasal and paranasal cavities" — 3D measurements complementing this paper's 2D model
+
+### Conceptual Links (not citation-based)
+- [[Beddor_1986_NasalVowelHeight]] — Beddor examines how vowel height interacts with nasalization perception; this paper's pole-zero evolution patterns (Categories 1-3) predict different nasalization acoustics for high vs low vowels, directly explaining Beddor's perceptual findings. (Strong)
+- [[Kaburagi_2007_VocalTractSpectrum]] — Kaburagi provides vocal tract spectrum computation methods that could be applied to validate the transmission line model used here for nasal coupling simulation. (Moderate)

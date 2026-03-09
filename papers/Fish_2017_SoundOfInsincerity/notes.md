@@ -144,8 +144,11 @@ Different acoustic features marked differently in each position.
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Jiang_2017_SoundOfConfidenceDoubt]]
-- [[White_2014_ProsodicTimingFunction]]
+- [[Jiang_2017_SoundOfConfidenceDoubt]] — from same lab; examines prosodic cues for confidence/uncertainty, which interacts with sincerity perception
+- [[White_2014_ProsodicTimingFunction]] — prosodic timing for discourse functions; provides framework for understanding phrase-position-dependent acoustic cues
+
+### Cited By (in Collection)
+- [[Caballero_2018_SoundOfImpoliteness]] — uses similar methodology to extract acoustic profiles of pragmatic attitudes; examines politeness where this paper examines sincerity
 
 ### New Leads (Not Yet in Collection)
 - **Cheang & Pell (2008) - "The sound of sarcasm"** - Related work on acoustic markers of non-literal speech from the same lab; likely provides complementary parameters for sarcasm that could be contrasted with sincerity cues.

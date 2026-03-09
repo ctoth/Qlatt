@@ -212,7 +212,8 @@ This paper provides the empirical foundation for parameterizing vocal tract leng
 ## Collection Cross-References
 
 ### Already in Collection
-- (none of the directly cited papers are in the collection)
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for foundational VTL-formant theory and the vocal tract size factor discussion
+- [[Peterson_Barney_1952_VowelControl]] — cited for canonical vowel formant data that predicted VTL-dependent formant scaling
 
 ### New Leads (Not Yet in Collection)
 - Story, Titze, and Hoffman (1996) - "Vocal tract area functions from MRI" JASA 100, 537-554 - provides cross-sectional area data complementing this paper's midsagittal lengths

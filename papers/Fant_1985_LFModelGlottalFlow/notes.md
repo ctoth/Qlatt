@@ -254,3 +254,34 @@ This constraint ties the four shape parameters together - given t_p, t_e, t_a, t
 - Ananthapadmanabha & Fant (1982): "Calculation of true glottal flow and its components" - Source-tract interaction
 - Fant (1982): "Preliminaries to the analysis of the human voice source" - Background theory
 - Klatt & Klatt (1990): Voice quality variations - Uses LF concepts in Klatt synthesizer context
+
+---
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Fant's foundational acoustic theory; this paper extends the source model
+
+### Cited By (in Collection)
+- [[Fant_1986_GlottalFlowModelsInteraction]] — applies and extends LF model with source-filter interaction analysis
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — derives frequency-domain interpretation of the LF parameters
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — extends LF model with Rd unified parameter for connected speech
+- [[Doval_2003_VoiceSourceCALM]] — develops CALM model based on LF framework
+- [[Doval_2006_SpectrumGlottalFlowModels]] — analyzes spectral properties of LF and related models
+- [[Feugere_2017_CantorDigitalis]] — implements LF-based source model in real-time singing synthesizer
+- [[Gobl_2003_VoiceQualityEmotion]] — uses LF parameters for voice quality in emotional speech
+- [[Gobl_2021_LFModelFrequencyDomain]] — extends to alias-free digital LF implementation
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses LF R-parameters for PCA analysis
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — builds on LF framework for voice quality
+- [[Lu_Smith_GlottalSourceSingingVoice]] — applies LF model to singing voice
+- [[Muthukumar_2013_IterativeLFParameterFitting]] — uses LF model for iterative parameter fitting
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — proves linear-filter equivalence of LF model
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — references LF model for spectral synthesis
+- [[Henrich_2001_SpectralOqAsymmetry]] — analyzes spectral correlates of LF parameters
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — uses LF framework for female voice analysis
+- [[Klatt_1990_VoiceQualityVariations]] — uses LF concepts in Klatt synthesizer context
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — references LF source model
+
+### New Leads (Not Yet in Collection)
+- **Ananthapadmanabha (1984)** — "Acoustic analysis of voice source dynamics" — Five-parameter predecessor model
+- **Fant (1979)** — "Vocal source analysis - a progress report" — Earlier F-model

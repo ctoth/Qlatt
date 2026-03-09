@@ -190,6 +190,7 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 ## Collection Cross-References
 
 ### Already in Collection
+- [[Fitch_1999_VocalTractMorphology]] — cited for VTL-body size relationship underlying formant dispersion measures
 - [[Klatt_1990_VoiceQualityVariations]] - cited as ref [43]; voice quality analysis framework
 - [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - VOT framework referenced in introduction
 - [[Walton_1994_SpeakerRaceVocalAcoustics]] — cited as ref [4]; race identification from perturbation measures. Both studies show within-normal-range jitter/shimmer/HNR differences are perceptually salient for speaker differentiation.

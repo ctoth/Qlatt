@@ -241,11 +241,25 @@ Despite similar Uo/Ee ratios:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Fant_1985_LFModelGlottalFlow]]
-- [[Holmberg_1988_GlottalAirflowPressure]]
-- [[Sundberg_1972_SingingFormant]]
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational acoustic theory; provides bandwidth formulas and formant theory referenced here
+- [[Fant_1985_LFModelGlottalFlow]] — the original LF model paper; this paper derives its frequency-domain interpretation
+- [[Fant_1986_GlottalFlowModelsInteraction]] — companion paper on source-filter interaction; this paper extends the spectral analysis
+- [[Fant_1997_VoiceSourceConnectedSpeech]] — uses this paper's derivation approach for the Rd unified parameter
+- [[Holmberg_1988_GlottalAirflowPressure]] — provides empirical glottal flow measurements that validate the theoretical predictions here
+- [[Sundberg_1972_SingingFormant]] — singing voice acoustics; this paper's Fa parameter explains singing voice spectral characteristics
+
+### Cited By (in Collection)
+- [[Gobl_2021_LFModelFrequencyDomain]] — extends this frequency-domain LF analysis to alias-free digital implementation
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses the normalized R parameters from this paper for PCA analysis
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — builds on R-parameter framework for voice quality characterization
+- [[Doval_2006_SpectrumGlottalFlowModels]] — extends the spectral analysis of glottal flow models
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — references LF frequency-domain analysis for formant synthesizer design
+- [[Allen_1987_MITalk_TTS]] — references Fant's source analysis in TTS context
 
 ### New Leads (Not Yet in Collection)
-- **Gobl (1988) - "Voice Source Dynamics in Connected Speech"** - Studies temporal variation of LF parameters in running speech. Important for understanding how parameters change during coarticulation.
-- **Sundberg & Gauffin (1979)** - Detailed analysis of glottal voice source waveforms and spectra, including singing voice characteristics. Relevant for understanding the relationship between waveform shape and spectral content.
+- **Gobl (1988)** — "Voice Source Dynamics in Connected Speech" — Temporal variation of LF parameters in running speech
+- **Sundberg & Gauffin (1979)** — Glottal voice source waveforms and spectra analysis
+
+### Conceptual Links (not citation-based)
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — Hanson's corrected spectral measures (H1*-H2*, H1*-A3*) directly map to the Fa/Ra parameters defined here; Fa explains the male-female spectral tilt differences Hanson documents. (Strong)
+- [[Henrich_2001_SpectralOqAsymmetry]] — Henrich examines spectral correlates of OQ and asymmetry coefficient, directly related to this paper's Rk and Ra parameters. (Strong)

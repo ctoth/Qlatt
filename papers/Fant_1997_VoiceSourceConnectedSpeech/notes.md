@@ -279,6 +279,7 @@ Ee(t) contour:
 ### New Leads (Not Yet in Collection)
 - **Fant (1995)** — "The LF-model revisited" — More detailed treatment of transformed parameters and frequency domain analysis. Provides deeper background for Rd parameter.
 - **Gobl (1988)** — "Voice source dynamics in connected speech" — Detailed data on glottal parameter variations across segments. Source for much of the coarticulation data.
+- **Strik & Boves (1992a,b)** — F0/intensity/subglottal pressure relationships; provides empirical basis for the Ee-F0 covariation rules
 
 ### Cited By (in Collection)
 - [[Gobl_2003_VoiceQualityEmotion]] — uses Rd framework for characterizing voice quality in emotional speech
@@ -286,3 +287,9 @@ Ee(t) contour:
 - [[Kreiman_2007_GlottalSourceSpectrum]] — uses Rd/R parameters from this paper for PCA of glottal source measures
 - [[Kreiman_2012_VoiceQualityHarmonicOQ]] — builds on Rd parameter framework for voice quality characterization
 - [[Lu_Smith_GlottalSourceSingingVoice]] — applies Rd voice source parameterization to singing voice analysis
+- [[Muthukumar_2013_IterativeLFParameterFitting]] — uses LF parameters and Rd framework for iterative fitting
+- [[Bonada_2008_VoiceSynthesisSpectralModels]] — references voice source parameterization for spectral synthesis
+
+### Conceptual Links (not citation-based)
+- [[Feugere_2017_CantorDigitalis]] — Feugère implements a real-time singing synthesizer using open quotient and spectral tilt parameters that directly correspond to this paper's Rd-derived OQ and Fa values. The vocal effort mapping (Eq. 16-19 in Feugère) parallels Fant's six-stage production model. (Strong)
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — Iseli documents age/sex effects on voice source spectral measures (H1*-H2*, H1*-A3*) that map directly to Rd variation across speaker populations. (Moderate)

@@ -187,6 +187,7 @@ This paper has moderate relevance to the Qlatt synthesizer. Its primary value is
 - [[Borkowska_2011_F0DominanceAttractiveness]] - Related work on F0 and dominance/attractiveness
 - [[Belin_2017_SoundOfTrustworthiness]] - Voice perception and social judgments
 - [[Belyk_2014_AcousticValenceEmotion]] - Acoustic dimensions of emotional valence
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] - Cited for voice-body configuration link; provides the empirical correlation data (voice attractiveness vs SHR/WHR) that this paper's body size projection framework explains theoretically
 
 ### New Leads (Not Yet in Collection)
 - Chuenwattanapranithi, S., Xu, Y., Thipakorn, B., Maneewongvatana, S. (2008) "Encoding emotions in speech with the size code" Phonetica 65: 210-230 -- directly tests the size code hypothesis for emotional speech

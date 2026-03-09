@@ -1,0 +1,4 @@
+---
+tags: [voice-attractiveness, speaker-profiling, sexual-dimorphism, mate-selection]
+---
+This paper demonstrates that opposite-sex ratings of voice attractiveness predict sexually dimorphic body configuration (shoulder-to-hip ratio in males, waist-to-hip ratio in females) and multiple measures of sexual behavior, including age of first intercourse and number of partners. The key finding is that voice serves as a multidimensional fitness indicator, with the hormonal link between vocal development and body morphology providing the proposed mechanism, and that voice attractiveness is a stronger predictor of female sexual behavior than body shape alone. For speech synthesis speaker profiling, this supports the principle that coordinated acoustic parameter settings encode biologically meaningful speaker characteristics, though the paper does not identify which specific acoustic features drive the attractiveness ratings.

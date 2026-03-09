@@ -106,6 +106,7 @@ Note: The CPP differences are small in absolute terms (~0.08 for males, ~0.06 fo
 - [[Klatt_1990_VoiceQualityVariations]] -- provides the synthesis parameters (AV, AH, TL, jitter) that control the harmonic organization this paper measures via CPP
 - [[Gobl_2003_VoiceQualityEmotion]] -- modal voice quality settings maximize the harmonic clarity that correlates with attractiveness here
 - [[Childers_Lee_1991_VoiceQualityFactors]] -- voice quality analysis methods including harmonics-based measures
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] -- cited as motivation; establishes that voice attractiveness predicts sexual behavior and body configuration, providing the behavioral rationale for investigating acoustic correlates of sexually appealing voices
 
 ### Conceptual Links (not citation-based)
 - [[Fant_1985_LFModelGlottalFlow]] -- the LF glottal source model determines harmonic structure; cleaner LF pulses (lower RA, higher EE) would produce higher CPP

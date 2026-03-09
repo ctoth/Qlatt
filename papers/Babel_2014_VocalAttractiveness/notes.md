@@ -205,6 +205,7 @@ This paper has marginal direct relevance to the Qlatt synthesizer's core TTS fun
 
 ### Conceptual Links (not citation-based)
 - [[Liu_2011_FemaleVoiceAttractiveness]] — Perception experiment independently confirms breathiness as the dominant attractiveness cue for female voices (F(2,18) = 73.71), with voice quality effect size far exceeding formant shift and pitch. Both papers converge on voice quality > F0 > formants as the effect size ordering for female vocal attractiveness.
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — Hughes shows voice attractiveness predicts body configuration (SHR/WHR) and sexual behavior but does not identify the acoustic features driving ratings; Babel provides those acoustic features (breathiness, apparent VTL), together forming the perception-to-body link chain
 
 ### Supersedes or Recontextualizes
 - None — this paper complements rather than supersedes existing collection entries.

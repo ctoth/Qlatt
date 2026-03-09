@@ -148,6 +148,9 @@ This paper provides empirical data on the relationship between female voice acou
 ### Now in Collection (previously listed as leads)
 - [[Fitch_1999_VocalTractMorphology]] - MRI study of 129 subjects ages 2-25 establishing VTL-body size regressions (height r=0.926, log weight r=0.941) and documenting that male-female VTL differences arise at puberty through disproportionate pharyngeal elongation. Provides the anatomical basis for the formant dispersion-height relationship that Collins 2003 confirmed acoustically.
 
+### Cited By (in Collection)
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — cites Collins 2003 for the vocal-body size relationship; refines the finding by showing the relationship is driven by WHR (not BMI) and extends to males (SHR) and sexual behavior outcomes
+
 ### Supersedes or Recontextualizes
 None - this paper extends prior work on vocal attractiveness but does not correct or supersede existing collection papers.
 

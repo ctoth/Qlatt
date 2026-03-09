@@ -184,6 +184,7 @@ b10: Die wird auf dem Platz sein, wo wir sie immer hinlegen.
 
 ### Already in Collection
 - [[Banse_1996_VocalEmotionAcousticProfiles]]
+- [[Weninger_2013_AcousticsEmotionAudio]] — Uses EMO-DB as a reference emotional speech corpus; Weninger's GEMEP database serves a similar role for enacted emotion analysis.
 
 ### Cited By (in Collection)
 - [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — cites this as ref [16] for the EmoDB corpus; builds on this work's emotional speech data to develop rule-based phonation type formulas for Klatt synthesis

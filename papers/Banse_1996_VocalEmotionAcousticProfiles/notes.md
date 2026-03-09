@@ -319,7 +319,7 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Scherer_TaskLoadStressAcoustics]] — Same senior author (Scherer). This task-load/stress paper extends Banse & Scherer's emotion work by separating cognitive load from psychological stress as distinct vocal influences, showing load affects rate/energy gradients while stress affects F0/spectral distribution.
 
 ### Conceptual Links (not citation-based)
 - [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — Validates that F0 SD (pitch sigma), which Banse uses as one of 29 emotion-discriminating parameters (SdF0, loading .42 on PC1), is the strongest acoustic correlate of perceived vocal variability (r = .927). This provides perceptual grounding: when Banse reports increased SdF0 for high-arousal emotions, Cumbers shows listeners reliably perceive that increased variability.

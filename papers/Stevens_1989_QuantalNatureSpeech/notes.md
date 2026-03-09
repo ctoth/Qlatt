@@ -354,3 +354,4 @@ When spacing > 3.5 Bark:
 
 ### Conceptual Links (not citation-based)
 - [[Peterson_Barney_1952_VowelControl]] — P&B's empirical vowel space (Fig. 8) shows clear clusters with overlap between adjacent vowels; quantal theory provides the articulatory-acoustic mechanism explaining this pattern — stable articulatory plateaus produce well-separated acoustic clusters (the clear vowel regions), while transition zones between plateaus produce the overlapping regions where listeners confuse adjacent vowels
+- [[Titze_2014_BistableVocalFoldAdduction]] — Strong. The bistability in glottal geometry is a quantal phenomenon: small changes in convergence angle near the rectangular configuration produce large, abrupt changes in intraglottal pressure and register state, paralleling Stevens's quantal relations between articulation and acoustics.

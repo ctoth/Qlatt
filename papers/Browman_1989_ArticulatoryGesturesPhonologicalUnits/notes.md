@@ -214,6 +214,7 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 
 ### Already in Collection
 - [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] - extends and elaborates this 1989 framework with additional data and refinements
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — the computational engine for AP; formalizes the task-dynamic model with tract-variable dynamics, gestural blending, and transformation gating that implements the gestural primitives defined in this paper
 
 ### New Leads (Not Yet in Collection)
 - Saltzman & Kelso (1987) "Skilled actions: a task dynamic approach" - the formal dynamical model underlying gesture definitions

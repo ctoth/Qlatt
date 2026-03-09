@@ -129,6 +129,21 @@ The paper does NOT provide formant data, which would be needed to parameterize v
 - [ ] Why do some participants not achieve male-typical F0 despite adequate T levels? (AR sensitivity, CAG repeat length?)
 - [ ] How would formant frequencies change during the same treatment course?
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Klatt_1990_VoiceQualityVariations]] — cited for analysis of voice quality variations between male and female talkers; provides the source parameter framework for the sex differences in breathiness and spectral tilt that accompany the F0 changes documented here
+- [[Holmberg_1988_GlottalAirflowPressure]] — cited for glottal airflow and transglottal pressure measurements for male and female speakers; provides the source-side data for the physiological range Nygren's participants traverse
+- [[Fitch_1999_VocalTractMorphology]] — cited for vocal tract morphology and development; Nygren notes that VTL affects formant frequencies and gender perception but does not measure formants
+
+### Cited By (in Collection)
+- [[Fitch_1999_VocalTractMorphology]] — lists this paper in its "Cited By" section for vocal tract morphology reference
+
+### Conceptual Links (not citation-based)
+- [[Simpson_2009_PhoneticGenderDifferences]] — Simpson reviews the full spectrum of phonetic sex differences (F0, formants, VOT, vowel space) that Nygren's participants transition through; the F0 trajectory data here demonstrates that these differences exist on a continuum, not as a binary. (Strong)
+- [[Collins_2003_VocalVisualAttractiveness]] — Collins shows that F0 correlates with perceived masculinity and attractiveness; Nygren's data showing that lower F0 correlates with higher voice satisfaction (r_s = -0.68) in trans men parallels Collins's finding for cis men. (Moderate)
+- [[Babel_2014_VocalAttractiveness]] — Babel's nuanced view of vocal attractiveness provides context for understanding why some of Nygren's participants with higher F0 values still reported satisfaction — attractiveness involves more than F0 alone. (Moderate)
+
 ## Related Work Worth Reading
 - Cosyns et al. 2014 (Laryngoscope) -- cross-sectional study of 38 trans men after long-term T, includes F0 and formant data
 - Hodges-Simeon et al. 2021 (Scientific Reports) -- measures F0 and estimated VTL from formants in 30 trans men

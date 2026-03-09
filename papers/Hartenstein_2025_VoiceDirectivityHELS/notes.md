@@ -124,7 +124,7 @@ The frequency-dependent directivity patterns provide empirical data for acoustic
 ## Collection Cross-References
 
 ### Already in Collection
-- (none — no cited references match current collection entries)
+- [[Porschmann_2024_VoiceDirectivityGroundReflection]] — uses the same directivity datasets (Porschmann & Arend 2023); Porschmann provides phoneme-class-specific vertical directivity analysis that complements Hartenstein's general spherical harmonic reconstruction
 
 ### Cited By (in Collection)
 - (none found)

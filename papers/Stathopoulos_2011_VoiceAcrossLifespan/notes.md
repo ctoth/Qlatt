@@ -151,6 +151,26 @@ This paper provides the empirical basis for age-dependent voice parameter scalin
 - [ ] How do these F0 values compare with Peterson & Barney (1952) adult data already in our inventory?
 - [ ] Should SPL be modeled in the synthesizer, or is it purely a gain parameter?
 
+## Collection Cross-References
+
+### Already in Collection (cited or citing)
+- [[Peterson_Barney_1952_VowelControl]] — Stathopoulos cites Peterson & Barney for canonical adult vowel F0 data. Their adult male mean F0 (~132 Hz) and female mean F0 (~223 Hz) serve as reference points for Stathopoulos's lifespan trajectories.
+- [[Klatt_1990_VoiceQualityVariations]] — Cited for voice quality analysis framework. Stathopoulos's SNR measure relates to Klatt & Klatt's breathiness measures for female speakers.
+- [[Holmberg_1988_GlottalAirflowPressure]] — Cited for glottal airflow measurements across vocal intensities, which complement the SPL data here.
+- [[Hanson_1999_GlottalMaleSpeakers]] — Cited for male glottal characteristics; Stathopoulos's male SNR findings extend Hanson's work to the full age range.
+- [[Titze_1989_MaleFemaleVoices]] — Cited for physiological sex differences in voice; Stathopoulos's data provides the empirical F0/SPL/SNR trajectories that map onto Titze's anatomical explanations.
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — Kent's bandwidth data across ages complements Stathopoulos's F0/SPL/SNR age data.
+
+### Cited By (in Collection)
+- [[Lee_2019_AcousticVoiceVariation]] — Cites Stathopoulos for age-related voice acoustic data.
+- [[Isshiki_1964_VoiceIntensityRegulation]] — Cross-referenced for SPL measurements across ages.
+- [[Fitch_1999_VocalTractMorphology]] — Cross-referenced for acoustic lifespan data complementing Fitch's anatomical VTL growth data.
+
+### Conceptual Links (not citation-based)
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — Strong. Iseli measures H1*-H2*, H1*-A3* across ages 8-39 by sex; Stathopoulos provides the F0/SPL/SNR counterpart across ages 4-93. Together they provide source-side and output-side age/sex acoustic profiles.
+- [[Zhang_2021_LaryngealSizeSexDifferences]] — Moderate. Zhang's simulations of how vocal fold length affects SPL provide structural explanations for Stathopoulos's finding that sex is not a significant SPL predictor despite anatomical differences.
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — Moderate. Keating examines similarity among female voices; Stathopoulos's female F0 and SNR variability data (U-shaped COVAR curves) inform expectations about how much female voices cluster by age group.
+
 ## Related Work Worth Reading
 - Huber et al. (1999) — F0 and SPL data for ages 4-25 (subset of this data)
 - Linville (1996, 2002) — Perceptual indices of aging voice

@@ -227,3 +227,4 @@ Random Noise → HP Filter → Amplitude Modulation
 
 ### Conceptual Links (not citation-based)
 - **Larrouy-Maestri_2024_EmotionalProsody** — 30-year emotional prosody review identifies voice quality categories (breathy, tense, harsh, creaky) as critical for encoding emotion, particularly valence. Childers & Lee provide the physiological glottal parameters (OQ, SQ, closure abruptness, noise) that produce these voice qualities, connecting emotion-level descriptions to source-level production mechanisms.
+- [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Titze explains the geometric origin of the OQ and speed quotient differences between modal and falsetto that Childers & Lee measure: convergent glottis (modal) produces lower OQ and sharper closure, divergent glottis (falsetto) produces higher OQ and softer closure.

@@ -297,6 +297,7 @@ Directly relevant to Qlatt's intensity/loudness control system. The paper provid
 **Source-filter interaction and spectral modeling:**
 - [[Henrich_2001_SpectralOqAsymmetry]] -- derives analytical spectral formulas for LF and other glottal models that provide a more rigorous version of the one-parameter source spectrum (Eq. 23) used here; shows that $Q_o$ and asymmetry coefficient jointly determine H1-H2, relevant to mapping between this paper's waveform parameters and spectral measures
 - [[Fant_1985_LFModelGlottalFlow]] -- the LF four-parameter model provides the standard parameterization for the glottal waveform features ($\dot{u}_m$, $Q_o$, $Q_s$) that this paper relates to lung pressure; mapping LF parameters (Ee, Ra, Rk, Rg) to the empirical relations in Eqs. 33-36 would connect the two frameworks
+- [[Titze_2014_BistableVocalFoldAdduction]] — Strong. The 2014 paper shows that phonation threshold pressure depends on glottal convergence angle (area ratio a1/a2), adding a geometric dimension to the intensity model: register state changes the baseline $P_{th}$ from which excess pressure (and thus intensity) is measured.
 
 **Speaker type differences:**
 - [[Titze_1989_MaleFemaleVoices]] -- provides the physiological explanation (scale factors alpha, beta) for why male and female empirical constants differ in Table I; the 1989 paper predicts the anatomical basis, the 1992 paper measures the acoustic consequence

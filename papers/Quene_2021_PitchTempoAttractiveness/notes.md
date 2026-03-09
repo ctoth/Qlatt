@@ -95,6 +95,23 @@ Provides empirical constraints for voice parameter selection in TTS: the asymmet
 - [ ] Is the asymmetry (only negative deviations matter) universal or culture-specific?
 - [ ] How do these attractiveness effects interact with intelligibility?
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Collins_2003_VocalVisualAttractiveness]] — cited as Collins 2000; foundational study on men's voices and women's mate choices that this paper extends by adding tempo manipulation
+- [[Simpson_2009_PhoneticGenderDifferences]] — cited for phonetic sex differences; provides the broader context of sex-linked acoustic variation within which pitch attractiveness operates
+- [[Babel_2014_VocalAttractiveness]] — cited for a more nuanced view of vocal attractiveness; Babel shows attractiveness depends on multiple acoustic dimensions, consistent with Quene's finding that pitch and tempo contribute independently
+- [[Holmberg_1988_GlottalAirflowPressure]] — cited for glottal airflow measurements in male and female speakers; provides the source-level data underlying the F0 differences manipulated here
+
+### Cited By (in Collection)
+- [[Weiss_2020_VoiceAttractiveness]] — Quene is a contributor to this edited volume; the pitch/tempo findings are discussed in the broader attractiveness framework
+
+### Conceptual Links (not citation-based)
+- [[Schild_2019_AttractiveVoiceFormantF0]] — Schild uses PCA on voice quality measures including F0 and formants to predict attractiveness; Quene's finding that F0 has a larger effect than tempo on attractiveness aligns with Schild's finding that the F0-loaded component is the strongest predictor. (Strong)
+- [[Liu_2011_FemaleVoiceAttractiveness]] — Liu studies female voice attractiveness via breathiness and size projection; together with Quene's male voice study, the two papers suggest that attractiveness operates through different acoustic channels for male voices (F0, tempo) vs. female voices (breathiness, formant spacing). (Moderate)
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — Hughes links voice attractiveness to sexual behavior and body morphology; provides the evolutionary context for why the pitch-attractiveness relationship Quene documents exists. (Moderate)
+- [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — Cumbers shows that F0 variability affects voice perception; Quene's finding that only negative pitch deviations reduce attractiveness suggests a ceiling effect that interacts with variability. (Moderate)
+
 ## Related Work Worth Reading
 - Collins 2000 — Men's voices and women's choices (already in collection as Collins_2003_VocalVisualAttractiveness)
 - Feinberg et al. 2005 — Fundamental and formant frequency effects on male voice attractiveness

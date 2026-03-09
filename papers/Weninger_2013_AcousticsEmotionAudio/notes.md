@@ -194,6 +194,29 @@ The paper confirms and quantifies specific acoustic-to-affect mappings useful fo
 
 The paper argues (following Scherer 1991, 2013) that speech and music co-evolved from primitive affect bursts, sharing a common production mechanism (vocalization). The high cross-domain consistency for arousal may reflect this shared evolutionary origin — loudness/energy as a universal activation signal. The inconsistency for valence may reflect later divergence as speech and music took on more specialized representational functions.
 
+## Collection Cross-References
+
+### Already in Collection (cited or citing)
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — EMO-DB used as reference emotional speech corpus; GEMEP database in this paper serves a similar role for enacted emotion.
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — Cites Weninger 2013; GeMAPS feature set is a reduced, standardized version of the ComParE features used here. Weninger's cross-domain feature analysis directly informed GeMAPS parameter selection.
+- [[Scherer_2001_VocalEmotionCrossCultural]] — Scherer is co-author; his appraisal theory framework underlies the arousal/valence dimensional model used here.
+
+### Cited By (in Collection)
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — Cites as ref [24] for cross-domain acoustic emotion features.
+- [[KaczmarekMajer_2024_AcousticMarkersBipolar]] — Cites the openSMILE tool co-developed by Weninger/Eyben.
+- [[Staib_2021_CorticalVoiceProcessing]] — Cites the openSMILE development work.
+- [[Wiethoff_2008_CerebralEmotionalProsody]] — Cross-referenced for arousal correlates convergence.
+
+### Conceptual Links (not citation-based)
+- [[Gobl_2003_VoiceQualityEmotion]] — Strong. Gobl provides synthesis-side voice quality parameters for emotions (breathy, tense, etc.); this paper provides analysis-side acoustic features that predict emotion perception. Together they bridge analysis-to-synthesis for emotional voice.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Strong. Burkhardt synthesizes emotional speech; Weninger identifies which acoustic features best predict arousal (loudness, spectral flux) vs valence (F0, spectral shape), directly informing synthesis parameter priorities.
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Strong. Banse provides emotion-specific acoustic profiles for 14 categories; Weninger provides the dimensional (arousal/valence) decomposition showing which features generalize. The two approaches are complementary.
+- [[Scherer_TaskLoadStressAcoustics]] — Moderate. Scherer separates cognitive load from stress effects; Weninger's arousal dimension subsumes both but does not distinguish them. Scherer's granular distinction adds nuance to Weninger's dimensional model.
+- [[Grollero_2023_CoreAffectVocalBursts]] — Moderate. Grollero examines arousal/valence in vocal bursts (non-speech); Weninger includes environmental sounds as a third domain alongside speech and music, with similar cross-domain arousal consistency findings.
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — Moderate. Goudbeek shows valence requires spectral balance measures (H1-H2, spectral slope) beyond F0; Weninger confirms valence is harder than arousal to predict and domain-specific.
+- [[Belyk_2014_AcousticValenceEmotion]] — Moderate. Belyk examines acoustic valence encoding; Weninger's finding of inverse valence correlations across domains provides an explanation for why valence recognition is harder.
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]] — Moderate. Cummings examines glottal source parameters across emotions; Weninger's feature set includes voicing-related features (HNR, jitter, shimmer) but finds these less predictive than energy/spectral features for arousal.
+
 ## References of interest
 
 - Burkhardt et al. 2005 — German emotional speech database (EMO-DB)

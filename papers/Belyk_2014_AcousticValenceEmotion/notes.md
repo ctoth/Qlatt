@@ -207,3 +207,4 @@ This paper is directly relevant for implementing **emotion-dependent prosody rul
 
 ### Conceptual Links (not citation-based)
 - [[Grollero_2023_CoreAffectVocalBursts]] — Grollero demonstrates a V-shaped valence-arousal relationship in vocal bursts (quadratic R^2=0.38 vs linear R^2=0.17), which may emerge from the family-specific expression rules identified here: different emotion families use different pitch-loudness strategies for positive and negative valence, converging on similar arousal ratings at extreme valences
+- [[Weninger_2013_AcousticsEmotionAudio]] — Moderate. Weninger's finding that valence features have inverse correlations across speech, music, and sound domains provides cross-domain evidence for Belyk's family-specific valence encoding: the inverse correlations may arise precisely because different emotion families dominate different domains.

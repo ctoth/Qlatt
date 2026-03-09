@@ -228,3 +228,7 @@ Units: durations in samples (8 kHz), slopes in (normalized amplitude)/samples
 - **Rosenberg (1971)** - "Effect of glottal pulse shape on the quality of natural vowels" - Classic paper on perceptual effects of glottal shape; relevant for understanding which shape changes matter for synthesis quality.
 - **Wong et al. (1979)** - "Least squares glottal inverse filtering" - The closed-phase inverse filtering method used in this paper; useful for implementing glottal extraction to validate synthesis.
 - **Cummings (1992)** - PhD thesis - More complete discussion of the work, likely contains additional detail on the extraction method and style definitions not in the JASA paper.
+
+### Conceptual Links (not citation-based)
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci provides the suprasegmental prosodic parameters for emotional synthesis (pitch, rate, intonation patterns) while Cummings provides the voice source parameters. Together they cover complementary aspects of emotional speech: Mozziconacci's prosody-only approach achieves 63% recognition, and she explicitly notes that sadness/fear require the voice source cues that Cummings documents. (Strong)
+- [[Weninger_2013_AcousticsEmotionAudio]] — Moderate. Weninger's feature set includes voicing-related features (HNR, jitter, shimmer) but finds these less predictive than energy/spectral features for arousal; Cummings's glottal source parameters (open quotient, slope, asymmetry) may better capture the voice quality variation that Weninger's feature set underrepresents.

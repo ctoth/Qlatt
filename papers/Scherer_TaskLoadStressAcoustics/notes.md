@@ -77,6 +77,20 @@ This paper provides the key distinction between cognitive load and psychological
 - [ ] Do the spectral effects correspond to specific formant changes or global tilt?
 - [ ] How do these load/stress effects interact with emotional speech effects?
 
+## Collection Cross-References
+
+### Already in Collection (cited or citing)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Same senior author (Scherer). Banse & Scherer 1996 established acoustic profiles for 14 emotions; this paper extends their work by separating cognitive load from psychological stress as distinct influences on voice.
+- [[Scherer_2001_VocalEmotionCrossCultural]] — Same author. The 2001 cross-cultural emotion study provides the broader theoretical framework (appraisal theory) within which this task-load/stress study operates.
+
+### Conceptual Links (not citation-based)
+- [[Gobl_2003_VoiceQualityEmotion]] — Strong. Gobl maps voice quality dimensions (breathy, tense, etc.) to emotional categories. This paper's finding that stress shifts spectral energy upward (less below 500 Hz, more 500-1600 Hz) corresponds to increased vocal tension, connecting to Gobl's tense voice quality profile for negative emotions.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Strong. Burkhardt synthesizes emotional speech using formant parameters. This paper's load/stress acoustic distinctions (rate vs F0/spectral) provide synthesis guidance: cognitive load presets should modify rate and energy envelopes, while stress presets should modify F0 and spectral tilt.
+- [[Weninger_2013_AcousticsEmotionAudio]] — Moderate. Weninger finds loudness is the primary cross-domain arousal correlate. This paper's finding that energy attack/decay gradients change with cognitive load (but not stress) suggests energy dynamics encode load specifically, while F0 and spectral distribution encode stress/arousal.
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Moderate. Mozziconacci maps Dutch emotion prosody patterns; this paper adds the critical distinction that F0 changes reflect psychological stress rather than cognitive load.
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — Moderate. Zei Pollermann identifies acoustic patterns across emotion categories; this paper's load-vs-stress distinction provides a mechanistic decomposition of what drives those patterns.
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — Moderate. GeMAPS includes many of the same acoustic features (F0, energy, spectral) used here; this paper's finding that different features index load vs stress informs which GeMAPS features to use for each dimension.
+
 ## Related Work Worth Reading
 - Scherer, K. R. (1986). Vocal affect expression: A review and a model for future research. Psych. Bull., 99: 143-165.
 - Banse, R. and Scherer, K. R. (1996). Acoustic emotion profiles. Already in collection.

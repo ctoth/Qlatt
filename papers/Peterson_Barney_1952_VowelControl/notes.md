@@ -209,6 +209,9 @@ const vowelTargets = {
 ### Supersedes or Recontextualizes
 - [[Hillenbrand_1995_VowelAcoustics]] — directly extends P&B with modern digital recording, LPC analysis, duration measurements, and spectral change data that P&B lacked; shows F1-F2 crowding and lower children's F0 than P&B reported
 
+### Conceptual Links (not citation-based)
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos extends the age picture beyond P&B's adult data: while P&B established canonical adult vowel F0 values (~132 Hz male, ~223 Hz female), Stathopoulos provides the full lifespan F0 trajectory (ages 4-93) showing nonlinear curves with the adult values P&B measured as one point on that trajectory.
+
 ### New Leads (Not Yet in Collection)
 - **Potter & Steinberg (1950)**: Foundational work on the sound spectrograph - the measurement instrument used throughout this paper. Essential for understanding the acoustic measurement methodology.
 - **Stevens & Volkman (1940)**: Establishes the mel scale for frequency perception, which Peterson & Barney use for plotting their vowel loop diagrams - critical for understanding auditory frequency scaling.

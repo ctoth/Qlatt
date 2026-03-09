@@ -213,6 +213,7 @@ This review provides the physiological grounding for voice source control in the
 - [[Doval_2003_VoiceSourceCALM]] — CALM model provides the spectral-domain source approach Zhang advocates, treating the voice source as a mixed causal-anticausal filter rather than a time-domain waveform.
 - [[Doval_2006_SpectrumGlottalFlowModels]] — Analytical spectral formulas for glottal models that formalize the two-slope spectral structure Zhang describes in Sec. III.A.
 - [[Perrotin_2021_LF_LinearFilter_Equivalence]] — Efficient linear-filter LF implementations relevant to Zhang's call for computationally efficient reduced-order models.
+- [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Titze's bistable adduction model demonstrates the quantal register transition behavior that Zhang reviews in the context of vocal fold eigenmode coupling; the two-spring model provides a simplified framework for the biomechanics Zhang covers.
 
 ### New Leads (Not Yet in Collection)
 - **Kreiman et al. (2014)** — "Foundations of Voice Studies" — Comprehensive reference for voice perception and source characteristics

@@ -215,6 +215,7 @@ The functional framework offers:
 ### Already in Collection
 - [[Klatt_1976_SegmentalDuration]]
 - [[Recasens_2003_ArticulationSoundChangeRomance]]
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — cited for task-dynamic timing framework; the gestural score concept underlies the prosodic timing phenomena analyzed here
 
 ### New Leads (Not Yet in Collection)
 - **Turk, A.E., & Shattuck-Hufnagel, S., 2000** - "Word-boundary-related duration patterns in English" - Critical for understanding domain-edge (word-initial and phrase-final) lengthening effects that are implementable in TTS.

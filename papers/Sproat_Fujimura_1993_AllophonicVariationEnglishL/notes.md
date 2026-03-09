@@ -176,6 +176,7 @@ For the Qlatt declarative frontend, the key implementation is:
 - [[Volenec_2015_Coarticulation]] - Reviews coarticulation frameworks. Sproat & Fujimura's /l/ data exemplifies how coarticulation interacts with allophonic variation.
 - [[Recasens_1997_LingualCoarticulationDAC]] - DAC model predicts coarticulation based on tongue dorsum involvement. Dark /l/ has high DAC value, explaining its strong coarticulatory resistance.
 - [[Hertz_1991_StreamsPhonesTransitions]] - Referenced for multi-stream phonological representation
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — the task-dynamic model providing the formal gestural overlap framework that Sproat & Fujimura's two-gesture /l/ analysis depends on
 
 ### New Leads (Not Yet in Collection)
 - Giles & Moll (1975) - Cinefluorographic /l/ study, foundational articulatory data

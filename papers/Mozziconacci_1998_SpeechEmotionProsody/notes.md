@@ -256,6 +256,27 @@ This thesis is directly applicable to the Qlatt Klatt formant synthesizer:
 - [ ] How does intensity (AV parameter) vary with emotion?
 - [ ] Are the Dutch-derived patterns applicable to English synthesis?
 
+## Collection Cross-References
+
+### Already in Collection
+- [[Pierrehumbert_1980_EnglishIntonation]] — cited for autosegmental-metrical intonation theory; Mozziconacci's IPO framework is an alternative approach to the same problem of F0 contour representation
+- [[Klatt_1976_SegmentalDuration]] — cited for segmental duration rules; Mozziconacci's emotion-specific duration multipliers build on Klatt's neutral baseline
+- [[Klatt_1990_VoiceQualityVariations]] — relevant to the thesis's finding that sadness and fear require voice quality cues beyond prosody; Klatt & Klatt provide the source parameter framework (AH, OQ, TL) for implementing those cues
+- [[Fujisaki_InformationProsodyModeling]] — cited for the Fujisaki model of F0 generation; Mozziconacci's baseline declination approach is compatible with Fujisaki's phrase/accent components
+
+### Cited By (in Collection)
+- [[Mozziconacci_2002_ProsodyEmotions]] — same author's follow-up; develops the pitch contour type vs. implementation distinction
+- [[Gobl_2003_VoiceQualityEmotion]] — cites this for the finding that prosody alone is insufficient for sadness, motivating their voice quality study
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cites Mozziconacci (2002) for prosodic contour analysis methodology
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites this via Mozziconacci & Hermes (1999) for intonation pattern categorization of emotions
+
+### Conceptual Links (not citation-based)
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt provides Klatt parameter formulas for voice quality types (breathy, tense, harsh) that could implement the voice quality cues Mozziconacci identifies as essential for sadness and fear but does not parameterize. Together they cover the full prosody + voice quality space for emotional synthesis. (Strong)
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]] — Cummings analyzes glottal source parameters in emotional speech, providing the voice source data that Mozziconacci's prosody-only approach acknowledges is missing. The two papers are complementary: Mozziconacci for suprasegmental parameters, Cummings for source parameters. (Strong)
+- [[Scherer_2001_VocalEmotionCrossCultural]] — Scherer's cross-cultural emotion recognition study (66% accuracy across 9 countries) provides external validation for the universality question Mozziconacci raises about her Dutch-specific findings. (Moderate)
+- [[OShaughnessy_1976_F0_Prosody]] — O'Shaughnessy's F0 declination model provides a formal framework for the baseline declination Mozziconacci uses (~3.5 st/s) as the foundation of her emotional pitch contour generation. (Moderate)
+- [[Grollero_2023_CoreAffectVocalBursts]] — Grollero's finding that arousal dominates vocal expression while valence is secondary aligns with Mozziconacci's observation that the most recognizable emotions (joy, boredom) are those with the most extreme arousal-correlated parameters (speech rate, pitch level). (Moderate)
+
 ## Related Work Worth Reading
 
 From the thesis bibliography:

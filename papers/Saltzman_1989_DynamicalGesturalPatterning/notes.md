@@ -288,15 +288,30 @@ The gestural score concept maps naturally to Qlatt's track structure:
 
 ---
 
-## Related Work in Collection
+## Collection Cross-References
 
-- **Ohman_1966_CoarticulationVCV** — Empirical coarticulation data that this model explains
-- **Recasens_1997_LingualCoarticulationDAC** — DAC model of coarticulation resistance
-- **Sering_2020_AnticipatoryCoarticulation** — Neural network approach to anticipatory coarticulation using VocalTractLab
-- **Liberman_Mattingly_1985_MotorTheory** — Motor theory context for gestural primitives
-- **Fant_1960_AcousticTheorySpeechProduction** — Source-filter model that provides the acoustic interpretation
-- **Kirkham_2025_DynamicalLawsSpeechGestures** — Uses SINDy on X-ray microbeam data to discover that articulatory gestures are actually under-damped ($b \ll 2\sqrt{k}$), not critically damped as assumed here; ~1/3 of trajectories also require a nonlinear cubic restoring force term
+### Already in Collection
+- [[Ohman_1966_CoarticulationVCV]] — cited for classic VCV coarticulation data; this model explains Ohman's observations through gestural overlap
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for source-filter theory; provides the acoustic interpretation of the articulatory dynamics modeled here
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the target synthesis system; gestural scores could drive Klatt parameter trajectories through an articulatory-to-acoustic mapping
+- [[Liberman_Mattingly_1985_MotorTheory]] — cited for motor theory of speech perception; gestural primitives are the "intended gestures" that motor theory posits listeners recover
+- [[Recasens_1997_LingualCoarticulationDAC]] — the DAC model of coarticulation resistance offers a complementary approach; DAC quantifies what this model explains through gestural overlap on same vs. different tract variables
 
----
+### Cited By (in Collection)
+- [[Kirkham_2025_DynamicalLawsSpeechGestures]] — tests and extends this model using SINDy on X-ray microbeam data; finds gestures are under-damped ($b \ll 2\sqrt{k}$), not critically damped as assumed here
+- [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] — replaces the linear harmonic oscillator with a nonlinear anharmonic oscillator ($V(x) = kx^2/2 - dx^4/4$), retaining step activation and autonomy
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] — companion paper defining gestures as phonological primitives; cites Saltzman & Kelso (1987) for the formal dynamical model
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — extends and elaborates the gestural framework with additional data; lists Saltzman & Munhall (1989) as a foundational new lead
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — comprehensive 21st-century appraisal of AP and task dynamics
+- [[Volenec_2015_Coarticulation]] — reviews coarticulation theory including the coproduction/AP framework from this paper
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cites this for the gestural timing account of English /l/ allophony
+- [[White_2014_ProsodicTimingFunction]] — cites this for task-dynamic timing in the context of prosodic structure
+- [[Kaburagi_2007_VocalTractSpectrum]] — cites this for articulatory dynamics
 
-**See also:** Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem — proposes replacing the linear harmonic oscillator with a nonlinear anharmonic oscillator ($V(x) = kx^2/2 - dx^4/4$), retaining step activation and autonomy while correctly predicting velocity profile symmetry, nonlinear amplitude-velocity covariation, and the equation of constraint.
+### Conceptual Links (not citation-based)
+- [[Sering_2020_AnticipatoryCoarticulation]] — Sering uses a neural network trained on VocalTractLab to model anticipatory coarticulation; the gestural overlap mechanism proposed here is the theoretical basis for the coarticulation patterns Sering's network learns to reproduce. (Strong)
+- [[Fowler_2006_CoarticulationGesturePerception]] — Fowler's perceptual evidence for gesture-based coarticulation provides the perceptual validation for the coproduction model proposed here. (Moderate)
+
+### Supersedes or Recontextualizes
+- [[Kirkham_2025_DynamicalLawsSpeechGestures]] — Kirkham's data-driven SINDy analysis finds the critical damping assumption is incorrect; actual dynamics are under-damped. This does not invalidate the gestural score framework but revises the core dynamical law.
+- [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] — proposes replacing the linear harmonic oscillator with a nonlinear anharmonic oscillator. The gestural score concept and blending equations remain unchanged.

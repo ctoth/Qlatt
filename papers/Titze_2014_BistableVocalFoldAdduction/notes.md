@@ -188,11 +188,22 @@ The paper suggests that register control requires coordinating multiple paramete
 | Fig. 9 | Area ratio vs pe/ps for increased top stiffness (CT activation, falsetto). Shows divergent tendency with stiff upper portion. |
 | Fig. 10 | (a) EGG comparison for modal and falsetto register. (b) Vocal fold adduction sketches showing medial surface shape correspondence to EGG. |
 
-## Connections to Other Papers in Collection
+## Collection Cross-References
 
-- **Childers & Lee 1991**: Voice quality factors (OQ, speed quotient) for modal/falsetto -- this paper explains the geometric origin of those differences
-- **Fant 1985 (LF model)**: The return phase parameter ta relates to closure abruptness, which Titze links to convergent vs divergent medial surface geometry
-- **Klatt 1990**: Voice quality variations -- bistability explains why register transitions can be abrupt rather than gradual
-- **Burkhardt 2009**: Falsetto voice quality parameters -- this paper provides the physical basis for why those parameters take the values they do
-- **Gobl 2003**: Voice quality and emotion -- register bistability constrains which voice quality transitions are physically smooth vs abrupt
-- **Stevens 1989 (Quantal theory)**: The bistability here is a quantal phenomenon -- small geometric changes produce large acoustic consequences near the rectangular configuration
+### Already in Collection (cited or citing)
+- [[Childers_Lee_1991_VoiceQualityFactors]] — Voice quality factors (OQ, speed quotient) for modal/falsetto; this paper explains the geometric origin of those differences.
+- [[Fant_1985_LFModelGlottalFlow]] — The LF return phase parameter ta relates to closure abruptness, which Titze links to convergent vs divergent medial surface geometry.
+- [[Klatt_1990_VoiceQualityVariations]] — Voice quality variations; bistability explains why register transitions can be abrupt rather than gradual.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Falsetto voice quality parameters; this paper provides the physical basis for why those parameters take the values they do.
+- [[Gobl_2003_VoiceQualityEmotion]] — Voice quality and emotion; register bistability constrains which voice quality transitions are physically smooth vs abrupt.
+- [[Stevens_1989_QuantalNatureSpeech]] — The bistability here is a quantal phenomenon; small geometric changes produce large acoustic consequences near the rectangular configuration.
+
+### Cited By (in Collection)
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — Cites Titze 2014 for the bistable adduction mechanism in the context of voice production mechanics.
+
+### Conceptual Links (not citation-based)
+- [[Titze_1989_MaleFemaleVoices]] — Strong. The 1989 paper documents male-female physiological voice differences (fold length, mass, stiffness); the 2014 paper explains how those stiffness differences create register behavior differences via the bistability mechanism.
+- [[Titze_1992_VocalIntensity]] — Strong. The vocal intensity model depends on subglottal pressure and glottal geometry; the 2014 paper shows how the same geometric variables (convergence angle, area ratio) create bistable register states that interact with intensity control.
+- [[Hanson_1999_GlottalMaleSpeakers]] — Moderate. Hanson's glottal source measurements (OQ, H1-H2) for male speakers reflect the convergent-glottis modal configuration described here; the bistability framework explains why those parameters cluster into distinct modal/falsetto groups rather than varying continuously.
+- [[Doval_2003_VoiceSourceCALM]] — Moderate. The CALM model parameterizes the glottal source; the bistability framework constrains which parameter combinations are physically realizable (convergent geometry produces certain OQ/tilt combinations that divergent geometry cannot).
+- [[Kreiman_2007_GlottalSourceSpectrum]] — Moderate. Kreiman's glottal source spectrum measurements should show discontinuities at register transitions, consistent with the bistable jump behavior described here.

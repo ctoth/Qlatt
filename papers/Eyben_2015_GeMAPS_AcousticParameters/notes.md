@@ -308,6 +308,8 @@ Key findings:
 - [[Banse_1996_VocalEmotionAcousticProfiles]]
 - [[Burkhardt_2005_GermanEmotionalSpeechDatabase]]
 - [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
+- [[Weninger_2013_AcousticsEmotionAudio]] — Cited as ref [24]. Weninger's cross-domain acoustic emotion analysis directly informed GeMAPS parameter selection; the ComParE feature set from which GeMAPS was distilled is described in this paper.
+- [[Scherer_TaskLoadStressAcoustics]] — Moderate. Scherer (co-author of Weninger 2013) provides the load-vs-stress distinction showing which acoustic features (energy gradients vs F0/spectral) index which cognitive/emotional state, informing GeMAPS feature priorities.
 
 ### Now in Collection (previously listed as leads)
 - [[Goudbeek_2010_ValencePotencyVocalEmotion]] — Analyzes GEMEP corpus showing arousal dominates via F0/intensity (R²=0.82), but valence is encoded in spectral slope and intensity variability (R²=0.22-0.49), and potency/control in F0 level, HNR, and low spectral dominance (R²=0.23-0.38). Directly informed GeMAPS's inclusion of spectral slope and HNR parameters.

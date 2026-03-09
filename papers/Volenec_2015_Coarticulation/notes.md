@@ -186,6 +186,7 @@ This chapter provides the theoretical framework for implementing coarticulation 
 - [[Sering_2020_AnticipatoryCoarticulation]] — relevant to anticipatory coarticulation in synthesis
 - [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — related to AP/coproduction framework
 - [[Liberman_Mattingly_1985_MotorTheory]] — related to gesture-based perception
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — the task-dynamic model that computationally implements the coproduction theory reviewed here; provides the formal equations for gestural blending and overlap
 
 ### New Leads (Not Yet in Collection)
 - Keating (1990b) "The window model of coarticulation" — primary theoretical framework for grammar-based coarticulation

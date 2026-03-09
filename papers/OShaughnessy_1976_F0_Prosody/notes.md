@@ -460,6 +460,9 @@ Papers cited that may be worth reading:
 - **Lea, Wayne (1973)** - "Segmental and Suprasegmental Influences on Fundamental Frequency Contours." Directly addresses how segmental features affect F0, critical for TTS implementation.
 - **Mattingly, Ignatius (1966-1970)** - Multiple publications on "Synthesis by Rule" establishing methods for rule-based prosodic synthesis, foundational for speech synthesis approaches.
 
+### Conceptual Links (not citation-based)
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci uses a declination baseline (~3.5 st/s) as the foundation for emotional pitch contour generation, citing the declination framework that O'Shaughnessy formalizes. O'Shaughnessy's neutral declination model becomes the baseline upon which Mozziconacci builds emotion-specific modifications. (Moderate)
+
 ---
 
 **See also:** Ladd_2008_IntonationalPhonology — provides a more principled phonological basis (AM theory) for accent placement and declination modeling that supersedes O'Shaughnessy's rule-based approach, though the practical word-class accent hierarchy and phonetic adjustment rules from O'Shaughnessy remain implementationally useful.

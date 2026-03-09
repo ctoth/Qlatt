@@ -152,6 +152,10 @@ This paper provides empirical data on the relationship between female voice acou
 - [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — cites Collins 2003 for the vocal-body size relationship; refines the finding by showing the relationship is driven by WHR (not BMI) and extends to males (SHR) and sexual behavior outcomes
 - [[Krumpholz_2022_PitchManipulationFemaleRatings]] — cites Collins 2003 for positive pitch-attractiveness correlation in unmanipulated voices; Krumpholz extends with PSOLA manipulation finding that ~20 Hz increases affect femininity/age but not attractiveness
 
+### Conceptual Links (not citation-based)
+- [[Quene_2021_PitchTempoAttractiveness]] — Quene extends the pitch-attractiveness finding by showing that tempo also independently affects male vocal attractiveness, with pitch having a larger effect. The asymmetric pattern (only higher pitch reduces attractiveness) is consistent with Collins's finding that lower F0 correlates with higher attractiveness. (Strong)
+- [[Nygren_2016_TransVoiceF0Testosterone]] — Nygren's longitudinal data showing trans men's satisfaction correlates with F0 lowering (r_s = -0.68) during testosterone treatment parallels Collins's finding that lower F0 correlates with perceived attractiveness in cis men. (Moderate)
+
 ### Supersedes or Recontextualizes
 None - this paper extends prior work on vocal attractiveness but does not correct or supersede existing collection papers.
 

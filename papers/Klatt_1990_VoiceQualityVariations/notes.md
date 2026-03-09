@@ -448,6 +448,10 @@ Ug(t) = at² - bt³   (open phase)
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 - [[Stevens_1989_QuantalNatureSpeech]]
 
+### Conceptual Links (not citation-based)
+- [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Klatt 1990 documents voice quality variations including register transitions; Titze 2014 provides the biomechanical explanation (bistable glottal geometry) for why those transitions can be abrupt rather than gradual.
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos's SNR and F0 lifespan data extend Klatt & Klatt's voice quality observations (particularly female breathiness) across the full age range, showing how the voice quality parameters documented here change with aging.
+
 ### New Leads (Not Yet in Collection)
 - Essential reference for the original cascade/parallel architecture that forms the foundation of KLSYN88
 - Directly relevant to understanding voice quality variations and parametric voice source modeling

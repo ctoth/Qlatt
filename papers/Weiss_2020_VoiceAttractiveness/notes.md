@@ -67,14 +67,30 @@ This volume is a reference collection for the speaker personality/voice profile 
 - [ ] Does Ch.4 (systematic review) contain parameter tables that consolidate the field?
 - [ ] Does Ch.15 (multidimensional mapping) provide computational models usable for voice preset optimization?
 
-## Related Work Already in Collection
-- Babel_2014_VocalAttractiveness (Babel is Ch.6 author)
-- Quene_2021_PitchTempoAttractiveness (Quene is Ch.9 author -- likely same or similar content)
-- Kreiman_2007_GlottalSourceSpectrum (Kreiman is Ch.5 author)
-- Burkhardt_2009_VoiceQualityFormantSynthesis (Burkhardt is Ch.13 co-author)
-- Collins_2003_VocalVisualAttractiveness
-- Feinberg_2008_FemininityAveragenessVoicePitch
-- Feinberg_2011_IntegratingF0FormantPreferences
-- Zuta_2007_AttractiveMaleVoices
-- Chen_2022_AcousticMasculinityFemininity
-- Starr_2015_SweetVoiceJapaneseFeminine
+## Collection Cross-References
+
+### Already in Collection (chapter authors or cited works)
+- [[Babel_2014_VocalAttractiveness]] — Babel is Ch.6 author (voice evaluation and recall).
+- [[Quene_2021_PitchTempoAttractiveness]] — Quene is Ch.9 author (pitch and tempo effects on male speaker attractiveness; likely overlapping content).
+- [[Kreiman_2007_GlottalSourceSpectrum]] — Kreiman is Ch.5 author (normal voice quality definition).
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — Related Kreiman voice quality work.
+- [[Kreiman_2021_ValidatingVoiceQuality]] — Kreiman validation study that cites this volume.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt is Ch.13 co-author (acoustic correlates of likeability).
+- [[Collins_2003_VocalVisualAttractiveness]] — Vocal-visual attractiveness correlations.
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — F0 and femininity in attractiveness judgments.
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — F0-formant integration in voice preferences.
+- [[Zuta_2007_AttractiveMaleVoices]] — Attractive male voice acoustics.
+- [[Chen_2022_AcousticMasculinityFemininity]] — Acoustic masculinity-femininity perception.
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — Cultural feminine voice ideals.
+- [[Staib_2021_CorticalVoiceProcessing]] — Belin's voice perception work (Ch.8 author) connects to cortical voice processing.
+
+### Cited By (in Collection)
+- [[Schild_2019_AttractiveVoiceFormantF0]] — Cites this volume for broader voice attractiveness context.
+
+### Conceptual Links (not citation-based)
+- [[Borkowska_2011_F0DominanceAttractiveness]] — Strong. Borkowska's nonlinear F0-attractiveness findings for female voices complement the prosodic attractiveness chapters (Ch.2, Ch.9) in this volume.
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — Strong. Dominance and attractiveness as dual voice evaluation dimensions; this volume's Part I addresses how these dimensions relate.
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — Strong. Hughes's evolutionary perspective on voice attractiveness connects to Ch.7 (voice, sexual selection, and reproductive success).
+- [[Liu_2011_FemaleVoiceAttractiveness]] — Strong. Liu's breathiness/size-projection attractiveness model complements Ch.5's normal voice quality discussion and Ch.7's evolutionary perspective.
+- [[XuLee_VocalAttractivenessMandarinListeners]] — Moderate. Cross-linguistic attractiveness perception data complementing this volume's primarily Western focus.
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — Moderate. Articulatory status and attractiveness extends beyond the acoustic parameter focus of most chapters.

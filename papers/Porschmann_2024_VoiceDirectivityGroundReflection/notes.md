@@ -125,5 +125,15 @@ This paper is primarily about **room acoustics and spatial sound propagation**, 
 
 ## Collection Cross-References
 
+### Already in Collection
+- [[Monson_2014_HighFrequencyVoice]] — cited in citations.md; relates to the finding that nasals have strongest directivity above 4 kHz, where high-frequency voice energy is perceptually important
+- [[Jongman_2000_FricativeAcoustics]] — cited in citations.md; the directivity differences for unvoiced fricatives relate to their distinct source characteristics documented by Jongman
+- [[Shadle_2023_FricativeSpectraHighFreq]] — cited in citations.md; relevant to understanding why fricatives radiate differently in the vertical plane
+
+### Cited By (in Collection)
+- [[Kocon_2018_VowelDirectivityRunningSpeech]] — lists this paper as a conceptual link for complementary vertical vs. horizontal directivity data
+- [[Hartenstein_2025_VoiceDirectivityHELS]] — cites Porschmann's directivity datasets; Hartenstein's spherical harmonic approach captures the full 3D picture
+
 ### Conceptual Links (not citation-based)
-- [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon measures horizontal vowel-specific directivity; Porschmann measures vertical phoneme-class directivity. Together they provide complementary axes of 3D directivity, both demonstrating phoneme-dependent radiation patterns.
+- [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon measures horizontal vowel-specific directivity; Porschmann measures vertical phoneme-class directivity. Together they provide complementary axes of 3D directivity, both demonstrating phoneme-dependent radiation patterns. (Strong)
+- [[Hartenstein_2025_VoiceDirectivityHELS]] — Hartenstein reconstructs full 3D far-field directivity using spherical harmonics; Porschmann's phoneme-specific vertical analysis provides the empirical phoneme-class distinctions that Hartenstein's general approach averages over. (Strong)

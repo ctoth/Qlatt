@@ -221,9 +221,9 @@ This paper provides the theoretical framework for understanding:
 - [[Volenec_2015_Coarticulation]] - Reviews coarticulation theory including the coproduction/AP framework presented in this paper
 - [[Fowler_2006_CoarticulationGesturePerception]] - Perceptual evidence supporting the gesture-based view of coarticulation advocated here
 - [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] - Cited (as "submitted") in this paper; provides articulatory/acoustic data for English /l/ allophony that validates the gestural timing account
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — the computational engine behind AP; formalizes tract-variable dynamics, gestural blending, and transformation gating
 
 ### New Leads (Not Yet in Collection)
-- Saltzman & Munhall (1989) - "A dynamical approach to gestural patterning" - The computational engine behind AP; essential for numerical implementation
 - Browman & Goldstein (1990a) - "Gestural specification using dynamically-defined articulatory structures" - Detailed computational specification of gestural scores
 - Nolan (1992) - "The descriptive role of segments: Evidence from assimilation" - EPG evidence that assimilated consonants retain residual gestures
 - Cooper (1991) - "An articulatory account of aspiration in English" - Transillumination data on gradient aspiration

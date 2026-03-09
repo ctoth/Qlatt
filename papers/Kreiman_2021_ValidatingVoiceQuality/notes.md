@@ -195,6 +195,7 @@ The four-piece noise spectral model with independent HNR control validates:
 - [[Childers_Lee_1991_VoiceQualityFactors]] — Voice quality factors including OQ, SQ, closure abruptness; complements this model's source decomposition
 - [[Hanson_2001_ModelsPhonation]] — HLsyn quasi-articulatory controller; alternative high-level parameterization approach
 - [[Lee_2019_AcousticVoiceVariation]] — cited as ref [25]; PCA on the same 13 psychoacoustic measures across 100 speakers, showing harmonic/inharmonic balance as the dominant variability axis. Provides the acoustic variability structure that this paper's perceptual validation builds upon.
+- [[Weiss_2020_VoiceAttractiveness]] — Cited as ref [13] (Kreiman, Auszmann & Gerratt chapter on "normal" voice quality); Kreiman is Ch.5 author in this volume.
 
 ### New Leads (Not Yet in Collection)
 - **Garellek, Samlan, Gerratt, and Kreiman (2016)** — "Modeling the voice source in terms of spectral slopes," JASA 139, 1404-1410. Provides the spectral slope framework underlying the four-piece source model. Essential companion paper.

@@ -206,5 +206,12 @@ Tracheal/nasal coupling (FTP, FTZ, FNP, FNZ, BTP, BNP) may need addition for bre
 - [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] — references this paper's "rate" parameter concept in an open question about mapping medial surface thickness to voice quality modification
 - [[Zhang_2016_MechanicsVoiceProductionControl]] — this review provides the physiological grounding for why Burkhardt's voice quality modification rules work: medial surface thickness (controlled by CT/TA balance) is the primary voice quality controller
 
+### Conceptual Links (not citation-based)
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci provides the prosodic parameter space (pitch level, pitch range, speech rate) for seven emotions but identifies voice quality as the missing component for sadness and fear. Burkhardt provides exactly those missing voice quality formulas, making the two papers complementary halves of a full emotional synthesis system. (Strong)
+- [[Scherer_TaskLoadStressAcoustics]] — Moderate. Scherer's load/stress acoustic distinctions inform synthesis parameter selection: cognitive load presets should modify rate and energy envelopes (Burkhardt's rate parameter), while stress presets should modify F0 and spectral tilt (Burkhardt's voice quality parameters).
+- [[Titze_2014_BistableVocalFoldAdduction]] — Moderate. Titze provides the physical basis for why Burkhardt's falsetto voice quality parameters take their values: convergent vs divergent glottal geometry determines OQ and spectral tilt.
+- [[Weiss_2020_VoiceAttractiveness]] — Moderate. Burkhardt is Ch.13 co-author in this volume, connecting emotional speech synthesis to likeability perception.
+- [[Weninger_2013_AcousticsEmotionAudio]] — Moderate. Weninger identifies which acoustic features best predict arousal (loudness, spectral flux) vs valence (F0, spectral shape), directly informing which of Burkhardt's synthesis parameters to prioritize for each emotional dimension.
+
 ### Supersedes or Recontextualizes
 - Extends **Burkhardt & Sendlmeier 2000** (ref [3]) — the 2000 paper verified acoustic correlates of emotional speech using formant synthesis; this 2009 paper provides the mature, explicit rule-based formulas with perceptual validation. Burkhardt_2005 lists the 2000 paper as a new lead; this paper covers that ground more comprehensively.

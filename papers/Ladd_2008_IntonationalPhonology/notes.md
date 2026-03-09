@@ -470,3 +470,5 @@ For Qlatt's TTS frontend, this book motivates:
 ---
 
 **See also:** Goldsmith_1976_AutosegmentalPhonology - the original PhD dissertation that founded autosegmental phonology and the multi-tier representation framework that Ladd's AM theory comprehensively develops and extends.
+
+**See also:** [[Ladd_2014_AmericanFourLevelIntonation]] - Ladd's 2014 historical postscript corrects and extends the Chapter 2 account of the levels-vs-configurations controversy by publishing Pike's 1989 correspondence, establishing Pike's clear priority over Wells for the four-level analysis.

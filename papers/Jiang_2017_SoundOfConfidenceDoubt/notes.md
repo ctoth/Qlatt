@@ -175,6 +175,7 @@ Normalized duration = utterance_duration / mean_duration_neutral
 
 ### Cited By (in Collection)
 - [[Fish_2017_SoundOfInsincerity]] — from same lab (Pell); cites this paper for prosodic cues of confidence/uncertainty that interact with sincerity perception
+- [[Goupil_2021_ConfidenceAccuracyProsody]] — cites this as the perception-side complement; Goupil's production study dissociates confidence from accuracy in prosody, extending Jiang & Pell's perception findings
 
 ### New Leads (Not Yet in Collection)
 - **Scherer, London, Wolf (1973)** - "The voice of confidence" - Foundational paper on paralinguistic cues for confidence perception. Direct precursor to this work.

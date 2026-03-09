@@ -196,6 +196,14 @@ Combined effect: even distribution of sound energy in the 800-2300 cps range wit
 
 ### Already in Collection
 - [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Stevens_1991_HL_Parameters]] — Stevens cites Fujimura 1962 for nasal pole-zero calculations (FNP/FNZ parameters)
+
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — references Fujimura's nasal consonant analysis
+- [[Beddor_1986_NasalVowelHeight]] — references Fujimura's nasal pole-zero analysis
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — uses Fujimura's nasal formant data for synthesizer parameterization
+- [[Recasens_1983_NasalPlaceCues]] — builds on Fujimura's nasal place-of-articulation cues
+- [[Stevens_1991_HL_Parameters]] — cites Fujimura 1962 for nasal pole-zero calculations
 
 ### New Leads (Not Yet in Collection)
 - **Bell, Fujisaki, Heinz, Stevens, and House (1961)** [Ref 2] - Analysis-by-synthesis method for obtaining pole-zero distributions from natural speech. Defines the methodology used in this paper.

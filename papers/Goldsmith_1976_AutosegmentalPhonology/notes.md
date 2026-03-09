@@ -227,6 +227,7 @@ This dissertation provides the **theoretical foundation** for implementing tone 
 - Clements, G.N. 1976. "Vowel Harmony in Non-linear Generative Phonology" -- extending autosegmental theory to vowel harmony
 
 ### Cited By (in Collection)
+- [[Beckman_2005_ToBISystemEvolution]] — ToBI's Tones tier is a direct implementation of Goldsmith's autosegmental representation; multi-tier architecture is the practical realization of autosegmental phonology for prosody annotation
 - [[Hertz_1991_StreamsPhonesTransitions]] — cites this as inspiration for the multi-tiered parallel stream structure of the Delta framework; Hertz's synchronized streams are a practical implementation of autosegmental multi-tier representation
 
 ### Supersedes or Recontextualizes

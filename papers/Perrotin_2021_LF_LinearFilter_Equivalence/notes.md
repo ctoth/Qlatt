@@ -325,5 +325,8 @@ $$
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Klatt_1990_VoiceQualityVariations]]
 
+### Conceptual Links (not citation-based)
+- [[Gobl_2021_LFModelFrequencyDomain]] — Both 2021 papers address computational implementation of the LF model; Gobl provides frequency-domain alias-free generation via IDFT while Perrotin proves linear-filter equivalence for time-domain synthesis. Complementary approaches to accurate LF implementation (Strong)
+
 ### New Leads (Not Yet in Collection)
 - **Fant (1995)** - "The LF-model revisited: Transformations and frequency domain analysis" - Derives the Rd parameter transformation equations that unify time-domain and spectral interpretations of the LF model.

@@ -294,9 +294,18 @@ Output: Sampled LF pulse (N samples)
 ### Already in Collection
 - [[Doval_2003_VoiceSourceCALM]]
 - [[Fant_1985_LFModelGlottalFlow]]
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — Fant's earlier frequency-domain LF analysis; Gobl's 2021 work extends this to provide complete closed-form alias-free spectral equations
 - [[Fant_1997_VoiceSourceConnectedSpeech]]
 - [[Gobl_2003_VoiceQualityEmotion]]
 - [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
+
+### Cited By (in Collection)
+- [[Doval_2003_VoiceSourceCALM]] — lists Gobl_2021 for similar causal/anticausal filter treatment
+- [[Fant_1985_LFModelGlottalFlow]] — lists Gobl_2021 as extending to alias-free digital LF implementation
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — lists Gobl_2021 as extending the frequency-domain LF analysis
+
+### Conceptual Links (not citation-based)
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — Both 2021 papers address computational implementation of the LF model; Perrotin proves linear-filter equivalence while Gobl provides frequency-domain alias-free generation. Complementary approaches to the same problem of accurate LF implementation (Strong)
 
 ### New Leads (Not Yet in Collection)
 - **[12] Kawahara et al. 2015** - Direct competitor approach to aliasing-free glottal source implementation using anti-aliasing functions; important for understanding alternative solutions

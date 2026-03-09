@@ -220,7 +220,18 @@ FujisakiModel:
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Ladd_2008_IntonationalPhonology]] — Ladd contrasts the Fujisaki superpositional approach (phrase + accent commands) with the AM sequential approach; Fig 1.3 shows the Fujisaki model block diagram
+- [[Taylor_2000_TiltModelIntonation]] — Taylor's Tilt model cited as alternative parametric intonation model; Fujisaki & Ohno (1997) listed as comparison point
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci's baseline declination approach is compatible with Fujisaki's phrase/accent components; cited for the F0 generation model
+- [[Mozziconacci_2002_ProsodyEmotions]] — cites Fujisaki (1991) for the F0 contour generation model with linguistic and paralinguistic functions
+- [[vanSanten_1997_ProsodicModeling]] — Fujisaki 1983 cited as seminal F0 contour modeling work
+- [[Hertz_1985_DeltaRuleSystem]] — Fujisaki & Hirose 1982 cited as alternative quantitative prosody approach using mathematical functions
+- [[Silverman_1992_ToBILabelingProsody]] — references interaction between ToBI and Fujisaki-type quantitative F0 models
+
+### Cited By (in Collection)
+- [[Ladd_2008_IntonationalPhonology]] — discusses Fujisaki model extensively as the superpositional F0 generation approach
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — uses Fujisaki framework for baseline declination
+- [[Hertz_1985_DeltaRuleSystem]] — cites Fujisaki & Hirose 1982 for function-based prosody modeling
 
 ### New Leads (Not Yet in Collection)
 - **[4] Fujisaki & Hirose, 1984** - The foundational paper establishing the model for Japanese declarative sentences. Essential for understanding the original formulation.
@@ -228,3 +239,7 @@ FujisakiModel:
 - **[15] Mixdorff & Fujisaki, 1994** - German analysis. Mixdorff has extensive follow-up work on the Fujisaki model and maintains an implementation.
 - **[2] Öhman, 1967** - Earlier quantitative intonation model from KTH. Important historical context and alternative approach.
 - **[5] Fujisaki, 1988** - Physiological basis paper. Critical for understanding why the model structure is the way it is (cricothyroid muscle mechanics).
+
+### Conceptual Links (not citation-based)
+- [[OShaughnessy_1976_F0_Prosody]] — O'Shaughnessy's practical F0 rules (word-class accent hierarchy, declination model at ~3.5 st/s) provide an implementation-oriented complement to Fujisaki's mathematically principled command-response framework; both address the same F0 generation problem from different angles (Strong)
+- [[Pierrehumbert_1980_EnglishIntonation]] — Pierrehumbert's AM framework and Fujisaki's superpositional model are the two dominant approaches to intonation modeling; Pierrehumbert uses sequential tone targets while Fujisaki uses superposed command responses (Strong)

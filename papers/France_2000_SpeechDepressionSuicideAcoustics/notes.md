@@ -185,6 +185,13 @@ This paper provides empirical acoustic profiles for different emotional/psycholo
 ### Already in Collection
 - [[Stevens_1989_QuantalNatureSpeech]]
 
+### Cited By (in Collection)
+- [[Moore_2003_GlottalFeaturesDepression]] — cites France et al. for multivariate acoustic depression classification
+- [[Kamiloglu_2021_VoiceProductionPerception]] — cites France et al. in the context of vocal indicators of psychological state
+
+### Conceptual Links (not citation-based)
+- [[Moore_2003_GlottalFeaturesDepression]] — Moore extends France's formant/PSD classification approach by analyzing glottal source features (jitter, shimmer, HNR, glottal pulse parameters) in depressed speech. France uses formant and spectral features; Moore adds voice source features. Together they span the full acoustic space for depression detection. (Strong)
+
 ### New Leads (Not Yet in Collection)
 - **Scherer (1986) [37]** - "Vocal affect expression: A review and a model for future research" - Comprehensive theoretical framework for how emotion affects voice production. Essential for understanding the mechanisms behind the acoustic changes observed.
 - **Stassen (1988, 1991) [42, 43]** - Multi-parameter modeling of affect in speech. Provides theoretical justification for why single-parameter (F0-only) approaches fail, which this paper empirically confirms.

@@ -231,6 +231,19 @@ Where:
 - [[Scherer_TaskLoadStressAcoustics]] — Stress shifts spectral energy upward, corresponding to increased vocal tension in Gobl's voice quality framework.
 - [[Weninger_2013_AcousticsEmotionAudio]] — Analysis-side complement: identifies loudness and spectral flux as primary arousal features, confirming that Gobl's synthesis-side voice quality parameters target the right acoustic dimensions.
 
+### Cited By (in Collection)
+- [[Belyk_2014_AcousticValenceEmotion]] — references Gobl's voice quality parameter trajectories
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — builds on Gobl's voice quality settings for Klatt synthesis
+- [[Cui_2006_PleasureAcousticFeaturesAffectiveSpeech]] — references voice quality and emotion mapping
+- [[Drugman_2020_GlottalSourceEstimation]] — references Gobl's voice source analysis
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — references Gobl for voice quality and emotion
+- [[Gobl_2021_LFModelFrequencyDomain]] — same first author; cites own 2003 work
+- [[Kreiman_2021_ValidatingVoiceQuality]] — references Gobl's voice quality parameters
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites for voice quality types and emotional associations
+- [[Rutledge_1995_SynthesizingStyledSpeechKlatt]] — references Gobl's work on voice quality in emotion
+- [[Walton_1994_SpeakerRaceVocalAcoustics]] — references voice quality analysis methods
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — references Gobl's emotional voice quality findings
+
 ### New Leads (Not Yet in Collection)
 - **Laver, J., 1980** - The Phonetic Description of Voice Quality - provides the comprehensive physiological framework (adductive tension, medial compression, longitudinal tension) that underpins voice quality classification throughout this paper.
 - **Scherer, K.R., 1986** - Foundational review of vocal affect expression, establishing that voice quality may be key to differentiating discrete emotions (referenced extensively in the discussion).

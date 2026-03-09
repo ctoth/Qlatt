@@ -209,6 +209,7 @@ This paper provides the empirical basis for implementing emotional speech synthe
 - [[Eyben_2015_GeMAPS_AcousticParameters]] — cites this as foundational for understanding which acoustic features correlate with emotional dimensions
 - [[Belyk_2014_AcousticValenceEmotion]] — cites this for the dimensional approach to vocal emotion; Belyk's family-specific valence rules extend Goudbeek's finding that valence is reflected in spectral slope
 - [[Kamiloglu_2021_VoiceProductionPerception]] — cites this in the context of vocal emotion perception research
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites this for arousal/valence/potency dimensional analysis showing spectral slope encodes valence
 
 ### New Leads (Not Yet in Collection)
 - Fontaine et al. (2007) — "The world of emotions is not two-dimensional" — establishes potency/control as a necessary third dimension; theoretical foundation for this paper's design

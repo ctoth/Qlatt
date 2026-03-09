@@ -183,3 +183,7 @@ ToBI is the standard prosodic annotation framework. For the Qlatt TTS frontend, 
 
 ### Supersedes or Recontextualizes
 - None identified; this is a foundational standard definition paper
+
+---
+
+**See also:** [[Beckman_2005_OriginalToBIEvolution]] — The original creators' full-length account of the MAE_ToBI design, superseding this brief conference paper with complete workshop history, worked examples, alignment rules, and comparison with competing transcription approaches (INTSINT, IViE).

@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The use of voice recordings in both research and industry practice has increased dramatically in recent years---from diagnosing a COVID-19 infection based on patients' self-recorded voice samples to predicting customer emotions during a service center call. Crowdsourced audio data collection in participants' natural environment using their own recording device has opened up new avenues for researchers and practitioners to conduct research at scale across a broad range of disciplines. The current research examines whether fundamental properties of the human voice are reliably and validly captured through common consumer-grade audio-recording devices in current medical, behavioral science, business, and computer science research. Specifically, this work provides evidence from a tightly controlled laboratory experiment analyzing 1800 voice samples and subsequent simulations that recording devices with high proximity to a speaker (such as a headset or a lavalier microphone) lead to inflated measures of amplitude compared to a benchmark studio-quality microphone while recording devices with lower proximity to a speaker (such as a laptop or a smartphone in front of the speaker) systematically reduce measures of amplitude and can lead to biased measures of the speaker's true fundamental frequency. We further demonstrate through simulation studies that these differences can lead to biased and ultimately invalid conclusions in, for example, an emotion detection task. Finally, we outline a set of recording guidelines to ensure reliable and valid voice recordings and offer initial evidence for a machine-learning approach to bias correction in the case of distorted speech signals.
+
+---
+
+## Our Interpretation
+
+This paper asks whether consumer recording devices (smartphones, laptops, headsets, lavalier mics) capture f0 and amplitude accurately compared to a studio microphone, using a controlled experiment with 30 speakers and 1,800 samples. The main finding is that they do not: high-proximity mics inflate amplitude, smartphones inflate f0, and these biases meaningfully degrade downstream classification tasks. The paper is relevant as calibration context for any synthesis-vs-recording comparison work, establishing that device choice is a confound that must be controlled.

@@ -175,5 +175,25 @@ This paper is relevant to Qlatt's prosody rule system in two ways: (1) it provid
 
 ## Collection Cross-References
 
+### Already in Collection
+- [[Pierrehumbert_1980_EnglishIntonation]] — cited as the foundational autosegmental-metrical theory underlying both ToBI and RaP annotation systems
+- [[Beckman_2005_ToBISystemEvolution]] — cited for the development and evolution of the ToBI framework
+- [[Beckman_2005_OriginalToBIEvolution]] — cited for ToBI labeling conventions and design principles
+- [[Beckman_2022_ToBISystem]] — Dilley & Breen contribute the AM+ commentary section proposing five pitch levels; directly extends this reliability work
+- [[Ladd_2008_IntonationalPhonology]] — cited for evidence on pitch accent categories and tonal contrasts (2nd ed., 2009)
+- [[Ladd_2014_AmericanFourLevelIntonation]] — Ladd's historical analysis of pitch level distinctions relates to the tonal inventory questions this paper raises
+- [[Silverman_1992_ToBILabelingProsody]] — cited as the original ToBI standard that both studies evaluate
+
+### New Leads (Not Yet in Collection)
+- Dilley & Brown (2005) — "The RaP (Rhythm and Pitch) Labeling System, Version 1.0" — the complete specification of RaP, essential for understanding the annotation system validated here
+- Carletta (1996) — "Assessing agreement on classification tasks: the Kappa statistic" — methodological foundation for chance-corrected agreement metrics
+- Pitrelli, Beckman, & Hirschberg (1994) — "Evaluation of prosodic transcription labeling reliability in the ToBI framework" — first ToBI reliability study, key comparison point
+
+### Cited By (in Collection)
+- [[Ladd_2021_TroubleWithToBI]] — cites this (via Pitrelli et al. 1994 reliability data) as empirical evidence for poor agreement on pitch accent type distinctions; the conceptual link already present references this paper's findings directly
+- [[Beckman_2022_ToBISystem]] — Breen & Dilley are commentary authors; their AM+ framework in that chapter builds on the empirical reliability findings from this study
+
 ### Conceptual Links (not citation-based)
-- [[Ladd_2021_TroubleWithToBI]] — Ladd argues that ToBI's categorical pitch accent distinctions (especially L+H\* vs H\*) are unreliable because the underlying phonetic variation is gradient, not categorical. This paper's finding of moderate agreement (~0.54 kappa) on fine-grained pitch accent types provides direct empirical support for Ladd's theoretical argument.
+- [[Ladd_2021_TroubleWithToBI]] — **Strong.** Ladd argues that ToBI's categorical pitch accent distinctions (especially L+H\* vs H\*) are unreliable because the underlying phonetic variation is gradient, not categorical. This paper's finding of moderate agreement (~0.54 kappa) on fine-grained pitch accent types provides direct empirical support for Ladd's theoretical argument.
+- [[Jun_2005_ProsodicTypology]] — **Moderate.** Jun's cross-linguistic prosodic typology framework contextualizes both ToBI and RaP as language-specific annotation systems within a broader typological perspective. The reliability results here help establish which prosodic categories are robust enough for cross-linguistic comparison.
+- [[Hellbernd_2016_ProsodySpeechActIntention]] — **Moderate.** Hellbernd's work on prosodic correlates of speech act intentions relies on consistent prosodic annotation; this paper's reliability data validates the annotation framework underlying such perceptual studies.

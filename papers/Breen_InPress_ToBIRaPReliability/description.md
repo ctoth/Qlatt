@@ -1,0 +1,4 @@
+---
+tags: [prosody, tobi, annotation, inter-transcriber-reliability, intonation]
+---
+This paper presents the first large-scale inter-transcriber reliability comparison of the ToBI and RaP prosodic annotation systems, using both naive and expert labelers on read and spontaneous speech corpora with chance-corrected agreement metrics. Both systems achieve substantial reliability (kappa > 0.60 for most categories), with RaP showing significantly higher agreement for phrasal boundaries among naive labelers and comparable agreement among experts. For speech synthesis, the reliability data identifies which prosodic distinctions are robustly perceived (prominence, phrasal boundaries) versus unreliable (fine-grained pitch accent type), and the complete label inventories for both systems inform the prosodic categories a synthesizer's rule engine should target.

@@ -155,7 +155,16 @@ The modular architecture allows independent development of each component.
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Allen_1987_MITalk_TTS]] — the full book-length documentation of the MITalk system that this 1977 conference paper previews; expands every module (FORMAT through SPEAK) with complete algorithms, parameter tables, and evaluation data
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the synthesizer that serves as the SYNTHS module in this pipeline; Klatt 1980 specifies the 39-parameter cascade/parallel formant synthesizer that Allen's architecture drives
+
+### Cited By (in Collection)
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — cites Allen 1977 as the system context for the Klatt synthesizer
 
 ### New Leads (Not Yet in Collection)
-- None. No citations are provided in this paper.
+- None. No formal citations are provided in this conference paper.
+
+### Conceptual Links (not citation-based)
+- [[Elovitz_1976_NRL_LTS]] — NRL's letter-to-sound rules provide an alternative to Allen's DECOMP + SOUND2 morphological-analysis approach; both address the same problem (text to phonemes) with different tradeoffs between lexicon size and rule coverage (Strong)
+- [[Carlson_1975_RuleBasedTTS]] — Carlson & Granstrom's KTH system is a contemporary Swedish TTS system with similar modular architecture but different linguistic analysis strategies; both establish the canonical TTS pipeline pattern (Moderate)
+- [[Klatt_1976_SegmentalDuration]] — Klatt's duration rules, developed concurrently with this system, feed directly into the PROSOD module of the pipeline Allen describes (Strong)

@@ -173,3 +173,4 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 
 ### Conceptual Links (not citation-based — added during reconciliation)
 - [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — Karthikeyan shows that fully released/aspirated word-final /t/ increases perceived prestige and long-term attractiveness; Hanson & Stevens' acoustic models of aspiration (supraglottal frication + glottal noise) describe exactly the acoustic properties that distinguish Karthikeyan's two speaker groups
+- [[Abramson_Whalen_2017_VOTat50]] — Abramson & Whalen's VOT measurement framework defines the aspiration interval that Hanson & Stevens model acoustically; the Praat labeling scheme (REL + ASP) maps directly onto the noise generation mechanisms described here (Strong)

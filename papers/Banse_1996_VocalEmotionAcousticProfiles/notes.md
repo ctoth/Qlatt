@@ -321,6 +321,27 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 ### Already in Collection
 - [[Scherer_TaskLoadStressAcoustics]] — Same senior author (Scherer). This task-load/stress paper extends Banse & Scherer's emotion work by separating cognitive load from psychological stress as distinct vocal influences, showing load affects rate/energy gradients while stress affects F0/spectral distribution.
 
+### Cited By (in Collection)
+- [[Belyk_2014_AcousticValenceEmotion]] — cites Banse & Scherer 1996 for 14-emotion acoustic profiles; recontextualizes the inconsistent valence effects by showing valence interacts with emotion family (motivational/moral/aesthetic), explaining why only elation showed the expected high-loud positive pattern
+- [[Burkhardt_2005_GermanEmotionalSpeechDatabase]] — cites Banse & Scherer 1996 as a methodological reference for German emotional speech; EMO-DB extends this approach with natural-language sentences
+- [[Busquet_2023_VoiceAnalyticsRecordingDevices]] — demonstrates that the emotion-differentiating acoustic features Banse catalogued are systematically distorted by recording device choice
+- [[Caballero_2018_SoundOfImpoliteness]] — cites Banse & Scherer for acoustic profiles of emotions relevant to impoliteness expression
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — references Banse 1996 for acoustic parameter selection in computational paralinguistics
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — extends this work by adding potency/control as a third emotion dimension, demonstrating that spectral balance specifically encodes valence
+- [[Grollero_2023_CoreAffectVocalBursts]] — references Banse's emotion-specific acoustic profiles in context of core affect dimensions in vocal bursts
+- [[Hellbernd_2016_ProsodySpeechActIntention]] — cites Banse for prosodic correlates of communicative intent
+- [[Kamiloglu_2021_VoiceProductionPerception]] — references Banse for the foundational acoustic profiles of vocal emotion
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites Banse & Scherer for established emotion-acoustic parameter mappings
+- [[Laukka_2008_AnxietyVocalExpression]] — builds on Banse's anxiety vs. fear distinction with focused investigation of anxiety expression
+- [[Laukka_2011_SpontaneousAffectIrritation]] — extends Banse's acted-emotion paradigm to spontaneous affect
+- [[Lee_2019_AcousticVoiceVariation]] — references Banse for acoustic features of emotional speech
+- [[Mozziconacci_2002_ProsodyEmotions]] — cites Banse & Scherer for the component process model predictions tested in this study
+- [[Scherer_2001_VocalEmotionCrossCultural]] — same senior author; cross-cultural extension of the emotion recognition paradigm
+- [[Szameitat_2011_LaughterEmotionAcoustics]] — references Banse for non-laughter emotion acoustic profiles as comparison baseline
+- [[Weninger_2013_AcousticsEmotionAudio]] — references Banse's acoustic profiles in computational emotion recognition
+- [[Wiethoff_2008_CerebralEmotionalProsody]] — uses Banse's emotion categories and acoustic profiles as basis for neuroimaging study
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — extends Banse's 14-emotion taxonomy with additional acoustic analysis
+
 ### Conceptual Links (not citation-based)
 - [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — Validates that F0 SD (pitch sigma), which Banse uses as one of 29 emotion-discriminating parameters (SdF0, loading .42 on PC1), is the strongest acoustic correlate of perceived vocal variability (r = .927). This provides perceptual grounding: when Banse reports increased SdF0 for high-arousal emotions, Cumbers shows listeners reliably perceive that increased variability.
 
@@ -330,11 +351,3 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 - **Ladd et al. (1985)** - "Evidence for the independent function of intonation contour type, voice quality, and F0 range in signaling speaker affect" - Key empirical work on which acoustic parameters independently signal emotion.
 - **Scherer, Banse, Wallbott & Goldbeck (1991)** - "Vocal cues in emotion encoding and decoding" - Earlier work by same authors with related methodology; useful for understanding the research program.
 - **Hammarberg et al. (1980)** - "Perceptual and acoustic correlates of abnormal voice qualities" - Source of the Hammarberg index (spectral slope measure) used in this study; important for understanding spectral energy measures.
-
----
-
-**See also:** Belyk_2014_AcousticValenceEmotion - recontextualizes the inconsistent valence effects in this paper's 14-emotion data by showing that valence interacts with emotion family (motivational/moral/aesthetic), explaining why only elation showed the expected high-loud positive pattern.
-
----
-
-**See also:** Goudbeek_2010_ValencePotencyVocalEmotion - Extends this work by adding potency/control as a third emotion dimension and demonstrating that spectral balance (not just F0/intensity) specifically encodes valence, using the French GEMEP corpus with cross-cultural validation against this Munich data.

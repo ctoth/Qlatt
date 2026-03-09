@@ -754,6 +754,7 @@ SIL and glottal segments have no inherent targets - inherit from context.
 ## Collection Cross-References
 
 ### Already in Collection
+- [[Allen_1977_ModularAudioResponse]] — Allen's earlier conference paper previewing this system's modular architecture
 - [[Elovitz_1976_NRL_LTS]] — cited for 329 context-sensitive LTS rules achieving 90% accuracy; NRL's simpler rule-only approach contrasts with MITalk's morphological analysis + dictionary
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 - [[Fant_1988_LFFrequencyDomainInterpretation]]
@@ -766,3 +767,19 @@ SIL and glottal segments have no inherent targets - inherit from context.
 - [[Rabiner_1968_DigitalFormantSynthesizer]]
 - [[Rabiner_1968_SynthesisByRule]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]
+
+### Cited By (in Collection)
+- [[Anumanchipalli_KLATTSTAT]] — cites Allen et al. 1987 as the canonical expert-tuned Klatt TTS system that KLATTSTAT aims to automate
+- [[Klatt_1982_KlattalkTTS]] — Klatt's own Klattalk system extends and refines the synthesis-by-rule approach documented in MITalk
+- [[Klatt_1987_TTS_Review]] — Klatt's review of TTS systems uses MITalk as a primary reference point
+- [[Hertz_1985_DeltaRuleSystem]] — references MITalk's duration rules and phonetic component as baseline for the Delta system's improvements
+- [[Hertz_1991_StreamsPhonesTransitions]] — builds on MITalk's segment-based approach, proposing streams as an alternative phonetic representation
+- [[vanSanten_1993_SegmentalDuration]] — van Santen's duration model extends Klatt's 10 duration rules from MITalk Ch. 9
+- [[vanSanten_1994_SegmentalDurationTTS]] — further development of duration models that build on MITalk's framework
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — discusses MITalk as a representative formant synthesis-by-rule system
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references MITalk's morphological decomposition and letter-to-sound approaches
+- [[Ebden_2015_KestrelTextNormalization]] — references MITalk's FORMAT module as an early text normalization system
+
+### Conceptual Links (not citation-based)
+- [[vanSanten_1997_ProsodicModeling]] — extends the prosodic modeling framework (duration + F0) that MITalk established, with more sophisticated statistical approaches to the same problems MITalk solved with hand-tuned rules (Strong)
+- [[Carlson_1975_RuleBasedTTS]] — the KTH synthesis-by-rule system developed in parallel with MITalk; both represent the state of the art in rule-based TTS but with different linguistic traditions (Swedish vs. American English) and different phonetic rule formalisms (Moderate)

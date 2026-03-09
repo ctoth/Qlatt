@@ -265,3 +265,7 @@ Key quantitative findings:
 ---
 
 **See also:** vanSanten_1994_SegmentalDurationTTS - demonstrates that Klatt's pure multiplicative duration model is a special case of sums-of-products, and that key interactions (pitch accent x syllabic stress) are not properly captured by multiplication alone. The new system is perceptually preferred 73% of the time.
+
+---
+
+**See also:** Allen_1977_ModularAudioResponse - Allen's modular TTS architecture describes the PROSOD module that implements Klatt's duration rules as part of the MIT system pipeline; these rules feed directly into the synthesis-by-rule framework Allen documents.

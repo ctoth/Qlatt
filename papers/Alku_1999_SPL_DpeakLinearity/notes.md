@@ -195,4 +195,4 @@ This paper refines the relationship between voice source amplitude (Ee/dpeak) an
 - [[Herbst_2015_GlottalAdductionSubglottalPressure]] — shows independent control of adduction and pressure in trained singers, producing different phonation types. Alku's knee may correspond to the boundary where untrained speakers shift from primarily adduction-mediated intensity (soft) to primarily pressure-mediated intensity (normal/loud).
 
 ### Cited By (in Collection)
-- (none found)
+- [[Vogel_2010_FatigueSpeechAcoustics]] — cites Alku 1999 in context of voice source analysis methods for studying vocal fatigue effects on SPL-dpeak relationships

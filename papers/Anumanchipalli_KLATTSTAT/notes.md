@@ -284,7 +284,14 @@ The paper's parameter numbering maps to standard Klatt parameters. Key observati
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Klatt_1987_TTS_Review]]
 
+### Cited By (in Collection)
+- [[vanSanten_1997_ProsodicModeling]] — references Klatt parameter extraction in context of prosodic modeling for TTS
+
 ### New Leads (Not Yet in Collection)
 - **[12] Metze 2007 - Discriminative Articulatory Features** - Describes the GMM-based discriminative approach used for detecting nasality, aspiration, and frication. Useful technique for automatic parameter extraction.
 - **[15] Iles & Ing-Simmons 1995 - Klatt in C** - The C implementation of Klatt used for resynthesis in this paper. A reference implementation that may be useful for comparison.
 - **[14] Black 2006 - CLUSTERGEN** - The statistical parametric synthesizer framework that was extended to use Klatt parameters. Describes the trajectory modeling approach for parameter prediction.
+
+### Conceptual Links (not citation-based)
+- [[Jesus_1997_KlattSynthesiserImplementation]] — another implementation of the Klatt synthesizer with focus on parameter accuracy; both papers address the challenge of correctly setting all 40 Klatt parameters, but Jesus focuses on faithful reimplementation while Anumanchipalli focuses on automatic extraction from speech (Strong)
+- [[Klatt_1982_KlattalkTTS]] — Klattalk represents the expert-tuned Klatt parameter generation that KLATTSTAT aims to replicate automatically; comparing KLATTSTAT's extracted parameters against Klattalk's hand-tuned values would quantify the quality gap (Strong)

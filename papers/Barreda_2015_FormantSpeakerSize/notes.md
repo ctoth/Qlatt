@@ -207,5 +207,11 @@ This validates the approach used in the current project's Klatt synthesizer for 
 ### New Leads (Not Yet in Collection)
 - **Fant (1970)** - "Acoustic Theory of Speech Production" - Foundational source-filter theory that underlies all formant synthesis, explaining VTL-formant relationships.
 
+### Cited By (in Collection)
+- [[Peterson_Barney_1952_VowelControl]] — Barreda analyzes P&B data for VTL scaling patterns across speaker groups; P&B notes reference Barreda's finding that listeners use formant frequencies directly rather than recovering VTL
+- [[Fitch_1999_VocalTractMorphology]] — cites Barreda for formant-speaker size perception experiments testing the perceptual consequences of VTL-body size correlations
+
 ### Conceptual Links (not citation-based)
-- [[Cartei_2014_VoiceMasculinity]] — Cartei shows deltaF (formant spacing) mediates perceived masculinity; Barreda tests whether listeners use formant spacing for speaker size judgments, connecting body size and gender perception through the same acoustic cue
+- [[Cartei_2014_VoiceMasculinity]] — Cartei shows deltaF (formant spacing) mediates perceived masculinity; Barreda tests whether listeners use formant spacing for speaker size judgments, connecting body size and gender perception through the same acoustic cue (Strong)
+- [[Delattre_1952_AcousticDeterminantsVowelColor]] — Delattre's finding that F2 position is the primary carrier of vowel identity connects to Barreda's finding that phoneme-specific formant patterns create biases in size perception; the same F2 variation that identifies vowels also misleads size judgments (Moderate)
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — Kent & Vorperian's lifespan formant data provides the developmental trajectory behind the speaker-size-to-formant mapping that Barreda's listeners exploit; the F4 between/within variability ratio data Barreda cites from Hillenbrand is complemented by Kent's bandwidth data (Moderate)

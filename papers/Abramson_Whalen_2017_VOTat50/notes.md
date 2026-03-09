@@ -190,5 +190,9 @@ VOT increases as articulation moves posteriorly:
 - **Stevens, K. N. (1993)** - Models for the production and acoustics of stop consonants. Theoretical foundation for implementing stop consonant synthesis.
 - **Crystal, T. H., & House, A. S. (1982)** - Segmental durations in connected speech. Important for understanding how VOT varies in running speech contexts.
 
+### Cited By (in Collection)
+- [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — lists VOT as a heavily weighted auditory cue, connecting Abramson & Whalen's VOT framework to cue weighting and distributional learning models
+
 ### Conceptual Links (not citation-based)
 - [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — demonstrates that the aspirated vs unreleased distinction in word-final /t/ (defined by VOT measurement framework) has social-perceptual consequences: aspirated /t/ increases perceived prestige and long-term attractiveness, connecting VOT phonetics to social evaluation
+- [[Hanson_2003_AspiratedStopsModels]] — models aspiration noise generation during the VOT interval using Stevens' quantal theory; the acoustic details of the aspiration period that Abramson & Whalen define and measure are what Hanson models computationally (Strong)

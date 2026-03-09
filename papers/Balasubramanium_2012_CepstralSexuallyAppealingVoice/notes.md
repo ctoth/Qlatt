@@ -108,6 +108,11 @@ Note: The CPP differences are small in absolute terms (~0.08 for males, ~0.06 fo
 - [[Childers_Lee_1991_VoiceQualityFactors]] -- voice quality analysis methods including harmonics-based measures
 - [[Hughes_2004_VoiceAttractivenessSexualBehavior]] -- cited as motivation; establishes that voice attractiveness predicts sexual behavior and body configuration, providing the behavioral rationale for investigating acoustic correlates of sexually appealing voices
 
+### Cited By (in Collection)
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — cites Balasubramanium 2012 in context of cross-cultural acoustic correlates of voice attractiveness
+- [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — cited by Balasubramanium as motivation; reciprocally, Hughes' Cited By section lists this paper
+
 ### Conceptual Links (not citation-based)
 - [[Fant_1985_LFModelGlottalFlow]] -- the LF glottal source model determines harmonic structure; cleaner LF pulses (lower RA, higher EE) would produce higher CPP
 - [[Cummings_1995_GlottalExcitationEmotionalSpeech]] -- glottal excitation characteristics that affect harmonic energy distribution
+- [[Babel_2014_VocalAttractiveness]] -- Babel finds breathiness (high H1-A3, low CPP) predicts female attractiveness, which seemingly contradicts Balasubramanium's finding that higher CPP = more attractive; the resolution may be gender-specific: Babel's breathiness effect is for female voices only, while Balasubramanium pools both genders and finds the harmonic clarity effect (Moderate)

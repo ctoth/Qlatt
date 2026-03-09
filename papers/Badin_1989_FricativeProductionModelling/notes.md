@@ -220,6 +220,18 @@ SPL = G_0 + p * 20 * log10(Δp) + q * 20 * log10(A_c)
 - [[Shadle_1985_FricativeAcoustics]]
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 
+### Cited By (in Collection)
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — references Badin 1989 in survey of speech synthesis models and fricative generation approaches
+- [[Feng_1996_NasalVowelTarget]] — cites Badin & Fant's vocal tract computation methods
+- [[Stevens_1991_HL_Parameters]] — cites Badin 1989 in context of articulatory-acoustic parameters for fricatives
+- [[Monson_2012_SpeechDirectivityHFE]] — references Badin's aeroacoustic modeling of fricative sources in relation to phoneme-specific directivity patterns
+
 ### New Leads (Not Yet in Collection)
 - **Badin & Fant (1984)** - Technical details on vocal tract computation using electric quadrupole representation. Relevant for implementing acoustic transfer function calculations.
 - **Hixon et al. (1967)** - Original experimental work on turbulent noise correlates that this paper replicates and extends. Useful for understanding experimental methodology.
+
+### Conceptual Links (not citation-based)
+- [[Jongman_2000_FricativeAcoustics]] — comprehensive acoustic study of all English fricatives, providing empirical spectral data that complements Badin's aerodynamic production model; Badin explains *why* fricatives have certain spectral shapes, Jongman documents *what* those shapes are across the full inventory (Strong)
+- [[Shadle_2023_FricativeSpectraHighFreq]] — extends fricative spectral analysis to higher frequencies (>8 kHz); Badin's obstacle effect model predicts that dental-source fricatives should have different high-frequency behavior than constriction-source ones, which Shadle's high-frequency measurements can test (Strong)
+- [[Behrens_Blumstein_1988_FricativeAmplitude]] — characterizes fricative amplitude as a function of context, complementing Badin's aerodynamic amplitude model; together they connect production mechanics to contextual amplitude variation (Moderate)
+- [[Deloche_2020_StatisticalStructureSpeech]] — Deloche's time-frequency statistical structure of fricatives validates the distinct source mechanisms that Badin models; sibilants vs non-sibilants show different statistical distributions consistent with Badin's obstacle vs non-obstacle distinction (Moderate)

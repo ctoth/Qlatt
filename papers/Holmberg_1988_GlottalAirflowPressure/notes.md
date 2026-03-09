@@ -218,6 +218,10 @@ Key mappings to Klatt/LF parameters:
 ### Already in Collection
 - [[Klatt_1987_TTS_Review]]
 
+### Cited By (in Collection)
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- cites Holmberg for glottal airflow measurements in speech
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] -- references for glottal airflow and pressure data
+
 ### New Leads (Not Yet in Collection)
 - **Rothenberg (1973)** — Foundational inverse-filtering technique used in this study; essential for understanding glottal airflow waveform derivation
 - **Fant (1979, 1982)** — Voice source theory predicting 6 dB SPL increase per doubling of MFDR; links airflow parameters to acoustic output

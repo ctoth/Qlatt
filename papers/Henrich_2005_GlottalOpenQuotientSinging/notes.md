@@ -216,12 +216,25 @@ Invariants derived from this paper's empirical data that should hold in any voic
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Hanson_1995_GlottalCharacteristicsFemale]]
-- [[Holmberg_1988_GlottalAirflowPressure]]
-- [[Klatt_1990_VoiceQualityVariations]]
-- [[Lienard_1999_VocalEffortVowelSpectral]]
+- [[Doval_2003_VoiceSourceCALM]] -- cited indirectly; CALM model provides alternative parameterization for the open quotient measured here
+- [[Fant_1985_LFModelGlottalFlow]] -- cited; LF model provides the glottal flow parameterization that maps to the Oq measurements
+- [[Hanson_1995_GlottalCharacteristicsFemale]] -- cited for glottal open quotient measures in female speakers
+- [[Henrich_2001_SpectralOqAsymmetry]] -- cited; same first author, establishes spectral correlates of Oq
+- [[Henrich_2003_JND_OpenQuotient]] -- cited; same first author, establishes perceptual resolution of Oq
+- [[Holmberg_1988_GlottalAirflowPressure]] -- cited for glottal airflow measurements in speech
+- [[Klatt_1990_VoiceQualityVariations]] -- cited for voice quality synthesis framework
+- [[Lienard_1999_VocalEffortVowelSpectral]] -- cited for vocal effort and spectral characteristics
+
+### Cited By (in Collection)
+- [[Feugere_2017_CantorDigitalis]] -- cites this for empirical Oq ranges across laryngeal mechanisms in singing
+- [[Titze_1992_VocalIntensity]] -- references this for glottal parameters in singing
 
 ### New Leads (Not Yet in Collection)
 - **Henrich et al. (2004)** - DECOM method paper. Essential for understanding the open quotient measurement technique used throughout this study.
 - **Sundberg et al. (1993)** - Phonatory control in male singing with subglottal pressure and voice source analysis. Provides complementary aerodynamic data to the EGG-based measurements in this paper.
 - **Childers et al. (1990)** - EGG and vocal fold physiology. Foundational for understanding the relationship between EGG signals and the glottal parameters measured here.
+
+### Conceptual Links (not citation-based)
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] -- Strong. Both study phonation in trained singers; Herbst provides the subglottal pressure and adduction dimensions that complement the Oq measurements here. Herbst's Breathy-Flow-Neutral-Pressed continuum maps to the Oq ranges measured here (pressed ~0.3-0.4, breathy ~0.7-0.9).
+- [[Sundberg_2005_GlottalSourceLoudness]] -- Strong. Both address voice source characteristics in singers; Sundberg provides loudness-dependent voice source data that complements the intensity-Oq correlations documented here.
+- [[Childers_Lee_1991_VoiceQualityFactors]] -- Moderate. Childers & Lee's voice quality factor analysis provides a complementary acoustic perspective on the breathy-modal-pressed continuum that this paper documents from the physiological (Oq) side.

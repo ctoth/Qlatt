@@ -285,7 +285,9 @@ The multi-stream delta architecture could inform Qlatt's internal representation
 - [[Hertz_2002_HybridFormantConcatenation]] — cites this as the core phone-and-transition model underlying the ETI-Eloquence approach
 - [[Hertz_2006_HybridSynthesisRegularities]] — cites this as the theoretical foundation for the phone-and-transition model underlying the hybrid model
 - [[Carlson_1995_ModelsOfSpeechSynthesis]] — cites this in survey of synthesis models
+- [[Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis]] — conceptual link; Hertz's stream-based approach prevents the concatenation discontinuities that Chappell & Hansen smooth post hoc
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — conceptual link; references phone-and-transition model for acoustic realization
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cites this for multi-stream phonological representation
 - **vanSanten_1993_SegmentalDuration** — cites this for duration modeling
 - **vanSanten_1994_SegmentalDurationTTS** — cites this in references
 - **vanSanten_1997_ProsodicModeling** — cites this as directly instantiating the sub-segmental non-uniform stretching van Santen identifies as an open problem
-- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cites this in references

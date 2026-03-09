@@ -309,12 +309,24 @@ None explicitly provided - the system is rule-based rather than equation-driven.
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Hertz_1982_SRS_TextToSpeech]]
-- [[Hertz_1991_StreamsPhonesTransitions]]
-- [[Klatt_1990_VoiceQualityVariations]]
-- [[Pierrehumbert_1980_EnglishIntonation]]
+- [[Hertz_1982_SRS_TextToSpeech]] -- SRS predecessor system
+- [[Hertz_1985_DeltaRuleSystem]] -- Delta language used to implement the rule system
+- [[Hertz_1987_DeltaNonLinearPhonology]] -- non-linear phonology models implemented in Delta
+- [[Hertz_1991_StreamsPhonesTransitions]] -- phone-and-transition model central to ETI-Eloquence timing
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] -- the Klatt synthesizer architecture used (5ms frame generation)
+- [[Klatt_1990_VoiceQualityVariations]] -- KLSYN88 synthesizer and voice quality framework
+- [[Pierrehumbert_1980_EnglishIntonation]] -- intonation framework for F0 model
+
+### Cited By (in Collection)
+- [[Hertz_2002_HybridFormantConcatenation]] -- cites this for ETI-Eloquence system architecture
+- [[Hertz_2006_HybridSynthesisRegularities]] -- cites this for the ETI-Eloquence system
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] -- references ETI-Eloquence multi-language architecture
 
 ### New Leads (Not Yet in Collection)
 - **[4] Hertz (1990)** - Documents the Delta programming language itself, the core tool enabling rule-based text-to-speech development across languages.
 - **[1] Beckman & Pierrehumbert (1986)** - Provides the intonational framework (tones and tiers) used for F0 contour generation across languages.
 - **[2] Clements & Hertz (1995)** - Shows an integrated phonological and phonetic approach to deriving acoustic parameters from linguistic structure.
+
+### Conceptual Links (not citation-based)
+- [[Allen_1987_MITalk_TTS]] -- Moderate. MITalk and ETI-Eloquence represent competing philosophies: MITalk uses a large morph dictionary (12000 entries) while ETI-Eloquence uses rules for morphological analysis, but both implement the canonical TTS pipeline architecture.
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] -- Moderate. Carlson's survey of synthesis models provides context for where ETI-Eloquence's phone-and-transition approach sits in the landscape of formant synthesis techniques.

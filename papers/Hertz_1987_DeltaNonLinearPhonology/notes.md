@@ -451,10 +451,18 @@ Qlatt's current linear phoneme representation could be enhanced with:
 
 ### Already in Collection
 - [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Hertz_1985_DeltaRuleSystem]]
-- [[Pierrehumbert_1980_EnglishIntonation]]
+- [[Hertz_1982_SRS_TextToSpeech]] -- predecessor system; linear representation limitations motivate the multi-stream approach here
+- [[Hertz_1985_DeltaRuleSystem]] -- the Delta language used to implement the phonological and phonetic models
+- [[Pierrehumbert_1980_EnglishIntonation]] -- intonation framework that Delta's F0 model draws on
 - [[Stevens_1989_QuantalNatureSpeech]]
+
+### Cited By (in Collection)
+- [[vanSanten_1997_ProsodicModeling]] -- references this as precursor establishing formant transitions as durational units (40ms sonorant-obstruent, 90ms sonorant-sonorant)
 
 ### New Leads (Not Yet in Collection)
 - **Holmes, Mattingly, & Shearme (1964) - Speech synthesis by rule** - Early formant synthesis work establishing target-and-transition model used throughout Hertz's paper
 - **Clements & Keyser (1983) - CV Phonology** - Multi-level representation theory that Delta implements, fundamental to understanding non-linear phonological structure
+
+### Conceptual Links (not citation-based)
+- [[Goldsmith_1976_AutosegmentalPhonology]] -- Strong. Goldsmith's autosegmental phonology with multi-tier representations and association lines provides the theoretical foundation for Delta's synchronized streams. The Well-formedness Condition (association lines must not cross) formalizes the temporal alignment constraints that Hertz implements with sync marks.
+- [[Klatt_1976_SegmentalDuration]] -- Moderate. Klatt's duration rules operate at the segment level; Hertz's models show that sub-segmental decomposition (phone + transition) provides better duration prediction, particularly for the pre-voiced lengthening phenomenon.

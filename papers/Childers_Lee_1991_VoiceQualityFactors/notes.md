@@ -225,6 +225,9 @@ Random Noise → HP Filter → Amplitude Modulation
 - **Holmes (1973)** - Original work on glottal waveform influence on parallel formant synthesizer naturalness
 - **Isshiki et al. (1978)** - Turbulent noise characteristics in dysphonia, directly cited for breathiness modeling approach
 
+### Conceptual Links (not citation-based)
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — Moderate. Childers & Lee's voice quality factor analysis (breathy-modal-pressed continuum via spectral and time-domain measures) provides a complementary acoustic perspective to Henrich's physiological Oq measurements across the same continuum in singers.
+
 ### Cited By (in Collection)
 - [[Alku_1999_SPL_DpeakLinearity]] — cited for frequency-domain voice source quantification
 - [[Balasubramanium_2012_CepstralSexuallyAppealingVoice]] — cited for voice quality analysis methods

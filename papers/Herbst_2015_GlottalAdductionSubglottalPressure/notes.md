@@ -128,13 +128,25 @@ This paper provides empirical evidence for how the three main voice control dime
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1960_AcousticTheorySpeechProduction]] -- cited for acoustic theory foundation
+- [[Holmberg_1988_GlottalAirflowPressure]] -- cited (via Dromey 1992); provides glottal airflow and pressure measurements for speech that complement the singing measurements here
 - [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]]
-- [[Klatt_1990_VoiceQualityVariations]]
-- [[Stevens_1998_AcousticPhonetics]]
+- [[Klatt_1990_VoiceQualityVariations]] -- cited; defines KLSYN88 voice quality framework
+- [[Stevens_1998_AcousticPhonetics]] -- cited for acoustic phonetics foundation
 - [[Sun_2006_VocalTractGlottalSource]]
+
+### Cited By (in Collection)
+- [[Bjorklund_2016_SubglottalPressureSPL]] -- references this for independent control of subglottal pressure and glottal adduction in trained singers
+- [[Ericsson_2020_FormantEstimationEvaluation]] -- references this in voice production context
 
 ### New Leads (Not Yet in Collection)
 - **Laver 1980 (ref 9)** - The Phonetic Description of Voice Quality. Foundational framework for the Breathy-Flow-Neutral-Pressed continuum used in this paper.
 - **Titze 1988/2006 (refs 5, 36)** - Framework for vocal registers and myoelastic aerodynamic theory. Provides the physiological underpinning for register modeling in synthesis.
 - **Stathopoulos & Sapienza 1997 (ref 17)** - Developmental changes in laryngeal function with intensity variation. Important for understanding untrained vs trained voice control.
+
+### Conceptual Links (not citation-based)
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- Strong. Both study voice source parameters in trained singers. Henrich provides the complementary EGG-based Oq measurements across laryngeal mechanisms that map directly to the Breathy-Flow-Neutral-Pressed continuum documented here.
+- [[Titze_1992_VocalIntensity]] -- Strong. Titze models the analytical relationships between subglottal pressure, glottal parameters, and vocal intensity that Herbst measures empirically; Titze's Table I constants provide the mathematical framework for the pressure-flow relationships Herbst observes.
+- [[Titze_1989_MaleFemaleVoices]] -- Strong. Titze's physiological model of male-female voice differences predicts the prephonatory adduction configurations that Herbst measures directly via videokymography.
+- [[Alku_1999_SPL_DpeakLinearity]] -- Moderate. Alku's finding of a linearity knee in the relationship between d-peak and SPL may correspond to the boundary between adduction-mediated and pressure-mediated intensity control that Herbst documents.
+- [[Lienard_1999_VocalEffortVowelSpectral]] -- Moderate. Lienard quantifies how vocal effort modifies spectral tilt and F0, which are the acoustic consequences of the pressure-adduction interactions Herbst measures at the source level.

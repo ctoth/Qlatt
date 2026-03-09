@@ -247,3 +247,4 @@ This paper provides the quantitative mapping from vocal effort (subglottal press
 
 ### Conceptual Links (not citation-based)
 - [[Bjorklund_2016_SubglottalPressureSPL]] — Uses the identical /pae/ protocol on a similar untrained population but measures the Ps-to-SPL transfer function rather than voice source parameters. Together, Sundberg 2005 (Ps -> voice quality) and Bjorklund 2016 (Ps -> SPL) provide the complete effort-to-output mapping needed for synthesis.
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — Strong. Both address voice source characteristics in singers; Henrich provides EGG-based Oq measurements across laryngeal mechanisms and intensities that complement the inverse-filtering-based voice source data here.

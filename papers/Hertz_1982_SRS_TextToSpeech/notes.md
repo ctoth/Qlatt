@@ -236,14 +236,26 @@ FR  AV  AH  F1    F2    F3   DU
 ## Collection Cross-References
 
 ### Already in Collection
+- [[Allen_1987_MITalk_TTS]] -- MITalk system; competing TTS approach that SRS improves upon
 - [[Carlson_1979_VowelPerceptionSalience]]
+- [[Elovitz_1976_NRL_LTS]] -- NRL letter-to-sound rules; foundational G2P approach that SRS extends
 - [[Klatt_1979_SpeechPerceptionLexicalAccess]]
-- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] -- the Klatt synthesizer driven by SRS parameter rules
 - [[Rabiner_1968_DigitalFormantSynthesizer]]
 - [[Rabiner_1968_SynthesisByRule]]
+
+### Cited By (in Collection)
+- [[Carlson_1979_VowelPerceptionSalience]] -- references SRS as a TTS rule system
+- [[Hertz_1985_DeltaRuleSystem]] -- SRS is the predecessor system that Delta improves upon
+- [[Hertz_1987_DeltaNonLinearPhonology]] -- references SRS for the linear representation limitations
+- [[Hertz_1991_StreamsPhonesTransitions]] -- references SRS as part of the Hertz synthesis lineage
+- [[Hertz_1999_ETI-Eloquence_MultiLanguage]] -- references SRS as predecessor to ETI-Eloquence
 
 ### New Leads (Not Yet in Collection)
 - **Hertz (1979b)** - Ph.D. dissertation - Contains more detailed information about the SRS rule language, contour definition system, and implementation details not fully covered in this JASA paper.
 - **Carlson & Granström (1976)** - "A text-to-speech system based entirely on rules" - Parallel development of rule-based TTS in Sweden, useful for comparing approaches to the same problem.
 - **Lovins, Macchi & Fujimura (1979)** - "A demisyllable inventory for speech synthesis" - Alternative to phoneme-based synthesis that might inform coarticulation modeling.
 - **Allen (1976)** - "Synthesis of speech from unrestricted text" - MIT approach to unrestricted text synthesis, important context for the field at the time.
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1987_TTS_Review]] -- Moderate. Klatt's review surveys TTS systems including SRS, placing it in context of the field's development from rule-based to concatenative approaches.

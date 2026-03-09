@@ -173,10 +173,15 @@ When comparing synthesized output against natural speech measurements, H1*-H2* a
 
 ### Cited By (in Collection)
 - [[Doval_2006_SpectrumGlottalFlowModels]] -- extends the spectral formulas derived here to a complete spectral model
+- [[Fant_1985_LFModelGlottalFlow]] -- lists this in its "Cited By" section
+- [[Fant_1988_LFFrequencyDomainInterpretation]] -- lists this as a conceptual link
+- [[Hanson_1995_GlottalCharacteristicsFemale]] -- lists this in its "Cited By" section
 - [[Henrich_2003_JND_OpenQuotient]] -- uses the same parameterization framework (Oq, alpha_m) for perceptual testing
 - [[Henrich_2005_GlottalOpenQuotientSinging]] -- empirical measurements building on the theoretical framework here
 
 ### Conceptual Links (not citation-based)
-- [[Kreiman_2012_VoiceQualityHarmonicOQ]] -- addresses the same fundamental question of how harmonic measures relate to open quotient, from a perceptual perspective
-- [[Iseli_2007_VoiceSourceAgeSexVowel]] -- uses a formant correction formula similar to Hanson's (analyzed here) for H1*-H2* estimation across speakers
-- [[Hanson_2001_ModelsPhonation]] -- extends Hanson's approach to phonation modeling, directly relevant to the KLGLOTT88 limitation documented here
+- [[Drugman_2020_GlottalSourceEstimation]] -- Strong. Both analyze the relationship between time-domain glottal parameters (Oq, alpha_m) and spectral measures (H1-H2); Drugman's NAQ feature captures effects of both Oq and alpha_m that this paper shows are inseparable from H1-H2 alone.
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] -- Strong. Addresses the same fundamental question of how harmonic measures relate to open quotient, from a perceptual perspective.
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] -- Moderate. Uses a formant correction formula similar to Hanson's (analyzed here) for H1*-H2* estimation across speakers.
+- [[Hanson_2001_ModelsPhonation]] -- Strong. Extends Hanson's approach to phonation modeling, directly relevant to the KLGLOTT88 limitation documented here.
+- [[Titze_1992_VocalIntensity]] -- Moderate. Titze's analytical model relates source spectrum to glottal parameters using a simplified one-parameter spectral model; this paper shows the limitations of such simplification when Oq and alpha_m covary.

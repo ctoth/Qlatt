@@ -160,10 +160,20 @@ Systems used:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Hertz_1991_StreamsPhonesTransitions]]
-- **Hertz_1999_ETI-Eloquence_MultiLanguage**
-- [[Klatt_1990_VoiceQualityVariations]]
+- [[Hertz_1982_SRS_TextToSpeech]] -- original SRS system; part of the Hertz synthesis lineage
+- [[Hertz_1985_DeltaRuleSystem]] -- Delta language underlying ETI-Eloquence
+- [[Hertz_1987_DeltaNonLinearPhonology]] -- non-linear phonology framework used in ETI-Eloquence
+- [[Hertz_1991_StreamsPhonesTransitions]] -- phone-and-transition model underlying ETI-Eloquence
+- [[Hertz_1999_ETI-Eloquence_MultiLanguage]] -- the ETI-Eloquence system architecture
+- [[Klatt_1990_VoiceQualityVariations]] -- KLSYN88 synthesizer used for formant synthesis component
+
+### Cited By (in Collection)
+- [[Hertz_2006_HybridSynthesisRegularities]] -- extends the hybrid formant-concatenation approach with acoustic regularities analysis
 
 ### New Leads (Not Yet in Collection)
 - **[2] Verhelst 2000** - Describes the WSOLA join technique used to splice waveform fragments in the hybrid utterances; technically important for understanding the concatenation methodology.
 - **[5] Hertz & Huffman 1992** - Presents nucleus-based timing models for speech synthesis; relevant for understanding prosodic and durational aspects of synthesis-by-rule.
+
+### Conceptual Links (not citation-based)
+- [[Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis]] -- Moderate. Both address the spectral discontinuity problem in segment-based synthesis, but from opposite directions: Hertz replaces natural obstruents with synthetic ones to avoid discontinuities; Chappell & Hansen smooth existing discontinuities post hoc.
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] -- Moderate. Carlson's survey positions hybrid approaches in the synthesis landscape; the finding that obstruents can be synthesized while vowels need natural samples validates the distinction between source-driven and resonance-driven segments.

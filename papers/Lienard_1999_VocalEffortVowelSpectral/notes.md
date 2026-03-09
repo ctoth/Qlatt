@@ -147,7 +147,10 @@ The vowel triangle **shifts upward** in F1 with increased vocal effort, rather t
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Henrich_2005_GlottalOpenQuotientSinging]] -- cites Lienard for vocal effort and spectral characteristics
+
+### Conceptual Links (not citation-based)
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] — Moderate. Lienard quantifies how vocal effort modifies spectral tilt and F0 from the radiated speech perspective; Herbst measures the same phenomenon at the source level (pressure-adduction interactions), providing the physiological mechanism behind Lienard's acoustic observations.
 
 ### New Leads (Not Yet in Collection)
 - **Sluijter & Van Heuven (1996)** - Directly relevant: shows spectral balance (same effect as spectral tilt) is a cue for linguistic stress. Critical for implementing stress/prominence in synthesis.

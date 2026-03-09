@@ -209,3 +209,4 @@ This study validates two key acoustic measures — pitch sigma and SFF range (bo
 
 ### Conceptual Links (not citation-based)
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — Banse uses F0 variability (SdF0) as one of 29 acoustic parameters profiling 14 emotions, reporting that high-arousal emotions increase F0 variability. Cumbers validates that SdF0 (pitch sigma) is the strongest acoustic correlate of perceived vocal variability (r = .927), providing perceptual grounding for Banse's use of this parameter as an emotion indicator.
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — Hodges-Simeon identifies F0-SD (pitch variation) as the key acoustic predictor of physical dominance perception in male voices (beta=-.16); Cumbers provides the perceptual validation that F0 variability is reliably perceived by listeners, grounding Hodges-Simeon's dominance finding in perceptual reality

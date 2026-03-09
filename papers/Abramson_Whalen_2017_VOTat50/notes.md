@@ -189,3 +189,6 @@ VOT increases as articulation moves posteriorly:
 - **Cho, T., & Ladefoged, P. (1999)** - Variation and universals in VOT across 18 languages. Provides language-specific VOT targets useful for multilingual synthesis.
 - **Stevens, K. N. (1993)** - Models for the production and acoustics of stop consonants. Theoretical foundation for implementing stop consonant synthesis.
 - **Crystal, T. H., & House, A. S. (1982)** - Segmental durations in connected speech. Important for understanding how VOT varies in running speech contexts.
+
+### Conceptual Links (not citation-based)
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — demonstrates that the aspirated vs unreleased distinction in word-final /t/ (defined by VOT measurement framework) has social-perceptual consequences: aspirated /t/ increases perceived prestige and long-term attractiveness, connecting VOT phonetics to social evaluation

@@ -123,3 +123,30 @@ For the Qlatt speaker personality system, this paper establishes that dominance 
 - Puts et al. (2006) — Dominance and male voice pitch (source data)
 - Borkowska & Pawlowski (2011) — F0 and female dominance/attractiveness (next paper)
 - Feinberg et al. (2005, 2008) — Pitch manipulation studies (already in collection)
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Puts_2006_DominanceVoicePitch]] — cited for the original dating-game paradigm data and dominance-voice pitch analysis that this study extends
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited for pitch manipulation studies on voice attractiveness; this paper complements with natural speech data
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — cited for integrated F0-formant preference models
+- [[Collins_2003_VocalVisualAttractiveness]] — cited for vocal and visual attractiveness in women; provides female voice data for comparison
+- [[Fitch_1999_VocalTractMorphology]] — cited for vocal tract morphology and formant dispersion (Df) as body size indicator
+- [[Scherer_2001_VocalEmotionCrossCultural]] — cited for vocal affect expression model relating acoustic parameters to emotion/personality perception
+
+### Cited By (in Collection)
+- [[Borkowska_2011_F0DominanceAttractiveness]] — cites this for male voice F0/dominance/attractiveness showing linear relationships; extends analysis to female voices with nonlinear attractiveness finding
+- [[Schild_2019_AttractiveVoiceFormantF0]] — cites Arnocky, Hodges-Simeon et al. (2018) on voice-immunocompetence links
+- [[Cartei_2014_VoiceMasculinity]] — cites this for dominance/attractiveness dissociation and voice-mating success
+- [[Babel_2014_VocalAttractiveness]] — cites this for different vocal parameters predicting dominance vs attractiveness
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — cites Hodges-Simeon via Zhang et al. (2021) on pitch lowering and aggressive intent
+
+### New Leads (Not Yet in Collection)
+- Bruckert et al. (2006) — "Women use voice parameters to assess men's characteristics" — voice-based mate assessment
+- Puts et al. (2007) — "Men's voices as dominance signals" — vocal F0 and formant frequencies as dominance cues
+
+### Conceptual Links (not citation-based)
+- [[Borkowska_2011_F0DominanceAttractiveness]] — direct female-voice counterpart: Hodges-Simeon shows low F0 linearly predicts male attractiveness, while Borkowska shows female attractiveness peaks at intermediate F0 (~260 Hz), establishing sex-specific voice-perception mappings
+- [[Schild_2019_AttractiveVoiceFormantF0]] — uses PCA to decompose the same set of voice parameters (F0, formants, spectral tilt) into orthogonal components predicting attractiveness; provides a data-driven complement to Hodges-Simeon's regression approach
+- [[Liu_2011_FemaleVoiceAttractiveness]] — examines female voice attractiveness through voice quality dimensions (breathiness, size projection) rather than Hodges-Simeon's F0/Df/intensity framework; together they show attractiveness operates through different parameters for male vs female voices
+- [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — examines how F0 variability (which Hodges-Simeon identifies as key dominance predictor F0-SD) relates to personality perception more broadly

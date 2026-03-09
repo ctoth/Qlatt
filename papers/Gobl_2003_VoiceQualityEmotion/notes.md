@@ -227,8 +227,14 @@ Where:
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]]
 - [[Klatt_1990_VoiceQualityVariations]]
 - [[Mozziconacci_1998_SpeechEmotionProsody]]
+- [[Titze_2014_BistableVocalFoldAdduction]] — Register bistability constrains which voice quality transitions are physically smooth vs abrupt; relevant to Gobl's mapping of voice quality to emotion categories.
+- [[Scherer_TaskLoadStressAcoustics]] — Stress shifts spectral energy upward, corresponding to increased vocal tension in Gobl's voice quality framework.
+- [[Weninger_2013_AcousticsEmotionAudio]] — Analysis-side complement: identifies loudness and spectral flux as primary arousal features, confirming that Gobl's synthesis-side voice quality parameters target the right acoustic dimensions.
 
 ### New Leads (Not Yet in Collection)
 - **Laver, J., 1980** - The Phonetic Description of Voice Quality - provides the comprehensive physiological framework (adductive tension, medial compression, longitudinal tension) that underpins voice quality classification throughout this paper.
 - **Scherer, K.R., 1986** - Foundational review of vocal affect expression, establishing that voice quality may be key to differentiating discrete emotions (referenced extensively in the discussion).
 - **Nı Chasaide, A., Gobl, C., 1997** - Voice source variation handbook chapter providing comprehensive technical background on analysis techniques and parameters (EE, RA, RG, RK) used for voice quality measurement.
+
+### Conceptual Links (not citation-based — added during reconciliation)
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — Gobl's emotion-voice quality mappings use the same spectral tilt and H1-H2 measures that Iseli provides age/sex norms for; together they establish that voice source parameters vary systematically with both speaker identity (age/sex) and communicative intent (emotion)

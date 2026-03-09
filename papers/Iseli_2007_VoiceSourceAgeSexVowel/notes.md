@@ -173,3 +173,37 @@ This paper is essential for the Qlatt synthesizer in two ways:
 - Holmberg et al. (1995) — H1*-H2* correlated with open quotient
 - Fant (1995) — LF model frequency domain analysis
 - Lee et al. (1999) — F0 and formant developmental data
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory of speech production; the vocal tract transfer function model (Eq. A2) derives from Fant's formant theory
+- [[Fant_1985_LFModelGlottalFlow]] — cited for the LF glottal flow model; the voice source measures (H1-H2, spectral tilt) relate to LF parameters
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — cited for glottal characteristics of female speakers; directly comparable corrected measures
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for acoustic correlates of female speaker glottal characteristics; provides the original correction approach this paper improves
+- [[Hanson_1999_GlottalMaleSpeakers]] — cited for male speaker glottal characteristics with same measures
+- [[Klatt_1990_VoiceQualityVariations]] — cited for voice quality analysis and synthesis; the KLSYN88 synthesizer uses parameters (AV, OQ, TL) that map to measures corrected here
+- [[Peterson_Barney_1952_VowelControl]] — cited for canonical vowel formant frequencies used as correction input (Table I)
+
+### Cited By (in Collection)
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — uses Iseli et al. (2007) correction formula for H1*-H2* vocal tract effects; Iseli is a co-author
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses Iseli & Alwan (2004) correction for H1-A1/H1-A3 measures (the earlier version of this formula)
+- [[Lee_2019_AcousticVoiceVariation]] — cites this for harmonic correction formulas used in their voice variation study
+- [[Keating_2015_CreakyVoiceAcoustics]] — references the formant-corrected H1*-H2* measure from Hanson 1995 / Iseli 2007
+- [[Henrich_2001_SpectralOqAsymmetry]] — cites this for the formant correction formula for H1*-H2* estimation
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — cites this for age/sex voice source dependencies
+- [[Schild_2019_AttractiveVoiceFormantF0]] — cites this for age- and sex-specific norms for spectral tilt measures
+- [[Zhang_2021_LaryngealSizeSexDifferences]] — cites this for voice source age/sex variation data
+- [[Titze_1989_MaleFemaleVoices]] — related F0 and voice source sex difference data
+- [[Fitch_1999_VocalTractMorphology]] — related developmental vocal tract data
+
+### New Leads (Not Yet in Collection)
+- Holmberg et al. (1995) — "Comparisons among aerodynamic, electroglottographic, and acoustic spectral measures of female voice" — links H1*-H2* to physiological open quotient
+- Lee et al. (1999) — "Acoustics of children's speech: Developmental changes" — extends the age range of speaker modeling data
+- Mannell (1998) — "Formant diphone parameter extraction" — source of the bandwidth estimation formula (Eq. 2)
+
+### Conceptual Links (not citation-based)
+- [[Childers_Lee_1991_VoiceQualityFactors]] — both papers characterize voice source differences across speaker populations; Childers & Lee examines voice quality factors while Iseli provides the corrected spectral measures needed to compare voice source characteristics accurately
+- [[Gobl_2003_VoiceQualityEmotion]] — Gobl's emotion-voice quality mappings use the same spectral tilt and H1-H2 measures that Iseli provides age/sex norms for; together they establish that voice source parameters vary systematically with both speaker identity (age/sex) and communicative intent (emotion)
+- [[Hanson_2001_ModelsPhonation]] — extends Hanson's phonation modeling approach that Iseli's correction formula supports
+- [[Hanson_2002_HLsynSourceParameters]] — HLsyn uses parameters (OQ, TL) directly related to the H1*-H2* and H1*-A3* measures Iseli characterizes; the age/sex norms here could parameterize HLsyn speaker profiles

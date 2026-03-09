@@ -72,3 +72,30 @@ This paper demonstrates that articulatory precision -- specifically whether stop
 - Kempe, V., Puts, D. & Cardenas, R. Masculine men articulate less clearly. Human Nat. 24, 25 (2013). [ref 62]
 - Bond, Z. S. & Moore, T. J. A note on the acoustic-phonetic characteristics of inadvertently clear speech. Speech Commun. 14, 325-337 (1994). [ref 63]
 - Stehr, D. A. et al. Examining vocal attractiveness through articulatory working space. J. Acoust. Soc. Am. 150, 1548-1564 (2021). [ref 12]
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Puts_2006_DominanceVoicePitch]] — cited for dominance and sexual dimorphism in human voice pitch
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited (via ref 40, Feinberg et al. 2005) for pitch manipulation and attractiveness
+- [[Babel_2014_VocalAttractiveness]] — cited (via ref 112) for multidimensional view of vocal attractiveness
+- [[Fitch_1999_VocalTractMorphology]] — cited (via ref 26, Fitch 2010) for vocal tract evolution and language
+- [[Schild_2019_AttractiveVoiceFormantF0]] — cited (via ref 37, Schild et al. 2020) for voice-morphology-hormones links
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — cited (via ref 49, Zhang, Hodges-Simeon et al. 2021) for pitch and dominance perception
+- [[Abramson_Whalen_2017_VOTat50]] — relevant for VOT measurement framework; the /t/ release patterns studied here are defined by VOT
+
+### Cited By (in Collection)
+- [[Schild_2019_AttractiveVoiceFormantF0]] — conceptually linked as showing voice quality measures beyond F0/formants matter for attractiveness
+- [[Fitch_1999_VocalTractMorphology]] — cross-references this for vocal tract anatomy
+
+### New Leads (Not Yet in Collection)
+- Stehr et al. (2021) — "Examining vocal attractiveness through articulatory working space" — quantifies the link between articulation quality and attractiveness
+- Kempe, Puts & Cardenas (2013) — "Masculine men articulate less clearly" — establishes inverse masculinity-articulatory precision relationship
+- Podesva et al. (2015) — "Constraints on the social meaning of released /t/" — production and perception data on the same /t/ variable
+- Pietraszewski & Schwartz (2014) — "Evidence that accent is a dedicated dimension of social categorization" — accent/articulation in social evaluation
+
+### Conceptual Links (not citation-based)
+- [[Abramson_Whalen_2017_VOTat50]] — Abramson & Whalen's comprehensive VOT framework provides the acoustic measurement basis for the aspirated vs unreleased /t/ distinction that Karthikeyan shows affects social perception; together they connect phonetic detail to social evaluation
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — both study vocal parameters predicting male dominance vs attractiveness; Hodges-Simeon focuses on F0/Df/intensity while Karthikeyan adds articulatory precision as a new dimension, and both find that prestige/attractiveness and dominance are predicted by different cues
+- [[Borkowska_2011_F0DominanceAttractiveness]] — Borkowska's finding that dominance and attractiveness are separable voice dimensions parallels Karthikeyan's finding that aspirated /t/ predicts prestige but not physical dominance
+- [[Hanson_2003_AspiratedStopsModels]] — Hanson & Stevens model the acoustic properties of aspirated stops (/t/, /k/) that Karthikeyan's study identifies as socially meaningful; the aspiration duration and burst characteristics modeled in Hanson are exactly what distinguishes Karthikeyan's two speaker groups

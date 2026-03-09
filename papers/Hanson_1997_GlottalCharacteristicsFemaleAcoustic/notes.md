@@ -217,6 +217,9 @@ H1\*-H2\* is commonly used as an open quotient indicator, but this paper finds i
 - Cranen & Schroeter (1995) - "Acoustic consequences of glottal openings" - addresses the same glottal chink modeling
 - Södersten & Lindestad (1990) - "Glottal closure and perceived breathiness" - direct physiological validation
 
+### Cited By (in Collection)
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — extends Hanson's correction formula for harmonic magnitudes; provides systematic age/sex/vowel data using the corrected measures across 335 speakers
+
 ### Supersedes or Recontextualizes
 - This is the published JASA paper version of the analysis in [[Hanson_1995_GlottalCharacteristicsFemale]] (the PhD thesis). The thesis contains more detail; this paper provides the condensed, peer-reviewed findings with corrected measures and group classification.
 

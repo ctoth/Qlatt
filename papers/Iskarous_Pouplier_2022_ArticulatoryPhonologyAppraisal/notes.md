@@ -120,20 +120,38 @@ Speech planning modeled as activation fields over gestural representations:
 - **Figure A3** (p.32): Comparison of real LA kinematics with first-order and second-order models
 - **Figure B1** (p.34): Limit cycle oscillator behavior — amplitude stability and phase resetting
 
-## Cross-References to Collection
+## Collection Cross-References
 
-- **Saltzman_1989_DynamicalGesturalPatterning**: The foundational task dynamics paper reviewed here
-- **Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem**: The nonlinear extension with cubic term
-- **Kirkham_2025_DynamicalLawsSpeechGestures**: Empirical validation using SINDy showing under-damped dynamics
-- **Recasens_1997_LingualCoarticulationDAC**: DAC model relates to gestural blending weights
-- **Ohman_1966_CoarticulationVCV**: Vowel-to-vowel diphthongal gesture model confirmed by AP framework
-- **Klatt_1976_SegmentalDuration**: Duration rules relate to stiffness parameter in task dynamics
-- **White_2014_ProsodicTimingFunction**: Boundary lengthening effects relate to π-gesture
-- **Liberman_Mattingly_1985_MotorTheory**: Motor theory validated by AP's gesture-based phonology
-- **Sering_2020_AnticipatoryCoarticulation**: Neural network coarticulation maps to AP gestural overlap
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory; the paper discusses the articulation-acoustics mapping gap that Fant's work defines
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — cited as the foundational task dynamics paper reviewed here
+- [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] — cited for the nonlinear extension with cubic term
+- [[Liberman_Mattingly_1985_MotorTheory]] — cited for motor theory that AP's gesture-based phonology relates to
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] — cited for the foundational AP paper defining gestures as phonological primitives
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — cited as the foundational 1992 AP overview that this paper extends and critically evaluates
+
+### Cited By (in Collection)
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — cross-references this as the 21st-century appraisal extending the 1992 overview
+- [[Kirkham_2025_DynamicalLawsSpeechGestures]] — cites Iskarous (2016, 2017) and Iskarous, Cole & Steffman (2024) for dynamical models of speech
+- [[Volenec_2015_Coarticulation]] — cross-references this for the AP/coproduction framework
+- [[Hertz_1991_StreamsPhonesTransitions]] — cross-references this for the π-gesture mechanism explaining phrase-final lengthening
+- [[Fowler_2006_CoarticulationGesturePerception]] — cross-references this for the AP framework and gestural theory
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cross-references this for the gestural overlap framework applied to /l/ allophones
+
+### New Leads (Not Yet in Collection)
+- Byrd & Saltzman (2003) — "The elastic phrase: modeling the dynamics of boundary-adjacent lengthening" — defines the π-gesture model for prosodic lengthening
+- Saltzman et al. (2008) — "A task-dynamic toolkit for modeling the effects of prosodic structure on articulation" — defines μ-gestures for prominence/boundary modulation
+- Roon & Gafos (2016) — "Perceiving while producing: modeling phonological planning dynamics" — dynamic field theory for speech planning
+- Nam et al. (2004) — "TADA: An enhanced, portable Task Dynamics model in Matlab" — reference implementation of task dynamics
 
 ### Conceptual Links (not citation-based)
-- **Hertz_1991_StreamsPhonesTransitions** — Hertz's observation that only steady states lengthen phrase-finally while transitions remain durationally stable maps to AP's π-gesture mechanism: prosodic clock-slowing at boundaries affects low-stiffness gestures (steady states) but high-stiffness gestures (transitions) resist stretching. Hertz provides the empirical data; AP provides the dynamical mechanism.
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's observation that only steady states lengthen phrase-finally while transitions remain durationally stable maps to AP's π-gesture mechanism: prosodic clock-slowing at boundaries affects low-stiffness gestures (steady states) but high-stiffness gestures (transitions) resist stretching. Hertz provides the empirical data; AP provides the dynamical mechanism.
+- [[Kirkham_2025_DynamicalLawsSpeechGestures]] — empirical validation using SINDy showing under-damped dynamics, challenging the standard critically-damped assumption in task dynamics that this paper reviews
+- [[Recasens_1997_LingualCoarticulationDAC]] — DAC model's degree-of-constraint concept maps to AP's gestural blending weights; both frameworks explain why some segments resist coarticulation more than others
+- [[Ohman_1966_CoarticulationVCV]] — the vowel-to-vowel diphthongal gesture model is confirmed and extended by AP's framework of overlapping gestures
+- [[Klatt_1976_SegmentalDuration]] — Klatt's segment-level duration rules relate to AP's stiffness parameter; higher stiffness = shorter intrinsic duration
+- [[White_2014_ProsodicTimingFunction]] — boundary lengthening effects relate to AP's π-gesture prosodic time-warping
+- [[Sering_2020_AnticipatoryCoarticulation]] — neural network coarticulation predictions map to AP's gestural overlap and anticipatory activation
 
 ## Key Terminology
 

@@ -170,3 +170,6 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 
 ### Cited By (in Collection)
 - (none found)
+
+### Conceptual Links (not citation-based — added during reconciliation)
+- [[Karthikeyan_2023_ArticulatoryStatusAttractiveness]] — Karthikeyan shows that fully released/aspirated word-final /t/ increases perceived prestige and long-term attractiveness; Hanson & Stevens' acoustic models of aspiration (supraglottal frication + glottal noise) describe exactly the acoustic properties that distinguish Karthikeyan's two speaker groups

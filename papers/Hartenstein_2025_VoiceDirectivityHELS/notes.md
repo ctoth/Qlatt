@@ -123,5 +123,18 @@ The frequency-dependent directivity patterns provide empirical data for acoustic
 
 ## Collection Cross-References
 
+### Already in Collection
+- (none — no cited references match current collection entries)
+
+### Cited By (in Collection)
+- (none found)
+
+### New Leads (Not Yet in Collection)
+- Brandner et al. (2020) — "A pilot study on the influence of mouth configuration and torso on singing voice directivity" — relevant for understanding how mouth shape affects radiation patterns across vowels
+- Pörschmann & Arend (2021) — "Investigating phoneme-dependencies of spherical voice directivity patterns" — directly relevant for phoneme-dependent directivity in synthesis
+- Pörschmann & Arend (2024) — "On the impact of downward-directed human voice radiation on ground reflections" — implications for realistic acoustic modeling
+- Leishman et al. (2021) — "High-resolution spherical directivity of live speech" — alternative high-resolution measurement methodology
+
 ### Conceptual Links (not citation-based)
 - [[Kocon_2018_VowelDirectivityRunningSpeech]] — Kocon provides empirical 2D half-plane vowel directivity data (5 vowels, 13 angles, up to 20 kHz); Hartenstein's 3D spherical harmonic approach captures the full directivity picture that Kocon's half-plane may underestimate, especially for off-axis lobes above 2 kHz.
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Fant's acoustic theory models the vocal tract as a series of tubes with radiation at the lips; Hartenstein's empirical 3D directivity data shows that real voice radiation is far more complex than Fant's simplified monopole/dipole radiation model, especially above 600 Hz where off-axis lobes appear.

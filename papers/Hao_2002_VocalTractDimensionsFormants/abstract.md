@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+This study compared formant frequencies and vocal tract dimensions of White American, African American, and Chinese male and female speakers. One hundred and twenty healthy adult subjects with equal numbers of males and females were divided among three races: forty White American speakers (twenty male speakers, and twenty female speakers), forty African American speakers (twenty male speakers, and twenty female speakers), and forty Chinese speakers (twenty male speakers, and twenty female speakers). Subjects were controlled for age, gender, height, weight, and dialect. Six dimensional parameters of the speakers' vocal tract cavities were measured with acoustic reflection technology (AR). The first three formant frequencies of nine isolated vowels and of continuous speech were analyzed using CSL (Computerized Speech Lab). Significant gender and race main effects were found in certain vocal tract dimensions and formant frequencies of certain vowels and continuous speech. This study extended the application of AR-based length and volumetric examinations to speech production research including large groups of subjects. The findings of this study now provide speech scientists, speech-language pathologists, and other health professionals with a new acoustic and anatomical database for adult speakers from three different races. Attempts were also made to apply the vocal tract dimensional measurements to an empirical evaluation of the relationship between vocal tract dimension and formant structure.
+
+---
+
+## Our Interpretation
+
+This study establishes normative data for how vocal tract physical dimensions (oral and pharyngeal cavity lengths and volumes) and vowel formant frequencies vary across gender and three racial groups, using a well-controlled sample of 120 speakers. The main finding is that while gross tract dimensions (especially volume) differ by race, these dimensions only weakly predict formant frequencies -- oral length, pharyngeal length, and oral volume together explain just 18% of F1 variance, and F2/F3 have no significant linear relationship to tract size. This reinforces that articulatory configuration during speech, not resting tract geometry, is the primary driver of formant variation across speakers.

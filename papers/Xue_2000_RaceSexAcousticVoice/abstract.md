@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+This study sought to provide preliminary normative data for the vocal productions of 44 Euro-American and 40 African-American elderly speakers and to test the hypotheses that (1) Euro-American elderly speakers do not have significantly different acoustic parameters of voice from African-American elderly speakers, and (2) elderly male speakers (both Euro-American and African-American) do not have significantly different acoustic parameters of voice from elderly female speakers (both Euro-American and African-American). Voice samples from groups of 44 Euro-American (21 men and 23 women) and 40 African-American (20 men and 20 women) elderly speakers (ages 70 to 80 years) from northeastern Arkansas were compared on measures of 15 selected multidimensional voice profile (KAY Elemetrics) acoustic parameters. Analysis show that Euro-American elderly speakers did not differ significantly from African-American elderly speakers on the measurements of all the selected acoustic parameters of voice, and elderly male speakers as a group differed from elderly female speakers on the measurements of absolute jitter, soft phonation index, and standard deviation of the fundamental frequency as well as fundamental frequency in Hz. The findings suggest it may not be necessary to establish separate acoustic norms of voice for Euro-American and African-American elderly speakers. However, some acoustic parameters of voice are highly sex-dependent, and different norms may be needed for male and female speakers regardless of their racial origins.
+
+---
+
+## Our Interpretation
+
+This paper asks whether race and sex affect standard clinical acoustic voice measures in elderly speakers, using 15 parameters from the Kay Elemetrics MDVP system on sustained /a/ productions. The main finding is that race (Euro-American vs. African-American) has no significant effect on any parameter, while sex produces significant differences specifically in F0-dependent measures (absolute jitter, F0 SD, SPI) plus F0 itself. For our project, the practical takeaway is that sex-based voice norms matter more than race-based norms for these perturbation and spectral balance parameters, and that the SPI-F0 coupling provides a concrete link between pitch and spectral tilt.

@@ -1,0 +1,4 @@
+---
+tags: [voice-quality, fundamental-frequency, aging, sex-differences, acoustics]
+---
+This paper compares 15 MDVP acoustic voice parameters across Euro-American and African-American elderly speakers (ages 70-80), finding no significant racial differences but significant sex effects on F0, absolute jitter, soft phonation index, and F0 standard deviation. The key contribution is normative data for elderly voice production and the demonstration that absolute perturbation measures are F0-dependent while relative measures are not, with SPI differences explained by the -12 dB/octave harmonic rolloff interacting with F0. For speech synthesis, the SPI-F0 relationship and sex-specific perturbation norms inform spectral tilt modeling and speaker profile design for aged and sex-differentiated voices.

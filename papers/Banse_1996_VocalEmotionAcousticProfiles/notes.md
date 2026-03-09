@@ -321,6 +321,9 @@ To apply: Take neutral baseline, add Z × SD for each parameter.
 ### Already in Collection
 - (none found)
 
+### Conceptual Links (not citation-based)
+- [[Cumbers_2013_PerceptualCorrelatesVocalVariability]] — Validates that F0 SD (pitch sigma), which Banse uses as one of 29 emotion-discriminating parameters (SdF0, loading .42 on PC1), is the strongest acoustic correlate of perceived vocal variability (r = .927). This provides perceptual grounding: when Banse reports increased SdF0 for high-arousal emotions, Cumbers shows listeners reliably perceive that increased variability.
+
 ### New Leads (Not Yet in Collection)
 - **Murray & Arnott (1993)** - "Toward a simulation of emotion in synthetic speech: A review of the literature on human vocal emotion" - Directly relevant review for implementing emotional speech synthesis.
 - **Scherer (1986)** - "Vocal affect expression: A review and a model for future research" - The theoretical foundation (component process model) that this paper tests; provides predictions for acoustic parameter changes.

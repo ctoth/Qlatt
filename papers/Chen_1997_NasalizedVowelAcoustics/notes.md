@@ -312,6 +312,12 @@ For nasalized vowels compared to oral:
 - [[Maeda_1982_VowelNasalizationCues]]
 - [[Sundberg_1972_SingingFormant]]
 
+### Cited By (in Collection)
+- [[Beddor_1986_NasalVowelHeight]] — references this paper for nasalized vowel acoustic measurements
+
+### Conceptual Links (not citation-based)
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt's breathy voice formulas increase B1 and add tracheal coupling (FNP/FNZ); Chen's nasalization also increases B1 by ~107 Hz and adds nasal coupling (FNP/FNZ). The two phenomena share the same Klatt parameter mechanisms (B1 widening, pole-zero pairs) but for different physiological reasons, requiring careful disambiguation in synthesis. (Moderate)
+
 ### New Leads (Not Yet in Collection)
 - **Stevens, K. N. (in press). Acoustic Phonetics** - Theoretical framework for how velopharyngeal coupling affects vocal tract acoustics; directly cited for predictions in this paper.
 - **Maeda, S. (1993). Acoustics of vowel nasalization and articulatory shifts in French nasal vowels** - Comprehensive treatment of French nasal vowel acoustics; provides complementary analysis methodology.

@@ -205,6 +205,12 @@ Tracheal/nasal coupling (FTP, FTZ, FNP, FNZ, BTP, BNP) may need addition for bre
 ### Cited By (in Collection)
 - [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] — references this paper's "rate" parameter concept in an open question about mapping medial surface thickness to voice quality modification
 - [[Zhang_2016_MechanicsVoiceProductionControl]] — this review provides the physiological grounding for why Burkhardt's voice quality modification rules work: medial surface thickness (controlled by CT/TA balance) is the primary voice quality controller
+- [[Kreiman_2021_ValidatingVoiceQuality]] — references this paper's rule-based voice quality modification as a validated target space for Klatt parameter settings
+- [[Lee_2019_AcousticVoiceVariation]] — the spectral tilt and noise dimensions identified by Lee map to Burkhardt's Klatt parameters TL and AH
+- [[Nittrouer_1990_AcousticMeasurementsVoice]] — Burkhardt's formulas for TL and AH implement the spectral tilt and aspiration noise dimensions Nittrouer shows are related but partially independent
+- [[Starr_2015_SweetVoiceJapaneseFeminine]] — cites this paper for voice quality phonation types in Klatt synthesis; sweet voice findings complement Burkhardt's breathy/tense/falsetto parameter rules
+- [[Titze_1991_NeurologicAperiodicity]] — Burkhardt's FL (flutter/jitter) parameter simulates F0 perturbation; Titze provides the physiological basis for setting FL values
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites this paper for Klatt parameter formulas for voice quality types discussed in the review
 
 ### Conceptual Links (not citation-based)
 - [[Mozziconacci_1998_SpeechEmotionProsody]] — Mozziconacci provides the prosodic parameter space (pitch level, pitch range, speech rate) for seven emotions but identifies voice quality as the missing component for sadness and fear. Burkhardt provides exactly those missing voice quality formulas, making the two papers complementary halves of a full emotional synthesis system. (Strong)

@@ -179,5 +179,12 @@ Linear interpolation between control points.
 - **Zwicker, E. & Feldtkeller, R. (1967)** - Das Ohr als Nachrichtenempfänger
 - Comprehensive auditory system modeling for understanding critical band analysis and psychoacoustic principles underlying vowel perception.
 
+### Cited By (in Collection)
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — cites Carlson et al. 1979 for perceptual salience of formant parameters
+- [[Klatt_1982_KlattalkTTS]] — references this work for vowel perception priorities
+- [[Hertz_1985_DeltaRuleSystem]] — cites this work in context of vowel perception
+- [[Hertz_1982_SRS_TextToSpeech]] — cites Carlson et al. 1979 for perceptual salience findings
+
 ### Conceptual Links (not citation-based)
 - [[Peterson_Barney_1952_VowelControl]] — P&B established the canonical F1/F2/F3 vowel space and documented which vowels are confused; Carlson's perceptual salience hierarchy (formant frequency >> spectral tilt > amplitude > bandwidth) explains *why* formant frequency is the primary dimension of vowel identity and why P&B's F1-F2 plot captures the dominant perceptual structure
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — Kent & Vorperian provide comprehensive bandwidth data; Carlson's finding that bandwidth is perceptually 20x less important than formant frequency explains why TTS systems can use approximate bandwidth values without perceptible degradation. (Moderate)

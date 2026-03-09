@@ -160,7 +160,14 @@ None - this is a text-only conference paper.
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- (none directly cited)
+
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — references KTH synthesis-by-rule system as parallel development with different linguistic tradition (Swedish vs American English)
+- [[Gobl_2003_VoiceQualityEmotion]] — cites Carlson & Granström for KTH synthesis work
+- [[Stevens_1989_QuantalNatureSpeech]] — cites Carlson & Granström for rule-based synthesis
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — cites Carlson & Granström for KTH formant synthesis
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — later survey by same first author references this earlier rule-based system
 
 ### New Leads (Not Yet in Collection)
 - **Allen (1973) "Speech synthesis from unrestricted text"** - MITalk precursor, directly relevant to English TTS architecture. Worth finding for comparison to our approach.

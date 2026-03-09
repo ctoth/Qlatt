@@ -188,6 +188,11 @@ b10: Die wird auf dem Platz sein, wo wir sie immer hinlegen.
 
 ### Cited By (in Collection)
 - [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — cites this as ref [16] for the EmoDB corpus; builds on this work's emotional speech data to develop rule-based phonation type formulas for Klatt synthesis
+- [[Eyben_2015_GeMAPS_AcousticParameters]] — cites EmoDB as a key emotional speech corpus informing parameter selection
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cites EmoDB as comparable emotion corpus
+- [[Laukka_2011_SpontaneousAffectIrritation]] — cites EmoDB for call-center emotion detection work
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — lists EmoDB as complementary dataset with EGG data
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites EmoDB as a key emotional speech corpus used in many reviewed studies
 
 ### New Leads (Not Yet in Collection)
 - **Laver 1980 [11]** - "The Phonetic Description of Voice Quality" - Canonical reference for voice quality terminology and classification; essential for understanding the articulatory settings labels used in emotional speech annotation.

@@ -265,6 +265,13 @@ Where:
 ### Already in Collection
 - [[Fant_1960_AcousticTheorySpeechProduction]]
 
+### Cited By (in Collection)
+- (none found)
+
+### Conceptual Links (not citation-based)
+- [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's stream-based representation addresses the same spectral continuity problem from the formant synthesis side: by defining formant trajectories as continuous streams, Hertz avoids the concatenation discontinuities that Chappell & Hansen smooth post hoc. Hertz's approach prevents the problem; Chappell & Hansen's approach repairs it. (Moderate)
+- [[Carlson_1979_VowelPerceptionSalience]] — Carlson's finding that formant frequency JND is ~3% and bandwidth JND is ~20% directly informs Chappell & Hansen's perceptual thresholds for evaluating spectral smoothing quality. (Moderate)
+
 ### New Leads (Not Yet in Collection)
 - **Conkie & Isard (1997)** - Introduces optimal coupling technique for improving segment concatenation by adjusting boundaries for better spectral match
 - **Kleijn & Haagen (1995)** - Foundational work on waveform interpolation for speech coding and synthesis applications

@@ -156,5 +156,11 @@ No empirical results - this is a survey paper. Key observations:
 - [[Stevens_1971_AirflowTurbulenceNoise]]
 - [[Stevens_1991_HL_Parameters]]
 
+### Cited By (in Collection)
+- [[Allen_1987_MITalk_TTS]] — discusses Carlson 1995 as referencing MITalk as a representative formant synthesis-by-rule system
+
+### Conceptual Links (not citation-based)
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Carlson discusses LF model parameters (Rg, Rk, Ra) and their spectral effects; Burkhardt provides the concrete rule-based formulas for using these (via OQ, TL, AH) to achieve specific voice qualities. Carlson's survey frames the problem; Burkhardt solves it. (Strong)
+
 ### New Leads (Not Yet in Collection)
 - **Gobl & Karlsson (1991) [ref 25]** - Source of Figure 2 showing LF parameter effects on spectrum. Useful for voice quality tuning.

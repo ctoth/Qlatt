@@ -177,6 +177,14 @@ $$
 - [[Jiang_2017_SoundOfConfidenceDoubt]]
 - [[Scherer_2001_VocalEmotionCrossCultural]]
 
+### Cited By (in Collection)
+- [[Trott_2022_ProsodyIndirectRequests]] — cites this paper for acoustic correlates of politeness in requests
+
+### Conceptual Links (not citation-based)
+- [[Xu_2013_VocalAttractivenessBodySizeProjection]] — Xu finds pressed voice = less attractive, consistent with Caballero's finding that lower HNR (harsher voice quality) marks rude speech; both suggest pressed/harsh phonation signals social hostility. (Moderate)
+- [[Hellbernd_2016_ProsodySpeechActIntention]] — both papers demonstrate that prosody conveys speaker intentions (politeness vs speech act type), with overlapping parameter spaces (F0 contour, duration); Hellbernd focuses on speech act categorization while Caballero focuses on the politeness dimension. (Strong)
+- [[Fish_2017_SoundOfInsincerity]] — both use similar methodologies to extract acoustic profiles of pragmatic attitudes; Fish examines sincerity while Caballero examines politeness. (Moderate)
+
 ### New Leads (Not Yet in Collection)
 - **Scherer, K.R., Ladd, D.R., Silverman, K.E., 1984** - "Vocal cues to speaker affect: testing two models" - Foundational paper on covariance vs configuration models for how acoustic cues encode affect. Critical for understanding categorical vs graded prosodic distinctions.
 - **Gussenhoven, C., 2004** - "Paralinguistics: Three Biological Codes" - Theoretical framework (frequency code, effort code) explaining why higher pitch signals politeness cross-linguistically.

@@ -217,6 +217,9 @@ The functional framework offers:
 - [[Recasens_2003_ArticulationSoundChangeRomance]]
 - [[Saltzman_1989_DynamicalGesturalPatterning]] — cited for task-dynamic timing framework; the gestural score concept underlies the prosodic timing phenomena analyzed here
 
+### Conceptual Links (not citation-based)
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — Campbell & Isard's syllable elasticity model with exponential weighting (0.75^(n-i)) for final lengthening complements White's reinterpretation of polysyllabic shortening as attenuated lengthening; both papers model duration variation as modulation of an underlying timing framework rather than independent segment-level rules. (Moderate)
+
 ### New Leads (Not Yet in Collection)
 - **Turk, A.E., & Shattuck-Hufnagel, S., 2000** - "Word-boundary-related duration patterns in English" - Critical for understanding domain-edge (word-initial and phrase-final) lengthening effects that are implementable in TTS.
 - **Beckman, M.E., 1992** - "Evidence for speech rhythms across languages" - Establishes cross-linguistic validity of prosodic timing effects, relevant for extending Qlatt's framework beyond English.

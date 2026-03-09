@@ -185,6 +185,13 @@ Key insight for Qlatt: The paper suggests "conventionalized" prosodic patterns e
 - [[Pierrehumbert_1980_EnglishIntonation]]
 - [[White_2014_ProsodicTimingFunction]]
 
+### Cited By (in Collection)
+- [[Caballero_2018_SoundOfImpoliteness]] — cites Hellbernd for speech act-prosody mapping
+- [[Trott_2022_ProsodyIndirectRequests]] — cites Hellbernd for prosodic encoding of speaker intentions
+
+### Conceptual Links (not citation-based)
+- [[Caballero_2018_SoundOfImpoliteness]] — both papers demonstrate that prosody conveys speaker intentions, with overlapping parameter spaces (F0 contour, duration); Hellbernd focuses on speech act categorization while Caballero focuses on the politeness dimension within requests. (Strong)
+
 ### New Leads (Not Yet in Collection)
 - **Morlec, Bailly, & Aubergé (2001)** - "Generating prosodic attitudes in French" - Directly relevant to synthesis: describes a computational model for generating attitude-specific prosody in French TTS.
 - **Blanc & Dominey (2003)** - "Identification of prosodic attitudes by temporal recurrent network" - Neural network approach to classifying prosodic attitudes, could inform machine learning approaches to intention-prosody mapping.

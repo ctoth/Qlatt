@@ -216,8 +216,14 @@ This directly complements van Santen (1993) sums-of-products models and Klatt (1
 - Peterson & Lehiste (1960) - "Duration of syllable nuclei in English" - classic vowel nucleus duration data
 - Bartkova & Sorin (1987) - "A model of segmental duration for French" - French duration rules for cross-language comparison
 
+### Cited By (in Collection)
+- [[Beckman_2005_ToBISystemEvolution]] — cites this paper for segment duration modeling
+- [[DeTournemire_1998_ProsodicAlphabetTranscription]] — applies the same syllable elasticity factor k model to French
+- [[vanSanten_1997_ProsodicModeling]] — discusses Campbell & Isard's hierarchical syllable-to-segment decomposition as an alternative to pure segment-level multiplication
+
 ### Conceptual Links (not citation-based)
 - [[Hertz_1991_StreamsPhonesTransitions]] — Hertz's nucleus stream and the observation that lengthening affects the entire sonorant sequence (vowel + /l/, /r/, /n/) solve the same problem as Campbell & Isard's syllable-level rhyme lengthening. Hertz provides a representational solution (nucleus stream); Campbell & Isard provide a computational one (z-score elasticity with exponential weighting). Both reject purely segment-level duration models.
+- [[White_2014_ProsodicTimingFunction]] — reinterprets polysyllabic shortening as attenuated lengthening, complementing Campbell & Isard's elasticity hypothesis; both papers model duration variation as modulation of an underlying timing framework rather than independent segment-level rules. (Moderate)
 
 ### Supersedes or Recontextualizes
 - Provides a higher-level framework that sits above [[Klatt_1976_SegmentalDuration]] -- Klatt's segment-level rules predict inherent durations and contextual modifications, while Campbell & Isard add a syllable-level timing layer that accommodates segments within a prosodically-determined syllable duration. The two are complementary rather than competing.

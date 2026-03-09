@@ -130,6 +130,8 @@ This paper provides empirical evidence that voice carries reliable information a
 ### Cited By (in Collection)
 - [[Balasubramanium_2012_CepstralSexuallyAppealingVoice]] — cites this paper as motivation for investigating acoustic correlates of sexually appealing voices using cepstral measures
 - [[Xu_2013_VocalAttractivenessBodySizeProjection]] — cites this paper for the voice-body configuration link; Xu provides the theoretical framework (body size projection) that explains why voice maps onto body morphology
+- [[Weiss_2020_VoiceAttractiveness]] — cites Hughes for evolutionary perspective on voice attractiveness; connects to sexual selection and reproductive success
+- [[Quene_2021_PitchTempoAttractiveness]] — cites Hughes for evolutionary context linking voice attractiveness to sexual behavior and body morphology
 
 ### New Leads (Not Yet in Collection)
 - Hughes, Harrison, & Gallup (2002) — "The sound of symmetry: voice as a marker of developmental instability" — predecessor study linking voice attractiveness to bilateral symmetry

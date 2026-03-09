@@ -158,11 +158,24 @@ The JSRU synthesizer block diagram (Fig. 23) is essentially what Klatt88 impleme
 ### Already in Collection
 - [[Carlson_1975_RuleBasedTTS]]
 - [[Fant_1960_AcousticTheorySpeechProduction]]
-- [[Klatt_1980_CascadeParallelFormantSynthesizer]]
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the cascade/parallel hybrid synthesizer that Holmes argues against; Holmes responds directly to Klatt's design choices
 - [[Rabiner_1968_DigitalFormantSynthesizer]]
 - [[Rabiner_1968_SynthesisByRule]]
+
+### Cited By (in Collection)
+- [[Jesus_1997_KlattSynthesiserImplementation]] — cites Holmes for the cascade vs parallel formant synthesizer analysis
+- [[Lin_1995_CascadeIntoParallel]] — cites Holmes for parallel formant synthesis and higher-pole correction analysis
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — references Holmes for all-parallel formant synthesizer design
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — cites Holmes for parallel formant synthesizer design
+- [[Feugere_2017_CantorDigitalis]] — references Holmes's cascade/parallel analysis
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — references Holmes's formant synthesizer analysis
+- [[Schwarz_Rodet_SpectralEnvelopeEstimation]] — references Holmes's parallel synthesizer design
+- [[Barreda_2015_FormantSpeakerSize]] — references Holmes's formant synthesizer work
 
 ### New Leads (Not Yet in Collection)
 - **Holmes [17] 1973** - "The influence of glottal waveform on the naturalness of speech from a parallel formant synthesizer" - Details on glottal source modeling and the original JSRU parallel synthesizer design.
 - **Flanagan [15] 1972** - "Speech Analysis, Synthesis and Perception" - Comprehensive reference on speech synthesis including source-filter model details.
 - **Rosenberg [19] 1971** - "Effect of glottal pulse shape on the quality of natural vowels" - Glottal waveform modeling that informs the excitation signal design in Section 7.
+
+### Conceptual Links (not citation-based)
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]] — Hu's thesis uses Holmes' 12-PFS parallel formant synthesizer as the synthesis backend; Holmes 1983 provides the theoretical justification for why parallel topology works for all speech sounds, which Hu's implementation relies on.

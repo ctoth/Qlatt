@@ -370,26 +370,20 @@ The thesis uses the reduced 49-phone TIMIT set with folding rules:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Klatt_1987_TTS_Review]]
-- [[Peterson_Barney_1952_VowelControl]]
+- [[Klatt_1987_TTS_Review]] — cited via Hunnicutt & Klatt 1987 (MITalk system)
+- [[Peterson_Barney_1952_VowelControl]] — cited for vowel formant reference data
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — cited for articulatory phonology framework underlying gestural coarticulation models
+
+### Cited By (in Collection)
+- (none found)
 
 ### New Leads (Not Yet in Collection)
-- Holmes & Holmes (2001) - "Speech synthesis and recognition"**
-- Comprehensive technical reference for formant-based synthesis and recognition systems, directly relevant to understanding Klatt-style synthesizers and their acoustic modeling.
-- Tokuda et al. (2000) - "Speech parameter generation algorithms for HMM-based speech synthesis"**
-- Establishes the speech parameter generation algorithm used extensively in HMM-based synthesis, the foundation for trajectory modeling in modern parametric synthesis systems.
-- Russell (2004) - "A Unified Model for Speech Recognition and Synthesis"**
-- Proposes a unified framework connecting recognition and synthesis through a common acoustic representation, highly relevant to understanding bidirectional speech models.
-- Foundational TTS implementation combining text analysis, prosody rules, and Klatt synthesizer, providing complete reference for practical synthesis-by-rule systems.
-- Deng & Ma (2000) - "Spontaneous speech recognition using a statistical coarticulatory model for the vocal-tract-resonance dynamics"**
-- Presents statistical approaches to coarticulation modeling critical for realistic formant transitions and speaker adaptation.
-- Rabiner (1989) - "A tutorial on hidden Markov models and selected applications in speech recognition"**
-- Classic reference for HMM theory, essential for understanding the probabilistic foundations of statistical parametric synthesis.
-- Masuko et al. (1996, 1997) - "Speech synthesis from HMMs using dynamic features" and "Voice characteristics conversion for HMM-based speech synthesis"**
-- Key works on integrating dynamic features and voice quality control in HMM-based synthesis systems.
-- Levinson (1986) - "Continuously variable duration hidden Markov models for automatic speech recognition"**
-- Addresses duration modeling in HMMs, critical for naturalness in synthetic speech timing and prosody.
-- Ostendorf & Roukos (1989) - "A stochastic segment model for phoneme-based continuous speech recognition"**
-- Introduces segment models that bridge discrete phoneme units with continuous acoustic trajectories.
-- Bridle et al. (1999) - "An investigation of segmental hidden dynamic models of speech coarticulation for automatic speech recognition"**
-- Comprehensive study of dynamic modeling for coarticulation, providing explicit implementation strategies for modeling articulatory movement patterns in synthesis.
+- **Holmes & Holmes (2001)** — "Speech synthesis and recognition" — comprehensive technical reference for formant-based synthesis and recognition systems
+- **Tokuda et al. (2000)** — "Speech parameter generation algorithms for HMM-based speech synthesis" — the SPG algorithm that is central to this thesis
+- **Russell (2004)** — "A Unified Model for Speech Recognition and Synthesis" — proposes unified recognition-synthesis framework
+- **Deng & Ma (2000)** — "Spontaneous speech recognition using a statistical coarticulatory model" — statistical coarticulation modeling
+- **Rabiner (1989)** — "A tutorial on hidden Markov models" — classic HMM reference
+
+### Conceptual Links (not citation-based)
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — Hu's thesis uses Holmes' 12-PFS parallel formant synthesizer as its synthesis backend. Holmes 1983 provides the theoretical justification for why parallel topology works for all speech sounds, directly relevant to the 12-PFS parameter set Hu employs.
+- [[Hillenbrand_1995_VowelAcoustics]] — Hillenbrand's formant measurements provide the kind of vowel target data that trajectory models like Hu's aim to reproduce through smooth interpolation rather than static targets.

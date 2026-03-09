@@ -217,10 +217,27 @@ Key mappings to Klatt/LF parameters:
 
 ### Already in Collection
 - [[Klatt_1987_TTS_Review]]
+- [[Klatt_1990_VoiceQualityVariations]] — cites Holmberg for glottal flow measurements
 
 ### Cited By (in Collection)
-- [[Henrich_2005_GlottalOpenQuotientSinging]] -- cites Holmberg for glottal airflow measurements in speech
-- [[Herbst_2015_GlottalAdductionSubglottalPressure]] -- references for glottal airflow and pressure data
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — cites Holmberg for glottal airflow measurements in speech
+- [[Herbst_2015_GlottalAdductionSubglottalPressure]] — references for glottal airflow and pressure data
+- [[Sundberg_2005_GlottalSourceLoudness]] — cites for glottal airflow and pressure data across soft/normal/loud voice
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — references for aerodynamic measures of male and female voice
+- [[Hanson_1999_GlottalMaleSpeakers]] — uses Holmberg's minimum airflow data combined with KLGLOTT88 for chink area estimates
+- [[Titze_1992_VocalIntensity]] — primary empirical data source for airflow and pressure measurements across loudness levels
+- [[Titze_1989_MaleFemaleVoices]] — uses Holmberg's average-to-peak flow ratios (0.52 male, 0.62 female) to derive aerodynamic scale factors
+- [[Fant_1988_LFFrequencyDomainInterpretation]] — provides empirical glottal flow measurements that validate theoretical predictions
+- [[Alku_1999_SPL_DpeakLinearity]] — cites for glottal airflow measurements at soft/normal/loud; notes their SPL range was ~11 dB
+- [[Doval_2006_SpectrumGlottalFlowModels]] — references Holmberg's glottal flow data
+- [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] — references for glottal airflow and pressure data
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — references for glottal airflow measurements
+- [[Koenig_LaryngealFactors]] — references for glottal airflow and pressure data
+- [[Stathopoulos_2011_VoiceAcrossLifespan]] — cites for glottal airflow measurements across vocal intensities
+- [[Nygren_2016_TransVoiceF0Testosterone]] — cites for glottal airflow and transglottal pressure measurements; provides source-side data for physiological range
+- [[Titze_2015_OddHarmonicSensitivity]] — references Holmberg's glottal airflow data
+- [[Zhang_2021_LaryngealSizeSexDifferences]] — references for glottal airflow and pressure data
+- [[Quene_2021_PitchTempoAttractiveness]] — references Holmberg's glottal airflow data
 
 ### New Leads (Not Yet in Collection)
 - **Rothenberg (1973)** — Foundational inverse-filtering technique used in this study; essential for understanding glottal airflow waveform derivation

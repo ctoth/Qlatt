@@ -256,10 +256,27 @@ Black (1949) correlation suggests: connected speech duration ≈ 0.6 × /hVd/ du
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Peterson_Barney_1952_VowelControl]]
+- [[Peterson_Barney_1952_VowelControl]] — the foundational 1952 vowel study that this paper replicates and extends with duration data, spectral change patterns, and F3/F4 measurements
+
+### Cited By (in Collection)
+- [[Hao_2002_VocalTractDimensionsFormants]] — cites Hillenbrand as a key formant frequency reference with 45 men and 48 women; uses the same /hVd/ context for direct comparison
+- [[Barreda_2015_FormantSpeakerSize]] — uses Hillenbrand's F1-F4 data to analyze between/within category variability ratios and uniform scaling across speaker sizes
+- [[Simpson_2009_PhoneticGenderDifferences]] — cites for male vs female vowel formant data and vowel space comparison
+- [[Kent_Vorperian_2018_VowelFormantBandwidths]] — references as a modern replication of Peterson & Barney with larger sample
+- [[Ericsson_2020_FormantEstimationEvaluation]] — Hillenbrand's vowel formant measurements provide ground-truth data that could validate the estimation methods evaluated
+- [[Delattre_1952_AcousticDeterminantsVowelColor]] — listed as a conceptual extension of the vowel space with modern digital analysis
+- [[Fant_1960_AcousticTheorySpeechProduction]] — listed as extending Fant's Russian vowel data to modern American English with dynamic trajectory information
+- [[Klatt_1990_VoiceQualityVariations]] — references Hillenbrand's vowel data
+- [[Chen_1997_NasalizedVowelAcoustics]] — references Hillenbrand's vowel formant data
+- [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — cited for vowel formant weighting (formants weighted more than duration for tense/lax)
+- [[Lyzenga_Carlyon_2005_FormantFMDetection]] — references Hillenbrand's formant data
+
 
 ### New Leads (Not Yet in Collection)
 - **Fant (1973)**: Speech theory and spectral characteristics; fundamental reference for formant-based synthesis
 - **Stevens & House (1963)**: Perturbation of vowel acoustics by consonantal context; crucial for understanding coarticulation effects in synthesis
 - **Nearey (1989, 1992)**: Vowel perception models incorporating dynamic and relational properties; demonstrates importance of spectral change beyond static formants
 - **Miller (1989)**: Auditory-perceptual interpretation of vowels; bridges acoustic measurements to perceptual reality for synthesis applications
+
+### Conceptual Links (not citation-based)
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]] — Hu's thesis uses Holmes' parallel formant synthesizer for vowel synthesis; the formant targets that inform such systems come from databases like Hillenbrand's. Both address the gap between static formant measurements and dynamic synthesis requirements.

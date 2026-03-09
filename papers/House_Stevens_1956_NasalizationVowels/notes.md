@@ -205,15 +205,22 @@ This is relatively vowel-independent.
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Stevens_1955_QuantitativeVowelArticulation]] — House & Stevens 1955 auditory testing of vowel articulation descriptions; precursor work by the same authors
 
 ### Cited By (in Collection)
 - [[Beddor_1986_NasalVowelHeight]] — cites this for foundational analog synthesis studies of nasal vowel spectra; extends those findings with articulatory synthesis and perceptual experiments
 - [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — builds on House & Stevens' nasalization synthesis work to establish pole-zero pair as the perceptual correlate of vowel nasality
+- [[Fant_1960_AcousticTheorySpeechProduction]] — references House & Stevens' nasalization work
+- [[Feng_1996_NasalVowelTarget]] — cites for foundational nasalization acoustic data
+- [[Chen_1997_NasalizedVowelAcoustics]] — references for nasalized vowel spectral characteristics
+- [[Allen_1987_MITalk_TTS]] — references for nasalization modeling
+- [[Stevens_1989_QuantalNatureSpeech]] — references for nasal vowel acoustics
+- [[Klatt_1990_VoiceQualityVariations]] — references House & Stevens nasalization data
+- [[Ruhlen_1973_NasalVowels]] — references for foundational nasalization acoustic studies
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — references House & Stevens' work
 
 ### New Leads (Not Yet in Collection)
 - **STEVENS, K. N., KASOWSKI, S. and FANT, C. G. M. (1953)** - Describes the electrical vocal tract analog methodology used throughout this paper; essential for understanding the experimental apparatus and acoustic modeling approach.
 - **FANT, C. G. M. (1952)** - Transmission properties of the vocal tract with acoustic specification; foundational work on formant theory and vocal tract acoustics directly applicable to synthesizer design.
 - **DUNN, H. K. (1950)** - Calculation of vowel resonances and electrical vocal tract design; relevant for understanding how to model vowel acoustics electronically for synthesis.
 - **DELATTRE, P. C. (1951)** - Physiological interpretation of sound spectrograms; important for understanding how nasalization appears in spectrographic analysis and formant measurement.
-- **HOUSE, A. S. and STEVENS, K. N. (1955)** - Auditory testing of simplified vowel articulation description; relevant for validating that synthetic nasalized vowels sound natural to listeners.

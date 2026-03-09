@@ -234,9 +234,9 @@ This paper provides quantitative targets for setting voice quality parameters wh
 - [[Stevens_1998_AcousticPhonetics]] - theoretical framework for spectral effects of glottal configuration
 - [[Fant_1985_LFModelGlottalFlow]] - LF model basis (Fant 1995 LF-model-revisited paper not in collection but 1985 version is)
 - [[Fant_1960_AcousticTheorySpeechProduction]] - foundational acoustic theory
+- [[Holmberg_1988_GlottalAirflowPressure]] — source for glottal airflow data used in chink area estimates; minimum airflow data combined with KLGLOTT88 for predictions
 
 ### New Leads (Not Yet in Collection)
-- Holmberg, E. B. et al. (1988) - "Glottal airflow and transglottal air pressure measurements" JASA 84, 511-529 - source for airflow data used in chink area estimates
 - Perkell, J. S. et al. (1994) - "Group differences in measures of voice production and revised values of maximum airflow declination rate" JASA 96, 695-698 - revised MFDR values
 - Fant, G. (1995) - "The LF-model revisited" - frequency domain analysis of LF model (we have 1985 but not 1995 revision)
 - Titze, I. R. (1989) - "Physiologic and acoustic differences between male and female voices" JASA 85, 1699-1707 - gender voice differences

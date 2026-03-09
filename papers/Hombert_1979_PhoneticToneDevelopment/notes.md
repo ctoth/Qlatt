@@ -167,9 +167,13 @@ This paper provides the empirical basis for the F0 microprosody rule in Qlatt's 
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Peterson_Barney_1952_VowelControl]] - cited for intrinsic vowel F0 data (Table 3)
-- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] - cited for VOT and voicing framework
-- [[OShaughnessy_1976_F0_Prosody]] - related F0 generation work
+- [[Peterson_Barney_1952_VowelControl]] — cited for intrinsic vowel F0 data (Table 3)
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — cited for VOT and voicing framework
+- [[OShaughnessy_1976_F0_Prosody]] — related F0 generation work
+
+### Cited By (in Collection)
+- [[Goldsmith_1976_AutosegmentalPhonology]] — discusses tonal phenomena that autosegmental theory addresses; Hombert's F0 perturbation data provides the phonetic grounding for autosegmental tone representations
+- [[Miller_1998_PronunciationModelingSpeechSynthesis]] — cites for consonant voicing effects on F0
 
 ### New Leads (Not Yet in Collection)
 - Hombert 1975a - "Towards a theory of tonogenesis" - primary source for the English F0 perturbation data used in our rule
@@ -179,3 +183,6 @@ This paper provides the empirical basis for the F0 microprosody rule in Qlatt's 
 
 ### Supersedes or Recontextualizes
 - None directly, but this paper provides the foundational data that our F0 microprosody rule cites, so it contextualizes the +20% voiceless onset raising value we currently use (which may be an overestimate based on this data).
+
+### Conceptual Links (not citation-based)
+- [[Abramson_Whalen_2017_VOTat50]] — Abramson & Whalen's VOT framework provides the temporal measurement system for the stop voicing distinctions that drive Hombert's F0 perturbations. The two papers address complementary aspects of the same phenomenon: VOT measures the timing, Hombert measures the F0 consequences.

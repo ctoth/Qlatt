@@ -152,11 +152,17 @@ The study validates that:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Hertz_1991_StreamsPhonesTransitions]]
-- **Hertz_1999_ETI-Eloquence_MultiLanguage**
-- [[Hertz_2002_HybridFormantConcatenation]]
-- [[Klatt_1990_VoiceQualityVariations]]
+- [[Hertz_1991_StreamsPhonesTransitions]] — cited as the theoretical foundation for the phone-and-transition model
+- [[Hertz_1999_ETI-Eloquence_MultiLanguage]] — cited for the ETI-Eloquence system that implements the hybrid model
+- [[Hertz_2002_HybridFormantConcatenation]] — cited as the precursor hybrid formant-concatenation approach
+- [[Klatt_1990_VoiceQualityVariations]] — cited as Klatt & Klatt 1990 for KLSYN-88 synthesizer used in rule-based formant synthesis experiments
+
+### Cited By (in Collection)
+- (none found)
 
 ### New Leads (Not Yet in Collection)
 - **[4] Hertz & Huffman 1992 (Nucleus-based timing model)** — Directly relevant for understanding timing patterns in consonant and vowel structure, foundational to the hybrid model framework.
 - **[2] Pierrehumbert 2000 (Exemplar dynamics)** — Contrasting view on how listeners process speech; important for understanding the rules-vs-exemplars debate that motivates this work.
+
+### Conceptual Links (not citation-based)
+- [[Hillenbrand_1995_VowelAcoustics]] — Hillenbrand's finding that spectral change (20%/80% formant trajectories) is critical for vowel identification supports Hertz's distinction between speaker-specific Acoustic Nuclei (vowel-centered) and speaker-generic Acoustic Consonant Clusters. The spectral change data quantifies what makes ANs perceptually distinctive.

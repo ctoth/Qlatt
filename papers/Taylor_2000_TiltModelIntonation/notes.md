@@ -303,3 +303,6 @@ Finding: In natural speech, ~79% of accents are H*, ~15% are L+H*. This uneven d
 - **Taylor, P. A. (1995)** - Taylor's prior RFC (rise/fall/connection) model that preceded Tilt; necessary for understanding the development and improvements of the Tilt representation.
 - **Dusterhoff, K. and Black, A. (1997)** - Application of Tilt model to TTS using CART for F0 generation; demonstrates practical synthesis use of Tilt parameters.
 - **Fujisaki, H. and Ohno, S. (1997)** - Alternative phonetic intonation model with similar amplitude/duration parametrization; important comparison point for model design choices.
+
+### Conceptual Links (not citation-based)
+- [[Ladd_2021_TroubleWithToBI]] — Ladd's critique of ToBI's categorical distinctions (especially L+H\* vs H\*) is exactly the problem the Tilt model solves by replacing discrete labels with continuous amplitude/duration/tilt parameters. The Tilt model is a constructive answer to Ladd's diagnosis.

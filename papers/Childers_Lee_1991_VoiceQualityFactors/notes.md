@@ -225,6 +225,38 @@ Random Noise → HP Filter → Amplitude Modulation
 - **Holmes (1973)** - Original work on glottal waveform influence on parallel formant synthesizer naturalness
 - **Isshiki et al. (1978)** - Turbulent noise characteristics in dysphonia, directly cited for breathiness modeling approach
 
+### Cited By (in Collection)
+- [[Alku_1999_SPL_DpeakLinearity]] — cited for frequency-domain voice source quantification
+- [[Balasubramanium_2012_CepstralSexuallyAppealingVoice]] — cited for voice quality analysis methods
+- [[Collins_2003_VocalVisualAttractiveness]] — cited as Childers & Wu 1991 for gender recognition
+- [[Doval_2003_VoiceSourceCALM]] — cited for voice quality factors
+- [[Doval_2006_SpectrumGlottalFlowModels]] — cited for voice quality factors
+- [[Drugman_2020_GlottalSourceEstimation]] — cited for voice quality synthesis
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cited for reference female F0 value
+- [[Gobl_2003_VoiceQualityEmotion]] — cited for voice quality factors
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — related voice quality factor analysis
+- [[Hanson_2001_ModelsPhonation]] — related voice quality parameterization
+- [[Iseli_2007_VoiceSourceAgeSexVowel]] — cited for voice source characterization
+- [[Keating_2016_AcousticSimilarityFemaleVoices]] — cited for OQ and spectral tilt measures
+- [[Klatt_1990_VoiceQualityVariations]] — cited for voice quality analysis
+- [[Kreiman_2007_GlottalSourceSpectrum]] — cited for harmonic richness factor (HRF)
+- [[Kreiman_2021_ValidatingVoiceQuality]] — cited for OQ, SQ, closure abruptness
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — cited for voice quality synthesis
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cited for glottal source parameters underlying voice quality categories
+- [[Lee_2019_AcousticVoiceVariation]] — cited for source spectral measures
+- [[Nittrouer_1990_AcousticMeasurementsVoice]] — related sex-specific voice source analysis
+- [[Perrotin_2021_LF_LinearFilter_Equivalence]] — cited for third-order filter representation
+- [[Plumpe_1999_GlottalFlowDerivativeModeling]] — cited for prior iterative LF estimation approach
+- [[Rothenberg_1981_InteractiveVoiceSource]] — related voice quality parameterization
+- [[Simpson_2009_PhoneticGenderDifferences]] — cited for voice quality parameterization
+- [[Sun_2006_VocalTractGlottalSource]] — cited for voice quality factor extraction
+- [[Titze_2014_BistableVocalFoldAdduction]] — cited for OQ/SQ differences between modal and falsetto
+- [[vanDinther_2001_PerceptualGlottalPulse]] — cited for R-parameter sets
+- [[vanDinther_2004_PerceptualGlottalPulse]] — cited for voice quality factors
+- [[Yegnanarayana_1998_VocalTractExtraction]] — cited for voice quality factors
+- [[Zhang_2016_MechanicsVoiceProductionControl]] — cited for OQ, SQ, closure abruptness, noise
+
 ### Conceptual Links (not citation-based)
 - **Larrouy-Maestri_2024_EmotionalProsody** — 30-year emotional prosody review identifies voice quality categories (breathy, tense, harsh, creaky) as critical for encoding emotion, particularly valence. Childers & Lee provide the physiological glottal parameters (OQ, SQ, closure abruptness, noise) that produce these voice qualities, connecting emotion-level descriptions to source-level production mechanisms.
 - [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Titze explains the geometric origin of the OQ and speed quotient differences between modal and falsetto that Childers & Lee measure: convergent glottis (modal) produces lower OQ and sharper closure, divergent glottis (falsetto) produces higher OQ and softer closure.
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]] — Strong. Cummings measures how the same glottal parameters (OQ, SQ, closure abruptness) that Childers & Lee define for voice quality types vary across 11 emotional speech styles. Childers & Lee characterize voice types; Cummings shows emotional modulation.

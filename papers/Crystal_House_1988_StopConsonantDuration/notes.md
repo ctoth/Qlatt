@@ -230,9 +230,23 @@ elif word_final:
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Zue_1976_StopConsonantAcoustics]]
+- [[Zue_1976_StopConsonantAcoustics]] — cited for comprehensive acoustic analysis of stop consonants
+- [[Klatt_1976_SegmentalDuration]] — related; Crystal & House's connected-speech durations complement Klatt's segment-level duration model
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — related work on voicing distinctions in stops; Crystal & House show that closure duration (the primary Lisker & Abramson cue) does not reliably distinguish voicing in connected speech
+
+### Cited By (in Collection)
+- [[Klatt_1990_VoiceQualityVariations]] — cites for segmental duration data
+- [[vanSanten_1993_SegmentalDuration]] — cites for connected speech stop duration data
+- [[vanSanten_1994_SegmentalDurationTTS]] — references for connected speech duration data
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — cites for segmental durations in connected speech
+- [[Jongman_2000_FricativeAcoustics]] — cites for consonant duration reference data
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — provides complementary connected-speech stop duration data
 
 ### New Leads (Not Yet in Collection)
 - **Klatt (1973)** - Durational characteristics of stop consonants in clusters; directly relevant for understanding consonant shortening in initial /st/ combinations
 - **Port (1979)** - Systematic study of stop closure duration as a cue for voicing and place; establishes duration ordering across places of articulation
 - **Luce & Charles-Luce (1985)** - Contextual effects on closure duration and consonant/vowel ratio; relevant for understanding stop duration variation across positions
+
+### Conceptual Links (not citation-based)
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — Strong. Cooper's burst/transition perception experiments define the acoustic cues whose durations Crystal & House measure. The finding that release duration (not hold duration) carries voicing information connects directly to Cooper's finding that burst characteristics signal consonant identity.
+- [[Abramson_Whalen_2017_VOTat50]] — Strong. Crystal & House's release durations (voiced ~18 ms, voiceless ~39 ms) provide connected-speech VOT values that complement Abramson & Whalen's VOT framework derived primarily from citation forms.

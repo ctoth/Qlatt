@@ -151,6 +151,17 @@ This paper provides empirical data on the relationship between female voice acou
 ### Cited By (in Collection)
 - [[Hughes_2004_VoiceAttractivenessSexualBehavior]] — cites Collins 2003 for the vocal-body size relationship; refines the finding by showing the relationship is driven by WHR (not BMI) and extends to males (SHR) and sexual behavior outcomes
 - [[Krumpholz_2022_PitchManipulationFemaleRatings]] — cites Collins 2003 for positive pitch-attractiveness correlation in unmanipulated voices; Krumpholz extends with PSOLA manipulation finding that ~20 Hz increases affect femininity/age but not attractiveness
+- [[Borkowska_2011_F0DominanceAttractiveness]] — cites for vocal and visual attractiveness correlation in women
+- [[Feinberg_2008_FemininityAveragenessVoicePitch]] — cites for positive correlation between voice pitch and attractiveness in unmanipulated voices; extends with manipulation experiments
+- [[Feinberg_2011_IntegratingF0FormantPreferences]] — cites for foundational finding that women prefer lower-pitched male voices
+- [[Liu_2011_FemaleVoiceAttractiveness]] — cites for formant frequency-attractiveness relationship; consistent with Liu's formant condensation finding
+- [[Schild_2019_AttractiveVoiceFormantF0]] — cites as prior small-sample bottom-up study of attractive voice characteristics
+- [[Cartei_2014_VoiceMasculinity]] — cites for voice and attractiveness in women
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — cites for vocal and visual attractiveness; provides female voice data for comparison
+- [[Zuta_2007_AttractiveMaleVoices]] — cites for female vocal attractiveness and formant-attractiveness correlations
+- [[Weiss_2020_VoiceAttractiveness]] — includes in vocal-visual attractiveness overview
+- [[Fitch_1999_VocalTractMorphology]] — cites for vocal tract morphology and formant dispersion-body size relationship
+- [[Chen_2022_AcousticMasculinityFemininity]] — cites as related work on vocal attractiveness and formant frequencies in women
 
 ### Conceptual Links (not citation-based)
 - [[Quene_2021_PitchTempoAttractiveness]] — Quene extends the pitch-attractiveness finding by showing that tempo also independently affects male vocal attractiveness, with pitch having a larger effect. The asymmetric pattern (only higher pitch reduces attractiveness) is consistent with Collins's finding that lower F0 correlates with higher attractiveness. (Strong)

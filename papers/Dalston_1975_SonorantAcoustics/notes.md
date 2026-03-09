@@ -196,10 +196,19 @@ Key acoustic cues that distinguish sonorants:
 
 ### Already in Collection
 - [[Cooper_1952_PerceptionSyntheticSpeech]] — cited for pattern playback experiments on perception of synthetic speech sounds including consonant-vowel syllable cues
-- [[Fant_1960_AcousticTheorySpeechProduction]]
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory and /l/ identification cues
+
+### Cited By (in Collection)
+- [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cites for acoustic data on /l/ including formant frequencies and transition durations; extends with articulatory data and gradient allophony
+- [[Fowler_2006_CoarticulationGesturePerception]] — cites for sonorant formant measurements; provides VCV transition data for /l/ and /r/
+- [[Cooper_1952_PerceptionSyntheticSpeech]] — (bidirectional: Dalston cites Cooper, and Cooper's nasal/lateral findings are extended by Dalston)
 
 ### New Leads (Not Yet in Collection)
 - **O'Connor et al. (1957)** - Seminal work on acoustic cues for perception of initial sonorants; provides synthetic speech validation of spectrographic findings
 - **Liberman et al. (1959, 1956)** - Critical research on role of temporal cues and formant transitions in speech perception and synthesis
 - **Peterson (1961)** - Parameters of vowel quality, relevant for understanding formant relationships and normalization across speakers
 - **Koenigsknecht (1968)** - Child speech development and discrimination of spectral vs. temporal cues; directly relevant to developmental aspects
+
+### Conceptual Links (not citation-based)
+- [[Ohman_1966_CoarticulationVCV]] — Moderate. Ohman's VCV coarticulation framework extends Dalston's consonant-vowel transition measurements by showing how transitions depend on both flanking vowels, not just the following vowel that Dalston studied.
+- [[Recasens_1997_CoarticulationResistance]] — Moderate. Recasens' DAC model predicts coarticulation scope based on articulatory constraint, which would explain why /l/ (high DAC, tongue contact) has longer steady-state and more abrupt transitions than /w/ or /r/ in Dalston's data.

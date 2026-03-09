@@ -205,7 +205,11 @@ This study validates two key acoustic measures — pitch sigma and SFF range (bo
 - Hudson & Holbrook (1982) — Large-N (N=100) fundamental frequency characteristics of young adults — pitch sigma and SFF range norms
 
 ### Cited By (in Collection)
-- (none found)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — validates that F0 SD (pitch sigma), used as emotion parameter SdF0, is the strongest acoustic correlate of perceived vocal variability (r = .927)
+- [[HodgesSimeon_2010_DominanceAttractiveness]] — examines how F0 variability relates to dominance perception; Cumbers provides perceptual validation
+- [[Borkowska_2011_F0DominanceAttractiveness]] — references Cumbers for F0 variability perception
+- [[Quene_2021_PitchTempoAttractiveness]] — references Cumbers for pitch variability measures
+- [[Krumpholz_2022_PitchManipulationFemaleRatings]] — references Cumbers for pitch variability perception
 
 ### Conceptual Links (not citation-based)
 - [[Banse_1996_VocalEmotionAcousticProfiles]] — Banse uses F0 variability (SdF0) as one of 29 acoustic parameters profiling 14 emotions, reporting that high-arousal emotions increase F0 variability. Cumbers validates that SdF0 (pitch sigma) is the strongest acoustic correlate of perceived vocal variability (r = .927), providing perceptual grounding for Banse's use of this parameter as an emotion indicator.

@@ -153,6 +153,7 @@ This paper is foundational for understanding the acoustic cues that Qlatt must g
 ### Conceptual Links (not citation-based)
 - [[Ohman_1966_CoarticulationVCV]] -- extends the formant transition framework by showing that transitions are not fixed locus-based but depend on both preceding and following vowels, refining Cooper et al.'s vowel-dependent transition findings
 - [[Klatt_1987_TTS_Review]] -- the synthesis-by-rule approach demonstrated in Cooper et al.'s Fig. 10 is the direct ancestor of the rule-based formant synthesis approach reviewed by Klatt
+- [[Crystal_House_1988_StopConsonantDuration]] — Strong. Crystal & House measure the durations of the acoustic events (hold, burst/release) that Cooper et al. identified as perceptual cues. Their finding that release duration carries voicing information connects to Cooper's finding that burst characteristics signal consonant identity.
 
 ### New Leads (Not Yet in Collection)
 - Delattre, Liberman, and Cooper (1955) -- "Acoustic loci and transitional cues for consonants" -- the follow-up that formalized the locus theory hinted at in this paper

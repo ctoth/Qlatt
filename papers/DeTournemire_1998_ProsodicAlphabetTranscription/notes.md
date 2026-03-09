@@ -203,6 +203,11 @@ This paper's main value for Qlatt is:
 - [[OShaughnessy_1976_F0_Prosody]] - F0 modelling for TTS; both papers address F0 contour prediction from linguistic features, though O'Shaughnessy uses rule-based approach while de Tournemire uses neural networks.
 - [[Klatt_1976_SegmentalDuration]] - The segment-level duration model that the syllable elasticity approach complements (not directly cited, but Bartkova & Sorin 1987, which is cited, builds on Klatt's framework).
 
+### Cited By (in Collection)
+- [[Ladd_2021_TroubleWithToBI]] — references as an alternative approach that identifies prosodic labels acoustically rather than debating categorical labels
+- [[Beckman_2005_ToBISystemEvolution]] — references for alternative prosodic transcription approach; the relationship between symbolic annotation and phonetic interpretation is a shared concern
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — applies the same syllable elasticity factor k model; de Tournemire extends it to French
+
 ### Conceptual Links (not citation-based)
 - [[Taylor_2000_TiltModelIntonation]] - Tilt model parameterises intonational events (rise, fall, rise-fall) with continuous amplitude/duration parameters. De Tournemire's F0 shape labels (S0-S6) are a discrete categorical version of a similar decomposition. Both try to reduce F0 contours to a finite set of shape primitives, but Tilt uses continuous parameters while this paper uses semitone thresholds.
 - [[Silverman_1992_ToBILabelingProsody]] - ToBI provides a standard prosodic transcription system for English. De Tournemire's prosodic alphabet serves the same function for French but is identified from acoustic analysis rather than defined linguistically. The break indices (B0-B6) parallel ToBI's break index tier.

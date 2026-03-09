@@ -221,4 +221,8 @@ This paper establishes the relative perceptual importance of acoustic parameters
 - Partially supersedes individual findings in [[Feinberg_2008]] and [[Feinberg_2011]] by providing quantified importance weights for each acoustic factor, whereas Feinberg studies manipulated F0 and formants in isolation without addressing multicollinearity
 
 ### Cited By (in Collection)
-- (none found)
+- [[Cartei_2014_VoiceMasculinity]] — cites Chen; confirms F0 and deltaF independence with quantified importance weights
+- [[Babel_2014_VocalAttractiveness]] — references Chen's finding that perturbation measures are least important for masculinity/femininity
+- [[Nittrouer_1990_AcousticMeasurementsVoice]] — Chen's PCA clustering aligns with Nittrouer's sex-specific noise source findings
+- [[Weiss_2020_VoiceAttractiveness]] — includes Chen in attractiveness parameter overview
+- [[Fitch_1999_VocalTractMorphology]] — cites Chen for VTL sex differences

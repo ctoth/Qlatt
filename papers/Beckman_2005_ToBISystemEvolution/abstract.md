@@ -1,0 +1,11 @@
+# Abstract
+
+## Original Text (Verbatim)
+
+The **ToBI conventions** are a consensus system for labelling spoken utterances that segregates tags for different types of phonological events and structures into parallel quasi-independent tiers. Most notably, the conventions specify a way to mark the phonologically contrastive intonational events (**Tones**) separately from the hierarchy of inter-word junctures (**Break-Indices**) with which some of these pitch events are associated. The original ToBI conventions are language-specific; they were intended to cover the phonologically contrastive tones of Mainstream American English. However, other annotation conventions based on the same general design principles have now been proposed for several other English varieties and for a number of other languages. This function of the original ToBI system as a general model for developing language-specific annotation conventions makes it possible to compare prosodic systems across languages using a common vocabulary, and to search for universals. This chapter is an overview of the original ToBI system. It reviews the design of the original system and its foundations in basic and applied research. It describes the inter-disciplinary community of users and uses for which the system was intended, and it outlines how the consensus model of American English intonation and inter-word juncture was achieved by finding points of useful intersection among the research interests and knowledge embodied in this community. It thus identifies the practical principles for designing prosodic annotation conventions that emerged in the course of developing, testing, and using this particular system.
+
+---
+
+## Our Interpretation
+
+This chapter is the authoritative retrospective on how the ToBI prosodic annotation standard was designed and why specific decisions were made. It provides the complete label inventories (pitch accents, phrase accents, boundary tones, break indices) and their alignment rules for Mainstream American English, grounded in autosegmental-metrical phonology. For Qlatt, this is the primary reference document for the prosodic labeling scheme that the synthesis rules are designed to produce and consume.

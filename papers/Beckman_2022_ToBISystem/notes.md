@@ -227,6 +227,8 @@ function tobiToF0Target(label, pitchRange, register) {
 
 ### New Leads (Not Yet in Collection)
 - **Beckman & Ayers-Elam (1997)** - "Guidelines for ToBI Labeling" - The official ToBI labeling guidelines document that provides practical annotation conventions. Critical for implementing ToBI-based prosody generation.
-- **Beckman, Hirschberg & Shattuck-Hufnagel (2005)** - "The Original ToBI System and the Evolution of the ToBI Framework" - Comprehensive overview of ToBI's development and how it has been extended to different languages.
 - **Pierrehumbert & Beckman (1988)** - *Japanese Tone Structure* - Extends the AM framework to Japanese, demonstrating cross-linguistic applicability of the prosodic hierarchy (IP > ip > AP).
 - **Hirst & Di Cristo (1998)** - *Intonation Systems: A Survey of Twenty Languages* - Comparative survey of intonation across languages, useful for understanding cross-linguistic prosodic variation in TTS.
+
+### Now in Collection (previously listed as leads)
+- [[Beckman_2005_ToBISystemEvolution]] — The definitive account of MAE_ToBI by its creators. Provides complete tone inventory (H*, L*, L+H*, L*+H, H+!H*), phrase accents (H-, L-), boundary tones (H%, L%), break indices (0-4), alignment rules, and design principles for cross-linguistic extension. This 2005 chapter is the detailed specification that the 2022 paper (Beckman_2022) summarizes and extends with the AM+ five-level framework.

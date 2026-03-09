@@ -1,0 +1,4 @@
+---
+tags: [prosody, intonation, tobi, annotation, phrasing]
+---
+This chapter provides the definitive account of the MAE_ToBI prosodic annotation system, specifying the complete inventory of pitch accents (H*, L*, L+H*, L*+H, H+!H*), phrase accents (H-, L-), boundary tones (H%, L%), and break indices (0-4) for Mainstream American English, along with their alignment rules and inter-tier constraints. The authors chronicle the four Prosodic Transcription Workshops (1991-1994) that produced the conventions, ground them in the autosegmental-metrical theory of Pierrehumbert (1980), and articulate design principles for extending the framework to other languages. For speech synthesis, this is the primary reference for mapping phonological prosodic labels to F0 targets and phrase boundary effects, providing the standard notation that Qlatt's prosody rules are designed to generate.

@@ -182,6 +182,10 @@ primitives:
         type: float
         default: 0
         description: "F0 jitter (Fraj 2011, 0-100). 0 = none"
+      di:
+        type: float
+        default: 0
+        description: "Diplophonia index (Gobl & Ni Chasaide 2003, 0-100). 0 = uniform amplitude, 100 = odd periods silent"
     inputs: 0
     outputs: 1
 
@@ -285,8 +289,15 @@ primitives:
     inputs: 1
     outputs: 1
 
+  chalker-radiation:
+    description: "Chalker 1985 two-term radiation filter — y[n] = c1*(x[n]-x[n-1]) + c2*(x[n]-2*x[n-1]+x[n-2]). Reduces high-frequency impedance error from 13.4 ohms (Flanagan) to 1.22 ohms at 5 kHz."
+    worklet: "chalker-radiation-processor.js"
+    params: {}
+    inputs: 1
+    outputs: 1
+
   glottal-mod:
-    description: "Amplitude modulation synchronized to glottal cycle - 50% duty cycle square wave"
+    description: "Pulsatile aspiration modulation synchronized to glottal cycle - sinusoidal OQ envelope (Klatt 1980, Gobl 1988, Fant 1995)"
     worklet: "glottal-mod-processor.js"
     params:
       f0:
@@ -294,5 +305,10 @@ primitives:
         unit: "Hz"
         default: 120
         description: "Fundamental frequency for synchronization"
+      oq:
+        type: float
+        default: 0.5
+        range: [0.1, 1.0]
+        description: "Open quotient controlling aspiration envelope shape (Fant 1995: OQ = 1 - 1/(2*Rd))"
     inputs: 1
     outputs: 1

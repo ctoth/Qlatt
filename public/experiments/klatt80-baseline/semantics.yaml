@@ -188,6 +188,12 @@ params:
     default: 0
     range: [0, 100]
 
+  DI:
+    description: "Diplophonia index (Gobl & Ni Chasaide 2003). 0 = uniform, 100 = odd periods silent"
+    type: float
+    default: 0
+    range: [0, 100]
+
   openPhaseRatio:
     description: "Impulse source open phase ratio"
     type: float
@@ -453,6 +459,14 @@ realize:
     expr: "min(2.7, max(0.3, Rd + RdPhraseOffset))"
     deps: [Rd, RdPhraseOffset]
     description: "Connected-speech Rd after applying phrase-level offset."
+
+  # Glottal modulation OQ derived from Rd per Fant 1995: OQ ~= 1 - 1/(2*Rd)
+  # Clamped to [0.1, 1.0] for DSP stability. At Rd=0.3 (pressed): OQ=0.33;
+  # at Rd=1.0 (modal): OQ=0.5; at Rd=2.7 (breathy): OQ=0.81.
+  glottalModOQ:
+    expr: "1.0 - 1.0 / (2.0 * max(0.3, effectiveRd))"
+    deps: [effectiveRd]
+    description: "Open quotient for glottal aspiration modulation (Fant 1995: OQ = 1 - 1/(2*Rd))."
 
   Ra:
     expr: "max(-1.0 + 4.8 * effectiveRd, 0.0)"

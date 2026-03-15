@@ -128,6 +128,7 @@ nodes:
       tl: { bind: TL }
       flutter: { bind: flutter }
       jitter: { bind: jitter }
+      di: { bind: DI }
 
   impulseSource:
     type: impulse-train
@@ -148,11 +149,12 @@ nodes:
       gain: 1.0
       cutoff: { bind: fricationCutoff }
 
-  # Glottal modulation - 50% square wave synchronized to glottal cycle
+  # Glottal modulation - pulsatile sinusoidal envelope shaped by OQ (Klatt 1980, Gobl 1988, Fant 1995)
   glottalMod:
     type: glottal-mod
     params:
       f0: { bind: F0 }
+      oq: { bind: glottalModOQ }
 
   # ---------------------------------------------------------------------------
   # PLSTEP BURST MECHANISM
@@ -282,15 +284,17 @@ nodes:
       bandwidth: { bind: BGZ }
 
   # ---------------------------------------------------------------------------
-  # DIFFERENTIATORS (Radiation characteristic)
+  # RADIATION FILTERS
   # ---------------------------------------------------------------------------
+  # Chalker & Mackerras 1985 two-term radiation impedance approximation.
+  # Replaces simple first-difference with H(z) = c1*(1-z^-1) + c2*(1-2z^-1+z^-2).
+  # Reduces high-frequency error from 13.4 ohms (Flanagan) to 1.22 ohms at 5 kHz.
 
-  # First difference for radiation
   radiationDiff:
-    type: differentiator
+    type: chalker-radiation
 
   radiationDiffAvs:
-    type: differentiator
+    type: chalker-radiation
 
   # Differentiator for parallel branch (UGLOT1 = first diff of UGLOT)
   diff:

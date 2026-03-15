@@ -1,0 +1,7 @@
+# Abstract
+
+This paper examines a method for formant parameter extraction from a labeled single speaker database for use in a formant-parameter diphone-concatenation speech synthesis system. This procedure commences with an initial formant analysis of the labelled database, which is then used to obtain formant (F1-F5) probability spaces for each phoneme. These probability spaces guide a more careful speaker-specific extraction of formant frequencies. An analysis-by-synthesis procedure is then used to provide best-matching formant intensity and bandwidth parameters. The great majority of the parameters so extracted produce speech which is highly intelligible and which has a voice quality close to the original speaker.
+
+## Interpretation
+
+The paper addresses a fundamental challenge in formant synthesis: extracting reliable formant parameters (frequencies, bandwidths, intensities) from natural speech for use in diphone concatenation. The multi-pass approach — starting from neutral vowel analysis, building speaker-specific probability spaces, then refining through analysis-by-synthesis — achieves high accuracy with minimal hand correction. The bandwidth estimation formula Bx = (80 + 120 * Fx/5000) * W is a practical heuristic for initialising formant bandwidths in a parallel formant synthesiser, scaling linearly with frequency and doubling for voiceless sounds. The analysis-by-synthesis refinement uses perceptually motivated step sizes (1 dB for intensity, 20% for bandwidth) matching known psychoacoustic difference limens.

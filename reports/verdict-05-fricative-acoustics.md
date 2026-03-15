@@ -47,5 +47,6 @@ All 11 papers were read. Two synthesizer files were audited:
 | Stevens 1971 | ADEQUATE |
 | Stevens 1998 | ADEQUATE |
 
-## Commit
-Proceeding to commit.
+## Commits
+- `d8c57fb` — verdict file (research/verdicts/05-fricative-acoustics.md)
+- `72b0157` — report file (reports/verdict-05-fricative-acoustics.md)

@@ -1,0 +1,7 @@
+# Abstract
+
+A contemporary acoustical theory of vowel production is outlined and certain implications of the theory are discussed. The theory considers a vowel sound to be the result of excitation of a linear acoustic system by a quasi-periodic volume velocity source. The transfer function of the acoustic system is completely described by a number of poles whose frequency locations depend on the vocal-tract configuration. It is shown that the theory is compatible with data relevant to the over-all intensity of vowels, amplitude relations within syllables, and questions of balance in the vowel spectrum. Finally it is proposed that the traditional term *formant* be restricted to mean a normal mode of vibration of the vocal system.
+
+## Interpretation
+
+This paper provides the theoretical foundation for source-filter models of vowel production. The key contribution for synthesis is the demonstration that the entire vowel spectrum envelope can be constructed from knowledge of the formant frequencies and bandwidths alone, via the product-of-poles transfer function. The isoamplitude contour plots (Figures 8-9) give quantitative predictions of how each formant's amplitude depends on the frequencies of all formants, providing the basis for computing parallel branch amplitudes (A1, A2, A3) in formant synthesizers. The assumption of 100 Hz bandwidths for all formants is shown to be a reasonable approximation, with Table 1 giving measured bandwidth values ranging from 50-130 Hz for the first two formants across four vowels.

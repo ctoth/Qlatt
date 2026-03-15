@@ -1,0 +1,7 @@
+# Abstract
+
+This report describes preliminary results of a spectrographic study of prestressed word-initial consonant clusters. A list of monosyllabic words was constructed to include 5 examples for each of 25 different word-initial clusters. The word list was randomized and recorded at a moderate speaking rate by 3 adult male speakers in the frame sentence "Say x instead." Consonants are generally shorter in 2- and 3-element clusters than in simple CV syllables. Five rules are proposed for predicting durational changes: general consonantal shortening, sonorant lengthening after aspirated stops, ballistic shortening before stops, incompressibility of labials, and restructuring of dental-retroflex clusters. The rules predict measured durations with approximately 10 ms accuracy and express regularities consistent with data from British English (Haggard 1970).
+
+## Interpretation
+
+This is a foundational duration study for speech synthesis by rule. Klatt measures baseline consonant durations and derives compact, additive percentage rules for cluster-induced duration changes. The rules are framed explicitly for incorporation into synthesis systems — the same framework Klatt later used in his 1976 duration model and 1980 synthesizer. The five rules capture articulatory constraints (labial sluggishness, ballistic closure, aspiration-delayed transitions) through simple multiplicative factors, making them directly implementable as synthesis duration rules.

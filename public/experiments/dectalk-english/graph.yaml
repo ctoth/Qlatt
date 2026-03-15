@@ -266,15 +266,15 @@ nodes:
       bandwidth: { bind: BGZ }
 
   # ---------------------------------------------------------------------------
-  # DIFFERENTIATORS (Radiation characteristic)
+  # RADIATION FILTERS
   # ---------------------------------------------------------------------------
+  # Chalker & Mackerras 1985 two-term radiation impedance approximation.
 
-  # First difference for radiation
   radiationDiff:
-    type: differentiator
+    type: chalker-radiation
 
   radiationDiffAvs:
-    type: differentiator
+    type: chalker-radiation
 
   # Differentiator for parallel branch (UGLOT1 = first diff of UGLOT)
   diff:

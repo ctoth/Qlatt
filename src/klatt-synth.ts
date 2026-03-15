@@ -36,6 +36,7 @@ export class KlattSynth {
       new URL("./worklets/noise-source-processor.ts", import.meta.url),
       new URL("./worklets/glottal-mod-processor.ts", import.meta.url),
       new URL("./worklets/differentiator-processor.ts", import.meta.url),
+      new URL("./worklets/chalker-radiation-processor.ts", import.meta.url),
     ];
     await this._loadWasmBytes(workletBase);
     await Promise.all([
@@ -219,14 +220,16 @@ export class KlattSynth {
         reportInterval,
       },
     });
-    N.radiationDiff = new AudioWorkletNode(ctx, "differentiator-processor", {
+    // Chalker & Mackerras 1985 two-term radiation impedance approximation.
+    // Replaces simple first-difference with improved high-frequency accuracy.
+    N.radiationDiff = new AudioWorkletNode(ctx, "chalker-radiation-processor", {
       processorOptions: {
         debug: telemetry,
         nodeId: "radiation-diff",
         reportInterval,
       },
     });
-    N.radiationDiffAvs = new AudioWorkletNode(ctx, "differentiator-processor", {
+    N.radiationDiffAvs = new AudioWorkletNode(ctx, "chalker-radiation-processor", {
       processorOptions: {
         debug: telemetry,
         nodeId: "radiation-diff-avs",

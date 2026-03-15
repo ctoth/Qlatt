@@ -7,7 +7,7 @@
 
 import type { CelEvaluator } from './cel-evaluator';
 import type { ParamValue } from './types';
-import { dbToLinear, dbToLinearKlsyn, proximity, min, max, pow, builtinSqrt, builtinExp, builtinAbs, builtinLog } from '../builtin-functions';
+import { dbToLinear, dbToLinearKlsyn, proximity, resonatorMagnitudeDb, min, max, pow, builtinSqrt, builtinExp, builtinAbs, builtinLog } from '../builtin-functions';
 
 /**
  * Validate that a function argument is a finite number.
@@ -54,6 +54,17 @@ export function registerNumericBuiltins(celEvaluator: CelEvaluator): void {
   celEvaluator.registerFunction('proximity', (...args: ParamValue[]): ParamValue => {
     const delta = requireNumericArg('proximity', 0, args[0]);
     return proximity(delta);
+  });
+
+  celEvaluator.registerFunction('resonatorMagnitudeDb', (
+    evalFreq: ParamValue, poleFreq: ParamValue, poleBW: ParamValue, sr: ParamValue
+  ): ParamValue => {
+    return resonatorMagnitudeDb(
+      requireNumericArg('resonatorMagnitudeDb', 0, evalFreq),
+      requireNumericArg('resonatorMagnitudeDb', 1, poleFreq),
+      requireNumericArg('resonatorMagnitudeDb', 2, poleBW),
+      requireNumericArg('resonatorMagnitudeDb', 3, sr),
+    );
   });
 
   celEvaluator.registerFunction('sqrt', (...args: ParamValue[]): ParamValue => {

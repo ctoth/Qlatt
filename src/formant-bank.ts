@@ -63,7 +63,7 @@ export function expandFormantBanks(
     | undefined;
   if (!banks) return;
 
-  for (const [, bank] of Object.entries(banks)) {
+  for (const [bankName, bank] of Object.entries(banks)) {
     const sortedFormants = [...bank.formants].sort(
       (a, b) => a.index - b.index,
     );
@@ -182,84 +182,22 @@ export function expandFormantBanks(
     }
 
     // ------------------------------------------------------------------
-    // 5. Generate semantics constants (ndbScale entries — parallel only)
+    // 5. Preserve bank spec for evaluator-native PFE amplitude computation (Lin 1995)
     // ------------------------------------------------------------------
-    if (!semantics.constants) semantics.constants = {};
-    if (!semantics.constants.ndbScale) {
-      semantics.constants.ndbScale = {} as Record<string, number>;
-    }
-    const ndbScale = semantics.constants.ndbScale as Record<string, number>;
-    for (const f of sortedFormants) {
-      if (f.ndbScale != null) {
-        ndbScale[`A${f.index}`] = f.ndbScale;
-      }
-    }
-
-    // ------------------------------------------------------------------
-    // 6. Generate proximity correction realize rules
-    // ------------------------------------------------------------------
-    if (!semantics.realize) semantics.realize = {};
-    for (const prox of bank.proximity) {
-      const [lo, hi] = prox.pair;
-      const name = `n${lo}${hi}Cor`;
-      const expr =
-        prox.offset === 0
-          ? `proximity(F${hi} - F${lo})`
-          : `proximity(F${hi} - F${lo} - ${prox.offset})`;
-      semantics.realize[name] = {
-        expr,
-        deps: [`F${lo}`, `F${hi}`],
-      };
-    }
-
-    // ------------------------------------------------------------------
-    // 7. Generate a{N}Linear realize rules
-    // ------------------------------------------------------------------
-
-    // Build correction terms per formant index
-    const correctionTerms = new Map<number, string[]>();
-    for (const prox of bank.proximity) {
-      const [lo, hi] = prox.pair;
-      const corrName = `n${lo}${hi}Cor`;
-
-      // lo formant gets corrName (multiplier 1)
-      if (!correctionTerms.has(lo)) correctionTerms.set(lo, []);
-      correctionTerms.get(lo)!.push(corrName);
-
-      // hi formant gets corrName * 2 (multiplier 2)
-      if (!correctionTerms.has(hi)) correctionTerms.set(hi, []);
-      correctionTerms.get(hi)!.push(`${corrName} * 2`);
-    }
-
-    for (const f of sortedFormants) {
-      // Only generate a{N}Linear for formants with parallel branch
-      if (!f.parallelSource) continue;
-
-      const N = f.index;
-      const corrections = correctionTerms.get(N) || [];
-      const prefix = f.sign === -1 ? '-' : '';
-
-      const parts: string[] = [`A${N}`];
-      if (corrections.length > 0) {
-        parts.push(...corrections);
-      }
-      parts.push(`ndbScale.A${N}`);
-
-      const inner = parts.join(' + ');
-      const expr = `${prefix}dbToLinear(${inner}) * parallelScale`;
-
-      // Build deps
-      const deps: string[] = [`A${N}`];
-      // Add all correction rule names used
-      for (const corr of corrections) {
-        // Strip " * 2" suffix to get the dep name
-        const depName = corr.replace(/ \* 2$/, '');
-        if (!deps.includes(depName)) deps.push(depName);
-      }
-      deps.push('parallelScale');
-
-      semantics.realize[`a${N}Linear`] = { expr, deps };
-    }
+    // Instead of generating ndbScale constants, proximity rules, and a{N}Linear
+    // realize rules, we store the bank spec on semantics so the topological
+    // evaluator can compute formant amplitudes natively per-frame using PFE.
+    if (!semantics.formantBanks) semantics.formantBanks = {};
+    semantics.formantBanks[bankName] = {
+      formants: sortedFormants.map(f => ({
+        index: f.index,
+        freqDefault: f.freqDefault,
+        bwDefault: f.bwDefault,
+        ndbScale: f.ndbScale,
+        sign: f.sign,
+        parallelSource: f.parallelSource,
+      })),
+    };
   }
 
   // Clean up: remove the formantBanks key from the graph

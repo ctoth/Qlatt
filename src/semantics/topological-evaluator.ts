@@ -6,6 +6,7 @@
 import toposort from 'toposort';
 import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types';
 import type { CelEvaluator } from './cel-evaluator';
+import { resonatorMagnitudeDb, dbToLinear } from '../builtin-functions';
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;
@@ -91,6 +92,38 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
             name,
             error: e instanceof Error ? e.message : String(e),
           });
+        }
+      }
+
+      // After normal realize rules, compute formant bank amplitudes via PFE (Lin 1995).
+      // This replaces the old codegen layer that produced proximity corrections and
+      // static ndbScale-based a{N}Linear rules. The PFE approach computes the actual
+      // transfer function magnitude of each resonator at every other formant's frequency,
+      // yielding dynamic corrections that track formant movement.
+      if (semantics.formantBanks) {
+        const sr = (result.values.sampleRate as number) ?? 10000;
+        for (const [, bank] of Object.entries(semantics.formantBanks)) {
+          const formants = bank.formants;
+          for (let i = 0; i < formants.length; i++) {
+            const f = formants[i];
+            if (!f.parallelSource) continue; // No parallel branch for this formant
+            const idx = f.index;
+            const evalFreq = (result.values[`F${idx}`] as number) ?? f.freqDefault;
+            const ampDb = (result.values[`A${idx}`] as number) ?? 0;
+            const ndbScaleVal = f.ndbScale ?? 0;
+            // Sum correction from all OTHER formants' transfer functions at this frequency
+            let correctionDb = 0;
+            for (let j = 0; j < formants.length; j++) {
+              if (j === i) continue;
+              const jIdx = formants[j].index;
+              const otherFreq = (result.values[`F${jIdx}`] as number) ?? formants[j].freqDefault;
+              const otherBw = (result.values[`B${jIdx}`] as number) ?? formants[j].bwDefault;
+              correctionDb += resonatorMagnitudeDb(evalFreq, otherFreq, otherBw, sr);
+            }
+            const sign = f.sign ?? 1;
+            const parallelScale = (result.values.parallelScale as number) ?? 1;
+            result.values[`a${idx}Linear`] = sign * dbToLinear(ampDb + correctionDb + ndbScaleVal) * parallelScale;
+          }
         }
       }
 

@@ -86,6 +86,45 @@ export function proximity(delta: number): number {
   return ndbCor[Math.max(0, Math.min(index, ndbCor.length - 1))];
 }
 
+/**
+ * Compute the magnitude (in dB) of a 2-pole resonator at a given evaluation frequency.
+ * Used for PFE-based parallel formant amplitude correction (Lin 1995).
+ *
+ * @param evalFreq - frequency to evaluate at (Hz)
+ * @param poleFreq - resonator center frequency (Hz)
+ * @param poleBW - resonator bandwidth (Hz)
+ * @param sampleRate - sample rate (Hz)
+ * @returns magnitude in dB
+ */
+export function resonatorMagnitudeDb(
+  evalFreq: number, poleFreq: number, poleBW: number, sampleRate: number
+): number {
+  // Digital resonator pole: r * exp(±j*theta) where
+  //   theta = 2*pi*poleFreq/sampleRate
+  //   r = exp(-pi*poleBW/sampleRate)
+  const theta = 2 * Math.PI * poleFreq / sampleRate;
+  const r = Math.exp(-Math.PI * poleBW / sampleRate);
+  // Evaluate H(z) = 1/((1 - r*e^jtheta * z^-1)(1 - r*e^-jtheta * z^-1))
+  // at z = e^(j*2*pi*evalFreq/sampleRate)
+  const w = 2 * Math.PI * evalFreq / sampleRate;
+  // Compute distances from e^jw to each pole on the unit circle
+  const cosW = Math.cos(w);
+  const sinW = Math.sin(w);
+  const cosTheta = Math.cos(theta);
+  const sinTheta = Math.sin(theta);
+  // Distance from e^jw to r*e^jtheta
+  const dx1 = cosW - r * cosTheta;
+  const dy1 = sinW - r * sinTheta;
+  const d1sq = dx1 * dx1 + dy1 * dy1;
+  // Distance from e^jw to r*e^-jtheta (conjugate pole)
+  const dx2 = cosW - r * cosTheta;
+  const dy2 = sinW + r * sinTheta;
+  const d2sq = dx2 * dx2 + dy2 * dy2;
+  // Magnitude squared = 1 / (d1sq * d2sq)
+  const magSq = 1 / (d1sq * d2sq);
+  return 10 * Math.log10(magSq);
+}
+
 // Re-export Math functions for CEL/expression compatibility
 export const min = Math.min;
 export const max = Math.max;

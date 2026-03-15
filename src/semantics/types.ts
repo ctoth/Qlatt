@@ -28,6 +28,21 @@ export interface RealizationRule {
   step?: boolean;
 }
 
+/** Formant spec — mirrors FormantSpec from formant-bank.ts for evaluator use */
+export interface FormantBankFormantSpec {
+  index: number;
+  freqDefault: number;
+  bwDefault: number;
+  ndbScale?: number;
+  sign?: 1 | -1;
+  parallelSource?: string;
+}
+
+/** Formant bank spec — stored on SemanticsDocument for evaluator-native PFE computation */
+export interface FormantBankEvalSpec {
+  formants: FormantBankFormantSpec[];
+}
+
 /** Semantics document structure */
 export interface SemanticsDocument {
   name: string;
@@ -41,6 +56,8 @@ export interface SemanticsDocument {
   params?: Record<string, ParamDefinition>;
   constants?: Record<string, ParamValue | Record<string, ParamValue>>;
   realize?: Record<string, RealizationRule | CelExpression>;
+  /** Formant bank specs for evaluator-native PFE amplitude computation (Lin 1995) */
+  formantBanks?: Record<string, FormantBankEvalSpec>;
 }
 
 /** Parameter definition */

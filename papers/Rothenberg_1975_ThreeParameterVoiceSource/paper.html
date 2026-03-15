@@ -1,0 +1,485 @@
+<html>
+
+<head>
+
+<title>A Three-Parameter Voice Source for Speech Synthesis</title>
+
+<script>
+
+// Script Source: CodeLifter.com
+// Copyright 2003
+// Do not remove this notice.
+
+// SETUPS:
+// ===============================
+
+// Set the horizontal and vertical position for the popup
+
+PositionX = 100;
+PositionY = 100;
+
+// Set these value approximately 20 pixels greater than the
+// size of the largest image to be used (needed for Netscape)
+
+defaultWidth  = 500;
+defaultHeight = 500;
+
+// Set autoclose true to have the window close automatically
+// Set autoclose false to allow multiple popup windows
+
+var AutoClose = false;
+
+// Do not edit below this line...
+// ================================
+if (parseInt(navigator.appVersion.charAt(0))>=4){
+var isNN=(navigator.appName=="Netscape")?1:0;
+var isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}
+var optNN='scrollbars=no,width='+defaultWidth+',height='+defaultHeight+',left='+PositionX+',top='+PositionY;
+var optIE='scrollbars=no,width=150,height=100,left='+PositionX+',top='+PositionY;
+function popImage(imageURL,imageTitle){
+if (isNN){imgWin=window.open('about:blank','',optNN);}
+if (isIE){imgWin=window.open('about:blank','',optIE);}
+with (imgWin.document){
+writeln('<html><head><title>Loading...</title><style>body{margin:0px;}</style>');writeln('<sc'+'ript>');
+writeln('var isNN,isIE;');writeln('if (parseInt(navigator.appVersion.charAt(0))>=4){');
+writeln('isNN=(navigator.appName=="Netscape")?1:0;');writeln('isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}');
+writeln('function reSizeToImage(){');writeln('if (isIE){');writeln('window.resizeTo(100,100);');
+writeln('width=100-(document.body.clientWidth-document.images[0].width);');
+writeln('height=100-(document.body.clientHeight-document.images[0].height);');
+writeln('window.resizeTo(width,height);}');writeln('if (isNN){');       
+writeln('window.innerWidth=document.images["George"].width;');writeln('window.innerHeight=document.images["George"].height;}}');
+writeln('function doTitle(){document.title="'+imageTitle+'";}');writeln('</sc'+'ript>');
+if (!AutoClose) writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()">')
+else writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()" onblur="self.close()">');
+writeln('<img name="George" src='+imageURL+' style="display:block"></body></html>');
+close();		
+}}
+
+</script>
+
+</head>
+
+<body BGCOLOR="#FFFFFF" LINK="#FF0000" VLINK="#0000FF" ALINK="#008000">
+<div align="left"><b><font size="3">Publications of Dr. Martin Rothenberg:</font></b> 
+</div>
+<p align="center"><font size="5">A Three-Parameter Voice Source for Speech Synthesis</font></p>
+
+<p align="center"><font size="3"><i>Martin Rothenberg</i><br>
+  <i>Dept. of Electrical and Computer Engineering, Syracuse University,<br>
+  Syracuse, NY, 13244<br>
+  Rolf Carlson, Björn Granström and Jan Lindqvist-Gauffin<br>
+  </i></font><font size="3"><i>Dept. of Speech Communication,<br>
+  Royal Institute of Technology (KTH), S-100 44 Stockholm 70, Sweden</i></font></p>
+<hr>
+<div align="left"> 
+  <p>Speech Communication Seminar Stockholm. Aug. 1-3. 1974</p>
+  <p><b><u>Abstract</u></b><br>
+    A &quot;black box&quot; model of the voice source has been built. This model 
+    has as inputs three physiologically derived variables and an output wave form 
+    similar to the actual glottal volume velocity wave. The voice source has been 
+    used with the OVE III serial formant synthesizer and this paper reports on 
+    some preliminary synthesis experiments using a new rule synthesis system.<br>
+    <br>
+    <b><u>Introduction</u></b><br>
+    Until recently, speech synthesizers have used a simple representation of the 
+    voice source, usually a pulse source of slowly varying frequency and amplitude, 
+    augmented by a noise source for use during glottal fricatives. It is generally 
+    recognized that the actual voice source differs from this simple model in 
+    that the quasi-periodic glottal pulses are constantly changing in spectral 
+    distribution, and have noise components and other irregularities not modeled 
+    by a pulse source of slowly varying frequency and amplitude. Also, in normal 
+    speech these acoustical parameters are not varied independently, but are controlled 
+    by the more fundamental physiological mechanisms for pitch control, glottal 
+    abduction and adduction, laryngeal constriction, and subglottal pressure regulation 
+    (Ladefoged, 1973. Lindqvist, 1972). A mechanism for raising and lowering the 
+    whole larynx is also important in languages employing ejectives or implosives.<br>
+    <br>
+    The approaches taken by Fujimura (1968) and by Ishizaka and Flanagan (1972) 
+    illustrate two rather different ways to model the glottal source more closely. 
+    We might call these the acoustical and the physiological approaches. Fujimura 
+    used the usual quasi-periodic pulse source during voicing, but in a way that 
+    made it more similar acoustically to an actual source, in this case by irregularly 
+    alternating noise and periodic excitation in some of the higher frequency 
+    bands. On the other hand, Ishizaka and Flanagan attempted to use a computer-based 
+    model of the laryngeal source to produce a replica of the glottal wave.<br>
+    <br>
+    The acoustical approach is often simplest to implement, when the correct acoustic 
+    parameters, and the rules for their use, have been identified. The physiological 
+    approach, however, introduces in a natural way parameters whose effects are 
+    not yet known, for example the effects of context on voice quality, that is, 
+    the effects of the simultaneous supraglottal articulation and the effects 
+    of the preceding and following phonetic segments. The physiological approach 
+    presupposes a reasonably accurate model of the glottal source.<br>
+    <br>
+    We report here on an approach intermediate to the acoustical and physiological 
+    methods. We have attempted to develop a behavioral or &quot;black box&quot; 
+    model of the glottal source. This model would have as inputs physiologically 
+    derived variables, and as an output a waveform similar to the actual glottal 
+    volume velocity wave. However, the internal operation of the model would not 
+    necessarily have any physiological relevance. We have found that a behavioral 
+    model is especially well-suited to the primary data we have used in its development, 
+    namely glottal air flow waveforms obtained by inverse-filtering the volume 
+    velocity waveform at the mouth (Rothenberg, 1973).<br>
+    <br>
+    <u><b>Voice source circuitry</b></u><br>
+    Our model of the voice sqilrce makes use of a simple electrical network shown 
+    in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 1</a>, 
+    that for appropriate values of its parameters produces an output waveform 
+    V<sub><font size="2">2</font></sub> similar to a typical glottal waveform 
+    during normal voicing. Its operation can be explained as follows. When the 
+    diodes D<sub><font size="2">1</font></sub> and D<sub><font size="2">2</font></sub> 
+    are not conducting (when V<sub><font size="2">2</font></sub> &gt; [V<sub><font size="2">1</font></sub> 
+    + V<sub><font size="2">B</font></sub>] and V<sub><font size="2">2</font></sub> 
+    &gt; 0, as in the rising segment of V<sub><font size="2">2</font></sub>, the 
+    low pass filter formed by R<sub><font size="2">1</font></sub> and C tends 
+    to produce a sinusoidal output that is smaller than the input, and delayed 
+    by up to 1/4 cycle. depending on the frequency. However, when V<sub><font size="2">2</font></sub> 
+    gets larger than [V<sub><font size="2">1</font></sub>, + V<sub><font size="2">B</font></sub>] 
+    (the time at which the two curves cross in the oscilloscope photo) the diode 
+    D<sub><font size="2">1</font></sub> conducts, and V<sub><font size="2">2</font></sub> 
+    falls more rapidly than it rose. The steep falling phase of V<sub><font size="2">2</font></sub> 
+    is interrupted when V<sub><font size="2">2</font></sub> becomes negative and 
+    D<sub><font size="2">2</font></sub> conducts to hold V<sub><font size="2">2</font></sub> 
+    just be1ow zero volts. V<sub><font size="2">2</font></sub> stays zero until 
+    [V<sub><font size="2">1</font></sub> + V<sub><font size="2">B</font></sub>] 
+    becomes positive once more, and then V<sub><font size="2">2</font></sub> rises 
+    slowly, as controlled by the time constant R<sub><font size="2">1</font></sub>C. 
+    In the actual circuit used, the branch R<sub><font size="2">2</font></sub>D<sub><font size="2">1</font></sub> 
+    was replaced by a more complex resistor diode network to improve the falling 
+    segment of the waveform. The waveform V<sub><font size="2">2</font></sub> 
+    shown was generated by the more complex network.<br>
+    <br>
+    Over a limited range, the circuit shown in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    1</a> can be easily controlled to produce changes in the waveform roughly 
+    similar to changes produced by three important physiological parameters of 
+    the voice source. An increase in the frequency of V<sub><font size="2">1</font></sub>, 
+    in addition to increasing the frequency of V<sub><font size="2">2</font></sub>, 
+    also reduced the amplitude of V<sub><font size="2">2</font></sub> somewhat, 
+    thus simulating the effect of increasing longitudinal vocal cord tension. 
+    Small changes in the amplitude of V<sub><font size="2">1</font></sub> produce 
+    changes in the waveform roughly similar to what one may expect from changes 
+    in P<sub><font size="2">sg</font></sub>. By varying the dc voltage V<sub><font size="2">B</font></sub> 
+    one could get either smaller, narrower pulses (V<sub><font size="2">B</font></sub> 
+    negative) or larger, broader pulses (V<sub><font size="2">B</font></sub> positive). 
+    This action appears to simulate well the effect of changing the degree of 
+    adduction or abduction on the vocal folds (Rothenberg. 1973).<br>
+    <br>
+    The basic circuit of <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    1</a> was incorporated into a complex electrical network designed to represent 
+    our &quot;best guess&quot; as to how a set of three control voltages representing 
+    neurological command parameters F (frequency), L (loudness), and T (tightness) 
+    are related to the glottal air flow waveform, for an unconstricted supraglottal 
+    vocal tract. Filtered gaussian noise was added to the waveform in a manner 
+    meant to simulate the occurrence of noise in the actual glottal wave (Rothenberg, 
+    in preparation). Since the basic waveform shown in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    1</a> still did not have the steep termination of the glottal closing phase 
+    characteristic of natural waveforms, it sounded somewhat deficient in high 
+    frequencies when used for synthesis. The termination was made steeper by adding 
+    a component [1.8x10<sup><font size="2">-4</font></sup>dV<sub><font size="2">2</font></sub>/dt], 
+    with the constant chosen by informal listening tests as the minimum sufficient 
+    to produce adequate high frequency energy. Some of the effects of the acoustic 
+    interaction between the glottis and the subglottal and supraglottal systems 
+    are included in the model, since the waveforms obtained by inverse-filtering 
+    that have been used as comparison guides do contain these effects. However, 
+    other effects are not present, such as oscillations in the rising phase at 
+    the frequency of the first formant (representing the change in first formant 
+    damping), and differences correlated with the vowel value. The operation of 
+    the complete model is illustrated by the sample waveforms shown below.<br>
+    <br>
+    <u><b>Varying frequency</b></u><br>
+    In the voice source model, frequency is varied linearly by the F parameter. 
+    In addition, raising the tightness parameter T above a preset level, illustrated 
+    below, results in a sharp decrease of fundamental frequency, followed by a 
+    small range of T in which irregular, low frequency pulses occur. Higher values 
+    of T extinguish glottal oscillations entirely.<br>
+    <br>
+    There is provision in the model for varying frequency slightly in proportion 
+    to L, to simulate the dependence on subglottal pressure. However, this provision 
+    was not used in the synthesis experiments so far. <br>
+    <br>
+    The small random or systematic variations of the periodicity of the voice 
+    source sometimes found in the human voice were not added. However some degree 
+    of aperiodicity that could be termed '&quot;frequency jitter&quot; is introduced 
+    by the additive random noise.<br>
+    <br>
+    <u><b>Varying loudness</b></u><br>
+    There is as yet no conclusive evidence as to the way the waveform varies with 
+    changes in the various amplitude related voice parameters such as subglottal 
+    pressure, perceived loudness, subjective voice effort, or the various types 
+    of stress found in natural speech. However, the waveforms shown by Lindqvist 
+    (1970) and Rothenberg (1973) indicate that the peak-to-peak amplitude of the 
+    glottal air flow pulses would increase only slightly with increased loudness 
+    (less than the percentage increase in subglottal pressure) with the pulses 
+    getting narrower and having a steeper closing phase. The intensity change 
+    is thus mainly caused by a change in the voice source spectrum and not by 
+    an increasing amplitude of the source. The observed change in the source waveform 
+    can be explained by an increase in the pressure drop across the glottis, but 
+    we cannot exclude the possibility that some rearrangement of the laryngeal 
+    muscles is made, even if this has not been experimentally shown in a conclusive 
+    way (Hirano, Ohala. and Vennard, 1969). Increasing subglottal pressure also 
+    causes the fundamental frequency to raise which by itself has the effect of 
+    increasing the voice intensity (Fant and Liljencrants, 1962).<br>
+    <br>
+    <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 2</a> shows 
+    the variation in the waveform of the artificial voice source, as the loudness 
+    parameter is varied in six equally spaced steps to the maximum possible. The 
+    F parameter was set for a glottal period of about 8 msec, and the T parameter 
+    for a normal or average adduction of the vocal folds. The dependence of fundamental 
+    frequency on L was removed to facilitate comparison of the waveforms. The 
+    steps in L shown might be considered roughly equivalent to values of subglottal 
+    pressure of 2.5, 5, 7.5, 10, 12.5, and 15 cm H<sub><font size="2">2</font></sub>O, 
+    with 8 cm H<sub><font size="2">2</font></sub>O being a typical average value 
+    in quiet conversation. These waveforms show, at least approximately, the desired 
+    variation in waveform and amplitude.<br>
+    <br>
+    To further facilitate the comparison of the wave shapes in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    2</a>, these same waveforms are shown in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    3</a> normalized in both zero level and peak amplitude. It is easy to see 
+    that an increase in L increases the high frequency content of the waveform, 
+    with an increase in the ratio of the energy in the region of the second and 
+    third formants to the average air flow.<br>
+    <br>
+    <u><b>Varying &quot;Tightness</b></u><b>&quot;</b><br>
+    The T control parameter corresponds approximately to the physiological dimensions 
+    &quot;glottal abduction&quot; and &quot;laryngeal closure&quot; as described 
+    by Lindqvist (1972). Increasing T from zero simulates glottal adduction articulation 
+    until a level is reached where the glottis is in voicing position. If T is 
+    further increased, &quot;laryngeal closure&quot; is simulated. Accordingly, 
+    the T parameter is similar to the &quot;glottal stricture&quot; dimension 
+    used by Ladefoged (1973).<br>
+    <br>
+    <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 4</a> shows 
+    the variation of the waveform of the voice source model for 13 equally spaced 
+    steps of the T parameter, with the L parameter constant at what would be considered 
+    an average conversational level (1/2 of its maximum value) and the period 
+    kept constant at 8 msec. In our attempts at speech synthesis. the fourth trace 
+    from the bottom was considered to have an average or normal &quot;tightness&quot;. 
+    As the T parameter was increased from its normal value, the pulses became 
+    smaller and somewhat narrower. At the level indicated by the second trace 
+    from the bottom, the period would begin to lengthen if it had not been kept 
+    constant for the picutre. At the level of T corresponding to the lowermost 
+    trace, the period would be very long and possibly unstable. Any further increase 
+    in T would terminate the oscillations.<br>
+    <br>
+    Decreasing T below its normal value makes the simulated glottal pulse broader 
+    and more smoothly varying, as would occur if the vocal folds came together 
+    for a shorter period, with a lower velocity at the instants of closure and 
+    separation. By the sixth trace from the bottom, the flat part of the wave 
+    is offset from zero, indicating that the vocal folds would not be approximating 
+    over their entire length. (In such cases the incomplete closure usually occurs 
+    posteriorly between the arytenoid cartilages.) There would be little energy 
+    in this waveform above the fourth or fifth harmonic. A further decrease in 
+    T (seventh trace from the bottom) results in a waveform that is almost sinusoidal, 
+    as might occur if the vocal folds oscillated without coming in contact. As 
+    T decreases further, the oscillations become smaller, with some flattening 
+    on top. as compared to a sinusoid, and noise can be more clearly seen on the 
+    waveform. Noise can also be seen to increase for the most tight waveforms.<br>
+    <br>
+    To facilitate the comparison of the waveforms. the third through sixth waveforms 
+    from the bottom in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    4</a> are shown again in <a href="javascript:popImage('fig1-5.jpg','Figures 1-5')">Figure 
+    5</a>, but normalized in zero level and amplitude. Changes in the normalized 
+    waveshape can be seen to be similar to those which occur when the L parameter 
+    is varied. This is to be expected, since we have hypothesized that a pressure-induced 
+    increase in the loudness includes increase in the adduction of the vocal folds.<br>
+    <br>
+    <u><b>Use of the voice source in synthesized speech</b></u><br>
+    To explore the dynamic capabilities of the voice source it has been linked 
+    to the new rule synthesis system at the Department of Speech Communication, 
+    KTH (Carlson and Granström, 1974, this Seminar). The three parameters of the 
+    source were controlled via separate digital to analog converters and the output 
+    of the source was connected to our OVE III serial formant synthesizer. Since 
+    the internal pulse amplitude, pulse frequency, and glottal noise (aspiration) 
+    controls of the synthesizer were thus made unnecessary, the number of control 
+    parameters remained constant.<br>
+    <br>
+    In our old synthesis system, the main interest has been focused on the description 
+    of supraglottal articulation, since glottal articulation, at least from a 
+    phonemic standpoint, is relatively unimportant in the languages we mostly 
+    have worked with. i.e. Swedish and English. However, the expectations with 
+    the new source are not so much for better segmental intelligibility as for 
+    increased segmental and supra-segmental naturalness, primarily due to more 
+    natural transitions between different states of the glottis and the incorporation 
+    of prosodically controlled source changes. The nature of the control parameters 
+    should also fit a more elegant and less ad hoc formulation of some synthesis 
+    rules.<br>
+    <br>
+    Some examples where we feel that this is the case will be given below. The 
+    synthesis is based on smoothed step commands (Liljencrants, 1971) so the control 
+    problem is reduced to assigning the appropriate extent and timing of the steps 
+    and the characteristics of the step smoothing. The rules under discussions 
+    will be illustrated by the synthesized sentence &quot;He eats what Heddy heated&quot; 
+    that can be seen in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>.<br>
+    <br>
+    <u><b>Signaling of constituent boundaries</b></u><br>
+    When two vowels close in quality are contiguous phonemically but separated 
+    by a constituent boundary, the boundary is marked by a simulated glottal stop 
+    gesture, as produced by a brief positive tightness command (point 2 in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>). As can be seen, the pulse amplitude and the frequency are lowered 
+    very much as in natural speech. This kind of gesture can also be used for 
+    disambiguiting phrases like &quot;an ice man&quot; and &quot;a nice man&quot; 
+    (Lehiste, 1959).<br>
+    <br>
+    <u><b>Allophonic variations in [ h ]</b></u><br>
+    [ h ] tends to be voiceless in post-pausal and post-unvoiced positions but 
+    voiced in voiced contexts. This is clearly a matter of coarticulation that 
+    can easily be described as such by always associating an [ h ] with a moderately 
+    negative going step in the tightness parameter. The effect of this could be 
+    seen in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 6</a> 
+    at points 1a, 1b, 1c.<br>
+    <br>
+    <u><b>Non-nasal consonants with supraglottal constriction</b></u><br>
+    For these kinds of sounds, several aspects of the glottal source have to be 
+    taken into account in addition to the two obvious modes, voiced and unvoiced. 
+    If the constriction is complete, as in stops, or only slightly open, the supraglottal 
+    pressure increase gives a reduction of transglottal pressure. This corresponds 
+    to a lowering of the L parameter, however. the change has to be made differently 
+    depending on whether the constriction is complete or not.<br>
+    <br>
+    During an unvoiced stop occlusion the voice source output should be zero. 
+    This is automatically obtained by setting the T parameter to a low value appropriate 
+    for voiceless sounds while simultaneously lowering L. These changes are relatively 
+    rapid, since they are due to only a small part of the total movement of the 
+    tongue or the lips, and could not be expected to follow time constants typical 
+    for glottal adjustment. Hence the source parameter time constants associated 
+    with these articulatory changes have been made to be approximately twice as 
+    fast as the parameter variations related to glottal and subglottal dynamics.<br>
+    <br>
+    Since the synthesizer does not model radiation from the walls, the voiced 
+    murmur of a voiced stop has been introduced functionally by setting the L 
+    and T parameters to values that result in a fairly steep spectral slope of 
+    the voice source.<br>
+    <br>
+    When the release occurs in a stop, the L parameter is raised. This results 
+    in a simulated aspiration if T is kept constant, or normal voicing if T is 
+    raised simultaneously. The aspiration is accordingly introduced in the synthesis 
+    as the normal articulatory delay in pulling the vocal folds together. These 
+    effects are illustrated in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>, points 3a and 3b.<br>
+    <br>
+    In the synthesis of the release of a stop, a short burst of energy is introduced 
+    to simulate the energy generated at the articulators by the explosion. The 
+    noise source during aspiration following the explosion does not have to be 
+    entirely at the glottis. It could be higher up in the vocal tract in the region 
+    of epiglottis or even at the main constriction, resulting in something like 
+    a homorganic fricative in the context of front vowels, and sometimes causing 
+    a phonological shift from stop to affricate (English) or fricative (Swedish). 
+    This aspiration variation has not yet been taken into account in our model, 
+    however.<br>
+    <br>
+    Unvoiced fricatives, as the [s] in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>, are produced with the energy generated at the articulatory constriction 
+    added separately, but with a glottal control similar to that for an [h]. In 
+    this way, glottal coarticulation effects occur in a natural manner.<br>
+    <br>
+    Voiced fricatives and semivowels, as the [w] in <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>, are produced by using values for L and T that differ from normal voicing 
+    values in the proportions used for a voiced stop, but differ from normal voicing 
+    only about half as much as for the stop. The time constant for these changes 
+    is slower than for a stop.<br>
+    <br>
+    <u><b>Lexical stress and Linguistic marking</b></u><br>
+    The relation between subglottal pressure and prosody has been shown to be 
+    quite close (Ladefoged. 1968). In our synthesis rules supra-segmental factors 
+    are manifested by relatively slow variations in L and F<sub><font size="2">0</font></sub>. 
+    The lexical stress marking, however, is not so clear and can be simulated 
+    perceptually by either a T or an L change. dependent on whether the innervation 
+    of the larynx or the subglottal system is believed to be the most important. 
+    In the example of <a href="javascript:popImage('fig6.jpg','Figure 6')">Figure 
+    6</a>, lexical stress was signalled in part by a different value for T during 
+    the vowel.<br>
+    <br>
+    <u><b>Summary</b></u><br>
+    Our model of the voice source assumes that the three control parameters F, 
+    L, and T are adequate for the synthesis of the target languages. Swedish and 
+    English, and are related to the acoustical parameters of frequency. amplitude. 
+    spectral distribution and aperiodicity in ways similar to those inherent in 
+    the model. These assumptions are supported by our success so far in synthesizing 
+    many types of natural sounding glottal transitions using relatively simple 
+    rules. However, we feel that much more independent verification is needed 
+    for the relationships between the physiological parameters and their acoustic 
+    consequences. For example. more information is needed on the effect of the 
+    transglottal pressure on the glottal waveform.<br>
+    <br>
+    It is also not clear whether the control parameter L should include changes 
+    of laryngeal adjustment, as now, or should reflect only the effect of changes 
+    in transglottal pressure.<br>
+    <br>
+  </p>
+  <p><u><b>References</b></u><br>
+    Carlson, R. and Granström, B.: &quot;A phonetically oriented programming language 
+    for rule description of speech&quot;, Speech Communication Seminar, Stockholm 
+    1974.<br>
+    <br>
+    Fant. G. and Liljencrants, J.: &quot;How to define formant level. A study 
+    of the mathematical model of voiced sounds&quot;, STL-QPSR 2/1962, pp. 1-9.<br>
+    <br>
+    Fujimura, O.: &quot;An approximation to voice aperiodicity&quot;, IEEE Trans, 
+    on Audio and Electroacoustics, <u>AU-16</u>, March 1968, pp. 68-72.<br>
+    <br>
+    Hirano, M., Ohala, J., and Vennard, W.: &quot;The function of laryngeal muscles 
+    in regulating fundamental frequency and intensity of phonation&quot;, JSHR. 
+    <u>12</u> (1969). pp. 616-628.<br>
+    <br>
+    Ishizaka, K. and Flanagan, J.: &quot;Synthesis of voiced sounds from a two-mass 
+    model of the vocal cords&quot;, Bell System Technical Journal. <u>51</u> (1972), 
+    pp. 1233-1268.<br>
+    <br>
+    Ladefoged, P.: &quot;Linguistic aspects of respiratory phenomena&quot;, Ann. 
+    of the New York Academy of Sciences, <u>155</u>, November 20, 1968.<br>
+    <br>
+    Ladefoged, P.: &quot;The features of the larynx&quot;, J. of Phonetics, 1 
+    (1973), pp. 73-83.<br>
+    <br>
+    Lehiste, I.: &quot;An acoustic-phonetic study of internal open juncture&quot;, 
+    Report no. 2, Speech Research Lab., University of Michigan, Aug. 1959.<br>
+    <br>
+    Liljencrants, J.: &quot;Computer vocal response system using smoothed step 
+    commands&quot;, paper 24 E 5 presented at the Seventh International Congress 
+    on Acoustics, Budapest 1971.<br>
+    <br>
+    Lindqvist, J.: &quot;The voice source studied by means of inverse filtering&quot;, 
+    STL-QPSR 1/1970, pp. 3-9.<br>
+    <br>
+    Lindqvist, J.: &quot;A descriptive model of laryngeal articulation in speech&quot;, 
+    STL-QPSR 2-3/1972, pp. 1-9.<br>
+    <br>
+    <a href="http://www.rothenberg.org/Inverse/Inverse.htm">Rothenberg, M.: &quot;A 
+    new inverse-filtering technique for deriving the glottal air flow waveform 
+    during voicing&quot;, J.Acoust.Soc.Am. 53 (1973), pp. 1632-1645.</a><br>
+    <br>
+    Rothenberg. M.: &quot;Parameters of the voice source&quot; (in preparation 
+    for the STL-QPSR). <br>
+    <br>
+    <br>
+    <br>
+  </p>
+</div>
+<hr width="736">
+<table width="736" border="0" cellspacing="0" cellpadding="0" height="67" align="center">
+  <tr> 
+    <td width="75"> 
+      <div align="center"><font face="Arial, Helvetica, sans-serif"><b><a href="http://www.rothenberg.org"><font size="4" color="#FF0000">Home</font></a></b></font></div>
+    </td>
+    <td width="118"> 
+      <div align="center"><font face="Arial, Helvetica, sans-serif"><font size="4" color="#FF0000"><a href="http://www.rothenberg.org/publications.htm"><font size="3"><b>Publications</b></font></a></font></font></div>
+    </td>
+    <td width="93"> 
+      <div align="center"><b><font face="Arial, Helvetica, sans-serif"><a href="mailto:mrothenberg@glottal.com"><font size="3" color="#FF0000">E-mail</font></a></font></b></div>
+    </td>
+    <td width="124"> 
+      <div align="center"><font face="Arial, Helvetica, sans-serif"><font color="#FFFFFF"><b><font size="3"> 
+        <font color="#000000"><a href="http://www.rothenberg.org/contents.htm">Papers 
+        online</a></font></font></b></font></font></div>
+    </td>
+    <td width="303" bordercolor="#FFFFFF"> 
+      <div align="center"><b><font size="4"><a
+    href="http://www.glottal.com" target="_blank"><img src="http://www.rothenberg.org/Images/GL_Logo2.gif" alt="Glottal Enterprises"
+    width="274" height="57" border="0"></a></font></b></div>
+    </td>
+  </tr>
+</table>
+<hr width="736">
+</body>
+</html>

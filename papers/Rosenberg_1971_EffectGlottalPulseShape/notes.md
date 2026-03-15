@@ -135,3 +135,28 @@ For a default "Rosenberg C" pulse in the synthesizer:
 11. Flanagan 1958 - Some Properties of the Glottal Sound Source
 12. Flanagan 1961 - Some Influences of the Glottal Wave upon Vowel Quality
 13. Dunn, Flanagan & Gestrin 1962 - Complex Zeros of Triangular Approximation to Glottal Wave
+
+## Collection Cross-References
+
+### Already in Collection
+- `Flanagan_1958_PropertiesGlottalSoundSource` — Flanagan 1958, properties of glottal sound source; cited as ref 11
+- `Holmes_1973_GlottalWaveformParallelFormant` — Holmes related work on glottal waveform in parallel formant synthesis
+- `Holmes_1983_FormantSynthesizersCascadeParallel` — Holmes cascade/parallel formant synthesizer design
+
+### Cited By (in Collection)
+- `Klatt_1990_VoiceQualityVariations` — discusses Rosenberg pulse shapes in context of voice quality
+- `Doval_2003_VoiceSourceCALM` — references Rosenberg pulse shape in survey of source models
+- `Doval_2006_SpectrumGlottalFlowModels` — references in spectral analysis of source models
+- `Childers_Lee_1991_VoiceQualityFactors` — references Rosenberg pulse shapes
+- `Fant_1985_LFModelGlottalFlow` — LF model supersedes Rosenberg pulse with more parameters
+- `Gobl_2021_LFModelFrequencyDomain` — discusses Rosenberg in context of LF model frequency domain
+- `Cummings_1995_GlottalExcitationEmotionalSpeech` — references Rosenberg source model
+
+### New Leads
+- Miller 1959 — Nature of the vocal cord wave (inverse filtering pioneer)
+- Mathews, Miller & David 1961 — Pitch synchronous analysis / glottal waveshape estimation
+
+### Conceptual Links (not citation-based)
+- `Fant_1988_LFFrequencyDomainInterpretation` — Frequency-domain analysis of LF model, the successor to Rosenberg's simpler pulse shapes
+- `Sun_2006_VocalTractGlottalSource` — Joint estimation of source and tract, building on the source-filter separation assumption Rosenberg explicitly noted
+- `Plumpe_1999_GlottalFlowDerivativeModeling` — Glottal flow derivative modeling extends Rosenberg's work on pulse shape parameterization

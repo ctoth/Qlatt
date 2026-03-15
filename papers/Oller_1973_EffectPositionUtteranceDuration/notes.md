@@ -109,3 +109,30 @@ Klatt 1976 incorporates these findings primarily through:
 - **Rule 4** (phrase-final lengthening): Directly informed by Oller's Experiments 1-3
 - **Rule 7** (non-initial shortening): Related to Oller's word-initial consonant lengthening finding
 - The specific magnitudes in Klatt's rules are calibrated against Oller's measurements among other sources
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 directly builds on Oller's positional measurements for Rules 4 and 7
+- `Wightman_1992_SegmentalDurationsProsodic` — extends positional duration work to prosodic boundaries
+- `White_2014_ProsodicTimingFunction` — references Oller in context of timing and prosodic structure
+
+### Cited By (in Collection)
+- `Klatt_1976_SegmentalDuration` — duration model directly builds on Oller's positional data
+- `Klatt_1973_DurationStopConsonantClusters` — related duration work
+- `Wightman_1992_SegmentalDurationsProsodic` — cites Oller on positional lengthening
+- `White_2014_ProsodicTimingFunction` — cites Oller on prosodic timing
+- `Beckman_1990_LengtheningsShorteningsProsodic` — cites Oller on position-in-utterance effects
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — references Oller's positional effects
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — cites Oller on duration
+- `vanSanten_1994_SegmentalDurationTTS` — references Oller's duration data
+
+### New Leads
+- Lindblom 1968 — Temporal organization of syllable production
+- Barnwell 1970 — Algorithm for segment durations in a reading machine context (MIT thesis)
+- Lehiste 1971 — Temporal organization in spoken language
+
+### Conceptual Links (not citation-based)
+- `Crystal_House_1988_StopConsonantDuration` — Both measure positional duration effects; Crystal & House extend to connected speech
+- `vanSanten_1994_AssignmentSegmentalDuration` — Formalizes positional duration effects into a computational model
+- `Umeda_1975_VowelDurationAmericanEnglish` — Complementary large-corpus vowel duration study with multiplicative rule model

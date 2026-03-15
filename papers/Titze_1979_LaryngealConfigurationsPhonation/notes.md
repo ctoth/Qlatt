@@ -157,3 +157,27 @@ Where:
 - No vocal tract coupling in the acoustic output
 - Subglottal system treated as simple pressure source
 - Mucosal wave not explicitly tracked (combined mucosal layers)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Steinecke_1995_BifurcationsVocalFold` — extends vocal fold modeling with nonlinear dynamics and bifurcation analysis
+
+### Cited By (in Collection)
+- `Zhang_2016_MechanicsVoiceProductionControl` — cites Titze 1979 on vocal fold mechanics and body-cover theory
+- `Zhang_2016_VocalFoldPhysiologyVoiceProduction` — references Titze's laryngeal configuration model
+- `Cummings_1995_GlottalExcitationEmotionalSpeech` — references Titze 1979 on laryngeal configurations
+- `Rothenberg_1981_InteractiveVoiceSource` — references Titze's vocal fold model
+- `Zhang_2021_LaryngealSizeSexDifferences` — cites Titze on F0 control mechanisms
+- `Steinecke_1995_BifurcationsVocalFold` — cites Titze's vocal fold model as foundation
+
+### New Leads
+- Ishizaka & Flanagan 1972 — Two-mass vocal cord model; aerodynamic equations used in glottal flow computation
+- Hirano 1975 — Body-cover theory of vocal fold structure; stress-strain data
+- Baer 1975 — Investigation of phonation using excised larynges
+
+### Conceptual Links (not citation-based)
+- `Titze_1989_MaleFemaleVoices` — Extends to male-female voice differences using body-cover framework
+- `Titze_1992_VocalIntensity` — Relates laryngeal configuration to vocal intensity regulation
+- `Titze_2014_BistableVocalFoldAdduction` — Later work on vocal fold adduction states building on this model
+- `Herbst_2015_GlottalAdductionSubglottalPressure` — Empirical measurements of adduction and pressure relationships modeled here

@@ -115,22 +115,23 @@ Derive a small set of acoustic parameters that are:
 ## Collection Cross-References
 
 ### Already in Collection
-- (none found)
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cited for H1-A1, H1-A2 spectral tilt measures; defines acoustic correlates of breathy/tense voice
+- [[Klatt_1990_VoiceQualityVariations]] — cited indirectly via KLSYN88; the voice quality analysis-synthesis framework this paper critiques
+- [[Kreiman_2007_GlottalSourceSpectrum]] — same first author; PCA analysis of glottal source measures yielding four independent factors that motivate the psychoacoustic model proposed here
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — same first author; empirical demonstration that OQ-H1*-H2* relationship is speaker-dependent, supporting the critique of simple acoustic measures
+- [[Kreiman_2021_ValidatingVoiceQuality]] — same first author; validates the psychoacoustic model proposed in this paper with 200-voice synthesis experiment
+
+### Cited By (in Collection)
+- [[Kreiman_2012_VoiceQualityHarmonicOQ]] — references this paper's perceptual framework
+- [[Kreiman_2021_ValidatingVoiceQuality]] — builds on this paper's framework as a precursor to validation
 
 ### New Leads (Not Yet in Collection)
-- **Gerratt, B. R., & Kreiman, J. (2001). Measuring vocal quality with speech synthesis. JASA, 110(5), 2560-2566.**
-- Core methodology paper: how to use synthesis for perceptual measurement
-- Directly relevant to validating Qlatt output quality
-- **Hanson, H. M. (1997). Glottal characteristics of female speakers: Acoustic correlates. JASA, 101, 466-481.**
-- Defines H1-A1, H1-A2 spectral tilt measures
-- Already in papers/ - provides acoustic correlates of breathy/tense
-- **Hillenbrand, J., Cleveland, R. A., & Erickson, R. L. (1994). Acoustic correlates of breathy vocal quality. JSHR, 37, 769-778.**
-- Cepstral peak prominence measure
-- Acoustic basis for breathiness quality
-- **Kreiman, J., Gerratt, B. R., & Ito, M. (2007). When and why listeners disagree in voice quality assessment tasks. JASA, 122, 2354-2364.**
-- Details the four factors causing disagreement
-- Method achieving 96% agreement
-- Methodology for any future perceptual testing
-- **Fletcher, H. (1934). Loudness, pitch, and the timbre of musical tones. JASA, 6, 59-69.**
-- Equal loudness curves methodology
-- Model for building perceptual interaction correction factors
+- **Gerratt, B. R., & Kreiman, J. (2001). Measuring vocal quality with speech synthesis. JASA, 110(5), 2560-2566.** — Core methodology paper: how to use synthesis for perceptual measurement
+- **Hillenbrand, J., Cleveland, R. A., & Erickson, R. L. (1994). Acoustic correlates of breathy vocal quality. JSHR, 37, 769-778.** — Cepstral peak prominence measure; acoustic basis for breathiness quality
+- **Kreiman, J., Gerratt, B. R., & Ito, M. (2007). When and why listeners disagree in voice quality assessment tasks. JASA, 122, 2354-2364.** — Details the four factors causing disagreement; method achieving 96% agreement
+- **Fletcher, H. (1934). Loudness, pitch, and the timbre of musical tones. JASA, 6, 59-69.** — Equal loudness curves methodology; model for building perceptual interaction correction factors
+
+### Conceptual Links (not citation-based)
+- [[Gobl_2003_VoiceQualityEmotion]] — **Strong.** Gobl uses KLSYN88 parameters to synthesize voice quality continua for emotion perception; this paper critiques the same kind of rating-scale methodology Gobl uses and proposes an alternative psychoacoustic approach. Both address voice quality measurement but from different angles.
+- [[Childers_Lee_1991_VoiceQualityFactors]] — **Moderate.** Childers & Lee define physiological voice quality factors (OQ, SQ, closure abruptness); this paper argues that acoustic measures derived from such factors lack perceptual validity without synthesis-based validation.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — **Moderate.** Burkhardt provides rule-based voice quality modification using Klatt parameters; this paper's framework suggests such rules should be validated via method-of-adjustment tasks rather than rating scales.

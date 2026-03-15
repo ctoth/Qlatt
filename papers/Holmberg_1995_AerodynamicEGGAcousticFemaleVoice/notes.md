@@ -138,3 +138,33 @@ This paper is a companion to Holmberg et al. 1988 and 1989 (male speakers). The 
 - EGG adduction quotient criterion changed to 65% (from 75%) due to waveform irregularities
 - Flow adduction quotient criterion changed to 30% (from 25%) for same reason
 - The inverse filtering center frequency was determined via LPC and DFT for each token
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990, analysis/synthesis/perception of voice quality (cited directly)
+- `Hillenbrand_1994_AcousticCorrelatesBreathyVoice` — Hillenbrand et al. 1994, acoustic correlates of breathiness (cited)
+- `Childers_Lee_1991_VoiceQualityFactors` — Childers & Lee 1991, voice quality factors (cited)
+- `Holmberg_1988_GlottalAirflowPressure` — Holmberg et al. 1988, companion male speaker study (cited as foundation)
+- `Hanson_1995_GlottalCharacteristicsFemale` — related female voice source work
+- `Hanson_1997_GlottalCharacteristicsFemaleAcoustic` — related female voice acoustics
+
+### Cited By (in Collection)
+- `Hanson_1997_GlottalCharacteristicsFemaleAcoustic` — references Holmberg's female voice data
+- `Hanson_1995_GlottalCharacteristicsFemale` — references Holmberg's normative female data
+- `Hanson_1999_GlottalMaleSpeakers` — references Holmberg's methodology
+- `Sundberg_2005_GlottalSourceLoudness` — cites Holmberg on loudness and glottal source
+- `Herbst_2015_GlottalAdductionSubglottalPressure` — references adduction quotient data
+- `Isshiki_1964_VoiceIntensityRegulation` — related through pressure-intensity relationships
+- `Koenig_LaryngealFactors` — references Holmberg's female voice measures
+- `Rothenberg_1975_ThreeParameterVoiceSource` — related source parameterization
+
+### New Leads
+- Stevens 1977 — Physics of laryngeal behavior (glottal configuration model, Figure 2 in this paper)
+- Stevens & Hanson 1995 — Classification of glottal vibration from acoustic measurements
+- Karlsson 1985 — Glottal waveforms for normal female speakers
+
+### Conceptual Links (not citation-based)
+- `Iseli_2007_VoiceSourceAgeSexVowel` — Voice source variations by age, sex, and vowel; complements Holmberg's female normative data
+- `Gauffin_1989_SpectralCorrelatesGlottalVoice` — Spectral correlates of glottal voice source; provides spectral framework for Holmberg's H1-H2 findings
+- `Fant_1997_VoiceSourceConnectedSpeech` — Voice source in connected speech extends the sustained vowel paradigm used here

@@ -72,3 +72,23 @@ Harris proposes listeners use a two-stage process:
 - O'Connor, Gerstman, Liberman, Delattre & Cooper (1957) - Cues for /w j r l/
 - Potter, Kopp & Green (1947) - Visible Speech
 - Schatz (1954) - Context effects on stop perception
+
+## Collection Cross-References
+
+### Already in Collection
+- `Hughes_1956_SpectralPropertiesFricatives` — Hughes & Halle 1956, spectral properties of fricative consonants; cited as foundation for friction-based identification
+
+### Cited By (in Collection)
+- `Heinz_1961_PropertiesVoicelessFricatives` — cites Harris in context of voiceless fricative spectral analysis
+- `Behrens_Blumstein_1988_FricativeAmplitude` — references Harris's perceptual hierarchy of fricative cues
+- `Jongman_1989_FricativeDuration` — cites Harris on fricative perceptual cues
+- `Shadle_2023_FricativeSpectraHighFreq` — references Harris's two-class perceptual model
+
+### New Leads
+- Liberman, Delattre & Cooper 1952 — Role of selected stimulus variables in stop perception
+- O'Connor et al. 1957 — Acoustic cues for perception of initial /w j r l/
+
+### Conceptual Links (not citation-based)
+- `Jongman_2000_FricativeAcoustics` — Comprehensive acoustic analysis of all English fricatives; provides quantitative spectral data explaining why Harris's perceptual results hold
+- `Shadle_1985_FricativeAcoustics` — Aerodynamic and acoustic modeling of fricative production; physical basis for why /f/ and /theta/ produce similar weak noise spectra
+- `Badin_1989_FricativeProductionModelling` — Quantitative relationships between intra-oral pressure, constriction area, and radiated SPL for fricatives

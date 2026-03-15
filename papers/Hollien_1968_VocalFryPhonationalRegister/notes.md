@@ -53,3 +53,30 @@ For a Klatt synthesizer modeling vocal fry / creaky voice:
 - Vocal fry range determined by having subjects produce slowest and fastest pulse rates
 - One female could not produce vocal fry at all
 - Range limits judged subjectively by experimenter + independent observer + subject
+
+## Collection Cross-References
+
+### Already in Collection
+- `Childers_Lee_1991_VoiceQualityFactors` — discusses vocal fry characteristics in voice quality analysis
+- `Gobl_2003_VoiceQualityEmotion` — uses vocal fry/creak as voice quality dimension
+- `Burkhardt_2009_VoiceQualityFormantSynthesis` — implements creaky voice in formant synthesis
+- `Keating_2015_CreakyVoiceAcoustics` — modern acoustic analysis of vocal fry
+- `Herzel_1994_VocalDisordersNonlinearDynamics` — models fry as bifurcation phenomenon
+- `Steinecke_1995_BifurcationsVocalFold` — period-doubling route to fry
+- `Zhang_2016_VocalFoldPhysiologyVoiceProduction` — covers register transitions
+- `Titze_1991_NeurologicAperiodicity` — relates to irregular fry phonation
+
+### Cited By (in Collection)
+- `Titze_1989_MaleFemaleVoices` — cites Hollien on vocal register ranges
+- `Herzel_1994_VocalDisordersNonlinearDynamics` — cites Hollien on vocal fry as phonational register
+- `Stathopoulos_2011_VoiceAcrossLifespan` — cites Hollien on register data
+- `Hillenbrand_1994_AcousticCorrelatesBreathyVoice` — cites Hollien on voice quality
+- `Cumbers_2013_PerceptualCorrelatesVocalVariability` — cites Hollien on vocal registers
+
+### New Leads
+- Hollien, Moore, Wendahl & Michel 1966 — "On the nature of vocal fry" (predecessor paper)
+
+### Conceptual Links (not citation-based)
+- `Klatt_1990_VoiceQualityVariations` — voice quality synthesis including breathiness and register modeling
+- `Fant_1985_LFModelGlottalFlow` — LF glottal model needed to generate fry pulses at very low F0
+- `Fant_1997_VoiceSourceConnectedSpeech` — voice source analysis including creaky voice endpoints

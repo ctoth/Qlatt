@@ -105,3 +105,26 @@ The paper carefully argues that polysyllabic shortening (stressed syllable in *p
 - Suggests word-boundary lengthening should be a separate, smaller rule
 - Related to Wightman et al. (1992) which provides quantitative boundary-lengthening data across the full ToBI break index hierarchy
 - Related to Edwards et al. (1988) on articulatory timing at prosodic boundaries
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1975 (cited as Klatt 1975 on vowel lengthening in connected discourse) feeds into Klatt 1976 duration model
+- `Oller_1973_EffectPositionUtteranceDuration` — Oller 1973 cited on position-in-utterance duration effects
+- `Pierrehumbert_1980_EnglishIntonation` — Pierrehumbert 1980, English intonation phonology (ToBI foundation)
+- `Edwards_1988_ArticulatoryTimingProsodicInterpretation` — same research group on articulatory timing at prosodic boundaries
+
+### Cited By (in Collection)
+- `Wightman_1992_SegmentalDurationsProsodic` — directly extends Beckman & Edwards with quantitative boundary-lengthening data across ToBI break indices
+- `White_2014_ProsodicTimingFunction` — cites Beckman & Edwards on prosodic timing
+- `Bartkova_1987_ModelSegmentalDurationFrench` — references in context of boundary lengthening
+
+### New Leads
+- Cooper & Paccia-Cooper 1980 — *Syntax and Speech*: catalog of syntactic effects on duration
+- Selkirk 1984 — *Phonology and Syntax*: metrical grid theory used as framework
+- Fowler 1977 — Timing control in speech production (dissertation on rhythmic timing)
+
+### Conceptual Links (not citation-based)
+- `Crystal_House_1988_StopConsonantDuration` — Both measure positional duration effects at prosodic boundaries
+- `vanSanten_1994_AssignmentSegmentalDuration` — Computational duration model incorporating boundary lengthening effects
+- `Umeda_1975_VowelDurationAmericanEnglish` — Complementary vowel duration study quantifying prepausal lengthening

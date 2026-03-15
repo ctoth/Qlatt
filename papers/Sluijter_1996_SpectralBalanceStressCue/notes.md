@@ -117,3 +117,22 @@ The paper distinguishes between "total amplitude" (a measure of power integrated
 ## Connection to Companion Paper
 
 This paper is the perceptual companion to Sluijter & van Heuven (1996), "Spectral balance as an acoustic correlate of linguistic stress," JASA 100(4), 2471-2485, which established the acoustic facts. The present paper confirms the perceptual relevance of those acoustic findings.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Wightman_1992_SegmentalDurationsProsodic` — Wightman et al. 1992, prosodic phrase boundary durations; cited on duration and stress
+
+### Cited By (in Collection)
+- `Lienard_1999_VocalEffortVowelSpectral` — references Sluijter on spectral balance and vocal effort
+- `vanSon_1997_ConsonantReduction` — cites Sluijter on spectral balance as stress correlate
+
+### New Leads
+- Fry 1955 — Duration and intensity as physical correlates of linguistic stress (classic study)
+- Fry 1958 — Experiments in the perception of stress
+- Beckman 1986 — *Stress and Non-Stress Accent* monograph; total amplitude measure
+
+### Conceptual Links (not citation-based)
+- `Lienard_1999_VocalEffortVowelSpectral` — Both examine spectral tilt changes related to vocal effort and stress; Lienard provides effort-related spectral data
+- `Fant_1997_VoiceSourceConnectedSpeech` — Voice source properties in connected speech relate to the spectral balance changes Sluijter measures
+- `Iseli_2007_VoiceSourceAgeSexVowel` — Voice source age/sex variations include spectral tilt measures relevant to stress modeling

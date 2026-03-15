@@ -90,3 +90,25 @@ Rating variances (synthesis vs. visual analog):
 3. **F0 interpolation algorithm**: The pulse-by-pulse interpolation with sub-sample tracking is directly relevant to avoiding F0 quantization artifacts in Qlatt's source generation
 4. **RA parameter as perceptual discriminator**: High-frequency harmonic energy masks noise perception -- relevant for setting noise parameters in voice quality modeling
 5. **Validation methodology**: The analysis-synthesis-as-measurement paradigm provides a framework for validating Qlatt's output quality against human perception
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — Fant et al. 1985, LF glottal flow model used as source model (cited as ref 6)
+- `Fant_1988_LFFrequencyDomainInterpretation` — Fant & Lin 1988, RA parameter and frequency-domain glottal flow (cited as ref 7)
+- `Hillenbrand_1994_AcousticCorrelatesBreathyVoice` — Hillenbrand et al. 1994, acoustic correlates of breathiness (cited as ref 12)
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990 referenced implicitly through voice quality measurement context
+
+### Cited By (in Collection)
+- `Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment` — extends the analysis-synthesis measurement paradigm
+- `Kreiman_2007_GlottalSourceSpectrum` — references Gerratt & Kreiman's synthesis-based measurement approach
+
+### New Leads
+- de Krom 1993 — Cepstral HNR technique for noise extraction
+- Epstein et al. 1999 — Source model adequacy for pathological voice; LF equal-area constraint issues
+- Cranen & Schroeter 1995 — Leaky glottis modeling
+
+### Conceptual Links (not citation-based)
+- `Kreiman_2021_ValidatingVoiceQuality` — Extends voice quality validation methodology
+- `Kreiman_2012_VoiceQualityHarmonicOQ` — Related work on voice quality and harmonic structure
+- `Gobl_2003_VoiceQualityEmotion` — Voice quality dimensions relevant to the synthesis-based measurement approach

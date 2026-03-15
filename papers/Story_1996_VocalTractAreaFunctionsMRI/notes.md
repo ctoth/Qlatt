@@ -186,3 +186,29 @@ Percentage errors (Delta) range from 0.2% to 43.6%, with most below 10%.
 - Yang and Kasuya (1994): similar shapes, BS glottal end areas 0.5-1.0 cm^2 smaller
 - Fant (1960): areas considerably larger than BS (based on x-ray and plaster casts, different subject)
 - Vowel centralization observed: MRI shapes somewhat centralized due to fatigue during scanning (~30 repetitions per shape)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960, canonical acoustic theory reference; Story compares area functions with Fant's data (cited)
+- `Hao_2002_VocalTractDimensionsFormants` — vocal tract dimensions and formants; uses similar MRI methodology
+
+### Cited By (in Collection)
+- `Hanson_2001_ModelsPhonation` — references Story's MRI data for vocal tract modeling
+- `Hao_2002_VocalTractDimensionsFormants` — cites Story's area function data
+- `Xue_2006_VocalTractDimensionsRace` — references Story's MRI vocal tract data
+- `Fitch_1999_VocalTractMorphology` — cites Story's area functions
+- `Zhang_2016_MechanicsVoiceProductionControl` — references Story's vocal tract model
+- `Zhang_2016_VocalFoldPhysiologyVoiceProduction` — references Story's area function data
+- `Fraj_2011_BreathyRoughVoices` — references Story's vocal tract model
+- `Steinecke_1995_BifurcationsVocalFold` — references Story/Titze vocal fold work
+
+### New Leads
+- Baer et al. 1991 — MRI vocal tract area functions for two subjects (comparison dataset)
+- Mermelstein 1973 — Articulatory model for study of speech production
+- Narayanan et al. 1995 — MRI articulatory study of fricative consonants
+
+### Conceptual Links (not citation-based)
+- `EspyWilson_2000_AcousticModelingAmericanR` — Acoustic modeling of American English /r/ requires vocal tract area function data like Story's
+- `Barreda_2015_FormantSpeakerSize` — Formant-speaker size relationships relate to the vocal tract dimensions Story measured
+- `Stevens_1955_QuantitativeVowelArticulation` — Earlier quantitative vowel articulation data that Story's MRI data supersedes

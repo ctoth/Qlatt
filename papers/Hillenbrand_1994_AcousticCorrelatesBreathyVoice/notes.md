@@ -115,3 +115,30 @@ CPP alone explains 84% of variance; adding all other measures only gains 10%.
 - Used simulated breathiness (normal talkers), not naturally occurring dysphonic voices
 - Sustained vowels only — continuous speech untested
 - Dysphonic voices may show more complex patterns than simple breathiness
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990, analysis/synthesis/perception of voice quality variations; direct predecessor establishing aspiration noise as primary breathiness cue (cited as key ref)
+
+### Cited By (in Collection)
+- `Gerratt_2001_MeasuringVocalQualitySpeechSynthesis` — cites Hillenbrand 1994 on breathiness correlates
+- `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — cites Hillenbrand 1994 on breathiness
+- `Vogel_2010_FatigueSpeechAcoustics` — references breathiness measures
+- `Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment` — references CPP as voice quality measure
+- `Kreiman_2021_ValidatingVoiceQuality` — references breathiness correlates
+- `Hanson_1997_GlottalCharacteristicsFemaleAcoustic` — references breathiness measures
+- `Kreiman_2012_VoiceQualityHarmonicOQ` — references breathiness-OQ relationship
+- `Zhang_2021_LaryngealSizeSexDifferences` — cites breathiness data
+- `Alku_1997_ParabolicSpectralParameter` — references breathiness correlates
+
+### New Leads
+- de Krom 1993 — Cepstrum-based harmonic-to-noise ratio technique (related to CPP)
+- Fukazawa et al. 1988 — Spectral tilt index BRI; contradicted by this paper
+- Bickley 1982 — H1 amplitude and breathiness in Gujarati (contradicted)
+
+### Conceptual Links (not citation-based)
+- `Hanson_1995_GlottalCharacteristicsFemale` — Complementary female voice source data including breathiness parameters
+- `Hanson_2001_ModelsPhonation` — Models of phonation types including breathy voice
+- `Gobl_2003_VoiceQualityEmotion` — Voice quality dimensions including breathiness as emotional correlate
+- `Fraj_2011_BreathyRoughVoices` — Synthesis of breathy and rough voices

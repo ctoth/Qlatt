@@ -189,3 +189,31 @@ Speaker JH durations are 2-4 ms SD greater than SP.
 6. **Word prominence**: Could be approximated by a content-word/function-word binary, or by word frequency rank. The effect is substantial (can halve duration).
 
 7. **Speaker differences**: CC (slow, deliberate reader) consistently has higher S-factors than SP or JH. This maps to speaking rate — a rate-dependent scaling of S would capture inter-speaker variation.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 duration model incorporates Umeda's findings; cites this paper
+- `Crystal_House_1988_StopConsonantDuration` — related duration measurements in connected speech
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — references Umeda's vowel duration data
+- `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, syllable nuclei duration (cited as ref 2)
+- `vanSanten_1994_SegmentalDurationTTS` — references Umeda's duration model
+
+### Cited By (in Collection)
+- `Klatt_1976_SegmentalDuration` — uses Umeda's duration data for rule calibration
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — cites Umeda on vowel duration
+- `Crystal_House_1988_StopConsonantDuration` — references Umeda's duration findings
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — cites Umeda's connected speech duration data
+- `Carlson_1975_RuleBasedTTS` — references Umeda's duration rules
+- `vanSanten_1994_SegmentalDurationTTS` — cites Umeda's multiplicative duration model
+- `Coker_1973_AutomaticSynthesisOrdinaryEnglish` — references Umeda's duration work
+
+### New Leads
+- House & Fairbanks 1953 — Consonant environment effects on vowels (foundational for C-factor)
+- House 1961 — Vowel duration in English (prior duration measurements)
+- Harris & Umeda 1974 — Speaking rate effects on vowel duration (companion paper)
+
+### Conceptual Links (not citation-based)
+- `Oller_1973_EffectPositionUtteranceDuration` — Complementary positional duration study using nonsense syllables; Umeda uses continuous speech
+- `Beckman_1990_LengtheningsShorteningsProsodic` — Distinguishes boundary lengthening from stress-timing effects relevant to Umeda's S-factor
+- `vanSanten_1993_SegmentalDuration` — Statistical duration modeling extending Umeda's rule-based approach

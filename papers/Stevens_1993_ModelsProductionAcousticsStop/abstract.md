@@ -1,0 +1,7 @@
+# Abstract
+
+Stop consonants are produced by forming a closure in the vocal tract, building up pressure in the mouth behind this closure, and releasing the closure. Models of the mechanical, aerodynamic, and acoustic events in the vicinity of the stop consonant are described, and examples of calculations of the airflow and of various components of the radiated sound are given. At the consonantal release, these components of the sound include an initial transient, a burst of frication noise, and an interval in which there is a sound source at the glottis and transitions in the formants. The models predict the absolute levels of these components for different places of articulation for the consonants.
+
+## Interpretation
+
+This paper provides a physics-based framework for understanding and synthesizing the release portion of stop consonants. The key contribution is the quantitative modeling of four sequential sound sources (transient, frication, aspiration, voicing) with their absolute amplitudes and spectral characteristics. For a Klatt synthesizer, this maps directly to the PLSTEP burst mechanism (transient), AF parameter (frication), AH parameter (aspiration), and AV parameter (voicing onset). The place-dependent constriction area trajectories (100 cm^2/s for labials/alveolars vs. 25 cm^2/s for velars) and the turbulence noise amplitude formula (proportional to Uc^3 * Ac^(-2.5)) provide principled bases for parameterizing stop releases rather than relying on ad-hoc values.

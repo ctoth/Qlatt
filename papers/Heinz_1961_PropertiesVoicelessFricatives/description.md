@@ -1,0 +1,11 @@
+---
+tags:
+  - fricatives
+  - spectral-analysis
+  - pole-zero-model
+  - synthesis
+  - perception
+  - voiceless-consonants
+---
+
+Heinz and Stevens present an acoustic theory of voiceless fricative consonant production based on pole-zero modeling of the vocal tract, where the noise source location within the tract determines the zeros (antiresonances) while the poles (resonances) arise from the natural frequencies of the front cavities and constriction. They match measured spectra of /f/, /s/, and /sh/ against electric circuit analogs to extract pole and zero frequencies and bandwidths, finding that a simplified model with just one pole and one zero (zero roughly one octave below pole frequency) can produce perceptually identifiable fricatives. Perceptual tests with both isolated and syllable-context stimuli confirm that the resonant frequency of the primary spectral peak determines fricative identity (/sh/ ~2500 Hz, /s/ ~3500-5000 Hz, /f/ and /th/ above ~6500 Hz), while F2 transitions of the adjacent vowel are critical for distinguishing /f/ from /th/.

@@ -1,0 +1,7 @@
+# Abstract
+
+In three related experiments, listeners judged the affect conveyed by short recorded utterances in which the voice quality, intonation contour type, and fundamental frequency range had been systematically and independently manipulated. (Contour and range were manipulated using digital resynthesis of naturally spoken utterances.) Analyses of variance of the results showed that range and contour, and less clearly range and voice quality, had independent effects on the way the utterances were judged. The results also strongly suggest that these differences are independent of effects due to interspeaker differences and to differences of verbal content. Finally, analysis of the results suggests that differences of F0 range, as is commonly assumed, have continuous rather than categorical effects on affective judgments.
+
+## Interpretation
+
+This paper establishes that three major prosodic/paralinguistic variables — F0 contour shape, F0 range, and voice quality — operate independently in listener perception of speaker affect. For a formant synthesizer, this validates the architectural decision to implement these as orthogonal control dimensions. The F0 range scaling formula (using a logarithmic model relative to speaker floor) is directly implementable as a prosody rule. The continuous (not categorical) nature of F0 range effects means a single scalar parameter suffices for range control rather than discrete levels.

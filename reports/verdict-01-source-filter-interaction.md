@@ -25,3 +25,5 @@ The source-filter independence assumption underlying Klatt synthesis is approxim
 ## Verdict Location
 
 Full verdict: `research/verdicts/01-source-filter-interaction.md`
+
+Commit: 287414f

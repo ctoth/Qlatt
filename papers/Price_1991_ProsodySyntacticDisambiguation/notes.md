@@ -112,3 +112,36 @@ Key hypotheses supported:
 - Within-clause syntactic boundaries should produce smaller but still measurable prosodic breaks
 - Prominence placement is more semantic than syntactic — focus-driven rather than structure-driven
 - The finding that some structures cannot be reliably disambiguated by prosody alone suggests a "neutral prosody" mode may be appropriate for ambiguous structures
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Pierrehumbert_1980_EnglishIntonation` — Pierrehumbert 1980 intonation phonology framework is the basis for boundary tone labels used
+- `Crystal_House_1988_StopConsonantDuration` — Crystal & House 1988 cited for connected-speech duration data
+- `Allen_1987_MITalk_TTS` — Klatt 1987 TTS review cited (part of Allen et al. 1987 MITalk)
+- `Wightman_1992_SegmentalDurationsProsodic` — Companion paper on segmental durations near prosodic boundaries, using same corpus
+
+### Cited By (in Collection)
+
+- `Wightman_1992_SegmentalDurationsProsodic` — Cites Price et al. 1991 as companion study
+- `Silverman_1992_ToBILabelingProsody` — References Price et al. for break index system
+- `Beckman_2005_ToBISystemEvolution` — Cites for prosodic break index precursor to ToBI
+- `Breen_InPress_ToBIRaPReliability` — References for prosodic labeling context
+- `Ladd_2021_TroubleWithToBI` — Cites for prosodic transcription conventions
+- `Jun_2005_ProsodicTypology` — References for break index system
+- `Roach_1994_ProsodicTranscriptionConversion` — Cites for prosodic transcription
+- `Trott_2022_ProsodyIndirectRequests` — References for prosody-syntax relationship
+- `White_2014_ProsodicTimingFunction` — Cites for prosodic boundary cues
+
+### New Leads (Not Yet in Collection)
+
+- Cooper, W., & Paccia-Cooper, J. (1980). *Syntax and Speech*. Harvard U.P. — Duration at syntactic boundaries
+- Lehiste, I. (1973). "Phonetic disambiguation of syntactic ambiguity." Glossa 7(2), 107-121. — Original prosodic disambiguation study
+- Selkirk, E. (1984). *Phonology and Syntax*. MIT. — Prosodic phonology theory
+
+### Conceptual Links (not citation-based)
+
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — Both use normalized duration measures for connected speech; Price et al. use z-score normalization identical in concept to what Crystal & House's gamma distribution parameters enable
+- `Pitrelli_1994_ToBILabellingReliability` — Price et al. introduced the 7-level break index precursor; Pitrelli validates the reliability of the resulting ToBI system
+- `Wightman_1992_SegmentalDurationsProsodic` — Companion study from same research group and corpus; Price establishes prosody-syntax mapping, Wightman provides the durational details

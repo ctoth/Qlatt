@@ -172,3 +172,40 @@ For a segment with baseline duration mu_p:
 - Onset of final syllable: NO
 - Earlier syllables in the foot: NO
 - Post-boundary segments: NO
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — Crystal & House 1982 provides baseline duration statistics and gamma distribution model used in this paper
+- `Crystal_House_1988_StopConsonantDuration` — Crystal & House 1988 provides "current results" on connected-speech durations
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 foundational duration rules, predecessor to prosodic lengthening work
+- `Pierrehumbert_1980_EnglishIntonation` — Theoretical framework for prosodic hierarchy used
+- `Price_1991_ProsodySyntacticDisambiguation` — Companion paper using same corpus; prosody in syntactic disambiguation
+- `Allen_1987_MITalk_TTS` — Allen, Hunnicutt & Klatt 1987 MITalk system cited for TTS context
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — Campbell 1991 syllable-based model cited
+
+### Cited By (in Collection)
+
+- `White_2014_ProsodicTimingFunction` — Cites Wightman et al. 1992 for prosodic boundary lengthening data
+- `Jun_2005_ProsodicTypology` — References Wightman et al. for break index validation
+- `Silverman_1992_ToBILabelingProsody` — Cites for ToBI break index system development
+- `Beckman_2005_ToBISystemEvolution` — References for empirical validation of break indices
+- `Breen_InPress_ToBIRaPReliability` — Cites for ToBI reliability context
+- `Ladd_2021_TroubleWithToBI` — References for ToBI labeling conventions
+- `Taylor_2000_TiltModelIntonation` — Cites for prosodic boundary data
+- `Roach_1994_ProsodicTranscriptionConversion` — References for prosodic transcription
+- `Larrouy-Maestri_2024_EmotionalProsody` — Cites for prosodic phrasing
+- `Pitrelli_1994_ToBILabellingReliability` — Companion study on ToBI reliability
+
+### New Leads (Not Yet in Collection)
+
+- Beckman, M., & Edwards, J. (1990). "Lengthenings and Shortenings and the Nature of Prosodic Constituency." Papers in Laboratory Phonology I, 152-178. — Prosodic constituency and lengthening
+- Nespor, M., & Vogel, I. (1986). *Prosodic Phonology*. Foris. — Prosodic hierarchy theory
+- Selkirk, E. (1984). *Phonology and Syntax*. MIT. — Prosodic categories framework
+
+### Conceptual Links (not citation-based)
+
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — Both measure segmental durations in connected speech; Crystal & House provide baseline phone-level statistics, Wightman et al. show how these durations are modulated by prosodic boundary strength
+- `Hertz_1992_NucleusBasedTiming` — Both address how suprasegmental structure conditions duration; Wightman focuses on prosodic boundaries, Hertz on syllabic nucleus organization
+- `Price_1991_ProsodySyntacticDisambiguation` — Companion study from same research group and corpus; Price establishes prosody-syntax mapping, Wightman provides the durational details

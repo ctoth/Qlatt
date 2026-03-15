@@ -151,3 +151,30 @@ Ratio of speech to elapsed time:
 4. **Pre-voicing lengthening:** Effect is context-dependent and may not apply uniformly in connected speech, particularly for short vowels before fricatives.
 
 5. **Voiceless fricatives** have notably bimodal distributions, suggesting subgroups with different durational characteristics (sibilants vs. non-sibilants likely).
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 "Linguistic Uses of Segmental Duration in English" is the foundational predecessor for duration rules that Crystal & House 1982 extends with connected-speech data
+- `Crystal_House_1988_StopConsonantDuration` — Crystal & House 1988 is the companion/follow-up paper providing "current results" and focusing on stop consonant duration in connected speech
+
+### Cited By (in Collection)
+
+- `Wightman_1992_SegmentalDurationsProsodic` — Uses Crystal & House 1982 duration statistics and gamma distribution model as baseline for pre-boundary lengthening analysis
+- `Crystal_House_1988_StopConsonantDuration` — Self-cites as predecessor providing preliminary connected-speech duration results
+- `Abramson_Whalen_2017_VOTat50` — Cites Crystal & House 1982 for understanding how VOT varies in running speech contexts
+- `vanSanten_1993_SegmentalDuration` — Cites Crystal & House duration data as comparison baseline
+- `vanSanten_1994_SegmentalDurationTTS` — Uses Crystal & House connected-speech duration data
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — References Crystal & House duration statistics for syllable-level timing model
+
+### New Leads (Not Yet in Collection)
+
+- Klatt, D. H. (1975). "Vowel lengthening is syntactically determined in a connected discourse," J. Phonet. 3, 129-140. — Directly relevant predecessor on syntactic conditioning of vowel duration
+- Umeda, N. (1975). "Vowel duration in American English," J. Acoust. Soc. Am. 58, 434-445. — Vowel duration data used as comparison
+- Lehiste, I. (1970). *Suprasegmentals*. MIT Press. — Foundational suprasegmental analysis
+
+### Conceptual Links (not citation-based)
+
+- `Hertz_1992_NucleusBasedTiming` — Both address segmental duration in connected speech; Hertz proposes the acoustic nucleus as a superior unit to individual segments for duration assignment, while Crystal & House provide the segment-level baseline statistics that nucleus models must improve upon
+- `Price_1991_ProsodySyntacticDisambiguation` — Both use normalized duration measures; Price et al. use a z-score normalization identical in concept to what Crystal & House's gamma distribution parameters enable

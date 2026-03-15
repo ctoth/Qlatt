@@ -136,3 +136,31 @@ When synthesizing affect, F0 and formant changes should be *consistent* with the
 - No specific Hz values or percentage changes for F0 manipulation are prescribed
 - The vocal tract length manipulation for smile is demonstrated acoustically but not parameterized for a formant synthesizer
 - The experiment used natural speech manipulation, not synthesis
+
+## Collection Cross-References
+
+### Already in Collection
+
+(No papers directly cited by Ohala 1984 are in the collection.)
+
+### Cited By (in Collection)
+
+- `Belyk_2014_AcousticValenceEmotion` — Cites Ohala 1984 for the frequency code framework
+- `Liu_2011_FemaleVoiceAttractiveness` — References Ohala for F0 and body size perception
+- `Xu_2013_VocalAttractivenessBodySizeProjection` — Cites for frequency code and body size projection
+- `Fitch_1999_VocalTractMorphology` — References for size-frequency relationship
+- `Winter_2012_KoreanSpeechRegisters` — Cites for frequency code in politeness registers
+- `Babel_2014_VocalAttractiveness` — References for frequency code theory
+- `Caballero_2018_SoundOfImpoliteness` — Cites for F0 and politeness/dominance mapping
+- `XuLee_VocalAttractivenessMandarinListeners` — References for frequency code
+- `Trott_2022_ProsodyIndirectRequests` — Cites for frequency code in indirect speech
+
+### New Leads (Not Yet in Collection)
+
+- Morton, E. W. (1977). "On the occurrence and significance of motivation-structural rules in some bird and mammal sounds." Am. Nat. 111, 855-869. — Foundational cross-species frequency code
+- Bolinger, D. (1964). "Intonation as a universal." — Intonation universals across languages
+
+### Conceptual Links (not citation-based)
+
+- `Ladd_1985_IndependentFunctionIntonation` — Both address how F0 range signals affect/attitude; Ohala provides the biological explanation (frequency code), Ladd et al. show the independence and continuous nature of the F0 range effect
+- `Belin_2017_SoundOfTrustworthiness` — Both relate F0 contours to social perception; Ohala's frequency code predicts that high F0 signals submission/friendliness, Belin's trustworthiness contour data provides specific F0 shapes

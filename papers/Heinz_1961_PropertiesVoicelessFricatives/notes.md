@@ -137,3 +137,31 @@ Key findings:
 6. **Relative level** of fricative to vowel matters (tested -5 to -25 dB)
 7. For /sh/: need additional low-frequency attenuation (sharp cutoff below ~3000 Hz)
 8. For /f/: may need additional uncoupled low-frequency noise (turbulence at lips)
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960 is cited for acoustic theory foundation; pole-zero framework for fricative modeling
+- `Hughes_1956_SpectralPropertiesFricatives` — Hughes & Halle 1956 is the direct source of the fricative spectra analyzed and modeled in this paper
+
+### Cited By (in Collection)
+
+- `Shadle_1985_FricativeAcoustics` — Cites Heinz & Stevens 1961 for pole-zero model of fricative production
+- `Jongman_2000_FricativeAcoustics` — References Heinz & Stevens for fricative acoustic theory
+- `Jongman_1989_FricativeDuration` — Cites Heinz & Stevens for fricative spectral properties
+- `Behrens_Blumstein_1988_FricativeAmplitude` — References Heinz & Stevens for fricative perceptual cues
+- `Stevens_1971_AirflowTurbulenceNoise` — Cites Heinz & Stevens for noise source properties in fricatives
+- `Stevens_1991_HL_Parameters` — References Heinz & Stevens for fricative pole-zero analysis
+- `Fujimura_1962_NasalConsonantAnalysis` — Cites Heinz & Stevens for pole-zero modeling approach applied to nasal consonants
+- `Monson_2014_HighFrequencyVoice` — References for high-frequency spectral data
+
+### New Leads (Not Yet in Collection)
+
+- Harris, K. S. (1958). "Cues for the discrimination of American English fricatives in spoken syllables." Language and Speech 1, 1. — Fricative perception cues including transitions
+- Delattre, P. C., Liberman, A. M., & Cooper, F. S. (1955). JASA 27, 769-773. — F2 locus theory for consonant place
+
+### Conceptual Links (not citation-based)
+
+- `Hughes_1956_SpectralPropertiesFricatives` — Companion study: Hughes & Halle 1956 provides empirical spectral measurements; Heinz & Stevens 1961 provides the pole-zero acoustic theory explaining those measurements
+- `Stevens_1978_InvariantCuesPlaceArticulation` — Stevens is co-author of both; the invariant spectral template approach for stops parallels the pole-zero modeling of fricative spectra

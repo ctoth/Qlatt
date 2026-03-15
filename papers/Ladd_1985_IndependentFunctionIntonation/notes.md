@@ -94,3 +94,28 @@ This maps naturally onto Klatt synthesizer parameters:
 - F0 range -> scale F0 targets using the R formula
 - Contour type -> different F0 contour templates/rules
 - Voice quality -> source parameters (AV, TL, OQ, spectral tilt) and possibly formant bandwidths
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Pierrehumbert_1980_EnglishIntonation` — Pierrehumbert 1981 "Synthesizing Intonation" is cited; the intonation framework underlies the contour type dimension
+
+### Cited By (in Collection)
+
+- `Banse_1996_VocalEmotionAcousticProfiles` — Cites Ladd et al. 1985 for independent function of intonation contour type, voice quality, and F0 range
+- `Mozziconacci_1998_SpeechEmotionProsody` — References Ladd et al. 1985 for affect signaling via prosodic dimensions
+- `Mozziconacci_2002_ProsodyEmotions` — Cites Ladd et al. 1985 as evidence for independent prosodic channels
+- `Cui_2006_PleasureAcousticFeaturesAffectiveSpeech` — References for affect-prosody independence
+- `Gobl_2003_VoiceQualityEmotion` — Cites Ladd et al. for independent voice quality dimension
+- `Trott_2022_ProsodyIndirectRequests` — References Ladd et al. for prosodic affect signaling
+
+### New Leads (Not Yet in Collection)
+
+- Scherer, K. R., Ladd, D. R., & Silverman, K. E. A. (1984). Vocal Cues to Speaker Affect: Testing Two Models. JASA 76, 1346-1356. — Predecessor study testing continuous vs categorical vocal cue distinction
+- Laver, J. (1980). *The Phonetic Description of Voice Quality*. Cambridge University Press. — Voice quality description framework used in this study
+
+### Conceptual Links (not citation-based)
+
+- `Ohala_1984_EthologicalF0FrequencyCode` — Both address how F0 range signals affect/attitude; Ladd et al. show F0 range effects are continuous, Ohala provides the biological frequency code framework explaining why higher/lower F0 carries specific attitudinal meanings
+- `Hammarberg_1980_PerceptualAcousticCorrelatesVoice` — Both identify independent perceptual dimensions of voice; Hammarberg's breathy-overtight factor maps onto Ladd's voice quality dimension, validating orthogonal control

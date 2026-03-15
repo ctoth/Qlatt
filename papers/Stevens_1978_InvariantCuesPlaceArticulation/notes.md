@@ -150,6 +150,30 @@ Key finding: Burst-only stimuli are very poorly identified. Full-cue (burst+tran
 
 5. **Context-independent property at onset, context-dependent transitions**: The gross spectral shape at onset is invariant, but the formant transition trajectories that achieve this shape vary with vowel context. This validates the Klatt synthesis approach where formant starting frequencies are context-dependent parameters but the target onset spectrum shape is fixed per place of articulation.
 
+## Collection Cross-References
+
+### Already in Collection
+
+- `Blumstein_Stevens_1979_AcousticInvariance` — Companion paper providing acoustic production evidence for the same three spectral templates validated perceptually here
+- `Zue_1976_StopConsonantAcoustics` — Acoustic measurements used as basis for stimulus design decisions
+- `Fant_1960_AcousticTheorySpeechProduction` — Theoretical foundation for formant-shift predictions underlying the three templates
+
+### Cited By (in Collection)
+
+- `Blumstein_Stevens_1979_AcousticInvariance` — Cites Stevens & Blumstein 1978 as the perceptual complement to the production study
+- `Jongman_1989_FricativeDuration` — References Stevens & Blumstein for stop consonant invariance
+- `Allen_1987_MITalk_TTS` — Cites for stop consonant synthesis parameters
+
+### New Leads (Not Yet in Collection)
+
+- Halle, M., Hughes, G. W., & Radley, J.-P. A. (1957). "Acoustic properties of stop consonants." JASA 29, 107-116. — Earlier burst frequency work this paper builds upon
+- Cole, R. A., & Scott, B. (1974). "Toward a theory of speech perception." Psychol. Rev. 81, 348-374. — Spectral continuity at onset theory
+
+### Conceptual Links (not citation-based)
+
+- `Hughes_1956_SpectralPropertiesFricatives` — Both establish spectral templates for consonant identification; Stevens & Blumstein for stops (diffuse-rising, diffuse-falling, compact), Hughes & Halle for fricatives (3 spectral classes by place)
+- `Heinz_1961_PropertiesVoicelessFricatives` — Stevens is co-author of both; pole-zero modeling of fricatives parallels the invariant spectral approach to stops
+
 ## Relation to Companion Paper (Blumstein & Stevens 1979)
 
 This 1978 paper establishes the **perceptual** validity of invariant onset spectra through synthetic speech experiments. The 1979 paper (Blumstein & Stevens, already in collection) provides the **acoustic production** evidence — showing that the same three spectral templates (diffuse-rising, diffuse-falling, compact) correctly classify ~85% of natural speech tokens across speakers and vowel contexts. Together they establish both the production and perception basis for invariant place-of-articulation cues.

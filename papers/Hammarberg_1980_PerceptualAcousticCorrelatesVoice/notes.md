@@ -149,3 +149,28 @@ Head vs chest register perception is primarily driven by F0, secondarily by high
 
 ### Reliability
 Listener retest reliability was very high (Pearson r = 0.93-0.97), validating these perceptual dimensions as stable and replicable.
+
+## Collection Cross-References
+
+### Already in Collection
+
+(No papers directly cited by Hammarberg et al. 1980 are in the collection.)
+
+### Cited By (in Collection)
+
+- `Kreiman_2007_GlottalSourceSpectrum` — Cites Hammarberg et al. 1980 for voice quality factor analysis
+- `Banse_1996_VocalEmotionAcousticProfiles` — References Hammarberg for acoustic correlates of voice quality
+- `Monson_2014_HighFrequencyVoice` — Cites for LTAS-based voice quality analysis
+- `Eyben_2015_GeMAPS_AcousticParameters` — References for spectral slope as voice quality measure
+- `Goudbeek_2010_ValencePotencyVocalEmotion` — Cites for perceptual voice quality dimensions
+
+### New Leads (Not Yet in Collection)
+
+- Isshiki, N. & Takeuchi, Y. (1970). Factor analysis of hoarseness. Studia Phonologica 5, 37. — Prior factor analysis of hoarseness that this study builds upon
+- Wendahl, R. W. (1963/1966). Laryngeal analog synthesis of harsh/jitter/shimmer. Folia Phoniatrica. — Laryngeal analog synthesis of voice quality, directly relevant to Klatt synthesis
+
+### Conceptual Links (not citation-based)
+
+- `Ladd_1985_IndependentFunctionIntonation` — Both identify independent perceptual dimensions; Hammarberg's breathy-overtight factor maps onto Ladd's voice quality dimension, both supporting orthogonal control of prosodic parameters
+- `Gobl_2003_VoiceQualityEmotion` — Both map voice quality to perceptual dimensions; Hammarberg establishes pathological voice factors, Gobl maps voice quality types to emotional expressions
+- `Burkhardt_2009_VoiceQualityFormantSynthesis` — Hammarberg's spectral slope findings for breathy-overtight directly inform Burkhardt's Klatt parameter formulas for phonation types

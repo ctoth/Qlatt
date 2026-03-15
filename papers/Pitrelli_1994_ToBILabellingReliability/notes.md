@@ -140,3 +140,27 @@ Relatively small variation among transcribers, indicating training materials are
 4. **Downstep is the weakest distinction**: 33.5% of tonal disagreements involve the downstep diacritic (!). This suggests that downstep implementation in F0 rules can be approximate without noticeable quality loss.
 
 5. **Break index 2 is problematic**: The split definition (strong disjuncture without tone marks OR weak disjuncture at a tonal boundary) makes BI=2 the least reliable break index. Duration rules should treat BI=2 conservatively.
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Silverman_1992_ToBILabelingProsody` — Silverman et al. 1992 is the original ToBI standard definition that this paper evaluates
+- `Beckman_2005_ToBISystemEvolution` — Beckman & Hirschberg 1994 ToBI annotation conventions manuscript is cited; Beckman 2005 provides the evolved system
+
+### Cited By (in Collection)
+
+- `Breen_InPress_ToBIRaPReliability` — Cites Pitrelli et al. 1994 as the primary prior reliability study for ToBI
+- `Ladd_2021_TroubleWithToBI` — References Pitrelli et al. for inter-transcriber reliability data
+- `Jun_2005_ProsodicTypology` — Cites for ToBI reliability validation
+- `Beckman_2005_ToBISystemEvolution` — References as key reliability study
+- `Ladd_2008_IntonationalPhonology` — Cites for ToBI reliability evidence
+
+### New Leads (Not Yet in Collection)
+
+- Beckman, M. E., & Ayers, G. (1994). Guidelines for ToBI labelling, version 2.0. Manuscript, Ohio State University. — The actual ToBI specification document
+
+### Conceptual Links (not citation-based)
+
+- `Wightman_1992_SegmentalDurationsProsodic` — Both use the break index system; Pitrelli validates its labeling reliability, Wightman demonstrates its acoustic correlates in duration
+- `Price_1991_ProsodySyntacticDisambiguation` — Price et al. introduced the 7-level break index precursor that ToBI later adopted; Pitrelli validates the reliability of the resulting system

@@ -102,3 +102,28 @@ The three-measurement procedure suggests that for synthesis:
 - Speaker H: male (most consistent voicing component)
 - Speaker T: female ([f] spectra had very strong high-frequency component)
 - 2 additional speakers used for measurement validation (not shown in figures)
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Fant_1960_AcousticTheorySpeechProduction` — Jakobson, Fant & Halle 1952 *Preliminaries to Speech Analysis* is cited; Fant 1960 provides the acoustic theory framework for understanding fricative spectra
+
+### Cited By (in Collection)
+
+- `Heinz_1961_PropertiesVoicelessFricatives` — Heinz & Stevens 1961 directly analyze and model the fricative spectra measured by Hughes & Halle 1956
+- `Jongman_2000_FricativeAcoustics` — Cites Hughes & Halle 1956 as foundational fricative spectral analysis
+- `Jongman_1989_FricativeDuration` — References Hughes & Halle for fricative spectral properties
+- `Behrens_Blumstein_1988_FricativeAmplitude` — Builds on Hughes & Halle's spectral classification of fricatives
+- `Shadle_1985_FricativeAcoustics` — Cites Hughes & Halle as predecessor work on fricative acoustics
+- `Shadle_2023_FricativeSpectraHighFreq` — References Hughes & Halle for historical fricative spectral measurements
+- `Monson_2014_HighFrequencyVoice` — Cites Hughes & Halle for high-frequency spectral data
+
+### New Leads (Not Yet in Collection)
+
+- Harris, K. S. (1954). Cues for the identification of the fricatives of American English. JASA 26, 952. — Showed formant transitions contribute little to fricative identification
+
+### Conceptual Links (not citation-based)
+
+- `Heinz_1961_PropertiesVoicelessFricatives` — Companion study: Hughes & Halle 1956 provides empirical spectral measurements; Heinz & Stevens 1961 provides the pole-zero acoustic theory explaining those measurements
+- `Stevens_1978_InvariantCuesPlaceArticulation` — Both establish spectral templates for consonant identification; Hughes & Halle for fricatives (3 spectral classes), Stevens & Blumstein for stops (3 onset spectrum shapes)

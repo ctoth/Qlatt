@@ -213,3 +213,32 @@ After total nucleus duration is assigned:
 10. Klatt & Klatt 1990 — "Analysis, Synthesis, and Perception of Voice Quality Variations" JASA 87, pp. 820-857
 11. House, Williams, Hecker & Kryter 1965 — "Articulation-testing methods" JASA 37, pp. 158-166
 12. Logan, Greene & Pisoni 1989 — "Segmental Intelligibility of Synthetic Speech" JASA 86, pp. 566-581
+
+## Collection Cross-References
+
+### Already in Collection
+
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 "Linguistic Uses of Segmental Duration" is the foundational duration model that Hertz's nucleus-based approach extends
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990 cited for voice quality analysis
+- `Hertz_1999_ETI-Eloquence_MultiLanguage` — Later work by Hertz on multi-language synthesis
+- `Hertz_2002_HybridFormantConcatenation` — Follow-up Hertz work on hybrid synthesis
+- `Hertz_2006_HybridSynthesisRegularities` — Later Hertz work on synthesis regularities
+
+### Cited By (in Collection)
+
+- `Hertz_1999_ETI-Eloquence_MultiLanguage` — Self-cites Hertz 1992 for nucleus-based timing
+- `Hertz_2002_HybridFormantConcatenation` — References Hertz 1992 for timing model
+- `Hertz_2006_HybridSynthesisRegularities` — Cites for nucleus timing approach
+- `Miller_1998_PronunciationModelingSpeechSynthesis` — References Hertz for synthesis timing model
+- `Hanson_1995_GlottalCharacteristicsFemale` — Cites Hertz 1992 for synthesis context
+
+### New Leads (Not Yet in Collection)
+
+- Hertz, S. R. (1991). "Streams, Phones, and Transitions: Toward a Phonological and Phonetic Model of Formant Timing." Journal of Phonetics 19, 91-109. — Most detailed theoretical presentation of nucleus-based timing
+- Hertz, S. R. (1990). "The Delta Programming Language." Papers in Laboratory Phonology I, 215-257. — Rule formalism for multi-stream synthesis
+
+### Conceptual Links (not citation-based)
+
+- `Crystal_1982_SegmentalDurationsConnectedSpeech` — Both address segmental duration in connected speech; Crystal & House provide segment-level baseline statistics, Hertz proposes the acoustic nucleus as a superior unit
+- `Wightman_1992_SegmentalDurationsProsodic` — Both address how suprasegmental structure conditions duration; Wightman focuses on prosodic boundaries, Hertz on syllabic nucleus organization
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — Both propose syllable-level timing models as alternatives to pure segment-level approaches; Campbell & Isard use elasticity measures, Hertz uses the acoustic nucleus

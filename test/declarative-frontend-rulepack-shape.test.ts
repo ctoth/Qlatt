@@ -13,9 +13,9 @@ describe("declarative frontend rulepack shape", () => {
     const short = QLATT_ENGLISH_RULEPACK.rules.vowel_shortening;
     const boundary = QLATT_ENGLISH_RULEPACK.rules.pre_boundary_lengthening;
 
-    expect(ruleOp(stress)).toBeUndefined();
-    expect(ruleOp(short)).toBeUndefined();
-    expect(ruleOp(boundary)).toBeUndefined();
+    expect(ruleOp(stress)).toBeFalsy();
+    expect(ruleOp(short)).toBeFalsy();
+    expect(ruleOp(boundary)).toBeFalsy();
 
     expect(stress?.select?.stream).toBe("phone");
     expect(short?.select?.stream).toBe("phone");

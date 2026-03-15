@@ -92,12 +92,12 @@ describe("DAC-weighted F2 coarticulation", () => {
 
     // bilabial_f2_locus sets M F2 to 1200 (default, AA is low, not front/hi or back)
     // flanking_avg_f2 = (2020 + 1220) / 2 = 1620
-    // DAC=1: resistance = 1/3 = 0.333, weight = 0.3 * (1 - 0.333) = 0.2
-    // new F2 = 1200 + (1620 - 1200) * 0.2 = 1200 + 84 = 1284
+    // DAC=1: resistance = 1/3 = 0.333, weight = 0.2 * (1 - 0.333) = 0.133
+    // new F2 = 1200 + (1620 - 1200) * 0.133 = 1200 + 56 = 1256
     expect(m!.params.F2).toBeGreaterThan(1200);
     expect(m!.params.F2).toBeLessThan(1620);
-    // More precisely, ~1284
-    expect(m!.params.F2).toBeCloseTo(1284, -1);
+    // More precisely, ~1256
+    expect(m!.params.F2).toBeCloseTo(1256, -1);
   });
 
   it("DAC=3 consonant F2 is unchanged by flanking vowels (full resistance)", () => {
@@ -124,7 +124,7 @@ describe("DAC-weighted F2 coarticulation", () => {
     );
     expect(c).toBeTruthy();
 
-    // DAC=3: resistance = 3/3 = 1.0, weight = 0.3 * (1 - 1.0) = 0.0
+    // DAC=3: resistance = 3/3 = 1.0, weight = 0.2 * (1 - 1.0) = 0.0
     // F2 should remain at 1400 (no coarticulation)
     // But dark_l_allophony only fires for phoneme == 'L', and r_f3_lowering for 'R',
     // so TEST_C doesn't match any locus rule -- its F2 stays at 1400 before vcv runs.
@@ -177,8 +177,8 @@ describe("DAC-weighted F2 coarticulation", () => {
     expect(c3).toBeTruthy();
 
     // flanking_avg = (2020 + 1220) / 2 = 1620
-    // DAC=1: weight = 0.3 * (1 - 1/3) = 0.2, shift = (1620-1400)*0.2 = 44
-    // DAC=3: weight = 0.3 * (1 - 1) = 0.0, shift = 0
+    // DAC=1: weight = 0.2 * (1 - 1/3) = 0.133, shift = (1620-1400)*0.133 = 29.3
+    // DAC=3: weight = 0.2 * (1 - 1) = 0.0, shift = 0
     const shift1 = Math.abs(c1!.params.F2 - 1400);
     const shift3 = Math.abs(c3!.params.F2 - 1400);
 
@@ -208,12 +208,12 @@ describe("DAC-weighted F2 coarticulation", () => {
     );
     expect(c).toBeTruthy();
 
-    // DAC=2: resistance = 2/3 = 0.667, weight = 0.3 * (1 - 0.667) = 0.1
-    // shift = (1620 - 1400) * 0.1 = 22
-    // F2 = 1400 + 22 = 1422
+    // DAC=2: resistance = 2/3 = 0.667, weight = 0.2 * (1 - 0.667) = 0.067
+    // shift = (1620 - 1400) * 0.067 = 14.7
+    // F2 = 1400 + 14.7 = 1415
     expect(c!.params.F2).toBeGreaterThan(1400);
     expect(c!.params.F2).toBeLessThan(1500);
-    expect(c!.params.F2).toBeCloseTo(1422, -1);
+    expect(c!.params.F2).toBeCloseTo(1415, -1);
   });
 
   it("missing dac defaults to 1 (maximum coarticulation)", () => {
@@ -281,24 +281,24 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
     // bilabial_f2_locus sets M F2 to 1200 (default, AA is low but not explicitly back)
     // After locus: cur_f2 = 1200 (overwritten by bilabial_f2_locus)
     // flanking_avg_f2 = (2020 + 1220) / 2 = 1620
-    // DAC=1: resistance = 1/3, weight = 0.3 * (1 - 1/3) = 0.2
-    // new F2 = 1200 + (1620 - 1200) * 0.2 = 1284
+    // DAC=1: resistance = 1/3, weight = 0.2 * (1 - 1/3) = 0.133
+    // new F2 = 1200 + (1620 - 1200) * 0.133 = 1256
 
     // F1: cur_f1 = 300, flanking_avg_f1 = (310 + 700) / 2 = 505
-    // new F1 = 300 + (505 - 300) * 0.2 = 300 + 41 = 341
+    // new F1 = 300 + (505 - 300) * 0.133 = 300 + 27.3 = 327
     expect(m!.params.F1).toBeGreaterThan(300);
     expect(m!.params.F1).toBeLessThan(505);
-    expect(m!.params.F1).toBeCloseTo(341, -1);
+    expect(m!.params.F1).toBeCloseTo(327, -1);
 
     // F2: shifted from locus (already tested in F2-only tests)
     expect(m!.params.F2).toBeGreaterThan(1200);
     expect(m!.params.F2).toBeLessThan(1620);
 
     // F3: cur_f3 = 2500, flanking_avg_f3 = (2960 + 2600) / 2 = 2780
-    // new F3 = 2500 + (2780 - 2500) * 0.2 = 2500 + 56 = 2556
+    // new F3 = 2500 + (2780 - 2500) * 0.133 = 2500 + 37.3 = 2537
     expect(m!.params.F3).toBeGreaterThan(2500);
     expect(m!.params.F3).toBeLessThan(2780);
-    expect(m!.params.F3).toBeCloseTo(2556, -1);
+    expect(m!.params.F3).toBeCloseTo(2537, -1);
   });
 
   it("magnitude hierarchy: F2 shift > F3 shift > F1 shift (Ohman 1966 Table I)", () => {
@@ -349,7 +349,7 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
     const c = out.find((t: Record<string, unknown>) => t.phoneme === "TEST_D3");
     expect(c).toBeTruthy();
 
-    // DAC=3: weight = 0.3 * (1 - 3/3) = 0.0
+    // DAC=3: weight = 0.2 * (1 - 3/3) = 0.0
     // All formants should remain at their base values
     expect(c!.params.F1).toBe(400);
     expect(c!.params.F2).toBe(1400);
@@ -378,20 +378,20 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
 
     // F2 should shift as before
     // flanking_avg_f2 = (2020 + 1220) / 2 = 1620
-    // new F2 = 1400 + (1620 - 1400) * 0.2 = 1444
+    // new F2 = 1400 + (1620 - 1400) * 0.133 = 1429
     expect(c!.params.F2).toBeGreaterThan(1400);
-    expect(c!.params.F2).toBeCloseTo(1444, -1);
+    expect(c!.params.F2).toBeCloseTo(1429, -1);
 
     // F1 falls back to default_f1_fallback = 500
     // flanking_avg_f1 = (310 + 700) / 2 = 505
-    // new F1 = 500 + (505 - 500) * 0.2 = 501
+    // new F1 = 500 + (505 - 500) * 0.133 = 500.7
     expect(c!.params.F1).toBeDefined();
     expect(c!.params.F1).toBeCloseTo(501, -1);
 
     // F3 falls back to default_f3_fallback = 2500
     // flanking_avg_f3 = (2960 + 2600) / 2 = 2780
-    // new F3 = 2500 + (2780 - 2500) * 0.2 = 2556
+    // new F3 = 2500 + (2780 - 2500) * 0.133 = 2537
     expect(c!.params.F3).toBeDefined();
-    expect(c!.params.F3).toBeCloseTo(2556, -1);
+    expect(c!.params.F3).toBeCloseTo(2537, -1);
   });
 });

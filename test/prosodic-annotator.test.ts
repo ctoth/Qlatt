@@ -237,9 +237,9 @@ describe("annotateProsody — unit tests", () => {
 
       const result = annotateProsody(tokens);
 
-      // "here" stressed vowel (index 9) should be nuclear with L*
+      // "here" stressed vowel (index 9) should be nuclear with L*+H (Pierrehumbert 1980)
       expect(result[9].isNuclearAccent).toBe(true);
-      expect(result[9].accentType).toBe("L*");
+      expect(result[9].accentType).toBe("L*+H");
 
       // Boundary tone on the SIL token
       expect(result[11].boundaryTone).toBe("H%");
@@ -271,14 +271,14 @@ describe("annotateProsody — unit tests", () => {
 
       const result = annotateProsody(tokens);
 
-      // "store" stressed vowel (index 13) should be nuclear with H*
+      // "store" stressed vowel (index 13) should be nuclear with H*+L (Pierrehumbert 1980)
       expect(result[13].isNuclearAccent).toBe(true);
-      expect(result[13].accentType).toBe("H*");
+      expect(result[13].accentType).toBe("H*+L");
 
-      // "went" stressed vowel (index 4) should be prenuclear H*
+      // "went" stressed vowel (index 4) should be prenuclear L+H* (Pierrehumbert 1980)
       expect(result[4].isAccented).toBe(true);
       expect(result[4].isNuclearAccent).toBe(false);
-      expect(result[4].accentType).toBe("H*");
+      expect(result[4].accentType).toBe("L+H*");
 
       // "she" — personal pronoun, function word, not accented
       expect(result[1].isFunctionWord).toBe(true);

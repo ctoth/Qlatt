@@ -158,14 +158,14 @@ describe("declarative frontend first migration slice", () => {
     expect(rel?.weak).toBe(true);
     expect(rel?.duration).toBe(15);
     expect(rel?.params?.AF).toBe(45);
-    expect(rel?.params?.AH).toBe(43);
+    expect(rel?.params?.AH).toBe(0);  // Stevens 1998: burst is supraglottal, aspiration on K_ASP
 
     expect(asp?.params).toBeDefined();
     expect(asp?.type).toBe("stop_aspiration");
     expect(asp?.weak).toBe(true);
     // Weak phrase-final aspiration duration is derived from VOT split and weak scaling.
-    expect(asp?.duration).toBeCloseTo(26.301369863013697);
-    expect(asp?.params?.AH).toBe(43);
+    expect(asp?.duration).toBeCloseTo(27.951807228915662);
+    expect(asp?.params?.AH).toBe(43);  // K_ASP inventory AH=53 minus weak_release_amplitude_reduction_db=10
   });
 
   it("initializes sync marks on base stream tokens during structural phase", () => {

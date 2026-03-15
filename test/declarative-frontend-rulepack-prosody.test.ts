@@ -415,8 +415,9 @@ describe("declarative frontend rulepack prosody phase", () => {
     const points = out.filter((t) => t.stream === "f0");
     const boundary = points.find((p) => p.tag === "f0_boundary_rise");
     expect(boundary).toBeTruthy();
-    // H%: 110 + 80 * 0.8 = 174
-    expect(boundary!.value).toBeCloseTo(174, 0);
+    // H%: max(high_floor=174, prev_f0 + 0.2*(ceiling - prev_f0))
+    // upstep path wins when prev_f0 is high enough (Pierrehumbert 1980 Rule 9)
+    expect(boundary!.value).toBeCloseTo(177.2, 0);
   });
 
   // --- Register reset ---

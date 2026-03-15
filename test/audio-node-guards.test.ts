@@ -44,14 +44,14 @@ describe('isAudioWorkletNode', () => {
 
     it('returns true for AudioWorkletNode instances', () => {
       const node = new MockAudioWorkletNode();
-      expect(isAudioWorkletNode(node as unknown as AudioNode)).toBe(true);
+      expect(isAudioWorkletNode(node as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(true);
     });
 
     it('returns false for a plain object with a port property', () => {
       // This is the key regression test: the old 'port' in node check
       // would return true for this, but instanceof should return false.
       const fakeNode = { port: {}, connect() {}, disconnect() {} };
-      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode)).toBe(false);
+      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
     });
 
     it('returns false for GainNode-like objects', () => {
@@ -60,7 +60,7 @@ describe('isAudioWorkletNode', () => {
         connect() {},
         disconnect() {},
       };
-      expect(isAudioWorkletNode(gainLike as unknown as AudioNode)).toBe(false);
+      expect(isAudioWorkletNode(gainLike as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
     });
 
     it('returns false for ConstantSourceNode-like objects', () => {
@@ -69,7 +69,7 @@ describe('isAudioWorkletNode', () => {
         connect() {},
         disconnect() {},
       };
-      expect(isAudioWorkletNode(constSourceLike as unknown as AudioNode)).toBe(false);
+      expect(isAudioWorkletNode(constSourceLike as unknown as AudioNode, MockAudioWorkletNode as any)).toBe(false);
     });
   });
 
@@ -88,12 +88,12 @@ describe('isAudioWorkletNode', () => {
 
     it('returns false for any node (cannot instanceof a missing class)', () => {
       const node = new MockAudioWorkletNode();
-      expect(isAudioWorkletNode(node as unknown as AudioNode)).toBe(false);
+      expect(isAudioWorkletNode(node as unknown as AudioNode, undefined)).toBe(false);
     });
 
     it('returns false for plain objects with port property', () => {
       const fakeNode = { port: {}, connect() {}, disconnect() {} };
-      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode)).toBe(false);
+      expect(isAudioWorkletNode(fakeNode as unknown as AudioNode, undefined)).toBe(false);
     });
   });
 });

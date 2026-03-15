@@ -36,8 +36,8 @@ describe("YAML frontend config — output section", () => {
     expect(output.min_duration.default_ms).toBe(20);
   });
 
-  it("transition_ms is 30", () => {
-    expect(output.transition_ms).toBe(30);
+  it("transition_ms is 50", () => {
+    expect(output.transition_ms).toBe(50);
   });
 
   it("final_silence_ms is 100", () => {

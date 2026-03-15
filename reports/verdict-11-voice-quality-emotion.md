@@ -48,3 +48,4 @@ Reviewed 38 of 47 assigned papers (notes.md) covering voice quality parameteriza
 
 - Verdict: `research/verdicts/11-voice-quality-emotion.md`
 - Report: `reports/verdict-11-voice-quality-emotion.md`
+- Commit: `9157fce`

@@ -149,6 +149,10 @@ parameters:
         citations:
           - White 2014 (accent distributes across word, small effect on unstressed)
           - "Engineering estimate"
+      incompressibility_ratio:
+        value: 0.42
+        citations:
+          - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
       # Duration cap — prevents pathological stacking of multiple lengthening rules
       max_duration_ratio:
         value: 2.0

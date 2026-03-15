@@ -366,8 +366,8 @@ rules:
       - field: duration
         op: set
         value: >-
-          current.duration < current.inherentDuration * 0.42
-          ? current.inherentDuration * 0.42
+          current.duration < current.inherentDuration * params.policy.duration.incompressibility_ratio
+          ? current.inherentDuration * params.policy.duration.incompressibility_ratio
           : current.duration
         tag: incompressibility
     citations:

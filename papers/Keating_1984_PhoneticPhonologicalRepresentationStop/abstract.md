@@ -1,0 +1,7 @@
+# Abstract
+
+This paper argues for a more structured view of the relation between the phonological feature [voice] and its specific phonetic implementations. Under the theory of universal phonetics proposed here, the implementation of [voice] is sharply constrained: the opposition is defined relatively, as more or less voicing, along a dimension consisting of exactly three discrete, ordered categories, which can be shown to have clear articulatory and acoustic bases. While the phonological feature allows certain rule equivalences across languages to be expressed, the phonetic categories describe possible contrasts within languages, and express markedness relations.
+
+## Interpretation
+
+Keating's framework provides a principled architecture for stop voicing in a formant synthesizer. Rather than mapping phonemes directly to continuous parameter values, her model introduces an intermediate "phonetic category" level that constrains variation: {voiced} (prevoiced/lead VOT), {vl.unasp.} (short-lag VOT), and {vl.asp.} (long-lag VOT). This is directly applicable to a rule-based TTS system where phonological rules select allophone categories, and then language-specific detail rules provide exact acoustic parameter values (VOT duration, closure voicing, aspiration duration, F0 perturbation). The insight that vowel duration and F0 effects depend on phonological feature values rather than on degree of phonetic voicing is particularly important for synthesizer rule design.

@@ -1,0 +1,27 @@
+# References
+
+- Cederlund, C., Krokstad, A., & Kringlebotn, M. (1960). "Voice source studies", STL-QPSR 1/1960, pp. 1-2.
+- Fant, G. (1959). "The acoustics of speech". Proc. of the 3rd Int. Congr. o Acoustics, Stuttgart (ed. L. Cremer), Elsevier Publ. Co., Amsterdam 1961, Vol. 1, pp. 188-201.
+- Fant, G. (1960). Acoustic Theory of Speech Production. Mouton, 's-Gravenhage (2nd edition 1970).
+- Fant, G. (1979). "Temporal fine structure of formant damping and excitation", paper presented at the ASA-meeting, Boston, June.
+- Fant, G. & Liljencrants, J. (1979). "Perception of vowels with truncated intraperiod decay envelopes", STL-QPSR 1/1979, pp. 79-84.
+- Fant, G. & Sonesson, B. (1962). "Indirect studies of glottal cycles by synchronous inverse filtering and photo-electrical glottography", STL-QPSR 4/1962, pp. 1-2.
+- Fant, G., Ishizaka, K., Lindqvist, J., & Sundberg, J. (1972). "Subglottal formants", STL-QPSR 1/1972, pp. 1-12.
+- Flanagan, J. L. (1955). Speech analysis synthesis and perception. Springer Verlag, Heidelberg.
+- Flanagan, J. L., Ishizaka, K., & Shipley, K. (1975). "Synthesis of speech from a dynamic model of the vocal cords and vocal tract", Bell System Techn. J. 54, pp. 485-506.
+- Guerin, B., Mrayati, M., & Carre, R. (1976). "A voice source taking account of coupling with the supraglottal cavities", Report from Lab. de la Communication parlee, E.N.S.E.R.G., Grenoble.
+- Holmes, J. N. (1962). "An investigation of the volume velocity waveform at the larynx during speech by means of an inverse filter", Proc. SCS-62, KTH, Stockholm.
+- Holmes, J. N. (1976). "Formant excitation before and after glottal closure", IEEE Conf. on Acoustics, Speech and Signal Processing, Philadelphia, Pa., April.
+- Lindqvist, J. (1965). "Studies of the voice source by means of inverse filtering", STL-QPSR 2/1965, pp. 8-13.
+- Lindqvist, J. (1970). "The voice source studied by means of inverse filtering", STL-QPSR 1/1970, pp. 3-9.
+- Martony, J. (1961). "Studies of the voice source", STL-QPSR 4/1961, p. 9.
+- Martony, J. (1964). "On the vowel source spectrum", STL-QPSR 1/1964, pp. 3-4.
+- Martony, J. (1965). "Studies of the voice source", STL-QPSR 1/1965, pp. 4-9.
+- Miller, R. L. (1959). "Nature of the vocal cord wave", J. Acoust. Soc. Am. 31, pp. 667-677.
+- Monsen, R. B. & Engebretson, A. M. (1977). "Study of variations in the male and female glottal wave", J. Acoust. Soc. Am. 62, pp. 981-993.
+- Rosenberg, A. E. (1971). "Effect of glottal pulse on the quality of natural vowels", J. Acoust. Soc. Am. 49, pp. 583-588.
+- Rothenberg, M. (1973). "A new inverse-filtering technique for deriving the glottal air flow waveform during voicing", J. Acoust. Soc. Am. 53, pp. 1632-1645.
+- Rothenberg, M., Carlson, R., Granstrom, B., & Lindqvist-Gauffin, J. (1974). "A three-parameter voice source for speech synthesis", Speech Communication, Vol. 2 (ed. G. Fant), pp. 235-243 (Proc. SCS-74, Stockholm), Almqvist & Wiksell Int., Stockholm 1975.
+- Sondhi, M. M. (1975). "Measurement of the glottal waveform", J. Acoust. Soc. Am. 57, pp. 228-232.
+- Sundberg, J. & Gauffin, J. (1978). "Waveforms and spectrum of the glottal voice source", STL-QPSR 2-3/1978, pp. 35-50.
+- Wakita, H. & Fant, G. (1978). "Towards a better vocal tract model", STL-QPSR 1/1978, pp. 9-29.

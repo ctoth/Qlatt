@@ -1,0 +1,4 @@
+---
+tags: [glottal-source, excitation-analysis, source-filter, voice-quality, inverse-filtering]
+---
+Fant presents a parameterized model of the glottal source waveform with three parameters (U_0, F_g, K) and derives its Laplace transform to analyze how glottal closure excites vocal tract formants. The paper demonstrates that the "offset time" T_d (related to the steepness of glottal closure) is the primary determinant of excitation strength and formant initial amplitudes, with the key finding that formant initial amplitudes in the time domain are independent of their bandwidths. Experimental validation using inverse filtering and Rothenberg mask recordings confirms the theoretical predictions within 1 dB for connected speech, establishing the foundation for Fant's later LF glottal source model.

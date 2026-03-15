@@ -1,3 +1,22 @@
+/**
+ * Glottal modulation processor — shapes aspiration noise with a sinusoidal
+ * envelope synchronized to the glottal cycle.
+ *
+ * During the open phase (phase < OQ * period), modulation follows:
+ *   0.5 + 0.5 * sin(pi * phase / (OQ * period))
+ * During the closed phase, modulation is a constant 0.5 (half amplitude).
+ *
+ * This replaces the original 50% duty-cycle square wave with a smooth
+ * pulsatile envelope shaped by the open quotient (OQ) parameter.
+ *
+ * OQ is derived from the Rd voice quality parameter per Fant 1995:
+ *   OQ ~= 1 - 1/(2*Rd)
+ *
+ * Citations:
+ *   - Klatt 1980 COEWAV.FOR lines 116-122 (aspiration modulation)
+ *   - Gobl 1988 (voice source dynamics in connected speech)
+ *   - Fant 1995 (OQ-Rd relationship)
+ */
 import { computeRmsPeak } from "./wasm-utils.js";
 class GlottalModProcessor extends AudioWorkletProcessor {
     phase;
@@ -9,6 +28,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors() {
         return [
             { name: "f0", defaultValue: 110, minValue: 0, maxValue: 500, automationRate: "a-rate" },
+            { name: "oq", defaultValue: 0.5, minValue: 0.1, maxValue: 1.0, automationRate: "k-rate" },
         ];
     }
     constructor(options) {
@@ -43,6 +63,9 @@ class GlottalModProcessor extends AudioWorkletProcessor {
             }
             this.lastF0 = f0Sum / f0Values.length;
         }
+        // OQ is k-rate: use first value for the entire block
+        const oqValues = parameters.oq ?? new Float32Array([0.5]);
+        const oq = Math.min(1.0, Math.max(0.1, oqValues[0] ?? 0.5));
         for (let i = 0; i < blockSize; i += 1) {
             const f0 = hasF0
                 ? (f0Values.length > 1 ? (f0Values[i] ?? f0Values[0] ?? 0) : (f0Values[0] ?? 0))
@@ -56,7 +79,16 @@ class GlottalModProcessor extends AudioWorkletProcessor {
                 if (this.phase >= period) {
                     this.phase %= period;
                 }
-                out[i] = this.phase < period * 0.5 ? 1.0 : 0.5;
+                // Pulsatile aspiration envelope shaped by OQ (Klatt 1980, Gobl 1988, Fant 1995)
+                const openDuration = oq * period;
+                if (this.phase < openDuration) {
+                    // Open phase: sinusoidal modulation peaking at 1.0
+                    out[i] = 0.5 + 0.5 * Math.sin(Math.PI * this.phase / openDuration);
+                }
+                else {
+                    // Closed phase: constant half-amplitude
+                    out[i] = 0.5;
+                }
                 this.phase += 1;
             }
             else {

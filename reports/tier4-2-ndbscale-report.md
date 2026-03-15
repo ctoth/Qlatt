@@ -85,6 +85,6 @@ This means:
 
 The `ndbScale` values from `FormantSpec` are preserved in the computation as additive offsets (`f.ndbScale`), maintaining the overall amplitude calibration.
 
-## Not Committed
+## Commit
 
-Per the prompt instructions, the commit should be created, but the parallel swarm warning means I should verify no other agents have modified these files. The changes are staged and ready.
+`0bb992d` — Replace formant bank codegen with evaluator-native PFE amplitude computation (Lin 1995)

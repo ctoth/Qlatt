@@ -1,0 +1,7 @@
+# Abstract
+
+Current accounts of coarticulation belong to a single class of theory, here called extrinsic timing theories of speech production. The accounts all assume that the dimension of time is excluded from the specification of a phonological segment in the articulatory plan for an utterance, and all of them fail to explain or predict the coarticulatory patterns of speech. Here I suggest that some of the failings are endemic to the class of extrinsic timing theories, and that a more adequate account must derive from an intrinsic timing theory. The essential characteristics of an intrinsic timing theory are described.
+
+## Interpretation
+
+Fowler argues that the dominant class of speech production theories (extrinsic timing) treats phonological segments as timeless feature bundles that are sequentially executed by a separate articulatory mechanism. She demonstrates that these theories cannot adequately explain coarticulation patterns and proposes an alternative framework based on intrinsic timing, where time is an inherent dimension of phonological segments. In her intrinsic timing view, segments are four-dimensional entities produced by coordinative structures (functional muscle organizations), and coarticulation arises naturally from the coproduction of consonants and vowels by distinct but overlapping coordinative structures. This paper is foundational for articulatory phonology and task dynamics approaches to speech production.

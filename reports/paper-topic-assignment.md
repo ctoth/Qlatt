@@ -385,3 +385,5 @@
 - Hartenstein_2025_VoiceDirectivityHELS — voice directivity reconstruction
 - Porschmann_2024_VoiceDirectivityGroundReflection — voice directivity measurement
 - Sundberg_1972_SingingFormant — singing formant (specialized singing topic)
+
+Commit: 6a2015c

@@ -1,0 +1,7 @@
+# Abstract
+
+Measurements of the formant frequencies and bandwidths of eight common vowels of American English are described. The speech materials were provided by three adult male talkers and the measurements were performed using a spectrum-matching procedure implemented on a general-purpose digital computer. The differences between the present data and measurements in the literature, and the systematic differences in formant data from one talker to another are discussed and explicated in terms of an acoustical theory of speech production and certain postulated dynamic properties of the articulatory mechanism.
+
+## Interpretation
+
+This paper establishes the empirical and theoretical foundation for how consonantal context perturbs vowel formant frequencies. The key contribution is twofold: (1) comprehensive formant frequency and bandwidth data for eight vowels across 14 consonant contexts and three talkers, enabling direct quantification of coarticulatory effects; and (2) the undershoot hypothesis, which explains these perturbations through the inertia and dynamic limitations of the articulatory system. For a Klatt synthesizer, this paper provides the data needed to implement context-dependent formant targets and transition rules -- vowel formants in CVC syllables should not use isolated-vowel targets but rather targets adjusted for consonant place, manner, and voicing effects. The F2 perturbation patterns (shift toward ~1500 Hz neutral) and the bandwidth increases in consonantal contexts are directly implementable as coarticulation rules.

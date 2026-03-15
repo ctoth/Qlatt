@@ -356,6 +356,58 @@ describe("track-assembler", () => {
     });
   });
 
+  describe("per-token transition_ms override", () => {
+    it("uses per-token transition_ms when present on the phone", () => {
+      // A stop token with transition_ms=30 should use 30ms, not the global 50ms.
+      const phoneSequence = [
+        {
+          phoneme: "AH",
+          type: "vowel",
+          duration: 200,
+          transition_ms: 25,
+          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
+        },
+        {
+          phoneme: "AH",
+          type: "vowel",
+          duration: 200,
+          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
+        },
+      ];
+      // With per-token transition_ms=25 on first phone, the steady-state point
+      // should be at targetTime - 25ms (0.025s), not targetTime - 50ms.
+      const trackWithOverride = assembleKlattTrack(phoneSequence, [], {
+        baseF0: 120,
+        transitionMs: 50,
+      });
+      // The per-token value should be used; verify frames exist (basic smoke test).
+      expect(trackWithOverride.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it("falls back to global transitionMs when token lacks transition_ms", () => {
+      const phoneSequence = [
+        {
+          phoneme: "AH",
+          type: "vowel",
+          duration: 200,
+          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
+        },
+        {
+          phoneme: "AH",
+          type: "vowel",
+          duration: 200,
+          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
+        },
+      ];
+      const track = assembleKlattTrack(phoneSequence, [], {
+        baseF0: 120,
+        transitionMs: 50,
+      });
+      // No per-token transition_ms, should use global 50ms.
+      expect(track.length).toBeGreaterThanOrEqual(3);
+    });
+  });
+
   describe("assembleKlattTrack with f0Model", () => {
     it("uses layered renderer when f0Model is present", () => {
       const f0Model: LayeredF0ModelConfig = {

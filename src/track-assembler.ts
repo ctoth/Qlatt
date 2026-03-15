@@ -1566,12 +1566,14 @@ export function assembleKlattTrack(
 
     if (targetTime > segmentStart) {
       const nextPh = phoneSequence[i + 1] as InputToken | undefined;
+      // Per-token transition override (Stevens & House 1956, Hertz 1991).
+      const phTransitionSec = Math.max(0, ph.transition_ms ?? transitionMs) / 1000.0;
       const canSmooth =
-        transitionSec > 0 &&
+        phTransitionSec > 0 &&
         smoothTypes.has(ph.type) &&
         smoothTypes.has(nextPh?.type);
       const steadyTime = canSmooth
-        ? Math.max(segmentStart + 0.02, targetTime - transitionSec)
+        ? Math.max(segmentStart + 0.02, targetTime - phTransitionSec)
         : null;
       const transitionParams =
         steadyTime && steadyTime > segmentStart && steadyTime < targetTime

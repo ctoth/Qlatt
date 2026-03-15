@@ -379,6 +379,21 @@ parameters:
           - Hanson et al. 2001 (phrase-final spectral tilt/breathiness increases in connected speech)
           - "Engineering estimate: reduced Rd softening magnitude for qlatt"
     formant:
+      transition_ms_stop:
+        value: 30
+        citations:
+          - "Stevens & House 1956 (stop transitions ~20-40 ms)"
+          - "Hertz 1991 (per-class transition timing)"
+      transition_ms_fricative:
+        value: 40
+        citations:
+          - "Stevens & House 1956 (fricative transitions ~30-50 ms)"
+          - "Hertz 1991 (per-class transition timing)"
+      transition_ms_default:
+        value: 50
+        citations:
+          - "Stevens & House 1956 (sonorant transitions ~40-60 ms)"
+          - "Hertz 1991 (default transition timing)"
       rate_undershoot_factor:
         value: 0
         citations:
@@ -806,7 +821,8 @@ parameters:
           tl: 0
           ah_offset_db: 0
           flutter: 0
-          jitter: 20         # Approximation for DI; true creaky needs diplophonia (not implemented)
+          jitter: 20         # Gobl 2003: mild jitter co-occurs with creaky voice
+          di: 40             # Gobl & Ni Chasaide 2003 Table 1: diplophonia index for creaky voice
           f0_scale: 1.0
         whispery:
           rd: 2.0           # Fant 1997: breathy Rd range

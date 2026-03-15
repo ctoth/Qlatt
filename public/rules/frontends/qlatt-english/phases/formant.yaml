@@ -604,6 +604,19 @@ rules:
     citations:
       - Miller 1998, Pronunciation Modeling in Speech Synthesis (/u/ fronting in coronal environments, 86% accuracy with coronals on both sides)
       - Harrington et al. 2011 (tongue advancement, not lip unrounding, drives /u/ fronting)
+  transition_override:
+    kind: scalar
+    select:
+      stream: phone
+      where: "true"
+    apply:
+      - field: transition_ms
+        op: set
+        value: "current.type in ['stop_closure', 'stop_release', 'stop_aspiration'] ? params.policy.formant.transition_ms_stop : current.type == 'fricative' ? params.policy.formant.transition_ms_fricative : params.policy.formant.transition_ms_default"
+        tag: transition
+    citations:
+      - "Stevens & House 1956 (formant transition durations vary by manner class)"
+      - "Hertz 1991 (per-class transition timing in synthesis)"
   sw_explicit_override:
     kind: scalar
     select:

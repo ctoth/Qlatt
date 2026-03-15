@@ -17,6 +17,7 @@ interface LfSourceWasmExports {
     tlLen: number,
     flutter: number,
     jitter: number,
+    di: number,
     outputPtr: number,
     blockSize: number
   ): void;
@@ -63,6 +64,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       { name: "tl", defaultValue: 0, minValue: 0, maxValue: 41, automationRate: "a-rate" as const },       // Klatt 1990: dB at 3 kHz. 0 = derive from Rd
       { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const }, // Klatt & Klatt 1990 Eq. 1 scale
       { name: "jitter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },  // Normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+      { name: "di", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },        // Gobl & Ni Chasaide 2003: diplophonia index
     ];
   }
 
@@ -130,6 +132,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     const tlValues = parameters.tl;
     const flutterValues = parameters.flutter;
     const jitterValues = parameters.jitter;
+    const diValues = parameters.di;
     const f0Len = f0Values.length;
     const rdLen = rdValues.length;
     const oqLen = oqValues ? oqValues.length : 0;
@@ -160,6 +163,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
     // k-rate params: read first value
     const flutter = flutterValues && flutterValues.length > 0 ? flutterValues[0] : 0;
     const jitter = jitterValues && jitterValues.length > 0 ? jitterValues[0] : 0;
+    const di = diValues && diValues.length > 0 ? diValues[0] : 0;
 
     this.outputBuffer.ensure(blockSize);
     this.f0Buffer.ensure(f0Len);
@@ -187,6 +191,7 @@ class LfSourceProcessor extends AudioWorkletProcessor {
       tlLen,
       flutter,
       jitter,
+      di,
       this.outputBuffer.ptr,
       blockSize
     );

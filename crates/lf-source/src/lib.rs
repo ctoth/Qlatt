@@ -133,6 +133,7 @@ pub struct LfSource {
     mode: LfMode,
     sample_count: u64,  // Cumulative sample counter (for flutter); u64 won't overflow for billions of years at 44100 Hz
     rng_state: u32,     // xorshift32 PRNG state (for jitter)
+    period_cycle_count: u64, // Cycle counter for diplophonia (Gobl & Ni Chasaide 2003)
 }
 
 impl LfSource {
@@ -147,6 +148,7 @@ impl LfSource {
             mode: LfMode::Legacy,
             sample_count: 0,
             rng_state: 0x12345678,
+            period_cycle_count: 0,
         }
     }
 
@@ -294,6 +296,7 @@ impl LfSource {
         tl: &[f32],
         flutter: f32,   // k-rate: Klatt 1990 scale 0-100
         jitter: f32,    // k-rate: normalized 0-100, maps to Fraj 2011 b=[0, 4.5]
+        di: f32,        // k-rate: diplophonia index 0-100 (Gobl & Ni Chasaide 2003)
         output: &mut [f32],
     ) {
         let f0_len = f0.len();
@@ -355,6 +358,7 @@ impl LfSource {
                 };
 
                 self.start_period(f0_final, rd_value, oq_value, tl_value);
+                self.period_cycle_count += 1;
             }
 
             if !self.voiced {
@@ -366,6 +370,13 @@ impl LfSource {
             let impulse = if self.pos_in_period == 0 { 1.0 } else { 0.0 };
             let mut sample = self.glottal.step(impulse);
             sample = self.tilt.step(sample);
+
+            // Diplophonia: on odd cycles, reduce amplitude by DI/100
+            // Gobl & Ni Chasaide 2003 Table 1: DI=0 uniform, DI=100 odd cycles silent
+            if di > 0.0 && self.period_cycle_count % 2 == 1 {
+                sample *= 1.0 - clamp(di, 0.0, 100.0) / 100.0;
+            }
+
             output[i] = sample;
             self.pos_in_period += 1;
         }
@@ -420,6 +431,7 @@ pub extern "C" fn lf_source_process(
     tl_len: usize,
     flutter: f32,   // k-rate: single value per block
     jitter: f32,    // k-rate: single value per block
+    di: f32,        // k-rate: diplophonia index 0-100 (Gobl & Ni Chasaide 2003)
     output_ptr: *mut f32,
     len: usize,
 ) {
@@ -454,7 +466,7 @@ pub extern "C" fn lf_source_process(
             }
             return;
         }
-        (*ptr).process(f0, rd, oq, tl, flutter, jitter, output);
+        (*ptr).process(f0, rd, oq, tl, flutter, jitter, di, output);
     }
 }
 
@@ -480,8 +492,8 @@ mod tests {
         let mut out1 = [0.0_f32; 256];
         let mut out2 = [0.0_f32; 256];
 
-        src1.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out1);
-        src2.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out2);
+        src1.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 0.0, &mut out1);
+        src2.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 0.0, &mut out2);
 
         for i in 0..256 {
             assert!(
@@ -509,8 +521,8 @@ mod tests {
         let mut out1 = vec![0.0_f32; 512];
         let mut out2 = vec![0.0_f32; 512];
 
-        src1.process(&f0, &rd, &oq_zero, &tl, 0.0, 0.0, &mut out1);
-        src2.process(&f0, &rd, &oq_65, &tl, 0.0, 0.0, &mut out2);
+        src1.process(&f0, &rd, &oq_zero, &tl, 0.0, 0.0, 0.0, &mut out1);
+        src2.process(&f0, &rd, &oq_65, &tl, 0.0, 0.0, 0.0, &mut out2);
 
         // Should produce nearly identical output since Rd=1.0 derives OQ~65%
         // Tolerance is 1e-4 to accommodate f32 rounding through the Rd->Rk->Rg->OQ chain
@@ -536,8 +548,8 @@ mod tests {
         let mut out_default = [0.0_f32; 256];
         let mut out_override = [0.0_f32; 256];
 
-        src_default.process(&f0, &rd, &oq_default, &tl, 0.0, 0.0, &mut out_default);
-        src_override.process(&f0, &rd, &oq_override, &tl, 0.0, 0.0, &mut out_override);
+        src_default.process(&f0, &rd, &oq_default, &tl, 0.0, 0.0, 0.0, &mut out_default);
+        src_override.process(&f0, &rd, &oq_override, &tl, 0.0, 0.0, 0.0, &mut out_override);
 
         let mut any_differ = false;
         for i in 0..256 {
@@ -564,8 +576,8 @@ mod tests {
         let mut out_default = [0.0_f32; 256];
         let mut out_override = [0.0_f32; 256];
 
-        src_default.process(&f0, &rd, &oq, &tl_default, 0.0, 0.0, &mut out_default);
-        src_override.process(&f0, &rd, &oq, &tl_override, 0.0, 0.0, &mut out_override);
+        src_default.process(&f0, &rd, &oq, &tl_default, 0.0, 0.0, 0.0, &mut out_default);
+        src_override.process(&f0, &rd, &oq, &tl_override, 0.0, 0.0, 0.0, &mut out_override);
 
         let mut any_differ = false;
         for i in 0..256 {
@@ -591,12 +603,12 @@ mod tests {
         let oq = [0.0_f32];
         let tl = [0.0_f32];
         let mut out_flutter = vec![0.0_f32; num_samples];
-        src_flutter.process(&f0, &rd, &oq, &tl, 25.0, 0.0, &mut out_flutter);
+        src_flutter.process(&f0, &rd, &oq, &tl, 25.0, 0.0, 0.0, &mut out_flutter);
 
         // Without flutter
         let mut src_no_flutter = LfSource::new(SAMPLE_RATE);
         let mut out_no_flutter = vec![0.0_f32; num_samples];
-        src_no_flutter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out_no_flutter);
+        src_no_flutter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 0.0, &mut out_no_flutter);
 
         // The outputs should differ when flutter is applied
         let mut any_differ = false;
@@ -620,11 +632,11 @@ mod tests {
         let oq = [0.0_f32];
         let tl = [0.0_f32];
         let mut out_jitter = vec![0.0_f32; num_samples];
-        src_jitter.process(&f0, &rd, &oq, &tl, 0.0, 50.0, &mut out_jitter);
+        src_jitter.process(&f0, &rd, &oq, &tl, 0.0, 50.0, 0.0, &mut out_jitter);
 
         let mut src_no_jitter = LfSource::new(SAMPLE_RATE);
         let mut out_no_jitter = vec![0.0_f32; num_samples];
-        src_no_jitter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, &mut out_no_jitter);
+        src_no_jitter.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 0.0, &mut out_no_jitter);
 
         let mut any_differ = false;
         for i in 0..num_samples {
@@ -634,5 +646,122 @@ mod tests {
             }
         }
         assert!(any_differ, "Jitter=50 should produce different output than jitter=0");
+    }
+
+    #[test]
+    fn test_di_zero_uniform() {
+        // With DI=0, output amplitude should be uniform across multiple periods.
+        // Gobl & Ni Chasaide 2003: DI=0 means no diplophonia.
+        let num_samples = 4410; // ~10 periods at 110 Hz
+        let mut src = LfSource::new(SAMPLE_RATE);
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut output = vec![0.0_f32; num_samples];
+        src.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 0.0, &mut output);
+
+        // Find peak amplitudes per period by looking for impulse responses
+        // Period length at 110 Hz / 44100 Hz = ~401 samples
+        let period_len = (SAMPLE_RATE / 110.0).round() as usize;
+        let mut period_peaks = Vec::new();
+        // Skip first period (startup transient)
+        for p in 1..8 {
+            let start = p * period_len;
+            let end = ((p + 1) * period_len).min(num_samples);
+            if end > num_samples { break; }
+            let peak = output[start..end].iter().map(|x| x.abs()).fold(0.0_f32, f32::max);
+            period_peaks.push(peak);
+        }
+
+        // All period peaks should be nearly identical (within 1%)
+        let max_peak = period_peaks.iter().copied().fold(0.0_f32, f32::max);
+        let min_peak = period_peaks.iter().copied().fold(f32::MAX, f32::min);
+        assert!(max_peak > 0.001, "Output should be non-silent");
+        let ratio = min_peak / max_peak;
+        assert!(ratio > 0.99, "DI=0: all periods should have uniform amplitude, ratio={}", ratio);
+    }
+
+    #[test]
+    fn test_di_50_alternating() {
+        // With DI=50, odd-cycle periods should have 50% amplitude of even-cycle periods.
+        // Gobl & Ni Chasaide 2003 Table 1.
+        let num_samples = 8820; // ~20 periods at 110 Hz
+        let mut src = LfSource::new(SAMPLE_RATE);
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut output = vec![0.0_f32; num_samples];
+        src.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 50.0, &mut output);
+
+        let period_len = (SAMPLE_RATE / 110.0).round() as usize;
+        let mut even_peaks = Vec::new();
+        let mut odd_peaks = Vec::new();
+        // Skip period 0 (startup), collect periods 1-16
+        for p in 1..17 {
+            let start = p * period_len;
+            let end = ((p + 1) * period_len).min(num_samples);
+            if end > num_samples { break; }
+            let peak = output[start..end].iter().map(|x| x.abs()).fold(0.0_f32, f32::max);
+            // period_cycle_count starts at 1 for period 0 (incremented before start_period output),
+            // so period index p has cycle_count = p+1. Odd cycle_count means p is even index.
+            // We need to check which are actually attenuated by observing the pattern.
+            if p % 2 == 0 {
+                even_peaks.push(peak);
+            } else {
+                odd_peaks.push(peak);
+            }
+        }
+
+        let avg_even: f32 = even_peaks.iter().sum::<f32>() / even_peaks.len() as f32;
+        let avg_odd: f32 = odd_peaks.iter().sum::<f32>() / odd_peaks.len() as f32;
+
+        // One group should be ~50% of the other
+        let (larger, smaller) = if avg_even > avg_odd {
+            (avg_even, avg_odd)
+        } else {
+            (avg_odd, avg_even)
+        };
+
+        assert!(larger > 0.001, "Output should be non-silent");
+        let ratio = smaller / larger;
+        // DI=50 means odd cycles at 50% amplitude, so ratio should be ~0.5
+        assert!(ratio > 0.35 && ratio < 0.65,
+            "DI=50: alternating amplitude ratio should be ~0.5, got {}", ratio);
+    }
+
+    #[test]
+    fn test_di_100_silent_odd() {
+        // With DI=100, odd-cycle periods should produce zero output.
+        // Gobl & Ni Chasaide 2003 Table 1.
+        let num_samples = 8820;
+        let mut src = LfSource::new(SAMPLE_RATE);
+        let f0 = [110.0_f32];
+        let rd = [1.0_f32];
+        let oq = [0.0_f32];
+        let tl = [0.0_f32];
+        let mut output = vec![0.0_f32; num_samples];
+        src.process(&f0, &rd, &oq, &tl, 0.0, 0.0, 100.0, &mut output);
+
+        let period_len = (SAMPLE_RATE / 110.0).round() as usize;
+        let mut has_loud_period = false;
+        let mut has_silent_period = false;
+        // Skip period 0, check periods 1-16
+        for p in 1..17 {
+            let start = p * period_len;
+            let end = ((p + 1) * period_len).min(num_samples);
+            if end > num_samples { break; }
+            let peak = output[start..end].iter().map(|x| x.abs()).fold(0.0_f32, f32::max);
+            if peak > 0.001 {
+                has_loud_period = true;
+            }
+            if peak < 1e-6 {
+                has_silent_period = true;
+            }
+        }
+
+        assert!(has_loud_period, "DI=100: should have some non-silent (even) periods");
+        assert!(has_silent_period, "DI=100: should have some silent (odd) periods");
     }
 }

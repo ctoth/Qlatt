@@ -1,0 +1,7 @@
+# Abstract
+
+A set of 17 voices representing various voice disorders were presented to a jury of voice experts who rated them on a 5-point scale for each of 28 terms frequently used for describing voices. A statistical treatment of these ratings yielded 5 bipolar factors accounting for 85% of the total variance. Significant correlations were found between four of these factors and certain acoustic data extracted from long-time-average spectra and fundamental frequency distribution analysis of the same voice sample.
+
+## Interpretation
+
+This paper provides an empirically grounded dimensional structure for voice quality perception, reducing 28 clinical voice descriptors to 5 orthogonal factors through principal component analysis. The most important contribution for synthesis work is the quantified mapping between spectral characteristics (particularly LTAS slope measures across 0-2, 2-5, and 5-8 kHz bands) and perceptual voice quality dimensions. The breathy-overtight factor is best predicted by spectral slope differences, while the hyperfunctional factor correlates most strongly with energy in the 2-5 kHz band. The unstable-steady factor (largest variance) notably has no acoustic correlate in averaged spectrum data, suggesting that temporal variation measures (jitter, shimmer, F0 perturbation) are needed to capture this dimension. The work builds on Isshiki & Takeuchi (1970) factor analysis of hoarseness and extends it with acoustic correlations.

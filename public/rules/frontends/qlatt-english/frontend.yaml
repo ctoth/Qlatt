@@ -73,6 +73,10 @@ parameters:
         value: 1.6
         citations:
           - Allen et al. 1987 Ch.9
+      vowel_shortening_voiced_fricative_medial_multiplier:
+        value: 1.1
+        citations:
+          - "Klatt 1979 (voicing effect reduced phrase-medially; ~1.1x vs ~1.6x phrase-finally)"
       vowel_shortening_voiced_stop_multiplier:
         value: 1.2
         citations:

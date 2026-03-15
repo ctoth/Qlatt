@@ -94,14 +94,21 @@ rules:
       where: current.type == 'vowel'
     define:
       "n": next
+      # Check if the segment after next is SIL or null (phrase-final position)
+      a1: ahead(current, 2)
+      is_phrase_final: "a1 == null ? true : (a1.phoneme == 'SIL')"
     apply:
       - field: duration
         op: mul
         dispatch:
           - when: "n == null ? true : n.phoneme == 'SIL'"
             value: params.policy.duration.vowel_shortening_end_multiplier
-          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')"
+          - when: >-
+              (n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative'))
+              && is_phrase_final
             value: params.policy.duration.vowel_shortening_voiced_fricative_multiplier
+          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')"
+            value: params.policy.duration.vowel_shortening_voiced_fricative_medial_multiplier
           - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_release'])"
             value: params.policy.duration.vowel_shortening_voiced_stop_multiplier
           - when: "n == null ? false : n.type == 'nasal'"
@@ -113,6 +120,7 @@ rules:
     citations:
       - Klatt 1976
       - Allen et al. 1987 Ch.9 (postvocalic context duration factors)
+      - "Klatt 1979 (voicing effect strongest phrase-finally, reduced phrase-medially)"
   accent_vowel_lengthening:
     kind: scalar
     select:
@@ -136,7 +144,9 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: current.phoneme != 'SIL'
+      where: >-
+        current.phoneme != 'SIL' && (current.type == 'vowel'
+        || (prev != null ? prev.type == 'vowel' || prev.type == 'nasal' || prev.type == 'liquid' || prev.type == 'glide' : false))
     define:
       "n": next
       a1: ahead(current, 1)
@@ -347,6 +357,21 @@ rules:
         tag: pause_rate
     citations:
       - Goldman-Eisler 1968 (pause duration scales with speaking rate)
+  incompressibility_floor:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL' && has(current.inherentDuration)"
+    apply:
+      - field: duration
+        op: set
+        value: >-
+          current.duration < current.inherentDuration * 0.42
+          ? current.inherentDuration * 0.42
+          : current.duration
+        tag: incompressibility
+    citations:
+      - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
   duration_cap:
     kind: scalar
     select:

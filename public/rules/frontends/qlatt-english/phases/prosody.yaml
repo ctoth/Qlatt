@@ -733,3 +733,24 @@ rules:
       - Hanson et al. 2001 (phrase-final and reduced-vowel spectral tilt changes imply source softening toward boundaries)
       - Silverman et al. 1992 (ToBI break index tier; BI>=3 used for phrase-local contour reset)
       - "Engineering estimate: conservative qlatt contour magnitudes for stable long-phrase loudness"
+
+  # --------------------------------------------------------------------------
+  # Rule 26: Spectral tilt reduction for stressed vowels
+  #
+  # Stressed vowels have flatter spectral tilt (lower TL), reflecting
+  # increased vocal effort. Sluijter & van Heuven 1996 showed spectral
+  # tilt is a primary acoustic correlate of linguistic stress, more
+  # reliable than F0 or intensity alone.
+  # --------------------------------------------------------------------------
+  stress_spectral_tilt:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && has(current.stress) && current.stress >= 1"
+    apply:
+      - field: params.TL
+        op: add
+        value: "-6"
+        tag: stress
+    citations:
+      - "Sluijter & van Heuven 1996"

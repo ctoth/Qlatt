@@ -1,0 +1,387 @@
+# Paper-Topic Assignment
+
+## Topic 1: source-filter-interaction
+- Fant_1960_AcousticTheorySpeechProduction
+- Fant_1986_GlottalFlowModelsInteraction
+- Rothenberg_1981_InteractiveVoiceSource
+- Sun_2006_VocalTractGlottalSource
+- Kamiloglu_2021_VoiceProductionPerception
+- Bonada_2008_VoiceSynthesisSpectralModels
+- McGowan_Howe_2007_CompactGreensFunction
+- Kaburagi_2007_VocalTractSpectrum
+- Laine_1988_HigherPoleCorrection
+- Titze_1992_VocalIntensity
+- Richards_1968_AcousticRadiationFundamentals
+- Lin_1995_CascadeIntoParallel
+- Holmes_1983_FormantSynthesizersCascadeParallel
+- Klatt_1980_CascadeParallelFormantSynthesizer
+- Stevens_1989_QuantalNatureSpeech
+- Yegnanarayana_1998_VocalTractExtraction
+- Schwarz_Rodet_SpectralEnvelopeEstimation
+- Milner_2002_MFCCReconstruction
+- Chalker_1985_MouthRadiationImpedance
+- Story_1996_VocalTractAreaFunctionsMRI
+
+## Topic 2: glottal-source-models
+- Fant_1985_LFModelGlottalFlow
+- Fant_1986_GlottalFlowModelsInteraction
+- Fant_1988_LFFrequencyDomainInterpretation
+- Fant_1995_LFModelRevisited
+- Fant_1997_VoiceSourceConnectedSpeech
+- Doval_2003_VoiceSourceCALM
+- Doval_2006_SpectrumGlottalFlowModels
+- Gobl_2021_LFModelFrequencyDomain
+- Perrotin_2021_LF_LinearFilter_Equivalence
+- Flanagan_1958_PropertiesGlottalSoundSource
+- Rosenberg_1971_EffectGlottalPulseShape
+- Rothenberg_1975_ThreeParameterVoiceSource
+- Rothenberg_1981_InteractiveVoiceSource
+- Holmes_1973_GlottalWaveformParallelFormant
+- Klatt_1990_VoiceQualityVariations
+- Hanson_2001_ModelsPhonation
+- Hanson_2002_HLsynSourceParameters
+- Hanson_1995_GlottalCharacteristicsFemale
+- Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+- Hanson_1999_GlottalMaleSpeakers
+- Henrich_2001_SpectralOqAsymmetry
+- Henrich_2003_JND_OpenQuotient
+- Henrich_2005_GlottalOpenQuotientSinging
+- Plumpe_1999_GlottalFlowDerivativeModeling
+- Muthukumar_2013_IterativeLFParameterFitting
+- Drugman_2020_GlottalSourceEstimation
+- Lu_Smith_GlottalSourceSingingVoice
+- Moore_2004_AutomatedGlottalWaveformEstimation
+- vanDinther_2001_PerceptualGlottalPulse
+- vanDinther_2004_PerceptualGlottalPulse
+- Alku_1997_ParabolicSpectralParameter
+- Alku_1999_SPL_DpeakLinearity
+- Gauffin_1989_SpectralCorrelatesGlottalVoice
+- Kreiman_2007_GlottalSourceSpectrum
+- Kreiman_2012_VoiceQualityHarmonicOQ
+- Iseli_2007_VoiceSourceAgeSexVowel
+- Holmberg_1988_GlottalAirflowPressure
+- Holmberg_1995_AerodynamicEGGAcousticFemaleVoice
+- Sundberg_2005_GlottalSourceLoudness
+- Bjorklund_2016_SubglottalPressureSPL
+- Herbst_2015_GlottalAdductionSubglottalPressure
+- Isshiki_1964_VoiceIntensityRegulation
+- Sun_2006_VocalTractGlottalSource
+- Titze_2015_OddHarmonicSensitivity
+- Feugere_2017_CantorDigitalis
+- Anumanchipalli_KLATTSTAT
+- Koenig_LaryngealFactors
+
+## Topic 3: vowel-formants
+- Peterson_Barney_1952_VowelControl
+- Hillenbrand_1995_VowelAcoustics
+- Delattre_1952_AcousticDeterminantsVowelColor
+- Stevens_1955_QuantitativeVowelArticulation
+- Fant_1960_AcousticTheorySpeechProduction
+- Chistovich_1979_CenterGravityEffectVowel
+- Carlson_1979_VowelPerceptionSalience
+- Flanagan_1957_MaximumPrecisionQuantizingVowel
+- Harrington_2011_HighBackVowelFronting
+- Hao_2002_VocalTractDimensionsFormants
+- Barreda_2015_FormantSpeakerSize
+- Ericsson_2020_FormantEstimationEvaluation
+- Strong_1967_MachineAidedFormantDetermination
+- Story_1996_VocalTractAreaFunctionsMRI
+- Lyzenga_Carlyon_2005_FormantFMDetection
+- Lienard_1999_VocalEffortVowelSpectral
+- EspyWilson_2000_AcousticModelingAmericanR
+- Deloche_2020_StatisticalStructureSpeech
+- Fitch_1999_VocalTractMorphology
+- Collins_2003_VocalVisualAttractiveness
+
+## Topic 4: formant-bandwidths
+- Kent_Vorperian_2018_VowelFormantBandwidths
+- deCheveigné_1999_FormantBandwidthCompetingVowels
+- Laine_1988_HigherPoleCorrection
+- Deloche_2020_StatisticalStructureSpeech
+- Fant_1960_AcousticTheorySpeechProduction
+
+## Topic 5: fricative-acoustics
+- Shadle_1985_FricativeAcoustics
+- Shadle_2023_FricativeSpectraHighFreq
+- Jongman_2000_FricativeAcoustics
+- Jongman_1989_FricativeDuration
+- Behrens_Blumstein_1988_FricativeAmplitude
+- Harris_1958_CuesDiscriminationFricatives
+- Heinz_1961_PropertiesVoicelessFricatives
+- Hughes_1956_SpectralPropertiesFricatives
+- Badin_1989_FricativeProductionModelling
+- Stevens_1971_AirflowTurbulenceNoise
+- Stevens_1998_AcousticPhonetics
+
+## Topic 6: stop-consonants-vot
+- Zue_1976_StopConsonantAcoustics
+- Abramson_Whalen_2017_VOTat50
+- Lisker_Abramson_1964_CrossLanguageVoicingStops
+- Lisker_1964_CrossLanguageVoicingInitialStops
+- Blumstein_Stevens_1979_AcousticInvariance
+- Stevens_1978_InvariantCuesPlaceArticulation
+- Stevens_1993_ModelsProductionAcousticsStop
+- Cho_1999_VariationUniversalsVOT
+- Klatt_1975_VoiceOnsetTimeFrication
+- Klatt_1973_DurationStopConsonantClusters
+- Crystal_House_1988_StopConsonantDuration
+- Port_1979_ClosureDurationVoicingPlace
+- Cooper_1952_PerceptionSyntheticSpeech
+- Haskins_StopRecognition
+- Keating_1984_PhoneticPhonologicalRepresentationStop
+- Hanson_2003_AspiratedStopsModels
+- Koenig_LaryngealFactors
+- Stevens_1998_AcousticPhonetics
+- Hombert_1979_PhoneticToneDevelopment
+
+## Topic 7: nasal-acoustics
+- Fujimura_1962_NasalConsonantAnalysis
+- House_Stevens_1956_NasalizationVowels
+- Hawkins_Stevens_1985_NasalVowelCorrelates
+- Chen_1997_NasalizedVowelAcoustics
+- Maeda_1982_VowelNasalizationCues
+- Maeda_1993_AcousticsVowelNasalization
+- Feng_1996_NasalVowelTarget
+- Ruhlen_1973_NasalVowels
+- Beddor_1986_NasalVowelHeight
+- Rossato_1998_RecoveringGesturesNasalVowels
+- Recasens_1983_NasalPlaceCues
+
+## Topic 8: coarticulation
+- Ohman_1966_CoarticulationVCV
+- Recasens_1997_LingualCoarticulationDAC
+- Recasens_2003_ArticulationSoundChangeRomance
+- Recasens_2012_LateralAllophones
+- Sering_2020_AnticipatoryCoarticulation
+- Fowler_1980_CoarticulationTheoriesExtrinsicTiming
+- Fowler_2006_CoarticulationGesturePerception
+- Volenec_2015_Coarticulation
+- Stevens_House_1956_FormantTransitionsVocalTract
+- Sproat_Fujimura_1993_AllophonicVariationEnglishL
+- Browman_1989_ArticulatoryGesturesPhonologicalUnits
+- Browman_Goldstein_1992_ArticulatoryPhonologyOverview
+- Saltzman_1989_DynamicalGesturalPatterning
+- Saltzman_1987_SkilledActionsTaskDynamic
+- Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
+- Kirkham_2025_DynamicalLawsSpeechGestures
+- Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal
+- Dalston_1975_SonorantAcoustics
+- King_2020_LabialGestureAngloEnglishR
+- EspyWilson_2000_AcousticModelingAmericanR
+- Yunusova_2012_LingualConsonantTargets
+- Hertz_1991_StreamsPhonesTransitions
+- Kaburagi_2007_VocalTractSpectrum
+- vanSon_1997_ConsonantReduction
+- Nittrouer_1990_AcousticMeasurementsVoice
+
+## Topic 9: duration-models
+- Klatt_1976_SegmentalDuration
+- vanSanten_1993_SegmentalDuration
+- vanSanten_1994_SegmentalDurationTTS
+- Crystal_1982_SegmentalDurationsConnectedSpeech
+- Crystal_House_1988_StopConsonantDuration
+- Campbell_Isard_1991_SegmentDurationsSyllable
+- Umeda_1975_VowelDurationAmericanEnglish
+- Peterson_1960_DurationSyllableNuclei
+- Klatt_1973_DurationStopConsonantClusters
+- Port_1979_ClosureDurationVoicingPlace
+- Oller_1973_EffectPositionUtteranceDuration
+- Bartkova_1987_ModelSegmentalDurationFrench
+- Wightman_1992_SegmentalDurationsProsodic
+- Beckman_1990_LengtheningsShorteningsProsodic
+- Edwards_1988_ArticulatoryTimingProsodicInterpretation
+- Byrd_2003_ElasticPhraseBoundaryLengthening
+- White_2014_ProsodicTimingFunction
+- Hertz_1992_NucleusBasedTiming
+- Jongman_1989_FricativeDuration
+- Schotz_2006_F0DurationSpeakerAge
+
+## Topic 10: prosody-intonation
+- Pierrehumbert_1980_EnglishIntonation
+- OShaughnessy_1976_F0_Prosody
+- Fujisaki_InformationProsodyModeling
+- Taylor_2000_TiltModelIntonation
+- Ladd_2008_IntonationalPhonology
+- Ladd_1985_IndependentFunctionIntonation
+- Ladd_2014_AmericanFourLevelIntonation
+- Ladd_2021_TroubleWithToBI
+- Beckman_2022_ToBISystem
+- Beckman_2005_ToBISystemEvolution
+- Silverman_1992_ToBILabelingProsody
+- Pitrelli_1994_ToBILabellingReliability
+- Breen_InPress_ToBIRaPReliability
+- Jun_2005_ProsodicTypology
+- Roach_1994_ProsodicTranscriptionConversion
+- DeTournemire_1998_ProsodicAlphabetTranscription
+- Price_1991_ProsodySyntacticDisambiguation
+- vanSanten_1997_ProsodicModeling
+- Strom_2002_TextToProsodyWithoutToBI
+- Goldsmith_1976_AutosegmentalPhonology
+- Ohala_1984_EthologicalF0FrequencyCode
+- Sluijter_1996_SpectralBalanceStressCue
+- Wightman_1992_SegmentalDurationsProsodic
+- White_2014_ProsodicTimingFunction
+- Beckman_1990_LengtheningsShorteningsProsodic
+- Edwards_1988_ArticulatoryTimingProsodicInterpretation
+- Ronanki_2013_SyllableProsodyHTS
+- Hellbernd_2016_ProsodySpeechActIntention
+- Trott_2022_ProsodyIndirectRequests
+- Goupil_2021_ConfidenceAccuracyProsody
+- Jiang_2017_SoundOfConfidenceDoubt
+- VaughanJohnston_2024_VocalIntonationPersuasion
+- Hombert_1979_PhoneticToneDevelopment
+- Rosenberg_2009_CharismaPerception
+
+## Topic 11: voice-quality-emotion
+- Gobl_2003_VoiceQualityEmotion
+- Burkhardt_2009_VoiceQualityFormantSynthesis
+- Burkhardt_2005_GermanEmotionalSpeechDatabase
+- Childers_Lee_1991_VoiceQualityFactors
+- Klatt_1990_VoiceQualityVariations
+- Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment
+- Kreiman_2021_ValidatingVoiceQuality
+- Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+- Hammarberg_1980_PerceptualAcousticCorrelatesVoice
+- Wendahl_1963_LaryngealAnalogSynthesisHarshness
+- Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+- Hollien_1968_VocalFryPhonationalRegister
+- Keating_2015_CreakyVoiceAcoustics
+- Fraj_2011_BreathyRoughVoices
+- Cummings_1995_GlottalExcitationEmotionalSpeech
+- Rutledge_1995_SynthesizingStyledSpeechKlatt
+- Murray_1993_SimulationEmotionSyntheticSpeech
+- Banse_1996_VocalEmotionAcousticProfiles
+- Scherer_2001_VocalEmotionCrossCultural
+- Scherer_1984_VocalCuesSpeakerAffect
+- Scherer_1986_VocalAffectExpressionReview
+- Scherer_TaskLoadStressAcoustics
+- Mozziconacci_1998_SpeechEmotionProsody
+- Mozziconacci_2002_ProsodyEmotions
+- Larrouy-Maestri_2024_EmotionalProsody
+- ZeiPollermann_2002_AcousticPatternsEmotions
+- Juslin_2003_CommunicationEmotionsVocalExpression
+- Goudbeek_2010_ValencePotencyVocalEmotion
+- Belyk_2014_AcousticValenceEmotion
+- Laukka_2008_AnxietyVocalExpression
+- Laukka_2011_SpontaneousAffectIrritation
+- Szameitat_2011_LaughterEmotionAcoustics
+- Grollero_2023_CoreAffectVocalBursts
+- France_2000_SpeechDepressionSuicideAcoustics
+- Moore_2003_GlottalFeaturesDepression
+- KaczmarekMajer_2024_AcousticMarkersBipolar
+- Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
+- Weninger_2013_AcousticsEmotionAudio
+- Caballero_2018_SoundOfImpoliteness
+- Fish_2017_SoundOfInsincerity
+- Lee_2019_AcousticVoiceVariation
+- Herzel_1994_VocalDisordersNonlinearDynamics
+- Titze_1991_NeurologicAperiodicity
+- Lucero_1999_BifurcationsVoiceOnsetOffset
+- Lucero_2005_VocalFoldBifurcations
+- Steinecke_1995_BifurcationsVocalFold
+- Vogel_2010_FatigueSpeechAcoustics
+
+## Topic 12: gender-speaker-differences
+- Titze_1989_MaleFemaleVoices
+- Zhang_2021_LaryngealSizeSexDifferences
+- Simpson_2009_PhoneticGenderDifferences
+- Hanson_1995_GlottalCharacteristicsFemale
+- Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+- Hanson_1999_GlottalMaleSpeakers
+- Holmberg_1995_AerodynamicEGGAcousticFemaleVoice
+- Iseli_2007_VoiceSourceAgeSexVowel
+- Fitch_1999_VocalTractMorphology
+- Hao_2002_VocalTractDimensionsFormants
+- Xue_2000_RaceSexAcousticVoice
+- Xue_2006_VocalTractDimensionsRace
+- Stathopoulos_2011_VoiceAcrossLifespan
+- Schotz_2006_F0DurationSpeakerAge
+- Lucero_2009_MaleFemaleVocalFoldSimulation
+- Keating_2016_AcousticSimilarityFemaleVoices
+- Nygren_2016_TransVoiceF0Testosterone
+- Cartei_2014_VoiceMasculinity
+- Chen_2022_AcousticMasculinityFemininity
+- Meek_2018_VocalParametersEthnicGroups
+- Walton_1994_SpeakerRaceVocalAcoustics
+- Kachel_2017_AcousticCorrelatesSexualOrientation
+- Starr_2015_SweetVoiceJapaneseFeminine
+- Zhang_2016_VocalFoldPhysiologyVoiceProduction
+- Zhang_2016_MechanicsVoiceProductionControl
+- Titze_1979_LaryngealConfigurationsPhonation
+- Koenig_LaryngealFactors
+
+## Unassigned
+- Allen_1973_SpeechSynthesisUnrestrictedText — TTS system architecture (not specific acoustic topic)
+- Allen_1977_ModularAudioResponse — TTS pipeline architecture
+- Allen_1987_MITalk_TTS — TTS system documentation
+- Black_1998_LTS_Rules — G2P letter-to-sound rules
+- Carlson_1975_RuleBasedTTS — TTS rule-based system
+- Carlson_1995_ModelsOfSpeechSynthesis — TTS synthesis survey
+- Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis — spectral smoothing for concatenative synthesis
+- Coker_1973_AutomaticSynthesisOrdinaryEnglish — TTS system with articulatory synthesis
+- Ebden_2014_KestrelTextNormalization — text normalization for TTS
+- Ebden_2015_KestrelTextNormalization — text normalization for TTS
+- Elovitz_1976_NRL_LTS — letter-to-sound rules
+- Eyben_2015_GeMAPS_AcousticParameters — standardized acoustic parameter set (measurement, not production)
+- Hertz_1982_SRS_TextToSpeech — TTS rule development system
+- Hertz_1985_DeltaRuleSystem — TTS rule programming language
+- Hertz_1987_DeltaNonLinearPhonology — phonological rule representation
+- Hertz_1999_ETI-Eloquence_MultiLanguage — multi-language TTS architecture
+- Hertz_2002_HybridFormantConcatenation — hybrid TTS approach
+- Hertz_2006_HybridSynthesisRegularities — hybrid TTS perceptual units
+- Holmes_2001_SpeechSynthesisRecognition — TTS/ASR textbook
+- Hu_2012_DynamicsModelSpeechRecognitionSynthesis — formant trajectory generation for TTS
+- Hunnicutt_1976_PhonologicalRules — phonological rules for TTS
+- Jesus_1997_KlattSynthesiserImplementation — MATLAB Klatt implementation (didactic)
+- Kim_Snyder_2012_UniversalG2P — cross-lingual G2P
+- Klatt_1979_SpeechPerceptionLexicalAccess — speech perception model
+- Klatt_1982_KlattalkTTS — complete TTS system
+- Klatt_1987_TTS_Review — TTS historical review
+- Lalwani_1992_FlexibleFormantSynthesizer — extended Klatt synthesizer (general)
+- Liberman_Mattingly_1985_MotorTheory — motor theory of speech perception
+- Liu_2008_HomographDisambiguationTTBL — homograph disambiguation for TTS
+- Miller_1998_PronunciationModelingSpeechSynthesis — pronunciation modeling for TTS
+- Montoyo_2005_WSD_Hybrid — word sense disambiguation (NLP, not acoustic)
+- Qharabagh_2025_FastNotFancy — G2P improvement via homograph datasets
+- Rabiner_1968_DigitalFormantSynthesizer — digital formant synthesizer design
+- Rabiner_1968_SynthesisByRule — synthesis-by-rule architecture
+- Stevens_1991_HL_Parameters — higher-level parameter control for Klatt (spans multiple topics broadly)
+- Stevens_1998_AcousticPhonetics — comprehensive textbook (spans all acoustic topics)
+- Taal_2011_STOI — speech intelligibility metric
+- Jensen_2016_ESTOI — speech intelligibility metric
+- HoltLotto_2006_CueWeightingAuditoryCategorization — auditory categorization perception
+- Babel_2014_VocalAttractiveness — vocal attractiveness perception
+- Balasubramanium_2012_CepstralSexuallyAppealingVoice — vocal attractiveness (cepstral analysis)
+- Belin_2017_SoundOfTrustworthiness — voice trustworthiness perception
+- Borkowska_2011_F0DominanceAttractiveness — voice pitch and dominance/attractiveness
+- Busquet_2023_VoiceAnalyticsRecordingDevices — recording device effects on measurements
+- Beckers_2021_TTSGenderTrustworthiness — TTS gender and trustworthiness perception
+- Collins_2003_VocalVisualAttractiveness — vocal/visual attractiveness correlation
+- Cumbers_2013_PerceptualCorrelatesVocalVariability — pitch variability and perception
+- Feinberg_2008_FemininityAveragenessVoicePitch — F0 and mate preference
+- Feinberg_2011_IntegratingF0FormantPreferences — F0/formant integration in attractiveness
+- HodgesSimeon_2010_DominanceAttractiveness — vocal parameters and dominance/attractiveness
+- Hughes_2004_VoiceAttractivenessSexualBehavior — voice attractiveness and mating
+- Karthikeyan_2023_ArticulatoryStatusAttractiveness — articulatory clarity and attractiveness
+- Klofstad_2012_VoicePitchLeadership — voice pitch and leadership preference
+- Krumpholz_2022_PitchManipulationFemaleRatings — pitch manipulation attractiveness
+- Liu_2011_FemaleVoiceAttractiveness — female voice attractiveness features
+- McAleer_2014_PersonalityVoiceImpressions — personality from voice
+- Puts_2006_DominanceVoicePitch — pitch and dominance perception
+- Quene_2021_PitchTempoAttractiveness — pitch/tempo and attractiveness
+- Schild_2019_AttractiveVoiceFormantF0 — attractiveness from formants/F0
+- Sporer_2006_ParaverbalDeceptionMetaAnalysis — deception and vocal cues
+- Staib_2021_CorticalVoiceProcessing — cortical voice processing neuroscience
+- VanZant_Berger_2019_VoicePersuades — voice modulation in persuasion
+- Weiss_2020_VoiceAttractiveness — voice attractiveness edited volume
+- Wiethoff_2008_CerebralEmotionalProsody — fMRI of emotional prosody
+- Winter_2012_KoreanSpeechRegisters — Korean speech register acoustics
+- XuLee_VocalAttractivenessMandarinListeners — vocal attractiveness cross-cultural
+- Xu_2013_VocalAttractivenessBodySizeProjection — vocal attractiveness body size
+- Zuta_2007_AttractiveMaleVoices — male voice attractiveness
+- Kocon_2018_VowelDirectivityRunningSpeech — speech directivity patterns
+- Monson_2012_SpeechDirectivityHFE — speech directivity high frequency
+- Monson_2014_HighFrequencyVoice — high-frequency voice energy
+- Hartenstein_2025_VoiceDirectivityHELS — voice directivity reconstruction
+- Porschmann_2024_VoiceDirectivityGroundReflection — voice directivity measurement
+- Sundberg_1972_SingingFormant — singing formant (specialized singing topic)

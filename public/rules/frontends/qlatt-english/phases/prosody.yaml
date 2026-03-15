@@ -63,8 +63,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
@@ -98,8 +98,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*+L'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
@@ -132,8 +132,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*+L'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)
@@ -155,8 +155,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'L+H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
@@ -180,8 +180,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'L+H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
@@ -213,8 +213,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H+!H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
       floor_hz: >-
@@ -241,8 +241,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H+!H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
@@ -273,8 +273,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*+H'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
@@ -305,8 +305,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*+H'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
       floor_hz: >-
@@ -333,8 +333,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H+L*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
       floor_hz: >-
@@ -361,8 +361,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H+L*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
@@ -384,8 +384,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && (current.accentType == 'L*' || current.accentType == 'L*+H')
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
@@ -409,8 +409,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'L*+H'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
@@ -434,8 +434,8 @@ rules:
         current.phoneme != 'SIL'
         && (has(current.isAccented) ? current.isAccented != true : true)
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
       base: params.policy.f0.base_hz
@@ -591,8 +591,8 @@ rules:
         has(current.isAccented) && current.isAccented == true && current.stress == 1
         && has(current.accentType) && current.accentType == 'H*'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       next_stressed: >-
         look_ahead_pred(current, 20, 'is_stressed_vowel')
@@ -725,8 +725,8 @@ rules:
       where: >-
         current.phoneme != 'SIL'
         && current.params != null
-        && ((current.params.AV != null && current.params.AV > 0)
-            || (current.params.AVS != null && current.params.AVS > 0))
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
     contour:
       domain: phrase
       # Silverman et al. 1992 ToBI: BI=3 marks intermediate phrase boundaries.

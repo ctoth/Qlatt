@@ -142,3 +142,24 @@ The high level on "again" for GEP was slightly higher than the precontour mid le
 3. **F0 contour generation:** The low target of a fall is relatively stable across vowels — only the peak varies with vowel quality. Model the fall endpoint independently from the peak.
 
 4. **Cross-speaker variation:** The absolute range of F0 movement varies greatly between speakers (M3 to M7), but the basic pattern (intrinsic F0, consonant perturbation) is consistent.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Peterson_Barney_1952_VowelControl` — Peterson & Barney 1952, canonical vowel F0 data used as comparison baseline (cited)
+- `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, the parent study providing the CNC corpus used here (cited)
+
+### Cited By (in Collection)
+- `Klatt_1975_VoiceOnsetTimeFrication` — references Lehiste & Peterson on F0 perturbation
+- `Iseli_2007_VoiceSourceAgeSexVowel` — references Lehiste & Peterson 1961 on intrinsic F0
+- `Hombert_1979_PhoneticToneDevelopment` — references Lehiste 1961 on consonant-conditioned F0
+- `Pierrehumbert_1980_EnglishIntonation` — references Lehiste work on intonation
+- `Hertz_1991_StreamsPhonesTransitions` — references Lehiste 1961
+
+### New Leads
+- Pike 1945 — foundational American English intonation model (4-level system)
+- Trager & Smith 1957 — alternative 4-level intonation analysis
+
+### Conceptual Links (not citation-based)
+- `Hombert_1979_PhoneticToneDevelopment` — directly extends the consonant-conditioned F0 perturbation findings
+- `Lisker_1964_CrossLanguageVoicingInitialStops` — VOT framework relates to the voicing-conditioned F0 perturbation documented here

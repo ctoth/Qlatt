@@ -127,3 +127,28 @@ The voicing effect extends to the entire vowel+sonorant sequence, not just the v
 4. The effect is weaker in consonant clusters
 5. The effect extends through intervening sonorants to the following obstruent
 6. The primary articulatory mechanism is differential closure transition speed
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960, acoustic theory (cited)
+- `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, vowel duration data (cited)
+- `Klatt_1976_SegmentalDuration` — Klatt 1976 duration rules cite Chen 1970 as a primary source for voicing-conditioned vowel duration
+
+### Cited By (in Collection)
+- `Klatt_1976_SegmentalDuration` — uses Chen 1970 voicing-conditioned vowel duration data
+- `Keating_1984_PhoneticPhonologicalRepresentationStop` — references Chen on voicing distinctions
+- `Klatt_1975_VoiceOnsetTimeFrication` — references Chen 1970
+- `Hombert_1979_PhoneticToneDevelopment` — references Chen on vowel duration
+- `Hertz_1991_StreamsPhonesTransitions` — references Chen 1970
+- `Crystal_House_1988_StopConsonantDuration` — references Chen 1970
+
+### New Leads
+- Delattre 1962 — cross-linguistic vowel duration factors
+- Kozhevnikov & Chistovich 1967 — syllable timing theory
+
+### Conceptual Links (not citation-based)
+- `Umeda_1975_VowelDurationAmericanEnglish` — companion vowel duration study for American English connected speech
+- `Oller_1973_EffectPositionUtteranceDuration` — positional duration effects interact with voicing-conditioned duration
+- `Lisker_1964_CrossLanguageVoicingInitialStops` — VOT as the primary voicing distinction; Chen 1970 addresses the durational correlate on the preceding vowel
+- `Peterson_1960_DurationSyllableNuclei` — foundational vowel duration data that Chen extends cross-linguistically

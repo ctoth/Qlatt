@@ -231,3 +231,23 @@ For a Klatt-style parametric synthesizer, the distinction suggests that:
 - Female voices often have posterior chink, explaining the characteristic "breathy but not dull" quality
 
 The four-component area derivative model (Eq. 13) with opening/closing corrections provides a more detailed template for glottal pulse shaping than the simple LF model, particularly for controlling the abruptness of opening and closing independently.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Holmberg_1988_GlottalAirflowPressure` — Holmberg et al. 1988, source of measured glottal flow and pressure values (cited)
+- `Fant_1988_LFFrequencyDomainInterpretation` — LF model that this work extends with physiological geometry
+- `Klatt_1990_VoiceQualityVariations` — Klatt's voice quality parameter system that maps to the leakage types identified here
+
+### Cited By (in Collection)
+- `Gerratt_2001_MeasuringVocalQualitySpeechSynthesis` — references Cranen & Schroeter on glottal modeling
+- `Hanson_2001_ModelsPhonation` — references Cranen & Schroeter on physiological voice source
+
+### New Leads
+- Titze 1984 — baseline parameterization that this paper extends (Q_a, Q_s, Q_p)
+- Ishizaka & Flanagan 1972 — two-mass model basis for aerodynamic equations
+
+### Conceptual Links (not citation-based)
+- `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — female voice aerodynamic data directly relevant to the parallel chink model
+- `Hanson_1995_GlottalCharacteristicsFemale` — female glottal characteristics that the linked leak vs. parallel chink distinction helps explain
+- `Hanson_1999_GlottalMaleSpeakers` — male voice source data for comparison with the leakage model predictions

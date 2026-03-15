@@ -130,3 +130,21 @@ Average female-to-male percentage differences (k values):
 - Heinz, J.M. (1962). Reduction of Speech Spectra to Descriptions in Terms of Vocal-Tract Area Functions. MIT Ph.D. thesis.
 - Pauli, S. (1974). Computer program for calculating formants from the vocal tract area function. *PERK* report, KTH.
 - Pols, L.C.W., Tromp, H.R.C. & Plomp, R. (1973). Frequency analysis of Dutch vowels from 50 male speakers. *JASA*, 53, 1093-1101.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960, source of male vocal tract area functions used as input data (cited)
+
+### Cited By (in Collection)
+- `Xue_2006_VocalTractDimensionsRace` — references Nordstrom on vocal tract scaling
+- `Hao_2002_VocalTractDimensionsFormants` — references Nordstrom on formant scaling
+- `Simpson_2009_PhoneticGenderDifferences` — references Nordstrom on male-female vocal tract differences
+
+### New Leads
+- Chiba & Kajiyama 1941 — *The Vowel*, source of child vocal tract dimensions
+- Fant 1975a — non-uniform vowel normalization
+
+### Conceptual Links (not citation-based)
+- `Hao_2002_VocalTractDimensionsFormants` — empirical formant data supporting the scaling predictions tested here
+- `Simpson_2009_PhoneticGenderDifferences` — gender-based acoustic differences that Nordstrom's scaling model attempts to explain

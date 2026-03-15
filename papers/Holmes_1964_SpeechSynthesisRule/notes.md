@@ -168,3 +168,28 @@ Modifiers alter table entries for specific occurrences:
 | /ae/ | AA | 10 | 1 | 790 | 410 | 1780 |
 
 Note: These are British RP vowel targets, not American English. F values in the table are quantized parameter values that map to actual Hz via the quantization scheme described above.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, source for vowel duration data (cited)
+
+### Cited By (in Collection)
+- `Rosenberg_1971_EffectGlottalPulseShape` — references Holmes et al. 1964
+- `Hu_2012_DynamicsModelSpeechRecognitionSynthesis` — references Holmes et al. 1964
+- `Carlson_1995_ModelsOfSpeechSynthesis` — references Holmes 1964 as foundational synthesis-by-rule
+- `Hertz_1982_SRS_TextToSpeech` — references Holmes et al. synthesis-by-rule approach
+- `Rabiner_1968_DigitalFormantSynthesizer` — references Holmes et al. 1964
+- `Hertz_1987_DeltaNonLinearPhonology` — references Holmes et al. transition model
+- `Hertz_1985_DeltaRuleSystem` — references Holmes et al. transition model
+- `Strong_1967_MachineAidedFormantDetermination` — references Holmes et al. 1964
+- `Allen_1987_MITalk_TTS` — references Holmes et al. as prior synthesis-by-rule system
+- `Klatt_1980_CascadeParallelFormantSynthesizer` — references Holmes et al. parallel synthesizer
+
+### New Leads
+- Kelly & Gerstman 1961 — first computer-driven synthesis by rule
+- Liberman et al. 1959 — minimal rules for synthesizing speech
+
+### Conceptual Links (not citation-based)
+- `Klatt_1980_CascadeParallelFormantSynthesizer` — Klatt's cascade/parallel architecture builds on Holmes's parallel formant approach
+- `Carlson_1975_RuleBasedTTS` — Swedish rule-based synthesis system contemporaneous with Holmes's approach

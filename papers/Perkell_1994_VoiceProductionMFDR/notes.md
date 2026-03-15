@@ -105,17 +105,24 @@ This paper is important as a calibration correction for the Holmberg 1988 data a
 ## Collection Cross-References
 
 ### Already in Collection
-- [[Holmberg_1988_GlottalAirflowPressure]] — Original 1988 study whose MFDR values this paper revises
-- [[Holmberg_1995_AerodynamicEGGAcousticFemaleVoice]] — 1993/1995 female study using the corrected algorithm
-- [[Klatt_1990_VoiceQualityVariations]] — Uses glottal source parameters that relate to MFDR
-- [[Fant_1988_LFFrequencyDomainInterpretation]] — LF model whose Ee parameter maps to MFDR
-- [[Alku_1999_SPL_DpeakLinearity]] — Studies SPL vs Dpeak (MFDR) linearity; references Holmberg data
-- [[Titze_1992_VocalIntensity]] — Uses airflow and pressure data from Holmberg 1988
-- [[Hanson_1995_GlottalCharacteristicsFemale]] — Uses aerodynamic measures of female voice
-- [[Hanson_1999_GlottalMaleSpeakers]] — Uses Holmberg's minimum airflow data
+- `Holmberg_1988_GlottalAirflowPressure` — Original 1988 study whose MFDR values this paper revises
+- `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — 1993/1995 female study using the corrected algorithm
+- `Klatt_1990_VoiceQualityVariations` — Uses glottal source parameters that relate to MFDR
+- `Fant_1988_LFFrequencyDomainInterpretation` — LF model whose Ee parameter maps to MFDR
+- `Titze_1992_VocalIntensity` — Uses airflow and pressure data from Holmberg 1988
+- `Hanson_1995_GlottalCharacteristicsFemale` — Uses aerodynamic measures of female voice
+- `Hanson_1999_GlottalMaleSpeakers` — Uses Holmberg's minimum airflow data
 
 ### Cited By (in Collection)
-- Papers citing Holmberg 1988 should also note this correction paper
+- `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — directly references this correction paper
+- `Hanson_2001_ModelsPhonation` — references Perkell et al. 1994
+- `Hanson_1999_GlottalMaleSpeakers` — references Perkell et al. 1994
+- `Hanson_1997_GlottalCharacteristicsFemaleAcoustic` — references Perkell et al. 1994
+- `Sundberg_2005_GlottalSourceLoudness` — references Perkell et al. 1994
+- `Hanson_1995_GlottalCharacteristicsFemale` — references Perkell et al. 1994
+
+### Conceptual Links (not citation-based)
+- `Cranen_1995_PhysiologicalVoiceSourceModelling` — physiological voice source model that uses MFDR-related measures
 
 ### New Leads (Not Yet in Collection)
 - **Holmberg, Hillman, Perkell, & Gress (1994a)** — Intra-speaker variation in aerodynamic measures; JSLHR 37:484-495. Relevant for understanding measurement reliability.

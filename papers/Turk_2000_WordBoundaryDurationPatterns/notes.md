@@ -140,3 +140,27 @@ The data can be accounted for by:
 - No F0 or formant data
 - No spectral information
 - Duration effects are relative to matched segmental contexts, not absolute targets
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1976, duration model that Turk's findings refine (cited)
+- `Crystal_House_1988_StopConsonantDuration` — Crystal & House 1988, segmental durations in connected speech (cited)
+- `Wightman_1992_SegmentalDurationsProsodic` — Wightman et al. 1992, phrase-boundary lengthening (cited)
+- `Oller_1973_EffectPositionUtteranceDuration` — Oller 1973, positional duration effects (cited)
+- `Beckman_1990_LengtheningsShorteningsProsodic` — Beckman & Edwards 1990, phrase-final vs word-final lengthening (cited)
+- `Umeda_1975_VowelDurationAmericanEnglish` — Umeda 1975, vowel duration in connected speech (cited indirectly via Oller)
+
+### Cited By (in Collection)
+- `Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem` — references Turk & Shattuck-Hufnagel 2000
+- `Kirkham_2025_DynamicalLawsSpeechGestures` — references Turk & Shattuck-Hufnagel 2000
+- `White_2014_ProsodicTimingFunction` — references Turk & Shattuck-Hufnagel 2000
+
+### New Leads
+- Lehiste 1972 — timing of utterances and linguistic boundaries (polysyllabic shortening)
+- Fougeron & Keating 1997 — articulatory strengthening at prosodic domain edges
+
+### Conceptual Links (not citation-based)
+- `Umeda_1977_ConsonantDurationAmericanEnglish` — consonant duration patterns in connected speech; Turk's word-boundary findings refine the positional effects Umeda documented
+- `Gay_1978_SpeakingRateFormantMovements` — speaking rate effects on duration interact with the word-boundary patterns found here
+- `Chen_1970_VowelLengthVariationVoicing` — voicing-conditioned vowel duration is another duration mechanism operating alongside word-boundary effects

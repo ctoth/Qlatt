@@ -119,3 +119,22 @@ This is the critical finding for synthesis: rate and stress are independently co
 5. **Stress reduction is separate from rate:** Unstressed vowels need reduced amplitude, F0, and slight formant centralization — even if their duration matches a fast-stressed vowel
 6. **Two control mechanisms:** Rate = horizontal time compression. Stress = modulation of overall articulatory effort (affects amplitude, F0, duration, and vowel color)
 7. **Nonlinear time compression:** Rate change causes both duration decrease within segments AND increased coarticulation between segments (Joos 1948 model)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1976, linguistic uses of segmental duration (cited)
+- `Ohman_1966_CoarticulationVCV` — Ohman 1965/1966, coarticulation in VCV utterances (cited)
+- `Peterson_1960_DurationSyllableNuclei` — Peterson & Lehiste 1960, vowel duration data (cited)
+
+### Cited By (in Collection)
+(No papers in collection currently cite Gay 1978.)
+
+### New Leads
+- Lindblom 1963 — spectrographic study of vowel reduction; Gay's data contradicts duration-only reduction explanation
+- Kuehn & Moll 1976 — articulatory velocity at different rates
+
+### Conceptual Links (not citation-based)
+- `Chen_1970_VowelLengthVariationVoicing` — vowel duration variation from a different mechanism (voicing) complements Gay's rate-based duration findings
+- `Turk_2000_WordBoundaryDurationPatterns` — word-boundary duration effects interact with the speaking rate effects documented here
+- `Umeda_1975_VowelDurationAmericanEnglish` — empirical vowel duration data from connected speech at natural rates

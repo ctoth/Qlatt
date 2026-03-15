@@ -231,3 +231,24 @@ Tongue-body consonants (/k/, /g/, /ng/) tend to shorten more than predicted in c
 - x = consonant in question
 - N = nasal
 - Notation example: V#'xV = vowel, word boundary, stressed syllable, consonant, vowel
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Klatt 1976, the duration model that Umeda directly critiques as insufficient for consonant duration (cited)
+- `Klatt_1975_VoiceOnsetTimeFrication` — Klatt 1975, VOT data for word-initial clusters (cited)
+- `Umeda_1975_VowelDurationAmericanEnglish` — companion paper on vowel duration from the same speaker/material (cited)
+
+### Cited By (in Collection)
+- `vanSanten_1994_SegmentalDurationTTS` — references Umeda 1977 consonant duration data
+- `Crystal_House_1988_StopConsonantDuration` — references Umeda 1977
+- `Allen_1987_MITalk_TTS` — references Umeda 1977 duration data
+
+### New Leads
+- Haggard 1973 — abbreviation of consonants in pre- and post-vocalic clusters
+- Lindblom & Rapp 1973 — temporal regularities in Swedish
+
+### Conceptual Links (not citation-based)
+- `Chen_1970_VowelLengthVariationVoicing` — vowel duration counterpart to the consonant duration data here
+- `Turk_2000_WordBoundaryDurationPatterns` — word-boundary duration effects that interact with Umeda's positional consonant duration patterns
+- `Oller_1973_EffectPositionUtteranceDuration` — positional duration effects on both consonants and vowels

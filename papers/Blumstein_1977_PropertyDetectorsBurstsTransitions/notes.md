@@ -164,3 +164,24 @@ This paper is a precursor to the acoustic invariance work. The "integrated prope
 - Diffuse-falling spectrum for labials
 - Diffuse-rising spectrum for alveolars
 - Compact (mid-frequency peak) spectrum for velars
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960, acoustic theory (cited)
+- `Zue_1976_StopConsonantAcoustics` — Zue 1976, detailed stop consonant acoustic measurements (cited)
+- `Blumstein_Stevens_1979_AcousticInvariance` — direct follow-up establishing context-independent invariant properties
+- `Stevens_1978_InvariantCuesPlaceArticulation` — companion perceptual validation of invariant spectral templates
+
+### Cited By (in Collection)
+- `Stevens_1978_InvariantCuesPlaceArticulation` — cites Blumstein et al. 1977 as precursor work
+- `Klatt_1990_VoiceQualityVariations` — references Blumstein 1977
+- `Klatt_1979_SpeechPerceptionLexicalAccess` — references Blumstein 1977
+
+### New Leads
+- Cole & Scott 1974 — theory of speech perception
+- Eimas & Corbit 1973 — selective adaptation of linguistic feature detectors
+
+### Conceptual Links (not citation-based)
+- `Lisker_1964_CrossLanguageVoicingInitialStops` — VOT at release complements the burst/transition integration documented here
+- `Stevens_1993_ModelsProductionAcousticsStop` — production models underlying the burst spectral patterns tested perceptually here

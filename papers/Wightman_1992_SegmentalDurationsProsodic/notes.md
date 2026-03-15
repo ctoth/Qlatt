@@ -198,9 +198,11 @@ For a segment with baseline duration mu_p:
 - `Larrouy-Maestri_2024_EmotionalProsody` — Cites for prosodic phrasing
 - `Pitrelli_1994_ToBILabellingReliability` — Companion study on ToBI reliability
 
+### Now in Collection
+- **Beckman & Edwards (1990)** — [[Beckman_1990_LengtheningsShorteningsProsodic]] — Experimentally separates phrase-final lengthening from stress-timed shortening, establishing that these are independent prosodic effects operating at different constituency levels.
+
 ### New Leads (Not Yet in Collection)
 
-- Beckman, M., & Edwards, J. (1990). "Lengthenings and Shortenings and the Nature of Prosodic Constituency." Papers in Laboratory Phonology I, 152-178. — Prosodic constituency and lengthening
 - Nespor, M., & Vogel, I. (1986). *Prosodic Phonology*. Foris. — Prosodic hierarchy theory
 - Selkirk, E. (1984). *Phonology and Syntax*. MIT. — Prosodic categories framework
 

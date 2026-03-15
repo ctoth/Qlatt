@@ -484,6 +484,12 @@ Ug(t) = at² - bt³   (open phase)
 - [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos's SNR and F0 lifespan data extend Klatt & Klatt's voice quality observations (particularly female breathiness) across the full age range, showing how the voice quality parameters documented here change with aging.
 - [[Larrouy-Maestri_2024_EmotionalProsody]] — Moderate. 30-year review of emotional prosody identifies voice quality (breathy, tense, harsh) as critical for emotion encoding beyond F0 alone; KLSYN88 parameters (AH, TL, OQ) are the implementation mechanism for these emotion-linked voice qualities.
 
+### Now in Collection
+- **Rosenberg (1971)** — [[Rosenberg_1971_EffectGlottalPulseShape]] — Effect of Glottal Pulse Shape on the Quality of Natural Vowels: Establishes that pulse shapes with a single slope discontinuity at closure are preferred; basis for Klatt synthesizer source model.
+- **Hillenbrand et al. (1994)** — [[Hillenbrand_1994_AcousticCorrelatesBreathyVoice]] — Acoustic Correlates of Breathy Vocal Quality: Confirms aspiration noise as primary breathiness cue; introduces CPP measure.
+- **Holmberg et al. (1995)** — [[Holmberg_1995_AerodynamicEGGAcousticFemaleVoice]] — Aerodynamic/EGG/Acoustic measures for female voice; normative female data using KLSYN88 framework.
+- **Hollien & Michel (1968)** — [[Hollien_1968_VocalFryPhonationalRegister]] — Vocal fry register data establishing F0 boundaries (2-78 Hz) for pulse register.
+
 ### New Leads (Not Yet in Collection)
 - **Laver, J. (1980). The Phonetic Description of Voice Quality.** Cambridge University Press.
 - Comprehensive framework for voice quality taxonomy and perceptual evaluation methodology

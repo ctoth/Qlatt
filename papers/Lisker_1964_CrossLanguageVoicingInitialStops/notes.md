@@ -167,3 +167,31 @@ The paper notes several features that co-vary with VOT but are not its primary f
 - Fant, G. (1960). Acoustic Theory of Speech Production. The Hague.
 - Jakobson, R., Fant, G., & Halle, M. (1952). Preliminaries to Speech Analysis. MIT Technical Report No. 13.
 - Liberman, A.M., Delattre, P.C., & Cooper, F.S. (1958). Some cues for the distinction between voiced and voiceless stops in initial position. Language and Speech, I, 153-166.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant 1960, acoustic theory of speech production (cited)
+- `Abramson_Whalen_2017_VOTat50` — 50-year retrospective on VOT by Abramson (co-author of this paper)
+
+### Cited By (in Collection)
+- `Abramson_Whalen_2017_VOTat50` — retrospective on VOT at 50 years, directly extends this paper
+- `Zue_1976_StopConsonantAcoustics` — references Lisker & Abramson's VOT framework
+- `Keating_1984_PhoneticPhonologicalRepresentationStop` — uses VOT framework from this paper
+- `Port_1979_ClosureDurationVoicingPlace` — references Lisker & Abramson on voicing distinctions
+- `Cho_1999_VariationUniversalsVOT` — extends VOT cross-linguistic work
+- `Klatt_1975_VoiceOnsetTimeFrication` — uses Lisker & Abramson's VOT definition
+- `Hanson_2003_AspiratedStopsModels` — references VOT data for stop modeling
+- `Crystal_House_1988_StopConsonantDuration` — references Lisker on stop timing
+- `Koenig_LaryngealFactors` — references Lisker & Abramson on voicing
+- `Hombert_1979_PhoneticToneDevelopment` — references VOT in tonal language context
+- `Fowler_1980_CoarticulationTheoriesExtrinsicTiming` — references Lisker's work on timing
+
+### New Leads
+- van den Berg 1958 — Myoelastic-aerodynamic theory of voice production
+- Lisker 1957 — Closure duration and intervocalic voiced-voiceless distinction
+
+### Conceptual Links (not citation-based)
+- `Blumstein_Stevens_1979_AcousticInvariance` — Acoustic invariance for stop consonants relates to VOT and burst spectral patterns
+- `Stevens_1993_ModelsProductionAcousticsStop` — Models of stop production and acoustics build on VOT framework
+- `Stevens_1978_InvariantCuesPlaceArticulation` — Invariant cues for place of articulation complement VOT voicing distinctions

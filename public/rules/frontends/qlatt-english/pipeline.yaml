@@ -80,6 +80,8 @@ phases:
       - pause_rate_scaling
       - stress_duration
       - accent_vowel_lengthening
+      - polysyllabic_shortening
+      - cluster_shortening
       - vowel_shortening
       - pre_boundary_lengthening
       - speech_rate_scaling

@@ -140,6 +140,32 @@ rules:
       - van Santen 1994 (pitch accent x stress amplificatory interaction)
       - White 2014 (phrasal accent lengthening distributed across accented word)
       - Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)
+  polysyllabic_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && has(current.word_syllable_count) && current.word_syllable_count > 1"
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.polysyllabic_shortening_factor
+        tag: polysyllabic
+    citations:
+      - Klatt 1976 Rule 4 (polysyllabic shortening)
+  cluster_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type != 'vowel' && has(current.cluster_position)"
+    apply:
+      - field: duration
+        op: mul
+        value: >-
+          current.cluster_position == 0 ? params.policy.duration.cluster_first_shortening :
+          params.policy.duration.cluster_subsequent_shortening
+        tag: cluster
+    citations:
+      - Klatt 1973 (cluster shortening)
   pre_boundary_lengthening:
     kind: scalar
     select:

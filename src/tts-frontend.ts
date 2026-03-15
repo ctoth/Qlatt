@@ -441,6 +441,66 @@ function buildTextToKlattTrackDetailed(
     stream: "phone",
     status: token.status ?? 1,
   }));
+
+  // --- Syllable Count & Cluster Position Annotation ---
+  // Compute word_syllable_count (vowel tokens) and cluster_position (consonant tokens)
+  // after structural expansion so that expanded stop segments are counted.
+  // Citations: Klatt 1976 Rule 4 (polysyllabic shortening), Klatt 1973 (cluster shortening)
+  {
+    // 1. Count vowels per word → word_syllable_count on vowel tokens.
+    //    A "syllable" is identified by a token with type === 'vowel'.
+    const wordVowelCounts = new Map<string, number>();
+    for (const token of parameterSequence) {
+      if (token.status === 2) continue; // skip deleted tokens
+      const word = token?.word;
+      if (typeof word !== "string" || word.length === 0) continue;
+      if (token.type === "vowel") {
+        wordVowelCounts.set(word, (wordVowelCounts.get(word) ?? 0) + 1);
+      }
+    }
+    for (const token of parameterSequence) {
+      if (token.status === 2) continue;
+      if (token.type !== "vowel") continue;
+      const word = token?.word;
+      if (typeof word !== "string" || word.length === 0) continue;
+      const count = wordVowelCounts.get(word);
+      if (typeof count === "number" && count > 0) {
+        token.word_syllable_count = count;
+      }
+    }
+
+    // 2. Assign cluster_position to consonant tokens within same-word clusters.
+    //    A "cluster" is a maximal run of consecutive non-vowel tokens sharing
+    //    the same word. Position 0 = first consonant, 1 = second, etc.
+    let clusterWord: string | null = null;
+    let clusterPos = 0;
+    for (const token of parameterSequence) {
+      if (token.status === 2) continue; // skip deleted tokens
+      const word = token?.word;
+      const isConsonant =
+        token.type !== "vowel" &&
+        typeof word === "string" &&
+        word.length > 0 &&
+        token.phoneme !== "SIL";
+
+      if (isConsonant && word === clusterWord) {
+        // Continuing a cluster in the same word
+        token.cluster_position = clusterPos;
+        clusterPos++;
+      } else if (isConsonant) {
+        // New word or first consonant after a vowel — start a new cluster
+        clusterWord = word;
+        clusterPos = 0;
+        token.cluster_position = clusterPos;
+        clusterPos++;
+      } else {
+        // Vowel or SIL — break the cluster
+        clusterWord = null;
+        clusterPos = 0;
+      }
+    }
+  }
+
   // --- Prosodic Structure Annotation ---
   // Annotate tokens with prosodic structure (break indices, accent types,
   // function/content word classification, nuclear accent) BEFORE duration rules.

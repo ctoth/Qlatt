@@ -241,6 +241,18 @@ parameters:
         citations:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8
+      polysyllabic_shortening_factor:
+        value: 0.78
+        citations:
+          - Klatt 1976 Rule 4 (polysyllabic shortening)
+      cluster_first_shortening:
+        value: 0.88
+        citations:
+          - Klatt 1973 (cluster shortening, first consonant)
+      cluster_subsequent_shortening:
+        value: 0.78
+        citations:
+          - Klatt 1973 (cluster shortening, subsequent consonants)
     f0:
       # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
       base_hz:

@@ -124,8 +124,9 @@ parameters:
         citations:
           - Wightman et al. 1992 (weak intermediate phrase, breakIndex=2)
       pre_boundary_bi1_multiplier:
-        value: 1.05
+        value: 1.0
         citations:
+          - Wightman 1992 (break index 0 and 1 are indistinguishable for duration)
           - Klatt 1976 §III.A (word boundary, small effect)
           - White 2014 (word-boundary lengthening is a secondary cue)
       # Accent-based vowel lengthening
@@ -299,11 +300,10 @@ parameters:
           - "Engineering estimate: minimum span for audible sag"
       # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
       voiceless_onset_raise:
-        value: 1.1
+        value: 1.08
         citations:
+          - "Hombert 1979 (~8% measured perturbation after voiceless onset)"
           - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
-          - "Hombert et al. 1979 (empirical perturbation is closer to ~8%)"
-          - "Engineering estimate: 1.1 balances classic synthesis cue strength with reduced overshoot"
       voiced_onset_lower:
         value: 0.95
         citations:
@@ -826,7 +826,7 @@ output:
     default_ms: 20
     citations:
       - Allen et al. 1987 Ch.8
-  transition_ms: 30
+  transition_ms: 50  # Hertz 1991, Stevens & House 1956 (verdict 08)
   initial_silence_ms: 30
   final_silence_ms: 100
 transcription:

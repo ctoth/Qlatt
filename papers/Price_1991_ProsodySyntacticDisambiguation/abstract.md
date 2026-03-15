@@ -1,0 +1,7 @@
+# Abstract
+
+Prosodic structure and syntactic structure are not identical; neither are they unrelated. Knowing when and how the two correspond could yield better quality speech synthesis, could aid in the disambiguation of competing syntactic hypotheses in speech understanding, and could lead to a more comprehensive view of human speech processing. In a set of experiments involving 35 pairs of phonetically similar sentences representing seven types of structural contrasts, the perceptual evidence shows that some, but not all, of the pairs can be disambiguated on the basis of prosodic differences. The phonological evidence relates the disambiguation primarily to boundary phenomena, although prominences sometimes play a role. Finally, phonetic analyses describing the attributes of these phonological markers indicate the importance of both absolute and relative measures.
+
+## Interpretation
+
+This paper establishes the empirical foundation for mapping syntactic structure to prosodic phrasing in speech synthesis. The key insight is that the prosody-syntax mapping is not one-to-one: clause boundaries reliably produce major prosodic breaks, but smaller syntactic boundaries have more variable prosodic realization. For a synthesizer, this means clause boundaries should always trigger large prosodic breaks (pre-boundary lengthening, pause, boundary tone), while within-clause boundaries should use a graduated system of break sizes. The 7-level break index system introduced here became the basis for the ToBI prosodic transcription standard.

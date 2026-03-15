@@ -161,8 +161,19 @@ describe("duration model — break-index pre-boundary lengthening", () => {
     // Use a sentence where we can compare sonorant and obstruent in pre-boundary position.
     // "I call fast." — /L/ in "call" is sonorant pre-boundary,
     //                  but "fast" final /S/ is obstruent pre-boundary
-    // Actually, for cleaner test: construct tokens directly.
-    // Use runDeclarativeFrontend with pre-annotated tokens.
+    // Pre-boundary lengthening rule requires prev to be vowel/nasal/liquid/glide
+    // for consonant selection (Crystal & House 1988 applies to coda consonants).
+    const vowelBeforeSonorant = {
+      phoneme: "AE",
+      type: "vowel",
+      stress: 1,
+      word: "man",
+      params: { F1: 660, F2: 1720, AV: 60 },
+      duration: 120,
+      inherentDuration: 120,
+      stream: "phone",
+      status: 1,
+    };
     const sonorantToken = {
       phoneme: "N",
       type: "nasal",
@@ -173,11 +184,21 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       inherentDuration: 100,
       stream: "phone",
       status: 1,
-      breakIndex: 4,
       isAccented: false,
       isNuclearAccent: false,
       isFunctionWord: false,
       isContentWord: true,
+    };
+    const vowelBeforeObstruent = {
+      phoneme: "AE",
+      type: "vowel",
+      stress: 1,
+      word: "fast",
+      params: { F1: 660, F2: 1720, AV: 60 },
+      duration: 120,
+      inherentDuration: 120,
+      stream: "phone",
+      status: 1,
     };
     const obstruentToken = {
       phoneme: "S",
@@ -189,7 +210,6 @@ describe("duration model — break-index pre-boundary lengthening", () => {
       inherentDuration: 100,
       stream: "phone",
       status: 1,
-      breakIndex: 4,
       isAccented: false,
       isNuclearAccent: false,
       isFunctionWord: false,
@@ -210,7 +230,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
 
     // Run duration rules on the sonorant
     const sonorantResult = runDeclarativeFrontend(
-      [sonorantToken, { ...silToken }],
+      [vowelBeforeSonorant, sonorantToken, { ...silToken }],
       { phases: ["duration"] },
     );
     const sonorantOut = sonorantResult.find(
@@ -219,7 +239,7 @@ describe("duration model — break-index pre-boundary lengthening", () => {
 
     // Run duration rules on the obstruent
     const obstruentResult = runDeclarativeFrontend(
-      [obstruentToken, { ...silToken }],
+      [vowelBeforeObstruent, obstruentToken, { ...silToken }],
       { phases: ["duration"] },
     );
     const obstruentOut = obstruentResult.find(

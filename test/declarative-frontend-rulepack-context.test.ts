@@ -94,8 +94,20 @@ describe("declarative frontend rulepack context migration", () => {
     // Pre-boundary lengthening uses break-index from the adjacent SIL token.
     // Sonorants get bi4 multiplier (1.5), obstruents get bi4 obstruent multiplier (1.2).
     // Tokens need stream/status/breakIndex for the rule to fire.
+    // Rule requires prev to be a vowel/nasal/liquid/glide for consonant selection
     const sonorant = runDeclarativeFrontend(
       [
+        {
+          phoneme: "AO",
+          type: "vowel",
+          stress: 1,
+          params: { F1: 570, F2: 840, AV: 60 },
+          duration: 120,
+          inherentDuration: 120,
+          stream: "phone",
+          status: 1,
+          word: "raw",
+        },
         {
           phoneme: "L",
           type: "liquid",
@@ -104,7 +116,7 @@ describe("declarative frontend rulepack context migration", () => {
           inherentDuration: 100,
           stream: "phone",
           status: 1,
-          word: "all",
+          word: "last",
         },
         {
           phoneme: "SIL",
@@ -124,6 +136,17 @@ describe("declarative frontend rulepack context migration", () => {
     const obstruent = runDeclarativeFrontend(
       [
         {
+          phoneme: "AE",
+          type: "vowel",
+          stress: 1,
+          params: { F1: 660, F2: 1720, AV: 60 },
+          duration: 120,
+          inherentDuration: 120,
+          stream: "phone",
+          status: 1,
+          word: "fat",
+        },
+        {
           phoneme: "S",
           type: "fricative",
           voiceless: true,
@@ -133,7 +156,7 @@ describe("declarative frontend rulepack context migration", () => {
           inherentDuration: 100,
           stream: "phone",
           status: 1,
-          word: "pass",
+          word: "sir",
         },
         {
           phoneme: "SIL",
@@ -150,9 +173,11 @@ describe("declarative frontend rulepack context migration", () => {
       { phases: ["duration"] }
     );
 
-    expect(sonorant[0].duration).toBeGreaterThan(100);
-    expect(obstruent[0].duration).toBeGreaterThan(100);
-    expect(obstruent[0].duration).toBeLessThan(sonorant[0].duration);
+    const sonL = sonorant.find((t) => t.phoneme === "L" && t.status !== 2)!;
+    const obsS = obstruent.find((t) => t.phoneme === "S" && t.status !== 2)!;
+    expect(sonL.duration).toBeGreaterThan(100);
+    expect(obsS.duration).toBeGreaterThan(100);
+    expect(obsS.duration).toBeLessThan(sonL.duration);
   });
 
   it("assigns SW declaratively and respects explicit inventory SW overrides", () => {

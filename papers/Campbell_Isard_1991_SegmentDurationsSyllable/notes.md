@@ -214,7 +214,8 @@ This directly complements van Santen (1993) sums-of-products models and Klatt (1
 - Campbell (1990b) - "Analog I/O nets for syllable timing" - neural net syllable duration model details
 - Edwards & Beckman (1988) - "Articulatory timing and prosodic interpretation of syllable duration" - articulatory basis for syllable timing
 - Peterson & Lehiste (1960) - "Duration of syllable nuclei in English" - classic vowel nucleus duration data
-- Bartkova & Sorin (1987) - "A model of segmental duration for French" - French duration rules for cross-language comparison
+### Now in Collection
+- **Bartkova & Sorin (1987)** — [[Bartkova_1987_ModelSegmentalDurationFrench]] — French duration rules for cross-language comparison
 
 ### Cited By (in Collection)
 - [[Beckman_2005_ToBISystemEvolution]] — cites this paper for segment duration modeling

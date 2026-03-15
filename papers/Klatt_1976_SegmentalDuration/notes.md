@@ -274,9 +274,12 @@ Key quantitative findings:
 - [[Mozziconacci_1998_SpeechEmotionProsody]] — references duration model in emotion/prosody context
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references Klatt's duration model
 
+### Now in Collection
+- **Peterson & Lehiste (1960)** — [[Peterson_1960_DurationSyllableNuclei]] — Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.
+- **Oller (1973)** — [[Oller_1973_EffectPositionUtteranceDuration]] — The Effect of Position in Utterance on Speech Segment Duration: Provides complementary empirical data on positional effects that validate the rule framework.
+- **Klatt (1973)** — [[Klatt_1973_DurationStopConsonantClusters]] — Durational characteristics of prestressed word-initial consonant clusters in English; cluster shortening rules incorporated into this duration model.
+
 ### New Leads (Not Yet in Collection)
-- **Peterson & Lehiste (1960)** - Duration of Syllabic Nuclei in English: Foundational vowel inherent duration measurements that underpin the 1976 model.
 - **House & Fairbanks (1953)** - The Influence of Consonantal Environment on Vowel Characteristics: Establishes the postvocalic consonant voicing effect on vowel duration.
 - **Fry (1958)** - Experiments in the Perception of Stress: Demonstrates that duration changes perception of stress patterns in English.
-- **Oller (1973)** - The Effect of Position in Utterance on Speech Segment Duration: Provides complementary empirical data on positional effects that validate the rule framework.
 - **Umeda (1975a)** - Vowel Duration in American English: Contemporary alternative vowel duration modeling approach with continuous discourse validation.

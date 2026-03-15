@@ -206,8 +206,10 @@ The paper does NOT provide:
 - [[Recasens_1997_LingualCoarticulationDAC]] — DAC model of coarticulation; Kirkham's dynamical approach offers an alternative mechanism
 - [[Sering_2020_AnticipatoryCoarticulation]] — Uses VocalTractLab articulatory synthesis; Kirkham's model provides the underlying gestural dynamics
 
+### Now in Collection
+- **Sorensen & Gafos (2016)** — [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] — the cubic model validated here
+
 ### New Leads (Not Yet in Collection)
-- Sorensen & Gafos (2016) — "The gesture as an autonomous nonlinear dynamical system" — the cubic model validated here
 - Turk & Shattuck-Hufnagel (2020) — General Tau model of speech timing
 - Tilsen (2019a) — Continuously active gestures model
 - Elie, Lee, & Turk (2023) — Modeling articulatory trajectories using general tau theory

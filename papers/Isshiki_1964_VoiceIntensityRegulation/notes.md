@@ -178,10 +178,12 @@ This paper provides the physiological basis for how voice intensity is controlle
 ### Already in Collection
 - (none — no cited papers are currently in the collection)
 
+### Now in Collection
+- **Flanagan (1958)** — [[Flanagan_1958_PropertiesGlottalSoundSource]] — opening quotient effects on intensity and efficiency; explains the mechanism behind Isshiki's efficiency findings
+
 ### New Leads (Not Yet in Collection)
 - van den Berg (1956a) — "Direct and indirect determination of the mean subglottic pressure" — foundational methodology for Ps measurement; reported 4th power relationship between intensity and flow rate
 - Ladefoged & McKinney (1963) — "Loudness, sound pressure, and subglottic pressure in speech" — emphasized relation between subglottic power and loudness in running speech
-- Flanagan (1958) — "Some properties of the glottal sound source" — opening quotient effects on intensity and efficiency; explains the mechanism behind Isshiki's efficiency findings
 
 ### Cited By (in Collection)
 - [[Titze_1992_VocalIntensity]] — cites Isshiki 1964 as establishing lung pressure as the primary intensity control variable; builds on this to derive analytical intensity equations

@@ -158,3 +158,30 @@ Input requirements:
 - Position of phoneme in syllable and word
 
 The duration rules are integrated into the prosodic module of the CNET diphone-synthesis system (Stella, 1985). Segment boundaries in the diphone dictionary use the same segmentation criteria as the measurement corpus.
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Crystal_1982_SegmentalDurationsConnectedSpeech]] — Crystal & House 1982 cited for segmental duration measurement methodology in connected speech
+- [[Klatt_1976_SegmentalDuration]] — Klatt 1976 cited for intrinsic duration concept, segmentation criteria, and English duration model framework (primary comparison target)
+- [[Peterson_1960_DurationSyllableNuclei]] — Peterson & Lehiste 1960 cited for duration measurement methodology
+
+### Cited By (in Collection)
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — cites Bartkova & Sorin 1987 for timing rules for French speech synthesis and cross-language duration model comparison
+- [[DeTournemire_1998_ProsodicAlphabetTranscription]] — cites Bartkova & Sorin 1987 for the French segment duration model
+
+### New Leads
+- O'Shaughnessy, D. (1984). A multispeaker analysis of durations in real French paragraphs. *JASA*, 76(6), 1664-1672. -- Direct competitor French duration model; comparison target
+- O'Shaughnessy, D. (1981). A study of French vowel and consonant durations. *J. Phonetics*, 9, 385-406. -- French vowel/consonant duration data
+- Delattre, P.C. (1939). Duree vocalique et consonnes subsequentes. *Le Maitre Phonetique*, 67, 41-44. -- Historical basis for co-intrinsic vowel lengthening before voiced consonants in French
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1973_DurationStopConsonantClusters]] — **Moderate.** Klatt 1973 uses additive percentage rules for cluster duration prediction in English; Bartkova & Sorin use multiplicative coefficients for French, explicitly contrasting the two mathematical frameworks.
+- [[vanSanten_1993_SegmentalDuration]] — **Strong.** van Santen develops a statistical approach to segmental duration that addresses limitations of both Klatt's additive and Bartkova's multiplicative frameworks, using sums-of-products models.
+- [[vanSanten_1994_SegmentalDurationTTS]] — **Strong.** van Santen 1994 provides the TTS-oriented synthesis-by-rule duration model that generalizes the Klatt and Bartkova approaches.
+- [[Campbell_Isard_1991_SegmentDurationsSyllable]] — **Strong.** Campbell & Isard propose syllable-level duration modeling as an alternative to the segment-level approach used by Bartkova, arguing that syllable structure captures duration patterns more naturally.
+- [[Wightman_1992_SegmentalDurationsProsodic]] — **Moderate.** Wightman et al. examine how prosodic structure affects segmental durations, providing evidence for hierarchical timing effects that Bartkova's positional coefficients partially capture.
+- [[Beckman_1990_LengtheningsShorteningsProsodic]] — **Moderate.** Beckman examines lengthening and shortening patterns in prosodic structure, complementing Bartkova's position-based duration coefficients with a prosodic-hierarchy perspective.

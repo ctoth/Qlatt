@@ -106,3 +106,36 @@ The spring-dynamics model (F = k(l - l₀)) for vowel articulation provides a pr
 - Vowel undershoot (spring doesn't reach target before next parameter change)
 - Context-dependent formant trajectories (same target, different starting positions → different gestures)
 - Rate effects (faster parameter changes → more undershoot)
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Ohman_1966_CoarticulationVCV]] — Ohman 1966 cited extensively as foundational evidence for coproduction model; VCV coarticulation data shows vowel-to-vowel formant transitions continue through consonant closure
+
+### Cited By (in Collection)
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] — cites Fowler 1980 as foundational work on coarticulation as inherent in gestural overlap rather than imposed by external timing rules
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — cites Fowler 1980 for coordinative structures organizing articulators into constriction gestures
+- [[Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem]] — cites Fowler 1980 for coarticulation and intrinsic timing theory
+- [[Liberman_Mattingly_1985_MotorTheory]] — cites Fowler 1980 for coarticulation and extrinsic timing critique
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — cites Fowler 1980 for coarticulation and theories of extrinsic timing
+- [[Volenec_2015_Coarticulation]] — cites Fowler 1980 for coarticulation and extrinsic timing theory critique
+- [[Kirkham_2025_DynamicalLawsSpeechGestures]] — cites Fowler 1980 for coarticulation and theories of extrinsic timing
+
+### New Leads
+- Feldman, A. G. (1966). Functional tuning of the nervous system with control of movement or maintenance of a steady posture — II. *Biophysics*, 11, 565-578. -- Spring-like equilibrium point model of muscle control; basis for vowel articulation dynamics
+- Bell-Berti, F. & Harris, K. (1979). Anticipating coarticulation: Some implications from a study of liprounding. *JASA*, 65, 1268-1270. -- Fixed temporal lead of anticipatory lip rounding
+- Kent, R. D. & Minifie, F. D. (1977). Coarticulation in recent speech production models. *J. Phonetics*, 5, 115-133. -- Critical review of coarticulation theories
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Browman_1989_ArticulatoryGesturesPhonologicalUnits]] — **Strong.** Browman & Goldstein formalize Fowler's intrinsic timing/coproduction ideas into the computational framework of Articulatory Phonology, with gestures as the basic units rather than segments.
+- [[Browman_Goldstein_1992_ArticulatoryPhonologyOverview]] — **Strong.** The mature articulation of Articulatory Phonology that directly builds on Fowler's coordinative structure framework and coproduction model.
+- [[Saltzman_1987_SkilledActionsTaskDynamic]] — **Strong.** Saltzman & Kelso develop the task-dynamic model of skilled actions that provides the mathematical formalism for Fowler's coordinative structures.
+- [[Saltzman_1989_DynamicalGesturalPatterning]] — **Strong.** Saltzman & Munhall apply task dynamics to speech, formalizing the gestural coproduction that Fowler argued for theoretically.
+- [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — **Moderate.** Modern appraisal of the Articulatory Phonology tradition that Fowler's work helped establish.
+- [[Fowler_2006_CoarticulationGesturePerception]] — **Strong.** Fowler's own later work extending the coproduction framework to gesture perception, building on the theoretical foundations laid in the 1980 paper.
+- [[Volenec_2015_Coarticulation]] — **Moderate.** Review of coarticulation theories that positions Fowler's intrinsic timing as one of the major theoretical frameworks.
+- [[Recasens_1997_LingualCoarticulationDAC]] — **Moderate.** Recasens' DAC model provides quantitative coarticulation resistance data that could be interpreted through either extrinsic or intrinsic timing frameworks; the data itself constrains both models.
+- [[Sering_2020_AnticipatoryCoarticulation]] — **Moderate.** Modern computational analysis of anticipatory coarticulation patterns that tests predictions of the coproduction model Fowler proposed.

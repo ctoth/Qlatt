@@ -382,6 +382,7 @@ A3COR = A2COR * A2SKRT
 - [[Allen_1977_ModularAudioResponse]] — Allen's modular TTS system that uses this synthesizer
 - [[Carlson_1979_VowelPerceptionSalience]] — vowel perception work referenced for spectral analysis
 - [[Fant_1960_AcousticTheorySpeechProduction]] — foundational acoustic theory underlying cascade/parallel model
+- [[Flanagan_1958_PropertiesGlottalSoundSource]] — glottal sound source properties; terminal analog design foundations
 - [[Fujimura_1962_NasalConsonantAnalysis]] — nasal consonant analysis informing nasal pole-zero modeling
 - [[Klatt_1976_SegmentalDuration]] — duration rules that drive synthesis parameter timing
 - [[Klatt_1979_SpeechPerceptionLexicalAccess]] — SCRIBER/LAFS perception model that motivates synthesis targets

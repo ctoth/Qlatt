@@ -233,11 +233,13 @@ This paper provides the theoretical foundation for **how articulatory gestures e
 - [[Stevens_2000_AcousticPhonetics]] — Cited for acoustic theory context
 - [[Sering_2020_AnticipatoryCoarticulation]] — Uses the same task-dynamic framework for coarticulation modeling
 
+### Now in Collection
+- **Fowler (1980)** — [[Fowler_1980_CoarticulationTheoriesExtrinsicTiming]] — theoretical motivation for intrinsic timing and coordinative structures
+
 ### New Leads (Not Yet in Collection)
 - Browman & Goldstein (1990) — "Gestural specification using dynamically-defined articulatory structures" — foundational for gestural phonology
 - Byrd & Saltzman (1998) — "Intragestural dynamics of multiple prosodic boundaries" — directly relevant for prosodic lengthening
 - Byrd & Saltzman (2003) — "The elastic phrase" — boundary-adjacent lengthening dynamics
-- Fowler (1980) — "Coarticulation and theories of extrinsic timing" — theoretical motivation
 - Kröger et al. (1995) — Continuous activation function (the nonautonomous alternative this paper argues against)
 
 ### Supersedes or Recontextualizes

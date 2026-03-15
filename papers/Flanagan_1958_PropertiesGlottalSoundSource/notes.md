@@ -142,3 +142,35 @@ Conditions: (I) lowest pitch/intensity, (II) same pitch higher intensity, (III) 
 4. **Quasi-static approximation valid below ~300 Hz**: The inertia of the air in the glottis limits the rise time to ~0.3 ms, meaning the flow can track area changes quasi-statically only for frequencies below about 300 cps. Above this, the flow waveform is "sharper" than the area waveform.
 
 5. **Phase spectrum may matter for voice quality**: While amplitude spectra of area and velocity functions are similar, their phase spectra differ. Flanagan notes this could be relevant to perceived voice quality, though existing analogs disregard phase.
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Stevens_1955_QuantitativeVowelArticulation]] — Stevens & House 1955 cited for quantitative description of vowel articulation
+- [[Stevens_House_1956_FormantTransitionsVocalTract]] — Stevens & House 1956 cited for analog studies of vowel nasalization
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Fant 1953 cited for speech communication research (precursor work to the 1960 monograph)
+
+### Cited By (in Collection)
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — cites Flanagan 1957 and 1958 for terminal analog design and glottal sound source properties
+- [[Rosenberg_1971_EffectGlottalPulseShape]] — cites Flanagan 1958 for properties of glottal sound source and source spectral decay characterization
+- [[Isshiki_1964_VoiceIntensityRegulation]] — cites Flanagan 1958 for opening quotient effects on intensity and efficiency
+- [[Xue_2000_RaceSexAcousticVoice]] — cites Flanagan 1958 for the -12 dB/octave harmonic rolloff that explains SPI sex differences
+- [[Allen_1987_MITalk_TTS]] — cites Flanagan 1958 for glottal sound source properties
+
+### New Leads
+- van den Berg, J. W., Zantema, J. T., & Doornenbal Jr., P. (1957). On the air resistance and the Bernoulli effect of the human larynx. *JASA*, 29, 626-631. -- Primary empirical source for glottal resistance formulas
+- Fletcher, W. W. (1950). A study of internal laryngeal activity in relation to vocal intensity. Ph.D. Thesis, Northwestern University. -- High-speed glottal area measurements used for volume velocity derivation
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Rosenberg_1971_EffectGlottalPulseShape]] — **Strong.** Rosenberg extends Flanagan's characterization of the glottal source by systematically testing how pulse shape affects perceived voice quality, building directly on the spectral analysis framework Flanagan established.
+- [[Fant_1985_LFModelGlottalFlow]] — **Strong.** The LF model provides the modern parametric glottal flow model that replaces Flanagan's triangular wave approximation with a more accurate four-parameter waveform, while preserving Flanagan's key insight about duty cycle controlling spectral richness.
+- [[Fant_1995_LFModelRevisited]] — **Strong.** Revisits the LF model with refined parameter relationships; Flanagan's duty cycle/spectral tilt relationship is formalized through the Rd parameter.
+- [[Rothenberg_1975_ThreeParameterVoiceSource]] — **Strong.** Rothenberg develops a more sophisticated parameterization of the glottal source that extends Flanagan's analysis of glottal impedance and flow-pressure relationships.
+- [[Holmberg_1988_GlottalAirflowPressure]] — **Moderate.** Holmberg et al. measure glottal airflow and pressure in running speech, providing modern validation of Flanagan's steady-flow resistance models.
+- [[Doval_2003_VoiceSourceCALM]] — **Moderate.** The CALM model provides an alternative parameterization of the source waveform that, like the LF model, builds on Flanagan's spectral analysis of the glottal pulse.
+- [[Holmes_1973_GlottalWaveformParallelFormant]] — **Moderate.** Holmes develops a glottal waveform model for parallel formant synthesis that builds on Flanagan's analysis of source spectral properties.
+- [[Gauffin_1989_SpectralCorrelatesGlottalVoice]] — **Moderate.** Gauffin & Sundberg investigate spectral correlates of glottal voice source parameters, extending Flanagan's duty cycle analysis with perceptual data.
+- [[Hanson_1995_GlottalCharacteristicsFemale]] — **Moderate.** Hanson measures glottal characteristics in female speakers, applying modern methods to the same fundamental questions about source spectrum properties that Flanagan addressed.

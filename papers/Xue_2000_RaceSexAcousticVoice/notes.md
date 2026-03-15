@@ -125,8 +125,10 @@ The normative data for elderly speakers provides reference values for synthesizi
 ### Already in Collection
 - [[Titze_1989_MaleFemaleVoices]] — cited for physiologic and acoustic differences between male and female voice; provides the anatomical scale factors (alpha, beta) that explain the F0 sex differences this paper documents
 
+### Now in Collection
+- **Flanagan (1958)** — [[Flanagan_1958_PropertiesGlottalSoundSource]] — provides the -12 dB/octave harmonic rolloff that explains SPI sex differences; foundational source spectrum reference
+
 ### New Leads (Not Yet in Collection)
-- Flanagan (1958) — "Some properties of the glottal sound source" — provides the -12 dB/octave harmonic rolloff that explains SPI sex differences; foundational source spectrum reference
 - Xue & Deliyski (in press) — "Effects of aging on selected acoustic voice parameters" — companion paper establishing elderly vs. young/middle-aged acoustic norms
 - Awan & Mueller (1996) — "Speaking fundamental frequency characteristics of White, African American, and Hispanic kindergartners" — extends the race/F0 question to children
 

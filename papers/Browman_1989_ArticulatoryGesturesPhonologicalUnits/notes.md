@@ -222,10 +222,12 @@ The companion 1992 paper (already in collection as Browman_Goldstein_1992_Articu
 - [[Hertz_1991_StreamsPhonesTransitions]] — conceptual link to the "stable transition phenomenon"
 - [[Miller_1998_PronunciationModelingSpeechSynthesis]] — references articulatory phonology in context of pronunciation modeling
 
+### Now in Collection
+- **Fowler (1980)** — [[Fowler_1980_CoarticulationTheoriesExtrinsicTiming]] — foundational coarticulation theory; argues for intrinsic timing and coproduction over extrinsic timing
+- **Saltzman & Kelso (1987)** — [[Saltzman_1987_SkilledActionsTaskDynamic]] — the formal dynamical model underlying gesture definitions
+
 ### New Leads (Not Yet in Collection)
-- Saltzman & Kelso (1987) "Skilled actions: a task dynamic approach" - the formal dynamical model underlying gesture definitions
 - Sagey (1986) "The representation of features and relations in non-linear phonology" - the primary feature geometry comparison
-- Fowler (1980) "Coarticulation and theories of extrinsic timing" - foundational coarticulation theory
 - Stevens (1972) "The quantal nature of speech" - basis for CD categorical distinctions
 
 ### Conceptual Links (not citation-based)

@@ -291,6 +291,7 @@ The gestural score concept maps naturally to Qlatt's track structure:
 ## Collection Cross-References
 
 ### Already in Collection
+- [[Fowler_1980_CoarticulationTheoriesExtrinsicTiming]] — cited for coarticulation and theories of extrinsic timing; Fowler's intrinsic timing and coordinative structure framework provides the theoretical motivation for this task-dynamic model
 - [[Ohman_1966_CoarticulationVCV]] — cited for classic VCV coarticulation data; this model explains Ohman's observations through gestural overlap
 - [[Fant_1960_AcousticTheorySpeechProduction]] — cited for source-filter theory; provides the acoustic interpretation of the articulatory dynamics modeled here
 - [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the target synthesis system; gestural scores could drive Klatt parameter trajectories through an articulatory-to-acoustic mapping

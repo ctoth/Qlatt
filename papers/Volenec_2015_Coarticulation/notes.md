@@ -182,6 +182,7 @@ This chapter provides the theoretical framework for implementing coarticulation 
 - [[Recasens_1997_LingualCoarticulationDAC]] — cited as the primary DAC model paper
 - [[Recasens_2003_ArticulationSoundChangeRomance]] — cited for coarticulation-driven sound change
 - [[Recasens_2012_LateralAllophones]] — relevant to lateral coarticulation (not directly cited but Recasens' work pervades)
+- [[Fowler_1980_CoarticulationTheoriesExtrinsicTiming]] — cited for coarticulation and theories of extrinsic timing; foundational intrinsic timing framework
 - [[Fowler_2006_CoarticulationGesturePerception]] — cited for coproduction theory and gesture perception
 - [[Sering_2020_AnticipatoryCoarticulation]] — relevant to anticipatory coarticulation in synthesis
 - [[Iskarous_Pouplier_2022_ArticulatoryPhonologyAppraisal]] — related to AP/coproduction framework

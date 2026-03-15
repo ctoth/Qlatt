@@ -131,3 +131,30 @@ Klatt explicitly states these rules should be incorporated in speech synthesis b
 7. Sum all applicable percentage changes and apply to basic duration
 
 These rules stack additively (percentages are summed before applying).
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Peterson_1960_DurationSyllableNuclei]] — Peterson & Lehiste 1960 cited for segmental duration measurement methodology (duration of syllabic nuclei in English)
+
+### Cited By (in Collection)
+- [[Crystal_House_1988_StopConsonantDuration]] — cites Klatt 1973 for consonant cluster shortening effects and durational characteristics of stop consonants in clusters
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — cites Klatt 1973a for durational characteristics of prestressed word-initial consonant clusters
+- [[Klatt_1976_SegmentalDuration]] — cites Klatt 1973a for durational characteristics of prestressed word-initial consonant clusters in English
+- [[vanSanten_1997_ProsodicModeling]] — cites Klatt 1973 for vowel duration and voicing/boundary interactions
+- [[Bartkova_1987_ModelSegmentalDurationFrench]] — uses Klatt's framework as primary comparison target for French duration modeling
+
+### New Leads
+- Haggard, M. P. (1970). Effects of clusters on segment durations. *Speech Synthesis and Perception 5*, Psychological Laboratory, Cambridge, England, pp. 1-50. -- Primary comparison study; found similar cluster duration tendencies in British English
+- Huggins, A. W. F. (1972). Just-noticeable differences for segment duration in natural speech. *JASA*, 51, 1270. -- JND for consonant duration; validates perceptual relevance of cluster duration rules
+- Schwartz, M. F. (1970). Duration of /s/ in /s/-plosive blends. *JASA*, 47, 1143. -- Duration data for /s/ in stop clusters
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1976_SegmentalDuration]] — **Strong.** Klatt 1976 builds the comprehensive English duration model that incorporates the cluster shortening rules established here. The 1973 paper provides the cluster-specific component; the 1976 paper integrates it into the full segmental duration framework.
+- [[Crystal_House_1988_StopConsonantDuration]] — **Strong.** Crystal & House measure stop consonant durations in connected speech with much larger corpora, providing validation data for the cluster shortening patterns Klatt identified from controlled reading.
+- [[vanSanten_1993_SegmentalDuration]] — **Moderate.** van Santen develops a more sophisticated statistical approach to segmental duration prediction that addresses some limitations of Klatt's additive percentage rules.
+- [[Oller_1973_EffectPositionUtteranceDuration]] — **Moderate.** Oller examines positional effects on duration from a different angle (utterance position), complementing Klatt's within-cluster positional analysis.
+- [[Bartkova_1987_ModelSegmentalDurationFrench]] — **Moderate.** Bartkova & Sorin develop a multiplicative (rather than additive) duration model for French that explicitly contrasts with Klatt's additive approach, demonstrating an alternative mathematical framework for the same problem.

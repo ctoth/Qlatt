@@ -242,8 +242,10 @@ elif word_final:
 - [[Jongman_2000_FricativeAcoustics]] — cites for consonant duration reference data
 - [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — provides complementary connected-speech stop duration data
 
+### Now in Collection
+- **Klatt (1973)** — [[Klatt_1973_DurationStopConsonantClusters]] — Durational characteristics of stop consonants in clusters; directly relevant for understanding consonant shortening in initial /st/ combinations
+
 ### New Leads (Not Yet in Collection)
-- **Klatt (1973)** - Durational characteristics of stop consonants in clusters; directly relevant for understanding consonant shortening in initial /st/ combinations
 - **Port (1979)** - Systematic study of stop closure duration as a cue for voicing and place; establishes duration ordering across places of articulation
 - **Luce & Charles-Luce (1985)** - Contextual effects on closure duration and consonant/vowel ratio; relevant for understanding stop duration variation across positions
 

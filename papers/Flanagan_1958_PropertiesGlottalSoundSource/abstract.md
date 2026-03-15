@@ -1,0 +1,7 @@
+# Abstract
+
+The paper investigates quantitative properties of the vocal excitation for voiced sounds, motivated by the need for accurate source models in electrical analog speech synthesis. Using steady-flow resistance measurements from van den Berg's larynx models and high-speed motion pictures of glottal area from Fletcher, Flanagan derives volume velocity waveforms and their Fourier spectra. A small-signal equivalent circuit for the glottal source is determined, and the differential acoustic resistance of the glottis is calculated and compared with impedance levels of the vocal tract and subglottal system. The paper also analyzes the "efficiency" of the glottal source as a function of the glottal duty cycle.
+
+## Interpretation
+
+This is one of the earliest rigorous quantitative analyses of the glottal source for use in speech synthesis. Its key contribution is establishing that the glottis behaves as a high-impedance (approximately constant volume velocity) source, which provides physical justification for the source-filter independence assumption central to formant synthesis. The spectral tilt measurement of -12 dB/octave and the duty cycle analysis directly influenced later glottal source models including those by Rosenberg, Fant, and ultimately the LF model. For a Klatt synthesizer, this paper justifies the current-source excitation model and provides the physical basis for understanding how AV (voicing amplitude) and TL (spectral tilt) parameters relate to glottal physiology.

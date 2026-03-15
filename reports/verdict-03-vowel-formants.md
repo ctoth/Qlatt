@@ -45,4 +45,4 @@ Full analysis with complete replacement value tables: `research/verdicts/03-vowe
 
 ## Commit
 
-Commit hash: TBD (will be filled after commit)
+Commit hash: debbbd0

@@ -113,3 +113,25 @@ PSP provides a way to **validate synthesized glottal waveforms** against target 
 - Can serve as a diagnostic metric: "is the synthesized glottal source spectrally appropriate for the intended phonation type?"
 
 However, PSP cannot be used to directly synthesize the time-domain glottal waveform (acknowledged by the authors). It is an analysis/validation tool, not a synthesis parameter. For synthesis, the LF-model parameters (Ee, Rd, etc.) remain the primary controls.
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cited for HRF (Harmonic Richness Factor) definition; PSP outperforms HRF for phonation type discrimination
+- [[Fant_1985_LFModelGlottalFlow]] — the four-parameter LF model whose output PSP can validate
+- [[Gauffin_1989_SpectralCorrelatesGlottalVoice]] — cited for spectral correlates of glottal source; foundational relationship between flow glottogram and spectrum that PSP quantifies differently
+
+### Cited By (in Collection)
+- [[Kreiman_2007_GlottalSourceSpectrum]] — uses PSP as one of the glottal source measures evaluated for perceptual relevance
+- [[Alku_1999_SPL_DpeakLinearity]] — uses PSP as a key analysis tool for quantifying glottal flow spectral decay
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — cites PSP method
+- [[Gobl_2003_VoiceQualityEmotion]] — cites in context of voice quality measurement
+- [[Doval_2003_VoiceSourceCALM]] — cites for glottal flow spectral quantification
+- [[Drugman_2020_GlottalSourceEstimation]] — cites for glottal source estimation methods
+
+### New Leads (Not Yet in Collection)
+- El-Jaroudi & Makhoul (1991) — "Discrete all-pole modeling" — the DAP inverse filtering method used for glottal flow estimation
+
+### Conceptual Links (not citation-based)
+- [[Doval_2006_SpectrumGlottalFlowModels]] — both papers address how to characterize glottal flow spectra, but from different angles: PSP fits a parabola to the low-frequency spectral envelope while Doval derives closed-form spectral expressions from LF model parameters; they converge on the importance of spectral decay slope for phonation type
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — both address quantification of glottal source characteristics; Hanson uses H1-H2 and formant-corrected measures while Alku uses PSP, providing complementary frequency-domain approaches to the same phonation-type distinctions

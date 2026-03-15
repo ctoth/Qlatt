@@ -84,3 +84,30 @@ For vowel /ae/ with varying loudness:
 - Spectrum tilt is controlled by t_a independently of overall level
 - The relationship between SPL and dU_G/dt is consistent across registers (modal, falsetto) with only slight differences
 - For normal speech synthesis: use the 10 dB SPL = 4 dB fundamental increase rule (Fant 1959)
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1985_LFModelGlottalFlow]] — the four-parameter LF model validated by this paper; provides the theoretical framework (t_p, t_e, t_a, E_e) that the spectral correlates are mapped onto
+- [[Fant_1960_AcousticTheorySpeechProduction]] — foundational acoustic theory; Fant 1970 edition cited for source-filter framework
+
+### Cited By (in Collection)
+- [[Alku_1999_SPL_DpeakLinearity]] — refines Gauffin & Sundberg's single linear SPL-dpeak relationship, showing it breaks down across a wide intensity range with a "knee" at the soft-to-normal boundary
+- [[Alku_1997_ParabolicSpectralParameter]] — cites for spectral correlates of glottal source; PSP method builds on this paper's spectral analysis approach
+- [[Vogel_2010_FatigueSpeechAcoustics]] — cites for glottal source waveform characteristics and spectral correlates
+- [[Titze_1992_VocalIntensity]] — cites in context of vocal intensity measurements
+- [[Henrich_2003_JND_OpenQuotient]] — cites for open quotient and glottal source relationships
+- [[Henrich_2005_GlottalOpenQuotientSinging]] — cites for glottal waveform characteristics in singing
+- [[Hanson_1997_GlottalCharacteristicsFemaleAcoustic]] — cites for inverse filtering methodology
+
+### New Leads (Not Yet in Collection)
+- Rothenberg (1973) — "A new inverse-filtering technique for deriving the glottal airflow during voicing" — the inverse filtering method used to obtain flow glottograms
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Doval_2006_SpectrumGlottalFlowModels]] — directly extends this paper's spectral analysis by deriving closed-form expressions for how LF model parameters (OQ, asymmetry) map to spectral slope; provides the mathematical basis for the spectral correlates Gauffin & Sundberg observed empirically
+- [[Childers_Lee_1991_VoiceQualityFactors]] — complementary approach to voice quality quantification; Childers & Lee use HRF (harmonic richness factor) while Gauffin & Sundberg use flow glottogram amplitude ratios, both converging on the same phonation-type distinctions
+- [[Gobl_2003_VoiceQualityEmotion]] — applies the phonation type framework (breathy/modal/pressed) established here to emotional speech, connecting glottal source parameters to affect expression
+- [[Kreiman_2007_GlottalSourceSpectrum]] — extends the spectral analysis of glottal source to perceptual dimensions, evaluating which spectral measures (including those derived from LF parameters) best predict perceived voice quality

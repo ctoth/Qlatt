@@ -225,6 +225,8 @@ Peak fatigue effect at **22h post-baseline (06:00, pre-dawn)** with partial reco
 - [[Sun_2006_VocalTractGlottalSource]]
 
 ### New Leads (Not Yet in Collection)
-- **Gauffin & Sundberg (1980, 1989)** - Glottal source waveform characteristics and spectral correlates - Fundamental for understanding how source modifications (like those during fatigue) affect the output spectrum.
 - **Nilsonne et al. (1988)** - F0 variation during depression - Relevant because depression and fatigue show similar acoustic patterns; useful for implementing affective speech states.
 - **Hillenbrand et al. (1994, 1996)** - Acoustic correlates of breathy voice - Discusses how breathiness (relevant to fatigue) affects higher formants and spectral characteristics.
+
+### Now in Collection (previously listed as leads)
+- [[Gauffin_1989_SpectralCorrelatesGlottalVoice]] — Establishes the spectral correlates of glottal voice source waveform characteristics, including the relationship between flow glottogram parameters and SPL. Fundamental for understanding how source modifications during fatigue (increased breathiness, reduced E_e) affect the output spectrum.

@@ -185,10 +185,12 @@ VOT increases as articulation moves posteriorly:
 - `Lisker_Abramson_1964_CrossLanguageVoicingStops` - The original 1964 VOT paper that this 2017 retrospective looks back on. Contains detailed per-language VOT tables (Tables 1-22) and frequency distribution histograms for 11 languages that this paper summarizes but does not reproduce in full.
 
 ### New Leads (Not Yet in Collection)
-- **Klatt, D. H. (1975)** - Voice onset time, frication, and aspiration in word-initial consonant clusters. Directly relevant to Klatt synthesizer implementation of VOT.
-- **Cho, T., & Ladefoged, P. (1999)** - Variation and universals in VOT across 18 languages. Provides language-specific VOT targets useful for multilingual synthesis.
-- **Stevens, K. N. (1993)** - Models for the production and acoustics of stop consonants. Theoretical foundation for implementing stop consonant synthesis.
 - **Crystal, T. H., & House, A. S. (1982)** - Segmental durations in connected speech. Important for understanding how VOT varies in running speech contexts.
+
+### Now in Collection (previously listed as leads)
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — VOT, frication, and aspiration measurements for English word-initial consonant clusters. Provides the detailed burst duration + aspiration duration decomposition and context-dependent VOT prediction rules (Appendix) directly relevant to Klatt synthesizer implementation.
+- [[Cho_1999_VariationUniversalsVOT]] — Cross-linguistic VOT study across 18 languages establishing four VOT categories (~10-30 ms unaspirated through ~90-160 ms highly aspirated) and confirming the universal velar > alveolar > bilabial ordering. Provides language-specific targets for multilingual synthesis.
+- [[Stevens_1993_ModelsProductionAcousticsStop]] — Aerodynamic models of stop consonant production providing the theoretical foundation (two-constriction tube model, four sequential sound sources) for understanding the physical mechanisms behind VOT measurements.
 
 ### Cited By (in Collection)
 - [[HoltLotto_2006_CueWeightingAuditoryCategorization]] — lists VOT as a heavily weighted auditory cue, connecting Abramson & Whalen's VOT framework to cue weighting and distributional learning models

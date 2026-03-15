@@ -161,9 +161,11 @@ The PLSTEP burst mechanism in Qlatt handles the transient, but the transition fr
 - [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — cited as [3], provides the VOT measurement framework used to define the aspiration phase duration
 
 ### New Leads (Not Yet in Collection)
-- Stevens (1993) — "Models for the production and acoustics of stop consonants," Speech Commun. 13:367-375 — source of the classical three-phase model (Fig. 1) that this paper challenges; directly relevant to stop synthesis
-- Klatt (1975) — "Voice onset time, frication, and aspiration in word-initial consonant clusters," JSHR 18:686-706 — VOT and frication/aspiration timing measurements; foundational for AF/AH parameter transitions
 - Stevens, Manuel & Matthies (1999) — "Revisiting place of articulation measures for stop consonants," ICPhS 99, pp. 1117-1120 — complementary burst spectra analysis
+
+### Now in Collection (previously listed as leads)
+- [[Stevens_1993_ModelsProductionAcousticsStop]] — source of the classical three-phase model (transient → frication → aspiration → voicing) that Hanson & Stevens challenge by showing aspiration overlays the CV transition rather than forming a separate sequential phase. Stevens provides the aerodynamic circuit model and four-source taxonomy.
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — VOT and frication/aspiration timing measurements foundational for AF/AH parameter transitions. Klatt's decomposition of VOT = burst + aspiration aligns with Stevens' four-source model but Hanson shows the frication component persists longer than Klatt's measurements suggest for /t/ and /k/.
 
 ### Conceptual Links (not citation-based)
 - [[Hertz_1991_StreamsPhonesTransitions]] — Hertz treats aspiration as an independent stream overlaying the CV transition after voiceless stops. Hanson & Stevens' finding that /t/ and /k/ releases contain supraglottal frication (not just glottal aspiration) complicates this model: the AF parameter may need place-dependent extension into what Hertz models as the aspiration interval, rather than a clean AH overlay.

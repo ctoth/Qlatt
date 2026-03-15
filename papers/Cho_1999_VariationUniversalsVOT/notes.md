@@ -94,3 +94,21 @@ Six factors account for the velar > alveolar > bilabial VOT ordering:
 ### Key Distinction: Phonetic vs. Phonological VOT
 
 The authors propose redefining VOT for phonological purposes as the interval between the articulatory gesture for release and the laryngeal gesture for voicing (rather than the acoustic interval between burst and voicing onset). This is compatible with articulatory phonology (Browman & Goldstein 1990, 1992).
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — foundational cross-language VOT study that this paper extends with 18 additional languages; Cho & Ladefoged reanalyze Lisker & Abramson's original data (Table II)
+
+### Cited By (in Collection)
+- [[Abramson_Whalen_2017_VOTat50]] — cites as providing language-specific VOT targets useful for multilingual synthesis
+
+### New Leads (Not Yet in Collection)
+- Stevens (1999) — *Acoustic Phonetics* — comprehensive acoustic phonetics reference providing aerodynamic explanations for VOT place effects
+- Keating (1984) — "Phonetic and phonological representation of stop consonant voicing" — framework for understanding phonetic vs. phonological VOT categories
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — Klatt's detailed English VOT tables (Table 1) represent one language's instantiation of the cross-linguistic patterns Cho & Ladefoged document; Klatt's context-dependent VOT prediction rules complement Cho's universal place-of-articulation trends
+- [[Stevens_1993_ModelsProductionAcousticsStop]] — Stevens' aerodynamic models provide the six physiological mechanisms (cavity volume, articulator velocity, contact area, etc.) that Cho & Ladefoged cite to explain the universal velar > alveolar > bilabial VOT ordering
+- [[Zue_1976_StopConsonantAcoustics]] — Zue's controlled acoustic analysis of English stops provides detailed empirical data on burst spectra and VOT that grounds Cho's cross-linguistic comparisons in a single well-studied language
+- [[Hanson_2003_AspiratedStopsModels]] — both address the aspiration phase of voiceless stops; Cho documents cross-linguistic VOT variation while Hanson models the spectral characteristics of the aspiration noise itself

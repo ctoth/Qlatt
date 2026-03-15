@@ -179,9 +179,11 @@ This paper refines the relationship between voice source amplitude (Ee/dpeak) an
 - [[Titze_1992_VocalIntensity]] — cited for vocal intensity in speakers/singers and H1-H2 as spectral decay measure
 
 ### New Leads (Not Yet in Collection)
-- Gauffin & Sundberg (1989) — "Spectral correlates of glottal voice source waveform characteristics" — foundational paper establishing the single-line SPL-dpeak relationship that this paper refines
 - Fant (1995) — "The LF-model revisited" — frequency domain analysis of LF model parameters
-- Alku et al. (1997) — "Parabolic spectral parameter" — introduces PSP for glottal flow spectral decay quantification, used as key analysis tool here
+
+### Now in Collection (previously listed as leads)
+- [[Gauffin_1989_SpectralCorrelatesGlottalVoice]] — foundational paper establishing the single linear SPL-dpeak relationship that this paper refines. Alku shows this relationship breaks down across a wide intensity range, revealing a "knee" at the soft-to-normal phonation boundary where the SPL-dpeak slope changes.
+- [[Alku_1997_ParabolicSpectralParameter]] — introduces the PSP method for glottal flow spectral decay quantification, used here as a key analysis tool to characterize phonation type changes across the intensity range.
 
 ### Conceptual Links (not citation-based)
 

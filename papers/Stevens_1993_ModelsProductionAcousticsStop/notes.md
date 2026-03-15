@@ -110,3 +110,22 @@ Three types of evidence for place of articulation:
   - Transition to aspiration/voicing: ~3-20 ms depending on place
 - Wall compliance contributes significantly to burst airflow — affects burst amplitude calculation
 - Velar stops need 4x slower constriction opening rate than labial/alveolar
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited as the foundational acoustic theory reference
+- [[Shadle_1985_FricativeAcoustics]] — cited for the turbulence noise source amplitude formula (Uc^3 * Ac^(-2.5))
+
+### Cited By (in Collection)
+- [[Hanson_2003_AspiratedStopsModels]] — uses Stevens' three-phase model (transient → frication → aspiration → voicing) as baseline, then challenges it by showing aspiration overlays transitions rather than being a separate phase
+- [[Hanson_2002_HLsynSourceParameters]] — cites for the low-frequency equivalent-circuit model of pressures and airflows used in HLsyn
+- [[Abramson_Whalen_2017_VOTat50]] — cites as theoretical foundation for stop consonant production models
+
+### New Leads (Not Yet in Collection)
+- Stevens (1971) — "Airflow and turbulence noise for fricative and stop consonants" — nonlinear resistance model for constriction flow
+- Rothenberg (1968) — "The breath stream dynamics of simple-released-plosive production" — wall compliance values for burst modeling
+
+### Conceptual Links (not citation-based)
+- [[Zue_1976_StopConsonantAcoustics]] — provides the detailed empirical burst spectra and VOT measurements that Stevens' aerodynamic model predicts; complementary theory-vs-data perspectives on the same stop consonant phenomena
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — Stevens' four-source model provides the aerodynamic explanation for why burst duration increases labial < alveolar < velar, which Klatt's measurements quantify

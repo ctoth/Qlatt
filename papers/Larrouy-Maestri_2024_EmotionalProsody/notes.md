@@ -316,7 +316,9 @@ Seven acoustic factors (57% variance explained):
 - van Rijn & Larrouy-Maestri (2023) — "Modelling individual and cross-cultural variation in the mapping of emotions to speech prosody" — concrete computational modeling of emotion-prosody mapping
 - Laukka et al. (2016) — "The expression and recognition of emotions in the voice across five nations" — lens model analysis with acoustic features across 5 nations
 - Juslin & Laukka (2003) — "Communication of emotions in vocal expression and music performance" — unified code hypothesis for emotion in speech and music
-- Murray & Arnott (1993) — "Toward the simulation of emotion in synthetic speech" — early review directly targeting synthesis implementation
+
+### Now in Collection (previously listed as leads)
+- [[Murray_1993_SimulationEmotionSyntheticSpeech]] — Early review directly targeting synthesis implementation. Provides Table I mapping five primary emotions to parameter changes (F0, rate, intensity, voice quality) that this 2024 review contextualizes within three decades of subsequent empirical work. Murray's synthesis-focused framing complements this review's broader perceptual and cross-cultural perspective.
 
 ### Conceptual Links (not citation-based)
 

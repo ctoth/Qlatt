@@ -212,11 +212,15 @@ This paper is highly relevant for voice quality parameter design in the Klatt sy
 - [[Fant_1997_VoiceSourceConnectedSpeech]] -- cited for Rd parameter definitions and R parameter framework used in Table 1 of this paper; provides the unified waveshape parameter and covariation rules
 
 ### New Leads (Not Yet in Collection)
-- Alku, Strik, & Vilkman (1997) -- "Parabolic spectral parameter" -- alternative to H1-H2 for quantifying glottal source spectral shape
 - Iseli & Alwan (2004) -- improved correction formula for harmonic magnitude estimation, essential for accurate H1*-A1 and H1*-A3 computation
 - de Krom (1993) -- cepstral-domain harmonics-to-noise ratio technique for separating harmonic/noise source components
 
+### Now in Collection (previously listed as leads)
+- [[Alku_1997_ParabolicSpectralParameter]] -- PSP provides an alternative to H1-H2 for quantifying glottal source spectral shape. Kreiman uses PSP as one measure in the evaluation and finds that while PSP captures low-frequency spectral decay well, it shares the limitation of most measures in failing to characterize mid-frequency (1.5-4 kHz) variability.
+
 ### Cited By (in Collection)
+- [[Kreiman_2021_ValidatingVoiceQuality]] — validates the four-factor PCA from this paper perceptually; four-piece harmonic source model directly derived from these four factors
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — constrains the review's recommendation to use more voice quality features by showing most measures are redundant
 - [[Zhang_2016_VocalFoldPhysiologyVoiceProduction]] -- cites this paper in the context of voice source measurement and spectral characterization
 - [[Zhang_2016_MechanicsVoiceProductionControl]] — cites Kreiman's work on source spectrum redundancy and the gap in mid-frequency parameterization; advocates spectral-domain source models over time-domain
 

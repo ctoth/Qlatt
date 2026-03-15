@@ -151,3 +151,24 @@ For a Klatt synthesizer, the emotion effects map approximately to:
 - Typically 2-3 dimensional models
 - Four commonly accepted "basic" emotions: happiness, sadness, anger, fear
 - Dimensional vs. categorical debate unresolved; discrete emotions exist as points within a continuous dimensional space
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Gobl_2003_VoiceQualityEmotion]] — extends Murray & Arnott's voice quality dimension with systematic perceptual evaluation of six voice quality types (breathy, whispery, tense, creaky, harsh, modal) mapped to emotional categories
+
+### Cited By (in Collection)
+- [[Scherer_2001_VocalEmotionCrossCultural]] — cites as a review of emotion simulation in synthetic speech with parameter recommendations
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cites as directly relevant review for implementing emotional speech synthesis
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — cites as a review of emotional speech synthesis
+- [[Larrouy-Maestri_2024_EmotionalProsody]] — cites as early review directly targeting synthesis implementation
+
+### New Leads (Not Yet in Collection)
+- Scherer (1986) — "Vocal affect expression: A review and a model for future research" — theoretical model linking physiological emotion to acoustic parameters; cited extensively across the emotion literature
+- Fairbanks & Pronovost (1939) — "An experimental study of the pitch characteristics of the voice during the expression of emotion" — source of the quantitative F0 data in Table I
+- Williams & Stevens (1972) — "Emotions and speech: Some acoustical correlates" — establishes systematic relationships between emotional expression and acoustic parameters
+
+### Conceptual Links (not citation-based)
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — Murray provides a qualitative synthesis of emotion-acoustic mappings from decades of studies; Banse provides systematic quantitative measurements of 29 acoustic parameters across 14 emotions, offering the empirical precision Murray's review lacked
+- [[Cummings_1995_GlottalExcitationEmotionalSpeech]] — Murray identifies voice quality as critical for secondary emotions but lacks glottal source data; Cummings provides the complementary glottal source measurements (closing slope, opening slope, durations) for emotional speech styles
+- [[Belyk_2014_AcousticValenceEmotion]] — challenges Murray's simple emotion-to-parameter mappings by showing valence encoding depends on emotion family (motivational vs. moral vs. aesthetic), each with distinct pitch/loudness patterns

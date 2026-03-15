@@ -185,3 +185,23 @@ Five rules for motor commands to laryngeal muscles:
 - /k/: Energy concentrated at F2-F3 (place-dependent), longer burst
 - /p/: Weak, diffuse spectrum, very short burst (~11 ms, estimated from /b/)
 - Voiced plosive bursts: 3-6 dB weaker than voiceless equivalents
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — cited for acoustic theory of speech production
+- [[Lisker_Abramson_1964_CrossLanguageVoicingStops]] — foundational cross-language VOT measurements that this paper builds upon
+
+### Cited By (in Collection)
+- [[Hanson_2003_AspiratedStopsModels]] — cites for VOT and frication/aspiration timing measurements; listed as new lead
+- [[Abramson_Whalen_2017_VOTat50]] — cites as directly relevant to Klatt synthesizer VOT implementation
+- [[Zue_1976_StopConsonantAcoustics]] — cites as the first systematic cluster VOT data; Zue's work extends Klatt's measurements with detailed spectral analysis
+- [[Pierrehumbert_1980_EnglishIntonation]] — cites for VOT timing data
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — cites for consonant timing data
+
+### New Leads (Not Yet in Collection)
+- Stevens & Klatt (1974) — "Role of formant transitions in voiced/voiceless distinction" — perceptual trading between VOT and F1 onset frequency
+
+### Conceptual Links (not citation-based)
+- [[Cho_1999_VariationUniversalsVOT]] — Klatt's English VOT measurements (Table 1) represent one language's values within Cho & Ladefoged's cross-linguistic framework; both confirm the universal bilabial < alveolar < velar VOT ordering but Cho shows the absolute values are language-specific
+- [[Stevens_1993_ModelsProductionAcousticsStop]] — Stevens' aerodynamic model provides the physical explanation for the burst duration and aspiration timing patterns Klatt measured; Klatt's decomposition of VOT into burst + aspiration aligns with Stevens' four-source sequential model

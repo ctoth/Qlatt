@@ -276,6 +276,8 @@ Parameters:
 
 ### New Leads (Not Yet in Collection)
 - **Stevens K. N., Blumstein S. E. (1975)** - "Dynamic Aspects of Consonant Production and Perception: A Study of Retroflex Stop Consonants" - Foundational work on how stop place of articulation is distinguished through acoustic cues; directly relevant for stop consonant synthesis rules and burst spectrum design.
-- **Klatt D. H. (1975)** - "Voice Onset Time, Frication, and Aspiration in Word-Initial Consonant Clusters" - Critical for understanding VOT timing, aspiration duration, and the interaction of voicing cues with stop consonant production parameters.
 - **Fant G. (1973)** - "Speech Sounds and Features" - Provides the foundational acoustic-phonetic framework and source-filter theory underlying all formant-based synthesis approaches.
 - **Peterson G., Lehiste I. (1960)** - "Duration of Syllable Nuclei in English" - Establishes empirical duration data for vowels that complements stop consonant timing rules for comprehensive duration modeling in speech synthesis.
+
+### Now in Collection (previously listed as leads)
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — Systematic VOT measurements for English word-initial consonant clusters. Provides burst duration + aspiration duration decomposition and context-dependent VOT prediction rules. Zue's spectral analysis of bursts complements Klatt's temporal measurements: Klatt quantifies when things happen, Zue quantifies what they sound like.

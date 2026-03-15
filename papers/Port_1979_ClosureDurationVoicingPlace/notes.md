@@ -83,3 +83,29 @@ No formal equations are given. The key quantitative relationships:
 - **Perceptual boundary shift with tempo:** ~10 ms between fast and slow conditions
 - **Labial vs apical closure difference:** ~10-15 ms (labial longer)
 - **Minimum physiological closure:** labial ~30 ms, apical flap ~5 ms
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — Duration model that incorporates voicing-conditioned closure duration rules
+- `Peterson_1960_DurationSyllableNuclei` — Vowel duration data conditioned by following consonant voicing, directly cited
+- `Lisker_Abramson_1964_CrossLanguageVoicingStops` — Cross-language VOT data establishing voicing categories, cited for the voiced/voiceless distinction framework
+- `Crystal_House_1988_StopConsonantDuration` — Stop consonant duration in connected speech, extending these findings
+
+### New Leads
+- Lisker (1957) — "Closure duration and the intervocalic voiced-voiceless distinction in English." Foundational work on closure duration as voicing cue
+- Raphael (1972) — "Preceding vowel duration as a cue to the perception of voicing." JASA 51, 1296-1303
+- Summerfield & Haggard (1972) — "Speech rate effects in the perception of voicing." Tempo normalization in voicing perception
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Abramson_Whalen_2017_VOTat50` — VOT as voicing cue complements closure duration as voicing cue; both are temporal cues for the same phonological contrast
+- `Keating_1984_PhoneticPhonologicalRepresentationStop` — Three-level model for stop voicing provides the phonological framework for the closure duration patterns measured here
+- `Zue_1976_StopConsonantAcoustics` — Stop consonant acoustics including closure and burst properties
+- `Stevens_1993_ModelsProductionAcousticsStop` — Aerodynamic models of stop production that explain why voiced closures are shorter
+- `Klatt_1975_VoiceOnsetTimeFrication` — VOT and frication timing complement closure duration data for a complete picture of stop consonant timing

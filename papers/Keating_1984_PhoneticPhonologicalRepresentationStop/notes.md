@@ -117,3 +117,35 @@ The paper's three-level model maps naturally to a synthesizer pipeline:
 - Phonological level → the input phoneme identity (/b/ vs /p/)
 - Phonetic category selection → context-dependent allophone rules (position, stress)
 - Phonetic detail → quantitative parameter values (exact VOT, F0 perturbation magnitude, vowel duration multiplier)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Lisker_Abramson_1964_CrossLanguageVoicingStops` — Cross-language VOT data establishing three-category system, foundational to this paper
+- `Pierrehumbert_1980_EnglishIntonation` — Phonology-phonetics interface for intonation, cited for the multi-level representation approach
+- `Hombert_1979_PhoneticToneDevelopment` — F0 perturbation by stop voicing, cited for phonetic explanation of tone development
+- `Goldsmith_1976_AutosegmentalPhonology` — Autosegmental phonology framework referenced for feature representation
+- `Blumstein_Stevens_1979_AcousticInvariance` — Acoustic invariance for place of articulation, related to Stevens & Blumstein 1981 cited here
+- `Abramson_Whalen_2017_VOTat50` — Modern retrospective on VOT, directly extends the framework formalized here
+- `Cho_1999_VariationUniversalsVOT` — Cross-language VOT variation within the three-category framework established here
+- `Klatt_1975_VoiceOnsetTimeFrication` — Klatt's VOT measurements, relevant to the quantitative phonetic detail level
+
+### New Leads
+- Chen (1970) — "Vowel length variation as a function of the voicing of the consonant environment." Cross-language vowel duration conditioned by voicing
+- Stevens & Klatt (1974) — "Role of formant transitions in the voiced-voiceless distinction for stops." JASA 55, 653-659
+- Westbury & Keating (1980) — Aerodynamic model showing {vl.unasp.} as default vocal tract state
+- Kahn (1976) — Syllable-based allophone rules for English stops
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Port_1979_ClosureDurationVoicingPlace` — Closure duration data fits the three-level framework: phonological [+/-voice] maps to phonetic categories with different closure durations
+- `Zue_1976_StopConsonantAcoustics` — Acoustic analysis of stops that provides the phonetic detail data for the lowest level of this model
+- `Stevens_1993_ModelsProductionAcousticsStop` — Aerodynamic models that explain the physical basis of the three phonetic categories
+- `Stevens_1998_AcousticPhonetics` — Comprehensive acoustic phonetics reference that operationalizes the three-level framework
+- `Hanson_2003_AspiratedStopsModels` — Models of aspirated stops, directly implementing the {vl.asp.} phonetic category
+- `Haskins_StopRecognition` — Stop recognition research grounded in the cue-weighting approach that this paper's framework helps organize

@@ -114,3 +114,35 @@ Used smoothed step commands (Liljencrants 1971). Key rules demonstrated on "He e
   - Fant's later work on the LF model (1985), which parameterized the waveform shape mathematically
   - The "behavioral model" approach to glottal source modeling
   - The idea of physiologically-motivated but acoustically-implemented control parameters
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — LF model built on this behavioral modeling tradition, replacing analog circuit with mathematical parameterization
+- `Fant_1995_LFModelRevisited` — Further development of the LF parameterization
+- `Doval_2003_VoiceSourceCALM` — CALM model uses similar physiologically-motivated parameters (F/L/T concept)
+- `Kreiman_2007_GlottalSourceSpectrum` — Perceptual voice quality assessment relates to spectral effects of L and T variation
+- `Gauffin_1989_SpectralCorrelatesGlottalVoice` — Gauffin (co-author Lindqvist-Gauffin) on spectral correlates of glottal voice source variation
+- `Holmberg_1988_GlottalAirflowPressure` — Glottal airflow measurements validating waveform shapes produced by this model
+- `Hanson_1995_GlottalCharacteristicsFemale` — Glottal characteristics measurements relating to T parameter effects
+- `Rothenberg_1981_InteractiveVoiceSource` — Rothenberg's later work on source-tract interaction
+- `Fant_1986_GlottalFlowModelsInteraction` — Source-tract interaction that this paper acknowledged but did not model
+
+### New Leads
+- Ishizaka & Flanagan (1972) — Two-mass vocal cord model, the "physiological approach" alternative to this behavioral approach
+- Lindqvist (1972) — Descriptive model of laryngeal articulation, source of T parameter dimensions
+- Ladefoged (1973) — "Glottal stricture" dimension, similar to T parameter
+- Rothenberg (1973) — Inverse filtering technique used to derive reference glottal waveforms
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Klatt_1990_VoiceQualityVariations` — Klatt's voice quality variations relate to the F/L/T framework: AV maps to L, OQ/TL map to T
+- `Childers_Lee_1991_VoiceQualityFactors` — Voice quality factor analysis that maps to the same source parameter space
+- `Hanson_2001_ModelsPhonation` — Models of phonation that formalize what this paper demonstrated with analog circuits
+- `Hanson_2002_HLsynSourceParameters` — HLsyn source parameters are a modern descendant of this F/L/T framework
+- `Plumpe_1999_GlottalFlowDerivativeModeling` — Glottal flow derivative modeling, a mathematical alternative to the analog circuit approach

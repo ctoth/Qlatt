@@ -109,3 +109,29 @@ The threshold for detecting a formant peak (A1 level where F1 becomes perceptibl
 4. **For back vowels [u, o, a]**: Can be approximated by single-formant stimuli because F1-F2 distance is within critical range.
 
 5. **For front vowels [i, e, ae]**: F2-F3 integration applies; F2* must be computed accounting for F3 proximity.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Delattre_1952_AcousticDeterminantsVowelColor` — One- and two-formant vowel perception experiments directly relevant to the center-of-gravity concept
+- `Carlson_1975_RuleBasedTTS` — Carlson, Fant & Granstrom work on rule-based synthesis; Carlson & Fant also authored two-formant perception studies cited here
+- `Carlson_1979_VowelPerceptionSalience` — Vowel perception salience, related to the perceptual integration phenomena studied here
+- `Fant_1960_AcousticTheorySpeechProduction` — Fant's acoustic theory provides the formant framework this paper extends perceptually
+
+### New Leads
+- Bedrov, Chistovich & Sheikin (1976) — Frequency location of center of gravity as useful vowel perception parameter
+- Plomp (1975) — Auditory analysis and timbre perception
+- Zwicker & Feldtkeller (1967) — Hz-to-Bark conversion used in this paper
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Peterson_Barney_1952_VowelControl` — Canonical vowel formant data; the center-of-gravity effect explains why some P&B vowels with similar F1-F2 patterns are perceptually distinct
+- `Hillenbrand_1995_VowelAcoustics` — Updated vowel acoustics; the 3.5-Bark critical distance applies to interpreting formant proximity in these measurements
+- `Kent_Vorperian_2018_VowelFormantBandwidths` — Formant bandwidths affect the spectral prominence of individual formants, interacting with center-of-gravity integration
+- `Stevens_1989_QuantalNatureSpeech` — Quantal theory's regions of stability relate to the critical distance boundaries for perceptual integration
+- `Flanagan_1957_MaximumPrecisionQuantizingVowel` — Perceptual precision bounds for formant frequencies relate to the critical distance for formant integration

@@ -117,3 +117,28 @@ The authors acknowledge C. Gunnar M. Fant of KTH Stockholm for providing mingogr
 - Lehiste & Peterson (1959) — companion study, more detail on CNC list
 - Crystal & House (1988) — later study extending to connected speech (already in collection)
 - Klatt (1976) — duration model that builds on these findings (already in collection)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Crystal_House_1988_StopConsonantDuration` — Later study extending vowel duration conditioning to connected speech
+- `Klatt_1976_SegmentalDuration` — Duration model that builds directly on these voicing-conditioned duration findings
+- `Hillenbrand_1995_VowelAcoustics` — Updated vowel acoustics measurements comparable to the intrinsic duration data here
+
+### New Leads
+- House & Fairbanks (1953) — "The influence of consonant environment upon the secondary acoustical characteristics of vowels." Direct predecessor studying consonant influence on vowel duration
+- Denes (1955) — "Effect of duration on the perception of voicing." Duration as a perceptual cue for voicing
+- Lehiste & Peterson (1959) — Companion study with detailed CNC word list
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- `Port_1979_ClosureDurationVoicingPlace` — Cites Peterson & Lehiste 1960 for vowel duration data conditioned by consonant voicing
+- `Klatt_1976_SegmentalDuration` — Duration model builds on these findings (noted in Cross-references above)
+
+### Conceptual Links (not citation-based)
+- `vanSanten_1993_SegmentalDuration` / `vanSanten_1994_SegmentalDurationTTS` — Alternative duration modeling approaches that address the same voicing-conditioned duration phenomena
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — Segment durations in syllable context, complementary to this CNC-word study
+- `Wightman_1992_SegmentalDurationsProsodic` — Prosodic effects on segmental duration, extending beyond the segmental conditioning studied here
+- `Edwards_1988_ArticulatoryTimingProsodicInterpretation` — Argues that duration effects from different prosodic sources (stress vs phrase-final) are qualitatively different, not just quantitative scaling of the kind measured here

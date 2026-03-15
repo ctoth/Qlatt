@@ -109,3 +109,28 @@ This agrees with independent estimates from bandwidth and SNR considerations (Fl
 12. Flanagan (1955) — JASA 27, 1223-1225 (over-all vowel amplitude DL)
 13. Fairbanks (1940) — JASA 11, 457-466 (F0 range)
 14. Flanagan (1956) — JASA 28, 592-596 (bandwidth/SNR estimates)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Peterson_Barney_1952_VowelControl` — Source of formant frequency and amplitude ranges used in quantization calculations
+- `Fant_1960_AcousticTheorySpeechProduction` — Vocal tract transmission properties underlying formant theory (Fant 1952 cited directly)
+- `Stevens_1955_QuantitativeVowelArticulation` — Quantitative vowel articulation study from same era
+
+### New Leads
+- Fairbanks (1940) — F0 range data for adult males, JASA 11, 457-466
+- Flanagan (1955) — Formant frequency difference limen experiments, JASA 27, 613-617
+- Pollack (1952) — Absolute discrimination of frequency, JASA 24, 745-749
+
+### Supersedes or Recontextualizes
+- None
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Chistovich_1979_CenterGravityEffectVowel` — The 3% formant frequency DL relates to the critical distance for perceptual integration; both papers address perceptual limits on formant resolution
+- `Kent_Vorperian_2018_VowelFormantBandwidths` — Formant bandwidth data complements the quantization precision bounds established here
+- `Hillenbrand_1995_VowelAcoustics` — Modern vowel measurements that can be evaluated against these perceptual precision bounds
+- `Henrich_2003_JND_OpenQuotient` — JND study for open quotient, analogous methodology to Flanagan's DL approach for different voice parameters
+- `Holmes_1983_FormantSynthesizersCascadeParallel` — Cascade synthesizer design where formant amplitudes are implicit, supported by Flanagan's finding that amplitude information is redundant for vowels

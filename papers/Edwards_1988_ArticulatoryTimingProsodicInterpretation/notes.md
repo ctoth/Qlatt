@@ -84,3 +84,29 @@ Instead of raw millisecond durations, they measure the **sonority profile** of t
 - Edwards & Beckman argue this framework is insufficient because it treats all prosodic effects as the same type of operation (scaling duration)
 - Their data show that phrase-final lengthening requires a qualitatively different representation than stress lengthening
 - However, for practical synthesis, a two-factor approach could work: uniform scaling for stress, plus a separate closing-phase scaling for phrase-final position
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1976_SegmentalDuration` — The primary duration model this paper critiques and extends; argues multiplicative scaling is insufficient for phrase-final lengthening
+- `Pierrehumbert_1980_EnglishIntonation` — Framework for prosodic hierarchy (Pierrehumbert & Beckman) used in this paper
+- `Wightman_1992_SegmentalDurationsProsodic` — Segmental durations and prosodic boundaries, directly related findings on pre-boundary lengthening
+
+### New Leads
+- Beckman & Edwards (1987) — "The phonological and phonetic basis of final lengthening." Companion paper with more detail on phrase-final lengthening mechanisms
+- Lindblom (1963) — "A spectrographic study of vowel reduction." Foundational work on how duration affects formant targets
+- Kent & Netsell (1971) — "Effects of stress contrasts on certain articulatory parameters." Articulatory correlates of stress
+
+### Supersedes or Recontextualizes
+- Critiques the uniform multiplicative duration model of `Klatt_1976_SegmentalDuration` by showing phrase-final and stress lengthening are qualitatively different operations
+
+### Cited By (in Collection)
+- No direct citations found in existing collection notes
+
+### Conceptual Links (not citation-based)
+- `Peterson_1960_DurationSyllableNuclei` — Segmental duration data that this paper reinterprets through a prosodic lens
+- `vanSanten_1993_SegmentalDuration` / `vanSanten_1994_SegmentalDurationTTS` — Alternative duration models; van Santen's approach may better capture the non-uniform lengthening patterns demonstrated here
+- `Campbell_Isard_1991_SegmentDurationsSyllable` — Syllable-based duration model, relevant to the sonority-profile approach advocated here
+- `Crystal_House_1988_StopConsonantDuration` — Duration data for stops in connected speech, subject to the same phrase-final vs. stress distinction
+- `Browman_1989_ArticulatoryGesturesPhonologicalUnits` / `Browman_Goldstein_1992_ArticulatoryPhonologyOverview` — Articulatory phonology framework that formalizes the gestural timing concepts used here
+- `White_2014_ProsodicTimingFunction` — Prosodic timing functions, modern treatment of the phenomena this paper identified

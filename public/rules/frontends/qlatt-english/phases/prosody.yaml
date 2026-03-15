@@ -573,6 +573,47 @@ rules:
       - Pierrehumbert 1980 (register reset at IP boundaries)
       - Ladd 2008 Ch.5 (declination reset at intonational phrase boundaries)
 
+  # --------------------------------------------------------------------------
+  # Rule 21: Sagging F0 transition between consecutive H* accents
+  #
+  # Pierrehumbert 1980 observed that F0 between two H* pitch accents does
+  # not interpolate linearly but sags below the straight line — a concave
+  # dip.  Ladd 2008 pp.155-157 documents this as "sagging transitions."
+  # This rule inserts a low F0 target at the right edge of the first H*
+  # vowel, pulling the interpolation downward by sag_depth_hz (12 Hz)
+  # before the contour rises again to the next H* peak.
+  # --------------------------------------------------------------------------
+  sagging_transition:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.isAccented) && current.isAccented == true && current.stress == 1
+        && has(current.accentType) && current.accentType == 'H*'
+        && current.params != null
+        && ((current.params.AV != null && current.params.AV > 0)
+            || (current.params.AVS != null && current.params.AVS > 0))
+    define:
+      next_stressed: >-
+        look_ahead_pred(current, 20, 'is_stressed_vowel')
+      has_following_h_star: >-
+        next_stressed != null
+        && has(next_stressed.accentType) && next_stressed.accentType == 'H*'
+      prev_f0: prev_point('f0')
+      sag_value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
+        - params.policy.f0.sag_depth_hz
+    constraint: has_following_h_star
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: >-
+        max([sag_value, params.policy.f0.base_hz])
+      tag: f0_sag
+    citations:
+      - "Pierrehumbert 1980 (H*-H* nonmonotonic sagging interpolation)"
+      - "Ladd 2008 pp.155-157 (sagging transitions between H* accents)"
+
   # ==========================================================================
   # Microprosodic / Segmental F0 Perturbation (Kept Unchanged)
   #

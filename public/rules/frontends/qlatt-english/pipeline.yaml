@@ -123,6 +123,7 @@ phases:
       - tobi_boundary_low
       - tobi_boundary_rise
       - tobi_register_reset
+      - sagging_transition
       - connected_speech_source_contour
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation

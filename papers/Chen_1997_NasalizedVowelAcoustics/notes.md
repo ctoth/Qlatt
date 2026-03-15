@@ -320,4 +320,6 @@ For nasalized vowels compared to oral:
 
 ### New Leads (Not Yet in Collection)
 - **Stevens, K. N. (in press). Acoustic Phonetics** - Theoretical framework for how velopharyngeal coupling affects vocal tract acoustics; directly cited for predictions in this paper.
-- **Maeda, S. (1993). Acoustics of vowel nasalization and articulatory shifts in French nasal vowels** - Comprehensive treatment of French nasal vowel acoustics; provides complementary analysis methodology.
+
+### Now in Collection (previously listed as leads)
+- [[Maeda_1993_AcousticsVowelNasalization]] — Maeda's simulation-based study of French nasal vowels identifies four vowel-dependent types of spectral modification from nasal coupling and proposes N1-N2 spectral peak distance as a vowel-independent nasalization measure. Provides the theoretical taxonomy that complements Chen's American English measurements: Maeda's Type 1 (high front vowels, rapid nasalization with small coupling) and Type 3 (non-high back vowels, F1 split + F3 upshift) predict Chen's observed formant patterns.

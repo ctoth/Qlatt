@@ -84,3 +84,5 @@ For Klatt synthesizer nasalization:
 ### New Leads (Not Yet in Collection)
 - **Fant (1979) Status Report** - Essential reference for glottal flow and vocal-tract theory; foundational for understanding acoustic characteristics
 - **Miller (1959)** - Classic work on inverse filtering techniques; relevant for analyzing glottal characteristics and spectral analysis methods
+
+**See also:** [[Maeda_1993_AcousticsVowelNasalization]] — Maeda's 1993 chapter extends this 1982 work with a fuller vowel-dependent spectral modification taxonomy (4 types by vowel class), the N1-N2 spectral peak distance as a vowel-independent perceptual nasalization measure, and articulatory shift analysis for French nasal vowels.

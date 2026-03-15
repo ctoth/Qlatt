@@ -186,5 +186,7 @@ $$
 - [[Fish_2017_SoundOfInsincerity]] — both use similar methodologies to extract acoustic profiles of pragmatic attitudes; Fish examines sincerity while Caballero examines politeness. (Moderate)
 
 ### New Leads (Not Yet in Collection)
-- **Scherer, K.R., Ladd, D.R., Silverman, K.E., 1984** - "Vocal cues to speaker affect: testing two models" - Foundational paper on covariance vs configuration models for how acoustic cues encode affect. Critical for understanding categorical vs graded prosodic distinctions.
 - **Gussenhoven, C., 2004** - "Paralinguistics: Three Biological Codes" - Theoretical framework (frequency code, effort code) explaining why higher pitch signals politeness cross-linguistically.
+
+### Now in Collection (previously listed as leads)
+- [[Scherer_1984_VocalCuesSpeakerAffect]] — Tests covariance (continuous acoustic parameters) vs configuration (categorical intonation interacting with text) models for vocal affect. Finds both models are partially correct: voice quality operates as parallel channel (covariance), intonation contour type interacts with sentence type (configuration). Directly relevant to Caballero's finding that impoliteness markers include both gradient voice quality cues (HNR) and categorical prosodic patterns (F0 contour shape).

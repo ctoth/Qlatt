@@ -120,3 +120,32 @@
 - Related to Ladd et al. (in press, 1984) -- further theoretical discussion of configuration model
 - Extends Lieberman & Michaels (1962) and Lieberman (1962) work on F0 and emotion
 - Williams & Stevens (1972) -- emotion and speech acoustical correlates
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Pierrehumbert_1980_EnglishIntonation]] — Pierrehumbert 1980 intonation framework used for categorizing contours as rise vs. fall (high vs. low boundary tone)
+
+### Cited By (in Collection)
+- [[Ladd_1985_IndependentFunctionIntonation]] — cites Scherer et al. 1984 as predecessor study testing continuous vs categorical vocal cue distinction; Ladd is a co-author on both papers
+- [[Caballero_2018_SoundOfImpoliteness]] — cites for covariance vs configuration models of how acoustic cues encode affect
+- [[ZeiPollermann_2002_AcousticPatternsEmotions]] — uses the covariance model from Scherer et al. 1984 as theoretical framework
+- [[Mozziconacci_2002_ProsodyEmotions]] — cites for covariance vs configuration approaches to affect
+- [[Mozziconacci_1998_SpeechEmotionProsody]] — references for affect signaling methodology
+- [[Banse_1996_VocalEmotionAcousticProfiles]] — cites Scherer et al. 1984 for vocal cues to affect
+- [[Goudbeek_2010_ValencePotencyVocalEmotion]] — cites for vocal affect testing methodology
+- [[Murray_1993_SimulationEmotionSyntheticSpeech]] — cites Scherer 1984 for emotion component process approach
+
+### New Leads (Not Yet in Collection)
+- Laver (1980) — *The Phonetic Description of Voice Quality* — framework for voice quality parameters relevant to affect
+- Williams & Stevens (1972) — "Emotion and speech: Some acoustical correlates" — foundational activation-vocal expression model
+- Lieberman & Michaels (1962) — F0 and envelope amplitude related to emotional content
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Gobl_2003_VoiceQualityEmotion]] — Scherer et al. demonstrate that voice quality conveys affect independently of text (covariance model), and Gobl & Chasaide 2003 provide the specific Klatt synthesis parameter values (AV, OQ, TL, spectral tilt) that produce perceived voice quality differences for different emotions. Scherer identifies the channel; Gobl provides the synthesis implementation.
+- [[Burkhardt_2009_VoiceQualityFormantSynthesis]] — Burkhardt provides Klatt-parameter formulas for voice quality modification in emotional speech synthesis. Scherer's finding that voice quality operates as a parallel affect channel supports Burkhardt's approach of applying voice quality modifications as overlays on any text.
+- [[Scherer_2001_VocalEmotionCrossCultural]] — Scherer's own later cross-cultural study extends the covariance/configuration framework to test universality of vocal emotion recognition, finding substantial cross-cultural agreement that supports the voice-quality-as-parallel-channel hypothesis.
+- [[Ladd_1985_IndependentFunctionIntonation]] — direct successor study by overlapping author team that builds on the covariance/configuration distinction, proposing three independent prosodic dimensions (F0 range, voice quality, contour type) for affect signaling.

@@ -182,3 +182,29 @@ Two origins for these exceptions:
 - [11] Umeda 1972 — Vowel duration in polysyllabic words (JASA 52:1)
 - [12] Monsen, Molter, Umeda 1972 — Spectrographic study of allophones of voiceless stops (JASA 52:1)
 - [13] Coker & Umeda 1972 — On significance of allophonic variation in voiceless stops (JASA 52:1)
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Allen_1973_SpeechSynthesisUnrestrictedText]] — cited this paper as [15], the Bell Labs parallel TTS system; Allen's MIT system uses formant synthesis while Coker uses articulatory synthesis
+
+### Cited By (in Collection)
+- [[Klatt_1976_SegmentalDuration]] — cites Coker et al. 1973 for vowel duration modeling
+- [[Allen_1987_MITalk_TTS]] — cites Coker et al. for Bell Labs TTS as competing approach
+- [[Carlson_1975_RuleBasedTTS]] — cites as Bell Labs TTS system for comparison to KTH approach
+- [[vanSanten_1993_SegmentalDuration]] — cites for vowel duration data
+- [[vanSanten_1994_SegmentalDurationTTS]] — cites for duration model in TTS context
+- [[Klatt_1975_VoiceOnsetTimeFrication]] — cites for allophonic variation in voiceless stops
+- [[Hertz_1982_SRS_TextToSpeech]] — cites Coker 1968 articulatory model
+
+### New Leads (Not Yet in Collection)
+- Pike (1945) — *The Intonation of American English* — intonation model that the pitch control system expands upon
+- Umeda (1972) — Vowel duration in polysyllabic words — data source for duration model
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1976_SegmentalDuration]] — Coker's vowel duration equation T = K1 + S*(K2 + K3*C) is a product-of-factors model with stress-situation and consonant-following terms. Klatt 1976 develops a more comprehensive product-of-factors model with 11 separate duration rules. Different parameterizations of the same insight that segment duration is multiplicatively affected by multiple independent factors.
+- [[Allen_1973_SpeechSynthesisUnrestrictedText]] — contemporary MIT TTS system using formant rather than articulatory synthesis, with complementary approaches to the same linguistic challenges. Allen's morph-based G2P vs. Coker's dictionary lookup; Allen's SPE-based stress vs. Coker's 9-level scale.
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — Coker's articulatory model with orthogonalized control variables represents the alternative approach to speech synthesis that Klatt's terminal-analog formant synthesizer was designed to match in output quality while being more directly controllable.

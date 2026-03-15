@@ -170,8 +170,10 @@ None - this is a text-only conference paper.
 - [[Carlson_1995_ModelsOfSpeechSynthesis]] — later survey by same first author references this earlier rule-based system
 
 ### New Leads (Not Yet in Collection)
-- **Allen (1973) "Speech synthesis from unrestricted text"** - MITalk precursor, directly relevant to English TTS architecture. Worth finding for comparison to our approach.
-- **Coker, Umeda, Browman (1973) "Automatic synthesis from ordinary English text"** - Bell Labs TTS system, another major English TTS from the era. Good for understanding alternative approaches.
 - **Chomsky & Halle (1968) The Sound Pattern of English** - Foundational for phonological rule notation. Already influential on our letter-to-sound rules.
 - **Rothenberg et al. (1975) "A three-parameter voice source"** - Could be relevant for glottal source modeling. The "three parameters" might relate to or predate the LF model.
 - **Liljencrants (1968) "The OVE III speech synthesizer"** - Johan Liljencrants later co-authored the LF model with Fant. Understanding OVE III might provide historical context for glottal source development.
+
+### Now in Collection (previously listed as leads)
+- [[Allen_1973_SpeechSynthesisUnrestrictedText]] — Allen 1976 describes the complete MITalk pipeline: morph decomposition, letter-to-sound rules, morphophonemic rules, SPE-based stress, sentence parsing, and prosodic control with Klatt synthesizer as backend. Complements Carlson's KTH approach with a morph-dictionary-based G2P strategy vs. Carlson's rule-only approach.
+- [[Coker_1973_AutomaticSynthesisOrdinaryEnglish]] — Bell Labs TTS system using Coker's articulatory vocal tract model with orthogonalized control variables. Vowel duration model T = K1 + S*(K2 + K3*C) and 9-level stress scale. Uses articulatory synthesis (natural coarticulation) vs. Carlson's formant synthesis (explicit coarticulation rules).

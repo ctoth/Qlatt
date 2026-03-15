@@ -137,3 +137,36 @@ The central insight: nasalization percept requires an antiformant near a vowel f
 ### 9. Interaction Between Vowel Identity and Nasality Perception
 
 Listeners separate spectral attributes contributing to nasality from those contributing to vowel identity. The N1/N2 peak identification provides a reasonable approximation of this segregation process. However, for [u], the spectral shape at low frequencies resembles nasalized [i], suggesting that a pure bottom-up model is insufficient -- vowel identity influences nasality judgment.
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Fant 1970 2nd ed. cited for acoustic theory underlying the vocal tract model
+- [[Hawkins_Stevens_1985_NasalVowelCorrelates]] — Hawkins & Stevens 1985 cited for perceptual correlates of the nasal-nonnasal distinction for vowels
+- [[House_Stevens_1956_NasalizationVowels]] — House & Stevens 1956 cited as foundational analog study of vowel nasalization
+- [[Maeda_1982_VowelNasalizationCues]] — Maeda's own earlier work on sinus cavity effects and spectral correlates of nasalization
+- [[Stevens_1989_QuantalNatureSpeech]] — Stevens 1972 quantal nature of speech cited for formant-antiformant interaction theory
+
+### Cited By (in Collection)
+- [[Feng_1996_NasalVowelTarget]] — cites Maeda 1993 for nasalization acoustics and spectral correlates
+- [[Chen_1997_NasalizedVowelAcoustics]] — cites Maeda 1993 for French nasal vowel acoustics and complementary analysis methodology
+- [[Klatt_1990_VoiceQualityVariations]] — references Maeda's nasalization work
+- [[EspyWilson_2000_AcousticModelingAmericanR]] — references Maeda for nasalization modeling
+- [[Beddor_1986_NasalVowelHeight]] — references Maeda's nasalization work
+- [[Ruhlen_1973_NasalVowels]] — references Maeda for nasalization acoustics
+- [[Kaburagi_2007_VocalTractSpectrum]] — references Maeda for vocal tract modeling with nasal coupling
+- [[Rossato_1998_RecoveringGesturesNasalVowels]] — references Maeda for nasalization gesture recovery
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — references Maeda for nasalization implementation
+- [[Laine_1988_HigherPoleCorrection]] — references Maeda for nasalization effects
+
+### New Leads (Not Yet in Collection)
+- Chistovich & Lublinskaya (1979) — "Center of gravity" effect in vowel spectra — referenced for N1-N2 peak identification method
+- Fujimura (1960) — Spectra of nasalized vowels — early MIT analysis of nasal vowel spectra
+
+### Supersedes or Recontextualizes
+- [[Maeda_1982_VowelNasalizationCues]] — this 1993 chapter extends Maeda's own 1982 work with fuller vowel-dependent spectral modification taxonomy (4 types), the N1-N2 perceptual measure, and articulatory shift analysis for French nasal vowels
+
+### Conceptual Links (not citation-based)
+- [[Chen_1997_NasalizedVowelAcoustics]] — Chen provides American English nasalized vowel measurements (F1, B1, FNP, FNZ values for specific vowels) that complement Maeda's French-focused simulation. Maeda's four vowel-type taxonomy predicts Chen's observations: high vowels show rapid nasalization with small coupling, low vowels require larger coupling. Different languages, converging acoustic principles.
+- [[Feng_1996_NasalVowelTarget]] — Feng extends Maeda's port model with sinus cavity effects and develops French nasal vowel synthesis targets. Maeda provides the acoustic theory; Feng provides the synthesis implementation parameters.
+- [[Beddor_1986_NasalVowelHeight]] — Beddor examines how nasalization interacts with perceived vowel height across languages. Maeda's finding that articulatory shifts in French nasal vowels enhance nasalization percept provides the acoustic mechanism for the perceptual vowel height shifts Beddor documents.

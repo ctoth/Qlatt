@@ -176,8 +176,10 @@ This paper provides concrete numerical targets for implementing emotion presets 
 
 ### New Leads (Not Yet in Collection)
 - Williams & Stevens (1972) — "Emotion and speech" — foundational activation-vocal expression model
-- Scherer, Ladd, & Silverman (1984) — "Vocal cues to speaker affect" — two-model vocal affect test
 - Pittam (1987) — "Discrimination of five voice qualities" — voice quality perception ratings
+
+### Now in Collection (previously listed as leads)
+- [[Scherer_1984_VocalCuesSpeakerAffect]] — Tests covariance vs configuration models for vocal affect signaling. Finds voice quality cues (spectral energy distribution) convey affect independently of text (covariance model), while intonation contour type conveys affect only in interaction with question type (configuration model). Zei Pollermann & Archinard's use of the covariance model as theoretical framework is directly grounded in this 1984 study's empirical validation.
 
 ### Supersedes or Recontextualizes
 - None — this paper is complementary to Banse_1996 (fewer emotions but real induced emotions rather than acted) and to Gobl_2003 (empirical data vs synthesis parameter targets)

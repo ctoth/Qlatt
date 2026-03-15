@@ -177,3 +177,32 @@ This paper is the architectural precursor to Allen et al. 1987 (MITalk), which i
 5. **Duration rules**: Duration factors (intrinsic vowel, consonant context, grammatical function, syntactic position) are implemented in Qlatt's duration rule phase
 6. **Prosodic control**: The functional model (ideational/interpersonal/textual) for F0 contour generation
 7. **Word boundary rules**: The ~25 boundary adjustment rules (palatalization, geminate shortening, glottalization) map to Qlatt's postlexical rule phase
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Allen_1987_MITalk_TTS]] — the full MITalk book, production implementation of the system described here. Allen 1976 is the theoretical blueprint.
+- [[Allen_1977_ModularAudioResponse]] — describes the modular hardware/software architecture for the same MIT TTS system
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — the Klatt synthesizer explicitly shown in Fig. 1 as the vocal-tract backend
+- [[OShaughnessy_1976_F0_Prosody]] — O'Shaughnessy 1974 consonant duration data cited as [16]; O'Shaughnessy was Allen's collaborator on F0 contour work
+- [[Coker_1973_AutomaticSynthesisOrdinaryEnglish]] — cited as [15], the Bell Labs parallel TTS system compared in this paper
+
+### Cited By (in Collection)
+- [[Hertz_1985_DeltaRuleSystem]] — references Allen's MITalk pipeline as competing approach that Delta improves upon
+- [[Hertz_1982_SRS_TextToSpeech]] — cites Allen 1976 for MIT approach to unrestricted text synthesis
+- [[Carlson_1975_RuleBasedTTS]] — cites Allen 1973 as the MITalk precursor for comparison to KTH approach
+- [[Klatt_1979_SpeechPerceptionLexicalAccess]] — cites Allen for text-to-speech architecture
+
+### New Leads (Not Yet in Collection)
+- Hunnicutt (1974) — Letter-to-sound rules (several hundred rules), became core of MITalk G2P
+- Chomsky & Halle (1968) — SPE lexical stress rules, basis for stress assignment algorithm
+- Halliday (1970) — Functional model of language (ideational/interpersonal/textual) for F0 contour theory
+- Barnwell (1971) — Segment duration algorithm for reading machine context
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Klatt_1976_SegmentalDuration]] — Allen describes duration factors (intrinsic vowel quality, consonant context, grammatical function, syntactic position) that Klatt 1976 later quantifies with specific rules and measurements. Allen provides the theoretical motivation; Klatt provides the implementation parameters.
+- [[Coker_1973_AutomaticSynthesisOrdinaryEnglish]] — contemporary Bell Labs TTS system using articulatory rather than formant synthesis, with a complementary vowel duration model (T = K1 + S*(K2 + K3*C)) and 9-level stress scale. Different synthesis backends, similar linguistic pipeline challenges.
+- [[Pierrehumbert_1980_EnglishIntonation]] — Allen's functional model of F0 (ideational/interpersonal/textual components) represents an earlier framework for the same phenomenon that Pierrehumbert later formalizes with the autosegmental-metrical approach.

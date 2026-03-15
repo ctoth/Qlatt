@@ -128,3 +128,33 @@ Result: neutral vowel differs from series synthesizer by no more than 1 dB over 
 - The stop burst mechanism (replacing noise with a single pulse on simultaneous amplitude jumps) relates to Qlatt's PLSTEP burst mechanism
 - The bandwidth-by-nasality rule (2.5x for F1) provides a concrete parameter for nasalization modeling
 - The finding that phase doesn't matter for loudspeaker listening supports using minimum-phase or simplified glottal models in practical synthesis
+
+## Collection Cross-References
+
+### Already in Collection
+- [[Fant_1960_AcousticTheorySpeechProduction]] — Fant et al. 1972 [6] cited for subglottal formant measurements; Fant's acoustic theory is the theoretical foundation
+- [[Flanagan_1957_MaximumPrecisionQuantizingVowel]] — Flanagan 1972 [5] cited for subglottal coupling effects on formant frequencies
+
+### Cited By (in Collection)
+- [[Klatt_1980_CascadeParallelFormantSynthesizer]] — cites Holmes 1973 for glottal waveform influence on parallel synthesizer
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — Holmes's own later paper references this 1973 work for the original JSRU parallel synthesizer design and glottal source modeling
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cites Holmes 1973 for glottal waveform influence on parallel formant synthesizer naturalness
+- [[Klatt_1987_TTS_Review]] — references Holmes 1973 parallel formant synthesizer as milestone in synthesis history
+- [[Jesus_1997_KlattSynthesiserImplementation]] — cites Holmes for parallel synthesis approach
+- [[Lalwani_1992_FlexibleFormantSynthesizer]] — cites for parallel formant synthesis design
+- [[Allen_1987_MITalk_TTS]] — cites Holmes for glottal waveform research
+- [[Carlson_1995_ModelsOfSpeechSynthesis]] — cites Holmes for parallel synthesizer design
+- [[Stevens_1991_HL_Parameters]] — cites for glottal source modeling
+- [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]] — uses Holmes-type parallel synthesizer as backend
+
+### New Leads (Not Yet in Collection)
+- Rosenberg (1971) — Effect of glottal pulse shape on quality of natural vowels — cosine-segment pulse shape; found subjects sometimes preferred idealized pulses
+- Mathes & Miller (1947) — Phase effects in monaural perception — source waveforms used in Holmes's phase experiment
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Fant_1985_LFModelGlottalFlow]] — Holmes uses inverse-filtered glottal pulses stored as 72-ordinate samples; Fant's LF model (1985) provides a parametric alternative that captures the same glottal waveform characteristics with just four parameters (Ee, Ra, Rk, Rg), removing the need for stored pulse shapes.
+- [[Klatt_1990_VoiceQualityVariations]] — Holmes's finding that voice quality differences between glottal pulse shapes are perceptible only under earphone listening connects directly to Klatt's 1990 work on voice quality variations, where different source types (impulse, KLGLOTT88) produce audible differences primarily in spectral tilt.
+- [[Holmes_1983_FormantSynthesizersCascadeParallel]] — Holmes's own 1983 review paper extends the parallel synthesis approach described here to a full cascade-vs-parallel comparison, using the same JSRU synthesizer architecture with refinements.

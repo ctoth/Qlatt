@@ -222,8 +222,10 @@ Random Noise → HP Filter → Amplitude Modulation
 
 ### New Leads (Not Yet in Collection)
 - **Flanagan (1972)** - Fundamental speech analysis and synthesis theory establishing source-filter model principles
-- **Holmes (1973)** - Original work on glottal waveform influence on parallel formant synthesizer naturalness
 - **Isshiki et al. (1978)** - Turbulent noise characteristics in dysphonia, directly cited for breathiness modeling approach
+
+### Now in Collection (previously listed as leads)
+- [[Holmes_1973_GlottalWaveformParallelFormant]] — Holmes demonstrates that inverse-filtered glottal pulses produce nearly indistinguishable-from-natural speech in a parallel formant synthesizer. Cosine-segment idealized pulses are nearly as good. Phase structure matters for earphone but not loudspeaker listening. Relevant to Childers & Lee's voice quality factor analysis because different glottal source shapes directly determine voice quality.
 
 ### Conceptual Links (not citation-based)
 - [[Henrich_2005_GlottalOpenQuotientSinging]] — Moderate. Childers & Lee's voice quality factor analysis (breathy-modal-pressed continuum via spectral and time-domain measures) provides a complementary acoustic perspective to Henrich's physiological Oq measurements across the same continuum in singers.

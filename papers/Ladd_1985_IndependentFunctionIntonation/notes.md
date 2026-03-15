@@ -112,8 +112,10 @@ This maps naturally onto Klatt synthesizer parameters:
 
 ### New Leads (Not Yet in Collection)
 
-- Scherer, K. R., Ladd, D. R., & Silverman, K. E. A. (1984). Vocal Cues to Speaker Affect: Testing Two Models. JASA 76, 1346-1356. — Predecessor study testing continuous vs categorical vocal cue distinction
 - Laver, J. (1980). *The Phonetic Description of Voice Quality*. Cambridge University Press. — Voice quality description framework used in this study
+
+### Now in Collection (previously listed as leads)
+- [[Scherer_1984_VocalCuesSpeakerAffect]] — Predecessor study by overlapping author team (Scherer, Ladd, Silverman). Tests covariance vs configuration models for vocal affect cues using German interview recordings with signal masking conditions. Finds voice quality operates per covariance model (parallel channel) while intonation contour type operates per configuration model (interacts with text). This 1984 paper provides the empirical foundation that Ladd et al. 1985 extends into the three-independent-dimension framework.
 
 ### Conceptual Links (not citation-based)
 

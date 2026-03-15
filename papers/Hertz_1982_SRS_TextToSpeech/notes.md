@@ -255,7 +255,9 @@ FR  AV  AH  F1    F2    F3   DU
 - **Hertz (1979b)** - Ph.D. dissertation - Contains more detailed information about the SRS rule language, contour definition system, and implementation details not fully covered in this JASA paper.
 - **Carlson & Granström (1976)** - "A text-to-speech system based entirely on rules" - Parallel development of rule-based TTS in Sweden, useful for comparing approaches to the same problem.
 - **Lovins, Macchi & Fujimura (1979)** - "A demisyllable inventory for speech synthesis" - Alternative to phoneme-based synthesis that might inform coarticulation modeling.
-- **Allen (1976)** - "Synthesis of speech from unrestricted text" - MIT approach to unrestricted text synthesis, important context for the field at the time.
+
+### Now in Collection (previously listed as leads)
+- [[Allen_1973_SpeechSynthesisUnrestrictedText]] — Allen 1976 describes the MIT TTS pipeline with morph-based G2P (12,000-entry lexicon from Brown Corpus), SPE-based lexical stress, and Klatt synthesizer backend. SRS's rule-based approach improves on MITalk's morph dictionary strategy by using generalized phonological rules instead of stored pronunciations.
 
 ### Conceptual Links (not citation-based)
 - [[Klatt_1987_TTS_Review]] -- Moderate. Klatt's review surveys TTS systems including SRS, placing it in context of the field's development from rule-based to concatenative approaches.

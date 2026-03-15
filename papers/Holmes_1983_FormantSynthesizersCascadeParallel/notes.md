@@ -173,9 +173,11 @@ The JSRU synthesizer block diagram (Fig. 23) is essentially what Klatt88 impleme
 - [[Barreda_2015_FormantSpeakerSize]] — references Holmes's formant synthesizer work
 
 ### New Leads (Not Yet in Collection)
-- **Holmes [17] 1973** - "The influence of glottal waveform on the naturalness of speech from a parallel formant synthesizer" - Details on glottal source modeling and the original JSRU parallel synthesizer design.
 - **Flanagan [15] 1972** - "Speech Analysis, Synthesis and Perception" - Comprehensive reference on speech synthesis including source-filter model details.
 - **Rosenberg [19] 1971** - "Effect of glottal pulse shape on the quality of natural vowels" - Glottal waveform modeling that informs the excitation signal design in Section 7.
+
+### Now in Collection (previously listed as leads)
+- [[Holmes_1973_GlottalWaveformParallelFormant]] — Holmes's original JSRU parallel formant synthesizer with inverse-filtered glottal source, spectrum-shaping filters for inter-formant interaction reduction, mixed excitation with per-formant voicing offsets, and stop burst mechanism. Key finding: glottal pulse phase structure is perceptually irrelevant for loudspeaker listening. This 1973 paper provides the foundation for the parallel synthesis approach that Holmes 1983 later reviews and compares to cascade.
 
 ### Conceptual Links (not citation-based)
 - [[Hu_2012_DynamicsModelSpeechRecognitionSynthesis]] — Hu's thesis uses Holmes' 12-PFS parallel formant synthesizer as the synthesis backend; Holmes 1983 provides the theoretical justification for why parallel topology works for all speech sounds, which Hu's implementation relies on.

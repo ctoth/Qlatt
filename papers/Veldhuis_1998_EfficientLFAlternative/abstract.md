@@ -1,0 +1,7 @@
+# Abstract
+
+An alternative for the Liljencrants-Fant (LF) glottal-pulse model is presented. This alternative is derived from the Rosenberg model. Therefore, it is called the Rosenberg++ model. In the derivation a general framework is used for glottal-pulse models. The Rosenberg++ model is described by the same set of T or R parameters as the LF model but it has the advantage over the LF model that it is computationally more efficient. It is compared with the LF model in a psychoacoustic experiment, from which it is concluded that in a practical situation it is capable of producing synthetic speech which is perceptually equivalent to speech generated with the LF model.
+
+## Interpretation
+
+The paper addresses a key practical limitation of the LF glottal source model: the need to iteratively solve a nonlinear equation (for the alpha parameter) every time voice source parameters change. The R++ model replaces the sinusoidal-exponential open-phase function with a cubic polynomial t*(t_p - t)*(t_x - t), where t_x can be computed in closed form from the same specification parameters. The return phase (exponential decay after glottal closure) is identical to LF. This makes R++ a direct substitute for LF in real-time synthesizers, with parameter-update speedups of 5.4x and overall speedups of 2.8x, while maintaining perceptual equivalence confirmed by 3AFC listening tests across multiple vowels and voice qualities.

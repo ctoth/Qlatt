@@ -1,0 +1,9 @@
+# Abstract
+
+In this paper the control of fundamental frequency, intensity level of the radiated acoustic signal and voice quality is studied in normal conversational speech. It is shown that the physiological factors that best explain measured features of the speech wave depend on the part of the utterance taken into account. Also, it appears that in speech, transglottal pressure is more important than subglottal pressure. We conclude that currently available mathematical models that describe the waveform of glottal volume flow lack a number of parameters necessary for a better understanding of the physiological control of the speech parameters investigated in this study.
+
+## Interpretation
+
+This paper provides empirical evidence that challenges the common assumption (derived from sustained vowel studies) that subglottal pressure is the primary control variable for F0 and intensity. In connected speech, oral pressure varies substantially due to consonantal constrictions, making transglottal pressure (P_sb - P_or) the more relevant aerodynamic variable. The paper quantifies the IL ~ P_tr^3 power law from speech data (confirming earlier results from sustained phonation), provides correlation matrices showing P_tr dominance over P_sb for within-interval predictions, and documents systematic voice quality changes at utterance endings that go beyond simple declination of F0 and intensity.
+
+For a Klatt-type synthesizer, the key implications are: (1) utterance-final segments should have modified source characteristics (more spectral tilt, more aspiration noise) beyond just lower AV and F0; (2) intensity modeling should be based on a transglottal pressure concept rather than a simple subglottal pressure parameter; (3) the relationship between LF model parameters (E_e, U_0) and aerodynamic variables follows different regimes for steady phonation vs. transitions vs. utterance-final positions.

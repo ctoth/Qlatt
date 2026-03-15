@@ -226,6 +226,7 @@ Random Noise → HP Filter → Amplitude Modulation
 
 ### Now in Collection (previously listed as leads)
 - [[Holmes_1973_GlottalWaveformParallelFormant]] — Holmes demonstrates that inverse-filtered glottal pulses produce nearly indistinguishable-from-natural speech in a parallel formant synthesizer. Cosine-segment idealized pulses are nearly as good. Phase structure matters for earphone but not loudspeaker listening. Relevant to Childers & Lee's voice quality factor analysis because different glottal source shapes directly determine voice quality.
+- [[Wendahl_1963_LaryngealAnalogSynthesisHarshness]] — Wendahl 1963 cited for laryngeal analog synthesis of harsh voice quality; establishes jitter as primary acoustic correlate of perceived harshness/roughness with quantitative perception thresholds. Directly informs the roughness component of Childers & Lee's voice quality factor analysis.
 
 ### Conceptual Links (not citation-based)
 - [[Henrich_2005_GlottalOpenQuotientSinging]] — Moderate. Childers & Lee's voice quality factor analysis (breathy-modal-pressed continuum via spectral and time-domain measures) provides a complementary acoustic perspective to Henrich's physiological Oq measurements across the same continuum in singers.

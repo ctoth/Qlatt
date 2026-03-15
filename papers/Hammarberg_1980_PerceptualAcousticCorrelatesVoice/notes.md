@@ -167,7 +167,9 @@ Listener retest reliability was very high (Pearson r = 0.93-0.97), validating th
 ### New Leads (Not Yet in Collection)
 
 - Isshiki, N. & Takeuchi, Y. (1970). Factor analysis of hoarseness. Studia Phonologica 5, 37. — Prior factor analysis of hoarseness that this study builds upon
-- Wendahl, R. W. (1963/1966). Laryngeal analog synthesis of harsh/jitter/shimmer. Folia Phoniatrica. — Laryngeal analog synthesis of voice quality, directly relevant to Klatt synthesis
+
+### Now in Collection (previously listed as leads)
+- [[Wendahl_1963_LaryngealAnalogSynthesisHarshness]] — Wendahl uses LADIC to synthesize sawtooth stimuli with controlled jitter, establishing that even 1 Hz jitter at 100 Hz F0 is perceptible as rough, and that roughness scales monotonically with jitter magnitude. The F0-dependent interaction (lower F0 = harsher for same absolute jitter) directly informs the roughness dimension in Hammarberg's voice quality factor analysis.
 
 ### Conceptual Links (not citation-based)
 

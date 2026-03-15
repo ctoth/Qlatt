@@ -85,3 +85,28 @@ Rank-ordered from most to least rough:
 - Intra-stimulus interval: 3 seconds
 - Thurstone scaling for analysis
 - SPL: ~75 dB at back of room
+
+## Collection Cross-References
+
+### Already in Collection
+
+(No papers directly cited by Wendahl 1963 are in the collection. The references are all unpublished dissertations and conference presentations from 1957-1962.)
+
+### Cited By (in Collection)
+- [[Childers_Lee_1991_VoiceQualityFactors]] — cites Wendahl 1963 and 1966 for laryngeal analog synthesis of harsh voice quality and jitter/shimmer parameters of harshness
+- [[Hammarberg_1980_PerceptualAcousticCorrelatesVoice]] — cites Wendahl 1963/1966 for laryngeal analog synthesis of voice quality, directly relevant to spectral correlates of roughness
+
+### New Leads (Not Yet in Collection)
+- Wendahl, R. W. (1966). Laryngeal analog synthesis of jitter and shimmer auditory parameters of harshness. *Folia Phoniatrica*, 18(2), 98-108. -- Follow-up study adding shimmer dimension and testing jitter-shimmer interaction
+- Coleman, R. F. (1960). Some acoustic correlates of hoarseness. Unpublished master's thesis, Vanderbilt University. -- Early measurement of cycle-to-cycle variation in pathological voices
+- Moore, G. P. (1962). The physiology of hoarseness. ASHA paper. -- Vocal fold behavior underlying harsh quality
+
+### Supersedes or Recontextualizes
+- (none)
+
+### Conceptual Links (not citation-based)
+- [[Titze_1991_NeurologicAperiodicity]] -- **Strong.** Wendahl demonstrates that jitter is the primary perceptual correlate of harshness and that roughness perception is F0-dependent. Titze provides the physiological model explaining where that jitter comes from (motor unit firing stochasticity). Wendahl establishes the perceptual side; Titze establishes the production mechanism.
+- [[Fraj_2011_BreathyRoughVoices]] -- **Strong.** Fraj provides a modern synthesis implementation of jitter via sample-by-sample phase perturbation with quantitative parameter-to-jitter% mapping. Wendahl established the foundational finding that jitter produces harshness; Fraj provides the synthesis algorithm for implementing it.
+- [[Herzel_1994_VocalDisordersNonlinearDynamics]] -- **Moderate.** Herzel shows that some "rough" voice qualities arise from deterministic nonlinear phenomena (period-doubling, chaos) rather than stochastic jitter. This complicates Wendahl's implicit assumption that cycle-to-cycle frequency perturbation is random — structured perturbation patterns produce perceptually different results.
+- [[Steinecke_1995_BifurcationsVocalFold]] -- **Moderate.** Steinecke models how left-right vocal fold asymmetry produces bifurcations including period-doubling, which creates perceived roughness through a mechanism entirely different from the stochastic jitter Wendahl synthesized.
+- [[Kreiman_Gerratt_2010_PerceptualVoiceQualityAssessment]] -- **Moderate.** Kreiman & Gerratt critique the perceptual validity of jitter/shimmer as voice quality measures, noting that listeners are relatively insensitive to jitter changes in sustained vowels. This challenges the magnitude of Wendahl's finding while validating his synthesis-based measurement approach.

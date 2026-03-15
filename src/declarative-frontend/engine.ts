@@ -1042,6 +1042,29 @@ function buildNavigationFunctions(
     look_back_where: lookBackWhereFn,
     look_back_pred: lookBackPredFn,
     look_ahead_pred: lookAheadPredFn,
+    // span_ms(token_a, token_b): sum of durations (ms) of all tokens from a to b
+    // inclusive.  Returns 0 if either token is null or not found.
+    // Used by prosody rules to enforce minimum temporal spans between accents.
+    // Citation: Pierrehumbert 1980 (temporal span governs interpolation shape)
+    span_ms: (tokenRefA: unknown, tokenRefB: unknown): number => {
+      const a = resolveLiveToken(tokenRefA);
+      const b = resolveLiveToken(tokenRefB);
+      if (!a || !b) return 0;
+      const streamA = getTokenStream(a);
+      const streamB = getTokenStream(b);
+      if (streamA !== streamB) return 0;
+      const active = getActiveStreamTokens(streamA);
+      let idxA = getTokenIndex(a, streamA);
+      let idxB = getTokenIndex(b, streamB);
+      if (idxA < 0 || idxB < 0) return 0;
+      if (idxA > idxB) { const tmp = idxA; idxA = idxB; idxB = tmp; }
+      let total = 0;
+      for (let i = idxA; i <= idxB; i++) {
+        const dur = Number(active[i]?.duration ?? 0);
+        if (Number.isFinite(dur)) total += dur;
+      }
+      return total;
+    },
     trajectory_to_windows: (trajectory: unknown, durationMs: unknown) =>
       buildTrajectoryControlWindows(trajectory, durationMs),
     dectalk_obstruent_profile: (

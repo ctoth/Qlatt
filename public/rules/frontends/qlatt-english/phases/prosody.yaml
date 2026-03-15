@@ -599,11 +599,15 @@ rules:
       has_following_h_star: >-
         next_stressed != null
         && has(next_stressed.accentType) && next_stressed.accentType == 'H*'
+      accent_span_ms: >-
+        next_stressed != null ? span_ms(current, next_stressed) : 0.0
       prev_f0: prev_point('f0')
       sag_value: >-
         (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
         - params.policy.f0.sag_depth_hz
-    constraint: has_following_h_star
+    constraint: >-
+      has_following_h_star
+      && accent_span_ms >= params.policy.f0.sag_min_span_ms
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)

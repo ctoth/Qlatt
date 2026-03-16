@@ -1,6 +1,6 @@
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
-export const DEFAULT_ACCENT_POLICY_PATH = "/rules/phases/accent-policy.yaml";
+export const DEFAULT_ACCENT_POLICY_PATH = "/rules/frontends/qlatt-english/policy/accent-policy.yaml";
 
 export interface AccentAssignmentPolicy {
   require_content_word: boolean;

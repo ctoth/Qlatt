@@ -1,6 +1,6 @@
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
-export const DEFAULT_TUNE_GRAMMAR_PATH = "/rules/phases/tune-grammar.yaml";
+export const DEFAULT_TUNE_GRAMMAR_PATH = "/rules/frontends/qlatt-english/policy/tune-grammar.yaml";
 
 export type TunePhraseType = "declarative" | "question" | "exclamation" | "continuation";
 

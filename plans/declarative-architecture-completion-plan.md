@@ -17,7 +17,7 @@ Landed:
 6. executable proof in:
    - `test/control-score-schema.test.ts`
    - `test/control-score-builder.test.ts`
-7. canonical tune grammar spec at `public/rules/phases/tune-grammar.yaml`;
+7. canonical tune grammar spec at `public/rules/frontends/qlatt-english/policy/tune-grammar.yaml`;
 8. typed tune-grammar loader and selector in `src/tune-grammar.ts`;
 9. `src/prosodic-annotator.ts` now delegates tune-family and edge-tone
    selection to the declarative grammar instead of hardcoded accent-family
@@ -28,7 +28,7 @@ Landed:
     - `test/tune-grammar.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
-12. canonical accent-policy spec at `public/rules/phases/accent-policy.yaml`;
+12. canonical accent-policy spec at `public/rules/frontends/qlatt-english/policy/accent-policy.yaml`;
 13. typed accent-policy loader and helpers in `src/accent-policy.ts`;
 14. `src/prosodic-annotator.ts` now delegates function-word classification and
     accent-carrier selection to the declarative accent policy instead of a
@@ -39,7 +39,7 @@ Landed:
     - `test/accent-policy.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
-17. canonical break-policy spec at `public/rules/phases/break-policy.yaml`;
+17. canonical break-policy spec at `public/rules/frontends/qlatt-english/policy/break-policy.yaml`;
 18. typed break-policy loader and resolver in `src/break-policy.ts`;
 19. `src/prosodic-annotator.ts` now delegates long-phrase breaking to the
     declarative break policy instead of a hardcoded threshold and midpoint
@@ -50,7 +50,7 @@ Landed:
     - `test/break-policy.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
-22. canonical speaker-profile spec at `public/rules/phases/speaker-profile.yaml`;
+22. canonical speaker-profile spec at `public/rules/policy/speaker-profile.yaml`;
 23. typed speaker-profile loader and resolver in `src/speaker-profile.ts`;
 24. `src/tts-frontend.ts` now resolves default speaker values from the
     declarative speaker-profile spec instead of hardcoded fallback logic;
@@ -60,7 +60,7 @@ Landed:
     - `test/speaker-profile-schema.test.ts`
     - `test/speaker-profiles.test.ts`
     - `test/control-score-builder.test.ts`
-27. canonical source-contour spec at `public/rules/phases/source-contour.yaml`;
+27. canonical source-contour spec at `public/rules/policy/source-contour.yaml`;
 28. typed source-contour loader and resolver in `src/source-contour.ts`;
 29. `src/tts-frontend.ts` now resolves LF baseline source mode and voice-quality
     preset policy from the declarative source-contour spec instead of reading a

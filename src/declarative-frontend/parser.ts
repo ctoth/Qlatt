@@ -60,6 +60,25 @@ function cloneObject(value: unknown): PlainObject {
   return isPlainObject(value) ? { ...value } : {};
 }
 
+const ROOT_DSL_KEYS = new Set([
+  "version",
+  "inventory_path",
+  "lts_path",
+  "f0_model",
+  "parameters",
+  "input_contract",
+  "streams",
+  "topology",
+  "predicates",
+  "patterns",
+  "phases",
+  "rules",
+  "interpolation",
+  "output",
+  "transcription",
+  "include",
+]);
+
 function normalizeConditionSpec(value: unknown): unknown {
   if (typeof value === "string") return value;
   if (!isPlainObject(value)) return cloneValue(value);
@@ -219,8 +238,14 @@ export function parseDslSpec(source: unknown): PlainObject {
   const parameters = isPlainObject(raw.parameters) ? raw.parameters : {};
   const topology = isPlainObject(raw.topology) ? raw.topology : {};
   const interpolation = isPlainObject(raw.interpolation) ? raw.interpolation : {};
+  const extraRootFields = Object.fromEntries(
+    Object.entries(raw)
+      .filter(([key]) => !ROOT_DSL_KEYS.has(key))
+      .map(([key, value]) => [key, cloneValue(value)])
+  );
 
   return {
+    ...extraRootFields,
     version: raw.version ?? null,
     inventory_path: asString(raw.inventory_path, null),
     lts_path: asString(raw.lts_path, null),

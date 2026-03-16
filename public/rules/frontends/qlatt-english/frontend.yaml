@@ -2,8 +2,8 @@ version: v13-cel
 inventory_path: /rules/frontends/qlatt-english/inventory.yaml
 lts_path: /rules/frontends/qlatt-english/lts-rules.yaml
 morphology_path: /rules/frontends/qlatt-english/morphology.yaml
-speaker_profile_path: /rules/phases/speaker-profile.yaml
-source_contour_path: /rules/phases/source-contour.yaml
+speaker_profile_path: /rules/policy/speaker-profile.yaml
+source_contour_path: /rules/policy/source-contour.yaml
 include:
   - pipeline.yaml
   - phases/normalize.yaml

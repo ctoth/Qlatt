@@ -47,12 +47,12 @@ The frontend should stop embedding backend-specific branches once this exists.
 
 - `public/rules/control-score.yaml`
   - Canonical schema for the control score fields and defaults.
-- `public/rules/phases/tune-grammar.yaml`
+- `public/rules/frontends/qlatt-english/policy/tune-grammar.yaml`
   - Declarative tune inventory and legal tune sequencing.
-- `public/rules/phases/phonetic-implementation.yaml`
+- `public/rules/frontends/qlatt-english/policy/phonetic-implementation.yaml`
   - Declarative realization of tonal targets into alignment anchors and F0
     events.
-- `public/rules/phases/source-contour.yaml`
+- `public/rules/policy/source-contour.yaml`
   - Declarative source dynamics (Fant-style phrase, segment, and stress rules).
 - `public/rules/backend-adapters/klatt80.yaml`
   - Mapping from control score to `klatt80-baseline` params.
@@ -174,7 +174,7 @@ Move tune selection out of `src/prosodic-annotator.ts` into declarative specs.
 
 Changes:
 
-- Add `public/rules/phases/tune-grammar.yaml`
+- Add `public/rules/frontends/qlatt-english/policy/tune-grammar.yaml`
 - Reduce `src/prosodic-annotator.ts` to phrase segmentation, content-word marking,
   and accent-carrier marking
 - Add a small interpreter in the rule engine or frontend orchestration for
@@ -192,8 +192,8 @@ Separate tune selection from contour realization.
 
 Changes:
 
-- Add `public/rules/phases/phonetic-implementation.yaml`
-- Move alignment constants and target timing out of `public/rules/phases/prosody.yaml`
+- Add `public/rules/frontends/qlatt-english/policy/phonetic-implementation.yaml`
+- Move alignment constants and target timing out of `public/rules/frontends/qlatt-english/phases/prosody.yaml`
 - Simplify `src/track-assembler.ts` to consume explicit anchor points
 
 Success criteria:
@@ -208,7 +208,7 @@ Move Fant-style source planning into declarative policy.
 
 Changes:
 
-- Add `public/rules/phases/source-contour.yaml`
+- Add `public/rules/policy/source-contour.yaml`
 - Move phrase, stress, and segment source dynamics out of `src/tts-frontend.ts`
 - Keep semantics responsible only for numeric realization
 

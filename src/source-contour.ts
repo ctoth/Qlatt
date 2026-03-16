@@ -2,7 +2,7 @@ import type { VoiceQualityOverrides } from "./track-assembler";
 import type { ResolvedSpeakerProfile } from "./speaker-profile";
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
-export const DEFAULT_SOURCE_CONTOUR_PATH = "/rules/phases/source-contour.yaml";
+export const DEFAULT_SOURCE_CONTOUR_PATH = "/rules/policy/source-contour.yaml";
 
 export type SourceContourVoiceQuality =
   | "modal"

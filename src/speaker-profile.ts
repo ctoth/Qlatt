@@ -1,6 +1,6 @@
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
-export const DEFAULT_SPEAKER_PROFILE_PATH = "/rules/phases/speaker-profile.yaml";
+export const DEFAULT_SPEAKER_PROFILE_PATH = "/rules/policy/speaker-profile.yaml";
 
 export interface SpeakerProfileFieldSpec {
   value: number;

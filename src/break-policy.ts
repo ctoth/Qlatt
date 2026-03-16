@@ -1,6 +1,6 @@
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
-export const DEFAULT_BREAK_POLICY_PATH = "/rules/phases/break-policy.yaml";
+export const DEFAULT_BREAK_POLICY_PATH = "/rules/frontends/qlatt-english/policy/break-policy.yaml";
 
 export interface LongPhraseBreakingPolicy {
   enabled: boolean;

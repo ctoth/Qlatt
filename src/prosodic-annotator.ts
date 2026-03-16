@@ -17,6 +17,14 @@
  */
 
 import type { ProvenanceCollector } from "./provenance";
+import {
+  DEFAULT_ACCENT_POLICY_PATH,
+  classifyWordProsody,
+  getFunctionWordSet,
+  loadAccentPolicySync,
+  resolveAccentAssignment,
+  type AccentPolicy,
+} from "./accent-policy";
 import { loadTuneGrammarSync, selectTuneForPhrase, type TuneSelection } from "./tune-grammar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,83 +36,7 @@ export interface ProsodicAnnotatorOptions {
   baseF0?: number;
 }
 
-// ---------------------------------------------------------------------------
-// Function Word Set
-// ---------------------------------------------------------------------------
-
-/**
- * Function words that do not receive pitch accent in neutral (broad-focus) speech.
- *
- * Compiled from O'Shaughnessy 1976 accent priority levels 0-3 and
- * Allen, Hunnicutt & Klatt 1987 Table 10-1 levels 0-3.
- *
- * Categories:
- * - Articles (accent 0): a, an, the
- * - Conjunctions (accent 1): and, or, but, ...
- * - Relative pronouns (accent 1): who, whom, whose, which, that
- * - Prepositions (accent 2): in, on, at, to, for, from, ...
- * - Auxiliary verbs (accent 2): is, am, are, was, were, ...
- * - B-group modals (accent 2): will, would, can, could, shall, should
- * - Personal pronouns (accent 3): i, me, my, mine, you, ...
- * - Determiners (accent 0-2): this, that, these, those, some, ...
- * - Common contractions of function word bases
- *
- * Citations:
- * - O'Shaughnessy 1976, Table (accent priority levels 0-3 = function words)
- * - Allen, Hunnicutt & Klatt 1987, Table 10-1 (POS accent levels 0-3)
- */
-export const FUNCTION_WORDS: ReadonlySet<string> = new Set([
-  // Articles (accent 0)
-  "a", "an", "the",
-
-  // Conjunctions (accent 1)
-  "and", "or", "but", "so", "yet", "nor", "for", "if", "when", "while",
-  "as", "than", "that", "because", "since", "although", "though", "unless",
-  "until", "whether",
-
-  // Relative pronouns (accent 1) — "that" already included above
-  "who", "whom", "whose", "which",
-
-  // Prepositions (accent 2)
-  "in", "on", "at", "to", "from", "with", "by", "of", "about", "into",
-  "through", "during", "before", "after", "above", "below", "between",
-  "under", "over", "up", "down", "out", "off", "near", "around", "among",
-  "along", "across", "against", "toward", "towards", "upon", "within",
-  "without", "beside", "besides", "beyond", "beneath", "throughout",
-
-  // Auxiliary verbs (accent 2)
-  "is", "am", "are", "was", "were", "be", "been", "being",
-  "have", "has", "had", "having", "do", "does", "did",
-
-  // B-group modals (accent 2) — O'Shaughnessy 1976
-  "will", "would", "can", "could", "shall", "should",
-
-  // Personal pronouns (accent 3)
-  "i", "me", "my", "mine", "you", "your", "yours",
-  "he", "him", "his", "she", "her", "hers",
-  "it", "its", "we", "us", "our", "ours",
-  "they", "them", "their", "theirs",
-
-  // Determiners / other function words (accent 0-2)
-  "this", "these", "those", "some", "any", "each", "every", "no",
-  "all", "both", "such", "other", "another",
-
-  // Contractions (function word base forms)
-  "i'm", "i've", "i'll", "i'd",
-  "you're", "you've", "you'll", "you'd",
-  "he's", "he'll", "he'd",
-  "she's", "she'll", "she'd",
-  "it's", "it'll",
-  "we're", "we've", "we'll", "we'd",
-  "they're", "they've", "they'll", "they'd",
-  "isn't", "aren't", "wasn't", "weren't",
-  "haven't", "hasn't", "hadn't",
-  "don't", "doesn't", "didn't",
-  "won't", "wouldn't",
-  "can't", "couldn't",
-  "shan't", "shouldn't", "mustn't",
-  "let's", "that's", "who's", "what's", "here's", "there's",
-]);
+export const FUNCTION_WORDS: ReadonlySet<string> = getFunctionWordSet(loadAccentPolicySync());
 
 // ---------------------------------------------------------------------------
 // Types for internal phrase representation
@@ -162,6 +94,7 @@ export function annotateProsody(
   options: ProsodicAnnotatorOptions = {},
 ): PipelineToken[] {
   const provenance = options.provenance ?? null;
+  const accentPolicy = loadAccentPolicySync();
   const tuneGrammar = loadTuneGrammarSync();
 
   // Work on a shallow copy of each token so we never mutate the input array
@@ -172,10 +105,14 @@ export function annotateProsody(
   const phrases = identifyPhrases(result);
 
   // Step 2: Mark function/content words.
-  markFunctionWords(result);
+  markFunctionWords(result, accentPolicy);
 
   // Step 3: Assign accent (stress==1 AND content word).
-  assignAccent(result);
+  assignAccent(result, accentPolicy);
+
+  if (provenance) {
+    emitAccentPolicyProvenance(provenance, accentPolicy);
+  }
 
   // Steps 4-7: Per-phrase passes (nuclear accent, accent types, edge tones, long-phrase breaking).
   for (let pi = 0; pi < phrases.length; pi++) {
@@ -263,7 +200,7 @@ function identifyPhrases(tokens: PipelineToken[]): Phrase[] {
 // Step 2: Mark function/content words
 // ---------------------------------------------------------------------------
 
-function markFunctionWords(tokens: PipelineToken[]): void {
+function markFunctionWords(tokens: PipelineToken[], accentPolicy: AccentPolicy): void {
   for (const token of tokens) {
     // Initialize phrase-edge tone properties on ALL tokens for consistency.
     // These are only set to non-null values on SIL tokens at phrase boundaries
@@ -280,10 +217,9 @@ function markFunctionWords(tokens: PipelineToken[]): void {
       token.isContentWord = false;
       continue;
     }
-    const word = typeof token.word === "string" ? token.word.toLowerCase() : "";
-    const isFn = FUNCTION_WORDS.has(word);
-    token.isFunctionWord = isFn;
-    token.isContentWord = !isFn;
+    const classification = classifyWordProsody(accentPolicy, token.word);
+    token.isFunctionWord = classification.isFunctionWord;
+    token.isContentWord = classification.isContentWord;
   }
 }
 
@@ -291,7 +227,7 @@ function markFunctionWords(tokens: PipelineToken[]): void {
 // Step 3: Assign accent
 // ---------------------------------------------------------------------------
 
-function assignAccent(tokens: PipelineToken[]): void {
+function assignAccent(tokens: PipelineToken[], accentPolicy: AccentPolicy): void {
   // First pass: determine which words are accented (content word + primary stress).
   // We need to propagate accent to ALL phones of the same word within a phrase.
   // A word is accented if ANY of its phones has stress==1 and the word is a content word.
@@ -346,21 +282,24 @@ function assignAccent(tokens: PipelineToken[]): void {
 
   // For each word group, determine if accented.
   for (const group of wordGroups) {
-    const hasPrimaryStress = group.some((idx) => tokens[idx].stress === 1);
     const isContent = group.some((idx) => tokens[idx].isContentWord === true);
-    const accented = hasPrimaryStress && isContent;
-    let carrierAssigned = false;
+    const accentDecision = resolveAccentAssignment(accentPolicy, {
+      isContentWord: isContent,
+      stresses: group.map((idx) => tokens[idx].stress),
+    });
+    let primaryStressOrdinal = 0;
     for (const idx of group) {
-      tokens[idx].isAccented = accented;
+      tokens[idx].isAccented = accentDecision.accented;
       tokens[idx].isAccentCarrier = false;
-      if (
-        accented &&
-        !carrierAssigned &&
-        tokens[idx].stress === 1 &&
-        !isSuppressedToken(tokens[idx])
-      ) {
-        tokens[idx].isAccentCarrier = true;
-        carrierAssigned = true;
+      if (tokens[idx].stress === accentDecision.carrierStress) {
+        const isSelectedCarrier =
+          accentDecision.accented &&
+          accentDecision.carrierOrdinal != null &&
+          primaryStressOrdinal === accentDecision.carrierOrdinal;
+        if (isSelectedCarrier && !isSuppressedToken(tokens[idx])) {
+          tokens[idx].isAccentCarrier = true;
+        }
+        primaryStressOrdinal += 1;
       }
     }
   }
@@ -663,6 +602,22 @@ function emitPhraseProvenance(
     subject: `phrase:${phraseIndex}`,
     reason: `Identified phrase with ${contentWordCount} content words${nuclearWord ? `, nuclear accent on "${nuclearWord}"` : ", no nuclear accent"}`,
     citations: ["Silverman 1992", "O'Shaughnessy 1976", "Allen 1987"],
+  });
+}
+
+function emitAccentPolicyProvenance(
+  provenance: ProvenanceCollector,
+  accentPolicy: AccentPolicy,
+): void {
+  provenance.add({
+    stage: "prosody",
+    type: "accent_policy_selected",
+    subject: "utterance:0",
+    reason: `Applied accent policy require_content_word=${accentPolicy.accent_assignment.require_content_word}, required_stress=${accentPolicy.accent_assignment.required_stress}, carrier_selection=${accentPolicy.accent_assignment.carrier_selection}, function_words=${accentPolicy.function_words.length}`,
+    citations: [
+      DEFAULT_ACCENT_POLICY_PATH,
+      ...accentPolicy.citations,
+    ],
   });
 }
 

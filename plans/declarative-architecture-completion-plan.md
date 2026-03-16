@@ -13,7 +13,8 @@ Landed:
 3. first control-score builder and validator in `src/control-score.ts`;
 4. frontend emission of `controlScore` alongside the existing detailed track
    result in `src/tts-frontend.ts`;
-5. executable proof in:
+5. provenance decision `control_score_created` emitted at frontend stage;
+6. executable proof in:
    - `test/control-score-schema.test.ts`
    - `test/control-score-builder.test.ts`
 

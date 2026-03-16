@@ -3,6 +3,7 @@ import {
   textToControlScore,
   textToKlattTrackDetailed,
 } from "../src/tts-frontend";
+import { createProvenanceCollector } from "../src/provenance";
 
 describe("declarative control score builder", () => {
   it("emits a score artifact from the real frontend pipeline", () => {
@@ -32,6 +33,21 @@ describe("declarative control score builder", () => {
       expect(result.track.length).toBeGreaterThan(0);
       expect(result.frontendPhones.length).toBeGreaterThan(0);
       expect(result.controlScore.tokens.length).toBe(result.frontendPhones.length);
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("records a provenance decision when the control score is created", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const provenance = createProvenanceCollector();
+      textToKlattTrackDetailed("hello world.", 110, 30, { provenance });
+      const decisions = provenance.getDecisions();
+      const decision = decisions.find((entry) => entry.type === "control_score_created");
+      expect(decision).toBeDefined();
+      expect(decision?.stage).toBe("frontend");
+      expect(decision?.citations).toContain("/rules/control-score.yaml");
     } finally {
       warnSpy.mockRestore();
     }

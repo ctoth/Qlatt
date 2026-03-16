@@ -568,6 +568,13 @@ function buildTextToKlattTrackDetailed(
   );
   const controlScore = buildDeclarativeControlScore(frontendId, parameterSequence);
   validateDeclarativeControlScore(controlScore);
+  provenance?.add({
+    stage: "frontend",
+    type: "control_score_created",
+    subject: `control_score:${frontendId}`,
+    reason: `Created declarative control score with ${controlScore.tokens.length} phone tokens and ${controlScore.f0_events.length} F0 events`,
+    citations: ["/rules/control-score.yaml"],
+  });
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---
   // Transition durations scale inversely with rate (Broad & Fertig 1970).

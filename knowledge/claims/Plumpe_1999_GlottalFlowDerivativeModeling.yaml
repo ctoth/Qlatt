@@ -1,0 +1,46 @@
+source:
+  paper: Plumpe_1999_GlottalFlowDerivativeModeling
+
+claims:
+  - id: claim_0059
+    type: equation
+    expression: "CQ + OQ + RQ = 1"
+    variables:
+      - symbol: CQ
+        concept: speech_0013
+      - symbol: OQ
+        concept: speech_0002
+    concepts:
+      - speech_0013
+      - speech_0002
+    provenance:
+      paper: Plumpe_1999_GlottalFlowDerivativeModeling
+      page: 578
+      section: "Normalized LF Timing Parameters"
+
+  - id: claim_0060
+    type: observation
+    statement: >
+      The glottal flow derivative can be decomposed into coarse structure
+      (LF model) and fine structure (aspiration + ripple from source-vocal
+      tract interaction). The fine structure contains significant
+      speaker-dependent information complementary to vocal tract features.
+    concepts:
+      - speech_0004
+    provenance:
+      paper: Plumpe_1999_GlottalFlowDerivativeModeling
+      page: 570
+      section: "Key Contributions"
+
+  - id: claim_0061
+    type: observation
+    statement: >
+      First formant frequency tracks best for closed-phase detection
+      (SNR = 161 male, 155 female), far exceeding F1 bandwidth (8.7/4.2)
+      or F2 frequency (42.7/59.4) measures.
+    concepts:
+      - speech_0004
+    provenance:
+      paper: Plumpe_1999_GlottalFlowDerivativeModeling
+      page: 576
+      table: "Tables II, III"

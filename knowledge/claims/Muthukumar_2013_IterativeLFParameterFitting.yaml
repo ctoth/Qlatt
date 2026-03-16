@@ -1,0 +1,61 @@
+source:
+  paper: Muthukumar_2013_IterativeLFParameterFitting
+
+claims:
+  - id: claim_0062
+    type: equation
+    expression: "OQ = (Te + Ta) / T0"
+    variables:
+      - symbol: OQ
+        concept: speech_0002
+      - symbol: Ta
+        concept: speech_0005
+    concepts:
+      - speech_0002
+      - speech_0005
+      - speech_0001
+    provenance:
+      paper: Muthukumar_2013_IterativeLFParameterFitting
+      page: 2
+      section: "F0-Independent Quotient Parameters"
+
+  - id: claim_0063
+    type: equation
+    expression: "SQ = Tp / (Te - Tp)"
+    variables:
+      - symbol: SQ
+        concept: speech_0003
+    concepts:
+      - speech_0003
+    provenance:
+      paper: Muthukumar_2013_IterativeLFParameterFitting
+      page: 2
+      section: "F0-Independent Quotient Parameters"
+
+  - id: claim_0064
+    type: equation
+    expression: "RQ = Ta / T0"
+    variables:
+      - symbol: Ta
+        concept: speech_0005
+    concepts:
+      - speech_0008
+      - speech_0005
+      - speech_0001
+    provenance:
+      paper: Muthukumar_2013_IterativeLFParameterFitting
+      page: 2
+      section: "F0-Independent Quotient Parameters"
+
+  - id: claim_0065
+    type: observation
+    statement: >
+      Iterative refinement using CART predictions to re-initialize LF fitting
+      improves both fitting quality (RMSE 406.89 to 390.56) and correlation
+      (0.482 to 0.551) over 30 iterations.
+    concepts:
+      - speech_0009
+    provenance:
+      paper: Muthukumar_2013_IterativeLFParameterFitting
+      page: 3
+      table: "Table 1"

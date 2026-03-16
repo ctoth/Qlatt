@@ -1,0 +1,134 @@
+source:
+  paper: Fant_1988_LFFrequencyDomainInterpretation
+claims:
+- id: claim_0014
+  type: parameter
+  concept: speech_0006
+  value: 1.15
+  unit: ratio
+  conditions:
+  - speaker_sex == 'male'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+  lower_bound: 1.1
+  upper_bound: 1.2
+- id: claim_0015
+  type: parameter
+  concept: speech_0006
+  value: 0.95
+  unit: ratio
+  conditions:
+  - speaker_sex == 'female'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+  lower_bound: 0.9
+  upper_bound: 1.0
+- id: claim_0016
+  type: parameter
+  concept: speech_0016
+  value: 420.0
+  unit: cm3_per_second
+  conditions:
+  - speaker_sex == 'male'
+  - speech_task == 'sustained_vowel'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+- id: claim_0017
+  type: parameter
+  concept: speech_0016
+  value: 210.0
+  unit: cm3_per_second
+  conditions:
+  - speaker_sex == 'female'
+  - speech_task == 'sustained_vowel'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+- id: claim_0018
+  type: parameter
+  concept: speech_0010
+  value: 2000.0
+  unit: Hz
+  conditions:
+  - speaker_sex == 'male'
+  - speech_task == 'sustained_vowel'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+  lower_bound: 1000.0
+  upper_bound: 3000.0
+- id: claim_0019
+  type: parameter
+  concept: speech_0010
+  value: 1215.0
+  unit: Hz
+  conditions:
+  - speaker_sex == 'female'
+  - speech_task == 'sustained_vowel'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 9
+    table: Parameters
+  lower_bound: 430.0
+  upper_bound: 2000.0
+- id: claim_0020
+  type: observation
+  statement: 'Fa (spectral tilt cutoff) is the most dramatic voice quality parameter,
+    followed by Ee (excitation strength), then Uo (peak flow). Rg and Rk have subtle,
+    barely audible effects in vowel context.
+
+    '
+  concepts:
+  - speech_0010
+  - speech_0004
+  - speech_0016
+  - speech_0006
+  - speech_0007
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 19
+    section: Perceptual Importance Ranking
+- id: claim_0021
+  type: equation
+  expression: Fa = F0 / (2 * pi * Ra)
+  variables:
+  - symbol: Fa
+    concept: speech_0010
+  - symbol: F0
+    concept: speech_0001
+  - symbol: Ra
+    concept: speech_0008
+  concepts:
+  - speech_0010
+  - speech_0008
+  - speech_0001
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 4
+    section: Normalized Parameters
+- id: claim_0022
+  type: equation
+  expression: Uo = Ei / (pi * F0 * Rg)
+  variables:
+  - symbol: Uo
+    concept: speech_0016
+  - symbol: F0
+    concept: speech_0001
+  - symbol: Rg
+    concept: speech_0006
+  concepts:
+  - speech_0016
+  - speech_0001
+  - speech_0006
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 7
+    section: Flow-to-Derivative Relation

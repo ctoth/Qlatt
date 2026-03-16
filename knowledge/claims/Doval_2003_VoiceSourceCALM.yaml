@@ -1,0 +1,57 @@
+source:
+  paper: Doval_2003_VoiceSourceCALM
+claims:
+- id: claim_0034
+  type: observation
+  statement: 'The glottal flow can be modeled as the impulse response of a mixed causal/anticausal
+    linear filter with 2 anticausal poles (glottal formant) and 1 causal pole (spectral
+    tilt).
+
+    '
+  concepts:
+  - speech_0015
+  - speech_0017
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 3
+    section: Key Contributions
+- id: claim_0036
+  type: parameter
+  concept: speech_0002
+  value: 0.65
+  unit: ratio
+  conditions:
+  - speech_task == 'speech'
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 4
+    table: Parameters
+  lower_bound: 0.3
+  upper_bound: 1.0
+- id: claim_0037
+  type: parameter
+  concept: speech_0011
+  value: 0.7
+  unit: ratio
+  conditions:
+  - speech_task == 'speech'
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 4
+    table: Parameters
+  lower_bound: 0.6
+  upper_bound: 0.8
+- id: claim_0038
+  type: observation
+  statement: 'Tenseness and loudness can be varied independently in both the CALM
+    model and actual voice production. Causal poles control spectral tilt (loud/weak),
+    anticausal poles control glottal formant position (tense/lax).
+
+    '
+  concepts:
+  - speech_0017
+  - speech_0015
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 5
+    section: Voice Quality Perception Mapping

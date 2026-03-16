@@ -1,0 +1,80 @@
+source:
+  paper: Perrotin_2021_LF_LinearFilter_Equivalence
+
+claims:
+  - id: claim_0045
+    type: observation
+    statement: >
+      LFLM and LFCALM linear filter implementations are perceptually equivalent
+      to the original LF model. Rd parameter has the strongest perceptual effect
+      (chi2 = 3620, p < 0.001). Model factor is marginally significant (chi2 = 8.8, p = 0.012).
+    concepts:
+      - speech_0009
+    provenance:
+      paper: Perrotin_2021_LF_LinearFilter_Equivalence
+      page: 1280
+      section: "Perceptual Findings"
+
+  - id: claim_0046
+    type: equation
+    expression: "Fg = 1 / (2 * Oq * T0)"
+    variables:
+      - symbol: Fg
+        concept: speech_0015
+      - symbol: Oq
+        concept: speech_0002
+    concepts:
+      - speech_0015
+      - speech_0002
+      - speech_0001
+    provenance:
+      paper: Perrotin_2021_LF_LinearFilter_Equivalence
+      page: 1278
+      section: "Glottal Formant Parameters"
+
+  - id: claim_0047
+    type: equation
+    expression: "Oq = (1 + Rk) / (2 * Rg)"
+    variables:
+      - symbol: Oq
+        concept: speech_0002
+      - symbol: Rk
+        concept: speech_0007
+      - symbol: Rg
+        concept: speech_0006
+    concepts:
+      - speech_0002
+      - speech_0007
+      - speech_0006
+    provenance:
+      paper: Perrotin_2021_LF_LinearFilter_Equivalence
+      page: 1283
+      section: "Appendix A"
+
+  - id: claim_0048
+    type: equation
+    expression: "alpha_m = 1 / (1 + Rk)"
+    variables:
+      - symbol: alpha_m
+        concept: speech_0011
+      - symbol: Rk
+        concept: speech_0007
+    concepts:
+      - speech_0011
+      - speech_0007
+    provenance:
+      paper: Perrotin_2021_LF_LinearFilter_Equivalence
+      page: 1283
+      section: "Appendix A"
+
+  - id: claim_0049
+    type: observation
+    statement: >
+      LFCALM/LFLM are 10-100x faster than original LF model computationally.
+      Real-time factor: LF 0.1-1x, LFCALM/LFLM 0.001-0.01x.
+    concepts:
+      - speech_0009
+    provenance:
+      paper: Perrotin_2021_LF_LinearFilter_Equivalence
+      page: 1281
+      figure: "Fig 4"

@@ -1,0 +1,169 @@
+source:
+  paper: Fant_1997_VoiceSourceConnectedSpeech
+claims:
+- id: claim_0023
+  type: equation
+  expression: Rd = (Uo / Ee) * (F0 / 110) * 1000
+  variables:
+  - symbol: Rd
+    concept: speech_0009
+  - symbol: Uo
+    concept: speech_0016
+  - symbol: Ee
+    concept: speech_0004
+  - symbol: F0
+    concept: speech_0001
+  concepts:
+  - speech_0009
+  - speech_0016
+  - speech_0004
+  - speech_0001
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 127
+    section: Rd unified waveshape parameter
+- id: claim_0024
+  type: equation
+  expression: Rap = (-1 + 4.8 * Rd) / 100
+  variables:
+  - symbol: Rap
+    concept: speech_0008
+  - symbol: Rd
+    concept: speech_0009
+  concepts:
+  - speech_0008
+  - speech_0009
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 128
+    section: Default LF parameters from Rd
+- id: claim_0025
+  type: equation
+  expression: Rkp = (22.4 + 11.8 * Rd) / 100
+  variables:
+  - symbol: Rkp
+    concept: speech_0007
+  - symbol: Rd
+    concept: speech_0009
+  concepts:
+  - speech_0007
+  - speech_0009
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 128
+    section: Default LF parameters from Rd
+- id: claim_0026
+  type: equation
+  expression: OQe = (1 + Rk) / (2 * Rg) + Ra
+  variables:
+  - symbol: OQe
+    concept: speech_0002
+  - symbol: Rk
+    concept: speech_0007
+  - symbol: Rg
+    concept: speech_0006
+  - symbol: Ra
+    concept: speech_0008
+  concepts:
+  - speech_0002
+  - speech_0007
+  - speech_0006
+  - speech_0008
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 128
+    section: Open Quotient complete form
+- id: claim_0027
+  type: equation
+  expression: H1_H2 = -6 + 0.27 * exp(5.5 * OQi)
+  variables:
+  - symbol: H1_H2
+    concept: speech_0012
+  - symbol: OQi
+    concept: speech_0002
+  concepts:
+  - speech_0012
+  - speech_0002
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 129
+    section: H1*-H2* from OQ
+- id: claim_0028
+  type: equation
+  expression: H1_H2 = -7.6 + 11.1 * Rd
+  variables:
+  - symbol: H1_H2
+    concept: speech_0012
+  - symbol: Rd
+    concept: speech_0009
+  concepts:
+  - speech_0012
+  - speech_0009
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 129
+    section: H1*-H2* from Rd
+- id: claim_0029
+  type: parameter
+  concept: speech_0009
+  value: 1.0
+  unit: dimensionless
+  conditions:
+  - speaker_sex == 'male'
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 127
+    table: Parameters
+  lower_bound: 0.5
+  upper_bound: 1.5
+- id: claim_0030
+  type: parameter
+  concept: speech_0009
+  value: 1.65
+  unit: dimensionless
+  conditions:
+  - speaker_sex == 'female'
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 127
+    table: Parameters
+  lower_bound: 0.8
+  upper_bound: 2.5
+- id: claim_0031
+  type: observation
+  statement: 'A 1 dB change in 1/Rd corresponds to a 2 dB change in Ee. This covariation
+    applies within and across segments, voice effort changes, and dynamic variations.
+
+    '
+  concepts:
+  - speech_0009
+  - speech_0004
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 131
+    figure: Fig. 5
+- id: claim_0032
+  type: parameter
+  concept: speech_0002
+  value: 0.5700000000000001
+  unit: ratio
+  conditions:
+  - speech_task == 'speech'
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 128
+    table: Default LF-parameters Table 1
+  lower_bound: 0.35
+  upper_bound: 0.79
+- id: claim_0033
+  type: equation
+  expression: delta_B1 = 250 * (F1 / 500)^2 * (Ra / 12)
+  variables:
+  - symbol: Ra
+    concept: speech_0008
+  concepts:
+  - speech_0008
+  provenance:
+    paper: Fant_1997_VoiceSourceConnectedSpeech
+    page: 132
+    section: Formant bandwidth increase from glottal leakage

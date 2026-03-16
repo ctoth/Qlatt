@@ -1,0 +1,83 @@
+source:
+  paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+claims:
+- id: claim_0089
+  type: observation
+  statement: 'Medial surface thickness is the dominant voice quality controller. T
+    < 1 mm produces breathy phonation (incomplete closure, high OQ, high H1-H2). T
+    = 1-3 mm produces modal phonation (moderate CQ 0.3-0.5). T > 3 mm produces pressed
+    phonation (high CQ > 0.6, low H1-H2).
+
+    '
+  concepts:
+  - speech_0002
+  - speech_0013
+  - speech_0012
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 10
+    section: Voice Quality Control via Medial Surface Thickness
+- id: claim_0090
+  type: parameter
+  concept: speech_0009
+  value: 2.7
+  unit: dimensionless
+  conditions:
+  - voice_quality_type == 'soft'
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 13
+    table: Table II
+- id: claim_0091
+  type: parameter
+  concept: speech_0009
+  value: 0.72
+  unit: dimensionless
+  conditions:
+  - voice_quality_type == 'loud'
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 13
+    table: Table II
+  lower_bound: 0.7
+  upper_bound: 0.74
+- id: claim_0092
+  type: observation
+  statement: 'CQ and OQ are generally inversely correlated (CQ + OQ approximately
+    1) but can decorrelate when vocal fold stiffness is very high or medial surface
+    is very thin. In those cases, vocal folds vibrate but may not contact, giving
+    CQ = 0 but OQ < 1.
+
+    '
+  concepts:
+  - speech_0013
+  - speech_0002
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 10
+    section: CQ vs OQ Relationship
+- id: claim_0093
+  type: observation
+  statement: 'Intensity is primarily controlled by subglottal pressure (nearly linear
+    in dB scale), with secondary effects from medial surface thickness and vocal fold
+    stiffness.
+
+    '
+  concepts:
+  - speech_0018
+  - speech_0004
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 8
+    section: Intensity Control
+- id: claim_0094
+  type: parameter
+  concept: speech_0012
+  value: 3.5
+  unit: dB
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 10
+    section: Spectral Characteristics
+  lower_bound: -5.0
+  upper_bound: 12.0

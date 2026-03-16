@@ -1,0 +1,19 @@
+source:
+  paper: Carlson_1995_ModelsOfSpeechSynthesis
+
+claims:
+  - id: claim_0088
+    type: observation
+    statement: >
+      Higher Rg values (200 vs 100) reduce amplitude of first few harmonics.
+      Higher Rk values (60 vs 20) increase H1-H2 difference (more breathy).
+      Higher Ra values (5 vs 0) reduce high-frequency energy (spectral tilt).
+    concepts:
+      - speech_0006
+      - speech_0007
+      - speech_0008
+      - speech_0012
+    provenance:
+      paper: Carlson_1995_ModelsOfSpeechSynthesis
+      page: 9933
+      figure: "Fig 2"

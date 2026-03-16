@@ -17,6 +17,7 @@
  */
 
 import type { ProvenanceCollector } from "./provenance";
+import { loadTuneGrammarSync, selectTuneForPhrase, type TuneSelection } from "./tune-grammar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PipelineToken = Record<string, any>;
@@ -161,6 +162,7 @@ export function annotateProsody(
   options: ProsodicAnnotatorOptions = {},
 ): PipelineToken[] {
   const provenance = options.provenance ?? null;
+  const tuneGrammar = loadTuneGrammarSync();
 
   // Work on a shallow copy of each token so we never mutate the input array
   // entries directly. The spread preserves all existing properties.
@@ -182,17 +184,24 @@ export function annotateProsody(
     // Step 4: find last accented token in phrase (nuclear accent).
     identifyNuclearAccent(result, phrase);
 
+    const hasPrenuclearAccent = phraseHasPrenuclearAccent(result, phrase);
+    const tuneSelection = selectTuneForPhrase(tuneGrammar, {
+      punctuation: phrase.punctuation,
+      hasPrenuclearAccent,
+    });
+
     // Step 5: Assign accent types.
-    assignAccentTypes(result, phrase, phrase.punctuation);
+    assignAccentTypes(result, phrase, tuneSelection);
 
     // Step 6: Assign phrase accent and boundary tone on phrase boundary.
-    assignPhraseEdgeTones(result, phrase);
+    assignPhraseEdgeTones(result, phrase, tuneSelection);
 
     // Step 7: Long phrase breaking heuristic.
     applyLongPhraseBreaking(result, phrase);
 
     // Provenance
     if (provenance) {
+      emitTuneSelectionProvenance(provenance, phrase, pi, tuneSelection, hasPrenuclearAccent);
       emitPhraseProvenance(provenance, result, phrase, pi);
     }
   }
@@ -397,40 +406,19 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
 function assignAccentTypes(
   tokens: PipelineToken[],
   phrase: Phrase,
-  punctuation: string | null,
+  tuneSelection: TuneSelection,
 ): void {
-  const isQuestion = punctuation === "?";
-  const isExclamation = punctuation === "!";
-  const isContinuation = punctuation != null && CLAUSE_PUNCTUATION.has(punctuation);
-  const accentedIndices = phrase.tokenIndices.filter(
-    (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].isAccentCarrier === true,
-  );
-  const hasPrenuclearAccent = accentedIndices.some((idx) => !tokens[idx].isNuclearAccent);
   let prenuclearAccentCount = 0;
   for (const idx of phrase.tokenIndices) {
     const token = tokens[idx];
     if (isSuppressedToken(token) || token.isAccentCarrier !== true) continue;
 
     if (token.isNuclearAccent) {
-      // Nuclear accent: L* for short/simple questions; L*+H when there is
-      // prenuclear material to support the characteristic question rise.
-      // Continuations expose H+L*, while broad-focus declaratives and
-      // exclamations with prenuclear material expose the falling H*+L family.
-      // Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
-      token.accentType = isQuestion
-        ? (hasPrenuclearAccent ? "L*+H" : "L*")
-        : (isContinuation ? "H+L*" : ((isExclamation || hasPrenuclearAccent) ? "H*+L" : "H*"));
+      token.accentType = tuneSelection.nuclearAccent;
     } else if (prenuclearAccentCount === 0) {
-      // Use a leading rise on the first prenuclear accent so the tune starts
-      // from the phrase baseline and reaches the first accented peak locally.
-      // Continuation phrases instead use the sustained-high H*+H family.
-      // Citations: Pierrehumbert 1980, Ladd 2008
-      token.accentType = isContinuation ? "H*+H" : "L+H*";
+      token.accentType = tuneSelection.prenuclearFirstAccent;
     } else {
-      // Later prenuclear accents use the revised MAE-ToBI H+!H* category:
-      // an early H lead into a downstepped high starred target.
-      // Citations: Ladd 2008 Ch.3, Pierrehumbert 1980 (downstep)
-      token.accentType = "H+!H*";
+      token.accentType = tuneSelection.prenuclearLaterAccent;
     }
     prenuclearAccentCount += token.isNuclearAccent ? 0 : 1;
   }
@@ -561,29 +549,24 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
  *
  * Citations: Pierrehumbert 1980, Silverman et al. 1992
  */
-function assignPhraseEdgeTones(tokens: PipelineToken[], phrase: Phrase): void {
+function assignPhraseEdgeTones(
+  tokens: PipelineToken[],
+  phrase: Phrase,
+  tuneSelection: TuneSelection,
+): void {
   if (phrase.trailingSilIndex < 0) return;
 
   const silToken = tokens[phrase.trailingSilIndex];
-  const punct = phrase.punctuation;
   const firstTokenIndex = phrase.tokenIndices.find(
     (idx) => !isSuppressedToken(tokens[idx]) && tokens[idx].phoneme !== "SIL",
   );
 
-  if (firstTokenIndex != null && firstTokenIndex >= 0 && punct === "?") {
-    tokens[firstTokenIndex].initialBoundaryTone = "%H";
+  if (firstTokenIndex != null && firstTokenIndex >= 0) {
+    tokens[firstTokenIndex].initialBoundaryTone = tuneSelection.initialBoundaryTone;
   }
 
-  if (punct === "?") {
-    silToken.phraseAccent = "H-";
-    silToken.boundaryTone = "H%";
-  } else if (punct === "." || punct === "!") {
-    silToken.phraseAccent = "L-";
-    silToken.boundaryTone = "L%";
-  } else if (punct && CLAUSE_PUNCTUATION.has(punct)) {
-    silToken.phraseAccent = "L-";
-    silToken.boundaryTone = "H%";
-  }
+  silToken.phraseAccent = tuneSelection.phraseAccent;
+  silToken.boundaryTone = tuneSelection.boundaryTone;
 }
 
 // ---------------------------------------------------------------------------
@@ -638,6 +621,15 @@ function applyLongPhraseBreaking(tokens: PipelineToken[], phrase: Phrase): void 
   }
 }
 
+function phraseHasPrenuclearAccent(tokens: PipelineToken[], phrase: Phrase): boolean {
+  return phrase.tokenIndices.some(
+    (idx) =>
+      !isSuppressedToken(tokens[idx]) &&
+      tokens[idx].isAccentCarrier === true &&
+      tokens[idx].isNuclearAccent !== true,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Provenance
 // ---------------------------------------------------------------------------
@@ -671,5 +663,21 @@ function emitPhraseProvenance(
     subject: `phrase:${phraseIndex}`,
     reason: `Identified phrase with ${contentWordCount} content words${nuclearWord ? `, nuclear accent on "${nuclearWord}"` : ", no nuclear accent"}`,
     citations: ["Silverman 1992", "O'Shaughnessy 1976", "Allen 1987"],
+  });
+}
+
+function emitTuneSelectionProvenance(
+  provenance: ProvenanceCollector,
+  phrase: Phrase,
+  phraseIndex: number,
+  tuneSelection: TuneSelection,
+  hasPrenuclearAccent: boolean,
+): void {
+  provenance.add({
+    stage: "prosody",
+    type: "tune_selected",
+    subject: `phrase:${phraseIndex}`,
+    reason: `Selected ${tuneSelection.phraseType} tune for punctuation ${phrase.punctuation ?? "<default>"} with hasPrenuclearAccent=${hasPrenuclearAccent}, nuclear=${tuneSelection.nuclearAccent}, edge=${tuneSelection.phraseAccent ?? "null"} ${tuneSelection.boundaryTone ?? "null"}`,
+    citations: tuneSelection.citations,
   });
 }

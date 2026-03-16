@@ -1,0 +1,81 @@
+version: v1
+
+# Canonical English tune inventory for the current ToBI-oriented frontend.
+# Citations:
+# - Pierrehumbert 1980
+# - Ladd 2008 Ch.3
+citations:
+  - Pierrehumbert 1980
+  - Ladd 2008 Ch.3
+
+phrase_types:
+  declarative:
+    punctuation:
+      - "."
+    default: true
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.3
+    prenuclear:
+      first: L+H*
+      later: H+!H*
+    nuclear:
+      with_prenuclear: H*+L
+      without_prenuclear: H*
+    edge:
+      initial_boundary_tone: null
+      phrase_accent: L-
+      boundary_tone: L%
+
+  question:
+    punctuation:
+      - "?"
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.3
+    prenuclear:
+      first: L+H*
+      later: H+!H*
+    nuclear:
+      with_prenuclear: L*+H
+      without_prenuclear: L*
+    edge:
+      initial_boundary_tone: "%H"
+      phrase_accent: H-
+      boundary_tone: H%
+
+  exclamation:
+    punctuation:
+      - "!"
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.3
+    prenuclear:
+      first: L+H*
+      later: H+!H*
+    nuclear:
+      with_prenuclear: H*+L
+      without_prenuclear: H*+L
+    edge:
+      initial_boundary_tone: null
+      phrase_accent: L-
+      boundary_tone: L%
+
+  continuation:
+    punctuation:
+      - ","
+      - ";"
+      - ":"
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 Ch.3
+    prenuclear:
+      first: H*+H
+      later: H+!H*
+    nuclear:
+      with_prenuclear: H+L*
+      without_prenuclear: H+L*
+    edge:
+      initial_boundary_tone: null
+      phrase_accent: L-
+      boundary_tone: H%

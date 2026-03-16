@@ -50,6 +50,16 @@ Landed:
     - `test/break-policy.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
+22. canonical speaker-profile spec at `public/rules/phases/speaker-profile.yaml`;
+23. typed speaker-profile loader and resolver in `src/speaker-profile.ts`;
+24. `src/tts-frontend.ts` now resolves default speaker values from the
+    declarative speaker-profile spec instead of hardcoded fallback logic;
+25. provenance decision `speaker_profile_selected` emitted at frontend stage
+    with citations including the speaker-profile spec;
+26. executable proof in:
+    - `test/speaker-profile-schema.test.ts`
+    - `test/speaker-profiles.test.ts`
+    - `test/control-score-builder.test.ts`
 
 Notes:
 
@@ -57,8 +67,8 @@ Notes:
    prosody, source planning, or backend adaptation.
 2. The main English-specific policy that previously lived in
    `src/prosodic-annotator.ts` now has declarative tune, accent, and
-   break-policy specs. Remaining Phase 2 work is mostly generic cleanup and
-   any future consolidation of these prosody policy documents.
+   break-policy specs. Phase 3 has started with a first-class speaker-profile
+   spec, but voice-state and source-contour planning are still primarily in TS.
 3. Targeted control-score and tune-grammar tests pass.
 4. Full `npm run typecheck:core` is not currently clean for unrelated
    pre-existing errors in:

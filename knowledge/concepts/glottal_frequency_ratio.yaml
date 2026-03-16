@@ -1,0 +1,25 @@
+id: speech_0006
+canonical_name: glottal_frequency_ratio
+status: proposed
+definition: Ratio of the glottal formant frequency to the fundamental frequency. Rg
+  = Fg/F0 = T0/(2*Tp). Controls low-frequency harmonic amplitudes in the LF model.
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: Rg
+  source: Fant_1988
+- name: R_g
+  source: Fant_1985
+relationships:
+- type: derived_from
+  target: speech_0009
+- type: related
+  target: speech_0015
+- type: related
+  target: speech_0001
+form: dimensionless_compound
+form_parameters:
+  construction: null
+range:
+- 0.7
+- 2.0

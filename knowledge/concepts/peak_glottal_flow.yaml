@@ -1,0 +1,19 @@
+id: speech_0016
+canonical_name: peak_glottal_flow
+status: proposed
+definition: Maximum volume velocity of airflow through the glottis during the open
+  phase of the glottal cycle. Determines the amplitude of the voice fundamental and
+  low-frequency source spectrum.
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: Uo
+  source: Fant_1988
+- name: U0
+  source: Fant_1997
+relationships:
+- type: related
+  target: speech_0004
+- type: related
+  target: speech_0009
+form: flow

@@ -1,0 +1,14 @@
+id: speech_0021
+canonical_name: speech_task
+status: proposed
+definition: Type of speech task or context for acoustic measurements.
+domain: speech
+created_date: '2026-03-15'
+form: category
+form_parameters:
+  values:
+  - speech
+  - sustained_vowel
+  - singing
+  - reading
+  extensible: true

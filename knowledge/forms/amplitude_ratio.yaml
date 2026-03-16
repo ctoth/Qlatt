@@ -1,0 +1,7 @@
+name: amplitude_ratio
+base: ratio
+parameters:
+  numerator: amplitude
+  denominator: amplitude
+unit_symbol: null
+qudt: null

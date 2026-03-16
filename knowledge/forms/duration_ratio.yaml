@@ -1,0 +1,7 @@
+name: duration_ratio
+base: ratio
+parameters:
+  numerator: duration
+  denominator: duration
+unit_symbol: null
+qudt: null

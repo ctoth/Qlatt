@@ -1,0 +1,6 @@
+name: pressure
+unit_symbol: Pa
+qudt: qudt:PA
+common_alternatives:
+  - { unit: cmH2O, type: multiplicative, multiplier: 98.0665 }
+  - { unit: hPa, type: multiplicative, multiplier: 100.0 }

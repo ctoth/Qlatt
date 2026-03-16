@@ -1,0 +1,23 @@
+id: speech_0013
+canonical_name: closed_quotient
+status: proposed
+definition: Fraction of the glottal cycle during which the vocal folds are in contact.
+  CQ = t_contact/T0. Approximately equals 1 - OQ for modal voice, but can decorrelate
+  in extreme phonation conditions.
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: CQ
+  source: Plumpe_1999
+relationships:
+- type: inverse
+  target: speech_0002
+- type: related
+  target: speech_0001
+form: duration_ratio
+form_parameters:
+  numerator: duration
+  denominator: duration
+range:
+- 0.0
+- 0.8

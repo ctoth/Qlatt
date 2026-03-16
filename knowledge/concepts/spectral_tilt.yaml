@@ -1,0 +1,25 @@
+id: speech_0017
+canonical_name: spectral_tilt
+status: proposed
+definition: Rate of high-frequency energy rolloff in the voice source spectrum, typically
+  quantified as attenuation in dB at a reference frequency (e.g., 3000 Hz). Controlled
+  by return phase time constant Ta. Klatt TL parameter.
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: TL
+  source: Klatt_1990
+relationships:
+- type: related
+  target: speech_0010
+- type: related
+  target: speech_0005
+- type: related
+  target: speech_0008
+form: level
+form_parameters:
+  scale: dB
+  reference: null
+range:
+- 0.0
+- 24.0

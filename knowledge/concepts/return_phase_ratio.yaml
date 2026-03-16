@@ -1,0 +1,26 @@
+id: speech_0008
+canonical_name: return_phase_ratio
+status: proposed
+definition: Normalized return phase duration. Ra = Ta/T0. Controls spectral tilt in
+  the LF model. Most perceptually relevant of the three R-parameters.
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: Ra
+  source: Fant_1988
+- name: R_a
+  source: Fant_1985
+relationships:
+- type: related
+  target: speech_0005
+- type: derived_from
+  target: speech_0009
+- type: related
+  target: speech_0010
+form: duration_ratio
+form_parameters:
+  numerator: duration
+  denominator: duration
+range:
+- 0.0
+- 0.12

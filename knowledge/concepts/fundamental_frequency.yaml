@@ -1,0 +1,8 @@
+id: speech_0001
+canonical_name: fundamental_frequency
+status: proposed
+definition: Rate of vocal fold vibration during phonation, perceived as pitch. Measured
+  in Hertz.
+domain: speech
+created_date: '2026-03-15'
+form: frequency

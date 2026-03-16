@@ -1,0 +1,21 @@
+id: speech_0019
+canonical_name: voice_quality_type
+status: proposed
+definition: 'Categorical voice quality classification: modal, breathy, pressed, falsetto,
+  vocal_fry, creaky, whispery.'
+domain: speech
+created_date: '2026-03-15'
+form: category
+form_parameters:
+  values:
+  - modal
+  - breathy
+  - pressed
+  - falsetto
+  - vocal_fry
+  - creaky
+  - whispery
+  - normal
+  - soft
+  - loud
+  extensible: true

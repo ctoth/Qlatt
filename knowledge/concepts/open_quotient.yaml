@@ -1,0 +1,33 @@
+id: speech_0002
+canonical_name: open_quotient
+status: proposed
+definition: Ratio of the open phase duration to the fundamental period. OQ = Te/T0
+  (Klatt definition) or OQ = (Te+Ta)/T0 (extended definition including return phase).
+definition_source: Fant_1985_LFModelGlottalFlow
+domain: speech
+created_date: '2026-03-15'
+aliases:
+- name: OQ
+  source: Klatt_1990
+- name: Oq
+  source: Doval_2006
+- name: OQi
+  source: Fant_1997
+- name: OQe
+  source: Fant_1997
+- name: Ro
+  source: vanDinther_2001
+relationships:
+- type: inverse
+  target: speech_0013
+- type: related
+  target: speech_0001
+- type: derived_from
+  target: speech_0009
+form: duration_ratio
+form_parameters:
+  numerator: duration
+  denominator: duration
+range:
+- 0.2
+- 1.0

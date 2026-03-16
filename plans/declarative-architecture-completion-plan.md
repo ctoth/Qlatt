@@ -39,15 +39,26 @@ Landed:
     - `test/accent-policy.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
+17. canonical break-policy spec at `public/rules/phases/break-policy.yaml`;
+18. typed break-policy loader and resolver in `src/break-policy.ts`;
+19. `src/prosodic-annotator.ts` now delegates long-phrase breaking to the
+    declarative break policy instead of a hardcoded threshold and midpoint
+    heuristic;
+20. provenance decision `phrase_break_selected` emitted at prosody stage with
+    citations including the break-policy spec;
+21. executable proof in:
+    - `test/break-policy.test.ts`
+    - `test/prosodic-annotator.test.ts`
+    - `test/tobi-intonation.test.ts`
 
 Notes:
 
 1. This is intentionally Phase 1 infrastructure, not yet the full migration of
    prosody, source planning, or backend adaptation.
-2. Phase 2 is still in progress: tune selection, edge-tone policy,
-   function-word classification, and accent-priority policy moved to
-   declarative specs, but long-phrase breaking and some generic annotator
-   cleanup remain in TS.
+2. The main English-specific policy that previously lived in
+   `src/prosodic-annotator.ts` now has declarative tune, accent, and
+   break-policy specs. Remaining Phase 2 work is mostly generic cleanup and
+   any future consolidation of these prosody policy documents.
 3. Targeted control-score and tune-grammar tests pass.
 4. Full `npm run typecheck:core` is not currently clean for unrelated
    pre-existing errors in:

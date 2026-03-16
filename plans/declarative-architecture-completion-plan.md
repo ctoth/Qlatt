@@ -28,14 +28,26 @@ Landed:
     - `test/tune-grammar.test.ts`
     - `test/prosodic-annotator.test.ts`
     - `test/tobi-intonation.test.ts`
+12. canonical accent-policy spec at `public/rules/phases/accent-policy.yaml`;
+13. typed accent-policy loader and helpers in `src/accent-policy.ts`;
+14. `src/prosodic-annotator.ts` now delegates function-word classification and
+    accent-carrier selection to the declarative accent policy instead of a
+    hardcoded lexicon and stress-rule blob;
+15. provenance decision `accent_policy_selected` emitted at prosody stage with
+    citations including the accent-policy spec;
+16. executable proof in:
+    - `test/accent-policy.test.ts`
+    - `test/prosodic-annotator.test.ts`
+    - `test/tobi-intonation.test.ts`
 
 Notes:
 
 1. This is intentionally Phase 1 infrastructure, not yet the full migration of
    prosody, source planning, or backend adaptation.
-2. Phase 2 is now in progress: tune selection and edge-tone policy moved to a
-   declarative spec, but function-word classification, accent-priority policy,
-   and long-phrase breaking remain in TS.
+2. Phase 2 is still in progress: tune selection, edge-tone policy,
+   function-word classification, and accent-priority policy moved to
+   declarative specs, but long-phrase breaking and some generic annotator
+   cleanup remain in TS.
 3. Targeted control-score and tune-grammar tests pass.
 4. Full `npm run typecheck:core` is not currently clean for unrelated
    pre-existing errors in:

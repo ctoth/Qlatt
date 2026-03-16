@@ -1,0 +1,89 @@
+version: v1
+description: >
+  Canonical backend-neutral declarative control-score schema for frontend output.
+  This phase exposes score structure as an inspectable artifact without changing
+  backend audio behavior.
+
+token_fields:
+  id:
+    type: string
+    required: true
+  phoneme:
+    type: string
+    required: true
+  type:
+    type: string
+    required: true
+  word:
+    type: string
+    required: false
+  stress:
+    type: int_or_null
+    required: false
+  break_index:
+    type: int
+    required: false
+  prosody:
+    type: object
+    required: true
+    fields:
+      is_function_word: { type: bool, required: false }
+      is_accented: { type: bool, required: false }
+      is_accent_carrier: { type: bool, required: false }
+      is_nuclear_accent: { type: bool, required: false }
+      initial_boundary_tone: { type: string_or_null, required: false }
+      accent_type: { type: string_or_null, required: false }
+      phrase_accent: { type: string_or_null, required: false }
+      boundary_tone: { type: string_or_null, required: false }
+  alignment:
+    type: object
+    required: true
+    fields:
+      anchors:
+        type: object
+        required: true
+        fields:
+          onset: { type: string, required: false }
+          release: { type: string, required: false }
+      transition_ms:
+        type: number
+        required: false
+  duration:
+    type: object
+    required: true
+    fields:
+      lexical_target_ms: { type: number, required: false }
+      realized_target_ms: { type: number, required: true }
+      minimum_ms: { type: number, required: false }
+  source:
+    type: object
+    required: false
+  filter:
+    type: object
+    required: false
+  control_windows:
+    type: array
+    required: false
+
+f0_event_fields:
+  id:
+    type: string
+    required: true
+  time_ms:
+    type: number
+    required: false
+  value_hz:
+    type: number
+    required: true
+  tag:
+    type: string
+    required: false
+  anchor_left:
+    type: any
+    required: false
+  anchor_right:
+    type: any
+    required: false
+  ratio:
+    type: number
+    required: false

@@ -27,6 +27,11 @@ import {
 import { annotateProsody } from "./prosodic-annotator";
 import type { Diagnostics } from "./diagnostics";
 import { emitNasalSubsystemExplainability } from "./nasal-subsystem";
+import {
+  buildDeclarativeControlScore,
+  validateDeclarativeControlScore,
+} from "./control-score";
+import type { DeclarativeControlScore } from "./tts-frontend-types";
 
 /**
  * Loose token type for intermediate pipeline stages.
@@ -103,6 +108,7 @@ export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
   frontendPhones: FrontendPhoneSummary[];
   f0LayerCommands?: F0LayerCommand[];
+  controlScore: DeclarativeControlScore;
 };
 
 // Plain stop symbols are intentionally rewritten in the structural phase
@@ -199,7 +205,8 @@ function buildTextToKlattTrackDetailed(
   transitionMs = 30,
   options: TextToKlattTrackOptions = {}
 ): TextToKlattTrackDetailedResult {
-  const frontendSpec = loadBundledRulepackSpec(options.frontendId);
+  const frontendId = options.frontendId ?? "qlatt-english";
+  const frontendSpec = loadBundledRulepackSpec(frontendId);
   const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
 
@@ -559,6 +566,8 @@ function buildTextToKlattTrackDetailed(
   const phoneSequence = parameterSequence.filter(
     (token: PipelineToken) => token?.stream !== "f0" && token?.status !== 2
   );
+  const controlScore = buildDeclarativeControlScore(frontendId, parameterSequence);
+  validateDeclarativeControlScore(controlScore);
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---
   // Transition durations scale inversely with rate (Broad & Fertig 1970).
@@ -654,6 +663,7 @@ function buildTextToKlattTrackDetailed(
   return {
     track,
     frontendPhones,
+    controlScore,
     ...(f0Model
       ? { f0LayerCommands: extractLayerCommands(parameterSequence, syncTimeByKey) }
       : {}),
@@ -676,4 +686,13 @@ export function textToKlattTrack(
   options: TextToKlattTrackOptions = {}
 ): KlattFrame[] {
   return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).track;
+}
+
+export function textToControlScore(
+  inputText: string,
+  baseF0: number | undefined = undefined,
+  transitionMs = 30,
+  options: TextToKlattTrackOptions = {}
+): DeclarativeControlScore {
+  return buildTextToKlattTrackDetailed(inputText, baseF0, transitionMs, options).controlScore;
 }

@@ -41,6 +41,84 @@ export type TranscriptionOptions = {
   dictLookup?: (word: string) => string[] | null;
 };
 
+export interface ControlScoreAnchors {
+  onset?: string;
+  release?: string;
+}
+
+export interface ControlScoreAlignmentPlan {
+  anchors: ControlScoreAnchors;
+  transition_ms?: number;
+}
+
+export interface ControlScoreDurationPlan {
+  lexical_target_ms?: number;
+  realized_target_ms: number;
+  minimum_ms?: number;
+}
+
+export interface ControlScoreSourcePlan {
+  source_mode?: number;
+  rd?: number;
+  rd_ref?: number;
+  oq?: number;
+  tl?: number;
+  av?: number;
+  avs?: number;
+  ah?: number;
+  af?: number;
+}
+
+export interface ControlScoreFilterPlan {
+  formants: Array<{ index: number; frequency_hz: number; bandwidth_hz?: number }>;
+  nasal?: {
+    coupling?: number;
+    place_index?: number;
+    murmur_strength?: number;
+  };
+}
+
+export interface ControlScorePhoneToken {
+  id: string;
+  phoneme: string;
+  type: string;
+  word?: string;
+  stress?: number | null;
+  break_index?: number;
+  prosody: {
+    is_function_word?: boolean;
+    is_accented?: boolean;
+    is_accent_carrier?: boolean;
+    is_nuclear_accent?: boolean;
+    initial_boundary_tone?: string | null;
+    accent_type?: string | null;
+    phrase_accent?: string | null;
+    boundary_tone?: string | null;
+  };
+  alignment: ControlScoreAlignmentPlan;
+  duration: ControlScoreDurationPlan;
+  source?: ControlScoreSourcePlan;
+  filter?: ControlScoreFilterPlan;
+  control_windows?: ControlWindowSpec[];
+}
+
+export interface ControlScoreF0Event {
+  id: string;
+  time_ms?: number;
+  value_hz: number;
+  tag?: string;
+  anchor_left?: unknown;
+  anchor_right?: unknown;
+  ratio?: number;
+}
+
+export interface DeclarativeControlScore {
+  version: "v1";
+  frontend_id: string;
+  tokens: ControlScorePhoneToken[];
+  f0_events: ControlScoreF0Event[];
+}
+
 /** The segment a control window applies to.
  *  Generic timed control windows may affect the current segment or an adjacent
  *  one, enabling overlap-style behavior without forcing synthetic extra tokens.

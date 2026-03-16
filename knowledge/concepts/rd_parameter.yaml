@@ -12,11 +12,11 @@ aliases:
 - name: R_d
   source: Fant_1997
 relationships:
-- type: derives
+- type: derived_from
   target: speech_0008
-- type: derives
+- type: derived_from
   target: speech_0007
-- type: derives
+- type: derived_from
   target: speech_0006
 - type: related
   target: speech_0002

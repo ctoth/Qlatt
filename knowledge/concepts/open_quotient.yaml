@@ -18,7 +18,7 @@ aliases:
 - name: Ro
   source: vanDinther_2001
 relationships:
-- type: inverse
+- type: related
   target: speech_0013
 - type: related
   target: speech_0001

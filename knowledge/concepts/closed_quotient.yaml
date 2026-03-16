@@ -10,7 +10,7 @@ aliases:
 - name: CQ
   source: Plumpe_1999
 relationships:
-- type: inverse
+- type: related
   target: speech_0002
 - type: related
   target: speech_0001

@@ -17,13 +17,27 @@ Landed:
 6. executable proof in:
    - `test/control-score-schema.test.ts`
    - `test/control-score-builder.test.ts`
+7. canonical tune grammar spec at `public/rules/phases/tune-grammar.yaml`;
+8. typed tune-grammar loader and selector in `src/tune-grammar.ts`;
+9. `src/prosodic-annotator.ts` now delegates tune-family and edge-tone
+   selection to the declarative grammar instead of hardcoded accent-family
+   branching;
+10. provenance decision `tune_selected` emitted at prosody stage with
+    citations including the tune-grammar spec;
+11. executable proof in:
+    - `test/tune-grammar.test.ts`
+    - `test/prosodic-annotator.test.ts`
+    - `test/tobi-intonation.test.ts`
 
 Notes:
 
 1. This is intentionally Phase 1 infrastructure, not yet the full migration of
    prosody, source planning, or backend adaptation.
-2. Targeted control-score tests pass.
-3. Full `npm run typecheck:core` is not currently clean for unrelated
+2. Phase 2 is now in progress: tune selection and edge-tone policy moved to a
+   declarative spec, but function-word classification, accent-priority policy,
+   and long-phrase breaking remain in TS.
+3. Targeted control-score and tune-grammar tests pass.
+4. Full `npm run typecheck:core` is not currently clean for unrelated
    pre-existing errors in:
    - `src/declarative-frontend/engine.ts`
    - `src/klatt-runtime.ts`

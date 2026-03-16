@@ -1,0 +1,85 @@
+version: v1
+
+# Canonical source contour policy for the current English frontend.
+# Citations:
+# - Fant 1997 Table 1
+# - Gobl 2003
+# - Klatt & Klatt 1990
+# - Burkhardt 2009
+citations:
+  - Fant 1997 Table 1
+  - Gobl 2003
+  - Klatt & Klatt 1990
+  - Burkhardt 2009
+
+baseline:
+  source_mode: 1
+  citations:
+    - Fant 1997 Table 1
+    - Klatt & Klatt 1990
+
+voice_quality_presets:
+  modal:
+    rd: 0.7
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  breathy:
+    rd: 2.0
+    oq: 0
+    tl: 0
+    ah_offset_db: 20
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+      - Gobl 2003
+      - Klatt & Klatt 1990
+  pressed:
+    rd: 0.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  creaky:
+    rd: 0.8
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 20
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+      - Burkhardt 2009
+  whispery:
+    rd: 2.0
+    oq: 0
+    tl: 10
+    ah_offset_db: 30
+    flutter: 0
+    jitter: 5
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+  falsetto:
+    rd: 2.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 50
+    jitter: 0
+    f0_scale: 1.5
+    citations:
+      - Burkhardt 2009
+      - Fant 1997 Table 1

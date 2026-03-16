@@ -39,6 +39,11 @@ import {
   resolveSpeakerProfile,
   type ResolvedSpeakerProfile,
 } from "./speaker-profile";
+import {
+  DEFAULT_SOURCE_CONTOUR_PATH,
+  loadSourceContourSync,
+  resolveSourceContour,
+} from "./source-contour";
 
 /**
  * Loose token type for intermediate pipeline stages.
@@ -144,17 +149,21 @@ const SPEAKER_FORMANT_KEYS = [
 
 function applySpeakerProfileToParams(
   params: Record<string, number> | null | undefined,
-  speaker: ResolvedSpeakerProfile
+  speaker: ResolvedSpeakerProfile,
+  sourceContourBaseline: {
+    source_mode: number;
+    rd: number;
+    rd_ref: number;
+    spectral_tilt_offset_db: number;
+  },
 ): void {
   if (!params) return;
 
-  // Fant 1997 / Klatt & Klatt 1990 source controls only affect the LF source.
-  // The paper-backed frontend therefore makes LF the active default source.
-  params.sourceMode = 1;
-  params.Rd = speaker.rd_default;
-  params.RdRef = speaker.rd_default;
-  if (speaker.spectral_tilt_offset_db !== 0) {
-    params.TL = (params.TL ?? 0) + speaker.spectral_tilt_offset_db;
+  params.sourceMode = sourceContourBaseline.source_mode;
+  params.Rd = sourceContourBaseline.rd;
+  params.RdRef = sourceContourBaseline.rd_ref;
+  if (sourceContourBaseline.spectral_tilt_offset_db !== 0) {
+    params.TL = (params.TL ?? 0) + sourceContourBaseline.spectral_tilt_offset_db;
   }
   if (speaker.formant_scale !== 1.0) {
     for (const key of SPEAKER_FORMANT_KEYS) {
@@ -197,7 +206,6 @@ function buildTextToKlattTrackDetailed(
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
-  const frontendSpeakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
   const speakerProfilePath =
     typeof (frontendSpec as { speaker_profile_path?: unknown })?.speaker_profile_path === "string"
       ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
@@ -220,62 +228,26 @@ function buildTextToKlattTrackDetailed(
     citations: collectSpeakerProfileCitations(speakerProfileSpec, speakerProfilePath),
   });
 
-  // --- Voice Quality Preset Resolution ---
-  // Resolve voiceQuality preset BEFORE rule phases run.
-  // Presets are defined in the selected frontend spec under params.policy.speaker.voice_quality_presets.
-  // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
-  let voiceQualityOverrides: VoiceQualityOverrides | undefined;
-  const requestedQuality = options.voiceQuality;
-  if (requestedQuality && requestedQuality !== 'modal') {
-    const presetTable = frontendSpeakerPolicy
-      ?.voice_quality_presets as Record<string, Record<string, unknown>> | undefined;
-    const presetRaw = presetTable?.[requestedQuality];
-    if (presetRaw) {
-      const preset: VoiceQualityPreset = {
-        rd: typeof presetRaw.rd === 'number' ? presetRaw.rd : resolvedSpeaker.rd_default,
-        oq: typeof presetRaw.oq === 'number' ? presetRaw.oq : 0,
-        tl: typeof presetRaw.tl === 'number' ? presetRaw.tl : 0,
-        ah_offset_db: typeof presetRaw.ah_offset_db === 'number' ? presetRaw.ah_offset_db : 0,
-        flutter: typeof presetRaw.flutter === 'number' ? presetRaw.flutter : 0,
-        jitter: typeof presetRaw.jitter === 'number' ? presetRaw.jitter : 0,
-        f0_scale: typeof presetRaw.f0_scale === 'number' ? presetRaw.f0_scale : 1.0,
-      };
-
-      // Apply F0 scaling: multiply baseF0 by preset's f0_scale.
-      // Citation: Burkhardt 2009 (falsetto F0 increase)
-      if (preset.f0_scale !== 1.0) {
-        effectiveBaseF0 = Math.round(effectiveBaseF0 * preset.f0_scale);
-      }
-
-      // Build voice quality overrides for the track assembler.
-      // These inject Rd, OQ, TL, flutter, jitter into every frame's params,
-      // and add ah_offset_db to every frame's AH value.
-      voiceQualityOverrides = {
-        rd: preset.rd,
-        oq: preset.oq,
-        tl: preset.tl,
-        ah_offset_db: preset.ah_offset_db,
-        flutter: preset.flutter,
-        jitter: preset.jitter,
-      };
-
-      // Emit provenance record for voice quality preset application
-      provenance?.add({
-        stage: 'frontend',
-        type: 'voice_quality_preset',
-        subject: 'voice_quality',
-        reason: `voiceQuality='${requestedQuality}' applied: Rd=${preset.rd}, AH offset=${preset.ah_offset_db} dB`,
-        citations: ['Fant 1997', 'Gobl 2003', 'Klatt & Klatt 1990'],
-        parents: [],
-      });
-    } else {
-      diagnostics?.warn(
-        `Unknown voice quality preset '${requestedQuality}'. Using modal defaults.`,
-        { requestedQuality },
-        "W_UNKNOWN_VOICE_QUALITY",
-      );
-    }
-  }
+  const sourceContourPath =
+    typeof (frontendSpec as { source_contour_path?: unknown })?.source_contour_path === "string"
+      ? (frontendSpec as { source_contour_path: string }).source_contour_path
+      : DEFAULT_SOURCE_CONTOUR_PATH;
+  const sourceContourSpec = loadSourceContourSync(sourceContourPath);
+  const sourceContour = resolveSourceContour({
+    spec: sourceContourSpec,
+    requestedQuality: options.voiceQuality,
+    speaker: resolvedSpeaker,
+    baseF0Hz: effectiveBaseF0,
+  });
+  let voiceQualityOverrides: VoiceQualityOverrides | undefined = sourceContour.voiceQualityOverrides;
+  effectiveBaseF0 = sourceContour.effectiveBaseF0Hz;
+  provenance?.add({
+    stage: "frontend",
+    type: "source_contour_selected",
+    subject: "source_contour",
+    reason: `Resolved source contour preset=${sourceContour.presetName}, source_mode=${sourceContour.baseline.source_mode}, rd=${sourceContour.baseline.rd}, rd_ref=${sourceContour.baseline.rd_ref}, base_f0_hz=${effectiveBaseF0}`,
+    citations: sourceContour.citations,
+  });
 
   const tokenDecisionIds = new Map<string, string>();
   const normalized = normalizeText(inputText);
@@ -550,7 +522,7 @@ function buildTextToKlattTrackDetailed(
       ...token,
       params: { ...(token.params as Record<string, number>) },
     };
-    applySpeakerProfileToParams(nextToken.params, resolvedSpeaker);
+    applySpeakerProfileToParams(nextToken.params, resolvedSpeaker, sourceContour.baseline);
     return nextToken;
   });
   const phoneSequence = parameterSequence.filter(

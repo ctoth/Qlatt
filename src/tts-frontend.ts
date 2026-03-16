@@ -32,6 +32,13 @@ import {
   validateDeclarativeControlScore,
 } from "./control-score";
 import type { DeclarativeControlScore } from "./tts-frontend-types";
+import {
+  DEFAULT_SPEAKER_PROFILE_PATH,
+  collectSpeakerProfileCitations,
+  loadSpeakerProfileSync,
+  resolveSpeakerProfile,
+  type ResolvedSpeakerProfile,
+} from "./speaker-profile";
 
 /**
  * Loose token type for intermediate pipeline stages.
@@ -57,13 +64,6 @@ export interface VoiceQualityPreset {
   jitter: number;
   f0_scale: number;
 }
-
-type ResolvedSpeakerProfile = {
-  base_f0_hz: number;
-  formant_scale: number;
-  rd_default: number;
-  spectral_tilt_offset_db: number;
-};
 
 export type TextToKlattTrackOptions = {
   provenance?: ProvenanceCollector | null;
@@ -138,32 +138,6 @@ function readPolicyNumber(entry: unknown): number | undefined {
   return undefined;
 }
 
-function resolveSpeakerProfile(
-  baseF0: number | undefined,
-  speakerOverride: TextToKlattTrackOptions["speaker"],
-  specSource: unknown,
-): ResolvedSpeakerProfile {
-  const speakerPolicy = (specSource as any)?.parameters?.policy?.speaker;
-  const baseFromPolicy = readPolicyNumber(speakerPolicy?.base_f0_hz);
-  const formantScaleFromPolicy = readPolicyNumber(speakerPolicy?.formant_scale);
-  const rdFromPolicy = readPolicyNumber(speakerPolicy?.rd_default);
-  const tiltFromPolicy = readPolicyNumber(speakerPolicy?.spectral_tilt_offset_db);
-  const baseF0Override = speakerOverride?.base_f0_hz;
-  const formantScaleOverride = speakerOverride?.formant_scale;
-  const rdOverride = speakerOverride?.rd_default;
-  const tiltOverride = speakerOverride?.spectral_tilt_offset_db;
-
-  const fin = (v: number | undefined): number | undefined =>
-    typeof v === "number" && Number.isFinite(v) ? v : undefined;
-
-  return {
-    base_f0_hz: fin(baseF0Override) ?? fin(baseF0) ?? baseFromPolicy ?? 110,
-    formant_scale: fin(formantScaleOverride) ?? formantScaleFromPolicy ?? 1.0,
-    rd_default: fin(rdOverride) ?? rdFromPolicy ?? 0.7,
-    spectral_tilt_offset_db: fin(tiltOverride) ?? tiltFromPolicy ?? 0,
-  };
-}
-
 const SPEAKER_FORMANT_KEYS = [
   "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
 ] as const;
@@ -224,11 +198,27 @@ function buildTextToKlattTrackDetailed(
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
   const frontendSpeakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
-  const resolvedSpeaker = resolveSpeakerProfile(baseF0, options.speaker, frontendSpec);
+  const speakerProfilePath =
+    typeof (frontendSpec as { speaker_profile_path?: unknown })?.speaker_profile_path === "string"
+      ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
+      : DEFAULT_SPEAKER_PROFILE_PATH;
+  const speakerProfileSpec = loadSpeakerProfileSync(speakerProfilePath);
+  const resolvedSpeaker = resolveSpeakerProfile({
+    baseF0,
+    speakerOverride: options.speaker,
+    profileSpec: speakerProfileSpec,
+  });
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
   // Speaker profile overrides — merged into policy.speaker for all rule phases.
   // Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990
   const speakerOverrides = { speaker: resolvedSpeaker };
+  provenance?.add({
+    stage: "frontend",
+    type: "speaker_profile_selected",
+    subject: "speaker_profile",
+    reason: `Resolved speaker profile base_f0_hz=${resolvedSpeaker.base_f0_hz}, formant_scale=${resolvedSpeaker.formant_scale}, rd_default=${resolvedSpeaker.rd_default}, spectral_tilt_offset_db=${resolvedSpeaker.spectral_tilt_offset_db}`,
+    citations: collectSpeakerProfileCitations(speakerProfileSpec, speakerProfilePath),
+  });
 
   // --- Voice Quality Preset Resolution ---
   // Resolve voiceQuality preset BEFORE rule phases run.

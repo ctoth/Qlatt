@@ -60,6 +60,17 @@ Landed:
     - `test/speaker-profile-schema.test.ts`
     - `test/speaker-profiles.test.ts`
     - `test/control-score-builder.test.ts`
+27. canonical source-contour spec at `public/rules/phases/source-contour.yaml`;
+28. typed source-contour loader and resolver in `src/source-contour.ts`;
+29. `src/tts-frontend.ts` now resolves LF baseline source mode and voice-quality
+    preset policy from the declarative source-contour spec instead of reading a
+    hardcoded preset table and source baseline in TS;
+30. provenance decision `source_contour_selected` emitted at frontend stage with
+    citations including the source-contour spec;
+31. executable proof in:
+    - `test/source-contour.test.ts`
+    - `test/voice-quality-presets.test.ts`
+    - `test/control-score-builder.test.ts`
 
 Notes:
 
@@ -67,8 +78,9 @@ Notes:
    prosody, source planning, or backend adaptation.
 2. The main English-specific policy that previously lived in
    `src/prosodic-annotator.ts` now has declarative tune, accent, and
-   break-policy specs. Phase 3 has started with a first-class speaker-profile
-   spec, but voice-state and source-contour planning are still primarily in TS.
+   break-policy specs. Phase 3 now has first-class speaker-profile and
+   source-contour specs; the main remaining work in this phase is declarative
+   voice-state planning and further reduction of TS-side overlay logic.
 3. Targeted control-score and tune-grammar tests pass.
 4. Full `npm run typecheck:core` is not currently clean for unrelated
    pre-existing errors in:

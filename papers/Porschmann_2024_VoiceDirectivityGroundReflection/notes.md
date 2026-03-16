@@ -1,9 +1,12 @@
-# On the Impact of Downward-Directed Human Voice Radiation on Ground Reflections
+---
+title: "On the Impact of Downward-Directed Human Voice Radiation on Ground Reflections"
+authors: "Christoph Pörschmann, Johannes M. Arend"
+year: 2024
+venue: "Acta Acustica, 8, 12"
+doi_url: "10.1051/aacus/2024004"
+---
 
-**Authors:** Christoph Pörschmann, Johannes M. Arend
-**Year:** 2024
-**Venue:** Acta Acustica, 8, 12
-**DOI:** 10.1051/aacus/2024004
+# On the Impact of Downward-Directed Human Voice Radiation on Ground Reflections
 
 ## One-Sentence Summary
 

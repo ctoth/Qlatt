@@ -1,10 +1,13 @@
-# On the Role of the Amplitude of the Fricative Noise in the Perception of Place of Articulation in Voiceless Fricative Consonants
+---
+title: "On the Role of the Amplitude of the Fricative Noise in the Perception of Place of Articulation in Voiceless Fricative Consonants"
+authors: "Susan Behrens and Sheila E. Blumstein"
+year: "1988 (received April 1987, accepted May 1988)"
+venue: "Journal of the Acoustical Society of America (JASA)"
+affiliation: "Department of Cognitive and Linguistic Sciences, Brown University, Providence, RI 02912"
+pacs: "43.71.Es"
+---
 
-**Authors:** Susan Behrens and Sheila E. Blumstein
-**Year:** 1988 (received April 1987, accepted May 1988)
-**Venue:** Journal of the Acoustical Society of America (JASA)
-**Affiliation:** Department of Cognitive and Linguistic Sciences, Brown University, Providence, RI 02912
-**PACS:** 43.71.Es
+# On the Role of the Amplitude of the Fricative Noise in the Perception of Place of Articulation in Voiceless Fricative Consonants
 
 ## One-Sentence Summary
 

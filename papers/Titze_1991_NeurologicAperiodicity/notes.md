@@ -1,9 +1,12 @@
-# A Model for Neurologic Sources of Aperiodicity in Vocal Fold Vibration
+---
+title: "A Model for Neurologic Sources of Aperiodicity in Vocal Fold Vibration"
+authors: "Ingo R. Titze"
+year: 1991
+venue: "Journal of Speech and Hearing Research, 34(3), 460-472"
+doi_url: "10.1044/jshr.3403.460"
+---
 
-**Authors:** Ingo R. Titze
-**Year:** 1991
-**Venue:** Journal of Speech and Hearing Research, 34(3), 460-472
-**DOI:** 10.1044/jshr.3403.460
+# A Model for Neurologic Sources of Aperiodicity in Vocal Fold Vibration
 
 ## One-Sentence Summary
 Provides a quantitative model of how motor unit twitch summation in laryngeal muscles produces fundamental frequency (F0) perturbation (jitter), predicting perturbation magnitudes of 0.2-1.2% as a function of motor unit count, firing rate, twitch amplitude variability, and interspike interval variability.

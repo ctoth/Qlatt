@@ -1,9 +1,12 @@
-# Cross-Racial Studies of Human Vocal Tract Dimensions and Formant Structures
+---
+title: "Cross-Racial Studies of Human Vocal Tract Dimensions and Formant Structures"
+authors: "Jianping Hao"
+year: 2002
+venue: "Ph.D. Dissertation, Ohio University, School of Hearing, Speech and Language Sciences"
+director: "Steve Xue"
+---
 
-**Authors:** Jianping Hao
-**Year:** 2002
-**Venue:** Ph.D. Dissertation, Ohio University, School of Hearing, Speech and Language Sciences
-**Director:** Steve Xue
+# Cross-Racial Studies of Human Vocal Tract Dimensions and Formant Structures
 
 ## One-Sentence Summary
 Provides normative vocal tract dimension measurements (oral/pharyngeal length and volume via acoustic reflection) and F1-F3 formant frequencies for nine vowels across 120 speakers from three racial groups (White American, African American, Chinese), with regression models linking tract dimensions to formant frequencies.

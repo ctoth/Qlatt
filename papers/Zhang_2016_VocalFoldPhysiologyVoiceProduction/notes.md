@@ -1,9 +1,12 @@
-# Cause-Effect Relationship Between Vocal Fold Physiology and Voice Production in a Three-Dimensional Phonation Model
+---
+title: "Cause-Effect Relationship Between Vocal Fold Physiology and Voice Production in a Three-Dimensional Phonation Model"
+authors: "Zhaoyan Zhang"
+year: 2016
+venue: "Journal of the Acoustical Society of America, 139(4), 1493-1507"
+doi_url: "10.1121/1.4944754"
+---
 
-**Authors:** Zhaoyan Zhang
-**Year:** 2016
-**Venue:** Journal of the Acoustical Society of America, 139(4), 1493-1507
-**DOI:** 10.1121/1.4944754
+# Cause-Effect Relationship Between Vocal Fold Physiology and Voice Production in a Three-Dimensional Phonation Model
 
 ## One-Sentence Summary
 This paper uses a 3D continuum phonation model to systematically map how vocal fold physiology (stiffness, geometry, subglottal pressure) affects voice output (F0, intensity, spectral characteristics, voice quality), establishing quantitative cause-effect relationships essential for controlling voice source parameters in synthesis.

@@ -1,9 +1,12 @@
-# Machine-Aided Formant Determination for Speech Synthesis
+---
+title: "Machine-Aided Formant Determination for Speech Synthesis"
+authors: "William J. Strong"
+year: 1967
+venue: "Journal of the Acoustical Society of America, Volume 41, Number 6, pp. 1434-1442"
+doi_url: "Published by ASA"
+---
 
-**Authors:** William J. Strong
-**Year:** 1967
-**Venue:** Journal of the Acoustical Society of America, Volume 41, Number 6, pp. 1434-1442
-**DOI/URL:** Published by ASA
+# Machine-Aided Formant Determination for Speech Synthesis
 
 ## One-Sentence Summary
 This paper describes a semi-automatic "manual formant vocoder" system where a human operator marks formant positions on processed speech data to extract control parameters for a four-pole parallel synthesizer.

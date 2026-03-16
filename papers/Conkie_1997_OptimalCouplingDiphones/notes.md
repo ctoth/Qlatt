@@ -1,3 +1,8 @@
+---
+title: "Conkie & Isard 1994/1997 — Optimal Coupling of Diphones"
+year: 1997
+---
+
 # Conkie & Isard 1994/1997 — Optimal Coupling of Diphones
 
 ## Implementation-Relevant Notes
@@ -81,3 +86,13 @@ This paper is about concatenative (PSOLA) diphone synthesis, not parametric synt
 2. **Simple frame-by-frame spectral distance is a useful quality metric** — could be adapted to evaluate Klatt output quality at segment junctions
 3. **Duration and spectral optimization interact** — adjusting segment duration can improve spectral continuity, relevant to Qlatt's duration rules
 4. The concept of precomputed optimal coupling tables could inform how structural rules handle segment boundary positioning
+
+## Collection Cross-References
+
+### Cited By (in Collection)
+- `Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis` — references Conkie for diphone boundary optimization
+- `Strom_2002_TextToProsodyWithoutToBI` — references Conkie in synthesis context
+
+### Conceptual Links (not citation-based)
+- `Hertz_2006_HybridSynthesisRegularities` — both address segment boundary quality in different synthesis frameworks
+- `Carlson_1995_ModelsOfSpeechSynthesis` — both concern practical speech synthesis quality

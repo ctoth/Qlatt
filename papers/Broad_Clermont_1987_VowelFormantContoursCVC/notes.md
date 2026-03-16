@@ -1,9 +1,12 @@
-# Broad & Clermont 1987 — Implementation Notes
+---
+title: "Broad & Clermont 1987 — Implementation Notes"
+authors: "David J. Broad, Frantz Clermont"
+year: 1987
+venue: "J. Acoust. Soc. Am. 81(1), 155-165, January 1987"
+doi_url: "10.1121/1.395025"
+---
 
-**Paper:** A methodology for modeling vowel formant contours in CVC context
-**Authors:** David J. Broad, Frantz Clermont
-**Journal:** J. Acoust. Soc. Am. 81(1), 155-165, January 1987
-**DOI:** 10.1121/1.395025
+# Broad & Clermont 1987 — Implementation Notes
 
 ## Core Concept
 
@@ -255,3 +258,18 @@ The exponential transition model (Model IVb, Eqs. 38-39) provides a principled w
 - **Stevens & House (1963):** Perturbation of vowels by consonant context
 - **Broad & Fertig (1970):** Earlier additive model work on formant trajectories
 - **Schouten & Pols (1979a,b, 1981):** Spectral study of coarticulation, locus measurements
+
+## Collection Cross-References
+
+### Already in Collection
+- `Delattre_1955_AcousticLociTransitionalCues` — consonant locus concept used throughout
+- `Stevens_House_1963_PerturbationVowelConsonant` — additivity of consonant perturbations
+- `Ohman_1966_CoarticulationVCV` — numerical coarticulation model with similar superposition
+
+### Cited By (in Collection)
+- `Kaburagi_2007_VocalTractSpectrum` — references Broad & Clermont for formant contour modeling
+
+### Conceptual Links (not citation-based)
+- `Gay_1977_ArticulatoryMovementsVCV` — articulatory data underlying the acoustic transitions Broad & Clermont model
+- `Lindblom_1971_AcousticConsequencesArticulatory` — provides articulatory-acoustic theory that supports the locus-based transition model
+- `Holmes_1964_SpeechSynthesisRule` — both provide frameworks for computing formant transitions in synthesis

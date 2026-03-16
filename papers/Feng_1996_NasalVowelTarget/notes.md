@@ -1,9 +1,12 @@
-# Some Acoustic Features of Nasal and Nasalized Vowels: A Target for Vowel Nasalization
+---
+title: "Some Acoustic Features of Nasal and Nasalized Vowels: A Target for Vowel Nasalization"
+authors: "Gang Feng and Eric Castelli"
+year: 1996
+venue: "Journal of the Acoustical Society of America, Vol. 99, No. 6"
+doi_url: "10.1121/1.414866"
+---
 
-**Authors:** Gang Feng and Eric Castelli
-**Year:** 1996
-**Venue:** Journal of the Acoustical Society of America, Vol. 99, No. 6
-**DOI:** 10.1121/1.414866
+# Some Acoustic Features of Nasal and Nasalized Vowels: A Target for Vowel Nasalization
 
 ## One-Sentence Summary
 Proposes the pharyngonasal tract (velar nasal [ŋ]-like configuration) as a stable acoustic "target" for vowel nasalization, characterized by two resonances at ~300 Hz and ~1000 Hz, enabling systematic modeling of pole-zero evolution during nasalization.

@@ -1,9 +1,12 @@
-# F0 and Segment Duration in Formant Synthesis of Speaker Age
+---
+title: "F0 and Segment Duration in Formant Synthesis of Speaker Age"
+authors: "Susanne Schötz"
+year: 2006
+venue: "Proc. of Speech Prosody, Dresden (pp. 515-518)"
+institution: "Linguistics and Phonetics, Centre for Languages and Literature, Lund University"
+---
 
-**Authors:** Susanne Schötz
-**Year:** 2006
-**Venue:** Proc. of Speech Prosody, Dresden (pp. 515-518)
-**Institution:** Linguistics and Phonetics, Centre for Languages and Literature, Lund University
+# F0 and Segment Duration in Formant Synthesis of Speaker Age
 
 ## One-Sentence Summary
 

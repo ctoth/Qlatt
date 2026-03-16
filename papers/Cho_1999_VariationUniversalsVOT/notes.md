@@ -1,3 +1,8 @@
+---
+title: "Cho & Ladefoged 1999 - Variation and Universals in VOT: Evidence from 18 Languages"
+year: 1999
+---
+
 # Cho & Ladefoged 1999 - Variation and Universals in VOT: Evidence from 18 Languages
 
 ## Key Findings for Synthesizer Implementation

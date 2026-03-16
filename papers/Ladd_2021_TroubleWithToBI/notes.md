@@ -1,9 +1,12 @@
-# The Trouble with ToBI
+---
+title: "The Trouble with ToBI"
+authors: "D. Robert Ladd"
+year: "2021 (preprint circulated ~2018)"
+venue: "Chapter in J. Barnes and S. Shattuck-Hufnagel (eds.), *Prosodic Theory and Practice*, MIT Press, pp. 247-257."
+doi_url: "N/A (preprint)"
+---
 
-**Authors:** D. Robert Ladd
-**Year:** 2021 (preprint circulated ~2018)
-**Venue:** Chapter in J. Barnes and S. Shattuck-Hufnagel (eds.), *Prosodic Theory and Practice*, MIT Press, pp. 247-257.
-**DOI/URL:** N/A (preprint)
+# The Trouble with ToBI
 
 ## One-Sentence Summary
 

@@ -1,10 +1,13 @@
-# Prosodic Modeling in Text-to-Speech Synthesis
+---
+title: "Prosodic Modeling in Text-to-Speech Synthesis"
+authors: "Jan P. H. van Santen"
+year: 1997
+venue: "EUROSPEECH '97, 5th European Conference on Speech Communication and Technology, Rhodes, Greece"
+doi_url: "10.21437/Eurospeech.1997-3"
+affiliation: "Lucent Technologies - Bell Labs"
+---
 
-**Authors:** Jan P. H. van Santen
-**Year:** 1997
-**Venue:** EUROSPEECH '97, 5th European Conference on Speech Communication and Technology, Rhodes, Greece
-**DOI:** 10.21437/Eurospeech.1997-3
-**Affiliation:** Lucent Technologies - Bell Labs
+# Prosodic Modeling in Text-to-Speech Synthesis
 
 ## One-Sentence Summary
 A comprehensive analysis of obstacles to improving TTS prosody: synthesis component limits, combinatorial/statistical constraints requiring content-specific models, and neglected research issues in timing and intonation.

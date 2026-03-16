@@ -1,9 +1,12 @@
-# Coarticulation in VCV Utterances: Spectrographic Measurements
+---
+title: "Coarticulation in VCV Utterances: Spectrographic Measurements"
+authors: "S. E. G. Öhman"
+year: 1966
+venue: "The Journal of the Acoustical Society of America, Vol. 39, pp. 151-168"
+doi_url: "10.1121/1.1909864"
+---
 
-**Author:** S. E. G. Öhman
-**Year:** 1966
-**Venue:** The Journal of the Acoustical Society of America, Vol. 39, pp. 151-168
-**DOI:** 10.1121/1.1909864
+# Coarticulation in VCV Utterances: Spectrographic Measurements
 
 ## One-Sentence Summary
 

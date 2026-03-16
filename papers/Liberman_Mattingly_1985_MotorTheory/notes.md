@@ -1,9 +1,12 @@
-# The Motor Theory of Speech Perception Revised
+---
+title: "The Motor Theory of Speech Perception Revised"
+authors: "Alvin M. Liberman, Ignatius G. Mattingly"
+year: 1985
+venue: "Cognition, 21, pp. 1-36"
+affiliation: "Haskins Laboratories, University of Connecticut, Yale University"
+---
 
-**Authors:** Alvin M. Liberman, Ignatius G. Mattingly
-**Year:** 1985
-**Venue:** Cognition, 21, pp. 1-36
-**Affiliation:** Haskins Laboratories, University of Connecticut, Yale University
+# The Motor Theory of Speech Perception Revised
 
 ## One-Sentence Summary
 

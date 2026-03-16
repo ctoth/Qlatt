@@ -1,3 +1,8 @@
+---
+title: "Stevens & House 1963 — Perturbation of Vowel Articulations by Consonantal Context"
+year: 1963
+---
+
 # Stevens & House 1963 — Perturbation of Vowel Articulations by Consonantal Context
 
 ## Key Findings for Synthesis
@@ -156,3 +161,22 @@ The paper identifies a neutral vocal tract configuration corresponding approxima
    - Labials: low F2-locus (~700-1000 cps)
    - Postdentals: intermediate F2-locus (~1700-1800 cps)
    - Velars: high F2-locus (~2000+ cps for front vowels, variable for back vowels)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — theoretical framework
+- `Peterson_Barney_1952_VowelFormants` — baseline vowel formant data
+- `Stevens_House_1961_AcousticalTheoryVowelProduction` — predecessor paper on vowel acoustics
+
+### Cited By (in Collection)
+- `Broad_Clermont_1987_VowelFormantContoursCVC` — cites Stevens & House 1963 for additivity of consonant effects
+- `Hillenbrand_1995_VowelAcoustics` — references Stevens & House for coarticulation effects
+- `Harrington_2011_HighBackVowelFronting` — cites for formant perturbation baseline
+- `Zue_1976_StopConsonantAcoustics` — references for stop consonant context effects
+
+### Conceptual Links (not citation-based)
+- `Delattre_1955_AcousticLociTransitionalCues` — complementary perspectives: Delattre's perceptual loci vs Stevens & House's production-based undershoot
+- `Lindblom_1971_AcousticConsequencesArticulatory` — both study articulator-to-formant mapping; Lindblom provides the articulatory model, Stevens & House provide empirical formant data in context
+- `Gay_1977_ArticulatoryMovementsVCV` — articulatory data that explains the acoustic undershoot Stevens & House measured
+- `Broad_Clermont_1987_VowelFormantContoursCVC` — extends Stevens & House's additivity findings into a formal mathematical model

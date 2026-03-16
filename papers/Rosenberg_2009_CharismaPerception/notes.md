@@ -1,6 +1,10 @@
-# Rosenberg & Hirschberg (2009) - Charisma Perception from Text and Speech
+---
+title: "Rosenberg & Hirschberg (2009) - Charisma Perception from Text and Speech"
+year: 2009
+citation: "Rosenberg A, Hirschberg J (2009) Charisma perception from text and speech. Speech Communication 51, 640-655. doi:10.1016/j.specom.2008.11.001"
+---
 
-**Citation:** Rosenberg A, Hirschberg J (2009) Charisma perception from text and speech. Speech Communication 51, 640-655. doi:10.1016/j.specom.2008.11.001
+# Rosenberg & Hirschberg (2009) - Charisma Perception from Text and Speech
 
 ## Experimental Design
 - Stimuli: 2004 Democratic primary candidate speeches (Edwards, Sharpton, Dean, Lieberman, Kucinich, Gephardt, Kerry, Clark, Moseley Braun)

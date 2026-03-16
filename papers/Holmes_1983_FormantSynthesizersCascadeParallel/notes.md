@@ -1,9 +1,12 @@
-# Formant Synthesizers: Cascade or Parallel?
+---
+title: "Formant Synthesizers: Cascade or Parallel?"
+authors: "J.N. Holmes"
+year: 1983
+venue: "Speech Communication 2 (1983) 251-273, Elsevier/North-Holland"
+doi_url: "0167-6393/83/$3.00"
+---
 
-**Authors:** J.N. Holmes
-**Year:** 1983
-**Venue:** Speech Communication 2 (1983) 251-273, Elsevier/North-Holland
-**DOI/URL:** 0167-6393/83/$3.00
+# Formant Synthesizers: Cascade or Parallel?
 
 ## One-Sentence Summary
 This paper provides a rigorous technical argument that parallel formant synthesizers, when properly designed with appropriate spectral shaping filters and low-frequency compensation, are superior to cascade synthesizers for all speech sounds including vowels.

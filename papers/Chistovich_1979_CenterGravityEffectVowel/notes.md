@@ -1,3 +1,8 @@
+---
+title: "Chistovich & Lublinskaya (1979) - Implementation Notes"
+year: 1979
+---
+
 # Chistovich & Lublinskaya (1979) - Implementation Notes
 
 ## The Center of Gravity Effect in Vowel Spectra and Critical Distance Between the Formants

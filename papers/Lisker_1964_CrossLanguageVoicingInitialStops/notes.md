@@ -1,9 +1,12 @@
-# Lisker & Abramson 1964 — Implementation Notes
+---
+title: "Lisker & Abramson 1964 — Implementation Notes"
+authors: "Leigh Lisker & Arthur S. Abramson"
+year: 1964
+venue: "Word, 20:3, 384-422"
+doi_url: "10.1080/00437956.1964.11659830"
+---
 
-**Paper:** A Cross-Language Study of Voicing in Initial Stops: Acoustical Measurements
-**Authors:** Leigh Lisker & Arthur S. Abramson
-**Journal:** Word, 20:3, 384-422
-**DOI:** 10.1080/00437956.1964.11659830
+# Lisker & Abramson 1964 — Implementation Notes
 
 ## Core Concept: Voice Onset Time (VOT)
 

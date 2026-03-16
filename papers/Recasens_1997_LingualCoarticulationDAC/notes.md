@@ -1,9 +1,12 @@
-# A Model of Lingual Coarticulation Based on Articulatory Constraints
+---
+title: "A Model of Lingual Coarticulation Based on Articulatory Constraints"
+authors: "Daniel Recasens, Maria Dolors Pallarès, Jordi Fontdevila"
+year: 1997
+venue: "Journal of the Acoustical Society of America, Vol. 102(1), pp. 544-561"
+doi_url: "S0001-4966(97)03106-8"
+---
 
-**Authors:** Daniel Recasens, Maria Dolors Pallarès, Jordi Fontdevila
-**Year:** 1997
-**Venue:** Journal of the Acoustical Society of America, Vol. 102(1), pp. 544-561
-**DOI:** S0001-4966(97)03106-8
+# A Model of Lingual Coarticulation Based on Articulatory Constraints
 
 ## One-Sentence Summary
 

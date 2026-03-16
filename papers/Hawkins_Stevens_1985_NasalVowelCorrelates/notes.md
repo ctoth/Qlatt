@@ -1,9 +1,12 @@
-# Acoustic and Perceptual Correlates of the Non-Nasal-Nasal Distinction for Vowels
+---
+title: "Acoustic and Perceptual Correlates of the Non-Nasal-Nasal Distinction for Vowels"
+authors: "Sarah Hawkins (Haskins Laboratories), Kenneth N. Stevens (MIT)"
+year: 1985
+venue: "Journal of the Acoustical Society of America, Vol. 77(4), April 1985, pp. 1560-1575"
+doi_url: "0001-4966/85/041560-16$00.80"
+---
 
-**Authors:** Sarah Hawkins (Haskins Laboratories), Kenneth N. Stevens (MIT)
-**Year:** 1985
-**Venue:** Journal of the Acoustical Society of America, Vol. 77(4), April 1985, pp. 1560-1575
-**DOI:** 0001-4966/85/041560-16$00.80
+# Acoustic and Perceptual Correlates of the Non-Nasal-Nasal Distinction for Vowels
 
 ## One-Sentence Summary
 

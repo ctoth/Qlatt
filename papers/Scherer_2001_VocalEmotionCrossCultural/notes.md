@@ -1,9 +1,12 @@
-# Emotion Inferences from Vocal Expression Correlate Across Languages and Cultures
+---
+title: "Emotion Inferences from Vocal Expression Correlate Across Languages and Cultures"
+authors: "Klaus R. Scherer, Rainer Banse, Harald G. Wallbott"
+year: 2001
+venue: "Journal of Cross-Cultural Psychology, Vol. 32 No. 1, pp. 76-92"
+doi_url: "10.1177/0022022101032001009"
+---
 
-**Authors:** Klaus R. Scherer, Rainer Banse, Harald G. Wallbott
-**Year:** 2001
-**Venue:** Journal of Cross-Cultural Psychology, Vol. 32 No. 1, pp. 76-92
-**DOI:** 10.1177/0022022101032001009
+# Emotion Inferences from Vocal Expression Correlate Across Languages and Cultures
 
 ## One-Sentence Summary
 

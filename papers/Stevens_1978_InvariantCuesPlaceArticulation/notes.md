@@ -1,3 +1,8 @@
+---
+title: "Stevens & Blumstein 1978 — Invariant Cues for Place of Articulation in Stop Consonants"
+year: 1978
+---
+
 # Stevens & Blumstein 1978 — Invariant Cues for Place of Articulation in Stop Consonants
 
 ## Key Finding

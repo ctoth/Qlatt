@@ -1,9 +1,12 @@
-# Analog Studies Of The Nasalization Of Vowels
+---
+title: "Analog Studies Of The Nasalization Of Vowels"
+authors: "Arthur S. House, Kenneth N. Stevens"
+year: 1956
+venue: "Journal of Speech and Hearing Disorders, Vol. 21, No. 2, pp. 218-232"
+doi_url: "N/A (presented at 1955 ASHA Convention in Los Angeles)"
+---
 
-**Authors:** Arthur S. House, Kenneth N. Stevens
-**Year:** 1956
-**Venue:** Journal of Speech and Hearing Disorders, Vol. 21, No. 2, pp. 218-232
-**DOI/URL:** N/A (presented at 1955 ASHA Convention in Los Angeles)
+# Analog Studies Of The Nasalization Of Vowels
 
 ## One-Sentence Summary
 

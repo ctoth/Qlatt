@@ -1,9 +1,12 @@
-# Laryngeal Factors in Voiceless Consonant Production in Men, Women, and 5-Year-Olds
+---
+title: "Laryngeal Factors in Voiceless Consonant Production in Men, Women, and 5-Year-Olds"
+authors: "Laura L. Koenig"
+year: 2000
+venue: "Journal of Speech, Language, and Hearing Research, Vol. 43, pp. 1211-1228"
+affiliation: "Haskins Laboratories, New Haven, CT"
+---
 
-**Authors:** Laura L. Koenig
-**Year:** 2000
-**Venue:** Journal of Speech, Language, and Hearing Research, Vol. 43, pp. 1211-1228
-**Affiliation:** Haskins Laboratories, New Haven, CT
+# Laryngeal Factors in Voiceless Consonant Production in Men, Women, and 5-Year-Olds
 
 ## One-Sentence Summary
 

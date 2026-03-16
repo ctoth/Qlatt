@@ -1,9 +1,12 @@
-# On the Linearity of the Relationship Between the Sound Pressure Level and the Negative Peak Amplitude of the Differentiated Glottal Flow in Vowel Production
+---
+title: "On the Linearity of the Relationship Between the Sound Pressure Level and the Negative Peak Amplitude of the Differentiated Glottal Flow in Vowel Production"
+authors: "Paavo Alku, Juha Vintturi, Erkki Vilkman"
+year: 1999
+venue: "Speech Communication 28 (1999) 269-281"
+doi_url: "10.1016/S0167-6393(99)00020-5"
+---
 
-**Authors:** Paavo Alku, Juha Vintturi, Erkki Vilkman
-**Year:** 1999
-**Venue:** Speech Communication 28 (1999) 269-281
-**DOI:** 10.1016/S0167-6393(99)00020-5
+# On the Linearity of the Relationship Between the Sound Pressure Level and the Negative Peak Amplitude of the Differentiated Glottal Flow in Vowel Production
 
 ## One-Sentence Summary
 

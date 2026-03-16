@@ -1,9 +1,12 @@
-# Discovering Dynamical Laws for Speech Gestures
+---
+title: "Discovering Dynamical Laws for Speech Gestures"
+authors: "Sam Kirkham"
+year: 2025
+venue: "Cognitive Science (Vol. 49, e70064)"
+doi_url: "10.1111/cogs.70064"
+---
 
-**Authors:** Sam Kirkham
-**Year:** 2025
-**Venue:** Cognitive Science (Vol. 49, e70064)
-**DOI:** 10.1111/cogs.70064
+# Discovering Dynamical Laws for Speech Gestures
 
 ## One-Sentence Summary
 Uses sparse symbolic regression (SINDy) on X-ray microbeam articulatory data to discover that speech gestures are governed by under-damped (not critically damped) second-order differential equations, with ~1/3 of trajectories requiring a nonlinear cubic term.

@@ -1,9 +1,12 @@
-# The Sound of Im/Politeness
+---
+title: "The Sound of Im/Politeness"
+authors: "Jonathan A. Caballero, Nikos Vergis, Xiaoming Jiang, Marc D. Pell"
+year: 2018
+venue: "Speech Communication 102 (2018) 39-53"
+doi_url: "https://doi.org/10.1016/j.specom.2018.06.004"
+---
 
-**Authors:** Jonathan A. Caballero, Nikos Vergis, Xiaoming Jiang, Marc D. Pell
-**Year:** 2018
-**Venue:** Speech Communication 102 (2018) 39-53
-**DOI:** https://doi.org/10.1016/j.specom.2018.06.004
+# The Sound of Im/Politeness
 
 ## One-Sentence Summary
 

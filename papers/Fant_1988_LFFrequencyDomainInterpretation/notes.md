@@ -1,9 +1,12 @@
-# Frequency Domain Interpretation and Derivation of Glottal Flow Parameters
+---
+title: "Frequency Domain Interpretation and Derivation of Glottal Flow Parameters"
+authors: "Gunnar Fant & Qiguang Lin"
+year: 1988
+venue: "STL-QPSR, Vol. 29, No. 2-3, pp. 1-21"
+institution: "KTH Royal Institute of Technology, Stockholm"
+---
 
-**Authors:** Gunnar Fant & Qiguang Lin
-**Year:** 1988
-**Venue:** STL-QPSR, Vol. 29, No. 2-3, pp. 1-21
-**Institution:** KTH Royal Institute of Technology, Stockholm
+# Frequency Domain Interpretation and Derivation of Glottal Flow Parameters
 
 ## One-Sentence Summary
 Establishes the theoretical framework for relating LF model time-domain parameters to frequency-domain spectral characteristics, enabling both synthesis parameter control and analysis through inverse filtering.

@@ -1,9 +1,12 @@
-# On the Quantal Nature of Speech
+---
+title: "On the Quantal Nature of Speech"
+authors: "Kenneth N. Stevens"
+year: 1989
+venue: "Journal of Phonetics, 17, 3-45"
+institution: "Research Laboratory of Electronics, MIT"
+---
 
-**Authors:** Kenneth N. Stevens
-**Year:** 1989
-**Venue:** Journal of Phonetics, 17, 3-45
-**Institution:** Research Laboratory of Electronics, MIT
+# On the Quantal Nature of Speech
 
 ## One-Sentence Summary
 Speech production exhibits quantal (non-linear) articulatory-acoustic relationships where certain articulatory configurations produce stable acoustic outputs insensitive to small perturbations, forming the physical basis for distinctive phonetic features.

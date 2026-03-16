@@ -1,9 +1,12 @@
-# Fricative Production Modelling: Aerodynamic and Acoustic Data
+---
+title: "Fricative Production Modelling: Aerodynamic and Acoustic Data"
+authors: "Pierre Badin, Gunnar Fant"
+year: 1989
+venue: "EUROSPEECH '89, Paris, France, September 27-29, 1989"
+doi_url: "10.21437/Eurospeech.1989-174"
+---
 
-**Authors:** Pierre Badin, Gunnar Fant
-**Year:** 1989
-**Venue:** EUROSPEECH '89, Paris, France, September 27-29, 1989
-**DOI:** 10.21437/Eurospeech.1989-174
+# Fricative Production Modelling: Aerodynamic and Acoustic Data
 
 ## One-Sentence Summary
 

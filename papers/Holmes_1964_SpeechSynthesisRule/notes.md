@@ -1,3 +1,8 @@
+---
+title: "Holmes, Mattingly & Shearme 1964 - Speech Synthesis by Rule"
+year: 1964
+---
+
 # Holmes, Mattingly & Shearme 1964 - Speech Synthesis by Rule
 
 ## Implementation Notes

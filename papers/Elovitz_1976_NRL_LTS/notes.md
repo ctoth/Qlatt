@@ -1,10 +1,13 @@
-# Automatic Translation of English Text to Phonetics by Means of Letter-to-Sound Rules
+---
+title: "Automatic Translation of English Text to Phonetics by Means of Letter-to-Sound Rules"
+authors: "Honey Sue Elovitz, Rodney W. Johnson, Astrid McHugh, John E. Shore"
+year: 1976
+venue: "NRL Report 7948, Naval Research Laboratory, Washington, D.C."
+pages: "102"
+date: "January 21, 1976"
+---
 
-**Authors:** Honey Sue Elovitz, Rodney W. Johnson, Astrid McHugh, John E. Shore
-**Year:** 1976
-**Venue:** NRL Report 7948, Naval Research Laboratory, Washington, D.C.
-**Date:** January 21, 1976
-**Pages:** 102
+# Automatic Translation of English Text to Phonetics by Means of Letter-to-Sound Rules
 
 ## One-Sentence Summary
 Presents 329 letter-to-sound rules achieving 90% frequency-weighted accuracy on English text, using a simple context-sensitive pattern matching system that became the foundation for many later TTS G2P implementations.

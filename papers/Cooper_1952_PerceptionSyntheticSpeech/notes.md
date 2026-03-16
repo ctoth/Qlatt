@@ -1,9 +1,12 @@
-# Some Experiments on the Perception of Synthetic Speech Sounds
+---
+title: "Some Experiments on the Perception of Synthetic Speech Sounds"
+authors: "Franklin S. Cooper, Pierre C. Delattre, Alvin M. Liberman, John M. Borst, Louis J. Gerstman"
+year: 1952
+venue: "The Journal of the Acoustical Society of America, Vol. 24, No. 6, pp. 597-606"
+doi_url: "10.1121/1.1906940"
+---
 
-**Authors:** Franklin S. Cooper, Pierre C. Delattre, Alvin M. Liberman, John M. Borst, Louis J. Gerstman
-**Year:** 1952
-**Venue:** The Journal of the Acoustical Society of America, Vol. 24, No. 6, pp. 597-606
-**DOI:** 10.1121/1.1906940
+# Some Experiments on the Perception of Synthetic Speech Sounds
 
 ## One-Sentence Summary
 This paper establishes through systematic perception experiments on the Haskins pattern playback that stop consonant place of articulation is cued by burst frequency position and second-formant transition direction/extent, and that these cues interact with the following vowel context.

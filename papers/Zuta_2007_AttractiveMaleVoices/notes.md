@@ -1,9 +1,12 @@
-# Phonetic Criteria of Attractive Male Voices
+---
+title: "Phonetic Criteria of Attractive Male Voices"
+authors: "Vivien Zuta"
+year: 2007
+venue: "ICPhS XVI (Saarbrücken, 6-10 August 2007), ID 1021"
+pages: "1837-1840"
+---
 
-**Authors:** Vivien Zuta
-**Year:** 2007
-**Venue:** ICPhS XVI (Saarbrücken, 6-10 August 2007), ID 1021
-**Pages:** 1837-1840
+# Phonetic Criteria of Attractive Male Voices
 
 ## One-Sentence Summary
 Identifies acoustic parameters (F0 modulation, nasality, pause structure, hesitation frequency) that distinguish attractive from unattractive German male voices as judged by female listeners.

@@ -1,9 +1,12 @@
-# Glottal Source Modeling for Singing Voice Synthesis
+---
+title: "Glottal Source Modeling for Singing Voice Synthesis"
+authors: "Hui-Ling Lu, Julius O. Smith III"
+year: "~1999 (inferred from references)"
+venue: "CCRMA, Stanford University (likely ICMC or similar conference)"
+doi_url: "N/A"
+---
 
-**Authors:** Hui-Ling Lu, Julius O. Smith III
-**Year:** ~1999 (inferred from references)
-**Venue:** CCRMA, Stanford University (likely ICMC or similar conference)
-**DOI/URL:** N/A
+# Glottal Source Modeling for Singing Voice Synthesis
 
 ## One-Sentence Summary
 Provides a complete LF-model + pitch-synchronous aspiration noise framework for singing synthesis with detailed parameter tables and analysis algorithms for extracting voice quality from recordings.

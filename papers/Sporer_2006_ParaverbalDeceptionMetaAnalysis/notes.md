@@ -1,9 +1,12 @@
-# Paraverbal Indicators of Deception: A Meta-Analytic Synthesis
+---
+title: "Paraverbal Indicators of Deception: A Meta-Analytic Synthesis"
+authors: "Siegfried Ludwig Sporer, Barbara Schwandt"
+year: 2006
+venue: "Applied Cognitive Psychology, 20: 421-446"
+doi_url: "10.1002/acp.1190"
+---
 
-**Authors:** Siegfried Ludwig Sporer, Barbara Schwandt
-**Year:** 2006
-**Venue:** Applied Cognitive Psychology, 20: 421-446
-**DOI:** 10.1002/acp.1190
+# Paraverbal Indicators of Deception: A Meta-Analytic Synthesis
 
 ## One-Sentence Summary
 This meta-analysis quantifies the effect sizes of nine paraverbal speech behaviors (pitch, speech rate, message duration, pauses, response latency, speech errors, repetitions, number of words) associated with deception across 41 studies, finding that only pitch and response latency are reliably associated with lying in weighted analyses.

@@ -1,10 +1,13 @@
-# TOBI: A Standard for Labeling English Prosody
+---
+title: "TOBI: A Standard for Labeling English Prosody"
+authors: "Kim Silverman, Mary Beckman, John Pitrelli, Mari Ostendorf, Colin Wightman, Patti Price, Janet Pierrehumbert, Julia Hirschberg"
+year: 1992
+venue: "2nd International Conference on Spoken Language Processing (ICSLP 92), Banff, Alberta, Canada, October 12-16, 1992"
+doi_url: "10.21437/ICSLP.1992-260"
+pages: "867-870"
+---
 
-**Authors:** Kim Silverman, Mary Beckman, John Pitrelli, Mari Ostendorf, Colin Wightman, Patti Price, Janet Pierrehumbert, Julia Hirschberg
-**Year:** 1992
-**Venue:** 2nd International Conference on Spoken Language Processing (ICSLP 92), Banff, Alberta, Canada, October 12-16, 1992
-**DOI:** 10.21437/ICSLP.1992-260
-**Pages:** 867-870
+# TOBI: A Standard for Labeling English Prosody
 
 ## One-Sentence Summary
 Defines the ToBI (Tones and Break Indices) prosodic transcription standard -- a multi-tier annotation system for English prosody with demonstrated high inter-transcriber reliability, providing the canonical framework for labeling pitch accents, phrase boundaries, and break indices in speech.

@@ -1,9 +1,12 @@
-# Glottal Characteristics of Female Speakers: Acoustic Correlates
+---
+title: "Glottal Characteristics of Female Speakers: Acoustic Correlates"
+authors: "Helen M. Hanson"
+year: 1997
+venue: "Journal of the Acoustical Society of America, Vol. 101, No. 1, January 1997"
+doi_url: "S0001-4966(97)03001-4"
+---
 
-**Authors:** Helen M. Hanson
-**Year:** 1997
-**Venue:** Journal of the Acoustical Society of America, Vol. 101, No. 1, January 1997
-**DOI:** S0001-4966(97)03001-4
+# Glottal Characteristics of Female Speakers: Acoustic Correlates
 
 ## One-Sentence Summary
 Defines corrected spectral measures (H1\*-H2\*, H1\*-A1, H1\*-A3\*, B1, noise ratings) that quantify female glottal voice quality variations caused by incomplete vocal fold closure and nonabrupt closure patterns.

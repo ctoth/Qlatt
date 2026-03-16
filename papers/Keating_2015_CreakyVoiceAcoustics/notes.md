@@ -1,6 +1,10 @@
-# Keating, Garellek & Kreiman (2015) - Acoustic Properties of Different Kinds of Creaky Voice
+---
+title: "Keating, Garellek & Kreiman (2015) - Acoustic Properties of Different Kinds of Creaky Voice"
+year: 2015
+citation: "Keating PA, Garellek M, Kreiman J (2015) Acoustic properties of different kinds of creaky voice. Proc. ICPhS 2015."
+---
 
-**Citation:** Keating PA, Garellek M, Kreiman J (2015) Acoustic properties of different kinds of creaky voice. Proc. ICPhS 2015.
+# Keating, Garellek & Kreiman (2015) - Acoustic Properties of Different Kinds of Creaky Voice
 
 ## Core Argument
 

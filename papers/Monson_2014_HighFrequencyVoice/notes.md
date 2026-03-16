@@ -1,9 +1,12 @@
-# The Perceptual Significance of High-Frequency Energy in the Human Voice
+---
+title: "The Perceptual Significance of High-Frequency Energy in the Human Voice"
+authors: "Brian B. Monson, Eric J. Hunter, Andrew J. Lotto, Brad H. Story"
+year: 2014
+venue: "Frontiers in Psychology, 5, 587"
+doi_url: "10.3389/fpsyg.2014.00587"
+---
 
-**Authors:** Brian B. Monson, Eric J. Hunter, Andrew J. Lotto, Brad H. Story
-**Year:** 2014
-**Venue:** Frontiers in Psychology, 5, 587
-**DOI:** 10.3389/fpsyg.2014.00587
+# The Perceptual Significance of High-Frequency Energy in the Human Voice
 
 ## One-Sentence Summary
 This review establishes that high-frequency energy (HFE, defined as the 8- and 16-kHz octave bands, i.e., 5.7-22 kHz) in speech and singing is perceptually significant for quality, naturalness, localization, intelligibility, and talker recognition, contrary to longstanding assumptions that frequencies above ~5 kHz are unimportant.

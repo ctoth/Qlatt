@@ -1,3 +1,8 @@
+---
+title: "Gay 1978 — Effect of Speaking Rate on Vowel Formant Movements"
+year: 1978
+---
+
 # Gay 1978 — Effect of Speaking Rate on Vowel Formant Movements
 
 ## Implementation-Relevant Findings

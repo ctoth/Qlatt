@@ -1,9 +1,12 @@
-# Assignment of Segmental Duration in Text-to-Speech Synthesis
+---
+title: "Assignment of Segmental Duration in Text-to-Speech Synthesis"
+authors: "Jan P. H. van Santen"
+year: 1994
+venue: "Computer Speech and Language, Vol. 8, pp. 95-128"
+doi_url: "10.1006/csla.1994.1005"
+---
 
-**Authors:** Jan P. H. van Santen
-**Year:** 1994
-**Venue:** Computer Speech and Language, Vol. 8, pp. 95-128
-**DOI:** 10.1006/csla.1994.1005
+# Assignment of Segmental Duration in Text-to-Speech Synthesis
 
 ## One-Sentence Summary
 This paper presents a complete duration prediction system for TTS based on sums-of-products models organized within a category tree, achieving 0.93 correlation with observed durations and significantly outperforming Klatt-style multiplicative rules in perceptual evaluation.

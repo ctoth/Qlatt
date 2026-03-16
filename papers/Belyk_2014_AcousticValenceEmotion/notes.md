@@ -1,9 +1,12 @@
-# The Acoustic Correlates of Valence Depend on Emotion Family
+---
+title: "The Acoustic Correlates of Valence Depend on Emotion Family"
+authors: "Michel Belyk and Steven Brown"
+year: 2014
+venue: "Journal of Voice (Article in Press)"
+doi_url: "http://dx.doi.org/10.1016/j.jvoice.2013.12.007"
+---
 
-**Authors:** Michel Belyk and Steven Brown
-**Year:** 2014
-**Venue:** Journal of Voice (Article in Press)
-**DOI/URL:** http://dx.doi.org/10.1016/j.jvoice.2013.12.007
+# The Acoustic Correlates of Valence Depend on Emotion Family
 
 ## One-Sentence Summary
 Provides empirically grounded "rules of expression" mapping emotion families (motivational, moral, aesthetic) to distinct pitch × loudness profiles, showing that a single valence→F0 rule is inadequate for expressive synthesis.

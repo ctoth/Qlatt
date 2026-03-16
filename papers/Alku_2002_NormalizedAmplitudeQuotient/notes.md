@@ -1,3 +1,8 @@
+---
+title: "Alku, Backstrom & Vilkman 2002 — Normalized Amplitude Quotient for Parametrization of the Glottal Flow"
+year: 2002
+---
+
 # Alku, Backstrom & Vilkman 2002 — Normalized Amplitude Quotient for Parametrization of the Glottal Flow
 
 ## Key Contribution
@@ -135,3 +140,28 @@ NAQ provides a single-knob control for voice quality:
 3. d_peak: amplitude of derivative at t_peak
 4. Compute NAQ = f_ac / (d_peak * T)
 5. Average over 4-6 consecutive glottal periods for stable estimates
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — LF model whose parameters NAQ simplifies
+- `Fant_1995_LFModelRevisited` — defines Rd parameter that NAQ relates to
+- `Fant_1997_VoiceSourceConnectedSpeech` — uses Rd extensively; NAQ provides equivalent parametrization
+- `Fant_1988_LFFrequencyDomainInterpretation` — first introduced f_ac/d_peak as "effective declination time"
+- `Childers_Lee_1991_VoiceQualityFactors` — frequency-domain voice source quantification
+- `Holmberg_1988_GlottalAirflowPressure` — baseline glottal flow measurements
+- `Strik_Boves_1992_ControlF0IntensityVoiceQuality` — LF model fitting approach
+- `ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling` — DAP method used for inverse filtering
+- `Alku_1997_ParabolicSpectralParameter` — authors' earlier PSP work
+- `Alku_1999_SPL_DpeakLinearity` — authors' related work on d_peak
+
+### Cited By (in Collection)
+- `Doval_2006_SpectrumGlottalFlowModels` — references NAQ for voice source parametrization
+- `Drugman_2020_GlottalSourceEstimation` — cites NAQ as standard voice source measure
+- `Henrich_2001_SpectralOqAsymmetry` — references NAQ in context of open quotient measures
+- `Zhang_2021_LaryngealSizeSexDifferences` — uses NAQ for voice quality quantification
+- `Perrotin_2021_LF_LinearFilter_Equivalence` — references NAQ-Rd relationship
+
+### Conceptual Links (not citation-based)
+- `Gobl_2003_VoiceQualityEmotion` — NAQ could parametrize the voice quality dimensions Gobl studies
+- `Kreiman_2012_VoiceQualityHarmonicOQ` — both address voice quality parametrization from different angles

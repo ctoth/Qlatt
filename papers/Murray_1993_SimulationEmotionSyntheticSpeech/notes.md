@@ -1,3 +1,8 @@
+---
+title: "Murray & Arnott 1993 — Implementation Notes"
+year: 1993
+---
+
 # Murray & Arnott 1993 — Implementation Notes
 
 ## Table I: Summary of Vocal Emotion Effects (Five Primary Emotions)

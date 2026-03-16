@@ -1,9 +1,12 @@
-# The Spectrum of Glottal Flow Models
+---
+title: "The Spectrum of Glottal Flow Models"
+authors: "Boris Doval, Christophe d'Alessandro, Nathalie Henrich"
+year: 2006
+venue: "Acta Acustica united with Acustica, Vol. 92"
+doi_url: "10.1016/S0003-682X(06)00031-2"
+---
 
-**Authors:** Boris Doval, Christophe d'Alessandro, Nathalie Henrich
-**Year:** 2006
-**Venue:** Acta Acustica united with Acustica, Vol. 92
-**DOI:** 10.1016/S0003-682X(06)00031-2
+# The Spectrum of Glottal Flow Models
 
 ## One-Sentence Summary
 

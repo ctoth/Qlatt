@@ -1,3 +1,8 @@
+---
+title: "Saltzman & Munhall 1989 — A Dynamical Approach to Gestural Patterning in Speech Production"
+year: 1989
+---
+
 # Saltzman & Munhall 1989 — A Dynamical Approach to Gestural Patterning in Speech Production
 
 **Citation**: Saltzman, E. L., & Munhall, K. G. (1989). A dynamical approach to gestural patterning in speech production. *Ecological Psychology*, 1(4), 333–382. DOI: 10.1207/s15326969eco0104_2

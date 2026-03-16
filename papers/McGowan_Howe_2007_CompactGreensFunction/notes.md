@@ -1,9 +1,12 @@
-# Compact Green's Functions Extend the Acoustic Theory of Speech Production
+---
+title: "Compact Green's Functions Extend the Acoustic Theory of Speech Production"
+authors: "R.S. McGowan, M.S. Howe"
+year: 2007
+venue: "Journal of Phonetics 35, 259-270"
+doi_url: "10.1016/j.wocn.2006.03.001"
+---
 
-**Authors:** R.S. McGowan, M.S. Howe
-**Year:** 2007
-**Venue:** Journal of Phonetics 35, 259-270
-**DOI:** 10.1016/j.wocn.2006.03.001
+# Compact Green's Functions Extend the Acoustic Theory of Speech Production
 
 ## One-Sentence Summary
 This paper extends the classical source-filter acoustic theory of speech production by introducing compact Green's functions that model the detailed 3D coupling between aerodynamic (hydrodynamic) sources and acoustic radiation in the vocal tract, particularly for pressure sources like sibilant fricatives and aspiration.

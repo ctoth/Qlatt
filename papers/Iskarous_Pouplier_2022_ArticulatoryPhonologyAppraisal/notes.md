@@ -1,3 +1,8 @@
+---
+title: "Iskarous & Pouplier (2022) — Implementation Notes"
+year: 2022
+---
+
 # Iskarous & Pouplier (2022) — Implementation Notes
 
 ## Paper Identity

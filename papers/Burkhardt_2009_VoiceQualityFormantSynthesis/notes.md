@@ -1,9 +1,12 @@
-# Rule-Based Voice Quality Variation with Formant Synthesis
+---
+title: "Rule-Based Voice Quality Variation with Formant Synthesis"
+authors: "Felix Burkhardt"
+year: 2009
+venue: "Interspeech 2009, Brighton, UK"
+doi_url: "10.21437/Interspeech.2009-499"
+---
 
-**Authors:** Felix Burkhardt
-**Year:** 2009
-**Venue:** Interspeech 2009, Brighton, UK
-**DOI:** 10.21437/Interspeech.2009-499
+# Rule-Based Voice Quality Variation with Formant Synthesis
 
 ## One-Sentence Summary
 Provides explicit formulas for modifying Klatt synthesizer parameters (OQ, TL, AV, AH, B1-B5, DI, FL) to simulate Laver's phonation types (breathy, tense, whispery, creaky, falsetto) with perceptual validation.

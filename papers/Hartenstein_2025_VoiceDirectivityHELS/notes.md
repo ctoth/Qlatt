@@ -1,9 +1,12 @@
-# Sound Source Directivity Estimation via a Spherical Wave Decomposition of the Radiated Field: Application to Human Voice Directivity Measurements
+---
+title: "Sound Source Directivity Estimation via a Spherical Wave Decomposition of the Radiated Field: Application to Human Voice Directivity Measurements"
+authors: "Matthieu Hartenstein, Paul Luizard, Hélène Moingeon, Cédric Pinhède, Marc Pachebat, Christian Ollivon, François Ollivier, Fabrice Silva"
+year: 2025
+venue: "Forum Acusticum / Euronoise 2025 (11th Convention of the European Acoustics Association), Málaga, Spain"
+doi_url: "10.61782/fa.2025.0789"
+---
 
-**Authors:** Matthieu Hartenstein, Paul Luizard, Hélène Moingeon, Cédric Pinhède, Marc Pachebat, Christian Ollivon, François Ollivier, Fabrice Silva
-**Year:** 2025
-**Venue:** Forum Acusticum / Euronoise 2025 (11th Convention of the European Acoustics Association), Málaga, Spain
-**DOI:** 10.61782/fa.2025.0789
+# Sound Source Directivity Estimation via a Spherical Wave Decomposition of the Radiated Field: Application to Human Voice Directivity Measurements
 
 ## One-Sentence Summary
 Applies the Helmholtz Equation Least Squares (HELS) method with a 588-microphone spherical array to reconstruct full 3D far-field directivity of a human singer, providing frequency-dependent directivity patterns from 100 Hz to 4.5 kHz.

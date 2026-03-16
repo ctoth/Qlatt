@@ -1,9 +1,12 @@
-# Tree-Guided Transformation-Based Homograph Disambiguation in Mandarin TTS System
+---
+title: "Tree-Guided Transformation-Based Homograph Disambiguation in Mandarin TTS System"
+authors: "Fangzhou Liu, Qin Shi, Jianhua Tao"
+year: 2008
+venue: "ICASSP 2008"
+doi_url: "IEEE 1-4244-1484-9/08"
+---
 
-**Authors:** Fangzhou Liu, Qin Shi, Jianhua Tao
-**Year:** 2008
-**Venue:** ICASSP 2008
-**DOI/URL:** IEEE 1-4244-1484-9/08
+# Tree-Guided Transformation-Based Homograph Disambiguation in Mandarin TTS System
 
 ## One-Sentence Summary
 Hybrid algorithm combining decision trees with transformation-based learning (TBL) to automatically generate disambiguation templates for Mandarin polyphones, achieving 90.36% accuracy.

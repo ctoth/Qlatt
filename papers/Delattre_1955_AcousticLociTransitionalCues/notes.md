@@ -1,6 +1,10 @@
-# Delattre, Liberman & Cooper (1955) — Acoustic Loci and Transitional Cues for Consonants
+---
+title: "Delattre, Liberman & Cooper (1955) — Acoustic Loci and Transitional Cues for Consonants"
+year: 1955
+source: "JASA 27(4), 769–773. DOI: 10.1121/1.1908024"
+---
 
-**Source:** JASA 27(4), 769–773. DOI: 10.1121/1.1908024
+# Delattre, Liberman & Cooper (1955) — Acoustic Loci and Transitional Cues for Consonants
 
 ## Key Concept: Formant Locus Theory
 
@@ -96,3 +100,27 @@ F1 should always start low (~150–240 Hz) for stop consonants regardless of pla
 - Central harmonic 6 dB louder than flanking harmonics
 - Transitions always in syllable-initial position
 - Listeners: the three authors (not naive listeners for the main locus experiments)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Cooper_1952_PerceptionSyntheticSpeech` — predecessor Haskins perception experiments
+
+### Cited By (in Collection)
+- `Halle_1957_AcousticPropertiesStops` — cites Delattre et al. for Haskins transition experiments
+- `Broad_Clermont_1987_VowelFormantContoursCVC` — uses locus concept throughout
+- `Fant_1960_AcousticTheorySpeechProduction` — references locus concept
+- `Ohman_1966_CoarticulationVCV` — builds on locus theory for coarticulation model
+- `Stevens_1955_QuantitativeVowelArticulation` — references Delattre for transition cues
+- `Stevens_House_1956_FormantTransitionsVocalTract` — extends locus concept with vocal tract analog
+- `Holmes_1964_SpeechSynthesisRule` — uses locus values for synthesis rules
+- `Heinz_1961_PropertiesVoicelessFricatives` — references Delattre for consonant spectral analysis
+- `Blumstein_Stevens_1979_AcousticInvariance` — contrasts locus theory with spectral invariance
+- `Blumstein_1977_PropertyDetectorsBurstsTransitions` — tests locus theory predictions
+
+### Now in Collection
+- `Nakata_1959_SynthesisPerceptionNasals` — uses locus concept for nasal place cues
+
+### Conceptual Links (not citation-based)
+- `Stevens_House_1963_PerturbationVowelConsonant` — both study consonant-vowel acoustic relationships; Delattre from perceptual locus perspective, Stevens & House from production/undershoot perspective
+- `Gay_1977_ArticulatoryMovementsVCV` — articulatory evidence for the acoustic transitions Delattre characterized perceptually

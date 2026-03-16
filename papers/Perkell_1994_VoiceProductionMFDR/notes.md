@@ -1,9 +1,12 @@
-# Group Differences in Measures of Voice Production and Revised Values of Maximum Airflow Declination Rate
+---
+title: "Group Differences in Measures of Voice Production and Revised Values of Maximum Airflow Declination Rate"
+authors: "Joseph S. Perkell, Robert E. Hillman, Eva B. Holmberg"
+year: 1994
+venue: "Journal of the Acoustical Society of America, Vol. 96, No. 2, pp. 695-698"
+doi_url: "10.1121/1.410307"
+---
 
-**Authors:** Joseph S. Perkell, Robert E. Hillman, Eva B. Holmberg
-**Year:** 1994
-**Venue:** Journal of the Acoustical Society of America, Vol. 96, No. 2, pp. 695-698
-**DOI:** 10.1121/1.410307
+# Group Differences in Measures of Voice Production and Revised Values of Maximum Airflow Declination Rate
 
 ## One-Sentence Summary
 

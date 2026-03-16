@@ -1,9 +1,12 @@
-# Morphology and development of the human vocal tract: A study using magnetic resonance imaging
+---
+title: "Morphology and development of the human vocal tract: A study using magnetic resonance imaging"
+authors: "W. Tecumseh Fitch, Jay Giedd"
+year: 1999
+venue: "Journal of the Acoustical Society of America, 106(3), 1511-1522"
+doi_url: "10.1121/1.427148"
+---
 
-**Authors:** W. Tecumseh Fitch, Jay Giedd
-**Year:** 1999
-**Venue:** Journal of the Acoustical Society of America, 106(3), 1511-1522
-**DOI:** 10.1121/1.427148
+# Morphology and development of the human vocal tract: A study using magnetic resonance imaging
 
 ## One-Sentence Summary
 Provides MRI-derived normative data on vocal tract length (VTL) and segment proportions across age (2-25 years) and sex in 129 subjects, establishing quantitative relationships between body size, VTL, and the sex-specific pharyngeal elongation that occurs at male puberty.

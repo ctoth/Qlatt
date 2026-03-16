@@ -1,9 +1,12 @@
-# The Original ToBI System and the Evolution of the ToBI Framework
+---
+title: "The Original ToBI System and the Evolution of the ToBI Framework"
+authors: "Mary E. Beckman, Julia Hirschberg, and Stefanie Shattuck-Hufnagel"
+year: 2005
+venue: "Chapter 2 in Sun-Ah Jun (ed.), *Prosodic Models and Transcription: Towards Prosodic Typology*, Oxford University Press"
+doi_url: "Preprint draft"
+---
 
-**Authors:** Mary E. Beckman, Julia Hirschberg, and Stefanie Shattuck-Hufnagel
-**Year:** 2005
-**Venue:** Chapter 2 in Sun-Ah Jun (ed.), *Prosodic Models and Transcription: Towards Prosodic Typology*, Oxford University Press
-**DOI/URL:** Preprint draft
+# The Original ToBI System and the Evolution of the ToBI Framework
 
 ## One-Sentence Summary
 This chapter provides the definitive account of how the MAE_ToBI prosodic annotation system was designed, specifying the complete inventory of tonal labels, break indices, and inter-tier constraints that form the standard for annotating American English intonation and phrasing.

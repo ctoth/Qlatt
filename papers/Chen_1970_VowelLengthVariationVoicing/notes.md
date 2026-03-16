@@ -1,3 +1,8 @@
+---
+title: "Chen 1970 - Vowel Length Variation as a Function of the Voicing of the Consonant Environment"
+year: 1970
+---
+
 # Chen 1970 - Vowel Length Variation as a Function of the Voicing of the Consonant Environment
 
 ## Key Finding

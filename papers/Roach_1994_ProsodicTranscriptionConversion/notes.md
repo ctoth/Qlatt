@@ -1,9 +1,12 @@
-# Conversion between Prosodic Transcription Systems: "Standard British" and ToBI
+---
+title: "Conversion between Prosodic Transcription Systems: \"Standard British\" and ToBI"
+authors: "Peter Roach"
+year: 1994
+venue: "Speech Communication 15 (1994) 91-99"
+doi_url: "0167-6393(94)00022-0"
+---
 
-**Authors:** Peter Roach
-**Year:** 1994
-**Venue:** Speech Communication 15 (1994) 91-99
-**DOI/URL:** 0167-6393(94)00022-0
+# Conversion between Prosodic Transcription Systems: "Standard British" and ToBI
 
 ## One-Sentence Summary
 Provides explicit mapping tables for converting between British tonetic stress marks (SEC system) and ToBI pitch accents/boundary tones, with discussion of where the two systems are incommensurable.

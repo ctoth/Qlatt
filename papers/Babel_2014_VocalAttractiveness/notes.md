@@ -1,9 +1,12 @@
-# Towards a More Nuanced View of Vocal Attractiveness
+---
+title: "Towards a More Nuanced View of Vocal Attractiveness"
+authors: "Molly Babel, Grant McGuire, Joseph King"
+year: 2014
+venue: "PLoS ONE 9(2): e88616"
+doi_url: "10.1371/journal.pone.0088616"
+---
 
-**Authors:** Molly Babel, Grant McGuire, Joseph King
-**Year:** 2014
-**Venue:** PLoS ONE 9(2): e88616
-**DOI:** 10.1371/journal.pone.0088616
+# Towards a More Nuanced View of Vocal Attractiveness
 
 ## One-Sentence Summary
 

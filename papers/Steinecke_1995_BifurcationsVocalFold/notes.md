@@ -1,6 +1,9 @@
-# Steinecke & Herzel (1995) — Implementation Notes
+---
+title: "Steinecke & Herzel (1995) — Implementation Notes"
+year: 1995
+---
 
-**Paper:** "Bifurcations in an asymmetric vocal-fold model," JASA 97(3), 1874–1884.
+# Steinecke & Herzel (1995) — Implementation Notes
 
 ## Summary
 

@@ -1,3 +1,8 @@
+---
+title: "Stevens 1993 — Models for the production and acoustics of stop consonants"
+year: 1993
+---
+
 # Stevens 1993 — Models for the production and acoustics of stop consonants
 
 ## Implementation Notes for Klatt Synthesizer

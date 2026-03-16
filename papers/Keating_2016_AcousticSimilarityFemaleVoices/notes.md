@@ -1,9 +1,12 @@
-# Acoustic Similarity Among Female Voices
+---
+title: "Acoustic Similarity Among Female Voices"
+authors: "Patricia Keating, Jody Kreiman"
+year: 2016
+venue: "Acoustical Society of America Meeting (ASA), Honolulu, 2 Dec 2016, Poster 5aSC7"
+doi_url: "Poster presentation"
+---
 
-**Authors:** Patricia Keating, Jody Kreiman
-**Year:** 2016
-**Venue:** Acoustical Society of America Meeting (ASA), Honolulu, 2 Dec 2016, Poster 5aSC7
-**DOI/URL:** Poster presentation
+# Acoustic Similarity Among Female Voices
 
 ## One-Sentence Summary
 Identifies which acoustic parameters best distinguish individual female voices using MDS and LDA on 50 women's voices with 26 acoustic variables, finding that F0, SHR, F3, F4, and CPP do most of the work of speaker discrimination.

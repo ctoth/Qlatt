@@ -1,9 +1,12 @@
-# A Comparison of Spectral Smoothing Methods for Segment Concatenation Based Speech Synthesis
+---
+title: "A Comparison of Spectral Smoothing Methods for Segment Concatenation Based Speech Synthesis"
+authors: "David T. Chappell, John H.L. Hansen"
+year: 2002
+venue: "Speech Communication 36 (2002) 343-374"
+doi_url: "S0167-6393(01)00008-5"
+---
 
-**Authors:** David T. Chappell, John H.L. Hansen
-**Year:** 2002
-**Venue:** Speech Communication 36 (2002) 343-374
-**DOI:** S0167-6393(01)00008-5
+# A Comparison of Spectral Smoothing Methods for Segment Concatenation Based Speech Synthesis
 
 ## One-Sentence Summary
 Comprehensive comparison of four spectral smoothing algorithms (optimal coupling, waveform interpolation, LP techniques, and psychoacoustic closure) for improving concatenative speech synthesis with limited databases.

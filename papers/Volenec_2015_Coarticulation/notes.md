@@ -1,9 +1,12 @@
-# Coarticulation
+---
+title: "Coarticulation"
+authors: "Veno Volenec"
+year: 2015
+venue: "Chapter 2 in *Phonetics* (ed. Jasmine Davis), Nova Science Publishers, ISBN 978-1-63483-637-1"
+doi_url: "N/A"
+---
 
-**Authors:** Veno Volenec
-**Year:** 2015
-**Venue:** Chapter 2 in *Phonetics* (ed. Jasmine Davis), Nova Science Publishers, ISBN 978-1-63483-637-1
-**DOI/URL:** N/A
+# Coarticulation
 
 ## One-Sentence Summary
 A comprehensive review chapter covering the definition, classification, theories, measurement techniques, and phonological implications of coarticulation — the phenomenon where adjacent speech segments influence each other's articulatory and acoustic properties.

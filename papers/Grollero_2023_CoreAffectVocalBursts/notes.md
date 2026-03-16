@@ -1,9 +1,12 @@
-# The Structure Underlying Core Affect and Perceived Affective Qualities of Human Vocal Bursts
+---
+title: "The Structure Underlying Core Affect and Perceived Affective Qualities of Human Vocal Bursts"
+authors: "Demetrio Grollero, Valentina Petrolini, Marco Viola, Rosalba Morese, Giada Lettieri, Luca Cecchetti"
+year: 2023
+venue: "Cognition and Emotion, 37(1), 1-17"
+doi_url: "https://doi.org/10.1080/02699931.2022.2139661"
+---
 
-**Authors:** Demetrio Grollero, Valentina Petrolini, Marco Viola, Rosalba Morese, Giada Lettieri, Luca Cecchetti
-**Year:** 2023
-**Venue:** Cognition and Emotion, 37(1), 1-17
-**DOI:** https://doi.org/10.1080/02699931.2022.2139661
+# The Structure Underlying Core Affect and Perceived Affective Qualities of Human Vocal Bursts
 
 ## One-Sentence Summary
 

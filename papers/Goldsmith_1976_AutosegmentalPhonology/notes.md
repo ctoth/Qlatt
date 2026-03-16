@@ -1,10 +1,13 @@
-# Autosegmental Phonology
+---
+title: "Autosegmental Phonology"
+authors: "John A. Goldsmith"
+year: 1976
+venue: "PhD Dissertation, Massachusetts Institute of Technology, Department of Foreign Literatures and Linguistics"
+doi_url: "http://www.ai.mit.edu/projects/dm/theses/goldsmith76.pdf"
+thesis_supervisor: "Morris Halle"
+---
 
-**Author:** John A. Goldsmith
-**Year:** 1976
-**Venue:** PhD Dissertation, Massachusetts Institute of Technology, Department of Foreign Literatures and Linguistics
-**Thesis Supervisor:** Morris Halle
-**URL:** http://www.ai.mit.edu/projects/dm/theses/goldsmith76.pdf
+# Autosegmental Phonology
 
 ## One-Sentence Summary
 This dissertation introduces the autosegmental framework where phonological representations consist of multiple parallel tiers of segments connected by association lines, with a Well-formedness Condition governing how tones (or other features) map onto tone-bearing units -- providing the theoretical foundation for all modern tone association systems.

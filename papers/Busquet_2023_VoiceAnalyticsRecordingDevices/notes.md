@@ -1,9 +1,12 @@
-# Voice Analytics in the Wild: Validity and Predictive Accuracy of Common Audio-Recording Devices
+---
+title: "Voice Analytics in the Wild: Validity and Predictive Accuracy of Common Audio-Recording Devices"
+authors: "Francesc Busquet, Fotis Efthymiou, Christian Hildebrand"
+year: 2023
+venue: "Behavior Research Methods"
+doi_url: "https://doi.org/10.3758/s13428-023-02139-9"
+---
 
-**Authors:** Francesc Busquet, Fotis Efthymiou, Christian Hildebrand
-**Year:** 2023
-**Venue:** Behavior Research Methods
-**DOI:** https://doi.org/10.3758/s13428-023-02139-9
+# Voice Analytics in the Wild: Validity and Predictive Accuracy of Common Audio-Recording Devices
 
 ## One-Sentence Summary
 

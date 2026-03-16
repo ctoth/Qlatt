@@ -1,9 +1,12 @@
-# Nasal Vowels
+---
+title: "Nasal Vowels"
+authors: "Merritt Ruhlen"
+year: 1973
+venue: "Working Papers on Language Universals, No. 12, pp. 1-36, Stanford University"
+doi_url: "ERIC ED101552"
+---
 
-**Author:** Merritt Ruhlen
-**Year:** 1973
-**Venue:** Working Papers on Language Universals, No. 12, pp. 1-36, Stanford University
-**DOI/URL:** ERIC ED101552
+# Nasal Vowels
 
 ## One-Sentence Summary
 

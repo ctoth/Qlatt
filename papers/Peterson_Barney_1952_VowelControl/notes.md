@@ -1,9 +1,12 @@
-# Control Methods Used in a Study of the Vowels
+---
+title: "Control Methods Used in a Study of the Vowels"
+authors: "Gordon E. Peterson, Harold L. Barney"
+year: 1952
+venue: "Journal of the Acoustical Society of America, Vol. 24, No. 2 (March 1952)"
+pages: "175-184"
+---
 
-**Authors:** Gordon E. Peterson, Harold L. Barney
-**Year:** 1952
-**Venue:** Journal of the Acoustical Society of America, Vol. 24, No. 2 (March 1952)
-**Pages:** 175-184
+# Control Methods Used in a Study of the Vowels
 
 ## One-Sentence Summary
 

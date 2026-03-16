@@ -1,9 +1,12 @@
-# Synthesis of Breathy and Rough Voices with a View to Validating Perceptual and Automatic Glottal Cycle Pattern Recognition
+---
+title: "Synthesis of Breathy and Rough Voices with a View to Validating Perceptual and Automatic Glottal Cycle Pattern Recognition"
+authors: "S. Fraj, F. Grenez, J. Schoentgen"
+year: 2011
+venue: "7th International Workshop on Models and Analysis of Vocal Emissions for Biomedical Applications (MAVEBA), Florence"
+affiliation: "L.I.S.T, Faculty of Applied Sciences, Université Libre de Bruxelles; National Fund for Scientific Research, Belgium"
+---
 
-**Authors:** S. Fraj, F. Grenez, J. Schoentgen
-**Year:** 2011
-**Venue:** 7th International Workshop on Models and Analysis of Vocal Emissions for Biomedical Applications (MAVEBA), Florence
-**Affiliation:** L.I.S.T, Faculty of Applied Sciences, Université Libre de Bruxelles; National Fund for Scientific Research, Belgium
+# Synthesis of Breathy and Rough Voices with a View to Validating Perceptual and Automatic Glottal Cycle Pattern Recognition
 
 ## One-Sentence Summary
 

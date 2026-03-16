@@ -1,9 +1,12 @@
-# Measures of the Glottal Source Spectrum
+---
+title: "Measures of the Glottal Source Spectrum"
+authors: "Jody Kreiman, Bruce R. Gerratt, Norma Antonanzas-Barroso"
+year: 2007
+venue: "Journal of Speech, Language, and Hearing Research, Vol. 50, pp. 595-610"
+doi_url: "10.1044/1092-4388(2007/042)"
+---
 
-**Authors:** Jody Kreiman, Bruce R. Gerratt, Norma Antonanzas-Barroso
-**Year:** 2007
-**Venue:** Journal of Speech, Language, and Hearing Research, Vol. 50, pp. 595-610
-**DOI:** 10.1044/1092-4388(2007/042)
+# Measures of the Glottal Source Spectrum
 
 ## One-Sentence Summary
 This paper applies PCA to 78 spectral measures of the glottal source across 70 speakers (normal and pathological) to reveal that existing measures are highly redundant, poorly capture mid-to-high-frequency spectral variability, and reduce to only 4 independent spectral factors, with H1-H2 being the most robust measure.

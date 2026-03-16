@@ -1,10 +1,13 @@
-# Voice Processing and Synthesis by Performance Sampling and Spectral Models
+---
+title: "Voice Processing and Synthesis by Performance Sampling and Spectral Models"
+authors: "Jordi Bonada Sanjaume"
+year: 2008
+venue: "PhD Dissertation, Universitat Pompeu Fabra, Barcelona"
+supervisors: "Dr. Xavier Serra, Music Technology Group"
+funding: "Yamaha Corporation (research incorporated into Vocaloid)"
+---
 
-**Author:** Jordi Bonada Sanjaume
-**Year:** 2008
-**Type:** PhD Dissertation, Universitat Pompeu Fabra, Barcelona
-**Supervisors:** Dr. Xavier Serra, Music Technology Group
-**Funding:** Yamaha Corporation (research incorporated into Vocaloid)
+# Voice Processing and Synthesis by Performance Sampling and Spectral Models
 
 ## One-Sentence Summary
 

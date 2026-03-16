@@ -1,10 +1,13 @@
-# Segment Durations in a Syllable Frame
+---
+title: "Segment Durations in a Syllable Frame"
+authors: "W. N. Campbell and S. D. Isard"
+year: 1991
+venue: "Journal of Phonetics, Vol. 19, pp. 37-47"
+doi_url: "10.1016/S0095-4470(19)30315-8"
+affiliation: "Edinburgh University, Centre for Speech Technology Research"
+---
 
-**Authors:** W. N. Campbell and S. D. Isard
-**Year:** 1991
-**Venue:** Journal of Phonetics, Vol. 19, pp. 37-47
-**DOI:** 10.1016/S0095-4470(19)30315-8
-**Affiliation:** Edinburgh University, Centre for Speech Technology Research
+# Segment Durations in a Syllable Frame
 
 ## One-Sentence Summary
 Presents a two-level duration model where syllable duration is predicted first (via neural net), then individual segment durations are accommodated to the syllable frame using a measure of segment elasticity (z-score normalization).

@@ -1,9 +1,12 @@
-# Sensitivity of Odd-Harmonic Amplitudes to Open Quotient and Skewing Quotient in Glottal Airflow (L)
+---
+title: "Sensitivity of Odd-Harmonic Amplitudes to Open Quotient and Skewing Quotient in Glottal Airflow (L)"
+authors: "Ingo R. Titze"
+year: 2015
+venue: "Journal of the Acoustical Society of America, Vol. 137, No. 1, pp. 502-504"
+doi_url: "http://dx.doi.org/10.1121/1.4904539"
+---
 
-**Authors:** Ingo R. Titze
-**Year:** 2015
-**Venue:** Journal of the Acoustical Society of America, Vol. 137, No. 1, pp. 502-504
-**DOI:** http://dx.doi.org/10.1121/1.4904539
+# Sensitivity of Odd-Harmonic Amplitudes to Open Quotient and Skewing Quotient in Glottal Airflow (L)
 
 ## One-Sentence Summary
 Demonstrates that a perfectly symmetric glottal pulse (Qo=0.5, Qs=1.0) eliminates odd harmonics, and quantifies the minimal asymmetry needed to restore a balanced harmonic spectrum — critical for choosing glottal source parameters in formant synthesis.

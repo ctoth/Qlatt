@@ -1,3 +1,8 @@
+---
+title: "Property Detectors for Bursts and Transitions in Speech Perception"
+year: 1977
+---
+
 # Property Detectors for Bursts and Transitions in Speech Perception
 
 Blumstein, S. E., Stevens, K. N., & Nigro, G. N. (1977). *The Journal of the Acoustical Society of America*, 61(5), 1301--1313. DOI: 10.1121/1.381433

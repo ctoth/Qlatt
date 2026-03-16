@@ -1,9 +1,12 @@
-# Extraction of Vocal-Tract System Characteristics from Speech Signals
+---
+title: "Extraction of Vocal-Tract System Characteristics from Speech Signals"
+authors: "B. Yegnanarayana, Raymond N. J. Veldhuis"
+year: 1998
+venue: "IEEE Transactions on Speech and Audio Processing, Vol. 6, No. 4"
+doi_url: "S 1063-6676(98)04219-9"
+---
 
-**Authors:** B. Yegnanarayana, Raymond N. J. Veldhuis
-**Year:** 1998
-**Venue:** IEEE Transactions on Speech and Audio Processing, Vol. 6, No. 4
-**DOI/URL:** S 1063-6676(98)04219-9
+# Extraction of Vocal-Tract System Characteristics from Speech Signals
 
 ## One-Sentence Summary
 Provides a pitch-synchronous formant analysis method using glottal closure instants (GCI) detection via group delay, enabling accurate tracking of time-varying formant parameters in voiced speech.

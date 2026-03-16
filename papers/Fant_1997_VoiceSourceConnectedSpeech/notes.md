@@ -1,9 +1,12 @@
-# The Voice Source in Connected Speech
+---
+title: "The Voice Source in Connected Speech"
+authors: "Gunnar Fant"
+year: 1997
+venue: "Speech Communication 22 (1997) 125-139"
+doi_url: "S0167-6393(97)00017-4"
+---
 
-**Authors:** Gunnar Fant
-**Year:** 1997
-**Venue:** Speech Communication 22 (1997) 125-139
-**DOI:** S0167-6393(97)00017-4
+# The Voice Source in Connected Speech
 
 ## One-Sentence Summary
 

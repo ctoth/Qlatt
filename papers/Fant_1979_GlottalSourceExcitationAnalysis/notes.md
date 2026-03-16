@@ -1,3 +1,8 @@
+---
+title: "Fant 1979 — Glottal Source and Excitation Analysis"
+year: 1979
+---
+
 # Fant 1979 — Glottal Source and Excitation Analysis
 
 ## Implementation Notes for Klatt Synthesizer

@@ -1,9 +1,12 @@
-# Voice Production and Perception
+---
+title: "Voice Production and Perception"
+authors: "Roza G. Kamiloglu, Disa A. Sauter"
+year: 2021
+venue: "Oxford Research Encyclopedia of Psychology"
+doi_url: "10.1093/acrefore/9780190236557.013.766"
+---
 
-**Authors:** Roza G. Kamiloglu, Disa A. Sauter
-**Year:** 2021
-**Venue:** Oxford Research Encyclopedia of Psychology
-**DOI:** 10.1093/acrefore/9780190236557.013.766
+# Voice Production and Perception
 
 ## One-Sentence Summary
 Comprehensive review of source-filter theory, acoustic parameters of voice, and emotional prosody production/perception - provides the theoretical foundation for understanding what acoustic features a synthesizer needs to manipulate for naturalistic speech.

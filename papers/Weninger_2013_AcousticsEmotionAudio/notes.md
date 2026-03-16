@@ -1,8 +1,12 @@
-# Weninger et al. 2013 — On the Acoustics of Emotion in Audio
+---
+title: "Weninger et al. 2013 — On the Acoustics of Emotion in Audio"
+authors: "Felix Weninger, Florian Eyben, Bjorn W. Schuller, Marcello Mortillaro, Klaus R. Scherer"
+year: 2013
+full_title: "On the acoustics of emotion in audio: what speech, music, and sound have in common"
+published: "Frontiers in Psychology, May 2013, doi: 10.3389/fpsyg.2013.00292"
+---
 
-**Full title:** On the acoustics of emotion in audio: what speech, music, and sound have in common
-**Authors:** Felix Weninger, Florian Eyben, Bjorn W. Schuller, Marcello Mortillaro, Klaus R. Scherer
-**Published:** Frontiers in Psychology, May 2013, doi: 10.3389/fpsyg.2013.00292
+# Weninger et al. 2013 — On the Acoustics of Emotion in Audio
 
 ## One-sentence summary
 

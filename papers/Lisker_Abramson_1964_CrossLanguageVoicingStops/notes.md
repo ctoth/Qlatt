@@ -1,9 +1,12 @@
-# A Cross-Language Study of Voicing in Initial Stops: Acoustical Measurements
+---
+title: "A Cross-Language Study of Voicing in Initial Stops: Acoustical Measurements"
+authors: "Leigh Lisker, Arthur S. Abramson"
+year: 1964
+venue: "WORD, 20:3, 384-422"
+doi_url: "10.1080/00437956.1964.11659830"
+---
 
-**Authors:** Leigh Lisker, Arthur S. Abramson
-**Year:** 1964
-**Venue:** WORD, 20:3, 384-422
-**DOI:** 10.1080/00437956.1964.11659830
+# A Cross-Language Study of Voicing in Initial Stops: Acoustical Measurements
 
 ## One-Sentence Summary
 

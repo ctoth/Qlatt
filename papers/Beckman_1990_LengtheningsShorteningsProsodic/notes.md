@@ -1,3 +1,8 @@
+---
+title: "Beckman & Edwards 1990 — Implementation Notes"
+year: 1990
+---
+
 # Beckman & Edwards 1990 — Implementation Notes
 
 ## Reference

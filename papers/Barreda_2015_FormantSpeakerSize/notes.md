@@ -1,9 +1,12 @@
-# Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size
+---
+title: "Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size"
+authors: "Santiago Barreda"
+year: 2015
+venue: "Journal of the Acoustical Society of America (preprint r1)"
+affiliation: "University of California, Davis"
+---
 
-**Authors:** Santiago Barreda
-**Year:** 2015
-**Venue:** Journal of the Acoustical Society of America (preprint r1)
-**Affiliation:** University of California, Davis
+# Investigating the Use of Formant Frequencies in Listener Judgments of Speaker Size
 
 ## One-Sentence Summary
 

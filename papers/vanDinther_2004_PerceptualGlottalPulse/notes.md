@@ -1,9 +1,12 @@
-# A Method for Analysing the Perceptual Relevance of Glottal-Pulse Parameter Variations
+---
+title: "A Method for Analysing the Perceptual Relevance of Glottal-Pulse Parameter Variations"
+authors: "R. van Dinther, A. Kohlrausch, R. Veldhuis"
+year: 2004
+venue: "Speech Communication 42 (2004) 175-189"
+doi_url: "10.1016/j.specom.2003.07.002"
+---
 
-**Authors:** R. van Dinther, A. Kohlrausch, R. Veldhuis
-**Year:** 2004
-**Venue:** Speech Communication 42 (2004) 175-189
-**DOI:** 10.1016/j.specom.2003.07.002
+# A Method for Analysing the Perceptual Relevance of Glottal-Pulse Parameter Variations
 
 ## One-Sentence Summary
 

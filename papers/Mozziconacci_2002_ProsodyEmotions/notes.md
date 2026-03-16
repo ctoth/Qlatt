@@ -1,10 +1,13 @@
-# Prosody and Emotions
+---
+title: "Prosody and Emotions"
+authors: "Sylvie Mozziconacci"
+year: 2002
+venue: "Speech Prosody 2002, Aix-en-Provence, France (April 11-13, 2002)"
+doi_url: "10.21437/SpeechProsody.2002-1"
+affiliation: "Phonetics Lab, Leiden University, The Netherlands"
+---
 
-**Authors:** Sylvie Mozziconacci
-**Year:** 2002
-**Venue:** Speech Prosody 2002, Aix-en-Provence, France (April 11-13, 2002)
-**DOI:** 10.21437/SpeechProsody.2002-1
-**Affiliation:** Phonetics Lab, Leiden University, The Netherlands
+# Prosody and Emotions
 
 ## One-Sentence Summary
 

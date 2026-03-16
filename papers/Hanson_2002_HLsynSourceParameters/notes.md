@@ -1,9 +1,12 @@
-# A Quasiarticulatory Approach to Controlling Acoustic Source Parameters in a Klatt-Type Formant Synthesizer Using HLsyn
+---
+title: "A Quasiarticulatory Approach to Controlling Acoustic Source Parameters in a Klatt-Type Formant Synthesizer Using HLsyn"
+authors: "Helen M. Hanson, Kenneth N. Stevens"
+year: 2002
+venue: "Journal of the Acoustical Society of America, 112(3), 1158-1182"
+doi_url: "10.1121/1.1498851"
+---
 
-**Authors:** Helen M. Hanson, Kenneth N. Stevens
-**Year:** 2002
-**Venue:** Journal of the Acoustical Society of America, 112(3), 1158-1182
-**DOI:** 10.1121/1.1498851
+# A Quasiarticulatory Approach to Controlling Acoustic Source Parameters in a Klatt-Type Formant Synthesizer Using HLsyn
 
 ## One-Sentence Summary
 This paper provides the complete equations for mapping 13 higher-level quasiarticulatory parameters (HLsyn) to Klatt synthesizer source parameters (AV, AF, AH, OQ, TL, DI, F0), using an equivalent-circuit aerodynamic model of the vocal tract that enforces physically realistic source-filter constraints.

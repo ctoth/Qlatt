@@ -1,9 +1,12 @@
-# Effects of Race and Sex on Acoustic Features of Voice Analysis
+---
+title: "Effects of Race and Sex on Acoustic Features of Voice Analysis"
+authors: "Steve An Xue, Donald Fucci"
+year: 2000
+venue: "Perceptual and Motor Skills, 91, 951-958"
+doi_url: "Not provided"
+---
 
-**Authors:** Steve An Xue, Donald Fucci
-**Year:** 2000
-**Venue:** Perceptual and Motor Skills, 91, 951-958
-**DOI/URL:** Not provided
+# Effects of Race and Sex on Acoustic Features of Voice Analysis
 
 ## One-Sentence Summary
 

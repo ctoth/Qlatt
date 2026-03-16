@@ -1,3 +1,8 @@
+---
+title: "Gerratt & Kreiman (2001) - Measuring Vocal Quality with Speech Synthesis"
+year: 2001
+---
+
 # Gerratt & Kreiman (2001) - Measuring Vocal Quality with Speech Synthesis
 
 ## Implementation-Relevant Notes

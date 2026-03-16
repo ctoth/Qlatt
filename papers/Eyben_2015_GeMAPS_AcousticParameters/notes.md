@@ -1,12 +1,12 @@
+---
+title: "The Geneva Minimalistic Acoustic Parameter Set (GeMAPS) for Voice Research and Affective Computing"
+authors: "Florian Eyben, Klaus Scherer, Björn Schuller, Johan Sundberg, Elisabeth André, Carlos Busso, Laurence Devillers, Julien Epps, Petri Laukka, Shrikanth Narayanan, Khiet Truong"
+year: 2015
+venue: "IEEE Transactions on Affective Computing"
+doi_url: "10.1109/TAFFC.2015.2457417"
+---
+
 # The Geneva Minimalistic Acoustic Parameter Set (GeMAPS) for Voice Research and Affective Computing
-
-**Authors:** Florian Eyben, Klaus Scherer, Björn Schuller, Johan Sundberg, Elisabeth André, Carlos Busso, Laurence Devillers, Julien Epps, Petri Laukka, Shrikanth Narayanan, Khiet Truong
-
-**Year:** 2015
-
-**Venue:** IEEE Transactions on Affective Computing
-
-**DOI:** 10.1109/TAFFC.2015.2457417
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# Investigation on Pleasure Related Acoustic Features of Affective Speech
+---
+title: "Investigation on Pleasure Related Acoustic Features of Affective Speech"
+authors: "Dandan Cui, Lianhong Cai, Yongxin Wang, Xiaozhou Zhang"
+year: 2006
+venue: "ISCSLP 2006 (International Symposium on Chinese Spoken Language Processing), Kent Ridge, Singapore"
+doi_url: "ISCA Archive"
+---
 
-**Authors:** Dandan Cui, Lianhong Cai, Yongxin Wang, Xiaozhou Zhang
-**Year:** 2006
-**Venue:** ISCSLP 2006 (International Symposium on Chinese Spoken Language Processing), Kent Ridge, Singapore
-**DOI/URL:** ISCA Archive
+# Investigation on Pleasure Related Acoustic Features of Affective Speech
 
 ## One-Sentence Summary
 Identifies 5 acoustic features (spectral rolloff, spectral low-high ratio, average F0, min F0, F0 dominant ratio) correlated with the pleasure-displeasure dimension of emotional speech in Mandarin, demonstrating that spectral features are the primary carriers of pleasure/valence while F0 features primarily encode arousal.

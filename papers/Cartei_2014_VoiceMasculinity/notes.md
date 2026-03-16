@@ -1,9 +1,12 @@
-# What Makes a Voice Masculine: Physiological and Acoustical Correlates of Women's Ratings of Men's Vocal Masculinity
+---
+title: "What Makes a Voice Masculine: Physiological and Acoustical Correlates of Women's Ratings of Men's Vocal Masculinity"
+authors: "Valentina Cartei, Rod Bond, David Reby"
+year: 2014
+venue: "Hormones and Behavior (Accepted Manuscript)"
+doi_url: "10.1016/j.yhbeh.2014.08.006"
+---
 
-**Authors:** Valentina Cartei, Rod Bond, David Reby
-**Year:** 2014
-**Venue:** Hormones and Behavior (Accepted Manuscript)
-**DOI:** 10.1016/j.yhbeh.2014.08.006
+# What Makes a Voice Masculine: Physiological and Acoustical Correlates of Women's Ratings of Men's Vocal Masculinity
 
 ## One-Sentence Summary
 Uses a two-level path model to show that testosterone's effect on perceived vocal masculinity is entirely mediated by F0, while height's effect on perceived masculinity is partially mediated by both F0 and formant spacing (deltaF).

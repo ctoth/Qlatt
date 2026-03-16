@@ -1,9 +1,12 @@
-# Sweet Voice: The Role of Voice Quality in a Japanese Feminine Style
+---
+title: "Sweet Voice: The Role of Voice Quality in a Japanese Feminine Style"
+authors: "Rebecca L. Starr"
+year: 2015
+venue: "Language in Society 44, 1–34"
+doi_url: "10.1017/S0047404514000724"
+---
 
-**Authors:** Rebecca L. Starr
-**Year:** 2015
-**Venue:** Language in Society 44, 1–34
-**DOI:** 10.1017/S0047404514000724
+# Sweet Voice: The Role of Voice Quality in a Japanese Feminine Style
 
 ## One-Sentence Summary
 This paper acoustically characterizes "sweet voice" — a Japanese feminine vocal style used by professional voice actresses (seiyuu) — showing it is produced via head register phonation with elevated H1-H2, H1-A1, H1-A3, and HNR, combined with lower 2k-4k energy, rather than simply high pitch.

@@ -1,9 +1,12 @@
-# A Database of German Emotional Speech
+---
+title: "A Database of German Emotional Speech"
+authors: "F. Burkhardt, A. Paeschke, M. Rolfes, W. Sendlmeier, B. Weiss"
+year: 2005
+venue: "INTERSPEECH 2005, Lisbon, Portugal"
+doi_url: "http://www.expressive-speech.net/emodb/"
+---
 
-**Authors:** F. Burkhardt, A. Paeschke, M. Rolfes, W. Sendlmeier, B. Weiss
-**Year:** 2005
-**Venue:** INTERSPEECH 2005, Lisbon, Portugal
-**URL:** http://www.expressive-speech.net/emodb/
+# A Database of German Emotional Speech
 
 ## One-Sentence Summary
 Describes the Berlin Database of Emotional Speech (EmoDB): 800 acted German utterances across 7 emotions with perception validation, phonetic labels, and electroglottograms - freely available for emotional speech synthesis research.

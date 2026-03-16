@@ -1,6 +1,10 @@
-# Puts, Gaulin & Verdolini (2006) - Dominance and Voice Pitch
+---
+title: "Puts, Gaulin & Verdolini (2006) - Dominance and Voice Pitch"
+year: 2006
+citation: "Puts DA, Gaulin SJC, Verdolini K (2006) Dominance and the evolution of sexual dimorphism in human voice pitch. Evolution and Human Behavior 27, 283-296."
+---
 
-**Citation:** Puts DA, Gaulin SJC, Verdolini K (2006) Dominance and the evolution of sexual dimorphism in human voice pitch. Evolution and Human Behavior 27, 283-296.
+# Puts, Gaulin & Verdolini (2006) - Dominance and Voice Pitch
 
 ## Experimental Design
 

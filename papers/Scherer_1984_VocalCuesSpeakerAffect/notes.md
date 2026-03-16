@@ -1,3 +1,8 @@
+---
+title: "Scherer, Ladd, Silverman (1984) -- Vocal Cues to Speaker Affect: Testing Two Models"
+year: 1984
+---
+
 # Scherer, Ladd, Silverman (1984) -- Vocal Cues to Speaker Affect: Testing Two Models
 
 ## Key Concepts

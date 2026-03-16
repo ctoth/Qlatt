@@ -1,9 +1,12 @@
-# Effects on the Glottal Voice Source of Vocal Loudness Variation in Untrained Female and Male Voices
+---
+title: "Effects on the Glottal Voice Source of Vocal Loudness Variation in Untrained Female and Male Voices"
+authors: "Johan Sundberg, Ellinor Fahlstedt, Anja Morell"
+year: 2005
+venue: "Journal of the Acoustical Society of America, Vol. 117, No. 2, pp. 879-885"
+doi_url: "10.1121/1.1841612"
+---
 
-**Authors:** Johan Sundberg, Ellinor Fahlstedt, Anja Morell
-**Year:** 2005
-**Venue:** Journal of the Acoustical Society of America, Vol. 117, No. 2, pp. 879-885
-**DOI:** 10.1121/1.1841612
+# Effects on the Glottal Voice Source of Vocal Loudness Variation in Untrained Female and Male Voices
 
 ## One-Sentence Summary
 Provides quantitative equations relating subglottal pressure to voice source parameters (MFDR, closed quotient, pulse amplitude, H1-H2, compliance) for untrained male and female voices across three F0 levels — directly usable for effort-dependent voice quality control in synthesis.

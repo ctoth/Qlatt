@@ -1,9 +1,12 @@
-# Are Attractive Female Voices Really Best Characterized by Feminine Fundamental and Formant Frequencies?
+---
+title: "Are Attractive Female Voices Really Best Characterized by Feminine Fundamental and Formant Frequencies?"
+authors: "Christoph Schild, David R. Feinberg, David A. Puts, Julia Junger, Vanessa Fasolt, Iris Holzleitner, Kieran O'Shea, Rebecca Lai, Ruben Arslan, Amanda Hahn, Rodrigo A. Cardenas, Lisa M. DeBruine, & Benedict C. Jones"
+year: 2019
+venue: "Evolution and Human Behavior (Stage 1 Registered Report)"
+doi_url: "Not provided in manuscript; OSF: https://osf.io/8hma7/"
+---
 
-**Authors:** Christoph Schild, David R. Feinberg, David A. Puts, Julia Junger, Vanessa Fasolt, Iris Holzleitner, Kieran O'Shea, Rebecca Lai, Ruben Arslan, Amanda Hahn, Rodrigo A. Cardenas, Lisa M. DeBruine, & Benedict C. Jones
-**Year:** 2019
-**Venue:** Evolution and Human Behavior (Stage 1 Registered Report)
-**DOI/URL:** Not provided in manuscript; OSF: https://osf.io/8hma7/
+# Are Attractive Female Voices Really Best Characterized by Feminine Fundamental and Formant Frequencies?
 
 ## One-Sentence Summary
 A large-sample (N=450) registered replication of Babel et al. (2014) testing whether a data-driven PCA model of voice quality measures (HNR, spectral tilt, jitter, shimmer, CPP, energy, duration) predicts women's vocal attractiveness better than a theory-driven model using only F0 and formant frequencies.

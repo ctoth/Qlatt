@@ -1,11 +1,13 @@
+---
+title: "Relationship Between Subglottal Pressure and Sound Pressure Level in Untrained Voices"
+authors: "Staffan Bjorklund, Johan Sundberg"
+year: 2016
+venue: "Journal of Voice, 30(1), 15-20"
+doi_url: "10.1016/j.jvoice.2015.03.006"
+note: "PDF retrieval failed (sci-hub served wrong paper for this DOI). Notes compiled from PubMed abstract, citing papers, and metadata. Full-text verification needed."
+---
+
 # Relationship Between Subglottal Pressure and Sound Pressure Level in Untrained Voices
-
-**Authors:** Staffan Bjorklund, Johan Sundberg
-**Year:** 2016
-**Venue:** Journal of Voice, 30(1), 15-20
-**DOI:** 10.1016/j.jvoice.2015.03.006
-
-**NOTE:** PDF retrieval failed (sci-hub served wrong paper for this DOI). Notes compiled from PubMed abstract, citing papers, and metadata. Full-text verification needed.
 
 ## One-Sentence Summary
 Provides normative regression data relating subglottal pressure (Ps) to sound pressure level (SPL) in untrained voices, establishing that SPL = a + b*log2(Ps) with gender-specific slopes and intercepts.

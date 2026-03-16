@@ -1,9 +1,12 @@
-# Titze & Talkin 1979 - Implementation Notes
+---
+title: "Titze & Talkin 1979 - Implementation Notes"
+authors: "Ingo R. Titze, David T. Talkin"
+year: 1979
+venue: "J. Acoust. Soc. Am. 66(1), 60-74, July 1979"
+doi_url: "10.1121/1.382973"
+---
 
-**Paper:** A theoretical study of the effects of various laryngeal configurations on the acoustics of phonation
-**Authors:** Ingo R. Titze, David T. Talkin
-**Journal:** J. Acoust. Soc. Am. 66(1), 60-74, July 1979
-**DOI:** 10.1121/1.382973
+# Titze & Talkin 1979 - Implementation Notes
 
 ## Overview
 

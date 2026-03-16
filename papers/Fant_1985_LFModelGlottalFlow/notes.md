@@ -1,10 +1,13 @@
-# A Four-Parameter Model of Glottal Flow
+---
+title: "A Four-Parameter Model of Glottal Flow"
+authors: "Gunnar Fant, Johan Liljencrants, Qi-guang Lin"
+year: 1985
+venue: "STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Vol. 26, No. 4, pp. 1-13"
+doi_url: "http://www.speech.kth.se/qpsr"
+institution: "KTH (Royal Institute of Technology), Stockholm"
+---
 
-**Authors:** Gunnar Fant, Johan Liljencrants, Qi-guang Lin
-**Year:** 1985
-**Venue:** STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Vol. 26, No. 4, pp. 1-13
-**Institution:** KTH (Royal Institute of Technology), Stockholm
-**URL:** http://www.speech.kth.se/qpsr
+# A Four-Parameter Model of Glottal Flow
 
 ## One-Sentence Summary
 

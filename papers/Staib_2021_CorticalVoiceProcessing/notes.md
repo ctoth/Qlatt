@@ -1,9 +1,12 @@
-# Cortical Voice Processing is Grounded in Elementary Sound Analyses for Vocalization Relevant Sound Patterns
+---
+title: "Cortical Voice Processing is Grounded in Elementary Sound Analyses for Vocalization Relevant Sound Patterns"
+authors: "Matthias Staib, Sascha Frühholz"
+year: 2021
+venue: "Progress in Neurobiology (Volume 200)"
+doi_url: "https://doi.org/10.1016/j.pneurobio.2020.101982"
+---
 
-**Authors:** Matthias Staib, Sascha Frühholz
-**Year:** 2021
-**Venue:** Progress in Neurobiology (Volume 200)
-**DOI:** https://doi.org/10.1016/j.pneurobio.2020.101982
+# Cortical Voice Processing is Grounded in Elementary Sound Analyses for Vocalization Relevant Sound Patterns
 
 ## One-Sentence Summary
 

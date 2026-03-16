@@ -1,9 +1,12 @@
-# Syllable Based Models for Prosody Modeling in HMM Based Speech Synthesis
+---
+title: "Syllable Based Models for Prosody Modeling in HMM Based Speech Synthesis"
+authors: "Srikanth Ronanki, Oliver Watts, Simon King, Rob Clark"
+year: "2013 (part of Simple4All project, FP7/2007-2013)"
+venue: "Technical Report / Conference Paper (IIIT Hyderabad + University of Edinburgh CSTR)"
+doi_url: "N/A"
+---
 
-**Authors:** Srikanth Ronanki, Oliver Watts, Simon King, Rob Clark
-**Year:** 2013 (part of Simple4All project, FP7/2007-2013)
-**Venue:** Technical Report / Conference Paper (IIIT Hyderabad + University of Edinburgh CSTR)
-**DOI/URL:** N/A
+# Syllable Based Models for Prosody Modeling in HMM Based Speech Synthesis
 
 ## One-Sentence Summary
 

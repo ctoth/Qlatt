@@ -1,10 +1,13 @@
-# Review of Text-to-Speech Conversion for English
+---
+title: "Review of Text-to-Speech Conversion for English"
+authors: "Dennis H. Klatt"
+year: 1987
+venue: "Journal of the Acoustical Society of America, Vol. 82, No. 3, September 1987"
+doi_url: "0001-4966/87/090737-57$00.80"
+pages: "737-793"
+---
 
-**Authors:** Dennis H. Klatt
-**Year:** 1987
-**Venue:** Journal of the Acoustical Society of America, Vol. 82, No. 3, September 1987
-**DOI:** 0001-4966/87/090737-57$00.80
-**Pages:** 737-793
+# Review of Text-to-Speech Conversion for English
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# The ToBI Transcription System: Conventions, Strengths, and Challenges
+---
+title: "The ToBI Transcription System: Conventions, Strengths, and Challenges"
+authors: "Sun-Ah Jun (main chapter), Laura C. Dilley & Mara Breen (commentary)"
+year: 2022
+venue: "The Oxford Handbook of Language Prosody (Chapter 4, pp. 151-211)"
+publisher: "Oxford University Press"
+---
 
-**Authors:** Sun-Ah Jun (main chapter), Laura C. Dilley & Mara Breen (commentary)
-**Year:** 2022
-**Venue:** The Oxford Handbook of Language Prosody (Chapter 4, pp. 151-211)
-**Publisher:** Oxford University Press
+# The ToBI Transcription System: Conventions, Strengths, and Challenges
 
 ## One-Sentence Summary
 

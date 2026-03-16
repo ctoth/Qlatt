@@ -1,9 +1,12 @@
-# Software for a Cascade/Parallel Formant Synthesizer
+---
+title: "Software for a Cascade/Parallel Formant Synthesizer"
+authors: "Dennis H. Klatt"
+year: 1980
+venue: "Journal of the Acoustical Society of America, Vol. 67, No. 3, March 1980"
+doi_url: "0001-4966/80/030971-25"
+---
 
-**Authors:** Dennis H. Klatt
-**Year:** 1980
-**Venue:** Journal of the Acoustical Society of America, Vol. 67, No. 3, March 1980
-**DOI/URL:** 0001-4966/80/030971-25
+# Software for a Cascade/Parallel Formant Synthesizer
 
 ## One-Sentence Summary
 This paper provides the complete specification and FORTRAN implementation of a flexible cascade/parallel formant synthesizer that became the foundation for nearly all subsequent formant-based TTS systems.

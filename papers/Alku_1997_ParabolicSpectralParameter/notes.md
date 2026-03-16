@@ -1,3 +1,8 @@
+---
+title: "Alku, Strik & Vilkman 1997 — Parabolic Spectral Parameter: Implementation Notes"
+year: 1997
+---
+
 # Alku, Strik & Vilkman 1997 — Parabolic Spectral Parameter: Implementation Notes
 
 ## What PSP Is

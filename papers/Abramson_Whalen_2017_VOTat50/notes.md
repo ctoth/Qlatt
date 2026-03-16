@@ -1,9 +1,12 @@
-# Voice Onset Time (VOT) at 50: Theoretical and practical issues in measuring voicing distinctions
+---
+title: "Voice Onset Time (VOT) at 50: Theoretical and practical issues in measuring voicing distinctions"
+authors: "Arthur S. Abramson, D.H. Whalen"
+year: 2017
+venue: "Journal of Phonetics, Vol. 63, pp. 75-86"
+doi_url: "10.1016/j.wocn.2017.05.002"
+---
 
-**Authors:** Arthur S. Abramson, D.H. Whalen
-**Year:** 2017
-**Venue:** Journal of Phonetics, Vol. 63, pp. 75-86
-**DOI:** 10.1016/j.wocn.2017.05.002
+# Voice Onset Time (VOT) at 50: Theoretical and practical issues in measuring voicing distinctions
 
 ## One-Sentence Summary
 A comprehensive retrospective on VOT measurement after 50 years, clarifying the original definition, proposing extensions for medial/final positions and fricatives/affricates, discussing limitations (Hindi voiced aspirates, Korean, preaspirates), and providing standardized Praat labeling recommendations.

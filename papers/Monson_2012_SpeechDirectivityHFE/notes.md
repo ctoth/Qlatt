@@ -1,9 +1,12 @@
-# Horizontal Directivity of Low- and High-Frequency Energy in Speech and Singing
+---
+title: "Horizontal Directivity of Low- and High-Frequency Energy in Speech and Singing"
+authors: "Brian B. Monson, Eric J. Hunter, Brad H. Story"
+year: 2012
+venue: "Journal of the Acoustical Society of America, 132(1), 433-441"
+doi_url: "10.1121/1.4725963"
+---
 
-**Authors:** Brian B. Monson, Eric J. Hunter, Brad H. Story
-**Year:** 2012
-**Venue:** Journal of the Acoustical Society of America, 132(1), 433-441
-**DOI:** 10.1121/1.4725963
+# Horizontal Directivity of Low- and High-Frequency Energy in Speech and Singing
 
 ## One-Sentence Summary
 Simultaneous multi-channel horizontal-plane recordings of 15 speakers reveal that high-frequency energy (HFE) in speech and singing is highly directional, with voiceless fricatives /s/ and /sh/ showing the greatest directivity differences (up to 9 dB at angles beyond 90 degrees in the 8 kHz octave band), while gender, production level, and production mode (speech vs singing) have only minor effects.

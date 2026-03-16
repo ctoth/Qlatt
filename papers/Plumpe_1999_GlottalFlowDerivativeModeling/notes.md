@@ -1,9 +1,12 @@
-# Modeling of the Glottal Flow Derivative Waveform with Application to Speaker Identification
+---
+title: "Modeling of the Glottal Flow Derivative Waveform with Application to Speaker Identification"
+authors: "Michael D. Plumpe, Thomas F. Quatieri, Douglas A. Reynolds"
+year: 1999
+venue: "IEEE Transactions on Speech and Audio Processing, Vol. 7, No. 5, September 1999"
+publisher_item_identifier: "S 1063-6676(99)06562-1"
+---
 
-**Authors:** Michael D. Plumpe, Thomas F. Quatieri, Douglas A. Reynolds
-**Year:** 1999
-**Venue:** IEEE Transactions on Speech and Audio Processing, Vol. 7, No. 5, September 1999
-**Publisher Item Identifier:** S 1063-6676(99)06562-1
+# Modeling of the Glottal Flow Derivative Waveform with Application to Speaker Identification
 
 ## One-Sentence Summary
 Presents an automatic technique for decomposing the glottal flow derivative into coarse structure (LF model) and fine structure (aspiration, ripple from source-vocal tract interaction), with NL2SOL nonlinear least-squares fitting of LF parameters and application to GMM-based speaker identification.

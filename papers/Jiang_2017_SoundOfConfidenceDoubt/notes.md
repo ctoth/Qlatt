@@ -1,9 +1,12 @@
-# The Sound of Confidence and Doubt
+---
+title: "The Sound of Confidence and Doubt"
+authors: "Xiaoming Jiang, Marc D. Pell"
+year: 2017
+venue: "Speech Communication 88 (2017) 106-126"
+doi_url: "http://dx.doi.org/10.1016/j.specom.2017.01.011"
+---
 
-**Authors:** Xiaoming Jiang, Marc D. Pell
-**Year:** 2017
-**Venue:** Speech Communication 88 (2017) 106-126
-**DOI:** http://dx.doi.org/10.1016/j.specom.2017.01.011
+# The Sound of Confidence and Doubt
 
 ## One-Sentence Summary
 Comprehensive perceptual-acoustic study identifying the specific prosodic features (F0, intensity, duration, voice quality) that distinguish confident, close-to-confident, unconfident, and neutral speech expressions.

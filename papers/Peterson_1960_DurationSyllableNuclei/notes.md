@@ -1,3 +1,8 @@
+---
+title: "Peterson & Lehiste 1960 — Duration of Syllable Nuclei in English"
+year: 1960
+---
+
 # Peterson & Lehiste 1960 — Duration of Syllable Nuclei in English
 
 ## Reference

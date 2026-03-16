@@ -1,9 +1,12 @@
-# The Duration of American-English Stop Consonants: An Overview
+---
+title: "The Duration of American-English Stop Consonants: An Overview"
+authors: "Thomas H. Crystal and Arthur S. House"
+year: 1988
+venue: "Journal of Phonetics, 16, 285-294"
+doi_url: "0095-4470/88/030285"
+---
 
-**Authors:** Thomas H. Crystal and Arthur S. House
-**Year:** 1988
-**Venue:** Journal of Phonetics, 16, 285-294
-**DOI/URL:** 0095-4470/88/030285
+# The Duration of American-English Stop Consonants: An Overview
 
 ## One-Sentence Summary
 

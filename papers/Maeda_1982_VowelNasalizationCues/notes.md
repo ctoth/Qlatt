@@ -1,9 +1,12 @@
-# Acoustic Cues for Vowel Nasalization: A Simulation Study
+---
+title: "Acoustic Cues for Vowel Nasalization: A Simulation Study"
+authors: "Shinji Maeda"
+year: 1982
+venue: "J. Acoust. Soc. Am. 72, S102 (104th Meeting abstract)"
+doi_url: "https://doi.org/10.1121/1.2019690"
+---
 
-**Authors:** Shinji Maeda
-**Year:** 1982
-**Venue:** J. Acoust. Soc. Am. 72, S102 (104th Meeting abstract)
-**DOI:** https://doi.org/10.1121/1.2019690
+# Acoustic Cues for Vowel Nasalization: A Simulation Study
 
 ## One-Sentence Summary
 Simulation study showing that the primary acoustic cue for vowel nasalization is spectral flattening in the 300-2500 Hz range caused by nasal coupling.

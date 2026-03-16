@@ -1,9 +1,12 @@
-# Mechanics of Human Voice Production and Control
+---
+title: "Mechanics of Human Voice Production and Control"
+authors: "Zhaoyan Zhang"
+year: 2016
+venue: "Journal of the Acoustical Society of America, 140(4), 2614-2635"
+doi_url: "10.1121/1.4964509"
+---
 
-**Authors:** Zhaoyan Zhang
-**Year:** 2016
-**Venue:** Journal of the Acoustical Society of America, 140(4), 2614-2635
-**DOI:** 10.1121/1.4964509
+# Mechanics of Human Voice Production and Control
 
 ## One-Sentence Summary
 A comprehensive review of voice physiology, biomechanics, and the physics of vocal fold vibration that establishes cause-effect relationships between laryngeal muscle control, vocal fold properties, and voice output (F0, intensity, voice quality), with critical assessment of mechanical and computational models of voice production.

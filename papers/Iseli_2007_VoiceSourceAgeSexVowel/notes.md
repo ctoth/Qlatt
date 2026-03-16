@@ -1,9 +1,12 @@
-# Age, Sex, and Vowel Dependencies of Acoustic Measures Related to the Voice Source
+---
+title: "Age, Sex, and Vowel Dependencies of Acoustic Measures Related to the Voice Source"
+authors: "Markus Iseli, Yen-Liang Shue, Abeer Alwan"
+year: 2007
+venue: "Journal of the Acoustical Society of America, Vol. 121(4), 2283-2295"
+doi_url: "10.1121/1.2697522"
+---
 
-**Authors:** Markus Iseli, Yen-Liang Shue, Abeer Alwan
-**Year:** 2007
-**Venue:** Journal of the Acoustical Society of America, Vol. 121(4), 2283-2295
-**DOI:** 10.1121/1.2697522
+# Age, Sex, and Vowel Dependencies of Acoustic Measures Related to the Voice Source
 
 ## One-Sentence Summary
 Provides a spectral magnitude correction formula that removes vocal tract formant influence from harmonic measurements, then uses it to quantify age, sex, and vowel dependencies of F0, H1*-H2* (open quotient), and H1*-A3* (spectral tilt) across 335 speakers ages 8-39.

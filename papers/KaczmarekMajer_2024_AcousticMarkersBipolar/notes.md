@@ -1,9 +1,12 @@
-# Acoustic Features from Speech as Markers of Depressive and Manic Symptoms in Bipolar Disorder: A Prospective Study
+---
+title: "Acoustic Features from Speech as Markers of Depressive and Manic Symptoms in Bipolar Disorder: A Prospective Study"
+authors: "Katarzyna Kaczmarek-Majer, Monika Dominiak, Anna Z. Antosik, Olgierd Hryniewicz, Olga Kaminska, Karol Opara, Jan Owsinski, Weronika Radziszewska, Malgorzata Sochacka, Lukasz Swiecicki"
+year: "2024 (published 2025)"
+venue: "Acta Psychiatrica Scandinavica"
+doi_url: "10.1111/acps.13735"
+---
 
-**Authors:** Katarzyna Kaczmarek-Majer, Monika Dominiak, Anna Z. Antosik, Olgierd Hryniewicz, Olga Kaminska, Karol Opara, Jan Owsinski, Weronika Radziszewska, Malgorzata Sochacka, Lukasz Swiecicki
-**Year:** 2024 (published 2025)
-**Venue:** Acta Psychiatrica Scandinavica
-**DOI:** 10.1111/acps.13735
+# Acoustic Features from Speech as Markers of Depressive and Manic Symptoms in Bipolar Disorder: A Prospective Study
 
 ## One-Sentence Summary
 This study provides empirically-validated correlations between acoustic speech features (prosodic, spectral, voice quality) and affective states in bipolar disorder patients, with specific parameter values and sex-differentiated patterns useful for implementing emotional/affective speech synthesis.

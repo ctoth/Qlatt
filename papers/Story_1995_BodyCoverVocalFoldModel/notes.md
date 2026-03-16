@@ -1,3 +1,8 @@
+---
+title: "Story & Titze 1995 — Voice Simulation with a Body-Cover Model of the Vocal Folds"
+year: 1995
+---
+
 # Story & Titze 1995 — Voice Simulation with a Body-Cover Model of the Vocal Folds
 
 ## Implementation-Focused Notes
@@ -257,3 +262,19 @@ This model provides the physical basis for understanding:
 2. **CT vs TA muscle effects**: CT contraction primarily increases cover stiffness (raising F0), while TA contraction increases body stiffness (affecting amplitude and phase difference)
 3. **Glottal flow waveform shapes**: Different laryngeal configurations produce characteristically different glottal flow waveforms (sinusoidal for falsetto, pulse-like for chest voice)
 4. **Source parameter relationships**: The model shows how F0, open quotient, speed quotient, and amplitude are mechanistically linked through the tissue properties
+
+## Collection Cross-References
+
+### Cited By (in Collection)
+- `Hanson_2001_ModelsPhonation` — references body-cover model for phonation modeling
+- `Steinecke_1995_BifurcationsVocalFold` — studies bifurcation behavior in vocal fold models
+- `Zhang_2016_MechanicsVoiceProductionControl` — references body-cover model in voice mechanics review
+- `Zhang_2016_VocalFoldPhysiologyVoiceProduction` — cites Story & Titze for vocal fold tissue properties
+- `Story_1996_VocalTractAreaFunctionsMRI` — Story's own later MRI vocal tract work
+- `Fraj_2011_BreathyRoughVoices` — references body-cover model for voice quality simulation
+- `Titze_1989_MaleFemaleVoices` — Titze's related work on male-female voice differences
+
+### Conceptual Links (not citation-based)
+- `Cranen_1995_PhysiologicalVoiceSourceModelling` — both model vocal fold vibration physiology
+- `Herzel_1994_VocalDisordersNonlinearDynamics` — both study vocal fold dynamics using lumped-element models
+- `Gobl_1988_VoiceSourceDynamicsConnectedSpeech` — Gobl's LF parameter data could be used to validate Story's model output

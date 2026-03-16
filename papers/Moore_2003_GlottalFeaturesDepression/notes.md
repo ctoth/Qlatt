@@ -1,9 +1,12 @@
-# Investigating the Role of Glottal Features in Classifying Clinical Depression
+---
+title: "Investigating the Role of Glottal Features in Classifying Clinical Depression"
+authors: "Elliot Moore II, Mark Clements, John Peifer, Lydia Weisser"
+year: 2003
+venue: "EMBC 2003 (25th Annual International Conference of the IEEE Engineering in Medicine and Biology Society)"
+doi_url: "0-7803-7789-3/03/$17.00 ©2003 IEEE"
+---
 
-**Authors:** Elliot Moore II, Mark Clements, John Peifer, Lydia Weisser
-**Year:** 2003
-**Venue:** EMBC 2003 (25th Annual International Conference of the IEEE Engineering in Medicine and Biology Society)
-**DOI/URL:** 0-7803-7789-3/03/$17.00 ©2003 IEEE
+# Investigating the Role of Glottal Features in Classifying Clinical Depression
 
 ## One-Sentence Summary
 This paper demonstrates that glottal waveform features (timing ratios, shimmer, spectral tilt) can classify clinical depression with up to 100% accuracy for females, providing specific feature extraction methods for voice-based affect detection.

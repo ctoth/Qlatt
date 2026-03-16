@@ -1,9 +1,12 @@
-# Modelling Fundamental Frequency, and Its Relationship to Syntax, Semantics, and Phonetics
+---
+title: "Modelling Fundamental Frequency, and Its Relationship to Syntax, Semantics, and Phonetics"
+authors: "Douglas O'Shaughnessy"
+year: 1976
+venue: "MIT PhD Thesis, Department of Electrical Engineering and Computer Science"
+supervisor: "Jonathan Allen"
+---
 
-**Author:** Douglas O'Shaughnessy
-**Year:** 1976
-**Venue:** MIT PhD Thesis, Department of Electrical Engineering and Computer Science
-**Supervisor:** Jonathan Allen
+# Modelling Fundamental Frequency, and Its Relationship to Syntax, Semantics, and Phonetics
 
 ## One-Sentence Summary
 

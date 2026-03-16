@@ -1,3 +1,8 @@
+---
+title: "Cranen & Schroeter 1996 — Physiologically Motivated Modelling of the Voice Source"
+year: 1995
+---
+
 # Cranen & Schroeter 1996 — Physiologically Motivated Modelling of the Voice Source
 
 ## Key Contribution

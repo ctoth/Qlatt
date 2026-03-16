@@ -1,11 +1,14 @@
-# Pronunciation Modeling in Speech Synthesis
+---
+title: "Pronunciation Modeling in Speech Synthesis"
+authors: "Corey Andrew Miller"
+year: 1998
+venue: "PhD Dissertation, University of Pennsylvania (Linguistics)"
+doi_url: "UPenn dissertations archive"
+supervisor: "Mark Liberman"
+committee: "William Labov, Eugene Buckley, Mark Randolph (Motorola)"
+---
 
-**Authors:** Corey Andrew Miller
-**Year:** 1998
-**Venue:** PhD Dissertation, University of Pennsylvania (Linguistics)
-**Supervisor:** Mark Liberman
-**Committee:** William Labov, Eugene Buckley, Mark Randolph (Motorola)
-**DOI/URL:** UPenn dissertations archive
+# Pronunciation Modeling in Speech Synthesis
 
 ## One-Sentence Summary
 

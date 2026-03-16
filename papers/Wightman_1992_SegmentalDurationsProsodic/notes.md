@@ -1,3 +1,8 @@
+---
+title: "Wightman, Shattuck-Hufnagel, Ostendorf & Price 1992 — Implementation Notes"
+year: 1992
+---
+
 # Wightman, Shattuck-Hufnagel, Ostendorf & Price 1992 — Implementation Notes
 
 ## Reference

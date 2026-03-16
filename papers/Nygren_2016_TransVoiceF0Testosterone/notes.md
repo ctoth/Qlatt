@@ -1,9 +1,12 @@
-# Effects on Voice Fundamental Frequency and Satisfaction with Voice in Trans Men during Testosterone Treatment -- A Longitudinal Study
+---
+title: "Effects on Voice Fundamental Frequency and Satisfaction with Voice in Trans Men during Testosterone Treatment -- A Longitudinal Study"
+authors: "Ulrika Nygren, Agneta Nordenskjold, Stefan Arver, Maria Sodersten"
+year: 2016
+venue: "Journal of Voice, Vol. 30, No. 6, pp. 766.e23-766.e34"
+doi_url: "10.1016/j.jvoice.2015.10.016"
+---
 
-**Authors:** Ulrika Nygren, Agneta Nordenskjold, Stefan Arver, Maria Sodersten
-**Year:** 2016
-**Venue:** Journal of Voice, Vol. 30, No. 6, pp. 766.e23-766.e34
-**DOI:** 10.1016/j.jvoice.2015.10.016
+# Effects on Voice Fundamental Frequency and Satisfaction with Voice in Trans Men during Testosterone Treatment -- A Longitudinal Study
 
 ## One-Sentence Summary
 Provides longitudinal F0 tracking data across 50 trans men over 3-24 months of testosterone treatment, demonstrating continuous decline in fundamental frequency from female to male reference ranges with large interindividual variation.

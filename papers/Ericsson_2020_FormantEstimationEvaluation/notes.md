@@ -1,9 +1,12 @@
-# Evaluation of an Automated Formant Estimation Procedure with Optimized Formant Ceiling
+---
+title: "Evaluation of an Automated Formant Estimation Procedure with Optimized Formant Ceiling"
+authors: "Anna Ericsson"
+year: 2020
+venue: "Master's Thesis (Magister), Stockholm University, Department of Linguistics (Phonetics)"
+supervisor: "Marcin Wlodarczak"
+---
 
-**Authors:** Anna Ericsson
-**Year:** 2020
-**Venue:** Master's Thesis (Magister), Stockholm University, Department of Linguistics (Phonetics)
-**Supervisor:** Marcin Wlodarczak
+# Evaluation of an Automated Formant Estimation Procedure with Optimized Formant Ceiling
 
 ## One-Sentence Summary
 

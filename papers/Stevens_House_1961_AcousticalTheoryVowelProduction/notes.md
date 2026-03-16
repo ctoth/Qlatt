@@ -1,3 +1,8 @@
+---
+title: "Stevens & House 1961 - An Acoustical Theory of Vowel Production and Some of its Implications"
+year: 1961
+---
+
 # Stevens & House 1961 - An Acoustical Theory of Vowel Production and Some of its Implications
 
 ## Key Concepts
@@ -151,3 +156,21 @@ This is the standard second-order resonator form used in Klatt's cascade formant
 - Glottal source spectrum envelope falls at ~12 dB/octave (for normal voice)
 - Below ~250 Hz the slope is less steep
 - This is consistent with the Liljencrants-Fant model source spectrum used in Qlatt
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — parallel development of acoustic theory
+- `Peterson_Barney_1952_VowelFormants` — vowel formant data referenced
+
+### Cited By (in Collection)
+- `Stevens_House_1963_PerturbationVowelConsonant` — extends this theory to consonantal context
+- `Fujimura_1962_NasalConsonantAnalysis` — extends to nasal consonant transfer functions
+- `Isshiki_1964_VoiceIntensityRegulation` — references for source-filter framework
+- `Klatt_1990_VoiceQualityVariations` — references for formant amplitude theory
+- `Stevens_1991_HL_Parameters` — Stevens' later work extending these amplitude relations
+
+### Conceptual Links (not citation-based)
+- `Lindblom_1971_AcousticConsequencesArticulatory` — both derive formant patterns from vocal tract models; Stevens & House focus on amplitude relations, Lindblom & Sundberg on articulatory parameters
+- `Holmes_1983_FormantSynthesizersCascadeParallel` — Stevens & House 1961 provides theoretical basis for why cascade synthesis naturally produces correct amplitude ratios
+- `Kent_Vorperian_2018_VowelFormantBandwidths` — both provide bandwidth data; Stevens & House use 100 Hz default, Kent & Vorperian provide age/sex-dependent empirical values

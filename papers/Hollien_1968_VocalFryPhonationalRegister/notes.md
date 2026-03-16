@@ -1,3 +1,8 @@
+---
+title: "Hollien & Michel 1968 — Vocal Fry as a Phonational Register"
+year: 1968
+---
+
 # Hollien & Michel 1968 — Vocal Fry as a Phonational Register
 
 ## Key Finding

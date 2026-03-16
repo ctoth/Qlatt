@@ -1,9 +1,12 @@
-# A Text-to-Speech System Based Entirely on Rules
+---
+title: "A Text-to-Speech System Based Entirely on Rules"
+authors: "Rolf Carlson and Björn Granström"
+year: 1975
+venue: "Conference paper (appears to be from proceedings, pages 686-688)"
+institution: "Dept. of Speech Communication, KTH, Stockholm, Sweden"
+---
 
-**Authors:** Rolf Carlson and Björn Granström
-**Year:** 1975
-**Venue:** Conference paper (appears to be from proceedings, pages 686-688)
-**Institution:** Dept. of Speech Communication, KTH, Stockholm, Sweden
+# A Text-to-Speech System Based Entirely on Rules
 
 ## One-Sentence Summary
 Describes an early rule-based TTS system for Swedish that uses no lexicon, relying entirely on ordered phonological rules expressed in a custom programming language notation.

@@ -1,9 +1,12 @@
-# An Acoustic Profile of Consonant Reduction
+---
+title: "An Acoustic Profile of Consonant Reduction"
+authors: "R.J.J.H. van Son and Louis C.W. Pols"
+year: "1997 (inferred from page numbers 1529-1532, conference proceedings style)"
+venue: "Proceedings (likely Eurospeech or ICSLP based on format and citations)"
+institution: "Institute of Phonetic Sciences & IFOTT, University of Amsterdam"
+---
 
-**Authors:** R.J.J.H. van Son and Louis C.W. Pols
-**Year:** 1997 (inferred from page numbers 1529-1532, conference proceedings style)
-**Venue:** Proceedings (likely Eurospeech or ICSLP based on format and citations)
-**Institution:** Institute of Phonetic Sciences & IFOTT, University of Amsterdam
+# An Acoustic Profile of Consonant Reduction
 
 ## One-Sentence Summary
 

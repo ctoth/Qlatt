@@ -1,6 +1,10 @@
-# Strom 2002 — From Text to Prosody Without ToBI
+---
+title: "Strom 2002 — From Text to Prosody Without ToBI"
+year: 2002
+one_sentence_summary: "A bootstrapping/EM method that iteratively learns accent/boundary labels and prosody-predicting CARTs from unlabeled speech data, eliminating the need for manual ToBI annotation while outperforming hand-crafted prosody rules."
+---
 
-**One-sentence summary:** A bootstrapping/EM method that iteratively learns accent/boundary labels and prosody-predicting CARTs from unlabeled speech data, eliminating the need for manual ToBI annotation while outperforming hand-crafted prosody rules.
+# Strom 2002 — From Text to Prosody Without ToBI
 
 ## Key Contributions
 

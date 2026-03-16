@@ -1,3 +1,8 @@
+---
+title: "Hammarberg et al. 1980 — Perceptual and Acoustic Correlates of Abnormal Voice Qualities"
+year: 1980
+---
+
 # Hammarberg et al. 1980 — Perceptual and Acoustic Correlates of Abnormal Voice Qualities
 
 ## Key Findings

@@ -1,9 +1,12 @@
-# From Text to Speech with SRS
+---
+title: "From Text to Speech with SRS"
+authors: "Susan R. Hertz"
+year: 1982
+venue: "Journal of the Acoustical Society of America, Vol. 72(4), pp. 1155-1170"
+doi_url: "0001-4966/82/101155-16$00.80"
+---
 
-**Authors:** Susan R. Hertz
-**Year:** 1982
-**Venue:** Journal of the Acoustical Society of America, Vol. 72(4), pp. 1155-1170
-**DOI/URL:** 0001-4966/82/101155-16$00.80
+# From Text to Speech with SRS
 
 ## One-Sentence Summary
 

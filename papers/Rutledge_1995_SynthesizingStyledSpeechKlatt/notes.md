@@ -1,9 +1,12 @@
-# Synthesizing Styled Speech Using the Klatt Synthesizer
+---
+title: "Synthesizing Styled Speech Using the Klatt Synthesizer"
+authors: "Janet C. Rutledge, Kathleen E. Cummings, Daniel A. Lambert, Mark A. Clements"
+year: 1995
+venue: "Proceedings, IEEE ICASSP 1995, pp. 648-651"
+doi_url: "0-7803-2431-5/95"
+---
 
-**Authors:** Janet C. Rutledge, Kathleen E. Cummings, Daniel A. Lambert, Mark A. Clements
-**Year:** 1995
-**Venue:** Proceedings, IEEE ICASSP 1995, pp. 648-651
-**DOI/URL:** 0-7803-2431-5/95
+# Synthesizing Styled Speech Using the Klatt Synthesizer
 
 ## One-Sentence Summary
 

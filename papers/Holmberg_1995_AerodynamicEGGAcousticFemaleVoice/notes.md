@@ -1,3 +1,8 @@
+---
+title: "Implementation Notes: Holmberg et al. 1995"
+year: 1995
+---
+
 # Implementation Notes: Holmberg et al. 1995
 
 ## Overview

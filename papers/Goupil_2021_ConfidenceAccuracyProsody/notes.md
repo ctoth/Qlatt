@@ -1,9 +1,12 @@
-# Distinct Signatures of Subjective Confidence and Objective Accuracy in Speech Prosody
+---
+title: "Distinct Signatures of Subjective Confidence and Objective Accuracy in Speech Prosody"
+authors: "Louise Goupil, Jean-Julien Aucouturier"
+year: 2021
+venue: "Cognition (Elsevier), Volume 212, Article 104661"
+doi_url: "https://doi.org/10.1016/j.cognition.2021.104661"
+---
 
-**Authors:** Louise Goupil, Jean-Julien Aucouturier
-**Year:** 2021
-**Venue:** Cognition (Elsevier), Volume 212, Article 104661
-**DOI:** https://doi.org/10.1016/j.cognition.2021.104661
+# Distinct Signatures of Subjective Confidence and Objective Accuracy in Speech Prosody
 
 ## One-Sentence Summary
 This paper demonstrates that subjective confidence and objective accuracy are encoded in distinct prosodic features (intonation, loudness, duration) with different timings, providing empirical acoustic parameters for synthesizing confident vs. uncertain speech.

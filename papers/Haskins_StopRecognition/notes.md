@@ -1,9 +1,12 @@
-# Stop-Consonant Recognition: Release Bursts and Formant Transitions as Functionally Equivalent, Context-Dependent Cues
+---
+title: "Stop-Consonant Recognition: Release Bursts and Formant Transitions as Functionally Equivalent, Context-Dependent Cues"
+authors: "M. F. Dorman, M. Studdert-Kennedy, L. J. Raphael"
+year: 1977
+venue: "Perception & Psychophysics, Vol. 22(2), pp. 109-122"
+affiliations: "Arizona State University, Queens College CUNY, Haskins Laboratories"
+---
 
-**Authors:** M. F. Dorman, M. Studdert-Kennedy, L. J. Raphael
-**Year:** 1977
-**Venue:** Perception & Psychophysics, Vol. 22(2), pp. 109-122
-**Affiliations:** Arizona State University, Queens College CUNY, Haskins Laboratories
+# Stop-Consonant Recognition: Release Bursts and Formant Transitions as Functionally Equivalent, Context-Dependent Cues
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# Expression of Affect in Spontaneous Speech: Acoustic Correlates and Automatic Detection of Irritation and Resignation
+---
+title: "Expression of Affect in Spontaneous Speech: Acoustic Correlates and Automatic Detection of Irritation and Resignation"
+authors: "Petri Laukka, Daniel Neiberg, Mimmi Forsell, Inger Karlsson, Kjell Elenius"
+year: 2011
+venue: "Computer Speech and Language 25, 84–104"
+doi_url: "10.1016/j.csl.2010.03.004"
+---
 
-**Authors:** Petri Laukka, Daniel Neiberg, Mimmi Forsell, Inger Karlsson, Kjell Elenius
-**Year:** 2011
-**Venue:** Computer Speech and Language 25, 84–104
-**DOI:** 10.1016/j.csl.2010.03.004
+# Expression of Affect in Spontaneous Speech: Acoustic Correlates and Automatic Detection of Irritation and Resignation
 
 ## One-Sentence Summary
 Provides quantitative acoustic correlates of authentic (non-acted) irritation and resignation from a 200-utterance call-center corpus, comparing within-speaker affective vs. neutral speech across 73 acoustic measures related to F0, intensity, formants, voice source, and duration.

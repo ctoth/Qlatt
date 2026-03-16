@@ -1,3 +1,8 @@
+---
+title: "Veldhuis 1998 - A Computationally Efficient Alternative for the Liljencrants-Fant Model"
+year: 1998
+---
+
 # Veldhuis 1998 - A Computationally Efficient Alternative for the Liljencrants-Fant Model
 
 ## Key Contribution
@@ -156,3 +161,24 @@ Cost: 2 multiplications, 3 additions per sample (each factor incremented by T_s)
 4. **Return phase is identical** to LF (exponential decay), so spectral slope behavior is preserved
 5. **The r_d shape parameter** (Eq. 14) with Fant's statistical R-parameter mappings enables single-knob voice quality control — relevant for speaker personality system
 6. **Constraint check** (Eq. 13) should be implemented to ensure valid waveform when parameters are interpolated dynamically
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — Fant, Liljencrants & Lin 1985, the LF model that R++ replaces
+- `Fant_1995_LFModelRevisited` — Fant 1995, r_d parameter relationships used in R++
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990, voice quality analysis/synthesis
+- `Childers_Lee_1991_VoiceQualityFactors` — Childers & Lee 1991, voice quality factors
+
+### Cited By (in Collection)
+- `Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis` — references Veldhuis for efficient LF alternatives
+- `Doval_2003_VoiceSourceCALM` — references R++ as an LF approximation
+- `Doval_2006_SpectrumGlottalFlowModels` — discusses R++ among glottal flow models
+- `Henrich_2001_SpectralOqAsymmetry` — references Veldhuis for LF model implementation
+- `Henrich_2003_JND_OpenQuotient` — cites Veldhuis in context of glottal source modeling
+- `vanDinther_2001_PerceptualGlottalPulse` — references R++ for perceptual evaluation
+- `vanDinther_2004_PerceptualGlottalPulse` — cites Veldhuis for perceptual glottal pulse comparisons
+
+### Conceptual Links (not citation-based)
+- `Gobl_2021_LFModelFrequencyDomain` — both address computational aspects of LF model implementation
+- `Perrotin_2021_LF_LinearFilter_Equivalence` — both seek efficient alternatives to the standard LF solve

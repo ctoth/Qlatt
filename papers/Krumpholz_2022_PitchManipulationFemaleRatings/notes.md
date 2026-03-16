@@ -1,9 +1,12 @@
-# The Effects of Pitch Manipulation on Male Ratings of Female Speakers and Their Voices
+---
+title: "The Effects of Pitch Manipulation on Male Ratings of Female Speakers and Their Voices"
+authors: "Christina Krumpholz, Cliodhna Quigley, Karsan Ameen, Christoph Reuter, Leonida Fusani, Helmut Leder"
+year: 2022
+venue: "Frontiers in Psychology, 13:911854"
+doi_url: "10.3389/fpsyg.2022.911854"
+---
 
-**Authors:** Christina Krumpholz, Cliodhna Quigley, Karsan Ameen, Christoph Reuter, Leonida Fusani, Helmut Leder
-**Year:** 2022
-**Venue:** Frontiers in Psychology, 13:911854
-**DOI:** 10.3389/fpsyg.2022.911854
+# The Effects of Pitch Manipulation on Male Ratings of Female Speakers and Their Voices
 
 ## One-Sentence Summary
 Increasing female voice pitch by ~20 Hz via PSOLA increases perceived femininity and decreases perceived age, but does not significantly affect perceived attractiveness or health in naturalistic audio or audiovisual conditions.

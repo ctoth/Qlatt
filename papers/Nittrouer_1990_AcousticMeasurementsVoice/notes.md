@@ -1,9 +1,12 @@
-# Acoustic Measurements of Men's and Women's Voices: A Study of Context Effects and Covariation
+---
+title: "Acoustic Measurements of Men's and Women's Voices: A Study of Context Effects and Covariation"
+authors: "Susan Nittrouer, Richard S. McGowan, Paul H. Milenkovic, Donna Beehler"
+year: 1990
+venue: "Journal of Speech and Hearing Research, 33, 761-775"
+doi_url: "0022-4685/90/3304-0761"
+---
 
-**Authors:** Susan Nittrouer, Richard S. McGowan, Paul H. Milenkovic, Donna Beehler
-**Year:** 1990
-**Venue:** Journal of Speech and Hearing Research, 33, 761-775
-**DOI/URL:** 0022-4685/90/3304-0761
+# Acoustic Measurements of Men's and Women's Voices: A Study of Context Effects and Covariation
 
 ## One-Sentence Summary
 

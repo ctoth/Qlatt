@@ -1,3 +1,8 @@
+---
+title: "Halle, Hughes, & Radley (1957) — Acoustic Properties of Stop Consonants"
+year: 1957
+---
+
 # Halle, Hughes, & Radley (1957) — Acoustic Properties of Stop Consonants
 
 ## Implementation-Relevant Notes
@@ -97,3 +102,21 @@ This means the burst (very rapid spectral change) and transitions (slower spectr
 | Transition duration | ~50 ms typical | But varies greatly; some >100 ms |
 | Critical bandwidth for formant movement perception | ~300 cps | Estimate where pitch matching fails |
 | Vowel+transition before stop | ~100 ms minimum | For lax back vowels, very short |
+
+## Collection Cross-References
+
+### Already in Collection
+- `Delattre_1955_AcousticLociTransitionalCues` — Delattre et al. 1955, cited for Haskins transition experiments
+- `Stevens_1998_AcousticPhonetics` — references Halle 1957 burst spectral analysis
+
+### Cited By (in Collection)
+- `Blumstein_Stevens_1979_AcousticInvariance` — cites Halle et al. 1957 for stop burst spectral properties
+- `Zue_1976_StopConsonantAcoustics` — cites Halle et al. 1957 as foundational stop consonant study
+- `Behrens_Blumstein_1988_FricativeAmplitude` — references Halle et al. for spectral classification
+- `Hughes_1956_SpectralPropertiesFricatives` — companion study by same authors on fricatives
+- `Jongman_1989_FricativeDuration` — references Halle et al. for spectral analysis methods
+- `Stevens_1978_InvariantCuesPlaceArticulation` — builds on Halle 1957 burst spectral analysis
+
+### Conceptual Links (not citation-based)
+- `Crystal_House_1988_StopConsonantDuration` — both study stop consonant properties; Crystal & House focus on duration while Halle et al. focus on spectral cues
+- `Abramson_Whalen_2017_VOTat50` — both address stop consonant voicing distinctions from different perspectives

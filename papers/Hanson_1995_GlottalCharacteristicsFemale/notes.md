@@ -1,9 +1,12 @@
-# Glottal Characteristics of Female Speakers
+---
+title: "Glottal Characteristics of Female Speakers"
+authors: "Helen M. Hanson"
+year: 1995
+venue: "PhD Thesis, Harvard University"
+adviser: "Kenneth N. Stevens"
+---
 
-**Author:** Helen M. Hanson
-**Year:** 1995
-**Venue:** PhD Thesis, Harvard University
-**Adviser:** Kenneth N. Stevens
+# Glottal Characteristics of Female Speakers
 
 ## One-Sentence Summary
 

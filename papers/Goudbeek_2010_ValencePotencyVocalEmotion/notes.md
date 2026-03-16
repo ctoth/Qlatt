@@ -1,9 +1,12 @@
-# Beyond Arousal: Valence and Potency/Control Cues in the Vocal Expression of Emotion
+---
+title: "Beyond Arousal: Valence and Potency/Control Cues in the Vocal Expression of Emotion"
+authors: "Martijn Goudbeek, Klaus Scherer"
+year: 2010
+venue: "Journal of the Acoustical Society of America, 128(3), 1322-1336"
+doi_url: "10.1121/1.3466853"
+---
 
-**Authors:** Martijn Goudbeek, Klaus Scherer
-**Year:** 2010
-**Venue:** Journal of the Acoustical Society of America, 128(3), 1322-1336
-**DOI:** 10.1121/1.3466853
+# Beyond Arousal: Valence and Potency/Control Cues in the Vocal Expression of Emotion
 
 ## One-Sentence Summary
 

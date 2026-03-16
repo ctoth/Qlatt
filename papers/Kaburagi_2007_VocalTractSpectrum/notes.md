@@ -1,9 +1,12 @@
-# Generation of the Vocal Tract Spectrum from the Underlying Articulatory Mechanism
+---
+title: "Generation of the Vocal Tract Spectrum from the Underlying Articulatory Mechanism"
+authors: "Tokihiko Kaburagi, Jiji Kim"
+year: 2007
+venue: "Journal of the Acoustical Society of America, Vol. 121, No. 1, pp. 456-468"
+doi_url: "10.1121/1.2384847"
+---
 
-**Authors:** Tokihiko Kaburagi, Jiji Kim
-**Year:** 2007
-**Venue:** Journal of the Acoustical Society of America, Vol. 121, No. 1, pp. 456-468
-**DOI:** 10.1121/1.2384847
+# Generation of the Vocal Tract Spectrum from the Underlying Articulatory Mechanism
 
 ## One-Sentence Summary
 

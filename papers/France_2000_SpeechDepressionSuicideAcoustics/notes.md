@@ -1,9 +1,12 @@
-# Acoustical Properties of Speech as Indicators of Depression and Suicidal Risk
+---
+title: "Acoustical Properties of Speech as Indicators of Depression and Suicidal Risk"
+authors: "Daniel J. France, Richard G. Shiavi, Stephen Silverman, Marilyn Silverman, D. Mitchell Wilkes"
+year: 2000
+venue: "IEEE Transactions on Biomedical Engineering, Vol. 47, No. 7"
+doi_url: "S 0018-9294(00)05121-1"
+---
 
-**Authors:** Daniel J. France, Richard G. Shiavi, Stephen Silverman, Marilyn Silverman, D. Mitchell Wilkes
-**Year:** 2000
-**Venue:** IEEE Transactions on Biomedical Engineering, Vol. 47, No. 7
-**DOI/URL:** S 0018-9294(00)05121-1
+# Acoustical Properties of Speech as Indicators of Depression and Suicidal Risk
 
 ## One-Sentence Summary
 This paper demonstrates that multivariate acoustic features (formants, power spectral density, amplitude modulation) can discriminate between normal, depressed, and suicidal speech with 75-94% accuracy, providing quantitative evidence for how psychological state affects vocal production.

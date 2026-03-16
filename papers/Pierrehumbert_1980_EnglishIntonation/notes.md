@@ -1,9 +1,12 @@
-# The Phonology and Phonetics of English Intonation
+---
+title: "The Phonology and Phonetics of English Intonation"
+authors: "Janet Breckenridge Pierrehumbert"
+year: 1980
+venue: "MIT PhD Thesis, Department of Linguistics and Philosophy"
+supervisor: "Morris Halle"
+---
 
-**Author:** Janet Breckenridge Pierrehumbert
-**Year:** 1980
-**Venue:** MIT PhD Thesis, Department of Linguistics and Philosophy
-**Supervisor:** Morris Halle
+# The Phonology and Phonetics of English Intonation
 
 ## One-Sentence Summary
 

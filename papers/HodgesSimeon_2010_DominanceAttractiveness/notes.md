@@ -1,9 +1,12 @@
-# Different Vocal Parameters Predict Perceptions of Dominance and Attractiveness
+---
+title: "Different Vocal Parameters Predict Perceptions of Dominance and Attractiveness"
+authors: "Carolyn R. Hodges-Simeon, Steven J. C. Gaulin, David A. Puts"
+year: 2010
+venue: "Human Nature, Vol. 21, 406-427"
+doi_url: "10.1007/s12110-010-9101-5"
+---
 
-**Authors:** Carolyn R. Hodges-Simeon, Steven J. C. Gaulin, David A. Puts
-**Year:** 2010
-**Venue:** Human Nature, Vol. 21, 406-427
-**DOI:** 10.1007/s12110-010-9101-5
+# Different Vocal Parameters Predict Perceptions of Dominance and Attractiveness
 
 ## One-Sentence Summary
 Demonstrates that different acoustic parameters predict dominance vs attractiveness in male voices: F0 variation (F0-SD) and content predict physical dominance, while mean F0, F0-SD, Df (formant dispersion), and intensity predict attractiveness, with Df effects modulated by female fertility phase.

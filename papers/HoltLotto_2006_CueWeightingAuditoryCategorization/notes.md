@@ -1,9 +1,12 @@
-# Cue Weighting in Auditory Categorization: Implications for First and Second Language Acquisition
+---
+title: "Cue Weighting in Auditory Categorization: Implications for First and Second Language Acquisition"
+authors: "Lori L. Holt, Andrew J. Lotto"
+year: 2006
+venue: "Journal of the Acoustical Society of America, Vol. 119, No. 5, pp. 3059-3071"
+doi_url: "10.1121/1.2188377"
+---
 
-**Authors:** Lori L. Holt, Andrew J. Lotto
-**Year:** 2006
-**Venue:** Journal of the Acoustical Society of America, Vol. 119, No. 5, pp. 3059-3071
-**DOI:** 10.1121/1.2188377
+# Cue Weighting in Auditory Categorization: Implications for First and Second Language Acquisition
 
 ## One-Sentence Summary
 This paper investigates how listeners weight multiple acoustic dimensions when categorizing sounds, demonstrating that distributional properties (informativeness and variance) of training stimuli shape cue weighting in ways that parallel speech sound categorization biases.

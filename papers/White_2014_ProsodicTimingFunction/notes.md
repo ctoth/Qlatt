@@ -1,9 +1,12 @@
-# Communicative Function and Prosodic Form in Speech Timing
+---
+title: "Communicative Function and Prosodic Form in Speech Timing"
+authors: "Laurence White"
+year: 2014
+venue: "Speech Communication 63-64 (2014) 38-54"
+doi_url: "http://dx.doi.org/10.1016/j.specom.2014.04.003"
+---
 
-**Authors:** Laurence White
-**Year:** 2014
-**Venue:** Speech Communication 63-64 (2014) 38-54
-**DOI:** http://dx.doi.org/10.1016/j.specom.2014.04.003
+# Communicative Function and Prosodic Form in Speech Timing
 
 ## One-Sentence Summary
 

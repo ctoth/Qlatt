@@ -1,9 +1,12 @@
-# Acoustic Characteristics of Stop Consonants: A Controlled Study
+---
+title: "Acoustic Characteristics of Stop Consonants: A Controlled Study"
+authors: "Victor Waito Zue"
+year: 1976
+venue: "MIT ScD Thesis"
+advisor: "Kenneth N. Stevens"
+---
 
-**Author:** Victor Waito Zue
-**Year:** 1976
-**Venue:** MIT ScD Thesis
-**Advisor:** Kenneth N. Stevens
+# Acoustic Characteristics of Stop Consonants: A Controlled Study
 
 ## One-Sentence Summary
 

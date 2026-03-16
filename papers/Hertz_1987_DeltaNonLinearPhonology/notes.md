@@ -1,9 +1,12 @@
-# The Delta Programming Language: An Integrated Approach to Non-Linear Phonology, Phonetics, and Speech Synthesis
+---
+title: "The Delta Programming Language: An Integrated Approach to Non-Linear Phonology, Phonetics, and Speech Synthesis"
+authors: "Susan R. Hertz"
+year: "1987 (written December 1987)"
+venue: "Working Papers of the Cornell Phonetics Laboratory, No. 2, pp. 69-122"
+institution: "Eloquent Technology / Cornell University"
+---
 
-**Authors:** Susan R. Hertz
-**Year:** 1987 (written December 1987)
-**Venue:** Working Papers of the Cornell Phonetics Laboratory, No. 2, pp. 69-122
-**Institution:** Eloquent Technology / Cornell University
+# The Delta Programming Language: An Integrated Approach to Non-Linear Phonology, Phonetics, and Speech Synthesis
 
 ## One-Sentence Summary
 

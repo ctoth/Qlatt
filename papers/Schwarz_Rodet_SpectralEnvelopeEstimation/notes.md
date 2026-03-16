@@ -1,9 +1,12 @@
-# Spectral Envelope Estimation and Representation for Sound Analysis-Synthesis
+---
+title: "Spectral Envelope Estimation and Representation for Sound Analysis-Synthesis"
+authors: "Diemo Schwarz, Xavier Rodet"
+year: "~1999 (based on references)"
+venue: "IRCAM Technical Report / Conference Paper"
+affiliation: "IRCAM - Centre Georges Pompidou, Paris"
+---
 
-**Authors:** Diemo Schwarz, Xavier Rodet
-**Year:** ~1999 (based on references)
-**Venue:** IRCAM Technical Report / Conference Paper
-**Affiliation:** IRCAM - Centre Georges Pompidou, Paris
+# Spectral Envelope Estimation and Representation for Sound Analysis-Synthesis
 
 ## One-Sentence Summary
 A survey comparing spectral envelope estimation methods (LPC, cepstrum, discrete cepstrum) and representation formats (filter coefficients, sampled, geometric, formants) for musical sound analysis-synthesis applications.

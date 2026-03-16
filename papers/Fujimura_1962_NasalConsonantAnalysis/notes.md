@@ -1,9 +1,12 @@
-# Analysis of Nasal Consonants
+---
+title: "Analysis of Nasal Consonants"
+authors: "Osamu Fujimura"
+year: 1962
+venue: "The Journal of the Acoustical Society of America, Volume 34, Number 12, pp. 1865-1875"
+received: "September 5, 1962"
+---
 
-**Authors:** Osamu Fujimura
-**Year:** 1962
-**Venue:** The Journal of the Acoustical Society of America, Volume 34, Number 12, pp. 1865-1875
-**Received:** September 5, 1962
+# Analysis of Nasal Consonants
 
 ## One-Sentence Summary
 Provides the pole-zero (formant-antiformant) distributions that characterize the spectra of English nasal consonants /m/, /n/, and /ŋ/ in various vowel contexts, establishing the acoustic basis for distinguishing nasals by place of articulation.

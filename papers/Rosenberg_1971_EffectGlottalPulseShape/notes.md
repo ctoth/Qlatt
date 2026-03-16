@@ -1,3 +1,8 @@
+---
+title: "Rosenberg 1971 - Effect of Glottal Pulse Shape on the Quality of Natural Vowels"
+year: 1971
+---
+
 # Rosenberg 1971 - Effect of Glottal Pulse Shape on the Quality of Natural Vowels
 
 ## Implementation-Focused Notes

@@ -1,10 +1,13 @@
-# The Delta Rule Development System for Speech Synthesis from Text
+---
+title: "The Delta Rule Development System for Speech Synthesis from Text"
+authors: "Susan R. Hertz, James Kadin, Kevin J. Karplus"
+year: 1985
+venue: "Proceedings of the IEEE, Vol. 73, No. 11, November 1985"
+doi_url: "0018-9219/85/1100-1589"
+pages: "1589-1601"
+---
 
-**Authors:** Susan R. Hertz, James Kadin, Kevin J. Karplus
-**Year:** 1985
-**Venue:** Proceedings of the IEEE, Vol. 73, No. 11, November 1985
-**Pages:** 1589-1601
-**DOI:** 0018-9219/85/1100-1589
+# The Delta Rule Development System for Speech Synthesis from Text
 
 ## One-Sentence Summary
 

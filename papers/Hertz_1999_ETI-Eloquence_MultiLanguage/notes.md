@@ -1,9 +1,12 @@
-# Language-Universal and Language-Specific Components in the Multi-Language ETI-Eloquence Text-to-Speech System
+---
+title: "Language-Universal and Language-Specific Components in the Multi-Language ETI-Eloquence Text-to-Speech System"
+authors: "Susan R. Hertz, Rebecca J. Younes, Nina Zinovieva"
+year: 1999
+venue: "Proceedings 14th International Congress of Phonetic Sciences (ICPhS), San Francisco"
+affiliation: "Eloquent Technology, Inc. & Cornell University Linguistics"
+---
 
-**Authors:** Susan R. Hertz, Rebecca J. Younes, Nina Zinovieva
-**Year:** 1999
-**Venue:** Proceedings 14th International Congress of Phonetic Sciences (ICPhS), San Francisco
-**Affiliation:** Eloquent Technology, Inc. & Cornell University Linguistics
+# Language-Universal and Language-Specific Components in the Multi-Language ETI-Eloquence Text-to-Speech System
 
 ## One-Sentence Summary
 

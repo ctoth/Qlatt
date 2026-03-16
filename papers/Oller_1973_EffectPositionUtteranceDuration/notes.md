@@ -1,3 +1,8 @@
+---
+title: "Oller 1973 — The Effect of Position in Utterance on Speech Segment Duration in English"
+year: 1973
+---
+
 # Oller 1973 — The Effect of Position in Utterance on Speech Segment Duration in English
 
 ## Implementation-Relevant Summary

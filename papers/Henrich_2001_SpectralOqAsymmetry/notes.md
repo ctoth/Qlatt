@@ -1,9 +1,12 @@
-# Spectral Correlates of Voice Open Quotient and Glottal Flow Asymmetry: Theory, Limits and Experimental Data
+---
+title: "Spectral Correlates of Voice Open Quotient and Glottal Flow Asymmetry: Theory, Limits and Experimental Data"
+authors: "Nathalie Henrich, Christophe d'Alessandro, Boris Doval"
+year: 2001
+venue: "Proceedings of Eurospeech 2001 (7th European Conference on Speech Communication and Technology), pp. 47-50"
+doi_url: "10.21437/Eurospeech.2001-11"
+---
 
-**Authors:** Nathalie Henrich, Christophe d'Alessandro, Boris Doval
-**Year:** 2001
-**Venue:** Proceedings of Eurospeech 2001 (7th European Conference on Speech Communication and Technology), pp. 47-50
-**DOI:** 10.21437/Eurospeech.2001-11
+# Spectral Correlates of Voice Open Quotient and Glottal Flow Asymmetry: Theory, Limits and Experimental Data
 
 ## One-Sentence Summary
 This paper demonstrates analytically and experimentally that H1*-H2* (the amplitude difference of the first two harmonics after inverse filtering) is NOT a reliable measure of open quotient alone, because it depends jointly on both open quotient and asymmetry coefficient, and that experimental voice data often falls outside the domain predicted by any glottal flow model.

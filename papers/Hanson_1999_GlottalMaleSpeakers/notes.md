@@ -1,9 +1,12 @@
-# Glottal Characteristics of Male Speakers: Acoustic Correlates and Comparison with Female Data
+---
+title: "Glottal Characteristics of Male Speakers: Acoustic Correlates and Comparison with Female Data"
+authors: "Helen M. Hanson, Erika S. Chuang"
+year: 1999
+venue: "J. Acoust. Soc. Am. 106(2), pp. 1064-1077, August 1999"
+doi_url: "10.1121/1.427115"
+---
 
-**Authors:** Helen M. Hanson, Erika S. Chuang
-**Year:** 1999
-**Venue:** J. Acoust. Soc. Am. 106(2), pp. 1064-1077, August 1999
-**DOI:** 10.1121/1.427115
+# Glottal Characteristics of Male Speakers: Acoustic Correlates and Comparison with Female Data
 
 ## One-Sentence Summary
 

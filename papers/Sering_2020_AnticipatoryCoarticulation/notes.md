@@ -1,9 +1,12 @@
-# Anticipatory Coarticulation in Predictive Articulatory Speech Modeling
+---
+title: "Anticipatory Coarticulation in Predictive Articulatory Speech Modeling"
+authors: "Konstantin Sering, Fabian Tomaschek, Motoki Saito"
+year: 2020
+venue: "12th International Seminar on Speech Production (ISSP 2020)"
+affiliation: "Eberhard Karls Universität Tübingen"
+---
 
-**Authors:** Konstantin Sering, Fabian Tomaschek, Motoki Saito
-**Year:** 2020
-**Venue:** 12th International Seminar on Speech Production (ISSP 2020)
-**Affiliation:** Eberhard Karls Universität Tübingen
+# Anticipatory Coarticulation in Predictive Articulatory Speech Modeling
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# Modeling Glottal Source for High Quality Voice Conversion
+---
+title: "Modeling Glottal Source for High Quality Voice Conversion"
+authors: "Jun Sun, Beiqian Dai, Jian Zhang, Yanlu Xie"
+year: 2006
+venue: "Proceedings of the 6th World Congress on Intelligent Control and Automation (WCICA), Dalian, China"
+doi_url: "IEEE 1-4244-0332-4/06"
+---
 
-**Authors:** Jun Sun, Beiqian Dai, Jian Zhang, Yanlu Xie
-**Year:** 2006
-**Venue:** Proceedings of the 6th World Congress on Intelligent Control and Automation (WCICA), Dalian, China
-**DOI/URL:** IEEE 1-4244-0332-4/06
+# Modeling Glottal Source for High Quality Voice Conversion
 
 ## One-Sentence Summary
 Proposes a codebook-based glottal source model that links LSF (vocal tract) parameters to normalized glottal waveforms, outperforming both Rosenberg and LF models for voice conversion.

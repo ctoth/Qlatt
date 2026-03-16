@@ -1,10 +1,13 @@
-# The Acoustics of Fricative Consonants
+---
+title: "The Acoustics of Fricative Consonants"
+authors: "Christine Helen Shadle"
+year: 1985
+venue: "MIT PhD Thesis, Technical Report 506 (Research Laboratory of Electronics)"
+pages: "200"
+thesis_supervisor: "Kenneth N. Stevens"
+---
 
-**Author:** Christine Helen Shadle
-**Year:** 1985
-**Venue:** MIT PhD Thesis, Technical Report 506 (Research Laboratory of Electronics)
-**Pages:** 200
-**Thesis Supervisor:** Kenneth N. Stevens
+# The Acoustics of Fricative Consonants
 
 ## One-Sentence Summary
 

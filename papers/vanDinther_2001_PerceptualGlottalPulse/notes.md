@@ -1,9 +1,12 @@
-# The Perceptual Relevance of Glottal-Pulse Parameter Variations
+---
+title: "The Perceptual Relevance of Glottal-Pulse Parameter Variations"
+authors: "Ralph van Dinther, Raymond N.J. Veldhuis, Armin Kohlrausch"
+year: 2001
+venue: "Eurospeech 2001 - Scandinavia"
+doi_url: "10.21437/Eurospeech.2001-372"
+---
 
-**Authors:** Ralph van Dinther, Raymond N.J. Veldhuis, Armin Kohlrausch
-**Year:** 2001
-**Venue:** Eurospeech 2001 - Scandinavia
-**DOI:** 10.21437/Eurospeech.2001-372
+# The Perceptual Relevance of Glottal-Pulse Parameter Variations
 
 ## One-Sentence Summary
 Demonstrates that perceptual discrimination of LF glottal model parameters can be predicted using excitation pattern distance, and that the 3-parameter LF model effectively operates as a 1-2 parameter model perceptually.

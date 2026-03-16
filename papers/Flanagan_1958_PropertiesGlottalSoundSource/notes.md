@@ -1,3 +1,8 @@
+---
+title: "Flanagan 1958 — Some Properties of the Glottal Sound Source"
+year: 1958
+---
+
 # Flanagan 1958 — Some Properties of the Glottal Sound Source
 
 ## Implementation-Focused Notes

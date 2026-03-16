@@ -1,9 +1,12 @@
-# Regulatory Mechanism of Voice Intensity Variation
+---
+title: "Regulatory Mechanism of Voice Intensity Variation"
+authors: "Nobuhiko Isshiki"
+year: 1964
+venue: "Journal of Speech and Hearing Research, 7, 17-29"
+doi_url: "10.1044/jshr.0701.17"
+---
 
-**Authors:** Nobuhiko Isshiki
-**Year:** 1964
-**Venue:** Journal of Speech and Hearing Research, 7, 17-29
-**DOI:** 10.1044/jshr.0701.17
+# Regulatory Mechanism of Voice Intensity Variation
 
 ## One-Sentence Summary
 Establishes quantitative relationships between voice intensity (SPL), subglottic pressure, airflow rate, and glottal resistance across pitch registers, showing that the dominant intensity-regulation mechanism shifts from laryngeal (glottal resistance) at low pitch to respiratory (flow rate) at high pitch.

@@ -1,9 +1,12 @@
-# Acoustic Characteristics of English Fricatives
+---
+title: "Acoustic Characteristics of English Fricatives"
+authors: "Allard Jongman, Ratree Wayland, Serena Wong"
+year: 2000
+venue: "Journal of the Acoustical Society of America, Vol. 108(3), pp. 1252-1263"
+doi_url: "S0001-4966(00)02909-X"
+---
 
-**Authors:** Allard Jongman, Ratree Wayland, Serena Wong
-**Year:** 2000
-**Venue:** Journal of the Acoustical Society of America, Vol. 108(3), pp. 1252-1263
-**DOI:** S0001-4966(00)02909-X
+# Acoustic Characteristics of English Fricatives
 
 ## One-Sentence Summary
 

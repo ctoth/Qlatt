@@ -1,9 +1,12 @@
-# Quantitative Modeling of Segmental Duration
+---
+title: "Quantitative Modeling of Segmental Duration"
+authors: "Jan P. H. van Santen"
+year: 1993
+venue: "ACL 1993, pp. 323-328"
+affiliation: "AT&T Bell Laboratories"
+---
 
-**Authors:** Jan P. H. van Santen
-**Year:** 1993
-**Venue:** ACL 1993, pp. 323-328
-**Affiliation:** AT&T Bell Laboratories
+# Quantitative Modeling of Segmental Duration
 
 ## One-Sentence Summary
 Presents a speaker-dependent segmental duration prediction system using sums-of-products models with 42 separate models for different phonetic categories, achieving 0.93 correlation with observed durations and significantly outperforming Klatt-style rules in subjective TTS evaluation.

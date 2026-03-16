@@ -1,9 +1,12 @@
-# Glottal Airflow and Transglottal Air Pressure Measurements for Male and Female Speakers in Soft, Normal, and Loud Voice
+---
+title: "Glottal Airflow and Transglottal Air Pressure Measurements for Male and Female Speakers in Soft, Normal, and Loud Voice"
+authors: "Eva B. Holmberg, Robert E. Hillman, Joseph S. Perkell"
+year: 1988
+venue: "Journal of the Acoustical Society of America, Vol. 84, No. 2, August 1988, pp. 511-529"
+doi_url: "0001-4966/88/080511-19$00.80"
+---
 
-**Authors:** Eva B. Holmberg, Robert E. Hillman, Joseph S. Perkell
-**Year:** 1988
-**Venue:** Journal of the Acoustical Society of America, Vol. 84, No. 2, August 1988, pp. 511-529
-**DOI:** 0001-4966/88/080511-19$00.80
+# Glottal Airflow and Transglottal Air Pressure Measurements for Male and Female Speakers in Soft, Normal, and Loud Voice
 
 ## One-Sentence Summary
 Provides comprehensive normative data on glottal airflow waveform parameters and transglottal pressure across 45 speakers at three loudness levels, establishing quantitative male-female differences and loudness-dependent parameter relationships essential for voice source modeling.

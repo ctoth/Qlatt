@@ -1,9 +1,12 @@
-# Female voice frequency in the context of dominance and attractiveness perception
+---
+title: "Female voice frequency in the context of dominance and attractiveness perception"
+authors: "Barbara Borkowska, Boguslaw Pawlowski"
+year: 2011
+venue: "Animal Behaviour, Vol. 82, 55-59"
+doi_url: "10.1016/j.anbehav.2011.03.024"
+---
 
-**Authors:** Barbara Borkowska, Boguslaw Pawlowski
-**Year:** 2011
-**Venue:** Animal Behaviour, Vol. 82, 55-59
-**DOI:** 10.1016/j.anbehav.2011.03.024
+# Female voice frequency in the context of dominance and attractiveness perception
 
 ## One-Sentence Summary
 Demonstrates that female F0 predicts dominance linearly (lower = more dominant) but predicts attractiveness nonlinearly (increasing up to ~280 Hz then decreasing), establishing an optimal pitch for female vocal attractiveness.

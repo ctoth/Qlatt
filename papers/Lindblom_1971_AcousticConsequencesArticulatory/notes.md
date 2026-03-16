@@ -1,3 +1,8 @@
+---
+title: "Implementation Notes: Lindblom & Sundberg 1971 — Acoustical Consequences of Articulator Movement"
+year: 1971
+---
+
 # Implementation Notes: Lindblom & Sundberg 1971 — Acoustical Consequences of Articulator Movement
 
 ## Overview
@@ -194,3 +199,21 @@ The fixed-mandible experiment showed that for all artificial jaw positions, form
 | Tongue constriction (increase) | Small | Large (especially palatal) | Moderate | Small |
 | Lip rounding | Small decrease | Moderate decrease | Large decrease (front vowels) | Moderate decrease |
 | Larynx lowering (10 mm) | ~5% decrease | ~6% decrease | ~3% decrease | ~5% decrease |
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — LEA model used for formant computation
+
+### Cited By (in Collection)
+- `Gay_1977_ArticulatoryMovementsVCV` — cites Lindblom & Sundberg 1971 for articulator-formant mapping
+- `Allen_1987_MITalk_TTS` — references for articulatory-acoustic relationships
+- `Sundberg_1972_SingingFormant` — Sundberg builds on the larynx-lowering findings
+- `Harrington_2011_HighBackVowelFronting` — references Lindblom & Sundberg for formant-articulation theory
+- `Nordstrom_1975_SimulateFemaleInfantVocalTracts` — references for vocal tract scaling
+- `Hombert_1979_PhoneticToneDevelopment` — cites for articulatory effects on F0
+
+### Conceptual Links (not citation-based)
+- `Stevens_House_1963_PerturbationVowelConsonant` — both study how articulatory configuration affects formants; Stevens & House focus on consonantal perturbation while Lindblom & Sundberg model each articulator independently
+- `Peterson_Barney_1952_VowelFormants` — Lindblom & Sundberg's model predicts formant patterns that match Peterson & Barney's measurements
+- `Hao_2002_VocalTractDimensionsFormants` — both relate vocal tract dimensions to formant frequencies

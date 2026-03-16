@@ -1,9 +1,12 @@
-# Towards an Improved Model of Dynamics for Speech Recognition and Synthesis
+---
+title: "Towards an Improved Model of Dynamics for Speech Recognition and Synthesis"
+authors: "Hongwei Hu"
+year: 2012
+venue: "PhD Thesis, University of Birmingham"
+doi_url: "http://etheses.bham.ac.uk/id/eprint/3174"
+---
 
-**Authors:** Hongwei Hu
-**Year:** 2012
-**Venue:** PhD Thesis, University of Birmingham
-**DOI/URL:** http://etheses.bham.ac.uk/id/eprint/3174
+# Towards an Improved Model of Dynamics for Speech Recognition and Synthesis
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# Acoustic Profiles in Vocal Emotion Expression
+---
+title: "Acoustic Profiles in Vocal Emotion Expression"
+authors: "Rainer Banse (Humboldt University), Klaus R. Scherer (University of Geneva)"
+year: 1996
+venue: "Journal of Personality and Social Psychology, Vol. 70, No. 3, 614-636"
+doi_url: "0022-3514/96/$3.00"
+---
 
-**Authors:** Rainer Banse (Humboldt University), Klaus R. Scherer (University of Geneva)
-**Year:** 1996
-**Venue:** Journal of Personality and Social Psychology, Vol. 70, No. 3, 614-636
-**DOI:** 0022-3514/96/$3.00
+# Acoustic Profiles in Vocal Emotion Expression
 
 ## One-Sentence Summary
 

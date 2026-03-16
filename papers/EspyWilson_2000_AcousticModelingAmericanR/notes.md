@@ -1,9 +1,12 @@
-# Acoustic Modeling of American English /r/
+---
+title: "Acoustic Modeling of American English /r/"
+authors: "Carol Y. Espy-Wilson, Suzanne E. Boyce, Michel Jackson, Shrikanth Narayanan, Abeer Alwan"
+year: 2000
+venue: "Journal of the Acoustical Society of America, Vol. 108(1), pp. 343-356"
+doi_url: "10.1121/1.429469"
+---
 
-**Authors:** Carol Y. Espy-Wilson, Suzanne E. Boyce, Michel Jackson, Shrikanth Narayanan, Abeer Alwan
-**Year:** 2000
-**Venue:** Journal of the Acoustical Society of America, Vol. 108(1), pp. 343-356
-**DOI:** 10.1121/1.429469
+# Acoustic Modeling of American English /r/
 
 ## One-Sentence Summary
 Provides MRI-derived vocal tract dimensions and acoustic tube models for American English /r/, demonstrating that the sublingual space is critical for achieving the characteristically low F3, and offering equations for calculating formants from cavity dimensions.

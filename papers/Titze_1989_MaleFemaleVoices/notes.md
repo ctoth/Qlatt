@@ -1,9 +1,12 @@
-# Physiologic and acoustic differences between male and female voices
+---
+title: "Physiologic and acoustic differences between male and female voices"
+authors: "Ingo R. Titze"
+year: 1989
+venue: "Journal of the Acoustical Society of America, 85(4), 1699-1707"
+doi_url: "10.1121/1.397959"
+---
 
-**Authors:** Ingo R. Titze
-**Year:** 1989
-**Venue:** Journal of the Acoustical Society of America, 85(4), 1699-1707
-**DOI:** 10.1121/1.397959
+# Physiologic and acoustic differences between male and female voices
 
 ## One-Sentence Summary
 Derives two physiologic scale factors relating male and female larynges (alpha = 1.2 for overall size, beta = 1.6 for membranous vocal fold length) and uses them to predict sex differences in F0, airflow, sound power, glottal efficiency, and glottographic waveform shape.

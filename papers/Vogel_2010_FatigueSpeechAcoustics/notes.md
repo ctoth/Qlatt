@@ -1,9 +1,12 @@
-# Acoustic analysis of the effects of sustained wakefulness on speech
+---
+title: "Acoustic analysis of the effects of sustained wakefulness on speech"
+authors: "Adam P. Vogel, Janet Fletcher, Paul Maruff"
+year: 2010
+venue: "Journal of the Acoustical Society of America, Vol. 128, No. 6, pp. 3747-3756"
+doi_url: "10.1121/1.3506349"
+---
 
-**Authors:** Adam P. Vogel, Janet Fletcher, Paul Maruff
-**Year:** 2010
-**Venue:** Journal of the Acoustical Society of America, Vol. 128, No. 6, pp. 3747-3756
-**DOI:** 10.1121/1.3506349
+# Acoustic analysis of the effects of sustained wakefulness on speech
 
 ## One-Sentence Summary
 This paper documents how acoustic properties of speech (timing, F0 variation, F4 variation, spectral tilt) change systematically during 24 hours of sustained wakefulness, providing empirical data on fatigue-induced speech degradation patterns.

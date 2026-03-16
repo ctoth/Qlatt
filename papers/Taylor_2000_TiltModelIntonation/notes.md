@@ -1,9 +1,12 @@
-# Analysis and Synthesis of Intonation using the Tilt Model
+---
+title: "Analysis and Synthesis of Intonation using the Tilt Model"
+authors: "Paul Taylor"
+year: 2000
+venue: "Speech Communication (journal article)"
+affiliation: "Centre for Speech Technology Research, University of Edinburgh"
+---
 
-**Authors:** Paul Taylor
-**Year:** 2000
-**Venue:** Speech Communication (journal article)
-**Affiliation:** Centre for Speech Technology Research, University of Edinburgh
+# Analysis and Synthesis of Intonation using the Tilt Model
 
 ## One-Sentence Summary
 

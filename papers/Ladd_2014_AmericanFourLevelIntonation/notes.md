@@ -1,9 +1,12 @@
-# The American Four-Level Analysis of Intonation Contours: Historical Postscript
+---
+title: "The American Four-Level Analysis of Intonation Contours: Historical Postscript"
+authors: "D. Robert Ladd"
+year: 2014
+venue: "*Historiographia Linguistica* 42.1"
+doi_url: "Preprint; published in HL 42.1 (2014)"
+---
 
-**Authors:** D. Robert Ladd
-**Year:** 2014
-**Venue:** *Historiographia Linguistica* 42.1
-**DOI/URL:** Preprint; published in HL 42.1 (2014)
+# The American Four-Level Analysis of Intonation Contours: Historical Postscript
 
 ## One-Sentence Summary
 This paper establishes the historical priority of Kenneth Lee Pike (not Rulon Wells) for the American four-level pitch analysis of English intonation, based on publication records and 1989 correspondence with Pike himself.

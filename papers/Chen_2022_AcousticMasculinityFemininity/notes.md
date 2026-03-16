@@ -1,9 +1,12 @@
-# Acoustic Characterization and Machine Prediction of Perceived Masculinity and Femininity in Adults
+---
+title: "Acoustic Characterization and Machine Prediction of Perceived Masculinity and Femininity in Adults"
+authors: "Fuling Chen, Roberto Togneri, Murray Maybery, Diana Tan"
+year: 2022
+venue: "Preprint submitted to Speech Communication (arXiv:2102.07982v2)"
+doi_url: "https://arxiv.org/abs/2102.07982"
+---
 
-**Authors:** Fuling Chen, Roberto Togneri, Murray Maybery, Diana Tan
-**Year:** 2022
-**Venue:** Preprint submitted to Speech Communication (arXiv:2102.07982v2)
-**DOI/URL:** https://arxiv.org/abs/2102.07982
+# Acoustic Characterization and Machine Prediction of Perceived Masculinity and Femininity in Adults
 
 ## One-Sentence Summary
 Identifies F0 mean as the dominant acoustic predictor of perceived masculinity/femininity (43.5% for males, 23.8% for females), with F3/F4/VTL estimators second, using hierarchical clustering to build 8-9 independent acoustic factor groups from 23 measures.

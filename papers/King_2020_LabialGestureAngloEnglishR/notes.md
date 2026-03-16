@@ -1,9 +1,12 @@
-# Loose lips and tongue tips: The central role of the /r/-typical labial gesture in Anglo-English
+---
+title: "Loose lips and tongue tips: The central role of the /r/-typical labial gesture in Anglo-English"
+authors: "Hannah King, Emmanuel Ferragne"
+year: 2020
+venue: "Journal of Phonetics, 80, 100978"
+doi_url: "https://doi.org/10.1016/j.wocn.2020.100978"
+---
 
-**Authors:** Hannah King, Emmanuel Ferragne
-**Year:** 2020
-**Venue:** Journal of Phonetics, 80, 100978
-**DOI:** https://doi.org/10.1016/j.wocn.2020.100978
+# Loose lips and tongue tips: The central role of the /r/-typical labial gesture in Anglo-English
 
 ## One-Sentence Summary
 This paper documents articulatory trading relations between tongue shape and lip protrusion in English /r/, showing that bunched configurations require more lip protrusion to maintain acoustic equivalence with retroflex variants.

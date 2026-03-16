@@ -1,9 +1,12 @@
-# What Makes a Female Voice Attractive?
+---
+title: "What Makes a Female Voice Attractive?"
+authors: "Xuan Liu, Yi Xu"
+year: 2011
+venue: "ICPhS XVII (International Congress of Phonetic Sciences), Hong Kong"
+doi_url: "N/A (conference proceedings, pp. 1274-1277)"
+---
 
-**Authors:** Xuan Liu, Yi Xu
-**Year:** 2011
-**Venue:** ICPhS XVII (International Congress of Phonetic Sciences), Hong Kong
-**DOI/URL:** N/A (conference proceedings, pp. 1274-1277)
+# What Makes a Female Voice Attractive?
 
 ## One-Sentence Summary
 This paper demonstrates that female vocal attractiveness is primarily driven by voice quality (breathy > normal > pressed), with secondary contributions from formant shift (shorter vocal tract) and pitch height, all consistent with a "small body size projection" hypothesis.

@@ -1,3 +1,8 @@
+---
+title: "Price et al. 1991 — The Use of Prosody in Syntactic Disambiguation"
+year: 1991
+---
+
 # Price et al. 1991 — The Use of Prosody in Syntactic Disambiguation
 
 ## Reference

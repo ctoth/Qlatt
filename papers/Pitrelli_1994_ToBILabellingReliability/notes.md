@@ -1,3 +1,8 @@
+---
+title: "Pitrelli, Beckman & Hirschberg 1994 -- Implementation Notes"
+year: 1994
+---
+
 # Pitrelli, Beckman & Hirschberg 1994 -- Implementation Notes
 
 ## Paper Overview

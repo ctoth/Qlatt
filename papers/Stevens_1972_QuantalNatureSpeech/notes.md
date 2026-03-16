@@ -1,8 +1,11 @@
+---
+title: "Stevens 1972/1989 — On the Quantal Nature of Speech"
+year: 1972
+expanded_version_this_pdf: "Stevens, K. N. (1989). On the quantal nature of speech. *Journal of Phonetics*, 17(1-2), 3-45."
+full_citation: "Stevens, K. N. (1972). The quantal nature of speech: Evidence from articulatory-acoustic data. In E. E. David & P. B. Denes (Eds.), *Human Communication: A Unified View* (pp. 51-66). New York: McGraw-Hill."
+---
+
 # Stevens 1972/1989 — On the Quantal Nature of Speech
-
-**Full citation:** Stevens, K. N. (1972). The quantal nature of speech: Evidence from articulatory-acoustic data. In E. E. David & P. B. Denes (Eds.), *Human Communication: A Unified View* (pp. 51-66). New York: McGraw-Hill.
-
-**Expanded version (this PDF):** Stevens, K. N. (1989). On the quantal nature of speech. *Journal of Phonetics*, 17(1-2), 3-45.
 
 The 1989 paper is a substantial expansion of the 1972 chapter, containing the same core theory with much more detailed articulatory-acoustic evidence.
 
@@ -198,3 +201,32 @@ where A_g = glottal area.
 - **Fig. 19**: Turbulence noise amplitude vs. constriction area — demonstrates quantal noise onset
 - **Fig. 21**: Calculated spectra of radiated sound for fricative constriction — shows spectral peak from front-cavity resonance
 - **Fig. 25**: Formant bandwidths as function of frequency — shows that formant bandwidths are narrower than auditory filter bandwidths
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — theoretical foundation for coupled-resonator analysis
+- `Blumstein_Stevens_1979_AcousticInvariance` — Stevens' later work on acoustic invariance
+- `Stevens_1998_AcousticPhonetics` — Stevens' comprehensive textbook expanding quantal theory
+- `Klatt_1980_CascadeParallelFormantSynthesizer` — Klatt synthesizer referenced
+- `Klatt_1990_VoiceQualityVariations` — voice quality analysis
+- `Peterson_Barney_1952_VowelFormants` — vowel formant data referenced
+- `Shadle_1985_FricativeAcoustics` — fricative noise analysis cited
+- `Chistovich_1979_CenterGravityEffectVowel` — center of gravity effect for formant merging
+
+### Cited By (in Collection)
+- `Browman_1989_ArticulatoryGesturesPhonologicalUnits` — references quantal theory
+- `Browman_Goldstein_1992_ArticulatoryPhonologyOverview` — discusses quantal theory in context
+- `Carlson_1975_RuleBasedTTS` — references Stevens for acoustic-phonetic theory
+- `Hanson_2001_ModelsPhonation` — references quantal theory for voicing
+- `Hawkins_Stevens_1985_NasalVowelCorrelates` — applies quantal framework to nasals
+- `Hertz_1987_DeltaNonLinearPhonology` — references quantal theory
+
+### New Leads
+- Chistovich & Lublinskaya 1979 — Critical 3-3.5 Bark distance for formant merging (relevant to proximity() function)
+- Liljencrants & Lindblom 1972 — Dispersion theory of vowel systems (complementary to quantal theory)
+- Syrdal & Gopal 1986 — Bark-distance vowel classification (validates quantal predictions)
+
+### Conceptual Links (not citation-based)
+- `Keating_1984_PhoneticPhonologicalRepresentationStop` — both address the interface between phonetics and phonology for consonants
+- `Lindblom_1971_AcousticConsequencesArticulatory` — provides the articulatory-acoustic data that quantal theory explains

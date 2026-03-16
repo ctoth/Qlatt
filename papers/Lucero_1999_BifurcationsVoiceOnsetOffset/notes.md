@@ -1,3 +1,8 @@
+---
+title: "Lucero 1999 — Bifurcations at Voice Onset-Offset: Implementation Notes"
+year: 1999
+---
+
 # Lucero 1999 — Bifurcations at Voice Onset-Offset: Implementation Notes
 
 ## Core Claim

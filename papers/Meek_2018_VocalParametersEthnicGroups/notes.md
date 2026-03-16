@@ -1,9 +1,12 @@
-# Are There Differences in Vocal Parameters Across Various Ethnic Groups?
+---
+title: "Are There Differences in Vocal Parameters Across Various Ethnic Groups?"
+authors: "Mason P. Meek"
+year: 2018
+venue: "Cleveland State University, Master's Thesis (MA in Speech-Language Pathology and Audiology), ETD Archive 1096"
+doi_url: "https://engagedscholarship.csuohio.edu/etdarchive/1096"
+---
 
-**Authors:** Mason P. Meek
-**Year:** 2018
-**Venue:** Cleveland State University, Master's Thesis (MA in Speech-Language Pathology and Audiology), ETD Archive 1096
-**DOI/URL:** https://engagedscholarship.csuohio.edu/etdarchive/1096
+# Are There Differences in Vocal Parameters Across Various Ethnic Groups?
 
 ## One-Sentence Summary
 This thesis presents a small-sample descriptive comparison of F0, jitter (RAP), shimmer, NHR, VTI, and glottal closure patterns across African-American, Asian, Caucasian, and Hispanic speakers, finding no statistically significant acoustic differences but noting that posterior glottal chink was present in all non-Caucasian males and correlated with higher F0.

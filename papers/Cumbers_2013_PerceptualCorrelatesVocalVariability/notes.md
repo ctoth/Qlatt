@@ -1,9 +1,12 @@
-# Perceptual Correlates of Acoustic Measures of Vocal Variability
+---
+title: "Perceptual Correlates of Acoustic Measures of Vocal Variability"
+authors: "Bree A. Cumbers"
+year: 2013
+venue: "Master's Thesis, University of Wisconsin-Milwaukee (Communication Sciences and Disorders)"
+doi_url: "UWM Digital Commons (uwm_0263m_10382)"
+---
 
-**Authors:** Bree A. Cumbers
-**Year:** 2013
-**Venue:** Master's Thesis, University of Wisconsin-Milwaukee (Communication Sciences and Disorders)
-**DOI/URL:** UWM Digital Commons (uwm_0263m_10382)
+# Perceptual Correlates of Acoustic Measures of Vocal Variability
 
 ## One-Sentence Summary
 

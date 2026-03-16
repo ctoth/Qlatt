@@ -1,9 +1,12 @@
-# The LF Model in the Frequency Domain for Glottal Airflow Modelling without Aliasing Distortion
+---
+title: "The LF Model in the Frequency Domain for Glottal Airflow Modelling without Aliasing Distortion"
+authors: "Christer Gobl"
+year: 2021
+venue: "INTERSPEECH 2021, Brno, Czechia"
+doi_url: "http://dx.doi.org/10.21437/Interspeech.2021-1625"
+---
 
-**Authors:** Christer Gobl
-**Year:** 2021
-**Venue:** INTERSPEECH 2021, Brno, Czechia
-**DOI:** http://dx.doi.org/10.21437/Interspeech.2021-1625
+# The LF Model in the Frequency Domain for Glottal Airflow Modelling without Aliasing Distortion
 
 ## One-Sentence Summary
 

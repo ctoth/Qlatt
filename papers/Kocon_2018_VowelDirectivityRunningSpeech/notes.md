@@ -1,9 +1,12 @@
-# Horizontal Directivity Patterns Differ Between Vowels Extracted from Running Speech
+---
+title: "Horizontal Directivity Patterns Differ Between Vowels Extracted from Running Speech"
+authors: "Paulina Kocon, Brian B. Monson"
+year: 2018
+venue: "The Journal of the Acoustical Society of America, 144(1), EL7-EL12 (Express Letter)"
+doi_url: "https://doi.org/10.1121/1.5044508"
+---
 
-**Authors:** Paulina Kocon, Brian B. Monson
-**Year:** 2018
-**Venue:** The Journal of the Acoustical Society of America, 144(1), EL7-EL12 (Express Letter)
-**DOI/URL:** https://doi.org/10.1121/1.5044508
+# Horizontal Directivity Patterns Differ Between Vowels Extracted from Running Speech
 
 ## One-Sentence Summary
 Provides vowel-specific horizontal directivity patterns and third-octave band weighting functions (up to 20 kHz, 15-degree resolution) for five vowels extracted from running speech, showing that /a/ is significantly more directional than /o/ and /u/.

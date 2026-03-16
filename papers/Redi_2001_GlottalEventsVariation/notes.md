@@ -1,3 +1,8 @@
+---
+title: "Redi & Shattuck-Hufnagel 2001 — Implementation Notes"
+year: 2001
+---
+
 # Redi & Shattuck-Hufnagel 2001 — Implementation Notes
 
 ## Reference
@@ -108,3 +113,21 @@ Priority order (by frequency of occurrence):
 - No systematic investigation of segmental context effects
 - Gender effects inconclusive for nonprofessional speakers
 - No acoustic measurements beyond classification (no jitter/shimmer values, no spectral measures)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990 H1-H2 diagnostics for glottalization
+- `Gobl_1988_VoiceSourceDynamicsConnectedSpeech` — voice source dynamics at phrase boundaries
+
+### Cited By (in Collection)
+- `Hanson_2001_ModelsPhonation` — references Redi & Shattuck-Hufnagel for glottalization patterns
+- `Kreiman_2007_GlottalSourceSpectrum` — cites Redi for nonmodal phonation variation
+
+### Now in Collection
+- `Dilley_2005_RaPLabelingSystem` — Dilley, cited for prosodic conditioning of glottalization
+
+### Conceptual Links (not citation-based)
+- `Keating_2015_CreakyVoiceAcoustics` — both study creaky/nonmodal phonation in American English; Keating focuses on acoustic measurement while Redi focuses on distributional patterns
+- `Hollien_1968_VocalFryPhonationalRegister` — foundational work on vocal fry that relates to Redi's creak category
+- `Gobl_2003_VoiceQualityEmotion` — both document voice quality variation; Gobl studies emotional dimension while Redi studies prosodic conditioning

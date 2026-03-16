@@ -1,9 +1,12 @@
-# Vocal Intensity in Speakers and Singers
+---
+title: "Vocal Intensity in Speakers and Singers"
+authors: "Ingo R. Titze, Johan Sundberg"
+year: 1992
+venue: "The Journal of the Acoustical Society of America, 91(5), 2936-2946"
+doi_url: "10.1121/1.402929"
+---
 
-**Authors:** Ingo R. Titze, Johan Sundberg
-**Year:** 1992
-**Venue:** The Journal of the Acoustical Society of America, 91(5), 2936-2946
-**DOI:** 10.1121/1.402929
+# Vocal Intensity in Speakers and Singers
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# A Comparative Study of Glottal Source Estimation Techniques
+---
+title: "A Comparative Study of Glottal Source Estimation Techniques"
+authors: "Thomas Drugman, Baris Bozkurt, Thierry Dutoit"
+year: "2020 (arXiv preprint, submitted to Computer Speech and Language)"
+venue: "Preprint submitted to Computer Speech and Language"
+doi_url: "arXiv:2001.00840v1"
+---
 
-**Authors:** Thomas Drugman, Baris Bozkurt, Thierry Dutoit
-**Year:** 2020 (arXiv preprint, submitted to Computer Speech and Language)
-**Venue:** Preprint submitted to Computer Speech and Language
-**DOI/URL:** arXiv:2001.00840v1
+# A Comparative Study of Glottal Source Estimation Techniques
 
 ## One-Sentence Summary
 This paper compares three state-of-the-art methods for estimating glottal flow from speech (CPIF, IAIF, CCD), finding that mixed-phase decomposition (CCD) and closed-phase inverse filtering (CPIF) work best for clean speech while iterative adaptive inverse filtering (IAIF) is most robust to noise.

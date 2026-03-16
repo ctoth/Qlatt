@@ -1,9 +1,12 @@
-# Glottal Adduction and Subglottal Pressure in Singing
+---
+title: "Glottal Adduction and Subglottal Pressure in Singing"
+authors: "Christian T. Herbst, Markus Hess, Frank Muller, Jan G. Svec, Johan Sundberg"
+year: 2015
+venue: "Journal of Voice, Vol. 29, No. 4, pp. 391-402"
+doi_url: "http://dx.doi.org/10.1016/j.jvoice.2014.08.009"
+---
 
-**Authors:** Christian T. Herbst, Markus Hess, Frank Muller, Jan G. Svec, Johan Sundberg
-**Year:** 2015
-**Venue:** Journal of Voice, Vol. 29, No. 4, pp. 391-402
-**DOI:** http://dx.doi.org/10.1016/j.jvoice.2014.08.009
+# Glottal Adduction and Subglottal Pressure in Singing
 
 ## One-Sentence Summary
 This paper demonstrates that trained singers can independently control vocal loudness, phonation type (breathy/flow/neutral/pressed), and vocal register (chest/falsetto) by manipulating subglottal pressure and glottal adduction independently, with quantitative measurements of how these three phonatory dimensions affect voice source parameters.

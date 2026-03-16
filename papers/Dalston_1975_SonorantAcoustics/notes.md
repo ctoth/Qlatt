@@ -1,9 +1,12 @@
-# Acoustic Characteristics of English /w,r,l/ Spoken Correctly by Young Children and Adults
+---
+title: "Acoustic Characteristics of English /w,r,l/ Spoken Correctly by Young Children and Adults"
+authors: "Rodger M. Dalston"
+year: 1975
+venue: "Journal of the Acoustical Society of America, Vol. 57, No. 2, February 1975"
+doi_url: "Published by Acoustical Society of America"
+---
 
-**Authors:** Rodger M. Dalston
-**Year:** 1975
-**Venue:** Journal of the Acoustical Society of America, Vol. 57, No. 2, February 1975
-**DOI/URL:** Published by Acoustical Society of America
+# Acoustic Characteristics of English /w,r,l/ Spoken Correctly by Young Children and Adults
 
 ## One-Sentence Summary
 Provides spectrographic measurements of F1-F3 frequencies, steady-state durations, transition durations, and transition rates for word-initial /w/, /r/, and /l/ that can be used to set synthesis parameters for sonorant consonants.

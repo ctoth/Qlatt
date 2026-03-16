@@ -1,9 +1,12 @@
-# Phonetic Differences Between Male and Female Speech
+---
+title: "Phonetic Differences Between Male and Female Speech"
+authors: "Adrian P. Simpson"
+year: 2009
+venue: "Language and Linguistics Compass, 3/2, 621-640"
+doi_url: "10.1111/j.1749-818x.2009.00125.x"
+---
 
-**Authors:** Adrian P. Simpson
-**Year:** 2009
-**Venue:** Language and Linguistics Compass, 3/2, 621-640
-**DOI:** 10.1111/j.1749-818x.2009.00125.x
+# Phonetic Differences Between Male and Female Speech
 
 ## One-Sentence Summary
 A comprehensive review of phonetic differences between male and female speech covering phonation/pitch, voice quality, vowel formants, vocal tract dimensions, VOT, duration, reduction, and children's speech, critically evaluating biophysical versus sociophonetic explanations for each difference.

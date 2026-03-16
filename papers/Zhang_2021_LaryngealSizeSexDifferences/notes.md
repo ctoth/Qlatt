@@ -1,10 +1,13 @@
-# Contribution of Laryngeal Size to Differences Between Male and Female Voice Production
+---
+title: "Contribution of Laryngeal Size to Differences Between Male and Female Voice Production"
+authors: "Zhaoyan Zhang"
+year: 2021
+venue: "Journal of the Acoustical Society of America, Vol. 150, No. 6, December 2021, pp. 4511-4521"
+doi_url: "10.1121/10.0009033"
+pmcid: "PMC8716178"
+---
 
-**Author:** Zhaoyan Zhang
-**Year:** 2021
-**Venue:** Journal of the Acoustical Society of America, Vol. 150, No. 6, December 2021, pp. 4511-4521
-**DOI:** 10.1121/10.0009033
-**PMCID:** PMC8716178
+# Contribution of Laryngeal Size to Differences Between Male and Female Voice Production
 
 ## One-Sentence Summary
 

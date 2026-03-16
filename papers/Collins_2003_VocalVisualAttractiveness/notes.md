@@ -1,9 +1,12 @@
-# Vocal and Visual Attractiveness Are Related in Women
+---
+title: "Vocal and Visual Attractiveness Are Related in Women"
+authors: "Sarah A. Collins, Caroline Missing"
+year: 2003
+venue: "Animal Behaviour, 65, 997-1004"
+doi_url: "10.1006/anbe.2003.2123"
+---
 
-**Authors:** Sarah A. Collins, Caroline Missing
-**Year:** 2003
-**Venue:** Animal Behaviour, 65, 997-1004
-**DOI:** 10.1006/anbe.2003.2123
+# Vocal and Visual Attractiveness Are Related in Women
 
 ## One-Sentence Summary
 Provides empirical data linking female F0, formant frequencies, formant dispersion, and body size to perceived vocal attractiveness, with specific acoustic measurements from 30 women's vowel productions judged by 30 male listeners.

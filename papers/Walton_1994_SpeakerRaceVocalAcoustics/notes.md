@@ -1,9 +1,12 @@
-# Speaker Race Identification From Acoustic Cues in the Vocal Signal
+---
+title: "Speaker Race Identification From Acoustic Cues in the Vocal Signal"
+authors: "Julie H. Walton, Robert F. Orlikoff"
+year: 1994
+venue: "Journal of Speech and Hearing Research, 37, 738-745"
+doi_url: "0022-4685/94/3704-0738"
+---
 
-**Authors:** Julie H. Walton, Robert F. Orlikoff
-**Year:** 1994
-**Venue:** Journal of Speech and Hearing Research, 37, 738-745
-**DOI/URL:** 0022-4685/94/3704-0738
+# Speaker Race Identification From Acoustic Cues in the Vocal Signal
 
 ## One-Sentence Summary
 This paper demonstrates that listeners can identify speaker race from sustained /a/ vowels at 60% accuracy using differences in vocal perturbation (jitter, shimmer) and harmonics-to-noise ratio, not F0 or formant structure.

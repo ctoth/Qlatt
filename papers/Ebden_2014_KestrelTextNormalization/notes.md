@@ -1,9 +1,12 @@
-# The Kestrel TTS Text Normalization System
+---
+title: "The Kestrel TTS Text Normalization System"
+authors: "Peter Ebden, Richard Sproat"
+year: "2014 (published online December 2014, journal March 2015)"
+venue: "Natural Language Engineering, Cambridge University Press"
+doi_url: "10.1017/S1351324914000175"
+---
 
-**Authors:** Peter Ebden, Richard Sproat
-**Year:** 2014 (published online December 2014, journal March 2015)
-**Venue:** Natural Language Engineering, Cambridge University Press
-**DOI:** 10.1017/S1351324914000175
+# The Kestrel TTS Text Normalization System
 
 ## One-Sentence Summary
 

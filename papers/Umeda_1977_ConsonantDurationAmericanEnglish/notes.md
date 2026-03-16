@@ -1,3 +1,8 @@
+---
+title: "Umeda 1977 -- Consonant Duration in American English"
+year: 1977
+---
+
 # Umeda 1977 -- Consonant Duration in American English
 
 ## Implementation-Relevant Notes

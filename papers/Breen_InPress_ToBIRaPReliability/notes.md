@@ -1,9 +1,12 @@
-# Inter-transcriber reliability for two systems of prosodic annotation: ToBI (Tones and Break Indices) and RaP (Rhythm and Pitch)
+---
+title: "Inter-transcriber reliability for two systems of prosodic annotation: ToBI (Tones and Break Indices) and RaP (Rhythm and Pitch)"
+authors: "Mara Breen, Laura C. Dilley, John Kraemer, Edward Gibson"
+year: "In Press"
+venue: "Corpus Linguistics and Linguistic Theory (CLLT)"
+doi_url: "N/A"
+---
 
-**Authors:** Mara Breen, Laura C. Dilley, John Kraemer, Edward Gibson
-**Year:** In Press
-**Venue:** Corpus Linguistics and Linguistic Theory (CLLT)
-**DOI/URL:** N/A
+# Inter-transcriber reliability for two systems of prosodic annotation: ToBI (Tones and Break Indices) and RaP (Rhythm and Pitch)
 
 ## One-Sentence Summary
 

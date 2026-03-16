@@ -1,9 +1,12 @@
-# Intonational Phonology (2nd Edition)
+---
+title: "Intonational Phonology (2nd Edition)"
+authors: "D. Robert Ladd"
+year: 2008
+venue: "Cambridge University Press (Cambridge Studies in Linguistics, 79)"
+doi_url: "ISBN 978-0-521-67843-5"
+---
 
-**Authors:** D. Robert Ladd
-**Year:** 2008
-**Venue:** Cambridge University Press (Cambridge Studies in Linguistics, 79)
-**DOI/URL:** ISBN 978-0-521-67843-5
+# Intonational Phonology (2nd Edition)
 
 ## One-Sentence Summary
 

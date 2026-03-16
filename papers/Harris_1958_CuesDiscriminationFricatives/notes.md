@@ -1,3 +1,8 @@
+---
+title: "Harris 1958 - Cues for the Discrimination of American English Fricatives in Spoken Syllables"
+year: 1958
+---
+
 # Harris 1958 - Cues for the Discrimination of American English Fricatives in Spoken Syllables
 
 ## Key Finding: Two-Class Perceptual Model for Fricatives

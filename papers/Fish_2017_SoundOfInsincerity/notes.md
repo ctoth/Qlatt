@@ -1,9 +1,12 @@
-# The Sound of (In)sincerity
+---
+title: "The Sound of (In)sincerity"
+authors: "Karyn Fish, Kathrin Rothermich, Marc D. Pell"
+year: 2017
+venue: "Journal of Pragmatics 121 (2017) 147-161"
+doi_url: "https://doi.org/10.1016/j.pragma.2017.10.008"
+---
 
-**Authors:** Karyn Fish, Kathrin Rothermich, Marc D. Pell
-**Year:** 2017
-**Venue:** Journal of Pragmatics 121 (2017) 147-161
-**DOI:** https://doi.org/10.1016/j.pragma.2017.10.008
+# The Sound of (In)sincerity
 
 ## One-Sentence Summary
 This paper identifies specific prosodic acoustic features (speech rate, F0, amplitude) that differentiate sincere from insincere compliments (prosocial lies), providing empirically-validated parameters for synthesizing utterances that convey different degrees of perceived sincerity.

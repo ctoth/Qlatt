@@ -1,9 +1,12 @@
-# A Modular Audio Response System for Computer Output
+---
+title: "A Modular Audio Response System for Computer Output"
+authors: "Jonathan Allen"
+year: 1977
+venue: "1977 IEEE International Conference on Acoustics, Speech and Signal Processing, Hartford"
+doi_url: "IEEE Catalog No. 77CH1197-3 ASSP, pp. 579-582"
+---
 
-**Authors:** Jonathan Allen
-**Year:** 1977
-**Venue:** 1977 IEEE International Conference on Acoustics, Speech and Signal Processing, Hartford
-**DOI/URL:** IEEE Catalog No. 77CH1197-3 ASSP, pp. 579-582
+# A Modular Audio Response System for Computer Output
 
 ## One-Sentence Summary
 This paper describes the modular architecture of MIT's text-to-speech system (precursor to MITalk), defining the pipeline of FORMAT, DECOMP, PARSER, SOUND1, SOUND2, PROSE, SYNTHS, and SPEAK modules that became the standard TTS architecture.

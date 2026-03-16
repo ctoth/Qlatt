@@ -1,9 +1,12 @@
-# Streams, Phones and Transitions: Toward a New Phonological and Phonetic Model of Formant Timing
+---
+title: "Streams, Phones and Transitions: Toward a New Phonological and Phonetic Model of Formant Timing"
+authors: "Susan R. Hertz"
+year: 1991
+venue: "Journal of Phonetics, 19, 91-109"
+affiliation: "Eloquent Technology, Inc. & Cornell University Phonetics Laboratory"
+---
 
-**Authors:** Susan R. Hertz
-**Year:** 1991
-**Venue:** Journal of Phonetics, 19, 91-109
-**Affiliation:** Eloquent Technology, Inc. & Cornell University Phonetics Laboratory
+# Streams, Phones and Transitions: Toward a New Phonological and Phonetic Model of Formant Timing
 
 ## One-Sentence Summary
 

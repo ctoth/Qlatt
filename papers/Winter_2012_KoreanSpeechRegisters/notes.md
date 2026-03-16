@@ -1,6 +1,10 @@
-# Winter & Grawunder (2012) - Phonetic Profile of Korean Formal/Informal Speech
+---
+title: "Winter & Grawunder (2012) - Phonetic Profile of Korean Formal/Informal Speech"
+year: 2012
+citation: "Winter B, Grawunder S (2012) The phonetic profile of Korean formal and informal speech registers. Journal of Phonetics 40, 808-815. doi:10.1016/j.wocn.2012.08.006"
+---
 
-**Citation:** Winter B, Grawunder S (2012) The phonetic profile of Korean formal and informal speech registers. Journal of Phonetics 40, 808-815. doi:10.1016/j.wocn.2012.08.006
+# Winter & Grawunder (2012) - Phonetic Profile of Korean Formal/Informal Speech
 
 ## Design
 - 16 Korean speakers (9F, 7M), age 21-31

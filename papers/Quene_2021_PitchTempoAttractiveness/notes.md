@@ -1,9 +1,12 @@
-# Attractiveness of Male Speakers: Effects of Pitch and Tempo
+---
+title: "Attractiveness of Male Speakers: Effects of Pitch and Tempo"
+authors: "Hugo Quené, Geke Boomsma, Romée van Erning"
+year: 2021
+venue: "Chapter 9 in B. Weiss et al. (eds.), *Voice Attractiveness*, Prosody, Phonology and Phonetics, Springer"
+doi_url: "https://doi.org/10.1007/978-981-15-6627-1_9"
+---
 
-**Authors:** Hugo Quené, Geke Boomsma, Romée van Erning
-**Year:** 2021
-**Venue:** Chapter 9 in B. Weiss et al. (eds.), *Voice Attractiveness*, Prosody, Phonology and Phonetics, Springer
-**DOI/URL:** https://doi.org/10.1007/978-981-15-6627-1_9
+# Attractiveness of Male Speakers: Effects of Pitch and Tempo
 
 ## One-Sentence Summary
 Demonstrates that both increased pitch (+1.5 semitones) and decreased tempo (factor 0.85) independently reduce perceived attractiveness of male speakers by female listeners, with pitch having a larger effect than tempo.

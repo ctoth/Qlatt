@@ -1,9 +1,12 @@
-# Bifurcations and Limit Cycles in a Model for a Vocal Fold Oscillator
+---
+title: "Bifurcations and Limit Cycles in a Model for a Vocal Fold Oscillator"
+authors: "Jorge C. Lucero"
+year: 2005
+venue: "Communications in Mathematical Sciences, 3(4), 517-529"
+doi_url: "10.4310/CMS.2005.v3.n4.a3"
+---
 
-**Authors:** Jorge C. Lucero
-**Year:** 2005
-**Venue:** Communications in Mathematical Sciences, 3(4), 517-529
-**DOI:** 10.4310/CMS.2005.v3.n4.a3
+# Bifurcations and Limit Cycles in a Model for a Vocal Fold Oscillator
 
 ## One-Sentence Summary
 

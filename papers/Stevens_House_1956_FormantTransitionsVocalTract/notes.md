@@ -1,9 +1,12 @@
-# Studies of Formant Transitions Using a Vocal Tract Analog
+---
+title: "Studies of Formant Transitions Using a Vocal Tract Analog"
+authors: "Kenneth N. Stevens and Arthur S. House"
+year: 1956
+venue: "The Journal of the Acoustical Society of America, Vol. 28, No. 4, pp. 578-585"
+doi_url: "10.1121/1.1908403"
+---
 
-**Authors:** Kenneth N. Stevens and Arthur S. House
-**Year:** 1956
-**Venue:** The Journal of the Acoustical Society of America, Vol. 28, No. 4, pp. 578-585
-**DOI:** 10.1121/1.1908403
+# Studies of Formant Transitions Using a Vocal Tract Analog
 
 ## One-Sentence Summary
 This paper uses a 35-section electrical vocal tract analog to empirically determine how formant frequencies change during consonant-vowel transitions, establishing that F2 loci vary by consonant class and adjacent vowel rather than being fixed per consonant place.

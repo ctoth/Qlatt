@@ -1,9 +1,12 @@
-# Flexible Formant Synthesizer: A Tool for Improving Speech Production Quality
+---
+title: "Flexible Formant Synthesizer: A Tool for Improving Speech Production Quality"
+authors: "Ajit L. Lalwani (Advisor: D. G. Childers)"
+year: 1992
+venue: "Ph.D. Dissertation, University of Florida"
+doi_url: "N/A"
+---
 
-**Authors:** Ajit L. Lalwani (Advisor: D. G. Childers)
-**Year:** 1992
-**Venue:** Ph.D. Dissertation, University of Florida
-**DOI/URL:** N/A
+# Flexible Formant Synthesizer: A Tool for Improving Speech Production Quality
 
 ## One-Sentence Summary
 

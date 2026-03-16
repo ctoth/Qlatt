@@ -1,9 +1,12 @@
-# The Gesture as an Autonomous Nonlinear Dynamical System
+---
+title: "The Gesture as an Autonomous Nonlinear Dynamical System"
+authors: "Tanner Sorensen and Adamantios Gafos"
+year: 2016
+venue: "Ecological Psychology, 28(4), 188-215"
+doi_url: "10.1080/10407413.2016.1230368"
+---
 
-**Authors:** Tanner Sorensen and Adamantios Gafos
-**Year:** 2016
-**Venue:** Ecological Psychology, 28(4), 188-215
-**DOI:** 10.1080/10407413.2016.1230368
+# The Gesture as an Autonomous Nonlinear Dynamical System
 
 ## One-Sentence Summary
 Proposes that the speech gesture is a nonlinear autonomous dynamical system with an anharmonic potential, replacing the standard linear (critically damped harmonic oscillator) model to correctly predict kinematic relationships among movement amplitude, peak velocity, and duration.

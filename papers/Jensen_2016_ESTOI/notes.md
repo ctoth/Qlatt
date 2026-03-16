@@ -1,9 +1,12 @@
-# An Algorithm for Predicting the Intelligibility of Speech Masked by Modulated Noise Maskers
+---
+title: "An Algorithm for Predicting the Intelligibility of Speech Masked by Modulated Noise Maskers"
+authors: "Jesper Jensen and Cees H. Taal"
+year: 2016
+venue: "IEEE/ACM Transactions on Audio, Speech, and Language Processing, vol. 24, no. 11, pp. 2009-2022"
+doi_url: "10.1109/TASLP.2016.2585878"
+---
 
-**Authors:** Jesper Jensen and Cees H. Taal
-**Year:** 2016
-**Venue:** IEEE/ACM Transactions on Audio, Speech, and Language Processing, vol. 24, no. 11, pp. 2009-2022
-**DOI:** 10.1109/TASLP.2016.2585878
+# An Algorithm for Predicting the Intelligibility of Speech Masked by Modulated Noise Maskers
 
 ## One-Sentence Summary
 ESTOI extends STOI by replacing per-subband temporal correlation with spectral correlation across a full row-and-column-normalized spectrogram, enabling accurate intelligibility prediction for speech degraded by temporally modulated noise maskers where STOI fails.

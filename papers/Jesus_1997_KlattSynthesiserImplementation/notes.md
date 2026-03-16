@@ -1,9 +1,12 @@
-# An Implementation of the Klatt Speech Synthesiser
+---
+title: "An Implementation of the Klatt Speech Synthesiser"
+authors: "Luis Miguel Teixeira de Jesus, Francisco Vaz, José Carlos Principe"
+year: 1997
+venue: "Revista do DETUA, Vol. 2, No. 1, Setembro 1997"
+doi_url: "N/A (Portuguese academic journal)"
+---
 
-**Authors:** Luis Miguel Teixeira de Jesus, Francisco Vaz, José Carlos Principe
-**Year:** 1997
-**Venue:** Revista do DETUA, Vol. 2, No. 1, Setembro 1997
-**DOI/URL:** N/A (Portuguese academic journal)
+# An Implementation of the Klatt Speech Synthesiser
 
 ## One-Sentence Summary
 

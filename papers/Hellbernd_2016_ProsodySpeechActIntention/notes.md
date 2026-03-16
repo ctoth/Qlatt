@@ -1,9 +1,12 @@
-# Prosody conveys speaker's intentions: Acoustic cues for speech act perception
+---
+title: "Prosody conveys speaker's intentions: Acoustic cues for speech act perception"
+authors: "Nele Hellbernd, Daniela Sammler"
+year: 2016
+venue: "Journal of Memory and Language, 88, 70-86"
+doi_url: "http://dx.doi.org/10.1016/j.jml.2016.01.001"
+---
 
-**Authors:** Nele Hellbernd, Daniela Sammler
-**Year:** 2016
-**Venue:** Journal of Memory and Language, 88, 70-86
-**DOI:** http://dx.doi.org/10.1016/j.jml.2016.01.001
+# Prosody conveys speaker's intentions: Acoustic cues for speech act perception
 
 ## One-Sentence Summary
 This paper demonstrates that distinct prosodic acoustic patterns reliably encode six different communicative intentions (speech acts), providing empirical acoustic profiles that could inform intention-aware prosody generation in TTS systems.

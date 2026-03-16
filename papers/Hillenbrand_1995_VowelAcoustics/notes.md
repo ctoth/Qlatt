@@ -1,9 +1,12 @@
-# Acoustic Characteristics of American English Vowels
+---
+title: "Acoustic Characteristics of American English Vowels"
+authors: "James Hillenbrand, Laura A. Getty, Michael J. Clark, Kimberlee Wheeler"
+year: 1995
+venue: "Journal of the Acoustical Society of America, Vol. 97, No. 5, Pt. 1, pp. 3099-3111"
+doi_url: "0001-4966/95/97(5)/3099/13/$6.00"
+---
 
-**Authors:** James Hillenbrand, Laura A. Getty, Michael J. Clark, Kimberlee Wheeler
-**Year:** 1995
-**Venue:** Journal of the Acoustical Society of America, Vol. 97, No. 5, Pt. 1, pp. 3099-3111
-**DOI:** 0001-4966/95/97(5)/3099/13/$6.00
+# Acoustic Characteristics of American English Vowels
 
 ## One-Sentence Summary
 

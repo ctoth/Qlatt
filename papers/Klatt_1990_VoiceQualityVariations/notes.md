@@ -1,3 +1,8 @@
+---
+title: "Klatt & Klatt 1990 - Voice Quality Variations Analysis"
+year: 1990
+---
+
 # Klatt & Klatt 1990 - Voice Quality Variations Analysis
 
 ## Bibliographic Information

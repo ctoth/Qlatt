@@ -1,8 +1,11 @@
+---
+title: "Implementation Notes: Klatt 1973 — Durational Characteristics of Prestressed Word-Initial Consonant Clusters in English"
+year: 1973
+note: "The PDF contains the full Speech Communication section (XIX) of QPR 108. Klatt's paper is Section B, pages 253-260."
+citation: "Klatt, D. H. (1973). Durational characteristics of prestressed word-initial consonant clusters in English. Quarterly Progress Report No. 108, Research Laboratory of Electronics, M.I.T., pp. 253-260."
+---
+
 # Implementation Notes: Klatt 1973 — Durational Characteristics of Prestressed Word-Initial Consonant Clusters in English
-
-**Citation:** Klatt, D. H. (1973). Durational characteristics of prestressed word-initial consonant clusters in English. Quarterly Progress Report No. 108, Research Laboratory of Electronics, M.I.T., pp. 253-260.
-
-**Note:** The PDF contains the full Speech Communication section (XIX) of QPR 108. Klatt's paper is Section B, pages 253-260.
 
 ## Key Findings for Synthesis
 

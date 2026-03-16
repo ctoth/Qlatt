@@ -1,9 +1,12 @@
-# Acoustic Correlates of Emotional Dimensions in Laughter: Arousal, Dominance, and Valence
+---
+title: "Acoustic Correlates of Emotional Dimensions in Laughter: Arousal, Dominance, and Valence"
+authors: "Diana P. Szameitat, Chris J. Darwin, Dirk Wildgruber, Kai Alter, André J. Szameitat"
+year: 2011
+venue: "Cognition and Emotion, 25(4), 599–611"
+doi_url: "10.1080/02699931.2010.508624"
+---
 
-**Authors:** Diana P. Szameitat, Chris J. Darwin, Dirk Wildgruber, Kai Alter, André J. Szameitat
-**Year:** 2011
-**Venue:** Cognition and Emotion, 25(4), 599–611
-**DOI:** 10.1080/02699931.2010.508624
+# Acoustic Correlates of Emotional Dimensions in Laughter: Arousal, Dominance, and Valence
 
 ## One-Sentence Summary
 Establishes quantitative acoustic correlates of four emotional dimensions (arousal, dominance, sender's valence, receiver-directed valence) in laughter using 43 acoustic parameters extracted from 123 acted laughter sequences.

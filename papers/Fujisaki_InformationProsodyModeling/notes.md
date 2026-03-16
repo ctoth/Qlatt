@@ -1,9 +1,12 @@
-# Information, Prosody, and Modeling — with Emphasis on Tonal Features of Speech
+---
+title: "Information, Prosody, and Modeling — with Emphasis on Tonal Features of Speech"
+authors: "Hiroya Fujisaki"
+year: "Unknown (appears to be ~2003-2005 based on references)"
+venue: "Conference/Workshop paper (appears to be a keynote or invited talk)"
+affiliation: "Professor Emeritus, University of Tokyo"
+---
 
-**Authors:** Hiroya Fujisaki
-**Year:** Unknown (appears to be ~2003-2005 based on references)
-**Venue:** Conference/Workshop paper (appears to be a keynote or invited talk)
-**Affiliation:** Professor Emeritus, University of Tokyo
+# Information, Prosody, and Modeling — with Emphasis on Tonal Features of Speech
 
 ## One-Sentence Summary
 

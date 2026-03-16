@@ -1,6 +1,10 @@
-# Implementation Notes: Allen 1976 — Synthesis of Speech from Unrestricted Text
+---
+title: "Implementation Notes: Allen 1976 — Synthesis of Speech from Unrestricted Text"
+year: 1973
+citation: "Allen, J. (1976). Synthesis of speech from unrestricted text. *Proceedings of the IEEE*, 64(4), 433-442. DOI: 10.1109/PROC.1976.10152"
+---
 
-**Citation:** Allen, J. (1976). Synthesis of speech from unrestricted text. *Proceedings of the IEEE*, 64(4), 433-442. DOI: 10.1109/PROC.1976.10152
+# Implementation Notes: Allen 1976 — Synthesis of Speech from Unrestricted Text
 
 ## 1. Overall TTS Architecture
 

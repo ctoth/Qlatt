@@ -1,3 +1,8 @@
+---
+title: "Gay 1977 — Articulatory Movements in VCV Sequences"
+year: 1977
+---
+
 # Gay 1977 — Articulatory Movements in VCV Sequences
 
 ## Implementation-Relevant Findings
@@ -109,3 +114,20 @@ Vowel /i/ in nine VCV utterances with /i/ as V2:
 5. **Jaw-formant independence**: Jaw position and tongue body height appear to be independent articulatory features that co-vary with vowels. This supports modeling jaw opening as a facilitory rather than primary mechanism for formant changes.
 
 6. **Tongue body movement leads**: In the opening phase, tongue body begins moving before jaw and primary articulator. This suggests formant transitions (especially F2) may begin slightly before the acoustic release burst.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Ohman_1966_CoarticulationVCV` — foundational VCV coarticulation model that Gay refines
+- `Lindblom_1971_AcousticConsequencesArticulatory` — articulatory-acoustic mapping referenced
+
+### Cited By (in Collection)
+- `Kaburagi_2007_VocalTractSpectrum` — references Gay 1977 for articulatory movement data
+- `Recasens_1997_LingualCoarticulationDAC` — cites Gay for VCV coarticulation findings
+- `Klatt_1979_SpeechPerceptionLexicalAccess` — references Gay for articulatory timing data
+
+### Conceptual Links (not citation-based)
+- `Stevens_House_1963_PerturbationVowelConsonant` — Gay's articulatory data explains the acoustic undershoot Stevens & House documented
+- `Delattre_1955_AcousticLociTransitionalCues` — Gay's articulatory measurements provide physical basis for Delattre's acoustic loci
+- `Broad_Clermont_1987_VowelFormantContoursCVC` — both model VCV transitions; Gay provides articulatory data, Broad & Clermont provide acoustic models
+- `Fowler_1980_CoarticulationTheoriesExtrinsicTiming` — both address coarticulation theory

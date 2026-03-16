@@ -1,9 +1,12 @@
-# Vowel Perception: The Relative Perceptual Salience of Selected Acoustic Manipulations
+---
+title: "Vowel Perception: The Relative Perceptual Salience of Selected Acoustic Manipulations"
+authors: "R. Carlson, B. Granström, D. Klatt"
+year: 1979
+venue: "STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Volume 20, Number 3-4, pp. 73-83"
+doi_url: "http://www.speech.kth.se/qpsr"
+---
 
-**Authors:** R. Carlson, B. Granström, D. Klatt
-**Year:** 1979
-**Venue:** STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Volume 20, Number 3-4, pp. 73-83
-**URL:** http://www.speech.kth.se/qpsr
+# Vowel Perception: The Relative Perceptual Salience of Selected Acoustic Manipulations
 
 ## One-Sentence Summary
 This paper quantifies the relative perceptual importance of formant frequencies, bandwidths, spectral tilt, and harmonic phase for vowel perception, providing empirical psychophysical distance scores that can guide synthesizer parameter priorities.

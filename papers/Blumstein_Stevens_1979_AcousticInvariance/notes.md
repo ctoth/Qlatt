@@ -1,9 +1,12 @@
-# Acoustic Invariance in Speech Production: Evidence from Measurements of the Spectral Characteristics of Stop Consonants
+---
+title: "Acoustic Invariance in Speech Production: Evidence from Measurements of the Spectral Characteristics of Stop Consonants"
+authors: "Sheila E. Blumstein, Kenneth N. Stevens"
+year: 1979
+venue: "Journal of the Acoustical Society of America, Vol. 66(4), pp. 1001-1017"
+doi_url: "10.1121/1.383319"
+---
 
-**Authors:** Sheila E. Blumstein, Kenneth N. Stevens
-**Year:** 1979
-**Venue:** Journal of the Acoustical Society of America, Vol. 66(4), pp. 1001-1017
-**DOI:** 10.1121/1.383319
+# Acoustic Invariance in Speech Production: Evidence from Measurements of the Spectral Characteristics of Stop Consonants
 
 ## One-Sentence Summary
 

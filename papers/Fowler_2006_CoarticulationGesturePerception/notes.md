@@ -1,9 +1,12 @@
-# Compensation for Coarticulation Reflects Gesture Perception, Not Spectral Contrast
+---
+title: "Compensation for Coarticulation Reflects Gesture Perception, Not Spectral Contrast"
+authors: "Carol A. Fowler"
+year: 2006
+venue: "Perception & Psychophysics, 68(2), 161-177"
+institution: "Haskins Laboratories, New Haven, CT; University of Connecticut, Storrs, CT"
+---
 
-**Authors:** Carol A. Fowler
-**Year:** 2006
-**Venue:** Perception & Psychophysics, 68(2), 161-177
-**Institution:** Haskins Laboratories, New Haven, CT; University of Connecticut, Storrs, CT
+# Compensation for Coarticulation Reflects Gesture Perception, Not Spectral Contrast
 
 ## One-Sentence Summary
 This paper provides strong experimental evidence that listeners compensate for coarticulation by tracking articulatory gestures rather than by applying general auditory spectral contrast, with direct implications for how coarticulation must be modeled in synthesis to sound natural.

@@ -1,9 +1,12 @@
-# Variability in the Relationships among Voice Quality, Harmonic Amplitudes, Open Quotient, and Glottal Area Waveform Shape in Sustained Phonation
+---
+title: "Variability in the Relationships among Voice Quality, Harmonic Amplitudes, Open Quotient, and Glottal Area Waveform Shape in Sustained Phonation"
+authors: "Jody Kreiman, Yen-Liang Shue, Gang Chen, Markus Iseli, Bruce R. Gerratt, Juergen Neubauer, Abeer Alwan"
+year: 2012
+venue: "Journal of the Acoustical Society of America, Vol. 132, No. 4, pp. 2625-2632"
+doi_url: "http://dx.doi.org/10.1121/1.4747007"
+---
 
-**Authors:** Jody Kreiman, Yen-Liang Shue, Gang Chen, Markus Iseli, Bruce R. Gerratt, Juergen Neubauer, Abeer Alwan
-**Year:** 2012
-**Venue:** Journal of the Acoustical Society of America, Vol. 132, No. 4, pp. 2625-2632
-**DOI:** http://dx.doi.org/10.1121/1.4747007
+# Variability in the Relationships among Voice Quality, Harmonic Amplitudes, Open Quotient, and Glottal Area Waveform Shape in Sustained Phonation
 
 ## One-Sentence Summary
 This paper empirically demonstrates that the widely assumed simple relationship between H1*-H2*, open quotient, and perceived breathiness is actually speaker-dependent and requires multiple predictors (OQ, asymmetry coefficient, F0) for accurate modeling.

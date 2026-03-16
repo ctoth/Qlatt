@@ -1,3 +1,8 @@
+---
+title: "Story, Titze, Hoffman 1996 — Vocal Tract Area Functions from MRI"
+year: 1996
+---
+
 # Story, Titze, Hoffman 1996 — Vocal Tract Area Functions from MRI
 
 ## Implementation-Relevant Notes

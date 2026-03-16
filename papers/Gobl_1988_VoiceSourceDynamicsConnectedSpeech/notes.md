@@ -1,3 +1,8 @@
+---
+title: "Gobl 1988 — Voice Source Dynamics in Connected Speech"
+year: 1988
+---
+
 # Gobl 1988 — Voice Source Dynamics in Connected Speech
 
 ## Key Contribution
@@ -159,3 +164,25 @@ The paper proposes controlling the LF model by rules:
 - Utterances were resynthesized using inverse-filtered formant values + matched source parameters
 - Child's voice was most strikingly improved with the LF model
 - Adult male voices also showed considerable enhancement
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — the LF model definition used throughout this paper
+- `Fant_1960_AcousticTheorySpeechProduction` — theoretical foundation
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt voice quality analysis (cited as forthcoming)
+
+### Cited By (in Collection)
+- `Fant_1988_LFFrequencyDomainInterpretation` — references Gobl 1988 for connected speech source data
+- `Fant_1997_VoiceSourceConnectedSpeech` — builds directly on Gobl 1988 findings
+- `Gobl_2003_VoiceQualityEmotion` — extends Gobl's own 1988 work to emotional voice quality
+- `Hanson_1995_GlottalCharacteristicsFemale` — references Gobl 1988 for male voice source baseline
+- `Hanson_1997_GlottalCharacteristicsFemaleAcoustic` — cites Gobl 1988 for LF parameter ranges
+- `Klatt_1990_VoiceQualityVariations` — references Gobl for source dynamics data
+- `Nittrouer_1990_AcousticMeasurementsVoice` — references Gobl 1988 for voice source measurements
+- `Redi_2001_GlottalEventsVariation` — cites Gobl 1988 for voice source dynamics at phrase boundaries
+
+### Conceptual Links (not citation-based)
+- `Strik_Boves_1992_ControlF0IntensityVoiceQuality` — both study voice source variation in connected speech; complementary Dutch and Swedish data
+- `Alku_2002_NormalizedAmplitudeQuotient` — Gobl's LF parameter ranges provide context for NAQ's simplified parametrization
+- `Childers_Lee_1991_VoiceQualityFactors` — both study voice source parameters across phonation types

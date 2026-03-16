@@ -1,9 +1,12 @@
-# An Algorithm for Intelligibility Prediction of Time-Frequency Weighted Noisy Speech
+---
+title: "An Algorithm for Intelligibility Prediction of Time-Frequency Weighted Noisy Speech"
+authors: "Cees H. Taal, Richard C. Hendriks, Richard Heusdens, Jesper Jensen"
+year: 2011
+venue: "IEEE Transactions on Audio, Speech, and Language Processing, Vol. 19, No. 7, pp. 2125-2136"
+doi_url: "10.1109/TASL.2011.2114881"
+---
 
-**Authors:** Cees H. Taal, Richard C. Hendriks, Richard Heusdens, Jesper Jensen
-**Year:** 2011
-**Venue:** IEEE Transactions on Audio, Speech, and Language Processing, Vol. 19, No. 7, pp. 2125-2136
-**DOI:** 10.1109/TASL.2011.2114881
+# An Algorithm for Intelligibility Prediction of Time-Frequency Weighted Noisy Speech
 
 ## One-Sentence Summary
 STOI is a short-time objective intelligibility measure that computes correlation coefficients between normalized/clipped temporal envelopes of clean and degraded speech in one-third octave bands over 384 ms segments, achieving higher correlation with subjective intelligibility than five competing measures across diverse noise conditions.

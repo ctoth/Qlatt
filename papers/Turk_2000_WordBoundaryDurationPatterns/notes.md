@@ -1,3 +1,8 @@
+---
+title: "Turk & Shattuck-Hufnagel 2000 — Implementation Notes"
+year: 2000
+---
+
 # Turk & Shattuck-Hufnagel 2000 — Implementation Notes
 
 ## Paper Reference

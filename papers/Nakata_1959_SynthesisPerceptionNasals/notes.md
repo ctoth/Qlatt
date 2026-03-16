@@ -1,3 +1,8 @@
+---
+title: "Nakata 1959 — Synthesis and Perception of Nasal Consonants"
+year: 1959
+---
+
 # Nakata 1959 — Synthesis and Perception of Nasal Consonants
 
 ## Implementation-Relevant Notes
@@ -104,3 +109,20 @@ Results with broad B2 (200 Hz):
 3. F2 locus is the primary perceptual cue — must be set correctly per place of articulation
 4. Amplitude naturally drops when F1 is low in cascade configuration — consistent with natural nasal murmur being lower amplitude than adjacent vowel
 5. Formant transitions should be continuous (exponential) from nasal to vowel
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1960_AcousticTheorySpeechProduction` — acoustic theory of nasal tract
+- `Delattre_1955_AcousticLociTransitionalCues` — locus concept applied to nasals
+
+### Cited By (in Collection)
+- `Fujimura_1962_NasalConsonantAnalysis` — extends Nakata's nasal analysis with spectral zeros
+- `Recasens_1983_NasalPlaceCues` — builds on Nakata's nasal place identification findings
+- `Rabiner_1968_DigitalFormantSynthesizer` — references Nakata for cascade nasal synthesis
+
+### Conceptual Links (not citation-based)
+- `Beddor_1986_NasalVowelHeight` — both study nasal acoustic effects; Nakata on consonants, Beddor on vowel nasalization
+- `House_Stevens_1956_NasalizationVowels` — both study nasal coupling effects on spectrum
+- `Hawkins_Stevens_1985_NasalVowelCorrelates` — complementary work on nasal vowel correlates
+- `Chen_1997_NasalizedVowelAcoustics` — both address nasal acoustic properties in synthesis context

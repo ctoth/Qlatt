@@ -1,3 +1,8 @@
+---
+title: "Bartkova & Sorin (1987) - A Model of Segmental Duration for Speech Synthesis in French"
+year: 1987
+---
+
 # Bartkova & Sorin (1987) - A Model of Segmental Duration for Speech Synthesis in French
 
 ## Implementation-Focused Notes

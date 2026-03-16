@@ -1,9 +1,12 @@
-# Development of a Quantitative Description of Vowel Articulation
+---
+title: "Development of a Quantitative Description of Vowel Articulation"
+authors: "Kenneth N. Stevens, Arthur S. House"
+year: 1955
+venue: "Journal of the Acoustical Society of America, Vol. 27, No. 3, pp. 484-493"
+doi_url: "10.1121/1.1907943"
+---
 
-**Authors:** Kenneth N. Stevens, Arthur S. House
-**Year:** 1955
-**Venue:** Journal of the Acoustical Society of America, Vol. 27, No. 3, pp. 484-493
-**DOI:** 10.1121/1.1907943
+# Development of a Quantitative Description of Vowel Articulation
 
 ## One-Sentence Summary
 This paper develops a three-parameter articulatory model (tongue constriction position, constriction size, mouth opening ratio) and maps it to the first three formant frequencies using a 35-section electrical vocal tract analog.

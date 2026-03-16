@@ -1,9 +1,12 @@
-# A Cross-Language Acoustic Study of Initial and Final Allophones of /l/
+---
+title: "A Cross-Language Acoustic Study of Initial and Final Allophones of /l/"
+authors: "Daniel Recasens"
+year: 2012
+venue: "Speech Communication 54 (2012) 368-383"
+doi_url: "10.1016/j.specom.2011.10.001"
+---
 
-**Authors:** Daniel Recasens
-**Year:** 2012
-**Venue:** Speech Communication 54 (2012) 368-383
-**DOI:** 10.1016/j.specom.2011.10.001
+# A Cross-Language Acoustic Study of Initial and Final Allophones of /l/
 
 ## One-Sentence Summary
 Provides F1, F2, F3 formant frequency data for /l/ across 23 languages/dialects, quantifying clear vs dark /l/ distinctions and position-dependent allophonic variation for implementation in formant synthesis.

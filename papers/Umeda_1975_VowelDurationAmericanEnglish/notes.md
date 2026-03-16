@@ -1,3 +1,8 @@
+---
+title: "Umeda 1975 — Vowel Duration in American English"
+year: 1975
+---
+
 # Umeda 1975 — Vowel Duration in American English
 
 ## Implementation-Focused Notes

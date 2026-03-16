@@ -1,3 +1,8 @@
+---
+title: "Implementation Notes: Rothenberg et al. (1975) — A Three-Parameter Voice Source"
+year: 1975
+---
+
 # Implementation Notes: Rothenberg et al. (1975) — A Three-Parameter Voice Source
 
 ## Overview

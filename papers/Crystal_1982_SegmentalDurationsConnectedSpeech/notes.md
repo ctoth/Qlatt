@@ -1,3 +1,8 @@
+---
+title: "Crystal & House 1982 - Segmental Durations in Connected Speech Signals: Preliminary Results"
+year: 1982
+---
+
 # Crystal & House 1982 - Segmental Durations in Connected Speech Signals: Preliminary Results
 
 ## Key Data for Synthesizer Implementation

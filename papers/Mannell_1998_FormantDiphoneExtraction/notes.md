@@ -1,3 +1,8 @@
+---
+title: "Mannell 1998 — Formant Diphone Parameter Extraction — Implementation Notes"
+year: 1998
+---
+
 # Mannell 1998 — Formant Diphone Parameter Extraction — Implementation Notes
 
 ## Key Contribution
@@ -98,3 +103,16 @@ Target synthesiser: SHLRC Parallel Formant Synthesiser "MU-TALK" (Clark et al. 1
 2. **Formant proximity threshold** of 0.8 * Ns (average formant spacing) for determining when formants interact perceptually — relevant to parallel formant synthesiser gain calculations where closely-spaced formants affect each other's peak levels.
 
 3. **Analysis-by-synthesis methodology** demonstrates that bandwidth refinement in 20% steps and intensity refinement in 1 dB steps are perceptually meaningful step sizes aligned with psychoacoustic difference limens.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Flanagan_1972_SpeechAnalysisSynthesisPerception` — formant bandwidth difference limen (~20%)
+
+### Cited By (in Collection)
+- `Iseli_2007_VoiceSourceAgeSexVowel` — references Mannell for formant extraction methodology
+
+### Conceptual Links (not citation-based)
+- `Kent_Vorperian_2018_VowelFormantBandwidths` — both provide bandwidth estimation approaches; Kent & Vorperian provide age/sex-dependent data, Mannell provides a frequency-dependent formula
+- `Ericsson_2020_FormantEstimationEvaluation` — both address formant tracking accuracy
+- `Conkie_1997_OptimalCouplingDiphones` — both address diphone synthesis unit construction

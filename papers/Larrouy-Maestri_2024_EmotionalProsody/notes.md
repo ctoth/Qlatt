@@ -1,9 +1,12 @@
-# The Sound of Emotional Prosody: Nearly 3 Decades of Research and Future Directions
+---
+title: "The Sound of Emotional Prosody: Nearly 3 Decades of Research and Future Directions"
+authors: "Pauline Larrouy-Maestri, David Poeppel, Marc D. Pell"
+year: "2024 (published in Perspectives on Psychological Science, 2025, Vol. 20(4), 623-638)"
+venue: "Perspectives on Psychological Science (Association for Psychological Science)"
+doi_url: "10.1177/17456916231217722"
+---
 
-**Authors:** Pauline Larrouy-Maestri, David Poeppel, Marc D. Pell
-**Year:** 2024 (published in Perspectives on Psychological Science, 2025, Vol. 20(4), 623-638)
-**Venue:** Perspectives on Psychological Science (Association for Psychological Science)
-**DOI:** 10.1177/17456916231217722
+# The Sound of Emotional Prosody: Nearly 3 Decades of Research and Future Directions
 
 ## One-Sentence Summary
 

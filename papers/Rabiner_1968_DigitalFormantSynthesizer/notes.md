@@ -1,9 +1,12 @@
-# Digital-Formant Synthesizer for Speech-Synthesis Studies
+---
+title: "Digital-Formant Synthesizer for Speech-Synthesis Studies"
+authors: "Lawrence R. Rabiner"
+year: 1968
+venue: "Journal of the Acoustical Society of America, Vol. 43, No. 4, pp. 822-828"
+doi_url: "10.1121/1.1910902"
+---
 
-**Authors:** Lawrence R. Rabiner
-**Year:** 1968
-**Venue:** Journal of the Acoustical Society of America, Vol. 43, No. 4, pp. 822-828
-**DOI:** 10.1121/1.1910902
+# Digital-Formant Synthesizer for Speech-Synthesis Studies
 
 ## One-Sentence Summary
 Describes a digital serial terminal-analog formant synthesizer with three key innovations: a voiced fricative excitation network using pitch-synchronous noise modulation, a voice bar generator for voiced stops, and automatic higher-pole correction exploiting sampled data system properties.

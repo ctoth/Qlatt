@@ -1,9 +1,12 @@
-# Changes in Acoustic Characteristics of the Voice Across the Life Span: Measures From Individuals 4-93 Years of Age
+---
+title: "Changes in Acoustic Characteristics of the Voice Across the Life Span: Measures From Individuals 4-93 Years of Age"
+authors: "Elaine T. Stathopoulos, Jessica E. Huber, Joan E. Sussman"
+year: 2011
+venue: "Journal of Speech, Language, and Hearing Research, Vol. 54, 1011-1021"
+doi_url: "10.1044/1092-4388(2010/10-0036)"
+---
 
-**Authors:** Elaine T. Stathopoulos, Jessica E. Huber, Joan E. Sussman
-**Year:** 2011
-**Venue:** Journal of Speech, Language, and Hearing Research, Vol. 54, 1011-1021
-**DOI:** 10.1044/1092-4388(2010/10-0036)
+# Changes in Acoustic Characteristics of the Voice Across the Life Span: Measures From Individuals 4-93 Years of Age
 
 ## One-Sentence Summary
 Provides F0, SPL, and SNR measurements across the full life span (ages 4-93) for 192 speakers, with stepwise regression models showing nonlinear age-dependent trends that differ by sex.

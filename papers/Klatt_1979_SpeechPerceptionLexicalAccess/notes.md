@@ -1,10 +1,13 @@
-# Speech Perception: A Model of Acoustic-Phonetic Analysis and Lexical Access
+---
+title: "Speech Perception: A Model of Acoustic-Phonetic Analysis and Lexical Access"
+authors: "Dennis H. Klatt"
+year: 1979
+venue: "Journal of Phonetics, 7, 279-312"
+affiliation: "Room 36-523, Massachusetts Institute of Technology, Cambridge, MA 02139, U.S.A."
+received: "1 November 1978"
+---
 
-**Authors:** Dennis H. Klatt
-**Year:** 1979
-**Venue:** Journal of Phonetics, 7, 279-312
-**Received:** 1 November 1978
-**Affiliation:** Room 36-523, Massachusetts Institute of Technology, Cambridge, MA 02139, U.S.A.
+# Speech Perception: A Model of Acoustic-Phonetic Analysis and Lexical Access
 
 ## One-Sentence Summary
 

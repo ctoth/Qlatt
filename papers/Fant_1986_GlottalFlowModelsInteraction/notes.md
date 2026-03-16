@@ -1,9 +1,12 @@
-# Glottal Flow: Models and Interaction
+---
+title: "Glottal Flow: Models and Interaction"
+authors: "Gunnar Fant"
+year: 1986
+venue: "Journal of Phonetics, 14, 393-399"
+doi_url: "0095-4470/86/030393"
+---
 
-**Authors:** Gunnar Fant
-**Year:** 1986
-**Venue:** Journal of Phonetics, 14, 393-399
-**DOI/URL:** 0095-4470/86/030393
+# Glottal Flow: Models and Interaction
 
 ## One-Sentence Summary
 This paper presents the LF (Liljencrants-Fant) four-parameter model for glottal flow derivative and analyzes source-filter interaction effects that cause the actual glottal flow to deviate from the idealized glottal area function.

@@ -1,9 +1,12 @@
-# The Role of Prosody in Disambiguating English Indirect Requests
+---
+title: "The Role of Prosody in Disambiguating English Indirect Requests"
+authors: "Sean Trott, Stefanie Reed, Dan Kaliblotzky, Victor Ferreira, Benjamin Bergen"
+year: 2022
+venue: "Language and Speech (SAGE)"
+doi_url: "https://doi.org/10.1177/00238309221087715"
+---
 
-**Authors:** Sean Trott, Stefanie Reed, Dan Kaliblotzky, Victor Ferreira, Benjamin Bergen
-**Year:** 2022
-**Venue:** Language and Speech (SAGE)
-**DOI:** https://doi.org/10.1177/00238309221087715
+# The Role of Prosody in Disambiguating English Indirect Requests
 
 ## One-Sentence Summary
 This paper demonstrates that prosodic features (F0 slope, duration, mean pitch) reliably signal whether an utterance is intended as an indirect request vs. a literal statement/question, with both humans and machine classifiers achieving above-chance accuracy using acoustic cues alone.

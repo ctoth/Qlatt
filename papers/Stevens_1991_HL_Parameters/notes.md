@@ -1,9 +1,12 @@
-# Constraints among parameters simplify control of Klatt formant synthesizer
+---
+title: "Constraints among parameters simplify control of Klatt formant synthesizer"
+authors: "Kenneth N. Stevens, Corine A. Bickley"
+year: 1991
+venue: "Journal of Phonetics, 19, 161-174"
+doi_url: "0095-4470/91/010161"
+---
 
-**Authors:** Kenneth N. Stevens, Corine A. Bickley
-**Year:** 1991
-**Venue:** Journal of Phonetics, 19, 161-174
-**DOI/URL:** 0095-4470/91/010161
+# Constraints among parameters simplify control of Klatt formant synthesizer
 
 ## One-Sentence Summary
 

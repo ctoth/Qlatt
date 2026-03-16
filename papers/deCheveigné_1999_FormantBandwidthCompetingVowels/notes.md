@@ -1,9 +1,12 @@
-# Formant Bandwidth Affects the Identification of Competing Vowels
+---
+title: "Formant Bandwidth Affects the Identification of Competing Vowels"
+authors: "Alain de Cheveigné"
+year: 1999
+venue: "ICPhS99 (International Congress of Phonetic Sciences), San Francisco"
+pages: "2093-2096"
+---
 
-**Authors:** Alain de Cheveigné
-**Year:** 1999
-**Venue:** ICPhS99 (International Congress of Phonetic Sciences), San Francisco
-**Pages:** 2093-2096
+# Formant Bandwidth Affects the Identification of Competing Vowels
 
 ## One-Sentence Summary
 Demonstrates that formant bandwidth, while having little effect on isolated vowel quality, strongly affects mutual masking between concurrent vowels - narrow formants increase both resistance to masking and masking power.

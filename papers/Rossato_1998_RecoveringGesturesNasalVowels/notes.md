@@ -1,9 +1,12 @@
-# Recovering Gestures from Speech Signals: A Preliminary Study for Nasal Vowels
+---
+title: "Recovering Gestures from Speech Signals: A Preliminary Study for Nasal Vowels"
+authors: "Solange Rossato, Gang Feng, Rafael Laboissiere"
+year: 1998
+venue: "5th International Conference on Spoken Language Processing (ICSLP 98), Sydney, Australia"
+doi_url: "10.21437/ICSLP.1998-546"
+---
 
-**Authors:** Solange Rossato, Gang Feng, Rafael Laboissiere
-**Year:** 1998
-**Venue:** 5th International Conference on Spoken Language Processing (ICSLP 98), Sydney, Australia
-**DOI:** 10.21437/ICSLP.1998-546
+# Recovering Gestures from Speech Signals: A Preliminary Study for Nasal Vowels
 
 ## One-Sentence Summary
 

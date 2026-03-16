@@ -1,9 +1,12 @@
-# Ratings of Voice Attractiveness Predict Sexual Behavior and Body Configuration
+---
+title: "Ratings of Voice Attractiveness Predict Sexual Behavior and Body Configuration"
+authors: "Susan M. Hughes, Franco Dispenza, Gordon G. Gallup Jr."
+year: 2004
+venue: "Evolution and Human Behavior, 25, 295-304"
+doi_url: "10.1016/j.evolhumbehav.2004.06.001"
+---
 
-**Authors:** Susan M. Hughes, Franco Dispenza, Gordon G. Gallup Jr.
-**Year:** 2004
-**Venue:** Evolution and Human Behavior, 25, 295-304
-**DOI:** 10.1016/j.evolhumbehav.2004.06.001
+# Ratings of Voice Attractiveness Predict Sexual Behavior and Body Configuration
 
 ## One-Sentence Summary
 Demonstrates that opposite-sex ratings of voice attractiveness correlate with sexually dimorphic body ratios (SHR in males, WHR in females) and predict multiple measures of sexual behavior, supporting voice as a multidimensional fitness indicator.

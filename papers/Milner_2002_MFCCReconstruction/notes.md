@@ -1,9 +1,12 @@
-# Speech Reconstruction from Mel-Frequency Cepstral Coefficients Using a Source-Filter Model
+---
+title: "Speech Reconstruction from Mel-Frequency Cepstral Coefficients Using a Source-Filter Model"
+authors: "Ben Milner, Xu Shao"
+year: 2002
+venue: "7th International Conference on Spoken Language Processing (ICSLP 2002), Denver, Colorado, USA"
+doi_url: "10.21437/ICSLP.2002-110"
+---
 
-**Authors:** Ben Milner, Xu Shao
-**Year:** 2002
-**Venue:** 7th International Conference on Spoken Language Processing (ICSLP 2002), Denver, Colorado, USA
-**DOI:** 10.21437/ICSLP.2002-110
+# Speech Reconstruction from Mel-Frequency Cepstral Coefficients Using a Source-Filter Model
 
 ## One-Sentence Summary
 

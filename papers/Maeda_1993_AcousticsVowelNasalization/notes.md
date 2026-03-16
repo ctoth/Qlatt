@@ -1,3 +1,8 @@
+---
+title: "Maeda 1993 - Acoustics of Vowel Nasalization and Articulatory Shifts in French Nasal Vowels"
+year: 1993
+---
+
 # Maeda 1993 - Acoustics of Vowel Nasalization and Articulatory Shifts in French Nasal Vowels
 
 ## Implementation-Focused Notes

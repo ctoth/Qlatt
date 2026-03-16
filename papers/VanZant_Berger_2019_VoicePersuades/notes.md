@@ -1,9 +1,12 @@
-# How the Voice Persuades
+---
+title: "How the Voice Persuades"
+authors: "Alex B. Van Zant, Jonah Berger"
+year: 2019
+venue: "Journal of Personality and Social Psychology"
+doi_url: "http://dx.doi.org/10.1037/pspi0000193"
+---
 
-**Authors:** Alex B. Van Zant, Jonah Berger
-**Year:** 2019
-**Venue:** Journal of Personality and Social Psychology
-**DOI:** http://dx.doi.org/10.1037/pspi0000193
+# How the Voice Persuades
 
 ## One-Sentence Summary
 This paper establishes that speakers modulate specific acoustic features (primarily volume and volume variability) during paralinguistic persuasion attempts, and that these cues enhance persuasion by making speakers appear more confident.

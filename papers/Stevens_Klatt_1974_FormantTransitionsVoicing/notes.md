@@ -1,3 +1,8 @@
+---
+title: "Stevens & Klatt (1974) — Implementation Notes"
+year: 1974
+---
+
 # Stevens & Klatt (1974) — Implementation Notes
 
 ## Key Finding

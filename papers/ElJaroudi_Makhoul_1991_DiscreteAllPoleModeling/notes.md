@@ -1,3 +1,8 @@
+---
+title: "Implementation Notes: El-Jaroudi & Makhoul 1991 — Discrete All-Pole Modeling"
+year: 1991
+---
+
 # Implementation Notes: El-Jaroudi & Makhoul 1991 — Discrete All-Pole Modeling
 
 ## Core Problem
@@ -206,3 +211,16 @@ Formant estimation percent error |%| = (|F_hat - F|/F) * 100:
 | (47) | Accelerated update with alpha parameter |
 | (49) | Weighted I-S error measure |
 | (56) | WDAP nonlinear normal equations |
+
+## Collection Cross-References
+
+### Cited By (in Collection)
+- `Alku_2002_NormalizedAmplitudeQuotient` — uses DAP for inverse filtering in NAQ extraction
+- `Alku_1997_ParabolicSpectralParameter` — uses DAP for glottal flow estimation
+- `Alku_1999_SPL_DpeakLinearity` — uses DAP for vocal tract estimation
+- `Drugman_2020_GlottalSourceEstimation` — references DAP as improved spectral estimation method
+- `Gobl_2003_VoiceQualityEmotion` — cites DAP for voice source analysis
+
+### Conceptual Links (not citation-based)
+- `Yegnanarayana_1998_VocalTractExtraction` — both address improved vocal tract estimation for voiced speech
+- `Ericsson_2020_FormantEstimationEvaluation` — both deal with formant estimation accuracy; DAP could improve results

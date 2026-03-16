@@ -1,10 +1,13 @@
-# Voice Attractiveness: Studies on Sexy, Likable, and Charismatic Speakers
+---
+title: "Voice Attractiveness: Studies on Sexy, Likable, and Charismatic Speakers"
+year: "2020 (Springer, uncorrected editor proof dated Sept 2020; published 2021)"
+venue: "Springer, Prosody, Phonology and Phonetics series"
+doi_url: "10.1007/978-981-15-6627-1"
+editors: "Benjamin Weiss, Jurgen Trouvain, Melissa Barkat-Defradas, John J. Ohala"
+isbn: "978-981-15-6626-4 (print), 978-981-15-6627-1 (eBook)"
+---
 
-**Editors:** Benjamin Weiss, Jurgen Trouvain, Melissa Barkat-Defradas, John J. Ohala
-**Year:** 2020 (Springer, uncorrected editor proof dated Sept 2020; published 2021)
-**Venue:** Springer, Prosody, Phonology and Phonetics series
-**DOI:** 10.1007/978-981-15-6627-1
-**ISBN:** 978-981-15-6626-4 (print), 978-981-15-6627-1 (eBook)
+# Voice Attractiveness: Studies on Sexy, Likable, and Charismatic Speakers
 
 ## One-Sentence Summary
 An edited volume of 17 chapters covering the acoustic correlates, perceptual dimensions, and social consequences of voice attractiveness, likeability, and charisma, organized across five parts: general considerations, voice quality, prosody, databases, and technological applications.

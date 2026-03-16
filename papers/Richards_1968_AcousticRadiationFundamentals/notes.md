@@ -1,9 +1,12 @@
-# Acoustic Radiation Fundamentals (Chapter 3)
+---
+title: "Acoustic Radiation Fundamentals (Chapter 3)"
+authors: "E.J. Richards, D.J. Mead (editors)"
+year: 1968
+venue: "Chapter 3 of \"Noise and Acoustic Fatigue in Aeronautics\", Wiley, London"
+doi_url: "N/A (book chapter)"
+---
 
-**Authors:** E.J. Richards, D.J. Mead (editors)
-**Year:** 1968
-**Venue:** Chapter 3 of "Noise and Acoustic Fatigue in Aeronautics", Wiley, London
-**DOI/URL:** N/A (book chapter)
+# Acoustic Radiation Fundamentals (Chapter 3)
 
 ## One-Sentence Summary
 Textbook chapter covering fundamentals of aerodynamic sound radiation — monopoles, dipoles, quadrupoles, radiation impedance, and Lighthill's aeroacoustic analogy — with no relevance to speech synthesis.

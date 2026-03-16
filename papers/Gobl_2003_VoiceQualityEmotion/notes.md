@@ -1,9 +1,12 @@
-# The Role of Voice Quality in Communicating Emotion, Mood and Attitude
+---
+title: "The Role of Voice Quality in Communicating Emotion, Mood and Attitude"
+authors: "Christer Gobl, Ailbhe Ní Chasaide"
+year: 2003
+venue: "Speech Communication 40, pp. 189-212"
+doi_url: "PII: S0167-6393(02)00082-1"
+---
 
-**Authors:** Christer Gobl, Ailbhe Ní Chasaide
-**Year:** 2003
-**Venue:** Speech Communication 40, pp. 189-212
-**DOI/URL:** PII: S0167-6393(02)00082-1
+# The Role of Voice Quality in Communicating Emotion, Mood and Attitude
 
 ## One-Sentence Summary
 Provides KLSYN88 voice source parameter settings for synthesizing 7 distinct voice qualities (modal, tense, breathy, whispery, creaky, harsh, lax-creaky) with perceptual validation linking each to affective states.

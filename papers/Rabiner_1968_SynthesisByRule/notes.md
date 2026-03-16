@@ -1,9 +1,12 @@
-# A Model for Synthesizing Speech by Rule
+---
+title: "A Model for Synthesizing Speech by Rule"
+authors: "Lawrence R. Rabiner"
+year: "1969 (presented 1968)"
+venue: "IEEE Transactions on Audio and Electroacoustics, Vol. AU-17, No. 1, pp. 7-13"
+doi_url: "10.1109/TAU.1969.1162023"
+---
 
-**Authors:** Lawrence R. Rabiner
-**Year:** 1969 (presented 1968)
-**Venue:** IEEE Transactions on Audio and Electroacoustics, Vol. AU-17, No. 1, pp. 7-13
-**DOI:** 10.1109/TAU.1969.1162023
+# A Model for Synthesizing Speech by Rule
 
 ## One-Sentence Summary
 Presents a complete synthesis-by-rule architecture with a two-stage transformation strategy: linguistic preprocessing followed by interdependent segmental (formant contours via critically-damped differential equations) and suprasegmental (F0 via subglottal pressure model) models.

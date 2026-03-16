@@ -1,9 +1,12 @@
-# Models of Speech Synthesis
+---
+title: "Models of Speech Synthesis"
+authors: "Rolf Carlson"
+year: 1995
+venue: "Proc. Natl. Acad. Sci. USA, Vol. 92, pp. 9932-9937 (Colloquium Paper: Human-Machine Communication by Voice)"
+doi_url: "PNAS October 1995"
+---
 
-**Authors:** Rolf Carlson
-**Year:** 1995
-**Venue:** Proc. Natl. Acad. Sci. USA, Vol. 92, pp. 9932-9937 (Colloquium Paper: Human-Machine Communication by Voice)
-**DOI/URL:** PNAS October 1995
+# Models of Speech Synthesis
 
 ## One-Sentence Summary
 A comprehensive survey of speech synthesis approaches in 1995, comparing acoustic models, articulatory models, and waveform-based methods with emphasis on the trade-offs between knowledge-based rules and data-driven concatenation.

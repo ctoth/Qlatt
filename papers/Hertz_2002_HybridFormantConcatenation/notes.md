@@ -1,9 +1,12 @@
-# Integration of Rule-Based Formant Synthesis and Waveform Concatenation: A Hybrid Approach to Text-to-Speech Synthesis
+---
+title: "Integration of Rule-Based Formant Synthesis and Waveform Concatenation: A Hybrid Approach to Text-to-Speech Synthesis"
+authors: "Susan R. Hertz"
+year: 2002
+venue: "Proceedings IEEE 2002 Workshop On Speech Synthesis, Santa Monica, CA"
+affiliation: "SpeechWorks International, Inc. & Department of Linguistics, Cornell University"
+---
 
-**Authors:** Susan R. Hertz
-**Year:** 2002
-**Venue:** Proceedings IEEE 2002 Workshop On Speech Synthesis, Santa Monica, CA
-**Affiliation:** SpeechWorks International, Inc. & Department of Linguistics, Cornell University
+# Integration of Rule-Based Formant Synthesis and Waveform Concatenation: A Hybrid Approach to Text-to-Speech Synthesis
 
 ## One-Sentence Summary
 

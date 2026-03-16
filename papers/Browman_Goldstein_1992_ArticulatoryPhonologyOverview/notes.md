@@ -1,9 +1,12 @@
-# Articulatory Phonology: An Overview
+---
+title: "Articulatory Phonology: An Overview"
+authors: "Catherine P. Browman, Louis Goldstein"
+year: 1992
+venue: "Phonetica, Vol. 49, pp. 155-180"
+doi_url: "10.1159/000261913"
+---
 
-**Authors:** Catherine P. Browman, Louis Goldstein
-**Year:** 1992
-**Venue:** Phonetica, Vol. 49, pp. 155-180
-**DOI:** 10.1159/000261913
+# Articulatory Phonology: An Overview
 
 ## One-Sentence Summary
 This paper presents the foundational framework of articulatory phonology where gestures -- abstract characterizations of articulatory events with intrinsic duration -- replace segments and features as the basic units of phonological contrast, enabling unified accounts of coarticulation, allophonic variation, assimilation, and fluent speech alternations through gestural overlap.

@@ -1,9 +1,12 @@
-# Positional Targets for Lingual Consonants Defined Using Electromagnetic Articulography
+---
+title: "Positional Targets for Lingual Consonants Defined Using Electromagnetic Articulography"
+authors: "Yunusova, Yana; Rosenthal, Jeffrey S.; Rudy, Krista; Baljko, Melanie; Daskalogiannakis, John"
+year: "~2012 (based on references citing 2012)"
+venue: "Journal article (likely JASA or similar)"
+institution: "University of Toronto"
+---
 
-**Authors:** Yunusova, Yana; Rosenthal, Jeffrey S.; Rudy, Krista; Baljko, Melanie; Daskalogiannakis, John
-**Year:** ~2012 (based on references citing 2012)
-**Venue:** Journal article (likely JASA or similar)
-**Institution:** University of Toronto
+# Positional Targets for Lingual Consonants Defined Using Electromagnetic Articulography
 
 ## One-Sentence Summary
 

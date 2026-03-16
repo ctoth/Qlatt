@@ -1,9 +1,12 @@
-# Cantor Digitalis: Chironomic Parametric Synthesis of Singing
+---
+title: "Cantor Digitalis: Chironomic Parametric Synthesis of Singing"
+authors: "Lionel Feugère, Christophe d'Alessandro, Boris Doval, Olivier Perrotin"
+year: 2017
+venue: "EURASIP Journal on Audio, Speech, and Music Processing"
+doi_url: "10.1186/s13636-016-0098-5"
+---
 
-**Authors:** Lionel Feugère, Christophe d'Alessandro, Boris Doval, Olivier Perrotin
-**Year:** 2017
-**Venue:** EURASIP Journal on Audio, Speech, and Music Processing
-**DOI:** 10.1186/s13636-016-0098-5
+# Cantor Digitalis: Chironomic Parametric Synthesis of Singing
 
 ## One-Sentence Summary
 

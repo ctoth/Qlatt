@@ -1,9 +1,13 @@
-# Lehiste & Peterson 1961 — Implementation Notes
+---
+title: "Lehiste & Peterson 1961 — Implementation Notes"
+authors: "Ilse Lehiste, Gordon E. Peterson"
+year: 1961
+venue: "JASA 33(4), pp. 419-425 (April 1961)"
+doi_url: "10.1121/1.1908681"
+full_title: "Some Basic Considerations in the Analysis of Intonation"
+---
 
-**Full title:** Some Basic Considerations in the Analysis of Intonation
-**Authors:** Ilse Lehiste, Gordon E. Peterson
-**Journal:** JASA 33(4), pp. 419-425 (April 1961)
-**DOI:** 10.1121/1.1908681
+# Lehiste & Peterson 1961 — Implementation Notes
 
 ## Key Findings for Synthesis
 

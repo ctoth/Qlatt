@@ -1,9 +1,13 @@
-# Holmes 1973 — Implementation Notes
+---
+title: "Holmes 1973 — Implementation Notes"
+authors: "John N. Holmes (Joint Speech Research Unit, Ruislip, England)"
+year: 1973
+doi_url: "10.1109/TAU.1973.1162466"
+full_title: "The Influence of Glottal Waveform on the Naturalness of Speech from a Parallel Formant Synthesizer"
+published: "IEEE Transactions on Audio and Electroacoustics, Vol. AU-21, No. 3, June 1973, pp. 298-305"
+---
 
-**Full title:** The Influence of Glottal Waveform on the Naturalness of Speech from a Parallel Formant Synthesizer
-**Author:** John N. Holmes (Joint Speech Research Unit, Ruislip, England)
-**Published:** IEEE Transactions on Audio and Electroacoustics, Vol. AU-21, No. 3, June 1973, pp. 298-305
-**DOI:** 10.1109/TAU.1973.1162466
+# Holmes 1973 — Implementation Notes
 
 ## Key Findings
 

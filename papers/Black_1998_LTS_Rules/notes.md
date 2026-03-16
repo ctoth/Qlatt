@@ -1,9 +1,12 @@
-# Issues in Building General Letter to Sound Rules
+---
+title: "Issues in Building General Letter to Sound Rules"
+authors: "Alan W Black, Kevin Lenzo, Vincent Pagel"
+year: 1998
+venue: "The Third ESCA/COCOSDA Workshop (ETRW) on Speech Synthesis, Jenolan Caves House, Blue Mountains, NSW, Australia"
+doi_url: "ISCA Archive (http://www.isca-speech.org/archive)"
+---
 
-**Authors:** Alan W Black, Kevin Lenzo, Vincent Pagel
-**Year:** 1998
-**Venue:** The Third ESCA/COCOSDA Workshop (ETRW) on Speech Synthesis, Jenolan Caves House, Blue Mountains, NSW, Australia
-**DOI/URL:** ISCA Archive (http://www.isca-speech.org/archive)
+# Issues in Building General Letter to Sound Rules
 
 ## One-Sentence Summary
 

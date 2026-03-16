@@ -1,9 +1,12 @@
-# Phonological Rules for a Text-to-Speech System
+---
+title: "Phonological Rules for a Text-to-Speech System"
+authors: "Sharon Hunnicutt"
+year: 1976
+venue: "American Journal of Computational Linguistics, Microfiche 57"
+affiliation: "Natural Language Processing Group, Research Laboratory of Electronics, MIT"
+---
 
-**Authors:** Sharon Hunnicutt
-**Year:** 1976
-**Venue:** American Journal of Computational Linguistics, Microfiche 57
-**Affiliation:** Natural Language Processing Group, Research Laboratory of Electronics, MIT
+# Phonological Rules for a Text-to-Speech System
 
 ## One-Sentence Summary
 

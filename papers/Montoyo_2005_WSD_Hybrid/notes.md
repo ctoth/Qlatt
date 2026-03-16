@@ -1,9 +1,12 @@
-# Combining Knowledge- and Corpus-based Word-Sense-Disambiguation Methods
+---
+title: "Combining Knowledge- and Corpus-based Word-Sense-Disambiguation Methods"
+authors: "Andres Montoyo, Armando Suarez, German Rigau, Manuel Palomar"
+year: 2005
+venue: "Journal of Artificial Intelligence Research (JAIR), Volume 23, pages 299-330"
+doi_url: "Submitted 07/04; published 03/05"
+---
 
-**Authors:** Andres Montoyo, Armando Suarez, German Rigau, Manuel Palomar
-**Year:** 2005
-**Venue:** Journal of Artificial Intelligence Research (JAIR), Volume 23, pages 299-330
-**DOI/URL:** Submitted 07/04; published 03/05
+# Combining Knowledge- and Corpus-based Word-Sense-Disambiguation Methods
 
 ## One-Sentence Summary
 

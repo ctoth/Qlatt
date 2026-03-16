@@ -1,3 +1,8 @@
+---
+title: "Implementation Notes: Ohala 1984 — Frequency Code"
+year: 1984
+---
+
 # Implementation Notes: Ohala 1984 — Frequency Code
 
 ## Core Concept: The Frequency Code

@@ -1,3 +1,8 @@
+---
+title: "Coker, Umeda, Browman (1973) — Automatic Synthesis from Ordinary English Text"
+year: 1973
+---
+
 # Coker, Umeda, Browman (1973) — Automatic Synthesis from Ordinary English Text
 
 ## Implementation-Focused Notes

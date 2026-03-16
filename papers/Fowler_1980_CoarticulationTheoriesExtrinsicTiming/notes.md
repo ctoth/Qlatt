@@ -1,6 +1,10 @@
-# Fowler (1980) — Coarticulation and Theories of Extrinsic Timing
+---
+title: "Fowler (1980) — Coarticulation and Theories of Extrinsic Timing"
+year: 1980
+reference: "Fowler, C. A. (1980). Coarticulation and theories of extrinsic timing. *Journal of Phonetics*, 8, 113–133."
+---
 
-**Reference:** Fowler, C. A. (1980). Coarticulation and theories of extrinsic timing. *Journal of Phonetics*, 8, 113–133.
+# Fowler (1980) — Coarticulation and Theories of Extrinsic Timing
 
 ## Overview
 

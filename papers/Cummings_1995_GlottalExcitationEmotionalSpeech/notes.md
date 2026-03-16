@@ -1,9 +1,12 @@
-# Analysis of the Glottal Excitation of Emotionally Styled and Stressed Speech
+---
+title: "Analysis of the Glottal Excitation of Emotionally Styled and Stressed Speech"
+authors: "Kathleen E. Cummings, Mark A. Clements"
+year: 1995
+venue: "Journal of the Acoustical Society of America, Vol. 98, No. 1, pp. 88-98"
+doi_url: "PACS numbers: 43.72.Ar, 43.70.Aj"
+---
 
-**Authors:** Kathleen E. Cummings, Mark A. Clements
-**Year:** 1995
-**Venue:** Journal of the Acoustical Society of America, Vol. 98, No. 1, pp. 88-98
-**DOI:** PACS numbers: 43.72.Ar, 43.70.Aj
+# Analysis of the Glottal Excitation of Emotionally Styled and Stressed Speech
 
 ## One-Sentence Summary
 

@@ -1,9 +1,12 @@
-# Algorithm for Automatic Glottal Waveform Estimation Without the Reliance on Precise Glottal Closure Information
+---
+title: "Algorithm for Automatic Glottal Waveform Estimation Without the Reliance on Precise Glottal Closure Information"
+authors: "Elliot Moore, Mark Clements"
+year: 2004
+venue: "ICASSP 2004 (IEEE International Conference on Acoustics, Speech, and Signal Processing)"
+doi_url: "0-7803-8484-9/04 IEEE"
+---
 
-**Authors:** Elliot Moore, Mark Clements
-**Year:** 2004
-**Venue:** ICASSP 2004 (IEEE International Conference on Acoustics, Speech, and Signal Processing)
-**DOI/URL:** 0-7803-8484-9/04 IEEE
+# Algorithm for Automatic Glottal Waveform Estimation Without the Reliance on Precise Glottal Closure Information
 
 ## One-Sentence Summary
 Presents an automated iterative algorithm that estimates glottal waveforms from acoustic speech by sliding LP analysis windows around approximate closure regions and selecting the smoothest candidate via first-order LP coefficient magnitude.

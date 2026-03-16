@@ -1,3 +1,8 @@
+---
+title: "Klatt 1975 - Voice Onset Time, Frication, and Aspiration in Word-Initial Consonant Clusters"
+year: 1975
+---
+
 # Klatt 1975 - Voice Onset Time, Frication, and Aspiration in Word-Initial Consonant Clusters
 
 ## Key Findings for Synthesis

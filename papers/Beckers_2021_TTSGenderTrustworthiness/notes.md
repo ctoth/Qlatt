@@ -1,9 +1,12 @@
-# The Effects of Text-To-Speech Gender and Accent on the Trustworthiness and Listening Experience of Informational News Content
+---
+title: "The Effects of Text-To-Speech Gender and Accent on the Trustworthiness and Listening Experience of Informational News Content"
+authors: "B.J.W. Beckers"
+year: 2021
+venue: "Master's Thesis, Tilburg University (Communication and Information Sciences)"
+doi_url: "N/A"
+---
 
-**Authors:** B.J.W. Beckers
-**Year:** 2021
-**Venue:** Master's Thesis, Tilburg University (Communication and Information Sciences)
-**DOI:** N/A
+# The Effects of Text-To-Speech Gender and Accent on the Trustworthiness and Listening Experience of Informational News Content
 
 ## One-Sentence Summary
 Male TTS voices are perceived as significantly more trustworthy than female TTS voices for news content reading, while national (Dutch) accent TTS voices produce a more positive listening experience than foreign (Belgian) accent voices, with perceived accent similarity mediating the accent-experience relationship.

@@ -1,9 +1,12 @@
-# Acoustic Phonetics - Expanded Notes
+---
+title: "Acoustic Phonetics - Expanded Notes"
+authors: "Kenneth N. Stevens"
+year: 1998
+pages: "607"
+publisher: "MIT Press"
+---
 
-**Author:** Kenneth N. Stevens
-**Year:** 1998
-**Publisher:** MIT Press
-**Pages:** 607
+# Acoustic Phonetics - Expanded Notes
 
 ## One-Sentence Summary
 

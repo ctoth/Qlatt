@@ -1,9 +1,12 @@
-# Acoustic Correlates of Sexual Orientation and Gender-Role Self-Concept in Women's Speech
+---
+title: "Acoustic Correlates of Sexual Orientation and Gender-Role Self-Concept in Women's Speech"
+authors: "Sven Kachel, Adrian P. Simpson, Melanie C. Steffens"
+year: 2017
+venue: "Journal of the Acoustical Society of America 141(6), 4793-4809"
+doi_url: "10.1121/1.4988684"
+---
 
-**Authors:** Sven Kachel, Adrian P. Simpson, Melanie C. Steffens
-**Year:** 2017
-**Venue:** Journal of the Acoustical Society of America 141(6), 4793-4809
-**DOI:** 10.1121/1.4988684
+# Acoustic Correlates of Sexual Orientation and Gender-Role Self-Concept in Women's Speech
 
 ## One-Sentence Summary
 

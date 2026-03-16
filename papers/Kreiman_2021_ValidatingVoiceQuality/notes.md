@@ -1,9 +1,12 @@
-# Validating a Psychoacoustic Model of Voice Quality
+---
+title: "Validating a Psychoacoustic Model of Voice Quality"
+authors: "Jody Kreiman, Yoonjeong Lee, Marc Garellek, Robin Samlan, Bruce R. Gerratt"
+year: 2021
+venue: "Journal of the Acoustical Society of America, Vol. 149, No. 1, pp. 457-465"
+doi_url: "https://doi.org/10.1121/10.0003331"
+---
 
-**Authors:** Jody Kreiman, Yoonjeong Lee, Marc Garellek, Robin Samlan, Bruce R. Gerratt
-**Year:** 2021
-**Venue:** Journal of the Acoustical Society of America, Vol. 149, No. 1, pp. 457-465
-**DOI:** https://doi.org/10.1121/10.0003331
+# Validating a Psychoacoustic Model of Voice Quality
 
 ## One-Sentence Summary
 This paper validates a psychoacoustic model of voice quality by demonstrating that its parameter set (harmonic source, inharmonic source, vocal tract, F0, amplitude) is both sufficient (198/200 synthetic voices indistinguishable from natural) and necessary (removing any harmonic source parameter degrades perceptual match).

@@ -1,3 +1,8 @@
+---
+title: "Steinecke & Herzel 1995 — Bifurcations in an Asymmetric Vocal-Fold Model"
+year: 1995
+---
+
 # Steinecke & Herzel 1995 — Bifurcations in an Asymmetric Vocal-Fold Model
 
 ## Key Contribution

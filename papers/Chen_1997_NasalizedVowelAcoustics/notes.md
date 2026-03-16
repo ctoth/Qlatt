@@ -1,9 +1,12 @@
-# Acoustic Correlates of English and French Nasalized Vowels
+---
+title: "Acoustic Correlates of English and French Nasalized Vowels"
+authors: "Marilyn Y. Chen"
+year: 1997
+venue: "Journal of the Acoustical Society of America, Vol. 102(4), pp. 2360-2370"
+doi_url: "S0001-4966(97)02010-9"
+---
 
-**Authors:** Marilyn Y. Chen
-**Year:** 1997
-**Venue:** Journal of the Acoustical Society of America, Vol. 102(4), pp. 2360-2370
-**DOI:** S0001-4966(97)02010-9
+# Acoustic Correlates of English and French Nasalized Vowels
 
 ## One-Sentence Summary
 

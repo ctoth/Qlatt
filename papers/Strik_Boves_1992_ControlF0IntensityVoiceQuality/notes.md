@@ -1,3 +1,8 @@
+---
+title: "Strik & Boves 1992 — Control of fundamental frequency, intensity and voice quality in speech"
+year: 1992
+---
+
 # Strik & Boves 1992 — Control of fundamental frequency, intensity and voice quality in speech
 
 ## Key Finding: Transglottal Pressure Dominates F0 and IL Control in Speech
@@ -141,3 +146,27 @@ Comparing stressed vowel /a/ (first syllable) vs. unstressed final /a/:
 - Pressure signals low-pass filtered and downsampled to 200 Hz
 - Inverse filtering used to derive glottal volume flow (LPC-based, closed glottis interval)
 - Median signals from 29 repetitions used (non-linear time-alignment method)
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt 1990, voice quality variations including breathiness
+- `Isshiki_1964_VoiceIntensityRegulation` — Isshiki 1964, intensity regulation mechanisms
+
+### Cited By (in Collection)
+- `Alku_2002_NormalizedAmplitudeQuotient` — cites Strik & Boves 1992 for LF model fitting approach
+- `Alku_1997_ParabolicSpectralParameter` — references Strik's voice source work
+- `Fant_1997_VoiceSourceConnectedSpeech` — references Strik's prosodic voice source findings
+- `Doval_2003_VoiceSourceCALM` — cites Strik & Boves for pressure-source relationships
+- `Doval_2006_SpectrumGlottalFlowModels` — references Strik's voice source parameter data
+- `Drugman_2020_GlottalSourceEstimation` — cites Strik & Boves for inverse filtering context
+
+### New Leads
+- Collier 1975 — Physiological correlates of intonation patterns (F0 declination modeling)
+- Titze 1984 — Parameterization of glottal area, flow, and vocal fold contact area
+
+### Conceptual Links (not citation-based)
+- `Bjorklund_2016_SubglottalPressureSPL` — both quantify the pressure-to-SPL relationship; Bjorklund provides normative data while Strik & Boves focus on transglottal pressure
+- `Gobl_1988_VoiceSourceDynamicsConnectedSpeech` — both study LF model parameter variation in connected speech; complementary datasets (Dutch vs Swedish)
+- `Sundberg_1993_PhonatoryControlSinging` — both investigate pressure-intensity relationships; Sundberg extends to singing phonation modes
+- `Holmberg_1988_GlottalAirflowPressure` — both measure glottal airflow and pressure; Holmberg provides male/female comparison

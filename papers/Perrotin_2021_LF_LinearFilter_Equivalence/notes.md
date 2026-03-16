@@ -1,9 +1,12 @@
-# Perceptual Equivalence of the Liljencrants-Fant and Linear-Filter Glottal Flow Models
+---
+title: "Perceptual Equivalence of the Liljencrants-Fant and Linear-Filter Glottal Flow Models"
+authors: "Olivier Perrotin, Lionel Feugere, Christophe d'Alessandro"
+year: 2021
+venue: "Journal of the Acoustical Society of America, Vol. 150(2), pp. 1273-1285"
+doi_url: "https://doi.org/10.1121/10.0005879"
+---
 
-**Authors:** Olivier Perrotin, Lionel Feugere, Christophe d'Alessandro
-**Year:** 2021
-**Venue:** Journal of the Acoustical Society of America, Vol. 150(2), pp. 1273-1285
-**DOI:** https://doi.org/10.1121/10.0005879
+# Perceptual Equivalence of the Liljencrants-Fant and Linear-Filter Glottal Flow Models
 
 ## One-Sentence Summary
 

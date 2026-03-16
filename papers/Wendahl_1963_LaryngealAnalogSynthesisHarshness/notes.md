@@ -1,3 +1,8 @@
+---
+title: "Wendahl 1963 — Laryngeal Analog Synthesis of Harsh Voice Quality"
+year: 1963
+---
+
 # Wendahl 1963 — Laryngeal Analog Synthesis of Harsh Voice Quality
 
 ## Implementation-Relevant Notes

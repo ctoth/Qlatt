@@ -1,9 +1,12 @@
-# An Interactive Model for the Voice Source
+---
+title: "An Interactive Model for the Voice Source"
+authors: "Martin Rothenberg (Syracuse University; guest researcher at KTH Stockholm)"
+year: "1981 (presented); 1983 (published in proceedings)"
+venue: "Vocal Fold Physiology: Contemporary Research and Clinical Issues, D. M. Bless and J. H. Abbs (Eds.), College Hill Press, San Diego, pp. 155-165. Also from STL-QPSR #4, KTH Stockholm."
+doi_url: "http://www.rothenberg.org/Interactive/Interactive.htm"
+---
 
-**Authors:** Martin Rothenberg (Syracuse University; guest researcher at KTH Stockholm)
-**Year:** 1981 (presented); 1983 (published in proceedings)
-**Venue:** Vocal Fold Physiology: Contemporary Research and Clinical Issues, D. M. Bless and J. H. Abbs (Eds.), College Hill Press, San Diego, pp. 155-165. Also from STL-QPSR #4, KTH Stockholm.
-**URL:** http://www.rothenberg.org/Interactive/Interactive.htm
+# An Interactive Model for the Voice Source
 
 ## One-Sentence Summary
 Presents a parametric model of the voice source that accounts for acoustic interaction between the glottal source and the subglottal/supraglottal vocal tract, explaining how inertive loading transforms symmetric glottal area pulses into asymmetric sawtooth-like airflow waveforms.

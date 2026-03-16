@@ -1,3 +1,8 @@
+---
+title: "Nordstrom 1977 - Female and infant vocal tracts simulated from male area functions"
+year: 1975
+---
+
 # Nordstrom 1977 - Female and infant vocal tracts simulated from male area functions
 
 ## Publication

@@ -1,9 +1,12 @@
-# Perceptual Assessment of Voice Quality: Past, Present, and Future
+---
+title: "Perceptual Assessment of Voice Quality: Past, Present, and Future"
+authors: "Jody Kreiman, Bruce R. Gerratt"
+year: "2010 (presented at 2009 ASHA Convention)"
+venue: "Perspectives on Voice and Voice Disorders, ASHA"
+doi_url: "http://journals.asha.org/perspectives/"
+---
 
-**Authors:** Jody Kreiman, Bruce R. Gerratt
-**Year:** 2010 (presented at 2009 ASHA Convention)
-**Venue:** Perspectives on Voice and Voice Disorders, ASHA
-**DOI/URL:** http://journals.asha.org/perspectives/
+# Perceptual Assessment of Voice Quality: Past, Present, and Future
 
 ## One-Sentence Summary
 This paper critiques traditional voice quality rating scales (GRBAS, CAPE-V) as lacking theoretical grounding and proposes a psychoacoustic approach using synthesis-based method-of-adjustment tasks to derive perceptually valid acoustic parameters.

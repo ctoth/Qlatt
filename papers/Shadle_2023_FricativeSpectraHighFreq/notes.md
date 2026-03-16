@@ -1,9 +1,12 @@
-# Refining and Extending Measures for Fricative Spectra, with Special Attention to the High-Frequency Range
+---
+title: "Refining and Extending Measures for Fricative Spectra, with Special Attention to the High-Frequency Range"
+authors: "Christine H. Shadle, Wei-Rong Chen, Laura L. Koenig, Jonathan L. Preston"
+year: 2023
+venue: "Journal of the Acoustical Society of America, 154(3), 1932-1944"
+doi_url: "https://doi.org/10.1121/10.0021075"
+---
 
-**Authors:** Christine H. Shadle, Wei-Rong Chen, Laura L. Koenig, Jonathan L. Preston
-**Year:** 2023
-**Venue:** Journal of the Acoustical Society of America, 154(3), 1932-1944
-**DOI:** https://doi.org/10.1121/10.0021075
+# Refining and Extending Measures for Fricative Spectra, with Special Attention to the High-Frequency Range
 
 ## One-Sentence Summary
 This paper introduces refined acoustic measures for fricative spectra that extend into the 7-15 kHz range, providing empirical data on spectral peak frequencies, amplitude differences, and high-frequency energy levels for English sibilant and non-sibilant fricatives that directly inform higher parallel formant targets in a Klatt synthesizer.

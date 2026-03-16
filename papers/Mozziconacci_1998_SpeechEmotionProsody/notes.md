@@ -1,10 +1,13 @@
-# Speech Variability and Emotion: Production and Perception
+---
+title: "Speech Variability and Emotion: Production and Perception"
+authors: "Sylvie J. L. Mozziconacci"
+year: 1998
+venue: "PhD Thesis"
+doi_url: "10.6100/IR516785"
+institution: "Technische Universiteit Eindhoven"
+---
 
-**Author:** Sylvie J. L. Mozziconacci
-**Year:** 1998
-**Type:** PhD Thesis
-**Institution:** Technische Universiteit Eindhoven
-**DOI:** 10.6100/IR516785
+# Speech Variability and Emotion: Production and Perception
 
 ## One-Sentence Summary
 

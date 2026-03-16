@@ -1,9 +1,12 @@
-# Articulatory Gestures as Phonological Units
+---
+title: "Articulatory Gestures as Phonological Units"
+authors: "Catherine P. Browman and Louis Goldstein"
+year: 1989
+venue: "Phonology, Volume 6, Issue 2, pp. 201-251"
+doi_url: "10.1017/S0952675700001019"
+---
 
-**Authors:** Catherine P. Browman and Louis Goldstein
-**Year:** 1989
-**Venue:** Phonology, Volume 6, Issue 2, pp. 201-251
-**DOI:** 10.1017/S0952675700001019
+# Articulatory Gestures as Phonological Units
 
 ## One-Sentence Summary
 This paper proposes that dynamically defined articulatory gestures -- discrete constriction actions within vocal tract subsystems -- serve as the primitive units of phonological representation, replacing traditional segments and features.

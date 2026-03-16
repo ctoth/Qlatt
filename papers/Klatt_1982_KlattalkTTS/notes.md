@@ -1,9 +1,12 @@
-# The Klattalk Text-to-Speech Conversion System
+---
+title: "The Klattalk Text-to-Speech Conversion System"
+authors: "Dennis H. Klatt"
+year: 1982
+venue: "IEEE ICASSP (International Conference on Acoustics, Speech, and Signal Processing)"
+copyright: "January 1, 1981 by Dennis H. Klatt"
+---
 
-**Authors:** Dennis H. Klatt
-**Year:** 1982
-**Venue:** IEEE ICASSP (International Conference on Acoustics, Speech, and Signal Processing)
-**Copyright:** January 1, 1981 by Dennis H. Klatt
+# The Klattalk Text-to-Speech Conversion System
 
 ## One-Sentence Summary
 Klattalk is a complete real-time TTS system combining ~500 letter-to-sound rules, a 1500-word exceptions dictionary, simple syntactic analysis, and detailed synthesis-by-rule with the Klatt formant synthesizer.

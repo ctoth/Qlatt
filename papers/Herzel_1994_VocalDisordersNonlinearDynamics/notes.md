@@ -1,9 +1,12 @@
-# Analysis of Vocal Disorders With Methods From Nonlinear Dynamics
+---
+title: "Analysis of Vocal Disorders With Methods From Nonlinear Dynamics"
+authors: "Hanspeter Herzel, David Berry, Ingo R. Titze, Marwa Saleh"
+year: 1994
+venue: "Journal of Speech and Hearing Research, 37(5), 1008-1019"
+doi_url: "10.1044/jshr.3705.1008"
+---
 
-**Authors:** Hanspeter Herzel, David Berry, Ingo R. Titze, Marwa Saleh
-**Year:** 1994
-**Venue:** Journal of Speech and Hearing Research, 37(5), 1008-1019
-**DOI:** 10.1044/jshr.3705.1008
+# Analysis of Vocal Disorders With Methods From Nonlinear Dynamics
 
 ## One-Sentence Summary
 

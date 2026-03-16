@@ -1,3 +1,8 @@
+---
+title: "Hertz & Huffman 1992 — A Nucleus-Based Timing Model Applied to Multi-Dialect Speech Synthesis by Rule"
+year: 1992
+---
+
 # Hertz & Huffman 1992 — A Nucleus-Based Timing Model Applied to Multi-Dialect Speech Synthesis by Rule
 
 ## Key Concept: The Acoustic Nucleus

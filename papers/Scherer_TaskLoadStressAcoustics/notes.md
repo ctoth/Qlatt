@@ -1,9 +1,12 @@
-# Acoustic Correlates of Task Load and Stress
+---
+title: "Acoustic Correlates of Task Load and Stress"
+authors: "K. R. Scherer, D. Grandjean, T. Johnstone, G. Klasmeyer, T. Banziger"
+year: "~2002 (conference paper, undated; part of EMOVOX project)"
+venue: "Conference proceedings (appears to be ICSLP or similar)"
+doi_url: "N/A"
+---
 
-**Authors:** K. R. Scherer, D. Grandjean, T. Johnstone, G. Klasmeyer, T. Banziger
-**Year:** ~2002 (conference paper, undated; part of EMOVOX project)
-**Venue:** Conference proceedings (appears to be ICSLP or similar)
-**DOI:** N/A
+# Acoustic Correlates of Task Load and Stress
 
 ## One-Sentence Summary
 Cognitive load and psychological stress produce distinguishable acoustic effects on speech: load primarily increases speech rate and energy attack/decay gradients, while stress primarily affects F0 and spectral energy distribution, with large individual differences moderating both effects.

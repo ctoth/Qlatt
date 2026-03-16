@@ -1,9 +1,12 @@
-# Acoustic Patterns of Emotions
+---
+title: "Acoustic Patterns of Emotions"
+authors: "Branka Zei Pollermann, Marc Archinard"
+year: 2002
+venue: "Chapter 23 in *Improvements in Speech Synthesis*, COST 258"
+doi_url: "Liaison Psychiatry, Geneva University Hospitals"
+---
 
-**Authors:** Branka Zei Pollermann, Marc Archinard
-**Year:** 2002
-**Venue:** Chapter 23 in *Improvements in Speech Synthesis*, COST 258
-**DOI/URL:** Liaison Psychiatry, Geneva University Hospitals
+# Acoustic Patterns of Emotions
 
 ## One-Sentence Summary
 Provides empirical acoustic parameter values (F0, energy, delivery rate, LTAS) for anger, joy, and sadness in French speakers, demonstrating that arousal is carried by F0/energy/rate while hedonic valence may be carried by long-term spectral shape.

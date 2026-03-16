@@ -1,3 +1,8 @@
+---
+title: "Keating 1984 — Phonetic and Phonological Representation of Stop Consonant Voicing"
+year: 1984
+---
+
 # Keating 1984 — Phonetic and Phonological Representation of Stop Consonant Voicing
 
 ## Implementation-Relevant Summary

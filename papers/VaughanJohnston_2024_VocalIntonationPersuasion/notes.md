@@ -1,9 +1,12 @@
-# Falling Vocal Intonation Signals Speaker Confidence and Conditionally Boosts Persuasion
+---
+title: "Falling Vocal Intonation Signals Speaker Confidence and Conditionally Boosts Persuasion"
+authors: "Thomas I. Vaughan-Johnston, Joshua J. Guyer, Leandre R. Fabrigar, Grigorios Lamprinakos, Pablo Briñol"
+year: "2024 (published 2026 in journal)"
+venue: "Personality and Social Psychology Bulletin, Vol. 52(1), pp. 3-21"
+doi_url: "10.1177/01461672241262180"
+---
 
-**Authors:** Thomas I. Vaughan-Johnston, Joshua J. Guyer, Leandre R. Fabrigar, Grigorios Lamprinakos, Pablo Briñol
-**Year:** 2024 (published 2026 in journal)
-**Venue:** Personality and Social Psychology Bulletin, Vol. 52(1), pp. 3-21
-**DOI:** 10.1177/01461672241262180
+# Falling Vocal Intonation Signals Speaker Confidence and Conditionally Boosts Persuasion
 
 ## One-Sentence Summary
 This paper demonstrates that falling (vs. rising) vocal intonation at sentence ends signals speaker confidence and increases listener message processing under moderate elaboration conditions, with implications for how prosody affects persuasion.

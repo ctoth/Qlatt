@@ -1,9 +1,12 @@
-# Articulatory Effects on Perceptions of Men's Status and Attractiveness
+---
+title: "Articulatory Effects on Perceptions of Men's Status and Attractiveness"
+authors: "Sethu Karthikeyan, David A. Puts, Toe Aung, Jennifer K. Link, Kevin Rosenfield, Alexander Mackiel, Allisen Casey, Kaelyn Marks, Michele Cristo, Jenny Patel, Aliza Santos, Glenn Geher"
+year: 2023
+venue: "Scientific Reports, 13:2647"
+doi_url: "https://doi.org/10.1038/s41598-023-29173-z"
+---
 
-**Authors:** Sethu Karthikeyan, David A. Puts, Toe Aung, Jennifer K. Link, Kevin Rosenfield, Alexander Mackiel, Allisen Casey, Kaelyn Marks, Michele Cristo, Jenny Patel, Aliza Santos, Glenn Geher
-**Year:** 2023
-**Venue:** Scientific Reports, 13:2647
-**DOI:** https://doi.org/10.1038/s41598-023-29173-z
+# Articulatory Effects on Perceptions of Men's Status and Attractiveness
 
 ## One-Sentence Summary
 Men who clearly enunciate word-final /t/ (aspirated release) are rated as more attractive for long-term relationships and higher in prestige by both women and men, linking articulatory clarity to social status perception.

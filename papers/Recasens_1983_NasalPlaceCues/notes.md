@@ -1,9 +1,12 @@
-# Place Cues for Nasal Consonants with Special Reference to Catalan
+---
+title: "Place Cues for Nasal Consonants with Special Reference to Catalan"
+authors: "Daniel Recasens"
+year: 1983
+venue: "Journal of the Acoustical Society of America, Vol. 73, No. 4, April 1983, pp. 1346–1353"
+doi_url: "0001-4966/83/041346-08$00.80"
+---
 
-**Authors:** Daniel Recasens
-**Year:** 1983
-**Venue:** Journal of the Acoustical Society of America, Vol. 73, No. 4, April 1983, pp. 1346–1353
-**DOI:** 0001-4966/83/041346-08$00.80
+# Place Cues for Nasal Consonants with Special Reference to Catalan
 
 ## One-Sentence Summary
 This paper quantifies the relative perceptual contributions of formant transitions vs. nasal murmur spectra for distinguishing place of articulation in nasal consonants [n], [ɲ], [ŋ], providing spectral parameter tables directly usable for synthesizing distinguishable nasals.

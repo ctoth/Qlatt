@@ -1,9 +1,12 @@
-# Duration of Frication Noise Required for Identification of English Fricatives
+---
+title: "Duration of Frication Noise Required for Identification of English Fricatives"
+authors: "Allard Jongman"
+year: 1989
+venue: "Journal of the Acoustical Society of America (JASA), Vol. 85, No. 4"
+doi_url: "0001-4966/89/041718-08"
+---
 
-**Authors:** Allard Jongman
-**Year:** 1989
-**Venue:** Journal of the Acoustical Society of America (JASA), Vol. 85, No. 4
-**DOI:** 0001-4966/89/041718-08
+# Duration of Frication Noise Required for Identification of English Fricatives
 
 ## One-Sentence Summary
 Establishes minimum frication noise durations (30-50 ms) required for perceptual identification of English fricatives, with place-of-articulation requiring more duration than voicing or manner cues.

@@ -1,9 +1,12 @@
-# Higher Pole Correction in Vocal Tract Models and Terminal Analogs
+---
+title: "Higher Pole Correction in Vocal Tract Models and Terminal Analogs"
+authors: "Unto K. Laine"
+year: 1988
+venue: "Speech Communication, Vol. 7, No. 1, pp. 21-40"
+doi_url: "10.1016/0167-6393(88)90019-2"
+---
 
-**Authors:** Unto K. Laine
-**Year:** 1988
-**Venue:** Speech Communication, Vol. 7, No. 1, pp. 21-40
-**DOI:** 10.1016/0167-6393(88)90019-2
+# Higher Pole Correction in Vocal Tract Models and Terminal Analogs
 
 ## One-Sentence Summary
 

@@ -1,10 +1,13 @@
-# Automatic Transcription of Intonation Using an Identified Prosodic Alphabet
+---
+title: "Automatic Transcription of Intonation Using an Identified Prosodic Alphabet"
+authors: "S. de Tournemire"
+year: 1998
+venue: "5th International Conference on Spoken Language Processing (ICSLP 98), Sydney, Australia"
+doi_url: "10.21437/ICSLP.1998-24"
+affiliation: "France Telecom, CNET (Centre National d'Etudes des Telecommunications)"
+---
 
-**Authors:** S. de Tournemire
-**Year:** 1998
-**Venue:** 5th International Conference on Spoken Language Processing (ICSLP 98), Sydney, Australia
-**DOI:** 10.21437/ICSLP.1998-24
-**Affiliation:** France Telecom, CNET (Centre National d'Etudes des Telecommunications)
+# Automatic Transcription of Intonation Using an Identified Prosodic Alphabet
 
 ## One-Sentence Summary
 Presents a method for rapidly adapting prosodic models to new voices by automatically identifying a prosodic alphabet (breaks, F0 shapes, accents) at the acoustic level and using the transcribed corpus to train neural network F0 and duration prediction models for French TTS.

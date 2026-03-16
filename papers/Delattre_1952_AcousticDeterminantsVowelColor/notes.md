@@ -1,9 +1,12 @@
-# An Experimental Study of the Acoustic Determinants of Vowel Color; Observations on One- and Two-Formant Vowels Synthesized from Spectrographic Patterns
+---
+title: "An Experimental Study of the Acoustic Determinants of Vowel Color; Observations on One- and Two-Formant Vowels Synthesized from Spectrographic Patterns"
+authors: "Pierre Delattre, Alvin M. Liberman, Franklin S. Cooper, Louis J. Gerstman"
+year: 1952
+venue: "WORD, Volume 8, Number 3 (December 1952)"
+institution: "Haskins Laboratories"
+---
 
-**Authors:** Pierre Delattre, Alvin M. Liberman, Franklin S. Cooper, Louis J. Gerstman
-**Year:** 1952
-**Venue:** WORD, Volume 8, Number 3 (December 1952)
-**Institution:** Haskins Laboratories
+# An Experimental Study of the Acoustic Determinants of Vowel Color; Observations on One- and Two-Formant Vowels Synthesized from Spectrographic Patterns
 
 ## One-Sentence Summary
 

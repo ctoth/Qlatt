@@ -1,9 +1,12 @@
-# Glottal Open Quotient in Singing: Measurements and Correlation with Laryngeal Mechanisms, Vocal Intensity, and Fundamental Frequency
+---
+title: "Glottal Open Quotient in Singing: Measurements and Correlation with Laryngeal Mechanisms, Vocal Intensity, and Fundamental Frequency"
+authors: "Nathalie Henrich, Christophe d'Alessandro, Boris Doval, Michele Castellengo"
+year: 2005
+venue: "Journal of the Acoustical Society of America, Vol. 117(3), pp. 1417-1430"
+doi_url: "10.1121/1.1850031"
+---
 
-**Authors:** Nathalie Henrich, Christophe d'Alessandro, Boris Doval, Michele Castellengo
-**Year:** 2005
-**Venue:** Journal of the Acoustical Society of America, Vol. 117(3), pp. 1417-1430
-**DOI:** 10.1121/1.1850031
+# Glottal Open Quotient in Singing: Measurements and Correlation with Laryngeal Mechanisms, Vocal Intensity, and Fundamental Frequency
 
 ## One-Sentence Summary
 Provides empirical measurements of glottal open quotient ($O_q$) across laryngeal mechanisms, vocal intensities, and fundamental frequencies in 18 trained singers, establishing quantitative ranges and correlations essential for voice source modeling.

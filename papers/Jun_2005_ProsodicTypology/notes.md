@@ -1,9 +1,12 @@
-# Prosodic Typology: The Phonology of Intonation and Phrasing
+---
+title: "Prosodic Typology: The Phonology of Intonation and Phrasing"
+authors: "Sun-Ah Jun (Editor); contributors: Beckman, Hirschberg, Shattuck-Hufnagel, Grice, Baumann, Benzmuller, Arvaniti, Baltazani, Gussenhoven, Godjevac, Venditti, Jun, Peng, Chan, Tseng, Huang, Lee, Beckman, Wong, Gordon, Bishop, Fletcher, D'Imperio, Savino, Avesani, Grabe, Warren, Bruce"
+year: 2005
+venue: "Oxford University Press (Oxford Linguistics)"
+doi_url: "ISBN 0-19-924963-6"
+---
 
-**Authors:** Sun-Ah Jun (Editor); contributors: Beckman, Hirschberg, Shattuck-Hufnagel, Grice, Baumann, Benzmuller, Arvaniti, Baltazani, Gussenhoven, Godjevac, Venditti, Jun, Peng, Chan, Tseng, Huang, Lee, Beckman, Wong, Gordon, Bishop, Fletcher, D'Imperio, Savino, Avesani, Grabe, Warren, Bruce
-**Year:** 2005
-**Venue:** Oxford University Press (Oxford Linguistics)
-**DOI/URL:** ISBN 0-19-924963-6
+# Prosodic Typology: The Phonology of Intonation and Phrasing
 
 ## One-Sentence Summary
 This edited volume establishes a cross-linguistic framework for prosodic typology by describing the intonation and phrasing systems of thirteen typologically diverse languages within the Autosegmental-Metrical (AM) model, providing the complete ToBI annotation inventories for each language.

@@ -1,3 +1,8 @@
+---
+title: "Heinz & Stevens 1961 — On the Properties of Voiceless Fricative Consonants"
+year: 1961
+---
+
 # Heinz & Stevens 1961 — On the Properties of Voiceless Fricative Consonants
 
 ## Implementation-Relevant Notes

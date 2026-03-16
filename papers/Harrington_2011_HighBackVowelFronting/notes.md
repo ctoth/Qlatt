@@ -1,9 +1,12 @@
-# The Contributions of the Lips and the Tongue to the Diachronic Fronting of High Back Vowels in Standard Southern British English
+---
+title: "The Contributions of the Lips and the Tongue to the Diachronic Fronting of High Back Vowels in Standard Southern British English"
+authors: "Jonathan Harrington, Felicitas Kleber, Ulrich Reubold"
+year: 2011
+venue: "Journal of the International Phonetic Association, 41(2), pp. 137-156"
+doi_url: "10.1017/S0025100310000265"
+---
 
-**Authors:** Jonathan Harrington, Felicitas Kleber, Ulrich Reubold
-**Year:** 2011
-**Venue:** Journal of the International Phonetic Association, 41(2), pp. 137-156
-**DOI:** 10.1017/S0025100310000265
+# The Contributions of the Lips and the Tongue to the Diachronic Fronting of High Back Vowels in Standard Southern British English
 
 ## One-Sentence Summary
 

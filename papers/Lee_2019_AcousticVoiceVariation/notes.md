@@ -1,9 +1,12 @@
-# Acoustic Voice Variation Within and Between Speakers
+---
+title: "Acoustic Voice Variation Within and Between Speakers"
+authors: "Yoonjeong Lee, Patricia Keating, Jody Kreiman"
+year: 2019
+venue: "Journal of the Acoustical Society of America, 146(3), 1568-1579"
+doi_url: "10.1121/1.5125134"
+---
 
-**Authors:** Yoonjeong Lee, Patricia Keating, Jody Kreiman
-**Year:** 2019
-**Venue:** Journal of the Acoustical Society of America, 146(3), 1568-1579
-**DOI:** 10.1121/1.5125134
+# Acoustic Voice Variation Within and Between Speakers
 
 ## One-Sentence Summary
 PCA on 26 psychoacoustic voice quality measures across 100 speakers reveals that the balance between high-frequency harmonic and inharmonic energy is the dominant axis of voice variation both within and between speakers, followed by higher formant frequencies and formant dispersion, with remaining variability largely idiosyncratic to individual voices.

@@ -1,9 +1,12 @@
-# Effect of Vocal Effort on Spectral Properties of Vowels
+---
+title: "Effect of Vocal Effort on Spectral Properties of Vowels"
+authors: "Jean-Sylvain Liénard, Maria-Gabriella Di Benedetto"
+year: 1999
+venue: "Journal of the Acoustical Society of America, Vol. 106, No. 1"
+doi_url: "S0001-4966(99)02707-1"
+---
 
-**Authors:** Jean-Sylvain Liénard, Maria-Gabriella Di Benedetto
-**Year:** 1999
-**Venue:** Journal of the Acoustical Society of America, Vol. 106, No. 1
-**DOI:** S0001-4966(99)02707-1
+# Effect of Vocal Effort on Spectral Properties of Vowels
 
 ## One-Sentence Summary
 Quantifies how vocal effort (soft to loud speech) systematically modifies F0, F1, and formant amplitudes in vowels, providing empirical rates (5 Hz/dB for F0, 3.5 Hz/dB for F1) and spectral tilt changes essential for synthesizing natural loudness variation.

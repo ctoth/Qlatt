@@ -1,9 +1,12 @@
-# KLATTSTAT: Knowledge-based Parametric Speech Synthesis
+---
+title: "KLATTSTAT: Knowledge-based Parametric Speech Synthesis"
+authors: "Gopala Krishna Anumanchipalli, Ying-Chang Cheng, Joseph Fernandez, Xiaohan Huang, Qi Mao, Alan W Black"
+year: "~2009-2010 (based on references)"
+venue: "Likely Interspeech or similar (CMU paper)"
+doi_url: "Not provided; contact: {gopalakr, awb}@cs.cmu.edu"
+---
 
-**Authors:** Gopala Krishna Anumanchipalli, Ying-Chang Cheng, Joseph Fernandez, Xiaohan Huang, Qi Mao, Alan W Black
-**Year:** ~2009-2010 (based on references)
-**Venue:** Likely Interspeech or similar (CMU paper)
-**DOI/URL:** Not provided; contact: {gopalakr, awb}@cs.cmu.edu
+# KLATTSTAT: Knowledge-based Parametric Speech Synthesis
 
 ## One-Sentence Summary
 

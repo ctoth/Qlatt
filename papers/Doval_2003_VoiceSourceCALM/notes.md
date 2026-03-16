@@ -1,9 +1,12 @@
-# The Voice Source as a Causal/Anticausal Linear Filter
+---
+title: "The Voice Source as a Causal/Anticausal Linear Filter"
+authors: "Boris Doval, Christophe d'Alessandro, Nathalie Henrich"
+year: 2003
+venue: "VOQUAL'03, Geneva, August 27-29, 2003"
+hal_id: "hal-00371680"
+---
 
-**Authors:** Boris Doval, Christophe d'Alessandro, Nathalie Henrich
-**Year:** 2003
-**Venue:** VOQUAL'03, Geneva, August 27-29, 2003
-**HAL ID:** hal-00371680
+# The Voice Source as a Causal/Anticausal Linear Filter
 
 ## One-Sentence Summary
 

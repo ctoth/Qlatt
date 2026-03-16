@@ -1,10 +1,13 @@
-# An Articulatory Interpretation of the 'Singing Formant'
+---
+title: "An Articulatory Interpretation of the 'Singing Formant'"
+authors: "Johan Sundberg"
+year: 1972
+venue: "STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Vol. 13, No. 1, pp. 45-53"
+doi_url: "http://www.speech.kth.se/qpsr"
+institution: "Dept. for Speech, Music and Hearing, KTH Stockholm"
+---
 
-**Authors:** Johan Sundberg
-**Year:** 1972
-**Venue:** STL-QPSR (Speech Transmission Laboratory - Quarterly Progress and Status Report), Vol. 13, No. 1, pp. 45-53
-**Institution:** Dept. for Speech, Music and Hearing, KTH Stockholm
-**URL:** http://www.speech.kth.se/qpsr
+# An Articulatory Interpretation of the 'Singing Formant'
 
 ## One-Sentence Summary
 

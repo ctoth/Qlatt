@@ -1,9 +1,12 @@
-# Normative Standards for Vocal Tract Dimensions by Race as Measured by Acoustic Pharyngometry
+---
+title: "Normative Standards for Vocal Tract Dimensions by Race as Measured by Acoustic Pharyngometry"
+authors: "Steve An. Xue, Jianping G. Hao"
+year: 2006
+venue: "Journal of Voice, Vol. 20, No. 3, pp. 391-400"
+doi_url: "10.1016/j.jvoice.2005.05.001"
+---
 
-**Authors:** Steve An. Xue, Jianping G. Hao
-**Year:** 2006
-**Venue:** Journal of Voice, Vol. 20, No. 3, pp. 391-400
-**DOI:** 10.1016/j.jvoice.2005.05.001
+# Normative Standards for Vocal Tract Dimensions by Race as Measured by Acoustic Pharyngometry
 
 ## One-Sentence Summary
 Provides normative vocal tract length and volume measurements (oral, pharyngeal, total) for White American, African American, and Chinese male and female speakers aged 20-30, using acoustic pharyngometry.

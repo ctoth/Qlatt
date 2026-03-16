@@ -1,3 +1,8 @@
+---
+title: "Childers et al. 1990 — Electroglottography and Vocal Fold Physiology"
+year: 1990
+---
+
 # Childers et al. 1990 — Electroglottography and Vocal Fold Physiology
 
 ## Implementation-Relevant Notes
@@ -134,3 +139,19 @@ Patient data shows larger mean differences and standard deviations than normal s
 - ~3000 film frames for normal subjects (~100+ pitch periods)
 - ~1000+ film frames for patients
 - 60% of normal data had complete glottal closure; 40% had incomplete closure (dc-offset removed)
+
+## Collection Cross-References
+
+### Cited By (in Collection)
+- `Childers_Lee_1991_VoiceQualityFactors` — extends Childers' EGG work to voice quality analysis
+- `Henrich_2005_GlottalOpenQuotientSinging` — uses EGG methodology from Childers 1990
+- `Lalwani_1992_FlexibleFormantSynthesizer` — uses Childers' EGG findings for synthesis
+- `Holmberg_1995_AerodynamicEGGAcousticFemaleVoice` — cites Childers for EGG methodology
+- `Bonada_2008_VoiceSynthesisSpectralModels` — references EGG-based voice source analysis
+- `Schoentgen_2001_StochasticJitterModels` — references Childers for vocal fold physiology data
+
+### Conceptual Links (not citation-based)
+- `Gobl_1988_VoiceSourceDynamicsConnectedSpeech` — both study glottal source in connected speech; Gobl uses inverse filtering while Childers uses EGG
+- `Hanson_1995_GlottalCharacteristicsFemale` — both measure open quotient; Childers via EGG, Hanson via acoustic measures
+- `Story_1995_BodyCoverVocalFoldModel` — Childers' EGG data constrains the vocal fold vibration models Story develops
+- `Kreiman_2012_VoiceQualityHarmonicOQ` — both address open quotient measurement

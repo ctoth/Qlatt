@@ -1,9 +1,12 @@
-# Cepstral Analysis of Sexually Appealing Voice
+---
+title: "Cepstral Analysis of Sexually Appealing Voice"
+authors: "Radish Kumar Balasubramanium, Jayashree S. Bhat, Manav Srivastava, Aimy Eldose"
+year: 2012
+venue: "Journal of Voice, Vol. 26, No. 4, pp. 412-415"
+doi_url: "10.1016/j.jvoice.2011.03.011"
+---
 
-**Authors:** Radish Kumar Balasubramanium, Jayashree S. Bhat, Manav Srivastava, Aimy Eldose
-**Year:** 2012
-**Venue:** Journal of Voice, Vol. 26, No. 4, pp. 412-415
-**DOI:** 10.1016/j.jvoice.2011.03.011
+# Cepstral Analysis of Sexually Appealing Voice
 
 ## One-Sentence Summary
 Higher Cepstral Peak Prominence (CPP) -- indicating stronger harmonic organization and greater periodicity -- characterizes sexually attractive voices in both male and female speakers.

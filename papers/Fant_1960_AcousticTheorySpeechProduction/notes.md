@@ -1,9 +1,12 @@
-# Acoustic Theory of Speech Production
+---
+title: "Acoustic Theory of Speech Production"
+authors: "Gunnar Fant"
+year: "1960 (2nd printing 1970)"
+affiliation: "Royal Institute of Technology, Stockholm"
+publisher: "Mouton, The Hague"
+---
 
-**Author:** Gunnar Fant
-**Year:** 1960 (2nd printing 1970)
-**Publisher:** Mouton, The Hague
-**Affiliation:** Royal Institute of Technology, Stockholm
+# Acoustic Theory of Speech Production
 
 ## One-Sentence Summary
 

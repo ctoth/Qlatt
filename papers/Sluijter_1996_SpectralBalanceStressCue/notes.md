@@ -1,8 +1,11 @@
-# Sluijter, van Heuven & Pacilly (1997) — Implementation Notes
+---
+title: "Sluijter, van Heuven & Pacilly (1997) — Implementation Notes"
+year: 1996
+doi_url: "10.1121/1.417994"
+citation: "Sluijter, A. M. C., van Heuven, V. J., & Pacilly, J. J. A. (1997). J. Acoust. Soc. Am., 101(1), 503-513."
+---
 
-**Paper:** Spectral balance as a cue in the perception of linguistic stress
-**Citation:** Sluijter, A. M. C., van Heuven, V. J., & Pacilly, J. J. A. (1997). J. Acoust. Soc. Am., 101(1), 503-513.
-**DOI:** 10.1121/1.417994
+# Sluijter, van Heuven & Pacilly (1997) — Implementation Notes
 
 ## Key Finding
 

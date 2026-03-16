@@ -1,9 +1,12 @@
-# Allophonic Variation in English /l/ and its Implications for Phonetic Implementation
+---
+title: "Allophonic Variation in English /l/ and its Implications for Phonetic Implementation"
+authors: "Richard Sproat, Osamu Fujimura"
+year: 1993
+venue: "Journal of Phonetics, Vol. 21, pp. 291-311"
+doi_url: "10.1016/S0095-4470(19)31340-3"
+---
 
-**Authors:** Richard Sproat, Osamu Fujimura
-**Year:** 1993
-**Venue:** Journal of Phonetics, Vol. 21, pp. 291-311
-**DOI:** 10.1016/S0095-4470(19)31340-3
+# Allophonic Variation in English /l/ and its Implications for Phonetic Implementation
 
 ## One-Sentence Summary
 Provides articulatory (X-ray microbeam) and acoustic evidence that English /l/ varies continuously between light and dark allophones as a function of syllable position and pre-boundary rime duration, with a key timing metric (Tip Delay) that predicts the darkness gradient.

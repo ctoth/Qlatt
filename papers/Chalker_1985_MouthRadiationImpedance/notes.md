@@ -1,9 +1,12 @@
-# Models for Representing the Acoustic Radiation Impedance of the Mouth
+---
+title: "Models for Representing the Acoustic Radiation Impedance of the Mouth"
+authors: "D. A. Chalker and D. Mackerras"
+year: 1985
+venue: "IEEE Trans. Acoust., Speech, Signal Processing, vol. ASSP-33, no. 6, pp. 1606-1609"
+affiliation: "Department of Electrical Engineering, University of Queensland"
+---
 
-**Authors:** D. A. Chalker and D. Mackerras
-**Year:** 1985
-**Venue:** IEEE Trans. Acoust., Speech, Signal Processing, vol. ASSP-33, no. 6, pp. 1606-1609
-**Affiliation:** Department of Electrical Engineering, University of Queensland
+# Models for Representing the Acoustic Radiation Impedance of the Mouth
 
 ## One-Sentence Summary
 

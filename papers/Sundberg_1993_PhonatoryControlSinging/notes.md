@@ -1,3 +1,8 @@
+---
+title: "Sundberg, Titze & Scherer 1993 — Phonatory Control in Male Singing"
+year: 1993
+---
+
 # Sundberg, Titze & Scherer 1993 — Phonatory Control in Male Singing
 
 ## Reference
@@ -128,3 +133,23 @@ In pressed vs neutral phonation at constant pitch (p.25):
 4. **F0-dependent source changes:** The finding that pulse shape becomes more symmetrical as F0 approaches F1 is critical for the LF source model — the Rd parameter (or equivalently OQ and skewing) should be made F0-dependent when F1/F0 < 3.
 
 5. **Loudness variation rules:** For prosodic stress modeling, the paper confirms that Ps is the primary control variable for loudness, with 8-9 dB per doubling being the baseline rule for neutral phonation.
+
+## Collection Cross-References
+
+### Already in Collection
+- `Fant_1985_LFModelGlottalFlow` — LF model referenced
+- `Fant_1960_AcousticTheorySpeechProduction` — theoretical foundation
+- `Holmberg_1988_GlottalAirflowPressure` — baseline glottal flow measurements for comparison
+- `Gauffin_1989_SpectralCorrelatesGlottalVoice` — spectral correlates of voice source
+
+### Cited By (in Collection)
+- `Alku_1997_ParabolicSpectralParameter` — cites Sundberg et al. 1993 for singing voice data
+- `Alku_1999_SPL_DpeakLinearity` — references Sundberg for pressure-SPL relationships
+- `Alku_2002_NormalizedAmplitudeQuotient` — cites for singing voice source data
+- `Henrich_2003_JND_OpenQuotient` — references Sundberg for phonatory control data
+- `Henrich_2005_GlottalOpenQuotientSinging` — directly extends Sundberg's singing phonation work
+
+### Conceptual Links (not citation-based)
+- `Strik_Boves_1992_ControlF0IntensityVoiceQuality` — both study pressure-F0-intensity relationships; Strik in speech, Sundberg in singing
+- `Bjorklund_2016_SubglottalPressureSPL` — both quantify Ps-SPL relationships; Bjorklund for untrained speakers, Sundberg for singers
+- `Herbst_2015_GlottalAdductionSubglottalPressure` — both study glottal adduction and pressure effects on voice source

@@ -1,9 +1,12 @@
-# Universal Grapheme-to-Phoneme Prediction Over Latin Alphabets
+---
+title: "Universal Grapheme-to-Phoneme Prediction Over Latin Alphabets"
+authors: "Young-Bum Kim and Benjamin Snyder"
+year: 2012
+venue: "EMNLP 2012 (Conference on Empirical Methods in Natural Language Processing)"
+institution: "University of Wisconsin-Madison"
+---
 
-**Authors:** Young-Bum Kim and Benjamin Snyder
-**Year:** 2012
-**Venue:** EMNLP 2012 (Conference on Empirical Methods in Natural Language Processing)
-**Institution:** University of Wisconsin-Madison
+# Universal Grapheme-to-Phoneme Prediction Over Latin Alphabets
 
 ## One-Sentence Summary
 

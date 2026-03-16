@@ -1,6 +1,10 @@
-# Klofstad, Anderson & Peters (2012) - Voice Pitch and Leadership
+---
+title: "Klofstad, Anderson & Peters (2012) - Voice Pitch and Leadership"
+year: 2012
+citation: "Klofstad CA, Anderson RC, Peters S (2012) Sounds like a winner: voice pitch influences perception of leadership capacity in both men and women. Proc. R. Soc. B 279, 2698-2704. doi:10.1098/rspb.2012.0311"
+---
 
-**Citation:** Klofstad CA, Anderson RC, Peters S (2012) Sounds like a winner: voice pitch influences perception of leadership capacity in both men and women. Proc. R. Soc. B 279, 2698-2704. doi:10.1098/rspb.2012.0311
+# Klofstad, Anderson & Peters (2012) - Voice Pitch and Leadership
 
 ## Experimental Design
 

@@ -1,3 +1,8 @@
+---
+title: "Hughes & Halle 1956 — Spectral Properties of Fricative Consonants"
+year: 1956
+---
+
 # Hughes & Halle 1956 — Spectral Properties of Fricative Consonants
 
 ## Key Findings for Synthesis

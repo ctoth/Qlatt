@@ -1,9 +1,12 @@
-# Airflow and Turbulence Noise for Fricative and Stop Consonants: Static Considerations
+---
+title: "Airflow and Turbulence Noise for Fricative and Stop Consonants: Static Considerations"
+authors: "Kenneth N. Stevens"
+year: 1971
+venue: "Journal of the Acoustical Society of America, Vol. 50, No. 4 (Part 2), pp. 1180-1192"
+doi_url: "JASA Volume 50"
+---
 
-**Authors:** Kenneth N. Stevens
-**Year:** 1971
-**Venue:** Journal of the Acoustical Society of America, Vol. 50, No. 4 (Part 2), pp. 1180-1192
-**DOI/URL:** JASA Volume 50
+# Airflow and Turbulence Noise for Fricative and Stop Consonants: Static Considerations
 
 ## One-Sentence Summary
 Derives the aerodynamic and acoustic equations relating airflow, pressure drop, constriction geometry, and turbulence noise source strength for fricative and stop consonants, providing a quantitative framework for predicting noise source levels in the vocal tract.

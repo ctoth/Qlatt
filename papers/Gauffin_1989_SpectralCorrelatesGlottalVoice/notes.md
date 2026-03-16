@@ -1,3 +1,8 @@
+---
+title: "Gauffin & Sundberg 1989 — Spectral Correlates of Glottal Voice Source Waveform Characteristics"
+year: 1989
+---
+
 # Gauffin & Sundberg 1989 — Spectral Correlates of Glottal Voice Source Waveform Characteristics
 
 ## Key Findings for Synthesis

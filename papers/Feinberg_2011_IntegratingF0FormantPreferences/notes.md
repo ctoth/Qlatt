@@ -1,9 +1,12 @@
-# Integrating Fundamental and Formant Frequencies in Women's Preferences for Men's Voices
+---
+title: "Integrating Fundamental and Formant Frequencies in Women's Preferences for Men's Voices"
+authors: "D. R. Feinberg, B. C. Jones, L. M. DeBruine, J. J. M. O'Connor, C. C. Tigue, D. J. Borak"
+year: 2011
+venue: "Behavioral Ecology, 22:1320–1325"
+doi_url: "10.1093/beheco/arr134"
+---
 
-**Authors:** D. R. Feinberg, B. C. Jones, L. M. DeBruine, J. J. M. O'Connor, C. C. Tigue, D. J. Borak
-**Year:** 2011
-**Venue:** Behavioral Ecology, 22:1320–1325
-**DOI:** 10.1093/beheco/arr134
+# Integrating Fundamental and Formant Frequencies in Women's Preferences for Men's Voices
 
 ## One-Sentence Summary
 Demonstrates that women integrate F0 (pitch) and formant frequencies (vocal tract length) interactively — not independently — when judging male voice attractiveness, supporting a cue amplification model.

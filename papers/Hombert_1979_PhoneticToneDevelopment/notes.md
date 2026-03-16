@@ -1,9 +1,12 @@
-# Phonetic Explanations for the Development of Tones
+---
+title: "Phonetic Explanations for the Development of Tones"
+authors: "Jean-Marie Hombert, John J. Ohala, William G. Ewan"
+year: 1979
+venue: "Language, Vol. 55, No. 1, pp. 37-58"
+doi_url: "10.2307/412518"
+---
 
-**Authors:** Jean-Marie Hombert, John J. Ohala, William G. Ewan
-**Year:** 1979
-**Venue:** Language, Vol. 55, No. 1, pp. 37-58
-**DOI:** 10.2307/412518
+# Phonetic Explanations for the Development of Tones
 
 ## One-Sentence Summary
 This paper provides quantitative F0 perturbation data showing that prevocalic voiceless consonants raise F0 of following vowels by ~10 Hz (approximately 8% for male speakers) while voiced consonants lower it, with perturbation lasting 100+ ms in English and 40-60 ms in Yoruba -- the key phonetic mechanism underlying the historical development of tone from consonant voicing distinctions.

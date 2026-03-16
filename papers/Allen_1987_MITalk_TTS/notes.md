@@ -1,8 +1,11 @@
-# From Text to Speech: The MITalk System
+---
+title: "From Text to Speech: The MITalk System"
+authors: "Jonathan Allen, M. Sharon Hunnicutt, Dennis Klatt"
+year: 1987
+publisher: "Cambridge University Press (Cambridge Studies in Speech Science and Communication)"
+---
 
-**Authors:** Jonathan Allen, M. Sharon Hunnicutt, Dennis Klatt
-**Year:** 1987
-**Publisher:** Cambridge University Press (Cambridge Studies in Speech Science and Communication)
+# From Text to Speech: The MITalk System
 
 ## One-Sentence Summary
 

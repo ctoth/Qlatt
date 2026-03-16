@@ -1,9 +1,12 @@
-# Perception of Vocal Attractiveness by Mandarin Native Listeners
+---
+title: "Perception of Vocal Attractiveness by Mandarin Native Listeners"
+authors: "Anqi Xu, Albert Lee"
+year: 2018
+venue: "9th International Conference on Speech Prosody, Poznan, Poland"
+doi_url: "10.21437/SpeechProsody.2018-70"
+---
 
-**Authors:** Anqi Xu, Albert Lee
-**Year:** 2018
-**Venue:** 9th International Conference on Speech Prosody, Poznan, Poland
-**DOI:** 10.21437/SpeechProsody.2018-70
+# Perception of Vocal Attractiveness by Mandarin Native Listeners
 
 ## One-Sentence Summary
 Mandarin native listeners prefer breathy and modal male voices with low f0, narrow formant spacing, and normal pitch range, while for female voices they prefer breathy quality with moderately spaced formants and normal pitch range -- partially replicating but also diverging from Western studies.

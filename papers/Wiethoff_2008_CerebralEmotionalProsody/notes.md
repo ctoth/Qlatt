@@ -1,9 +1,12 @@
-# Cerebral Processing of Emotional Prosody — Influence of Acoustic Parameters and Arousal
+---
+title: "Cerebral Processing of Emotional Prosody — Influence of Acoustic Parameters and Arousal"
+authors: "Sarah Wiethoff, Dirk Wildgruber, Benjamin Kreifelts, Hubertus Becker, Cornelia Herbert, Wolfgang Grodd, Thomas Ethofer"
+year: 2008
+venue: "NeuroImage 39, 885–893"
+doi_url: "10.1016/j.neuroimage.2007.09.028"
+---
 
-**Authors:** Sarah Wiethoff, Dirk Wildgruber, Benjamin Kreifelts, Hubertus Becker, Cornelia Herbert, Wolfgang Grodd, Thomas Ethofer
-**Year:** 2008
-**Venue:** NeuroImage 39, 885–893
-**DOI:** 10.1016/j.neuroimage.2007.09.028
+# Cerebral Processing of Emotional Prosody — Influence of Acoustic Parameters and Arousal
 
 ## One-Sentence Summary
 

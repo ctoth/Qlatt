@@ -1,9 +1,12 @@
-# The Role of Femininity and Averageness of Voice Pitch in Aesthetic Judgments of Women's Voices
+---
+title: "The Role of Femininity and Averageness of Voice Pitch in Aesthetic Judgments of Women's Voices"
+authors: "David R Feinberg, Lisa M DeBruine, Benedict C Jones, David I Perrett"
+year: 2008
+venue: "Perception, volume 37, pages 615–623"
+doi_url: "10.1068/p5514"
+---
 
-**Authors:** David R Feinberg, Lisa M DeBruine, Benedict C Jones, David I Perrett
-**Year:** 2008
-**Venue:** Perception, volume 37, pages 615–623
-**DOI:** 10.1068/p5514
+# The Role of Femininity and Averageness of Voice Pitch in Aesthetic Judgments of Women's Voices
 
 ## One-Sentence Summary
 Demonstrates that men prefer higher (more feminine) F0 in women's voices over average F0, with a linear pitch–attractiveness relationship (r = 0.341) and preference for +20 Hz pitch shifts even in already-high-pitched voices.

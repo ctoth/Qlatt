@@ -1,9 +1,12 @@
-# Articulation and Sound Change in Romance
+---
+title: "Articulation and Sound Change in Romance"
+authors: "Daniel Recasens"
+year: 2003
+venue: "15th International Congress of Phonetic Sciences (ICPhS), Barcelona"
+isbn: "1-876346-48-5"
+---
 
-**Authors:** Daniel Recasens
-**Year:** 2003
-**Venue:** 15th International Congress of Phonetic Sciences (ICPhS), Barcelona
-**ISBN:** 1-876346-48-5
+# Articulation and Sound Change in Romance
 
 ## One-Sentence Summary
 

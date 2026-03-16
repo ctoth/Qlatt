@@ -1,10 +1,13 @@
-# The Sound of Trustworthiness: Acoustic-based Modulation of Perceived Voice Personality
+---
+title: "The Sound of Trustworthiness: Acoustic-based Modulation of Perceived Voice Personality"
+authors: "Pascal Belin, Bibi Boehme, Phil McAleer"
+year: "2017 (Correction published January 2019)"
+venue: "PLoS ONE 12(10): e0185651"
+doi_url: "https://doi.org/10.1371/journal.pone.0185651"
+correction_doi: "https://doi.org/10.1371/journal.pone.0211282"
+---
 
-**Authors:** Pascal Belin, Bibi Boehme, Phil McAleer
-**Year:** 2017 (Correction published January 2019)
-**Venue:** PLoS ONE 12(10): e0185651
-**DOI:** https://doi.org/10.1371/journal.pone.0185651
-**Correction DOI:** https://doi.org/10.1371/journal.pone.0211282
+# The Sound of Trustworthiness: Acoustic-based Modulation of Perceived Voice Personality
 
 > **Note:** A correction was published January 17, 2019 stating that an incorrect version of S1 Data (raw participant ratings) was originally published. The article was republished January 10, 2019 with the corrected data file. The findings and conclusions are unchanged.
 

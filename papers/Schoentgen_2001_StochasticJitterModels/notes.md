@@ -1,3 +1,8 @@
+---
+title: "Schoentgen 2001 - Stochastic Models of Jitter"
+year: 2001
+---
+
 # Schoentgen 2001 - Stochastic Models of Jitter
 
 ## Implementation Notes
@@ -176,3 +181,22 @@ To add realistic jitter to a Klatt synthesizer F0 contour:
    - Normal voice: coefficient of variation ~0.5%, lag-1 autocorrelation ~0.6
    - Moderately rough: coefficient of variation ~1-2%
    - Severely rough: coefficient of variation > 3%
+
+## Collection Cross-References
+
+### Already in Collection
+- `Klatt_1990_VoiceQualityVariations` — Klatt & Klatt voice quality including flutter
+- `Crystal_House_1988_StopConsonantDuration` — Crystal & House duration perturbation data
+
+### Cited By (in Collection)
+- `Fraj_2011_BreathyRoughVoices` — references Schoentgen for jitter modeling
+- `Gobl_2003_VoiceQualityEmotion` — cites Schoentgen for voice perturbation analysis
+- `Bonada_2008_VoiceSynthesisSpectralModels` — references for jitter synthesis
+- `KaczmarekMajer_2024_AcousticMarkersBipolar` — references jitter measures
+- `Busquet_2023_VoiceAnalyticsRecordingDevices` — references Schoentgen for voice quality measures
+- `Mozziconacci_1998_SpeechEmotionProsody` — references for voice quality variation
+
+### Conceptual Links (not citation-based)
+- `Redi_2001_GlottalEventsVariation` — both study F0 perturbations; Schoentgen models stochastic jitter, Redi documents deliberate/systematic glottalization
+- `Childers_1990_EGGVocalFoldPhysiology` — Childers' EGG measurements provide empirical jitter data that Schoentgen's models explain
+- `Herzel_1994_VocalDisordersNonlinearDynamics` — both model vocal fold perturbations using dynamical systems approaches

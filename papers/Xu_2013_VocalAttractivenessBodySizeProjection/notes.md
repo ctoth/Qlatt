@@ -1,9 +1,12 @@
-# Human Vocal Attractiveness as Signaled by Body Size Projection
+---
+title: "Human Vocal Attractiveness as Signaled by Body Size Projection"
+authors: "Yi Xu, Albert Lee, Wing-Li Wu, Xuan Liu, Peter Birkholz"
+year: 2013
+venue: "PLoS ONE 8(4): e62397"
+doi_url: "10.1371/journal.pone.0062397"
+---
 
-**Authors:** Yi Xu, Albert Lee, Wing-Li Wu, Xuan Liu, Peter Birkholz
-**Year:** 2013
-**Venue:** PLoS ONE 8(4): e62397
-**DOI:** 10.1371/journal.pone.0062397
+# Human Vocal Attractiveness as Signaled by Body Size Projection
 
 ## One-Sentence Summary
 

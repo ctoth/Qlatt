@@ -1,9 +1,12 @@
-# Optimizations and Fitting Procedures for the Liljencrants-Fant model for Statistical Parametric Speech Synthesis
+---
+title: "Optimizations and Fitting Procedures for the Liljencrants-Fant model for Statistical Parametric Speech Synthesis"
+authors: "Prasanna Kumar Muthukumar, Alan W Black, H. Timothy Bunnell"
+year: "2013 (estimated from citations)"
+venue: "Conference paper (likely Interspeech or similar)"
+affiliations: "Carnegie Mellon University (LTI), Nemours Biomedical Research"
+---
 
-**Authors:** Prasanna Kumar Muthukumar, Alan W Black, H. Timothy Bunnell
-**Year:** 2013 (estimated from citations)
-**Venue:** Conference paper (likely Interspeech or similar)
-**Affiliations:** Carnegie Mellon University (LTI), Nemours Biomedical Research
+# Optimizations and Fitting Procedures for the Liljencrants-Fant model for Statistical Parametric Speech Synthesis
 
 ## One-Sentence Summary
 Presents a robust iterative method for fitting LF model parameters to speech using IAIF preprocessing, gradient descent optimization, and CART-based prediction refinement for statistical parametric synthesis.

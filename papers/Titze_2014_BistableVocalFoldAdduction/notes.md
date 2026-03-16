@@ -1,3 +1,8 @@
+---
+title: "Titze 2014 - Bi-stable Vocal Fold Adduction: Implementation Notes"
+year: 2014
+---
+
 # Titze 2014 - Bi-stable Vocal Fold Adduction: Implementation Notes
 
 Titze, I. R. (2014). "Bi-stable vocal fold adduction: A mechanism of modal-falsetto register shifts and mixed registration." J. Acoust. Soc. Am. 135(4), 2091-2101.

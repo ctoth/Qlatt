@@ -1,9 +1,12 @@
-# Fine-grained statistical structure of speech
+---
+title: "Fine-grained statistical structure of speech"
+authors: "François Deloche"
+year: 2020
+venue: "PLoS ONE 15(3): e0230233"
+doi_url: "https://doi.org/10.1371/journal.pone.0230233"
+---
 
-**Authors:** François Deloche
-**Year:** 2020
-**Venue:** PLoS ONE 15(3): e0230233
-**DOI:** https://doi.org/10.1371/journal.pone.0230233
+# Fine-grained statistical structure of speech
 
 ## One-Sentence Summary
 

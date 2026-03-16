@@ -1,9 +1,12 @@
-# Detection, Direction Discrimination, and Off-Frequency Interference of Center-Frequency Modulations and Glides for Vowel Formants
+---
+title: "Detection, Direction Discrimination, and Off-Frequency Interference of Center-Frequency Modulations and Glides for Vowel Formants"
+authors: "J. Lyzenga, R. P. Carlyon"
+year: 2005
+venue: "Journal of the Acoustical Society of America, Vol. 117, No. 5, May 2005, pp. 3042-3053"
+doi_url: "10.1121/1.1882943"
+---
 
-**Authors:** J. Lyzenga, R. P. Carlyon
-**Year:** 2005
-**Venue:** Journal of the Acoustical Society of America, Vol. 117, No. 5, May 2005, pp. 3042-3053
-**DOI:** 10.1121/1.1882943
+# Detection, Direction Discrimination, and Off-Frequency Interference of Center-Frequency Modulations and Glides for Vowel Formants
 
 ## One-Sentence Summary
 

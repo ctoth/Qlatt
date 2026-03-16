@@ -1,3 +1,8 @@
+---
+title: "Ladd et al. 1985 — Evidence for the Independent Function of Intonation Contour Type, Voice Quality, and F0 Range in Signaling Speaker Affect"
+year: 1985
+---
+
 # Ladd et al. 1985 — Evidence for the Independent Function of Intonation Contour Type, Voice Quality, and F0 Range in Signaling Speaker Affect
 
 ## Implementation-Relevant Findings

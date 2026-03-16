@@ -1,3 +1,8 @@
+---
+title: "Hillenbrand, Cleveland, & Erickson (1994) — Implementation Notes"
+year: 1994
+---
+
 # Hillenbrand, Cleveland, & Erickson (1994) — Implementation Notes
 
 ## Key Finding: Hierarchy of Breathiness Correlates

@@ -1,9 +1,12 @@
-# Perceptual Constraints and Phonological Change: A Study of Nasal Vowel Height
+---
+title: "Perceptual Constraints and Phonological Change: A Study of Nasal Vowel Height"
+authors: "Patrice Speeter Beddor, Rena Arens Krakow, Louis M. Goldstein"
+year: 1986
+venue: "Phonology Yearbook, Vol. 3, pp. 197-217"
+doi_url: "JSTOR stable/4615399"
+---
 
-**Authors:** Patrice Speeter Beddor, Rena Arens Krakow, Louis M. Goldstein
-**Year:** 1986
-**Venue:** Phonology Yearbook, Vol. 3, pp. 197-217
-**DOI/URL:** JSTOR stable/4615399
+# Perceptual Constraints and Phonological Change: A Study of Nasal Vowel Height
 
 ## One-Sentence Summary
 Demonstrates that the acoustic effects of nasal coupling on the F1 region of vowel spectra (pole-zero introduction, F1' shift, spectral centre of gravity changes) are consistent with cross-language phonological patterns of nasal vowel height shifts, but perceptual height shifts only occur when nasalisation is phonetically or phonologically inappropriate.

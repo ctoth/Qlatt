@@ -1,3 +1,8 @@
+---
+title: "Dilley & Brown 2005 — The RaP (Rhythm and Pitch) Labeling System"
+year: 2005
+---
+
 # Dilley & Brown 2005 — The RaP (Rhythm and Pitch) Labeling System
 
 ## Overview
@@ -186,3 +191,22 @@ Key rules for synthesis:
 - Local pitch range expansion on focused/contrastive elements (marked with absence of `"!"`)
 - Compression of pitch range in backgrounded material (marked with `"!"`)
 - Range diacritics `">"` and `"<"` indicate phrase-final boundary tones at pitch extremes
+
+## Collection Cross-References
+
+### Already in Collection
+- `Pierrehumbert_1980_EnglishIntonation` — RaP builds on Pierrehumbert's autosegmental-metrical theory
+- `Beckman_2005_ToBISystemEvolution` — primary comparison system; RaP as alternative to ToBI
+- `Ladd_2008_IntonationalPhonology` — theoretical framework for intonation that RaP addresses
+
+### Cited By (in Collection)
+- `Beckman_2022_ToBISystem` — references Dilley's RaP as alternative annotation system
+- `Breen_InPress_ToBIRaPReliability` — directly compares ToBI and RaP labeling reliability
+- `Redi_2001_GlottalEventsVariation` — cites Dilley's work on prosodic conditioning of glottalization
+- `Hanson_2001_ModelsPhonation` — references Dilley for prosodic structure effects
+- `White_2014_ProsodicTimingFunction` — references Dilley for rhythm and prosody
+
+### Conceptual Links (not citation-based)
+- `Beckman_2005_OriginalToBIEvolution` — both describe prosodic annotation systems for English
+- `Jun_2005_ProsodicTypology` — both address prosodic labeling frameworks
+- `Fry_1958_PerceptionStress` — foundational work on stress perception that informs RaP's rhythm tier

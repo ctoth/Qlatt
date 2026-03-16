@@ -1,9 +1,12 @@
-# Just Noticeable Differences of Open Quotient and Asymmetry Coefficient in Singing Voice
+---
+title: "Just Noticeable Differences of Open Quotient and Asymmetry Coefficient in Singing Voice"
+authors: "Nathalie Henrich, Gunilla Sundin, Daniel Ambroise, Christophe d'Alessandro, Michele Castellengo, Boris Doval"
+year: 2003
+venue: "Journal of Voice, Vol. 17, No. 4, pp. 481-494"
+doi_url: "10.1067/S0892-1997(03)00005-5"
+---
 
-**Authors:** Nathalie Henrich, Gunilla Sundin, Daniel Ambroise, Christophe d'Alessandro, Michele Castellengo, Boris Doval
-**Year:** 2003
-**Venue:** Journal of Voice, Vol. 17, No. 4, pp. 481-494
-**DOI:** 10.1067/S0892-1997(03)00005-5
+# Just Noticeable Differences of Open Quotient and Asymmetry Coefficient in Singing Voice
 
 ## One-Sentence Summary
 This paper measures the just noticeable differences (JNDs) of glottal open quotient and asymmetry coefficient in singing voice synthesis, establishing that the relative JND for open quotient is constant at ~10-14% (Weber's law) while asymmetry coefficient JND is ~4%, providing perceptual resolution limits for voice quality parameter control.

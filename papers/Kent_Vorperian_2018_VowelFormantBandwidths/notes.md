@@ -1,7 +1,11 @@
-# Kent & Vorperian 2018 - Static Measurements of Vowel Formant Frequencies and Bandwidths: A Review
+---
+title: "Kent & Vorperian 2018 - Static Measurements of Vowel Formant Frequencies and Bandwidths: A Review"
+year: 2018
+focus: "Comprehensive review of vowel formant frequencies and bandwidths for American English across the lifespan"
+source: "Journal of Communication Disorders, 2018; 74: 74-97"
+---
 
-**Source:** Journal of Communication Disorders, 2018; 74: 74-97
-**Focus:** Comprehensive review of vowel formant frequencies and bandwidths for American English across the lifespan
+# Kent & Vorperian 2018 - Static Measurements of Vowel Formant Frequencies and Bandwidths: A Review
 
 ---
 

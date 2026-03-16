@@ -1,9 +1,12 @@
-# Linguistic Uses of Segmental Duration in English: Acoustic and Perceptual Evidence
+---
+title: "Linguistic Uses of Segmental Duration in English: Acoustic and Perceptual Evidence"
+authors: "Dennis H. Klatt"
+year: 1976
+venue: "Journal of the Acoustical Society of America, Vol. 59, No. 5, May 1976"
+pages: "1208-1221"
+---
 
-**Authors:** Dennis H. Klatt
-**Year:** 1976
-**Venue:** Journal of the Acoustical Society of America, Vol. 59, No. 5, May 1976
-**Pages:** 1208-1221
+# Linguistic Uses of Segmental Duration in English: Acoustic and Perceptual Evidence
 
 ## One-Sentence Summary
 Comprehensive review establishing duration rules for English TTS synthesis, with quantitative models for vowel and consonant timing based on phonetic context, stress, and phrase position.

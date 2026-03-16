@@ -1,9 +1,12 @@
-# Towards Models of Phonation
+---
+title: "Towards Models of Phonation"
+authors: "Helen M. Hanson, Kenneth N. Stevens, Hong-Kwang Jeff Kuo, Marilyn Y. Chen, Janet Slifka"
+year: 2001
+venue: "Journal of Phonetics, 29, 451-480"
+doi_url: "10.1006/jpho.2001.0146"
+---
 
-**Authors:** Helen M. Hanson, Kenneth N. Stevens, Hong-Kwang Jeff Kuo, Marilyn Y. Chen, Janet Slifka
-**Year:** 2001
-**Venue:** Journal of Phonetics, 29, 451-480
-**DOI:** 10.1006/jpho.2001.0146
+# Towards Models of Phonation
 
 ## One-Sentence Summary
 This paper reviews and extends acoustic models of nonmodal phonation (breathy, irregular, disordered) by linking glottal configuration types to measurable spectral characteristics (H1*-H2*, H1*-A1, H1*-A3*, B1, noise ratings), validates these models against data from 43 normal speakers and disordered populations, and describes HLsyn — a higher-level Klatt controller with 13 quasi-articulatory parameters.

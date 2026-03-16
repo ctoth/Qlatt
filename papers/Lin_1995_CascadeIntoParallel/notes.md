@@ -1,9 +1,12 @@
-# Formant Synthesis: Turning Cascade into Parallel with Applications to the Klatt Synthesizer
+---
+title: "Formant Synthesis: Turning Cascade into Parallel with Applications to the Klatt Synthesizer"
+authors: "Qiguang Lin, Jingyun Zou, Gael Richard, James L. Flanagan"
+year: 1995
+venue: "130th Meeting ASA, St. Louis, MO; JASA Vol. 98, No. 5, Pt. 2, November 1995"
+doi_url: "10.1121/1.413964"
+---
 
-**Authors:** Qiguang Lin, Jingyun Zou, Gael Richard, James L. Flanagan
-**Year:** 1995
-**Venue:** 130th Meeting ASA, St. Louis, MO; JASA Vol. 98, No. 5, Pt. 2, November 1995
-**DOI:** 10.1121/1.413964
+# Formant Synthesis: Turning Cascade into Parallel with Applications to the Klatt Synthesizer
 
 ## One-Sentence Summary
 A method using partial fraction expansion to mathematically convert cascade formant filter configurations into equivalent parallel configurations, deriving complex amplitudes from formant frequencies, bandwidths, and higher-pole correction without additional empirical parameters.

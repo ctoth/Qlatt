@@ -1,9 +1,12 @@
-# Models of Aspirated Stops in English
+---
+title: "Models of Aspirated Stops in English"
+authors: "Helen M. Hanson, Kenneth N. Stevens"
+year: 2003
+venue: "15th International Congress of Phonetic Sciences (ICPhS), Barcelona"
+doi_url: "https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2003/papers/p15_0783.pdf"
+---
 
-**Authors:** Helen M. Hanson, Kenneth N. Stevens
-**Year:** 2003
-**Venue:** 15th International Congress of Phonetic Sciences (ICPhS), Barcelona
-**URL:** https://www.internationalphoneticassociation.org/icphs-proceedings/ICPhS2003/papers/p15_0783.pdf
+# Models of Aspirated Stops in English
 
 ## One-Sentence Summary
 Challenges the classical three-phase model of aspirated stop releases (transient-frication-aspiration) by showing that some speakers produce frication noise during the "aspiration" phase, with place-dependent spectral characteristics that provide alternative cues to place of articulation.

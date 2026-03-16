@@ -1,9 +1,12 @@
-# A Model of the Regularities Underlying Speaker Variation: Evidence from Hybrid Synthesis
+---
+title: "A Model of the Regularities Underlying Speaker Variation: Evidence from Hybrid Synthesis"
+authors: "Susan R. Hertz"
+year: 2006
+venue: "Interspeech 2006 (slightly revised version)"
+affiliation: "NovaSpeech LLC and Cornell University"
+---
 
-**Authors:** Susan R. Hertz
-**Year:** 2006
-**Venue:** Interspeech 2006 (slightly revised version)
-**Affiliation:** NovaSpeech LLC and Cornell University
+# A Model of the Regularities Underlying Speaker Variation: Evidence from Hybrid Synthesis
 
 ## One-Sentence Summary
 Demonstrates that consonant clusters (ACCs) are perceptually generic across speakers and can be substituted (even with formant synthesis) without degrading speaker identity, while vowel nuclei (ANs) carry speaker-specific information.

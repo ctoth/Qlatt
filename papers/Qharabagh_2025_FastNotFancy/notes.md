@@ -1,9 +1,12 @@
-# Fast, Not Fancy: Rethinking G2P with Rich Data and Rule-Based Models
+---
+title: "Fast, Not Fancy: Rethinking G2P with Rich Data and Rule-Based Models"
+authors: "Mahta Fetrat Qharabagh, Zahra Dehghanian, Hamid R. Rabiee"
+year: 2025
+venue: "arXiv preprint (arXiv:2505.12973v1)"
+doi_url: "https://arxiv.org/abs/2505.12973"
+---
 
-**Authors:** Mahta Fetrat Qharabagh, Zahra Dehghanian, Hamid R. Rabiee
-**Year:** 2025
-**Venue:** arXiv preprint (arXiv:2505.12973v1)
-**DOI/URL:** https://arxiv.org/abs/2505.12973
+# Fast, Not Fancy: Rethinking G2P with Rich Data and Rule-Based Models
 
 ## One-Sentence Summary
 This paper demonstrates that rich, balanced homograph datasets can dramatically improve both neural and rule-based G2P systems, achieving ~30% improvement in homograph disambiguation while maintaining real-time performance for accessibility applications.

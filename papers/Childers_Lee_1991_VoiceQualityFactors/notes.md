@@ -1,9 +1,12 @@
-# Vocal Quality Factors: Analysis, Synthesis, and Perception
+---
+title: "Vocal Quality Factors: Analysis, Synthesis, and Perception"
+authors: "D. G. Childers, C. K. Lee"
+year: 1991
+venue: "Journal of the Acoustical Society of America, Vol. 90, No. 5, pp. 2394-2410"
+doi_url: "10.1121/1.401349"
+---
 
-**Authors:** D. G. Childers, C. K. Lee
-**Year:** 1991
-**Venue:** Journal of the Acoustical Society of America, Vol. 90, No. 5, pp. 2394-2410
-**DOI:** 10.1121/1.401349
+# Vocal Quality Factors: Analysis, Synthesis, and Perception
 
 ## One-Sentence Summary
 Identifies four key glottal source factors (pulse width, pulse skewness, closure abruptness, turbulent noise) that characterize voice quality types and develops a new LF-based source model with turbulent noise for synthesizing natural-sounding speech with selectable vocal qualities.

@@ -1,6 +1,10 @@
-# McAleer, Todorov & Belin (2014) - Personality Impressions from Brief Novel Voices
+---
+title: "McAleer, Todorov & Belin (2014) - Personality Impressions from Brief Novel Voices"
+year: 2014
+citation: "McAleer P, Todorov A, Belin P (2014) How Do You Say 'Hello'? Personality Impressions from Brief Novel Voices. PLoS ONE 9(3): e90779."
+---
 
-**Citation:** McAleer P, Todorov A, Belin P (2014) How Do You Say 'Hello'? Personality Impressions from Brief Novel Voices. PLoS ONE 9(3): e90779.
+# McAleer, Todorov & Belin (2014) - Personality Impressions from Brief Novel Voices
 
 ## Key Finding: Two-Dimensional Social Voice Space
 

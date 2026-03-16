@@ -1,3 +1,8 @@
+---
+title: "Edwards & Beckman 1988 — Articulatory Timing and the Prosodic Interpretation of Syllable Duration"
+year: 1988
+---
+
 # Edwards & Beckman 1988 — Articulatory Timing and the Prosodic Interpretation of Syllable Duration
 
 ## Key Findings for Synthesis

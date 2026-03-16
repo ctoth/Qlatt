@@ -1,9 +1,12 @@
-# In a Nervous Voice: Acoustic Analysis and Perception of Anxiety in Social Phobics' Speech
+---
+title: "In a Nervous Voice: Acoustic Analysis and Perception of Anxiety in Social Phobics' Speech"
+authors: "Petri Laukka, Clas Linnman, Fredrik Åhs, Anna Pissiota, Örjan Frans, Vanda Faria, Åsa Michelgård, Lieuwe Appel, Mats Fredrikson, Tomas Furmark"
+year: 2008
+venue: "Journal of Nonverbal Behavior, 32:195-214"
+doi_url: "10.1007/s10919-008-0055-9"
+---
 
-**Authors:** Petri Laukka, Clas Linnman, Fredrik Åhs, Anna Pissiota, Örjan Frans, Vanda Faria, Åsa Michelgård, Lieuwe Appel, Mats Fredrikson, Tomas Furmark
-**Year:** 2008
-**Venue:** Journal of Nonverbal Behavior, 32:195-214
-**DOI:** 10.1007/s10919-008-0055-9
+# In a Nervous Voice: Acoustic Analysis and Perception of Anxiety in Social Phobics' Speech
 
 ## One-Sentence Summary
 Provides empirically validated acoustic correlates of anxiety in authentic (not posed) speech, showing that F0 mean/max, spectral tilt (HF500), and pause proportion increase with anxiety level.

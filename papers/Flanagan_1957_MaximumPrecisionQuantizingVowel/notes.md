@@ -1,3 +1,8 @@
+---
+title: "Flanagan 1957 — Estimates of the Maximum Precision Necessary in Quantizing Certain \"Dimensions\" of Vowel Sounds"
+year: 1957
+---
+
 # Flanagan 1957 — Estimates of the Maximum Precision Necessary in Quantizing Certain "Dimensions" of Vowel Sounds
 
 ## Key Contribution

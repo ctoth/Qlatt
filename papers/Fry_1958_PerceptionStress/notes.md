@@ -1,3 +1,8 @@
+---
+title: "Fry (1958) — Experiments in the Perception of Stress"
+year: 1958
+---
+
 # Fry (1958) — Experiments in the Perception of Stress
 
 ## Implementation-Relevant Findings

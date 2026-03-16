@@ -25,6 +25,13 @@ import {
   resolveAccentAssignment,
   type AccentPolicy,
 } from "./accent-policy";
+import {
+  DEFAULT_BREAK_POLICY_PATH,
+  loadBreakPolicySync,
+  resolveLongPhraseBreak,
+  type BreakPolicy,
+  type LongPhraseBreakDecision,
+} from "./break-policy";
 import { loadTuneGrammarSync, selectTuneForPhrase, type TuneSelection } from "./tune-grammar";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,6 +102,7 @@ export function annotateProsody(
 ): PipelineToken[] {
   const provenance = options.provenance ?? null;
   const accentPolicy = loadAccentPolicySync();
+  const breakPolicy = loadBreakPolicySync();
   const tuneGrammar = loadTuneGrammarSync();
 
   // Work on a shallow copy of each token so we never mutate the input array
@@ -134,11 +142,12 @@ export function annotateProsody(
     assignPhraseEdgeTones(result, phrase, tuneSelection);
 
     // Step 7: Long phrase breaking heuristic.
-    applyLongPhraseBreaking(result, phrase);
+    const breakDecision = applyLongPhraseBreaking(result, phrase, breakPolicy);
 
     // Provenance
     if (provenance) {
       emitTuneSelectionProvenance(provenance, phrase, pi, tuneSelection, hasPrenuclearAccent);
+      emitBreakPolicyProvenance(provenance, phrase, pi, breakDecision, breakPolicy);
       emitPhraseProvenance(provenance, result, phrase, pi);
     }
   }
@@ -521,7 +530,11 @@ function assignPhraseEdgeTones(
  *
  * Citation: O'Shaughnessy 1976
  */
-function applyLongPhraseBreaking(tokens: PipelineToken[], phrase: Phrase): void {
+function applyLongPhraseBreaking(
+  tokens: PipelineToken[],
+  phrase: Phrase,
+  breakPolicy: BreakPolicy,
+): LongPhraseBreakDecision {
   // Collect the last phone index of each content word.
   const contentWordEnds: number[] = [];
   let currentWord: string | null = null;
@@ -550,14 +563,11 @@ function applyLongPhraseBreaking(tokens: PipelineToken[], phrase: Phrase): void 
     contentWordEnds.push(lastIdx);
   }
 
-  if (contentWordEnds.length <= 6) return;
-
-  // Insert breakIndex=2 at the content word nearest the midpoint.
-  const midpoint = Math.floor(contentWordEnds.length / 2);
-  const breakTokenIdx = contentWordEnds[midpoint - 1]; // -1 because "after" the midpoint word
-  if (breakTokenIdx >= 0) {
-    tokens[breakTokenIdx].breakIndex = 2;
+  const breakDecision = resolveLongPhraseBreak(breakPolicy, contentWordEnds);
+  if (breakDecision.breakTokenIndex != null && breakDecision.breakTokenIndex >= 0) {
+    tokens[breakDecision.breakTokenIndex].breakIndex = breakDecision.breakIndex;
   }
+  return breakDecision;
 }
 
 function phraseHasPrenuclearAccent(tokens: PipelineToken[], phrase: Phrase): boolean {
@@ -634,5 +644,26 @@ function emitTuneSelectionProvenance(
     subject: `phrase:${phraseIndex}`,
     reason: `Selected ${tuneSelection.phraseType} tune for punctuation ${phrase.punctuation ?? "<default>"} with hasPrenuclearAccent=${hasPrenuclearAccent}, nuclear=${tuneSelection.nuclearAccent}, edge=${tuneSelection.phraseAccent ?? "null"} ${tuneSelection.boundaryTone ?? "null"}`,
     citations: tuneSelection.citations,
+  });
+}
+
+function emitBreakPolicyProvenance(
+  provenance: ProvenanceCollector,
+  phrase: Phrase,
+  phraseIndex: number,
+  breakDecision: LongPhraseBreakDecision,
+  breakPolicy: BreakPolicy,
+): void {
+  if (breakDecision.breakTokenIndex == null) return;
+
+  provenance.add({
+    stage: "prosody",
+    type: "phrase_break_selected",
+    subject: `phrase:${phraseIndex}`,
+    reason: `Selected long-phrase break for punctuation ${phrase.punctuation ?? "<default>"} with contentWordCount=${breakDecision.contentWordCount}, breakTokenIndex=${breakDecision.breakTokenIndex}, breakIndex=${breakDecision.breakIndex}, placement=${breakPolicy.long_phrase_breaking.placement}`,
+    citations: [
+      DEFAULT_BREAK_POLICY_PATH,
+      ...breakPolicy.citations,
+    ],
   });
 }

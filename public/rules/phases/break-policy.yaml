@@ -1,0 +1,13 @@
+version: v1
+
+# Canonical long-phrase breaking policy for the current English frontend.
+# Citation:
+# - O'Shaughnessy 1976
+citations:
+  - O'Shaughnessy 1976
+
+long_phrase_breaking:
+  enabled: true
+  minimum_content_words: 7
+  break_index: 2
+  placement: pre_midpoint_content_word_end

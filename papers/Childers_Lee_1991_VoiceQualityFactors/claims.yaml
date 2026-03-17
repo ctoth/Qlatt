@@ -30,97 +30,13 @@ claims:
   unit: Hz
 - id: claim4
   type: parameter
-  concept: open_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 0.7
-- id: claim5
-  type: parameter
-  concept: open_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 0.45
-- id: claim6
-  type: parameter
-  concept: open_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 0.99
-- id: claim7
-  type: parameter
-  concept: open_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 0.91
-- id: claim8
-  type: parameter
-  concept: speed_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 2.6
-- id: claim9
-  type: parameter
-  concept: speed_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 3.5
-- id: claim10
-  type: parameter
-  concept: speed_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 1.5
-- id: claim11
-  type: parameter
-  concept: speed_quotient_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 1.4
-- id: claim12
-  type: parameter
-  concept: spectral_slope_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: -12
-- id: claim13
-  type: parameter
-  concept: spectral_slope_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: -6
-- id: claim14
-  type: parameter
-  concept: spectral_slope_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: -18
-- id: claim15
-  type: parameter
-  concept: spectral_slope_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: -18
-- id: claim16
-  type: parameter
   concept: hrf_typical_value
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
   value: -9.9
   unit: dB
-- id: claim17
+- id: claim5
   type: parameter
   concept: hrf_typical_value
   provenance:
@@ -128,7 +44,7 @@ claims:
     page: 0
   value: 2.1
   unit: dB
-- id: claim18
+- id: claim6
   type: parameter
   concept: hrf_typical_value
   provenance:
@@ -136,7 +52,7 @@ claims:
     page: 0
   value: -19.1
   unit: dB
-- id: claim19
+- id: claim7
   type: parameter
   concept: hrf_typical_value
   provenance:
@@ -144,7 +60,7 @@ claims:
     page: 0
   value: -16.7
   unit: dB
-- id: claim20
+- id: claim8
   type: parameter
   concept: nhr_h_typical_value
   provenance:
@@ -152,7 +68,7 @@ claims:
     page: 0
   value: -5.3
   unit: dB
-- id: claim21
+- id: claim9
   type: parameter
   concept: nhr_h_typical_value
   provenance:
@@ -160,7 +76,7 @@ claims:
     page: 0
   value: -6.6
   unit: dB
-- id: claim22
+- id: claim10
   type: parameter
   concept: nhr_h_typical_value
   provenance:
@@ -168,28 +84,7 @@ claims:
     page: 0
   value: 2.8
   unit: dB
-- id: claim23
-  type: parameter
-  concept: wpf_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 2.8
-- id: claim24
-  type: parameter
-  concept: wpf_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 4.0
-- id: claim25
-  type: parameter
-  concept: wpf_typical_value
-  provenance:
-    paper: Childers_Lee_1991_VoiceQualityFactors
-    page: 0
-  value: 1.8
-- id: claim26
+- id: claim11
   type: parameter
   concept: hp_filter_cutoff_typical_value
   provenance:
@@ -197,58 +92,139 @@ claims:
     page: 0
   value: 2
   unit: kHz
-- id: claim27
+- id: claim12
   type: equation
   expression: U_g(z) = \frac{K}{(1 - z_a z^{-1})(1 - z_b z^{-1})}
+  variables:
+  - symbol: U_g
+    concept: u_g
+  - symbol: z_a
+    concept: z_a
+  - symbol: z_b
+    concept: z_b
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim28
+- id: claim13
   type: equation
   expression: U_g(z) = \frac{K}{(1 - z_a z^{-1})(1 - z_b z^{-1})(1 - z_c z^{-1})}
+  variables:
+  - symbol: U_g
+    concept: u_g
+  - symbol: z_a
+    concept: z_a
+  - symbol: z_b
+    concept: z_b
+  - symbol: z_c
+    concept: z_c
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim29
+- id: claim14
   type: equation
   expression: u'_g(t) = A e^{\alpha t} \sin(\omega_g t)
+  variables:
+  - symbol: omega_g
+    concept: omega_g
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim30
+- id: claim15
   type: equation
   expression: u'_g(t) = \frac{u'_g(t_e)}{\epsilon t_a} \left( e^{-\epsilon(t-t_e)}
     - e^{-\epsilon(t_0-t_e)} \right)
+  variables:
+  - symbol: t_e
+    concept: t_e
+  - symbol: t_a
+    concept: t_a
+  - symbol: t_0
+    concept: t_0
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim31
+- id: claim16
   type: equation
   expression: OQ_{LF} = \frac{t_e + k \cdot t_a}{t_0}
+  variables:
+  - symbol: OQ_LF
+    concept: oq_lf
+  - symbol: t_e
+    concept: t_e
+  - symbol: t_a
+    concept: t_a
+  - symbol: t_0
+    concept: t_0
+  - symbol: OQ_
+    concept: oq
+  - symbol: LF
+    concept: lf
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim32
+- id: claim17
   type: equation
   expression: SQ_{LF} = \frac{t_p}{t_e + k \cdot t_a - t_p}
+  variables:
+  - symbol: SQ_LF
+    concept: sq_lf
+  - symbol: t_p
+    concept: t_p
+  - symbol: t_e
+    concept: t_e
+  - symbol: t_a
+    concept: t_a
+  - symbol: SQ_
+    concept: sq
+  - symbol: LF
+    concept: lf
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim33
+- id: claim18
   type: equation
   expression: HRF = \frac{\sum_{i \geq 2} H_i}{H_1}
+  variables:
+  - symbol: H_i
+    concept: h_i
+  - symbol: H_1
+    concept: h_1
+  - symbol: HRF
+    concept: hrf
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim34
+- id: claim19
   type: equation
   expression: NHR_h = \frac{\sum N_i}{\sum H_i} \quad \text{(above 2 kHz)}
+  variables:
+  - symbol: NHR_h
+    concept: nhr_h
+  - symbol: N_i
+    concept: n_i
+  - symbol: H_i
+    concept: h_i
+  - symbol: quad
+    concept: quad
+  - symbol: above
+    concept: above
+  - symbol: kHz
+    concept: khz
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0
-- id: claim35
+- id: claim20
   type: equation
   expression: WPF = \frac{\max(|x_i|)}{\left[ \frac{1}{N} \sum_{i=1}^{N} x_i^2 \right]^{1/2}}
+  variables:
+  - symbol: x_i
+    concept: x_i
+  - symbol: WPF
+    concept: wpf
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Childers_Lee_1991_VoiceQualityFactors
     page: 0

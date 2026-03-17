@@ -1,7 +1,7 @@
 source:
   paper: Veldhuis_1998_EfficientLFAlternative
 claims:
-- id: claim10842
+- id: claim2627
   type: parameter
   concept: lf_sample
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: us
   value: 9.4
-- id: claim10843
+- id: claim2628
   type: parameter
   concept: r_sample
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: us
   value: 13.6
-- id: claim10844
+- id: claim2629
   type: parameter
   concept: lf_update
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: us
   value: 57.8
-- id: claim10845
+- id: claim2630
   type: parameter
   concept: r_update
   provenance:

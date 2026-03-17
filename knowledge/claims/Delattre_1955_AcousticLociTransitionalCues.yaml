@@ -1,7 +1,7 @@
 source:
   paper: Delattre_1955_AcousticLociTransitionalCues
 claims:
-- id: claim1819
+- id: claim675
   type: parameter
   concept: b
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 720
-- id: claim1820
+- id: claim676
   type: parameter
   concept: d
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 1800
-- id: claim1821
+- id: claim677
   type: parameter
   concept: g
   provenance:

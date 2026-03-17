@@ -1,21 +1,7 @@
 source:
   paper: Moore_2004_AutomatedGlottalWaveformEstimation
 claims:
-- id: claim6760
-  type: parameter
-  concept: lp_model_order
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  value: 10
-- id: claim6761
-  type: parameter
-  concept: number_of_iterations
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  value: 20
-- id: claim6762
+- id: claim1938
   type: parameter
   concept: window_length
   provenance:
@@ -23,14 +9,7 @@ claims:
     page: 0
   value: 20
   unit: samples
-- id: claim6763
-  type: parameter
-  concept: frame_size
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  unit: pitch periods
-- id: claim6764
+- id: claim1939
   type: parameter
   concept: sampling_rate
   provenance:
@@ -38,57 +17,3 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim6765
-  type: parameter
-  concept: selection_percentile
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  unit: '%'
-- id: claim6766
-  type: parameter
-  concept: lip_radiation_zero
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  lower_bound: 0.95
-  upper_bound: 1.0
-- id: claim6767
-  type: observation
-  statement: '|a1| values of selected estimates should be in top 1% (99th percentile)
-    of all candidates'
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim6768
-  type: observation
-  statement: Smoother glottal derivatives should have |a1| closer to 1.0
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim6769
-  type: observation
-  statement: For modal phonation, estimates should show clear opening, closing, and
-    closed phases
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim6770
-  type: observation
-  statement: Integrated glottal waveform should be quasi-periodic within the analysis
-    frame
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim6771
-  type: observation
-  statement: Algorithm should produce similar estimates regardless of whether analysis
-    windows land on closing or opening phase
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0

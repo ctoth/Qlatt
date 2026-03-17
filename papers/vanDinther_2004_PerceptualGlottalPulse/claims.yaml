@@ -3,30 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: return_phase_ratio
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.01
-  upper_bound: 0.092
-- id: claim2
-  type: parameter
-  concept: symmetry_quotient
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.25
-  upper_bound: 0.5
-- id: claim3
-  type: parameter
-  concept: open_quotient
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.4
-  upper_bound: 0.8
-- id: claim4
-  type: parameter
   concept: perceptual_threshold
   provenance:
     paper: vanDinther_2004_PerceptualGlottalPulse
@@ -34,21 +10,7 @@ claims:
   lower_bound: 1.5
   upper_bound: 10
   unit: dB EPD
-- id: claim5
-  type: parameter
-  concept: f0
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
-  concept: sampling_rate
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  unit: kHz
-- id: claim7
+- id: claim2
   type: parameter
   concept: r1
   provenance:
@@ -56,7 +18,7 @@ claims:
     page: 0
   unit: sensitivity
   value: 2390
-- id: claim8
+- id: claim3
   type: parameter
   concept: r2
   provenance:
@@ -64,7 +26,7 @@ claims:
     page: 0
   unit: sensitivity
   value: 3267
-- id: claim9
+- id: claim4
   type: parameter
   concept: r3
   provenance:
@@ -72,7 +34,7 @@ claims:
     page: 0
   unit: sensitivity
   value: 536
-- id: claim10
+- id: claim5
   type: parameter
   concept: r4
   provenance:
@@ -80,7 +42,7 @@ claims:
     page: 0
   unit: sensitivity
   value: 1960
-- id: claim11
+- id: claim6
   type: parameter
   concept: r5
   provenance:
@@ -88,14 +50,7 @@ claims:
     page: 0
   unit: sensitivity
   value: 3338
-- id: claim12
-  type: parameter
-  concept: ro_jnd
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  value: 0.034
-- id: claim13
+- id: claim7
   type: parameter
   concept: ro_epd
   provenance:
@@ -103,14 +58,7 @@ claims:
     page: 0
   value: 8.2
   unit: dB
-- id: claim14
-  type: parameter
-  concept: rk_jnd
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  value: 0.069
-- id: claim15
+- id: claim8
   type: parameter
   concept: rk_epd
   provenance:
@@ -118,15 +66,7 @@ claims:
     page: 0
   value: 9.0
   unit: dB
-- id: claim16
-  type: parameter
-  concept: ro_jnd
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.058
-  upper_bound: 0.106
-- id: claim17
+- id: claim9
   type: parameter
   concept: ro_epd
   provenance:
@@ -135,15 +75,7 @@ claims:
   lower_bound: 6.6
   upper_bound: 8.0
   unit: dB
-- id: claim18
-  type: parameter
-  concept: ro_jnd
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.037
-  upper_bound: 0.079
-- id: claim19
+- id: claim10
   type: parameter
   concept: ro_epd
   provenance:
@@ -152,10 +84,3 @@ claims:
   lower_bound: 4.1
   upper_bound: 6.1
   unit: dB
-- id: claim20
-  type: parameter
-  concept: various_epd
-  provenance:
-    paper: vanDinther_2004_PerceptualGlottalPulse
-    page: 0
-  value: 4.3

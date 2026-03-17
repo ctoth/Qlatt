@@ -1,7 +1,7 @@
 source:
   paper: Henrich_2005_GlottalOpenQuotientSinging
 claims:
-- id: claim3969
+- id: claim1298
   type: parameter
   concept: open_quotient
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0
   upper_bound: 1
   unit: dimensionless
-- id: claim3970
+- id: claim1299
   type: parameter
   concept: open_quotient
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 0.8
   unit: dimensionless
-- id: claim3971
+- id: claim1300
   type: parameter
   concept: open_quotient
   provenance:
@@ -28,14 +28,7 @@ claims:
   lower_bound: 0.5
   upper_bound: 0.95
   unit: dimensionless
-- id: claim3972
-  type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: Hz
-- id: claim3973
+- id: claim1301
   type: parameter
   concept: vocal_intensity
   provenance:
@@ -44,7 +37,7 @@ claims:
   lower_bound: 50
   upper_bound: 110
   unit: dB SPL
-- id: claim3974
+- id: claim1302
   type: parameter
   concept: piano_intensity
   provenance:
@@ -53,7 +46,7 @@ claims:
   lower_bound: 60
   upper_bound: 70
   unit: dB SPL
-- id: claim3975
+- id: claim1303
   type: parameter
   concept: forte_intensity
   provenance:
@@ -62,7 +55,7 @@ claims:
   lower_bound: 95
   upper_bound: 105
   unit: dB SPL
-- id: claim3976
+- id: claim1304
   type: parameter
   concept: m1
   provenance:
@@ -70,7 +63,7 @@ claims:
     page: 0
   unit: SD
   value: 0.64
-- id: claim3977
+- id: claim1305
   type: parameter
   concept: m1
   provenance:
@@ -78,7 +71,7 @@ claims:
     page: 0
   unit: SD
   value: 0.64
-- id: claim3978
+- id: claim1306
   type: parameter
   concept: m1
   provenance:
@@ -86,7 +79,7 @@ claims:
     page: 0
   unit: SD
   value: 0.65
-- id: claim3979
+- id: claim1307
   type: parameter
   concept: m2
   provenance:
@@ -94,7 +87,7 @@ claims:
     page: 0
   unit: SD
   value: 0.77
-- id: claim3980
+- id: claim1308
   type: parameter
   concept: m2
   provenance:
@@ -102,7 +95,7 @@ claims:
     page: 0
   unit: SD
   value: 0.77
-- id: claim3981
+- id: claim1309
   type: parameter
   concept: m2
   provenance:
@@ -110,59 +103,53 @@ claims:
     page: 0
   unit: SD
   value: 0.77
-- id: claim3982
+- id: claim1310
   type: observation
   statement: '**Oq range by mechanism**: M1 $O_q \in [0.3, 0.8]$; M2 $O_q \in [0.5,
     0.95]$'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2005_GlottalOpenQuotientSinging
     page: 0
-- id: claim3983
-  type: observation
-  statement: '**M1 < M2**: For the same singer and comparable conditions, $O_q^{M1}
-    < O_q^{M2}$'
-  concepts: []
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim3984
+- id: claim1311
   type: observation
   statement: '**Intensity–Oq in M1**: Increasing vocal intensity must decrease $O_q$
     (partial $r$ up to $-0.90$)'
-  concepts: []
+  concepts:
+  - intensity
+  - open_quotient
   provenance:
     paper: Henrich_2005_GlottalOpenQuotientSinging
     page: 0
-- id: claim3985
+- id: claim1312
   type: observation
   statement: '**f0–Oq in M2**: Increasing fundamental frequency must decrease $O_q$
     (partial $r$ up to $-0.79$)'
-  concepts: []
+  concepts:
+  - f0
+  - fundamental_frequency
+  - open_quotient
   provenance:
     paper: Henrich_2005_GlottalOpenQuotientSinging
     page: 0
-- id: claim3986
+- id: claim1313
   type: observation
   statement: '**Intensity–Oq in M2**: No consistent correlation — should NOT be strongly
     coupled'
-  concepts: []
+  concepts:
+  - intensity
+  - open_quotient
   provenance:
     paper: Henrich_2005_GlottalOpenQuotientSinging
     page: 0
-- id: claim3987
+- id: claim1314
   type: observation
   statement: '**f0–Oq in M1**: No consistent correlation — should NOT be strongly
     coupled'
-  concepts: []
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim3988
-  type: observation
-  statement: '**Transition overlap**: At mechanism transitions, $O_q$ values should
-    converge to the overlap zone $[0.5, 0.7]$'
-  concepts: []
+  concepts:
+  - f0
+  - open_quotient
   provenance:
     paper: Henrich_2005_GlottalOpenQuotientSinging
     page: 0

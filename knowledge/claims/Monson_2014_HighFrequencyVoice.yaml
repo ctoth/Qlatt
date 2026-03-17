@@ -1,124 +1,7 @@
 source:
   paper: Monson_2014_HighFrequencyVoice
 claims:
-- id: claim6697
-  type: parameter
-  concept: sivian_hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.6
-  upper_bound: 12
-  unit: kHz
-- id: claim6698
-  type: parameter
-  concept: sivian_male
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 13
-  unit: dB
-- id: claim6699
-  type: parameter
-  concept: sivian_female
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 21
-  unit: dB
-- id: claim6700
-  type: parameter
-  concept: dunn_and_white_hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.6
-  upper_bound: 12
-  unit: kHz
-- id: claim6701
-  type: parameter
-  concept: dunn_and_white_male
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 24
-  unit: dB
-- id: claim6702
-  type: parameter
-  concept: dunn_and_white_female
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 30
-  unit: dB
-- id: claim6703
-  type: parameter
-  concept: byrne_et_al_hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.7
-  upper_bound: 18
-  unit: kHz
-- id: claim6704
-  type: parameter
-  concept: byrne_et_al_male
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 43.7
-  unit: dB
-- id: claim6705
-  type: parameter
-  concept: byrne_et_al_female
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 46.3
-  unit: dB
-- id: claim6706
-  type: parameter
-  concept: moore_et_al_hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.7
-  upper_bound: 18
-  unit: kHz
-- id: claim6707
-  type: parameter
-  concept: moore_et_al_female
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 45.2
-  unit: dB
-- id: claim6708
-  type: parameter
-  concept: monson_et_al_hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.7
-  upper_bound: 22
-  unit: kHz
-- id: claim6709
-  type: parameter
-  concept: monson_et_al_male
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 48.2
-  unit: dB
-- id: claim6710
-  type: parameter
-  concept: monson_et_al_female
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 51
-  unit: dB
-- id: claim6711
+- id: claim1923
   type: parameter
   concept: s_approximate_spectral_peak
   provenance:
@@ -127,7 +10,7 @@ claims:
   lower_bound: 5.5
   upper_bound: 8
   unit: kHz
-- id: claim6712
+- id: claim1924
   type: parameter
   concept: z_approximate_spectral_peak
   provenance:
@@ -136,7 +19,7 @@ claims:
   lower_bound: 3
   upper_bound: 8
   unit: kHz
-- id: claim6713
+- id: claim1925
   type: parameter
   concept: sh_approximate_spectral_peak
   provenance:
@@ -145,7 +28,7 @@ claims:
   lower_bound: 1
   upper_bound: 3
   unit: kHz
-- id: claim6714
+- id: claim1926
   type: parameter
   concept: zh_approximate_spectral_peak
   provenance:
@@ -154,7 +37,7 @@ claims:
   lower_bound: 1
   upper_bound: 3
   unit: kHz
-- id: claim6715
+- id: claim1927
   type: parameter
   concept: f_approximate_spectral_peak
   provenance:
@@ -163,7 +46,7 @@ claims:
   lower_bound: 8
   upper_bound: 9
   unit: kHz
-- id: claim6716
+- id: claim1928
   type: parameter
   concept: v_approximate_spectral_peak
   provenance:
@@ -171,7 +54,7 @@ claims:
     page: 0
   value: 7.5
   unit: kHz
-- id: claim6717
+- id: claim1929
   type: parameter
   concept: theta_approximate_spectral_peak
   provenance:
@@ -180,7 +63,7 @@ claims:
   lower_bound: 7
   upper_bound: 7.5
   unit: kHz
-- id: claim6718
+- id: claim1930
   type: parameter
   concept: dh_approximate_spectral_peak
   provenance:
@@ -189,56 +72,7 @@ claims:
   lower_bound: 7
   upper_bound: 7.5
   unit: kHz
-- id: claim6719
-  type: parameter
-  concept: hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz center
-- id: claim6720
-  type: parameter
-  concept: hfe_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz center
-- id: claim6721
-  type: parameter
-  concept: hfe_level
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: dB SPL
-- id: claim6722
-  type: parameter
-  concept: hfe_level
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: dB SPL
-- id: claim6723
-  type: parameter
-  concept: hfe_below_overall_level
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: dB
-- id: claim6724
-  type: parameter
-  concept: hfe_below_maximum_band
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: dB
-- id: claim6725
-  type: parameter
-  concept: naturalness_critical_range
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6726
+- id: claim1931
   type: parameter
   concept: consonant_id_at_8_khz_hp
   provenance:
@@ -246,83 +80,3 @@ claims:
     page: 0
   value: 75
   unit: '%'
-- id: claim6727
-  type: parameter
-  concept: f_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6728
-  type: parameter
-  concept: theta_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6729
-  type: parameter
-  concept: s_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6730
-  type: parameter
-  concept: sh_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6731
-  type: parameter
-  concept: piriform_fossa_antiresonance
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  unit: kHz
-- id: claim6732
-  type: observation
-  statement: HFE energy should be 15-17 dB below overall speech level in synthesized
-    output
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-- id: claim6733
-  type: observation
-  statement: Fricatives /f/ and /theta/ should have peak spectral energy near 7-9
-    kHz
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-- id: claim6734
-  type: observation
-  statement: /s/ peak should be higher in frequency than /sh/ peak
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-- id: claim6735
-  type: observation
-  statement: Low-pass filtering synthesized speech at 8 kHz should noticeably degrade
-    naturalness
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-- id: claim6736
-  type: observation
-  statement: Female voice presets should have 2-4 dB more HFE than male presets
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-- id: claim6737
-  type: observation
-  statement: Vowels /a/, /e/, /i/ should have more HFE than /o/, /u/
-  concepts: []
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0

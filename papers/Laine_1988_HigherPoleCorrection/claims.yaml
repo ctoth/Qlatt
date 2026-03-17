@@ -31,13 +31,6 @@ claims:
   unit: Hz
 - id: claim4
   type: parameter
-  concept: lambda
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-  value: 0.1
-- id: claim5
-  type: parameter
   concept: zero_bandwidths
   provenance:
     paper: Laine_1988_HigherPoleCorrection
@@ -46,7 +39,7 @@ claims:
   lower_bound: 1.25
   upper_bound: 2.0
   unit: kHz
-- id: claim6
+- id: claim5
   type: parameter
   concept: zero_bw
   provenance:
@@ -54,100 +47,40 @@ claims:
     page: 0
   value: 2.0
   unit: kHz
-- id: claim7
-  type: parameter
-  concept: hpc_sensitivity
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-  unit: dB/cm
-- id: claim8
-  type: parameter
-  concept: hpc_sensitivity
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-  unit: dB/cm
-- id: claim9
-  type: parameter
-  concept: max_hpc_variation
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-  unit: dB
-- id: claim10
+- id: claim6
   type: equation
   expression: 'For the **5-pole case**:'
+  variables:
+  - symbol: For
+    concept: for
+  - symbol: the
+    concept: the
+  - symbol: pole
+    concept: pole
+  - symbol: case
+    concept: case
   provenance:
     paper: Laine_1988_HigherPoleCorrection
     page: 0
-- id: claim11
+- id: claim7
   type: equation
   expression: $$P_p(s) = \prod_{i=1}^{N} \frac{(s - s_i)(s - s_i^*)}{s_i \cdot s_i^*}$$
+  variables:
+  - symbol: P_p
+    concept: p_p
+  - symbol: s_i
+    concept: s_i
+  - symbol: prod_
+    concept: prod
   provenance:
     paper: Laine_1988_HigherPoleCorrection
     page: 0
-- id: claim12
-  type: observation
-  statement: '**Effective length range:** l_e must be in [14, 21] cm for adult male
-    vowels'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim13
-  type: observation
-  statement: '**Zero spacing:** HPC zeros must be at odd multiples of c/(4*l_e) within
-    measurement accuracy'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim14
+- id: claim8
   type: observation
   statement: '**Zero bandwidth range:** HPC zero bandwidths must be in [1.25, 2.0]
     kHz'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim15
-  type: observation
-  statement: '**HPC sensitivity bound:** At 3.5 kHz, 4-pole HPC changes by ~4 dB per
-    cm of l_e change'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim16
-  type: observation
-  statement: '**Digital self-correction:** When l_ed = l_e, digital all-pole model
-    needs zero additional HPC'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim17
-  type: observation
-  statement: '**Polynomial convergence:** Order 30-34 polynomial must approximate
-    H(s) within 0.5 dB to 4 kHz'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim18
-  type: observation
-  statement: '**Pole-zero flatness:** Above highest pole-zero pair, response must
-    be approximately flat (~10 dB constant attenuation)'
-  concepts: []
-  provenance:
-    paper: Laine_1988_HigherPoleCorrection
-    page: 0
-- id: claim19
-  type: observation
-  statement: '**Order independence:** HPC all-zero model should give same results
-    regardless of lambda (0.05-0.2)'
-  concepts: []
+  concepts:
+  - bandwidth
   provenance:
     paper: Laine_1988_HigherPoleCorrection
     page: 0

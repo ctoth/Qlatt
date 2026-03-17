@@ -34,70 +34,70 @@ claims:
   value: 3
   unit: ms
 - id: claim5
-  type: parameter
-  concept: analysis_range
-  provenance:
-    paper: Hanson_2003_AspiratedStopsModels
-    page: 0
-  unit: ms
-- id: claim6
-  type: parameter
-  concept: formant_peaks_tracked
-  provenance:
-    paper: Hanson_2003_AspiratedStopsModels
-    page: 0
-  unit: dB
-- id: claim7
   type: equation
   expression: \bar{S}_{t_0}(\omega) = 10 \log_{10}\left[\frac{1}{K+1} \sum_{t=t_0-K/2}^{t_0+K/2}
     |S_t(\omega)|^2\right]
+  variables:
+  - symbol: t_0
+    concept: t_0
+  - symbol: S_t
+    concept: s_t
+  - symbol: log_
+    concept: log
+  - symbol: sum_
+    concept: sum
+  provenance:
+    paper: Hanson_2003_AspiratedStopsModels
+    page: 0
+- id: claim6
+  type: equation
+  expression: S_t(\omega) = \mathcal{F}[s(\tau) w(\tau - [t - T_w/2])]
+  variables:
+  - symbol: S_t
+    concept: s_t
+  - symbol: T_w
+    concept: t_w
+  - symbol: mathcal
+    concept: mathcal
+  provenance:
+    paper: Hanson_2003_AspiratedStopsModels
+    page: 0
+- id: claim7
+  type: observation
+  statement: For /p/ releases, formant amplitudes during the aspiration phase should
+    not systematically exceed those measured during /h/ in the same vowel context
+  concepts:
+  - formant
   provenance:
     paper: Hanson_2003_AspiratedStopsModels
     page: 0
 - id: claim8
-  type: equation
-  expression: S_t(\omega) = \mathcal{F}[s(\tau) w(\tau - [t - T_w/2])]
+  type: observation
+  statement: For /t/ releases, at least the F4-F5 amplitude should exceed /h/ levels
+    during the aspiration phase (observed across all 4 subjects)
+  concepts:
+  - f4
   provenance:
     paper: Hanson_2003_AspiratedStopsModels
     page: 0
 - id: claim9
   type: observation
-  statement: For /p/ releases, formant amplitudes during the aspiration phase should
-    not systematically exceed those measured during /h/ in the same vowel context
-  concepts: []
+  statement: For /k/ releases before /A/, F2 amplitude may exceed /h/ levels during
+    the aspiration phase (speaker-dependent)
+  concepts:
+  - f2
   provenance:
     paper: Hanson_2003_AspiratedStopsModels
     page: 0
 - id: claim10
   type: observation
-  statement: For /t/ releases, at least the F4-F5 amplitude should exceed /h/ levels
-    during the aspiration phase (observed across all 4 subjects)
-  concepts: []
-  provenance:
-    paper: Hanson_2003_AspiratedStopsModels
-    page: 0
-- id: claim11
-  type: observation
-  statement: For /k/ releases before /A/, F2 amplitude may exceed /h/ levels during
-    the aspiration phase (speaker-dependent)
-  concepts: []
-  provenance:
-    paper: Hanson_2003_AspiratedStopsModels
-    page: 0
-- id: claim12
-  type: observation
   statement: If frication dominates the aspiration phase, the dominant spectral peak
     should correspond to the front-cavity resonance of the original constriction (F2-F3
     for velar, F4-F5 for alveolar)
-  concepts: []
-  provenance:
-    paper: Hanson_2003_AspiratedStopsModels
-    page: 0
-- id: claim13
-  type: observation
-  statement: Labial stops should show the most classical aspiration pattern because
-    they have no significant front-cavity resonance during release
-  concepts: []
+  concepts:
+  - f2
+  - f3
+  - f4
   provenance:
     paper: Hanson_2003_AspiratedStopsModels
     page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Feinberg_2008_FemininityAveragenessVoicePitch
 claims:
-- id: claim2415
+- id: claim834
   type: parameter
   concept: female_f0
   provenance:
@@ -11,35 +11,7 @@ claims:
   lower_bound: 170.2
   upper_bound: 273.21
   unit: Hz
-- id: claim2416
-  type: parameter
-  concept: pitch_manipulation
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  unit: Hz
-- id: claim2417
-  type: parameter
-  concept: low_starting_pitch
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  unit: Hz
-- id: claim2418
-  type: parameter
-  concept: average_starting_pitch
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  unit: Hz
-- id: claim2419
-  type: parameter
-  concept: high_starting_pitch
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  unit: Hz
-- id: claim2420
+- id: claim835
   type: parameter
   concept: lowered_pitch
   provenance:
@@ -47,7 +19,7 @@ claims:
     page: 0
   value: 180
   unit: Hz
-- id: claim2421
+- id: claim836
   type: parameter
   concept: raised_pitch
   provenance:
@@ -55,7 +27,7 @@ claims:
     page: 0
   value: 220
   unit: Hz
-- id: claim2422
+- id: claim837
   type: parameter
   concept: lowered_pitch
   provenance:
@@ -63,7 +35,7 @@ claims:
     page: 0
   value: 200
   unit: Hz
-- id: claim2423
+- id: claim838
   type: parameter
   concept: raised_pitch
   provenance:
@@ -71,7 +43,7 @@ claims:
     page: 0
   value: 240
   unit: Hz
-- id: claim2424
+- id: claim839
   type: parameter
   concept: lowered_pitch
   provenance:
@@ -79,7 +51,7 @@ claims:
     page: 0
   value: 221
   unit: Hz
-- id: claim2425
+- id: claim840
   type: parameter
   concept: raised_pitch
   provenance:
@@ -87,7 +59,7 @@ claims:
     page: 0
   value: 261
   unit: Hz
-- id: claim2426
+- id: claim841
   type: parameter
   concept: attractivenesspitch_correlation
   provenance:
@@ -95,7 +67,7 @@ claims:
     page: 0
   value: 0.341
   unit: —
-- id: claim2427
+- id: claim842
   type: parameter
   concept: stimulus_duration
   provenance:
@@ -103,7 +75,7 @@ claims:
     page: 0
   value: 500
   unit: ms
-- id: claim2428
+- id: claim843
   type: parameter
   concept: stimulus_amplitude
   provenance:
@@ -111,7 +83,7 @@ claims:
     page: 0
   value: 87.5
   unit: dB SPL
-- id: claim2429
+- id: claim844
   type: parameter
   concept: recording_sample_rate
   provenance:
@@ -119,7 +91,7 @@ claims:
     page: 0
   value: 44.1
   unit: kHz
-- id: claim2430
+- id: claim845
   type: parameter
   concept: analysis_sample_rate
   provenance:
@@ -127,152 +99,74 @@ claims:
     page: 0
   value: 11.025
   unit: kHz
-- id: claim2431
-  type: parameter
-  concept: f1_low_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 584
-- id: claim2432
-  type: parameter
-  concept: f1_average_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 530
-- id: claim2433
-  type: parameter
-  concept: f1_high_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 534
-- id: claim2434
-  type: parameter
-  concept: f2_low_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1725
-- id: claim2435
-  type: parameter
-  concept: f2_average_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1773
-- id: claim2436
-  type: parameter
-  concept: f2_high_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1840
-- id: claim2437
-  type: parameter
-  concept: f3_low_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 2848
-- id: claim2438
-  type: parameter
-  concept: f3_average_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 2937
-- id: claim2439
-  type: parameter
-  concept: f3_high_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 3004
-- id: claim2440
-  type: parameter
-  concept: f4_low_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 4008
-- id: claim2441
-  type: parameter
-  concept: f4_average_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 4067
-- id: claim2442
-  type: parameter
-  concept: f4_high_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 4122
-- id: claim2443
-  type: parameter
-  concept: fdisp_low_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1141
-- id: claim2444
-  type: parameter
-  concept: fdisp_average_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1179
-- id: claim2445
-  type: parameter
-  concept: fdisp_high_pitch_group
-  provenance:
-    paper: Feinberg_2008_FemininityAveragenessVoicePitch
-    page: 0
-  value: 1196
-- id: claim2446
+- id: claim846
   type: equation
   expression: \text{Attractiveness} = \beta_0 + \beta_1 \cdot F_0
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: Attractiveness
+    concept: attractiveness
+  - symbol: beta_0
+    concept: beta_0
+  - symbol: beta_1
+    concept: beta_1
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0
-- id: claim2447
+- id: claim847
   type: equation
   expression: \text{Attractiveness} = \beta_0 + \beta_1 \cdot F_0 + \beta_2 \cdot
     F_0^2
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: Attractiveness
+    concept: attractiveness
+  - symbol: beta_0
+    concept: beta_0
+  - symbol: beta_1
+    concept: beta_1
+  - symbol: beta_2
+    concept: beta_2
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0
-- id: claim2448
+- id: claim848
   type: observation
   statement: F0–attractiveness relationship should be monotonically increasing (linear,
     not inverted-U)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0
-- id: claim2449
+- id: claim849
   type: observation
   statement: ±20 Hz PSOLA shift should not significantly alter F1–F4 or formant dispersion
-  concepts: []
+  concepts:
+  - f1
+  - f4
+  - formant
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0
-- id: claim2450
+- id: claim850
   type: observation
   statement: Effect of +20 Hz on attractiveness should be larger for low-F0 voices
     than high-F0 voices (diminishing returns)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0
-- id: claim2451
+- id: claim851
   type: observation
   statement: Female raters should show weaker pitch preference than male raters, especially
     at high starting F0
-  concepts: []
+  concepts:
+  - f0
+  - pitch
   provenance:
     paper: Feinberg_2008_FemininityAveragenessVoicePitch
     page: 0

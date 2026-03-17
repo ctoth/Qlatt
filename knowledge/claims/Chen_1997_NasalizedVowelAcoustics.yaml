@@ -1,7 +1,7 @@
 source:
   paper: Chen_1997_NasalizedVowelAcoustics
 claims:
-- id: claim1217
+- id: claim399
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 273
-- id: claim1218
+- id: claim400
   type: parameter
   concept: u
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 206
-- id: claim1219
+- id: claim401
   type: parameter
   concept: greek_small_letter_epsilon
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 223
-- id: claim1220
+- id: claim402
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 223
-- id: claim1221
+- id: claim403
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 212
-- id: claim1222
+- id: claim404
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 217
-- id: claim1223
+- id: claim405
   type: parameter
   concept: avg
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 216
-- id: claim1224
+- id: claim406
   type: parameter
   concept: e
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 236
-- id: claim1225
+- id: claim407
   type: parameter
   concept: a
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 256
-- id: claim1226
+- id: claim408
   type: parameter
   concept: o
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 238
-- id: claim1227
+- id: claim409
   type: parameter
   concept: latin_small_ligature_oe_combining_tilde
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 216
-- id: claim1228
+- id: claim410
   type: parameter
   concept: avg
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 237
-- id: claim1229
+- id: claim411
   type: parameter
   concept: i
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: dB
   value: 15
-- id: claim1230
+- id: claim412
   type: parameter
   concept: u
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: dB
   value: 11
-- id: claim1231
+- id: claim413
   type: parameter
   concept: greek_small_letter_epsilon
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: dB
   value: 10
-- id: claim1232
+- id: claim414
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: dB
   value: 12
-- id: claim1233
+- id: claim415
   type: parameter
   concept: greek_small_letter_epsilon
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: dB
   value: 8
-- id: claim1234
+- id: claim416
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: dB
   value: 8
-- id: claim1235
+- id: claim417
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: dB
   value: 8
-- id: claim1236
+- id: claim418
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: dB
   value: 6
-- id: claim1237
+- id: claim419
   type: parameter
   concept: e
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: dB
   value: 12
-- id: claim1238
+- id: claim420
   type: parameter
   concept: a
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: dB
   value: 9
-- id: claim1239
+- id: claim421
   type: parameter
   concept: o
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: dB
   value: 11
-- id: claim1240
+- id: claim422
   type: parameter
   concept: latin_small_ligature_oe_combining_tilde
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: dB
   value: 9
-- id: claim1241
+- id: claim423
   type: parameter
   concept: e
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: dB
   value: 7
-- id: claim1242
+- id: claim424
   type: parameter
   concept: a
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: dB
   value: 8
-- id: claim1243
+- id: claim425
   type: parameter
   concept: o
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: dB
   value: 9
-- id: claim1244
+- id: claim426
   type: parameter
   concept: latin_small_ligature_oe_combining_tilde
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: dB
   value: 3
-- id: claim1245
+- id: claim427
   type: parameter
   concept: a1_lowering_theoretical_change
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   value: 5
   unit: dB
-- id: claim1246
+- id: claim428
   type: parameter
   concept: p1_raising_theoretical_change
   provenance:
@@ -241,7 +241,7 @@ claims:
     page: 0
   value: 13
   unit: dB
-- id: claim1247
+- id: claim429
   type: parameter
   concept: p0_raising_theoretical_change
   provenance:
@@ -250,7 +250,7 @@ claims:
   lower_bound: 3
   upper_bound: 6
   unit: dB
-- id: claim1248
+- id: claim430
   type: parameter
   concept: theoretical_change
   provenance:
@@ -258,7 +258,7 @@ claims:
     page: 0
   value: 18
   unit: dB
-- id: claim1249
+- id: claim431
   type: parameter
   concept: theoretical_change
   provenance:
@@ -267,7 +267,7 @@ claims:
   lower_bound: 8
   upper_bound: 11
   unit: dB
-- id: claim1250
+- id: claim432
   type: parameter
   concept: oral
   provenance:
@@ -275,7 +275,7 @@ claims:
     page: 0
   unit: Hz
   value: 131
-- id: claim1251
+- id: claim433
   type: parameter
   concept: nasal
   provenance:
@@ -283,7 +283,7 @@ claims:
     page: 0
   unit: Hz
   value: 238
-- id: claim1252
+- id: claim434
   type: parameter
   concept: nostrils
   provenance:
@@ -291,7 +291,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim1253
+- id: claim435
   type: parameter
   concept: anterior_nasal
   provenance:
@@ -299,7 +299,7 @@ claims:
     page: 0
   unit: cm
   value: 3.4
-- id: claim1254
+- id: claim436
   type: parameter
   concept: middle_nasal
   provenance:
@@ -307,7 +307,7 @@ claims:
     page: 0
   unit: cm
   value: 4.4
-- id: claim1255
+- id: claim437
   type: parameter
   concept: posterior_nasal
   provenance:
@@ -315,7 +315,7 @@ claims:
     page: 0
   unit: cm
   value: 3.9
-- id: claim1256
+- id: claim438
   type: parameter
   concept: vp_opening
   provenance:
@@ -323,7 +323,7 @@ claims:
     page: 0
   unit: cm
   value: 2.0
-- id: claim1257
+- id: claim439
   type: parameter
   concept: pharynx
   provenance:
@@ -331,7 +331,7 @@ claims:
     page: 0
   unit: cm
   value: 8.0
-- id: claim1258
+- id: claim440
   type: parameter
   concept: oral_cavity
   provenance:
@@ -339,7 +339,7 @@ claims:
     page: 0
   unit: cm
   value: 8.0
-- id: claim1259
+- id: claim441
   type: parameter
   concept: sinus_ostium
   provenance:
@@ -347,7 +347,7 @@ claims:
     page: 0
   unit: cm
   value: 0.4
-- id: claim1260
+- id: claim442
   type: parameter
   concept: maxillary_sinus
   provenance:
@@ -355,29 +355,69 @@ claims:
     page: 0
   unit: cm³
   value: 8.8
-- id: claim1261
+- id: claim443
   type: equation
   expression: f_{zs} = \frac{c}{2\pi} \sqrt{\frac{S_o}{V L_o}}
+  variables:
+  - symbol: f_zs
+    concept: f_zs
+  - symbol: S_o
+    concept: s_o
+  - symbol: L_o
+    concept: l_o
+  - symbol: f_
+    concept: f
+  - symbol: zs
+    concept: zs
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
-- id: claim1262
+- id: claim444
   type: equation
   expression: S_f = \frac{S}{\sqrt{4\pi A}}
+  variables:
+  - symbol: S_f
+    concept: s_f
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
-- id: claim1263
+- id: claim445
   type: equation
   expression: T1(F_{P0}) = \frac{(0.5B1)^2 + F1^2}{[((0.5B1)^2 + (F1-F_{P0})^2) \cdot
     ((0.5B1)^2 + (F1+F_{P0})^2)]^{1/2}}
+  variables:
+  - symbol: F_P0
+    concept: f_p0
+  - symbol: T1
+    concept: t1
+  - symbol: F_
+    concept: f
+  - symbol: P0
+    concept: p0
+  - symbol: B1
+    concept: b1
+  - symbol: F1
+    concept: f1
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
-- id: claim1264
+- id: claim446
   type: equation
   expression: T2(F_{P0}) = \frac{(0.5B2)^2 + F2^2}{[((0.5B2)^2 + (F2-F_{P0})^2) \cdot
     ((0.5B2)^2 + (F2+F_{P0})^2)]^{1/2}}
+  variables:
+  - symbol: F_P0
+    concept: f_p0
+  - symbol: T2
+    concept: t2
+  - symbol: F_
+    concept: f
+  - symbol: P0
+    concept: p0
+  - symbol: B2
+    concept: b2
+  - symbol: F2
+    concept: f2
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0

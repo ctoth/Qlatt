@@ -1,9 +1,16 @@
 source:
   paper: Harrington_2011_HighBackVowelFronting
 claims:
-- id: claim3727
+- id: claim1249
   type: equation
   expression: d_V = \log(E_i / E_ɔ)
+  variables:
+  - symbol: d_V
+    concept: d_v
+  - symbol: E_i
+    concept: e_i
+  - symbol: E_
+    concept: e
   provenance:
     paper: Harrington_2011_HighBackVowelFronting
     page: 0

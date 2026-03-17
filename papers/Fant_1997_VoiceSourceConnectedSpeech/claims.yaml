@@ -3,42 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: waveshape_parameter
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  lower_bound: 0.3
-  upper_bound: 2.7
-- id: claim2
-  type: parameter
-  concept: excitation_amplitude
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: dB
-- id: claim3
-  type: parameter
-  concept: return_phase_ratio
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: '%'
-- id: claim4
-  type: parameter
-  concept: rise_time_ratio
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: '%'
-- id: claim5
-  type: parameter
-  concept: skew_ratio
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: '%'
-- id: claim6
-  type: parameter
   concept: glottal_spectrum_cutoff
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
@@ -46,36 +10,7 @@ claims:
   lower_bound: 133
   upper_bound: 3600
   unit: Hz
-- id: claim7
-  type: parameter
-  concept: open_quotient
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  lower_bound: 0.35
-  upper_bound: 0.79
-- id: claim8
-  type: parameter
-  concept: declination_time
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: ms
-- id: claim9
-  type: parameter
-  concept: abduction_factor
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 1.0
-- id: claim10
-  type: parameter
-  concept: rise_factor
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 1.0
-- id: claim11
+- id: claim2
   type: parameter
   concept: critical_f0
   provenance:
@@ -84,14 +19,7 @@ claims:
   lower_bound: 200
   upper_bound: 300
   unit: Hz
-- id: claim12
-  type: parameter
-  concept: phrase_rise_time
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  unit: ms
-- id: claim13
+- id: claim3
   type: parameter
   concept: phrase_declination
   provenance:
@@ -99,7 +27,7 @@ claims:
     page: 0
   value: 6
   unit: dB/s
-- id: claim14
+- id: claim4
   type: parameter
   concept: '03'
   provenance:
@@ -107,7 +35,7 @@ claims:
     page: 0
   unit: Hz
   value: 3600
-- id: claim15
+- id: claim5
   type: parameter
   concept: '05'
   provenance:
@@ -115,7 +43,7 @@ claims:
     page: 0
   unit: Hz
   value: 1590
-- id: claim16
+- id: claim6
   type: parameter
   concept: '07'
   provenance:
@@ -123,7 +51,7 @@ claims:
     page: 0
   unit: Hz
   value: 674
-- id: claim17
+- id: claim7
   type: parameter
   concept: '10'
   provenance:
@@ -131,7 +59,7 @@ claims:
     page: 0
   unit: Hz
   value: 420
-- id: claim18
+- id: claim8
   type: parameter
   concept: '14'
   provenance:
@@ -139,7 +67,7 @@ claims:
     page: 0
   unit: Hz
   value: 280
-- id: claim19
+- id: claim9
   type: parameter
   concept: '20'
   provenance:
@@ -147,7 +75,7 @@ claims:
     page: 0
   unit: Hz
   value: 185
-- id: claim20
+- id: claim10
   type: parameter
   concept: '27'
   provenance:
@@ -155,132 +83,222 @@ claims:
     page: 0
   unit: Hz
   value: 133
-- id: claim21
-  type: parameter
-  concept: ra_dr_dh1
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 1.0
-- id: claim22
-  type: parameter
-  concept: ra_dr_d
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 1.25
-- id: claim23
-  type: parameter
-  concept: rk_dr_dh1
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 3.0
-- id: claim24
-  type: parameter
-  concept: rk_dr_d
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: 4.5
-- id: claim25
-  type: parameter
-  concept: rg_dr_dh1
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: -12
-- id: claim26
-  type: parameter
-  concept: rg_dr_d
-  provenance:
-    paper: Fant_1997_VoiceSourceConnectedSpeech
-    page: 0
-  value: -10
-- id: claim27
+- id: claim11
   type: equation
   expression: F_a = \frac{1}{2\pi T_a} = \frac{F_0}{2\pi R_a}
+  variables:
+  - symbol: F_a
+    concept: f_a
+  - symbol: T_a
+    concept: t_a
+  - symbol: F_0
+    concept: f_0
+  - symbol: R_a
+    concept: r_a
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim28
+- id: claim12
   type: equation
   expression: R_d = \frac{U_o}{E_e} \cdot \frac{F_0}{110} \cdot 1000 = \frac{1}{0.11}
     \cdot \frac{T_d}{T_0}
+  variables:
+  - symbol: R_d
+    concept: r_d
+  - symbol: U_o
+    concept: u_o
+  - symbol: E_e
+    concept: e_e
+  - symbol: F_0
+    concept: f_0
+  - symbol: T_d
+    concept: t_d
+  - symbol: T_0
+    concept: t_0
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim29
+- id: claim13
   type: equation
   expression: R_d = \frac{U_o}{E_e} \cdot \frac{F_0}{110}
+  variables:
+  - symbol: R_d
+    concept: r_d
+  - symbol: U_o
+    concept: u_o
+  - symbol: E_e
+    concept: e_e
+  - symbol: F_0
+    concept: f_0
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim30
+- id: claim14
   type: equation
   expression: R_d = \frac{1}{0.11}(0.5 + 1.2R_k)(R_k/4R_g + R_a)
+  variables:
+  - symbol: R_d
+    concept: r_d
+  - symbol: R_k
+    concept: r_k
+  - symbol: R_g
+    concept: r_g
+  - symbol: R_a
+    concept: r_a
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim31
+- id: claim15
   type: equation
   expression: OQ_e = \frac{T_e + T_a}{T_0} = \frac{1 + R_k}{2R_g} + R_a
+  variables:
+  - symbol: OQ_e
+    concept: oq_e
+  - symbol: T_e
+    concept: t_e
+  - symbol: T_a
+    concept: t_a
+  - symbol: T_0
+    concept: t_0
+  - symbol: R_k
+    concept: r_k
+  - symbol: R_g
+    concept: r_g
+  - symbol: R_a
+    concept: r_a
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim32
+- id: claim16
   type: equation
   expression: OQ_i = \frac{T_e}{T_0} = \frac{1 + R_k}{2R_g}
+  variables:
+  - symbol: OQ_i
+    concept: oq_i
+  - symbol: T_e
+    concept: t_e
+  - symbol: T_0
+    concept: t_0
+  - symbol: R_k
+    concept: r_k
+  - symbol: R_g
+    concept: r_g
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim33
+- id: claim17
   type: equation
   expression: R_{ap} = \frac{-1 + 4.8R_d}{100}
+  variables:
+  - symbol: R_ap
+    concept: r_ap
+  - symbol: R_d
+    concept: r_d
+  - symbol: R_
+    concept: r
+  - symbol: ap
+    concept: ap
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim34
+- id: claim18
   type: equation
   expression: R_{kp} = \frac{22.4 + 11.8R_d}{100}
+  variables:
+  - symbol: R_kp
+    concept: r_kp
+  - symbol: R_d
+    concept: r_d
+  - symbol: R_
+    concept: r
+  - symbol: kp
+    concept: kp
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim35
+- id: claim19
   type: equation
   expression: H1^* - H2^* = -6 + 0.27 \exp(5.5 \cdot OQ_i)
+  variables:
+  - symbol: OQ_i
+    concept: oq_i
+  - symbol: H1
+    concept: h1
+  - symbol: H2
+    concept: h2
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim36
+- id: claim20
   type: equation
   expression: H1^* - H2^* = -7.6 + 11.1 R_d
+  variables:
+  - symbol: R_d
+    concept: r_d
+  - symbol: H1
+    concept: h1
+  - symbol: H2
+    concept: h2
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim37
+- id: claim21
   type: equation
   expression: \Delta B1 = 250 \cdot \left(\frac{F1}{500}\right)^2 \cdot \frac{R_a}{12}
+  variables:
+  - symbol: R_a
+    concept: r_a
+  - symbol: B1
+    concept: b1
+  - symbol: F1
+    concept: f1
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim38
+- id: claim22
   type: equation
   expression: \Delta B2 = \frac{\Delta B1 \cdot F1}{2 \cdot F2}
+  variables:
+  - symbol: B2
+    concept: b2
+  - symbol: B1
+    concept: b1
+  - symbol: F1
+    concept: f1
+  - symbol: F2
+    concept: f2
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim39
+- id: claim23
   type: equation
   expression: \Delta SPL = 10 \log_{10}\left(1 + \frac{\Delta F_0}{F_0}\right) \text{
     dB}
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: SPL
+    concept: spl
+  - symbol: log_
+    concept: log
+  - symbol: dB
+    concept: db
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0
-- id: claim40
+- id: claim24
   type: equation
   expression: \Delta SPL = 20 \log_{10}\left[\frac{P_s + \Delta P_s}{P_s}\right]^{1.1}
     \times \left[\frac{F_0 + \Delta F_0}{F_0}\right]^{1.35+0.5}
+  variables:
+  - symbol: P_s
+    concept: p_s
+  - symbol: F_0
+    concept: f_0
+  - symbol: SPL
+    concept: spl
+  - symbol: log_
+    concept: log
   provenance:
     paper: Fant_1997_VoiceSourceConnectedSpeech
     page: 0

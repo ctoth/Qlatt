@@ -2,80 +2,39 @@ source:
   paper: Rossato_1998_RecoveringGesturesNasalVowels
 claims:
 - id: claim1
-  type: parameter
-  concept: velum_parameter
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-  unit: normalized
-- id: claim2
-  type: parameter
-  concept: nasal_area
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-  unit: cm^2
-- id: claim3
-  type: parameter
-  concept: area_ratio
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-  unit: dimensionless
-- id: claim4
-  type: parameter
-  concept: pharyngonasal_target
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-  unit: Hz
-- id: claim5
   type: equation
   expression: d = \frac{A_n}{A_n + A_{oral}}
+  variables:
+  - symbol: A_n
+    concept: a_n
+  - symbol: A_oral
+    concept: a_oral
+  - symbol: A_
+    concept: a
+  - symbol: oral
+    concept: oral
   provenance:
     paper: Rossato_1998_RecoveringGesturesNasalVowels
     page: 0
-- id: claim6
+- id: claim2
   type: equation
   expression: \hat{v} = \arg\max_v p(v \mid H)
+  variables:
+  - symbol: arg
+    concept: arg
+  - symbol: max_v
+    concept: max_v
+  - symbol: mid
+    concept: mid
   provenance:
     paper: Rossato_1998_RecoveringGesturesNasalVowels
     page: 0
-- id: claim7
+- id: claim3
   type: equation
   expression: p(v \mid H) = \frac{p(H \mid v) \cdot p(v)}{p(H)}
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-- id: claim8
-  type: observation
-  statement: Nasality axis should be approximately perpendicular to the first 4 PCA
-    dimensions of oral vowel cepstra (angle > 80 degrees)
-  concepts: []
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-- id: claim9
-  type: observation
-  statement: For An < 0.8 cm^2, spectral changes from velum opening should be large
-    enough for reliable classification
-  concepts: []
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-- id: claim10
-  type: observation
-  statement: Pharyngo-nasal transfer functions (d=1) should cluster in the F'1-F'2
-    plane near (300, 800) Hz
-  concepts: []
-  provenance:
-    paper: Rossato_1998_RecoveringGesturesNasalVowels
-    page: 0
-- id: claim11
-  type: observation
-  statement: Area ratio d should remain discriminable across its full range, unlike
-    An which saturates
-  concepts: []
+  variables:
+  - symbol: mid
+    concept: mid
   provenance:
     paper: Rossato_1998_RecoveringGesturesNasalVowels
     page: 0

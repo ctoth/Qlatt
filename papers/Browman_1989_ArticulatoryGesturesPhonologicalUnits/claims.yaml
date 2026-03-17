@@ -4,69 +4,13 @@ claims:
 - id: claim1
   type: equation
   expression: m\ddot{x} + b\dot{x} + k(x - x_0) = 0
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim2
-  type: observation
-  statement: Increasing gestural overlap between two gestures on different tiers must
-    produce hiding (acoustic masking) of the weaker gesture
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim3
-  type: observation
-  statement: Increasing gestural overlap between gestures on the same tier must produce
-    blending (intermediate tract variable trajectories)
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim4
-  type: observation
-  statement: The CD at any tube geometry node must be predictable from the CDs of
-    its children using MIN (series) and MAX (parallel) operations
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim5
-  type: observation
-  statement: Sonorants must have Supra CD = [open] AND VT output = resonance
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim6
-  type: observation
-  statement: Obstruents must have Supra CD = [closed] or [critical] AND VT output
-    = occlusion or noise
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim7
-  type: observation
-  statement: Nasals must share Supra CD and VT characterization with vowels and laterals
-    (all resonance) but diverge at Oral level
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim8
-  type: observation
-  statement: Aspiration requires GLO [wide] timing synchronized with oral release
-    phase
-  concepts: []
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
-- id: claim9
-  type: observation
-  statement: Glides /j/ and /w/ must have same CD and CL as /i/ and /u/ but higher
-    stiffness
-  concepts: []
+  variables:
+  - symbol: x_0
+    concept: x_0
+  - symbol: ddot
+    concept: ddot
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
     page: 0

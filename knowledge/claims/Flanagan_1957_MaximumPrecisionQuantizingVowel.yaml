@@ -1,7 +1,7 @@
 source:
   paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
 claims:
-- id: claim2808
+- id: claim935
   type: parameter
   concept: second_formant_amplitude_dl
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 3
   unit: dB
-- id: claim2809
+- id: claim936
   type: parameter
   concept: overall_vowel_amplitude_dl
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 1
   unit: dB
-- id: claim2810
+- id: claim937
   type: parameter
   concept: f1
   provenance:
@@ -26,7 +26,7 @@ claims:
   lower_bound: 250
   upper_bound: 800
   unit: Hz
-- id: claim2811
+- id: claim938
   type: parameter
   concept: f2
   provenance:
@@ -35,7 +35,7 @@ claims:
   lower_bound: 800
   upper_bound: 2300
   unit: Hz
-- id: claim2812
+- id: claim939
   type: parameter
   concept: f3
   provenance:
@@ -44,7 +44,7 @@ claims:
   lower_bound: 1700
   upper_bound: 3000
   unit: Hz
-- id: claim2813
+- id: claim940
   type: parameter
   concept: f0
   provenance:
@@ -53,7 +53,7 @@ claims:
   lower_bound: 80
   upper_bound: 160
   unit: Hz
-- id: claim2814
+- id: claim941
   type: parameter
   concept: f1_frequency_step
   provenance:
@@ -61,7 +61,7 @@ claims:
     page: 0
   value: 20
   unit: Hz
-- id: claim2815
+- id: claim942
   type: parameter
   concept: f1_amplitude_step
   provenance:
@@ -69,7 +69,7 @@ claims:
     page: 0
   value: 1
   unit: dB
-- id: claim2816
+- id: claim943
   type: parameter
   concept: f2_frequency_step
   provenance:
@@ -77,7 +77,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim2817
+- id: claim944
   type: parameter
   concept: f2_amplitude_step
   provenance:
@@ -85,7 +85,7 @@ claims:
     page: 0
   value: 3
   unit: dB
-- id: claim2818
+- id: claim945
   type: parameter
   concept: f3_frequency_step
   provenance:
@@ -93,7 +93,7 @@ claims:
     page: 0
   value: 75
   unit: Hz
-- id: claim2819
+- id: claim946
   type: parameter
   concept: f3_amplitude_step
   provenance:
@@ -101,7 +101,7 @@ claims:
     page: 0
   value: 5
   unit: dB
-- id: claim2820
+- id: claim947
   type: parameter
   concept: f0_frequency_step
   provenance:
@@ -109,7 +109,7 @@ claims:
     page: 0
   value: 1
   unit: Hz
-- id: claim2821
+- id: claim948
   type: parameter
   concept: f1
   provenance:
@@ -117,7 +117,7 @@ claims:
     page: 0
   unit: Hz
   value: 40
-- id: claim2822
+- id: claim949
   type: parameter
   concept: f2
   provenance:
@@ -125,7 +125,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim2823
+- id: claim950
   type: parameter
   concept: f3
   provenance:
@@ -133,7 +133,7 @@ claims:
     page: 0
   unit: Hz
   value: 150
-- id: claim2824
+- id: claim951
   type: parameter
   concept: f0
   provenance:
@@ -141,52 +141,3 @@ claims:
     page: 0
   unit: Hz
   value: 2
-- id: claim2825
-  type: parameter
-  concept: f1_freq
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 76
-- id: claim2826
-  type: parameter
-  concept: f1_amp
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 32
-- id: claim2827
-  type: parameter
-  concept: f2_freq
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 76
-- id: claim2828
-  type: parameter
-  concept: f2_amp
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 32
-- id: claim2829
-  type: parameter
-  concept: f3_freq
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 64
-- id: claim2830
-  type: parameter
-  concept: f3_amp
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 20
-- id: claim2831
-  type: parameter
-  concept: f0_freq
-  provenance:
-    paper: Flanagan_1957_MaximumPrecisionQuantizingVowel
-    page: 0
-  value: 106

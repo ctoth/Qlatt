@@ -120,6 +120,11 @@ claims:
 - id: claim15
   type: equation
   expression: 'For anger:'
+  variables:
+  - symbol: For
+    concept: for
+  - symbol: anger
+    concept: anger
   provenance:
     paper: Mozziconacci_1998_SpeechEmotionProsody
     page: 0

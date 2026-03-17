@@ -1,7 +1,7 @@
 source:
   paper: Stevens_House_1961_AcousticalTheoryVowelProduction
 claims:
-- id: claim8931
+- id: claim2378
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 300
-- id: claim8932
+- id: claim2379
   type: parameter
   concept: ae
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 730
-- id: claim8933
+- id: claim2380
   type: parameter
   concept: a
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 720
-- id: claim8934
+- id: claim2381
   type: parameter
   concept: u
   provenance:

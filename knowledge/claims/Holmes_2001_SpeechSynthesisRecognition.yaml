@@ -1,7 +1,7 @@
 source:
   paper: Holmes_2001_SpeechSynthesisRecognition
 claims:
-- id: claim4421
+- id: claim1395
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 50
   upper_bound: 200
   unit: Hz
-- id: claim4422
+- id: claim1396
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 100
   upper_bound: 400
   unit: Hz
-- id: claim4423
+- id: claim1397
   type: parameter
   concept: formant_frequencies
   provenance:
@@ -28,21 +28,7 @@ claims:
   lower_bound: 250
   upper_bound: 5000
   unit: Hz
-- id: claim4424
-  type: parameter
-  concept: formant_bandwidths
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  unit: Hz
-- id: claim4425
-  type: parameter
-  concept: formant_bandwidths
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  unit: Hz
-- id: claim4426
+- id: claim1398
   type: parameter
   concept: frame_duration
   provenance:
@@ -50,7 +36,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim4427
+- id: claim1399
   type: parameter
   concept: sound_velocity
   provenance:
@@ -58,7 +44,7 @@ claims:
     page: 0
   value: 350
   unit: m/s
-- id: claim4428
+- id: claim1400
   type: parameter
   concept: tract_length
   provenance:
@@ -66,64 +52,31 @@ claims:
     page: 0
   value: 0.175
   unit: m
-- id: claim4429
-  type: parameter
-  concept: hms_table_parameters_per_element
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  value: 10
-- id: claim4430
-  type: observation
-  statement: HMS boundary value = fixed_contribution + (proportion x vowel_target)
-    — this formula can be verified against table entries
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim4431
-  type: observation
-  statement: Higher-rank elements should dominate transition specification in adjacent
-    pairs
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim4432
-  type: observation
-  statement: Overlapping transitions should produce parabolic-shaped combined transitions
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim4433
-  type: observation
-  statement: Radiation adds +6 dB/octave tilt to volume velocity spectrum
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim4434
+- id: claim1401
   type: observation
   statement: Closed-glottis F1 bandwidth ~80 Hz; open-glottis F1 bandwidth can be
     4x greater (~300+ Hz)
-  concepts: []
+  concepts:
+  - f1
+  - bandwidth
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0
-- id: claim4435
+- id: claim1402
   type: observation
   statement: F0 for adult males typically 50-200 Hz; females approximately one octave
     higher
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0
-- id: claim4436
+- id: claim1403
   type: observation
   statement: Female formant frequencies approximately 20% higher than male due to
     shorter vocal tract
-  concepts: []
+  concepts:
+  - formant
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0

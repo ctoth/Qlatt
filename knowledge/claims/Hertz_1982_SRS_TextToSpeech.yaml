@@ -1,7 +1,7 @@
 source:
   paper: Hertz_1982_SRS_TextToSpeech
 claims:
-- id: claim3996
+- id: claim1315
   type: parameter
   concept: voicing_amplitude
   provenance:
@@ -10,38 +10,3 @@ claims:
   lower_bound: 0
   upper_bound: 30
   unit: dB
-- id: claim3997
-  type: parameter
-  concept: aspiration_amplitude
-  provenance:
-    paper: Hertz_1982_SRS_TextToSpeech
-    page: 0
-  unit: dB
-- id: claim3998
-  type: parameter
-  concept: formant_1
-  provenance:
-    paper: Hertz_1982_SRS_TextToSpeech
-    page: 0
-  unit: Hz
-- id: claim3999
-  type: parameter
-  concept: formant_2
-  provenance:
-    paper: Hertz_1982_SRS_TextToSpeech
-    page: 0
-  unit: Hz
-- id: claim4000
-  type: parameter
-  concept: formant_3
-  provenance:
-    paper: Hertz_1982_SRS_TextToSpeech
-    page: 0
-  unit: Hz
-- id: claim4001
-  type: parameter
-  concept: duration
-  provenance:
-    paper: Hertz_1982_SRS_TextToSpeech
-    page: 0
-  unit: ms

@@ -1,42 +1,7 @@
 source:
   paper: Alku_1999_SPL_DpeakLinearity
 claims:
-- id: claim5
-  type: parameter
-  concept: negative_peak_amplitude
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  unit: dB
-- id: claim6
-  type: parameter
-  concept: sound_pressure_level
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  unit: dB
-- id: claim7
-  type: parameter
-  concept: slope
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  unit: dB/dB
-- id: claim8
-  type: parameter
-  concept: slope
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  unit: dB/dB
-- id: claim9
-  type: parameter
-  concept: h1h2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  unit: dB
-- id: claim10
+- id: claim2
   type: parameter
   concept: f1_center
   provenance:
@@ -45,7 +10,7 @@ claims:
   lower_bound: 646
   upper_bound: 851
   unit: Hz
-- id: claim11
+- id: claim3
   type: parameter
   concept: f1_center
   provenance:
@@ -54,7 +19,7 @@ claims:
   lower_bound: 528
   upper_bound: 635
   unit: Hz
-- id: claim12
+- id: claim4
   type: parameter
   concept: f0_range
   provenance:
@@ -63,7 +28,7 @@ claims:
   lower_bound: 125
   upper_bound: 500
   unit: Hz
-- id: claim13
+- id: claim5
   type: parameter
   concept: f0_range
   provenance:
@@ -72,380 +37,82 @@ claims:
   lower_bound: 75
   upper_bound: 315
   unit: Hz
-- id: claim14
-  type: parameter
-  concept: hr_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 72
-- id: claim15
-  type: parameter
-  concept: hr_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 65
-- id: claim16
-  type: parameter
-  concept: hr_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 73
-- id: claim17
-  type: parameter
-  concept: hr_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 63
-- id: claim18
-  type: parameter
-  concept: hs_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 65
-- id: claim19
-  type: parameter
-  concept: hs_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 59
-- id: claim20
-  type: parameter
-  concept: hs_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 71
-- id: claim21
-  type: parameter
-  concept: hs_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 59
-- id: claim22
-  type: parameter
-  concept: as_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 82
-- id: claim23
-  type: parameter
-  concept: as_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 69
-- id: claim24
-  type: parameter
-  concept: as_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 86
-- id: claim25
-  type: parameter
-  concept: as_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 69
-- id: claim26
-  type: parameter
-  concept: el_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 87
-- id: claim27
-  type: parameter
-  concept: el_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 68
-- id: claim28
-  type: parameter
-  concept: el_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 97
-- id: claim29
-  type: parameter
-  concept: el_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 74
-- id: claim30
-  type: parameter
-  concept: lm_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 84
-- id: claim31
-  type: parameter
-  concept: lm_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 72
-- id: claim32
-  type: parameter
-  concept: lm_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 88
-- id: claim33
-  type: parameter
-  concept: lm_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 77
-- id: claim34
-  type: parameter
-  concept: ev_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 69
-- id: claim35
-  type: parameter
-  concept: ev_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 62
-- id: claim36
-  type: parameter
-  concept: ev_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 74
-- id: claim37
-  type: parameter
-  concept: ev_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 64
-- id: claim38
-  type: parameter
-  concept: hp_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 70
-- id: claim39
-  type: parameter
-  concept: hp_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 63
-- id: claim40
-  type: parameter
-  concept: hp_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 74
-- id: claim41
-  type: parameter
-  concept: hp_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 61
-- id: claim42
-  type: parameter
-  concept: pa_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 68
-- id: claim43
-  type: parameter
-  concept: pa_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 64
-- id: claim44
-  type: parameter
-  concept: pa_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 73
-- id: claim45
-  type: parameter
-  concept: pa_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 61
-- id: claim46
-  type: parameter
-  concept: jk_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 63
-- id: claim47
-  type: parameter
-  concept: jk_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 57
-- id: claim48
-  type: parameter
-  concept: jk_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 70
-- id: claim49
-  type: parameter
-  concept: jk_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 56
-- id: claim50
-  type: parameter
-  concept: tb_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 87
-- id: claim51
-  type: parameter
-  concept: tb_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 70
-- id: claim52
-  type: parameter
-  concept: tb_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 92
-- id: claim53
-  type: parameter
-  concept: tb_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 75
-- id: claim54
-  type: parameter
-  concept: jv_spl1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 66
-- id: claim55
-  type: parameter
-  concept: jv_dpeak1
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 63
-- id: claim56
-  type: parameter
-  concept: jv_spl2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 68
-- id: claim57
-  type: parameter
-  concept: jv_dpeak2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-  value: 62
-- id: claim58
+- id: claim6
   type: equation
   expression: SPL_{speech} = 94 \text{ dB} + 20 \log \frac{RMS_{speech}}{RMS_{calibration}}
+  variables:
+  - symbol: SPL_speech
+    concept: spl_speech
+  - symbol: RMS_speech
+    concept: rms_speech
+  - symbol: RMS_calibration
+    concept: rms_calibration
+  - symbol: SPL_
+    concept: spl
+  - symbol: speech
+    concept: speech
+  - symbol: dB
+    concept: db
+  - symbol: RMS_
+    concept: rms
+  - symbol: calibration
+    concept: calibration
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim59
-  type: equation
-  expression: H(z) = 1.0 - 0.98z^{-1}
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim60
+- id: claim7
   type: equation
   expression: y(k) = ak^2 + b
+  variables:
+  - symbol: ak
+    concept: ak
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim61
+- id: claim8
   type: observation
   statement: slope1 > slope2 for any speaker's SPL-dpeak graph when wide intensity
     range is analyzed
-  concepts: []
+  concepts:
+  - intensity
+  - spl
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim62
-  type: observation
-  statement: Male speakers show steeper slopes than female speakers on average
-  concepts: []
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim63
+- id: claim9
   type: observation
   statement: H1-H2 must decrease monotonically with increasing SPL (overall trend)
-  concepts: []
+  concepts:
+  - spl
+  - h1_h2
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim64
+- id: claim10
   type: observation
   statement: PSP parameter a must increase (toward zero) with increasing SPL
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim65
+- id: claim11
   type: observation
   statement: At soft phonation levels, F0 component dominates SPL; at normal/loud
     levels, F1-region harmonics dominate
-  concepts: []
+  concepts:
+  - f0
+  - f1
+  - spl
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0
-- id: claim66
+- id: claim12
   type: observation
   statement: The knee in SPL-dpeak persists when F0 effects are removed (ESP analysis)
-  concepts: []
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim67
-  type: observation
-  statement: dpeak in dB corresponds to Ee in LF-model notation
-  concepts: []
+  concepts:
+  - f0
+  - spl
   provenance:
     paper: Alku_1999_SPL_DpeakLinearity
     page: 0

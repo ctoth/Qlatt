@@ -1,7 +1,7 @@
 source:
   paper: Behrens_Blumstein_1988_FricativeAmplitude
 claims:
-- id: claim649
+- id: claim208
   type: parameter
   concept: f
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: dB
   value: 49
-- id: claim650
+- id: claim209
   type: parameter
   concept: f
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: dB
   value: 47
-- id: claim651
+- id: claim210
   type: parameter
   concept: f
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: dB
   value: 50
-- id: claim652
+- id: claim211
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: dB
   value: 49
-- id: claim653
+- id: claim212
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: dB
   value: 48
-- id: claim654
+- id: claim213
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: dB
   value: 52
-- id: claim655
+- id: claim214
   type: parameter
   concept: s
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: dB
   value: 68
-- id: claim656
+- id: claim215
   type: parameter
   concept: s
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: dB
   value: 65
-- id: claim657
+- id: claim216
   type: parameter
   concept: s
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: dB
   value: 67
-- id: claim658
+- id: claim217
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: dB
   value: 64
-- id: claim659
+- id: claim218
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: dB
   value: 61
-- id: claim660
+- id: claim219
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: dB
   value: 64
-- id: claim661
+- id: claim220
   type: parameter
   concept: f
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: dB
   value: 52
-- id: claim662
+- id: claim221
   type: parameter
   concept: f
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: dB
   value: 48
-- id: claim663
+- id: claim222
   type: parameter
   concept: f
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: dB
   value: 50
-- id: claim664
+- id: claim223
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: dB
   value: 47
-- id: claim665
+- id: claim224
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: dB
   value: 44
-- id: claim666
+- id: claim225
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: dB
   value: 49
-- id: claim667
+- id: claim226
   type: parameter
   concept: s
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: dB
   value: 61
-- id: claim668
+- id: claim227
   type: parameter
   concept: s
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: dB
   value: 57
-- id: claim669
+- id: claim228
   type: parameter
   concept: s
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: dB
   value: 60
-- id: claim670
+- id: claim229
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: dB
   value: 65
-- id: claim671
+- id: claim230
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: dB
   value: 59
-- id: claim672
+- id: claim231
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: dB
   value: 63
-- id: claim673
+- id: claim232
   type: parameter
   concept: f_f
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: CV
   value: 28.9
-- id: claim674
+- id: claim233
   type: parameter
   concept: f_f
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: CV
   value: 29.4
-- id: claim675
+- id: claim234
   type: parameter
   concept: f_f
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: CV
   value: 27.0
-- id: claim676
+- id: claim235
   type: parameter
   concept: greek_small_letter_theta_greek_small_letter_theta_s
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: CV
   value: 26.5
-- id: claim677
+- id: claim236
   type: parameter
   concept: greek_small_letter_theta_greek_small_letter_theta_latin_small_letter_esh
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   unit: CV
   value: 27.6
-- id: claim678
+- id: claim237
   type: parameter
   concept: greek_small_letter_theta_greek_small_letter_theta_o_r_i_g
   provenance:
@@ -241,7 +241,7 @@ claims:
     page: 0
   unit: CV
   value: 26.3
-- id: claim679
+- id: claim238
   type: parameter
   concept: s_s
   provenance:
@@ -249,7 +249,7 @@ claims:
     page: 0
   unit: CV
   value: 18.1
-- id: claim680
+- id: claim239
   type: parameter
   concept: s_s
   provenance:
@@ -257,7 +257,7 @@ claims:
     page: 0
   unit: CV
   value: 18.2
-- id: claim681
+- id: claim240
   type: parameter
   concept: s_s
   provenance:
@@ -265,7 +265,7 @@ claims:
     page: 0
   unit: CV
   value: 29.1
-- id: claim682
+- id: claim241
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_esh_f
   provenance:
@@ -273,7 +273,7 @@ claims:
     page: 0
   unit: CV
   value: 23.3
-- id: claim683
+- id: claim242
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_esh_greek_small_letter_theta
   provenance:
@@ -281,7 +281,7 @@ claims:
     page: 0
   unit: CV
   value: 25.7
-- id: claim684
+- id: claim243
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_esh_o_r_i_g
   provenance:
@@ -289,45 +289,3 @@ claims:
     page: 0
   unit: CV
   value: 29.6
-- id: claim685
-  type: parameter
-  concept: f_noisetovowel_ratio
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: dB
-- id: claim686
-  type: parameter
-  concept: s_noisetovowel_ratio
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: dB
-- id: claim687
-  type: parameter
-  concept: s_spectral_peak
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: kHz
-- id: claim688
-  type: parameter
-  concept: spectral_peak
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: kHz
-- id: claim689
-  type: parameter
-  concept: f_spectrum
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: kHz
-- id: claim690
-  type: parameter
-  concept: spectrum
-  provenance:
-    paper: Behrens_Blumstein_1988_FricativeAmplitude
-    page: 0
-  unit: kHz

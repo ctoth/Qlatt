@@ -99,27 +99,13 @@ claims:
   value: 78
 - id: claim13
   type: parameter
-  concept: z
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  unit: base
-- id: claim14
-  type: parameter
-  concept: '3'
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  unit: base
-- id: claim15
-  type: parameter
   concept: m
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
   unit: base
   value: 86
-- id: claim16
+- id: claim14
   type: parameter
   concept: n
   provenance:
@@ -127,14 +113,7 @@ claims:
     page: 0
   unit: base
   value: 71
-- id: claim17
-  type: parameter
-  concept: ng
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  unit: base
-- id: claim18
+- id: claim15
   type: parameter
   concept: l
   provenance:
@@ -142,385 +121,79 @@ claims:
     page: 0
   unit: base
   value: 66
+- id: claim16
+  type: parameter
+  concept: t
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 31
+- id: claim17
+  type: parameter
+  concept: k
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 63
+- id: claim18
+  type: parameter
+  concept: s
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 95
 - id: claim19
   type: parameter
-  concept: 10_base
+  concept: f
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: 67
+  unit: msec
+  value: 83
 - id: claim20
   type: parameter
-  concept: 10_j
+  concept: theta
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: -3
+  unit: msec
+  value: 100
 - id: claim21
   type: parameter
-  concept: t_base
+  concept: d
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: 25
+  unit: msec
+  value: 38
 - id: claim22
   type: parameter
-  concept: 15_5_base
+  concept: z
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: 61
+  unit: msec
+  value: 62
 - id: claim23
   type: parameter
-  concept: 20_15_base
+  concept: n
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: 57
+  unit: msec
+  value: 48
 - id: claim24
   type: parameter
-  concept: 28_8_base
+  concept: ng
   provenance:
     paper: Umeda_1977_ConsonantDurationAmericanEnglish
     page: 0
-  value: 70
-- id: claim25
-  type: parameter
-  concept: 11_1_5_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 33
-- id: claim26
-  type: parameter
-  concept: 51_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 86
-- id: claim27
-  type: parameter
-  concept: 19_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 90
-- id: claim28
-  type: parameter
-  concept: 19_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -10
-- id: claim29
-  type: parameter
-  concept: 0_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 68
-- id: claim30
-  type: parameter
-  concept: 10_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
+  unit: msec
   value: 67
-- id: claim31
-  type: parameter
-  concept: 10_m
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -17
-- id: claim32
-  type: parameter
-  concept: 21_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 25
-- id: claim33
-  type: parameter
-  concept: 33_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 61
-- id: claim34
-  type: parameter
-  concept: 33_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -4
-- id: claim35
-  type: parameter
-  concept: 16_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 57
-- id: claim36
-  type: parameter
-  concept: 16_m
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -20
-- id: claim37
-  type: parameter
-  concept: d_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 26
-- id: claim38
-  type: parameter
-  concept: d_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -15
-- id: claim39
-  type: parameter
-  concept: g_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 51
-- id: claim40
-  type: parameter
-  concept: g_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -16
-- id: claim41
-  type: parameter
-  concept: 2_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 70
-- id: claim42
-  type: parameter
-  concept: 28_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 90
-- id: claim43
-  type: parameter
-  concept: 28_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -25
-- id: claim44
-  type: parameter
-  concept: 12_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 98
-- id: claim45
-  type: parameter
-  concept: 12_n
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: -20
-- id: claim46
-  type: parameter
-  concept: z_base
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 68
-- id: claim47
-  type: parameter
-  concept: z_preceded_by_l
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 0
-- id: claim48
-  type: parameter
-  concept: z_m
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 0
-- id: claim49
-  type: parameter
-  concept: cc_stv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 51
-- id: claim50
-  type: parameter
-  concept: cc_stv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 9
-- id: claim51
-  type: parameter
-  concept: cc_sstrv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 61
-- id: claim52
-  type: parameter
-  concept: cc_sstrv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 51
-- id: claim53
-  type: parameter
-  concept: ccvstv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 40
-- id: claim54
-  type: parameter
-  concept: ccvstv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 30
-- id: claim55
-  type: parameter
-  concept: jh_stv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 56
-- id: claim56
-  type: parameter
-  concept: jh_stv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 17
-- id: claim57
-  type: parameter
-  concept: jh_sstrv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 58
-- id: claim58
-  type: parameter
-  concept: jh_sstrv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 60
-- id: claim59
-  type: parameter
-  concept: jhvstv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 46
-- id: claim60
-  type: parameter
-  concept: jhvstv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 41
-- id: claim61
-  type: parameter
-  concept: mm_stv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 55
-- id: claim62
-  type: parameter
-  concept: mm_stv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 12
-- id: claim63
-  type: parameter
-  concept: mm_sstrv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 68
-- id: claim64
-  type: parameter
-  concept: mm_sstrv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 38
-- id: claim65
-  type: parameter
-  concept: mmvstv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 57
-- id: claim66
-  type: parameter
-  concept: mmvstv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 24
-- id: claim67
-  type: parameter
-  concept: sp_stv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 40
-- id: claim68
-  type: parameter
-  concept: sp_stv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 14
-- id: claim69
-  type: parameter
-  concept: sp_sstrv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 42
-- id: claim70
-  type: parameter
-  concept: sp_sstrv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 21
-- id: claim71
-  type: parameter
-  concept: spvstv_closure
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 46
-- id: claim72
-  type: parameter
-  concept: spvstv_aspiration
-  provenance:
-    paper: Umeda_1977_ConsonantDurationAmericanEnglish
-    page: 0
-  value: 24
-- id: claim73
+- id: claim25
   type: parameter
   concept: ttv
   provenance:
@@ -528,7 +201,7 @@ claims:
     page: 0
   unit: msec
   value: 100
-- id: claim74
+- id: claim26
   type: parameter
   concept: ntto
   provenance:
@@ -536,7 +209,7 @@ claims:
     page: 0
   unit: msec
   value: 45
-- id: claim75
+- id: claim27
   type: parameter
   concept: tpv
   provenance:
@@ -544,7 +217,7 @@ claims:
     page: 0
   unit: msec
   value: 137
-- id: claim76
+- id: claim28
   type: parameter
   concept: tpv
   provenance:
@@ -552,7 +225,7 @@ claims:
     page: 0
   unit: msec
   value: 108
-- id: claim77
+- id: claim29
   type: parameter
   concept: tbv
   provenance:
@@ -560,7 +233,7 @@ claims:
     page: 0
   unit: msec
   value: 106
-- id: claim78
+- id: claim30
   type: parameter
   concept: tdv
   provenance:
@@ -568,7 +241,7 @@ claims:
     page: 0
   unit: msec
   value: 125
-- id: claim79
+- id: claim31
   type: parameter
   concept: tdv
   provenance:
@@ -576,7 +249,7 @@ claims:
     page: 0
   unit: msec
   value: 106
-- id: claim80
+- id: claim32
   type: parameter
   concept: kkv
   provenance:
@@ -584,7 +257,7 @@ claims:
     page: 0
   unit: msec
   value: 108
-- id: claim81
+- id: claim33
   type: parameter
   concept: dbv
   provenance:
@@ -592,7 +265,7 @@ claims:
     page: 0
   unit: msec
   value: 99
-- id: claim82
+- id: claim34
   type: parameter
   concept: dtv
   provenance:
@@ -600,7 +273,7 @@ claims:
     page: 0
   unit: msec
   value: 71
-- id: claim83
+- id: claim35
   type: parameter
   concept: ffv
   provenance:
@@ -608,7 +281,7 @@ claims:
     page: 0
   unit: msec
   value: 160
-- id: claim84
+- id: claim36
   type: parameter
   concept: cssv
   provenance:
@@ -616,7 +289,7 @@ claims:
     page: 0
   unit: msec
   value: 130
-- id: claim85
+- id: claim37
   type: parameter
   concept: vfv
   provenance:
@@ -624,7 +297,7 @@ claims:
     page: 0
   unit: msec
   value: 143
-- id: claim86
+- id: claim38
   type: parameter
   concept: vpv
   provenance:
@@ -632,7 +305,7 @@ claims:
     page: 0
   unit: msec
   value: 125
-- id: claim87
+- id: claim39
   type: parameter
   concept: va
   provenance:
@@ -640,7 +313,7 @@ claims:
     page: 0
   unit: msec
   value: 99
-- id: claim88
+- id: claim40
   type: parameter
   concept: zsv
   provenance:
@@ -648,7 +321,7 @@ claims:
     page: 0
   unit: msec
   value: 136
-- id: claim89
+- id: claim41
   type: parameter
   concept: zsc
   provenance:
@@ -656,7 +329,7 @@ claims:
     page: 0
   unit: msec
   value: 113
-- id: claim90
+- id: claim42
   type: parameter
   concept: nnv
   provenance:
@@ -664,7 +337,7 @@ claims:
     page: 0
   unit: msec
   value: 100
-- id: claim91
+- id: claim43
   type: parameter
   concept: nmv
   provenance:
@@ -672,7 +345,7 @@ claims:
     page: 0
   unit: msec
   value: 130
-- id: claim92
+- id: claim44
   type: parameter
   concept: mnv
   provenance:
@@ -680,7 +353,7 @@ claims:
     page: 0
   unit: msec
   value: 150
-- id: claim93
+- id: claim45
   type: parameter
   concept: ngnv
   provenance:
@@ -688,7 +361,7 @@ claims:
     page: 0
   unit: msec
   value: 127
-- id: claim94
+- id: claim46
   type: parameter
   concept: ngmv
   provenance:

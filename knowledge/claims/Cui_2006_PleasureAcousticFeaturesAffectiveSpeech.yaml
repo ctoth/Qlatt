@@ -1,7 +1,7 @@
 source:
   paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
 claims:
-- id: claim1605
+- id: claim570
   type: parameter
   concept: spectral_roll_off
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: P
   value: 0.96255
-- id: claim1606
+- id: claim571
   type: parameter
   concept: spectral_lowhigh_ratio
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: P
   value: 0.93921
-- id: claim1607
+- id: claim572
   type: parameter
   concept: average_f0
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: P
   value: 0.19521
-- id: claim1608
+- id: claim573
   type: parameter
   concept: min_f0
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: P
   value: 0.96265
-- id: claim1609
+- id: claim574
   type: parameter
   concept: f0_dominant_ratio
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: P
   value: 0.25862
-- id: claim1610
+- id: claim575
   type: parameter
   concept: rolloff
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: P
   value: 0.89543
-- id: claim1611
+- id: claim576
   type: parameter
   concept: lhratio
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: P
   value: 0.96255
-- id: claim1612
+- id: claim577
   type: parameter
   concept: meanf0
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: P
   value: 0.19521
-- id: claim1613
+- id: claim578
   type: parameter
   concept: minf0
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: P
   value: 0.96265
-- id: claim1614
+- id: claim579
   type: parameter
   concept: dominantratio
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: P
   value: 0.0076053
-- id: claim1615
+- id: claim580
   type: parameter
   concept: p
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: P
   value: 0.8336
-- id: claim1616
+- id: claim581
   type: parameter
   concept: a
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: P
   value: -0.26857
-- id: claim1617
+- id: claim582
   type: parameter
   concept: d
   provenance:
@@ -105,40 +105,36 @@ claims:
     page: 0
   unit: P
   value: 0.0076053
-- id: claim1618
-  type: observation
-  statement: Modifying spectral rolloff and low-high ratio should change perceived
-    pleasure without affecting perceived arousal
-  concepts: []
-  provenance:
-    paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
-    page: 0
-- id: claim1619
+- id: claim583
   type: observation
   statement: Spectral features should have higher correlation with P than F0 features
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
-- id: claim1620
+- id: claim584
   type: observation
   statement: F0 Dominant Ratio should be approximately independent of arousal (different
     factor in factor analysis)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
-- id: claim1621
+- id: claim585
   type: observation
   statement: DominantRatio(F0) must be in [0, 1] by definition (bounded ratio)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
-- id: claim1622
+- id: claim586
   type: observation
   statement: Average F0 must be >= Min F0, so DominantRatio >= 0
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0

@@ -3,128 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: vowel_steady_state_dad
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 150
-  unit: ms
-- id: claim2
-  type: parameter
-  concept: vowel_steady_state_dat
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 100
-  unit: ms
-- id: claim3
-  type: parameter
-  concept: cv_transition_dad
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 65
-  unit: ms
-- id: claim4
-  type: parameter
-  concept: cv_transition_dat
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 65
-  unit: ms
-- id: claim5
-  type: parameter
-  concept: vc_transition_dad
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 70
-  unit: ms
-- id: claim6
-  type: parameter
-  concept: vc_transition_dat
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 70
-  unit: ms
-- id: claim7
-  type: parameter
-  concept: 65_ms_tad
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 90
-  unit: ms
-- id: claim8
-  type: parameter
-  concept: 150_ms_tad
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 180
-  unit: ms
-- id: claim9
-  type: parameter
-  concept: 190_ms_owt_oat
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 145
-  unit: ms
-- id: claim10
-  type: parameter
-  concept: 40_ms_owt_oat
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  value: 40
-  unit: ms
-- id: claim11
-  type: parameter
-  concept: cv_transition_duration
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ms
-- id: claim12
-  type: parameter
-  concept: vc_transition_duration
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ms
-- id: claim13
-  type: parameter
-  concept: aspirated_cv_transition
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ms
-- id: claim14
-  type: parameter
-  concept: diphthong_interior_trans
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ms
-- id: claim15
-  type: parameter
-  concept: lengthening_factor
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ratio
-- id: claim16
-  type: parameter
-  concept: voicing_cutoff_before_voice
-  provenance:
-    paper: Hertz_1991_StreamsPhonesTransitions
-    page: 0
-  unit: ms
-- id: claim17
-  type: parameter
   concept: d
   provenance:
     paper: Hertz_1991_StreamsPhonesTransitions
@@ -132,7 +10,7 @@ claims:
   unit: Hz
   lower_bound: 1750
   upper_bound: 1840
-- id: claim18
+- id: claim2
   type: parameter
   concept: t
   provenance:
@@ -140,7 +18,7 @@ claims:
     page: 0
   unit: Hz
   value: 1840
-- id: claim19
+- id: claim3
   type: parameter
   concept: a
   provenance:
@@ -149,7 +27,7 @@ claims:
   unit: Hz
   lower_bound: 1260
   upper_bound: 1420
-- id: claim20
+- id: claim4
   type: parameter
   concept: i
   provenance:
@@ -158,7 +36,7 @@ claims:
   unit: Hz
   lower_bound: 2200
   upper_bound: 2580
-- id: claim21
+- id: claim5
   type: parameter
   concept: s
   provenance:
@@ -166,7 +44,7 @@ claims:
     page: 0
   unit: Hz
   value: 1660
-- id: claim22
+- id: claim6
   type: parameter
   concept: l
   provenance:

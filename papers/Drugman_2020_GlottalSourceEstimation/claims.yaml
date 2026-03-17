@@ -32,20 +32,13 @@ claims:
   unit: ratio
 - id: claim4
   type: parameter
-  concept: lpc_order
-  provenance:
-    paper: Drugman_2020_GlottalSourceEstimation
-    page: 0
-  value: 18
-- id: claim5
-  type: parameter
   concept: fft_size
   provenance:
     paper: Drugman_2020_GlottalSourceEstimation
     page: 0
   value: 4096
   unit: points
-- id: claim6
+- id: claim5
   type: parameter
   concept: window_length
   provenance:
@@ -53,7 +46,7 @@ claims:
     page: 0
   value: 2
   unit: periods
-- id: claim7
+- id: claim6
   type: parameter
   concept: snr
   provenance:
@@ -63,7 +56,7 @@ claims:
   lower_bound: 10
   upper_bound: 80
   unit: dB
-- id: claim8
+- id: claim7
   type: parameter
   concept: error_threshold
   provenance:
@@ -71,15 +64,27 @@ claims:
     page: 0
   value: 20
   unit: '%'
-- id: claim9
+- id: claim8
   type: equation
   expression: $$\log[X(\omega)] = \log(|X(\omega)|) + j\angle X(\omega)$$
+  variables:
+  - symbol: angle
+    concept: angle
   provenance:
     paper: Drugman_2020_GlottalSourceEstimation
     page: 0
-- id: claim10
+- id: claim9
   type: equation
   expression: 'Practical version (20 Hz to 4000 Hz):'
+  variables:
+  - symbol: Practical
+    concept: practical
+  - symbol: version
+    concept: version
+  - symbol: Hz
+    concept: hz
+  - symbol: to
+    concept: to
   provenance:
     paper: Drugman_2020_GlottalSourceEstimation
     page: 0

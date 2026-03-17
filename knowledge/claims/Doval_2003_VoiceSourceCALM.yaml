@@ -1,7 +1,7 @@
 source:
   paper: Doval_2003_VoiceSourceCALM
 claims:
-- id: claim1888
+- id: claim700
   type: parameter
   concept: open_quotient
   provenance:
@@ -10,7 +10,7 @@ claims:
   unit: ratio
   lower_bound: 0.3
   upper_bound: 1.0
-- id: claim1889
+- id: claim701
   type: parameter
   concept: asymmetry_coefficient
   provenance:
@@ -19,21 +19,7 @@ claims:
   unit: ratio
   lower_bound: 0.6
   upper_bound: 0.8
-- id: claim1890
-  type: parameter
-  concept: maximum_excitation
-  provenance:
-    paper: Doval_2003_VoiceSourceCALM
-    page: 0
-  unit: volume velocity/s
-- id: claim1891
-  type: parameter
-  concept: fundamental_period
-  provenance:
-    paper: Doval_2003_VoiceSourceCALM
-    page: 0
-  unit: seconds
-- id: claim1892
+- id: claim702
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -42,140 +28,307 @@ claims:
   unit: dB
   lower_bound: 0
   upper_bound: 24
-- id: claim1893
-  type: parameter
-  concept: sampling_period
-  provenance:
-    paper: Doval_2003_VoiceSourceCALM
-    page: 0
-  unit: seconds
-- id: claim1894
+- id: claim703
   type: equation
   expression: U'_g(t) = E \cdot n'_g\left(\frac{t}{O_q T_0}; \alpha_m\right) * \perp\!\!\!\perp_{T_0}(t)
+  variables:
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: perp_T
+    concept: perp_t
+  - symbol: alpha_m
+    concept: alpha_m
+  - symbol: perp
+    concept: perp
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1895
+- id: claim704
   type: equation
   expression: \widetilde{U'_g}(f) = E O_q T_0 \tilde{n}'_g(f O_q T_0; \alpha_m)(F_0
     \perp\!\!\!\perp_{F_0}(f))
+  variables:
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: F_0
+    concept: f_0
+  - symbol: perp_F
+    concept: perp_f
+  - symbol: widetilde
+    concept: widetilde
+  - symbol: alpha_m
+    concept: alpha_m
+  - symbol: perp
+    concept: perp
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1896
+- id: claim705
   type: equation
   expression: \widetilde{U'_g}(f) \xrightarrow{f=0} I 2\pi f
+  variables:
+  - symbol: widetilde
+    concept: widetilde
+  - symbol: xrightarrow
+    concept: xrightarrow
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1897
+- id: claim706
   type: equation
   expression: \widetilde{U'_g}(f) \xrightarrow{f \to +\infty} \frac{E}{2\pi f}
+  variables:
+  - symbol: widetilde
+    concept: widetilde
+  - symbol: xrightarrow
+    concept: xrightarrow
+  - symbol: to
+    concept: to
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1898
+- id: claim707
   type: equation
   expression: F_g = \frac{1}{2\pi} \sqrt{\frac{E}{I}} = \frac{f_g(\alpha_m)}{O_q T_0}
+  variables:
+  - symbol: F_g
+    concept: f_g
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: alpha_m
+    concept: alpha_m
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1899
+- id: claim708
   type: equation
   expression: A_g = \sqrt{EI} = E O_q T_0 a_g(\alpha_m)
+  variables:
+  - symbol: A_g
+    concept: a_g
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: EI
+    concept: ei
+  - symbol: alpha_m
+    concept: alpha_m
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1900
+- id: claim709
   type: equation
   expression: \widetilde{U'_g}(f) \xrightarrow{f \to +\infty} \frac{E 2\pi F_c}{(2\pi
     f)^2}
+  variables:
+  - symbol: F_c
+    concept: f_c
+  - symbol: widetilde
+    concept: widetilde
+  - symbol: xrightarrow
+    concept: xrightarrow
+  - symbol: to
+    concept: to
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1901
+- id: claim710
   type: equation
   expression: H_1(s) = -E_0 e^{(a-s)T_e} \frac{(s-a)\sin(\omega_g T_e) + \omega_g
     \cos(\omega_g T_e)}{(s-(a+j\omega_g))(s-(a-j\omega_g))}
+  variables:
+  - symbol: H_1
+    concept: h_1
+  - symbol: E_0
+    concept: e_0
+  - symbol: T_e
+    concept: t_e
+  - symbol: omega_g
+    concept: omega_g
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1902
+- id: claim711
   type: equation
   expression: p = a_p + / - j b_p
+  variables:
+  - symbol: a_p
+    concept: a_p
+  - symbol: b_p
+    concept: b_p
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1903
+- id: claim712
   type: equation
   expression: a_p = -\frac{\pi}{O_q T_0 \tan(\pi \alpha_m)}
+  variables:
+  - symbol: a_p
+    concept: a_p
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: alpha_m
+    concept: alpha_m
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1904
+- id: claim713
   type: equation
   expression: b_p = \frac{\pi}{O_q T_0}
+  variables:
+  - symbol: b_p
+    concept: b_p
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1905
+- id: claim714
   type: equation
   expression: H(z) = \frac{b_1 z}{1 + a_1 z + a_2 z^2}
+  variables:
+  - symbol: b_1
+    concept: b_1
+  - symbol: a_1
+    concept: a_1
+  - symbol: a_2
+    concept: a_2
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1906
+- id: claim715
   type: equation
   expression: a_1 = -2 e^{-a_p T_e} \cos(b_p T_e)
+  variables:
+  - symbol: a_1
+    concept: a_1
+  - symbol: a_p
+    concept: a_p
+  - symbol: T_e
+    concept: t_e
+  - symbol: b_p
+    concept: b_p
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1907
+- id: claim716
   type: equation
   expression: a_2 = e^{-2 a_p T_e}
+  variables:
+  - symbol: a_2
+    concept: a_2
+  - symbol: a_p
+    concept: a_p
+  - symbol: T_e
+    concept: t_e
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1908
+- id: claim717
   type: equation
   expression: b_1 = E \frac{\pi^2}{b_p^3} e^{-a_p T_e} \sin(b_p T_e)
+  variables:
+  - symbol: b_1
+    concept: b_1
+  - symbol: b_p
+    concept: b_p
+  - symbol: a_p
+    concept: a_p
+  - symbol: T_e
+    concept: t_e
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1909
+- id: claim718
   type: equation
   expression: y_n = -a_1 y_{n+1} - a_2 y_{n+2} + b_1 x_{n+1}
+  variables:
+  - symbol: y_n
+    concept: y_n
+  - symbol: a_1
+    concept: a_1
+  - symbol: a_2
+    concept: a_2
+  - symbol: b_1
+    concept: b_1
+  - symbol: x_n
+    concept: x_n
+  - symbol: y_
+    concept: y
+  - symbol: x_
+    concept: x
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1910
+- id: claim719
   type: equation
   expression: H(z) = \frac{b_{TL}}{1 - a_{TL} z^{-1}}
+  variables:
+  - symbol: b_TL
+    concept: b_tl
+  - symbol: a_TL
+    concept: a_tl
+  - symbol: b_
+    concept: b
+  - symbol: TL
+    concept: tl
+  - symbol: a_
+    concept: a
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1911
+- id: claim720
   type: equation
   expression: a_{TL} = \nu - \sqrt{\nu^2 - 1}
+  variables:
+  - symbol: a_TL
+    concept: a_tl
+  - symbol: a_
+    concept: a
+  - symbol: TL
+    concept: tl
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1912
+- id: claim721
   type: equation
   expression: b_{TL} = 1 - a_{TL}
+  variables:
+  - symbol: b_TL
+    concept: b_tl
+  - symbol: a_TL
+    concept: a_tl
+  - symbol: b_
+    concept: b
+  - symbol: TL
+    concept: tl
+  - symbol: a_
+    concept: a
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0
-- id: claim1913
-  type: equation
-  expression: \nu = 1 - \frac{1}{\eta}
-  provenance:
-    paper: Doval_2003_VoiceSourceCALM
-    page: 0
-- id: claim1914
+- id: claim722
   type: equation
   expression: \eta = \frac{e^{-TL/10.0 + a_2(10.0)}}{\cos(2\pi \frac{3000}{F_s}) -
     1} - 1
+  variables:
+  - symbol: a_2
+    concept: a_2
+  - symbol: F_s
+    concept: f_s
+  - symbol: TL
+    concept: tl
   provenance:
     paper: Doval_2003_VoiceSourceCALM
     page: 0

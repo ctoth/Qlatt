@@ -1,42 +1,7 @@
 source:
   paper: Kocon_2018_VowelDirectivityRunningSpeech
 claims:
-- id: claim5695
-  type: parameter
-  concept: di_a
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-  unit: dB
-- id: claim5696
-  type: parameter
-  concept: di_i
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-  unit: dB
-- id: claim5697
-  type: parameter
-  concept: di_e
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-  unit: dB
-- id: claim5698
-  type: parameter
-  concept: di_u
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-  unit: dB
-- id: claim5699
-  type: parameter
-  concept: di_o
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-  unit: dB
-- id: claim5700
+- id: claim1643
   type: parameter
   concept: mic_distance
   provenance:
@@ -44,7 +9,7 @@ claims:
     page: 0
   value: 60
   unit: cm
-- id: claim5701
+- id: claim1644
   type: parameter
   concept: angular_resolution
   provenance:
@@ -52,7 +17,7 @@ claims:
     page: 0
   value: 15
   unit: degrees
-- id: claim5702
+- id: claim1645
   type: parameter
   concept: sampling_rate
   provenance:
@@ -60,7 +25,7 @@ claims:
     page: 0
   value: 44.1
   unit: kHz
-- id: claim5703
+- id: claim1646
   type: parameter
   concept: fft_size
   provenance:
@@ -68,7 +33,7 @@ claims:
     page: 0
   value: 2048
   unit: points
-- id: claim5704
+- id: claim1647
   type: parameter
   concept: ltas_resolution
   provenance:
@@ -76,7 +41,7 @@ claims:
     page: 0
   value: 21.5
   unit: Hz
-- id: claim5705
+- id: claim1648
   type: parameter
   concept: fade_duration
   provenance:
@@ -84,7 +49,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim5706
+- id: claim1649
   type: parameter
   concept: '00'
   provenance:
@@ -92,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 79
-- id: claim5707
+- id: claim1650
   type: parameter
   concept: '00'
   provenance:
@@ -100,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 99
-- id: claim5708
+- id: claim1651
   type: parameter
   concept: '00'
   provenance:
@@ -108,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 125
-- id: claim5709
+- id: claim1652
   type: parameter
   concept: '00'
   provenance:
@@ -116,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 157
-- id: claim5710
+- id: claim1653
   type: parameter
   concept: '00'
   provenance:
@@ -124,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 198
-- id: claim5711
+- id: claim1654
   type: parameter
   concept: '00'
   provenance:
@@ -132,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 250
-- id: claim5712
+- id: claim1655
   type: parameter
   concept: '00'
   provenance:
@@ -140,7 +105,7 @@ claims:
     page: 0
   unit: Hz
   value: 315
-- id: claim5713
+- id: claim1656
   type: parameter
   concept: '00'
   provenance:
@@ -148,7 +113,7 @@ claims:
     page: 0
   unit: Hz
   value: 397
-- id: claim5714
+- id: claim1657
   type: parameter
   concept: '00'
   provenance:
@@ -156,7 +121,7 @@ claims:
     page: 0
   unit: Hz
   value: 500
-- id: claim5715
+- id: claim1658
   type: parameter
   concept: '00'
   provenance:
@@ -164,7 +129,7 @@ claims:
     page: 0
   unit: Hz
   value: 630
-- id: claim5716
+- id: claim1659
   type: parameter
   concept: '00'
   provenance:
@@ -172,7 +137,7 @@ claims:
     page: 0
   unit: Hz
   value: 794
-- id: claim5717
+- id: claim1660
   type: parameter
   concept: '00'
   provenance:
@@ -180,7 +145,7 @@ claims:
     page: 0
   unit: Hz
   value: 1000
-- id: claim5718
+- id: claim1661
   type: parameter
   concept: '00'
   provenance:
@@ -188,7 +153,7 @@ claims:
     page: 0
   unit: Hz
   value: 1260
-- id: claim5719
+- id: claim1662
   type: parameter
   concept: '00'
   provenance:
@@ -196,7 +161,7 @@ claims:
     page: 0
   unit: Hz
   value: 1587
-- id: claim5720
+- id: claim1663
   type: parameter
   concept: '00'
   provenance:
@@ -204,7 +169,7 @@ claims:
     page: 0
   unit: Hz
   value: 2000
-- id: claim5721
+- id: claim1664
   type: parameter
   concept: '00'
   provenance:
@@ -212,7 +177,7 @@ claims:
     page: 0
   unit: Hz
   value: 2520
-- id: claim5722
+- id: claim1665
   type: parameter
   concept: '00'
   provenance:
@@ -220,7 +185,7 @@ claims:
     page: 0
   unit: Hz
   value: 3175
-- id: claim5723
+- id: claim1666
   type: parameter
   concept: '00'
   provenance:
@@ -228,7 +193,7 @@ claims:
     page: 0
   unit: Hz
   value: 4000
-- id: claim5724
+- id: claim1667
   type: parameter
   concept: '00'
   provenance:
@@ -236,7 +201,7 @@ claims:
     page: 0
   unit: Hz
   value: 5040
-- id: claim5725
+- id: claim1668
   type: parameter
   concept: '00'
   provenance:
@@ -244,7 +209,7 @@ claims:
     page: 0
   unit: Hz
   value: 6350
-- id: claim5726
+- id: claim1669
   type: parameter
   concept: '00'
   provenance:
@@ -252,7 +217,7 @@ claims:
     page: 0
   unit: Hz
   value: 8000
-- id: claim5727
+- id: claim1670
   type: parameter
   concept: '00'
   provenance:
@@ -260,7 +225,7 @@ claims:
     page: 0
   unit: Hz
   value: 10079
-- id: claim5728
+- id: claim1671
   type: parameter
   concept: '00'
   provenance:
@@ -268,7 +233,7 @@ claims:
     page: 0
   unit: Hz
   value: 12699
-- id: claim5729
+- id: claim1672
   type: parameter
   concept: '00'
   provenance:
@@ -276,7 +241,7 @@ claims:
     page: 0
   unit: Hz
   value: 16000
-- id: claim5730
+- id: claim1673
   type: parameter
   concept: '00'
   provenance:
@@ -284,57 +249,21 @@ claims:
     page: 0
   unit: Hz
   value: 20159
-- id: claim5731
+- id: claim1674
   type: equation
   expression: DI_m(\omega) = 10 \log_{10} \frac{|H_{m,0}(\omega)|^2}{\frac{1}{N} \sum_{n=0}^{N-1}
     |H_{m,n}(\omega)|^2}
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5732
-  type: observation
-  statement: DI must be non-negative (energy at 0 degrees >= average energy by definition
-    of forward-facing speech)
-  concepts: []
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5733
-  type: observation
-  statement: Weighting function at 0 degrees must be 0.0 dB for all frequencies (reference
-    direction)
-  concepts: []
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5734
-  type: observation
-  statement: Weighting function must be monotonically non-increasing from 0 to 180
-    degrees for frequencies above ~1 kHz (general trend, not strict per-band)
-  concepts: []
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5735
-  type: observation
-  statement: At frequencies below 500 Hz, attenuation at 180 degrees should be less
-    than ~7 dB
-  concepts: []
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5736
-  type: observation
-  statement: At frequencies above 8 kHz, attenuation at 180 degrees should exceed
-    20 dB
-  concepts: []
-  provenance:
-    paper: Kocon_2018_VowelDirectivityRunningSpeech
-    page: 0
-- id: claim5737
-  type: observation
-  statement: /a/ DI must exceed /o/ and /u/ DI (statistically significant finding)
-  concepts: []
+  variables:
+  - symbol: DI_m
+    concept: di_m
+  - symbol: H_m
+    concept: h_m
+  - symbol: log_
+    concept: log
+  - symbol: H_
+    concept: h
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Kocon_2018_VowelDirectivityRunningSpeech
     page: 0

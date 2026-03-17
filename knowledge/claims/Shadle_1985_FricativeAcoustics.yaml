@@ -1,21 +1,7 @@
 source:
   paper: Shadle_1985_FricativeAcoustics
 claims:
-- id: claim8120
-  type: parameter
-  concept: speed_of_sound
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: cm/sec
-- id: claim8121
-  type: parameter
-  concept: air_density
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: g/cm^3
-- id: claim8122
+- id: claim2144
   type: parameter
   concept: kinematic_viscosity
   provenance:
@@ -23,28 +9,7 @@ claims:
     page: 0
   value: 0.15
   unit: cm^2/sec
-- id: claim8123
-  type: parameter
-  concept: viscosity_coefficient
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: dyne-s/cm^2
-- id: claim8124
-  type: parameter
-  concept: heat_conduction
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: cal/cm-s-deg
-- id: claim8125
-  type: parameter
-  concept: adiabatic_constant
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  value: 1.4
-- id: claim8126
+- id: claim2145
   type: parameter
   concept: tract_tube_length
   provenance:
@@ -52,7 +17,7 @@ claims:
     page: 0
   value: 17
   unit: cm
-- id: claim8127
+- id: claim2146
   type: parameter
   concept: tract_inner_diameter
   provenance:
@@ -60,7 +25,7 @@ claims:
     page: 0
   value: 2.54
   unit: cm
-- id: claim8128
+- id: claim2147
   type: parameter
   concept: back_cavity_area
   provenance:
@@ -68,7 +33,7 @@ claims:
     page: 0
   value: 5.067
   unit: cm^2
-- id: claim8129
+- id: claim2148
   type: parameter
   concept: front_cavity_area
   provenance:
@@ -76,7 +41,7 @@ claims:
     page: 0
   value: 5.07
   unit: cm^2
-- id: claim8130
+- id: claim2149
   type: parameter
   concept: glottis_area
   provenance:
@@ -84,28 +49,7 @@ claims:
     page: 0
   value: 0.97
   unit: cm^2
-- id: claim8131
-  type: parameter
-  concept: constriction_area
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: cm^2
-- id: claim8132
-  type: parameter
-  concept: constriction_length
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: cm
-- id: claim8133
-  type: parameter
-  concept: flowrate_range
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  unit: cc/sec
-- id: claim8134
+- id: claim2150
   type: parameter
   concept: circle
   provenance:
@@ -113,7 +57,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim8135
+- id: claim2151
   type: parameter
   concept: circle
   provenance:
@@ -121,7 +65,7 @@ claims:
     page: 0
   unit: cm
   value: 2.5
-- id: claim8136
+- id: claim2152
   type: parameter
   concept: circle
   provenance:
@@ -129,7 +73,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim8137
+- id: claim2153
   type: parameter
   concept: circle
   provenance:
@@ -137,7 +81,7 @@ claims:
     page: 0
   unit: cm
   value: 2.5
-- id: claim8138
+- id: claim2154
   type: parameter
   concept: circle
   provenance:
@@ -145,7 +89,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim8139
+- id: claim2155
   type: parameter
   concept: rectangle
   provenance:
@@ -153,7 +97,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim8140
+- id: claim2156
   type: parameter
   concept: rectangle
   provenance:
@@ -161,76 +105,7 @@ claims:
     page: 0
   unit: cm
   value: 1.0
-- id: claim8141
-  type: parameter
-  concept: 1_front_cavity
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 1
-  upper_bound: 3
-- id: claim8142
-  type: parameter
-  concept: 2_front_cavity
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 4
-  upper_bound: 8
-- id: claim8143
-  type: parameter
-  concept: 3_front_cavity
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 0
-  upper_bound: 2
-- id: claim8144
-  type: parameter
-  concept: s
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 800
-  upper_bound: 4000
-  unit: Hz
-- id: claim8145
-  type: parameter
-  concept: s
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 4000
-  upper_bound: 10000
-  unit: Hz
-- id: claim8146
-  type: parameter
-  concept: sh_apical
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 300
-  upper_bound: 6000
-  unit: Hz
-- id: claim8147
-  type: parameter
-  concept: f_theta
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 800
-  upper_bound: 10000
-  unit: Hz
-- id: claim8148
-  type: parameter
-  concept: x
-  provenance:
-    paper: Shadle_1985_FricativeAcoustics
-    page: 0
-  lower_bound: 300
-  upper_bound: 4000
-  unit: Hz
-- id: claim8149
+- id: claim2157
   type: parameter
   concept: s
   provenance:
@@ -238,7 +113,7 @@ claims:
     page: 0
   unit: dB
   value: 20
-- id: claim8150
+- id: claim2158
   type: parameter
   concept: sh
   provenance:
@@ -246,7 +121,7 @@ claims:
     page: 0
   unit: dB
   value: 32
-- id: claim8151
+- id: claim2159
   type: parameter
   concept: x
   provenance:
@@ -254,7 +129,7 @@ claims:
     page: 0
   unit: dB
   value: 37
-- id: claim8152
+- id: claim2160
   type: parameter
   concept: f
   provenance:
@@ -262,7 +137,7 @@ claims:
     page: 0
   unit: dB
   value: 22
-- id: claim8153
+- id: claim2161
   type: parameter
   concept: theta
   provenance:
@@ -270,7 +145,7 @@ claims:
     page: 0
   unit: dB
   value: 22
-- id: claim8154
+- id: claim2162
   type: parameter
   concept: phi
   provenance:
@@ -278,7 +153,7 @@ claims:
     page: 0
   unit: dB
   value: 24
-- id: claim8155
+- id: claim2163
   type: parameter
   concept: '15'
   provenance:
@@ -286,7 +161,7 @@ claims:
     page: 0
   unit: Hz
   value: 5750
-- id: claim8156
+- id: claim2164
   type: parameter
   concept: '20'
   provenance:
@@ -294,7 +169,7 @@ claims:
     page: 0
   unit: Hz
   value: 4300
-- id: claim8157
+- id: claim2165
   type: parameter
   concept: '32'
   provenance:
@@ -302,7 +177,7 @@ claims:
     page: 0
   unit: Hz
   value: 2690
-- id: claim8158
+- id: claim2166
   type: parameter
   concept: '60'
   provenance:
@@ -310,7 +185,7 @@ claims:
     page: 0
   unit: Hz
   value: 1440
-- id: claim8159
+- id: claim2167
   type: parameter
   concept: '120'
   provenance:

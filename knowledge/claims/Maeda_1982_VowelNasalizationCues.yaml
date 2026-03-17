@@ -1,7 +1,7 @@
 source:
   paper: Maeda_1982_VowelNasalizationCues
 claims:
-- id: claim6445
+- id: claim1858
   type: parameter
   concept: spectral_flattening_range
   provenance:

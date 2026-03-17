@@ -3,48 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: fundamental_period
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: samples
-- id: claim2
-  type: parameter
-  concept: time_of_positive_peak
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: samples
-- id: claim3
-  type: parameter
-  concept: time_of_excitation
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: samples
-- id: claim4
-  type: parameter
-  concept: return_time
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: samples
-- id: claim5
-  type: parameter
-  concept: cycle_end
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: samples
-- id: claim6
-  type: parameter
-  concept: amplitude
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: dB
-- id: claim7
-  type: parameter
   concept: open_quotient
   provenance:
     paper: Muthukumar_2013_IterativeLFParameterFitting
@@ -52,14 +10,7 @@ claims:
   lower_bound: 0
   upper_bound: 1
   unit: dimensionless
-- id: claim8
-  type: parameter
-  concept: speed_quotient
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  unit: dimensionless
-- id: claim9
+- id: claim2
   type: parameter
   concept: return_quotient
   provenance:
@@ -68,77 +19,7 @@ claims:
   lower_bound: 0
   upper_bound: 1
   unit: dimensionless
-- id: claim10
-  type: parameter
-  concept: lpc_residual_order
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 4
-- id: claim11
-  type: parameter
-  concept: 0_fitting_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 406.89
-- id: claim12
-  type: parameter
-  concept: 0_fitting_corr
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 0.482
-- id: claim13
-  type: parameter
-  concept: 0_prediction_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 4.84
-- id: claim14
-  type: parameter
-  concept: 10_fitting_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 391.57
-- id: claim15
-  type: parameter
-  concept: 10_fitting_corr
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 0.534
-- id: claim16
-  type: parameter
-  concept: 10_prediction_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 5.061
-- id: claim17
-  type: parameter
-  concept: 30_fitting_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 390.56
-- id: claim18
-  type: parameter
-  concept: 30_fitting_corr
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 0.551
-- id: claim19
-  type: parameter
-  concept: 30_prediction_rmse
-  provenance:
-    paper: Muthukumar_2013_IterativeLFParameterFitting
-    page: 0
-  value: 4.636
-- id: claim20
+- id: claim3
   type: equation
   expression: 'e(t) = \begin{cases}
 
@@ -148,18 +29,73 @@ claims:
     - T_e)} \right] & T_e < t < T_c
 
     \end{cases}'
+  variables:
+  - symbol: E_0
+    concept: e_0
+  - symbol: T_e
+    concept: t_e
+  - symbol: T_a
+    concept: t_a
+  - symbol: T_c
+    concept: t_c
+  - symbol: cases
+    concept: cases
+  - symbol: omega_g
+    concept: omega_g
+  - symbol: varepsilon
+    concept: varepsilon
   provenance:
     paper: Muthukumar_2013_IterativeLFParameterFitting
     page: 0
-- id: claim21
+- id: claim4
   type: equation
   expression: 'Where: Open Quotient - fraction of cycle that glottis is "open"'
+  variables:
+  - symbol: Where
+    concept: where
+  - symbol: Open
+    concept: open
+  - symbol: Quotient
+    concept: quotient
+  - symbol: fraction
+    concept: fraction
+  - symbol: of
+    concept: of
+  - symbol: cycle
+    concept: cycle
+  - symbol: that
+    concept: that
+  - symbol: glottis
+    concept: glottis
+  - symbol: is
+    concept: is
   provenance:
     paper: Muthukumar_2013_IterativeLFParameterFitting
     page: 0
-- id: claim22
+- id: claim5
   type: equation
   expression: 'Where: Speed Quotient - ratio of opening to closing phase duration'
+  variables:
+  - symbol: Where
+    concept: where
+  - symbol: Speed
+    concept: speed
+  - symbol: Quotient
+    concept: quotient
+  - symbol: ratio
+    concept: ratio
+  - symbol: of
+    concept: of
+  - symbol: opening
+    concept: opening
+  - symbol: to
+    concept: to
+  - symbol: closing
+    concept: closing
+  - symbol: phase
+    concept: phase
+  - symbol: duration
+    concept: duration
   provenance:
     paper: Muthukumar_2013_IterativeLFParameterFitting
     page: 0

@@ -1,125 +1,12 @@
 source:
   paper: Perkell_1994_VoiceProductionMFDR
 claims:
-- id: claim7124
-  type: parameter
-  concept: comfortable_pae_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 190.8
-- id: claim7125
-  type: parameter
-  concept: comfortable_pae_mfdr_sd
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 75.8
-- id: claim7126
-  type: parameter
-  concept: loud_pae_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 421.4
-- id: claim7127
-  type: parameter
-  concept: loud_pae_mfdr_sd
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 140.9
-- id: claim7128
-  type: parameter
-  concept: comfortable_ae_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 171.8
-- id: claim7129
-  type: parameter
-  concept: comfortable_ae_mfdr_sd
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 70.9
-- id: claim7130
-  type: parameter
-  concept: loud_ae_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 372.0
-- id: claim7131
-  type: parameter
-  concept: loud_ae_mfdr_sd
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 139.5
-- id: claim7132
-  type: parameter
-  concept: soft_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 171.1
-- id: claim7133
-  type: parameter
-  concept: normal_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 279.6
-- id: claim7134
-  type: parameter
-  concept: loud_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 481.1
-- id: claim7135
-  type: parameter
-  concept: soft_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 248.9
-- id: claim7136
-  type: parameter
-  concept: normal_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 164.0
-- id: claim7137
-  type: parameter
-  concept: loud_mfdr_mean
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-  value: 248.9
-- id: claim7138
-  type: observation
-  statement: Revised female MFDR at comfortable loudness (~190.8 l/s/s) is higher
-    than the 1988 value (~164.0 l/s/s)
-  concepts: []
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-- id: claim7139
+- id: claim1990
   type: observation
   statement: 'The 6 dB/doubling rule: doubling MFDR from 190.8 to ~421.4 should produce
     ~8.5 dB SPL increase (actual: 74.5 to 83.1 = 8.6 dB, close match)'
-  concepts: []
-  provenance:
-    paper: Perkell_1994_VoiceProductionMFDR
-    page: 0
-- id: claim7140
-  type: observation
-  statement: Low-pass filtering at 900 Hz (as in 1988) vs 1100 Hz (as in 1993) produces
-    measurably different MFDR values from the same signal
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Perkell_1994_VoiceProductionMFDR
     page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Lucero_2009_MaleFemaleVocalFoldSimulation
 claims:
-- id: claim6418
+- id: claim1850
   type: parameter
   concept: female_vocal_fold_length
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 13
   upper_bound: 17
   unit: mm
-- id: claim6419
+- id: claim1851
   type: parameter
   concept: male_vocal_fold_length
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 15
   upper_bound: 23
   unit: mm
-- id: claim6420
+- id: claim1852
   type: parameter
   concept: female_thyroid_angle
   provenance:
@@ -27,7 +27,7 @@ claims:
     page: 0
   value: 120
   unit: degrees
-- id: claim6421
+- id: claim1853
   type: parameter
   concept: male_thyroid_angle
   provenance:
@@ -35,21 +35,7 @@ claims:
     page: 0
   value: 90
   unit: degrees
-- id: claim6422
-  type: parameter
-  concept: female_mean_f0
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-  unit: Hz
-- id: claim6423
-  type: parameter
-  concept: male_mean_f0
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-  unit: Hz
-- id: claim6424
+- id: claim1854
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -57,7 +43,7 @@ claims:
     page: 0
   value: 980
   unit: Pa
-- id: claim6425
+- id: claim1855
   type: parameter
   concept: effective_stress
   provenance:
@@ -65,7 +51,7 @@ claims:
     page: 0
   value: 60
   unit: kPa
-- id: claim6426
+- id: claim1856
   type: parameter
   concept: dorsal_gap
   provenance:
@@ -73,7 +59,7 @@ claims:
     page: 0
   value: 1.2
   unit: mm
-- id: claim6427
+- id: claim1857
   type: parameter
   concept: mass_pairs_per_side
   provenance:
@@ -81,41 +67,3 @@ claims:
     page: 0
   value: 14
   unit: —
-- id: claim6428
-  type: observation
-  statement: Female vocal fold configuration should produce more spatially concentrated
-    contact forces than male or linear configurations
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim6429
-  type: observation
-  statement: The peak contact force location in female configuration should be near
-    the center of the vocal fold length
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim6430
-  type: observation
-  statement: Male and linear configurations should show zipper-like (sequential) closing;
-    female should show center-first closing
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim6431
-  type: observation
-  statement: 'Contact force amplitudes: linear > male ~ female'
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim6432
-  type: observation
-  statement: 'Contact force spatial spread: linear ~ male > female'
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0

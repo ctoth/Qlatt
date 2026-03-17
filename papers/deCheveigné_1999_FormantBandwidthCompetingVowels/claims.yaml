@@ -3,83 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: f1
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: f2
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: f3
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
-  concept: f4
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: f5
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
-  concept: b1
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
-  concept: b2
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim8
-  type: parameter
-  concept: b3
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim9
-  type: parameter
-  concept: b4
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim10
-  type: parameter
-  concept: b5
-  provenance:
-    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
-    page: 0
-  unit: Hz
-- id: claim11
-  type: parameter
   concept: duration_values
   provenance:
     paper: deCheveigné_1999_FormantBandwidthCompetingVowels
     page: 0
   value: 270
   unit: ms
-- id: claim12
+- id: claim2
   type: parameter
   concept: spl_values
   provenance:
@@ -88,9 +18,26 @@ claims:
   lower_bound: 63
   upper_bound: 70
   unit: dB
-- id: claim13
+- id: claim3
   type: equation
   expression: \Delta A_{peak} \approx 6 \text{ dB for 4-fold bandwidth reduction}
+  variables:
+  - symbol: A_peak
+    concept: a_peak
+  - symbol: A_
+    concept: a
+  - symbol: peak
+    concept: peak
+  - symbol: dB
+    concept: db
+  - symbol: for
+    concept: for
+  - symbol: fold
+    concept: fold
+  - symbol: bandwidth
+    concept: bandwidth
+  - symbol: reduction
+    concept: reduction
   provenance:
     paper: deCheveigné_1999_FormantBandwidthCompetingVowels
     page: 0

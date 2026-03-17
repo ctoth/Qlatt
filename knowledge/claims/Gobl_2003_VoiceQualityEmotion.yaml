@@ -1,7 +1,7 @@
 source:
   paper: Gobl_2003_VoiceQualityEmotion
 claims:
-- id: claim3131
+- id: claim1094
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 60
   upper_bound: 150
   unit: Hz
-- id: claim3132
+- id: claim1095
   type: parameter
   concept: amplitude_of_voicing
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 30
   upper_bound: 55
   unit: dB
-- id: claim3133
+- id: claim1096
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 0
   upper_bound: 30
   unit: dB
-- id: claim3134
+- id: claim1097
   type: parameter
   concept: aspiration_noise
   provenance:
@@ -37,291 +37,12 @@ claims:
   lower_bound: 0
   upper_bound: 55
   unit: dB
-- id: claim3135
+- id: claim1098
   type: parameter
   concept: first_formant_bandwidth
   provenance:
     paper: Gobl_2003_VoiceQualityEmotion
     page: 0
   lower_bound: 50
-  upper_bound: 250
-  unit: Hz
-- id: claim3136
-  type: parameter
-  concept: modal_f0
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 120
-- id: claim3137
-  type: parameter
-  concept: modal_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 50
-  upper_bound: 55
-  unit: dB
-- id: claim3138
-  type: parameter
-  concept: modal_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 10
-  upper_bound: 15
-  unit: dB
-- id: claim3139
-  type: parameter
-  concept: modal_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3140
-  type: parameter
-  concept: modal_di
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3141
-  type: parameter
-  concept: modal_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 120
-  upper_bound: 150
-  unit: Hz
-- id: claim3142
-  type: parameter
-  concept: tense_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 42
-  upper_bound: 48
-  unit: dB
-- id: claim3143
-  type: parameter
-  concept: tense_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 5
-  upper_bound: 8
-  unit: dB
-- id: claim3144
-  type: parameter
-  concept: tense_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3145
-  type: parameter
-  concept: tense_di
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3146
-  type: parameter
-  concept: tense_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 50
-  upper_bound: 70
-  unit: Hz
-- id: claim3147
-  type: parameter
-  concept: harsh_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 42
-  upper_bound: 48
-  unit: dB
-- id: claim3148
-  type: parameter
-  concept: harsh_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 5
-  upper_bound: 8
-  unit: dB
-- id: claim3149
-  type: parameter
-  concept: harsh_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3150
-  type: parameter
-  concept: harsh_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 50
-  upper_bound: 70
-  unit: Hz
-- id: claim3151
-  type: parameter
-  concept: breathy_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 35
-  upper_bound: 42
-  unit: dB
-- id: claim3152
-  type: parameter
-  concept: breathy_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 20
-  upper_bound: 30
-  unit: dB
-- id: claim3153
-  type: parameter
-  concept: breathy_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 35
-  upper_bound: 50
-  unit: dB
-- id: claim3154
-  type: parameter
-  concept: breathy_di
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3155
-  type: parameter
-  concept: breathy_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 200
-  upper_bound: 250
-  unit: Hz
-- id: claim3156
-  type: parameter
-  concept: whispery_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 30
-  upper_bound: 40
-  unit: dB
-- id: claim3157
-  type: parameter
-  concept: whispery_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 22
-  upper_bound: 30
-  unit: dB
-- id: claim3158
-  type: parameter
-  concept: whispery_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 45
-  upper_bound: 55
-  unit: dB
-- id: claim3159
-  type: parameter
-  concept: whispery_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 200
-  upper_bound: 250
-  unit: Hz
-- id: claim3160
-  type: parameter
-  concept: creaky_f0
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: -30
-  unit: Hz
-- id: claim3161
-  type: parameter
-  concept: creaky_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 50
-  upper_bound: 55
-  unit: dB
-- id: claim3162
-  type: parameter
-  concept: creaky_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 10
-  upper_bound: 15
-  unit: dB
-- id: claim3163
-  type: parameter
-  concept: creaky_ah
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: 0
-- id: claim3164
-  type: parameter
-  concept: creaky_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 120
-  upper_bound: 150
-  unit: Hz
-- id: claim3165
-  type: parameter
-  concept: laxcreaky_f0
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  value: -30
-  unit: Hz
-- id: claim3166
-  type: parameter
-  concept: laxcreaky_av
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 35
-  upper_bound: 42
-  unit: dB
-- id: claim3167
-  type: parameter
-  concept: laxcreaky_tl
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 20
-  upper_bound: 30
-  unit: dB
-- id: claim3168
-  type: parameter
-  concept: laxcreaky_b1
-  provenance:
-    paper: Gobl_2003_VoiceQualityEmotion
-    page: 0
-  lower_bound: 200
   upper_bound: 250
   unit: Hz

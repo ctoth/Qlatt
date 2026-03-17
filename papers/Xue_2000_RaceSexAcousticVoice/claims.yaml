@@ -122,123 +122,56 @@ claims:
   unit: ratio
   value: 0.069
 - id: claim16
-  type: parameter
-  concept: f0_hz_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 125.91
-- id: claim17
-  type: parameter
-  concept: f0_hz_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 181.35
-- id: claim18
-  type: parameter
-  concept: f0_hz_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 42.1
-- id: claim19
-  type: parameter
-  concept: jita_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 183.01
-- id: claim20
-  type: parameter
-  concept: jita_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 113.08
-- id: claim21
-  type: parameter
-  concept: jita_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 4.94
-- id: claim22
-  type: parameter
-  concept: spi_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 18.07
-- id: claim23
-  type: parameter
-  concept: spi_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 11.18
-- id: claim24
-  type: parameter
-  concept: spi_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 11.92
-- id: claim25
-  type: parameter
-  concept: std_hz_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 3.32
-- id: claim26
-  type: parameter
-  concept: std_hz_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 7.51
-- id: claim27
-  type: parameter
-  concept: std_hz_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 5.06
-- id: claim28
   type: equation
   expression: \text{Harmonic amplitude rolloff} \approx -12 \text{ dB/octave}
+  variables:
+  - symbol: Harmonic
+    concept: harmonic
+  - symbol: amplitude
+    concept: amplitude
+  - symbol: rolloff
+    concept: rolloff
+  - symbol: dB
+    concept: db
+  - symbol: octave
+    concept: octave
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim29
+- id: claim17
   type: observation
   statement: Absolute jitter (us) should be higher for lower F0 voices when percentage
     jitter is held constant (jitter is period-dependent)
-  concepts: []
+  concepts:
+  - f0
+  - jitter
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim30
+- id: claim18
   type: observation
   statement: SPI should increase as F0 decreases, given -12 dB/octave harmonic rolloff
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim31
+- id: claim19
   type: observation
   statement: STD Hz should scale with mean F0 (higher F0 -> more absolute variation
     in Hz for equivalent relative variation)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim32
+- id: claim20
   type: observation
   statement: NHR, VTI, shimmer, and percentage-based perturbation measures should
     be approximately F0-independent
-  concepts: []
+  concepts:
+  - f0
+  - shimmer
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0

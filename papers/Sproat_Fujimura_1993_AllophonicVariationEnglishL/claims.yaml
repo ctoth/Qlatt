@@ -3,48 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: f1_at_l
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: f2_at_l
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: f3_at_l
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
-  concept: tip_delay
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  unit: seconds
-- id: claim5
-  type: parameter
-  concept: preboundary_rime_duration
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  unit: seconds
-- id: claim6
-  type: parameter
   concept: cs
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
   unit: Hz
   value: 1300
-- id: claim7
+- id: claim2
   type: parameter
   concept: ch
   provenance:
@@ -52,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 1200
-- id: claim8
+- id: claim3
   type: parameter
   concept: dr
   provenance:
@@ -60,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 1400
-- id: claim9
+- id: claim4
   type: parameter
   concept: rs
   provenance:
@@ -68,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 1350
-- id: claim10
+- id: claim5
   type: parameter
   concept: as
   provenance:
@@ -76,126 +41,65 @@ claims:
     page: 0
   unit: Hz
   value: 1100
-- id: claim11
-  type: parameter
-  concept: cs_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.4
-- id: claim12
-  type: parameter
-  concept: cs_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.39
-- id: claim13
-  type: parameter
-  concept: ch_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.42
-- id: claim14
-  type: parameter
-  concept: ch_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.43
-- id: claim15
-  type: parameter
-  concept: dr_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.63
-- id: claim16
-  type: parameter
-  concept: dr_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.57
-- id: claim17
-  type: parameter
-  concept: rs_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.71
-- id: claim18
-  type: parameter
-  concept: rs_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.51
-- id: claim19
-  type: parameter
-  concept: as_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.47
-- id: claim20
-  type: parameter
-  concept: as_corr
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-  value: 0.36
-- id: claim21
+- id: claim6
   type: equation
   expression: \text{Tip Delay} = t(\text{Tip Extremum}) - t(\text{Mid Lowering Extremum})
+  variables:
+  - symbol: Tip
+    concept: tip
+  - symbol: Delay
+    concept: delay
+  - symbol: Extremum
+    concept: extremum
+  - symbol: Mid
+    concept: mid
+  - symbol: Lowering
+    concept: lowering
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
-- id: claim22
+- id: claim7
   type: observation
   statement: F2 of syllable-final /l/ must be lower than F2 of syllable-initial /l/
     (by approximately 200-500 Hz)
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
-- id: claim23
+- id: claim8
   type: observation
   statement: F3 of syllable-final /l/ must be lower than F3 of syllable-initial /l/
     (by approximately 200-600 Hz)
-  concepts: []
+  concepts:
+  - f3
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
-- id: claim24
+- id: claim9
   type: observation
   statement: Increasing pre-boundary duration should correlate with lower F2 at /l/
-  concepts: []
+  concepts:
+  - f2
+  - duration
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
-- id: claim25
+- id: claim10
   type: observation
   statement: Dark /l/ F2 target should be in range 800-1000 Hz; light /l/ F2 target
     in range 1200-1400 Hz
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0
-- id: claim26
+- id: claim11
   type: observation
   statement: Dark /l/ F3 should be approximately 2200-2600 Hz; light /l/ F3 approximately
     2800-3200 Hz
-  concepts: []
-  provenance:
-    paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
-    page: 0
-- id: claim27
-  type: observation
-  statement: 'The allophonic distinction is gradient: intermediate values should exist
-    for /l/ in intermediate prosodic positions'
-  concepts: []
+  concepts:
+  - f3
   provenance:
     paper: Sproat_Fujimura_1993_AllophonicVariationEnglishL
     page: 0

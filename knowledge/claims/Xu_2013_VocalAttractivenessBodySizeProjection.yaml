@@ -1,155 +1,41 @@
 source:
   paper: Xu_2013_VocalAttractivenessBodySizeProjection
 claims:
-- id: claim10996
-  type: parameter
-  concept: voice_quality_levels
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 3
-- id: claim10997
-  type: parameter
-  concept: formant_shift_levels
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 3
-- id: claim10998
-  type: parameter
-  concept: pitch_shift_levels
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 3
-- id: claim10999
-  type: parameter
-  concept: pitch_range_levels
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 3
-- id: claim11000
-  type: parameter
-  concept: centre_of_gravity_pressed
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 585
-- id: claim11001
-  type: parameter
-  concept: centre_of_gravity_modal
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 473
-- id: claim11002
-  type: parameter
-  concept: centre_of_gravity_breathy
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 353
-- id: claim11003
-  type: parameter
-  concept: h1h2_pressed
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: -1.4
-- id: claim11004
-  type: parameter
-  concept: h1h2_modal
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 3.3
-- id: claim11005
-  type: parameter
-  concept: h1h2_breathy
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 5.1
-- id: claim11006
-  type: parameter
-  concept: h1a1_pressed
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: -4.6
-- id: claim11007
-  type: parameter
-  concept: h1a1_modal
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 0.6
-- id: claim11008
-  type: parameter
-  concept: h1a1_breathy
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: 5.2
-- id: claim11009
-  type: parameter
-  concept: h1a3_pressed
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: -43.1
-- id: claim11010
-  type: parameter
-  concept: h1a3_modal
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: -36.3
-- id: claim11011
-  type: parameter
-  concept: h1a3_breathy
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-  value: -25.9
-- id: claim11012
+- id: claim2691
   type: observation
   statement: Breathy voice quality should be rated more attractive than modal or pressed
     for both male and female synthetic voices
-  concepts: []
+  concepts:
+  - voice_quality
   provenance:
     paper: Xu_2013_VocalAttractivenessBodySizeProjection
     page: 0
-- id: claim11013
+- id: claim2692
   type: observation
   statement: 'For female voices: higher F0 + wider formant dispersion + breathiness
     should maximize attractiveness'
-  concepts: []
+  concepts:
+  - f0
+  - formant
   provenance:
     paper: Xu_2013_VocalAttractivenessBodySizeProjection
     page: 0
-- id: claim11014
+- id: claim2693
   type: observation
   statement: 'For male voices: lower F0 + narrower formant dispersion + breathiness
     should maximize attractiveness'
-  concepts: []
+  concepts:
+  - f0
+  - formant
   provenance:
     paper: Xu_2013_VocalAttractivenessBodySizeProjection
     page: 0
-- id: claim11015
-  type: observation
-  statement: The same parameter settings that maximize female attractiveness should
-    also maximize perceived happiness
-  concepts: []
-  provenance:
-    paper: Xu_2013_VocalAttractivenessBodySizeProjection
-    page: 0
-- id: claim11016
+- id: claim2694
   type: observation
   statement: Normal or narrow pitch range should be preferred over wide pitch range
     for both sexes
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Xu_2013_VocalAttractivenessBodySizeProjection
     page: 0

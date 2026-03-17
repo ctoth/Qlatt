@@ -20,46 +20,50 @@ claims:
   upper_bound: 3.5
   unit: dimensionless
 - id: claim3
-  type: parameter
-  concept: alpha
+  type: equation
+  expression: t_o = \frac{T}{2\pi} \sin^{-1}(-\beta)
+  variables:
+  - symbol: t_o
+    concept: t_o
   provenance:
     paper: Titze_2015_OddHarmonicSensitivity
     page: 0
-  unit: 1/s
 - id: claim4
-  type: parameter
-  concept: beta
+  type: equation
+  expression: t_c = T/2 - t_o
+  variables:
+  - symbol: t_c
+    concept: t_c
+  - symbol: t_o
+    concept: t_o
   provenance:
     paper: Titze_2015_OddHarmonicSensitivity
     page: 0
-  unit: dimensionless
 - id: claim5
   type: equation
-  expression: u(t) = \max[0, \; e^{\alpha t}(\beta + \sin \omega t)]
+  expression: Q_o = (t_c - t_o) / T
+  variables:
+  - symbol: Q_o
+    concept: q_o
+  - symbol: t_c
+    concept: t_c
+  - symbol: t_o
+    concept: t_o
   provenance:
     paper: Titze_2015_OddHarmonicSensitivity
     page: 0
 - id: claim6
   type: equation
-  expression: t_o = \frac{T}{2\pi} \sin^{-1}(-\beta)
-  provenance:
-    paper: Titze_2015_OddHarmonicSensitivity
-    page: 0
-- id: claim7
-  type: equation
-  expression: t_c = T/2 - t_o
-  provenance:
-    paper: Titze_2015_OddHarmonicSensitivity
-    page: 0
-- id: claim8
-  type: equation
-  expression: Q_o = (t_c - t_o) / T
-  provenance:
-    paper: Titze_2015_OddHarmonicSensitivity
-    page: 0
-- id: claim9
-  type: equation
   expression: Q_s = (t_m - t_o) / (t_c - t_m)
+  variables:
+  - symbol: Q_s
+    concept: q_s
+  - symbol: t_m
+    concept: t_m
+  - symbol: t_o
+    concept: t_o
+  - symbol: t_c
+    concept: t_c
   provenance:
     paper: Titze_2015_OddHarmonicSensitivity
     page: 0

@@ -1,95 +1,12 @@
 source:
   paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
 claims:
-- id: claim977
-  type: parameter
-  concept: target
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-  unit: (dimension-specific)
-- id: claim978
-  type: parameter
-  concept: stiffness
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-  unit: (dimensionless ratio)
-- id: claim979
-  type: parameter
-  concept: damping
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-  unit: (dimensionless)
-- id: claim980
-  type: parameter
-  concept: constriction_location
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-  unit: (tract position)
-- id: claim981
-  type: parameter
-  concept: constriction_degree
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-  unit: (aperture)
-- id: claim982
-  type: observation
-  statement: Coarticulation follows automatically from gestural overlap; invariant
-    gesture targets should be measurable in articulatory data even when acoustic output
-    varies contextually
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim983
+- id: claim308
   type: observation
   statement: Consonantal gestures should have higher stiffness (shorter durations)
     than vocalic gestures
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim984
-  type: observation
-  statement: Increased speech rate should increase gestural overlap at all prosodic
-    boundary levels
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim985
-  type: observation
-  statement: Flapping should correlate with reduced glottal gesture magnitude in the
-    same environments
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim986
-  type: observation
-  statement: Syllable-final nasals should show velum lowering onset 100-350 ms before
-    oral closure onset
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim987
-  type: observation
-  statement: '"Assimilated" final alveolars should show residual tongue tip gesture
-    present in articulatory data'
-  concepts: []
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
-- id: claim988
-  type: observation
-  statement: Schwa deletion should correlate with increased overlap between flanking
-    consonant gestures
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
     page: 0

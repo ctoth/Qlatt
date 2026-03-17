@@ -3,37 +3,12 @@ source:
 claims:
 - id: claim1
   type: observation
-  statement: '**Inter-transcriber agreement for L+H\* vs. H\* should be low:** Pitrelli
-    et al. (1994) collapsed these categories due to poor agreement. Any new evaluation
-    should find similar difficulty.'
-  concepts: []
-  provenance:
-    paper: Ladd_2021_TroubleWithToBI
-    page: 0
-- id: claim2
-  type: observation
   statement: '**Pitch accent peak height should correlate with emphasis on a continuous
     scale:** If gradience is real, perceived emphasis should correlate continuously
     with F0 peak height, not show a step function at a categorical boundary.'
-  concepts: []
-  provenance:
-    paper: Ladd_2021_TroubleWithToBI
-    page: 0
-- id: claim3
-  type: observation
-  statement: '**L\* H- H% and H\* H- H% should be perceptually confusable:** If these
-    are gradient variants of "uptalk," listeners should struggle to consistently categorize
-    intermediate tokens.'
-  concepts: []
-  provenance:
-    paper: Ladd_2021_TroubleWithToBI
-    page: 0
-- id: claim4
-  type: observation
-  statement: '**Cross-dialect ToBI annotations should show systematic disagreements:**
-    Labelers from different English dialects should disagree on specific accent types
-    where their dialects differ phonetically.'
-  concepts: []
+  concepts:
+  - f0
+  - pitch
   provenance:
     paper: Ladd_2021_TroubleWithToBI
     page: 0

@@ -107,38 +107,34 @@ claims:
   value: 0.0076053
 - id: claim14
   type: observation
-  statement: Modifying spectral rolloff and low-high ratio should change perceived
-    pleasure without affecting perceived arousal
-  concepts: []
+  statement: Spectral features should have higher correlation with P than F0 features
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
 - id: claim15
   type: observation
-  statement: Spectral features should have higher correlation with P than F0 features
-  concepts: []
+  statement: F0 Dominant Ratio should be approximately independent of arousal (different
+    factor in factor analysis)
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
 - id: claim16
   type: observation
-  statement: F0 Dominant Ratio should be approximately independent of arousal (different
-    factor in factor analysis)
-  concepts: []
+  statement: DominantRatio(F0) must be in [0, 1] by definition (bounded ratio)
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0
 - id: claim17
   type: observation
-  statement: DominantRatio(F0) must be in [0, 1] by definition (bounded ratio)
-  concepts: []
-  provenance:
-    paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
-    page: 0
-- id: claim18
-  type: observation
   statement: Average F0 must be >= Min F0, so DominantRatio >= 0
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cui_2006_PleasureAcousticFeaturesAffectiveSpeech
     page: 0

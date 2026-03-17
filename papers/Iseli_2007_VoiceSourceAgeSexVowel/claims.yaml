@@ -2,138 +2,99 @@ source:
   paper: Iseli_2007_VoiceSourceAgeSexVowel
 claims:
 - id: claim1
-  type: parameter
-  concept: age_f0_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 235.0
-- id: claim2
-  type: parameter
-  concept: age_h1h2_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 23.9
-- id: claim3
-  type: parameter
-  concept: age_h1a3_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 35.0
-- id: claim4
-  type: parameter
-  concept: sex_f0_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 1012.3
-- id: claim5
-  type: parameter
-  concept: sex_h1h2_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 57.7
-- id: claim6
-  type: parameter
-  concept: sex_h1a3_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 4.1
-- id: claim7
-  type: parameter
-  concept: vowel_f0_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 28.0
-- id: claim8
-  type: parameter
-  concept: vowel_h1h2_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 52.7
-- id: claim9
-  type: parameter
-  concept: vowel_h1a3_f
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-  value: 68.9
-- id: claim10
   type: equation
   expression: H^*(\omega_0) = H(\omega_0) - \sum_{i=1}^{N} 10 \log_{10} \frac{(1 -
     2r_i \cos(\omega_i) + r_i^2)^2}{(1 - 2r_i \cos(\omega_0 + \omega_i) + r_i^2)(1
     - 2r_i \cos(\omega_0 - \omega_i) + r_i^2)}
+  variables:
+  - symbol: r_i
+    concept: r_i
+  - symbol: omega_0
+    concept: omega_0
+  - symbol: sum_
+    concept: sum
+  - symbol: log_
+    concept: log
+  - symbol: omega_i
+    concept: omega_i
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim11
+- id: claim2
   type: equation
   expression: B_i = 80 + 120 F_i / 5000
+  variables:
+  - symbol: B_i
+    concept: b_i
+  - symbol: F_i
+    concept: f_i
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim12
+- id: claim3
   type: equation
   expression: H_1^* - H_2^* \approx 0.22 F_0 - 28 \quad \text{for } F_0 \text{ between
     80 and 175 Hz}
+  variables:
+  - symbol: H_1
+    concept: h_1
+  - symbol: H_2
+    concept: h_2
+  - symbol: F_0
+    concept: f_0
+  - symbol: quad
+    concept: quad
+  - symbol: for
+    concept: for
+  - symbol: between
+    concept: between
+  - symbol: and
+    concept: and
+  - symbol: Hz
+    concept: hz
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim13
+- id: claim4
   type: equation
   expression: H^*(\omega) = H(\omega) - \sum_{i=1}^{N} 10 \log_{10} \frac{(1 - 2r_i
     \cos(\omega_i) + r_i^2)^2}{(1 - 2r_i \cos(\omega + \omega_i) + r_i^2)(1 - 2r_i
     \cos(\omega - \omega_i) + r_i^2)}
+  variables:
+  - symbol: r_i
+    concept: r_i
+  - symbol: sum_
+    concept: sum
+  - symbol: log_
+    concept: log
+  - symbol: omega_i
+    concept: omega_i
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim14
+- id: claim5
   type: observation
   statement: Correction formula error must be < 1 dB when F1 > 2.5*F0
-  concepts: []
+  concepts:
+  - f0
+  - f1
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim15
-  type: observation
-  statement: H1*-H2* must decrease with age for male talkers (monotonic between ages
-    8-20)
-  concepts: []
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-- id: claim16
-  type: observation
-  statement: H1*-A3* must decrease with age for both sexes
-  concepts: []
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-- id: claim17
+- id: claim6
   type: observation
   statement: 'For Group 2 talkers: H1*-H2* ≈ 0.22*F0 - 28 (linear relationship)'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0
-- id: claim18
-  type: observation
-  statement: H1*-A3* must be higher for /ae/ than for /uw/ (vowel height effect)
-  concepts: []
-  provenance:
-    paper: Iseli_2007_VoiceSourceAgeSexVowel
-    page: 0
-- id: claim19
+- id: claim7
   type: observation
   statement: Bandwidth estimate B = 80 + 120*F/5000 must produce correction errors
     within 1 dB of exact bandwidths
-  concepts: []
+  concepts:
+  - bandwidth
   provenance:
     paper: Iseli_2007_VoiceSourceAgeSexVowel
     page: 0

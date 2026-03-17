@@ -2,137 +2,15 @@ source:
   paper: Schild_2019_AttractiveVoiceFormantF0
 claims:
 - id: claim1
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: sd_of_f0
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: formant_1
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
-  concept: formant_2
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: formant_3
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
-  concept: formant_4
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
-  concept: standardized_formant_position
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: —
-- id: claim8
-  type: parameter
-  concept: hnr
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: dB
-- id: claim9
-  type: parameter
-  concept: duration
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: s
-- id: claim10
-  type: parameter
-  concept: spectral_tilt
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: dB
-- id: claim11
-  type: parameter
-  concept: jitter
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: —
-- id: claim12
-  type: parameter
-  concept: shimmer
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: —
-- id: claim13
-  type: parameter
-  concept: cpp
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: dB
-- id: claim14
-  type: parameter
-  concept: energy
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-  unit: dB
-- id: claim15
   type: observation
   statement: Standardized formant position Pf = mean(z(F1), z(F2), z(F3), z(F4)),
     always bounded by individual z-score extremes
-  concepts: []
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-- id: claim16
-  type: observation
-  statement: ICC for attractiveness ratings must exceed 0.8 for analyses to proceed
-  concepts: []
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-- id: claim17
-  type: observation
-  statement: Cross-validated R^2 must be non-negative (model must outperform null)
-  concepts: []
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-- id: claim18
-  type: observation
-  statement: 'If H3 supported: data-driven model R^2_cv > theory-driven model R^2_cv'
-  concepts: []
-  provenance:
-    paper: Schild_2019_AttractiveVoiceFormantF0
-    page: 0
-- id: claim19
-  type: observation
-  statement: 'Exclusion criterion: voices with any acoustic measure > 3 SD from sample
-    mean are removed'
-  concepts: []
+  concepts:
+  - f1
+  - f2
+  - f3
+  - f4
+  - formant
   provenance:
     paper: Schild_2019_AttractiveVoiceFormantF0
     page: 0

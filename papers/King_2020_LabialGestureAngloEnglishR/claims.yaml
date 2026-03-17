@@ -29,6 +29,23 @@ claims:
   type: equation
   expression: \text{Front Cavity Volume} = \text{Sublingual Space} + \text{Lip Tube
     Extension}
+  variables:
+  - symbol: Front
+    concept: front
+  - symbol: Cavity
+    concept: cavity
+  - symbol: Volume
+    concept: volume
+  - symbol: Sublingual
+    concept: sublingual
+  - symbol: Space
+    concept: space
+  - symbol: Lip
+    concept: lip
+  - symbol: Tube
+    concept: tube
+  - symbol: Extension
+    concept: extension
   provenance:
     paper: King_2020_LabialGestureAngloEnglishR
     page: 0

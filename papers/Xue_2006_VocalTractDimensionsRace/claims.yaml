@@ -99,48 +99,6 @@ claims:
   value: 58.05
 - id: claim13
   type: parameter
-  concept: oral_length_male_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.91
-- id: claim14
-  type: parameter
-  concept: oral_length_female_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.39
-- id: claim15
-  type: parameter
-  concept: pharyngeal_length_male_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 9.12
-- id: claim16
-  type: parameter
-  concept: pharyngeal_length_female_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 8.15
-- id: claim17
-  type: parameter
-  concept: total_vocal_tract_length_male_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 17.03
-- id: claim18
-  type: parameter
-  concept: total_vocal_tract_length_female_mean
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 15.54
-- id: claim19
-  type: parameter
   concept: height
   provenance:
     paper: Xue_2006_VocalTractDimensionsRace
@@ -149,7 +107,7 @@ claims:
   value: 174.79
   lower_bound: 167.64
   upper_bound: 185.42
-- id: claim20
+- id: claim14
   type: parameter
   concept: weight
   provenance:
@@ -159,7 +117,7 @@ claims:
   value: 71.98
   lower_bound: 57.19
   upper_bound: 98.04
-- id: claim21
+- id: claim15
   type: parameter
   concept: age
   provenance:
@@ -168,111 +126,3 @@ claims:
   unit: SD
   lower_bound: 20
   upper_bound: 30
-- id: claim22
-  type: parameter
-  concept: oral_length_fant_male
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 8.25
-- id: claim23
-  type: parameter
-  concept: oral_length_this_study_male
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.91
-- id: claim24
-  type: parameter
-  concept: oral_length_fant_female
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.0
-- id: claim25
-  type: parameter
-  concept: oral_length_this_study_female
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.39
-- id: claim26
-  type: parameter
-  concept: pharyngeal_length_fant_male
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 9.1
-- id: claim27
-  type: parameter
-  concept: pharyngeal_length_this_study_male
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 9.12
-- id: claim28
-  type: parameter
-  concept: pharyngeal_length_fant_female
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 7.0
-- id: claim29
-  type: parameter
-  concept: pharyngeal_length_this_study_female
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-  value: 8.15
-- id: claim30
-  type: observation
-  statement: Male total vocal tract length must exceed female total vocal tract length
-    on average (~17 cm vs ~15.5 cm)
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim31
-  type: observation
-  statement: Male pharyngeal length > female pharyngeal length across all three races
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim32
-  type: observation
-  statement: Oral length + pharyngeal length = total vocal tract length
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim33
-  type: observation
-  statement: All vocal tract lengths must be in range [12, 20] cm for healthy adults
-    aged 20-30
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim34
-  type: observation
-  statement: Oral volume + pharyngeal volume = total vocal tract volume
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim35
-  type: observation
-  statement: Total vocal tract volume must be in range [40, 90] mL for healthy adults
-    aged 20-30
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0
-- id: claim36
-  type: observation
-  statement: Male/female VTL ratio should be approximately 1.10 (17.03/15.54 = 1.096)
-  concepts: []
-  provenance:
-    paper: Xue_2006_VocalTractDimensionsRace
-    page: 0

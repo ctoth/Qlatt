@@ -1,7 +1,7 @@
 source:
   paper: Flanagan_1958_PropertiesGlottalSoundSource
 claims:
-- id: claim2832
+- id: claim952
   type: parameter
   concept: '97'
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: dB
   value: 56
-- id: claim2833
+- id: claim953
   type: parameter
   concept: '145'
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: dB
   value: 57
-- id: claim2834
+- id: claim954
   type: parameter
   concept: '218'
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: dB
   value: 62
-- id: claim2835
+- id: claim955
   type: parameter
   concept: '274'
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: dB
   value: 67
-- id: claim2836
+- id: claim956
   type: parameter
   concept: a
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: cps
   value: 125
-- id: claim2837
+- id: claim957
   type: parameter
   concept: b
   provenance:

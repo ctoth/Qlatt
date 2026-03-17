@@ -1,7 +1,7 @@
 source:
   paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
 claims:
-- id: claim4552
+- id: claim1429
   type: parameter
   concept: lowfrequency_formant
   provenance:
@@ -9,86 +9,7 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim4553
-  type: parameter
-  concept: lowfrequency_amplitude
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: dB
-- id: claim4554
-  type: parameter
-  concept: first_formant_frequency
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: Hz
-- id: claim4555
-  type: parameter
-  concept: first_formant_amplitude
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: dB
-- id: claim4556
-  type: parameter
-  concept: second_formant_frequency
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: Hz
-- id: claim4557
-  type: parameter
-  concept: second_formant_amplitude
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: dB
-- id: claim4558
-  type: parameter
-  concept: third_formant_frequency
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: Hz
-- id: claim4559
-  type: parameter
-  concept: third_formant_amplitude
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: dB
-- id: claim4560
-  type: parameter
-  concept: highfrequency_amplitude
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: dB
-- id: claim4561
-  type: parameter
-  concept: degree_of_voicing
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  lower_bound: 0
-  upper_bound: 63
-- id: claim4562
-  type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  unit: Hz
-- id: claim4563
-  type: parameter
-  concept: glottal_pulse_markspace
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  lower_bound: 31
-  upper_bound: 33
-- id: claim4564
+- id: claim1430
   type: parameter
   concept: frame_rate
   provenance:
@@ -96,7 +17,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim4565
+- id: claim1431
   type: parameter
   concept: analysis_window
   provenance:
@@ -104,7 +25,7 @@ claims:
     page: 0
   value: 25
   unit: ms
-- id: claim4566
+- id: claim1432
   type: parameter
   concept: maximum_state_duration
   provenance:
@@ -112,7 +33,7 @@ claims:
     page: 0
   value: 15
   unit: frames
-- id: claim4567
+- id: claim1433
   type: parameter
   concept: delta_window
   provenance:
@@ -120,53 +41,3 @@ claims:
     page: 0
   value: 2
   unit: frames
-- id: claim4568
-  type: parameter
-  concept: spectral_vector_dimension
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 31
-- id: claim4569
-  type: parameter
-  concept: phone_categories
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  lower_bound: 1
-  upper_bound: 49
-- id: claim4570
-  type: parameter
-  concept: male_optimal_states
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 4
-- id: claim4571
-  type: parameter
-  concept: female_optimal_states
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 5
-- id: claim4572
-  type: parameter
-  concept: maximum_optimal_states
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 6
-- id: claim4573
-  type: parameter
-  concept: nonlinear_trajectory_pesqlqo
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 1.35
-- id: claim4574
-  type: parameter
-  concept: piecewise_constant_pesqlqo
-  provenance:
-    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
-    page: 0
-  value: 1.28

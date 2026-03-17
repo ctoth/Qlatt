@@ -1,326 +1,58 @@
 source:
   paper: vanSanten_1993_SegmentalDuration
 claims:
-- id: claim10722
-  type: parameter
-  concept: overall_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.93
-- id: claim10723
-  type: parameter
-  concept: vowel_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.9
-- id: claim10724
-  type: parameter
-  concept: intervocalic_consonant_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.9
-- id: claim10725
-  type: parameter
-  concept: nonintervocalic_consonant_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.87
-- id: claim10726
-  type: parameter
-  concept: crossvalidation_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.987
-- id: claim10727
-  type: parameter
-  concept: crossspeaker_correlation
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 0.96
-- id: claim10728
-  type: parameter
-  concept: s_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 149
-  unit: ms
-- id: claim10729
-  type: parameter
-  concept: s_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 112
-  unit: ms
-- id: claim10730
-  type: parameter
-  concept: s_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 37
-  unit: ms
-- id: claim10731
-  type: parameter
-  concept: f_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 126
-  unit: ms
-- id: claim10732
-  type: parameter
-  concept: f_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 101
-  unit: ms
-- id: claim10733
-  type: parameter
-  concept: f_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 26
-  unit: ms
-- id: claim10734
-  type: parameter
-  concept: t_burst_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 71
-  unit: ms
-- id: claim10735
-  type: parameter
-  concept: t_burst_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 9
-  unit: ms
-- id: claim10736
-  type: parameter
-  concept: t_burst_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 62
-  unit: ms
-- id: claim10737
-  type: parameter
-  concept: p_burst_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 61
-  unit: ms
-- id: claim10738
-  type: parameter
-  concept: p_burst_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 18
-  unit: ms
-- id: claim10739
-  type: parameter
-  concept: p_burst_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 43
-  unit: ms
-- id: claim10740
-  type: parameter
-  concept: d_burst_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 12
-  unit: ms
-- id: claim10741
-  type: parameter
-  concept: d_burst_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 7
-  unit: ms
-- id: claim10742
-  type: parameter
-  concept: d_burst_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 5
-  unit: ms
-- id: claim10743
-  type: parameter
-  concept: b_burst_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 9
-  unit: ms
-- id: claim10744
-  type: parameter
-  concept: b_burst_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 8
-  unit: ms
-- id: claim10745
-  type: parameter
-  concept: b_burst_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 1
-  unit: ms
-- id: claim10746
-  type: parameter
-  concept: t_closure_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 75
-  unit: ms
-- id: claim10747
-  type: parameter
-  concept: t_closure_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 20
-  unit: ms
-- id: claim10748
-  type: parameter
-  concept: t_closure_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 55
-  unit: ms
-- id: claim10749
-  type: parameter
-  concept: p_closure_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 90
-  unit: ms
-- id: claim10750
-  type: parameter
-  concept: p_closure_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 68
-  unit: ms
-- id: claim10751
-  type: parameter
-  concept: p_closure_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 22
-  unit: ms
-- id: claim10752
-  type: parameter
-  concept: n_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 63
-  unit: ms
-- id: claim10753
-  type: parameter
-  concept: n_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 39
-  unit: ms
-- id: claim10754
-  type: parameter
-  concept: n_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 24
-  unit: ms
-- id: claim10755
-  type: parameter
-  concept: m_unstressed_stressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 75
-  unit: ms
-- id: claim10756
-  type: parameter
-  concept: m_stressed_unstressed
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 62
-  unit: ms
-- id: claim10757
-  type: parameter
-  concept: m_difference
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 14
-  unit: ms
-- id: claim10758
-  type: parameter
-  concept: 20_type_count
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 18
-- id: claim10759
-  type: parameter
-  concept: 20_lowest_type_frequency
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 13
-- id: claim10760
-  type: parameter
-  concept: 320_type_count
-  provenance:
-    paper: vanSanten_1993_SegmentalDuration
-    page: 0
-  value: 254
-- id: claim10761
+- id: claim2602
   type: equation
   expression: DUR(\mathbf{f}) = s_{1,1}(f_1) \times \cdots \times s_{1,n+1}(f_{n+1})
     + s_{2,n+1}(f_{n+1})
+  variables:
+  - symbol: s_1
+    concept: s_1
+  - symbol: f_1
+    concept: f_1
+  - symbol: f_n
+    concept: f_n
+  - symbol: s_2
+    concept: s_2
+  - symbol: DUR
+    concept: dur
+  - symbol: s_
+    concept: s
+  - symbol: cdots
+    concept: cdots
+  - symbol: f_
+    concept: f
   provenance:
     paper: vanSanten_1993_SegmentalDuration
     page: 0
-- id: claim10762
+- id: claim2603
   type: equation
   expression: DUR(C, P, S) = s_{1,1}(C) \times s_{1,2}(P) \times s_{1,3}(S) + s_{2,1}(C)
     \times s_{2,2}(P)
+  variables:
+  - symbol: s_1
+    concept: s_1
+  - symbol: s_2
+    concept: s_2
+  - symbol: DUR
+    concept: dur
+  - symbol: s_
+    concept: s
   provenance:
     paper: vanSanten_1993_SegmentalDuration
     page: 0
-- id: claim10763
+- id: claim2604
   type: equation
   expression: \text{Number of models} \to 2^{2^n - 1} - 1
+  variables:
+  - symbol: Number
+    concept: number
+  - symbol: of
+    concept: of
+  - symbol: models
+    concept: models
+  - symbol: to
+    concept: to
   provenance:
     paper: vanSanten_1993_SegmentalDuration
     page: 0

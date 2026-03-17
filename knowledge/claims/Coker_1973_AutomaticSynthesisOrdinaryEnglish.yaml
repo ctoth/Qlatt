@@ -1,7 +1,7 @@
 source:
   paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
 claims:
-- id: claim1408
+- id: claim476
   type: parameter
   concept: '1'
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim1409
+- id: claim477
   type: parameter
   concept: '2'
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim1410
+- id: claim478
   type: parameter
   concept: '3'
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim1411
+- id: claim479
   type: parameter
   concept: '4'
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim1412
+- id: claim480
   type: parameter
   concept: '5'
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim1413
+- id: claim481
   type: parameter
   concept: '6'
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim1414
+- id: claim482
   type: parameter
   concept: '7'
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: ms
   value: 25
-- id: claim1415
+- id: claim483
   type: parameter
   concept: '8'
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: ms
   value: 10
-- id: claim1416
+- id: claim484
   type: parameter
   concept: '9'
   provenance:

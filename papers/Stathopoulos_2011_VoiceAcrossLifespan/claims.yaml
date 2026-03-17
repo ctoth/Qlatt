@@ -172,55 +172,43 @@ claims:
 - id: claim18
   type: equation
   expression: \text{correction} = 20 \times \log(4/6) = -3.5 \text{ dB}
+  variables:
+  - symbol: correction
+    concept: correction
+  - symbol: dB
+    concept: db
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
 - id: claim19
   type: observation
   statement: F0 at age 4-8 should be ~250-300 Hz for both sexes (pre-pubertal convergence)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
 - id: claim20
   type: observation
   statement: Male F0 minimum occurs around age 50 (~115 Hz)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
 - id: claim21
   type: observation
   statement: Female F0 minimum occurs around age 60 (~200 Hz)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
 - id: claim22
   type: observation
   statement: SPL must increase monotonically with age in the combined-sex model
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim23
-  type: observation
-  statement: Variability (COVAR) for all measures must follow U-shaped curves
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim24
-  type: observation
-  statement: Male SNR increases linearly (more periodic energy with age)
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim25
-  type: observation
-  statement: Female SNR follows nonlinear pattern with inflection at ~50 years
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0

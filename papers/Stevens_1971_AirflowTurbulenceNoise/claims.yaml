@@ -105,48 +105,53 @@ claims:
 - id: claim12
   type: equation
   expression: \Delta P_L = k_L (\rho U^2 / 2A^2)
+  variables:
+  - symbol: P_L
+    concept: p_l
+  - symbol: k_L
+    concept: k_l
   provenance:
     paper: Stevens_1971_AirflowTurbulenceNoise
     page: 0
 - id: claim13
   type: equation
   expression: R = 12\mu l / bw^3
+  variables:
+  - symbol: bw
+    concept: bw
   provenance:
     paper: Stevens_1971_AirflowTurbulenceNoise
     page: 0
 - id: claim14
   type: equation
-  expression: R = 128\mu l / \pi d^4
+  expression: \Delta P = RU + k_L (\rho U^2 / 2A^2)
+  variables:
+  - symbol: k_L
+    concept: k_l
+  - symbol: RU
+    concept: ru
   provenance:
     paper: Stevens_1971_AirflowTurbulenceNoise
     page: 0
 - id: claim15
   type: equation
-  expression: \Delta P = RU + k_L (\rho U^2 / 2A^2)
+  expression: T_1(s) = s_1 s_1^* / (s - s_1)(s - s_1^*)
+  variables:
+  - symbol: T_1
+    concept: t_1
+  - symbol: s_1
+    concept: s_1
   provenance:
     paper: Stevens_1971_AirflowTurbulenceNoise
     page: 0
 - id: claim16
   type: equation
-  expression: \Delta P = 0.9(\rho U^2 / 2A^2)
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim17
-  type: equation
-  expression: W = k \Delta P^3 d^2 / (\rho^2 c^3)
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim18
-  type: equation
-  expression: T_1(s) = s_1 s_1^* / (s - s_1)(s - s_1^*)
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim19
-  type: equation
   expression: p_r \sim \Delta P^{\beta} A^{1/2}
+  variables:
+  - symbol: p_r
+    concept: p_r
+  - symbol: sim
+    concept: sim
   provenance:
     paper: Stevens_1971_AirflowTurbulenceNoise
     page: 0

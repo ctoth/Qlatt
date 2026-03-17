@@ -20,50 +20,24 @@ claims:
   unit: letters
 - id: claim3
   type: parameter
-  concept: train_test_split
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0
-  unit: ratio
-- id: claim4
-  type: parameter
   concept: min_word_length
   provenance:
     paper: Black_1998_LTS_Rules
     page: 0
   value: 4
   unit: letters
-- id: claim5
-  type: parameter
-  concept: letters
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0
-  unit: LTPS
-- id: claim6
-  type: parameter
-  concept: letters
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0
-  unit: LTPS
-- id: claim7
-  type: parameter
-  concept: words
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0
-  unit: LTPS
-- id: claim8
-  type: parameter
-  concept: words
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0
-  unit: LTPS
-- id: claim9
+- id: claim4
   type: equation
   expression: P(\text{alignment}) = \prod_{i} P(phone_i | letter_i)
+  variables:
+  - symbol: phone_i
+    concept: phone_i
+  - symbol: letter_i
+    concept: letter_i
+  - symbol: alignment
+    concept: alignment
+  - symbol: prod_
+    concept: prod
   provenance:
     paper: Black_1998_LTS_Rules
     page: 0

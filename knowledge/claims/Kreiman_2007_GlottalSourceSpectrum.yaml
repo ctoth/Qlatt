@@ -1,51 +1,39 @@
 source:
   paper: Kreiman_2007_GlottalSourceSpectrum
 claims:
-- id: claim5761
+- id: claim1681
   type: observation
   statement: H1-H2 measured from unsmoothed inverse-filtered pulses, LF-fitted pulses,
     and perceptually corrected pulses should be highly correlated (r > .5, p < .01)
-  concepts: []
+  concepts:
+  - h1_h2
   provenance:
     paper: Kreiman_2007_GlottalSourceSpectrum
     page: 0
-- id: claim5762
+- id: claim1682
   type: observation
   statement: H1-H2 and LTAS-derived H1-H2 from continuous speech should be highly
     correlated
-  concepts: []
+  concepts:
+  - h1_h2
   provenance:
     paper: Kreiman_2007_GlottalSourceSpectrum
     page: 0
-- id: claim5763
+- id: claim1683
   type: observation
   statement: PCA of a set of glottal source measures should produce factors dominated
     by H1-H2 in the first component
-  concepts: []
+  concepts:
+  - h1_h2
   provenance:
     paper: Kreiman_2007_GlottalSourceSpectrum
     page: 0
-- id: claim5764
-  type: observation
-  statement: R parameters (set of 7) should predict glottal pulse shapes with R^2
-    > .99 when applied to the full set
-  concepts: []
-  provenance:
-    paper: Kreiman_2007_GlottalSourceSpectrum
-    page: 0
-- id: claim5765
-  type: observation
-  statement: R parameters should predict spectral measures with R^2 < .5 (much weaker
-    than pulse shape prediction)
-  concepts: []
-  provenance:
-    paper: Kreiman_2007_GlottalSourceSpectrum
-    page: 0
-- id: claim5766
+- id: claim1684
   type: observation
   statement: Measures of mid-frequency spectral slope (1.5-4 kHz) should be poorly
     correlated with H1-H2 and overall spectral slope
-  concepts: []
+  concepts:
+  - h1_h2
   provenance:
     paper: Kreiman_2007_GlottalSourceSpectrum
     page: 0

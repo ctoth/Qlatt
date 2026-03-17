@@ -1,7 +1,7 @@
 source:
   paper: Ericsson_2020_FormantEstimationEvaluation
 claims:
-- id: claim2000
+- id: claim736
   type: parameter
   concept: generic_ceiling
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 5000
   unit: Hz
-- id: claim2001
+- id: claim737
   type: parameter
   concept: generic_ceiling
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 5500
   unit: Hz
-- id: claim2002
+- id: claim738
   type: parameter
   concept: optimized_ceiling_range
   provenance:
@@ -26,7 +26,7 @@ claims:
   lower_bound: 4000
   upper_bound: 6500
   unit: Hz
-- id: claim2003
+- id: claim739
   type: parameter
   concept: number_of_formants
   provenance:
@@ -36,7 +36,7 @@ claims:
   lower_bound: 4
   upper_bound: 6
   unit: count
-- id: claim2004
+- id: claim740
   type: parameter
   concept: analysis_window
   provenance:
@@ -44,7 +44,7 @@ claims:
     page: 0
   value: 0.025
   unit: s
-- id: claim2005
+- id: claim741
   type: parameter
   concept: preemphasis
   provenance:
@@ -52,7 +52,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim2006
+- id: claim742
   type: parameter
   concept: synthesis_bandwidth
   provenance:
@@ -60,7 +60,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim2007
+- id: claim743
   type: parameter
   concept: synthesis_bandwidth
   provenance:
@@ -68,7 +68,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim2008
+- id: claim744
   type: parameter
   concept: token_duration
   provenance:
@@ -76,660 +76,40 @@ claims:
     page: 0
   value: 400
   unit: ms
-- id: claim2009
-  type: parameter
-  concept: i_i_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 291
-- id: claim2010
-  type: parameter
-  concept: i_i_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 12
-- id: claim2011
-  type: parameter
-  concept: i_i_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 2107
-- id: claim2012
-  type: parameter
-  concept: i_i_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 74
-- id: claim2013
-  type: parameter
-  concept: i_i_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 351
-- id: claim2014
-  type: parameter
-  concept: i_i_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 34
-- id: claim2015
-  type: parameter
-  concept: i_i_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 2455
-- id: claim2016
-  type: parameter
-  concept: i_i_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 190
-- id: claim2017
-  type: parameter
-  concept: e_e_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 376
-- id: claim2018
-  type: parameter
-  concept: e_e_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 14
-- id: claim2019
-  type: parameter
-  concept: e_e_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 2152
-- id: claim2020
-  type: parameter
-  concept: e_e_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 41
-- id: claim2021
-  type: parameter
-  concept: e_e_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 438
-- id: claim2022
-  type: parameter
-  concept: e_e_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 24
-- id: claim2023
-  type: parameter
-  concept: e_e_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 2500
-- id: claim2024
-  type: parameter
-  concept: e_e_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 178
-- id: claim2025
-  type: parameter
-  concept: y_y_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 285
-- id: claim2026
-  type: parameter
-  concept: y_y_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 4
-- id: claim2027
-  type: parameter
-  concept: y_y_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1988
-- id: claim2028
-  type: parameter
-  concept: y_y_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 61
-- id: claim2029
-  type: parameter
-  concept: y_y_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 353
-- id: claim2030
-  type: parameter
-  concept: y_y_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 26
-- id: claim2031
-  type: parameter
-  concept: y_y_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 2319
-- id: claim2032
-  type: parameter
-  concept: y_y_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 194
-- id: claim2033
-  type: parameter
-  concept: a_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 612
-- id: claim2034
-  type: parameter
-  concept: a_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 40
-- id: claim2035
-  type: parameter
-  concept: a_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1501
-- id: claim2036
-  type: parameter
-  concept: a_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 79
-- id: claim2037
-  type: parameter
-  concept: a_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 755
-- id: claim2038
-  type: parameter
-  concept: a_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 64
-- id: claim2039
-  type: parameter
-  concept: a_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1890
-- id: claim2040
-  type: parameter
-  concept: a_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 171
-- id: claim2041
-  type: parameter
-  concept: o_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 436
-- id: claim2042
-  type: parameter
-  concept: o_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 21
-- id: claim2043
-  type: parameter
-  concept: o_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1601
-- id: claim2044
-  type: parameter
-  concept: o_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 60
-- id: claim2045
-  type: parameter
-  concept: o_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 517
-- id: claim2046
-  type: parameter
-  concept: o_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 51
-- id: claim2047
-  type: parameter
-  concept: o_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1900
-- id: claim2048
-  type: parameter
-  concept: o_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 86
-- id: claim2049
-  type: parameter
-  concept: u_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 328
-- id: claim2050
-  type: parameter
-  concept: u_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 17
-- id: claim2051
-  type: parameter
-  concept: u_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1679
-- id: claim2052
-  type: parameter
-  concept: u_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 52
-- id: claim2053
-  type: parameter
-  concept: u_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 386
-- id: claim2054
-  type: parameter
-  concept: u_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 10
-- id: claim2055
-  type: parameter
-  concept: u_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1904
-- id: claim2056
-  type: parameter
-  concept: u_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 84
-- id: claim2057
-  type: parameter
-  concept: a_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 560
-- id: claim2058
-  type: parameter
-  concept: a_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 41
-- id: claim2059
-  type: parameter
-  concept: a_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 876
-- id: claim2060
-  type: parameter
-  concept: a_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 32
-- id: claim2061
-  type: parameter
-  concept: a_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 665
-- id: claim2062
-  type: parameter
-  concept: a_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 47
-- id: claim2063
-  type: parameter
-  concept: a_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 1038
-- id: claim2064
-  type: parameter
-  concept: a_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 58
-- id: claim2065
-  type: parameter
-  concept: a_o_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 382
-- id: claim2066
-  type: parameter
-  concept: a_o_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 15
-- id: claim2067
-  type: parameter
-  concept: a_o_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 642
-- id: claim2068
-  type: parameter
-  concept: a_o_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 14
-- id: claim2069
-  type: parameter
-  concept: a_o_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 424
-- id: claim2070
-  type: parameter
-  concept: a_o_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 20
-- id: claim2071
-  type: parameter
-  concept: a_o_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 748
-- id: claim2072
-  type: parameter
-  concept: a_o_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 67
-- id: claim2073
-  type: parameter
-  concept: o_u_m_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 320
-- id: claim2074
-  type: parameter
-  concept: o_u_m_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 20
-- id: claim2075
-  type: parameter
-  concept: o_u_m_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 639
-- id: claim2076
-  type: parameter
-  concept: o_u_m_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 40
-- id: claim2077
-  type: parameter
-  concept: o_u_f_f1_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 374
-- id: claim2078
-  type: parameter
-  concept: o_u_f_f1_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 16
-- id: claim2079
-  type: parameter
-  concept: o_u_f_f2_mean
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 718
-- id: claim2080
-  type: parameter
-  concept: o_u_f_f2_sd
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 58
-- id: claim2081
-  type: parameter
-  concept: 100_optimized
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 10
-- id: claim2082
-  type: parameter
-  concept: 100_generic
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 8
-- id: claim2083
-  type: parameter
-  concept: 100_monsen_lpc
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 60
-- id: claim2084
-  type: parameter
-  concept: 100_monsen_human
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 35
-- id: claim2085
-  type: parameter
-  concept: 200_optimized
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 25
-- id: claim2086
-  type: parameter
-  concept: 200_generic
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 30
-- id: claim2087
-  type: parameter
-  concept: 200_monsen_lpc
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 80
-- id: claim2088
-  type: parameter
-  concept: 200_monsen_human
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 55
-- id: claim2089
-  type: parameter
-  concept: 300_optimized
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 40
-- id: claim2090
-  type: parameter
-  concept: 300_generic
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 50
-- id: claim2091
-  type: parameter
-  concept: 300_monsen_lpc
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 100
-- id: claim2092
-  type: parameter
-  concept: 300_monsen_human
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 75
-- id: claim2093
-  type: parameter
-  concept: 400_optimized
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 105
-- id: claim2094
-  type: parameter
-  concept: 400_generic
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 90
-- id: claim2095
-  type: parameter
-  concept: 400_monsen_lpc
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 140
-- id: claim2096
-  type: parameter
-  concept: 400_monsen_human
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 105
-- id: claim2097
-  type: parameter
-  concept: 500_optimized
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 155
-- id: claim2098
-  type: parameter
-  concept: 500_generic
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 140
-- id: claim2099
-  type: parameter
-  concept: 500_monsen_lpc
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 180
-- id: claim2100
-  type: parameter
-  concept: 500_monsen_human
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-  value: 160
-- id: claim2101
+- id: claim745
   type: equation
   expression: \text{ceiling}_{\text{opt}} = \arg\min_c \left[ \log(\text{Var}(F_1))
     + \log(\text{Var}(F_2)) \right]
+  variables:
+  - symbol: F_1
+    concept: f_1
+  - symbol: F_2
+    concept: f_2
+  - symbol: ceiling
+    concept: ceiling
+  - symbol: opt
+    concept: opt
+  - symbol: arg
+    concept: arg
+  - symbol: min_c
+    concept: min_c
+  - symbol: Var
+    concept: var
   provenance:
     paper: Ericsson_2020_FormantEstimationEvaluation
     page: 0
-- id: claim2102
+- id: claim746
   type: equation
   expression: E_{\min} = \max(0, f_0 - F_1^{\text{target}})
+  variables:
+  - symbol: f_0
+    concept: f_0
+  - symbol: F_1
+    concept: f_1
+  - symbol: E_
+    concept: e
+  - symbol: target
+    concept: target
   provenance:
     paper: Ericsson_2020_FormantEstimationEvaluation
     page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Badin_1989_FricativeProductionModelling
 claims:
-- id: claim405
+- id: claim150
   type: parameter
   concept: constriction_area_f
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0.1
   upper_bound: 0.4
   unit: cm²
-- id: claim406
+- id: claim151
   type: parameter
   concept: constriction_area_s
   provenance:
@@ -18,109 +18,7 @@ claims:
     page: 0
   value: 0.1
   unit: cm²
-- id: claim407
-  type: parameter
-  concept: iop_exponent_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 1.32
-  lower_bound: 1.27
-  upper_bound: 1.34
-- id: claim408
-  type: parameter
-  concept: iop_exponent_s_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 1.26
-  lower_bound: 1.26
-  upper_bound: 1.42
-- id: claim409
-  type: parameter
-  concept: iop_exponent_f_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 1.04
-  lower_bound: 1.04
-  upper_bound: 1.31
-- id: claim410
-  type: parameter
-  concept: area_exponent_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.11
-- id: claim411
-  type: parameter
-  concept: area_exponent_s_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.28
-- id: claim412
-  type: parameter
-  concept: area_exponent_f_sustained
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.97
-- id: claim413
-  type: parameter
-  concept: iop_exponent_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 1.34
-  lower_bound: 0.98
-  upper_bound: 1.66
-- id: claim414
-  type: parameter
-  concept: iop_exponent_s_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 1.43
-  lower_bound: 0.81
-  upper_bound: 2.09
-- id: claim415
-  type: parameter
-  concept: iop_exponent_f_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.77
-  lower_bound: 0.62
-  upper_bound: 1.68
-- id: claim416
-  type: parameter
-  concept: area_exponent_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.42
-  lower_bound: -0.09
-  upper_bound: 0.68
-- id: claim417
-  type: parameter
-  concept: area_exponent_s_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.29
-  lower_bound: -0.19
-  upper_bound: 0.82
-- id: claim418
-  type: parameter
-  concept: area_exponent_f_dynamic
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  value: 0.07
-  lower_bound: -0.2
-  upper_bound: 0.99
-- id: claim419
+- id: claim152
   type: parameter
   concept: glottal_area
   provenance:
@@ -130,7 +28,7 @@ claims:
   lower_bound: 0.13
   upper_bound: 0.3
   unit: cm²
-- id: claim420
+- id: claim153
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -140,14 +38,7 @@ claims:
   lower_bound: 2.4
   upper_bound: 8.0
   unit: cmH₂O
-- id: claim421
-  type: parameter
-  concept: front_cavity_area
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: cm²
-- id: claim422
+- id: claim154
   type: parameter
   concept: f1
   provenance:
@@ -155,7 +46,7 @@ claims:
     page: 0
   unit: Hz
   value: 430
-- id: claim423
+- id: claim155
   type: parameter
   concept: f2
   provenance:
@@ -163,7 +54,7 @@ claims:
     page: 0
   unit: Hz
   value: 1750
-- id: claim424
+- id: claim156
   type: parameter
   concept: f3
   provenance:
@@ -171,7 +62,7 @@ claims:
     page: 0
   unit: Hz
   value: 2680
-- id: claim425
+- id: claim157
   type: parameter
   concept: f4
   provenance:
@@ -179,7 +70,7 @@ claims:
     page: 0
   unit: Hz
   value: 3200
-- id: claim426
+- id: claim158
   type: parameter
   concept: z1
   provenance:
@@ -187,7 +78,7 @@ claims:
     page: 0
   unit: Hz
   value: 1440
-- id: claim427
+- id: claim159
   type: parameter
   concept: z2
   provenance:
@@ -195,7 +86,7 @@ claims:
     page: 0
   unit: Hz
   value: 2270
-- id: claim428
+- id: claim160
   type: parameter
   concept: z3
   provenance:
@@ -203,33 +94,56 @@ claims:
     page: 0
   unit: Hz
   value: 2980
-- id: claim429
+- id: claim161
   type: equation
   expression: A_c = \frac{U}{\sqrt{2 \cdot \Delta p / \rho}}
+  variables:
+  - symbol: A_c
+    concept: a_c
   provenance:
     paper: Badin_1989_FricativeProductionModelling
     page: 0
-- id: claim430
+- id: claim162
   type: equation
   expression: SP \sim (\Delta p)^p \cdot (A_c)^q
+  variables:
+  - symbol: A_c
+    concept: a_c
+  - symbol: SP
+    concept: sp
+  - symbol: sim
+    concept: sim
   provenance:
     paper: Badin_1989_FricativeProductionModelling
     page: 0
-- id: claim431
+- id: claim163
   type: equation
   expression: SPL = G_0 + p \cdot 20\log(\Delta p) + q \cdot 20\log(A_c)
+  variables:
+  - symbol: G_0
+    concept: g_0
+  - symbol: A_c
+    concept: a_c
+  - symbol: SPL
+    concept: spl
   provenance:
     paper: Badin_1989_FricativeProductionModelling
     page: 0
-- id: claim432
+- id: claim164
   type: equation
   expression: p = 1.3, \quad q = 0.3
+  variables:
+  - symbol: quad
+    concept: quad
   provenance:
     paper: Badin_1989_FricativeProductionModelling
     page: 0
-- id: claim433
+- id: claim165
   type: equation
   expression: p = 0.8, \quad q = 0.2
+  variables:
+  - symbol: quad
+    concept: quad
   provenance:
     paper: Badin_1989_FricativeProductionModelling
     page: 0

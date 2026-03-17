@@ -1,7 +1,7 @@
 source:
   paper: Hertz_1987_DeltaNonLinearPhonology
 claims:
-- id: claim4002
+- id: claim1316
   type: parameter
   concept: h_start_freq
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 230
-- id: claim4003
+- id: claim1317
   type: parameter
   concept: h_end_freq
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 150
-- id: claim4004
+- id: claim1318
   type: parameter
   concept: l_start_freq
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 170
-- id: claim4005
+- id: claim1319
   type: parameter
   concept: l_end_freq
   provenance:

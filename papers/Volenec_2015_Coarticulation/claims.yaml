@@ -20,61 +20,49 @@ claims:
   upper_bound: 1
   unit: dimensionless
 - id: claim3
-  type: parameter
-  concept: locus_equation_intercept
+  type: equation
+  expression: F2_{\text{onset}} = k \cdot F2_{\text{middle}} + c
+  variables:
+  - symbol: F2_
+    concept: f2
+  - symbol: onset
+    concept: onset
+  - symbol: middle
+    concept: middle
   provenance:
     paper: Volenec_2015_Coarticulation
     page: 0
-  unit: Hz
 - id: claim4
-  type: equation
-  expression: F2_{\text{onset}} = k \cdot F2_{\text{middle}} + c
+  type: observation
+  statement: '**DAC 1 segments should show more formant variation across vowel contexts
+    than DAC 3 segments**'
+  concepts:
+  - formant
   provenance:
     paper: Volenec_2015_Coarticulation
     page: 0
 - id: claim5
   type: observation
-  statement: '**Locus equation slope for velars should be higher than for alveolars**
-    (more C-to-V coarticulation for velars)'
-  concepts: []
+  statement: '**Faster speech rate → more formant undershoot** (target not reached)'
+  concepts:
+  - formant
   provenance:
     paper: Volenec_2015_Coarticulation
     page: 0
 - id: claim6
   type: observation
-  statement: '**DAC 1 segments should show more formant variation across vowel contexts
-    than DAC 3 segments**'
-  concepts: []
+  statement: '**Clear/hyper speech → formant trajectories closer to canonical targets**'
+  concepts:
+  - formant
   provenance:
     paper: Volenec_2015_Coarticulation
     page: 0
 - id: claim7
   type: observation
-  statement: '**Anticipatory labial coarticulation should span more segments than
-    lingual coarticulation**'
-  concepts: []
-  provenance:
-    paper: Volenec_2015_Coarticulation
-    page: 0
-- id: claim8
-  type: observation
-  statement: '**Faster speech rate → more formant undershoot** (target not reached)'
-  concepts: []
-  provenance:
-    paper: Volenec_2015_Coarticulation
-    page: 0
-- id: claim9
-  type: observation
-  statement: '**Clear/hyper speech → formant trajectories closer to canonical targets**'
-  concepts: []
-  provenance:
-    paper: Volenec_2015_Coarticulation
-    page: 0
-- id: claim10
-  type: observation
   statement: '**V-to-V coarticulation in VCV should be detectable in F2 transitions**
     (Öhman effect)'
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Volenec_2015_Coarticulation
     page: 0

@@ -1,191 +1,28 @@
 source:
   paper: KaczmarekMajer_2024_AcousticMarkersBipolar
 claims:
-- id: claim5023
-  type: parameter
-  concept: loudness
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: dB (relative)
-- id: claim5024
-  type: parameter
-  concept: log_energy
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: dB
-- id: claim5025
-  type: parameter
-  concept: f0
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: Hz
-- id: claim5026
-  type: parameter
-  concept: f0_envelope
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: Hz
-- id: claim5027
-  type: parameter
-  concept: f1_frequency
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: Hz
-- id: claim5028
-  type: parameter
-  concept: f2_frequency
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: Hz
-- id: claim5029
-  type: parameter
-  concept: bandwidth
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: Hz
-- id: claim5030
-  type: parameter
-  concept: speaking_time
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: seconds
-- id: claim5031
-  type: parameter
-  concept: call_length
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: seconds
-- id: claim5032
-  type: parameter
-  concept: speaking_rate
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: words/sec
-- id: claim5033
-  type: parameter
-  concept: jitter
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: '%'
-- id: claim5034
-  type: parameter
-  concept: jitter
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: '%'
-- id: claim5035
-  type: parameter
-  concept: shimmer
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: '%'
-- id: claim5036
-  type: parameter
-  concept: hnr
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  unit: dB
-- id: claim5037
-  type: parameter
-  concept: glm_accuracy
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.71
-- id: claim5038
-  type: parameter
-  concept: glm_depression_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.61
-- id: claim5039
-  type: parameter
-  concept: glm_mania_mixed_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.52
-- id: claim5040
-  type: parameter
-  concept: glm_accuracy
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.71
-- id: claim5041
-  type: parameter
-  concept: glm_depression_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.62
-- id: claim5042
-  type: parameter
-  concept: glm_mania_mixed_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.56
-- id: claim5043
-  type: parameter
-  concept: random_forest_accuracy
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.63
-- id: claim5044
-  type: parameter
-  concept: random_forest_depression_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.24
-- id: claim5045
-  type: parameter
-  concept: random_forest_mania_mixed_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.2
-- id: claim5046
-  type: parameter
-  concept: decision_tree_accuracy
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.59
-- id: claim5047
-  type: parameter
-  concept: decision_tree_depression_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.22
-- id: claim5048
-  type: parameter
-  concept: decision_tree_mania_mixed_sensitivity
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
-  value: 0.1
-- id: claim5049
+- id: claim1535
   type: equation
   expression: y_{ij} = \beta_0 + \beta_1 x_{ij} + u_j + \epsilon_{ij}
+  variables:
+  - symbol: y_ij
+    concept: y_ij
+  - symbol: x_ij
+    concept: x_ij
+  - symbol: u_j
+    concept: u_j
+  - symbol: y_
+    concept: y
+  - symbol: ij
+    concept: ij
+  - symbol: beta_0
+    concept: beta_0
+  - symbol: beta_1
+    concept: beta_1
+  - symbol: x_
+    concept: x
+  - symbol: epsilon_
+    concept: epsilon
   provenance:
     paper: KaczmarekMajer_2024_AcousticMarkersBipolar
     page: 0

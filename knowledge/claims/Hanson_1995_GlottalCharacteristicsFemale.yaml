@@ -1,7 +1,7 @@
 source:
   paper: Hanson_1995_GlottalCharacteristicsFemale
 claims:
-- id: claim3267
+- id: claim1135
   type: parameter
   concept: first_two_harmonics
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: -2.6
   unit: dB
-- id: claim3268
+- id: claim1136
   type: parameter
   concept: f1_prominence
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: -12.4
   unit: dB
-- id: claim3269
+- id: claim1137
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 8.6
   unit: dB
-- id: claim3270
+- id: claim1138
   type: parameter
   concept: f1_bandwidth
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 53
   unit: Hz
-- id: claim3271
+- id: claim1139
   type: parameter
   concept: noise_rating
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 1
   unit: scale
-- id: claim3272
+- id: claim1140
   type: parameter
   concept: sound_pressure_level
   provenance:
@@ -50,7 +50,7 @@ claims:
   lower_bound: 77
   upper_bound: 88
   unit: dB
-- id: claim3273
+- id: claim1141
   type: parameter
   concept: intraoral_pressure
   provenance:
@@ -59,7 +59,7 @@ claims:
   lower_bound: 5.5
   upper_bound: 10.3
   unit: cm H2O
-- id: claim3274
+- id: claim1142
   type: parameter
   concept: dc_flow
   provenance:
@@ -68,7 +68,7 @@ claims:
   lower_bound: 62
   upper_bound: 130
   unit: cm^3/sec
-- id: claim3275
+- id: claim1143
   type: parameter
   concept: ac_flow
   provenance:
@@ -77,7 +77,7 @@ claims:
   lower_bound: 147
   upper_bound: 338
   unit: cm^3/sec
-- id: claim3276
+- id: claim1144
   type: parameter
   concept: open_quotient
   provenance:
@@ -86,15 +86,7 @@ claims:
   lower_bound: 42
   upper_bound: 60
   unit: '%'
-- id: claim3277
-  type: parameter
-  concept: speed_quotient
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  lower_bound: 1.6
-  upper_bound: 3.2
-- id: claim3278
+- id: claim1145
   type: parameter
   concept: mfdr
   provenance:
@@ -103,7 +95,7 @@ claims:
   lower_bound: 191
   upper_bound: 676
   unit: l/sec^2
-- id: claim3279
+- id: claim1146
   type: parameter
   concept: f0
   provenance:
@@ -112,7 +104,7 @@ claims:
   lower_bound: 178
   upper_bound: 262
   unit: Hz
-- id: claim3280
+- id: claim1147
   type: parameter
   concept: '000'
   provenance:
@@ -120,7 +112,7 @@ claims:
     page: 0
   unit: Hz
   value: 0
-- id: claim3281
+- id: claim1148
   type: parameter
   concept: '001'
   provenance:
@@ -128,7 +120,7 @@ claims:
     page: 0
   unit: Hz
   value: 25
-- id: claim3282
+- id: claim1149
   type: parameter
   concept: '002'
   provenance:
@@ -136,7 +128,7 @@ claims:
     page: 0
   unit: Hz
   value: 50
-- id: claim3283
+- id: claim1150
   type: parameter
   concept: '003'
   provenance:
@@ -144,7 +136,7 @@ claims:
     page: 0
   unit: Hz
   value: 76
-- id: claim3284
+- id: claim1151
   type: parameter
   concept: '004'
   provenance:
@@ -152,7 +144,7 @@ claims:
     page: 0
   unit: Hz
   value: 101
-- id: claim3285
+- id: claim1152
   type: parameter
   concept: '005'
   provenance:
@@ -160,7 +152,7 @@ claims:
     page: 0
   unit: Hz
   value: 126
-- id: claim3286
+- id: claim1153
   type: parameter
   concept: '006'
   provenance:
@@ -168,7 +160,7 @@ claims:
     page: 0
   unit: Hz
   value: 151
-- id: claim3287
+- id: claim1154
   type: parameter
   concept: '007'
   provenance:
@@ -176,7 +168,7 @@ claims:
     page: 0
   unit: Hz
   value: 176
-- id: claim3288
+- id: claim1155
   type: parameter
   concept: 008
   provenance:
@@ -184,7 +176,7 @@ claims:
     page: 0
   unit: Hz
   value: 202
-- id: claim3289
+- id: claim1156
   type: parameter
   concept: 009
   provenance:
@@ -192,7 +184,7 @@ claims:
     page: 0
   unit: Hz
   value: 227
-- id: claim3290
+- id: claim1157
   type: parameter
   concept: '010'
   provenance:
@@ -200,7 +192,7 @@ claims:
     page: 0
   unit: Hz
   value: 252
-- id: claim3291
+- id: claim1158
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -209,7 +201,7 @@ claims:
   lower_bound: 0
   upper_bound: 25
   unit: dB
-- id: claim3292
+- id: claim1159
   type: parameter
   concept: f1_bandwidth
   provenance:
@@ -218,7 +210,7 @@ claims:
   lower_bound: 60
   upper_bound: 280
   unit: Hz
-- id: claim3293
+- id: claim1160
   type: parameter
   concept: aspiration_noise
   provenance:
@@ -227,7 +219,16 @@ claims:
   lower_bound: 32
   upper_bound: 50
   unit: dB
-- id: claim3294
+- id: claim1161
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Hanson_1995_GlottalCharacteristicsFemale
+    page: 0
+  unit: Modal
+  lower_bound: 53
+  upper_bound: 100
+- id: claim1162
   type: parameter
   concept: g1
   provenance:
@@ -235,7 +236,7 @@ claims:
     page: 0
   unit: dB
   value: 0
-- id: claim3295
+- id: claim1163
   type: parameter
   concept: g2
   provenance:
@@ -243,7 +244,7 @@ claims:
     page: 0
   unit: dB
   value: 5
-- id: claim3296
+- id: claim1164
   type: parameter
   concept: g3
   provenance:
@@ -251,7 +252,7 @@ claims:
     page: 0
   unit: dB
   value: 10
-- id: claim3297
+- id: claim1165
   type: parameter
   concept: g4
   provenance:
@@ -259,7 +260,7 @@ claims:
     page: 0
   unit: dB
   value: 15
-- id: claim3298
+- id: claim1166
   type: parameter
   concept: g5
   provenance:
@@ -267,7 +268,7 @@ claims:
     page: 0
   unit: dB
   value: 20
-- id: claim3299
+- id: claim1167
   type: parameter
   concept: g6
   provenance:
@@ -275,7 +276,7 @@ claims:
     page: 0
   unit: dB
   value: 25
-- id: claim3300
+- id: claim1168
   type: parameter
   concept: f9
   provenance:
@@ -283,7 +284,7 @@ claims:
     page: 0
   unit: dB
   value: 8
-- id: claim3301
+- id: claim1169
   type: parameter
   concept: f13
   provenance:
@@ -291,7 +292,7 @@ claims:
     page: 0
   unit: dB
   value: 10
-- id: claim3302
+- id: claim1170
   type: parameter
   concept: f2
   provenance:
@@ -299,7 +300,7 @@ claims:
     page: 0
   unit: dB
   value: 19
-- id: claim3303
+- id: claim1171
   type: parameter
   concept: f15
   provenance:
@@ -307,81 +308,3 @@ claims:
     page: 0
   unit: dB
   value: 17
-- id: claim3304
-  type: parameter
-  concept: 22_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 24
-- id: claim3305
-  type: parameter
-  concept: 23_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 26
-- id: claim3306
-  type: parameter
-  concept: 24_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 27
-- id: claim3307
-  type: parameter
-  concept: 31_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 39
-- id: claim3308
-  type: parameter
-  concept: 34_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 46
-- id: claim3309
-  type: parameter
-  concept: 38_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 54
-- id: claim3310
-  type: parameter
-  concept: 39_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 56
-- id: claim3311
-  type: parameter
-  concept: 312_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 73
-- id: claim3312
-  type: parameter
-  concept: 41_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 82
-- id: claim3313
-  type: parameter
-  concept: 46_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  value: 100
-- id: claim3314
-  type: parameter
-  concept: 5556_page
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  lower_bound: 117
-  upper_bound: 118

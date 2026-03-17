@@ -1,7 +1,7 @@
 source:
   paper: King_2020_LabialGestureAngloEnglishR
 claims:
-- id: claim5216
+- id: claim1544
   type: parameter
   concept: f1
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 421
-- id: claim5217
+- id: claim1545
   type: parameter
   concept: f2
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 1236
-- id: claim5218
+- id: claim1546
   type: parameter
   concept: f3
   provenance:
@@ -25,10 +25,27 @@ claims:
     page: 0
   unit: Hz
   value: 1881
-- id: claim5219
+- id: claim1547
   type: equation
   expression: \text{Front Cavity Volume} = \text{Sublingual Space} + \text{Lip Tube
     Extension}
+  variables:
+  - symbol: Front
+    concept: front
+  - symbol: Cavity
+    concept: cavity
+  - symbol: Volume
+    concept: volume
+  - symbol: Sublingual
+    concept: sublingual
+  - symbol: Space
+    concept: space
+  - symbol: Lip
+    concept: lip
+  - symbol: Tube
+    concept: tube
+  - symbol: Extension
+    concept: extension
   provenance:
     paper: King_2020_LabialGestureAngloEnglishR
     page: 0

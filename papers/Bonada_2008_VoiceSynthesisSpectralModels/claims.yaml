@@ -3,34 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: period_duration
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: seconds
-- id: claim2
-  type: parameter
-  concept: closed_quotient
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: ratio
-- id: claim3
-  type: parameter
-  concept: max_flow_declination_rate
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: 1/s
-- id: claim4
-  type: parameter
-  concept: sampling_frequency
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
   concept: fft_size
   provenance:
     paper: Bonada_2008_VoiceSynthesisSpectralModels
@@ -38,7 +10,7 @@ claims:
   unit: samples
   lower_bound: 512
   upper_bound: 8192
-- id: claim6
+- id: claim2
   type: parameter
   concept: window_periods
   provenance:
@@ -47,21 +19,7 @@ claims:
   unit: periods
   lower_bound: 3
   upper_bound: 5
-- id: claim7
-  type: parameter
-  concept: window_periods
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: periods
-- id: claim8
-  type: parameter
-  concept: hop_size
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: samples
-- id: claim9
+- id: claim3
   type: parameter
   concept: zeropadding_factor
   provenance:
@@ -70,63 +28,7 @@ claims:
   unit: ratio
   lower_bound: 8
   upper_bound: 1000
-- id: claim10
-  type: parameter
-  concept: phase_candidates
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: count
-- id: claim11
-  type: parameter
-  concept: phase_correction_decay
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: radians
-- id: claim12
-  type: parameter
-  concept: phase_offset
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: radians
-- id: claim13
-  type: parameter
-  concept: source_gain
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: dB
-- id: claim14
-  type: parameter
-  concept: source_slope_depth
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: dB
-- id: claim15
-  type: parameter
-  concept: resonance_frequency
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: Hz
-- id: claim16
-  type: parameter
-  concept: resonance_bandwidth
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: Hz
-- id: claim17
-  type: parameter
-  concept: resonance_amplitude
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: linear
-- id: claim18
+- id: claim4
   type: parameter
   concept: pitch_transposition
   provenance:
@@ -135,7 +37,7 @@ claims:
   unit: ratio
   lower_bound: 0.5
   upper_bound: 2.0
-- id: claim19
+- id: claim5
   type: parameter
   concept: timbre_scaling
   provenance:
@@ -144,50 +46,7 @@ claims:
   unit: ratio
   lower_bound: 0.95
   upper_bound: 1.18
-- id: claim20
-  type: parameter
-  concept: jitter_variance
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: '% of period'
-- id: claim21
-  type: parameter
-  concept: shimmer_variance
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: dB
-- id: claim22
-  type: parameter
-  concept: subharmonics_for_growl
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: count
-- id: claim23
-  type: parameter
-  concept: bandwidth_coefficient
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  lower_bound: 0
-  upper_bound: 1
-- id: claim24
-  type: parameter
-  concept: formant_bandwidth
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: Hz
-- id: claim25
-  type: parameter
-  concept: phase_excursion
-  provenance:
-    paper: Bonada_2008_VoiceSynthesisSpectralModels
-    page: 0
-  unit: radians
-- id: claim26
+- id: claim6
   type: parameter
   concept: vibrato_rate
   provenance:
@@ -196,7 +55,7 @@ claims:
   unit: Hz
   lower_bound: 2
   upper_bound: 7
-- id: claim27
+- id: claim7
   type: parameter
   concept: vibrato_depth
   provenance:

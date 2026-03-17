@@ -1,63 +1,7 @@
 source:
   paper: HoltLotto_2006_CueWeightingAuditoryCategorization
 claims:
-- id: claim4437
-  type: parameter
-  concept: 1_cf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.658
-- id: claim4438
-  type: parameter
-  concept: 1_mf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.342
-- id: claim4439
-  type: parameter
-  concept: 2_cf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.664
-- id: claim4440
-  type: parameter
-  concept: 2_mf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.336
-- id: claim4441
-  type: parameter
-  concept: 3_cf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.395
-- id: claim4442
-  type: parameter
-  concept: 3_mf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.65
-- id: claim4443
-  type: parameter
-  concept: 4_cf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.6
-- id: claim4444
-  type: parameter
-  concept: 4_mf_weight
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-  value: 0.4
-- id: claim4445
+- id: claim1404
   type: parameter
   concept: center_frequency
   provenance:
@@ -67,7 +11,7 @@ claims:
   lower_bound: 550
   upper_bound: 1150
   unit: Hz
-- id: claim4446
+- id: claim1405
   type: parameter
   concept: modulation_frequency
   provenance:
@@ -75,7 +19,7 @@ claims:
     page: 0
   value: 140
   unit: Hz
-- id: claim4447
+- id: claim1406
   type: parameter
   concept: fm_depth
   provenance:
@@ -83,7 +27,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim4448
+- id: claim1407
   type: parameter
   concept: stimulus_duration
   provenance:
@@ -91,7 +35,7 @@ claims:
     page: 0
   value: 300
   unit: ms
-- id: claim4449
+- id: claim1408
   type: parameter
   concept: sample_rate
   provenance:
@@ -99,7 +43,7 @@ claims:
     page: 0
   value: 10
   unit: kHz
-- id: claim4450
+- id: claim1409
   type: parameter
   concept: bit_depth
   provenance:
@@ -107,7 +51,7 @@ claims:
     page: 0
   value: 16
   unit: bits
-- id: claim4451
+- id: claim1410
   type: parameter
   concept: cf_step_size
   provenance:
@@ -115,7 +59,7 @@ claims:
     page: 0
   value: 30
   unit: Hz
-- id: claim4452
+- id: claim1411
   type: parameter
   concept: mf_step_size
   provenance:
@@ -123,7 +67,7 @@ claims:
     page: 0
   value: 18
   unit: Hz
-- id: claim4453
+- id: claim1412
   type: parameter
   concept: training_blocks
   provenance:
@@ -131,73 +75,60 @@ claims:
     page: 0
   value: 10
   unit: count
-- id: claim4454
+- id: claim1413
   type: equation
   expression: I_{\text{dimension}} = \frac{\% \text{Correct Ideal Observer} - \text{Chance}}{\text{Perfect
     Performance} - \text{Chance}}
+  variables:
+  - symbol: I_
+    concept: i
+  - symbol: dimension
+    concept: dimension
+  - symbol: Correct
+    concept: correct
+  - symbol: Ideal
+    concept: ideal
+  - symbol: Observer
+    concept: observer
+  - symbol: Chance
+    concept: chance
+  - symbol: Perfect
+    concept: perfect
+  - symbol: Performance
+    concept: performance
   provenance:
     paper: HoltLotto_2006_CueWeightingAuditoryCategorization
     page: 0
-- id: claim4455
+- id: claim1414
   type: equation
   expression: \log\left(\frac{p(A)}{1-p(A)}\right) = \beta_0 + \beta_{CF} \cdot CF
     + \beta_{MF} \cdot MF
+  variables:
+  - symbol: beta_0
+    concept: beta_0
+  - symbol: beta_
+    concept: beta
+  - symbol: CF
+    concept: cf
+  - symbol: MF
+    concept: mf
   provenance:
     paper: HoltLotto_2006_CueWeightingAuditoryCategorization
     page: 0
-- id: claim4456
+- id: claim1415
   type: equation
   expression: w_{CF} = \frac{|\beta_{CF}|}{|\beta_{CF}| + |\beta_{MF}|}
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4457
-  type: observation
-  statement: '**Cue weight bias exists:** Even with psychophysically equated, equally
-    informative dimensions, listeners will weight one more heavily'
-  concepts: []
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4458
-  type: observation
-  statement: '**Variance > informativeness for weight shifts:** Manipulating within-category
-    variance produces larger cue weight changes than manipulating distribution centroids
-    (informativeness)'
-  concepts: []
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4459
-  type: observation
-  statement: '**Passive exposure increases weight:** Exposure to variability along
-    a dimension (without feedback) increases that dimension''s cue weight in subsequent
-    categorization'
-  concepts: []
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4460
-  type: observation
-  statement: '**Weights sum to 1.0:** If one cue weight increases, the other must
-    decrease proportionally'
-  concepts: []
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4461
-  type: observation
-  statement: '**Accuracy tracks informativeness:** More overlap in distributions leads
-    to lower categorization accuracy'
-  concepts: []
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim4462
-  type: observation
-  statement: '**RT tracks cue weight:** Faster reaction times for stimuli varying
-    along the more heavily weighted dimension'
-  concepts: []
+  variables:
+  - symbol: w_CF
+    concept: w_cf
+  - symbol: w_
+    concept: w
+  - symbol: CF
+    concept: cf
+  - symbol: beta_
+    concept: beta
+  - symbol: MF
+    concept: mf
   provenance:
     paper: HoltLotto_2006_CueWeightingAuditoryCategorization
     page: 0

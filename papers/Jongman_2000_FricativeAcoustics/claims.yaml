@@ -99,20 +99,13 @@ claims:
   value: 123
 - id: claim13
   type: parameter
-  concept: lpc_poles
-  provenance:
-    paper: Jongman_2000_FricativeAcoustics
-    page: 0
-  value: 24
-- id: claim14
-  type: parameter
   concept: fv
   provenance:
     paper: Jongman_2000_FricativeAcoustics
     page: 0
   unit: slope
   value: 0.768
-- id: claim15
+- id: claim14
   type: parameter
   concept: greek_small_letter_theta_latin_small_letter_eth
   provenance:
@@ -120,7 +113,7 @@ claims:
     page: 0
   unit: slope
   value: 0.53
-- id: claim16
+- id: claim15
   type: parameter
   concept: sz
   provenance:
@@ -128,7 +121,7 @@ claims:
     page: 0
   unit: slope
   value: 0.517
-- id: claim17
+- id: claim16
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_ezh
   provenance:

@@ -1,7 +1,7 @@
 source:
   paper: Klatt_1975_VoiceOnsetTimeFrication
 claims:
-- id: claim5336
+- id: claim1562
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: msec
   value: 78
-- id: claim5337
+- id: claim1563
   type: parameter
   concept: e
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: msec
   value: 71
-- id: claim5338
+- id: claim1564
   type: parameter
   concept: ay
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: msec
   value: 73
-- id: claim5339
+- id: claim1565
   type: parameter
   concept: u
   provenance:

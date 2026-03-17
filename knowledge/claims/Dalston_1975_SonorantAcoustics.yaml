@@ -1,7 +1,7 @@
 source:
   paper: Dalston_1975_SonorantAcoustics
 claims:
-- id: claim1751
+- id: claim617
   type: parameter
   concept: r
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: SD
   value: 348
-- id: claim1752
+- id: claim618
   type: parameter
   concept: w
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: SD
   value: 336
-- id: claim1753
+- id: claim619
   type: parameter
   concept: l
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: SD
   value: 344
-- id: claim1754
+- id: claim620
   type: parameter
   concept: r
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: SD
   value: 1061
-- id: claim1755
+- id: claim621
   type: parameter
   concept: w
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: SD
   value: 732
-- id: claim1756
+- id: claim622
   type: parameter
   concept: l
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: SD
   value: 1179
-- id: claim1757
+- id: claim623
   type: parameter
   concept: r
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: SD
   value: 1546
-- id: claim1758
+- id: claim624
   type: parameter
   concept: w
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: SD
   value: 2290
-- id: claim1759
+- id: claim625
   type: parameter
   concept: l
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: SD
   value: 2523
-- id: claim1760
+- id: claim626
   type: parameter
   concept: f1_steadystate_duration
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: SD
   value: 39.2
-- id: claim1761
+- id: claim627
   type: parameter
   concept: f2_steadystate_duration
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: SD
   value: 35.5
-- id: claim1762
+- id: claim628
   type: parameter
   concept: f3_steadystate_duration
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: SD
   value: 30.9
-- id: claim1763
+- id: claim629
   type: parameter
   concept: f1_transition_duration
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: SD
   value: 33.7
-- id: claim1764
+- id: claim630
   type: parameter
   concept: f2_transition_duration
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: SD
   value: 50.4
-- id: claim1765
+- id: claim631
   type: parameter
   concept: f3_transition_duration
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: SD
   value: 71.4
-- id: claim1766
+- id: claim632
   type: parameter
   concept: f1_transition_rate
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: SD
   value: 3.9
-- id: claim1767
+- id: claim633
   type: parameter
   concept: f2_transition_rate
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: SD
   value: 10.5
-- id: claim1768
+- id: claim634
   type: parameter
   concept: f3_transition_rate
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: SD
   value: 12.8
-- id: claim1769
+- id: claim635
   type: parameter
   concept: f1_steadystate_duration
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: SD
   value: 40.3
-- id: claim1770
+- id: claim636
   type: parameter
   concept: f2_steadystate_duration
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: SD
   value: 41.2
-- id: claim1771
+- id: claim637
   type: parameter
   concept: f3_steadystate_duration
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: SD
   value: 38.9
-- id: claim1772
+- id: claim638
   type: parameter
   concept: f1_transition_duration
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: SD
   value: 32.7
-- id: claim1773
+- id: claim639
   type: parameter
   concept: f2_transition_duration
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: SD
   value: 52.3
-- id: claim1774
+- id: claim640
   type: parameter
   concept: f3_transition_duration
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: SD
   value: 61.0
-- id: claim1775
+- id: claim641
   type: parameter
   concept: f1_transition_rate
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: SD
   value: 8.0
-- id: claim1776
+- id: claim642
   type: parameter
   concept: f2_transition_rate
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: SD
   value: 11.7
-- id: claim1777
+- id: claim643
   type: parameter
   concept: f3_transition_rate
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: SD
   value: 14.3
-- id: claim1778
+- id: claim644
   type: parameter
   concept: w
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: Hz
   value: 340
-- id: claim1779
+- id: claim645
   type: parameter
   concept: r
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   unit: Hz
   value: 350
-- id: claim1780
+- id: claim646
   type: parameter
   concept: l
   provenance:
@@ -241,16 +241,34 @@ claims:
     page: 0
   unit: Hz
   value: 350
-- id: claim1781
+- id: claim647
   type: equation
   expression: \text{Transition Rate} = \frac{\Delta F \text{ (Hz)}}{\text{Transition
     Duration (ms)}}
+  variables:
+  - symbol: Transition
+    concept: transition
+  - symbol: Rate
+    concept: rate
+  - symbol: Hz
+    concept: hz
+  - symbol: Duration
+    concept: duration
+  - symbol: ms
+    concept: ms
   provenance:
     paper: Dalston_1975_SonorantAcoustics
     page: 0
-- id: claim1782
+- id: claim648
   type: equation
   expression: \text{Ratio} = \frac{F_n}{F_1}
+  variables:
+  - symbol: F_n
+    concept: f_n
+  - symbol: F_1
+    concept: f_1
+  - symbol: Ratio
+    concept: ratio
   provenance:
     paper: Dalston_1975_SonorantAcoustics
     page: 0

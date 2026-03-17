@@ -3,62 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: peak_frequency
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: harmonics_15
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
-  concept: harmonic_spacing
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: formants_15
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
-  concept: formant_dispersion
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
-  concept: lowdispersion
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim8
-  type: parameter
-  concept: highdispersion
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  unit: Hz
-- id: claim9
-  type: parameter
   concept: height
   provenance:
     paper: Collins_2003_VocalVisualAttractiveness
@@ -66,7 +10,7 @@ claims:
   lower_bound: 1.56
   upper_bound: 1.78
   unit: m
-- id: claim10
+- id: claim2
   type: parameter
   concept: weight
   provenance:
@@ -75,7 +19,7 @@ claims:
   lower_bound: 47
   upper_bound: 95
   unit: kg
-- id: claim11
+- id: claim3
   type: parameter
   concept: bmi
   provenance:
@@ -84,7 +28,7 @@ claims:
   lower_bound: 15.5
   upper_bound: 34.5
   unit: kg/m^2
-- id: claim12
+- id: claim4
   type: parameter
   concept: whr
   provenance:
@@ -93,7 +37,7 @@ claims:
   lower_bound: 0.66
   upper_bound: 0.85
   unit: ratio
-- id: claim13
+- id: claim5
   type: parameter
   concept: vowel_duration
   provenance:
@@ -102,92 +46,30 @@ claims:
   lower_bound: 0.25
   upper_bound: 0.38
   unit: s
-- id: claim14
-  type: parameter
-  concept: a_vocal_attractiveness_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.438
-- id: claim15
-  type: parameter
-  concept: a_age_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.315
-- id: claim16
-  type: parameter
-  concept: b_vocal_attractiveness_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.602
-- id: claim17
-  type: parameter
-  concept: b_age_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.32
-- id: claim18
-  type: parameter
-  concept: c_vocal_attractiveness_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.6
-- id: claim19
-  type: parameter
-  concept: c_age_w
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-  value: 0.114
-- id: claim20
+- id: claim6
   type: observation
   statement: Higher F0 in women should correlate with higher perceived vocal attractiveness
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Collins_2003_VocalVisualAttractiveness
     page: 0
-- id: claim21
+- id: claim7
   type: observation
   statement: Formant dispersion (especially F4-F5 spacing) should be inversely proportional
     to speaker height
-  concepts: []
+  concepts:
+  - f4
+  - formant
   provenance:
     paper: Collins_2003_VocalVisualAttractiveness
     page: 0
-- id: claim22
+- id: claim8
   type: observation
   statement: Larger body size (higher BMI/weight) should correlate with lower F0 and
     harmonics
-  concepts: []
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim23
-  type: observation
-  statement: Vocal and visual attractiveness ratings for the same individual should
-    be positively correlated
-  concepts: []
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim24
-  type: observation
-  statement: Within a narrow age range, perceived age from voice should not correlate
-    with actual age
-  concepts: []
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim25
-  type: observation
-  statement: Higher Harm, Formdisp, and Forms PCA scores should independently predict
-    vocal attractiveness
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Collins_2003_VocalVisualAttractiveness
     page: 0

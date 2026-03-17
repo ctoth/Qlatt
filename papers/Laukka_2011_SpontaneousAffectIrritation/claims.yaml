@@ -138,110 +138,46 @@ claims:
   unit: SD
   value: 0.462
 - id: claim18
-  type: parameter
-  concept: lda_irritation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 69.7
-- id: claim19
-  type: parameter
-  concept: lda_resignation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 64.3
-- id: claim20
-  type: parameter
-  concept: lda_neutral
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 50.0
-- id: claim21
-  type: parameter
-  concept: lda_irritation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 57.6
-- id: claim22
-  type: parameter
-  concept: lda_resignation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 42.9
-- id: claim23
-  type: parameter
-  concept: lda_neutral
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 62.5
-- id: claim24
-  type: parameter
-  concept: human_listeners_irritation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 56.7
-- id: claim25
-  type: parameter
-  concept: human_listeners_resignation
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 45.3
-- id: claim26
-  type: parameter
-  concept: human_listeners_neutral
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-  value: 71.2
-- id: claim27
   type: observation
   statement: 'Irritation: F0 mean increases, intensity mean increases, F0 Q1 and Q5
     increase relative to neutral baseline'
-  concepts: []
+  concepts:
+  - f0
+  - intensity
   provenance:
     paper: Laukka_2011_SpontaneousAffectIrritation
     page: 0
-- id: claim28
+- id: claim19
   type: observation
   statement: 'Resignation: F0 mean decreases, intensity mean/Q1/Q5 decrease, F0 SD
     decreases relative to neutral baseline'
-  concepts: []
+  concepts:
+  - f0
+  - intensity
   provenance:
     paper: Laukka_2011_SpontaneousAffectIrritation
     page: 0
-- id: claim29
+- id: claim20
   type: observation
   statement: 'Both: syllable duration increases (slower speech rate)'
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Laukka_2011_SpontaneousAffectIrritation
     page: 0
-- id: claim30
+- id: claim21
   type: observation
   statement: IntQ5 should be the single best predictor of emotion intensity (r ≈ .46)
-  concepts: []
+  concepts:
+  - intensity
   provenance:
     paper: Laukka_2011_SpontaneousAffectIrritation
     page: 0
-- id: claim31
+- id: claim22
   type: observation
   statement: F0FracRise should differentiate neutral (high) from affective (low) speech
-  concepts: []
-  provenance:
-    paper: Laukka_2011_SpontaneousAffectIrritation
-    page: 0
-- id: claim32
-  type: observation
-  statement: Irritation and resignation rarely confused with each other — they are
-    acoustically distinct
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Laukka_2011_SpontaneousAffectIrritation
     page: 0

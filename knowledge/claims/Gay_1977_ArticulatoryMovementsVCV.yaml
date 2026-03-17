@@ -1,7 +1,7 @@
 source:
   paper: Gay_1977_ArticulatoryMovementsVCV
 claims:
-- id: claim2974
+- id: claim1063
   type: parameter
   concept: ipi
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: FSC
   value: 340
-- id: claim2975
+- id: claim1064
   type: parameter
   concept: api
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: FSC
   value: 360
-- id: claim2976
+- id: claim1065
   type: parameter
   concept: upi
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: FSC
   value: 360
-- id: claim2977
+- id: claim1066
   type: parameter
   concept: iti
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: FSC
   value: 360
-- id: claim2978
+- id: claim1067
   type: parameter
   concept: ati
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: FSC
   value: 320
-- id: claim2979
+- id: claim1068
   type: parameter
   concept: uti
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: FSC
   value: 350
-- id: claim2980
+- id: claim1069
   type: parameter
   concept: iki
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: FSC
   value: 320
-- id: claim2981
+- id: claim1070
   type: parameter
   concept: aki
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: FSC
   value: 360
-- id: claim2982
+- id: claim1071
   type: parameter
   concept: uki
   provenance:

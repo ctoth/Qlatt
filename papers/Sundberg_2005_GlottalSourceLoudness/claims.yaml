@@ -340,107 +340,136 @@ claims:
 - id: claim43
   type: equation
   expression: P_{SEN} = \frac{P_s - P_{thr}}{P_{thr}}
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: P_s
+    concept: p_s
+  - symbol: P_thr
+    concept: p_thr
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: thr
+    concept: thr
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim44
   type: equation
   expression: Q_{closed} = A - e^{(-\alpha \cdot P_{SEN}) + B}
+  variables:
+  - symbol: Q_closed
+    concept: q_closed
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: Q_
+    concept: q
+  - symbol: closed
+    concept: closed
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim45
   type: equation
   expression: MFDR = C \cdot P_{SEN} + Icpt
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: MFDR
+    concept: mfdr
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim46
   type: equation
   expression: \hat{U} = C \cdot P_{SEN} + Icpt
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim47
   type: equation
   expression: C_{Gl} = (U_{pulse} - U_{dc}) \cdot T_{op} / P_s
+  variables:
+  - symbol: C_Gl
+    concept: c_gl
+  - symbol: U_pulse
+    concept: u_pulse
+  - symbol: U_dc
+    concept: u_dc
+  - symbol: T_op
+    concept: t_op
+  - symbol: P_s
+    concept: p_s
+  - symbol: C_
+    concept: c
+  - symbol: Gl
+    concept: gl
+  - symbol: U_
+    concept: u
+  - symbol: pulse
+    concept: pulse
+  - symbol: dc
+    concept: dc
+  - symbol: T_
+    concept: t
+  - symbol: op
+    concept: op
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim48
   type: equation
   expression: H_1 - H_2 = C \cdot Q_{closed} + Icpt
+  variables:
+  - symbol: H_1
+    concept: h_1
+  - symbol: H_2
+    concept: h_2
+  - symbol: Q_closed
+    concept: q_closed
+  - symbol: Q_
+    concept: q
+  - symbol: closed
+    concept: closed
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim49
   type: observation
-  statement: Qclosed must be in [0, ~0.6] (observed max asymptote ~0.52)
-  concepts: []
+  statement: Increasing Qclosed must decrease H1-H2 (monotonic, negative slope)
+  concepts:
+  - h1_h2
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
 - id: claim50
   type: observation
-  statement: Increasing PSEN must increase MFDR (monotonic, linear)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim51
-  type: observation
-  statement: Increasing PSEN must increase Qclosed (monotonic, saturating)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim52
-  type: observation
-  statement: Increasing PSEN must increase U-hat (monotonic, linear)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim53
-  type: observation
-  statement: Increasing Qclosed must decrease H1-H2 (monotonic, negative slope)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim54
-  type: observation
-  statement: Compliance must decrease or stay constant with increasing PSEN (never
-    increase)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim55
-  type: observation
-  statement: 'For given PSEN: male MFDR > female MFDR'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim56
-  type: observation
-  statement: 'For given PSEN: male Qclosed >= female Qclosed'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim57
-  type: observation
-  statement: 'For given PSEN: male compliance > female compliance'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim58
-  type: observation
   statement: 'At high F0: Qclosed asymptote is lower than at low F0 (especially females)'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0

@@ -3,48 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: fh_notes
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 3
-- id: claim2
-  type: parameter
-  concept: 1_age
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 6
-- id: claim3
-  type: parameter
-  concept: 2_age
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 36
-- id: claim4
-  type: parameter
-  concept: 3_age
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 66
-- id: claim5
-  type: parameter
-  concept: 4_age
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 91
-- id: claim6
-  type: parameter
   concept: latin_small_letter_esh
   provenance:
     paper: Schotz_2006_F0DurationSpeakerAge
     page: 0
   unit: 6y
   value: 139
-- id: claim7
+- id: claim2
   type: parameter
   concept: latin_small_letter_open_e_modifier_letter_triangular_colon
   provenance:
@@ -52,7 +17,7 @@ claims:
     page: 0
   unit: 6y
   value: 469
-- id: claim8
+- id: claim3
   type: parameter
   concept: l
   provenance:
@@ -60,7 +25,7 @@ claims:
     page: 0
   unit: 6y
   value: 312
-- id: claim9
+- id: claim4
   type: parameter
   concept: latin_small_letter_schwa
   provenance:
@@ -68,7 +33,7 @@ claims:
     page: 0
   unit: 6y
   value: 179
-- id: claim10
+- id: claim5
   type: parameter
   concept: n
   provenance:
@@ -76,7 +41,7 @@ claims:
     page: 0
   unit: 6y
   value: 111
-- id: claim11
+- id: claim6
   type: parameter
   concept: total
   provenance:
@@ -84,77 +49,50 @@ claims:
     page: 0
   unit: 6y
   value: 1209
-- id: claim12
-  type: parameter
-  concept: 6_years_natural
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 4
-- id: claim13
-  type: parameter
-  concept: 6_years_synthetic
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 2.5
-- id: claim14
-  type: parameter
-  concept: 36_years_natural
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 6
-- id: claim15
-  type: parameter
-  concept: 36_years_synthetic
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 4
-- id: claim16
-  type: parameter
-  concept: 66_years_natural
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 6
-- id: claim17
-  type: parameter
-  concept: 66_years_synthetic
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 4
-- id: claim18
-  type: parameter
-  concept: 91_years_natural
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 5
-- id: claim19
-  type: parameter
-  concept: 91_years_synthetic
-  provenance:
-    paper: Schotz_2006_F0DurationSpeakerAge
-    page: 0
-  value: 3.5
-- id: claim20
+- id: claim7
   type: equation
   expression: w = \frac{a_t - a_1}{a_2 - a_1}
+  variables:
+  - symbol: a_t
+    concept: a_t
+  - symbol: a_1
+    concept: a_1
+  - symbol: a_2
+    concept: a_2
   provenance:
     paper: Schotz_2006_F0DurationSpeakerAge
     page: 0
-- id: claim21
+- id: claim8
   type: equation
   expression: P_{target} = P_1 \cdot (1-w) + P_2 \cdot w
+  variables:
+  - symbol: P_target
+    concept: p_target
+  - symbol: P_1
+    concept: p_1
+  - symbol: P_2
+    concept: p_2
+  - symbol: P_
+    concept: p
+  - symbol: target
+    concept: target
   provenance:
     paper: Schotz_2006_F0DurationSpeakerAge
     page: 0
-- id: claim22
+- id: claim9
   type: equation
   expression: D_{target} = D_1 \cdot (1-w) + D_2 \cdot w
+  variables:
+  - symbol: D_target
+    concept: d_target
+  - symbol: D_1
+    concept: d_1
+  - symbol: D_2
+    concept: d_2
+  - symbol: D_
+    concept: d
+  - symbol: target
+    concept: target
   provenance:
     paper: Schotz_2006_F0DurationSpeakerAge
     page: 0

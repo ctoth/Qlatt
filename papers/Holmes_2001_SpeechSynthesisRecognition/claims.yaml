@@ -30,27 +30,13 @@ claims:
   unit: Hz
 - id: claim4
   type: parameter
-  concept: formant_bandwidths
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: formant_bandwidths
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
   concept: frame_duration
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0
   value: 10
   unit: ms
-- id: claim7
+- id: claim5
   type: parameter
   concept: sound_velocity
   provenance:
@@ -58,7 +44,7 @@ claims:
     page: 0
   value: 350
   unit: m/s
-- id: claim8
+- id: claim6
   type: parameter
   concept: tract_length
   provenance:
@@ -66,64 +52,31 @@ claims:
     page: 0
   value: 0.175
   unit: m
-- id: claim9
-  type: parameter
-  concept: hms_table_parameters_per_element
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-  value: 10
-- id: claim10
-  type: observation
-  statement: HMS boundary value = fixed_contribution + (proportion x vowel_target)
-    — this formula can be verified against table entries
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim11
-  type: observation
-  statement: Higher-rank elements should dominate transition specification in adjacent
-    pairs
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim12
-  type: observation
-  statement: Overlapping transitions should produce parabolic-shaped combined transitions
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim13
-  type: observation
-  statement: Radiation adds +6 dB/octave tilt to volume velocity spectrum
-  concepts: []
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim14
+- id: claim7
   type: observation
   statement: Closed-glottis F1 bandwidth ~80 Hz; open-glottis F1 bandwidth can be
     4x greater (~300+ Hz)
-  concepts: []
+  concepts:
+  - f1
+  - bandwidth
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0
-- id: claim15
+- id: claim8
   type: observation
   statement: F0 for adult males typically 50-200 Hz; females approximately one octave
     higher
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0
-- id: claim16
+- id: claim9
   type: observation
   statement: Female formant frequencies approximately 20% higher than male due to
     shorter vocal tract
-  concepts: []
+  concepts:
+  - formant
   provenance:
     paper: Holmes_2001_SpeechSynthesisRecognition
     page: 0

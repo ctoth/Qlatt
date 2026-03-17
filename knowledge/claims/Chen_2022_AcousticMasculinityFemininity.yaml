@@ -1,352 +1,91 @@
 source:
   paper: Chen_2022_AcousticMasculinityFemininity
 claims:
-- id: claim1265
-  type: parameter
-  concept: f0_mean
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1
-- id: claim1266
-  type: parameter
-  concept: f0_sd
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 2
-- id: claim1267
-  type: parameter
-  concept: hnr
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 3
-- id: claim1268
-  type: parameter
-  concept: local_jitter
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 4
-- id: claim1269
-  type: parameter
-  concept: local_absolute_jitter
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 5
-- id: claim1270
-  type: parameter
-  concept: rap_jitter
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 6
-- id: claim1271
-  type: parameter
-  concept: ppq5_jitter
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 7
-- id: claim1272
-  type: parameter
-  concept: ddp_jitter
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 8
-- id: claim1273
-  type: parameter
-  concept: local_shimmer
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 9
-- id: claim1274
-  type: parameter
-  concept: apq3_shimmer
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 10
-- id: claim1275
-  type: parameter
-  concept: apq5_shimmer
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 11
-- id: claim1276
-  type: parameter
-  concept: apq11_shimmer
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 12
-- id: claim1277
-  type: parameter
-  concept: dda_shimmer
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 13
-- id: claim1278
-  type: parameter
-  concept: f1_mean
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 14
-- id: claim1279
-  type: parameter
-  concept: f2_mean
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 15
-- id: claim1280
-  type: parameter
-  concept: f3_mean
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 16
-- id: claim1281
-  type: parameter
-  concept: f4_mean
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 17
-- id: claim1282
-  type: parameter
-  concept: pf
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 18
-- id: claim1283
-  type: parameter
-  concept: fdisp
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 19
-- id: claim1284
-  type: parameter
-  concept: avgformant
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 20
-- id: claim1285
-  type: parameter
-  concept: mff
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 21
-- id: claim1286
-  type: parameter
-  concept: fitch_vtl
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 22
-- id: claim1287
-  type: parameter
-  concept: f
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 23
-- id: claim1288
-  type: parameter
-  concept: 1_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.46
-- id: claim1289
-  type: parameter
-  concept: 2_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.81
-- id: claim1290
-  type: parameter
-  concept: 3_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.09
-- id: claim1291
-  type: parameter
-  concept: 4_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.86
-- id: claim1292
-  type: parameter
-  concept: 5_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.09
-- id: claim1293
-  type: parameter
-  concept: 6_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.65
-- id: claim1294
-  type: parameter
-  concept: 7_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 2.22
-- id: claim1295
-  type: parameter
-  concept: 8_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 2.5
-- id: claim1296
-  type: parameter
-  concept: 9_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 2.86
-- id: claim1297
-  type: parameter
-  concept: 1_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.62
-- id: claim1298
-  type: parameter
-  concept: 2_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.5
-- id: claim1299
-  type: parameter
-  concept: 3_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.61
-- id: claim1300
-  type: parameter
-  concept: 4_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.45
-- id: claim1301
-  type: parameter
-  concept: 5_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.14
-- id: claim1302
-  type: parameter
-  concept: 6_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 2.05
-- id: claim1303
-  type: parameter
-  concept: 7_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.69
-- id: claim1304
-  type: parameter
-  concept: 8_vif
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-  value: 1.42
-- id: claim1305
+- id: claim447
   type: equation
   expression: 'Average linkage cophenetic distance:'
+  variables:
+  - symbol: Average
+    concept: average
+  - symbol: linkage
+    concept: linkage
+  - symbol: cophenetic
+    concept: cophenetic
+  - symbol: distance
+    concept: distance
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1306
+- id: claim448
   type: equation
   expression: 'Variance Inflation Factor:'
+  variables:
+  - symbol: Variance
+    concept: variance
+  - symbol: Inflation
+    concept: inflation
+  - symbol: Factor
+    concept: factor
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1307
+- id: claim449
   type: observation
   statement: F0 mean should be the strongest single predictor of perceived masculinity/femininity
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1308
+- id: claim450
   type: observation
   statement: F0 and formant dispersion (ΔF) should be independent (low correlation)
-  concepts: []
+  concepts:
+  - f0
+  - formant
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1309
+- id: claim451
   type: observation
   statement: F0 mean and F1 mean should be independent
-  concepts: []
+  concepts:
+  - f0
+  - f1
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1310
+- id: claim452
   type: observation
   statement: F3 and F4 mean should be highly correlated with VTL estimators (r > .7)
-  concepts: []
+  concepts:
+  - f3
+  - f4
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1311
+- id: claim453
   type: observation
   statement: All 5 jitter measures should form a single cluster (inter-r > .6)
-  concepts: []
+  concepts:
+  - jitter
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1312
+- id: claim454
   type: observation
   statement: F0 mean should contribute proportionally more to male masculinity than
     female femininity
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0
-- id: claim1313
+- id: claim455
   type: observation
   statement: 'Optimal speech duration for stable ratings: ~7 seconds'
-  concepts: []
-  provenance:
-    paper: Chen_2022_AcousticMasculinityFemininity
-    page: 0
-- id: claim1314
-  type: observation
-  statement: VIF should drop below 5 at 8-9 clusters from 23 original measures
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Chen_2022_AcousticMasculinityFemininity
     page: 0

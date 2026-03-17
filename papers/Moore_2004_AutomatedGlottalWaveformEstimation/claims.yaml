@@ -3,34 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: lp_model_order
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  value: 10
-- id: claim2
-  type: parameter
-  concept: number_of_iterations
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  value: 20
-- id: claim3
-  type: parameter
   concept: window_length
   provenance:
     paper: Moore_2004_AutomatedGlottalWaveformEstimation
     page: 0
   value: 20
   unit: samples
-- id: claim4
-  type: parameter
-  concept: frame_size
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  unit: pitch periods
-- id: claim5
+- id: claim2
   type: parameter
   concept: sampling_rate
   provenance:
@@ -38,57 +17,3 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim6
-  type: parameter
-  concept: selection_percentile
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  unit: '%'
-- id: claim7
-  type: parameter
-  concept: lip_radiation_zero
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-  lower_bound: 0.95
-  upper_bound: 1.0
-- id: claim8
-  type: observation
-  statement: '|a1| values of selected estimates should be in top 1% (99th percentile)
-    of all candidates'
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim9
-  type: observation
-  statement: Smoother glottal derivatives should have |a1| closer to 1.0
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim10
-  type: observation
-  statement: For modal phonation, estimates should show clear opening, closing, and
-    closed phases
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim11
-  type: observation
-  statement: Integrated glottal waveform should be quasi-periodic within the analysis
-    frame
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0
-- id: claim12
-  type: observation
-  statement: Algorithm should produce similar estimates regardless of whether analysis
-    windows land on closing or opening phase
-  concepts: []
-  provenance:
-    paper: Moore_2004_AutomatedGlottalWaveformEstimation
-    page: 0

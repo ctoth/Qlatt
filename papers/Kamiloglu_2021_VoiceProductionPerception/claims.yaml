@@ -3,34 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: formant_frequencies
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: voice_intensity
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  unit: dB
-- id: claim4
-  type: parameter
-  concept: vibrato_rate
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
   concept: bass
   provenance:
     paper: Kamiloglu_2021_VoiceProductionPerception
@@ -38,7 +10,7 @@ claims:
   lower_bound: 80
   upper_bound: 330
   unit: Hz
-- id: claim6
+- id: claim2
   type: parameter
   concept: soprano
   provenance:

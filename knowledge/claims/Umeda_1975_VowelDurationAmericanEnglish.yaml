@@ -1,7 +1,7 @@
 source:
   paper: Umeda_1975_VowelDurationAmericanEnglish
 claims:
-- id: claim10553
+- id: claim2536
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: ms
   value: 20
-- id: claim10554
+- id: claim2537
   type: parameter
   concept: e
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: ms
   value: 45
-- id: claim10555
+- id: claim2538
   type: parameter
   concept: a
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: ms
   value: 25
-- id: claim10556
+- id: claim2539
   type: parameter
   concept: i
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim10557
+- id: claim2540
   type: parameter
   concept: e
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: ms
   value: 45
-- id: claim10558
+- id: claim2541
   type: parameter
   concept: a
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: ms
   value: 95
-- id: claim10559
+- id: claim2542
   type: parameter
   concept: ae
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: ms
   value: 30
-- id: claim10560
+- id: claim2543
   type: parameter
   concept: ai
   provenance:
@@ -65,248 +65,3 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim10561
-  type: parameter
-  concept: i_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.23
-- id: claim10562
-  type: parameter
-  concept: i_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.3
-- id: claim10563
-  type: parameter
-  concept: i_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.39
-- id: claim10564
-  type: parameter
-  concept: i_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10565
-  type: parameter
-  concept: e_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.47
-- id: claim10566
-  type: parameter
-  concept: e_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.14
-- id: claim10567
-  type: parameter
-  concept: e_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.36
-- id: claim10568
-  type: parameter
-  concept: e_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10569
-  type: parameter
-  concept: a_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.08
-- id: claim10570
-  type: parameter
-  concept: a_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.43
-- id: claim10571
-  type: parameter
-  concept: a_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.57
-- id: claim10572
-  type: parameter
-  concept: a_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10573
-  type: parameter
-  concept: i_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.11
-- id: claim10574
-  type: parameter
-  concept: i_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.44
-- id: claim10575
-  type: parameter
-  concept: i_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.68
-- id: claim10576
-  type: parameter
-  concept: i_vowel_ending
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.97
-- id: claim10577
-  type: parameter
-  concept: i_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10578
-  type: parameter
-  concept: e_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.21
-- id: claim10579
-  type: parameter
-  concept: e_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.6
-- id: claim10580
-  type: parameter
-  concept: e_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.3
-- id: claim10581
-  type: parameter
-  concept: e_vowel_ending
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.85
-- id: claim10582
-  type: parameter
-  concept: e_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10583
-  type: parameter
-  concept: o_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.21
-- id: claim10584
-  type: parameter
-  concept: o_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.4
-- id: claim10585
-  type: parameter
-  concept: o_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.61
-- id: claim10586
-  type: parameter
-  concept: o_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0
-- id: claim10587
-  type: parameter
-  concept: ae_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.4
-- id: claim10588
-  type: parameter
-  concept: ae_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.43
-- id: claim10589
-  type: parameter
-  concept: ae_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.61
-- id: claim10590
-  type: parameter
-  concept: ae_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.73
-- id: claim10591
-  type: parameter
-  concept: ai_vcl_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.23
-- id: claim10592
-  type: parameter
-  concept: ai_nasal
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.44
-- id: claim10593
-  type: parameter
-  concept: ai_vcd_stop
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.59
-- id: claim10594
-  type: parameter
-  concept: ai_vowel_ending
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 0.75
-- id: claim10595
-  type: parameter
-  concept: ai_vcd_fric
-  provenance:
-    paper: Umeda_1975_VowelDurationAmericanEnglish
-    page: 0
-  value: 1.0

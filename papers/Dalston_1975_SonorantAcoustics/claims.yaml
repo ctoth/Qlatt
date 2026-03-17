@@ -245,12 +245,30 @@ claims:
   type: equation
   expression: \text{Transition Rate} = \frac{\Delta F \text{ (Hz)}}{\text{Transition
     Duration (ms)}}
+  variables:
+  - symbol: Transition
+    concept: transition
+  - symbol: Rate
+    concept: rate
+  - symbol: Hz
+    concept: hz
+  - symbol: Duration
+    concept: duration
+  - symbol: ms
+    concept: ms
   provenance:
     paper: Dalston_1975_SonorantAcoustics
     page: 0
 - id: claim32
   type: equation
   expression: \text{Ratio} = \frac{F_n}{F_1}
+  variables:
+  - symbol: F_n
+    concept: f_n
+  - symbol: F_1
+    concept: f_1
+  - symbol: Ratio
+    concept: ratio
   provenance:
     paper: Dalston_1975_SonorantAcoustics
     page: 0

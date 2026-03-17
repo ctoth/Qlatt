@@ -11,49 +11,20 @@ claims:
   unit: Hz
 - id: claim2
   type: parameter
-  concept: f1_phase_correction_polezero
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: fn_resonance
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
   concept: higher_pole_correction_start
   provenance:
     paper: Holmes_1983_FormantSynthesizersCascadeParallel
     page: 0
   value: 5.5
   unit: kHz
-- id: claim5
-  type: parameter
-  concept: higher_pole_correction_magnitude
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0
-  unit: dB
-- id: claim6
-  type: parameter
-  concept: glottal_source_filter_poles
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0
-  unit: Hz
-- id: claim7
+- id: claim3
   type: equation
   expression: H(s) = \prod_{n=1}^{\infty} \frac{s_n s_n^*}{(s - s_n)(s - s_n^*)}
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0
-- id: claim8
-  type: equation
-  expression: d = c / 2L
+  variables:
+  - symbol: s_n
+    concept: s_n
+  - symbol: prod_
+    concept: prod
   provenance:
     paper: Holmes_1983_FormantSynthesizersCascadeParallel
     page: 0

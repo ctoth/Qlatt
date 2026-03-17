@@ -1,51 +1,7 @@
 source:
   paper: Kaburagi_2007_VocalTractSpectrum
 claims:
-- id: claim4921
-  type: parameter
-  concept: articulatory_dimensions
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 16
-- id: claim4922
-  type: parameter
-  concept: acoustic_dimensions
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 14
-- id: claim4923
-  type: parameter
-  concept: number_of_phoneme_types
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 23
-- id: claim4924
-  type: parameter
-  concept: number_of_phonemic_groups
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 13
-- id: claim4925
-  type: parameter
-  concept: timing_parameters
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 748
-- id: claim4926
-  type: parameter
-  concept: neighbor_samples
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 64
-  lower_bound: 1
-  upper_bound: 256
-- id: claim4927
+- id: claim1529
   type: parameter
   concept: ema_sampling_rate
   provenance:
@@ -53,7 +9,7 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim4928
+- id: claim1530
   type: parameter
   concept: speech_sampling_rate
   provenance:
@@ -61,14 +17,7 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim4929
-  type: parameter
-  concept: lpc_order
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-  value: 14
-- id: claim4930
+- id: claim1531
   type: parameter
   concept: analysis_window
   provenance:
@@ -76,7 +25,7 @@ claims:
     page: 0
   value: 30
   unit: ms
-- id: claim4931
+- id: claim1532
   type: parameter
   concept: ema_accuracy
   provenance:
@@ -84,55 +33,19 @@ claims:
     page: 0
   value: 0.1
   unit: mm
-- id: claim4932
-  type: observation
-  statement: 'Articulatory distance must be non-negative: $e_i \ge 0$'
-  concepts: []
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim4933
-  type: observation
-  statement: 'Interpolation weights must sum to 1: $\sum_{j=1}^{M} \alpha_j = 1$'
-  concepts: []
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim4934
-  type: observation
-  statement: Increasing $M$ should monotonically increase mean articulatory distance
-    of selected neighbors
-  concepts: []
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim4935
-  type: observation
-  statement: Spectral error should decrease then increase as $M$ grows (U-shaped curve,
-    minimum around 64-128)
-  concepts: []
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim4936
-  type: observation
-  statement: Task-constrained articulatory dimensions should show lower cross-phoneme
-    variance than unconstrained dimensions
-  concepts: []
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim4937
+- id: claim1533
   type: observation
   statement: 'Phoneme onset + offset durations must be positive: $L_k > 0, M_k > 0$'
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Kaburagi_2007_VocalTractSpectrum
     page: 0
-- id: claim4938
+- id: claim1534
   type: observation
   statement: Total predicted timing should equal sum of all onset and offset durations
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Kaburagi_2007_VocalTractSpectrum
     page: 0

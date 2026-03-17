@@ -389,31 +389,8 @@ claims:
   type: observation
   statement: Coarticulatory F3 lowering from /r/ should persist across a stop consonant
     boundary (~500 Hz lower than /l/ context)
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim50
-  type: observation
-  statement: Listeners should identify ambiguous /da/-/ga/ members differently depending
-    on coarticulatory context even without the preceding syllable
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim51
-  type: observation
-  statement: Enhancing effects (not contrastive) should occur when coarticulatory
-    information affects identification of the gestural source
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim52
-  type: observation
-  statement: Tone-speech comparison should show opposite effect directions for same
-    acoustic continuum
-  concepts: []
+  concepts:
+  - f3
   provenance:
     paper: Fowler_2006_CoarticulationGesturePerception
     page: 0

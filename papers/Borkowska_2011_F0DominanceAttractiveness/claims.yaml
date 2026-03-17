@@ -34,159 +34,36 @@ claims:
   unit: Hz
   value: 310.3
 - id: claim5
-  type: parameter
-  concept: raised_l_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 5.3
-- id: claim6
-  type: parameter
-  concept: raised_l_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 5.14
-- id: claim7
-  type: parameter
-  concept: lowered_m_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 4.76
-- id: claim8
-  type: parameter
-  concept: lowered_m_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 5.02
-- id: claim9
-  type: parameter
-  concept: m_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 4.71
-- id: claim10
-  type: parameter
-  concept: m_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 4.99
-- id: claim11
-  type: parameter
-  concept: raised_m_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 4.31
-- id: claim12
-  type: parameter
-  concept: raised_m_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 4.42
-- id: claim13
-  type: parameter
-  concept: lowered_h_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 3.68
-- id: claim14
-  type: parameter
-  concept: lowered_h_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 3.89
-- id: claim15
-  type: parameter
-  concept: h_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 3.25
-- id: claim16
-  type: parameter
-  concept: h_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 3.59
-- id: claim17
-  type: parameter
-  concept: raised_h_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 2.63
-- id: claim18
-  type: parameter
-  concept: raised_h_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 2.8
-- id: claim19
-  type: parameter
-  concept: lowered_vh_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 2.18
-- id: claim20
-  type: parameter
-  concept: vh_mens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 2.24
-- id: claim21
-  type: parameter
-  concept: vh_womens_rating
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-  value: 1.8
-- id: claim22
   type: observation
   statement: F0-dominance relationship must be monotonically negative across 185-310
     Hz range
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Borkowska_2011_F0DominanceAttractiveness
     page: 0
-- id: claim23
+- id: claim6
   type: observation
   statement: F0-attractiveness relationship must be nonlinear with a peak around 260-282
     Hz
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Borkowska_2011_F0DominanceAttractiveness
     page: 0
-- id: claim24
-  type: observation
-  statement: Voices above ~310 Hz must be rated lower in attractiveness than voices
-    at ~260-280 Hz
-  concepts: []
-  provenance:
-    paper: Borkowska_2011_F0DominanceAttractiveness
-    page: 0
-- id: claim25
+- id: claim7
   type: observation
   statement: Lowering F0 by 20 Hz must increase dominance rating
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Borkowska_2011_F0DominanceAttractiveness
     page: 0
-- id: claim26
+- id: claim8
   type: observation
   statement: Raising F0 by 20 Hz must decrease dominance rating
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Borkowska_2011_F0DominanceAttractiveness
     page: 0

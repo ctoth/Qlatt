@@ -1,66 +1,23 @@
 source:
   paper: Grollero_2023_CoreAffectVocalBursts
 claims:
-- id: claim3259
+- id: claim1134
   type: equation
   expression: $$\text{PAQ}_{\text{valence}} = -5.85 + 1.18 \cdot \text{CA}_{\text{valence}}
     \quad (R^2_{\text{adj}} = 0.71, \text{Study 2})$$
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3260
-  type: observation
-  statement: Arousal ratings for vocal bursts should follow a quadratic (V-shaped)
-    function of valence, with minimum arousal near neutral valence (50 on 0-100 scale)
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3261
-  type: observation
-  statement: The quadratic model should explain more variance than a linear model
-    for the valence-arousal relationship in vocal bursts
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3262
-  type: observation
-  statement: PAQ ratings should be systematically more extreme than CA ratings (regression
-    slope > 1.0)
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3263
-  type: observation
-  statement: PAQ ratings should show lower between-participant coefficient of variation
-    than CA ratings
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3264
-  type: observation
-  statement: Stimuli with high between-participant variance in valence (ambiguous)
-    should have higher arousal ratings than stimuli with low variance (unambiguous)
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3265
-  type: observation
-  statement: Ambiguous stimuli should show larger residuals from the quadratic valence-arousal
-    fit
-  concepts: []
-  provenance:
-    paper: Grollero_2023_CoreAffectVocalBursts
-    page: 0
-- id: claim3266
-  type: observation
-  statement: At least 80% of vocal bursts should receive consistent valence polarity
-    (positive/negative) across CA and PAQ conditions
-  concepts: []
+  variables:
+  - symbol: PAQ
+    concept: paq
+  - symbol: valence
+    concept: valence
+  - symbol: CA
+    concept: ca
+  - symbol: quad
+    concept: quad
+  - symbol: adj
+    concept: adj
+  - symbol: Study
+    concept: study
   provenance:
     paper: Grollero_2023_CoreAffectVocalBursts
     page: 0

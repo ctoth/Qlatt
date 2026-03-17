@@ -2,216 +2,81 @@ source:
   paper: Ronanki_2013_SyllableProsodyHTS
 claims:
 - id: claim1
-  type: parameter
-  concept: mgc_coefficients
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 40
-- id: claim2
-  type: parameter
-  concept: top_segments_for_clustering
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 200
-- id: claim3
-  type: parameter
-  concept: english_phone_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 5.57
-- id: claim4
-  type: parameter
-  concept: english_syllable_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 7.57
-- id: claim5
-  type: parameter
-  concept: telugu_phone_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 5.85
-- id: claim6
-  type: parameter
-  concept: telugu_syllable_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 6.6
-- id: claim7
-  type: parameter
-  concept: kannada_phone_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 5.45
-- id: claim8
-  type: parameter
-  concept: kannada_syllable_hmm
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 6.31
-- id: claim9
-  type: parameter
-  concept: english_rmse_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 24.82
-- id: claim10
-  type: parameter
-  concept: english_rmse_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 23.06
-- id: claim11
-  type: parameter
-  concept: english_corr_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.78
-- id: claim12
-  type: parameter
-  concept: english_corr_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.87
-- id: claim13
-  type: parameter
-  concept: telugu_rmse_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 19.04
-- id: claim14
-  type: parameter
-  concept: telugu_rmse_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 15.84
-- id: claim15
-  type: parameter
-  concept: telugu_corr_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.81
-- id: claim16
-  type: parameter
-  concept: telugu_corr_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.88
-- id: claim17
-  type: parameter
-  concept: kannada_rmse_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 18.56
-- id: claim18
-  type: parameter
-  concept: kannada_rmse_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 14.72
-- id: claim19
-  type: parameter
-  concept: kannada_corr_phone
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.8
-- id: claim20
-  type: parameter
-  concept: kannada_corr_syllable
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 0.88
-- id: claim21
-  type: parameter
-  concept: english_phone_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.2
-- id: claim22
-  type: parameter
-  concept: english_hybrid_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.3
-- id: claim23
-  type: parameter
-  concept: telugu_phone_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.2
-- id: claim24
-  type: parameter
-  concept: telugu_hybrid_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.35
-- id: claim25
-  type: parameter
-  concept: kannada_phone_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.1
-- id: claim26
-  type: parameter
-  concept: kannada_hybrid_hts
-  provenance:
-    paper: Ronanki_2013_SyllableProsodyHTS
-    page: 0
-  value: 4.3
-- id: claim27
   type: equation
   expression: MCD = \frac{10}{\log 10} \cdot \sqrt{2 \cdot \sum_{i=1}^{40}(mc^e_i
     - mc^o_i)^2}
+  variables:
+  - symbol: e_i
+    concept: e_i
+  - symbol: o_i
+    concept: o_i
+  - symbol: MCD
+    concept: mcd
+  - symbol: sum_
+    concept: sum
+  - symbol: mc
+    concept: mc
   provenance:
     paper: Ronanki_2013_SyllableProsodyHTS
     page: 0
-- id: claim28
+- id: claim2
   type: equation
   expression: RMSE = \sqrt{\frac{\sum_{i=1}^{n}(y_i^2 - \hat{y}_i^2)}{n}}
+  variables:
+  - symbol: y_i
+    concept: y_i
+  - symbol: RMSE
+    concept: rmse
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Ronanki_2013_SyllableProsodyHTS
     page: 0
-- id: claim29
+- id: claim3
   type: equation
   expression: CORR = \frac{n\sum(xy) - (\sum x)(\sum y)}{\sqrt{n(\sum x^2) - (\sum
     x)^2} \cdot \sqrt{n(\sum y^2) - (\sum y)^2}}
+  variables:
+  - symbol: CORR
+    concept: corr
+  - symbol: xy
+    concept: xy
   provenance:
     paper: Ronanki_2013_SyllableProsodyHTS
     page: 0
-- id: claim30
+- id: claim4
   type: equation
   expression: \alpha_t(j) = \max_i \{\alpha_{t-1}(i) a_{i,j}\} P(y(t), x(j))
+  variables:
+  - symbol: a_i
+    concept: a_i
+  - symbol: alpha_t
+    concept: alpha_t
+  - symbol: max_i
+    concept: max_i
+  - symbol: alpha_
+    concept: alpha
+  - symbol: a_
+    concept: a
   provenance:
     paper: Ronanki_2013_SyllableProsodyHTS
     page: 0
-- id: claim31
+- id: claim5
   type: equation
   expression: \phi_t(j) = \arg\max_i \{\alpha_{t-1}(i) a_{i,j}\}
+  variables:
+  - symbol: a_i
+    concept: a_i
+  - symbol: phi_t
+    concept: phi_t
+  - symbol: arg
+    concept: arg
+  - symbol: max_i
+    concept: max_i
+  - symbol: alpha_
+    concept: alpha
+  - symbol: a_
+    concept: a
   provenance:
     paper: Ronanki_2013_SyllableProsodyHTS
     page: 0

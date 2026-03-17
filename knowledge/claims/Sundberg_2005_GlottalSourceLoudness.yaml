@@ -1,7 +1,7 @@
 source:
   paper: Sundberg_2005_GlottalSourceLoudness
 claims:
-- id: claim10243
+- id: claim2419
   type: parameter
   concept: female
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.49
-- id: claim10244
+- id: claim2420
   type: parameter
   concept: male
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.49
-- id: claim10245
+- id: claim2421
   type: parameter
   concept: female
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.44
-- id: claim10246
+- id: claim2422
   type: parameter
   concept: male
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.52
-- id: claim10247
+- id: claim2423
   type: parameter
   concept: female
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.32
-- id: claim10248
+- id: claim2424
   type: parameter
   concept: male
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: asymptote
   value: 0.44
-- id: claim10249
+- id: claim2425
   type: parameter
   concept: female
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: slope
   value: 142.8
-- id: claim10250
+- id: claim2426
   type: parameter
   concept: male
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: slope
   value: 140.6
-- id: claim10251
+- id: claim2427
   type: parameter
   concept: female
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: slope
   value: 145
-- id: claim10252
+- id: claim2428
   type: parameter
   concept: male
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: slope
   value: 232.3
-- id: claim10253
+- id: claim2429
   type: parameter
   concept: female
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: slope
   value: 177.9
-- id: claim10254
+- id: claim2430
   type: parameter
   concept: male
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: slope
   value: 343.5
-- id: claim10255
+- id: claim2431
   type: parameter
   concept: female
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: slope
   value: 0.051
-- id: claim10256
+- id: claim2432
   type: parameter
   concept: male
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: slope
   value: 0.085
-- id: claim10257
+- id: claim2433
   type: parameter
   concept: female
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: slope
   value: 0.053
-- id: claim10258
+- id: claim2434
   type: parameter
   concept: male
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: slope
   value: 0.12
-- id: claim10259
+- id: claim2435
   type: parameter
   concept: female
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: slope
   value: 0.077
-- id: claim10260
+- id: claim2436
   type: parameter
   concept: male
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: slope
   value: 0.164
-- id: claim10261
+- id: claim2437
   type: parameter
   concept: female
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: slope
   value: -40.7
-- id: claim10262
+- id: claim2438
   type: parameter
   concept: male
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: slope
   value: -30
-- id: claim10263
+- id: claim2439
   type: parameter
   concept: female
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: slope
   value: -40.6
-- id: claim10264
+- id: claim2440
   type: parameter
   concept: male
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: slope
   value: -25.9
-- id: claim10265
+- id: claim2441
   type: parameter
   concept: female
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: slope
   value: -39.3
-- id: claim10266
+- id: claim2442
   type: parameter
   concept: male
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: slope
   value: -23.5
-- id: claim10267
+- id: claim2443
   type: parameter
   concept: female
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: slope
   value: -0.005
-- id: claim10268
+- id: claim2444
   type: parameter
   concept: male
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: slope
   value: -0.028
-- id: claim10269
+- id: claim2445
   type: parameter
   concept: female
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: slope
   value: -0.0
-- id: claim10270
+- id: claim2446
   type: parameter
   concept: male
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: slope
   value: -0.02
-- id: claim10271
+- id: claim2447
   type: parameter
   concept: female
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   unit: slope
   value: 0
-- id: claim10272
+- id: claim2448
   type: parameter
   concept: male
   provenance:
@@ -241,7 +241,7 @@ claims:
     page: 0
   unit: slope
   value: -0.01
-- id: claim10273
+- id: claim2449
   type: parameter
   concept: female
   provenance:
@@ -249,7 +249,7 @@ claims:
     page: 0
   unit: slope
   value: 2548
-- id: claim10274
+- id: claim2450
   type: parameter
   concept: male
   provenance:
@@ -257,7 +257,7 @@ claims:
     page: 0
   unit: slope
   value: 1492
-- id: claim10275
+- id: claim2451
   type: parameter
   concept: female
   provenance:
@@ -265,7 +265,7 @@ claims:
     page: 0
   unit: slope
   value: 2663
-- id: claim10276
+- id: claim2452
   type: parameter
   concept: male
   provenance:
@@ -273,7 +273,7 @@ claims:
     page: 0
   unit: slope
   value: 1962
-- id: claim10277
+- id: claim2453
   type: parameter
   concept: female
   provenance:
@@ -281,7 +281,7 @@ claims:
     page: 0
   unit: slope
   value: 2364
-- id: claim10278
+- id: claim2454
   type: parameter
   concept: male
   provenance:
@@ -289,7 +289,7 @@ claims:
     page: 0
   unit: slope
   value: 2164
-- id: claim10279
+- id: claim2455
   type: parameter
   concept: female
   provenance:
@@ -297,7 +297,7 @@ claims:
     page: 0
   unit: slope
   value: 1760
-- id: claim10280
+- id: claim2456
   type: parameter
   concept: male
   provenance:
@@ -305,7 +305,7 @@ claims:
     page: 0
   unit: slope
   value: 1745
-- id: claim10281
+- id: claim2457
   type: parameter
   concept: female
   provenance:
@@ -313,7 +313,7 @@ claims:
     page: 0
   unit: slope
   value: 1676
-- id: claim10282
+- id: claim2458
   type: parameter
   concept: male
   provenance:
@@ -321,7 +321,7 @@ claims:
     page: 0
   unit: slope
   value: 1944
-- id: claim10283
+- id: claim2459
   type: parameter
   concept: female
   provenance:
@@ -329,7 +329,7 @@ claims:
     page: 0
   unit: slope
   value: 2053
-- id: claim10284
+- id: claim2460
   type: parameter
   concept: male
   provenance:
@@ -337,110 +337,139 @@ claims:
     page: 0
   unit: slope
   value: 2866
-- id: claim10285
+- id: claim2461
   type: equation
   expression: P_{SEN} = \frac{P_s - P_{thr}}{P_{thr}}
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: P_s
+    concept: p_s
+  - symbol: P_thr
+    concept: p_thr
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: thr
+    concept: thr
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10286
+- id: claim2462
   type: equation
   expression: Q_{closed} = A - e^{(-\alpha \cdot P_{SEN}) + B}
+  variables:
+  - symbol: Q_closed
+    concept: q_closed
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: Q_
+    concept: q
+  - symbol: closed
+    concept: closed
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10287
+- id: claim2463
   type: equation
   expression: MFDR = C \cdot P_{SEN} + Icpt
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: MFDR
+    concept: mfdr
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10288
+- id: claim2464
   type: equation
   expression: \hat{U} = C \cdot P_{SEN} + Icpt
+  variables:
+  - symbol: P_SEN
+    concept: p_sen
+  - symbol: P_
+    concept: p
+  - symbol: SEN
+    concept: sen
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10289
+- id: claim2465
   type: equation
   expression: C_{Gl} = (U_{pulse} - U_{dc}) \cdot T_{op} / P_s
+  variables:
+  - symbol: C_Gl
+    concept: c_gl
+  - symbol: U_pulse
+    concept: u_pulse
+  - symbol: U_dc
+    concept: u_dc
+  - symbol: T_op
+    concept: t_op
+  - symbol: P_s
+    concept: p_s
+  - symbol: C_
+    concept: c
+  - symbol: Gl
+    concept: gl
+  - symbol: U_
+    concept: u
+  - symbol: pulse
+    concept: pulse
+  - symbol: dc
+    concept: dc
+  - symbol: T_
+    concept: t
+  - symbol: op
+    concept: op
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10290
+- id: claim2466
   type: equation
   expression: H_1 - H_2 = C \cdot Q_{closed} + Icpt
+  variables:
+  - symbol: H_1
+    concept: h_1
+  - symbol: H_2
+    concept: h_2
+  - symbol: Q_closed
+    concept: q_closed
+  - symbol: Q_
+    concept: q
+  - symbol: closed
+    concept: closed
+  - symbol: Icpt
+    concept: icpt
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10291
-  type: observation
-  statement: Qclosed must be in [0, ~0.6] (observed max asymptote ~0.52)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10292
-  type: observation
-  statement: Increasing PSEN must increase MFDR (monotonic, linear)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10293
-  type: observation
-  statement: Increasing PSEN must increase Qclosed (monotonic, saturating)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10294
-  type: observation
-  statement: Increasing PSEN must increase U-hat (monotonic, linear)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10295
+- id: claim2467
   type: observation
   statement: Increasing Qclosed must decrease H1-H2 (monotonic, negative slope)
-  concepts: []
+  concepts:
+  - h1_h2
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0
-- id: claim10296
-  type: observation
-  statement: Compliance must decrease or stay constant with increasing PSEN (never
-    increase)
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10297
-  type: observation
-  statement: 'For given PSEN: male MFDR > female MFDR'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10298
-  type: observation
-  statement: 'For given PSEN: male Qclosed >= female Qclosed'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10299
-  type: observation
-  statement: 'For given PSEN: male compliance > female compliance'
-  concepts: []
-  provenance:
-    paper: Sundberg_2005_GlottalSourceLoudness
-    page: 0
-- id: claim10300
+- id: claim2468
   type: observation
   statement: 'At high F0: Qclosed asymptote is lower than at low F0 (especially females)'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Sundberg_2005_GlottalSourceLoudness
     page: 0

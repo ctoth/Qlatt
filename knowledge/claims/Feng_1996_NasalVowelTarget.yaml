@@ -1,7 +1,7 @@
 source:
   paper: Feng_1996_NasalVowelTarget
 claims:
-- id: claim2461
+- id: claim859
   type: parameter
   concept: first_nasal_peak
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 200
   upper_bound: 300
   unit: Hz
-- id: claim2462
+- id: claim860
   type: parameter
   concept: second_nasal_peak
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 900
   upper_bound: 1100
   unit: Hz
-- id: claim2463
+- id: claim861
   type: parameter
   concept: wall_vibration_freq
   provenance:
@@ -29,7 +29,7 @@ claims:
   lower_bound: 150
   upper_bound: 220
   unit: Hz
-- id: claim2464
+- id: claim862
   type: parameter
   concept: nostril_output_area
   provenance:
@@ -39,7 +39,7 @@ claims:
   lower_bound: 0.6
   upper_bound: 1.0
   unit: cm²
-- id: claim2465
+- id: claim863
   type: parameter
   concept: nasal_tract_length
   provenance:
@@ -47,7 +47,7 @@ claims:
     page: 0
   value: 11
   unit: cm
-- id: claim2466
+- id: claim864
   type: parameter
   concept: neck_length
   provenance:
@@ -57,7 +57,7 @@ claims:
   lower_bound: 2.7
   upper_bound: 3
   unit: cm
-- id: claim2467
+- id: claim865
   type: parameter
   concept: sinus_volume
   provenance:
@@ -65,14 +65,7 @@ claims:
     page: 0
   value: 18
   unit: cm³
-- id: claim2468
-  type: parameter
-  concept: sinus_resonance
-  provenance:
-    paper: Feng_1996_NasalVowelTarget
-    page: 0
-  unit: Hz
-- id: claim2469
+- id: claim866
   type: parameter
   concept: fn1
   provenance:
@@ -81,7 +74,7 @@ claims:
   lower_bound: 250
   upper_bound: 300
   unit: Hz
-- id: claim2470
+- id: claim867
   type: parameter
   concept: fn3
   provenance:
@@ -90,7 +83,7 @@ claims:
   lower_bound: 650
   upper_bound: 700
   unit: Hz
-- id: claim2471
+- id: claim868
   type: parameter
   concept: fn5
   provenance:
@@ -99,7 +92,7 @@ claims:
   lower_bound: 900
   upper_bound: 1100
   unit: Hz
-- id: claim2472
+- id: claim869
   type: parameter
   concept: fn8
   provenance:
@@ -108,7 +101,7 @@ claims:
   lower_bound: 1900
   upper_bound: 2200
   unit: Hz
-- id: claim2473
+- id: claim870
   type: parameter
   concept: fn9
   provenance:
@@ -117,7 +110,7 @@ claims:
   lower_bound: 2800
   upper_bound: 3300
   unit: Hz
-- id: claim2474
+- id: claim871
   type: parameter
   concept: fn10
   provenance:
@@ -125,7 +118,7 @@ claims:
     page: 0
   unit: Hz
   value: 4000
-- id: claim2475
+- id: claim872
   type: parameter
   concept: fn1
   provenance:
@@ -134,7 +127,7 @@ claims:
   lower_bound: 250
   upper_bound: 300
   unit: Hz
-- id: claim2476
+- id: claim873
   type: parameter
   concept: fn2
   provenance:
@@ -143,7 +136,7 @@ claims:
   lower_bound: 400
   upper_bound: 450
   unit: Hz
-- id: claim2477
+- id: claim874
   type: parameter
   concept: fn3
   provenance:
@@ -152,7 +145,7 @@ claims:
   lower_bound: 650
   upper_bound: 700
   unit: Hz
-- id: claim2478
+- id: claim875
   type: parameter
   concept: fn4
   provenance:
@@ -161,7 +154,7 @@ claims:
   lower_bound: 850
   upper_bound: 900
   unit: Hz
-- id: claim2479
+- id: claim876
   type: parameter
   concept: fn5
   provenance:
@@ -170,7 +163,7 @@ claims:
   lower_bound: 1200
   upper_bound: 1300
   unit: Hz
-- id: claim2480
+- id: claim877
   type: parameter
   concept: fn67
   provenance:
@@ -179,7 +172,7 @@ claims:
   lower_bound: 1500
   upper_bound: 1700
   unit: Hz
-- id: claim2481
+- id: claim878
   type: parameter
   concept: fn8
   provenance:
@@ -188,7 +181,7 @@ claims:
   lower_bound: 1800
   upper_bound: 2200
   unit: Hz
-- id: claim2482
+- id: claim879
   type: parameter
   concept: fn9
   provenance:
@@ -197,7 +190,7 @@ claims:
   lower_bound: 2800
   upper_bound: 3300
   unit: Hz
-- id: claim2483
+- id: claim880
   type: parameter
   concept: fn10
   provenance:
@@ -205,7 +198,7 @@ claims:
     page: 0
   unit: Hz
   value: 4000
-- id: claim2484
+- id: claim881
   type: parameter
   concept: latin_small_letter_open_o_combining_tilde
   provenance:
@@ -214,7 +207,7 @@ claims:
   lower_bound: 250
   upper_bound: 700
   unit: Hz
-- id: claim2485
+- id: claim882
   type: parameter
   concept: a
   provenance:
@@ -223,7 +216,7 @@ claims:
   lower_bound: 250
   upper_bound: 950
   unit: Hz
-- id: claim2486
+- id: claim883
   type: parameter
   concept: latin_small_letter_open_e_combining_tilde
   provenance:
@@ -232,15 +225,41 @@ claims:
   lower_bound: 250
   upper_bound: 1200
   unit: Hz
-- id: claim2487
+- id: claim884
   type: equation
   expression: F_0 = \sqrt{F_{Helm}^2 + F_{wall}^2}
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: F_Helm
+    concept: f_helm
+  - symbol: F_wall
+    concept: f_wall
+  - symbol: F_
+    concept: f
+  - symbol: Helm
+    concept: helm
+  - symbol: wall
+    concept: wall
   provenance:
     paper: Feng_1996_NasalVowelTarget
     page: 0
-- id: claim2488
+- id: claim885
   type: equation
   expression: F_{Helm} = \frac{c}{2\pi} \sqrt{\frac{S}{V \cdot L_{eff}}}
+  variables:
+  - symbol: F_Helm
+    concept: f_helm
+  - symbol: L_eff
+    concept: l_eff
+  - symbol: F_
+    concept: f
+  - symbol: Helm
+    concept: helm
+  - symbol: L_
+    concept: l
+  - symbol: eff
+    concept: eff
   provenance:
     paper: Feng_1996_NasalVowelTarget
     page: 0

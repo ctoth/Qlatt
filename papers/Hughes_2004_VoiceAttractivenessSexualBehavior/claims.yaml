@@ -39,20 +39,6 @@ claims:
   unit: ratio
 - id: claim5
   type: parameter
-  concept: male_bmi
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: kg/m^2
-- id: claim6
-  type: parameter
-  concept: female_bmi
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: kg/m^2
-- id: claim7
-  type: parameter
   concept: voice_attractiveness_scale
   provenance:
     paper: Hughes_2004_VoiceAttractivenessSexualBehavior
@@ -60,7 +46,7 @@ claims:
   lower_bound: 1
   upper_bound: 5
   unit: points
-- id: claim8
+- id: claim6
   type: parameter
   concept: age_first_masturbation
   provenance:
@@ -68,7 +54,7 @@ claims:
     page: 0
   unit: n
   value: 36
-- id: claim9
+- id: claim7
   type: parameter
   concept: age_first_sex
   provenance:
@@ -76,7 +62,7 @@ claims:
     page: 0
   unit: n
   value: 34
-- id: claim10
+- id: claim8
   type: parameter
   concept: number_of_sex_partners
   provenance:
@@ -84,7 +70,7 @@ claims:
     page: 0
   unit: n
   value: 43
-- id: claim11
+- id: claim9
   type: parameter
   concept: number_of_epc_partners
   provenance:
@@ -92,7 +78,7 @@ claims:
     page: 0
   unit: n
   value: 43
-- id: claim12
+- id: claim10
   type: parameter
   concept: times_chosen_as_epc_partner
   provenance:
@@ -100,43 +86,3 @@ claims:
     page: 0
   unit: n
   value: 43
-- id: claim13
-  type: observation
-  statement: Voice attractiveness ratings should be positively correlated with SHR
-    in males (r ~ .5)
-  concepts: []
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-- id: claim14
-  type: observation
-  statement: Voice attractiveness ratings should be negatively correlated with WHR
-    in females (r ~ -.37)
-  concepts: []
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-- id: claim15
-  type: observation
-  statement: BMI should NOT significantly correlate with voice attractiveness in either
-    sex
-  concepts: []
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-- id: claim16
-  type: observation
-  statement: Opposite-sex voice ratings should be better predictors of sexual behavior
-    than same-sex ratings
-  concepts: []
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-- id: claim17
-  type: observation
-  statement: The voice-body configuration relationship should persist after controlling
-    for BMI (partial correlations should remain significant)
-  concepts: []
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0

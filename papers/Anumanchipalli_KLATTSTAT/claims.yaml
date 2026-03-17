@@ -165,15 +165,6 @@ claims:
   unit: dB
 - id: claim19
   type: parameter
-  concept: kopen
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 40
-  lower_bound: 0
-  upper_bound: 60
-- id: claim20
-  type: parameter
   concept: aturb
   provenance:
     paper: Anumanchipalli_KLATTSTAT
@@ -182,7 +173,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim21
+- id: claim20
   type: parameter
   concept: tilt
   provenance:
@@ -192,7 +183,7 @@ claims:
   lower_bound: 0
   upper_bound: 24
   unit: dB
-- id: claim22
+- id: claim21
   type: parameter
   concept: af
   provenance:
@@ -201,16 +192,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim23
-  type: parameter
-  concept: skew
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0
-  lower_bound: 0
-  upper_bound: 40
-- id: claim24
+- id: claim22
   type: parameter
   concept: a1
   provenance:
@@ -219,7 +201,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim25
+- id: claim23
   type: parameter
   concept: a2
   provenance:
@@ -228,7 +210,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim26
+- id: claim24
   type: parameter
   concept: a3
   provenance:
@@ -237,7 +219,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim27
+- id: claim25
   type: parameter
   concept: a4
   provenance:
@@ -246,7 +228,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim28
+- id: claim26
   type: parameter
   concept: a5
   provenance:
@@ -255,7 +237,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim29
+- id: claim27
   type: parameter
   concept: a6
   provenance:
@@ -264,7 +246,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim30
+- id: claim28
   type: parameter
   concept: ab
   provenance:
@@ -273,7 +255,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim31
+- id: claim29
   type: parameter
   concept: avp
   provenance:
@@ -282,7 +264,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim32
+- id: claim30
   type: parameter
   concept: gain
   provenance:
@@ -292,97 +274,18 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim33
-  type: parameter
-  concept: mcd_mean_naive
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.88
-- id: claim34
-  type: parameter
-  concept: mcd_mean_bayes
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.95
-- id: claim35
-  type: parameter
-  concept: mcd_mean_gmm_lda
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.96
-- id: claim36
-  type: parameter
-  concept: mcd_mean_gmm_ldae
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.95
-- id: claim37
-  type: parameter
-  concept: mcd_mean_mcep_lda
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.79
-- id: claim38
-  type: parameter
-  concept: mcd_mean_mcep_ldae
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 11.67
-- id: claim39
-  type: parameter
-  concept: mcd_variance_naive
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.36
-- id: claim40
-  type: parameter
-  concept: mcd_variance_bayes
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.37
-- id: claim41
-  type: parameter
-  concept: mcd_variance_gmm_lda
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.38
-- id: claim42
-  type: parameter
-  concept: mcd_variance_gmm_ldae
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.38
-- id: claim43
-  type: parameter
-  concept: mcd_variance_mcep_lda
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.26
-- id: claim44
-  type: parameter
-  concept: mcd_variance_mcep_ldae
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-  value: 0.26
-- id: claim45
+- id: claim31
   type: equation
   expression: S = \log_{10}(L_+ - L_- + 1)
+  variables:
+  - symbol: log_
+    concept: log
+  - symbol: L_
+    concept: l
   provenance:
     paper: Anumanchipalli_KLATTSTAT
     page: 0
-- id: claim46
+- id: claim32
   type: equation
   expression: 'S = \begin{cases}
 
@@ -391,6 +294,13 @@ claims:
     0 & \text{if } P(+|x) < P(-|x)
 
     \end{cases}'
+  variables:
+  - symbol: cases
+    concept: cases
+  - symbol: L_
+    concept: l
+  - symbol: if
+    concept: if
   provenance:
     paper: Anumanchipalli_KLATTSTAT
     page: 0

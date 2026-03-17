@@ -1,21 +1,7 @@
 source:
   paper: Feinberg_2011_IntegratingF0FormantPreferences
 claims:
-- id: claim2452
-  type: parameter
-  concept: vtl_shift
-  provenance:
-    paper: Feinberg_2011_IntegratingF0FormantPreferences
-    page: 0
-  unit: '%'
-- id: claim2453
-  type: parameter
-  concept: pitch_shift
-  provenance:
-    paper: Feinberg_2011_IntegratingF0FormantPreferences
-    page: 0
-  unit: ERB
-- id: claim2454
+- id: claim852
   type: parameter
   concept: n_voices
   provenance:
@@ -23,7 +9,7 @@ claims:
     page: 0
   value: 6
   unit: count
-- id: claim2455
+- id: claim853
   type: parameter
   concept: n_women
   provenance:
@@ -31,7 +17,7 @@ claims:
     page: 0
   value: 83
   unit: count
-- id: claim2456
+- id: claim854
   type: parameter
   concept: n_women
   provenance:
@@ -39,34 +25,38 @@ claims:
     page: 0
   value: 83
   unit: count
-- id: claim2457
+- id: claim855
   type: observation
   statement: Low pitch + large VTL should receive highest attractiveness ratings
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Feinberg_2011_IntegratingF0FormantPreferences
     page: 0
-- id: claim2458
+- id: claim856
   type: observation
   statement: High pitch + small VTL may not be rated lowest (internet sample showed
     preference for congruent high+small)
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Feinberg_2011_IntegratingF0FormantPreferences
     page: 0
-- id: claim2459
+- id: claim857
   type: observation
   statement: 'The interaction effect should be symmetric: pitch matters more at large
     VTL, VTL matters more at low pitch'
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Feinberg_2011_IntegratingF0FormantPreferences
     page: 0
-- id: claim2460
+- id: claim858
   type: observation
   statement: Congruent combinations (low pitch + large VTL, high pitch + small VTL)
     should be preferred over incongruent combinations (low pitch + small VTL)
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Feinberg_2011_IntegratingF0FormantPreferences
     page: 0

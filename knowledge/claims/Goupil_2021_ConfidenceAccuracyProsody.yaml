@@ -1,29 +1,61 @@
 source:
   paper: Goupil_2021_ConfidenceAccuracyProsody
 claims:
-- id: claim3255
-  type: parameter
-  concept: intonation_confidence_effect
-  provenance:
-    paper: Goupil_2021_ConfidenceAccuracyProsody
-    page: 0
-  value: -0.03
-- id: claim3256
+- id: claim1131
   type: equation
   expression: \text{pitch} \sim \beta_{\text{conf}} \times \text{confidence} + \beta_{\text{acc}}
     \times \text{accuracy} + \beta_{\text{SOA}} \times \text{SOA}
+  variables:
+  - symbol: pitch
+    concept: pitch
+  - symbol: sim
+    concept: sim
+  - symbol: beta_
+    concept: beta
+  - symbol: conf
+    concept: conf
+  - symbol: confidence
+    concept: confidence
+  - symbol: acc
+    concept: acc
+  - symbol: accuracy
+    concept: accuracy
+  - symbol: SOA
+    concept: soa
   provenance:
     paper: Goupil_2021_ConfidenceAccuracyProsody
     page: 0
-- id: claim3257
+- id: claim1132
   type: equation
   expression: \text{loudness} \sim \beta_{\text{acc}} \times \text{accuracy}
+  variables:
+  - symbol: loudness
+    concept: loudness
+  - symbol: sim
+    concept: sim
+  - symbol: beta_
+    concept: beta
+  - symbol: acc
+    concept: acc
+  - symbol: accuracy
+    concept: accuracy
   provenance:
     paper: Goupil_2021_ConfidenceAccuracyProsody
     page: 0
-- id: claim3258
+- id: claim1133
   type: equation
   expression: \text{duration} \sim \beta_{\text{conf}} \times \text{confidence}
+  variables:
+  - symbol: duration
+    concept: duration
+  - symbol: sim
+    concept: sim
+  - symbol: beta_
+    concept: beta
+  - symbol: conf
+    concept: conf
+  - symbol: confidence
+    concept: confidence
   provenance:
     paper: Goupil_2021_ConfidenceAccuracyProsody
     page: 0

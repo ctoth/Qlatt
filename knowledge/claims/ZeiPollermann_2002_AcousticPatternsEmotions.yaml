@@ -1,7 +1,7 @@
 source:
   paper: ZeiPollermann_2002_AcousticPatternsEmotions
 claims:
-- id: claim11181
+- id: claim2774
   type: parameter
   concept: anger
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: M
   value: 128
-- id: claim11182
+- id: claim2775
   type: parameter
   concept: joy
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: M
   value: 126
-- id: claim11183
+- id: claim2776
   type: parameter
   concept: sadness
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: M
   value: 104
-- id: claim11184
+- id: claim2777
   type: parameter
   concept: '186'
   provenance:
@@ -34,7 +34,7 @@ claims:
   unit: Hz
   lower_bound: 40
   upper_bound: 161
-- id: claim11185
+- id: claim2778
   type: parameter
   concept: '235'
   provenance:
@@ -43,7 +43,7 @@ claims:
   unit: Hz
   lower_bound: 161
   upper_bound: 297
-- id: claim11186
+- id: claim2779
   type: parameter
   concept: '267'
   provenance:
@@ -52,7 +52,7 @@ claims:
   unit: Hz
   lower_bound: 297
   upper_bound: 453
-- id: claim11187
+- id: claim2780
   type: parameter
   concept: '309'
   provenance:
@@ -61,7 +61,7 @@ claims:
   unit: Hz
   lower_bound: 453
   upper_bound: 631
-- id: claim11188
+- id: claim2781
   type: parameter
   concept: '285'
   provenance:
@@ -70,7 +70,7 @@ claims:
   unit: Hz
   lower_bound: 631
   upper_bound: 838
-- id: claim11189
+- id: claim2782
   type: parameter
   concept: '211'
   provenance:
@@ -79,7 +79,7 @@ claims:
   unit: Hz
   lower_bound: 838
   upper_bound: 1081
-- id: claim11190
+- id: claim2783
   type: parameter
   concept: '196'
   provenance:
@@ -88,7 +88,7 @@ claims:
   unit: Hz
   lower_bound: 1081
   upper_bound: 1370
-- id: claim11191
+- id: claim2784
   type: parameter
   concept: '225'
   provenance:
@@ -97,7 +97,7 @@ claims:
   unit: Hz
   lower_bound: 1370
   upper_bound: 1720
-- id: claim11192
+- id: claim2785
   type: parameter
   concept: '207'
   provenance:
@@ -106,7 +106,7 @@ claims:
   unit: Hz
   lower_bound: 1720
   upper_bound: 2152
-- id: claim11193
+- id: claim2786
   type: parameter
   concept: '187'
   provenance:
@@ -115,7 +115,7 @@ claims:
   unit: Hz
   lower_bound: 2152
   upper_bound: 2700
-- id: claim11194
+- id: claim2787
   type: parameter
   concept: '133'
   provenance:
@@ -124,7 +124,7 @@ claims:
   unit: Hz
   lower_bound: 2700
   upper_bound: 3400
-- id: claim11195
+- id: claim2788
   type: parameter
   concept: '106'
   provenance:
@@ -133,7 +133,7 @@ claims:
   unit: Hz
   lower_bound: 3400
   upper_bound: 4370
-- id: claim11196
+- id: claim2789
   type: parameter
   concept: '19'
   provenance:
@@ -142,51 +142,39 @@ claims:
   unit: Hz
   lower_bound: 4370
   upper_bound: 5500
-- id: claim11197
+- id: claim2790
   type: observation
   statement: '**F0 ordering:** For both genders, sadness F0 < anger F0 and sadness
     F0 < joy F0'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
-- id: claim11198
+- id: claim2791
   type: observation
   statement: '**F0 range ordering:** Sadness max/min ratio < anger max/min ratio and
     < joy max/min ratio'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
-- id: claim11199
+- id: claim2792
   type: observation
   statement: '**Arousal discrimination:** All F0/energy/rate parameters should significantly
     differ between sadness and anger, and between sadness and joy'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
-- id: claim11200
+- id: claim2793
   type: observation
   statement: '**Valence non-discrimination:** F0 mean, F0 range, F0 SD, delivery rate
     should NOT significantly differ between anger and joy'
-  concepts: []
-  provenance:
-    paper: ZeiPollermann_2002_AcousticPatternsEmotions
-    page: 0
-- id: claim11201
-  type: observation
-  statement: '**LTAS valence signal:** Anger spectral energy > joy spectral energy
-    in the 300–3400 Hz range'
-  concepts: []
-  provenance:
-    paper: ZeiPollermann_2002_AcousticPatternsEmotions
-    page: 0
-- id: claim11202
-  type: observation
-  statement: '**Gender invariance of energy/rate:** Voiced energy range and delivery
-    rate should NOT differ significantly between genders for any emotion'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0

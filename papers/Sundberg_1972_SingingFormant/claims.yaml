@@ -2,89 +2,46 @@ source:
   paper: Sundberg_1972_SingingFormant
 claims:
 - id: claim1
-  type: parameter
-  concept: sinus_morgagni_volume
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm³
-- id: claim2
-  type: parameter
-  concept: larynx_tube_length
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm
-- id: claim3
-  type: parameter
-  concept: larynx_tube_crosssection
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm²
-- id: claim4
-  type: parameter
-  concept: larynx_tube_resonance
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: kHz
-- id: claim5
-  type: parameter
-  concept: sinus_piriformes_depth
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm
-- id: claim6
-  type: parameter
-  concept: sinus_piriformes_area
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm²
-- id: claim7
-  type: parameter
-  concept: piriformes_zero_frequency
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: kHz
-- id: claim8
-  type: parameter
-  concept: pharynx_crosssection
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: cm²
-- id: claim9
-  type: parameter
-  concept: spectrum_gain_at_3_khz
-  provenance:
-    paper: Sundberg_1972_SingingFormant
-    page: 0
-  unit: dB
-- id: claim10
   type: equation
   expression: f = \frac{c}{2\pi} \cdot \sqrt{\frac{A_n}{V \cdot \ell_{n,e}}}
+  variables:
+  - symbol: A_n
+    concept: a_n
+  - symbol: ell_n
+    concept: ell_n
+  - symbol: ell_
+    concept: ell
   provenance:
     paper: Sundberg_1972_SingingFormant
     page: 0
-- id: claim11
+- id: claim2
   type: equation
   expression: \ell_{n,e} = \ell_n + 0.48 \sqrt{A} \cdot (1 - 1.25\sqrt{A_n/A})
+  variables:
+  - symbol: ell_n
+    concept: ell_n
+  - symbol: A_n
+    concept: a_n
+  - symbol: ell_
+    concept: ell
   provenance:
     paper: Sundberg_1972_SingingFormant
     page: 0
-- id: claim12
+- id: claim3
   type: equation
   expression: f = \frac{c}{4 \cdot \ell_e}
+  variables:
+  - symbol: ell_e
+    concept: ell_e
   provenance:
     paper: Sundberg_1972_SingingFormant
     page: 0
-- id: claim13
+- id: claim4
   type: equation
   expression: A_n < \frac{A}{6}
+  variables:
+  - symbol: A_n
+    concept: a_n
   provenance:
     paper: Sundberg_1972_SingingFormant
     page: 0

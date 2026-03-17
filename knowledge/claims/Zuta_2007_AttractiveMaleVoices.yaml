@@ -1,7 +1,7 @@
 source:
   paper: Zuta_2007_AttractiveMaleVoices
 claims:
-- id: claim11298
+- id: claim2849
   type: parameter
   concept: mean_f0
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: mean
   value: 110
-- id: claim11299
+- id: claim2850
   type: parameter
   concept: f0_std_dev
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: mean
   value: 18
-- id: claim11300
+- id: claim2851
   type: parameter
   concept: avg_pause_length
   provenance:
@@ -27,7 +27,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 0.8
   value: 0.6
-- id: claim11301
+- id: claim2852
   type: parameter
   concept: pausefree_interval
   provenance:
@@ -35,7 +35,7 @@ claims:
     page: 0
   unit: mean
   value: 3.7
-- id: claim11302
+- id: claim2853
   type: parameter
   concept: hesitations_min
   provenance:
@@ -43,7 +43,7 @@ claims:
     page: 0
   unit: mean
   value: 11
-- id: claim11303
+- id: claim2854
   type: parameter
   concept: avg_hesitation_duration
   provenance:
@@ -51,7 +51,7 @@ claims:
     page: 0
   unit: mean
   value: 0.8
-- id: claim11304
+- id: claim2855
   type: parameter
   concept: hesitationfree_interval
   provenance:
@@ -59,7 +59,7 @@ claims:
     page: 0
   unit: mean
   value: 4.9
-- id: claim11305
+- id: claim2856
   type: parameter
   concept: '1'
   provenance:
@@ -67,7 +67,7 @@ claims:
     page: 0
   unit: Hz
   value: 117
-- id: claim11306
+- id: claim2857
   type: parameter
   concept: '2'
   provenance:
@@ -75,7 +75,7 @@ claims:
     page: 0
   unit: Hz
   value: 101
-- id: claim11307
+- id: claim2858
   type: parameter
   concept: '3'
   provenance:
@@ -83,7 +83,7 @@ claims:
     page: 0
   unit: Hz
   value: 113
-- id: claim11308
+- id: claim2859
   type: parameter
   concept: '4'
   provenance:
@@ -91,7 +91,7 @@ claims:
     page: 0
   unit: Hz
   value: 134
-- id: claim11309
+- id: claim2860
   type: parameter
   concept: '5'
   provenance:
@@ -99,7 +99,7 @@ claims:
     page: 0
   unit: Hz
   value: 108
-- id: claim11310
+- id: claim2861
   type: parameter
   concept: '6'
   provenance:
@@ -107,39 +107,21 @@ claims:
     page: 0
   unit: Hz
   value: 94
-- id: claim11311
+- id: claim2862
   type: observation
   statement: F0 standard deviation in range [19, 29] Hz for "attractive" male voice
     presets
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Zuta_2007_AttractiveMaleVoices
     page: 0
-- id: claim11312
-  type: observation
-  statement: Absence of spectral dip at ~2.8 kHz (nasality check) for attractive voices
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim11313
-  type: observation
-  statement: Hesitation rate < 5/min for attractive speech
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim11314
-  type: observation
-  statement: Pause-free interval around 2.5-3.5 s for natural-sounding phrasing
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim11315
+- id: claim2863
   type: observation
   statement: Pause duration clustering around 0.6 s for standard voice quality
-  concepts: []
+  concepts:
+  - duration
+  - voice_quality
   provenance:
     paper: Zuta_2007_AttractiveMaleVoices
     page: 0

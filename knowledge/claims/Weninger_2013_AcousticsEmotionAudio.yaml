@@ -1,7 +1,7 @@
 source:
   paper: Weninger_2013_AcousticsEmotionAudio
 claims:
-- id: claim10945
+- id: claim2673
   type: parameter
   concept: gemep
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: r
   value: 0.64
-- id: claim10946
+- id: claim2674
   type: parameter
   concept: vam
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: r
   value: 0.81
-- id: claim10947
+- id: claim2675
   type: parameter
   concept: ntwicm
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: r
   value: 0.7
-- id: claim10948
+- id: claim2676
   type: parameter
   concept: esd
   provenance:

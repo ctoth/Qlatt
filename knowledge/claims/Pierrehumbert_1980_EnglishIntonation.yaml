@@ -1,185 +1,133 @@
 source:
   paper: Pierrehumbert_1980_EnglishIntonation
 claims:
-- id: claim7376
-  type: parameter
-  concept: downstep_factor
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: ratio
-- id: claim7377
-  type: parameter
-  concept: peak_ratio_constant
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: dimensionless
-- id: claim7378
-  type: parameter
-  concept: upstep_factor
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: dimensionless
-- id: claim7379
-  type: parameter
-  concept: upstep_ceiling
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: baseline units
-- id: claim7380
-  type: parameter
-  concept: baseline
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7381
-  type: parameter
-  concept: baseline
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7382
-  type: parameter
-  concept: baseline_drop
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7383
-  type: parameter
-  concept: baseline_drop
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7384
-  type: parameter
-  concept: lh_timing
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: ms
-- id: claim7385
-  type: parameter
-  concept: high_low_vowel_f0_difference
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7386
-  type: parameter
-  concept: female_h_typical
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7387
-  type: parameter
-  concept: female_l_typical
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7388
-  type: parameter
-  concept: male_h_typical
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7389
-  type: parameter
-  concept: male_l_typical
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-  unit: Hz
-- id: claim7390
+- id: claim2029
   type: equation
   expression: /H_i/ = k \cdot /H_i/ \quad \text{where } 0 < k < 1
+  variables:
+  - symbol: H_i
+    concept: h_i
+  - symbol: quad
+    concept: quad
+  - symbol: where
+    concept: where
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7391
-  type: equation
-  expression: /T/ = /H^-/ + /T/
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-- id: claim7392
+- id: claim2030
   type: equation
   expression: T^-_i \text{ spreads towards } T_{i+1} \text{ if } /T_{i+1}/ \geq /T^-_i/
+  variables:
+  - symbol: T_i
+    concept: t_i
+  - symbol: spreads
+    concept: spreads
+  - symbol: towards
+    concept: towards
+  - symbol: T_
+    concept: t
+  - symbol: if
+    concept: if
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7393
+- id: claim2031
   type: equation
   expression: T^-_i \text{ spreads towards } T_{i-1} \text{ if } /T_{i-1}/ = /T^-_i/
+  variables:
+  - symbol: T_i
+    concept: t_i
+  - symbol: spreads
+    concept: spreads
+  - symbol: towards
+    concept: towards
+  - symbol: T_
+    concept: t
+  - symbol: if
+    concept: if
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7394
-  type: equation
-  expression: \hat{P} = \frac{P - B}{B}
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-- id: claim7395
+- id: claim2032
   type: equation
   expression: H_{n} = V \cdot k^n
+  variables:
+  - symbol: H_n
+    concept: h_n
+  - symbol: H_
+    concept: h
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7396
+- id: claim2033
   type: equation
   expression: T_{n+1} = (1-a) \cdot T_n + a \cdot t
+  variables:
+  - symbol: T_n
+    concept: t_n
+  - symbol: T_
+    concept: t
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7397
+- id: claim2034
   type: equation
   expression: \hat{P} = \frac{P - b_p}{b_p}
+  variables:
+  - symbol: b_p
+    concept: b_p
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7398
-  type: equation
-  expression: \hat{A} = c \cdot \hat{B}
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-- id: claim7399
+- id: claim2035
   type: equation
   expression: P_2 = c(b_2/b_1) P_1 + (1-c)b_2
+  variables:
+  - symbol: P_2
+    concept: p_2
+  - symbol: b_2
+    concept: b_2
+  - symbol: b_1
+    concept: b_1
+  - symbol: P_1
+    concept: p_1
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7400
+- id: claim2036
   type: equation
   expression: P_2 = (1/c)(b_2/b_1) P_1 + (1-1/c)b_2
+  variables:
+  - symbol: P_2
+    concept: p_2
+  - symbol: b_2
+    concept: b_2
+  - symbol: b_1
+    concept: b_1
+  - symbol: P_1
+    concept: p_1
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7401
+- id: claim2037
   type: equation
   expression: T_{n} = k^n \cdot H_1
+  variables:
+  - symbol: T_n
+    concept: t_n
+  - symbol: H_1
+    concept: h_1
+  - symbol: T_
+    concept: t
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0
-- id: claim7402
+- id: claim2038
   type: equation
   expression: /H^*_{i+1}/ = /H^*_i/ \times \frac{\text{Prominence}(H^*_{i+1})}{\text{Prominence}(H^*_i)}
-  provenance:
-    paper: Pierrehumbert_1980_EnglishIntonation
-    page: 0
-- id: claim7403
-  type: equation
-  expression: /L^*/ = k \cdot /H^-/
+  variables:
+  - symbol: Prominence
+    concept: prominence
   provenance:
     paper: Pierrehumbert_1980_EnglishIntonation
     page: 0

@@ -2,68 +2,19 @@ source:
   paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
 claims:
 - id: claim1
-  type: parameter
-  concept: f0
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: f1
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: f2
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-  unit: Hz
-- id: claim4
-  type: parameter
-  concept: f3
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: jitter
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-  unit: ratio
-- id: claim6
-  type: observation
-  statement: Aspirated word-final /t/ should increase perceived prestige relative
-    to unreleased /t/
-  concepts: []
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-- id: claim7
-  type: observation
-  statement: Long-term attractiveness ratings should show larger articulation effects
-    than short-term ratings
-  concepts: []
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-- id: claim8
   type: observation
   statement: Jitter values should be higher for speakers who consistently aspirate
     word-final /t/
-  concepts: []
+  concepts:
+  - jitter
   provenance:
     paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
     page: 0
-- id: claim9
+- id: claim2
   type: observation
   statement: F0 alone should not predict /t/ articulation group membership
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
     page: 0

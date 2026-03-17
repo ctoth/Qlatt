@@ -3,13 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: fundamental_period
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: sec
-- id: claim2
-  type: parameter
   concept: open_quotient
   provenance:
     paper: Lu_Smith_GlottalSourceSingingVoice
@@ -18,16 +11,7 @@ claims:
   lower_bound: 0.49
   upper_bound: 0.78
   unit: ratio
-- id: claim3
-  type: parameter
-  concept: rd_parameter
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  value: 1.19
-  lower_bound: 0.84
-  upper_bound: 2.9
-- id: claim4
+- id: claim2
   type: parameter
   concept: spectral_tilt_frequency
   provenance:
@@ -37,7 +21,7 @@ claims:
   lower_bound: 161
   upper_bound: 675
   unit: Hz
-- id: claim5
+- id: claim3
   type: parameter
   concept: deviation_constant_ka
   provenance:
@@ -46,7 +30,7 @@ claims:
   lower_bound: 0.89
   upper_bound: 1.35
   unit: ratio
-- id: claim6
+- id: claim4
   type: parameter
   concept: deviation_constant_kk
   provenance:
@@ -55,14 +39,7 @@ claims:
   lower_bound: 0.9
   upper_bound: 1.07
   unit: ratio
-- id: claim7
-  type: parameter
-  concept: noise_lag
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: '% period'
-- id: claim8
+- id: claim5
   type: parameter
   concept: noise_strength
   provenance:
@@ -70,14 +47,7 @@ claims:
     page: 0
   value: 0.04
   unit: ratio
-- id: claim9
-  type: parameter
-  concept: noise_duty_cycle
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: '%'
-- id: claim10
+- id: claim6
   type: parameter
   concept: noise_floor
   provenance:
@@ -85,14 +55,7 @@ claims:
     page: 0
   value: 0.02
   unit: ratio
-- id: claim11
-  type: parameter
-  concept: deemphasis_pole
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  value: 0.9
-- id: claim12
+- id: claim7
   type: parameter
   concept: hp_cutoff
   provenance:
@@ -102,7 +65,7 @@ claims:
   lower_bound: 1200
   upper_bound: 4000
   unit: Hz
-- id: claim13
+- id: claim8
   type: parameter
   concept: pressed
   provenance:
@@ -110,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 675
-- id: claim14
+- id: claim9
   type: parameter
   concept: normal
   provenance:
@@ -118,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 515
-- id: claim15
+- id: claim10
   type: parameter
   concept: breathy
   provenance:
@@ -126,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 161
-- id: claim16
+- id: claim11
   type: parameter
   concept: low_f0
   provenance:
@@ -134,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 349
-- id: claim17
+- id: claim12
   type: parameter
   concept: medium_f0
   provenance:
@@ -142,7 +105,7 @@ claims:
     page: 0
   unit: Hz
   value: 326
-- id: claim18
+- id: claim13
   type: parameter
   concept: high_f0
   provenance:
@@ -150,7 +113,7 @@ claims:
     page: 0
   unit: Hz
   value: 301
-- id: claim19
+- id: claim14
   type: parameter
   concept: vowel_a
   provenance:
@@ -158,7 +121,7 @@ claims:
     page: 0
   unit: Hz
   value: 349
-- id: claim20
+- id: claim15
   type: parameter
   concept: vowel_e
   provenance:
@@ -166,7 +129,7 @@ claims:
     page: 0
   unit: Hz
   value: 319
-- id: claim21
+- id: claim16
   type: parameter
   concept: vowel_i
   provenance:
@@ -174,15 +137,29 @@ claims:
     page: 0
   unit: Hz
   value: 298
-- id: claim22
+- id: claim17
   type: equation
   expression: $$R_g = T_o / (2 \cdot T_p)$$
+  variables:
+  - symbol: R_g
+    concept: r_g
+  - symbol: T_o
+    concept: t_o
+  - symbol: T_p
+    concept: t_p
   provenance:
     paper: Lu_Smith_GlottalSourceSingingVoice
     page: 0
-- id: claim23
+- id: claim18
   type: equation
   expression: $$a = \frac{27 \cdot AV}{4 \cdot (OQ^2 \cdot T_0)}$$
+  variables:
+  - symbol: T_0
+    concept: t_0
+  - symbol: AV
+    concept: av
+  - symbol: OQ
+    concept: oq
   provenance:
     paper: Lu_Smith_GlottalSourceSingingVoice
     page: 0

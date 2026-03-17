@@ -1,7 +1,7 @@
 source:
   paper: Hertz_1999_ETI-Eloquence_MultiLanguage
 claims:
-- id: claim4028
+- id: claim1326
   type: parameter
   concept: duration_phone_f
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 110
   unit: ms
-- id: claim4029
+- id: claim1327
   type: parameter
   concept: duration_transition
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 30
   unit: ms
-- id: claim4030
+- id: claim1328
   type: parameter
   concept: duration_phone_a
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 84
   unit: ms
-- id: claim4031
+- id: claim1329
   type: parameter
   concept: duration_phone_v
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 60
   unit: ms
-- id: claim4032
+- id: claim1330
   type: parameter
   concept: av_phone_f
   provenance:
@@ -41,14 +41,7 @@ claims:
     page: 0
   value: 0
   unit: dB
-- id: claim4033
-  type: parameter
-  concept: av_transition
-  provenance:
-    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
-    page: 0
-  value: 52
-- id: claim4034
+- id: claim1331
   type: parameter
   concept: av_phone_v
   provenance:
@@ -56,7 +49,7 @@ claims:
     page: 0
   value: 30
   unit: dB
-- id: claim4035
+- id: claim1332
   type: parameter
   concept: af_phone_f
   provenance:
@@ -64,14 +57,7 @@ claims:
     page: 0
   value: 55
   unit: dB
-- id: claim4036
-  type: parameter
-  concept: af_transition
-  provenance:
-    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
-    page: 0
-  value: 0
-- id: claim4037
+- id: claim1333
   type: parameter
   concept: af_phone_v
   provenance:
@@ -79,7 +65,7 @@ claims:
     page: 0
   value: 55
   unit: dB
-- id: claim4038
+- id: claim1334
   type: parameter
   concept: f2_start_phone_f
   provenance:
@@ -87,7 +73,7 @@ claims:
     page: 0
   value: 1300
   unit: Hz
-- id: claim4039
+- id: claim1335
   type: parameter
   concept: f2_start_transition
   provenance:
@@ -95,7 +81,7 @@ claims:
     page: 0
   value: 1000
   unit: Hz
-- id: claim4040
+- id: claim1336
   type: parameter
   concept: f2_start_phone_a
   provenance:
@@ -103,7 +89,7 @@ claims:
     page: 0
   value: 1200
   unit: Hz
-- id: claim4041
+- id: claim1337
   type: parameter
   concept: f2_start_phone_y
   provenance:
@@ -111,7 +97,7 @@ claims:
     page: 0
   value: 1400
   unit: Hz
-- id: claim4042
+- id: claim1338
   type: parameter
   concept: f2_start_phone_v
   provenance:
@@ -119,7 +105,7 @@ claims:
     page: 0
   value: 1775
   unit: Hz
-- id: claim4043
+- id: claim1339
   type: parameter
   concept: f2_end_phone_v
   provenance:

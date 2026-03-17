@@ -12,13 +12,6 @@ claims:
   unit: dB re 0.0002 dyne/cm^2
 - id: claim2
   type: parameter
-  concept: subglottic_pressure
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-  unit: cm H2O
-- id: claim3
-  type: parameter
   concept: flow_rate
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
@@ -26,7 +19,7 @@ claims:
   lower_bound: 100
   upper_bound: 500
   unit: cc/sec
-- id: claim4
+- id: claim3
   type: parameter
   concept: glottal_resistance
   provenance:
@@ -35,14 +28,7 @@ claims:
   lower_bound: 20
   upper_bound: 200
   unit: dyne-sec/cm^5
-- id: claim5
-  type: parameter
-  concept: splpressure_exponent
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-  value: 3.3
-- id: claim6
+- id: claim4
   type: parameter
   concept: low_pitch_glottal_resistance
   provenance:
@@ -51,7 +37,7 @@ claims:
   lower_bound: 20
   upper_bound: 100
   unit: dyne-sec/cm^5
-- id: claim7
+- id: claim5
   type: parameter
   concept: medium_pitch_glottal_resistance
   provenance:
@@ -60,14 +46,7 @@ claims:
   lower_bound: 20
   upper_bound: 100
   unit: dyne-sec/cm^5
-- id: claim8
-  type: parameter
-  concept: high_pitch_glottal_resistance
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-  unit: dyne-sec/cm^5
-- id: claim9
+- id: claim6
   type: parameter
   concept: voice_efficiency
   provenance:
@@ -75,7 +54,7 @@ claims:
     page: 0
   value: 9.0e-05
   unit: dimensionless
-- id: claim10
+- id: claim7
   type: parameter
   concept: voice_efficiency
   provenance:
@@ -83,7 +62,7 @@ claims:
     page: 0
   value: 7.0e-05
   unit: dimensionless
-- id: claim11
+- id: claim8
   type: parameter
   concept: voice_efficiency
   provenance:
@@ -91,121 +70,199 @@ claims:
     page: 0
   value: 3.0e-05
   unit: dimensionless
-- id: claim12
+- id: claim9
   type: equation
   expression: I \propto P^{3.3 \pm 0.7}
+  variables:
+  - symbol: propto
+    concept: propto
+  - symbol: pm
+    concept: pm
+  provenance:
+    paper: Isshiki_1964_VoiceIntensityRegulation
+    page: 0
+- id: claim10
+  type: equation
+  expression: W = PU = \frac{P^2}{R} = RU^2
+  variables:
+  - symbol: PU
+    concept: pu
+  - symbol: RU
+    concept: ru
+  provenance:
+    paper: Isshiki_1964_VoiceIntensityRegulation
+    page: 0
+- id: claim11
+  type: equation
+  expression: I = W \cdot E_g \cdot E_{tr}
+  variables:
+  - symbol: E_g
+    concept: e_g
+  - symbol: E_tr
+    concept: e_tr
+  - symbol: E_
+    concept: e
+  - symbol: tr
+    concept: tr
+  provenance:
+    paper: Isshiki_1964_VoiceIntensityRegulation
+    page: 0
+- id: claim12
+  type: equation
+  expression: I = R \cdot U^2 \cdot E_g \cdot E_{tr}
+  variables:
+  - symbol: E_g
+    concept: e_g
+  - symbol: E_tr
+    concept: e_tr
+  - symbol: E_
+    concept: e
+  - symbol: tr
+    concept: tr
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim13
   type: equation
-  expression: W = PU = \frac{P^2}{R} = RU^2
+  expression: \log W = IL/10 + \log I_{ref} + \log 4\pi r^2, \quad (4\pi r^2 \sim
+    5000)
+  variables:
+  - symbol: I_ref
+    concept: i_ref
+  - symbol: IL
+    concept: il
+  - symbol: I_
+    concept: i
+  - symbol: ref
+    concept: ref
+  - symbol: quad
+    concept: quad
+  - symbol: sim
+    concept: sim
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim14
   type: equation
-  expression: I = W \cdot E_g \cdot E_{tr}
+  expression: W = 10^{-4} \text{ (Watt)}
+  variables:
+  - symbol: Watt
+    concept: watt
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim15
   type: equation
-  expression: I = R \cdot U^2 \cdot E_g \cdot E_{tr}
+  expression: E_g \cdot E_{tr} = \frac{\text{radiated acoustic power}}{\text{subglottic
+    power}}
+  variables:
+  - symbol: E_g
+    concept: e_g
+  - symbol: E_tr
+    concept: e_tr
+  - symbol: E_
+    concept: e
+  - symbol: tr
+    concept: tr
+  - symbol: radiated
+    concept: radiated
+  - symbol: acoustic
+    concept: acoustic
+  - symbol: power
+    concept: power
+  - symbol: subglottic
+    concept: subglottic
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim16
   type: equation
-  expression: \log W = IL/10 + \log I_{ref} + \log 4\pi r^2, \quad (4\pi r^2 \sim
-    5000)
+  expression: I \propto U^{3.5}
+  variables:
+  - symbol: propto
+    concept: propto
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim17
   type: equation
-  expression: \log W = (64-1)/10 - 16 + 3.7
+  expression: E_g \cdot E_{tr} = K \cdot U^{1.3}
+  variables:
+  - symbol: E_g
+    concept: e_g
+  - symbol: E_tr
+    concept: e_tr
+  - symbol: E_
+    concept: e
+  - symbol: tr
+    concept: tr
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim18
-  type: equation
-  expression: W = 10^{-4} \text{ (Watt)}
+  type: observation
+  statement: SPL must increase monotonically with subglottic pressure at any given
+    pitch
+  concepts:
+  - spl
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim19
-  type: equation
-  expression: E_g \cdot E_{tr} = \frac{\text{radiated acoustic power}}{\text{subglottic
-    power}}
+  type: observation
+  statement: '$I \propto P^{3.3 \pm 0.7}$: the power law exponent should be in range
+    [2.6, 4.0] for any pitch'
+  concepts:
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim20
-  type: equation
-  expression: I \propto U^{3.5}
+  type: observation
+  statement: At high pitch (falsetto), glottal resistance should be approximately
+    constant regardless of intensity
+  concepts:
+  - intensity
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim21
-  type: equation
-  expression: E_g \cdot E_{tr} = K \cdot U^{1.3}
+  type: observation
+  statement: At low pitch, increasing intensity should increase glottal resistance
+    while flow rate stays roughly constant or decreases
+  concepts:
+  - intensity
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim22
   type: observation
-  statement: SPL must increase monotonically with subglottic pressure at any given
-    pitch
-  concepts: []
+  statement: At high pitch, increasing intensity should increase flow rate while resistance
+    stays roughly constant
+  concepts:
+  - intensity
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim23
   type: observation
-  statement: '$I \propto P^{3.3 \pm 0.7}$: the power law exponent should be in range
-    [2.6, 4.0] for any pitch'
-  concepts: []
+  statement: Voice efficiency (radiated power / subglottic power) should increase
+    with intensity
+  concepts:
+  - intensity
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0
 - id: claim24
   type: observation
-  statement: At high pitch (falsetto), glottal resistance should be approximately
-    constant regardless of intensity
-  concepts: []
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-- id: claim25
-  type: observation
-  statement: At low pitch, increasing intensity should increase glottal resistance
-    while flow rate stays roughly constant or decreases
-  concepts: []
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-- id: claim26
-  type: observation
-  statement: At high pitch, increasing intensity should increase flow rate while resistance
-    stays roughly constant
-  concepts: []
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-- id: claim27
-  type: observation
-  statement: Voice efficiency (radiated power / subglottic power) should increase
-    with intensity
-  concepts: []
-  provenance:
-    paper: Isshiki_1964_VoiceIntensityRegulation
-    page: 0
-- id: claim28
-  type: observation
   statement: Glottal resistance at falsetto (~150 dyne-sec/cm^5) should exceed that
     at low or medium pitch (~20-100 dyne-sec/cm^5)
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Isshiki_1964_VoiceIntensityRegulation
     page: 0

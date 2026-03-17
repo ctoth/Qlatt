@@ -1,7 +1,7 @@
 source:
   paper: Hillenbrand_1995_VowelAcoustics
 claims:
-- id: claim4086
+- id: claim1347
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: ms
   value: 243
-- id: claim4087
+- id: claim1348
   type: parameter
   concept: i
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: ms
   value: 306
-- id: claim4088
+- id: claim1349
   type: parameter
   concept: i
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: ms
   value: 297
-- id: claim4089
+- id: claim1350
   type: parameter
   concept: latin_letter_small_capital_i
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: ms
   value: 192
-- id: claim4090
+- id: claim1351
   type: parameter
   concept: latin_letter_small_capital_i
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: ms
   value: 237
-- id: claim4091
+- id: claim1352
   type: parameter
   concept: latin_letter_small_capital_i
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: ms
   value: 248
-- id: claim4092
+- id: claim1353
   type: parameter
   concept: e
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: ms
   value: 267
-- id: claim4093
+- id: claim1354
   type: parameter
   concept: e
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: ms
   value: 320
-- id: claim4094
+- id: claim1355
   type: parameter
   concept: e
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: ms
   value: 314
-- id: claim4095
+- id: claim1356
   type: parameter
   concept: latin_small_letter_open_e
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: ms
   value: 189
-- id: claim4096
+- id: claim1357
   type: parameter
   concept: latin_small_letter_open_e
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: ms
   value: 254
-- id: claim4097
+- id: claim1358
   type: parameter
   concept: latin_small_letter_open_e
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: ms
   value: 235
-- id: claim4098
+- id: claim1359
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: ms
   value: 278
-- id: claim4099
+- id: claim1360
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: ms
   value: 332
-- id: claim4100
+- id: claim1361
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: ms
   value: 322
-- id: claim4101
+- id: claim1362
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: ms
   value: 267
-- id: claim4102
+- id: claim1363
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: ms
   value: 323
-- id: claim4103
+- id: claim1364
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: ms
   value: 311
-- id: claim4104
+- id: claim1365
   type: parameter
   concept: latin_small_letter_open_o
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: ms
   value: 283
-- id: claim4105
+- id: claim1366
   type: parameter
   concept: latin_small_letter_open_o
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: ms
   value: 353
-- id: claim4106
+- id: claim1367
   type: parameter
   concept: latin_small_letter_open_o
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: ms
   value: 319
-- id: claim4107
+- id: claim1368
   type: parameter
   concept: o
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: ms
   value: 265
-- id: claim4108
+- id: claim1369
   type: parameter
   concept: o
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: ms
   value: 326
-- id: claim4109
+- id: claim1370
   type: parameter
   concept: o
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: ms
   value: 310
-- id: claim4110
+- id: claim1371
   type: parameter
   concept: latin_small_letter_upsilon
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: ms
   value: 192
-- id: claim4111
+- id: claim1372
   type: parameter
   concept: latin_small_letter_upsilon
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: ms
   value: 249
-- id: claim4112
+- id: claim1373
   type: parameter
   concept: latin_small_letter_upsilon
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: ms
   value: 247
-- id: claim4113
+- id: claim1374
   type: parameter
   concept: u
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: ms
   value: 237
-- id: claim4114
+- id: claim1375
   type: parameter
   concept: u
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   unit: ms
   value: 303
-- id: claim4115
+- id: claim1376
   type: parameter
   concept: u
   provenance:
@@ -241,7 +241,7 @@ claims:
     page: 0
   unit: ms
   value: 278
-- id: claim4116
+- id: claim1377
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -249,7 +249,7 @@ claims:
     page: 0
   unit: ms
   value: 188
-- id: claim4117
+- id: claim1378
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -257,7 +257,7 @@ claims:
     page: 0
   unit: ms
   value: 226
-- id: claim4118
+- id: claim1379
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -265,7 +265,7 @@ claims:
     page: 0
   unit: ms
   value: 234
-- id: claim4119
+- id: claim1380
   type: parameter
   concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
   provenance:
@@ -273,7 +273,7 @@ claims:
     page: 0
   unit: ms
   value: 263
-- id: claim4120
+- id: claim1381
   type: parameter
   concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
   provenance:
@@ -281,7 +281,7 @@ claims:
     page: 0
   unit: ms
   value: 321
-- id: claim4121
+- id: claim1382
   type: parameter
   concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
   provenance:

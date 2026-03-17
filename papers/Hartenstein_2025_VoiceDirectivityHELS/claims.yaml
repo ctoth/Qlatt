@@ -3,42 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: truncation_order
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-  lower_bound: 0
-  upper_bound: 12
-- id: claim2
-  type: parameter
-  concept: regularization
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-  value: 0
-- id: claim3
-  type: parameter
-  concept: cv_tolerance
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-  value: 0.01
-- id: claim4
-  type: parameter
   concept: array_radius
   provenance:
     paper: Hartenstein_2025_VoiceDirectivityHELS
     page: 0
   value: 1.8
   unit: m
-- id: claim5
-  type: parameter
-  concept: microphone_count
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-  value: 588
-- id: claim6
+- id: claim2
   type: parameter
   concept: sampling_frequency
   provenance:
@@ -46,7 +17,7 @@ claims:
     page: 0
   value: 50
   unit: kHz
-- id: claim7
+- id: claim3
   type: parameter
   concept: spectral_window
   provenance:
@@ -54,7 +25,7 @@ claims:
     page: 0
   value: 20
   unit: ms
-- id: claim8
+- id: claim4
   type: parameter
   concept: sweep_duration
   provenance:
@@ -62,74 +33,88 @@ claims:
     page: 0
   value: 30
   unit: s
-- id: claim9
+- id: claim5
   type: equation
   expression: p(r, \theta, \phi) = \sum_{n=0}^{+\infty} c_{mn}(k) \psi_n^m(kr, \theta,
     \phi)
+  variables:
+  - symbol: c_mn
+    concept: c_mn
+  - symbol: sum_
+    concept: sum
+  - symbol: c_
+    concept: c
+  - symbol: mn
+    concept: mn
+  - symbol: psi_n
+    concept: psi_n
+  - symbol: kr
+    concept: kr
   provenance:
     paper: Hartenstein_2025_VoiceDirectivityHELS
     page: 0
-- id: claim10
-  type: equation
-  expression: \mathbf{p} = \mathbf{H}\mathbf{c}
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim11
-  type: equation
-  expression: \hat{\mathbf{c}} = (\mathbf{H}^H \mathbf{H} + \lambda \mathbf{I})^{-1}
-    \mathbf{H}^H \mathbf{p}
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim12
+- id: claim6
   type: equation
   expression: D_\infty(\theta, \phi) = \sum_{n=0}^{N} \sum_{m=-n}^{n} \hat{c}_{mn}
     j^{(n+1)} Y_n(\theta, \phi)
+  variables:
+  - symbol: Y_n
+    concept: y_n
+  - symbol: D_
+    concept: d
+  - symbol: sum_
+    concept: sum
+  - symbol: mn
+    concept: mn
   provenance:
     paper: Hartenstein_2025_VoiceDirectivityHELS
     page: 0
-- id: claim13
+- id: claim7
   type: equation
   expression: \mathcal{L}_{CV} = \frac{\sqrt{\sum_{q=0}^{Q-1} |p(r_q, \theta_q, \phi_q)
     - \hat{p}(r_q, \theta_q, \phi_q)|^2}}{\sqrt{\sum_{q=0}^{Q-1} |p(r_q, \theta_q,
     \phi_q)|^2}}
+  variables:
+  - symbol: r_q
+    concept: r_q
+  - symbol: mathcal
+    concept: mathcal
+  - symbol: CV
+    concept: cv
+  - symbol: sum_
+    concept: sum
+  - symbol: theta_q
+    concept: theta_q
+  - symbol: phi_q
+    concept: phi_q
   provenance:
     paper: Hartenstein_2025_VoiceDirectivityHELS
     page: 0
-- id: claim14
+- id: claim8
   type: equation
   expression: N_{opt} = \arg\min_{N \in I} \kappa(N) \quad \text{s.t.} \quad |\mathcal{L}_{CV}(N)
     - \mathcal{L}_{min}| \leq \epsilon
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim15
-  type: observation
-  statement: Condition number κ(N) must monotonically increase with N for any frequency
-  concepts: []
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim16
-  type: observation
-  statement: Cross-validation error must decrease from N=0 before reaching a plateau
-  concepts: []
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim17
-  type: observation
-  statement: Far-field directivity at low frequency (<300 Hz) should be nearly omnidirectional
-  concepts: []
-  provenance:
-    paper: Hartenstein_2025_VoiceDirectivityHELS
-    page: 0
-- id: claim18
-  type: observation
-  statement: At any frequency, N_opt for singer ≥ N_opt for simple controlled source
-    (above 600 Hz)
-  concepts: []
+  variables:
+  - symbol: N_opt
+    concept: n_opt
+  - symbol: N_
+    concept: n
+  - symbol: opt
+    concept: opt
+  - symbol: arg
+    concept: arg
+  - symbol: min_
+    concept: min
+  - symbol: in
+    concept: in
+  - symbol: kappa
+    concept: kappa
+  - symbol: quad
+    concept: quad
+  - symbol: mathcal
+    concept: mathcal
+  - symbol: CV
+    concept: cv
   provenance:
     paper: Hartenstein_2025_VoiceDirectivityHELS
     page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Lienard_1999_VocalEffortVowelSpectral
 claims:
-- id: claim6074
+- id: claim1768
   type: parameter
   concept: f0_rate
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 5.1
   unit: Hz/dB
-- id: claim6075
+- id: claim1769
   type: parameter
   concept: f1_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 3.5
   unit: Hz/dB
-- id: claim6076
+- id: claim1770
   type: parameter
   concept: a1_rate
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 1.1
   unit: dB/dB
-- id: claim6077
+- id: claim1771
   type: parameter
   concept: a2_rate
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 1.24
   unit: dB/dB
-- id: claim6078
+- id: claim1772
   type: parameter
   concept: a3_rate
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 1.3
   unit: dB/dB
-- id: claim6079
+- id: claim1773
   type: parameter
   concept: effort_range
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 9
   unit: dB
-- id: claim6080
+- id: claim1774
   type: parameter
   concept: front_back_threshold
   provenance:
@@ -57,39 +57,91 @@ claims:
     page: 0
   value: 3.5
   unit: Bark
-- id: claim6081
+- id: claim1775
   type: equation
   expression: \Delta F0 = 5.1 \cdot \Delta AX \text{ (Hz/dB)}
+  variables:
+  - symbol: F0
+    concept: f0
+  - symbol: AX
+    concept: ax
+  - symbol: Hz
+    concept: hz
+  - symbol: dB
+    concept: db
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0
-- id: claim6082
+- id: claim1776
   type: equation
   expression: \Delta F1 \approx 3.5 \cdot \Delta AX \text{ (Hz/dB)}
+  variables:
+  - symbol: F1
+    concept: f1
+  - symbol: AX
+    concept: ax
+  - symbol: Hz
+    concept: hz
+  - symbol: dB
+    concept: db
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0
-- id: claim6083
+- id: claim1777
   type: equation
   expression: A1 = 1.10 \cdot AX \text{ (dB/dB)}
+  variables:
+  - symbol: A1
+    concept: a1
+  - symbol: AX
+    concept: ax
+  - symbol: dB
+    concept: db
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0
-- id: claim6084
+- id: claim1778
   type: equation
   expression: A2 = 1.24 \cdot AX \text{ (dB/dB)}
+  variables:
+  - symbol: A2
+    concept: a2
+  - symbol: AX
+    concept: ax
+  - symbol: dB
+    concept: db
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0
-- id: claim6085
+- id: claim1779
   type: equation
   expression: A3 = 1.30 \cdot AX \text{ (dB/dB)}
+  variables:
+  - symbol: A3
+    concept: a3
+  - symbol: AX
+    concept: ax
+  - symbol: dB
+    concept: db
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0
-- id: claim6086
+- id: claim1780
   type: equation
   expression: F_{23} = \frac{A2 \cdot F2 + A3 \cdot F3}{A2 + A3}
+  variables:
+  - symbol: F_23
+    concept: f_23
+  - symbol: F_
+    concept: f
+  - symbol: A2
+    concept: a2
+  - symbol: F2
+    concept: f2
+  - symbol: A3
+    concept: a3
+  - symbol: F3
+    concept: f3
   provenance:
     paper: Lienard_1999_VocalEffortVowelSpectral
     page: 0

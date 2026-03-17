@@ -1,7 +1,7 @@
 source:
   paper: Henrich_2001_SpectralOqAsymmetry
 claims:
-- id: claim3915
+- id: claim1274
   type: parameter
   concept: open_quotient
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0.2
   upper_bound: 0.9
   unit: dimensionless
-- id: claim3916
+- id: claim1275
   type: parameter
   concept: asymmetry_coefficient
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0.55
   upper_bound: 0.9
   unit: dimensionless
-- id: claim3917
+- id: claim1276
   type: parameter
   concept: speed_quotient
   provenance:
@@ -27,14 +27,7 @@ claims:
     page: 0
   value: 2
   unit: dimensionless
-- id: claim3918
-  type: parameter
-  concept: return_phase
-  provenance:
-    paper: Henrich_2001_SpectralOqAsymmetry
-    page: 0
-  unit: seconds
-- id: claim3919
+- id: claim1277
   type: parameter
   concept: h1h2
   provenance:
@@ -42,7 +35,7 @@ claims:
     page: 0
   value: -5
   unit: dB
-- id: claim3920
+- id: claim1278
   type: parameter
   concept: h1h2
   provenance:
@@ -50,7 +43,7 @@ claims:
     page: 0
   value: -5
   unit: dB
-- id: claim3921
+- id: claim1279
   type: parameter
   concept: h1h2
   provenance:
@@ -58,59 +51,86 @@ claims:
     page: 0
   value: 0
   unit: dB
-- id: claim3922
+- id: claim1280
   type: equation
   expression: 'The full formula (Eq. 1 in paper) involves the implicit parameter alpha
     satisfying:'
+  variables:
+  - symbol: The
+    concept: the
+  - symbol: full
+    concept: full
+  - symbol: formula
+    concept: formula
+  - symbol: Eq
+    concept: eq
+  - symbol: in
+    concept: in
+  - symbol: paper
+    concept: paper
+  - symbol: involves
+    concept: involves
+  - symbol: implicit
+    concept: implicit
+  - symbol: parameter
+    concept: parameter
+  - symbol: satisfying
+    concept: satisfying
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3923
+- id: claim1281
   type: observation
   statement: '**KLGLOTT88 Oq-H1*-H2* monotonicity**: In the KLGLOTT88 model, H1*-H2*
     must be a monotonically increasing function of Oq'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3924
+- id: claim1282
   type: observation
   statement: '**LF model H1*-H2* range**: For the LF model with abrupt closure, H1*-H2*
     must fall in approximately [-5, +10] dB for Oq in [0.2, 0.9] and alpha_m in [2/3,
     0.9]'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3925
+- id: claim1283
   type: observation
   statement: '**R++ model wider range**: R++ H1*-H2* domain is strictly wider than
     LF H1*-H2* domain for the same Oq range'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3926
+- id: claim1284
   type: observation
   statement: '**Ambiguity**: For LF model, any H1*-H2* value in [0, 5] dB must correspond
     to at least two distinct (Oq, alpha_m) pairs'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3927
+- id: claim1285
   type: observation
   statement: '**Increasing Oq increases H1*-H2* (at fixed alpha_m)**: At any fixed
     asymmetry coefficient, increasing Oq must increase H1*-H2*'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0
-- id: claim3928
+- id: claim1286
   type: observation
   statement: '**Increasing alpha_m decreases H1*-H2* (at fixed Oq)**: At any fixed
     open quotient, increasing asymmetry coefficient must decrease H1*-H2*'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2001_SpectralOqAsymmetry
     page: 0

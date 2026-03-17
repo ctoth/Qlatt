@@ -76,6 +76,11 @@ claims:
 - id: claim10
   type: equation
   expression: 'Cohen''s d from r:'
+  variables:
+  - symbol: Cohen
+    concept: cohen
+  - symbol: from
+    concept: from
   provenance:
     paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
     page: 0
@@ -83,37 +88,16 @@ claims:
   type: observation
   statement: Pitch should increase more during high-motivation deception than low-motivation
     (r=.529 vs .012)
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
     page: 0
 - id: claim12
   type: observation
-  statement: Response latency should increase with deception only under short preparation
-    (r=.190 vs -.044)
-  concepts: []
-  provenance:
-    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
-    page: 0
-- id: claim13
-  type: observation
   statement: Message duration should decrease under high motivation deception (r=-.102)
-  concepts: []
-  provenance:
-    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
-    page: 0
-- id: claim14
-  type: observation
-  statement: Effect sizes for paraverbal deception cues should be small (|d| < 0.3)
-  concepts: []
-  provenance:
-    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
-    page: 0
-- id: claim15
-  type: observation
-  statement: Unsanctioned lies should produce larger paraverbal effects than sanctioned
-    lies
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
     page: 0

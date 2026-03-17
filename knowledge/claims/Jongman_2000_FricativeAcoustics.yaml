@@ -1,7 +1,7 @@
 source:
   paper: Jongman_2000_FricativeAcoustics
 claims:
-- id: claim4896
+- id: claim1509
   type: parameter
   concept: fv
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 5108
-- id: claim4897
+- id: claim1510
   type: parameter
   concept: greek_small_letter_theta_latin_small_letter_eth
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 5137
-- id: claim4898
+- id: claim1511
   type: parameter
   concept: sz
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 6133
-- id: claim4899
+- id: claim1512
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_ezh
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 4229
-- id: claim4900
+- id: claim1513
   type: parameter
   concept: f
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: ms
   value: 166
-- id: claim4901
+- id: claim1514
   type: parameter
   concept: v
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim4902
+- id: claim1515
   type: parameter
   concept: greek_small_letter_theta
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: ms
   value: 163
-- id: claim4903
+- id: claim1516
   type: parameter
   concept: latin_small_letter_eth
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: ms
   value: 88
-- id: claim4904
+- id: claim1517
   type: parameter
   concept: s
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: ms
   value: 178
-- id: claim4905
+- id: claim1518
   type: parameter
   concept: z
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: ms
   value: 118
-- id: claim4906
+- id: claim1519
   type: parameter
   concept: latin_small_letter_esh
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: ms
   value: 178
-- id: claim4907
+- id: claim1520
   type: parameter
   concept: latin_small_letter_ezh
   provenance:
@@ -97,14 +97,7 @@ claims:
     page: 0
   unit: ms
   value: 123
-- id: claim4908
-  type: parameter
-  concept: lpc_poles
-  provenance:
-    paper: Jongman_2000_FricativeAcoustics
-    page: 0
-  value: 24
-- id: claim4909
+- id: claim1521
   type: parameter
   concept: fv
   provenance:
@@ -112,7 +105,7 @@ claims:
     page: 0
   unit: slope
   value: 0.768
-- id: claim4910
+- id: claim1522
   type: parameter
   concept: greek_small_letter_theta_latin_small_letter_eth
   provenance:
@@ -120,7 +113,7 @@ claims:
     page: 0
   unit: slope
   value: 0.53
-- id: claim4911
+- id: claim1523
   type: parameter
   concept: sz
   provenance:
@@ -128,7 +121,7 @@ claims:
     page: 0
   unit: slope
   value: 0.517
-- id: claim4912
+- id: claim1524
   type: parameter
   concept: latin_small_letter_esh_latin_small_letter_ezh
   provenance:

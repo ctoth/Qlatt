@@ -1,7 +1,7 @@
 source:
   paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
 claims:
-- id: claim11220
+- id: claim2804
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -10,7 +10,7 @@ claims:
   unit: kPa
   lower_bound: 0.2
   upper_bound: 1.2
-- id: claim11221
+- id: claim2805
   type: parameter
   concept: vocal_fold_length
   provenance:
@@ -19,7 +19,7 @@ claims:
   unit: cm
   lower_bound: 1.0
   upper_bound: 2.0
-- id: claim11222
+- id: claim2806
   type: parameter
   concept: body_ap_stiffness
   provenance:
@@ -28,7 +28,7 @@ claims:
   unit: kPa
   lower_bound: 1
   upper_bound: 20
-- id: claim11223
+- id: claim2807
   type: parameter
   concept: cover_ap_stiffness
   provenance:
@@ -37,7 +37,7 @@ claims:
   unit: kPa
   lower_bound: 1
   upper_bound: 8
-- id: claim11224
+- id: claim2808
   type: parameter
   concept: medial_surface_thickness
   provenance:
@@ -46,7 +46,7 @@ claims:
   unit: mm
   lower_bound: 0.3
   upper_bound: 4.5
-- id: claim11225
+- id: claim2809
   type: parameter
   concept: cover_transverse_stiffness
   provenance:
@@ -55,7 +55,7 @@ claims:
   unit: kPa
   lower_bound: 0.5
   upper_bound: 8
-- id: claim11226
+- id: claim2810
   type: parameter
   concept: body_transverse_stiffness
   provenance:
@@ -64,21 +64,7 @@ claims:
   unit: kPa
   lower_bound: 0.5
   upper_bound: 20
-- id: claim11227
-  type: parameter
-  concept: subglottal_resonance_freq
-  provenance:
-    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
-    page: 0
-  unit: Hz
-- id: claim11228
-  type: parameter
-  concept: subglottal_bandwidth
-  provenance:
-    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
-    page: 0
-  unit: Hz
-- id: claim11229
+- id: claim2811
   type: parameter
   concept: soft_low
   provenance:
@@ -86,7 +72,7 @@ claims:
     page: 0
   unit: kPa
   value: 0.4
-- id: claim11230
+- id: claim2812
   type: parameter
   concept: mf_mid
   provenance:
@@ -94,7 +80,7 @@ claims:
     page: 0
   unit: kPa
   value: 0.6
-- id: claim11231
+- id: claim2813
   type: parameter
   concept: mf_high
   provenance:
@@ -102,7 +88,7 @@ claims:
     page: 0
   unit: kPa
   value: 0.6
-- id: claim11232
+- id: claim2814
   type: parameter
   concept: loud_low
   provenance:
@@ -112,7 +98,7 @@ claims:
   lower_bound: 0.8
   upper_bound: 1.0
   value: 4
-- id: claim11233
+- id: claim2815
   type: parameter
   concept: loud_mid
   provenance:
@@ -122,7 +108,7 @@ claims:
   lower_bound: 0.8
   upper_bound: 1.0
   value: 6
-- id: claim11234
+- id: claim2816
   type: parameter
   concept: loud_high
   provenance:

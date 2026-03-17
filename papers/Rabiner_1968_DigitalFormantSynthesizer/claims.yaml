@@ -61,12 +61,30 @@ claims:
   type: equation
   expression: \frac{d^2f_N(t)}{dt^2} + \frac{2}{\tau_{AB}^N}\frac{df_N(t)}{dt} + \frac{1}{(\tau_{AB}^N)^2}f_N(t)
     = \frac{P_N(t)}{(\tau_{AB}^N)^2}
+  variables:
+  - symbol: f_N
+    concept: f_n
+  - symbol: df_N
+    concept: df_n
+  - symbol: P_N
+    concept: p_n
+  - symbol: dt
+    concept: dt
+  - symbol: tau_
+    concept: tau
+  - symbol: AB
+    concept: ab
   provenance:
     paper: Rabiner_1968_DigitalFormantSynthesizer
     page: 0
 - id: claim9
   type: equation
   expression: f, f + f_s, f + 2f_s, \ldots
+  variables:
+  - symbol: f_s
+    concept: f_s
+  - symbol: ldots
+    concept: ldots
   provenance:
     paper: Rabiner_1968_DigitalFormantSynthesizer
     page: 0

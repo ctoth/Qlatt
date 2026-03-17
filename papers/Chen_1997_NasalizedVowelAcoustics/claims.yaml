@@ -358,12 +358,26 @@ claims:
 - id: claim45
   type: equation
   expression: f_{zs} = \frac{c}{2\pi} \sqrt{\frac{S_o}{V L_o}}
+  variables:
+  - symbol: f_zs
+    concept: f_zs
+  - symbol: S_o
+    concept: s_o
+  - symbol: L_o
+    concept: l_o
+  - symbol: f_
+    concept: f
+  - symbol: zs
+    concept: zs
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
 - id: claim46
   type: equation
   expression: S_f = \frac{S}{\sqrt{4\pi A}}
+  variables:
+  - symbol: S_f
+    concept: s_f
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
@@ -371,6 +385,19 @@ claims:
   type: equation
   expression: T1(F_{P0}) = \frac{(0.5B1)^2 + F1^2}{[((0.5B1)^2 + (F1-F_{P0})^2) \cdot
     ((0.5B1)^2 + (F1+F_{P0})^2)]^{1/2}}
+  variables:
+  - symbol: F_P0
+    concept: f_p0
+  - symbol: T1
+    concept: t1
+  - symbol: F_
+    concept: f
+  - symbol: P0
+    concept: p0
+  - symbol: B1
+    concept: b1
+  - symbol: F1
+    concept: f1
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0
@@ -378,6 +405,19 @@ claims:
   type: equation
   expression: T2(F_{P0}) = \frac{(0.5B2)^2 + F2^2}{[((0.5B2)^2 + (F2-F_{P0})^2) \cdot
     ((0.5B2)^2 + (F2+F_{P0})^2)]^{1/2}}
+  variables:
+  - symbol: F_P0
+    concept: f_p0
+  - symbol: T2
+    concept: t2
+  - symbol: F_
+    concept: f
+  - symbol: P0
+    concept: p0
+  - symbol: B2
+    concept: b2
+  - symbol: F2
+    concept: f2
   provenance:
     paper: Chen_1997_NasalizedVowelAcoustics
     page: 0

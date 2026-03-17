@@ -146,7 +146,8 @@ claims:
   type: observation
   statement: '**F0 ordering:** For both genders, sadness F0 < anger F0 and sadness
     F0 < joy F0'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
@@ -154,7 +155,8 @@ claims:
   type: observation
   statement: '**F0 range ordering:** Sadness max/min ratio < anger max/min ratio and
     < joy max/min ratio'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
@@ -162,7 +164,8 @@ claims:
   type: observation
   statement: '**Arousal discrimination:** All F0/energy/rate parameters should significantly
     differ between sadness and anger, and between sadness and joy'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0
@@ -170,23 +173,8 @@ claims:
   type: observation
   statement: '**Valence non-discrimination:** F0 mean, F0 range, F0 SD, delivery rate
     should NOT significantly differ between anger and joy'
-  concepts: []
-  provenance:
-    paper: ZeiPollermann_2002_AcousticPatternsEmotions
-    page: 0
-- id: claim21
-  type: observation
-  statement: '**LTAS valence signal:** Anger spectral energy > joy spectral energy
-    in the 300–3400 Hz range'
-  concepts: []
-  provenance:
-    paper: ZeiPollermann_2002_AcousticPatternsEmotions
-    page: 0
-- id: claim22
-  type: observation
-  statement: '**Gender invariance of energy/rate:** Voiced energy range and delivery
-    rate should NOT differ significantly between genders for any emotion'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: ZeiPollermann_2002_AcousticPatternsEmotions
     page: 0

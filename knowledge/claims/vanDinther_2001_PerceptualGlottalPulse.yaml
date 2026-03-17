@@ -1,89 +1,24 @@
 source:
   paper: vanDinther_2001_PerceptualGlottalPulse
 claims:
-- id: claim10690
-  type: parameter
-  concept: r_o
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.56
-  upper_bound: 0.68
-- id: claim10691
-  type: parameter
-  concept: r_k
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.31
-  upper_bound: 0.33
-- id: claim10692
-  type: parameter
-  concept: r_a
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  lower_bound: 0.01
-  upper_bound: 0.03
-- id: claim10693
-  type: parameter
-  concept: number_of_harmonics
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 36
-- id: claim10694
-  type: parameter
-  concept: mathbfr_1_r_a
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.03
-- id: claim10695
-  type: parameter
-  concept: mathbfr_1_r_k
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.31
-- id: claim10696
-  type: parameter
-  concept: mathbfr_1_r_o
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.56
-- id: claim10697
-  type: parameter
-  concept: mathbfr_2_r_a
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.01
-- id: claim10698
-  type: parameter
-  concept: mathbfr_2_r_k
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.33
-- id: claim10699
-  type: parameter
-  concept: mathbfr_2_r_o
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-  value: 0.68
-- id: claim10700
+- id: claim2590
   type: equation
   expression: \|f\| := \left( \int_0^{40} |f(x)|^2 dx \right)^{1/2}
+  variables:
+  - symbol: int_0
+    concept: int_0
+  - symbol: dx
+    concept: dx
   provenance:
     paper: vanDinther_2001_PerceptualGlottalPulse
     page: 0
-- id: claim10701
+- id: claim2591
   type: equation
   expression: \|\psi_v(\mathbf{r} + \mathbf{h}) - \psi_v(\mathbf{r})\|^2 \approx \frac{1}{2}\mathbf{h}^T
     H(\mathbf{r}) \mathbf{h}
+  variables:
+  - symbol: psi_v
+    concept: psi_v
   provenance:
     paper: vanDinther_2001_PerceptualGlottalPulse
     page: 0

@@ -1,65 +1,7 @@
 source:
   paper: Allen_1987_MITalk_TTS
 claims:
-- id: claim79
-  type: parameter
-  concept: 1_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 200
-- id: claim80
-  type: parameter
-  concept: 2_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 140
-- id: claim81
-  type: parameter
-  concept: 4_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 85
-- id: claim82
-  type: parameter
-  concept: 5_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 80
-- id: claim83
-  type: parameter
-  concept: 6_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 85
-- id: claim84
-  type: parameter
-  concept: 8_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 140
-- id: claim85
-  type: parameter
-  concept: 9_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  lower_bound: 70
-  upper_bound: 160
-- id: claim86
-  type: parameter
-  concept: 10_prcnt1
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  lower_bound: 50
-  upper_bound: 120
-- id: claim87
+- id: claim15
   type: parameter
   concept: amplitude_of_voicing
   provenance:
@@ -69,7 +11,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim88
+- id: claim16
   type: parameter
   concept: amplitude_of_quasisinusoidal_voicing
   provenance:
@@ -79,7 +21,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim89
+- id: claim17
   type: parameter
   concept: amplitude_of_aspiration
   provenance:
@@ -89,7 +31,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim90
+- id: claim18
   type: parameter
   concept: amplitude_of_frication
   provenance:
@@ -99,7 +41,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim91
+- id: claim19
   type: parameter
   concept: amplitude_of_bypass
   provenance:
@@ -109,7 +51,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim92
+- id: claim20
   type: parameter
   concept: amplitude_of_nasal_formant
   provenance:
@@ -119,7 +61,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim93
+- id: claim21
   type: parameter
   concept: amplitude_of_formants_16
   provenance:
@@ -129,7 +71,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim94
+- id: claim22
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -139,7 +81,7 @@ claims:
   lower_bound: 0
   upper_bound: 500
   unit: Hz
-- id: claim95
+- id: claim23
   type: parameter
   concept: first_formant_frequency
   provenance:
@@ -149,7 +91,7 @@ claims:
   lower_bound: 150
   upper_bound: 900
   unit: Hz
-- id: claim96
+- id: claim24
   type: parameter
   concept: second_formant_frequency
   provenance:
@@ -159,7 +101,7 @@ claims:
   lower_bound: 500
   upper_bound: 2500
   unit: Hz
-- id: claim97
+- id: claim25
   type: parameter
   concept: third_formant_frequency
   provenance:
@@ -169,7 +111,7 @@ claims:
   lower_bound: 1300
   upper_bound: 3500
   unit: Hz
-- id: claim98
+- id: claim26
   type: parameter
   concept: fourth_formant_frequency
   provenance:
@@ -179,7 +121,7 @@ claims:
   lower_bound: 2500
   upper_bound: 4500
   unit: Hz
-- id: claim99
+- id: claim27
   type: parameter
   concept: fifth_formant_frequency
   provenance:
@@ -189,7 +131,7 @@ claims:
   lower_bound: 3500
   upper_bound: 4900
   unit: Hz
-- id: claim100
+- id: claim28
   type: parameter
   concept: sixth_formant_frequency
   provenance:
@@ -199,7 +141,7 @@ claims:
   lower_bound: 4000
   upper_bound: 4999
   unit: Hz
-- id: claim101
+- id: claim29
   type: parameter
   concept: first_formant_bandwidth
   provenance:
@@ -209,7 +151,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim102
+- id: claim30
   type: parameter
   concept: second_formant_bandwidth
   provenance:
@@ -219,7 +161,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim103
+- id: claim31
   type: parameter
   concept: third_formant_bandwidth
   provenance:
@@ -229,7 +171,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim104
+- id: claim32
   type: parameter
   concept: fourth_formant_bandwidth
   provenance:
@@ -239,7 +181,7 @@ claims:
   lower_bound: 100
   upper_bound: 500
   unit: Hz
-- id: claim105
+- id: claim33
   type: parameter
   concept: fifth_formant_bandwidth
   provenance:
@@ -249,7 +191,7 @@ claims:
   lower_bound: 150
   upper_bound: 700
   unit: Hz
-- id: claim106
+- id: claim34
   type: parameter
   concept: sixth_formant_bandwidth
   provenance:
@@ -259,7 +201,7 @@ claims:
   lower_bound: 200
   upper_bound: 2000
   unit: Hz
-- id: claim107
+- id: claim35
   type: parameter
   concept: nasal_pole_frequency
   provenance:
@@ -269,7 +211,7 @@ claims:
   lower_bound: 200
   upper_bound: 500
   unit: Hz
-- id: claim108
+- id: claim36
   type: parameter
   concept: nasal_pole_bandwidth
   provenance:
@@ -279,7 +221,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim109
+- id: claim37
   type: parameter
   concept: nasal_zero_frequency
   provenance:
@@ -289,7 +231,7 @@ claims:
   lower_bound: 200
   upper_bound: 700
   unit: Hz
-- id: claim110
+- id: claim38
   type: parameter
   concept: nasal_zero_bandwidth
   provenance:
@@ -299,7 +241,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim111
+- id: claim39
   type: parameter
   concept: glottal_resonator_frequency
   provenance:
@@ -309,7 +251,7 @@ claims:
   lower_bound: 0
   upper_bound: 600
   unit: Hz
-- id: claim112
+- id: claim40
   type: parameter
   concept: glottal_resonator_bandwidth
   provenance:
@@ -319,7 +261,7 @@ claims:
   lower_bound: 100
   upper_bound: 2000
   unit: Hz
-- id: claim113
+- id: claim41
   type: parameter
   concept: glottal_zero_frequency
   provenance:
@@ -329,7 +271,7 @@ claims:
   lower_bound: 0
   upper_bound: 5000
   unit: Hz
-- id: claim114
+- id: claim42
   type: parameter
   concept: glottal_zero_bandwidth
   provenance:
@@ -339,7 +281,7 @@ claims:
   lower_bound: 0
   upper_bound: 9000
   unit: Hz
-- id: claim115
+- id: claim43
   type: parameter
   concept: glottal_resonator_2_bandwidth
   provenance:
@@ -349,32 +291,7 @@ claims:
   lower_bound: 100
   upper_bound: 1000
   unit: Hz
-- id: claim116
-  type: parameter
-  concept: cascade_parallel_switch
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 0
-- id: claim117
-  type: parameter
-  concept: number_of_cascaded_formants
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 5
-  lower_bound: 4
-  upper_bound: 6
-- id: claim118
-  type: parameter
-  concept: number_of_waveform_samples
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 50
-  lower_bound: 1
-  upper_bound: 200
-- id: claim119
+- id: claim44
   type: parameter
   concept: overall_gain
   provenance:
@@ -384,7 +301,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim120
+- id: claim45
   type: parameter
   concept: sampling_rate
   provenance:
@@ -394,7 +311,7 @@ claims:
   lower_bound: 5000
   upper_bound: 20000
   unit: Hz
-- id: claim121
+- id: claim46
   type: parameter
   concept: aa
   provenance:
@@ -402,7 +319,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim122
+- id: claim47
   type: parameter
   concept: ae
   provenance:
@@ -410,7 +327,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim123
+- id: claim48
   type: parameter
   concept: ah
   provenance:
@@ -418,7 +335,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim124
+- id: claim49
   type: parameter
   concept: ao
   provenance:
@@ -426,7 +343,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim125
+- id: claim50
   type: parameter
   concept: aw
   provenance:
@@ -434,7 +351,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim126
+- id: claim51
   type: parameter
   concept: ax
   provenance:
@@ -442,7 +359,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim127
+- id: claim52
   type: parameter
   concept: axr
   provenance:
@@ -450,7 +367,7 @@ claims:
     page: 0
   unit: ms
   value: 120
-- id: claim128
+- id: claim53
   type: parameter
   concept: ay
   provenance:
@@ -458,7 +375,7 @@ claims:
     page: 0
   unit: ms
   value: 150
-- id: claim129
+- id: claim54
   type: parameter
   concept: eh
   provenance:
@@ -466,7 +383,7 @@ claims:
     page: 0
   unit: ms
   value: 70
-- id: claim130
+- id: claim55
   type: parameter
   concept: er
   provenance:
@@ -474,7 +391,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim131
+- id: claim56
   type: parameter
   concept: exr
   provenance:
@@ -482,7 +399,7 @@ claims:
     page: 0
   unit: ms
   value: 130
-- id: claim132
+- id: claim57
   type: parameter
   concept: ey
   provenance:
@@ -490,7 +407,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim133
+- id: claim58
   type: parameter
   concept: ih
   provenance:
@@ -498,7 +415,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim134
+- id: claim59
   type: parameter
   concept: ix
   provenance:
@@ -506,7 +423,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim135
+- id: claim60
   type: parameter
   concept: ixr
   provenance:
@@ -514,7 +431,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim136
+- id: claim61
   type: parameter
   concept: iy
   provenance:
@@ -522,7 +439,7 @@ claims:
     page: 0
   unit: ms
   value: 55
-- id: claim137
+- id: claim62
   type: parameter
   concept: ow
   provenance:
@@ -530,7 +447,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim138
+- id: claim63
   type: parameter
   concept: oxr
   provenance:
@@ -538,7 +455,7 @@ claims:
     page: 0
   unit: ms
   value: 130
-- id: claim139
+- id: claim64
   type: parameter
   concept: oy
   provenance:
@@ -546,7 +463,7 @@ claims:
     page: 0
   unit: ms
   value: 150
-- id: claim140
+- id: claim65
   type: parameter
   concept: uh
   provenance:
@@ -554,7 +471,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim141
+- id: claim66
   type: parameter
   concept: uw
   provenance:
@@ -562,7 +479,7 @@ claims:
     page: 0
   unit: ms
   value: 70
-- id: claim142
+- id: claim67
   type: parameter
   concept: uxr
   provenance:
@@ -570,7 +487,7 @@ claims:
     page: 0
   unit: ms
   value: 110
-- id: claim143
+- id: claim68
   type: parameter
   concept: yu
   provenance:
@@ -578,7 +495,7 @@ claims:
     page: 0
   unit: ms
   value: 150
-- id: claim144
+- id: claim69
   type: parameter
   concept: el
   provenance:
@@ -586,7 +503,7 @@ claims:
     page: 0
   unit: ms
   value: 110
-- id: claim145
+- id: claim70
   type: parameter
   concept: hh
   provenance:
@@ -594,7 +511,7 @@ claims:
     page: 0
   unit: ms
   value: 20
-- id: claim146
+- id: claim71
   type: parameter
   concept: ll
   provenance:
@@ -602,7 +519,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim147
+- id: claim72
   type: parameter
   concept: lx
   provenance:
@@ -610,7 +527,7 @@ claims:
     page: 0
   unit: ms
   value: 70
-- id: claim148
+- id: claim73
   type: parameter
   concept: rr
   provenance:
@@ -618,7 +535,7 @@ claims:
     page: 0
   unit: ms
   value: 30
-- id: claim149
+- id: claim74
   type: parameter
   concept: ww
   provenance:
@@ -626,7 +543,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim150
+- id: claim75
   type: parameter
   concept: yy
   provenance:
@@ -634,7 +551,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim151
+- id: claim76
   type: parameter
   concept: em
   provenance:
@@ -642,7 +559,7 @@ claims:
     page: 0
   unit: ms
   value: 110
-- id: claim152
+- id: claim77
   type: parameter
   concept: en
   provenance:
@@ -650,7 +567,7 @@ claims:
     page: 0
   unit: ms
   value: 100
-- id: claim153
+- id: claim78
   type: parameter
   concept: mm
   provenance:
@@ -658,7 +575,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim154
+- id: claim79
   type: parameter
   concept: nn
   provenance:
@@ -666,7 +583,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim155
+- id: claim80
   type: parameter
   concept: ng
   provenance:
@@ -674,7 +591,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim156
+- id: claim81
   type: parameter
   concept: dh
   provenance:
@@ -682,7 +599,7 @@ claims:
     page: 0
   unit: ms
   value: 30
-- id: claim157
+- id: claim82
   type: parameter
   concept: ff
   provenance:
@@ -690,7 +607,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim158
+- id: claim83
   type: parameter
   concept: ss
   provenance:
@@ -698,7 +615,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim159
+- id: claim84
   type: parameter
   concept: sh
   provenance:
@@ -706,7 +623,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim160
+- id: claim85
   type: parameter
   concept: th
   provenance:
@@ -714,7 +631,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim161
+- id: claim86
   type: parameter
   concept: vv
   provenance:
@@ -722,7 +639,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim162
+- id: claim87
   type: parameter
   concept: zz
   provenance:
@@ -730,7 +647,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim163
+- id: claim88
   type: parameter
   concept: zh
   provenance:
@@ -738,7 +655,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim164
+- id: claim89
   type: parameter
   concept: bb
   provenance:
@@ -746,7 +663,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim165
+- id: claim90
   type: parameter
   concept: dd
   provenance:
@@ -754,7 +671,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim166
+- id: claim91
   type: parameter
   concept: dx
   provenance:
@@ -762,7 +679,7 @@ claims:
     page: 0
   unit: ms
   value: 20
-- id: claim167
+- id: claim92
   type: parameter
   concept: gg
   provenance:
@@ -770,7 +687,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim168
+- id: claim93
   type: parameter
   concept: kk
   provenance:
@@ -778,7 +695,7 @@ claims:
     page: 0
   unit: ms
   value: 60
-- id: claim169
+- id: claim94
   type: parameter
   concept: pp
   provenance:
@@ -786,7 +703,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim170
+- id: claim95
   type: parameter
   concept: tt
   provenance:
@@ -794,7 +711,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim171
+- id: claim96
   type: parameter
   concept: ch
   provenance:
@@ -802,7 +719,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim172
+- id: claim97
   type: parameter
   concept: jj
   provenance:
@@ -810,7 +727,7 @@ claims:
     page: 0
   unit: ms
   value: 50
-- id: claim173
+- id: claim98
   type: parameter
   concept: axp
   provenance:
@@ -818,7 +735,7 @@ claims:
     page: 0
   unit: ms
   value: 70
-- id: claim174
+- id: claim99
   type: parameter
   concept: iy
   provenance:
@@ -826,7 +743,7 @@ claims:
     page: 0
   unit: Hz
   value: 50
-- id: claim175
+- id: claim100
   type: parameter
   concept: ae
   provenance:
@@ -834,7 +751,7 @@ claims:
     page: 0
   unit: Hz
   value: 70
-- id: claim176
+- id: claim101
   type: parameter
   concept: aa
   provenance:
@@ -842,7 +759,7 @@ claims:
     page: 0
   unit: Hz
   value: 700
-- id: claim177
+- id: claim102
   type: parameter
   concept: uw
   provenance:
@@ -850,7 +767,7 @@ claims:
     page: 0
   unit: Hz
   value: 2200
-- id: claim178
+- id: claim103
   type: parameter
   concept: ax
   provenance:
@@ -858,7 +775,7 @@ claims:
     page: 0
   unit: Hz
   value: 80
-- id: claim179
+- id: claim104
   type: parameter
   concept: av
   provenance:
@@ -866,7 +783,7 @@ claims:
     page: 0
   unit: ms
   value: 25
-- id: claim180
+- id: claim105
   type: parameter
   concept: an
   provenance:
@@ -874,7 +791,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim181
+- id: claim106
   type: parameter
   concept: f1
   provenance:
@@ -882,7 +799,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim182
+- id: claim107
   type: parameter
   concept: f2f4
   provenance:
@@ -890,7 +807,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim183
+- id: claim108
   type: parameter
   concept: b1b3
   provenance:
@@ -898,7 +815,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim184
+- id: claim109
   type: parameter
   concept: fnz
   provenance:
@@ -906,7 +823,7 @@ claims:
     page: 0
   unit: ms
   value: 150
-- id: claim185
+- id: claim110
   type: parameter
   concept: af
   provenance:
@@ -914,7 +831,7 @@ claims:
     page: 0
   unit: ms
   value: 40
-- id: claim186
+- id: claim111
   type: parameter
   concept: asp
   provenance:
@@ -922,7 +839,7 @@ claims:
     page: 0
   unit: ms
   value: 20
-- id: claim187
+- id: claim112
   type: parameter
   concept: f0
   provenance:
@@ -930,470 +847,12 @@ claims:
     page: 0
   unit: ms
   value: 120
-- id: claim188
-  type: parameter
-  concept: aa_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 0
-- id: claim189
-  type: parameter
-  concept: aa_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 80
-- id: claim190
-  type: parameter
-  concept: ae_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 100
-- id: claim191
-  type: parameter
-  concept: ae_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 75
-- id: claim192
-  type: parameter
-  concept: ao_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 110
-- id: claim193
-  type: parameter
-  concept: ao_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 80
-- id: claim194
-  type: parameter
-  concept: aw_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 120
-- id: claim195
-  type: parameter
-  concept: aw_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 70
-- id: claim196
-  type: parameter
-  concept: ay_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 100
-- id: claim197
-  type: parameter
-  concept: ay_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 55
-- id: claim198
-  type: parameter
-  concept: eh_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 60
-- id: claim199
-  type: parameter
-  concept: eh_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 70
-- id: claim200
-  type: parameter
-  concept: ey_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 140
-- id: claim201
-  type: parameter
-  concept: ey_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 55
-- id: claim202
-  type: parameter
-  concept: ih_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 90
-- id: claim203
-  type: parameter
-  concept: ih_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 65
-- id: claim204
-  type: parameter
-  concept: iy_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 200
-- id: claim205
-  type: parameter
-  concept: iy_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 45
-- id: claim206
-  type: parameter
-  concept: ow_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 150
-- id: claim207
-  type: parameter
-  concept: ow_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 50
-- id: claim208
-  type: parameter
-  concept: oy_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 150
-- id: claim209
-  type: parameter
-  concept: oy_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 60
-- id: claim210
-  type: parameter
-  concept: uh_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 90
-- id: claim211
-  type: parameter
-  concept: uh_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 65
-- id: claim212
-  type: parameter
-  concept: uw_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 140
-- id: claim213
-  type: parameter
-  concept: uw_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 55
-- id: claim214
-  type: parameter
-  concept: yu_tcdiph
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 100
-- id: claim215
-  type: parameter
-  concept: yu_tdmid
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 45
-- id: claim216
-  type: parameter
-  concept: 21_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 18
-- id: claim217
-  type: parameter
-  concept: 31_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 31
-- id: claim218
-  type: parameter
-  concept: 32_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 37
-- id: claim219
-  type: parameter
-  concept: 41_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 47
-- id: claim220
-  type: parameter
-  concept: 42_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 48
-- id: claim221
-  type: parameter
-  concept: 71_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 72
-- id: claim222
-  type: parameter
-  concept: 72_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 74
-- id: claim223
-  type: parameter
-  concept: 91_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 94
-- id: claim224
-  type: parameter
-  concept: 101_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 105
-- id: claim225
-  type: parameter
-  concept: 112_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 112
-- id: claim226
-  type: parameter
-  concept: 113_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 113
-- id: claim227
-  type: parameter
-  concept: 114_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 114
-- id: claim228
-  type: parameter
-  concept: 115_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 115
-- id: claim229
-  type: parameter
-  concept: 116_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 117
-- id: claim230
-  type: parameter
-  concept: 123_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 126
-- id: claim231
-  type: parameter
-  concept: 126_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 131
-- id: claim232
-  type: parameter
-  concept: 127_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 135
-- id: claim233
-  type: parameter
-  concept: 129_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 141
-- id: claim234
-  type: parameter
-  concept: 1210_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 143
-- id: claim235
-  type: parameter
-  concept: c1_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 189
-- id: claim236
-  type: parameter
-  concept: c2_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 194
-- id: claim237
-  type: parameter
-  concept: 21_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 19
-- id: claim238
-  type: parameter
-  concept: 31_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 36
-- id: claim239
-  type: parameter
-  concept: 81_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 84
-- id: claim240
-  type: parameter
-  concept: 91_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 96
-- id: claim241
-  type: parameter
-  concept: 101_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 101
-- id: claim242
-  type: parameter
-  concept: 111_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 119
-- id: claim243
-  type: parameter
-  concept: 112_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 121
-- id: claim244
-  type: parameter
-  concept: 113_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 122
-- id: claim245
-  type: parameter
-  concept: 121_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 132
-- id: claim246
-  type: parameter
-  concept: c1_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 186
-- id: claim247
-  type: parameter
-  concept: c2_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 187
-- id: claim248
-  type: parameter
-  concept: c3_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 188
-- id: claim249
-  type: parameter
-  concept: c4_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 188
-- id: claim250
-  type: parameter
-  concept: c5_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 194
-- id: claim251
-  type: parameter
-  concept: c6_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 196
-- id: claim252
-  type: parameter
-  concept: c7_page
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-  value: 197
-- id: claim253
+- id: claim113
   type: equation
   expression: $$B = 2e^{-\pi BW \cdot T}\cos(2\pi f \cdot T)$$
-  provenance:
-    paper: Allen_1987_MITalk_TTS
-    page: 0
-- id: claim254
-  type: equation
-  expression: $$B' = -B/A$$
+  variables:
+  - symbol: BW
+    concept: bw
   provenance:
     paper: Allen_1987_MITalk_TTS
     page: 0

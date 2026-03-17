@@ -1,7 +1,7 @@
 source:
   paper: Rabiner_1968_DigitalFormantSynthesizer
 claims:
-- id: claim7521
+- id: claim2061
   type: parameter
   concept: f4
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 3500
-- id: claim7522
+- id: claim2062
   type: parameter
   concept: f5
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 4500
-- id: claim7523
+- id: claim2063
   type: parameter
   concept: f6
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 5500
-- id: claim7524
+- id: claim2064
   type: parameter
   concept: f7
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 6500
-- id: claim7525
+- id: claim2065
   type: parameter
   concept: f8
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 7500
-- id: claim7526
+- id: claim2066
   type: parameter
   concept: f9
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 8500
-- id: claim7527
+- id: claim2067
   type: parameter
   concept: f10
   provenance:
@@ -57,16 +57,34 @@ claims:
     page: 0
   unit: Hz
   value: 9500
-- id: claim7528
+- id: claim2068
   type: equation
   expression: \frac{d^2f_N(t)}{dt^2} + \frac{2}{\tau_{AB}^N}\frac{df_N(t)}{dt} + \frac{1}{(\tau_{AB}^N)^2}f_N(t)
     = \frac{P_N(t)}{(\tau_{AB}^N)^2}
+  variables:
+  - symbol: f_N
+    concept: f_n
+  - symbol: df_N
+    concept: df_n
+  - symbol: P_N
+    concept: p_n
+  - symbol: dt
+    concept: dt
+  - symbol: tau_
+    concept: tau
+  - symbol: AB
+    concept: ab
   provenance:
     paper: Rabiner_1968_DigitalFormantSynthesizer
     page: 0
-- id: claim7529
+- id: claim2069
   type: equation
   expression: f, f + f_s, f + 2f_s, \ldots
+  variables:
+  - symbol: f_s
+    concept: f_s
+  - symbol: ldots
+    concept: ldots
   provenance:
     paper: Rabiner_1968_DigitalFormantSynthesizer
     page: 0

@@ -5,7 +5,8 @@ claims:
   type: observation
   statement: F0 and deltaF should be uncorrelated in male voice samples (source-filter
     independence)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cartei_2014_VoiceMasculinity
     page: 0
@@ -13,22 +14,16 @@ claims:
   type: observation
   statement: Lower F0 must predict higher masculinity ratings (monotonic negative
     relationship)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cartei_2014_VoiceMasculinity
     page: 0
 - id: claim3
   type: observation
-  statement: Lower deltaF must predict higher masculinity ratings (monotonic negative
-    relationship)
-  concepts: []
-  provenance:
-    paper: Cartei_2014_VoiceMasculinity
-    page: 0
-- id: claim4
-  type: observation
   statement: F0 effect size on masculinity should be larger than deltaF effect size
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Cartei_2014_VoiceMasculinity
     page: 0

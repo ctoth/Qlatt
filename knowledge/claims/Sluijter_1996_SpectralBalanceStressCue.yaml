@@ -1,192 +1,67 @@
 source:
   paper: Sluijter_1996_SpectralBalanceStressCue
 claims:
-- id: claim8236
+- id: claim2179
   type: parameter
-  concept: step_1_s1
+  concept: '93'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 90
-- id: claim8237
+  unit: mixed
+  value: 76
+- id: claim2180
   type: parameter
-  concept: step_1_s2
+  concept: '2'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 270
-- id: claim8238
+  unit: mixed
+  value: 13
+- id: claim2181
   type: parameter
-  concept: step_1_s1s2
+  concept: '3'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 360
-- id: claim8239
+  unit: mixed
+  value: 7
+- id: claim2182
   type: parameter
-  concept: step_2_s1
+  concept: '4'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 120
-- id: claim8240
+  unit: mixed
+  value: 4
+- id: claim2183
   type: parameter
-  concept: step_2_s2
+  concept: '80'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 240
-- id: claim8241
+  unit: mixed
+  value: 35
+- id: claim2184
   type: parameter
-  concept: step_2_s1s2
+  concept: '3'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 360
-- id: claim8242
+  unit: mixed
+  value: 53
+- id: claim2185
   type: parameter
-  concept: step_3_s1
+  concept: '7'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 150
-- id: claim8243
+  unit: mixed
+  value: 5
+- id: claim2186
   type: parameter
-  concept: step_3_s2
+  concept: '4'
   provenance:
     paper: Sluijter_1996_SpectralBalanceStressCue
     page: 0
-  value: 210
-- id: claim8244
-  type: parameter
-  concept: step_3_s1s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 360
-- id: claim8245
-  type: parameter
-  concept: step_4_s1
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 180
-- id: claim8246
-  type: parameter
-  concept: step_4_s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 180
-- id: claim8247
-  type: parameter
-  concept: step_4_s1s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 360
-- id: claim8248
-  type: parameter
-  concept: step_5_s1
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 210
-- id: claim8249
-  type: parameter
-  concept: step_5_s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 150
-- id: claim8250
-  type: parameter
-  concept: step_5_s1s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 360
-- id: claim8251
-  type: parameter
-  concept: step_6_s1
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 240
-- id: claim8252
-  type: parameter
-  concept: step_6_s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 120
-- id: claim8253
-  type: parameter
-  concept: step_6_s1s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 360
-- id: claim8254
-  type: parameter
-  concept: step_7_s1
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 270
-- id: claim8255
-  type: parameter
-  concept: step_7_s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 90
-- id: claim8256
-  type: parameter
-  concept: step_7_s1s2
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 360
-- id: claim8257
-  type: parameter
-  concept: duration_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 361.3
-- id: claim8258
-  type: parameter
-  concept: intensity_level_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 129.8
-- id: claim8259
-  type: parameter
-  concept: presentation_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 2.8
-- id: claim8260
-  type: parameter
-  concept: duration_x_intensity_level_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 7.8
-- id: claim8261
-  type: parameter
-  concept: duration_x_presentation_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 53.5
-- id: claim8262
-  type: parameter
-  concept: intensity_level_x_method_f
-  provenance:
-    paper: Sluijter_1996_SpectralBalanceStressCue
-    page: 0
-  value: 46.1
+  unit: mixed
+  value: 7

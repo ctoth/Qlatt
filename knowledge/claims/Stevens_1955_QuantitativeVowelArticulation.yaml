@@ -1,7 +1,7 @@
 source:
   paper: Stevens_1955_QuantitativeVowelArticulation
 claims:
-- id: claim8504
+- id: claim2244
   type: parameter
   concept: constriction_distance
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 4
   upper_bound: 13
   unit: cm from glottis
-- id: claim8505
+- id: claim2245
   type: parameter
   concept: constriction_radius
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 1.2
   unit: cm
-- id: claim8506
+- id: claim2246
   type: parameter
   concept: mouth_opening_ratio
   provenance:
@@ -28,14 +28,7 @@ claims:
   lower_bound: 0.1
   upper_bound: 20
   unit: cm
-- id: claim8507
-  type: parameter
-  concept: maximum_radius_near_glottis
-  provenance:
-    paper: Stevens_1955_QuantitativeVowelArticulation
-    page: 0
-  unit: cm
-- id: claim8508
+- id: claim2247
   type: parameter
   concept: parabola_coefficient
   provenance:
@@ -44,74 +37,62 @@ claims:
   lower_bound: 0
   upper_bound: 0.225
   unit: cm^{-1}
-- id: claim8509
+- id: claim2248
   type: equation
   expression: r - r_0 = 0.25(1.2 - r_0)x^2
+  variables:
+  - symbol: r_0
+    concept: r_0
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0
-- id: claim8510
+- id: claim2249
   type: equation
   expression: Z_{mouth} \propto l/A
+  variables:
+  - symbol: Z_mouth
+    concept: z_mouth
+  - symbol: Z_
+    concept: z
+  - symbol: mouth
+    concept: mouth
+  - symbol: propto
+    concept: propto
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0
-- id: claim8511
+- id: claim2250
   type: observation
   statement: For $r_0$ = 1.2 cm, formant frequencies must be independent of $d_0$
     (uniform tube)
-  concepts: []
+  concepts:
+  - formant
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0
-- id: claim8512
+- id: claim2251
   type: observation
   statement: F2 must increase monotonically as $d_0$ increases (constriction moves
     forward) for small $r_0$
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0
-- id: claim8513
+- id: claim2252
   type: observation
   statement: F1 must decrease as constriction moves forward for narrow constrictions
-  concepts: []
+  concepts:
+  - f1
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0
-- id: claim8514
+- id: claim2253
   type: observation
   statement: At the crossover point (~$d_0$ = 7 cm), varying $r_0$ must produce minimal
     change in formant frequencies
-  concepts: []
-  provenance:
-    paper: Stevens_1955_QuantitativeVowelArticulation
-    page: 0
-- id: claim8515
-  type: observation
-  statement: The parabolic contour must produce $r = r_0$ at $x = 0$ (apex condition)
-  concepts: []
-  provenance:
-    paper: Stevens_1955_QuantitativeVowelArticulation
-    page: 0
-- id: claim8516
-  type: observation
-  statement: Mouth opening $A/l$ must be in range [0.1, 20] cm
-  concepts: []
-  provenance:
-    paper: Stevens_1955_QuantitativeVowelArticulation
-    page: 0
-- id: claim8517
-  type: observation
-  statement: Constriction distance $d_0$ must be in range [4, 13] cm
-  concepts: []
-  provenance:
-    paper: Stevens_1955_QuantitativeVowelArticulation
-    page: 0
-- id: claim8518
-  type: observation
-  statement: Constriction radius $r_0$ must be in range [0.3, 1.2] cm
-  concepts: []
+  concepts:
+  - formant
   provenance:
     paper: Stevens_1955_QuantitativeVowelArticulation
     page: 0

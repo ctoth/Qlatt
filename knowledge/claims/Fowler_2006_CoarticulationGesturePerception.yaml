@@ -1,7 +1,7 @@
 source:
   paper: Fowler_2006_CoarticulationGesturePerception
 claims:
-- id: claim2838
+- id: claim958
   type: parameter
   concept: ada
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 875
-- id: claim2839
+- id: claim959
   type: parameter
   concept: ada
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 703
-- id: claim2840
+- id: claim960
   type: parameter
   concept: ada
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 562
-- id: claim2841
+- id: claim961
   type: parameter
   concept: ada
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 812
-- id: claim2842
+- id: claim962
   type: parameter
   concept: aga
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 922
-- id: claim2843
+- id: claim963
   type: parameter
   concept: aga
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 625
-- id: claim2844
+- id: claim964
   type: parameter
   concept: aga
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 562
-- id: claim2845
+- id: claim965
   type: parameter
   concept: aga
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 906
-- id: claim2846
+- id: claim966
   type: parameter
   concept: alda
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 968
-- id: claim2847
+- id: claim967
   type: parameter
   concept: alda
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 531
-- id: claim2848
+- id: claim968
   type: parameter
   concept: alda
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 500
-- id: claim2849
+- id: claim969
   type: parameter
   concept: alda
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 906
-- id: claim2850
+- id: claim970
   type: parameter
   concept: arda
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: Hz
   value: 843
-- id: claim2851
+- id: claim971
   type: parameter
   concept: arda
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: Hz
   value: 515
-- id: claim2852
+- id: claim972
   type: parameter
   concept: arda
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: Hz
   value: 562
-- id: claim2853
+- id: claim973
   type: parameter
   concept: arda
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: Hz
   value: 859
-- id: claim2854
+- id: claim974
   type: parameter
   concept: alga
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: Hz
   value: 912
-- id: claim2855
+- id: claim975
   type: parameter
   concept: alga
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: Hz
   value: 500
-- id: claim2856
+- id: claim976
   type: parameter
   concept: alga
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: Hz
   value: 671
-- id: claim2857
+- id: claim977
   type: parameter
   concept: alga
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: Hz
   value: 968
-- id: claim2858
+- id: claim978
   type: parameter
   concept: arga
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: Hz
   value: 859
-- id: claim2859
+- id: claim979
   type: parameter
   concept: arga
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: Hz
   value: 406
-- id: claim2860
+- id: claim980
   type: parameter
   concept: arga
   provenance:
@@ -185,7 +185,7 @@ claims:
     page: 0
   unit: Hz
   value: 546
-- id: claim2861
+- id: claim981
   type: parameter
   concept: arga
   provenance:
@@ -193,7 +193,7 @@ claims:
     page: 0
   unit: Hz
   value: 875
-- id: claim2862
+- id: claim982
   type: parameter
   concept: ada
   provenance:
@@ -201,7 +201,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim2863
+- id: claim983
   type: parameter
   concept: ada
   provenance:
@@ -209,7 +209,7 @@ claims:
     page: 0
   unit: Hz
   value: 575
-- id: claim2864
+- id: claim984
   type: parameter
   concept: ada
   provenance:
@@ -217,7 +217,7 @@ claims:
     page: 0
   unit: Hz
   value: 516
-- id: claim2865
+- id: claim985
   type: parameter
   concept: ada
   provenance:
@@ -225,7 +225,7 @@ claims:
     page: 0
   unit: Hz
   value: 700
-- id: claim2866
+- id: claim986
   type: parameter
   concept: aga
   provenance:
@@ -233,7 +233,7 @@ claims:
     page: 0
   unit: Hz
   value: 725
-- id: claim2867
+- id: claim987
   type: parameter
   concept: aga
   provenance:
@@ -241,7 +241,7 @@ claims:
     page: 0
   unit: Hz
   value: 625
-- id: claim2868
+- id: claim988
   type: parameter
   concept: aga
   provenance:
@@ -249,7 +249,7 @@ claims:
     page: 0
   unit: Hz
   value: 640
-- id: claim2869
+- id: claim989
   type: parameter
   concept: aga
   provenance:
@@ -257,7 +257,7 @@ claims:
     page: 0
   unit: Hz
   value: 703
-- id: claim2870
+- id: claim990
   type: parameter
   concept: alda
   provenance:
@@ -265,7 +265,7 @@ claims:
     page: 0
   unit: Hz
   value: 658
-- id: claim2871
+- id: claim991
   type: parameter
   concept: alda
   provenance:
@@ -273,7 +273,7 @@ claims:
     page: 0
   unit: Hz
   value: 475
-- id: claim2872
+- id: claim992
   type: parameter
   concept: alda
   provenance:
@@ -281,7 +281,7 @@ claims:
     page: 0
   unit: Hz
   value: 480
-- id: claim2873
+- id: claim993
   type: parameter
   concept: alda
   provenance:
@@ -289,7 +289,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim2874
+- id: claim994
   type: parameter
   concept: arda
   provenance:
@@ -297,7 +297,7 @@ claims:
     page: 0
   unit: Hz
   value: 609
-- id: claim2875
+- id: claim995
   type: parameter
   concept: arda
   provenance:
@@ -305,7 +305,7 @@ claims:
     page: 0
   unit: Hz
   value: 406
-- id: claim2876
+- id: claim996
   type: parameter
   concept: arda
   provenance:
@@ -313,7 +313,7 @@ claims:
     page: 0
   unit: Hz
   value: 546
-- id: claim2877
+- id: claim997
   type: parameter
   concept: arda
   provenance:
@@ -321,7 +321,7 @@ claims:
     page: 0
   unit: Hz
   value: 734
-- id: claim2878
+- id: claim998
   type: parameter
   concept: alga
   provenance:
@@ -329,7 +329,7 @@ claims:
     page: 0
   unit: Hz
   value: 609
-- id: claim2879
+- id: claim999
   type: parameter
   concept: alga
   provenance:
@@ -337,7 +337,7 @@ claims:
     page: 0
   unit: Hz
   value: 546
-- id: claim2880
+- id: claim1000
   type: parameter
   concept: alga
   provenance:
@@ -345,7 +345,7 @@ claims:
     page: 0
   unit: Hz
   value: 531
-- id: claim2881
+- id: claim1001
   type: parameter
   concept: alga
   provenance:
@@ -353,7 +353,7 @@ claims:
     page: 0
   unit: Hz
   value: 797
-- id: claim2882
+- id: claim1002
   type: parameter
   concept: arga
   provenance:
@@ -361,7 +361,7 @@ claims:
     page: 0
   unit: Hz
   value: 703
-- id: claim2883
+- id: claim1003
   type: parameter
   concept: arga
   provenance:
@@ -369,7 +369,7 @@ claims:
     page: 0
   unit: Hz
   value: 453
-- id: claim2884
+- id: claim1004
   type: parameter
   concept: arga
   provenance:
@@ -377,7 +377,7 @@ claims:
     page: 0
   unit: Hz
   value: 562
-- id: claim2885
+- id: claim1005
   type: parameter
   concept: arga
   provenance:
@@ -385,35 +385,12 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim2886
+- id: claim1006
   type: observation
   statement: Coarticulatory F3 lowering from /r/ should persist across a stop consonant
     boundary (~500 Hz lower than /l/ context)
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim2887
-  type: observation
-  statement: Listeners should identify ambiguous /da/-/ga/ members differently depending
-    on coarticulatory context even without the preceding syllable
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim2888
-  type: observation
-  statement: Enhancing effects (not contrastive) should occur when coarticulatory
-    information affects identification of the gestural source
-  concepts: []
-  provenance:
-    paper: Fowler_2006_CoarticulationGesturePerception
-    page: 0
-- id: claim2889
-  type: observation
-  statement: Tone-speech comparison should show opposite effect directions for same
-    acoustic continuum
-  concepts: []
+  concepts:
+  - f3
   provenance:
     paper: Fowler_2006_CoarticulationGesturePerception
     page: 0

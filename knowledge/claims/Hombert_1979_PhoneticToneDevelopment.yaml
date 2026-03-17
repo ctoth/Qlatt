@@ -1,77 +1,7 @@
 source:
   paper: Hombert_1979_PhoneticToneDevelopment
 claims:
-- id: claim4463
-  type: parameter
-  concept: f0_after_voiceless_stops
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4464
-  type: parameter
-  concept: f0_after_voiced_stops
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4465
-  type: parameter
-  concept: f0_voicelessvoiced_difference
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4466
-  type: parameter
-  concept: f0_perturbation_duration
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: ms
-- id: claim4467
-  type: parameter
-  concept: f0_perturbation_duration
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: ms
-- id: claim4468
-  type: parameter
-  concept: f0_perturbation_duration
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: ms
-- id: claim4469
-  type: parameter
-  concept: perceptual_threshold
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4470
-  type: parameter
-  concept: intrinsic_f0_of_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4471
-  type: parameter
-  concept: intrinsic_f0_of_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4472
-  type: parameter
-  concept: intrinsic_f0_of_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  unit: Hz
-- id: claim4473
+- id: claim1416
   type: parameter
   concept: f0_rise_before
   provenance:
@@ -79,7 +9,7 @@ claims:
     page: 0
   value: 9
   unit: Hz
-- id: claim4474
+- id: claim1417
   type: parameter
   concept: f0_drop_before_h
   provenance:
@@ -87,434 +17,56 @@ claims:
     page: 0
   value: -25
   unit: Hz
-- id: claim4475
-  type: parameter
-  concept: house_fairbanks_1953_p
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127.9
-- id: claim4476
-  type: parameter
-  concept: house_fairbanks_1953_t
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127.1
-- id: claim4477
-  type: parameter
-  concept: house_fairbanks_1953_k
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127.2
-- id: claim4478
-  type: parameter
-  concept: house_fairbanks_1953_b
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 120.9
-- id: claim4479
-  type: parameter
-  concept: house_fairbanks_1953_d
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 120.6
-- id: claim4480
-  type: parameter
-  concept: house_fairbanks_1953_g
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 122.8
-- id: claim4481
-  type: parameter
-  concept: lehiste_peterson_1961_p
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 175
-- id: claim4482
-  type: parameter
-  concept: lehiste_peterson_1961_t
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 176
-- id: claim4483
-  type: parameter
-  concept: lehiste_peterson_1961_k
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 176
-- id: claim4484
-  type: parameter
-  concept: lehiste_peterson_1961_b
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 165
-- id: claim4485
-  type: parameter
-  concept: lehiste_peterson_1961_d
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 163
-- id: claim4486
-  type: parameter
-  concept: lehiste_peterson_1961_g
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 163
-- id: claim4487
-  type: parameter
-  concept: mohr_1968_p
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 130.7
-- id: claim4488
-  type: parameter
-  concept: mohr_1968_t
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 129.8
-- id: claim4489
-  type: parameter
-  concept: mohr_1968_k
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 131.1
-- id: claim4490
-  type: parameter
-  concept: mohr_1968_b
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 125.1
-- id: claim4491
-  type: parameter
-  concept: mohr_1968_d
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 124.8
-- id: claim4492
-  type: parameter
-  concept: mohr_1968_g
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 125
-- id: claim4493
-  type: parameter
-  concept: peterson_barney_1952_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 136
-- id: claim4494
-  type: parameter
-  concept: peterson_barney_1952_e
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 130
-- id: claim4495
-  type: parameter
-  concept: peterson_barney_1952_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127
-- id: claim4496
-  type: parameter
-  concept: peterson_barney_1952_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 124
-- id: claim4497
-  type: parameter
-  concept: peterson_barney_1952_o
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 129
-- id: claim4498
-  type: parameter
-  concept: peterson_barney_1952_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 141
-- id: claim4499
-  type: parameter
-  concept: peterson_barney_1952_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 235
-- id: claim4500
-  type: parameter
-  concept: peterson_barney_1952_e
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 223
-- id: claim4501
-  type: parameter
-  concept: peterson_barney_1952_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 210
-- id: claim4502
-  type: parameter
-  concept: peterson_barney_1952_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 212
-- id: claim4503
-  type: parameter
-  concept: peterson_barney_1952_o
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 216
-- id: claim4504
-  type: parameter
-  concept: peterson_barney_1952_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 231
-- id: claim4505
-  type: parameter
-  concept: peterson_barney_1952_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 272
-- id: claim4506
-  type: parameter
-  concept: peterson_barney_1952_e
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 260
-- id: claim4507
-  type: parameter
-  concept: peterson_barney_1952_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 251
-- id: claim4508
-  type: parameter
-  concept: peterson_barney_1952_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 256
-- id: claim4509
-  type: parameter
-  concept: peterson_barney_1952_o
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 263
-- id: claim4510
-  type: parameter
-  concept: peterson_barney_1952_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 274
-- id: claim4511
-  type: parameter
-  concept: lehiste_peterson_1961_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 129
-- id: claim4512
-  type: parameter
-  concept: lehiste_peterson_1961_e
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127
-- id: claim4513
-  type: parameter
-  concept: lehiste_peterson_1961_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 125
-- id: claim4514
-  type: parameter
-  concept: lehiste_peterson_1961_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 120
-- id: claim4515
-  type: parameter
-  concept: lehiste_peterson_1961_o
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 116
-- id: claim4516
-  type: parameter
-  concept: lehiste_peterson_1961_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 134
-- id: claim4517
-  type: parameter
-  concept: lehiste_peterson_1961_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 183
-- id: claim4518
-  type: parameter
-  concept: lehiste_peterson_1961_e
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 166
-- id: claim4519
-  type: parameter
-  concept: lehiste_peterson_1961_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 162
-- id: claim4520
-  type: parameter
-  concept: lehiste_peterson_1961_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 163
-- id: claim4521
-  type: parameter
-  concept: lehiste_peterson_1961_o
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 165
-- id: claim4522
-  type: parameter
-  concept: lehiste_peterson_1961_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 182
-- id: claim4523
-  type: parameter
-  concept: house_fairbanks_1953_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 127.9
-- id: claim4524
-  type: parameter
-  concept: house_fairbanks_1953_ae
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 119.8
-- id: claim4525
-  type: parameter
-  concept: house_fairbanks_1953_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 118
-- id: claim4526
-  type: parameter
-  concept: house_fairbanks_1953_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 129.9
-- id: claim4527
-  type: parameter
-  concept: mohr_1971_i
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 128.8
-- id: claim4528
-  type: parameter
-  concept: mohr_1971_a
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 124.2
-- id: claim4529
-  type: parameter
-  concept: mohr_1971_u
-  provenance:
-    paper: Hombert_1979_PhoneticToneDevelopment
-    page: 0
-  value: 129.9
-- id: claim4530
+- id: claim1418
   type: observation
   statement: F0 after voiceless stops must be higher than after voiced stops at vowel
     onset
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0
-- id: claim4531
+- id: claim1419
   type: observation
   statement: The F0 difference should be approximately 5-15 Hz for male speakers
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0
-- id: claim4532
+- id: claim1420
   type: observation
   statement: F0 perturbation should decay to < 3 Hz difference by 100 ms post-onset
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0
-- id: claim4533
+- id: claim1421
   type: observation
   statement: Place of articulation should NOT significantly affect F0 perturbation
     magnitude
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0
-- id: claim4534
+- id: claim1422
   type: observation
   statement: The perturbation magnitude as a percentage of mean F0 should be approximately
     7-10%
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0
-- id: claim4535
+- id: claim1423
   type: observation
   statement: Synthesized F0 ramps of +/-10 Hz should be imperceptible at durations
     < 40 ms
-  concepts: []
+  concepts:
+  - f0
+  - duration
   provenance:
     paper: Hombert_1979_PhoneticToneDevelopment
     page: 0

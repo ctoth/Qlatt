@@ -1,7 +1,7 @@
 source:
   paper: Delattre_1952_AcousticDeterminantsVowelColor
 claims:
-- id: claim1796
+- id: claim652
   type: parameter
   concept: i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 250
-- id: claim1797
+- id: claim653
   type: parameter
   concept: y
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 250
-- id: claim1798
+- id: claim654
   type: parameter
   concept: latin_small_letter_turned_m
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 250
-- id: claim1799
+- id: claim655
   type: parameter
   concept: u
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 250
-- id: claim1800
+- id: claim656
   type: parameter
   concept: e
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 360
-- id: claim1801
+- id: claim657
   type: parameter
   concept: latin_small_letter_o_with_stroke
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 360
-- id: claim1802
+- id: claim658
   type: parameter
   concept: latin_small_letter_rams_horn
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 360
-- id: claim1803
+- id: claim659
   type: parameter
   concept: o
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 360
-- id: claim1804
+- id: claim660
   type: parameter
   concept: latin_small_letter_open_e
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 510
-- id: claim1805
+- id: claim661
   type: parameter
   concept: latin_small_ligature_oe
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 510
-- id: claim1806
+- id: claim662
   type: parameter
   concept: latin_small_letter_turned_v
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 510
-- id: claim1807
+- id: claim663
   type: parameter
   concept: latin_small_letter_open_o
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 510
-- id: claim1808
+- id: claim664
   type: parameter
   concept: latin_small_letter_ae
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim1809
+- id: claim665
   type: parameter
   concept: a
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim1810
+- id: claim666
   type: parameter
   concept: latin_small_letter_turned_alpha
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim1811
+- id: claim667
   type: parameter
   concept: latin_small_letter_alpha
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   unit: Hz
   value: 750
-- id: claim1812
+- id: claim668
   type: parameter
   concept: u
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   unit: Hz
   value: 240
-- id: claim1813
+- id: claim669
   type: parameter
   concept: o
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   unit: Hz
   value: 480
-- id: claim1814
+- id: claim670
   type: parameter
   concept: latin_small_letter_open_o
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   unit: Hz
   value: 720
-- id: claim1815
+- id: claim671
   type: parameter
   concept: a
   provenance:
@@ -161,7 +161,7 @@ claims:
     page: 0
   unit: Hz
   value: 1200
-- id: claim1816
+- id: claim672
   type: parameter
   concept: latin_small_letter_open_e
   provenance:
@@ -169,7 +169,7 @@ claims:
     page: 0
   unit: Hz
   value: 2160
-- id: claim1817
+- id: claim673
   type: parameter
   concept: e
   provenance:
@@ -177,7 +177,7 @@ claims:
     page: 0
   unit: Hz
   value: 2520
-- id: claim1818
+- id: claim674
   type: parameter
   concept: i
   provenance:

@@ -2,29 +2,55 @@ source:
   paper: Rabiner_1968_SynthesisByRule
 claims:
 - id: claim1
-  type: parameter
-  concept: phoneme_influence_description
-  provenance:
-    paper: Rabiner_1968_SynthesisByRule
-    page: 0
-  value: 2
-- id: claim2
   type: equation
   expression: \frac{d^2 f_N(t)}{dt^2} + \frac{2}{\tau_{AB}^N} \frac{df_N(t)}{dt} +
     \frac{1}{(\tau_{AB}^N)^2} f_N(t) = \frac{P_N(t)}{(\tau_{AB}^N)^2}
+  variables:
+  - symbol: f_N
+    concept: f_n
+  - symbol: df_N
+    concept: df_n
+  - symbol: P_N
+    concept: p_n
+  - symbol: dt
+    concept: dt
+  - symbol: tau_
+    concept: tau
+  - symbol: AB
+    concept: ab
+  provenance:
+    paper: Rabiner_1968_SynthesisByRule
+    page: 0
+- id: claim2
+  type: equation
+  expression: f_N(t) = A_f + (A_i - A_f)(1 + t/\tau) \exp(-t/\tau); \quad t \geq 0
+  variables:
+  - symbol: f_N
+    concept: f_n
+  - symbol: A_f
+    concept: a_f
+  - symbol: A_i
+    concept: a_i
+  - symbol: quad
+    concept: quad
   provenance:
     paper: Rabiner_1968_SynthesisByRule
     page: 0
 - id: claim3
   type: equation
-  expression: f_N(t) = A_f + (A_i - A_f)(1 + t/\tau) \exp(-t/\tau); \quad t \geq 0
-  provenance:
-    paper: Rabiner_1968_SynthesisByRule
-    page: 0
-- id: claim4
-  type: equation
   expression: f_N(t) = A_f + (A_i - A_f) \exp(-t/\tau) + \left[ V_i + \frac{(A_i -
     A_f)}{\tau} \right] t \exp(-t/\tau); \quad t \geq 0
+  variables:
+  - symbol: f_N
+    concept: f_n
+  - symbol: A_f
+    concept: a_f
+  - symbol: A_i
+    concept: a_i
+  - symbol: V_i
+    concept: v_i
+  - symbol: quad
+    concept: quad
   provenance:
     paper: Rabiner_1968_SynthesisByRule
     page: 0

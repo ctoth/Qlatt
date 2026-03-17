@@ -1,7 +1,7 @@
 source:
   paper: Strong_1967_MachineAidedFormantDetermination
 claims:
-- id: claim10183
+- id: claim2386
   type: parameter
   concept: formant_1_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim10184
+- id: claim2387
   type: parameter
   concept: formant_2_frequency
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim10185
+- id: claim2388
   type: parameter
   concept: formant_3_frequency
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim10186
+- id: claim2389
   type: parameter
   concept: formant_4_frequency
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim10187
+- id: claim2390
   type: parameter
   concept: formant_1_amplitude
   provenance:
@@ -46,7 +46,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim10188
+- id: claim2391
   type: parameter
   concept: formant_2_amplitude
   provenance:
@@ -55,7 +55,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim10189
+- id: claim2392
   type: parameter
   concept: formant_3_amplitude
   provenance:
@@ -64,7 +64,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim10190
+- id: claim2393
   type: parameter
   concept: formant_4_amplitude
   provenance:
@@ -73,14 +73,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim10191
-  type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  unit: cps
-- id: claim10192
+- id: claim2394
   type: parameter
   concept: bandwidth_b1
   provenance:
@@ -88,7 +81,7 @@ claims:
     page: 0
   value: 70
   unit: cps
-- id: claim10193
+- id: claim2395
   type: parameter
   concept: bandwidth_b2
   provenance:
@@ -96,7 +89,7 @@ claims:
     page: 0
   value: 80
   unit: cps
-- id: claim10194
+- id: claim2396
   type: parameter
   concept: bandwidth_b3
   provenance:
@@ -104,7 +97,7 @@ claims:
     page: 0
   value: 100
   unit: cps
-- id: claim10195
+- id: claim2397
   type: parameter
   concept: bandwidth_b4
   provenance:
@@ -112,7 +105,7 @@ claims:
     page: 0
   value: 140
   unit: cps
-- id: claim10196
+- id: claim2398
   type: parameter
   concept: bandwidth_b1
   provenance:
@@ -120,7 +113,7 @@ claims:
     page: 0
   value: 100
   unit: cps
-- id: claim10197
+- id: claim2399
   type: parameter
   concept: bandwidth_b2
   provenance:
@@ -128,7 +121,7 @@ claims:
     page: 0
   value: 150
   unit: cps
-- id: claim10198
+- id: claim2400
   type: parameter
   concept: bandwidth_b3
   provenance:
@@ -136,7 +129,7 @@ claims:
     page: 0
   value: 200
   unit: cps
-- id: claim10199
+- id: claim2401
   type: parameter
   concept: bandwidth_b4
   provenance:
@@ -144,7 +137,7 @@ claims:
     page: 0
   value: 250
   unit: cps
-- id: claim10200
+- id: claim2402
   type: parameter
   concept: analysis_frame_rate
   provenance:
@@ -152,7 +145,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim10201
+- id: claim2403
   type: parameter
   concept: synthesis_interpolation
   provenance:
@@ -160,7 +153,7 @@ claims:
     page: 0
   value: 1
   unit: ms
-- id: claim10202
+- id: claim2404
   type: parameter
   concept: analysis_bandwidth
   provenance:
@@ -168,59 +161,3 @@ claims:
     page: 0
   value: 40
   unit: cps
-- id: claim10203
-  type: parameter
-  concept: vowels_errors
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 21
-- id: claim10204
-  type: parameter
-  concept: vowels_total
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 500
-- id: claim10205
-  type: parameter
-  concept: initial_consonants_errors
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 99
-- id: claim10206
-  type: parameter
-  concept: initial_consonants_total
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 500
-- id: claim10207
-  type: parameter
-  concept: final_consonants_errors
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 70
-- id: claim10208
-  type: parameter
-  concept: final_consonants_total
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 500
-- id: claim10209
-  type: parameter
-  concept: all_consonants_errors
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 169
-- id: claim10210
-  type: parameter
-  concept: all_consonants_total
-  provenance:
-    paper: Strong_1967_MachineAidedFormantDetermination
-    page: 0
-  value: 1000

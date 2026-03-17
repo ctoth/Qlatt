@@ -1,7 +1,7 @@
 source:
   paper: Taylor_2000_TiltModelIntonation
 claims:
-- id: claim10407
+- id: claim2473
   type: parameter
   concept: amplitude
   provenance:
@@ -9,119 +9,7 @@ claims:
     page: 0
   value: 0
   unit: Hz
-- id: claim10408
-  type: parameter
-  concept: tilt
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: -1.0
-- id: claim10409
-  type: parameter
-  concept: amplitude
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: Hz
-- id: claim10410
-  type: parameter
-  concept: duration
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: seconds
-- id: claim10411
-  type: parameter
-  concept: tilt
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: dimensionless
-- id: claim10412
-  type: parameter
-  concept: start_f0
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: Hz
-- id: claim10413
-  type: parameter
-  concept: syllabic_position
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: seconds or relative
-- id: claim10414
-  type: parameter
-  concept: median_filter_window
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: frames
-- id: claim10415
-  type: parameter
-  concept: search_region
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: frames
-- id: claim10416
-  type: parameter
-  concept: sidciem_correct
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 72.7
-- id: claim10417
-  type: parameter
-  concept: sidciem_accuracy
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 47.7
-- id: claim10418
-  type: parameter
-  concept: sddciem_correct
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 82.1
-- id: claim10419
-  type: parameter
-  concept: sddciem_accuracy
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 63.1
-- id: claim10420
-  type: parameter
-  concept: radio_news_correct
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 69.4
-- id: claim10421
-  type: parameter
-  concept: radio_news_accuracy
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 49.7
-- id: claim10422
-  type: parameter
-  concept: switchboard_correct
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 60.7
-- id: claim10423
-  type: parameter
-  concept: switchboard_accuracy
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  value: 35.1
-- id: claim10424
+- id: claim2474
   type: parameter
   concept: complete_rfc
   provenance:
@@ -129,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 6.94
-- id: claim10425
+- id: claim2475
   type: parameter
   concept: complete_tilt
   provenance:
@@ -137,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 7.14
-- id: claim10426
+- id: claim2476
   type: parameter
   concept: automatic_tilt
   provenance:
@@ -145,9 +33,22 @@ claims:
     page: 0
   unit: Hz
   value: 7.51
-- id: claim10427
+- id: claim2477
   type: equation
   expression: $$A_{fall} = \frac{A_{event}(1 - tilt)}{2}$$
+  variables:
+  - symbol: A_fall
+    concept: a_fall
+  - symbol: A_event
+    concept: a_event
+  - symbol: A_
+    concept: a
+  - symbol: fall
+    concept: fall
+  - symbol: event
+    concept: event
+  - symbol: tilt
+    concept: tilt
   provenance:
     paper: Taylor_2000_TiltModelIntonation
     page: 0

@@ -1,21 +1,7 @@
 source:
   paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
 claims:
-- id: claim1133
-  type: parameter
-  concept: lp_model_order
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 9
-- id: claim1134
-  type: parameter
-  concept: auditory_channels
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 32
-- id: claim1135
+- id: claim369
   type: parameter
   concept: sampling_rate
   provenance:
@@ -23,7 +9,7 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim1136
+- id: claim370
   type: parameter
   concept: interpolated_periods
   provenance:
@@ -32,14 +18,7 @@ claims:
   lower_bound: 0
   upper_bound: 10
   unit: frames
-- id: claim1137
-  type: parameter
-  concept: shaped_noise_duration
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  unit: ms
-- id: claim1138
+- id: claim371
   type: parameter
   concept: formant_jnd
   provenance:
@@ -47,7 +26,7 @@ claims:
     page: 0
   value: 1.5
   unit: dB
-- id: claim1139
+- id: claim372
   type: parameter
   concept: formant_jnd
   provenance:
@@ -55,62 +34,24 @@ claims:
     page: 0
   value: 3
   unit: dB
-- id: claim1140
-  type: parameter
-  concept: formant_freq_jnd
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  unit: '%'
-- id: claim1141
-  type: parameter
-  concept: formant_bw_jnd
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  unit: '%'
-- id: claim1142
-  type: parameter
-  concept: number_of_speakers
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 326
-- id: claim1143
-  type: parameter
-  concept: sample_mean
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 222.24
-- id: claim1144
-  type: parameter
-  concept: sample_standard_deviation
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 100.27
-- id: claim1145
-  type: parameter
-  concept: maximum_score
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 732
-- id: claim1146
-  type: parameter
-  concept: minimum_score
-  provenance:
-    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
-    page: 0
-  value: 6
-- id: claim1147
+- id: claim373
   type: equation
   expression: d_1(\vec{x}, \vec{y}) = \sum_{k=1}^{N} |x_k - y_k|
+  variables:
+  - symbol: d_1
+    concept: d_1
+  - symbol: x_k
+    concept: x_k
+  - symbol: y_k
+    concept: y_k
+  - symbol: vec
+    concept: vec
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
     page: 0
-- id: claim1148
+- id: claim374
   type: equation
   expression: 'D(p_0, p_1) = \begin{cases}
 
@@ -120,26 +61,92 @@ claims:
     \left|\ln\frac{p_1}{p_0}\right| \{2r^2/1-r^2\}, & r = r_0 = r_1
 
     \end{cases}'
+  variables:
+  - symbol: p_0
+    concept: p_0
+  - symbol: p_1
+    concept: p_1
+  - symbol: r_0
+    concept: r_0
+  - symbol: r_1
+    concept: r_1
+  - symbol: cases
+    concept: cases
   provenance:
     paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
     page: 0
-- id: claim1149
+- id: claim375
   type: equation
   expression: F_i = \frac{\theta_i}{2\pi T_s}, \quad BW_i = \frac{-\ln(r_i)}{\pi T_s}
+  variables:
+  - symbol: F_i
+    concept: f_i
+  - symbol: T_s
+    concept: t_s
+  - symbol: BW_i
+    concept: bw_i
+  - symbol: r_i
+    concept: r_i
+  - symbol: theta_i
+    concept: theta_i
+  - symbol: quad
+    concept: quad
   provenance:
     paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
     page: 0
-- id: claim1150
+- id: claim376
   type: equation
   expression: \theta_i = k_1\theta_1 + k_2\theta_2 \quad \text{and} \quad r_i = r_1^{k_1}
     + r_2^{k_2}
+  variables:
+  - symbol: k_1
+    concept: k_1
+  - symbol: k_2
+    concept: k_2
+  - symbol: r_i
+    concept: r_i
+  - symbol: r_1
+    concept: r_1
+  - symbol: r_2
+    concept: r_2
+  - symbol: theta_i
+    concept: theta_i
+  - symbol: theta_1
+    concept: theta_1
+  - symbol: theta_2
+    concept: theta_2
+  - symbol: quad
+    concept: quad
+  - symbol: and
+    concept: and
   provenance:
     paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
     page: 0
-- id: claim1151
+- id: claim377
   type: equation
   expression: P_i = k_1 P_1 + k_2 P_2 \quad \text{and} \quad Q_i = P_i + k_1(Q_1 -
     P_1) + k_2(Q_2 - P_2)
+  variables:
+  - symbol: P_i
+    concept: p_i
+  - symbol: k_1
+    concept: k_1
+  - symbol: P_1
+    concept: p_1
+  - symbol: k_2
+    concept: k_2
+  - symbol: P_2
+    concept: p_2
+  - symbol: Q_i
+    concept: q_i
+  - symbol: Q_1
+    concept: q_1
+  - symbol: Q_2
+    concept: q_2
+  - symbol: quad
+    concept: quad
+  - symbol: and
+    concept: and
   provenance:
     paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
     page: 0

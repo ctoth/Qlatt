@@ -1,7 +1,7 @@
 source:
   paper: Stevens_House_1956_FormantTransitionsVocalTract
 claims:
-- id: claim8917
+- id: claim2367
   type: parameter
   concept: constriction_radius
   provenance:
@@ -10,7 +10,7 @@ claims:
   unit: cm
   lower_bound: 0
   upper_bound: 0.8
-- id: claim8918
+- id: claim2368
   type: parameter
   concept: constriction_position
   provenance:
@@ -19,7 +19,7 @@ claims:
   unit: cm
   lower_bound: 4
   upper_bound: 13.5
-- id: claim8919
+- id: claim2369
   type: parameter
   concept: mouth_opening
   provenance:
@@ -28,79 +28,77 @@ claims:
   unit: cm
   lower_bound: 0
   upper_bound: 17
-- id: claim8920
-  type: parameter
-  concept: vocal_tract_length
-  provenance:
-    paper: Stevens_House_1956_FormantTransitionsVocalTract
-    page: 0
-  unit: cm
-- id: claim8921
-  type: parameter
-  concept: total_tract_length
-  provenance:
-    paper: Stevens_House_1956_FormantTransitionsVocalTract
-    page: 0
-  unit: cm
-- id: claim8922
-  type: parameter
-  concept: local_deformation_length
-  provenance:
-    paper: Stevens_House_1956_FormantTransitionsVocalTract
-    page: 0
-  unit: cm
-- id: claim8923
+- id: claim2370
   type: equation
   expression: r - r_0 = 0.025(1.2 - r_0)x^2
+  variables:
+  - symbol: r_0
+    concept: r_0
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8924
+- id: claim2371
   type: equation
   expression: r_0^2 = \frac{4}{\int_{-2}^{+2} dx/r^2} \text{ cm}^2
+  variables:
+  - symbol: r_0
+    concept: r_0
+  - symbol: int_
+    concept: int
+  - symbol: dx
+    concept: dx
+  - symbol: cm
+    concept: cm
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8925
+- id: claim2372
   type: observation
   statement: F1 locus must approach 0 Hz as any constriction approaches complete closure
-  concepts: []
+  concepts:
+  - f1
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8926
+- id: claim2373
   type: observation
   statement: For bilabial stops, F2 locus must be <= F2 of adjacent vowel
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8927
+- id: claim2374
   type: observation
   statement: For post-dental stops, F2 locus should be approximately 1800-2000 Hz
     regardless of vowel context
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8928
+- id: claim2375
   type: observation
   statement: For velar stops, F2 locus should generally be >= F2 of adjacent vowel
-  concepts: []
+  concepts:
+  - f2
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8929
+- id: claim2376
   type: observation
   statement: Reducing mouth opening (A/l -> 0) should monotonically decrease F1
-  concepts: []
+  concepts:
+  - f1
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0
-- id: claim8930
+- id: claim2377
   type: observation
   statement: Post-dental F2 and F3 loci should be independent of A/l value
-  concepts: []
+  concepts:
+  - f2
+  - f3
   provenance:
     paper: Stevens_House_1956_FormantTransitionsVocalTract
     page: 0

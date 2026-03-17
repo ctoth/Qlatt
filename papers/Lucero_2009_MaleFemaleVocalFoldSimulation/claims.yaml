@@ -37,27 +37,13 @@ claims:
   unit: degrees
 - id: claim5
   type: parameter
-  concept: female_mean_f0
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-  unit: Hz
-- id: claim6
-  type: parameter
-  concept: male_mean_f0
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
   concept: subglottal_pressure
   provenance:
     paper: Lucero_2009_MaleFemaleVocalFoldSimulation
     page: 0
   value: 980
   unit: Pa
-- id: claim8
+- id: claim6
   type: parameter
   concept: effective_stress
   provenance:
@@ -65,7 +51,7 @@ claims:
     page: 0
   value: 60
   unit: kPa
-- id: claim9
+- id: claim7
   type: parameter
   concept: dorsal_gap
   provenance:
@@ -73,7 +59,7 @@ claims:
     page: 0
   value: 1.2
   unit: mm
-- id: claim10
+- id: claim8
   type: parameter
   concept: mass_pairs_per_side
   provenance:
@@ -81,41 +67,3 @@ claims:
     page: 0
   value: 14
   unit: —
-- id: claim11
-  type: observation
-  statement: Female vocal fold configuration should produce more spatially concentrated
-    contact forces than male or linear configurations
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim12
-  type: observation
-  statement: The peak contact force location in female configuration should be near
-    the center of the vocal fold length
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim13
-  type: observation
-  statement: Male and linear configurations should show zipper-like (sequential) closing;
-    female should show center-first closing
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim14
-  type: observation
-  statement: 'Contact force amplitudes: linear > male ~ female'
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0
-- id: claim15
-  type: observation
-  statement: 'Contact force spatial spread: linear ~ male > female'
-  concepts: []
-  provenance:
-    paper: Lucero_2009_MaleFemaleVocalFoldSimulation
-    page: 0

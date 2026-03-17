@@ -1,7 +1,7 @@
 source:
   paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
 claims:
-- id: claim10889
+- id: claim2659
   type: parameter
   concept: '1'
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10890
+- id: claim2660
   type: parameter
   concept: '2'
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10891
+- id: claim2661
   type: parameter
   concept: '3'
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10892
+- id: claim2662
   type: parameter
   concept: '4'
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10893
+- id: claim2663
   type: parameter
   concept: '5'
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10894
+- id: claim2664
   type: parameter
   concept: '6'
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10895
+- id: claim2665
   type: parameter
   concept: '7'
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 100
-- id: claim10896
+- id: claim2666
   type: parameter
   concept: '8'
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10897
+- id: claim2667
   type: parameter
   concept: '9'
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10898
+- id: claim2668
   type: parameter
   concept: '10'
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10899
+- id: claim2669
   type: parameter
   concept: '11'
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10900
+- id: claim2670
   type: parameter
   concept: '12'
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10901
+- id: claim2671
   type: parameter
   concept: '13'
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10902
+- id: claim2672
   type: parameter
   concept: '14'
   provenance:
@@ -113,311 +113,3 @@ claims:
     page: 0
   unit: Hz
   value: 200
-- id: claim10903
-  type: parameter
-  concept: 1_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1
-- id: claim10904
-  type: parameter
-  concept: 1_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10905
-  type: parameter
-  concept: 1_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 2.371
-- id: claim10906
-  type: parameter
-  concept: 2_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 2
-- id: claim10907
-  type: parameter
-  concept: 2_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10908
-  type: parameter
-  concept: 2_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 2.334
-- id: claim10909
-  type: parameter
-  concept: 3_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 4
-- id: claim10910
-  type: parameter
-  concept: 3_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10911
-  type: parameter
-  concept: 3_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 2.177
-- id: claim10912
-  type: parameter
-  concept: 4_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 3
-- id: claim10913
-  type: parameter
-  concept: 4_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10914
-  type: parameter
-  concept: 4_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 2.039
-- id: claim10915
-  type: parameter
-  concept: 5_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 5
-- id: claim10916
-  type: parameter
-  concept: 5_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10917
-  type: parameter
-  concept: 5_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1.577
-- id: claim10918
-  type: parameter
-  concept: 6_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 8
-- id: claim10919
-  type: parameter
-  concept: 6_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10920
-  type: parameter
-  concept: 6_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1.534
-- id: claim10921
-  type: parameter
-  concept: 7_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 9
-- id: claim10922
-  type: parameter
-  concept: 7_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10923
-  type: parameter
-  concept: 7_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1.514
-- id: claim10924
-  type: parameter
-  concept: 8_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 10
-- id: claim10925
-  type: parameter
-  concept: 8_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10926
-  type: parameter
-  concept: 8_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1.24
-- id: claim10927
-  type: parameter
-  concept: 9_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 6
-- id: claim10928
-  type: parameter
-  concept: 9_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10929
-  type: parameter
-  concept: 9_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 1.207
-- id: claim10930
-  type: parameter
-  concept: 10_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 11
-- id: claim10931
-  type: parameter
-  concept: 10_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10932
-  type: parameter
-  concept: 10_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 0.896
-- id: claim10933
-  type: parameter
-  concept: 11_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 7
-- id: claim10934
-  type: parameter
-  concept: 11_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 100
-  unit: Hz
-- id: claim10935
-  type: parameter
-  concept: 11_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 0.585
-- id: claim10936
-  type: parameter
-  concept: 12_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 12
-- id: claim10937
-  type: parameter
-  concept: 12_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10938
-  type: parameter
-  concept: 12_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 0.524
-- id: claim10939
-  type: parameter
-  concept: 13_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 13
-- id: claim10940
-  type: parameter
-  concept: 13_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10941
-  type: parameter
-  concept: 13_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 0.367
-- id: claim10942
-  type: parameter
-  concept: 14_stimulus
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 14
-- id: claim10943
-  type: parameter
-  concept: 14_median_f0
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 200
-  unit: Hz
-- id: claim10944
-  type: parameter
-  concept: 14_scale_value
-  provenance:
-    paper: Wendahl_1963_LaryngealAnalogSynthesisHarshness
-    page: 0
-  value: 0.0

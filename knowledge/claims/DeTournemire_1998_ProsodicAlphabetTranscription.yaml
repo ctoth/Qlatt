@@ -1,114 +1,64 @@
 source:
   paper: DeTournemire_1998_ProsodicAlphabetTranscription
 claims:
-- id: claim1874
-  type: parameter
-  concept: 1_f0_mean
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 217
-  unit: Hz
-- id: claim1875
-  type: parameter
-  concept: 1_f0_sd
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 39
-  unit: Hz
-- id: claim1876
-  type: parameter
-  concept: 1_duration_mean
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 82
-  unit: ms
-- id: claim1877
-  type: parameter
-  concept: 1_duration_sd
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 41
-  unit: ms
-- id: claim1878
-  type: parameter
-  concept: 2_f0_mean
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 104
-  unit: Hz
-- id: claim1879
-  type: parameter
-  concept: 2_f0_sd
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 24
-  unit: Hz
-- id: claim1880
-  type: parameter
-  concept: 2_duration_mean
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 85
-  unit: ms
-- id: claim1881
-  type: parameter
-  concept: 2_duration_sd
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-  value: 41
-  unit: ms
-- id: claim1882
+- id: claim695
   type: equation
   expression: k = \frac{D_{syll} - \sum \mu_{seg,C}}{\sum \sigma_{seg,C}}
+  variables:
+  - symbol: D_syll
+    concept: d_syll
+  - symbol: D_
+    concept: d
+  - symbol: syll
+    concept: syll
+  - symbol: mu_
+    concept: mu
+  - symbol: seg
+    concept: seg
+  - symbol: sigma_
+    concept: sigma
   provenance:
     paper: DeTournemire_1998_ProsodicAlphabetTranscription
     page: 0
-- id: claim1883
+- id: claim696
   type: equation
   expression: \hat{D}_{seg} = \mu_{seg,C} + \hat{k} \cdot \sigma_{seg,C}
+  variables:
+  - symbol: seg
+    concept: seg
+  - symbol: mu_
+    concept: mu
+  - symbol: sigma_
+    concept: sigma
   provenance:
     paper: DeTournemire_1998_ProsodicAlphabetTranscription
     page: 0
-- id: claim1884
-  type: observation
-  statement: '**Elasticity uniformity**: Within non-final syllables, segments should
-    be lengthened/shortened by approximately the same z-score k, regardless of segment
-    type'
-  concepts: []
-  provenance:
-    paper: DeTournemire_1998_ProsodicAlphabetTranscription
-    page: 0
-- id: claim1885
+- id: claim697
   type: observation
   statement: '**4-point F0 adequacy**: Linear interpolation through 4 syllable points
     should produce F0 contours perceptually indistinguishable from the original (verified
     by the paper at 1 Hz mean error)'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: DeTournemire_1998_ProsodicAlphabetTranscription
     page: 0
-- id: claim1886
+- id: claim698
   type: observation
   statement: '**Threshold robustness**: The 1/6 semitone boundaries for F0 shapes
     should produce consistent labelling across utterances of similar prosodic structure'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: DeTournemire_1998_ProsodicAlphabetTranscription
     page: 0
-- id: claim1887
+- id: claim699
   type: observation
   statement: '**Break-to-shape correlation**: In French declarative sentences, specific
     break types should associate predominantly with specific F0 shapes (e.g., sentence-final
     breaks with falls)'
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: DeTournemire_1998_ProsodicAlphabetTranscription
     page: 0

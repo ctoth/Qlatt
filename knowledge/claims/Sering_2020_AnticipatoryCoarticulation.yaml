@@ -1,7 +1,7 @@
 source:
   paper: Sering_2020_AnticipatoryCoarticulation
 claims:
-- id: claim8105
+- id: claim2131
   type: parameter
   concept: vtl_control_parameters
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 30
   unit: dimensions
-- id: claim8106
+- id: claim2132
   type: parameter
   concept: cp_update_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 110
   unit: samples
-- id: claim8107
+- id: claim2133
   type: parameter
   concept: audio_sample_rate
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 44100
   unit: Hz
-- id: claim8108
+- id: claim2134
   type: parameter
   concept: mel_spectrum_rate
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 200
   unit: Hz
-- id: claim8109
+- id: claim2135
   type: parameter
   concept: mel_dimensions
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 60
   unit: bands
-- id: claim8110
+- id: claim2136
   type: parameter
   concept: mel_window
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 23.2
   unit: ms
-- id: claim8111
+- id: claim2137
   type: parameter
   concept: planning_iterations
   provenance:
@@ -57,21 +57,7 @@ claims:
     page: 0
   value: 40
   unit: cycles
-- id: claim8112
-  type: parameter
-  concept: forward_lstm_cells
-  provenance:
-    paper: Sering_2020_AnticipatoryCoarticulation
-    page: 0
-  unit: units
-- id: claim8113
-  type: parameter
-  concept: inverse_lstm_cells
-  provenance:
-    paper: Sering_2020_AnticipatoryCoarticulation
-    page: 0
-  unit: units
-- id: claim8114
+- id: claim2138
   type: parameter
   concept: ultrasound_rate
   provenance:
@@ -79,7 +65,7 @@ claims:
     page: 0
   value: 81.6
   unit: fps
-- id: claim8115
+- id: claim2139
   type: parameter
   concept: ultrasound_vectors
   provenance:
@@ -87,7 +73,7 @@ claims:
     page: 0
   value: 64
   unit: directions
-- id: claim8116
+- id: claim2140
   type: parameter
   concept: ultrasound_pixels
   provenance:
@@ -95,7 +81,7 @@ claims:
     page: 0
   value: 842
   unit: per vector
-- id: claim8117
+- id: claim2141
   type: parameter
   concept: formant_analysis_window
   provenance:
@@ -103,7 +89,7 @@ claims:
     page: 0
   value: 20
   unit: ms
-- id: claim8118
+- id: claim2142
   type: parameter
   concept: pitch_floor
   provenance:
@@ -111,7 +97,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim8119
+- id: claim2143
   type: parameter
   concept: pitch_ceiling
   provenance:

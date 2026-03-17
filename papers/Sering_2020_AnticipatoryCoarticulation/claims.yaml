@@ -59,27 +59,13 @@ claims:
   unit: cycles
 - id: claim8
   type: parameter
-  concept: forward_lstm_cells
-  provenance:
-    paper: Sering_2020_AnticipatoryCoarticulation
-    page: 0
-  unit: units
-- id: claim9
-  type: parameter
-  concept: inverse_lstm_cells
-  provenance:
-    paper: Sering_2020_AnticipatoryCoarticulation
-    page: 0
-  unit: units
-- id: claim10
-  type: parameter
   concept: ultrasound_rate
   provenance:
     paper: Sering_2020_AnticipatoryCoarticulation
     page: 0
   value: 81.6
   unit: fps
-- id: claim11
+- id: claim9
   type: parameter
   concept: ultrasound_vectors
   provenance:
@@ -87,7 +73,7 @@ claims:
     page: 0
   value: 64
   unit: directions
-- id: claim12
+- id: claim10
   type: parameter
   concept: ultrasound_pixels
   provenance:
@@ -95,7 +81,7 @@ claims:
     page: 0
   value: 842
   unit: per vector
-- id: claim13
+- id: claim11
   type: parameter
   concept: formant_analysis_window
   provenance:
@@ -103,7 +89,7 @@ claims:
     page: 0
   value: 20
   unit: ms
-- id: claim14
+- id: claim12
   type: parameter
   concept: pitch_floor
   provenance:
@@ -111,7 +97,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim15
+- id: claim13
   type: parameter
   concept: pitch_ceiling
   provenance:

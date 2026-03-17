@@ -1,32 +1,31 @@
 source:
   paper: Keating_2016_AcousticSimilarityFemaleVoices
 claims:
-- id: claim5065
+- id: claim1540
   type: observation
   statement: F0 must be the single strongest discriminator of individual voices
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Keating_2016_AcousticSimilarityFemaleVoices
     page: 0
-- id: claim5066
+- id: claim1541
   type: observation
   statement: F3 and F4 should contribute to speaker discrimination beyond F1/F2
-  concepts: []
+  concepts:
+  - f1
+  - f2
+  - f3
+  - f4
   provenance:
     paper: Keating_2016_AcousticSimilarityFemaleVoices
     page: 0
-- id: claim5067
+- id: claim1542
   type: observation
   statement: CPP (voice quality/periodicity) should contribute independently of F0
-  concepts: []
-  provenance:
-    paper: Keating_2016_AcousticSimilarityFemaleVoices
-    page: 0
-- id: claim5068
-  type: observation
-  statement: H1*-H2* and other source spectral measures should be weak individual
-    discriminators
-  concepts: []
+  concepts:
+  - f0
+  - voice_quality
   provenance:
     paper: Keating_2016_AcousticSimilarityFemaleVoices
     page: 0

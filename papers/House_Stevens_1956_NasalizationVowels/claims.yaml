@@ -13,20 +13,13 @@ claims:
   unit: cm
 - id: claim2
   type: parameter
-  concept: vta_sections
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: 35
-- id: claim3
-  type: parameter
   concept: nasal_tract_length
   provenance:
     paper: House_Stevens_1956_NasalizationVowels
     page: 0
   value: 12
   unit: cm
-- id: claim4
+- id: claim3
   type: parameter
   concept: coupling_area
   provenance:
@@ -35,7 +28,7 @@ claims:
   lower_bound: 0
   upper_bound: 3.72
   unit: cm²
-- id: claim5
+- id: claim4
   type: parameter
   concept: glottal_source_slope
   provenance:
@@ -43,80 +36,12 @@ claims:
     page: 0
   value: -12
   unit: dB/oct
-- id: claim6
-  type: parameter
-  concept: nasal_formant_bw
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
-  concept: i_coupling_0
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: 0.0
-  unit: dB
-- id: claim8
-  type: parameter
-  concept: i_071
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -3.0
-- id: claim9
-  type: parameter
-  concept: i_168
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -4.5
-- id: claim10
-  type: parameter
-  concept: i_372
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -5.0
-- id: claim11
-  type: parameter
-  concept: '168'
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: 0.0
-- id: claim12
-  type: parameter
-  concept: '372'
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -1.0
-- id: claim13
-  type: parameter
-  concept: u_071
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -1.0
-- id: claim14
-  type: parameter
-  concept: u_168
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -3.5
-- id: claim15
-  type: parameter
-  concept: u_372
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0
-  value: -5.0
-- id: claim16
+- id: claim5
   type: equation
   expression: r - r_o = 0.025 (1.2 - r_o) x^2
+  variables:
+  - symbol: r_o
+    concept: r_o
   provenance:
     paper: House_Stevens_1956_NasalizationVowels
     page: 0

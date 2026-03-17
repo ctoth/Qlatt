@@ -1,63 +1,7 @@
 source:
   paper: Vogel_2010_FatigueSpeechAcoustics
 claims:
-- id: claim10846
-  type: parameter
-  concept: fundamental_frequency
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: Hz
-- id: claim10847
-  type: parameter
-  concept: f0_standard_deviation
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: Hz
-- id: claim10848
-  type: parameter
-  concept: formant_4
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: Hz
-- id: claim10849
-  type: parameter
-  concept: f4_standard_deviation
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: Hz
-- id: claim10850
-  type: parameter
-  concept: alpha_ratio
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: dB
-- id: claim10851
-  type: parameter
-  concept: mean_pause_length
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: ms
-- id: claim10852
-  type: parameter
-  concept: total_speech_time
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: s
-- id: claim10853
-  type: parameter
-  concept: speech_rate
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  unit: syl/s
-- id: claim10854
+- id: claim2631
   type: parameter
   concept: leq
   provenance:
@@ -66,14 +10,7 @@ claims:
   lower_bound: 57.5
   upper_bound: 59.8
   unit: dB
-- id: claim10855
-  type: parameter
-  concept: intensity_threshold
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-  value: 0.65
-- id: claim10856
+- id: claim2632
   type: parameter
   concept: min_pause_duration
   provenance:
@@ -81,7 +18,7 @@ claims:
     page: 0
   value: 15
   unit: ms
-- id: claim10857
+- id: claim2633
   type: parameter
   concept: min_speech_duration
   provenance:
@@ -89,7 +26,7 @@ claims:
     page: 0
   value: 30
   unit: ms
-- id: claim10858
+- id: claim2634
   type: parameter
   concept: formant_ceiling
   provenance:
@@ -97,7 +34,7 @@ claims:
     page: 0
   value: 5000
   unit: Hz
-- id: claim10859
+- id: claim2635
   type: parameter
   concept: formant_ceiling
   provenance:
@@ -105,23 +42,41 @@ claims:
     page: 0
   value: 5500
   unit: Hz
-- id: claim10860
+- id: claim2636
   type: equation
   expression: L_{eq} = 10 \log_{10} \left[ \frac{(1/T) \int P_a^2 \cdot dt}{P_{ref}^2}
     \right]
+  variables:
+  - symbol: L_eq
+    concept: l_eq
+  - symbol: P_a
+    concept: p_a
+  - symbol: P_ref
+    concept: p_ref
+  - symbol: L_
+    concept: l
+  - symbol: eq
+    concept: eq
+  - symbol: log_
+    concept: log
+  - symbol: dt
+    concept: dt
+  - symbol: P_
+    concept: p
+  - symbol: ref
+    concept: ref
   provenance:
     paper: Vogel_2010_FatigueSpeechAcoustics
     page: 0
-- id: claim10861
-  type: equation
-  expression: d = t \left[ \frac{2(1-r)}{n} \right]^{1/2}
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-- id: claim10862
+- id: claim2637
   type: equation
   expression: \alpha = \frac{\text{Energy} \leq 1\text{ kHz}}{\text{Energy } 1\text{-}8\text{
     kHz}}
+  variables:
+  - symbol: Energy
+    concept: energy
+  - symbol: kHz
+    concept: khz
   provenance:
     paper: Vogel_2010_FatigueSpeechAcoustics
     page: 0

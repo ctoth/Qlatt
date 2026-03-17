@@ -1,7 +1,7 @@
 source:
   paper: McAleer_2014_PersonalityVoiceImpressions
 claims:
-- id: claim6458
+- id: claim1871
   type: parameter
   concept: aggressiveness
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Valence
   value: -0.74
-- id: claim6459
+- id: claim1872
   type: parameter
   concept: attractiveness
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.33
-- id: claim6460
+- id: claim1873
   type: parameter
   concept: competence
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.7
-- id: claim6461
+- id: claim1874
   type: parameter
   concept: confidence
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.75
-- id: claim6462
+- id: claim1875
   type: parameter
   concept: dominance
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.15
-- id: claim6463
+- id: claim1876
   type: parameter
   concept: likeability
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.95
-- id: claim6464
+- id: claim1877
   type: parameter
   concept: trustworthiness
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.92
-- id: claim6465
+- id: claim1878
   type: parameter
   concept: warmth
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.91
-- id: claim6466
+- id: claim1879
   type: parameter
   concept: aggressiveness
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Valence
   value: -0.52
-- id: claim6467
+- id: claim1880
   type: parameter
   concept: attractiveness
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.74
-- id: claim6468
+- id: claim1881
   type: parameter
   concept: competence
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.88
-- id: claim6469
+- id: claim1882
   type: parameter
   concept: confidence
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.62
-- id: claim6470
+- id: claim1883
   type: parameter
   concept: dominance
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.55
-- id: claim6471
+- id: claim1884
   type: parameter
   concept: likeability
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.93
-- id: claim6472
+- id: claim1885
   type: parameter
   concept: trustworthiness
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   unit: Valence
   value: 0.96
-- id: claim6473
+- id: claim1886
   type: parameter
   concept: warmth
   provenance:

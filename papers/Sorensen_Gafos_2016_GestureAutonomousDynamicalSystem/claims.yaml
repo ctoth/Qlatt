@@ -3,134 +3,89 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: stiffness
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: —
-- id: claim2
-  type: parameter
-  concept: damping
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: —
-- id: claim3
-  type: parameter
   concept: mass
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0
   value: 1
   unit: —
-- id: claim4
-  type: parameter
-  concept: nonlinearity_coefficient
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: —
-- id: claim5
-  type: parameter
-  concept: activation_onset
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: s
-- id: claim6
-  type: parameter
-  concept: activation_offset
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: s
-- id: claim7
-  type: parameter
-  concept: forcing_amplitude
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: —
-- id: claim8
-  type: parameter
-  concept: forcing_frequency
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-  unit: rad/s
-- id: claim9
+- id: claim2
   type: equation
   expression: 'where $b = 2\sqrt{mk}$ (critical damping, $m=1$), activated by a step
     function $a(t)$:'
+  variables:
+  - symbol: where
+    concept: where
+  - symbol: mk
+    concept: mk
+  - symbol: critical
+    concept: critical
+  - symbol: damping
+    concept: damping
+  - symbol: activated
+    concept: activated
+  - symbol: by
+    concept: by
+  - symbol: step
+    concept: step
+  - symbol: function
+    concept: function
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0
-- id: claim10
+- id: claim3
   type: equation
   expression: 'With potential:'
+  variables:
+  - symbol: With
+    concept: with
+  - symbol: potential
+    concept: potential
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0
-- id: claim11
+- id: claim4
   type: equation
   expression: 'Yielding the equation of motion:'
+  variables:
+  - symbol: Yielding
+    concept: yielding
+  - symbol: the
+    concept: the
+  - symbol: equation
+    concept: equation
+  - symbol: of
+    concept: of
+  - symbol: motion
+    concept: motion
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0
-- id: claim12
+- id: claim5
   type: equation
   expression: 'Which expands to:'
+  variables:
+  - symbol: Which
+    concept: which
+  - symbol: expands
+    concept: expands
+  - symbol: to
+    concept: to
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0
-- id: claim13
+- id: claim6
   type: equation
   expression: 'The restoring force becomes:'
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim14
-  type: observation
-  statement: Proportional time to peak velocity must be in range [0.36, 0.52] for
-    the nonlinear model (vs. 0.20 for linear)
-  concepts: []
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim15
-  type: observation
-  statement: Peak velocity must saturate (not grow linearly) with increasing amplitude
-  concepts: []
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim16
-  type: observation
-  statement: The ratio (peak velocity)/(amplitude × settling time) must be approximately
-    constant across movements of different amplitudes
-  concepts: []
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim17
-  type: observation
-  statement: For $d = 0$, the nonlinear model must reduce exactly to the linear model
-  concepts: []
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim18
-  type: observation
-  statement: 'Basin of attraction boundary: $|x| < \sqrt{k/d}$'
-  concepts: []
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim19
-  type: observation
-  statement: Hooke diagrams of real speech movements should show N-shaped curves (not
-    straight lines)
-  concepts: []
+  variables:
+  - symbol: The
+    concept: the
+  - symbol: restoring
+    concept: restoring
+  - symbol: force
+    concept: force
+  - symbol: becomes
+    concept: becomes
   provenance:
     paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
     page: 0

@@ -231,92 +231,25 @@ claims:
   unit: dB
   value: -3
 - id: claim29
-  type: parameter
-  concept: 11_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 15
-- id: claim30
-  type: parameter
-  concept: 12_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 16
-- id: claim31
-  type: parameter
-  concept: 31_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 35
-- id: claim32
-  type: parameter
-  concept: 316_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 70
-- id: claim33
-  type: parameter
-  concept: 41_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 76
-- id: claim34
-  type: parameter
-  concept: 44_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 90
-- id: claim35
-  type: parameter
-  concept: 45_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 92
-- id: claim36
-  type: parameter
-  concept: 410_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 95
-- id: claim37
-  type: parameter
-  concept: 411_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 98
-- id: claim38
-  type: parameter
-  concept: 53_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 108
-- id: claim39
-  type: parameter
-  concept: 59_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 120
-- id: claim40
-  type: parameter
-  concept: 510_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 121
-- id: claim41
   type: equation
   expression: 'All-pole transfer function (equivalent to Klatt cascade):'
+  variables:
+  - symbol: All
+    concept: all
+  - symbol: pole
+    concept: pole
+  - symbol: transfer
+    concept: transfer
+  - symbol: function
+    concept: function
+  - symbol: equivalent
+    concept: equivalent
+  - symbol: to
+    concept: to
+  - symbol: Klatt
+    concept: klatt
+  - symbol: cascade
+    concept: cascade
   provenance:
     paper: Zue_1976_StopConsonantAcoustics
     page: 0

@@ -1,45 +1,7 @@
 source:
   paper: Lucero_2005_VocalFoldBifurcations
 claims:
-- id: claim6393
-  type: parameter
-  concept: dimensionless_frequency_ratio
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  value: 0.32
-- id: claim6394
-  type: parameter
-  concept: dimensionless_damping
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  value: 0.97
-- id: claim6395
-  type: parameter
-  concept: subglottal_pressure_param
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  value: 0
-- id: claim6396
-  type: parameter
-  concept: nonlinear_damping
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  value: 100
-  lower_bound: 0
-  upper_bound: 300
-- id: claim6397
-  type: parameter
-  concept: nonlinear_damping
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  lower_bound: 10
-  upper_bound: 300
-- id: claim6398
+- id: claim1841
   type: parameter
   concept: air_density
   provenance:
@@ -47,138 +9,83 @@ claims:
     page: 0
   value: 1.15
   unit: kg/m^3
-- id: claim6399
-  type: parameter
-  concept: vocal_fold_length
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  unit: cm
-- id: claim6400
-  type: parameter
-  concept: mucosal_wave_velocity
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  unit: m/s
-- id: claim6401
-  type: parameter
-  concept: vocal_fold_thickness
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-  unit: cm
-- id: claim6402
+- id: claim1842
   type: equation
   expression: \xi(y, t) = x(t) - \frac{y}{c} \dot{x}(t)
+  variables:
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6403
+- id: claim1843
   type: equation
   expression: a(y, t) = a_0 + 2L\xi(y, t)
+  variables:
+  - symbol: a_0
+    concept: a_0
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6404
+- id: claim1844
   type: equation
   expression: \ddot{u} + (1 + \eta u^2)\left[\delta - \frac{\gamma}{(1 + u)^2}\right]\dot{u}
     + \alpha^2 u = 0
+  variables:
+  - symbol: ddot
+    concept: ddot
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6405
+- id: claim1845
   type: equation
   expression: \gamma_H = \delta
+  variables:
+  - symbol: gamma_H
+    concept: gamma_h
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6406
+- id: claim1846
   type: equation
   expression: \dot{u} = v
+  variables:
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6407
+- id: claim1847
   type: equation
   expression: \dot{v} = -\alpha^2 u - (1 + \eta u^2)\left[\delta - \frac{\gamma}{(1+u)^2}\right]
     v
+  variables:
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6408
-  type: equation
-  expression: \sigma = \frac{-3\pi}{2\alpha} \left[ \eta \delta^2 - \frac{\delta(5\delta
-    + 3)}{(3 + \delta^2)} \right]
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6409
-  type: equation
-  expression: \eta = \frac{5\delta + 3}{\delta(3 + \delta^2)}
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6410
+- id: claim1848
   type: equation
   expression: (1 + \eta_1 u^2 + \eta_2 u^4)[\delta - \gamma/(1+u)^2] \dot{u}
+  variables:
+  - symbol: eta_1
+    concept: eta_1
+  - symbol: eta_2
+    concept: eta_2
+  - symbol: dot
+    concept: dot
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0
-- id: claim6411
-  type: observation
-  statement: '**Hopf bifurcation threshold:** Oscillation onset must occur at $\gamma
-    = \delta$ (aerodynamic energy equals dissipation)'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6412
-  type: observation
-  statement: '**Lyapunov number sign:** For $\eta > (5\delta + 3)/[\delta(3 + \delta^2)]$,
-    the bifurcation must be supercritical ($\sigma < 0$)'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6413
-  type: observation
-  statement: '**Supercritical behavior:** When $\sigma < 0$, oscillation amplitude
-    must grow continuously from zero at threshold'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6414
-  type: observation
-  statement: '**Subcritical behavior:** When $\sigma > 0$, there must exist an unstable
-    limit cycle below the stable one, and oscillation onset must be discontinuous
-    (jump to finite amplitude)'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6415
-  type: observation
-  statement: '**Hysteresis:** In the extended model with subcritical Hopf, onset pressure
-    must exceed offset pressure'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6416
-  type: observation
-  statement: '**Singular point:** The point $u = -1$ (complete glottal closure) must
-    be a singular point of the system'
-  concepts: []
-  provenance:
-    paper: Lucero_2005_VocalFoldBifurcations
-    page: 0
-- id: claim6417
+- id: claim1849
   type: observation
   statement: '**Amplitude bound:** Limit cycle maximum displacement $u$ must satisfy
     $u > -1$ (glottis cannot have negative area)'
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Lucero_2005_VocalFoldBifurcations
     page: 0

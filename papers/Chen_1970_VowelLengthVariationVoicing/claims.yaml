@@ -35,160 +35,13 @@ claims:
   value: 91
 - id: claim5
   type: parameter
-  concept: english_before_voiceless
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 197
-- id: claim6
-  type: parameter
-  concept: english_before_voiced
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 297
-- id: claim7
-  type: parameter
-  concept: english_difference
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 100
-- id: claim8
-  type: parameter
-  concept: english_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.66
-- id: claim9
-  type: parameter
-  concept: english_before_voiceless
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 145
-- id: claim10
-  type: parameter
-  concept: english_before_voiced
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 228
-- id: claim11
-  type: parameter
-  concept: english_difference
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 83
-- id: claim12
-  type: parameter
-  concept: english_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.64
-- id: claim13
-  type: parameter
-  concept: english_before_voiceless
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 174
-- id: claim14
-  type: parameter
-  concept: english_before_voiced
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 253
-- id: claim15
-  type: parameter
-  concept: english_difference
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 79
-- id: claim16
-  type: parameter
-  concept: english_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.69
-- id: claim17
-  type: parameter
-  concept: german_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.9
-- id: claim18
-  type: parameter
-  concept: spanish_before_voiceless
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 109
-- id: claim19
-  type: parameter
-  concept: spanish_before_voiced
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 127
-- id: claim20
-  type: parameter
-  concept: spanish_difference
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 18
-- id: claim21
-  type: parameter
-  concept: spanish_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.86
-- id: claim22
-  type: parameter
-  concept: norwegian_before_voiceless
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 148
-- id: claim23
-  type: parameter
-  concept: norwegian_before_voiced
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 181
-- id: claim24
-  type: parameter
-  concept: norwegian_difference
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 33
-- id: claim25
-  type: parameter
-  concept: norwegian_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.82
-- id: claim26
-  type: parameter
   concept: laep
   provenance:
     paper: Chen_1970_VowelLengthVariationVoicing
     page: 0
   unit: ms
   value: 300
-- id: claim27
+- id: claim6
   type: parameter
   concept: faet
   provenance:
@@ -196,7 +49,7 @@ claims:
     page: 0
   unit: ms
   value: 308
-- id: claim28
+- id: claim7
   type: parameter
   concept: laek
   provenance:
@@ -204,7 +57,7 @@ claims:
     page: 0
   unit: ms
   value: 357
-- id: claim29
+- id: claim8
   type: parameter
   concept: aempl
   provenance:
@@ -212,7 +65,7 @@ claims:
     page: 0
   unit: ms
   value: 147
-- id: claim30
+- id: claim9
   type: parameter
   concept: sent
   provenance:
@@ -220,7 +73,7 @@ claims:
     page: 0
   unit: ms
   value: 147
-- id: claim31
+- id: claim10
   type: parameter
   concept: kilt
   provenance:
@@ -228,7 +81,7 @@ claims:
     page: 0
   unit: ms
   value: 120
-- id: claim32
+- id: claim11
   type: parameter
   concept: baenk
   provenance:
@@ -236,7 +89,7 @@ claims:
     page: 0
   unit: ms
   value: 288
-- id: claim33
+- id: claim12
   type: parameter
   concept: english
   provenance:
@@ -244,7 +97,7 @@ claims:
     page: 0
   unit: ms
   value: 140
-- id: claim34
+- id: claim13
   type: parameter
   concept: korean
   provenance:
@@ -252,105 +105,7 @@ claims:
     page: 0
   unit: ms
   value: 124
-- id: claim35
-  type: parameter
-  concept: lap_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.76
-- id: claim36
-  type: parameter
-  concept: lap_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.76
-- id: claim37
-  type: parameter
-  concept: nap_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.82
-- id: claim38
-  type: parameter
-  concept: nap_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.82
-- id: claim39
-  type: parameter
-  concept: cup_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.56
-- id: claim40
-  type: parameter
-  concept: cup_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.56
-- id: claim41
-  type: parameter
-  concept: pup_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.68
-- id: claim42
-  type: parameter
-  concept: pup_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.68
-- id: claim43
-  type: parameter
-  concept: rip_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.56
-- id: claim44
-  type: parameter
-  concept: rip_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.56
-- id: claim45
-  type: parameter
-  concept: bop_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.81
-- id: claim46
-  type: parameter
-  concept: bop_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.81
-- id: claim47
-  type: parameter
-  concept: average_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.69
-- id: claim48
-  type: parameter
-  concept: average_velocity
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.69
-- id: claim49
+- id: claim14
   type: parameter
   concept: lap
   provenance:
@@ -358,7 +113,7 @@ claims:
     page: 0
   unit: ms
   value: 80
-- id: claim50
+- id: claim15
   type: parameter
   concept: nap
   provenance:
@@ -366,7 +121,7 @@ claims:
     page: 0
   unit: ms
   value: 82
-- id: claim51
+- id: claim16
   type: parameter
   concept: cup
   provenance:
@@ -374,7 +129,7 @@ claims:
     page: 0
   unit: ms
   value: 88
-- id: claim52
+- id: claim17
   type: parameter
   concept: pup
   provenance:
@@ -382,7 +137,7 @@ claims:
     page: 0
   unit: ms
   value: 108
-- id: claim53
+- id: claim18
   type: parameter
   concept: rip
   provenance:
@@ -390,7 +145,7 @@ claims:
     page: 0
   unit: ms
   value: 58
-- id: claim54
+- id: claim19
   type: parameter
   concept: bip
   provenance:
@@ -398,7 +153,7 @@ claims:
     page: 0
   unit: ms
   value: 102
-- id: claim55
+- id: claim20
   type: parameter
   concept: bop
   provenance:
@@ -406,7 +161,7 @@ claims:
     page: 0
   unit: ms
   value: 97
-- id: claim56
+- id: claim21
   type: parameter
   concept: average
   provenance:
@@ -414,66 +169,3 @@ claims:
     page: 0
   unit: ms
   value: 88
-- id: claim57
-  type: parameter
-  concept: vcd_nasal_vowel_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.65
-- id: claim58
-  type: parameter
-  concept: vcd_nasal_sonorant_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.64
-- id: claim59
-  type: parameter
-  concept: vcd_nasal_total_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.65
-- id: claim60
-  type: parameter
-  concept: vcd_l_vowel_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.65
-- id: claim61
-  type: parameter
-  concept: vcd_l_sonorant_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.68
-- id: claim62
-  type: parameter
-  concept: vcd_l_total_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.65
-- id: claim63
-  type: parameter
-  concept: vcd_r_vowel_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.76
-- id: claim64
-  type: parameter
-  concept: vcd_r_sonorant_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.66
-- id: claim65
-  type: parameter
-  concept: vcd_r_total_ratio
-  provenance:
-    paper: Chen_1970_VowelLengthVariationVoicing
-    page: 0
-  value: 0.7

@@ -1,7 +1,7 @@
 source:
   paper: Lin_1995_CascadeIntoParallel
 claims:
-- id: claim6087
+- id: claim1781
   type: parameter
   concept: a1
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: dB
   value: -58
-- id: claim6088
+- id: claim1782
   type: parameter
   concept: a2
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: dB
   value: -65
-- id: claim6089
+- id: claim1783
   type: parameter
   concept: a3
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: dB
   value: -75
-- id: claim6090
+- id: claim1784
   type: parameter
   concept: a4
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: dB
   value: -78
-- id: claim6091
+- id: claim1785
   type: parameter
   concept: a5
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: dB
   value: -79
-- id: claim6092
+- id: claim1786
   type: parameter
   concept: a6
   provenance:
@@ -49,26 +49,95 @@ claims:
     page: 0
   unit: dB
   value: -80
-- id: claim6093
+- id: claim1787
   type: equation
   expression: 'can be decomposed via partial fraction expansion into a sum (parallel
     form):'
+  variables:
+  - symbol: can
+    concept: can
+  - symbol: be
+    concept: be
+  - symbol: decomposed
+    concept: decomposed
+  - symbol: via
+    concept: via
+  - symbol: fraction
+    concept: fraction
+  - symbol: expansion
+    concept: expansion
+  - symbol: into
+    concept: into
+  - symbol: parallel
+    concept: parallel
+  - symbol: form
+    concept: form
   provenance:
     paper: Lin_1995_CascadeIntoParallel
     page: 0
-- id: claim6094
+- id: claim1788
   type: equation
   expression: 'where the residues (alpha_i, beta_i) are computed from the pole locations
     of ALL resonators:
 
 
     For each pole p_i:'
+  variables:
+  - symbol: p_i
+    concept: p_i
+  - symbol: where
+    concept: where
+  - symbol: the
+    concept: the
+  - symbol: residues
+    concept: residues
+  - symbol: alpha_i
+    concept: alpha_i
+  - symbol: beta_i
+    concept: beta_i
+  - symbol: are
+    concept: are
+  - symbol: computed
+    concept: computed
+  - symbol: from
+    concept: from
+  - symbol: pole
+    concept: pole
+  - symbol: locations
+    concept: locations
+  - symbol: of
+    concept: of
+  - symbol: ALL
+    concept: all
+  - symbol: resonators
+    concept: resonators
+  - symbol: For
+    concept: for
+  - symbol: each
+    concept: each
   provenance:
     paper: Lin_1995_CascadeIntoParallel
     page: 0
-- id: claim6095
+- id: claim1789
   type: equation
   expression: 'For real second-order sections (combining conjugate pairs):'
+  variables:
+  - symbol: For
+    concept: for
+  - symbol: real
+    concept: real
+  - symbol: second
+    concept: second
+  - symbol: order
+    concept: order
+  - symbol: sections
+    concept: sections
+  - symbol: combining
+    concept: combining
+  - symbol: conjugate
+    concept: conjugate
+  - symbol: pairs
+    concept: pairs
   provenance:
     paper: Lin_1995_CascadeIntoParallel
     page: 0

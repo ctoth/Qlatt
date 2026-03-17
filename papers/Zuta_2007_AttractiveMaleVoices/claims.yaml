@@ -111,35 +111,17 @@ claims:
   type: observation
   statement: F0 standard deviation in range [19, 29] Hz for "attractive" male voice
     presets
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Zuta_2007_AttractiveMaleVoices
     page: 0
 - id: claim15
   type: observation
-  statement: Absence of spectral dip at ~2.8 kHz (nasality check) for attractive voices
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim16
-  type: observation
-  statement: Hesitation rate < 5/min for attractive speech
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim17
-  type: observation
-  statement: Pause-free interval around 2.5-3.5 s for natural-sounding phrasing
-  concepts: []
-  provenance:
-    paper: Zuta_2007_AttractiveMaleVoices
-    page: 0
-- id: claim18
-  type: observation
   statement: Pause duration clustering around 0.6 s for standard voice quality
-  concepts: []
+  concepts:
+  - duration
+  - voice_quality
   provenance:
     paper: Zuta_2007_AttractiveMaleVoices
     page: 0

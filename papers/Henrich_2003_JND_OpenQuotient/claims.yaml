@@ -29,269 +29,100 @@ claims:
   value: 2
   unit: dimensionless
 - id: claim4
-  type: parameter
-  concept: amplitude_of_voicing
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 1
-- id: claim5
-  type: parameter
-  concept: fundamental_period
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: seconds
-- id: claim6
-  type: parameter
-  concept: 04_g1_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.058
-- id: claim7
-  type: parameter
-  concept: 04_g1_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.019
-- id: claim8
-  type: parameter
-  concept: 04_g2_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.037
-- id: claim9
-  type: parameter
-  concept: 04_g2_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.01
-- id: claim10
-  type: parameter
-  concept: 06_g1_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.087
-- id: claim11
-  type: parameter
-  concept: 06_g1_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.027
-- id: claim12
-  type: parameter
-  concept: 06_g2_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.063
-- id: claim13
-  type: parameter
-  concept: 06_g2_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.015
-- id: claim14
-  type: parameter
-  concept: 08_g1_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.106
-- id: claim15
-  type: parameter
-  concept: 08_g1_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.043
-- id: claim16
-  type: parameter
-  concept: 08_g2_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.079
-- id: claim17
-  type: parameter
-  concept: 08_g2_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.014
-- id: claim18
-  type: parameter
-  concept: '04'
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: untrained
-- id: claim19
-  type: parameter
-  concept: '06'
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: untrained
-- id: claim20
-  type: parameter
-  concept: 08
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: untrained
-- id: claim21
-  type: parameter
-  concept: 2_3_g1_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.033
-- id: claim22
-  type: parameter
-  concept: 2_3_g1_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.009
-- id: claim23
-  type: parameter
-  concept: 2_3_g2_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.027
-- id: claim24
-  type: parameter
-  concept: 2_3_g2_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.01
-- id: claim25
-  type: parameter
-  concept: 08_g1_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.027
-- id: claim26
-  type: parameter
-  concept: 08_g1_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.009
-- id: claim27
-  type: parameter
-  concept: 08_g2_mean
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.022
-- id: claim28
-  type: parameter
-  concept: 08_g2_sd
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  value: 0.008
-- id: claim29
-  type: parameter
-  concept: '2_3'
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: untrained
-- id: claim30
-  type: parameter
-  concept: 08
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-  unit: untrained
-- id: claim31
   type: equation
   expression: '$$u''_g(t) = \frac{A_v}{O_q T_0} n''_g\left(\frac{t}{O_q T_0}, \alpha_m\right)$$
 
 
     For $O_q T_0 < t < T_0$ (closed phase):'
+  variables:
+  - symbol: A_v
+    concept: a_v
+  - symbol: O_q
+    concept: o_q
+  - symbol: T_0
+    concept: t_0
+  - symbol: alpha_m
+    concept: alpha_m
+  - symbol: For
+    concept: for
+  - symbol: closed
+    concept: closed
+  - symbol: phase
+    concept: phase
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim32
+- id: claim5
   type: equation
   expression: 'Where $a$ is the implicit solution of:'
+  variables:
+  - symbol: Where
+    concept: where
+  - symbol: is
+    concept: is
+  - symbol: the
+    concept: the
+  - symbol: implicit
+    concept: implicit
+  - symbol: solution
+    concept: solution
+  - symbol: of
+    concept: of
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim33
+- id: claim6
   type: observation
   statement: '**Relative JND of Oq is constant:** For any target Oq in [0.4, 0.8],
     delta_Oq/Oq should be ~0.10-0.14'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim34
+- id: claim7
   type: observation
   statement: '**Absolute JND of Oq increases with Oq:** JND(0.4) < JND(0.6) < JND(0.8)'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim35
-  type: observation
-  statement: '**JND of alpha_m decreases with alpha_m:** JND at alpha_m=0.8 < JND
-    at alpha_m=2/3'
-  concepts: []
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-- id: claim36
+- id: claim8
   type: observation
   statement: '**No vowel effect:** Synthesizing with different vowels should not change
     the perceptual resolution of Oq'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim37
+- id: claim9
   type: observation
   statement: '**No pitch effect:** Changing f0 within a given register should not
     change Oq perceptual resolution'
-  concepts: []
+  concepts:
+  - f0
+  - open_quotient
+  - pitch
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim38
+- id: claim10
   type: observation
   statement: '**Amplitude coupling:** When Av is constant and Oq varies, E also varies
     -- this creates larger spectral changes and lower JNDs than when E is held constant'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0
-- id: claim39
+- id: claim11
   type: observation
   statement: '**Minimum perceptible Oq change:** ~0.037 (trained) to ~0.058 (untrained)
     at Oq=0.4'
-  concepts: []
-  provenance:
-    paper: Henrich_2003_JND_OpenQuotient
-    page: 0
-- id: claim40
-  type: observation
-  statement: '**Minimum perceptible alpha_m change:** ~0.022 (trained) to ~0.027 (untrained)
-    at alpha_m=0.8'
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Henrich_2003_JND_OpenQuotient
     page: 0

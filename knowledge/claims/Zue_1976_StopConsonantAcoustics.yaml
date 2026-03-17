@@ -1,7 +1,7 @@
 source:
   paper: Zue_1976_StopConsonantAcoustics
 claims:
-- id: claim11257
+- id: claim2820
   type: parameter
   concept: b
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 13
   upper_bound: 17
   value: 3
-- id: claim11258
+- id: claim2821
   type: parameter
   concept: d
   provenance:
@@ -20,7 +20,7 @@ claims:
   unit: ms
   lower_bound: 19
   upper_bound: 23
-- id: claim11259
+- id: claim2822
   type: parameter
   concept: g
   provenance:
@@ -30,7 +30,7 @@ claims:
   lower_bound: 30
   upper_bound: 38
   value: 5
-- id: claim11260
+- id: claim2823
   type: parameter
   concept: p
   provenance:
@@ -38,7 +38,7 @@ claims:
     page: 0
   unit: ms
   value: 58.4
-- id: claim11261
+- id: claim2824
   type: parameter
   concept: t
   provenance:
@@ -46,7 +46,7 @@ claims:
     page: 0
   unit: ms
   value: 70.8
-- id: claim11262
+- id: claim2825
   type: parameter
   concept: k
   provenance:
@@ -54,7 +54,7 @@ claims:
     page: 0
   unit: ms
   value: 73.2
-- id: claim11263
+- id: claim2826
   type: parameter
   concept: high
   provenance:
@@ -62,7 +62,7 @@ claims:
     page: 0
   unit: ms
   value: 52.0
-- id: claim11264
+- id: claim2827
   type: parameter
   concept: high
   provenance:
@@ -70,7 +70,7 @@ claims:
     page: 0
   unit: ms
   value: 60.9
-- id: claim11265
+- id: claim2828
   type: parameter
   concept: back
   provenance:
@@ -78,7 +78,7 @@ claims:
     page: 0
   unit: ms
   value: 61.0
-- id: claim11266
+- id: claim2829
   type: parameter
   concept: back
   provenance:
@@ -86,7 +86,7 @@ claims:
     page: 0
   unit: ms
   value: 53.6
-- id: claim11267
+- id: claim2830
   type: parameter
   concept: all_vowels
   provenance:
@@ -94,7 +94,7 @@ claims:
     page: 0
   unit: ms
   value: 58.4
-- id: claim11268
+- id: claim2831
   type: parameter
   concept: p
   provenance:
@@ -102,7 +102,7 @@ claims:
     page: 0
   unit: dB
   value: -27.6
-- id: claim11269
+- id: claim2832
   type: parameter
   concept: t
   provenance:
@@ -110,7 +110,7 @@ claims:
     page: 0
   unit: dB
   value: -16.6
-- id: claim11270
+- id: claim2833
   type: parameter
   concept: k
   provenance:
@@ -118,7 +118,7 @@ claims:
     page: 0
   unit: dB
   value: -17.2
-- id: claim11271
+- id: claim2834
   type: parameter
   concept: b
   provenance:
@@ -126,7 +126,7 @@ claims:
     page: 0
   unit: dB
   value: -28.0
-- id: claim11272
+- id: claim2835
   type: parameter
   concept: d
   provenance:
@@ -134,7 +134,7 @@ claims:
     page: 0
   unit: dB
   value: -15.8
-- id: claim11273
+- id: claim2836
   type: parameter
   concept: g
   provenance:
@@ -142,7 +142,7 @@ claims:
     page: 0
   unit: dB
   value: -16.6
-- id: claim11274
+- id: claim2837
   type: parameter
   concept: b
   provenance:
@@ -150,7 +150,7 @@ claims:
     page: 0
   unit: ms
   value: 17
-- id: claim11275
+- id: claim2838
   type: parameter
   concept: d
   provenance:
@@ -158,7 +158,7 @@ claims:
     page: 0
   unit: ms
   value: 23
-- id: claim11276
+- id: claim2839
   type: parameter
   concept: g
   provenance:
@@ -166,7 +166,7 @@ claims:
     page: 0
   unit: ms
   value: 38
-- id: claim11277
+- id: claim2840
   type: parameter
   concept: p
   provenance:
@@ -174,7 +174,7 @@ claims:
     page: 0
   unit: ms
   value: 58
-- id: claim11278
+- id: claim2841
   type: parameter
   concept: t
   provenance:
@@ -182,7 +182,7 @@ claims:
     page: 0
   unit: ms
   value: 71
-- id: claim11279
+- id: claim2842
   type: parameter
   concept: k
   provenance:
@@ -190,7 +190,7 @@ claims:
     page: 0
   unit: ms
   value: 73
-- id: claim11280
+- id: claim2843
   type: parameter
   concept: p
   provenance:
@@ -198,7 +198,7 @@ claims:
     page: 0
   unit: dB
   value: -28
-- id: claim11281
+- id: claim2844
   type: parameter
   concept: b
   provenance:
@@ -206,7 +206,7 @@ claims:
     page: 0
   unit: dB
   value: -28
-- id: claim11282
+- id: claim2845
   type: parameter
   concept: d
   provenance:
@@ -214,7 +214,7 @@ claims:
     page: 0
   unit: dB
   value: 0
-- id: claim11283
+- id: claim2846
   type: parameter
   concept: k
   provenance:
@@ -222,7 +222,7 @@ claims:
     page: 0
   unit: dB
   value: -2
-- id: claim11284
+- id: claim2847
   type: parameter
   concept: g
   provenance:
@@ -230,93 +230,26 @@ claims:
     page: 0
   unit: dB
   value: -3
-- id: claim11285
-  type: parameter
-  concept: 11_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 15
-- id: claim11286
-  type: parameter
-  concept: 12_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 16
-- id: claim11287
-  type: parameter
-  concept: 31_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 35
-- id: claim11288
-  type: parameter
-  concept: 316_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 70
-- id: claim11289
-  type: parameter
-  concept: 41_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 76
-- id: claim11290
-  type: parameter
-  concept: 44_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 90
-- id: claim11291
-  type: parameter
-  concept: 45_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 92
-- id: claim11292
-  type: parameter
-  concept: 410_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 95
-- id: claim11293
-  type: parameter
-  concept: 411_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 98
-- id: claim11294
-  type: parameter
-  concept: 53_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 108
-- id: claim11295
-  type: parameter
-  concept: 59_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 120
-- id: claim11296
-  type: parameter
-  concept: 510_page
-  provenance:
-    paper: Zue_1976_StopConsonantAcoustics
-    page: 0
-  value: 121
-- id: claim11297
+- id: claim2848
   type: equation
   expression: 'All-pole transfer function (equivalent to Klatt cascade):'
+  variables:
+  - symbol: All
+    concept: all
+  - symbol: pole
+    concept: pole
+  - symbol: transfer
+    concept: transfer
+  - symbol: function
+    concept: function
+  - symbol: equivalent
+    concept: equivalent
+  - symbol: to
+    concept: to
+  - symbol: Klatt
+    concept: klatt
+  - symbol: cascade
+    concept: cascade
   provenance:
     paper: Zue_1976_StopConsonantAcoustics
     page: 0

@@ -3,48 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: frequency_parameter
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: Hz
-- id: claim2
-  type: parameter
-  concept: exponential_growth
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: 1/s
-- id: claim3
-  type: parameter
-  concept: return_time_constant
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: ms
-- id: claim4
-  type: parameter
-  concept: discontinuity_time
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: ms
-- id: claim5
-  type: parameter
-  concept: closure_time
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: ms
-- id: claim6
-  type: parameter
-  concept: first_formant
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
   concept: f1_bandwidth
   provenance:
     paper: Fant_1986_GlottalFlowModelsInteraction
@@ -52,49 +10,54 @@ claims:
   lower_bound: 50
   upper_bound: 150
   unit: Hz
-- id: claim8
-  type: parameter
-  concept: vocal_tract_inductance
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: mH
-- id: claim9
-  type: parameter
-  concept: subglottal_pressure
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: cm H₂O
-- id: claim10
-  type: parameter
-  concept: peak_glottal_area
-  provenance:
-    paper: Fant_1986_GlottalFlowModelsInteraction
-    page: 0
-  unit: cm²
-- id: claim11
+- id: claim2
   type: equation
   expression: E(t) = E_0 e^{\alpha t} \sin(\omega_g t)
+  variables:
+  - symbol: E_0
+    concept: e_0
+  - symbol: omega_g
+    concept: omega_g
   provenance:
     paper: Fant_1986_GlottalFlowModelsInteraction
     page: 0
-- id: claim12
+- id: claim3
   type: equation
   expression: E(t) = \frac{-E_0}{\varepsilon t_a} \left[ e^{-\varepsilon(t-t_e)} -
     e^{-\varepsilon(t_c-t_e)} \right]
+  variables:
+  - symbol: E_0
+    concept: e_0
+  - symbol: t_a
+    concept: t_a
+  - symbol: t_e
+    concept: t_e
+  - symbol: t_c
+    concept: t_c
+  - symbol: varepsilon
+    concept: varepsilon
   provenance:
     paper: Fant_1986_GlottalFlowModelsInteraction
     page: 0
-- id: claim13
+- id: claim4
   type: equation
   expression: F_a = (2\pi t_a)^{-1}
+  variables:
+  - symbol: F_a
+    concept: f_a
+  - symbol: t_a
+    concept: t_a
   provenance:
     paper: Fant_1986_GlottalFlowModelsInteraction
     page: 0
-- id: claim14
+- id: claim5
   type: equation
   expression: \Delta L = -10 \log_{10}[1 + (2\pi t_a f)^2]
+  variables:
+  - symbol: t_a
+    concept: t_a
+  - symbol: log_
+    concept: log
   provenance:
     paper: Fant_1986_GlottalFlowModelsInteraction
     page: 0

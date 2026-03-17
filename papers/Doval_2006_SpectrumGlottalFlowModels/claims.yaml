@@ -3,37 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: open_quotient
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  lower_bound: 0.3
-  upper_bound: 0.8
-- id: claim2
-  type: parameter
-  concept: asymmetry_coefficient
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  lower_bound: 0.5
-  upper_bound: 1.0
-- id: claim3
-  type: parameter
-  concept: return_phase_quotient
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  lower_bound: 0
-  upper_bound: 1
-- id: claim4
-  type: parameter
   concept: '025'
   provenance:
     paper: Doval_2006_SpectrumGlottalFlowModels
     page: 0
   unit: KLGLOTT88
   value: 2.2
-- id: claim5
+- id: claim2
   type: parameter
   concept: '050'
   provenance:
@@ -41,7 +17,7 @@ claims:
     page: 0
   unit: KLGLOTT88
   value: 1.1
-- id: claim6
+- id: claim3
   type: parameter
   concept: 080
   provenance:

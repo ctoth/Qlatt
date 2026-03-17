@@ -1,7 +1,7 @@
 source:
   paper: Ladd_2008_IntonationalPhonology
 claims:
-- id: claim5825
+- id: claim1701
   type: parameter
   concept: k
   provenance:
@@ -9,28 +9,7 @@ claims:
     page: 0
   value: 0.6
   unit: ratio
-- id: claim5826
-  type: parameter
-  concept: f_r
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-  unit: Hz
-- id: claim5827
-  type: parameter
-  concept: t
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-  unit: ratio
-- id: claim5828
-  type: parameter
-  concept: n
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-  unit: ratio
-- id: claim5829
+- id: claim1702
   type: parameter
   concept: r
   provenance:
@@ -38,7 +17,7 @@ claims:
     page: 0
   value: 1.0
   unit: ratio
-- id: claim5830
+- id: claim1703
   type: parameter
   concept: calling_contour_interval
   provenance:
@@ -46,7 +25,7 @@ claims:
     page: 0
   value: 3
   unit: semitones
-- id: claim5831
+- id: claim1704
   type: parameter
   concept: peak_alignment
   provenance:
@@ -54,7 +33,7 @@ claims:
     page: 0
   value: 35
   unit: ms
-- id: claim5832
+- id: claim1705
   type: parameter
   concept: low_rise_slope
   provenance:
@@ -62,7 +41,7 @@ claims:
     page: 0
   value: 6.7
   unit: oct/sec
-- id: claim5833
+- id: claim1706
   type: parameter
   concept: peak_control_precision
   provenance:
@@ -71,96 +50,22 @@ claims:
   lower_bound: 3.7
   upper_bound: 11.5
   unit: Hz
-- id: claim5834
-  type: parameter
-  concept: declination_total_drop
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-  unit: Hz
-- id: claim5835
-  type: observation
-  statement: Downstepped H* must be lower than preceding H* by a constant proportion
-    (k ~0.6)
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5836
+- id: claim1707
   type: observation
   statement: Between two H* accents, F0 must show a sagging transition with abrupt
     rise at onset of second accented syllable, NOT linear interpolation
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Ladd_2008_IntonationalPhonology
     page: 0
-- id: claim5837
-  type: observation
-  statement: Final accent in a downstep series must be lower than the constant-proportion
-    prediction (final lowering)
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5838
-  type: observation
-  statement: H% boundary tone must be higher than any preceding H in the same phrase
-    (upstep rule)
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5839
-  type: observation
-  statement: Calling contour H-to-!H interval should be approximately 3 semitones
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5840
-  type: observation
-  statement: Nuclear accent must be present in every intermediate phrase (obligatory)
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5841
-  type: observation
-  statement: For broad focus, the last accent in the phrase must fall on the last
-    content word
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5842
-  type: observation
-  statement: Moving the last accent away from the default position must imply narrow
-    focus
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5843
+- id: claim1708
   type: observation
   statement: Peak F0 at turning points should be approximately constant per speaker
     regardless of rise duration (segmental anchoring)
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5844
-  type: observation
-  statement: Raising the voice should primarily expand the span above a relatively
-    constant F_R floor
-  concepts: []
-  provenance:
-    paper: Ladd_2008_IntonationalPhonology
-    page: 0
-- id: claim5845
-  type: observation
-  statement: Prenuclear peaks should be aligned later in the syllable than nuclear
-    peaks
-  concepts: []
+  concepts:
+  - f0
+  - duration
   provenance:
     paper: Ladd_2008_IntonationalPhonology
     page: 0

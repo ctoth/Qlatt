@@ -1,21 +1,7 @@
 source:
   paper: vanSanten_1994_SegmentalDurationTTS
 claims:
-- id: claim10764
-  type: parameter
-  concept: vowel_identity_levels
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-  value: 15
-- id: claim10765
-  type: parameter
-  concept: consonant_identity_levels
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-  value: 32
-- id: claim10766
+- id: claim2605
   type: parameter
   concept: predicted
   provenance:
@@ -23,7 +9,7 @@ claims:
     page: 0
   unit: ms
   value: 52
-- id: claim10767
+- id: claim2606
   type: parameter
   concept: fast
   provenance:
@@ -31,7 +17,7 @@ claims:
     page: 0
   unit: ms
   value: 44
-- id: claim10768
+- id: claim2607
   type: parameter
   concept: normal
   provenance:
@@ -39,7 +25,7 @@ claims:
     page: 0
   unit: ms
   value: 53
-- id: claim10769
+- id: claim2608
   type: parameter
   concept: slow
   provenance:
@@ -47,55 +33,28 @@ claims:
     page: 0
   unit: ms
   value: 68
-- id: claim10770
+- id: claim2609
   type: observation
   statement: Duration must be non-negative for all parameter combinations
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: vanSanten_1994_SegmentalDurationTTS
     page: 0
-- id: claim10771
-  type: observation
-  statement: Stressed vowels must be longer than unstressed vowels in the same context
-  concepts: []
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-- id: claim10772
-  type: observation
-  statement: Phrase-final segments must be longer than phrase-medial segments
-  concepts: []
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-- id: claim10773
+- id: claim2610
   type: observation
   statement: Correlation between observed and predicted durations should exceed 0.85
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: vanSanten_1994_SegmentalDurationTTS
     page: 0
-- id: claim10774
-  type: observation
-  statement: Combined stress effect slopes ($S_{2,[1;3]}$) should be non-negative
-    for all consonant-position combinations
-  concepts: []
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-- id: claim10775
+- id: claim2611
   type: observation
   statement: Vowel identity effect should be ordered (inherent duration ranking preserved
     across contexts)
-  concepts: []
-  provenance:
-    paper: vanSanten_1994_SegmentalDurationTTS
-    page: 0
-- id: claim10776
-  type: observation
-  statement: The sums-of-products model should produce better predictions than a pure
-    multiplicative model when factor interactions are amplificatory
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: vanSanten_1994_SegmentalDurationTTS
     page: 0

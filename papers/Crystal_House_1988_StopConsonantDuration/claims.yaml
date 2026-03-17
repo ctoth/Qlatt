@@ -51,223 +51,13 @@ claims:
   value: 57
 - id: claim7
   type: parameter
-  concept: hold_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 54
-- id: claim8
-  type: parameter
-  concept: hold_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 53
-- id: claim9
-  type: parameter
-  concept: hold_sd_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 23
-- id: claim10
-  type: parameter
-  concept: hold_sd_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 21
-- id: claim11
-  type: parameter
-  concept: release_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 18
-- id: claim12
-  type: parameter
-  concept: release_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 39
-- id: claim13
-  type: parameter
-  concept: release_sd_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 10
-- id: claim14
-  type: parameter
-  concept: release_sd_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 23
-- id: claim15
-  type: parameter
-  concept: total_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 72
-- id: claim16
-  type: parameter
-  concept: total_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 92
-- id: claim17
-  type: parameter
-  concept: total_sd_voiced
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 25
-- id: claim18
-  type: parameter
-  concept: total_sd_voiceless
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 32
-- id: claim19
-  type: parameter
-  concept: hold_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 57
-- id: claim20
-  type: parameter
-  concept: hold_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 49
-- id: claim21
-  type: parameter
-  concept: hold_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 58
-- id: claim22
-  type: parameter
-  concept: hold_sd_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 24
-- id: claim23
-  type: parameter
-  concept: hold_sd_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 19
-- id: claim24
-  type: parameter
-  concept: hold_sd_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 22
-- id: claim25
-  type: parameter
-  concept: release_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 20
-- id: claim26
-  type: parameter
-  concept: release_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 30
-- id: claim27
-  type: parameter
-  concept: release_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 44
-- id: claim28
-  type: parameter
-  concept: release_sd_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 16
-- id: claim29
-  type: parameter
-  concept: release_sd_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 19
-- id: claim30
-  type: parameter
-  concept: release_sd_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 25
-- id: claim31
-  type: parameter
-  concept: total_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 77
-- id: claim32
-  type: parameter
-  concept: total_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 80
-- id: claim33
-  type: parameter
-  concept: total_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 103
-- id: claim34
-  type: parameter
-  concept: total_sd_labial
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 30
-- id: claim35
-  type: parameter
-  concept: total_sd_alveolar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 27
-- id: claim36
-  type: parameter
-  concept: total_sd_velar
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 34
-- id: claim37
-  type: parameter
   concept: overall_stop_duration
   provenance:
     paper: Crystal_House_1988_StopConsonantDuration
     page: 0
   unit: ms
   value: 76
-- id: claim38
+- id: claim8
   type: parameter
   concept: hold_duration
   provenance:
@@ -275,7 +65,7 @@ claims:
     page: 0
   unit: ms
   value: 55
-- id: claim39
+- id: claim9
   type: parameter
   concept: complete_stop_total
   provenance:
@@ -283,7 +73,7 @@ claims:
     page: 0
   unit: ms
   value: 89
-- id: claim40
+- id: claim10
   type: parameter
   concept: cv
   provenance:
@@ -291,7 +81,7 @@ claims:
     page: 0
   unit: ms
   value: 66
-- id: claim41
+- id: claim11
   type: parameter
   concept: cv
   provenance:
@@ -299,7 +89,7 @@ claims:
     page: 0
   unit: ms
   value: 55
-- id: claim42
+- id: claim12
   type: parameter
   concept: cv
   provenance:
@@ -307,7 +97,7 @@ claims:
     page: 0
   unit: ms
   value: 61
-- id: claim43
+- id: claim13
   type: parameter
   concept: cr
   provenance:
@@ -315,7 +105,7 @@ claims:
     page: 0
   unit: ms
   value: 58
-- id: claim44
+- id: claim14
   type: parameter
   concept: cr
   provenance:
@@ -323,7 +113,7 @@ claims:
     page: 0
   unit: ms
   value: 54
-- id: claim45
+- id: claim15
   type: parameter
   concept: scv
   provenance:
@@ -331,7 +121,7 @@ claims:
     page: 0
   unit: ms
   value: 51
-- id: claim46
+- id: claim16
   type: parameter
   concept: scv
   provenance:
@@ -339,7 +129,7 @@ claims:
     page: 0
   unit: ms
   value: 56
-- id: claim47
+- id: claim17
   type: parameter
   concept: c_pause
   provenance:
@@ -347,7 +137,7 @@ claims:
     page: 0
   unit: ms
   value: 59
-- id: claim48
+- id: claim18
   type: parameter
   concept: c_pause
   provenance:
@@ -355,7 +145,7 @@ claims:
     page: 0
   unit: ms
   value: 79
-- id: claim49
+- id: claim19
   type: parameter
   concept: vc_pause
   provenance:
@@ -363,7 +153,7 @@ claims:
     page: 0
   unit: ms
   value: 57
-- id: claim50
+- id: claim20
   type: parameter
   concept: vc_pause
   provenance:
@@ -371,10 +161,3 @@ claims:
     page: 0
   unit: ms
   value: 86
-- id: claim51
-  type: parameter
-  concept: n
-  provenance:
-    paper: Crystal_House_1988_StopConsonantDuration
-    page: 0
-  value: 161

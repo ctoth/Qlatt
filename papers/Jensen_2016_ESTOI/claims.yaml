@@ -35,27 +35,13 @@ claims:
   unit: --
 - id: claim5
   type: parameter
-  concept: window
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  unit: --
-- id: claim6
-  type: parameter
   concept: number_of_subbands
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
   value: 15
   unit: --
-- id: claim7
-  type: parameter
-  concept: frequency_range
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  unit: Hz
-- id: claim8
+- id: claim6
   type: parameter
   concept: segment_length
   provenance:
@@ -63,7 +49,7 @@ claims:
     page: 0
   value: 30
   unit: frames
-- id: claim9
+- id: claim7
   type: parameter
   concept: silence_threshold
   provenance:
@@ -71,338 +57,178 @@ claims:
     page: 0
   value: -40
   unit: dB
-- id: claim10
-  type: parameter
-  concept: logistic_param_a
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  unit: --
-- id: claim11
-  type: parameter
-  concept: logistic_param_b
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  unit: --
-- id: claim12
-  type: parameter
-  concept: add_noise_set_i_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.915
-- id: claim13
-  type: parameter
-  concept: add_noise_set_i_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.477
-- id: claim14
-  type: parameter
-  concept: add_noise_set_i_glimpse
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.872
-- id: claim15
-  type: parameter
-  concept: add_noise_set_i_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.514
-- id: claim16
-  type: parameter
-  concept: add_noise_set_i_sii
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.541
-- id: claim17
-  type: parameter
-  concept: add_noise_set_ii_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.916
-- id: claim18
-  type: parameter
-  concept: add_noise_set_ii_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.809
-- id: claim19
-  type: parameter
-  concept: add_noise_set_ii_glimpse
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.872
-- id: claim20
-  type: parameter
-  concept: add_noise_set_ii_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.027
-- id: claim21
-  type: parameter
-  concept: add_noise_set_ii_sii
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: -0.101
-- id: claim22
-  type: parameter
-  concept: add_noise_set_ii_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.96
-- id: claim23
-  type: parameter
-  concept: add_noise_set_ii_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.799
-- id: claim24
-  type: parameter
-  concept: add_noise_set_ii_glimpse
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.875
-- id: claim25
-  type: parameter
-  concept: add_noise_set_ii_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.238
-- id: claim26
-  type: parameter
-  concept: add_noise_set_ii_sii
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.107
-- id: claim27
-  type: parameter
-  concept: add_noise_set_iii_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.864
-- id: claim28
-  type: parameter
-  concept: add_noise_set_iii_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.887
-- id: claim29
-  type: parameter
-  concept: add_noise_set_iii_glimpse
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.845
-- id: claim30
-  type: parameter
-  concept: add_noise_set_iii_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.931
-- id: claim31
-  type: parameter
-  concept: add_noise_set_iii_sii
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.723
-- id: claim32
-  type: parameter
-  concept: itfs_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.948
-- id: claim33
-  type: parameter
-  concept: itfs_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.931
-- id: claim34
-  type: parameter
-  concept: itfs_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.958
-- id: claim35
-  type: parameter
-  concept: scnr_estoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.981
-- id: claim36
-  type: parameter
-  concept: scnr_stoi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.983
-- id: claim37
-  type: parameter
-  concept: scnr_simi
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-  value: 0.974
-- id: claim38
+- id: claim8
   type: equation
   expression: S(k, m) = \sum_{n=0}^{N'-1} s(mD + n) w(n) e^{-j2\pi kn/N'}
+  variables:
+  - symbol: sum_
+    concept: sum
+  - symbol: mD
+    concept: md
+  - symbol: j2
+    concept: j2
+  - symbol: kn
+    concept: kn
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim39
+- id: claim9
   type: equation
   expression: S_j(m) = \sqrt{\sum_{k \in CB_j} |S(k,m)|^2}, \quad j = 1, \ldots, J
+  variables:
+  - symbol: S_j
+    concept: s_j
+  - symbol: CB_j
+    concept: cb_j
+  - symbol: sum_
+    concept: sum
+  - symbol: in
+    concept: in
+  - symbol: quad
+    concept: quad
+  - symbol: ldots
+    concept: ldots
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim40
+- id: claim10
   type: equation
   expression: S_m = \begin{bmatrix} S_1(m-N+1) & \cdots & S_1(m) \\ \vdots & & \vdots
     \\ S_J(m-N+1) & \cdots & S_J(m) \end{bmatrix}
+  variables:
+  - symbol: S_m
+    concept: s_m
+  - symbol: S_1
+    concept: s_1
+  - symbol: S_J
+    concept: s_j
+  - symbol: bmatrix
+    concept: bmatrix
+  - symbol: cdots
+    concept: cdots
+  - symbol: vdots
+    concept: vdots
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim41
+- id: claim11
   type: equation
   expression: s_{j,m} = [S_j(m-N+1) \; S_j(m-N+2) \cdots S_j(m)]^T
+  variables:
+  - symbol: s_j
+    concept: s_j
+  - symbol: s_
+    concept: s
+  - symbol: cdots
+    concept: cdots
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim42
+- id: claim12
   type: equation
   expression: \bar{s}_{j,m} = \frac{1}{\|(s_{j,m} - \mu_{s_{j,m}} \mathbf{1})\|} (s_{j,m}
     - \mu_{s_{j,m}} \mathbf{1}) \tag{1}
+  variables:
+  - symbol: s_j
+    concept: s_j
+  - symbol: s_
+    concept: s
+  - symbol: mu_
+    concept: mu
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim43
+- id: claim13
   type: equation
   expression: \mu_{s_{j,m}} = \frac{1}{N} \sum_{m'=0}^{N-1} S_j(m - m') \tag{2}
+  variables:
+  - symbol: S_j
+    concept: s_j
+  - symbol: mu_
+    concept: mu
+  - symbol: s_
+    concept: s
+  - symbol: sum_
+    concept: sum
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim44
+- id: claim14
   type: equation
   expression: \bar{S}_m = \begin{bmatrix} \bar{s}_{1,m}^T \\ \vdots \\ \bar{s}_{J,m}^T
     \end{bmatrix}
+  variables:
+  - symbol: bmatrix
+    concept: bmatrix
+  - symbol: vdots
+    concept: vdots
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim45
+- id: claim15
   type: equation
   expression: \check{S}_m = [\check{s}_{1,m} \cdots \check{s}_{N,m}]
+  variables:
+  - symbol: check
+    concept: check
+  - symbol: cdots
+    concept: cdots
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim46
+- id: claim16
   type: equation
   expression: d_m = \frac{1}{N} \sum_{n=1}^{N} \check{s}_{n,m}^T \check{x}_{n,m} \tag{4}
+  variables:
+  - symbol: d_m
+    concept: d_m
+  - symbol: sum_
+    concept: sum
+  - symbol: check
+    concept: check
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim47
+- id: claim17
   type: equation
   expression: d = \frac{1}{M} \sum_{m=1}^{M} d_m \tag{5}
+  variables:
+  - symbol: d_m
+    concept: d_m
+  - symbol: sum_
+    concept: sum
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim48
+- id: claim18
   type: equation
   expression: d = \frac{1}{MN} \text{Tr}(\check{S}^T \check{X}) \tag{7}
+  variables:
+  - symbol: MN
+    concept: mn
+  - symbol: Tr
+    concept: tr
+  - symbol: check
+    concept: check
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0
-- id: claim49
+- id: claim19
   type: equation
   expression: \hat{I} = \frac{100}{1 + \exp(a\tilde{I} + b)} \tag{10}
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim50
-  type: observation
-  statement: d must be in [-1, 1] for any input signals
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim51
-  type: observation
-  statement: d_m must be in [-1, 1] for any time segment
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim52
-  type: observation
-  statement: For identical clean and noisy signals (no noise), d should equal 1
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim53
-  type: observation
-  statement: For uncorrelated signals, d should approach 0
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim54
-  type: observation
-  statement: Row-normalized vectors must have zero mean and unit norm
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim55
-  type: observation
-  statement: Column-normalized vectors must have zero mean and unit norm
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim56
-  type: observation
-  statement: d = (1/MN) Tr(S_check^T X_check) -- trace form must match element-wise
-    computation
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim57
-  type: observation
-  statement: Sum of eigenvalues of the cross-correlation matrix must equal d
-  concepts: []
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim58
-  type: observation
-  statement: Performance should be insensitive to N for 20 <= N <= 50 (256-640 ms)
-  concepts: []
+  variables:
+  - symbol: tag
+    concept: tag
   provenance:
     paper: Jensen_2016_ESTOI
     page: 0

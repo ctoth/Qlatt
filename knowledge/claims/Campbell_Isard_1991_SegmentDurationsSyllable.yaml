@@ -1,7 +1,7 @@
 source:
   paper: Campbell_Isard_1991_SegmentDurationsSyllable
 claims:
-- id: claim1057
+- id: claim328
   type: parameter
   concept: segment_zscore
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 0
   unit: SD units
-- id: claim1058
+- id: claim329
   type: parameter
   concept: long_syllable_mean_z
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 1.4
   unit: SD
-- id: claim1059
+- id: claim330
   type: parameter
   concept: short_syllable_mean_z
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: -1.2
   unit: SD
-- id: claim1060
+- id: claim331
   type: parameter
   concept: intermediate_syllable_mean_z
   provenance:
@@ -33,21 +33,7 @@ claims:
     page: 0
   value: -0.05
   unit: SD
-- id: claim1061
-  type: parameter
-  concept: compression_factor_k
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  unit: SD
-- id: claim1062
-  type: parameter
-  concept: final_lengthening_exponent_base
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 0.75
-- id: claim1063
+- id: claim332
   type: parameter
   concept: onset
   provenance:
@@ -55,7 +41,7 @@ claims:
     page: 0
   unit: mean
   value: 1.56
-- id: claim1064
+- id: claim333
   type: parameter
   concept: peak
   provenance:
@@ -63,7 +49,7 @@ claims:
     page: 0
   unit: mean
   value: 1.47
-- id: claim1065
+- id: claim334
   type: parameter
   concept: coda
   provenance:
@@ -71,7 +57,7 @@ claims:
     page: 0
   unit: mean
   value: 1.03
-- id: claim1066
+- id: claim335
   type: parameter
   concept: medial
   provenance:
@@ -79,98 +65,7 @@ claims:
     page: 0
   unit: mean
   value: 1.48
-- id: claim1067
-  type: parameter
-  concept: words
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  unit: Words
-- id: claim1068
-  type: parameter
-  concept: syllables
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  unit: Syllables
-- id: claim1069
-  type: parameter
-  concept: segments
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  unit: Segments
-- id: claim1070
-  type: parameter
-  concept: vowels
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  unit: Vowels
-- id: claim1071
-  type: parameter
-  concept: onset_mean_z
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 0.33
-- id: claim1072
-  type: parameter
-  concept: onset_sd
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 0.97
-- id: claim1073
-  type: parameter
-  concept: onset_n
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 232
-- id: claim1074
-  type: parameter
-  concept: peak_mean_z
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 1.09
-- id: claim1075
-  type: parameter
-  concept: peak_sd
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 1.25
-- id: claim1076
-  type: parameter
-  concept: peak_n
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 245
-- id: claim1077
-  type: parameter
-  concept: coda_mean_z
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 1.14
-- id: claim1078
-  type: parameter
-  concept: coda_sd
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 1.21
-- id: claim1079
-  type: parameter
-  concept: coda_n
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-  value: 242
-- id: claim1080
+- id: claim336
   type: parameter
   concept: all_syllables
   provenance:
@@ -178,7 +73,7 @@ claims:
     page: 0
   unit: mean
   value: -0.022
-- id: claim1081
+- id: claim337
   type: parameter
   concept: sentinternal
   provenance:
@@ -186,7 +81,7 @@ claims:
     page: 0
   unit: mean
   value: -0.105
-- id: claim1082
+- id: claim338
   type: parameter
   concept: sentfinal
   provenance:
@@ -194,7 +89,7 @@ claims:
     page: 0
   unit: mean
   value: 0.959
-- id: claim1083
+- id: claim339
   type: parameter
   concept: long_syllables
   provenance:
@@ -202,7 +97,7 @@ claims:
     page: 0
   unit: mean
   value: 0.703
-- id: claim1084
+- id: claim340
   type: parameter
   concept: short_syllables
   provenance:
@@ -210,7 +105,7 @@ claims:
     page: 0
   unit: mean
   value: -0.667
-- id: claim1085
+- id: claim341
   type: parameter
   concept: all_syllables
   provenance:
@@ -218,71 +113,69 @@ claims:
     page: 0
   unit: mean
   value: 0.132
-- id: claim1086
+- id: claim342
   type: equation
   expression: z_{token} = \frac{\text{observed duration}_{token} - \mu_{type}}{\sigma_{type}}
+  variables:
+  - symbol: z_token
+    concept: z_token
+  - symbol: z_
+    concept: z
+  - symbol: token
+    concept: token
+  - symbol: observed
+    concept: observed
+  - symbol: duration
+    concept: duration
+  - symbol: mu_
+    concept: mu
+  - symbol: type
+    concept: type
+  - symbol: sigma_
+    concept: sigma
   provenance:
     paper: Campbell_Isard_1991_SegmentDurationsSyllable
     page: 0
-- id: claim1087
+- id: claim343
   type: equation
   expression: \Delta = \sum_{i=1}^{n} \exp(\mu_i + k\sigma_i)
+  variables:
+  - symbol: sum_
+    concept: sum
+  - symbol: mu_i
+    concept: mu_i
+  - symbol: sigma_i
+    concept: sigma_i
   provenance:
     paper: Campbell_Isard_1991_SegmentDurationsSyllable
     page: 0
-- id: claim1088
+- id: claim344
   type: equation
   expression: \exp(\mu_i + 0.75^{(n-i)} k \sigma_i)
+  variables:
+  - symbol: mu_i
+    concept: mu_i
+  - symbol: sigma_i
+    concept: sigma_i
   provenance:
     paper: Campbell_Isard_1991_SegmentDurationsSyllable
     page: 0
-- id: claim1089
-  type: observation
-  statement: '**Uniform compression**: In short, sentence-internal syllables, z-scores
-    should be approximately constant across onset, peak, and coda positions (within
-    ~0.15 SD)'
-  concepts: []
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-- id: claim1090
-  type: observation
-  statement: '**Final lengthening asymmetry**: Peak and coda z-scores in final syllables
-    should be significantly higher than onset z-scores (by ~0.7-0.8 SD)'
-  concepts: []
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-- id: claim1091
-  type: observation
-  statement: '**Pre-voicing effect size**: Vowels before voiced stops should be ~0.25
-    SD longer than before voiceless stops in sentence-internal syllables'
-  concepts: []
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-- id: claim1092
+- id: claim345
   type: observation
   statement: '**Log-normal distribution**: Raw segment durations should be approximately
     log-normally distributed (positive skew in raw, near-normal after log transform)'
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Campbell_Isard_1991_SegmentDurationsSyllable
     page: 0
-- id: claim1093
-  type: observation
-  statement: '**Elasticity range**: z-scores should fall within [-3, +3] with 0.998
-    probability'
-  concepts: []
-  provenance:
-    paper: Campbell_Isard_1991_SegmentDurationsSyllable
-    page: 0
-- id: claim1094
+- id: claim346
   type: observation
   statement: '**Syllable-level prediction**: Solving Eq. 2 for k and applying uniformly
     should reconstruct segment durations within the syllable to reasonable accuracy
     for non-final syllables'
-  concepts: []
+  concepts:
+  - duration
   provenance:
     paper: Campbell_Isard_1991_SegmentDurationsSyllable
     page: 0

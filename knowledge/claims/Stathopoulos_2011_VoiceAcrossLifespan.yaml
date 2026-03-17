@@ -1,7 +1,7 @@
 source:
   paper: Stathopoulos_2011_VoiceAcrossLifespan
 claims:
-- id: claim8467
+- id: claim2222
   type: parameter
   concept: '4'
   provenance:
@@ -11,7 +11,7 @@ claims:
   value: 6
   lower_bound: 4.0
   upper_bound: 4.8
-- id: claim8468
+- id: claim2223
   type: parameter
   concept: '6'
   provenance:
@@ -21,7 +21,7 @@ claims:
   value: 6
   lower_bound: 6.1
   upper_bound: 6.6
-- id: claim8469
+- id: claim2224
   type: parameter
   concept: '8'
   provenance:
@@ -31,7 +31,7 @@ claims:
   value: 6
   lower_bound: 8.1
   upper_bound: 8.9
-- id: claim8470
+- id: claim2225
   type: parameter
   concept: '10'
   provenance:
@@ -41,7 +41,7 @@ claims:
   value: 6
   lower_bound: 10.1
   upper_bound: 10.3
-- id: claim8471
+- id: claim2226
   type: parameter
   concept: '12'
   provenance:
@@ -51,7 +51,7 @@ claims:
   value: 6
   lower_bound: 12.0
   upper_bound: 12.8
-- id: claim8472
+- id: claim2227
   type: parameter
   concept: '14'
   provenance:
@@ -61,7 +61,7 @@ claims:
   value: 6
   lower_bound: 14.1
   upper_bound: 14.8
-- id: claim8473
+- id: claim2228
   type: parameter
   concept: '16'
   provenance:
@@ -71,7 +71,7 @@ claims:
   value: 6
   lower_bound: 16.2
   upper_bound: 16.7
-- id: claim8474
+- id: claim2229
   type: parameter
   concept: '18'
   provenance:
@@ -81,7 +81,7 @@ claims:
   value: 6
   lower_bound: 18.2
   upper_bound: 18.8
-- id: claim8475
+- id: claim2230
   type: parameter
   concept: '20'
   provenance:
@@ -91,7 +91,7 @@ claims:
   value: 6
   lower_bound: 20.9
   upper_bound: 23.1
-- id: claim8476
+- id: claim2231
   type: parameter
   concept: '30'
   provenance:
@@ -101,7 +101,7 @@ claims:
   value: 6
   lower_bound: 29.6
   upper_bound: 37.2
-- id: claim8477
+- id: claim2232
   type: parameter
   concept: '40'
   provenance:
@@ -111,7 +111,7 @@ claims:
   value: 6
   lower_bound: 41.8
   upper_bound: 48.5
-- id: claim8478
+- id: claim2233
   type: parameter
   concept: '50'
   provenance:
@@ -121,7 +121,7 @@ claims:
   value: 6
   lower_bound: 50.0
   upper_bound: 58.2
-- id: claim8479
+- id: claim2234
   type: parameter
   concept: '60'
   provenance:
@@ -131,7 +131,7 @@ claims:
   value: 7
   lower_bound: 60.0
   upper_bound: 68.8
-- id: claim8480
+- id: claim2235
   type: parameter
   concept: '70'
   provenance:
@@ -141,7 +141,7 @@ claims:
   value: 11
   lower_bound: 73.0
   upper_bound: 79.3
-- id: claim8481
+- id: claim2236
   type: parameter
   concept: '80'
   provenance:
@@ -151,7 +151,7 @@ claims:
   value: 10
   lower_bound: 80.0
   upper_bound: 84.7
-- id: claim8482
+- id: claim2237
   type: parameter
   concept: '90'
   provenance:
@@ -161,7 +161,7 @@ claims:
   value: 4
   lower_bound: 91.3
   upper_bound: 93.4
-- id: claim8483
+- id: claim2238
   type: parameter
   concept: total
   provenance:
@@ -169,58 +169,46 @@ claims:
     page: 0
   unit: F
   value: 104
-- id: claim8484
+- id: claim2239
   type: equation
   expression: \text{correction} = 20 \times \log(4/6) = -3.5 \text{ dB}
+  variables:
+  - symbol: correction
+    concept: correction
+  - symbol: dB
+    concept: db
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
-- id: claim8485
+- id: claim2240
   type: observation
   statement: F0 at age 4-8 should be ~250-300 Hz for both sexes (pre-pubertal convergence)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
-- id: claim8486
+- id: claim2241
   type: observation
   statement: Male F0 minimum occurs around age 50 (~115 Hz)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
-- id: claim8487
+- id: claim2242
   type: observation
   statement: Female F0 minimum occurs around age 60 (~200 Hz)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0
-- id: claim8488
+- id: claim2243
   type: observation
   statement: SPL must increase monotonically with age in the combined-sex model
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim8489
-  type: observation
-  statement: Variability (COVAR) for all measures must follow U-shaped curves
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim8490
-  type: observation
-  statement: Male SNR increases linearly (more periodic energy with age)
-  concepts: []
-  provenance:
-    paper: Stathopoulos_2011_VoiceAcrossLifespan
-    page: 0
-- id: claim8491
-  type: observation
-  statement: Female SNR follows nonlinear pattern with inflection at ~50 years
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Stathopoulos_2011_VoiceAcrossLifespan
     page: 0

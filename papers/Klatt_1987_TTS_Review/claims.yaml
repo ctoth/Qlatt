@@ -146,76 +146,43 @@ claims:
   upper_bound: 24
   unit: dB
 - id: claim17
-  type: parameter
-  concept: prose2000_words_correct
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 84
-- id: claim18
-  type: parameter
-  concept: prose2000_anomalous
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 65
-- id: claim19
-  type: parameter
-  concept: mitalk79_words_correct
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 93
-- id: claim20
-  type: parameter
-  concept: mitalk79_anomalous
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 79
-- id: claim21
-  type: parameter
-  concept: dectalk_words_correct
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 95
-- id: claim22
-  type: parameter
-  concept: dectalk_anomalous
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 87
-- id: claim23
-  type: parameter
-  concept: natural_speech_words_correct
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 99
-- id: claim24
-  type: parameter
-  concept: natural_speech_anomalous
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-  value: 98
-- id: claim25
   type: equation
   expression: DUR = MINDUR + \frac{(INHDUR - MINDUR) \times PRCNT}{100}
+  variables:
+  - symbol: DUR
+    concept: dur
+  - symbol: MINDUR
+    concept: mindur
+  - symbol: INHDUR
+    concept: inhdur
+  - symbol: PRCNT
+    concept: prcnt
   provenance:
     paper: Klatt_1987_TTS_Review
     page: 0
-- id: claim26
+- id: claim18
   type: equation
   expression: F2_{onset} = F2_{locus} + k \times [F2_{vowel} - F2_{locus}]
+  variables:
+  - symbol: F2_
+    concept: f2
+  - symbol: onset
+    concept: onset
+  - symbol: locus
+    concept: locus
+  - symbol: vowel
+    concept: vowel
   provenance:
     paper: Klatt_1987_TTS_Review
     page: 0
-- id: claim27
+- id: claim19
   type: equation
   expression: aT^2 - bT^3
+  variables:
+  - symbol: aT
+    concept: at
+  - symbol: bT
+    concept: bt
   provenance:
     paper: Klatt_1987_TTS_Review
     page: 0

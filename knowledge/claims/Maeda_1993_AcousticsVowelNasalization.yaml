@@ -1,7 +1,7 @@
 source:
   paper: Maeda_1993_AcousticsVowelNasalization
 claims:
-- id: claim6446
+- id: claim1859
   type: parameter
   concept: c_n1
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 368
-- id: claim6447
+- id: claim1860
   type: parameter
   concept: f1
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 501
-- id: claim6448
+- id: claim1861
   type: parameter
   concept: f2
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 1096
-- id: claim6449
+- id: claim1862
   type: parameter
   concept: c_n2
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: Hz
   value: 1803
-- id: claim6450
+- id: claim1863
   type: parameter
   concept: f3
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: Hz
   value: 2512
-- id: claim6451
+- id: claim1864
   type: parameter
   concept: f4
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: Hz
   value: 3392
-- id: claim6452
+- id: claim1865
   type: parameter
   concept: r1
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: Hz
   value: 296
-- id: claim6453
+- id: claim1866
   type: parameter
   concept: r2
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 688
-- id: claim6454
+- id: claim1867
   type: parameter
   concept: c_o1
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: Hz
   value: 872
-- id: claim6455
+- id: claim1868
   type: parameter
   concept: r3
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: Hz
   value: 1744
-- id: claim6456
+- id: claim1869
   type: parameter
   concept: r4
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: Hz
   value: 2648
-- id: claim6457
+- id: claim1870
   type: parameter
   concept: c_o2
   provenance:

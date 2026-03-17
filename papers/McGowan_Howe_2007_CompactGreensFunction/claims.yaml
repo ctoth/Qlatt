@@ -3,20 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: speed_of_sound
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: m/s
-- id: claim2
-  type: parameter
-  concept: air_density
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: kg/m^3
-- id: claim3
-  type: parameter
   concept: acoustic_wavelength
   provenance:
     paper: McGowan_Howe_2007_CompactGreensFunction
@@ -24,71 +10,3 @@ claims:
   lower_bound: 1.5
   upper_bound: 2.5
   unit: m
-- id: claim4
-  type: parameter
-  concept: source_region_size
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: cm
-- id: claim5
-  type: parameter
-  concept: jet_velocity_at_false_folds
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: cm/s
-- id: claim6
-  type: parameter
-  concept: radius_of_curvature
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: cm
-- id: claim7
-  type: parameter
-  concept: fence_height
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-  unit: cm
-- id: claim8
-  type: observation
-  statement: Sharp-edge obstruction sources should produce more high-frequency energy
-    than rounded-edge sources at the same flow velocity
-  concepts: []
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-- id: claim9
-  type: observation
-  statement: Sibilant fricative amplitude should correlate with the sharpness of the
-    nearest downstream obstruction (teeth)
-  concepts: []
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-- id: claim10
-  type: observation
-  statement: Aspiration noise spectral rolloff should correlate with false fold radius
-    of curvature
-  concepts: []
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-- id: claim11
-  type: observation
-  statement: Source effectiveness at rounded edges should diminish exponentially above
-    frequency V/r
-  concepts: []
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0
-- id: claim12
-  type: observation
-  statement: For compact sources ($\ell \ll \lambda$), the far-field spectrum should
-    factor cleanly into source × transfer function components
-  concepts: []
-  provenance:
-    paper: McGowan_Howe_2007_CompactGreensFunction
-    page: 0

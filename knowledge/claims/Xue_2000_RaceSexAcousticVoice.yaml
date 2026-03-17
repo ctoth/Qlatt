@@ -1,7 +1,7 @@
 source:
   paper: Xue_2000_RaceSexAcousticVoice
 claims:
-- id: claim11017
+- id: claim2695
   type: parameter
   concept: average_fundamental_frequency
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 154.29
-- id: claim11018
+- id: claim2696
   type: parameter
   concept: absolute_jitter
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: us
   value: 147.21
-- id: claim11019
+- id: claim2697
   type: parameter
   concept: jitter_percent
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: '%'
   value: 1.97
-- id: claim11020
+- id: claim2698
   type: parameter
   concept: pitch_period_perturbation_quotient
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: '%'
   value: 1.17
-- id: claim11021
+- id: claim2699
   type: parameter
   concept: phonatory_fundamental_frequency_range
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: st
   value: 4.11
-- id: claim11022
+- id: claim2700
   type: parameter
   concept: relative_average_perturbation
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: '%'
   value: 1.17
-- id: claim11023
+- id: claim2701
   type: parameter
   concept: smoothed_pitch_period_perturbation_quotient
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: '%'
   value: 2.29
-- id: claim11024
+- id: claim2702
   type: parameter
   concept: standard_deviation_of_f0
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: Hz
   value: 5.47
-- id: claim11025
+- id: claim2703
   type: parameter
   concept: fundamental_frequency_variation
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: '%'
   value: 3.82
-- id: claim11026
+- id: claim2704
   type: parameter
   concept: amplitude_perturbation_quotient
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: '%'
   value: 4.0
-- id: claim11027
+- id: claim2705
   type: parameter
   concept: shimmer
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: dB
   value: 0.48
-- id: claim11028
+- id: claim2706
   type: parameter
   concept: shimmer_percent
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: '%'
   value: 5.29
-- id: claim11029
+- id: claim2707
   type: parameter
   concept: noisetoharmonic_ratio
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   unit: ratio
   value: 0.18
-- id: claim11030
+- id: claim2708
   type: parameter
   concept: soft_phonation_index
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   unit: ratio
   value: 14.54
-- id: claim11031
+- id: claim2709
   type: parameter
   concept: voice_turbulence_index
   provenance:
@@ -121,124 +121,57 @@ claims:
     page: 0
   unit: ratio
   value: 0.069
-- id: claim11032
-  type: parameter
-  concept: f0_hz_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 125.91
-- id: claim11033
-  type: parameter
-  concept: f0_hz_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 181.35
-- id: claim11034
-  type: parameter
-  concept: f0_hz_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 42.1
-- id: claim11035
-  type: parameter
-  concept: jita_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 183.01
-- id: claim11036
-  type: parameter
-  concept: jita_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 113.08
-- id: claim11037
-  type: parameter
-  concept: jita_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 4.94
-- id: claim11038
-  type: parameter
-  concept: spi_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 18.07
-- id: claim11039
-  type: parameter
-  concept: spi_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 11.18
-- id: claim11040
-  type: parameter
-  concept: spi_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 11.92
-- id: claim11041
-  type: parameter
-  concept: std_hz_males_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 3.32
-- id: claim11042
-  type: parameter
-  concept: std_hz_females_m
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 7.51
-- id: claim11043
-  type: parameter
-  concept: std_hz_f
-  provenance:
-    paper: Xue_2000_RaceSexAcousticVoice
-    page: 0
-  value: 5.06
-- id: claim11044
+- id: claim2710
   type: equation
   expression: \text{Harmonic amplitude rolloff} \approx -12 \text{ dB/octave}
+  variables:
+  - symbol: Harmonic
+    concept: harmonic
+  - symbol: amplitude
+    concept: amplitude
+  - symbol: rolloff
+    concept: rolloff
+  - symbol: dB
+    concept: db
+  - symbol: octave
+    concept: octave
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim11045
+- id: claim2711
   type: observation
   statement: Absolute jitter (us) should be higher for lower F0 voices when percentage
     jitter is held constant (jitter is period-dependent)
-  concepts: []
+  concepts:
+  - f0
+  - jitter
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim11046
+- id: claim2712
   type: observation
   statement: SPI should increase as F0 decreases, given -12 dB/octave harmonic rolloff
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim11047
+- id: claim2713
   type: observation
   statement: STD Hz should scale with mean F0 (higher F0 -> more absolute variation
     in Hz for equivalent relative variation)
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0
-- id: claim11048
+- id: claim2714
   type: observation
   statement: NHR, VTI, shimmer, and percentage-based perturbation measures should
     be approximately F0-independent
-  concepts: []
+  concepts:
+  - f0
+  - shimmer
   provenance:
     paper: Xue_2000_RaceSexAcousticVoice
     page: 0

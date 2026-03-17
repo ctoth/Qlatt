@@ -2,129 +2,42 @@ source:
   paper: Busquet_2023_VoiceAnalyticsRecordingDevices
 claims:
 - id: claim1
-  type: parameter
-  concept: mean_amplitude
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: dB
-- id: claim2
-  type: parameter
-  concept: mean_amplitude
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: dB
-- id: claim3
-  type: parameter
-  concept: mean_amplitude
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: dB
-- id: claim4
-  type: parameter
-  concept: mean_amplitude
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: dB
-- id: claim5
-  type: parameter
-  concept: mean_amplitude
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: dB
-- id: claim6
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: Hz
-- id: claim7
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: Hz
-- id: claim8
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: Hz
-- id: claim9
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: Hz
-- id: claim10
-  type: parameter
-  concept: mean_f0
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-  unit: Hz
-- id: claim11
   type: equation
   expression: \hat{y}_{\text{baseline}} = f_{\text{RF}}(\text{amplitude}_{\text{device}},
     \text{f0}_{\text{device}}, \text{device\_type})
+  variables:
+  - symbol: baseline
+    concept: baseline
+  - symbol: f_
+    concept: f
+  - symbol: RF
+    concept: rf
+  - symbol: amplitude
+    concept: amplitude
+  - symbol: device
+    concept: device
+  - symbol: f0
+    concept: f0
+  - symbol: type
+    concept: type
   provenance:
     paper: Busquet_2023_VoiceAnalyticsRecordingDevices
     page: 0
-- id: claim12
-  type: observation
-  statement: High-proximity microphones (headset, lavalier at <20 cm) must produce
-    higher amplitude measurements than a studio microphone at 60 cm for the same speaker
-    and utterance
-  concepts: []
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-- id: claim13
+- id: claim2
   type: observation
   statement: Smartphone built-in microphones should show systematically inflated f0
     (~5-12 Hz) compared to external microphones for the same speaker
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Busquet_2023_VoiceAnalyticsRecordingDevices
     page: 0
-- id: claim14
+- id: claim3
   type: observation
   statement: Cross-device f0 correlations should be high (r > .85) for all device
     pairs
-  concepts: []
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-- id: claim15
-  type: observation
-  statement: Cross-device amplitude correlations should be high (r > .90) except for
-    lavalier vs. other devices (r ~ .64-.68)
-  concepts: []
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-- id: claim16
-  type: observation
-  statement: Increasing the proportion of high-proximity device recordings in a mixed
-    dataset must reduce the detectable effect size for amplitude-based group comparisons
-    (monotonically)
-  concepts: []
-  provenance:
-    paper: Busquet_2023_VoiceAnalyticsRecordingDevices
-    page: 0
-- id: claim17
-  type: observation
-  statement: A random forest trained on device-specific features and device type should
-    achieve $R^2 > .90$ for mapping amplitude back toward studio baseline
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Busquet_2023_VoiceAnalyticsRecordingDevices
     page: 0

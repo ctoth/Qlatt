@@ -1,51 +1,22 @@
 source:
   paper: Goldsmith_1976_AutosegmentalPhonology
 claims:
-- id: claim3202
-  type: observation
-  statement: Association lines must never cross (the no-crossing constraint)
-  concepts: []
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
-- id: claim3203
-  type: observation
-  statement: Every tone-bearing unit in a well-formed representation must be associated
-    with at least one tone
-  concepts: []
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
-- id: claim3204
-  type: observation
-  statement: Every tone must be associated with at least one tone-bearing unit (unless
-    it is a floating tone at a specific derivational stage)
-  concepts: []
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
-- id: claim3205
-  type: observation
-  statement: 'Left-to-right mapping must be monotonic: if tone_i maps to syllable_j,
-    then tone_{i+1} maps to syllable >= j'
-  concepts: []
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
-- id: claim3206
+- id: claim1127
   type: observation
   statement: 'Spreading produces level tone: if one tone spreads over N syllables,
     all N syllables have identical pitch'
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Goldsmith_1976_AutosegmentalPhonology
     page: 0
-- id: claim3207
+- id: claim1128
   type: observation
   statement: 'Contour tones only appear when multiple tones associate with one syllable:
     the number of pitch changes within a syllable equals (number of associated tones
     - 1)'
-  concepts: []
+  concepts:
+  - pitch
   provenance:
     paper: Goldsmith_1976_AutosegmentalPhonology
     page: 0

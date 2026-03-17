@@ -3,55 +3,13 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: spectral_tilt
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: dB
-- id: claim2
-  type: parameter
-  concept: firstformant_prominence
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: dB
-- id: claim3
-  type: parameter
-  concept: spectral_tilt
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: dB
-- id: claim4
-  type: parameter
-  concept: firstformant_bandwidth
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: Hz
-- id: claim5
-  type: parameter
-  concept: noise_rating
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: 1-4
-- id: claim6
-  type: parameter
-  concept: noise_rating
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-  unit: 1-4
-- id: claim7
-  type: parameter
   concept: comfortable
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0
   unit: dB
   value: -1
-- id: claim8
+- id: claim2
   type: parameter
   concept: comfortable
   provenance:
@@ -59,7 +17,7 @@ claims:
     page: 0
   unit: dB
   value: 1
-- id: claim9
+- id: claim3
   type: parameter
   concept: loud
   provenance:
@@ -67,7 +25,7 @@ claims:
     page: 0
   unit: dB
   value: -9
-- id: claim10
+- id: claim4
   type: parameter
   concept: loud
   provenance:
@@ -75,65 +33,59 @@ claims:
     page: 0
   unit: dB
   value: -6
-- id: claim11
+- id: claim5
   type: equation
   expression: $$H1^*-A1 = (H1 - A1) - \text{correction for } F_1 \text{ boosting}$$
+  variables:
+  - symbol: F_1
+    concept: f_1
+  - symbol: H1
+    concept: h1
+  - symbol: A1
+    concept: a1
+  - symbol: correction
+    concept: correction
+  - symbol: for
+    concept: for
+  - symbol: boosting
+    concept: boosting
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0
-- id: claim12
-  type: observation
-  statement: H1*-A1 should be positively correlated with H1*-A3* across speakers (both
-    increase with PGO)
-  concepts: []
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-- id: claim13
+- id: claim6
   type: observation
   statement: H1*-H2* should correlate with both H1*-A1 and H1*-A3* (all reflect open
     quotient/tilt)
-  concepts: []
+  concepts:
+  - open_quotient
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0
-- id: claim14
-  type: observation
-  statement: Females should show higher mean and wider range for all measures compared
-    to males
-  concepts: []
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-- id: claim15
-  type: observation
-  statement: H1*-A3* < 23 dB should correspond to simultaneous membranous closure
-    (Group 1 females and most males)
-  concepts: []
-  provenance:
-    paper: Hanson_2001_ModelsPhonation
-    page: 0
-- id: claim16
+- id: claim7
   type: observation
   statement: Reduced vowels should have larger H1*-H2*, larger B1, greater spectral
     tilt than stressed vowels in the same utterance
-  concepts: []
+  concepts:
+  - spectral_tilt
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0
-- id: claim17
+- id: claim8
   type: observation
   statement: SPL should follow 3/2 power law with subglottal pressure for both normal
     and nodules models
-  concepts: []
+  concepts:
+  - spl
+  - subglottal_pressure
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0
-- id: claim18
+- id: claim9
   type: observation
   statement: Nodules model at same P_s should produce lower SPL than normal model
     (requiring higher P_s compensation)
-  concepts: []
+  concepts:
+  - spl
   provenance:
     paper: Hanson_2001_ModelsPhonation
     page: 0

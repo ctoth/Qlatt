@@ -1,253 +1,148 @@
 source:
   paper: Titze_1989_MaleFemaleVoices
 claims:
-- id: claim10441
-  type: parameter
-  concept: general_size_scale_factor
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10442
-  type: parameter
-  concept: membranous_length_scale_factor
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10443
-  type: parameter
-  concept: membranous_vocal_fold_length
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: mm
-- id: claim10444
-  type: parameter
-  concept: vocal_fold_thickness
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: mm
-- id: claim10445
-  type: parameter
-  concept: tissue_density
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: g/cm^3
-- id: claim10446
-  type: parameter
-  concept: vocal_fold_growth_rate
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: mm/year
-- id: claim10447
-  type: parameter
-  concept: vocal_fold_growth_rate
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: mm/year
-- id: claim10448
-  type: parameter
-  concept: mean_airflow_scale
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10449
-  type: parameter
-  concept: avgtopeak_flow_ratio
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10450
-  type: parameter
-  concept: avgtopeak_flow_ratio
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10451
-  type: parameter
-  concept: radiated_source_power_scale
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10452
-  type: parameter
-  concept: glottal_efficiency_scale
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10453
-  type: parameter
-  concept: shape_quotient
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10454
-  type: parameter
-  concept: bulging_quotient
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10455
-  type: parameter
-  concept: abduction_quotient
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10456
-  type: parameter
-  concept: phasedelay_quotient
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10457
-  type: parameter
-  concept: register_transition
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: Hz
-- id: claim10458
-  type: parameter
-  concept: register_transition
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: Hz
-- id: claim10459
-  type: parameter
-  concept: nonisotropy_correction
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-  unit: dimensionless
-- id: claim10460
+- id: claim2478
   type: equation
   expression: F_0 = \frac{1700}{L_m}
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: L_m
+    concept: l_m
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10461
+- id: claim2479
   type: equation
   expression: F_0 = \frac{1}{2L}\left(\frac{\sigma}{\rho}\right)^{1/2} = \frac{1}{2L_0(1+\epsilon)}\left(\frac{\sigma}{\rho}\right)^{1/2}
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: L_0
+    concept: l_0
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10462
+- id: claim2480
   type: equation
   expression: \sigma(\epsilon) = 4L_0^2(1+\epsilon)^2 F_0^2 \rho
+  variables:
+  - symbol: L_0
+    concept: l_0
+  - symbol: F_0
+    concept: f_0
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10463
+- id: claim2481
   type: equation
   expression: \sigma(\epsilon) = e^{9.21(\epsilon + 0.623)} \text{ kPa}
+  variables:
+  - symbol: kPa
+    concept: kpa
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10464
+- id: claim2482
   type: equation
   expression: h(y,z,t) = \left[Q_a + \left(Q_s - \frac{4Q_b z}{T}\right)\left(1 -
     \frac{z}{T}\right)\right]\left(1 - \frac{y}{L}\right) + \sin\frac{\pi y}{L}\sin\left(\omega
     t - \frac{2\pi Q_p z}{T}\right)
+  variables:
+  - symbol: Q_a
+    concept: q_a
+  - symbol: Q_s
+    concept: q_s
+  - symbol: Q_b
+    concept: q_b
+  - symbol: Q_p
+    concept: q_p
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10465
+- id: claim2483
   type: equation
   expression: u_0 = (2p_s/\rho)^{1/2}(2LA)(a_0/2)
+  variables:
+  - symbol: u_0
+    concept: u_0
+  - symbol: p_s
+    concept: p_s
+  - symbol: a_0
+    concept: a_0
+  - symbol: LA
+    concept: la
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10466
+- id: claim2484
   type: equation
   expression: p_a = p_s(2p_s/\rho)^{1/2}(2LA)(a_0/2)
+  variables:
+  - symbol: p_a
+    concept: p_a
+  - symbol: p_s
+    concept: p_s
+  - symbol: a_0
+    concept: a_0
+  - symbol: LA
+    concept: la
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10467
+- id: claim2485
   type: equation
   expression: p_r = \frac{\pi F_0^2}{2c} \cdot \frac{2P_s}{\rho} \cdot (2LA)^2 \sum_{n=1}^{\infty}
     n^2 a_n^2
+  variables:
+  - symbol: p_r
+    concept: p_r
+  - symbol: F_0
+    concept: f_0
+  - symbol: P_s
+    concept: p_s
+  - symbol: a_n
+    concept: a_n
+  - symbol: LA
+    concept: la
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10468
+- id: claim2486
   type: equation
   expression: e = \frac{\sqrt{2}\pi k}{c} (F_0^2)(pP_s)^{-1/2}(LA) \cdot \frac{2}{a_0}
     \sum_{n=1}^{\infty} n^2 a_n^2
+  variables:
+  - symbol: F_0
+    concept: f_0
+  - symbol: pP_s
+    concept: pp_s
+  - symbol: a_0
+    concept: a_0
+  - symbol: a_n
+    concept: a_n
+  - symbol: LA
+    concept: la
+  - symbol: sum_
+    concept: sum
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10469
+- id: claim2487
   type: observation
   statement: F0 * L_m should approximate 1700 Hz*mm for modal phonation across speakers
-  concepts: []
+  concepts:
+  - f0
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0
-- id: claim10470
-  type: observation
-  statement: Male/female membranous length ratio should be ~1.6 in adult speakers
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10471
-  type: observation
-  statement: Male/female thyroid cartilage size ratio should be ~1.2
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10472
-  type: observation
-  statement: Vocal fold thickness should scale with alpha (~1.2), not beta (~1.6)
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10473
+- id: claim2488
   type: observation
   statement: Mean airflow ratio male/female should be ~1.5-1.9
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10474
-  type: observation
-  statement: Female stress-strain curve should be above (stiffer than) male at equal
-    strain
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10475
-  type: observation
-  statement: Contact area waveform for male voice should show a knee/inflection absent
-    in female
-  concepts: []
-  provenance:
-    paper: Titze_1989_MaleFemaleVoices
-    page: 0
-- id: claim10476
-  type: observation
-  statement: Glottal efficiency should be higher for female voices at matched effort
-    level
-  concepts: []
+  concepts:
+  - airflow
   provenance:
     paper: Titze_1989_MaleFemaleVoices
     page: 0

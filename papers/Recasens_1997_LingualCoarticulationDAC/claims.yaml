@@ -1,24 +1,3 @@
 source:
   paper: Recasens_1997_LingualCoarticulationDAC
-claims:
-- id: claim1
-  type: parameter
-  concept: palatal_contact_index
-  provenance:
-    paper: Recasens_1997_LingualCoarticulationDAC
-    page: 0
-  unit: '%'
-- id: claim2
-  type: parameter
-  concept: second_formant
-  provenance:
-    paper: Recasens_1997_LingualCoarticulationDAC
-    page: 0
-  unit: Hz
-- id: claim3
-  type: parameter
-  concept: temporal_step
-  provenance:
-    paper: Recasens_1997_LingualCoarticulationDAC
-    page: 0
-  unit: ms
+claims: []

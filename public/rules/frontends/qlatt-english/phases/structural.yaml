@@ -29,7 +29,7 @@ rules:
           velar: "has(cl_target.velar) ? cl_target.velar : null"
           inventorySW: "has(cl_target.inventorySW) ? cl_target.inventorySW : 0"
     citations:
-      - Klatt 1980 (stop consonants modeled as closure + release phases)
+      - Klatt 1980
   expand_affricates_with_closure:
     kind: structural
     select:
@@ -72,8 +72,8 @@ rules:
           postalveolar: "has(fr_target.postalveolar) ? fr_target.postalveolar : null"
           inventorySW: "has(fr_target.inventorySW) ? fr_target.inventorySW : 0"
     citations:
-      - Klatt 1980 (affricates modeled as stop closure plus frication interval)
-      - Stevens 1998 Ch.8 (affricate stop-gap + frication cue sequence)
+      - Klatt 1980
+      - Stevens 1998 (affricate stop-gap + frication cue sequence)
   expand_diphthongs:
     kind: structural
     select:
@@ -186,8 +186,8 @@ rules:
       - >-
         Lisker & Abramson 1964 (English long-lag VOT isolated /p/=58, /t/=70, /k/=80 ms; sentence-initial /p/=28,
         /t/=39, /k/=43 ms)
-      - Stevens 1998 Ch.8
-      - Allen et al. 1987 Table C-1
+      - Stevens 1998
+      - Allen et al. 1987
   insert_voiceless_stop_release_and_aspiration_final:
     kind: structural
     select:
@@ -235,7 +235,7 @@ rules:
           inventorySW: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
     citations:
       - Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release)
-      - Stevens 1998 Ch.8
+      - Stevens 1998
   insert_voiced_stop_release:
     kind: structural
     select:
@@ -281,8 +281,8 @@ rules:
             - punctuationSymbol
     citations:
       - Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position)
-      - Stevens 1998 Ch.8
-      - Allen et al. 1987 Table C-1
+      - Stevens 1998
+      - Allen et al. 1987
   insert_voiced_stop_release_final:
     kind: structural
     select:
@@ -312,4 +312,4 @@ rules:
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
     citations:
       - Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)
-      - Stevens 1998 Ch.8
+      - Stevens 1998

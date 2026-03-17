@@ -47,7 +47,7 @@ rules:
           phoneme: "\"IH\""
           params: ih_params
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+      - Miller 1998 (postlexical rule inventory)
   to_reduction:
     kind: postlexical
     select:
@@ -74,8 +74,8 @@ rules:
           phoneme: "\"AH\""
           params: schwa_params
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (function word reduction)
-      - Klatt 1979, Synthesis by Rule of Connected English (word-boundary rules)
+      - Miller 1998 (function word reduction)
+      - Klatt 1979
   t_flapping:
     kind: postlexical
     select:
@@ -101,7 +101,7 @@ rules:
           inherentDuration: "params.policy.duration.flap_duration_ms"
           params: dx_params
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory)
+      - Miller 1998 (postlexical rule inventory)
   t_deletion:
     kind: postlexical
     select:
@@ -134,8 +134,8 @@ rules:
         value: 0
         tag: t_deletion
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (t-deletion in coda clusters)
-      - Allen 1987, MITalk Ch.8 (PHONO2 rules)
+      - Miller 1998 (t-deletion in coda clusters)
+      - Allen et al. 1987
   t_glottalization:
     kind: postlexical
     select:
@@ -163,8 +163,8 @@ rules:
           inherentDuration: 30
           type: "\"stop_closure\""
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (t-glottalization before sonorants)
-      - Allen 1987, MITalk Ch.8 (rule 3: TT -> TQ before sonorants)
+      - Miller 1998 (t-glottalization before sonorants)
+      - Allen et al. 1987
   d_flapping:
     kind: postlexical
     select:
@@ -190,7 +190,7 @@ rules:
           inherentDuration: "params.policy.duration.flap_duration_ms"
           params: dx_params
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (postlexical rule inventory -- /d/ flapping mirrors /t/ flapping)
+      - Miller 1998 (postlexical rule inventory -- /d/ flapping mirrors /t/ flapping)
   d_deletion:
     kind: postlexical
     select:
@@ -223,8 +223,8 @@ rules:
         value: 0
         tag: d_deletion
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (d-deletion in coda clusters, mirrors t-deletion)
-      - Allen 1987, MITalk Ch.8 (PHONO2 rules)
+      - Miller 1998 (d-deletion in coda clusters, mirrors t-deletion)
+      - Allen et al. 1987
   palatalization_dy:
     kind: postlexical
     match: palatalization_dy_pattern
@@ -249,8 +249,8 @@ rules:
           duration: 80
           inherentDuration: 80
     citations:
-      - Klatt 1979, Synthesis by Rule of Connected English (cross-word palatalization /d#y/ -> /dZ/)
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis
+      - Klatt 1979
+      - Miller 1998
   palatalization_ty:
     kind: postlexical
     match: palatalization_ty_pattern
@@ -275,7 +275,7 @@ rules:
           duration: 90
           inherentDuration: 90
     citations:
-      - Klatt 1979, Synthesis by Rule of Connected English (cross-word palatalization)
+      - Klatt 1979
   glottal_stop_insertion:
     kind: postlexical
     select:
@@ -303,5 +303,5 @@ rules:
           word: current.word
         - copy_from: current
     citations:
-      - Allen 1987, MITalk Ch.8 (rule 5: glottal stop insertion before word-initial stressed vowels)
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (21% glottalization rate)
+      - Allen et al. 1987
+      - Miller 1998 (21% glottalization rate)

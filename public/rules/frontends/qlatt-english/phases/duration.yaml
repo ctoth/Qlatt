@@ -13,7 +13,7 @@ rules:
         value: params.policy.duration.non_word_initial_consonant_multiplier
         tag: consonant_position
     citations:
-      - Klatt 1976 Table III (non-word-initial consonant K=0.7)
+      - Klatt 1976
   word_medial_consonant_shortening:
     kind: scalar
     select:
@@ -28,7 +28,7 @@ rules:
         value: params.policy.duration.word_medial_consonant_multiplier
         tag: consonant_medial
     citations:
-      - Klatt 1976 Table III (word-medial consonant K=0.7)
+      - Klatt 1976
   unstressed_consonant_shortening:
     kind: scalar
     select:
@@ -42,7 +42,7 @@ rules:
         value: params.policy.duration.unstressed_consonant_multiplier
         tag: consonant_stress
     citations:
-      - Klatt 1976 Table III (unstressed consonant K=0.8)
+      - Klatt 1976
   word_initial_lengthening:
     kind: scalar
     select:
@@ -56,7 +56,7 @@ rules:
         value: params.policy.duration.word_initial_lengthening_multiplier
         tag: word_initial
     citations:
-      - White 2014 (localized word-initial lengthening +20-30% on onset consonants)
+      - White 2014
   punctuation_pause:
     kind: scalar
     select:
@@ -71,7 +71,7 @@ rules:
           (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.punctuation_pause_terminal_ms :
           current.duration))
     citations:
-      - Allen et al. 1987 Ch.8 (pause insertion)
+      - Allen et al. 1987
       - semicolon/colon mapping is engineering estimate
   stress_duration:
     kind: scalar
@@ -86,7 +86,7 @@ rules:
           ((has(current.stress) && current.stress == 0) ? params.policy.duration.stress_unstressed_multiplier : 1.0)
         tag: stress
     citations:
-      - Klatt 1976 §III.B
+      - Klatt 1976
   vowel_shortening:
     kind: scalar
     select:
@@ -119,8 +119,8 @@ rules:
         tag: segmental_context
     citations:
       - Klatt 1976
-      - Allen et al. 1987 Ch.9 (postvocalic context duration factors)
-      - "Klatt 1979 (voicing effect strongest phrase-finally, reduced phrase-medially)"
+      - Allen et al. 1987
+      - "Klatt 1979"
   accent_vowel_lengthening:
     kind: scalar
     select:
@@ -138,7 +138,7 @@ rules:
         tag: accent
     citations:
       - van Santen 1994 (pitch accent x stress amplificatory interaction)
-      - White 2014 (phrasal accent lengthening distributed across accented word)
+      - White 2014
       - Turk & Shattuck-Hufnagel 2007 (accent lengthening greatest on primary stress)
   polysyllabic_shortening:
     kind: scalar
@@ -151,7 +151,7 @@ rules:
         value: params.policy.duration.polysyllabic_shortening_factor
         tag: polysyllabic
     citations:
-      - Klatt 1976 Rule 4 (polysyllabic shortening)
+      - Klatt 1976
   cluster_shortening:
     kind: scalar
     select:
@@ -255,8 +255,8 @@ rules:
         tag: boundary
     citations:
       - Wightman et al. 1992 (pre-boundary lengthening scaled by prosodic boundary strength)
-      - Klatt 1976 §III.A (phrase-final lengthening)
-      - Crystal & House 1988 (sonorants lengthen more than obstruents at boundaries)
+      - Klatt 1976
+      - Crystal & House 1988
   fricative_minimum_duration:
     kind: scalar
     select:
@@ -297,7 +297,7 @@ rules:
         op: set
         value: "has(current.inherentDuration) ? current.inherentDuration : current.duration"
     citations:
-      - Allen et al. 1987 Table C-1 (fixed burst/aspiration durations)
+      - Allen et al. 1987 (fixed burst/aspiration durations)
   stop_unreleasing:
     kind: scalar
     select:
@@ -314,7 +314,7 @@ rules:
         op: set
         value: params.policy.duration.stop_unreleasing_min_ms
     citations:
-      - Miller 1998 (unreleased stops before non-sonorants)
+      - Miller 1998
       - Crystal & House 1988
   s_cluster_aspiration_reduction:
     kind: scalar
@@ -333,7 +333,7 @@ rules:
         value: "-(params.policy.duration.s_cluster_ah_reduction_db)"
     citations:
       - Lisker & Abramson 1964 (s-cluster VOT)
-      - Zue 1976 (s-clusters reduce VOT to voice-like values)
+      - Zue 1976
   aspiration_frication_carryover:
     kind: scalar
     select:
@@ -354,7 +354,7 @@ rules:
         tag: aspiration_frication
     citations:
       - Hanson & Stevens 2003 (place-dependent frication can extend into aspiration for /t/ and /k/)
-      - Stevens 1998 Ch.8 (stop release acoustics with place-dependent noise shaping)
+      - Stevens 1998 (stop release acoustics with place-dependent noise shaping)
       - "Engineering estimate: AF carryover magnitudes and weak-scale defaults"
   speech_rate_scaling:
     kind: scalar
@@ -368,8 +368,8 @@ rules:
         value: 1.0 / params.policy.duration.rate_scale
         tag: speech_rate
     citations:
-      - Klatt 1976 §III (speech rate duration compression)
-      - Allen et al. 1987 Ch.9 (rate-dependent duration model)
+      - Klatt 1976
+      - Allen et al. 1987
   pause_rate_scaling:
     kind: scalar
     select:
@@ -397,7 +397,7 @@ rules:
           : current.duration
         tag: incompressibility
     citations:
-      - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
+      - "Klatt 1976"
   duration_cap:
     kind: scalar
     select:
@@ -412,5 +412,5 @@ rules:
           : current.duration
         tag: duration_cap
     citations:
-      - Klatt 1976 (incompressibility principle implies bounded expansion)
+      - Klatt 1976
       - "Engineering estimate: cap prevents absurd durations from stacking multiple rules"

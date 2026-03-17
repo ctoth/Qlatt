@@ -1,35 +1,3 @@
 source:
   paper: Stevens_House_1961_AcousticalTheoryVowelProduction
-claims:
-- id: claim2378
-  type: parameter
-  concept: i
-  provenance:
-    paper: Stevens_House_1961_AcousticalTheoryVowelProduction
-    page: 0
-  unit: Hz
-  value: 300
-- id: claim2379
-  type: parameter
-  concept: ae
-  provenance:
-    paper: Stevens_House_1961_AcousticalTheoryVowelProduction
-    page: 0
-  unit: Hz
-  value: 730
-- id: claim2380
-  type: parameter
-  concept: a
-  provenance:
-    paper: Stevens_House_1961_AcousticalTheoryVowelProduction
-    page: 0
-  unit: Hz
-  value: 720
-- id: claim2381
-  type: parameter
-  concept: u
-  provenance:
-    paper: Stevens_House_1961_AcousticalTheoryVowelProduction
-    page: 0
-  unit: Hz
-  value: 320
+claims: []

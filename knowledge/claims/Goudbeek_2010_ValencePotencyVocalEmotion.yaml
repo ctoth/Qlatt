@@ -1,22 +1,3 @@
 source:
   paper: Goudbeek_2010_ValencePotencyVocalEmotion
-claims:
-- id: claim1129
-  type: observation
-  statement: Arousal classification from F0 level + Intensity level should achieve
-    R² > 0.80
-  concepts:
-  - f0
-  - intensity
-  provenance:
-    paper: Goudbeek_2010_ValencePotencyVocalEmotion
-    page: 0
-- id: claim1130
-  type: observation
-  statement: HNR should differ significantly between high and low potency/control
-    emotions at matched arousal
-  concepts:
-  - hnr
-  provenance:
-    paper: Goudbeek_2010_ValencePotencyVocalEmotion
-    page: 0
+claims: []

@@ -1,12 +1,3 @@
 source:
   paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-claims:
-- id: claim308
-  type: observation
-  statement: Consonantal gestures should have higher stiffness (shorter durations)
-    than vocalic gestures
-  concepts:
-  - duration
-  provenance:
-    paper: Browman_Goldstein_1992_ArticulatoryPhonologyOverview
-    page: 0
+claims: []

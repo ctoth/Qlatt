@@ -1,7 +1,7 @@
 source:
   paper: Titze_1992_VocalIntensity
 claims:
-- id: claim2508
+- id: claim583
   type: parameter
   concept: air_density
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 1.14
   unit: kg/m^3
-- id: claim2509
+- id: claim584
   type: parameter
   concept: sound_velocity
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 350
   unit: m/s
-- id: claim2510
+- id: claim585
   type: parameter
   concept: lip_radius
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 0.01
   unit: m
-- id: claim2511
+- id: claim586
   type: parameter
   concept: lung_pressure
   provenance:
@@ -34,7 +34,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 3.0
   unit: kPa
-- id: claim2512
+- id: claim587
   type: parameter
   concept: phonation_threshold
   provenance:
@@ -43,7 +43,7 @@ claims:
   lower_bound: 0.14
   upper_bound: 0.5
   unit: kPa
-- id: claim2513
+- id: claim588
   type: parameter
   concept: mic_distance
   provenance:
@@ -51,173 +51,3 @@ claims:
     page: 0
   value: 0.5
   unit: m
-- id: claim2514
-  type: parameter
-  concept: tenors
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-  unit: kPa
-  value: 2.0
-- id: claim2515
-  type: parameter
-  concept: male_nonsingers
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-  unit: kPa
-  value: 2.0
-- id: claim2516
-  type: parameter
-  concept: female_nonsingers
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-  unit: kPa
-  value: 0.65
-- id: claim2517
-  type: equation
-  expression: (Eq. 1)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2518
-  type: equation
-  expression: (Eq. 18)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2519
-  type: equation
-  expression: '(Eq. 23)
-
-
-    Where: $\alpha$ = spectral slope parameter. A spectral slope of 12 dB/octave yields
-    $\alpha = 2.0$ (typical male phonation).'
-  variables:
-  - symbol: Eq
-    concept: eq
-  - symbol: Where
-    concept: where
-  - symbol: spectral
-    concept: spectral
-  - symbol: slope
-    concept: slope
-  - symbol: parameter
-    concept: parameter
-  - symbol: of
-    concept: of
-  - symbol: dB
-    concept: db
-  - symbol: octave
-    concept: octave
-  - symbol: yields
-    concept: yields
-  - symbol: typical
-    concept: typical
-  - symbol: male
-    concept: male
-  - symbol: phonation
-    concept: phonation
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2520
-  type: equation
-  expression: '(Eq. 27)
-
-
-    Where:'
-  variables:
-  - symbol: Eq
-    concept: eq
-  - symbol: Where
-    concept: where
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2521
-  type: equation
-  expression: (Eq. 29)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2522
-  type: equation
-  expression: (Eq. 31)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2523
-  type: equation
-  expression: (Eq. 33)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2524
-  type: equation
-  expression: (Eq. 34)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2525
-  type: equation
-  expression: (Eq. 35)
-  variables:
-  - symbol: Eq
-    concept: eq
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2526
-  type: observation
-  statement: SPL must increase monotonically with $P_L$ when $P_L > P_{th}$ (all other
-    params constant)
-  concepts:
-  - spl
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2527
-  type: observation
-  statement: SPL must increase approximately 8-9 dB per doubling of $(P_L - P_{th})$
-  concepts:
-  - spl
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2528
-  type: observation
-  statement: SPL must increase approximately 8-9 dB per octave of $F_0$ (if $P_L/P_{th}$
-    ratio held constant)
-  concepts:
-  - spl
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0
-- id: claim2529
-  type: observation
-  statement: Vocal tract gain $G(F_0)$ shows peaks when harmonics align with formants
-  concepts:
-  - formant
-  provenance:
-    paper: Titze_1992_VocalIntensity
-    page: 0

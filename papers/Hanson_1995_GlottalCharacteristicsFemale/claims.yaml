@@ -106,94 +106,6 @@ claims:
   unit: Hz
 - id: claim13
   type: parameter
-  concept: '000'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 0
-- id: claim14
-  type: parameter
-  concept: '001'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 25
-- id: claim15
-  type: parameter
-  concept: '002'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 50
-- id: claim16
-  type: parameter
-  concept: '003'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 76
-- id: claim17
-  type: parameter
-  concept: '004'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 101
-- id: claim18
-  type: parameter
-  concept: '005'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 126
-- id: claim19
-  type: parameter
-  concept: '006'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 151
-- id: claim20
-  type: parameter
-  concept: '007'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 176
-- id: claim21
-  type: parameter
-  concept: 008
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 202
-- id: claim22
-  type: parameter
-  concept: 009
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 227
-- id: claim23
-  type: parameter
-  concept: '010'
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Hz
-  value: 252
-- id: claim24
-  type: parameter
   concept: spectral_tilt
   provenance:
     paper: Hanson_1995_GlottalCharacteristicsFemale
@@ -201,7 +113,7 @@ claims:
   lower_bound: 0
   upper_bound: 25
   unit: dB
-- id: claim25
+- id: claim14
   type: parameter
   concept: f1_bandwidth
   provenance:
@@ -210,7 +122,7 @@ claims:
   lower_bound: 60
   upper_bound: 280
   unit: Hz
-- id: claim26
+- id: claim15
   type: parameter
   concept: aspiration_noise
   provenance:
@@ -219,92 +131,3 @@ claims:
   lower_bound: 32
   upper_bound: 50
   unit: dB
-- id: claim27
-  type: parameter
-  concept: b1
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: Modal
-  lower_bound: 53
-  upper_bound: 100
-- id: claim28
-  type: parameter
-  concept: g1
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 0
-- id: claim29
-  type: parameter
-  concept: g2
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 5
-- id: claim30
-  type: parameter
-  concept: g3
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 10
-- id: claim31
-  type: parameter
-  concept: g4
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 15
-- id: claim32
-  type: parameter
-  concept: g5
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 20
-- id: claim33
-  type: parameter
-  concept: g6
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 25
-- id: claim34
-  type: parameter
-  concept: f9
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 8
-- id: claim35
-  type: parameter
-  concept: f13
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 10
-- id: claim36
-  type: parameter
-  concept: f2
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 19
-- id: claim37
-  type: parameter
-  concept: f15
-  provenance:
-    paper: Hanson_1995_GlottalCharacteristicsFemale
-    page: 0
-  unit: dB
-  value: 17

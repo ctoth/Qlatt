@@ -36,12 +36,3 @@ claims:
     page: 0
   value: -12
   unit: dB/oct
-- id: claim5
-  type: equation
-  expression: r - r_o = 0.025 (1.2 - r_o) x^2
-  variables:
-  - symbol: r_o
-    concept: r_o
-  provenance:
-    paper: House_Stevens_1956_NasalizationVowels
-    page: 0

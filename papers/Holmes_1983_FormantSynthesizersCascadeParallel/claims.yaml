@@ -17,14 +17,3 @@ claims:
     page: 0
   value: 5.5
   unit: kHz
-- id: claim3
-  type: equation
-  expression: H(s) = \prod_{n=1}^{\infty} \frac{s_n s_n^*}{(s - s_n)(s - s_n^*)}
-  variables:
-  - symbol: s_n
-    concept: s_n
-  - symbol: prod_
-    concept: prod
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0

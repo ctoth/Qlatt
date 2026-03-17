@@ -1,7 +1,7 @@
 source:
   paper: Carlson_1995_ModelsOfSpeechSynthesis
 claims:
-- id: claim361
+- id: claim124
   type: parameter
   concept: glottal_frequency_quotient
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 100
   upper_bound: 200
   unit: '%'
-- id: claim362
+- id: claim125
   type: parameter
   concept: open_quotient
   provenance:
@@ -21,7 +21,7 @@ claims:
   lower_bound: 20
   upper_bound: 60
   unit: '%'
-- id: claim363
+- id: claim126
   type: parameter
   concept: return_phase_parameter
   provenance:

@@ -1,35 +1,3 @@
 source:
   paper: Klatt_1975_VoiceOnsetTimeFrication
-claims:
-- id: claim1
-  type: parameter
-  concept: i
-  provenance:
-    paper: Klatt_1975_VoiceOnsetTimeFrication
-    page: 0
-  unit: msec
-  value: 78
-- id: claim2
-  type: parameter
-  concept: e
-  provenance:
-    paper: Klatt_1975_VoiceOnsetTimeFrication
-    page: 0
-  unit: msec
-  value: 71
-- id: claim3
-  type: parameter
-  concept: ay
-  provenance:
-    paper: Klatt_1975_VoiceOnsetTimeFrication
-    page: 0
-  unit: msec
-  value: 73
-- id: claim4
-  type: parameter
-  concept: u
-  provenance:
-    paper: Klatt_1975_VoiceOnsetTimeFrication
-    page: 0
-  unit: msec
-  value: 90
+claims: []

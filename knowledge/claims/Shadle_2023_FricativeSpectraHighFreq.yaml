@@ -1,7 +1,7 @@
 source:
   paper: Shadle_2023_FricativeSpectraHighFreq
 claims:
-- id: claim2168
+- id: claim519
   type: parameter
   concept: spectral_peak
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 2
   upper_bound: 8
   unit: kHz
-- id: claim2169
+- id: claim520
   type: parameter
   concept: peak_prominence
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 20
   upper_bound: 35
   unit: dB
-- id: claim2170
+- id: claim521
   type: parameter
   concept: combined_high_level
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 60
   upper_bound: 80
   unit: dB
-- id: claim2171
+- id: claim522
   type: parameter
   concept: highfreq_maximum
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 5
   upper_bound: 12
   unit: kHz
-- id: claim2172
+- id: claim523
   type: parameter
   concept: amplitude_range
   provenance:

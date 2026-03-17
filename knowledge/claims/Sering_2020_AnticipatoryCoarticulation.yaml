@@ -1,7 +1,7 @@
 source:
   paper: Sering_2020_AnticipatoryCoarticulation
 claims:
-- id: claim2131
+- id: claim500
   type: parameter
   concept: vtl_control_parameters
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 30
   unit: dimensions
-- id: claim2132
+- id: claim501
   type: parameter
   concept: cp_update_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 110
   unit: samples
-- id: claim2133
+- id: claim502
   type: parameter
   concept: audio_sample_rate
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 44100
   unit: Hz
-- id: claim2134
+- id: claim503
   type: parameter
   concept: mel_spectrum_rate
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 200
   unit: Hz
-- id: claim2135
+- id: claim504
   type: parameter
   concept: mel_dimensions
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 60
   unit: bands
-- id: claim2136
+- id: claim505
   type: parameter
   concept: mel_window
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 23.2
   unit: ms
-- id: claim2137
+- id: claim506
   type: parameter
   concept: planning_iterations
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 40
   unit: cycles
-- id: claim2138
+- id: claim507
   type: parameter
   concept: ultrasound_rate
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   value: 81.6
   unit: fps
-- id: claim2139
+- id: claim508
   type: parameter
   concept: ultrasound_vectors
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   value: 64
   unit: directions
-- id: claim2140
+- id: claim509
   type: parameter
   concept: ultrasound_pixels
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   value: 842
   unit: per vector
-- id: claim2141
+- id: claim510
   type: parameter
   concept: formant_analysis_window
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   value: 20
   unit: ms
-- id: claim2142
+- id: claim511
   type: parameter
   concept: pitch_floor
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim2143
+- id: claim512
   type: parameter
   concept: pitch_ceiling
   provenance:

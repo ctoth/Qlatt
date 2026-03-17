@@ -1,38 +1,3 @@
 source:
   paper: Jun_2005_ProsodicTypology
-claims:
-- id: claim1
-  type: observation
-  statement: Every intermediate phrase must contain at least one pitch accent
-  concepts:
-  - pitch
-  provenance:
-    paper: Jun_2005_ProsodicTypology
-    page: 0
-- id: claim2
-  type: observation
-  statement: The nuclear accent is always the last pitch accent in the intermediate
-    phrase
-  concepts:
-  - pitch
-  provenance:
-    paper: Jun_2005_ProsodicTypology
-    page: 0
-- id: claim3
-  type: observation
-  statement: 'In English, pitch accent alignment: L\* at F0 minimum within syllable,
-    H\* at F0 maximum'
-  concepts:
-  - f0
-  - pitch
-  provenance:
-    paper: Jun_2005_ProsodicTypology
-    page: 0
-- id: claim4
-  type: observation
-  statement: IP duration should average approximately 1.5 seconds in read speech
-  concepts:
-  - duration
-  provenance:
-    paper: Jun_2005_ProsodicTypology
-    page: 0
+claims: []

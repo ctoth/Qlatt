@@ -65,27 +65,3 @@ claims:
     page: 0
   value: 50
   unit: msec
-- id: claim9
-  type: parameter
-  concept: utterancefinal
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 126
-- id: claim10
-  type: parameter
-  concept: phrasefinal
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 148
-- id: claim11
-  type: parameter
-  concept: withinphrase
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 149

@@ -1,7 +1,7 @@
 source:
   paper: Xue_2006_VocalTractDimensionsRace
 claims:
-- id: claim2715
+- id: claim620
   type: parameter
   concept: oral_length
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: cm
   value: 7.78
-- id: claim2716
+- id: claim621
   type: parameter
   concept: pharyngeal_length
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: cm
   value: 9.07
-- id: claim2717
+- id: claim622
   type: parameter
   concept: total_vocal_tract_length
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: cm
   value: 16.85
-- id: claim2718
+- id: claim623
   type: parameter
   concept: oral_volume
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: mL
   value: 32.95
-- id: claim2719
+- id: claim624
   type: parameter
   concept: pharyngeal_volume
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: mL
   value: 29.65
-- id: claim2720
+- id: claim625
   type: parameter
   concept: total_vocal_tract_volume
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: mL
   value: 62.6
-- id: claim2721
+- id: claim626
   type: parameter
   concept: oral_length
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: cm
   value: 7.07
-- id: claim2722
+- id: claim627
   type: parameter
   concept: pharyngeal_length
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: cm
   value: 8.76
-- id: claim2723
+- id: claim628
   type: parameter
   concept: total_vocal_tract_length
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: cm
   value: 15.82
-- id: claim2724
+- id: claim629
   type: parameter
   concept: oral_volume
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: mL
   value: 31.59
-- id: claim2725
+- id: claim630
   type: parameter
   concept: pharyngeal_volume
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: mL
   value: 26.46
-- id: claim2726
+- id: claim631
   type: parameter
   concept: total_vocal_tract_volume
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: mL
   value: 58.05
-- id: claim2727
+- id: claim632
   type: parameter
   concept: height
   provenance:
@@ -107,7 +107,7 @@ claims:
   value: 174.79
   lower_bound: 167.64
   upper_bound: 185.42
-- id: claim2728
+- id: claim633
   type: parameter
   concept: weight
   provenance:
@@ -117,7 +117,7 @@ claims:
   value: 71.98
   lower_bound: 57.19
   upper_bound: 98.04
-- id: claim2729
+- id: claim634
   type: parameter
   concept: age
   provenance:

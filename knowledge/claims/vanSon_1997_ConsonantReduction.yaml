@@ -1,29 +1,3 @@
 source:
   paper: vanSon_1997_ConsonantReduction
-claims:
-- id: claim2615
-  type: equation
-  expression: \text{COG} = \frac{\int f \cdot E(f) \, df}{\int E(f) \, df}
-  variables:
-  - symbol: COG
-    concept: cog
-  - symbol: df
-    concept: df
-  provenance:
-    paper: vanSon_1997_ConsonantReduction
-    page: 0
-- id: claim2616
-  type: equation
-  expression: V_{max} = \frac{V_{1,max} + V_{2,max}}{2}
-  variables:
-  - symbol: V_max
-    concept: v_max
-  - symbol: V_1
-    concept: v_1
-  - symbol: V_2
-    concept: v_2
-  - symbol: V_
-    concept: v
-  provenance:
-    paper: vanSon_1997_ConsonantReduction
-    page: 0
+claims: []

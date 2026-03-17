@@ -1,7 +1,7 @@
 source:
   paper: Byrd_2003_ElasticPhraseBoundaryLengthening
 claims:
-- id: claim314
+- id: claim105
   type: parameter
   concept: prosodic_strength
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 0
   unit: dimensionless
-- id: claim315
+- id: claim106
   type: parameter
   concept: pigesture_activation
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 0
   unit: dimensionless
-- id: claim316
+- id: claim107
   type: parameter
   concept: mass
   provenance:
@@ -25,21 +25,3 @@ claims:
     page: 0
   value: 1
   unit: --
-- id: claim317
-  type: equation
-  expression: 'where:'
-  variables:
-  - symbol: where
-    concept: where
-  provenance:
-    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
-    page: 0
-- id: claim318
-  type: observation
-  statement: Duration increase in phrase-final position should be greater than phrase-initial
-    (asymmetric effect)
-  concepts:
-  - duration
-  provenance:
-    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
-    page: 0

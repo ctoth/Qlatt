@@ -1,27 +1,3 @@
 source:
   paper: Doval_2006_SpectrumGlottalFlowModels
-claims:
-- id: claim1
-  type: parameter
-  concept: '025'
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  unit: KLGLOTT88
-  value: 2.2
-- id: claim2
-  type: parameter
-  concept: '050'
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  unit: KLGLOTT88
-  value: 1.1
-- id: claim3
-  type: parameter
-  concept: 080
-  provenance:
-    paper: Doval_2006_SpectrumGlottalFlowModels
-    page: 0
-  unit: KLGLOTT88
-  value: 0.7
+claims: []

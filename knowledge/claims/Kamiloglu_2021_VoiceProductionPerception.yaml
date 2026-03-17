@@ -1,21 +1,3 @@
 source:
   paper: Kamiloglu_2021_VoiceProductionPerception
-claims:
-- id: claim1536
-  type: parameter
-  concept: bass
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  lower_bound: 80
-  upper_bound: 330
-  unit: Hz
-- id: claim1537
-  type: parameter
-  concept: soprano
-  provenance:
-    paper: Kamiloglu_2021_VoiceProductionPerception
-    page: 0
-  lower_bound: 200
-  upper_bound: 1200
-  unit: Hz
+claims: []

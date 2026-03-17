@@ -3,46 +3,6 @@ source:
 claims:
 - id: claim1
   type: parameter
-  concept: min_duration_for_70_accuracy
-  provenance:
-    paper: Jongman_1989_FricativeDuration
-    page: 0
-  value: 30
-  unit: ms
-- id: claim2
-  type: parameter
-  concept: z_min_duration_for_70_accuracy
-  provenance:
-    paper: Jongman_1989_FricativeDuration
-    page: 0
-  value: 30
-  unit: ms
-- id: claim3
-  type: parameter
-  concept: f_min_duration_for_70_accuracy
-  provenance:
-    paper: Jongman_1989_FricativeDuration
-    page: 0
-  value: 50
-  unit: ms
-- id: claim4
-  type: parameter
-  concept: s_min_duration_for_70_accuracy
-  provenance:
-    paper: Jongman_1989_FricativeDuration
-    page: 0
-  value: 50
-  unit: ms
-- id: claim5
-  type: parameter
-  concept: v_min_duration_for_70_accuracy
-  provenance:
-    paper: Jongman_1989_FricativeDuration
-    page: 0
-  value: 50
-  unit: ms
-- id: claim6
-  type: parameter
   concept: voicing_perception_at_20_ms
   provenance:
     paper: Jongman_1989_FricativeDuration

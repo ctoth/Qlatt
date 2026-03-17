@@ -1,7 +1,7 @@
 source:
   paper: Holmes_1983_FormantSynthesizersCascadeParallel
 claims:
-- id: claim1392
+- id: claim299
   type: parameter
   concept: f1_spectral_shaping_zero
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: -640
   unit: Hz
-- id: claim1393
+- id: claim300
   type: parameter
   concept: higher_pole_correction_start
   provenance:
@@ -17,14 +17,3 @@ claims:
     page: 0
   value: 5.5
   unit: kHz
-- id: claim1394
-  type: equation
-  expression: H(s) = \prod_{n=1}^{\infty} \frac{s_n s_n^*}{(s - s_n)(s - s_n^*)}
-  variables:
-  - symbol: s_n
-    concept: s_n
-  - symbol: prod_
-    concept: prod
-  provenance:
-    paper: Holmes_1983_FormantSynthesizersCascadeParallel
-    page: 0

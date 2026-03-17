@@ -1,127 +1,7 @@
 source:
   paper: Fant_1960_AcousticTheorySpeechProduction
 claims:
-- id: claim761
-  type: parameter
-  concept: u
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 240
-- id: claim762
-  type: parameter
-  concept: o
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 500
-- id: claim763
-  type: parameter
-  concept: a
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 630
-- id: claim764
-  type: parameter
-  concept: e
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 420
-- id: claim765
-  type: parameter
-  concept: i
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 230
-- id: claim766
-  type: parameter
-  concept: schwa
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 285
-- id: claim767
-  type: parameter
-  concept: a
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 57
-- id: claim768
-  type: parameter
-  concept: o
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 54
-- id: claim769
-  type: parameter
-  concept: u
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 69
-- id: claim770
-  type: parameter
-  concept: i
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 43
-- id: claim771
-  type: parameter
-  concept: e
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: Hz
-  value: 39
-- id: claim772
-  type: parameter
-  concept: a
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: back
-  value: 0.19
-- id: claim773
-  type: parameter
-  concept: o
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: back
-  value: 0.33
-- id: claim774
-  type: parameter
-  concept: u
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: back
-  value: 0.28
-- id: claim775
-  type: parameter
-  concept: i
-  provenance:
-    paper: Fant_1960_AcousticTheorySpeechProduction
-    page: 0
-  unit: back
-  value: 0.39
-- id: claim776
+- id: claim172
   type: parameter
   concept: speed_of_sound
   provenance:
@@ -129,7 +9,7 @@ claims:
     page: 0
   value: 35000
   unit: cm/s
-- id: claim777
+- id: claim173
   type: parameter
   concept: air_density
   provenance:
@@ -137,7 +17,7 @@ claims:
     page: 0
   value: 0.00114
   unit: g/cm^3
-- id: claim778
+- id: claim174
   type: parameter
   concept: viscosity_coefficient
   provenance:
@@ -145,7 +25,7 @@ claims:
     page: 0
   value: 0.000184
   unit: g/cm*s
-- id: claim779
+- id: claim175
   type: parameter
   concept: kinematic_viscosity
   provenance:
@@ -153,7 +33,7 @@ claims:
     page: 0
   value: 0.15
   unit: cm^2/s
-- id: claim780
+- id: claim176
   type: parameter
   concept: acoustic_resistance
   provenance:

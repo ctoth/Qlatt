@@ -1,95 +1,7 @@
 source:
   paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
 claims:
-- id: claim1172
-  type: parameter
-  concept: '000'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 0
-- id: claim1173
-  type: parameter
-  concept: '001'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 25
-- id: claim1174
-  type: parameter
-  concept: '002'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 50
-- id: claim1175
-  type: parameter
-  concept: '003'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 76
-- id: claim1176
-  type: parameter
-  concept: '004'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 101
-- id: claim1177
-  type: parameter
-  concept: '005'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 126
-- id: claim1178
-  type: parameter
-  concept: '006'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 151
-- id: claim1179
-  type: parameter
-  concept: '007'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 176
-- id: claim1180
-  type: parameter
-  concept: 008
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 202
-- id: claim1181
-  type: parameter
-  concept: 009
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 227
-- id: claim1182
-  type: parameter
-  concept: '010'
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-  unit: Hz
-  value: 252
-- id: claim1183
+- id: claim254
   type: parameter
   concept: h1h2
   provenance:
@@ -97,7 +9,7 @@ claims:
     page: 0
   value: 10
   unit: dB
-- id: claim1184
+- id: claim255
   type: parameter
   concept: h1a1
   provenance:
@@ -105,7 +17,7 @@ claims:
     page: 0
   value: 16
   unit: dB
-- id: claim1185
+- id: claim256
   type: parameter
   concept: h1a3
   provenance:
@@ -113,7 +25,7 @@ claims:
     page: 0
   value: 26
   unit: dB
-- id: claim1186
+- id: claim257
   type: parameter
   concept: b1
   provenance:
@@ -121,21 +33,3 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim1187
-  type: observation
-  statement: 'As glottal chink area increases: B1 increases, spectral tilt increases,
-    noise increases (monotonic)'
-  concepts:
-  - spectral_tilt
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0
-- id: claim1188
-  type: observation
-  statement: 'Spectral tilt from glottal chink alone (Table I): max ~18 dB for A_ch
-    = 0.10 cm^2'
-  concepts:
-  - spectral_tilt
-  provenance:
-    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
-    page: 0

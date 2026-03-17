@@ -1,7 +1,7 @@
 source:
   paper: Black_1998_LTS_Rules
 claims:
-- id: claim268
+- id: claim95
   type: parameter
   concept: stop_value
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 1
   upper_bound: 8
   unit: count
-- id: claim269
+- id: claim96
   type: parameter
   concept: context_window
   provenance:
@@ -18,7 +18,7 @@ claims:
     page: 0
   value: 3
   unit: letters
-- id: claim270
+- id: claim97
   type: parameter
   concept: min_word_length
   provenance:
@@ -26,18 +26,3 @@ claims:
     page: 0
   value: 4
   unit: letters
-- id: claim271
-  type: equation
-  expression: P(\text{alignment}) = \prod_{i} P(phone_i | letter_i)
-  variables:
-  - symbol: phone_i
-    concept: phone_i
-  - symbol: letter_i
-    concept: letter_i
-  - symbol: alignment
-    concept: alignment
-  - symbol: prod_
-    concept: prod
-  provenance:
-    paper: Black_1998_LTS_Rules
-    page: 0

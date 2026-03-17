@@ -1,7 +1,7 @@
 source:
   paper: Hughes_2004_VoiceAttractivenessSexualBehavior
 claims:
-- id: claim1434
+- id: claim327
   type: parameter
   concept: male_shr
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 1.01
   upper_bound: 1.47
   unit: ratio
-- id: claim1435
+- id: claim328
   type: parameter
   concept: female_shr
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0.84
   upper_bound: 1.19
   unit: ratio
-- id: claim1436
+- id: claim329
   type: parameter
   concept: male_whr
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 0.74
   upper_bound: 1.18
   unit: ratio
-- id: claim1437
+- id: claim330
   type: parameter
   concept: female_whr
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 0.64
   upper_bound: 0.97
   unit: ratio
-- id: claim1438
+- id: claim331
   type: parameter
   concept: voice_attractiveness_scale
   provenance:
@@ -46,43 +46,3 @@ claims:
   lower_bound: 1
   upper_bound: 5
   unit: points
-- id: claim1439
-  type: parameter
-  concept: age_first_masturbation
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: n
-  value: 36
-- id: claim1440
-  type: parameter
-  concept: age_first_sex
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: n
-  value: 34
-- id: claim1441
-  type: parameter
-  concept: number_of_sex_partners
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: n
-  value: 43
-- id: claim1442
-  type: parameter
-  concept: number_of_epc_partners
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: n
-  value: 43
-- id: claim1443
-  type: parameter
-  concept: times_chosen_as_epc_partner
-  provenance:
-    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
-    page: 0
-  unit: n
-  value: 43

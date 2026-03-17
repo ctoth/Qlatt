@@ -1,7 +1,7 @@
 source:
   paper: Klatt_1979_SpeechPerceptionLexicalAccess
 claims:
-- id: claim1570
+- id: claim353
   type: parameter
   concept: spectral_window
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 25.6
   unit: ms
-- id: claim1571
+- id: claim354
   type: parameter
   concept: frame_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim1572
+- id: claim355
   type: parameter
   concept: critical_bands
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 30
   unit: filters
-- id: claim1573
+- id: claim356
   type: parameter
   concept: phonetic_categories
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 55
   unit: types
-- id: claim1574
+- id: claim357
   type: parameter
   concept: decision_delay
   provenance:

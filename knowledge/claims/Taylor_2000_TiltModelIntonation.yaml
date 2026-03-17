@@ -1,7 +1,7 @@
 source:
   paper: Taylor_2000_TiltModelIntonation
 claims:
-- id: claim2473
+- id: claim579
   type: parameter
   concept: amplitude
   provenance:
@@ -9,46 +9,3 @@ claims:
     page: 0
   value: 0
   unit: Hz
-- id: claim2474
-  type: parameter
-  concept: complete_rfc
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: Hz
-  value: 6.94
-- id: claim2475
-  type: parameter
-  concept: complete_tilt
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: Hz
-  value: 7.14
-- id: claim2476
-  type: parameter
-  concept: automatic_tilt
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0
-  unit: Hz
-  value: 7.51
-- id: claim2477
-  type: equation
-  expression: $$A_{fall} = \frac{A_{event}(1 - tilt)}{2}$$
-  variables:
-  - symbol: A_fall
-    concept: a_fall
-  - symbol: A_event
-    concept: a_event
-  - symbol: A_
-    concept: a
-  - symbol: fall
-    concept: fall
-  - symbol: event
-    concept: event
-  - symbol: tilt
-    concept: tilt
-  provenance:
-    paper: Taylor_2000_TiltModelIntonation
-    page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Fant_1985_LFModelGlottalFlow
 claims:
-- id: claim781
+- id: claim177
   type: parameter
   concept: period
   provenance:
@@ -10,7 +10,7 @@ claims:
   unit: ms
   lower_bound: 5
   upper_bound: 20
-- id: claim782
+- id: claim178
   type: parameter
   concept: peak_time
   provenance:
@@ -19,7 +19,7 @@ claims:
   unit: ms
   lower_bound: 2
   upper_bound: 4
-- id: claim783
+- id: claim179
   type: parameter
   concept: excitation_time
   provenance:
@@ -28,7 +28,7 @@ claims:
   unit: ms
   lower_bound: 3
   upper_bound: 6
-- id: claim784
+- id: claim180
   type: parameter
   concept: return_time_constant
   provenance:
@@ -37,254 +37,3 @@ claims:
   unit: ms
   lower_bound: 0
   upper_bound: 1.5
-- id: claim785
-  type: parameter
-  concept: modal
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-  unit: ms
-  lower_bound: 0
-  upper_bound: 0.2
-- id: claim786
-  type: parameter
-  concept: pressed
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-  unit: ms
-  value: 0
-- id: claim787
-  type: parameter
-  concept: breathy
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-  unit: ms
-  lower_bound: 0.6
-  upper_bound: 1.5
-- id: claim788
-  type: equation
-  expression: E(t) = \frac{dU_g(t)}{dt} = E_0 e^{\alpha t} \sin(\omega_g t)
-  variables:
-  - symbol: dU_g
-    concept: du_g
-  - symbol: E_0
-    concept: e_0
-  - symbol: dt
-    concept: dt
-  - symbol: omega_g
-    concept: omega_g
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim789
-  type: equation
-  expression: U(t) = \frac{E_0 \left[ e^{\alpha t}(\alpha \sin\omega_g t - \omega_g
-    \cos\omega_g t) + \omega_g \right]}{\alpha^2 + \omega_g^2}
-  variables:
-  - symbol: E_0
-    concept: e_0
-  - symbol: omega_g
-    concept: omega_g
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim790
-  type: equation
-  expression: E_2(t) = \frac{-E_e}{\varepsilon \cdot t_a} \left[ e^{-\varepsilon(t-t_e)}
-    - e^{-\varepsilon(t_c-t_e)} \right]
-  variables:
-  - symbol: E_2
-    concept: e_2
-  - symbol: E_e
-    concept: e_e
-  - symbol: t_a
-    concept: t_a
-  - symbol: t_e
-    concept: t_e
-  - symbol: t_c
-    concept: t_c
-  - symbol: varepsilon
-    concept: varepsilon
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim791
-  type: equation
-  expression: \varepsilon t_a = 1 - e^{-\varepsilon(t_c - t_e)}
-  variables:
-  - symbol: t_a
-    concept: t_a
-  - symbol: t_c
-    concept: t_c
-  - symbol: t_e
-    concept: t_e
-  - symbol: varepsilon
-    concept: varepsilon
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim792
-  type: equation
-  expression: R_d = \frac{2\alpha}{\omega_g} = \frac{-B}{F_g}
-  variables:
-  - symbol: R_d
-    concept: r_d
-  - symbol: F_g
-    concept: f_g
-  - symbol: omega_g
-    concept: omega_g
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim793
-  type: equation
-  expression: R_k = \frac{t_e - t_p}{t_p} = \frac{t_n}{t_p}
-  variables:
-  - symbol: R_k
-    concept: r_k
-  - symbol: t_e
-    concept: t_e
-  - symbol: t_p
-    concept: t_p
-  - symbol: t_n
-    concept: t_n
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim794
-  type: equation
-  expression: R_a = \frac{t_a}{t_c - t_e}
-  variables:
-  - symbol: R_a
-    concept: r_a
-  - symbol: t_a
-    concept: t_a
-  - symbol: t_c
-    concept: t_c
-  - symbol: t_e
-    concept: t_e
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim795
-  type: equation
-  expression: '\text{If } R_a < 0.5: \quad K_a = 2 - 2.34 R_a^2 + 1.34 R_a^4'
-  variables:
-  - symbol: R_a
-    concept: r_a
-  - symbol: K_a
-    concept: k_a
-  - symbol: If
-    concept: if
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim796
-  type: equation
-  expression: '\text{If } R_a > 0.5: \quad K_a = 2.16 - 1.32 R_a + 0.64(R_a - 0.5)^2'
-  variables:
-  - symbol: R_a
-    concept: r_a
-  - symbol: K_a
-    concept: k_a
-  - symbol: If
-    concept: if
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim797
-  type: equation
-  expression: '\text{If } R_a < 0.1: \quad K_a = 2.0'
-  variables:
-  - symbol: R_a
-    concept: r_a
-  - symbol: K_a
-    concept: k_a
-  - symbol: If
-    concept: if
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim798
-  type: equation
-  expression: U_e = \frac{E_e \cdot t_a}{2} \cdot K_a
-  variables:
-  - symbol: U_e
-    concept: u_e
-  - symbol: E_e
-    concept: e_e
-  - symbol: t_a
-    concept: t_a
-  - symbol: K_a
-    concept: k_a
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim799
-  type: equation
-  expression: \frac{E_i}{E_e} = \frac{-e^{\frac{R_d}{2}(-\frac{\pi}{2} + \arctan\frac{R_d}{2}
-    - \pi R_k)} \cdot \sin(\frac{\pi}{2} + \arctan\frac{R_d}{2})}{\sin\omega_g t_e}
-  variables:
-  - symbol: E_i
-    concept: e_i
-  - symbol: E_e
-    concept: e_e
-  - symbol: R_d
-    concept: r_d
-  - symbol: R_k
-    concept: r_k
-  - symbol: t_e
-    concept: t_e
-  - symbol: arctan
-    concept: arctan
-  - symbol: omega_g
-    concept: omega_g
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim800
-  type: equation
-  expression: F_a = \frac{1}{2\pi t_a}
-  variables:
-  - symbol: F_a
-    concept: f_a
-  - symbol: t_a
-    concept: t_a
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim801
-  type: equation
-  expression: \Delta L = -10 \log_{10}\left(1 + \frac{f^2}{F_a^2}\right) = -10 \log_{10}\left(1
-    + (2\pi t_a f)^2\right)
-  variables:
-  - symbol: F_a
-    concept: f_a
-  - symbol: t_a
-    concept: t_a
-  - symbol: log_
-    concept: log
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0
-- id: claim802
-  type: equation
-  expression: \int_0^{T0} E(t) \, dt = 0
-  variables:
-  - symbol: int_0
-    concept: int_0
-  - symbol: T0
-    concept: t0
-  - symbol: dt
-    concept: dt
-  provenance:
-    paper: Fant_1985_LFModelGlottalFlow
-    page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
 claims:
-- id: claim587
+- id: claim136
   type: parameter
   concept: mean_sff
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 122.73
-- id: claim588
+- id: claim137
   type: parameter
   concept: sff_range
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 100.39
-- id: claim589
+- id: claim138
   type: parameter
   concept: sff_range
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 173.86
-- id: claim590
+- id: claim139
   type: parameter
   concept: pitch_sigma
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: ST
   value: 2.18
-- id: claim591
+- id: claim140
   type: parameter
   concept: pitch_sigma_range
   provenance:
@@ -42,7 +42,7 @@ claims:
   unit: ST
   lower_bound: 0.77
   upper_bound: 4.3
-- id: claim592
+- id: claim141
   type: parameter
   concept: sff_range
   provenance:
@@ -50,7 +50,7 @@ claims:
     page: 0
   unit: ST
   value: 11.33
-- id: claim593
+- id: claim142
   type: parameter
   concept: sff_range
   provenance:
@@ -59,160 +59,3 @@ claims:
   unit: ST
   lower_bound: 4.0
   upper_bound: 21.0
-- id: claim594
-  type: parameter
-  concept: hollien_jackson
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 3.2
-- id: claim595
-  type: parameter
-  concept: hudson_holbrook
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 5.06
-- id: claim596
-  type: parameter
-  concept: horii
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 2.41
-- id: claim597
-  type: parameter
-  concept: mysak
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  lower_bound: 2.9
-  upper_bound: 3.3
-- id: claim598
-  type: parameter
-  concept: snidecor
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 3.04
-- id: claim599
-  type: parameter
-  concept: linke
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 3.04
-- id: claim600
-  type: parameter
-  concept: hudson_holbrook
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  value: 3.3
-- id: claim601
-  type: parameter
-  concept: brown_et_al
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  lower_bound: 2.0
-  upper_bound: 2.44
-- id: claim602
-  type: parameter
-  concept: stoicheff
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  lower_bound: 3.78
-  upper_bound: 4.7
-- id: claim603
-  type: parameter
-  concept: mcglone_hollien
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-  unit: ST
-  lower_bound: 2.7
-  upper_bound: 2.96
-- id: claim604
-  type: equation
-  expression: \text{SD} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\bar{x} - x_i)^2}
-  variables:
-  - symbol: x_i
-    concept: x_i
-  - symbol: SD
-    concept: sd
-  - symbol: sum_
-    concept: sum
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim605
-  type: equation
-  expression: \text{ST} = 12 \cdot \log_2\left(\frac{f}{f_{\text{ref}}}\right)
-  variables:
-  - symbol: ST
-    concept: st
-  - symbol: log_2
-    concept: log_2
-  - symbol: f_
-    concept: f
-  - symbol: ref
-    concept: ref
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim606
-  type: observation
-  statement: Pitch sigma (in ST) must correlate positively with perceived vocal variability
-    (r > .85)
-  concepts:
-  - pitch
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim607
-  type: observation
-  statement: Pitch sigma correlation with perceived variability should be >= SFF range
-    correlation
-  concepts:
-  - pitch
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim608
-  type: observation
-  statement: For normal reading, pitch sigma should be in range [0.5, 5.0] ST for
-    healthy young adults
-  concepts:
-  - pitch
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim609
-  type: observation
-  statement: Pitch sigma and SFF range must be highly correlated with each other (r
-    > .95)
-  concepts:
-  - pitch
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0
-- id: claim610
-  type: observation
-  statement: No significant sex difference expected in pitch sigma or SFF range during
-    reading when measured in semitones
-  concepts:
-  - pitch
-  provenance:
-    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
-    page: 0

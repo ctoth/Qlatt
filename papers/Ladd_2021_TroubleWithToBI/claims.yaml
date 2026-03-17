@@ -1,14 +1,3 @@
 source:
   paper: Ladd_2021_TroubleWithToBI
-claims:
-- id: claim1
-  type: observation
-  statement: '**Pitch accent peak height should correlate with emphasis on a continuous
-    scale:** If gradience is real, perceived emphasis should correlate continuously
-    with F0 peak height, not show a step function at a categorical boundary.'
-  concepts:
-  - f0
-  - pitch
-  provenance:
-    paper: Ladd_2021_TroubleWithToBI
-    page: 0
+claims: []

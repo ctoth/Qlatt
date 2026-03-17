@@ -1,16 +1,3 @@
 source:
   paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-claims:
-- id: claim1
-  type: equation
-  expression: m\ddot{x} + b\dot{x} + k(x - x_0) = 0
-  variables:
-  - symbol: x_0
-    concept: x_0
-  - symbol: ddot
-    concept: ddot
-  - symbol: dot
-    concept: dot
-  provenance:
-    paper: Browman_1989_ArticulatoryGesturesPhonologicalUnits
-    page: 0
+claims: []

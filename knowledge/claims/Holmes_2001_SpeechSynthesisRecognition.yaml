@@ -1,7 +1,7 @@
 source:
   paper: Holmes_2001_SpeechSynthesisRecognition
 claims:
-- id: claim1395
+- id: claim301
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 50
   upper_bound: 200
   unit: Hz
-- id: claim1396
+- id: claim302
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 100
   upper_bound: 400
   unit: Hz
-- id: claim1397
+- id: claim303
   type: parameter
   concept: formant_frequencies
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 250
   upper_bound: 5000
   unit: Hz
-- id: claim1398
+- id: claim304
   type: parameter
   concept: frame_duration
   provenance:
@@ -36,7 +36,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim1399
+- id: claim305
   type: parameter
   concept: sound_velocity
   provenance:
@@ -44,7 +44,7 @@ claims:
     page: 0
   value: 350
   unit: m/s
-- id: claim1400
+- id: claim306
   type: parameter
   concept: tract_length
   provenance:
@@ -52,31 +52,3 @@ claims:
     page: 0
   value: 0.175
   unit: m
-- id: claim1401
-  type: observation
-  statement: Closed-glottis F1 bandwidth ~80 Hz; open-glottis F1 bandwidth can be
-    4x greater (~300+ Hz)
-  concepts:
-  - f1
-  - bandwidth
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim1402
-  type: observation
-  statement: F0 for adult males typically 50-200 Hz; females approximately one octave
-    higher
-  concepts:
-  - f0
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim1403
-  type: observation
-  statement: Female formant frequencies approximately 20% higher than male due to
-    shorter vocal tract
-  concepts:
-  - formant
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0

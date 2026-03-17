@@ -1,7 +1,7 @@
 source:
   paper: Lu_Smith_GlottalSourceSingingVoice
 claims:
-- id: claim1823
+- id: claim439
   type: parameter
   concept: open_quotient
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 0.49
   upper_bound: 0.78
   unit: ratio
-- id: claim1824
+- id: claim440
   type: parameter
   concept: spectral_tilt_frequency
   provenance:
@@ -21,7 +21,7 @@ claims:
   lower_bound: 161
   upper_bound: 675
   unit: Hz
-- id: claim1825
+- id: claim441
   type: parameter
   concept: deviation_constant_ka
   provenance:
@@ -30,7 +30,7 @@ claims:
   lower_bound: 0.89
   upper_bound: 1.35
   unit: ratio
-- id: claim1826
+- id: claim442
   type: parameter
   concept: deviation_constant_kk
   provenance:
@@ -39,7 +39,7 @@ claims:
   lower_bound: 0.9
   upper_bound: 1.07
   unit: ratio
-- id: claim1827
+- id: claim443
   type: parameter
   concept: noise_strength
   provenance:
@@ -47,7 +47,7 @@ claims:
     page: 0
   value: 0.04
   unit: ratio
-- id: claim1828
+- id: claim444
   type: parameter
   concept: noise_floor
   provenance:
@@ -55,7 +55,7 @@ claims:
     page: 0
   value: 0.02
   unit: ratio
-- id: claim1829
+- id: claim445
   type: parameter
   concept: hp_cutoff
   provenance:
@@ -65,101 +65,3 @@ claims:
   lower_bound: 1200
   upper_bound: 4000
   unit: Hz
-- id: claim1830
-  type: parameter
-  concept: pressed
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 675
-- id: claim1831
-  type: parameter
-  concept: normal
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 515
-- id: claim1832
-  type: parameter
-  concept: breathy
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 161
-- id: claim1833
-  type: parameter
-  concept: low_f0
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 349
-- id: claim1834
-  type: parameter
-  concept: medium_f0
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 326
-- id: claim1835
-  type: parameter
-  concept: high_f0
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 301
-- id: claim1836
-  type: parameter
-  concept: vowel_a
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 349
-- id: claim1837
-  type: parameter
-  concept: vowel_e
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 319
-- id: claim1838
-  type: parameter
-  concept: vowel_i
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-  unit: Hz
-  value: 298
-- id: claim1839
-  type: equation
-  expression: $$R_g = T_o / (2 \cdot T_p)$$
-  variables:
-  - symbol: R_g
-    concept: r_g
-  - symbol: T_o
-    concept: t_o
-  - symbol: T_p
-    concept: t_p
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0
-- id: claim1840
-  type: equation
-  expression: $$a = \frac{27 \cdot AV}{4 \cdot (OQ^2 \cdot T_0)}$$
-  variables:
-  - symbol: T_0
-    concept: t_0
-  - symbol: AV
-    concept: av
-  - symbol: OQ
-    concept: oq
-  provenance:
-    paper: Lu_Smith_GlottalSourceSingingVoice
-    page: 0

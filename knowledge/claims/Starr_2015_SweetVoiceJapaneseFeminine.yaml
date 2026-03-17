@@ -1,37 +1,3 @@
 source:
   paper: Starr_2015_SweetVoiceJapaneseFeminine
-claims:
-- id: claim2218
-  type: observation
-  statement: Sweet voice H1-H2 should be higher than same-speaker nonsweet voice
-  concepts:
-  - h1_h2
-  provenance:
-    paper: Starr_2015_SweetVoiceJapaneseFeminine
-    page: 0
-- id: claim2219
-  type: observation
-  statement: Sweet voice HNR should be higher than same-speaker nonsweet voice
-  concepts:
-  - hnr
-  provenance:
-    paper: Starr_2015_SweetVoiceJapaneseFeminine
-    page: 0
-- id: claim2220
-  type: observation
-  statement: Sweet voice F0 should NOT be reliably higher than nonsweet from same
-    speaker
-  concepts:
-  - f0
-  provenance:
-    paper: Starr_2015_SweetVoiceJapaneseFeminine
-    page: 0
-- id: claim2221
-  type: observation
-  statement: The combination of high H1-based measures + high HNR is distinctive (rules
-    out pure breathiness)
-  concepts:
-  - hnr
-  provenance:
-    paper: Starr_2015_SweetVoiceJapaneseFeminine
-    page: 0
+claims: []

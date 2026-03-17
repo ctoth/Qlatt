@@ -1,7 +1,7 @@
 source:
   paper: Fujisaki_InformationProsodyModeling
 claims:
-- id: claim1056
+- id: claim225
   type: parameter
   concept: accent_ceiling
   provenance:
@@ -9,100 +9,3 @@ claims:
     page: 0
   value: 0.9
   unit: ratio
-- id: claim1057
-  type: equation
-  expression: \log_e F_0(t) = \log_e F_b + \sum_{i=1}^{I} A_{pi} G_p(t - T_{0i}) +
-    \sum_{j=1}^{J} A_{aj} \{G_a(t - T_{1j}) - G_a(t - T_{2j})\}
-  variables:
-  - symbol: F_0
-    concept: f_0
-  - symbol: F_b
-    concept: f_b
-  - symbol: A_pi
-    concept: a_pi
-  - symbol: G_p
-    concept: g_p
-  - symbol: T_0i
-    concept: t_0i
-  - symbol: A_aj
-    concept: a_aj
-  - symbol: G_a
-    concept: g_a
-  - symbol: T_1j
-    concept: t_1j
-  - symbol: T_2j
-    concept: t_2j
-  - symbol: log_e
-    concept: log_e
-  - symbol: sum_
-    concept: sum
-  - symbol: A_
-    concept: a
-  - symbol: T_
-    concept: t
-  - symbol: aj
-    concept: aj
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0
-- id: claim1058
-  type: equation
-  expression: G_p(t) = \begin{cases} \alpha^2 t \exp(-\alpha t), & t \geq 0 \\ 0,
-    & t < 0 \end{cases}
-  variables:
-  - symbol: G_p
-    concept: g_p
-  - symbol: cases
-    concept: cases
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0
-- id: claim1059
-  type: equation
-  expression: G_a(t) = \begin{cases} \min[1 - (1 + \beta t) \exp(-\beta t), \gamma],
-    & t \geq 0 \\ 0, & t < 0 \end{cases}
-  variables:
-  - symbol: G_a
-    concept: g_a
-  - symbol: cases
-    concept: cases
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0
-- id: claim1060
-  type: equation
-  expression: \frac{dT}{dl} = a + bT
-  variables:
-  - symbol: dT
-    concept: dt
-  - symbol: dl
-    concept: dl
-  - symbol: bT
-    concept: bt
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0
-- id: claim1061
-  type: equation
-  expression: T = T_0 \exp(bx)
-  variables:
-  - symbol: T_0
-    concept: t_0
-  - symbol: bx
-    concept: bx
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0
-- id: claim1062
-  type: equation
-  expression: \log_e F_0(t) = \log_e F_b + (b/2)x(t)
-  variables:
-  - symbol: F_0
-    concept: f_0
-  - symbol: F_b
-    concept: f_b
-  - symbol: log_e
-    concept: log_e
-  provenance:
-    paper: Fujisaki_InformationProsodyModeling
-    page: 0

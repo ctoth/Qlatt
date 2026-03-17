@@ -1,7 +1,7 @@
 source:
   paper: Hertz_1982_SRS_TextToSpeech
 claims:
-- id: claim1315
+- id: claim294
   type: parameter
   concept: voicing_amplitude
   provenance:

@@ -1,11 +1,3 @@
 source:
   paper: Abramson_Whalen_2017_VOTat50
-claims:
-- id: claim1
-  type: parameter
-  concept: perceptual_resolution
-  provenance:
-    paper: Abramson_Whalen_2017_VOTat50
-    page: 0
-  value: 5
-  unit: ms
+claims: []

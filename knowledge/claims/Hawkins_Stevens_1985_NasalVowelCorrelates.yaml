@@ -1,7 +1,7 @@
 source:
   paper: Hawkins_Stevens_1985_NasalVowelCorrelates
 claims:
-- id: claim1258
+- id: claim271
   type: parameter
   concept: initial_fnp
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 400
   unit: Hz
-- id: claim1259
+- id: claim272
   type: parameter
   concept: initial_fnz
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 400
   unit: Hz
-- id: claim1260
+- id: claim273
   type: parameter
   concept: initial_bandwidth
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim1261
+- id: claim274
   type: parameter
   concept: transition_duration
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 40
   unit: ms
-- id: claim1262
+- id: claim275
   type: parameter
   concept: vowel_duration
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 325
   unit: ms
-- id: claim1263
+- id: claim276
   type: parameter
   concept: initial_stop_burst
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 15
   unit: ms
-- id: claim1264
+- id: claim277
   type: parameter
   concept: voicing_onset
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim1265
+- id: claim278
   type: parameter
   concept: nonnasal_interval
   provenance:
@@ -65,84 +65,3 @@ claims:
     page: 0
   value: 40
   unit: ms
-- id: claim1266
-  type: parameter
-  concept: i
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-  unit: nasal
-  value: 270
-- id: claim1267
-  type: parameter
-  concept: e
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-  unit: nasal
-  value: 350
-- id: claim1268
-  type: parameter
-  concept: a
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-  unit: nasal
-  value: 700
-- id: claim1269
-  type: parameter
-  concept: o
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-  unit: nasal
-  value: 430
-- id: claim1270
-  type: parameter
-  concept: u
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-  unit: nasal
-  value: 270
-- id: claim1271
-  type: equation
-  expression: \text{FNZ} = \frac{\text{FNP} + F1}{2}
-  variables:
-  - symbol: FNZ
-    concept: fnz
-  - symbol: FNP
-    concept: fnp
-  - symbol: F1
-    concept: f1
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-- id: claim1272
-  type: equation
-  expression: \text{Spacing} = \text{FNP} - \text{FNZ} \approx 75-110 \text{ Hz}
-  variables:
-  - symbol: Spacing
-    concept: spacing
-  - symbol: FNP
-    concept: fnp
-  - symbol: FNZ
-    concept: fnz
-  - symbol: Hz
-    concept: hz
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0
-- id: claim1273
-  type: equation
-  expression: \text{FNZ} \approx \frac{\text{FNP} + F1}{2}
-  variables:
-  - symbol: FNZ
-    concept: fnz
-  - symbol: FNP
-    concept: fnp
-  - symbol: F1
-    concept: f1
-  provenance:
-    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
-    page: 0

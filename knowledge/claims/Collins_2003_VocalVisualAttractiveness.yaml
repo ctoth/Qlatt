@@ -1,7 +1,7 @@
 source:
   paper: Collins_2003_VocalVisualAttractiveness
 claims:
-- id: claim485
+- id: claim131
   type: parameter
   concept: height
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 1.56
   upper_bound: 1.78
   unit: m
-- id: claim486
+- id: claim132
   type: parameter
   concept: weight
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 47
   upper_bound: 95
   unit: kg
-- id: claim487
+- id: claim133
   type: parameter
   concept: bmi
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 15.5
   upper_bound: 34.5
   unit: kg/m^2
-- id: claim488
+- id: claim134
   type: parameter
   concept: whr
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 0.66
   upper_bound: 0.85
   unit: ratio
-- id: claim489
+- id: claim135
   type: parameter
   concept: vowel_duration
   provenance:
@@ -46,30 +46,3 @@ claims:
   lower_bound: 0.25
   upper_bound: 0.38
   unit: s
-- id: claim490
-  type: observation
-  statement: Higher F0 in women should correlate with higher perceived vocal attractiveness
-  concepts:
-  - f0
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim491
-  type: observation
-  statement: Formant dispersion (especially F4-F5 spacing) should be inversely proportional
-    to speaker height
-  concepts:
-  - f4
-  - formant
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim492
-  type: observation
-  statement: Larger body size (higher BMI/weight) should correlate with lower F0 and
-    harmonics
-  concepts:
-  - f0
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0

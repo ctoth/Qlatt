@@ -1,20 +1,3 @@
 source:
   paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-claims:
-- id: claim1538
-  type: observation
-  statement: Jitter values should be higher for speakers who consistently aspirate
-    word-final /t/
-  concepts:
-  - jitter
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
-- id: claim1539
-  type: observation
-  statement: F0 alone should not predict /t/ articulation group membership
-  concepts:
-  - f0
-  provenance:
-    paper: Karthikeyan_2023_ArticulatoryStatusAttractiveness
-    page: 0
+claims: []

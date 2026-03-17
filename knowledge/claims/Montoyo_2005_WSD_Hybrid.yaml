@@ -1,7 +1,7 @@
 source:
   paper: Montoyo_2005_WSD_Hybrid
 claims:
-- id: claim1932
+- id: claim473
   type: parameter
   concept: context_window
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 15
   unit: nouns
-- id: claim1933
+- id: claim474
   type: parameter
   concept: keyword_threshold
   provenance:

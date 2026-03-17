@@ -1,7 +1,7 @@
 source:
   paper: Fant_1988_LFFrequencyDomainInterpretation
 claims:
-- id: claim808
+- id: claim182
   type: parameter
   concept: f_a
   provenance:
@@ -10,16 +10,3 @@ claims:
   lower_bound: 100
   upper_bound: 3000
   unit: Hz
-- id: claim809
-  type: equation
-  expression: 'For $T_e < t < T_c$:'
-  variables:
-  - symbol: T_e
-    concept: t_e
-  - symbol: T_c
-    concept: t_c
-  - symbol: For
-    concept: for
-  provenance:
-    paper: Fant_1988_LFFrequencyDomainInterpretation
-    page: 0

@@ -6,3 +6,4 @@ dimensions:
   T: 1
 common_alternatives:
   - { unit: ms, type: multiplicative, multiplier: 0.001 }
+  - { unit: msec, type: multiplicative, multiplier: 0.001 }

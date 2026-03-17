@@ -1,7 +1,7 @@
 source:
   paper: Yunusova_2012_LingualConsonantTargets
 claims:
-- id: claim2749
+- id: claim641
   type: parameter
   concept: speaking_rate
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: ms/syl
   value: 271.37
-- id: claim2750
+- id: claim642
   type: parameter
   concept: tf_sensor_placement
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: cm
   value: 1.3
-- id: claim2751
+- id: claim643
   type: parameter
   concept: tb_sensor_placement
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: cm
   value: 2.1
-- id: claim2752
+- id: claim644
   type: parameter
   concept: palate_height
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: mm
   value: 13.98
-- id: claim2753
+- id: claim645
   type: parameter
   concept: palate_height
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: mm
   value: 11.45
-- id: claim2754
+- id: claim646
   type: parameter
   concept: palate_width
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   unit: mm
   value: 34.99
-- id: claim2755
+- id: claim647
   type: parameter
   concept: palate_width
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   unit: mm
   value: 31.99
-- id: claim2756
+- id: claim648
   type: parameter
   concept: palate_length
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   unit: mm
   value: 35.21
-- id: claim2757
+- id: claim649
   type: parameter
   concept: palate_length
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   unit: mm
   value: 30.79
-- id: claim2758
+- id: claim650
   type: parameter
   concept: palate_curvature
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   unit: SD
   value: 1.86
-- id: claim2759
+- id: claim651
   type: parameter
   concept: palate_curvature
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   unit: SD
   value: 1.85
-- id: claim2760
+- id: claim652
   type: parameter
   concept: max_overlap
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   unit: SD
   value: 0.64
-- id: claim2761
+- id: claim653
   type: parameter
   concept: max_overlap
   provenance:
@@ -105,127 +105,3 @@ claims:
     page: 0
   unit: SD
   value: 0.7
-- id: claim2762
-  type: parameter
-  concept: d_t
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 1.52
-- id: claim2763
-  type: parameter
-  concept: z_s
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 1.36
-- id: claim2764
-  type: parameter
-  concept: g_k
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 2.14
-- id: claim2765
-  type: parameter
-  concept: alveolars
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 1.44
-- id: claim2766
-  type: parameter
-  concept: postalveolars
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 1.27
-- id: claim2767
-  type: parameter
-  concept: stops_vs_postalveolars
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 2.93
-- id: claim2768
-  type: parameter
-  concept: fricatives_vs_postalveolars
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-  unit: mm
-  value: 4.32
-- id: claim2769
-  type: equation
-  expression: f(v) = \frac{1}{n} \sum_{i=1}^{n} \Phi(v; w_i, h)
-  variables:
-  - symbol: w_i
-    concept: w_i
-  - symbol: sum_
-    concept: sum
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-- id: claim2770
-  type: equation
-  expression: \Phi(v; w_i, h) = \prod_{j=1}^{3} \frac{1}{\sqrt{2\pi}h_j} \exp[-(v_j
-    - w_{i,j})^2 / 2h_j^2]
-  variables:
-  - symbol: w_i
-    concept: w_i
-  - symbol: h_j
-    concept: h_j
-  - symbol: v_j
-    concept: v_j
-  - symbol: prod_
-    concept: prod
-  - symbol: w_
-    concept: w
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-- id: claim2771
-  type: equation
-  expression: h_j = n^{-1/7} \cdot \text{sd}(w_{1,j}, w_{2,j}, ..., w_{n,j})
-  variables:
-  - symbol: h_j
-    concept: h_j
-  - symbol: w_1
-    concept: w_1
-  - symbol: w_2
-    concept: w_2
-  - symbol: w_n
-    concept: w_n
-  - symbol: sd
-    concept: sd
-  - symbol: w_
-    concept: w
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-- id: claim2772
-  type: equation
-  expression: \text{overlap} = \int \min[f(v), g(v)] \, dv
-  variables:
-  - symbol: overlap
-    concept: overlap
-  - symbol: dv
-    concept: dv
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0
-- id: claim2773
-  type: equation
-  expression: O_2 = 1.28 - 0.0017 \cdot R - 0.339 \cdot \alpha
-  variables:
-  - symbol: O_2
-    concept: o_2
-  provenance:
-    paper: Yunusova_2012_LingualConsonantTargets
-    page: 0

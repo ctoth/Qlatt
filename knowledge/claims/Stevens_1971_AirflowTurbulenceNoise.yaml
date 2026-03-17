@@ -1,7 +1,7 @@
 source:
   paper: Stevens_1971_AirflowTurbulenceNoise
 claims:
-- id: claim2254
+- id: claim529
   type: parameter
   concept: kinetic_loss_constant
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 0.5
   upper_bound: 1.7
   unit: dimensionless
-- id: claim2255
+- id: claim530
   type: parameter
   concept: pressure_drop_exponent
   provenance:
@@ -20,7 +20,7 @@ claims:
   lower_bound: 1.0
   upper_bound: 1.5
   unit: dimensionless
-- id: claim2256
+- id: claim531
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -30,7 +30,7 @@ claims:
   lower_bound: 5
   upper_bound: 15
   unit: cm H₂O
-- id: claim2257
+- id: claim532
   type: parameter
   concept: vowel_airflow
   provenance:
@@ -39,7 +39,7 @@ claims:
   lower_bound: 50
   upper_bound: 300
   unit: cm³/sec
-- id: claim2258
+- id: claim533
   type: parameter
   concept: fricative_airflow
   provenance:
@@ -48,7 +48,7 @@ claims:
   lower_bound: 100
   upper_bound: 1000
   unit: cm³/sec
-- id: claim2259
+- id: claim534
   type: parameter
   concept: aspiration_airflow
   provenance:
@@ -57,7 +57,7 @@ claims:
   lower_bound: 300
   upper_bound: 2000
   unit: cm³/sec
-- id: claim2260
+- id: claim535
   type: parameter
   concept: fricative_constriction_area
   provenance:
@@ -66,7 +66,7 @@ claims:
   lower_bound: 0.02
   upper_bound: 0.5
   unit: cm²
-- id: claim2261
+- id: claim536
   type: parameter
   concept: vowel_constriction_area
   provenance:
@@ -75,7 +75,7 @@ claims:
   lower_bound: 0.1
   upper_bound: 10
   unit: cm²
-- id: claim2262
+- id: claim537
   type: parameter
   concept: glottal_area
   provenance:
@@ -84,7 +84,7 @@ claims:
   lower_bound: 0.02
   upper_bound: 0.5
   unit: cm²
-- id: claim2263
+- id: claim538
   type: parameter
   concept: glottal_area
   provenance:
@@ -93,7 +93,7 @@ claims:
   lower_bound: 0.05
   upper_bound: 1.0
   unit: cm²
-- id: claim2264
+- id: claim539
   type: parameter
   concept: glottal_width
   provenance:
@@ -102,56 +102,3 @@ claims:
   lower_bound: 0.1
   upper_bound: 5.0
   unit: mm
-- id: claim2265
-  type: equation
-  expression: \Delta P_L = k_L (\rho U^2 / 2A^2)
-  variables:
-  - symbol: P_L
-    concept: p_l
-  - symbol: k_L
-    concept: k_l
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim2266
-  type: equation
-  expression: R = 12\mu l / bw^3
-  variables:
-  - symbol: bw
-    concept: bw
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim2267
-  type: equation
-  expression: \Delta P = RU + k_L (\rho U^2 / 2A^2)
-  variables:
-  - symbol: k_L
-    concept: k_l
-  - symbol: RU
-    concept: ru
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim2268
-  type: equation
-  expression: T_1(s) = s_1 s_1^* / (s - s_1)(s - s_1^*)
-  variables:
-  - symbol: T_1
-    concept: t_1
-  - symbol: s_1
-    concept: s_1
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0
-- id: claim2269
-  type: equation
-  expression: p_r \sim \Delta P^{\beta} A^{1/2}
-  variables:
-  - symbol: p_r
-    concept: p_r
-  - symbol: sim
-    concept: sim
-  provenance:
-    paper: Stevens_1971_AirflowTurbulenceNoise
-    page: 0

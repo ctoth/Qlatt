@@ -52,31 +52,3 @@ claims:
     page: 0
   value: 0.175
   unit: m
-- id: claim7
-  type: observation
-  statement: Closed-glottis F1 bandwidth ~80 Hz; open-glottis F1 bandwidth can be
-    4x greater (~300+ Hz)
-  concepts:
-  - f1
-  - bandwidth
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim8
-  type: observation
-  statement: F0 for adult males typically 50-200 Hz; females approximately one octave
-    higher
-  concepts:
-  - f0
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0
-- id: claim9
-  type: observation
-  statement: Female formant frequencies approximately 20% higher than male due to
-    shorter vocal tract
-  concepts:
-  - formant
-  provenance:
-    paper: Holmes_2001_SpeechSynthesisRecognition
-    page: 0

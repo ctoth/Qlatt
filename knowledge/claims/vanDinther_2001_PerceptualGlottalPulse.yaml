@@ -1,24 +1,3 @@
 source:
   paper: vanDinther_2001_PerceptualGlottalPulse
-claims:
-- id: claim2590
-  type: equation
-  expression: \|f\| := \left( \int_0^{40} |f(x)|^2 dx \right)^{1/2}
-  variables:
-  - symbol: int_0
-    concept: int_0
-  - symbol: dx
-    concept: dx
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
-- id: claim2591
-  type: equation
-  expression: \|\psi_v(\mathbf{r} + \mathbf{h}) - \psi_v(\mathbf{r})\|^2 \approx \frac{1}{2}\mathbf{h}^T
-    H(\mathbf{r}) \mathbf{h}
-  variables:
-  - symbol: psi_v
-    concept: psi_v
-  provenance:
-    paper: vanDinther_2001_PerceptualGlottalPulse
-    page: 0
+claims: []

@@ -1,22 +1,3 @@
 source:
   paper: Goldsmith_1976_AutosegmentalPhonology
-claims:
-- id: claim1
-  type: observation
-  statement: 'Spreading produces level tone: if one tone spreads over N syllables,
-    all N syllables have identical pitch'
-  concepts:
-  - pitch
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
-- id: claim2
-  type: observation
-  statement: 'Contour tones only appear when multiple tones associate with one syllable:
-    the number of pitch changes within a syllable equals (number of associated tones
-    - 1)'
-  concepts:
-  - pitch
-  provenance:
-    paper: Goldsmith_1976_AutosegmentalPhonology
-    page: 0
+claims: []

@@ -1,37 +1,3 @@
 source:
   paper: Szameitat_2011_LaughterEmotionAcoustics
-claims:
-- id: claim2469
-  type: observation
-  statement: Arousal should correlate positively with F0 (r ≥ .60, largest shared
-    variance 44%)
-  concepts:
-  - f0
-  provenance:
-    paper: Szameitat_2011_LaughterEmotionAcoustics
-    page: 0
-- id: claim2470
-  type: observation
-  statement: Arousal should correlate negatively with jitter (r magnitude ≥ .37)
-  concepts:
-  - jitter
-  provenance:
-    paper: Szameitat_2011_LaughterEmotionAcoustics
-    page: 0
-- id: claim2471
-  type: observation
-  statement: Dominance should correlate positively with F1 (43% shared variance)
-  concepts:
-  - f1
-  provenance:
-    paper: Szameitat_2011_LaughterEmotionAcoustics
-    page: 0
-- id: claim2472
-  type: observation
-  statement: F0 parameters should NOT significantly correlate with dominance (divergent
-    finding from some speech studies)
-  concepts:
-  - f0
-  provenance:
-    paper: Szameitat_2011_LaughterEmotionAcoustics
-    page: 0
+claims: []

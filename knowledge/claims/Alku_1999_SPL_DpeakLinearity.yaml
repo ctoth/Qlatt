@@ -1,7 +1,7 @@
 source:
   paper: Alku_1999_SPL_DpeakLinearity
 claims:
-- id: claim2
+- id: claim1
   type: parameter
   concept: f1_center
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 646
   upper_bound: 851
   unit: Hz
-- id: claim3
+- id: claim2
   type: parameter
   concept: f1_center
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 528
   upper_bound: 635
   unit: Hz
-- id: claim4
+- id: claim3
   type: parameter
   concept: f0_range
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 125
   upper_bound: 500
   unit: Hz
-- id: claim5
+- id: claim4
   type: parameter
   concept: f0_range
   provenance:
@@ -37,82 +37,3 @@ claims:
   lower_bound: 75
   upper_bound: 315
   unit: Hz
-- id: claim6
-  type: equation
-  expression: SPL_{speech} = 94 \text{ dB} + 20 \log \frac{RMS_{speech}}{RMS_{calibration}}
-  variables:
-  - symbol: SPL_speech
-    concept: spl_speech
-  - symbol: RMS_speech
-    concept: rms_speech
-  - symbol: RMS_calibration
-    concept: rms_calibration
-  - symbol: SPL_
-    concept: spl
-  - symbol: speech
-    concept: speech
-  - symbol: dB
-    concept: db
-  - symbol: RMS_
-    concept: rms
-  - symbol: calibration
-    concept: calibration
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim7
-  type: equation
-  expression: y(k) = ak^2 + b
-  variables:
-  - symbol: ak
-    concept: ak
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim8
-  type: observation
-  statement: slope1 > slope2 for any speaker's SPL-dpeak graph when wide intensity
-    range is analyzed
-  concepts:
-  - intensity
-  - spl
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim9
-  type: observation
-  statement: H1-H2 must decrease monotonically with increasing SPL (overall trend)
-  concepts:
-  - spl
-  - h1_h2
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim10
-  type: observation
-  statement: PSP parameter a must increase (toward zero) with increasing SPL
-  concepts:
-  - spl
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim11
-  type: observation
-  statement: At soft phonation levels, F0 component dominates SPL; at normal/loud
-    levels, F1-region harmonics dominate
-  concepts:
-  - f0
-  - f1
-  - spl
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0
-- id: claim12
-  type: observation
-  statement: The knee in SPL-dpeak persists when F0 effects are removed (ESP analysis)
-  concepts:
-  - f0
-  - spl
-  provenance:
-    paper: Alku_1999_SPL_DpeakLinearity
-    page: 0

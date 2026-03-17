@@ -1,7 +1,7 @@
 source:
   paper: HoltLotto_2006_CueWeightingAuditoryCategorization
 claims:
-- id: claim1404
+- id: claim307
   type: parameter
   concept: center_frequency
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 550
   upper_bound: 1150
   unit: Hz
-- id: claim1405
+- id: claim308
   type: parameter
   concept: modulation_frequency
   provenance:
@@ -19,7 +19,7 @@ claims:
     page: 0
   value: 140
   unit: Hz
-- id: claim1406
+- id: claim309
   type: parameter
   concept: fm_depth
   provenance:
@@ -27,7 +27,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim1407
+- id: claim310
   type: parameter
   concept: stimulus_duration
   provenance:
@@ -35,7 +35,7 @@ claims:
     page: 0
   value: 300
   unit: ms
-- id: claim1408
+- id: claim311
   type: parameter
   concept: sample_rate
   provenance:
@@ -43,7 +43,7 @@ claims:
     page: 0
   value: 10
   unit: kHz
-- id: claim1409
+- id: claim312
   type: parameter
   concept: bit_depth
   provenance:
@@ -51,7 +51,7 @@ claims:
     page: 0
   value: 16
   unit: bits
-- id: claim1410
+- id: claim313
   type: parameter
   concept: cf_step_size
   provenance:
@@ -59,7 +59,7 @@ claims:
     page: 0
   value: 30
   unit: Hz
-- id: claim1411
+- id: claim314
   type: parameter
   concept: mf_step_size
   provenance:
@@ -67,7 +67,7 @@ claims:
     page: 0
   value: 18
   unit: Hz
-- id: claim1412
+- id: claim315
   type: parameter
   concept: training_blocks
   provenance:
@@ -75,60 +75,3 @@ claims:
     page: 0
   value: 10
   unit: count
-- id: claim1413
-  type: equation
-  expression: I_{\text{dimension}} = \frac{\% \text{Correct Ideal Observer} - \text{Chance}}{\text{Perfect
-    Performance} - \text{Chance}}
-  variables:
-  - symbol: I_
-    concept: i
-  - symbol: dimension
-    concept: dimension
-  - symbol: Correct
-    concept: correct
-  - symbol: Ideal
-    concept: ideal
-  - symbol: Observer
-    concept: observer
-  - symbol: Chance
-    concept: chance
-  - symbol: Perfect
-    concept: perfect
-  - symbol: Performance
-    concept: performance
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim1414
-  type: equation
-  expression: \log\left(\frac{p(A)}{1-p(A)}\right) = \beta_0 + \beta_{CF} \cdot CF
-    + \beta_{MF} \cdot MF
-  variables:
-  - symbol: beta_0
-    concept: beta_0
-  - symbol: beta_
-    concept: beta
-  - symbol: CF
-    concept: cf
-  - symbol: MF
-    concept: mf
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0
-- id: claim1415
-  type: equation
-  expression: w_{CF} = \frac{|\beta_{CF}|}{|\beta_{CF}| + |\beta_{MF}|}
-  variables:
-  - symbol: w_CF
-    concept: w_cf
-  - symbol: w_
-    concept: w
-  - symbol: CF
-    concept: cf
-  - symbol: beta_
-    concept: beta
-  - symbol: MF
-    concept: mf
-  provenance:
-    paper: HoltLotto_2006_CueWeightingAuditoryCategorization
-    page: 0

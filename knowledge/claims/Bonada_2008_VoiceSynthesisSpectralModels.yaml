@@ -1,7 +1,7 @@
 source:
   paper: Bonada_2008_VoiceSynthesisSpectralModels
 claims:
-- id: claim286
+- id: claim98
   type: parameter
   concept: fft_size
   provenance:
@@ -10,7 +10,7 @@ claims:
   unit: samples
   lower_bound: 512
   upper_bound: 8192
-- id: claim287
+- id: claim99
   type: parameter
   concept: window_periods
   provenance:
@@ -19,7 +19,7 @@ claims:
   unit: periods
   lower_bound: 3
   upper_bound: 5
-- id: claim288
+- id: claim100
   type: parameter
   concept: zeropadding_factor
   provenance:
@@ -28,7 +28,7 @@ claims:
   unit: ratio
   lower_bound: 8
   upper_bound: 1000
-- id: claim289
+- id: claim101
   type: parameter
   concept: pitch_transposition
   provenance:
@@ -37,7 +37,7 @@ claims:
   unit: ratio
   lower_bound: 0.5
   upper_bound: 2.0
-- id: claim290
+- id: claim102
   type: parameter
   concept: timbre_scaling
   provenance:
@@ -46,7 +46,7 @@ claims:
   unit: ratio
   lower_bound: 0.95
   upper_bound: 1.18
-- id: claim291
+- id: claim103
   type: parameter
   concept: vibrato_rate
   provenance:
@@ -55,7 +55,7 @@ claims:
   unit: Hz
   lower_bound: 2
   upper_bound: 7
-- id: claim292
+- id: claim104
   type: parameter
   concept: vibrato_depth
   provenance:

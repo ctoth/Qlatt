@@ -25,21 +25,3 @@ claims:
     page: 0
   value: 1
   unit: --
-- id: claim4
-  type: equation
-  expression: 'where:'
-  variables:
-  - symbol: where
-    concept: where
-  provenance:
-    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
-    page: 0
-- id: claim5
-  type: observation
-  statement: Duration increase in phrase-final position should be greater than phrase-initial
-    (asymmetric effect)
-  concepts:
-  - duration
-  provenance:
-    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
-    page: 0

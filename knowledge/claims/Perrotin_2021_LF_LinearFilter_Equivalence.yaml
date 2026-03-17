@@ -1,7 +1,7 @@
 source:
   paper: Perrotin_2021_LF_LinearFilter_Equivalence
 claims:
-- id: claim1991
+- id: claim487
   type: parameter
   concept: rd_parameter
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 0.4
   upper_bound: 2.7
   unit: dimensionless
-- id: claim1992
+- id: claim488
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -21,7 +21,7 @@ claims:
   lower_bound: 70
   upper_bound: 1000
   unit: Hz
-- id: claim1993
+- id: claim489
   type: parameter
   concept: peak_excitation
   provenance:
@@ -29,7 +29,7 @@ claims:
     page: 0
   value: 0.2
   unit: arbitrary
-- id: claim1994
+- id: claim490
   type: parameter
   concept: open_quotient
   provenance:
@@ -38,7 +38,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 0.9
   unit: ratio
-- id: claim1995
+- id: claim491
   type: parameter
   concept: asymmetry_coefficient
   provenance:
@@ -47,7 +47,7 @@ claims:
   lower_bound: 0.5
   upper_bound: 0.9
   unit: ratio
-- id: claim1996
+- id: claim492
   type: parameter
   concept: glottal_formant_frequency
   provenance:
@@ -56,7 +56,7 @@ claims:
   lower_bound: 64
   upper_bound: 121
   unit: Hz
-- id: claim1997
+- id: claim493
   type: parameter
   concept: sampling_frequency
   provenance:
@@ -64,460 +64,3 @@ claims:
     page: 0
   value: 96000
   unit: Hz
-- id: claim1998
-  type: equation
-  expression: h_T(t) = G_n e^{a_n t} \sin(b_n t + \phi_n) \quad \text{if } t \in \mathcal{D}
-  variables:
-  - symbol: h_T
-    concept: h_t
-  - symbol: G_n
-    concept: g_n
-  - symbol: a_n
-    concept: a_n
-  - symbol: b_n
-    concept: b_n
-  - symbol: phi_n
-    concept: phi_n
-  - symbol: quad
-    concept: quad
-  - symbol: if
-    concept: if
-  - symbol: in
-    concept: in
-  - symbol: mathcal
-    concept: mathcal
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim1999
-  type: equation
-  expression: h_{LF_{open}}(t) = \frac{-E}{\sin\left(\frac{\pi}{\alpha_m}\right)}
-    e^{a_{LF} t} \sin\left(\frac{\pi}{\alpha_m O_q T_0} t + \frac{\pi}{\alpha_m}\right),
-    \quad t \in [-O_q T_0, 0]
-  variables:
-  - symbol: h_LF
-    concept: h_lf
-  - symbol: a_LF
-    concept: a_lf
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_0
-    concept: t_0
-  - symbol: h_
-    concept: h
-  - symbol: LF_
-    concept: lf
-  - symbol: open
-    concept: open
-  - symbol: alpha_m
-    concept: alpha_m
-  - symbol: a_
-    concept: a
-  - symbol: quad
-    concept: quad
-  - symbol: in
-    concept: in
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2000
-  type: equation
-  expression: H_{LF_{open}}(s) = \frac{G_{LF} b_{LF} (e^{-sT_{LF}} - 1) + Es}{(a_{LF}
-    - s)^2 + b_{LF}^2}
-  variables:
-  - symbol: H_LF
-    concept: h_lf
-  - symbol: G_LF
-    concept: g_lf
-  - symbol: b_LF
-    concept: b_lf
-  - symbol: sT_LF
-    concept: st_lf
-  - symbol: a_LF
-    concept: a_lf
-  - symbol: H_
-    concept: h
-  - symbol: LF_
-    concept: lf
-  - symbol: open
-    concept: open
-  - symbol: G_
-    concept: g
-  - symbol: b_
-    concept: b
-  - symbol: sT_
-    concept: st
-  - symbol: Es
-    concept: es
-  - symbol: a_
-    concept: a
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2001
-  type: equation
-  expression: h_{CALM_{open}}(t) = -\frac{E}{\sin(\pi(1-\alpha_m))} e^{a_{CALM} t}
-    \sin\left(\frac{\pi}{O_q T_0} t + \pi(1-\alpha_m)\right), \quad t \in [-O_q T_0,
-    0]
-  variables:
-  - symbol: h_CALM
-    concept: h_calm
-  - symbol: a_CALM
-    concept: a_calm
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_0
-    concept: t_0
-  - symbol: h_
-    concept: h
-  - symbol: CALM_
-    concept: calm
-  - symbol: open
-    concept: open
-  - symbol: alpha_m
-    concept: alpha_m
-  - symbol: a_
-    concept: a
-  - symbol: quad
-    concept: quad
-  - symbol: in
-    concept: in
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2002
-  type: equation
-  expression: H_{CALM_{open}}(s) = \frac{(1 + e^{(a_{CALM}-s)T_{CALM}}) Es}{(a_{CALM}
-    - s)^2 + b_{CALM}^2}
-  variables:
-  - symbol: H_CALM
-    concept: h_calm
-  - symbol: a_CALM
-    concept: a_calm
-  - symbol: T_CALM
-    concept: t_calm
-  - symbol: b_CALM
-    concept: b_calm
-  - symbol: H_
-    concept: h
-  - symbol: CALM_
-    concept: calm
-  - symbol: open
-    concept: open
-  - symbol: a_
-    concept: a
-  - symbol: T_
-    concept: t
-  - symbol: Es
-    concept: es
-  - symbol: b_
-    concept: b
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2003
-  type: equation
-  expression: h_{LM_{open}}(t) = \frac{E}{\sin(\pi(1-\alpha_m))} e^{a_{LM} t} \sin\left(\frac{\pi}{O_q
-    T_0} t - \pi(1-\alpha_m)\right), \quad t > 0
-  variables:
-  - symbol: h_LM
-    concept: h_lm
-  - symbol: a_LM
-    concept: a_lm
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_0
-    concept: t_0
-  - symbol: h_
-    concept: h
-  - symbol: LM_
-    concept: lm
-  - symbol: open
-    concept: open
-  - symbol: alpha_m
-    concept: alpha_m
-  - symbol: a_
-    concept: a
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2004
-  type: equation
-  expression: H_{LM_{open}}(s) = \frac{Es}{(a_{LM} - s)^2 + b_{LM}^2}
-  variables:
-  - symbol: H_LM
-    concept: h_lm
-  - symbol: a_LM
-    concept: a_lm
-  - symbol: b_LM
-    concept: b_lm
-  - symbol: H_
-    concept: h
-  - symbol: LM_
-    concept: lm
-  - symbol: open
-    concept: open
-  - symbol: Es
-    concept: es
-  - symbol: a_
-    concept: a
-  - symbol: b_
-    concept: b
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2005
-  type: equation
-  expression: h_{LF_{closed}}(t) = \frac{-E}{\epsilon T_a} (e^{-\epsilon t} - e^{-\epsilon(T_0
-    - O_q T_0)}), \quad t \in [0, T_0 - O_q T_0]
-  variables:
-  - symbol: h_LF
-    concept: h_lf
-  - symbol: T_a
-    concept: t_a
-  - symbol: T_0
-    concept: t_0
-  - symbol: O_q
-    concept: o_q
-  - symbol: h_
-    concept: h
-  - symbol: LF_
-    concept: lf
-  - symbol: closed
-    concept: closed
-  - symbol: quad
-    concept: quad
-  - symbol: in
-    concept: in
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2006
-  type: equation
-  expression: 1 - e^{-\epsilon(T_0 - O_q T_0)} = \epsilon T_a
-  variables:
-  - symbol: T_0
-    concept: t_0
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_a
-    concept: t_a
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2007
-  type: equation
-  expression: '\begin{cases}
-
-    R_a = (-1 + 4.8 R_d) / 100 \\
-
-    R_k = (22.4 + 11.8 R_d) / 100 \\
-
-    R_g = \frac{R_k(0.5 + 1.2 R_k)}{0.44 R_d - 4 R_a(0.5 + 1.2 R_k)}
-
-    \end{cases}
-
-    \Rightarrow
-
-    \begin{cases}
-
-    O_q = \frac{1 + R_k}{2 R_g} \\
-
-    \alpha_m = \frac{1}{1 + R_k} \\
-
-    T_a = R_a T_0
-
-    \end{cases}'
-  variables:
-  - symbol: R_a
-    concept: r_a
-  - symbol: R_d
-    concept: r_d
-  - symbol: R_k
-    concept: r_k
-  - symbol: R_g
-    concept: r_g
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_a
-    concept: t_a
-  - symbol: T_0
-    concept: t_0
-  - symbol: cases
-    concept: cases
-  - symbol: Rightarrow
-    concept: rightarrow
-  - symbol: alpha_m
-    concept: alpha_m
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2008
-  type: equation
-  expression: '\begin{cases}
-
-    F_g = \frac{1}{2 O_q T_0} \\
-
-    B_g = \frac{1}{O_q T_0 \tan(\pi(1-\alpha_m))} \\
-
-    A_g = E
-
-    \end{cases}'
-  variables:
-  - symbol: F_g
-    concept: f_g
-  - symbol: O_q
-    concept: o_q
-  - symbol: T_0
-    concept: t_0
-  - symbol: B_g
-    concept: b_g
-  - symbol: A_g
-    concept: a_g
-  - symbol: cases
-    concept: cases
-  - symbol: alpha_m
-    concept: alpha_m
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2009
-  type: equation
-  expression: '\begin{cases}
-
-    b_1 = -A_g \\
-
-    b_2 = A_g \\
-
-    a_1 = -2 e^{-\pi B_g / F_s} \cos(2\pi F_g / F_s) \\
-
-    a_2 = e^{-2\pi B_g / F_s}
-
-    \end{cases}'
-  variables:
-  - symbol: b_1
-    concept: b_1
-  - symbol: A_g
-    concept: a_g
-  - symbol: b_2
-    concept: b_2
-  - symbol: a_1
-    concept: a_1
-  - symbol: B_g
-    concept: b_g
-  - symbol: F_s
-    concept: f_s
-  - symbol: F_g
-    concept: f_g
-  - symbol: a_2
-    concept: a_2
-  - symbol: cases
-    concept: cases
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2010
-  type: equation
-  expression: H_{ST}(z) = \frac{b_{ST}}{1 + a_{ST} z^{-1}}
-  variables:
-  - symbol: H_ST
-    concept: h_st
-  - symbol: b_ST
-    concept: b_st
-  - symbol: a_ST
-    concept: a_st
-  - symbol: H_
-    concept: h
-  - symbol: ST
-    concept: st
-  - symbol: b_
-    concept: b
-  - symbol: a_
-    concept: a
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2011
-  type: equation
-  expression: '\begin{cases}
-
-    b_{ST} = 1 - e^{-2\pi F_a / F_s} \\
-
-    a_{ST} = -e^{-2\pi F_a / F_s}
-
-    \end{cases}'
-  variables:
-  - symbol: b_ST
-    concept: b_st
-  - symbol: F_a
-    concept: f_a
-  - symbol: F_s
-    concept: f_s
-  - symbol: a_ST
-    concept: a_st
-  - symbol: cases
-    concept: cases
-  - symbol: b_
-    concept: b
-  - symbol: ST
-    concept: st
-  - symbol: a_
-    concept: a
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2012
-  type: equation
-  expression: x_{LM_{open}}[n] = b_1 \delta_{goi}[n-1] + b_2 \delta_{goi}[n-2] - a_1
-    x_{LM_{open}}[n-1] - a_2 x_{LM_{open}}[n-2]
-  variables:
-  - symbol: x_LM
-    concept: x_lm
-  - symbol: b_1
-    concept: b_1
-  - symbol: b_2
-    concept: b_2
-  - symbol: a_1
-    concept: a_1
-  - symbol: a_2
-    concept: a_2
-  - symbol: x_
-    concept: x
-  - symbol: LM_
-    concept: lm
-  - symbol: open
-    concept: open
-  - symbol: delta_
-    concept: delta
-  - symbol: goi
-    concept: goi
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0
-- id: claim2013
-  type: equation
-  expression: x_{LM}[n] = b_{ST} x_{LM_{open}}[n-1] - a_{ST} x_{LM}[n-1]
-  variables:
-  - symbol: x_LM
-    concept: x_lm
-  - symbol: b_ST
-    concept: b_st
-  - symbol: a_ST
-    concept: a_st
-  - symbol: x_
-    concept: x
-  - symbol: LM
-    concept: lm
-  - symbol: b_
-    concept: b
-  - symbol: ST
-    concept: st
-  - symbol: open
-    concept: open
-  - symbol: a_
-    concept: a
-  provenance:
-    paper: Perrotin_2021_LF_LinearFilter_Equivalence
-    page: 0

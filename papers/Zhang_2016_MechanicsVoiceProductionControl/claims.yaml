@@ -60,31 +60,3 @@ claims:
     page: 0
   value: 160
   unit: Pa
-- id: claim8
-  type: observation
-  statement: Increasing medial surface vertical thickness should increase closed quotient
-    and decrease H1-H2
-  concepts:
-  - h1_h2
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0
-- id: claim9
-  type: observation
-  statement: F0 should increase with increasing cover AP stiffness more than with
-    body stiffness
-  concepts:
-  - f0
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0
-- id: claim10
-  type: observation
-  statement: Subglottal pressure should have a relatively small effect on F0 compared
-    to stiffness/tension changes
-  concepts:
-  - f0
-  - subglottal_pressure
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0

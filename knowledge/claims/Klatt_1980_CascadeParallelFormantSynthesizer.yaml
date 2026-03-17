@@ -1,7 +1,7 @@
 source:
   paper: Klatt_1980_CascadeParallelFormantSynthesizer
 claims:
-- id: claim1575
+- id: claim358
   type: parameter
   concept: amplitude_of_voicing
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1576
+- id: claim359
   type: parameter
   concept: amplitude_of_frication
   provenance:
@@ -21,7 +21,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1577
+- id: claim360
   type: parameter
   concept: amplitude_of_aspiration
   provenance:
@@ -31,7 +31,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1578
+- id: claim361
   type: parameter
   concept: amplitude_of_sinusoidal_voicing
   provenance:
@@ -41,7 +41,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1579
+- id: claim362
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -51,7 +51,7 @@ claims:
   lower_bound: 0
   upper_bound: 500
   unit: Hz
-- id: claim1580
+- id: claim363
   type: parameter
   concept: first_formant_frequency
   provenance:
@@ -61,7 +61,7 @@ claims:
   lower_bound: 150
   upper_bound: 900
   unit: Hz
-- id: claim1581
+- id: claim364
   type: parameter
   concept: second_formant_frequency
   provenance:
@@ -71,7 +71,7 @@ claims:
   lower_bound: 500
   upper_bound: 2500
   unit: Hz
-- id: claim1582
+- id: claim365
   type: parameter
   concept: third_formant_frequency
   provenance:
@@ -81,7 +81,7 @@ claims:
   lower_bound: 1300
   upper_bound: 3500
   unit: Hz
-- id: claim1583
+- id: claim366
   type: parameter
   concept: fourth_formant_frequency
   provenance:
@@ -91,7 +91,7 @@ claims:
   lower_bound: 2500
   upper_bound: 4500
   unit: Hz
-- id: claim1584
+- id: claim367
   type: parameter
   concept: fifth_formant_frequency
   provenance:
@@ -101,7 +101,7 @@ claims:
   lower_bound: 3500
   upper_bound: 4900
   unit: Hz
-- id: claim1585
+- id: claim368
   type: parameter
   concept: nasal_zero_frequency
   provenance:
@@ -111,7 +111,7 @@ claims:
   lower_bound: 200
   upper_bound: 700
   unit: Hz
-- id: claim1586
+- id: claim369
   type: parameter
   concept: first_formant_bandwidth
   provenance:
@@ -121,7 +121,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1587
+- id: claim370
   type: parameter
   concept: second_formant_bandwidth
   provenance:
@@ -131,7 +131,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1588
+- id: claim371
   type: parameter
   concept: third_formant_bandwidth
   provenance:
@@ -141,7 +141,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1589
+- id: claim372
   type: parameter
   concept: parallel_formant_amplitudes
   provenance:
@@ -151,7 +151,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1590
+- id: claim373
   type: parameter
   concept: nasal_formant_amplitude
   provenance:
@@ -161,7 +161,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1591
+- id: claim374
   type: parameter
   concept: bypass_path_amplitude
   provenance:
@@ -171,7 +171,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1592
+- id: claim375
   type: parameter
   concept: glottal_resonator_frequency
   provenance:
@@ -181,7 +181,7 @@ claims:
   lower_bound: 0
   upper_bound: 600
   unit: Hz
-- id: claim1593
+- id: claim376
   type: parameter
   concept: glottal_resonator_bandwidth
   provenance:
@@ -191,7 +191,7 @@ claims:
   lower_bound: 100
   upper_bound: 2000
   unit: Hz
-- id: claim1594
+- id: claim377
   type: parameter
   concept: glottal_zero_frequency
   provenance:
@@ -201,7 +201,7 @@ claims:
   lower_bound: 0
   upper_bound: 5000
   unit: Hz
-- id: claim1595
+- id: claim378
   type: parameter
   concept: glottal_zero_bandwidth
   provenance:
@@ -211,7 +211,7 @@ claims:
   lower_bound: 100
   upper_bound: 9000
   unit: Hz
-- id: claim1596
+- id: claim379
   type: parameter
   concept: fourth_formant_bandwidth
   provenance:
@@ -221,7 +221,7 @@ claims:
   lower_bound: 100
   upper_bound: 500
   unit: Hz
-- id: claim1597
+- id: claim380
   type: parameter
   concept: fifth_formant_bandwidth
   provenance:
@@ -231,7 +231,7 @@ claims:
   lower_bound: 150
   upper_bound: 700
   unit: Hz
-- id: claim1598
+- id: claim381
   type: parameter
   concept: sixth_formant_frequency
   provenance:
@@ -241,7 +241,7 @@ claims:
   lower_bound: 4000
   upper_bound: 4999
   unit: Hz
-- id: claim1599
+- id: claim382
   type: parameter
   concept: sixth_formant_bandwidth
   provenance:
@@ -251,7 +251,7 @@ claims:
   lower_bound: 200
   upper_bound: 2000
   unit: Hz
-- id: claim1600
+- id: claim383
   type: parameter
   concept: nasal_pole_frequency
   provenance:
@@ -261,7 +261,7 @@ claims:
   lower_bound: 200
   upper_bound: 500
   unit: Hz
-- id: claim1601
+- id: claim384
   type: parameter
   concept: nasal_pole_bandwidth
   provenance:
@@ -271,7 +271,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim1602
+- id: claim385
   type: parameter
   concept: nasal_zero_bandwidth
   provenance:
@@ -281,7 +281,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim1603
+- id: claim386
   type: parameter
   concept: glottal_resonator_2_bandwidth
   provenance:
@@ -291,7 +291,7 @@ claims:
   lower_bound: 100
   upper_bound: 1000
   unit: Hz
-- id: claim1604
+- id: claim387
   type: parameter
   concept: sampling_rate
   provenance:
@@ -301,7 +301,7 @@ claims:
   lower_bound: 5000
   upper_bound: 20000
   unit: Hz
-- id: claim1605
+- id: claim388
   type: parameter
   concept: overall_gain
   provenance:
@@ -311,93 +311,3 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1606
-  type: equation
-  expression: y(nT) = Ax(nT) + By(nT-T) + Cy(nT-2T)
-  variables:
-  - symbol: nT
-    concept: nt
-  - symbol: Ax
-    concept: ax
-  - symbol: By
-    concept: by
-  - symbol: Cy
-    concept: cy
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1607
-  type: equation
-  expression: C = -\exp(-2\pi \cdot BW \cdot T)
-  variables:
-  - symbol: BW
-    concept: bw
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1608
-  type: equation
-  expression: B = 2\exp(-\pi \cdot BW \cdot T) \cos(2\pi \cdot F \cdot T)
-  variables:
-  - symbol: BW
-    concept: bw
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1609
-  type: equation
-  expression: A' = 1.0/A, \quad B' = -B/A, \quad C' = -C/A
-  variables:
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1610
-  type: equation
-  expression: T(f) = \frac{A}{1 - Bz^{-1} - Cz^{-2}}
-  variables:
-  - symbol: Bz
-    concept: bz
-  - symbol: Cz
-    concept: cz
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1611
-  type: equation
-  expression: T(f) = \prod_{n=1}^{5} \frac{A(n)}{1 - B(n)z^{-1} - C(n)z^{-2}}
-  variables:
-  - symbol: prod_
-    concept: prod
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1612
-  type: equation
-  expression: T(f) = \prod_{n=1}^{\infty} \frac{s(n) \cdot s^*(n)}{[s + s(n)][s +
-    s^*(n)]}
-  variables:
-  - symbol: prod_
-    concept: prod
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1613
-  type: equation
-  expression: p(nT) = u(nT) - u(nT - T)
-  variables:
-  - symbol: nT
-    concept: nt
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0
-- id: claim1614
-  type: equation
-  expression: y(nT) = x(nT) + y(nT - T)
-  variables:
-  - symbol: nT
-    concept: nt
-  provenance:
-    paper: Klatt_1980_CascadeParallelFormantSynthesizer
-    page: 0

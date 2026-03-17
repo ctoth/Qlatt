@@ -1,12 +1,3 @@
 source:
   paper: Roach_1994_ProsodicTranscriptionConversion
-claims:
-- id: claim1
-  type: observation
-  statement: Every SEC tonetic stress mark in Tables 2/3 must map to exactly one ToBI
-    pitch accent + boundary tone combination (deterministic mapping)
-  concepts:
-  - pitch
-  provenance:
-    paper: Roach_1994_ProsodicTranscriptionConversion
-    page: 0
+claims: []

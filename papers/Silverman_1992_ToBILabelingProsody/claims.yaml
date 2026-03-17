@@ -1,11 +1,3 @@
 source:
   paper: Silverman_1992_ToBILabelingProsody
-claims:
-- id: claim1
-  type: observation
-  statement: 'Pitch accents must be one of exactly 5 types: H*, L*, L+H*, L*+H, H+!H*'
-  concepts:
-  - pitch
-  provenance:
-    paper: Silverman_1992_ToBILabelingProsody
-    page: 0
+claims: []

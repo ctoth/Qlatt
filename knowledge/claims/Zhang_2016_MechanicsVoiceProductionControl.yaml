@@ -1,7 +1,7 @@
 source:
   paper: Zhang_2016_MechanicsVoiceProductionControl
 claims:
-- id: claim2794
+- id: claim654
   type: parameter
   concept: vocal_fold_length
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 11
   upper_bound: 15
   unit: mm
-- id: claim2795
+- id: claim655
   type: parameter
   concept: vocal_fold_length
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 17
   upper_bound: 21
   unit: mm
-- id: claim2796
+- id: claim656
   type: parameter
   concept: lamina_propria_thickness
   provenance:
@@ -27,7 +27,7 @@ claims:
     page: 0
   value: 1
   unit: mm
-- id: claim2797
+- id: claim657
   type: parameter
   concept: stressstrain_slope
   provenance:
@@ -36,7 +36,7 @@ claims:
   lower_bound: 20
   upper_bound: 200
   unit: kPa
-- id: claim2798
+- id: claim658
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -44,7 +44,7 @@ claims:
     page: 0
   value: 800
   unit: Pa
-- id: claim2799
+- id: claim659
   type: parameter
   concept: f0_increase_from_ps
   provenance:
@@ -52,7 +52,7 @@ claims:
     page: 0
   value: 20
   unit: Hz/kPa
-- id: claim2800
+- id: claim660
   type: parameter
   concept: vortex_pressure_perturbation
   provenance:
@@ -60,31 +60,3 @@ claims:
     page: 0
   value: 160
   unit: Pa
-- id: claim2801
-  type: observation
-  statement: Increasing medial surface vertical thickness should increase closed quotient
-    and decrease H1-H2
-  concepts:
-  - h1_h2
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0
-- id: claim2802
-  type: observation
-  statement: F0 should increase with increasing cover AP stiffness more than with
-    body stiffness
-  concepts:
-  - f0
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0
-- id: claim2803
-  type: observation
-  statement: Subglottal pressure should have a relatively small effect on F0 compared
-    to stiffness/tension changes
-  concepts:
-  - f0
-  - subglottal_pressure
-  provenance:
-    paper: Zhang_2016_MechanicsVoiceProductionControl
-    page: 0

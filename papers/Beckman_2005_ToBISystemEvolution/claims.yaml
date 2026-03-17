@@ -1,20 +1,3 @@
 source:
   paper: Beckman_2005_ToBISystemEvolution
-claims:
-- id: claim1
-  type: observation
-  statement: Pitch accents must be aligned to stressed syllables of content words
-  concepts:
-  - pitch
-  provenance:
-    paper: Beckman_2005_ToBISystemEvolution
-    page: 0
-- id: claim2
-  type: observation
-  statement: The `!` diacritic implies all subsequent H tones in the phrase are produced
-    in a compressed pitch range
-  concepts:
-  - pitch
-  provenance:
-    paper: Beckman_2005_ToBISystemEvolution
-    page: 0
+claims: []

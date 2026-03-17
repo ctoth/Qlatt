@@ -274,33 +274,3 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim31
-  type: equation
-  expression: S = \log_{10}(L_+ - L_- + 1)
-  variables:
-  - symbol: log_
-    concept: log
-  - symbol: L_
-    concept: l
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-- id: claim32
-  type: equation
-  expression: 'S = \begin{cases}
-
-    \log(L_+) & \text{if } P(+|x) > P(-|x) \\
-
-    0 & \text{if } P(+|x) < P(-|x)
-
-    \end{cases}'
-  variables:
-  - symbol: cases
-    concept: cases
-  - symbol: L_
-    concept: l
-  - symbol: if
-    concept: if
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0

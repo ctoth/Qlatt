@@ -6,3 +6,5 @@ dimensions:
   T: -1
 common_alternatives:
   - { unit: kHz, type: multiplicative, multiplier: 1000 }
+  - { unit: cps, type: multiplicative, multiplier: 1 }
+  - { unit: ST, type: logarithmic, note: "semitones re arbitrary reference" }

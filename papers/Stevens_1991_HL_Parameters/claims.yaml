@@ -45,12 +45,3 @@ claims:
     page: 0
   value: 0
   unit: fraction of Ps
-- id: claim6
-  type: equation
-  expression: N \propto U^3 A^{-2.5}
-  variables:
-  - symbol: propto
-    concept: propto
-  provenance:
-    paper: Stevens_1991_HL_Parameters
-    page: 0

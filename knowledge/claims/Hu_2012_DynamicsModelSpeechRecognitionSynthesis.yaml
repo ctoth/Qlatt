@@ -1,7 +1,7 @@
 source:
   paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
 claims:
-- id: claim1429
+- id: claim322
   type: parameter
   concept: lowfrequency_formant
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim1430
+- id: claim323
   type: parameter
   concept: frame_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim1431
+- id: claim324
   type: parameter
   concept: analysis_window
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 25
   unit: ms
-- id: claim1432
+- id: claim325
   type: parameter
   concept: maximum_state_duration
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 15
   unit: frames
-- id: claim1433
+- id: claim326
   type: parameter
   concept: delta_window
   provenance:

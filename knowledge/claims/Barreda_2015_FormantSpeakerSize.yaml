@@ -1,7 +1,7 @@
 source:
   paper: Barreda_2015_FormantSpeakerSize
 claims:
-- id: claim166
+- id: claim72
   type: parameter
   concept: baseline_f1_i
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 295
   unit: Hz
-- id: claim167
+- id: claim73
   type: parameter
   concept: baseline_f2_i
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 2262
   unit: Hz
-- id: claim168
+- id: claim74
   type: parameter
   concept: baseline_f3_i
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 2900
   unit: Hz
-- id: claim169
+- id: claim75
   type: parameter
   concept: baseline_f1
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 755
   unit: Hz
-- id: claim170
+- id: claim76
   type: parameter
   concept: baseline_f2
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 1576
   unit: Hz
-- id: claim171
+- id: claim77
   type: parameter
   concept: baseline_f3
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 2441
   unit: Hz
-- id: claim172
+- id: claim78
   type: parameter
   concept: baseline_f1
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 458
   unit: Hz
-- id: claim173
+- id: claim79
   type: parameter
   concept: baseline_f2
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   value: 1100
   unit: Hz
-- id: claim174
+- id: claim80
   type: parameter
   concept: baseline_f3
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   value: 2392
   unit: Hz
-- id: claim175
+- id: claim81
   type: parameter
   concept: f4
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   value: 3500
   unit: Hz
-- id: claim176
+- id: claim82
   type: parameter
   concept: f5
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   value: 3500
   unit: Hz
-- id: claim177
+- id: claim83
   type: parameter
   concept: vtl_step_size
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   value: 0.077
   unit: log-Hz
-- id: claim178
+- id: claim84
   type: parameter
   concept: vtl_total_range
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   value: 16
   unit: '%'
-- id: claim179
+- id: claim85
   type: parameter
   concept: vowel_duration
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   value: 200
   unit: ms
-- id: claim180
+- id: claim86
   type: parameter
   concept: interstimulus_interval
   provenance:
@@ -121,109 +121,3 @@ claims:
     page: 0
   value: 250
   unit: ms
-- id: claim181
-  type: equation
-  expression: p(\text{success}_i) = \text{logistic}(\theta_i) = \frac{\exp(\theta_i)}{\exp(\theta_i)
-    + 1}
-  variables:
-  - symbol: success
-    concept: success
-  - symbol: logistic
-    concept: logistic
-  - symbol: theta_i
-    concept: theta_i
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0
-- id: claim182
-  type: equation
-  expression: \theta_i = \alpha_0 + \alpha_F + \alpha_V + \alpha_{\Delta VTL} + \alpha_S
-    + \alpha_{F \times V} + \alpha_{\Delta VTL \times F} + \alpha_{\Delta VTL \times
-    V}
-  variables:
-  - symbol: theta_i
-    concept: theta_i
-  - symbol: alpha_0
-    concept: alpha_0
-  - symbol: alpha_F
-    concept: alpha_f
-  - symbol: alpha_V
-    concept: alpha_v
-  - symbol: alpha_
-    concept: alpha
-  - symbol: VTL
-    concept: vtl
-  - symbol: alpha_S
-    concept: alpha_s
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0
-- id: claim183
-  type: equation
-  expression: p(\text{reference taller}_i) = \text{logistic}(\theta_i)
-  variables:
-  - symbol: reference
-    concept: reference
-  - symbol: taller
-    concept: taller
-  - symbol: logistic
-    concept: logistic
-  - symbol: theta_i
-    concept: theta_i
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0
-- id: claim184
-  type: equation
-  expression: \theta_i = \alpha_i + \beta_i \times VTL_i
-  variables:
-  - symbol: VTL_i
-    concept: vtl_i
-  - symbol: theta_i
-    concept: theta_i
-  - symbol: alpha_i
-    concept: alpha_i
-  - symbol: beta_i
-    concept: beta_i
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0
-- id: claim185
-  type: equation
-  expression: \alpha_i = \alpha_0 + \alpha_F + \alpha_V + \alpha_S + \alpha_{F \times
-    V}
-  variables:
-  - symbol: alpha_i
-    concept: alpha_i
-  - symbol: alpha_0
-    concept: alpha_0
-  - symbol: alpha_F
-    concept: alpha_f
-  - symbol: alpha_V
-    concept: alpha_v
-  - symbol: alpha_S
-    concept: alpha_s
-  - symbol: alpha_
-    concept: alpha
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0
-- id: claim186
-  type: equation
-  expression: \beta_i = \beta_0 + \beta_F + \beta_V + \beta_S + \beta_{F \times V}
-  variables:
-  - symbol: beta_i
-    concept: beta_i
-  - symbol: beta_0
-    concept: beta_0
-  - symbol: beta_F
-    concept: beta_f
-  - symbol: beta_V
-    concept: beta_v
-  - symbol: beta_S
-    concept: beta_s
-  - symbol: beta_
-    concept: beta
-  provenance:
-    paper: Barreda_2015_FormantSpeakerSize
-    page: 0

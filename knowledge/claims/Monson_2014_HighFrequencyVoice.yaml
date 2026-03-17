@@ -1,78 +1,7 @@
 source:
   paper: Monson_2014_HighFrequencyVoice
 claims:
-- id: claim1923
-  type: parameter
-  concept: s_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 5.5
-  upper_bound: 8
-  unit: kHz
-- id: claim1924
-  type: parameter
-  concept: z_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 3
-  upper_bound: 8
-  unit: kHz
-- id: claim1925
-  type: parameter
-  concept: sh_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 1
-  upper_bound: 3
-  unit: kHz
-- id: claim1926
-  type: parameter
-  concept: zh_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 1
-  upper_bound: 3
-  unit: kHz
-- id: claim1927
-  type: parameter
-  concept: f_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 8
-  upper_bound: 9
-  unit: kHz
-- id: claim1928
-  type: parameter
-  concept: v_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  value: 7.5
-  unit: kHz
-- id: claim1929
-  type: parameter
-  concept: theta_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 7
-  upper_bound: 7.5
-  unit: kHz
-- id: claim1930
-  type: parameter
-  concept: dh_approximate_spectral_peak
-  provenance:
-    paper: Monson_2014_HighFrequencyVoice
-    page: 0
-  lower_bound: 7
-  upper_bound: 7.5
-  unit: kHz
-- id: claim1931
+- id: claim472
   type: parameter
   concept: consonant_id_at_8_khz_hp
   provenance:

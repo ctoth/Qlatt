@@ -1,7 +1,7 @@
 source:
   paper: Ericsson_2020_FormantEstimationEvaluation
 claims:
-- id: claim736
+- id: claim163
   type: parameter
   concept: generic_ceiling
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 5000
   unit: Hz
-- id: claim737
+- id: claim164
   type: parameter
   concept: generic_ceiling
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 5500
   unit: Hz
-- id: claim738
+- id: claim165
   type: parameter
   concept: optimized_ceiling_range
   provenance:
@@ -26,7 +26,7 @@ claims:
   lower_bound: 4000
   upper_bound: 6500
   unit: Hz
-- id: claim739
+- id: claim166
   type: parameter
   concept: number_of_formants
   provenance:
@@ -36,7 +36,7 @@ claims:
   lower_bound: 4
   upper_bound: 6
   unit: count
-- id: claim740
+- id: claim167
   type: parameter
   concept: analysis_window
   provenance:
@@ -44,7 +44,7 @@ claims:
     page: 0
   value: 0.025
   unit: s
-- id: claim741
+- id: claim168
   type: parameter
   concept: preemphasis
   provenance:
@@ -52,7 +52,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim742
+- id: claim169
   type: parameter
   concept: synthesis_bandwidth
   provenance:
@@ -60,7 +60,7 @@ claims:
     page: 0
   value: 50
   unit: Hz
-- id: claim743
+- id: claim170
   type: parameter
   concept: synthesis_bandwidth
   provenance:
@@ -68,7 +68,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim744
+- id: claim171
   type: parameter
   concept: token_duration
   provenance:
@@ -76,40 +76,3 @@ claims:
     page: 0
   value: 400
   unit: ms
-- id: claim745
-  type: equation
-  expression: \text{ceiling}_{\text{opt}} = \arg\min_c \left[ \log(\text{Var}(F_1))
-    + \log(\text{Var}(F_2)) \right]
-  variables:
-  - symbol: F_1
-    concept: f_1
-  - symbol: F_2
-    concept: f_2
-  - symbol: ceiling
-    concept: ceiling
-  - symbol: opt
-    concept: opt
-  - symbol: arg
-    concept: arg
-  - symbol: min_c
-    concept: min_c
-  - symbol: Var
-    concept: var
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0
-- id: claim746
-  type: equation
-  expression: E_{\min} = \max(0, f_0 - F_1^{\text{target}})
-  variables:
-  - symbol: f_0
-    concept: f_0
-  - symbol: F_1
-    concept: f_1
-  - symbol: E_
-    concept: e
-  - symbol: target
-    concept: target
-  provenance:
-    paper: Ericsson_2020_FormantEstimationEvaluation
-    page: 0

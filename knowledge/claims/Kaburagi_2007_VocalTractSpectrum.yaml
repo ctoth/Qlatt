@@ -1,7 +1,7 @@
 source:
   paper: Kaburagi_2007_VocalTractSpectrum
 claims:
-- id: claim1529
+- id: claim348
   type: parameter
   concept: ema_sampling_rate
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim1530
+- id: claim349
   type: parameter
   concept: speech_sampling_rate
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim1531
+- id: claim350
   type: parameter
   concept: analysis_window
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 30
   unit: ms
-- id: claim1532
+- id: claim351
   type: parameter
   concept: ema_accuracy
   provenance:
@@ -33,19 +33,3 @@ claims:
     page: 0
   value: 0.1
   unit: mm
-- id: claim1533
-  type: observation
-  statement: 'Phoneme onset + offset durations must be positive: $L_k > 0, M_k > 0$'
-  concepts:
-  - duration
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0
-- id: claim1534
-  type: observation
-  statement: Total predicted timing should equal sum of all onset and offset durations
-  concepts:
-  - duration
-  provenance:
-    paper: Kaburagi_2007_VocalTractSpectrum
-    page: 0

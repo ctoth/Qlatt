@@ -1,7 +1,7 @@
 source:
   paper: Klatt_1990_VoiceQualityVariations
 claims:
-- id: claim1634
+- id: claim405
   type: parameter
   concept: av
   provenance:
@@ -11,7 +11,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1635
+- id: claim406
   type: parameter
   concept: tl
   provenance:
@@ -21,7 +21,7 @@ claims:
   lower_bound: 0
   upper_bound: 41
   unit: dB
-- id: claim1636
+- id: claim407
   type: parameter
   concept: ah
   provenance:
@@ -31,51 +31,3 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1637
-  type: parameter
-  concept: 1st
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 900
-- id: claim1638
-  type: parameter
-  concept: 2nd
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 1650
-- id: claim1639
-  type: parameter
-  concept: 3rd
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 2350
-- id: claim1640
-  type: parameter
-  concept: 2nd
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 1550
-- id: claim1641
-  type: parameter
-  concept: 3rd
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 2200
-- id: claim1642
-  type: parameter
-  concept: 4th
-  provenance:
-    paper: Klatt_1990_VoiceQualityVariations
-    page: 0
-  unit: Hz
-  value: 3275

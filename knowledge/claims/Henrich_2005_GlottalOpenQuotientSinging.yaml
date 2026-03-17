@@ -1,7 +1,7 @@
 source:
   paper: Henrich_2005_GlottalOpenQuotientSinging
 claims:
-- id: claim1298
+- id: claim288
   type: parameter
   concept: open_quotient
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0
   upper_bound: 1
   unit: dimensionless
-- id: claim1299
+- id: claim289
   type: parameter
   concept: open_quotient
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 0.8
   unit: dimensionless
-- id: claim1300
+- id: claim290
   type: parameter
   concept: open_quotient
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 0.5
   upper_bound: 0.95
   unit: dimensionless
-- id: claim1301
+- id: claim291
   type: parameter
   concept: vocal_intensity
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 50
   upper_bound: 110
   unit: dB SPL
-- id: claim1302
+- id: claim292
   type: parameter
   concept: piano_intensity
   provenance:
@@ -46,7 +46,7 @@ claims:
   lower_bound: 60
   upper_bound: 70
   unit: dB SPL
-- id: claim1303
+- id: claim293
   type: parameter
   concept: forte_intensity
   provenance:
@@ -55,101 +55,3 @@ claims:
   lower_bound: 95
   upper_bound: 105
   unit: dB SPL
-- id: claim1304
-  type: parameter
-  concept: m1
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.64
-- id: claim1305
-  type: parameter
-  concept: m1
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.64
-- id: claim1306
-  type: parameter
-  concept: m1
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.65
-- id: claim1307
-  type: parameter
-  concept: m2
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.77
-- id: claim1308
-  type: parameter
-  concept: m2
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.77
-- id: claim1309
-  type: parameter
-  concept: m2
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-  unit: SD
-  value: 0.77
-- id: claim1310
-  type: observation
-  statement: '**Oq range by mechanism**: M1 $O_q \in [0.3, 0.8]$; M2 $O_q \in [0.5,
-    0.95]$'
-  concepts:
-  - open_quotient
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim1311
-  type: observation
-  statement: '**Intensity–Oq in M1**: Increasing vocal intensity must decrease $O_q$
-    (partial $r$ up to $-0.90$)'
-  concepts:
-  - intensity
-  - open_quotient
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim1312
-  type: observation
-  statement: '**f0–Oq in M2**: Increasing fundamental frequency must decrease $O_q$
-    (partial $r$ up to $-0.79$)'
-  concepts:
-  - f0
-  - fundamental_frequency
-  - open_quotient
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim1313
-  type: observation
-  statement: '**Intensity–Oq in M2**: No consistent correlation — should NOT be strongly
-    coupled'
-  concepts:
-  - intensity
-  - open_quotient
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0
-- id: claim1314
-  type: observation
-  statement: '**f0–Oq in M1**: No consistent correlation — should NOT be strongly
-    coupled'
-  concepts:
-  - f0
-  - open_quotient
-  provenance:
-    paper: Henrich_2005_GlottalOpenQuotientSinging
-    page: 0

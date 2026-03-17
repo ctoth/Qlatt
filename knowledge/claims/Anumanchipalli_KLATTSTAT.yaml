@@ -1,7 +1,7 @@
 source:
   paper: Anumanchipalli_KLATTSTAT
 claims:
-- id: claim114
+- id: claim38
   type: parameter
   concept: av
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim115
+- id: claim39
   type: parameter
   concept: f1
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 200
   upper_bound: 1300
   unit: Hz
-- id: claim116
+- id: claim40
   type: parameter
   concept: b1
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim117
+- id: claim41
   type: parameter
   concept: f2
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 550
   upper_bound: 3000
   unit: Hz
-- id: claim118
+- id: claim42
   type: parameter
   concept: b2
   provenance:
@@ -46,7 +46,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim119
+- id: claim43
   type: parameter
   concept: f3
   provenance:
@@ -55,7 +55,7 @@ claims:
   lower_bound: 1200
   upper_bound: 4999
   unit: Hz
-- id: claim120
+- id: claim44
   type: parameter
   concept: b3
   provenance:
@@ -64,7 +64,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim121
+- id: claim45
   type: parameter
   concept: f4
   provenance:
@@ -73,7 +73,7 @@ claims:
   lower_bound: 1200
   upper_bound: 4999
   unit: Hz
-- id: claim122
+- id: claim46
   type: parameter
   concept: b4
   provenance:
@@ -82,7 +82,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim123
+- id: claim47
   type: parameter
   concept: f5
   provenance:
@@ -91,7 +91,7 @@ claims:
   lower_bound: 1200
   upper_bound: 4999
   unit: Hz
-- id: claim124
+- id: claim48
   type: parameter
   concept: b5
   provenance:
@@ -100,7 +100,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim125
+- id: claim49
   type: parameter
   concept: f6
   provenance:
@@ -109,7 +109,7 @@ claims:
   lower_bound: 1200
   upper_bound: 4999
   unit: Hz
-- id: claim126
+- id: claim50
   type: parameter
   concept: b6
   provenance:
@@ -118,7 +118,7 @@ claims:
   lower_bound: 40
   upper_bound: 2000
   unit: Hz
-- id: claim127
+- id: claim51
   type: parameter
   concept: fnz
   provenance:
@@ -127,7 +127,7 @@ claims:
   lower_bound: 248
   upper_bound: 528
   unit: Hz
-- id: claim128
+- id: claim52
   type: parameter
   concept: bnz
   provenance:
@@ -136,7 +136,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim129
+- id: claim53
   type: parameter
   concept: fnp
   provenance:
@@ -145,7 +145,7 @@ claims:
   lower_bound: 248
   upper_bound: 528
   unit: Hz
-- id: claim130
+- id: claim54
   type: parameter
   concept: bnp
   provenance:
@@ -154,7 +154,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim131
+- id: claim55
   type: parameter
   concept: asp
   provenance:
@@ -163,7 +163,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim132
+- id: claim56
   type: parameter
   concept: aturb
   provenance:
@@ -173,7 +173,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim133
+- id: claim57
   type: parameter
   concept: tilt
   provenance:
@@ -183,7 +183,7 @@ claims:
   lower_bound: 0
   upper_bound: 24
   unit: dB
-- id: claim134
+- id: claim58
   type: parameter
   concept: af
   provenance:
@@ -192,7 +192,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim135
+- id: claim59
   type: parameter
   concept: a1
   provenance:
@@ -201,7 +201,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim136
+- id: claim60
   type: parameter
   concept: a2
   provenance:
@@ -210,7 +210,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim137
+- id: claim61
   type: parameter
   concept: a3
   provenance:
@@ -219,7 +219,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim138
+- id: claim62
   type: parameter
   concept: a4
   provenance:
@@ -228,7 +228,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim139
+- id: claim63
   type: parameter
   concept: a5
   provenance:
@@ -237,7 +237,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim140
+- id: claim64
   type: parameter
   concept: a6
   provenance:
@@ -246,7 +246,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim141
+- id: claim65
   type: parameter
   concept: ab
   provenance:
@@ -255,7 +255,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim142
+- id: claim66
   type: parameter
   concept: avp
   provenance:
@@ -264,7 +264,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim143
+- id: claim67
   type: parameter
   concept: gain
   provenance:
@@ -274,33 +274,3 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim144
-  type: equation
-  expression: S = \log_{10}(L_+ - L_- + 1)
-  variables:
-  - symbol: log_
-    concept: log
-  - symbol: L_
-    concept: l
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0
-- id: claim145
-  type: equation
-  expression: 'S = \begin{cases}
-
-    \log(L_+) & \text{if } P(+|x) > P(-|x) \\
-
-    0 & \text{if } P(+|x) < P(-|x)
-
-    \end{cases}'
-  variables:
-  - symbol: cases
-    concept: cases
-  - symbol: L_
-    concept: l
-  - symbol: if
-    concept: if
-  provenance:
-    paper: Anumanchipalli_KLATTSTAT
-    page: 0

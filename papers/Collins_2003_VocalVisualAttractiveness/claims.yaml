@@ -46,30 +46,3 @@ claims:
   lower_bound: 0.25
   upper_bound: 0.38
   unit: s
-- id: claim6
-  type: observation
-  statement: Higher F0 in women should correlate with higher perceived vocal attractiveness
-  concepts:
-  - f0
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim7
-  type: observation
-  statement: Formant dispersion (especially F4-F5 spacing) should be inversely proportional
-    to speaker height
-  concepts:
-  - f4
-  - formant
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0
-- id: claim8
-  type: observation
-  statement: Larger body size (higher BMI/weight) should correlate with lower F0 and
-    harmonics
-  concepts:
-  - f0
-  provenance:
-    paper: Collins_2003_VocalVisualAttractiveness
-    page: 0

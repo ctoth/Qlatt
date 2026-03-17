@@ -41,20 +41,3 @@ claims:
     page: 0
   value: 3.3
   unit: 1-7
-- id: claim6
-  type: observation
-  statement: Higher pitch must reduce attractiveness ratings (monotonic for upward
-    direction)
-  concepts:
-  - pitch
-  provenance:
-    paper: Quene_2021_PitchTempoAttractiveness
-    page: 0
-- id: claim7
-  type: observation
-  statement: Pitch and tempo effects should be additive (no significant interaction)
-  concepts:
-  - pitch
-  provenance:
-    paper: Quene_2021_PitchTempoAttractiveness
-    page: 0

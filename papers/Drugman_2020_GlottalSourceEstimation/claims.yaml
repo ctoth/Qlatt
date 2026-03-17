@@ -64,27 +64,3 @@ claims:
     page: 0
   value: 20
   unit: '%'
-- id: claim8
-  type: equation
-  expression: $$\log[X(\omega)] = \log(|X(\omega)|) + j\angle X(\omega)$$
-  variables:
-  - symbol: angle
-    concept: angle
-  provenance:
-    paper: Drugman_2020_GlottalSourceEstimation
-    page: 0
-- id: claim9
-  type: equation
-  expression: 'Practical version (20 Hz to 4000 Hz):'
-  variables:
-  - symbol: Practical
-    concept: practical
-  - symbol: version
-    concept: version
-  - symbol: Hz
-    concept: hz
-  - symbol: to
-    concept: to
-  provenance:
-    paper: Drugman_2020_GlottalSourceEstimation
-    page: 0

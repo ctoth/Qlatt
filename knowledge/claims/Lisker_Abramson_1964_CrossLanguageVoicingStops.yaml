@@ -1,7 +1,7 @@
 source:
   paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
 claims:
-- id: claim1805
+- id: claim435
   type: parameter
   concept: voice_onset_time
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: -250
   unit: msec
-- id: claim1806
+- id: claim436
   type: parameter
   concept: voicing_lead
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: -250
   unit: msec
-- id: claim1807
+- id: claim437
   type: parameter
   concept: short_lag
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 0
   unit: msec
-- id: claim1808
+- id: claim438
   type: parameter
   concept: long_lag
   provenance:
@@ -33,76 +33,3 @@ claims:
     page: 0
   value: 60
   unit: msec
-- id: claim1809
-  type: observation
-  statement: VOT for English /p/ should average 28-58 msec (sentences vs. isolated
-    words)
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1810
-  type: observation
-  statement: VOT for English /t/ should average 39-70 msec
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1811
-  type: observation
-  statement: VOT for English /k/ should average 43-80 msec
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1812
-  type: observation
-  statement: VOT for English /b d g/ should be 0-20 msec (short lag) for most speakers
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1813
-  type: observation
-  statement: Velar VOT > alveolar VOT > labial VOT (monotonic ordering by place)
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1814
-  type: observation
-  statement: Aspirated stops should show VOT > 50 msec
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1815
-  type: observation
-  statement: Unaspirated stops should show VOT 0-25 msec
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1816
-  type: observation
-  statement: Prevoiced stops should show VOT -50 to -250 msec
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0
-- id: claim1817
-  type: observation
-  statement: In sentences, VOT magnitudes are slightly compressed vs. isolated words
-  concepts:
-  - vot
-  provenance:
-    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
-    page: 0

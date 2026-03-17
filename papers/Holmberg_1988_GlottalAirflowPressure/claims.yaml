@@ -10,39 +10,3 @@ claims:
   unit: dB
   lower_bound: 73.3
   upper_bound: 87.0
-- id: claim2
-  type: observation
-  statement: Open quotient decreases from soft to loud voice for males (0.73 → 0.60
-    → 0.57)
-  concepts:
-  - open_quotient
-  provenance:
-    paper: Holmberg_1988_GlottalAirflowPressure
-    page: 0
-- id: claim3
-  type: observation
-  statement: 'Within loudness conditions: SPL and MFDR positively correlated (r >
-    0.79)'
-  concepts:
-  - spl
-  provenance:
-    paper: Holmberg_1988_GlottalAirflowPressure
-    page: 0
-- id: claim4
-  type: observation
-  statement: 'Within loudness conditions: SPL and vocal efficiency positively correlated
-    (r > 0.87)'
-  concepts:
-  - spl
-  provenance:
-    paper: Holmberg_1988_GlottalAirflowPressure
-    page: 0
-- id: claim5
-  type: observation
-  statement: A 6-dB SPL increase should correspond approximately to a doubling of
-    MFDR (acoustic theory)
-  concepts:
-  - spl
-  provenance:
-    paper: Holmberg_1988_GlottalAirflowPressure
-    page: 0

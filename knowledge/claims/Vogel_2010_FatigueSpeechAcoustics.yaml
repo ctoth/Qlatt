@@ -1,7 +1,7 @@
 source:
   paper: Vogel_2010_FatigueSpeechAcoustics
 claims:
-- id: claim2631
+- id: claim592
   type: parameter
   concept: leq
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 57.5
   upper_bound: 59.8
   unit: dB
-- id: claim2632
+- id: claim593
   type: parameter
   concept: min_pause_duration
   provenance:
@@ -18,7 +18,7 @@ claims:
     page: 0
   value: 15
   unit: ms
-- id: claim2633
+- id: claim594
   type: parameter
   concept: min_speech_duration
   provenance:
@@ -26,7 +26,7 @@ claims:
     page: 0
   value: 30
   unit: ms
-- id: claim2634
+- id: claim595
   type: parameter
   concept: formant_ceiling
   provenance:
@@ -34,7 +34,7 @@ claims:
     page: 0
   value: 5000
   unit: Hz
-- id: claim2635
+- id: claim596
   type: parameter
   concept: formant_ceiling
   provenance:
@@ -42,41 +42,3 @@ claims:
     page: 0
   value: 5500
   unit: Hz
-- id: claim2636
-  type: equation
-  expression: L_{eq} = 10 \log_{10} \left[ \frac{(1/T) \int P_a^2 \cdot dt}{P_{ref}^2}
-    \right]
-  variables:
-  - symbol: L_eq
-    concept: l_eq
-  - symbol: P_a
-    concept: p_a
-  - symbol: P_ref
-    concept: p_ref
-  - symbol: L_
-    concept: l
-  - symbol: eq
-    concept: eq
-  - symbol: log_
-    concept: log
-  - symbol: dt
-    concept: dt
-  - symbol: P_
-    concept: p
-  - symbol: ref
-    concept: ref
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0
-- id: claim2637
-  type: equation
-  expression: \alpha = \frac{\text{Energy} \leq 1\text{ kHz}}{\text{Energy } 1\text{-}8\text{
-    kHz}}
-  variables:
-  - symbol: Energy
-    concept: energy
-  - symbol: kHz
-    concept: khz
-  provenance:
-    paper: Vogel_2010_FatigueSpeechAcoustics
-    page: 0

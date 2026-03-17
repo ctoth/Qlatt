@@ -9,3 +9,4 @@ dimensions:
 common_alternatives:
   - { unit: cmH2O, type: multiplicative, multiplier: 98.0665 }
   - { unit: hPa, type: multiplicative, multiplier: 100.0 }
+  - { unit: kPa, type: multiplicative, multiplier: 1000.0 }

@@ -1,7 +1,7 @@
 source:
   paper: Hanson_1999_GlottalMaleSpeakers
 claims:
-- id: claim1189
+- id: claim258
   type: parameter
   concept: length_of_vocal_tract
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 17
   unit: cm
-- id: claim1190
+- id: claim259
   type: parameter
   concept: vertical_length_of_glottis
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 0.4
   unit: cm
-- id: claim1191
+- id: claim260
   type: parameter
   concept: length_of_trachea
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 12
   unit: cm
-- id: claim1192
+- id: claim261
   type: parameter
   concept: crosssectional_area_of_vocal_tract
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 4
   unit: cm^2
-- id: claim1193
+- id: claim262
   type: parameter
   concept: crosssectional_area_of_trachea
   provenance:
@@ -41,138 +41,3 @@ claims:
     page: 0
   value: 2.5
   unit: cm^2
-- id: claim1194
-  type: parameter
-  concept: '000'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 0
-- id: claim1195
-  type: parameter
-  concept: '001'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 15
-- id: claim1196
-  type: parameter
-  concept: '002'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 31
-- id: claim1197
-  type: parameter
-  concept: '003'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 46
-- id: claim1198
-  type: parameter
-  concept: '004'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 62
-- id: claim1199
-  type: parameter
-  concept: '005'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 77
-- id: claim1200
-  type: parameter
-  concept: '006'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 93
-- id: claim1201
-  type: parameter
-  concept: '007'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 108
-- id: claim1202
-  type: parameter
-  concept: 008
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 124
-- id: claim1203
-  type: parameter
-  concept: 009
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 139
-- id: claim1204
-  type: parameter
-  concept: '010'
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-  unit: Hz
-  value: 155
-- id: claim1205
-  type: equation
-  expression: 'In frequency domain:'
-  variables:
-  - symbol: In
-    concept: in
-  - symbol: frequency
-    concept: frequency
-  - symbol: domain
-    concept: domain
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-- id: claim1206
-  type: equation
-  expression: 'Net effect at frequency $\omega$:'
-  variables:
-  - symbol: Net
-    concept: net
-  - symbol: effect
-    concept: effect
-  - symbol: at
-    concept: at
-  - symbol: frequency
-    concept: frequency
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-- id: claim1207
-  type: observation
-  statement: Increasing posterior glottal chink area monotonically increases B1, spectral
-    tilt, and dc airflow (Table II)
-  concepts:
-  - spectral_tilt
-  - airflow
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0
-- id: claim1208
-  type: observation
-  statement: 'For a synthesizer: increasing OQ should increase H1\*-H2\*; increasing
-    glottal chink area should increase H1\*-A1 and H1\*-A3\*'
-  concepts:
-  - open_quotient
-  provenance:
-    paper: Hanson_1999_GlottalMaleSpeakers
-    page: 0

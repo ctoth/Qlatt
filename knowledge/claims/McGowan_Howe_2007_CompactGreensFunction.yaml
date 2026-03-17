@@ -1,7 +1,7 @@
 source:
   paper: McGowan_Howe_2007_CompactGreensFunction
 claims:
-- id: claim1887
+- id: claim456
   type: parameter
   concept: acoustic_wavelength
   provenance:

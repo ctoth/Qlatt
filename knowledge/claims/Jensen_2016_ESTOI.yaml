@@ -1,7 +1,7 @@
 source:
   paper: Jensen_2016_ESTOI
 claims:
-- id: claim1475
+- id: claim340
   type: parameter
   concept: sampling_rate
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 10000
   unit: Hz
-- id: claim1476
+- id: claim341
   type: parameter
   concept: frame_length
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 256
   unit: samples
-- id: claim1477
+- id: claim342
   type: parameter
   concept: frame_shift
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 128
   unit: samples
-- id: claim1478
+- id: claim343
   type: parameter
   concept: fft_order
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 512
   unit: --
-- id: claim1479
+- id: claim344
   type: parameter
   concept: number_of_subbands
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 15
   unit: --
-- id: claim1480
+- id: claim345
   type: parameter
   concept: segment_length
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 30
   unit: frames
-- id: claim1481
+- id: claim346
   type: parameter
   concept: silence_threshold
   provenance:
@@ -57,178 +57,3 @@ claims:
     page: 0
   value: -40
   unit: dB
-- id: claim1482
-  type: equation
-  expression: S(k, m) = \sum_{n=0}^{N'-1} s(mD + n) w(n) e^{-j2\pi kn/N'}
-  variables:
-  - symbol: sum_
-    concept: sum
-  - symbol: mD
-    concept: md
-  - symbol: j2
-    concept: j2
-  - symbol: kn
-    concept: kn
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1483
-  type: equation
-  expression: S_j(m) = \sqrt{\sum_{k \in CB_j} |S(k,m)|^2}, \quad j = 1, \ldots, J
-  variables:
-  - symbol: S_j
-    concept: s_j
-  - symbol: CB_j
-    concept: cb_j
-  - symbol: sum_
-    concept: sum
-  - symbol: in
-    concept: in
-  - symbol: quad
-    concept: quad
-  - symbol: ldots
-    concept: ldots
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1484
-  type: equation
-  expression: S_m = \begin{bmatrix} S_1(m-N+1) & \cdots & S_1(m) \\ \vdots & & \vdots
-    \\ S_J(m-N+1) & \cdots & S_J(m) \end{bmatrix}
-  variables:
-  - symbol: S_m
-    concept: s_m
-  - symbol: S_1
-    concept: s_1
-  - symbol: S_J
-    concept: s_j
-  - symbol: bmatrix
-    concept: bmatrix
-  - symbol: cdots
-    concept: cdots
-  - symbol: vdots
-    concept: vdots
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1485
-  type: equation
-  expression: s_{j,m} = [S_j(m-N+1) \; S_j(m-N+2) \cdots S_j(m)]^T
-  variables:
-  - symbol: s_j
-    concept: s_j
-  - symbol: s_
-    concept: s
-  - symbol: cdots
-    concept: cdots
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1486
-  type: equation
-  expression: \bar{s}_{j,m} = \frac{1}{\|(s_{j,m} - \mu_{s_{j,m}} \mathbf{1})\|} (s_{j,m}
-    - \mu_{s_{j,m}} \mathbf{1}) \tag{1}
-  variables:
-  - symbol: s_j
-    concept: s_j
-  - symbol: s_
-    concept: s
-  - symbol: mu_
-    concept: mu
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1487
-  type: equation
-  expression: \mu_{s_{j,m}} = \frac{1}{N} \sum_{m'=0}^{N-1} S_j(m - m') \tag{2}
-  variables:
-  - symbol: S_j
-    concept: s_j
-  - symbol: mu_
-    concept: mu
-  - symbol: s_
-    concept: s
-  - symbol: sum_
-    concept: sum
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1488
-  type: equation
-  expression: \bar{S}_m = \begin{bmatrix} \bar{s}_{1,m}^T \\ \vdots \\ \bar{s}_{J,m}^T
-    \end{bmatrix}
-  variables:
-  - symbol: bmatrix
-    concept: bmatrix
-  - symbol: vdots
-    concept: vdots
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1489
-  type: equation
-  expression: \check{S}_m = [\check{s}_{1,m} \cdots \check{s}_{N,m}]
-  variables:
-  - symbol: check
-    concept: check
-  - symbol: cdots
-    concept: cdots
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1490
-  type: equation
-  expression: d_m = \frac{1}{N} \sum_{n=1}^{N} \check{s}_{n,m}^T \check{x}_{n,m} \tag{4}
-  variables:
-  - symbol: d_m
-    concept: d_m
-  - symbol: sum_
-    concept: sum
-  - symbol: check
-    concept: check
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1491
-  type: equation
-  expression: d = \frac{1}{M} \sum_{m=1}^{M} d_m \tag{5}
-  variables:
-  - symbol: d_m
-    concept: d_m
-  - symbol: sum_
-    concept: sum
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1492
-  type: equation
-  expression: d = \frac{1}{MN} \text{Tr}(\check{S}^T \check{X}) \tag{7}
-  variables:
-  - symbol: MN
-    concept: mn
-  - symbol: Tr
-    concept: tr
-  - symbol: check
-    concept: check
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0
-- id: claim1493
-  type: equation
-  expression: \hat{I} = \frac{100}{1 + \exp(a\tilde{I} + b)} \tag{10}
-  variables:
-  - symbol: tag
-    concept: tag
-  provenance:
-    paper: Jensen_2016_ESTOI
-    page: 0

@@ -1,7 +1,7 @@
 source:
   paper: Sun_2006_VocalTractGlottalSource
 claims:
-- id: claim2405
+- id: claim575
   type: parameter
   concept: glottal_waveform_length
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 80
   unit: samples
-- id: claim2406
+- id: claim576
   type: parameter
   concept: optimal_codebook_size
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 1
   upper_bound: 20
   unit: classes
-- id: claim2407
+- id: claim577
   type: parameter
   concept: sample_rate
   provenance:
@@ -27,7 +27,7 @@ claims:
     page: 0
   value: 8000
   unit: Hz
-- id: claim2408
+- id: claim578
   type: parameter
   concept: bits_per_sample
   provenance:
@@ -35,128 +35,3 @@ claims:
     page: 0
   value: 16
   unit: bits
-- id: claim2409
-  type: equation
-  expression: s[n] = \sum_{k=1}^{p} a_k \cdot s[n-k] + b_n \cdot \sum_{m=1}^{q} \delta[n
-    - mp]
-  variables:
-  - symbol: a_k
-    concept: a_k
-  - symbol: b_n
-    concept: b_n
-  - symbol: sum_
-    concept: sum
-  - symbol: mp
-    concept: mp
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0
-- id: claim2410
-  type: equation
-  expression: s(z) = \frac{B(z)}{A(z)} p(z) = B(z)V(z)p(z) = AG(z)R(z)V(z)p(z)
-  variables:
-  - symbol: AG
-    concept: ag
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0
-- id: claim2411
-  type: equation
-  expression: v = \frac{v_{max}}{2} \left( \frac{\arctan(\mu \rho_s)}{\arctan(\mu)}
-    + 1 \right)
-  variables:
-  - symbol: v_max
-    concept: v_max
-  - symbol: v_
-    concept: v
-  - symbol: arctan
-    concept: arctan
-  - symbol: rho_s
-    concept: rho_s
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0
-- id: claim2412
-  type: equation
-  expression: 'g_R(n) = \begin{cases}
-
-    A_{go} e^{\alpha_{go} n} \sin(\omega_{go} n + \Phi_{go}), & n = 0,1,...,N-1 \\
-
-    -A_{gc} e^{-\alpha_{gc}(n-N)}, & n = N,...,M-1
-
-    \end{cases}'
-  variables:
-  - symbol: g_R
-    concept: g_r
-  - symbol: A_go
-    concept: a_go
-  - symbol: A_gc
-    concept: a_gc
-  - symbol: cases
-    concept: cases
-  - symbol: A_
-    concept: a
-  - symbol: go
-    concept: go
-  - symbol: alpha_
-    concept: alpha
-  - symbol: omega_
-    concept: omega
-  - symbol: Phi_
-    concept: phi
-  - symbol: gc
-    concept: gc
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0
-- id: claim2413
-  type: equation
-  expression: 'g_R(n) = \begin{cases}
-
-    \frac{1}{2}(1 - \cos(\pi n / N_1)), & n = 0,1,...,N_1-1 \\
-
-    \cos(\pi(n-N_1) / 2N_2), & n = N_1,...,N_1+N_2 \\
-
-    0 & \text{otherwise}
-
-    \end{cases}'
-  variables:
-  - symbol: g_R
-    concept: g_r
-  - symbol: N_1
-    concept: n_1
-  - symbol: N_2
-    concept: n_2
-  - symbol: cases
-    concept: cases
-  - symbol: otherwise
-    concept: otherwise
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0
-- id: claim2414
-  type: equation
-  expression: SD = \frac{1}{M} \sum_{p=0}^{M-1} \left[ \frac{1}{N} \sum_{k=0}^{N-1}
-    \left[ |S_{org}(pL, \omega_k)| - |S_{con}(pL, \omega_k)| \right]^2 \right]^{1/2}
-  variables:
-  - symbol: S_org
-    concept: s_org
-  - symbol: S_con
-    concept: s_con
-  - symbol: SD
-    concept: sd
-  - symbol: sum_
-    concept: sum
-  - symbol: S_
-    concept: s
-  - symbol: org
-    concept: org
-  - symbol: pL
-    concept: pl
-  - symbol: omega_k
-    concept: omega_k
-  - symbol: con
-    concept: con
-  provenance:
-    paper: Sun_2006_VocalTractGlottalSource
-    page: 0

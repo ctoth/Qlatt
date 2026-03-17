@@ -97,16 +97,3 @@ claims:
     page: 0
   value: 305
   unit: ms
-- id: claim13
-  type: equation
-  expression: \text{JND}_{F1/F2} \approx 3\%
-  variables:
-  - symbol: JND
-    concept: jnd
-  - symbol: F1
-    concept: f1
-  - symbol: F2
-    concept: f2
-  provenance:
-    paper: Carlson_1979_VowelPerceptionSalience
-    page: 0

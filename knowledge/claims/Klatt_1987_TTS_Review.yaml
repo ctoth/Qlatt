@@ -1,7 +1,7 @@
 source:
   paper: Klatt_1987_TTS_Review
 claims:
-- id: claim1615
+- id: claim389
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 50
   upper_bound: 500
   unit: Hz
-- id: claim1616
+- id: claim390
   type: parameter
   concept: amplitude_of_voicing
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim1617
+- id: claim391
   type: parameter
   concept: first_formant_frequency
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 200
   upper_bound: 1000
   unit: Hz
-- id: claim1618
+- id: claim392
   type: parameter
   concept: first_formant_bandwidth
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 40
   upper_bound: 1000
   unit: Hz
-- id: claim1619
+- id: claim393
   type: parameter
   concept: second_formant_frequency
   provenance:
@@ -46,7 +46,7 @@ claims:
   lower_bound: 500
   upper_bound: 3000
   unit: Hz
-- id: claim1620
+- id: claim394
   type: parameter
   concept: second_formant_bandwidth
   provenance:
@@ -55,7 +55,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1621
+- id: claim395
   type: parameter
   concept: third_formant_frequency
   provenance:
@@ -64,7 +64,7 @@ claims:
   lower_bound: 1500
   upper_bound: 4500
   unit: Hz
-- id: claim1622
+- id: claim396
   type: parameter
   concept: third_formant_bandwidth
   provenance:
@@ -73,7 +73,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1623
+- id: claim397
   type: parameter
   concept: nasal_formant_frequency
   provenance:
@@ -82,7 +82,7 @@ claims:
   lower_bound: 200
   upper_bound: 500
   unit: Hz
-- id: claim1624
+- id: claim398
   type: parameter
   concept: nasal_formant_bandwidth
   provenance:
@@ -91,7 +91,7 @@ claims:
   lower_bound: 40
   upper_bound: 500
   unit: Hz
-- id: claim1625
+- id: claim399
   type: parameter
   concept: amplitude_of_aspiration
   provenance:
@@ -100,7 +100,7 @@ claims:
   lower_bound: 0
   upper_bound: 70
   unit: dB
-- id: claim1626
+- id: claim400
   type: parameter
   concept: amplitude_of_frication
   provenance:
@@ -109,7 +109,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1627
+- id: claim401
   type: parameter
   concept: parallel_formant_amplitudes
   provenance:
@@ -118,7 +118,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1628
+- id: claim402
   type: parameter
   concept: bypass_amplitude
   provenance:
@@ -127,7 +127,7 @@ claims:
   lower_bound: 0
   upper_bound: 80
   unit: dB
-- id: claim1629
+- id: claim403
   type: parameter
   concept: open_quotient
   provenance:
@@ -136,7 +136,7 @@ claims:
   lower_bound: 10
   upper_bound: 90
   unit: '%'
-- id: claim1630
+- id: claim404
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -145,44 +145,3 @@ claims:
   lower_bound: 0
   upper_bound: 24
   unit: dB
-- id: claim1631
-  type: equation
-  expression: DUR = MINDUR + \frac{(INHDUR - MINDUR) \times PRCNT}{100}
-  variables:
-  - symbol: DUR
-    concept: dur
-  - symbol: MINDUR
-    concept: mindur
-  - symbol: INHDUR
-    concept: inhdur
-  - symbol: PRCNT
-    concept: prcnt
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-- id: claim1632
-  type: equation
-  expression: F2_{onset} = F2_{locus} + k \times [F2_{vowel} - F2_{locus}]
-  variables:
-  - symbol: F2_
-    concept: f2
-  - symbol: onset
-    concept: onset
-  - symbol: locus
-    concept: locus
-  - symbol: vowel
-    concept: vowel
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0
-- id: claim1633
-  type: equation
-  expression: aT^2 - bT^3
-  variables:
-  - symbol: aT
-    concept: at
-  - symbol: bT
-    concept: bt
-  provenance:
-    paper: Klatt_1987_TTS_Review
-    page: 0

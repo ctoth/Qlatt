@@ -1,7 +1,7 @@
 source:
   paper: Walton_1994_SpeakerRaceVocalAcoustics
 claims:
-- id: claim2645
+- id: claim599
   type: parameter
   concept: fundamental_frequency
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   unit: Hz
   value: 108.85
-- id: claim2646
+- id: claim600
   type: parameter
   concept: first_formant
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   unit: Hz
   value: 660
-- id: claim2647
+- id: claim601
   type: parameter
   concept: second_formant
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   unit: Hz
   value: 1181
-- id: claim2648
+- id: claim602
   type: parameter
   concept: jitter
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   unit: '%'
   value: 0.4
-- id: claim2649
+- id: claim603
   type: parameter
   concept: shimmer
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   unit: dB
   value: 0.331
-- id: claim2650
+- id: claim604
   type: parameter
   concept: harmonicstonoise_ratio
   provenance:
@@ -49,71 +49,3 @@ claims:
     page: 0
   unit: dB
   value: 14.77
-- id: claim2651
-  type: parameter
-  concept: f0
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-  unit: SD
-  value: 106.94
-- id: claim2652
-  type: parameter
-  concept: shimmer
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-  unit: SD
-  value: 0.372
-- id: claim2653
-  type: parameter
-  concept: h_n_ratio
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-  unit: SD
-  value: 14.36
-- id: claim2654
-  type: observation
-  statement: Shimmer values for healthy adult males should fall within 0.095-0.704
-    dB (observed range)
-  concepts:
-  - shimmer
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-- id: claim2655
-  type: observation
-  statement: RAP jitter for healthy adult males should fall within 0.14-2.33% (observed
-    range)
-  concepts:
-  - jitter
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-- id: claim2656
-  type: observation
-  statement: 'F0 for adult male sustained /a/: 83-148 Hz range'
-  concepts:
-  - f0
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-- id: claim2657
-  type: observation
-  statement: 'F1 of /a/ for adult males: 515-898 Hz; F2: 1030-1501 Hz'
-  concepts:
-  - f1
-  - f2
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0
-- id: claim2658
-  type: observation
-  statement: When shimmer and H/N differences between two voices are minimal, perceptual
-    discrimination should approach chance (50%)
-  concepts:
-  - shimmer
-  provenance:
-    paper: Walton_1994_SpeakerRaceVocalAcoustics
-    page: 0

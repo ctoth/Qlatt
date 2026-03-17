@@ -1,7 +1,7 @@
 source:
   paper: OShaughnessy_1976_F0_Prosody
 claims:
-- id: claim1979
+- id: claim479
   type: parameter
   concept: standard_f0_range
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim1980
+- id: claim480
   type: parameter
   concept: bottom_of_range
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 85
   unit: Hz
-- id: claim1981
+- id: claim481
   type: parameter
   concept: head_peak_base
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 115
   unit: Hz
-- id: claim1982
+- id: claim482
   type: parameter
   concept: head_peak_max
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 185
   unit: Hz
-- id: claim1983
+- id: claim483
   type: parameter
   concept: phrase_increment
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 10
   unit: Hz
-- id: claim1984
+- id: claim484
   type: parameter
   concept: jnd_for_rise
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 1.5
   unit: semitones
-- id: claim1985
+- id: claim485
   type: parameter
   concept: jnd_for_fall
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 3.0
   unit: semitones
-- id: claim1986
+- id: claim486
   type: parameter
   concept: smoothing_threshold
   provenance:
@@ -65,27 +65,3 @@ claims:
     page: 0
   value: 50
   unit: msec
-- id: claim1987
-  type: parameter
-  concept: utterancefinal
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 126
-- id: claim1988
-  type: parameter
-  concept: phrasefinal
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 148
-- id: claim1989
-  type: parameter
-  concept: withinphrase
-  provenance:
-    paper: OShaughnessy_1976_F0_Prosody
-    page: 0
-  unit: Hz
-  value: 149

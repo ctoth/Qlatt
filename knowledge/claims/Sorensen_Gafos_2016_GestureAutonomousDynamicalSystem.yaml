@@ -1,7 +1,7 @@
 source:
   paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
 claims:
-- id: claim2187
+- id: claim524
   type: parameter
   concept: mass
   provenance:
@@ -9,83 +9,3 @@ claims:
     page: 0
   value: 1
   unit: —
-- id: claim2188
-  type: equation
-  expression: 'where $b = 2\sqrt{mk}$ (critical damping, $m=1$), activated by a step
-    function $a(t)$:'
-  variables:
-  - symbol: where
-    concept: where
-  - symbol: mk
-    concept: mk
-  - symbol: critical
-    concept: critical
-  - symbol: damping
-    concept: damping
-  - symbol: activated
-    concept: activated
-  - symbol: by
-    concept: by
-  - symbol: step
-    concept: step
-  - symbol: function
-    concept: function
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim2189
-  type: equation
-  expression: 'With potential:'
-  variables:
-  - symbol: With
-    concept: with
-  - symbol: potential
-    concept: potential
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim2190
-  type: equation
-  expression: 'Yielding the equation of motion:'
-  variables:
-  - symbol: Yielding
-    concept: yielding
-  - symbol: the
-    concept: the
-  - symbol: equation
-    concept: equation
-  - symbol: of
-    concept: of
-  - symbol: motion
-    concept: motion
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim2191
-  type: equation
-  expression: 'Which expands to:'
-  variables:
-  - symbol: Which
-    concept: which
-  - symbol: expands
-    concept: expands
-  - symbol: to
-    concept: to
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0
-- id: claim2192
-  type: equation
-  expression: 'The restoring force becomes:'
-  variables:
-  - symbol: The
-    concept: the
-  - symbol: restoring
-    concept: restoring
-  - symbol: force
-    concept: force
-  - symbol: becomes
-    concept: becomes
-  provenance:
-    paper: Sorensen_Gafos_2016_GestureAutonomousDynamicalSystem
-    page: 0

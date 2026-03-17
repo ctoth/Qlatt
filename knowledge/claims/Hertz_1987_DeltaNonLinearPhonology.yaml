@@ -1,35 +1,3 @@
 source:
   paper: Hertz_1987_DeltaNonLinearPhonology
-claims:
-- id: claim1316
-  type: parameter
-  concept: h_start_freq
-  provenance:
-    paper: Hertz_1987_DeltaNonLinearPhonology
-    page: 0
-  unit: Hz
-  value: 230
-- id: claim1317
-  type: parameter
-  concept: h_end_freq
-  provenance:
-    paper: Hertz_1987_DeltaNonLinearPhonology
-    page: 0
-  unit: Hz
-  value: 150
-- id: claim1318
-  type: parameter
-  concept: l_start_freq
-  provenance:
-    paper: Hertz_1987_DeltaNonLinearPhonology
-    page: 0
-  unit: Hz
-  value: 170
-- id: claim1319
-  type: parameter
-  concept: l_end_freq
-  provenance:
-    paper: Hertz_1987_DeltaNonLinearPhonology
-    page: 0
-  unit: Hz
-  value: 130
+claims: []

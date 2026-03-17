@@ -1,7 +1,7 @@
 source:
   paper: Strong_1967_MachineAidedFormantDetermination
 claims:
-- id: claim2386
+- id: claim556
   type: parameter
   concept: formant_1_frequency
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim2387
+- id: claim557
   type: parameter
   concept: formant_2_frequency
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim2388
+- id: claim558
   type: parameter
   concept: formant_3_frequency
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim2389
+- id: claim559
   type: parameter
   concept: formant_4_frequency
   provenance:
@@ -37,7 +37,7 @@ claims:
   lower_bound: 20
   upper_bound: 4000
   unit: cps
-- id: claim2390
+- id: claim560
   type: parameter
   concept: formant_1_amplitude
   provenance:
@@ -46,7 +46,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim2391
+- id: claim561
   type: parameter
   concept: formant_2_amplitude
   provenance:
@@ -55,7 +55,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim2392
+- id: claim562
   type: parameter
   concept: formant_3_amplitude
   provenance:
@@ -64,7 +64,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim2393
+- id: claim563
   type: parameter
   concept: formant_4_amplitude
   provenance:
@@ -73,7 +73,7 @@ claims:
   lower_bound: 0
   upper_bound: 62.5
   unit: dB
-- id: claim2394
+- id: claim564
   type: parameter
   concept: bandwidth_b1
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   value: 70
   unit: cps
-- id: claim2395
+- id: claim565
   type: parameter
   concept: bandwidth_b2
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   value: 80
   unit: cps
-- id: claim2396
+- id: claim566
   type: parameter
   concept: bandwidth_b3
   provenance:
@@ -97,7 +97,7 @@ claims:
     page: 0
   value: 100
   unit: cps
-- id: claim2397
+- id: claim567
   type: parameter
   concept: bandwidth_b4
   provenance:
@@ -105,7 +105,7 @@ claims:
     page: 0
   value: 140
   unit: cps
-- id: claim2398
+- id: claim568
   type: parameter
   concept: bandwidth_b1
   provenance:
@@ -113,7 +113,7 @@ claims:
     page: 0
   value: 100
   unit: cps
-- id: claim2399
+- id: claim569
   type: parameter
   concept: bandwidth_b2
   provenance:
@@ -121,7 +121,7 @@ claims:
     page: 0
   value: 150
   unit: cps
-- id: claim2400
+- id: claim570
   type: parameter
   concept: bandwidth_b3
   provenance:
@@ -129,7 +129,7 @@ claims:
     page: 0
   value: 200
   unit: cps
-- id: claim2401
+- id: claim571
   type: parameter
   concept: bandwidth_b4
   provenance:
@@ -137,7 +137,7 @@ claims:
     page: 0
   value: 250
   unit: cps
-- id: claim2402
+- id: claim572
   type: parameter
   concept: analysis_frame_rate
   provenance:
@@ -145,7 +145,7 @@ claims:
     page: 0
   value: 10
   unit: ms
-- id: claim2403
+- id: claim573
   type: parameter
   concept: synthesis_interpolation
   provenance:
@@ -153,7 +153,7 @@ claims:
     page: 0
   value: 1
   unit: ms
-- id: claim2404
+- id: claim574
   type: parameter
   concept: analysis_bandwidth
   provenance:

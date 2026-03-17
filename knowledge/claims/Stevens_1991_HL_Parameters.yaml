@@ -1,7 +1,7 @@
 source:
   paper: Stevens_1991_HL_Parameters
 claims:
-- id: claim2275
+- id: claim540
   type: parameter
   concept: glottal_area
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0
   upper_bound: 0.4
   unit: cm^2
-- id: claim2276
+- id: claim541
   type: parameter
   concept: constriction_area
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0
   upper_bound: 0.4
   unit: cm^2
-- id: claim2277
+- id: claim542
   type: parameter
   concept: velopharyngeal_area
   provenance:
@@ -29,7 +29,7 @@ claims:
   lower_bound: 0
   upper_bound: 1.0
   unit: cm^2
-- id: claim2278
+- id: claim543
   type: parameter
   concept: stridency
   provenance:
@@ -37,7 +37,7 @@ claims:
     page: 0
   value: 0
   unit: dB
-- id: claim2279
+- id: claim544
   type: parameter
   concept: pressure_manipulation
   provenance:
@@ -45,12 +45,3 @@ claims:
     page: 0
   value: 0
   unit: fraction of Ps
-- id: claim2280
-  type: equation
-  expression: N \propto U^3 A^{-2.5}
-  variables:
-  - symbol: propto
-    concept: propto
-  provenance:
-    paper: Stevens_1991_HL_Parameters
-    page: 0

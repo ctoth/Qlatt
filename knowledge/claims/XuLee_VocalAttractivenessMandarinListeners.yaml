@@ -1,29 +1,3 @@
 source:
   paper: XuLee_VocalAttractivenessMandarinListeners
-claims:
-- id: claim2730
-  type: observation
-  statement: Narrowly distributed formants should increase attractiveness for both
-    genders
-  concepts:
-  - formant
-  provenance:
-    paper: XuLee_VocalAttractivenessMandarinListeners
-    page: 0
-- id: claim2731
-  type: observation
-  statement: Narrow pitch range should decrease attractiveness ratings
-  concepts:
-  - pitch
-  provenance:
-    paper: XuLee_VocalAttractivenessMandarinListeners
-    page: 0
-- id: claim2732
-  type: observation
-  statement: 'For male voices: low f0 should be preferred, but medium f0 should be
-    nearly equivalent'
-  concepts:
-  - f0
-  provenance:
-    paper: XuLee_VocalAttractivenessMandarinListeners
-    page: 0
+claims: []

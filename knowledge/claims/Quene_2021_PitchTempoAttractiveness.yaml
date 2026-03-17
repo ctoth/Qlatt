@@ -1,7 +1,7 @@
 source:
   paper: Quene_2021_PitchTempoAttractiveness
 claims:
-- id: claim2054
+- id: claim495
   type: parameter
   concept: male_speaker_f0
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 116
   unit: Hz
-- id: claim2055
+- id: claim496
   type: parameter
   concept: male_speaker_syllable_duration
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 0.188
   unit: s
-- id: claim2056
+- id: claim497
   type: parameter
   concept: tempo_manipulation_factors
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 1.0
   unit: ratio
-- id: claim2057
+- id: claim498
   type: parameter
   concept: pitch_manipulation
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 0
   unit: semitones
-- id: claim2058
+- id: claim499
   type: parameter
   concept: baseline_attractiveness_rating
   provenance:
@@ -41,20 +41,3 @@ claims:
     page: 0
   value: 3.3
   unit: 1-7
-- id: claim2059
-  type: observation
-  statement: Higher pitch must reduce attractiveness ratings (monotonic for upward
-    direction)
-  concepts:
-  - pitch
-  provenance:
-    paper: Quene_2021_PitchTempoAttractiveness
-    page: 0
-- id: claim2060
-  type: observation
-  statement: Pitch and tempo effects should be additive (no significant interaction)
-  concepts:
-  - pitch
-  provenance:
-    paper: Quene_2021_PitchTempoAttractiveness
-    page: 0

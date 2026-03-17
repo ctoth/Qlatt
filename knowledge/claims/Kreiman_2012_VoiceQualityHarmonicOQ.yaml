@@ -1,7 +1,7 @@
 source:
   paper: Kreiman_2012_VoiceQualityHarmonicOQ
 claims:
-- id: claim1685
+- id: claim414
   type: parameter
   concept: open_quotient
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0.3
   upper_bound: 1.0
   unit: ratio
-- id: claim1686
+- id: claim415
   type: parameter
   concept: asymmetry_coefficient
   provenance:
@@ -19,7 +19,7 @@ claims:
   lower_bound: 0
   upper_bound: 1
   unit: ratio
-- id: claim1687
+- id: claim416
   type: parameter
   concept: h1h2
   provenance:
@@ -27,98 +27,3 @@ claims:
     page: 0
   value: -10
   unit: dB
-- id: claim1688
-  type: parameter
-  concept: '1'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 9.92
-- id: claim1689
-  type: parameter
-  concept: '2'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 11.01
-- id: claim1690
-  type: parameter
-  concept: '3'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 14.57
-- id: claim1691
-  type: parameter
-  concept: '4'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 20.64
-- id: claim1692
-  type: parameter
-  concept: '5'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 10.33
-- id: claim1693
-  type: parameter
-  concept: '6'
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-  unit: dB
-  value: 20.96
-- id: claim1694
-  type: equation
-  expression: H1 - H2 = -6 + 0.27 \exp(0.055 \cdot OQ)
-  variables:
-  - symbol: H1
-    concept: h1
-  - symbol: H2
-    concept: h2
-  - symbol: OQ
-    concept: oq
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-- id: claim1695
-  type: equation
-  expression: OQ = \frac{t_{open \rightarrow maxclosure}}{t_{open \rightarrow next\_open}}
-  variables:
-  - symbol: t_open
-    concept: t_open
-  - symbol: OQ
-    concept: oq
-  - symbol: t_
-    concept: t
-  - symbol: open
-    concept: open
-  - symbol: rightarrow
-    concept: rightarrow
-  - symbol: maxclosure
-    concept: maxclosure
-  - symbol: next
-    concept: next
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0
-- id: claim1696
-  type: equation
-  expression: AC = \frac{t_o}{t_o + t_c}
-  variables:
-  - symbol: t_o
-    concept: t_o
-  - symbol: t_c
-    concept: t_c
-  - symbol: AC
-    concept: ac
-  provenance:
-    paper: Kreiman_2012_VoiceQualityHarmonicOQ
-    page: 0

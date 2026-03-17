@@ -1,27 +1,3 @@
 source:
   paper: Zhang_2021_LaryngealSizeSexDifferences
-claims:
-- id: claim2817
-  type: parameter
-  concept: children
-  provenance:
-    paper: Zhang_2021_LaryngealSizeSexDifferences
-    page: 0
-  unit: L
-  value: 6
-- id: claim2818
-  type: parameter
-  concept: adult_females
-  provenance:
-    paper: Zhang_2021_LaryngealSizeSexDifferences
-    page: 0
-  unit: L
-  value: 10
-- id: claim2819
-  type: parameter
-  concept: adult_males
-  provenance:
-    paper: Zhang_2021_LaryngealSizeSexDifferences
-    page: 0
-  unit: L
-  value: 17
+claims: []

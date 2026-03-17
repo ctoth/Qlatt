@@ -1,38 +1,3 @@
 source:
   paper: Scherer_2001_VocalEmotionCrossCultural
-claims:
-- id: claim2116
-  type: equation
-  expression: \kappa = \frac{P_o - P_e}{1 - P_e}
-  variables:
-  - symbol: P_o
-    concept: p_o
-  - symbol: P_e
-    concept: p_e
-  - symbol: kappa
-    concept: kappa
-  provenance:
-    paper: Scherer_2001_VocalEmotionCrossCultural
-    page: 0
-- id: claim2117
-  type: equation
-  expression: \text{Accuracy}_{\text{emotion}} = \frac{\text{Correct judgments for
-    emotion}}{\text{Total stimuli for emotion}} \times 100
-  variables:
-  - symbol: Accuracy
-    concept: accuracy
-  - symbol: emotion
-    concept: emotion
-  - symbol: Correct
-    concept: correct
-  - symbol: judgments
-    concept: judgments
-  - symbol: for
-    concept: for
-  - symbol: Total
-    concept: total
-  - symbol: stimuli
-    concept: stimuli
-  provenance:
-    paper: Scherer_2001_VocalEmotionCrossCultural
-    page: 0
+claims: []

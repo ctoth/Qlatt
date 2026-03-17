@@ -1,7 +1,7 @@
 source:
   paper: Allen_1977_ModularAudioResponse
 claims:
-- id: claim13
+- id: claim5
   type: parameter
   concept: parameter_update_rate
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 5
   unit: ms
-- id: claim14
+- id: claim6
   type: parameter
   concept: data_word_length
   provenance:

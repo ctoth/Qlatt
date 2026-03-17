@@ -1,7 +1,7 @@
 source:
   paper: Fraj_2011_BreathyRoughVoices
 claims:
-- id: claim1007
+- id: claim212
   type: parameter
   concept: base_f0
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 100
   unit: Hz
-- id: claim1008
+- id: claim213
   type: parameter
   concept: noise_delay
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 1
   unit: ms
-- id: claim1009
+- id: claim214
   type: parameter
   concept: trachea_area
   provenance:
@@ -25,226 +25,3 @@ claims:
     page: 0
   value: 1.2
   unit: cm²
-- id: claim1010
-  type: parameter
-  concept: '0315'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 28.8
-- id: claim1011
-  type: parameter
-  concept: '0315'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 23.5
-- id: claim1012
-  type: parameter
-  concept: '0315'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 17.5
-- id: claim1013
-  type: parameter
-  concept: '063'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 30.0
-- id: claim1014
-  type: parameter
-  concept: '063'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 22.7
-- id: claim1015
-  type: parameter
-  concept: '063'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 18.5
-- id: claim1016
-  type: parameter
-  concept: '126'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 29.4
-- id: claim1017
-  type: parameter
-  concept: '126'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 21.7
-- id: claim1018
-  type: parameter
-  concept: '126'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 17.4
-- id: claim1019
-  type: parameter
-  concept: '189'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 28.8
-- id: claim1020
-  type: parameter
-  concept: '189'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 22.9
-- id: claim1021
-  type: parameter
-  concept: '189'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 19.2
-- id: claim1022
-  type: parameter
-  concept: '252'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 29.4
-- id: claim1023
-  type: parameter
-  concept: '252'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 22.2
-- id: claim1024
-  type: parameter
-  concept: '252'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 18.6
-- id: claim1025
-  type: parameter
-  concept: '345'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 29.6
-- id: claim1026
-  type: parameter
-  concept: '345'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 22.7
-- id: claim1027
-  type: parameter
-  concept: '345'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 17.7
-- id: claim1028
-  type: parameter
-  concept: '45'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 29.2
-- id: claim1029
-  type: parameter
-  concept: '45'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 22.0
-- id: claim1030
-  type: parameter
-  concept: '45'
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-  unit: dB
-  value: 18.5
-- id: claim1031
-  type: equation
-  expression: \theta(n) = \theta(n-1) + 2\pi f_0 \Delta + 2\pi b \xi(n)
-  variables:
-  - symbol: f_0
-    concept: f_0
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-- id: claim1032
-  type: equation
-  expression: \xi(n) = \begin{cases} +1, & p = 0.5 \\ -1, & p = 0.5 \end{cases}
-  variables:
-  - symbol: cases
-    concept: cases
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-- id: claim1033
-  type: equation
-  expression: \text{noisy\_velocity}(n) = u_g(n) + n_1 \cdot u_g(n-d) \cdot \text{noise}(n)
-    + n_2
-  variables:
-  - symbol: u_g
-    concept: u_g
-  - symbol: n_1
-    concept: n_1
-  - symbol: n_2
-    concept: n_2
-  - symbol: noisy
-    concept: noisy
-  - symbol: velocity
-    concept: velocity
-  - symbol: noise
-    concept: noise
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0
-- id: claim1034
-  type: equation
-  expression: \text{SNR (dB)} = 10 \log_{10} \frac{\sum u_g^2(n)}{\sum \text{noise}^2(n)}
-  variables:
-  - symbol: u_g
-    concept: u_g
-  - symbol: SNR
-    concept: snr
-  - symbol: dB
-    concept: db
-  - symbol: log_
-    concept: log
-  - symbol: noise
-    concept: noise
-  provenance:
-    paper: Fraj_2011_BreathyRoughVoices
-    page: 0

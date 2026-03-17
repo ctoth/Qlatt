@@ -1,7 +1,7 @@
 source:
   paper: Kirkham_2025_DynamicalLawsSpeechGestures
 claims:
-- id: claim1548
+- id: claim352
   type: parameter
   concept: damping
   provenance:

@@ -1,12 +1,3 @@
 source:
   paper: Monson_2012_SpeechDirectivityHFE
-claims:
-- id: claim1922
-  type: observation
-  statement: At 0 degrees, normal speech overall level should be approximately 62
-    dB SPL at 1 m (for calibrated output)
-  concepts:
-  - spl
-  provenance:
-    paper: Monson_2012_SpeechDirectivityHFE
-    page: 0
+claims: []

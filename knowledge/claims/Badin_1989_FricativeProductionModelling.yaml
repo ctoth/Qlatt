@@ -1,7 +1,7 @@
 source:
   paper: Badin_1989_FricativeProductionModelling
 claims:
-- id: claim150
+- id: claim68
   type: parameter
   concept: constriction_area_f
   provenance:
@@ -10,7 +10,7 @@ claims:
   lower_bound: 0.1
   upper_bound: 0.4
   unit: cm²
-- id: claim151
+- id: claim69
   type: parameter
   concept: constriction_area_s
   provenance:
@@ -18,7 +18,7 @@ claims:
     page: 0
   value: 0.1
   unit: cm²
-- id: claim152
+- id: claim70
   type: parameter
   concept: glottal_area
   provenance:
@@ -28,7 +28,7 @@ claims:
   lower_bound: 0.13
   upper_bound: 0.3
   unit: cm²
-- id: claim153
+- id: claim71
   type: parameter
   concept: subglottal_pressure
   provenance:
@@ -38,112 +38,3 @@ claims:
   lower_bound: 2.4
   upper_bound: 8.0
   unit: cmH₂O
-- id: claim154
-  type: parameter
-  concept: f1
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 430
-- id: claim155
-  type: parameter
-  concept: f2
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 1750
-- id: claim156
-  type: parameter
-  concept: f3
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 2680
-- id: claim157
-  type: parameter
-  concept: f4
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 3200
-- id: claim158
-  type: parameter
-  concept: z1
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 1440
-- id: claim159
-  type: parameter
-  concept: z2
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 2270
-- id: claim160
-  type: parameter
-  concept: z3
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-  unit: Hz
-  value: 2980
-- id: claim161
-  type: equation
-  expression: A_c = \frac{U}{\sqrt{2 \cdot \Delta p / \rho}}
-  variables:
-  - symbol: A_c
-    concept: a_c
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-- id: claim162
-  type: equation
-  expression: SP \sim (\Delta p)^p \cdot (A_c)^q
-  variables:
-  - symbol: A_c
-    concept: a_c
-  - symbol: SP
-    concept: sp
-  - symbol: sim
-    concept: sim
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-- id: claim163
-  type: equation
-  expression: SPL = G_0 + p \cdot 20\log(\Delta p) + q \cdot 20\log(A_c)
-  variables:
-  - symbol: G_0
-    concept: g_0
-  - symbol: A_c
-    concept: a_c
-  - symbol: SPL
-    concept: spl
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-- id: claim164
-  type: equation
-  expression: p = 1.3, \quad q = 0.3
-  variables:
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0
-- id: claim165
-  type: equation
-  expression: p = 0.8, \quad q = 0.2
-  variables:
-  - symbol: quad
-    concept: quad
-  provenance:
-    paper: Badin_1989_FricativeProductionModelling
-    page: 0

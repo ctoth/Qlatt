@@ -1,28 +1,3 @@
 source:
   paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-claims:
-- id: claim1
-  type: equation
-  expression: y_{ij} = \beta_0 + \beta_1 x_{ij} + u_j + \epsilon_{ij}
-  variables:
-  - symbol: y_ij
-    concept: y_ij
-  - symbol: x_ij
-    concept: x_ij
-  - symbol: u_j
-    concept: u_j
-  - symbol: y_
-    concept: y
-  - symbol: ij
-    concept: ij
-  - symbol: beta_0
-    concept: beta_0
-  - symbol: beta_1
-    concept: beta_1
-  - symbol: x_
-    concept: x
-  - symbol: epsilon_
-    concept: epsilon
-  provenance:
-    paper: KaczmarekMajer_2024_AcousticMarkersBipolar
-    page: 0
+claims: []

@@ -1,20 +1,3 @@
 source:
   paper: Scherer_TaskLoadStressAcoustics
-claims:
-- id: claim2118
-  type: observation
-  statement: Cognitive load should increase speech rate without affecting F0
-  concepts:
-  - f0
-  provenance:
-    paper: Scherer_TaskLoadStressAcoustics
-    page: 0
-- id: claim2119
-  type: observation
-  statement: Psychological stress should increase F0 without strongly affecting speech
-    rate
-  concepts:
-  - f0
-  provenance:
-    paper: Scherer_TaskLoadStressAcoustics
-    page: 0
+claims: []

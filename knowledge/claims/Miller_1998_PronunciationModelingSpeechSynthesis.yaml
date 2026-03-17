@@ -1,7 +1,7 @@
 source:
   paper: Miller_1998_PronunciationModelingSpeechSynthesis
 claims:
-- id: claim1901
+- id: claim457
   type: parameter
   concept: dp_insertion_cost
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 7
   unit: —
-- id: claim1902
+- id: claim458
   type: parameter
   concept: dp_deletion_cost
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 7
   unit: —
-- id: claim1903
+- id: claim459
   type: parameter
   concept: dp_default_substitution
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 10
   unit: —
-- id: claim1904
+- id: claim460
   type: parameter
   concept: acoustic_nn_frame_rate
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 5
   unit: ms
-- id: claim1905
+- id: claim461
   type: parameter
   concept: tdnn_context_window
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 415
   unit: ms
-- id: claim1906
+- id: claim462
   type: parameter
   concept: window_size
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 9
   unit: phones
-- id: claim1907
+- id: claim463
   type: parameter
   concept: output_phone_classes
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 117
   unit: —
-- id: claim1908
+- id: claim464
   type: parameter
   concept: phonological_features
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   value: 53
   unit: binary
-- id: claim1909
+- id: claim465
   type: parameter
   concept: boundary_features
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   value: 14
   unit: binary
-- id: claim1910
+- id: claim466
   type: parameter
   concept: stress_prominence_features
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   value: 4
   unit: —
-- id: claim1911
+- id: claim467
   type: parameter
   concept: male_speaking_rate
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   value: 4.69
   unit: syl/s
-- id: claim1912
+- id: claim468
   type: parameter
   concept: female_speaking_rate
   provenance:

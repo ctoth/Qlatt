@@ -1,7 +1,14 @@
 name: level
 dimensionless: true
+unit_symbol: dB
 parameters:
   scale: dB
   reference: null
 qudt: null
 dimensions: {}
+common_alternatives:
+  - { unit: "dB SPL", type: multiplicative, multiplier: 1, note: "re 20 µPa" }
+  - { unit: "dB/oct", type: multiplicative, multiplier: 1, note: "spectral slope" }
+  - { unit: "dB/octave", type: multiplicative, multiplier: 1, note: "spectral slope" }
+  - { unit: "dB/dB", type: multiplicative, multiplier: 1, note: "ratio of levels" }
+  - { unit: SD, type: multiplicative, multiplier: 1, note: "standard deviations" }

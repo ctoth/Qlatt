@@ -1,7 +1,7 @@
 source:
   paper: Carlson_1979_VowelPerceptionSalience
 claims:
-- id: claim348
+- id: claim112
   type: parameter
   concept: formant_1
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 700
   unit: Hz
-- id: claim349
+- id: claim113
   type: parameter
   concept: formant_2
   provenance:
@@ -17,7 +17,7 @@ claims:
     page: 0
   value: 1800
   unit: Hz
-- id: claim350
+- id: claim114
   type: parameter
   concept: formant_3
   provenance:
@@ -25,7 +25,7 @@ claims:
     page: 0
   value: 2500
   unit: Hz
-- id: claim351
+- id: claim115
   type: parameter
   concept: formant_4
   provenance:
@@ -33,7 +33,7 @@ claims:
     page: 0
   value: 3300
   unit: Hz
-- id: claim352
+- id: claim116
   type: parameter
   concept: formant_5
   provenance:
@@ -41,7 +41,7 @@ claims:
     page: 0
   value: 3700
   unit: Hz
-- id: claim353
+- id: claim117
   type: parameter
   concept: bandwidth_1
   provenance:
@@ -49,7 +49,7 @@ claims:
     page: 0
   value: 60
   unit: Hz
-- id: claim354
+- id: claim118
   type: parameter
   concept: bandwidth_2
   provenance:
@@ -57,7 +57,7 @@ claims:
     page: 0
   value: 140
   unit: Hz
-- id: claim355
+- id: claim119
   type: parameter
   concept: bandwidth_3
   provenance:
@@ -65,7 +65,7 @@ claims:
     page: 0
   value: 150
   unit: Hz
-- id: claim356
+- id: claim120
   type: parameter
   concept: bandwidth_4
   provenance:
@@ -73,7 +73,7 @@ claims:
     page: 0
   value: 200
   unit: Hz
-- id: claim357
+- id: claim121
   type: parameter
   concept: bandwidth_5
   provenance:
@@ -81,7 +81,7 @@ claims:
     page: 0
   value: 250
   unit: Hz
-- id: claim358
+- id: claim122
   type: parameter
   concept: spectral_tilt
   provenance:
@@ -89,7 +89,7 @@ claims:
     page: 0
   value: -6
   unit: dB/octave
-- id: claim359
+- id: claim123
   type: parameter
   concept: duration
   provenance:
@@ -97,16 +97,3 @@ claims:
     page: 0
   value: 305
   unit: ms
-- id: claim360
-  type: equation
-  expression: \text{JND}_{F1/F2} \approx 3\%
-  variables:
-  - symbol: JND
-    concept: jnd
-  - symbol: F1
-    concept: f1
-  - symbol: F2
-    concept: f2
-  provenance:
-    paper: Carlson_1979_VowelPerceptionSalience
-    page: 0

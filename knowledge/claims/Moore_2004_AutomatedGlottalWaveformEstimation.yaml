@@ -1,7 +1,7 @@
 source:
   paper: Moore_2004_AutomatedGlottalWaveformEstimation
 claims:
-- id: claim1938
+- id: claim475
   type: parameter
   concept: window_length
   provenance:
@@ -9,7 +9,7 @@ claims:
     page: 0
   value: 20
   unit: samples
-- id: claim1939
+- id: claim476
   type: parameter
   concept: sampling_rate
   provenance:

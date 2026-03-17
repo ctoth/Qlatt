@@ -1,13 +1,3 @@
 source:
   paper: Carlson_1975_RuleBasedTTS
-claims:
-- id: claim1
-  type: equation
-  expression: \text{DURATION} = T \cdot (A + B + C) \cdot \exp(-\log(B) \cdot 0.12
-    - \log(A) \cdot 0.35)
-  variables:
-  - symbol: DURATION
-    concept: duration
-  provenance:
-    paper: Carlson_1975_RuleBasedTTS
-    page: 0
+claims: []

@@ -31,6 +31,8 @@ No direct contradictions found between the 12 verdicts. All findings are mutuall
 
 ## Commit
 
+Commit: `0695930`
+
 Files written:
 - `research/verdicts/00-master-synthesis.md`
 - `reports/verdict-00-master-synthesis.md`

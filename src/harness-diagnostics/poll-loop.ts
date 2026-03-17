@@ -26,6 +26,7 @@ export class PollLoop {
   private timer: ReturnType<typeof setInterval> | null = null;
   private checkStates: Map<string, CheckState>;
   private lastActiveResults: Map<string, CheckResult> = new Map();
+  private trackAnalysisResults: Map<string, CheckResult> = new Map();
   private config: DiagConfig;
   private tapManager: TapManager;
   private acrossPlays: AcrossPlaysAccumulator;
@@ -66,6 +67,11 @@ export class PollLoop {
     }
   }
 
+  /** Set static track_analysis results (computed once in onPlayStart). */
+  setTrackAnalysisResults(results: Map<string, CheckResult>): void {
+    this.trackAnalysisResults = results;
+  }
+
   /** Reset per-play check state. */
   resetPerPlay(): void {
     for (const state of this.checkStates.values()) {
@@ -102,9 +108,10 @@ export class PollLoop {
       measurements.set(tapName, readRms(analyser));
     }
 
-    // Evaluate each check
+    // Evaluate each check (skip track_analysis — handled statically)
     const results = new Map<string, CheckResult>();
     for (const [checkName, checkDef] of Object.entries(this.config.checks)) {
+      if (checkDef.type === "track_analysis") continue;
       const state = this.checkStates.get(checkName)!;
 
       // For tap_check, read the specific measurement type
@@ -129,6 +136,11 @@ export class PollLoop {
 
       const result = evaluateCheck(checkName, checkDef, measurements, snapshot, state, now);
       results.set(checkName, result);
+    }
+
+    // Merge in static track_analysis results (they don't change per tick)
+    for (const [name, result] of this.trackAnalysisResults) {
+      results.set(name, result);
     }
 
     // Preserve last active (non-skip) results so they survive after playback ends

@@ -347,6 +347,86 @@ display:
     expect(config.checks["plstep_var"].field).toBe("amplitudeLinear");
   });
 
+  it("parses track_analysis check with compute", () => {
+    const yaml = `
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  parallel_af:
+    type: track_analysis
+    select: { SW: 1, AF: { min: 1 } }
+    compute: AF
+    assert: { min: 40 }
+    severity: warn
+    message: "Weak AF"
+display:
+  sections: []
+`;
+    const config = parseDiagConfig(yaml);
+    expect(config.checks["parallel_af"].type).toBe("track_analysis");
+    expect(config.checks["parallel_af"].select).toEqual({ SW: 1, AF: { min: 1 } });
+    expect(config.checks["parallel_af"].compute).toBe("AF");
+  });
+
+  it("parses track_analysis check with assert_any_of", () => {
+    const yaml = `
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  formants:
+    type: track_analysis
+    select: { SW: 1 }
+    assert_any_of: [A2, A3, A4]
+    assert: { min: 1 }
+    severity: warn
+    message: "No formant amps"
+display:
+  sections: []
+`;
+    const config = parseDiagConfig(yaml);
+    expect(config.checks["formants"].assert_any_of).toEqual(["A2", "A3", "A4"]);
+  });
+
+  it("throws on track_analysis without select", () => {
+    expect(() => parseDiagConfig(`
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  bad:
+    type: track_analysis
+    compute: AF
+    assert: { min: 40 }
+    severity: warn
+    message: test
+display:
+  sections: []
+`)).toThrow("select");
+  });
+
+  it("throws on track_analysis without compute or assert_any_of", () => {
+    expect(() => parseDiagConfig(`
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  bad:
+    type: track_analysis
+    select: { SW: 1 }
+    assert: { min: 40 }
+    severity: warn
+    message: test
+display:
+  sections: []
+`)).toThrow("compute");
+  });
+
   it("parses fft_peak_freq with measure_params", () => {
     const yaml = `
 taps:

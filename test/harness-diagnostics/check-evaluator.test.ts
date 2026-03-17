@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   evaluateCheck,
   matchesWhen,
+  matchesTrackSelect,
+  evaluateTrackAnalysis,
   createCheckState,
   updateParamRange,
 } from "../../src/harness-diagnostics/check-evaluator";
@@ -9,6 +11,7 @@ import type {
   CheckDef,
   TrackEvent,
   WhenClause,
+  TrackAnalysisCheckDef,
 } from "../../src/harness-diagnostics/types";
 import type { TimingSnapshot } from "../../src/harness-diagnostics/timing-context";
 
@@ -300,5 +303,208 @@ describe("updateParamRange", () => {
     updateParamRange(state, "F0", track);
     // No F0 in params — paramRange stays null
     expect(state.paramRange).toBeNull();
+  });
+});
+
+describe("matchesTrackSelect", () => {
+  it("SW=1 + AF range matches frame with SW=1 and AF=55", () => {
+    const frame: TrackEvent = {
+      time: 0.1,
+      phoneme: "S",
+      params: { SW: 1, AF: 55 },
+    };
+    expect(matchesTrackSelect(frame, { SW: 1, AF: { min: 1 } })).toBe(true);
+  });
+
+  it("AF range rejects frame with AF=0", () => {
+    const frame: TrackEvent = {
+      time: 0.1,
+      phoneme: "S",
+      params: { SW: 1, AF: 0 },
+    };
+    expect(matchesTrackSelect(frame, { AF: { min: 1 } })).toBe(false);
+  });
+
+  it("phoneme glob *_REL matches K_REL and T_REL", () => {
+    const kRel: TrackEvent = { time: 0.1, phoneme: "K_REL", params: {} };
+    const tRel: TrackEvent = { time: 0.2, phoneme: "T_REL", params: {} };
+    const kCl: TrackEvent = { time: 0.3, phoneme: "K_CL", params: {} };
+    expect(matchesTrackSelect(kRel, { phoneme: "*_REL" })).toBe(true);
+    expect(matchesTrackSelect(tRel, { phoneme: "*_REL" })).toBe(true);
+    expect(matchesTrackSelect(kCl, { phoneme: "*_REL" })).toBe(false);
+  });
+
+  it("voiced=true matches when AV > 0", () => {
+    const frame: TrackEvent = { time: 0.1, params: { AV: 60, AVS: 0 } };
+    expect(matchesTrackSelect(frame, { voiced: true })).toBe(true);
+  });
+
+  it("voiced=true rejects when AV=0 and AVS=0", () => {
+    const frame: TrackEvent = { time: 0.1, params: { AV: 0, AVS: 0 } };
+    expect(matchesTrackSelect(frame, { voiced: true })).toBe(false);
+  });
+
+  it("exact numeric match works", () => {
+    const frame: TrackEvent = { time: 0.1, params: { SW: 0 } };
+    expect(matchesTrackSelect(frame, { SW: 0 })).toBe(true);
+    expect(matchesTrackSelect(frame, { SW: 1 })).toBe(false);
+  });
+
+  it("max range filter works", () => {
+    const frame: TrackEvent = { time: 0.1, params: { AH: 53 } };
+    expect(matchesTrackSelect(frame, { AH: { max: 0 } })).toBe(false);
+    expect(matchesTrackSelect(frame, { AH: { max: 60 } })).toBe(true);
+  });
+});
+
+describe("evaluateTrackAnalysis", () => {
+  it("compute mode: detects failure when AF below min", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1 },
+      compute: "AF",
+      assert: { min: 40 },
+      severity: "warn",
+      message: "SW=1 frame with weak AF",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "S", params: { SW: 1, AF: 55 } },
+      { time: 0.2, phoneme: "S", params: { SW: 1, AF: 0 } },  // fails
+      { time: 0.3, phoneme: "S", params: { SW: 1, AF: 60 } },
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("warn");
+    expect(result.collected).toHaveLength(1);
+    expect(result.collected![0].time).toBe(0.2);
+    expect(result.collected![0].value).toBe(0);
+  });
+
+  it("assert_any_of: passes when at least one field meets assert", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1 },
+      assert_any_of: ["A2", "A3"],
+      assert: { min: 1 },
+      severity: "warn",
+      message: "No formant amplitudes",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "S", params: { SW: 1, A2: 0, A3: 53 } }, // A3 passes
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("pass");
+  });
+
+  it("assert_any_of: fails when no field meets assert", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1 },
+      assert_any_of: ["A2", "A3"],
+      assert: { min: 1 },
+      severity: "warn",
+      message: "No formant amplitudes",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "S", params: { SW: 1, A2: 0, A3: 0 } },
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("warn");
+    expect(result.collected).toHaveLength(1);
+  });
+
+  it("no matching frames → skip", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { phoneme: "*_REL" },
+      compute: "AF",
+      assert: { min: 30 },
+      severity: "warn",
+      message: "Release with weak AF",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "AH", params: { AF: 0 } },
+      { time: 0.2, phoneme: "S", params: { AF: 50 } },
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("skip");
+  });
+
+  it("all frames pass → pass with frame count", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { voiced: true },
+      compute: "AV",
+      assert: { min: 40 },
+      severity: "warn",
+      message: "Weak voicing",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, params: { AV: 60 } },
+      { time: 0.2, params: { AV: 55 } },
+      { time: 0.3, params: { AV: 50 } },
+      { time: 0.4, params: { AV: 45 } },
+      { time: 0.5, params: { AV: 65 } },
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("pass");
+    expect(result.message).toContain("5 frames");
+  });
+
+  it("collected limited to 6 entries", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1 },
+      compute: "AF",
+      assert: { min: 40 },
+      severity: "warn",
+      message: "Weak AF",
+    };
+    // 10 failing frames
+    const track: TrackEvent[] = Array.from({ length: 10 }, (_, i) => ({
+      time: i * 0.01,
+      phoneme: "S",
+      params: { SW: 1, AF: 5 },
+    }));
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("warn");
+    expect(result.collected).toHaveLength(6);
+  });
+
+  it("worst value is reported", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1 },
+      compute: "AF",
+      assert: { min: 40 },
+      severity: "warn",
+      message: "Weak AF",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "S", params: { SW: 1, AF: 30 } },
+      { time: 0.2, phoneme: "S", params: { SW: 1, AF: 10 } }, // worst
+      { time: 0.3, phoneme: "S", params: { SW: 1, AF: 20 } },
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.value).toBe(10);
+  });
+
+  it("max assert works (e.g. AH must be 0)", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { phoneme: "*_REL" },
+      compute: "AH",
+      assert: { max: 0 },
+      severity: "info",
+      message: "Release has AH",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "K_REL", params: { AH: 0 } },
+      { time: 0.2, phoneme: "T_REL", params: { AH: 53 } }, // fails max:0
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    // severity=info → status=pass (info severity maps to pass)
+    expect(result.status).toBe("pass");
+    expect(result.collected).toHaveLength(1);
+    expect(result.collected![0].value).toBe(53);
   });
 });

@@ -48,6 +48,9 @@ Read 20 assigned papers on duration modeling, audit every duration rule in Qlatt
 - `public/rules/frontends/qlatt-english/inventory.yaml` — base durations checked against literature
 - `public/rules/frontends/qlatt-english/frontend.yaml` — policy parameter values checked
 
+## Commit
+`c602b2d`
+
 ## Citation Accuracy
 All 14 duration rules have citations. 11 of 14 citations are fully correct. 3 have partial issues:
 - `word_medial_consonant_shortening`: cites K=0.7 but uses 0.85

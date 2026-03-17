@@ -19,7 +19,7 @@ rules:
             value: params.policy.formant.velar_f2_locus_front
           - default: params.policy.formant.velar_f2_locus
     citations:
-      - Allen et al. 1987 Ch.11 (velar locus)
+      - Allen et al. 1987 (velar locus)
   k_context_rel_copy:
     kind: scalar
     select:
@@ -30,7 +30,7 @@ rules:
         op: set
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.velar_f2_locus"
     citations:
-      - Allen et al. 1987 Ch.11 (velar locus transitions)
+      - Allen et al. 1987 (velar locus transitions)
   bilabial_f2_locus:
     kind: scalar
     select:
@@ -66,7 +66,7 @@ rules:
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus"
     citations:
       - Stevens & House 1956
-      - Allen et al. 1987 Ch.11 (bilabial locus transitions)
+      - Allen et al. 1987 (bilabial locus transitions)
   alveolar_f2_locus:
     kind: scalar
     select:
@@ -88,8 +88,8 @@ rules:
             value: params.policy.formant.alveolar_f2_locus_back
           - default: params.policy.formant.alveolar_f2_locus
     citations:
-      - Stevens & House 1956 (formant transitions)
-      - Allen et al. 1987 Ch.11 (alveolar F2 locus ~1800 Hz)
+      - Stevens & House 1956
+      - Allen et al. 1987 (alveolar F2 locus ~1800 Hz)
   alveolar_rel_copy:
     kind: scalar
     select:
@@ -101,7 +101,7 @@ rules:
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus"
     citations:
       - Stevens & House 1956
-      - Allen et al. 1987 Ch.11 (alveolar locus transitions)
+      - Allen et al. 1987 (alveolar locus transitions)
   palatal_f2_locus:
     kind: scalar
     select:
@@ -115,8 +115,8 @@ rules:
             value: params.policy.formant.palatal_f2_back_vowel
           - default: params.policy.formant.palatal_f2_locus
     citations:
-      - Stevens & House 1956 (formant transitions)
-      - Allen et al. 1987 Ch.11 (palatal F2 locus ~2600 Hz)
+      - Stevens & House 1956
+      - Allen et al. 1987 (palatal F2 locus ~2600 Hz)
   nasal_place_assignment:
     kind: scalar
     select:
@@ -143,8 +143,8 @@ rules:
         value: 1
         tag: nasal_coupling
     citations:
-      - Fujimura 1962 (nasal consonant antiresonances by place)
-      - Stevens 1998 Ch.10 (nasal consonant oral cavity zeros)
+      - Fujimura 1962
+      - Stevens 1998 (nasal consonant oral cavity zeros)
   nasal_place_assimilation:
     kind: scalar
     select:
@@ -175,9 +175,9 @@ rules:
             value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
     citations:
-      - Allen et al. 1987 Ch.10 (nasal place assimilation)
-      - Fujimura 1962 (nasal consonant place acoustics)
-      - Stevens 1998 Ch.10
+      - Allen et al. 1987
+      - Fujimura 1962
+      - Stevens 1998
   nasal_windows:
     kind: scalar
     select:
@@ -289,7 +289,7 @@ rules:
     citations:
       - Hawkins & Stevens 1985 (time-varying anticipatory and carryover nasalization)
       - Chen 1997 (nasalized vowel secondary cues)
-      - Fujimura 1962 (nasal murmur interval)
+      - Fujimura 1962
   dark_l_allophony:
     kind: scalar
     select:
@@ -335,7 +335,7 @@ rules:
           - default: params.policy.formant.r_f3_onset
     citations:
       - Espy-Wilson 2000 (acoustic modeling of American /r/)
-      - Stevens 1998 Ch.9
+      - Stevens 1998
   f1_stop_onset:
     kind: scalar
     select:
@@ -353,7 +353,7 @@ rules:
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
     citations:
-      - Stevens 1998 Ch.8 (stop consonant acoustics -- low F1 at release onset)
+      - Stevens 1998 (stop consonant acoustics -- low F1 at release onset)
   burst_spectral_template:
     kind: scalar
     select:
@@ -452,8 +452,8 @@ rules:
           - default: "has(current.?params.A10) ? current.params.A10 : 0"
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
-      - Zue 1976 (burst amplitude by place)
-      - Klatt 1980 Table III (aspiration carries same place-based spectral shape as release)
+      - Zue 1976
+      - Klatt 1980
       - Shadle et al. 2023 (fricative HF spectra above 7 kHz)
       - Monson et al. 2014 (perceptual significance of HF energy)
   vcv_coarticulation:
@@ -499,7 +499,7 @@ rules:
     citations:
       - Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)
       - Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)
-      - Allen et al. 1987 Ch.11
+      - Allen et al. 1987
   vowel_reduction:
     kind: scalar
     select:
@@ -519,8 +519,8 @@ rules:
           current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
           params.policy.formant.vowel_reduction_rate
     citations:
-      - Allen et al. 1987 Ch.9 (unstressed vowel centralization)
-      - Klatt 1976 (unstressed shortening)
+      - Allen et al. 1987
+      - Klatt 1976
       - Peterson & Barney 1952 (schwa formants)
   vowel_rate_undershoot:
     kind: scalar
@@ -573,7 +573,7 @@ rules:
               params.policy.formant.schwa_coronal_fronting_rate * 0.5
         tag: coronal_fronting
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (schwa fronting to [ɨ] in coronal environments, 67-83% accuracy, both-side coronal strongest predictor)
+      - Miller 1998 (schwa fronting to [ɨ] in coronal environments, 67-83% accuracy, both-side coronal strongest predictor)
   uw_coronal_fronting:
     kind: scalar
     select:
@@ -602,7 +602,7 @@ rules:
               params.policy.formant.uw_coronal_fronting_rate * 0.5
         tag: coronal_fronting
     citations:
-      - Miller 1998, Pronunciation Modeling in Speech Synthesis (/u/ fronting in coronal environments, 86% accuracy with coronals on both sides)
+      - Miller 1998 (/u/ fronting in coronal environments, 86% accuracy with coronals on both sides)
       - Harrington et al. 2011 (tongue advancement, not lip unrounding, drives /u/ fronting)
   transition_override:
     kind: scalar
@@ -615,7 +615,7 @@ rules:
         value: "current.type in ['stop_closure', 'stop_release', 'stop_aspiration'] ? params.policy.formant.transition_ms_stop : current.type == 'fricative' ? params.policy.formant.transition_ms_fricative : params.policy.formant.transition_ms_default"
         tag: transition
     citations:
-      - "Stevens & House 1956 (formant transition durations vary by manner class)"
+      - "Stevens & House 1956"
       - "Hertz 1991 (per-class transition timing in synthesis)"
   sw_explicit_override:
     kind: scalar
@@ -627,8 +627,8 @@ rules:
         op: set
         value: current.inventorySW
     citations:
-      - Klatt 1980 (SW switch)
-      - Allen et al. 1987 Table 12-1
+      - Klatt 1980
+      - Allen et al. 1987
   sw_default_assignment:
     kind: scalar
     select:
@@ -639,4 +639,4 @@ rules:
         op: set
         value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
     citations:
-      - Klatt 1980 (cascade/parallel source routing)
+      - Klatt 1980

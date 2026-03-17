@@ -1,0 +1,5 @@
+name: category
+dimensionless: false
+parameters:
+  values: []
+  extensible: false

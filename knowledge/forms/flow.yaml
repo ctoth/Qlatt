@@ -1,0 +1,7 @@
+name: flow
+dimensionless: false
+unit_symbol: "cm3/s"
+qudt: qudt:CentiM3-PER-SEC
+dimensions:
+  L: 3
+  T: -1

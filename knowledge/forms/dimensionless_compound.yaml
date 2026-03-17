@@ -1,0 +1,6 @@
+name: dimensionless_compound
+dimensionless: true
+parameters:
+  construction: null
+qudt: null
+dimensions: {}

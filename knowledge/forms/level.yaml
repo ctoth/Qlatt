@@ -1,0 +1,7 @@
+name: level
+dimensionless: true
+parameters:
+  scale: dB
+  reference: null
+qudt: null
+dimensions: {}

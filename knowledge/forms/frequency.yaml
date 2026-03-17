@@ -1,0 +1,8 @@
+name: frequency
+dimensionless: false
+unit_symbol: Hz
+qudt: qudt:HZ
+dimensions:
+  T: -1
+common_alternatives:
+  - { unit: kHz, type: multiplicative, multiplier: 1000 }

@@ -1,0 +1,8 @@
+name: time
+dimensionless: false
+unit_symbol: s
+qudt: qudt:SEC
+dimensions:
+  T: 1
+common_alternatives:
+  - { unit: ms, type: multiplicative, multiplier: 0.001 }

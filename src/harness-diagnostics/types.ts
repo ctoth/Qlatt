@@ -53,14 +53,34 @@ export type MeasureKind =
   | "rms_ratio_db";
 
 export type CheckType =
-  | "tap_check"      // default: measure a tap and assert
-  | "param_range"    // track min/max of a named param across utterance
-  | "event_check"    // check properties of events (e.g., PLSTEP)
-  | "across_plays";  // accumulate across N plays, then assert
+  | "tap_check"        // default: measure a tap and assert
+  | "param_range"      // track min/max of a named param across utterance
+  | "event_check"      // check properties of events (e.g., PLSTEP)
+  | "across_plays"     // accumulate across N plays, then assert
+  | "track_analysis";  // evaluate assertions on track parameters directly
 
 export type Severity = "info" | "warn" | "error";
 
 export type CheckStatus = "pass" | "warn" | "fail" | "skip" | "pending";
+
+/** Select clause for track_analysis checks — filters frames by parameter values. */
+export interface TrackSelectClause {
+  SW?: number;
+  phoneme?: string;
+  voiced?: boolean;
+  [param: string]: number | { min?: number; max?: number } | string | boolean | undefined;
+}
+
+/** Standalone type for track_analysis check definitions (used in evaluateTrackAnalysis). */
+export interface TrackAnalysisCheckDef {
+  type: "track_analysis";
+  select: TrackSelectClause;
+  compute?: string;
+  assert_any_of?: string[];
+  assert: AssertDef;
+  severity: Severity;
+  message: string;
+}
 
 /** A single check definition from YAML. */
 export interface CheckDef {
@@ -96,6 +116,12 @@ export interface CheckDef {
   event?: string;
   /** For event_check: which field on the event to inspect. */
   field?: string;
+  /** For track_analysis: frame selection clause. */
+  select?: TrackSelectClause;
+  /** For track_analysis: field to extract and assert on. */
+  compute?: string;
+  /** For track_analysis: assert at least one of these fields meets the assertion. */
+  assert_any_of?: string[];
 }
 
 /** Display section config. */

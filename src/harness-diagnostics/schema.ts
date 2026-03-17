@@ -4,7 +4,7 @@ import yaml from "js-yaml";
 import type { DiagConfig, TapDef, CheckDef, PollConfig, DisplayConfig, DisplaySection } from "./types";
 
 const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "zcr", "rms_ratio_db"]);
-const VALID_CHECK_TYPES = new Set(["tap_check", "param_range", "event_check", "across_plays"]);
+const VALID_CHECK_TYPES = new Set(["tap_check", "param_range", "event_check", "across_plays", "track_analysis"]);
 const VALID_SEVERITIES = new Set(["info", "warn", "error"]);
 
 export function parseDiagConfig(source: string): DiagConfig {
@@ -117,6 +117,25 @@ function parseChecks(raw: unknown): Record<string, CheckDef> {
     if (typeof d.param === "string") check.param = d.param;
     if (typeof d.event === "string") check.event = d.event;
     if (typeof d.field === "string") check.field = d.field;
+
+    // track_analysis fields
+    if (d.select && typeof d.select === "object") {
+      check.select = d.select as CheckDef["select"];
+    }
+    if (typeof d.compute === "string") check.compute = d.compute;
+    if (Array.isArray(d.assert_any_of)) {
+      check.assert_any_of = d.assert_any_of.map(String);
+    }
+
+    // Validate track_analysis requires select + (compute or assert_any_of)
+    if (checkType === "track_analysis") {
+      if (!check.select) {
+        throw new Error(`check '${name}' (track_analysis) requires a 'select' clause`);
+      }
+      if (!check.compute && !check.assert_any_of) {
+        throw new Error(`check '${name}' (track_analysis) requires 'compute' or 'assert_any_of'`);
+      }
+    }
 
     result[name] = check;
   }

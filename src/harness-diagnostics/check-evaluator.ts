@@ -10,6 +10,8 @@ import type {
   CollectedEvent,
   ParamRangeAccum,
   TrackEvent,
+  TrackSelectClause,
+  TrackAnalysisCheckDef,
 } from "./types";
 import type { TimingSnapshot } from "./timing-context";
 
@@ -232,6 +234,132 @@ function severityToStatus(severity: Severity): CheckStatus {
     case "info":
       return "pass";
   }
+}
+
+/** Check if a track frame matches a TrackSelectClause. */
+export function matchesTrackSelect(
+  frame: TrackEvent,
+  select: TrackSelectClause,
+): boolean {
+  const params = frame.params ?? {};
+
+  for (const [key, condition] of Object.entries(select)) {
+    if (condition === undefined) continue;
+
+    // Special keys with dedicated logic
+    if (key === "phoneme") {
+      const phoneme = frame.phoneme;
+      if (phoneme === undefined) return false;
+      const pattern = condition as string;
+      if (pattern.startsWith("*")) {
+        // suffix glob: *_REL matches K_REL
+        const suffix = pattern.slice(1);
+        if (!phoneme.endsWith(suffix)) return false;
+      } else if (pattern.endsWith("*")) {
+        // prefix glob: IY* matches IY1
+        const prefix = pattern.slice(0, -1);
+        if (!phoneme.startsWith(prefix)) return false;
+      } else {
+        if (phoneme !== pattern) return false;
+      }
+      continue;
+    }
+
+    if (key === "voiced") {
+      const av = (params.AV as number) ?? 0;
+      const avs = (params.AVS as number) ?? 0;
+      const isVoiced = av > 0 || avs > 0;
+      if ((condition as boolean) !== isVoiced) return false;
+      continue;
+    }
+
+    // Numeric filters: exact number or { min?, max? }
+    const paramVal = (params[key] as number) ?? 0;
+    if (typeof condition === "number") {
+      if (paramVal !== condition) return false;
+    } else if (typeof condition === "object" && condition !== null) {
+      const range = condition as { min?: number; max?: number };
+      if (range.min !== undefined && paramVal < range.min) return false;
+      if (range.max !== undefined && paramVal > range.max) return false;
+    }
+  }
+
+  return true;
+}
+
+/** Evaluate a track_analysis check against the full track. */
+export function evaluateTrackAnalysis(
+  name: string,
+  def: TrackAnalysisCheckDef,
+  track: TrackEvent[],
+): CheckResult {
+  const base = {
+    name,
+    severity: def.severity,
+    message: def.message,
+  };
+
+  // Filter frames matching select clause
+  const matching = track.filter((frame) => matchesTrackSelect(frame, def.select));
+
+  if (matching.length === 0) {
+    return { ...base, status: "skip", message: "No frames matched select" };
+  }
+
+  const failures: CollectedEvent[] = [];
+
+  for (const frame of matching) {
+    const params = frame.params ?? {};
+
+    if (def.compute) {
+      const value = (params[def.compute] as number) ?? 0;
+      if (!assertValuePasses(value, def.assert)) {
+        failures.push({ time: frame.time, phoneme: frame.phoneme, value });
+      }
+    }
+
+    if (def.assert_any_of) {
+      const anyPasses = def.assert_any_of.some((field) =>
+        assertValuePasses((params[field] as number) ?? 0, def.assert),
+      );
+      if (!anyPasses) {
+        failures.push({ time: frame.time, phoneme: frame.phoneme, value: 0 });
+      }
+    }
+  }
+
+  if (failures.length === 0) {
+    return {
+      ...base,
+      status: "pass",
+      message: `${def.message} (${matching.length} frames checked)`,
+    };
+  }
+
+  // Find worst value (minimum for min assertions, maximum for max assertions)
+  const worstValue = def.assert.min !== undefined
+    ? Math.min(...failures.map((f) => f.value))
+    : Math.max(...failures.map((f) => f.value));
+
+  const status = severityToStatus(def.severity);
+
+  return {
+    ...base,
+    status,
+    value: worstValue,
+    collected: failures.slice(0, 6),
+    message: `${def.message} (${failures.length}/${matching.length} frames)`,
+  };
+}
+
+/** Check if a value passes an assertion (inverse of checkAssert). */
+function assertValuePasses(
+  value: number,
+  assert: { min?: number; max?: number },
+): boolean {
+  if (assert.min !== undefined && value < assert.min) return false;
+  if (assert.max !== undefined && value > assert.max) return false;
+  return true;
 }
 
 /** Update param_range accumulator with current track event params. */

@@ -104,6 +104,56 @@ checks:
     severity: error
     message: "Output varies across identical plays (state leak)"
 
+  # --- Track analysis checks (static, no polling needed) ---
+
+  parallel_has_energy:
+    type: track_analysis
+    select: { SW: 1, AF: { min: 1 } }
+    compute: AF
+    assert: { min: 40 }
+    severity: warn
+    message: "SW=1 frame with weak AF"
+
+  formant_amps_present:
+    type: track_analysis
+    select: { SW: 1, AF: { min: 1 } }
+    assert_any_of: [A2, A3, A4, A5, A6]
+    assert: { min: 1 }
+    severity: warn
+    message: "SW=1 frame with AF but no formant amplitudes (A2-A6)"
+
+  release_has_af:
+    type: track_analysis
+    select: { phoneme: "*_REL" }
+    compute: AF
+    assert: { min: 30 }
+    severity: warn
+    message: "Stop release with weak/missing AF"
+
+  aspiration_has_ah:
+    type: track_analysis
+    select: { phoneme: "*_ASP" }
+    compute: AH
+    assert: { min: 30 }
+    severity: warn
+    message: "Stop aspiration with weak/missing AH"
+
+  vowel_has_voicing:
+    type: track_analysis
+    select: { voiced: true }
+    compute: AV
+    assert: { min: 40 }
+    severity: warn
+    message: "Voiced frame with weak AV"
+
+  no_dual_noise_on_release:
+    type: track_analysis
+    select: { phoneme: "*_REL" }
+    compute: AH
+    assert: { max: 0 }
+    severity: info
+    message: "Stop release has AH (burst should be AF-only)"
+
 display:
   sections:
     - { id: session, source: session_info }

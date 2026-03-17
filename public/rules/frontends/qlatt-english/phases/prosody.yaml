@@ -30,8 +30,8 @@ rules:
       value: params.policy.f0.base_hz
       tag: f0_baseline
     citations:
-      - Pierrehumbert 1980 (baseline initialization)
-      - Ladd 2008 Ch.5
+      - Pierrehumbert 1980
+      - Ladd 2008
 
   # --------------------------------------------------------------------------
   # Rule 2: Initial %H boundary tone
@@ -49,8 +49,8 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       tag: f0_initial_boundary_high
     citations:
-      - "Ladd 2008 Ch.3 (%H initial boundary tone in MAE-ToBI)"
-      - "Pierrehumbert 1980 (phrase-initial high edge tone inventory)"
+      - "Ladd 2008"
+      - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
   # Rule 2: H* accent targets with downstep and final lowering
@@ -83,9 +83,9 @@ rules:
       value: target_hz
       tag: f0_h_star
     citations:
-      - "Pierrehumbert 1980 (H* pitch accent, downstep formula H_n = V * k^n)"
-      - "Ladd 2008 Ch.2 (constant-proportion downstep ratio k ≈ 0.6)"
-      - "O'Shaughnessy 1976 (peak position at 45% of vowel)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+      - "O'Shaughnessy 1976"
 
   # --------------------------------------------------------------------------
   # Rule 3: H* peak for H*+L falling accents
@@ -118,8 +118,8 @@ rules:
       value: target_hz
       tag: f0_h_star_plus_l_peak
     citations:
-      - "Pierrehumbert 1980 (H*+L falling accent family)"
-      - "Ladd 2008 Ch.3 (older Pierrehumbert inventory includes H*+L)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 4: Trailing L for H*+L falling accents
@@ -141,8 +141,8 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       tag: f0_h_star_plus_l_tail
     citations:
-      - "Pierrehumbert 1980 (H*+L trailing low target)"
-      - "Ladd 2008 Ch.3 (falling accent reaches low target after the starred peak)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 5: Leading L for L+H* prenuclear accents
@@ -166,8 +166,8 @@ rules:
       value: target_hz
       tag: f0_l_leading
     citations:
-      - "Pierrehumbert 1980 (leading L tone in L+H*)"
-      - "Ladd 2008 Ch.3 (prenuclear rising accent shape)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 6: H* peak for L+H* prenuclear accents
@@ -198,9 +198,9 @@ rules:
       value: target_hz
       tag: f0_l_plus_h_star
     citations:
-      - "Pierrehumbert 1980 (L+H* accent: leading L plus H* peak)"
-      - "Ladd 2008 Ch.3 (rising prenuclear accent)"
-      - "Ladd 2008 Ch.2 (downstep still applies to successive H targets)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 7: H lead for H+!H* downstepped prenuclear accents
@@ -227,8 +227,8 @@ rules:
       value: target_hz
       tag: f0_h_leading
     citations:
-      - "Ladd 2008 Ch.3 (H+!H* in revised MAE-ToBI inventory)"
-      - "Pierrehumbert 1980 (leading H + local downstep implementation)"
+      - "Ladd 2008"
+      - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
   # Rule 8: !H* peak for H+!H* prenuclear accents
@@ -259,8 +259,8 @@ rules:
       value: target_hz
       tag: f0_h_plus_downstepped_h_star
     citations:
-      - "Ladd 2008 Ch.3 (H+!H* accent category)"
-      - "Pierrehumbert 1980 (downstepped H target uses k^n scaling)"
+      - "Ladd 2008"
+      - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
   # Rule 9: H peak plus trailing H for H*+H sustained accents
@@ -291,8 +291,8 @@ rules:
       value: target_hz
       tag: f0_h_star_plus_h_peak
     citations:
-      - "Pierrehumbert 1980 (H*+H sustained high accent family)"
-      - "Ladd 2008 Ch.3 (older inventory includes H*+H)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 10: Trailing H for H*+H sustained accents
@@ -319,8 +319,8 @@ rules:
       value: target_hz
       tag: f0_h_star_plus_h_tail
     citations:
-      - "Pierrehumbert 1980 (H*+H trailing high target)"
-      - "Ladd 2008 Ch.3 (sustained high accent realization)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 11: Leading H for H+L* low-star accents
@@ -347,8 +347,8 @@ rules:
       value: target_hz
       tag: f0_h_plus_l_star_lead
     citations:
-      - "Pierrehumbert 1980 (H+L* leading high target)"
-      - "Ladd 2008 Ch.3 (older inventory includes H+L*)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 12: L* star for H+L* accents
@@ -370,8 +370,8 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       tag: f0_h_plus_l_star
     citations:
-      - "Pierrehumbert 1980 (H+L* low starred target)"
-      - "Ladd 2008 Ch.3 (low-star accent with leading H)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 13: L* accent targets (questions)
@@ -395,8 +395,8 @@ rules:
       value: target_hz
       tag: f0_l_star
     citations:
-      - Pierrehumbert 1980 (L* pitch accent)
-      - Ladd 2008 Ch.3 (L* in questions)
+      - Pierrehumbert 1980
+      - Ladd 2008
 
   # --------------------------------------------------------------------------
   # Rule 14: Trailing H for L*+H rising accents
@@ -420,8 +420,8 @@ rules:
       value: floor_hz
       tag: f0_l_star_plus_h
     citations:
-      - "Ladd 2008 Ch.3 (L*+H in revised MAE-ToBI inventory)"
-      - "Pierrehumbert 1980 (L*+H low starred tone with trailing rise)"
+      - "Ladd 2008"
+      - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
   # Rule 15: Unaccented voiced interpolation anchor
@@ -448,8 +448,8 @@ rules:
       value: target
       tag: f0_unaccented
     citations:
-      - "Pierrehumbert 1980 (intermediate interpolation between tonal events)"
-      - "Ladd 2008 Ch.3 (local transitions between tonal targets)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 16: Phrase accent H- at the start of phrase-final silence
@@ -473,8 +473,8 @@ rules:
       value: target_hz
       tag: f0_phrase_high
     citations:
-      - "Pierrehumbert 1980 (H- phrase accent sustains/raises postnuclear pitch)"
-      - "Ladd 2008 Ch.3 (H- maintained before H%)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 17: Phrase accent L- at the start of phrase-final silence
@@ -493,8 +493,8 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_phrase_low
     citations:
-      - "Pierrehumbert 1980 (L- phrase accent lowers postnuclear pitch)"
-      - "Ladd 2008 Ch.3 (L- followed by continued low contour)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 18: L% boundary tone (declarative final fall)
@@ -514,8 +514,8 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_boundary_low
     citations:
-      - "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)"
-      - Ladd 2008 (L-L% declarative final lowering)
+      - "Pierrehumbert 1980"
+      - Ladd 2008
 
   # --------------------------------------------------------------------------
   # Rule 19: H% boundary tone (question rise, continuation rise)
@@ -547,8 +547,8 @@ rules:
       value: target_hz
       tag: f0_boundary_rise
     citations:
-      - "Pierrehumbert 1980 Rule 9 (H% implemented by local upstep with a ≈ 0.2)"
-      - "Ladd 2008 Ch.3 (H- plus H% produces a final rise, not a plateau)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
   # Rule 20: Register reset at IP boundaries (breakIndex >= 4)
@@ -570,8 +570,8 @@ rules:
       value: params.policy.f0.base_hz
       tag: f0_register_reset
     citations:
-      - Pierrehumbert 1980 (register reset at IP boundaries)
-      - Ladd 2008 Ch.5 (declination reset at intonational phrase boundaries)
+      - Pierrehumbert 1980
+      - Ladd 2008 (declination reset at intonational phrase boundaries)
 
   # --------------------------------------------------------------------------
   # Rule 21: Sagging F0 transition between consecutive H* accents
@@ -615,8 +615,8 @@ rules:
         max([sag_value, params.policy.f0.base_hz])
       tag: f0_sag
     citations:
-      - "Pierrehumbert 1980 (H*-H* nonmonotonic sagging interpolation)"
-      - "Ladd 2008 pp.155-157 (sagging transitions between H* accents)"
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
 
   # ==========================================================================
   # Microprosodic / Segmental F0 Perturbation (Kept Unchanged)
@@ -650,7 +650,7 @@ rules:
              params.policy.f0.base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
-      - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
+      - "O'Shaughnessy 1976"
       - "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
       - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
 
@@ -676,7 +676,7 @@ rules:
              params.policy.f0.base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
-      - "O'Shaughnessy 1976 (after voiced onset F0 starts ~5% lower, peak delayed)"
+      - "O'Shaughnessy 1976"
       - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
 
   # --------------------------------------------------------------------------
@@ -706,7 +706,7 @@ rules:
       value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + continuation_rise"
       tag: f0_continuation
     citations:
-      - O'Shaughnessy 1976 (continuation rise at non-terminal boundaries)
+      - O'Shaughnessy 1976
       - "Engineering estimate: semicolon/colon rise magnitude"
 
   # --------------------------------------------------------------------------
@@ -774,9 +774,9 @@ rules:
       ee_total_db: >-
         onset_rise_db + declination_db + final_fall_db
     citations:
-      - Fant 1997 (connected-speech source contour: onset rise, declination, phrase-final fall)
-      - Hanson et al. 2001 (phrase-final and reduced-vowel spectral tilt changes imply source softening toward boundaries)
-      - Silverman et al. 1992 (ToBI break index tier; BI>=3 used for phrase-local contour reset)
+      - Fant 1997
+      - Hanson et al. 2001
+      - Silverman et al. 1992
       - "Engineering estimate: conservative qlatt contour magnitudes for stable long-phrase loudness"
 
   # --------------------------------------------------------------------------

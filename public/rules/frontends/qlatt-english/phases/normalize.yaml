@@ -37,7 +37,7 @@ rules:
           inherentDuration: ah_target.inherentDuration
           params: ah_target.params
     citations:
-      - Elovitz et al. 1976, NRL Report 7948 (AX = schwa in NRL notation)
+      - Elovitz et al. 1976
 
   normalize_velar_nasal:
     kind: postlexical
@@ -61,7 +61,7 @@ rules:
           inherentDuration: ng_target.inherentDuration
           params: ng_target.params
     citations:
-      - Elovitz et al. 1976, NRL Report 7948 (NX = velar nasal in NRL notation)
+      - Elovitz et al. 1976
 
   normalize_wh_merger:
     kind: postlexical

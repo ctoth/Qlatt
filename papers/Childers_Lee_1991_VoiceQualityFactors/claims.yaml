@@ -1,0 +1,254 @@
+source:
+  paper: Childers_Lee_1991_VoiceQualityFactors
+claims:
+- id: claim1
+  type: parameter
+  concept: modal
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  lower_bound: 94
+  upper_bound: 287
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: vocal_fry
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  lower_bound: 24
+  upper_bound: 52
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: falsetto
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  lower_bound: 275
+  upper_bound: 634
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: open_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 0.7
+- id: claim5
+  type: parameter
+  concept: open_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 0.45
+- id: claim6
+  type: parameter
+  concept: open_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 0.99
+- id: claim7
+  type: parameter
+  concept: open_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 0.91
+- id: claim8
+  type: parameter
+  concept: speed_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 2.6
+- id: claim9
+  type: parameter
+  concept: speed_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 3.5
+- id: claim10
+  type: parameter
+  concept: speed_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 1.5
+- id: claim11
+  type: parameter
+  concept: speed_quotient_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 1.4
+- id: claim12
+  type: parameter
+  concept: spectral_slope_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -12
+- id: claim13
+  type: parameter
+  concept: spectral_slope_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -6
+- id: claim14
+  type: parameter
+  concept: spectral_slope_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -18
+- id: claim15
+  type: parameter
+  concept: spectral_slope_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -18
+- id: claim16
+  type: parameter
+  concept: hrf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -9.9
+  unit: dB
+- id: claim17
+  type: parameter
+  concept: hrf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 2.1
+  unit: dB
+- id: claim18
+  type: parameter
+  concept: hrf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -19.1
+  unit: dB
+- id: claim19
+  type: parameter
+  concept: hrf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -16.7
+  unit: dB
+- id: claim20
+  type: parameter
+  concept: nhr_h_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -5.3
+  unit: dB
+- id: claim21
+  type: parameter
+  concept: nhr_h_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: -6.6
+  unit: dB
+- id: claim22
+  type: parameter
+  concept: nhr_h_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 2.8
+  unit: dB
+- id: claim23
+  type: parameter
+  concept: wpf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 2.8
+- id: claim24
+  type: parameter
+  concept: wpf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 4.0
+- id: claim25
+  type: parameter
+  concept: wpf_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 1.8
+- id: claim26
+  type: parameter
+  concept: hp_filter_cutoff_typical_value
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+  value: 2
+  unit: kHz
+- id: claim27
+  type: equation
+  expression: U_g(z) = \frac{K}{(1 - z_a z^{-1})(1 - z_b z^{-1})}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim28
+  type: equation
+  expression: U_g(z) = \frac{K}{(1 - z_a z^{-1})(1 - z_b z^{-1})(1 - z_c z^{-1})}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim29
+  type: equation
+  expression: u'_g(t) = A e^{\alpha t} \sin(\omega_g t)
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim30
+  type: equation
+  expression: u'_g(t) = \frac{u'_g(t_e)}{\epsilon t_a} \left( e^{-\epsilon(t-t_e)}
+    - e^{-\epsilon(t_0-t_e)} \right)
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim31
+  type: equation
+  expression: OQ_{LF} = \frac{t_e + k \cdot t_a}{t_0}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim32
+  type: equation
+  expression: SQ_{LF} = \frac{t_p}{t_e + k \cdot t_a - t_p}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim33
+  type: equation
+  expression: HRF = \frac{\sum_{i \geq 2} H_i}{H_1}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim34
+  type: equation
+  expression: NHR_h = \frac{\sum N_i}{\sum H_i} \quad \text{(above 2 kHz)}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0
+- id: claim35
+  type: equation
+  expression: WPF = \frac{\max(|x_i|)}{\left[ \frac{1}{N} \sum_{i=1}^{N} x_i^2 \right]^{1/2}}
+  provenance:
+    paper: Childers_Lee_1991_VoiceQualityFactors
+    page: 0

@@ -1,0 +1,419 @@
+source:
+  paper: Fowler_2006_CoarticulationGesturePerception
+claims:
+- id: claim1
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 875
+- id: claim2
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 703
+- id: claim3
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 562
+- id: claim4
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 812
+- id: claim5
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 922
+- id: claim6
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 625
+- id: claim7
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 562
+- id: claim8
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 906
+- id: claim9
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 968
+- id: claim10
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 531
+- id: claim11
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 500
+- id: claim12
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 906
+- id: claim13
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 843
+- id: claim14
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 515
+- id: claim15
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 562
+- id: claim16
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 859
+- id: claim17
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 912
+- id: claim18
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 500
+- id: claim19
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 671
+- id: claim20
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 968
+- id: claim21
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 859
+- id: claim22
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 406
+- id: claim23
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 546
+- id: claim24
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 875
+- id: claim25
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim26
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 575
+- id: claim27
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 516
+- id: claim28
+  type: parameter
+  concept: ada
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 700
+- id: claim29
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 725
+- id: claim30
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 625
+- id: claim31
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 640
+- id: claim32
+  type: parameter
+  concept: aga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 703
+- id: claim33
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 658
+- id: claim34
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 475
+- id: claim35
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 480
+- id: claim36
+  type: parameter
+  concept: alda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim37
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 609
+- id: claim38
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 406
+- id: claim39
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 546
+- id: claim40
+  type: parameter
+  concept: arda
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 734
+- id: claim41
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 609
+- id: claim42
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 546
+- id: claim43
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 531
+- id: claim44
+  type: parameter
+  concept: alga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 797
+- id: claim45
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 703
+- id: claim46
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 453
+- id: claim47
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 562
+- id: claim48
+  type: parameter
+  concept: arga
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim49
+  type: observation
+  statement: Coarticulatory F3 lowering from /r/ should persist across a stop consonant
+    boundary (~500 Hz lower than /l/ context)
+  concepts: []
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+- id: claim50
+  type: observation
+  statement: Listeners should identify ambiguous /da/-/ga/ members differently depending
+    on coarticulatory context even without the preceding syllable
+  concepts: []
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+- id: claim51
+  type: observation
+  statement: Enhancing effects (not contrastive) should occur when coarticulatory
+    information affects identification of the gestural source
+  concepts: []
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0
+- id: claim52
+  type: observation
+  statement: Tone-speech comparison should show opposite effect directions for same
+    acoustic continuum
+  concepts: []
+  provenance:
+    paper: Fowler_2006_CoarticulationGesturePerception
+    page: 0

@@ -1,0 +1,15 @@
+source:
+  paper: Ebden_2014_KestrelTextNormalization
+claims:
+- id: claim1
+  type: equation
+  expression: \left(\bigcup_{l \in \mathcal{L}} l\mathcal{S}\right)^*
+  provenance:
+    paper: Ebden_2014_KestrelTextNormalization
+    page: 0
+- id: claim2
+  type: equation
+  expression: 123 = 1 \times 10^2 + 2 \times 10^1 + 3
+  provenance:
+    paper: Ebden_2014_KestrelTextNormalization
+    page: 0

@@ -1,0 +1,152 @@
+source:
+  paper: Sun_2006_VocalTractGlottalSource
+claims:
+- id: claim1
+  type: parameter
+  concept: preemphasis_max
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.95
+- id: claim2
+  type: parameter
+  concept: preemphasis_shape
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 2
+- id: claim3
+  type: parameter
+  concept: glottal_waveform_length
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 80
+  unit: samples
+- id: claim4
+  type: parameter
+  concept: optimal_codebook_size
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 9
+  lower_bound: 1
+  upper_bound: 20
+  unit: classes
+- id: claim5
+  type: parameter
+  concept: sample_rate
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 8000
+  unit: Hz
+- id: claim6
+  type: parameter
+  concept: bits_per_sample
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 16
+  unit: bits
+- id: claim7
+  type: parameter
+  concept: rosenberg_glottal_correlation
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.6287
+- id: claim8
+  type: parameter
+  concept: rosenberg_spectral_distance
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.1196
+- id: claim9
+  type: parameter
+  concept: lf_glottal_correlation
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.6136
+- id: claim10
+  type: parameter
+  concept: lf_spectral_distance
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.122
+- id: claim11
+  type: parameter
+  concept: proposed_glottal_correlation
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.7985
+- id: claim12
+  type: parameter
+  concept: proposed_spectral_distance
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+  value: 0.0592
+- id: claim13
+  type: equation
+  expression: s[n] = \sum_{k=1}^{p} a_k \cdot s[n-k] + b_n \cdot \sum_{m=1}^{q} \delta[n
+    - mp]
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim14
+  type: equation
+  expression: s(z) = \frac{B(z)}{A(z)} p(z) = B(z)V(z)p(z) = AG(z)R(z)V(z)p(z)
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim15
+  type: equation
+  expression: B(z) = S(z) \cdot A(z)
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim16
+  type: equation
+  expression: v = \frac{v_{max}}{2} \left( \frac{\arctan(\mu \rho_s)}{\arctan(\mu)}
+    + 1 \right)
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim17
+  type: equation
+  expression: 'g_R(n) = \begin{cases}
+
+    A_{go} e^{\alpha_{go} n} \sin(\omega_{go} n + \Phi_{go}), & n = 0,1,...,N-1 \\
+
+    -A_{gc} e^{-\alpha_{gc}(n-N)}, & n = N,...,M-1
+
+    \end{cases}'
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim18
+  type: equation
+  expression: 'g_R(n) = \begin{cases}
+
+    \frac{1}{2}(1 - \cos(\pi n / N_1)), & n = 0,1,...,N_1-1 \\
+
+    \cos(\pi(n-N_1) / 2N_2), & n = N_1,...,N_1+N_2 \\
+
+    0 & \text{otherwise}
+
+    \end{cases}'
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0
+- id: claim19
+  type: equation
+  expression: SD = \frac{1}{M} \sum_{p=0}^{M-1} \left[ \frac{1}{N} \sum_{k=0}^{N-1}
+    \left[ |S_{org}(pL, \omega_k)| - |S_{con}(pL, \omega_k)| \right]^2 \right]^{1/2}
+  provenance:
+    paper: Sun_2006_VocalTractGlottalSource
+    page: 0

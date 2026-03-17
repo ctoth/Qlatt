@@ -1,0 +1,322 @@
+source:
+  paper: Zue_1976_StopConsonantAcoustics
+claims:
+- id: claim1
+  type: parameter
+  concept: b
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  lower_bound: 13
+  upper_bound: 17
+  value: 3
+- id: claim2
+  type: parameter
+  concept: d
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  lower_bound: 19
+  upper_bound: 23
+- id: claim3
+  type: parameter
+  concept: g
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  lower_bound: 30
+  upper_bound: 38
+  value: 5
+- id: claim4
+  type: parameter
+  concept: p
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 58.4
+- id: claim5
+  type: parameter
+  concept: t
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 70.8
+- id: claim6
+  type: parameter
+  concept: k
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 73.2
+- id: claim7
+  type: parameter
+  concept: high
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 52.0
+- id: claim8
+  type: parameter
+  concept: high
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 60.9
+- id: claim9
+  type: parameter
+  concept: back
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 61.0
+- id: claim10
+  type: parameter
+  concept: back
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 53.6
+- id: claim11
+  type: parameter
+  concept: all_vowels
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 58.4
+- id: claim12
+  type: parameter
+  concept: p
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -27.6
+- id: claim13
+  type: parameter
+  concept: t
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -16.6
+- id: claim14
+  type: parameter
+  concept: k
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -17.2
+- id: claim15
+  type: parameter
+  concept: b
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -28.0
+- id: claim16
+  type: parameter
+  concept: d
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -15.8
+- id: claim17
+  type: parameter
+  concept: g
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -16.6
+- id: claim18
+  type: parameter
+  concept: b
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 17
+- id: claim19
+  type: parameter
+  concept: d
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 23
+- id: claim20
+  type: parameter
+  concept: g
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 38
+- id: claim21
+  type: parameter
+  concept: p
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 58
+- id: claim22
+  type: parameter
+  concept: t
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 71
+- id: claim23
+  type: parameter
+  concept: k
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: ms
+  value: 73
+- id: claim24
+  type: parameter
+  concept: p
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -28
+- id: claim25
+  type: parameter
+  concept: b
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -28
+- id: claim26
+  type: parameter
+  concept: d
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: 0
+- id: claim27
+  type: parameter
+  concept: k
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -2
+- id: claim28
+  type: parameter
+  concept: g
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  unit: dB
+  value: -3
+- id: claim29
+  type: parameter
+  concept: 11_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 15
+- id: claim30
+  type: parameter
+  concept: 12_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 16
+- id: claim31
+  type: parameter
+  concept: 31_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 35
+- id: claim32
+  type: parameter
+  concept: 316_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 70
+- id: claim33
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 76
+- id: claim34
+  type: parameter
+  concept: 44_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 90
+- id: claim35
+  type: parameter
+  concept: 45_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 92
+- id: claim36
+  type: parameter
+  concept: 410_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 95
+- id: claim37
+  type: parameter
+  concept: 411_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 98
+- id: claim38
+  type: parameter
+  concept: 53_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 108
+- id: claim39
+  type: parameter
+  concept: 59_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 120
+- id: claim40
+  type: parameter
+  concept: 510_page
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0
+  value: 121
+- id: claim41
+  type: equation
+  expression: 'All-pole transfer function (equivalent to Klatt cascade):'
+  provenance:
+    paper: Zue_1976_StopConsonantAcoustics
+    page: 0

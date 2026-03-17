@@ -1,0 +1,99 @@
+source:
+  paper: Lyzenga_Carlyon_2005_FormantFMDetection
+claims:
+- id: claim1
+  type: parameter
+  concept: low_f080_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 480
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: low_f080_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 520
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: low_f0240_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 480
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: low_f0240_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 600
+  unit: Hz
+- id: claim5
+  type: parameter
+  concept: mid_f080_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 1440
+  unit: Hz
+- id: claim6
+  type: parameter
+  concept: mid_f080_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 1560
+  unit: Hz
+- id: claim7
+  type: parameter
+  concept: mid_f0240_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 1440
+  unit: Hz
+- id: claim8
+  type: parameter
+  concept: mid_f0240_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 1560
+  unit: Hz
+- id: claim9
+  type: parameter
+  concept: high_f080_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 2960
+  unit: Hz
+- id: claim10
+  type: parameter
+  concept: high_f080_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 3000
+  unit: Hz
+- id: claim11
+  type: parameter
+  concept: high_f0240_hz_on_harmonic
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 2880
+  unit: Hz
+- id: claim12
+  type: parameter
+  concept: high_f0240_hz_between
+  provenance:
+    paper: Lyzenga_Carlyon_2005_FormantFMDetection
+    page: 0
+  value: 3000
+  unit: Hz

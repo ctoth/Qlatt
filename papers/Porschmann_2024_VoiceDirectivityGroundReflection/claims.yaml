@@ -1,0 +1,124 @@
+source:
+  paper: Porschmann_2024_VoiceDirectivityGroundReflection
+claims:
+- id: claim1
+  type: parameter
+  concept: sentence_maximum_grg
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 2.6
+  unit: dB
+- id: claim2
+  type: parameter
+  concept: sentence_frequency
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 750
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: sentence_distance
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 4
+- id: claim4
+  type: parameter
+  concept: vowel_i_maximum_grg
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 4.6
+  unit: dB
+- id: claim5
+  type: parameter
+  concept: vowel_i_frequency
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 700
+  unit: Hz
+- id: claim6
+  type: parameter
+  concept: vowel_i_distance
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 3.85
+- id: claim7
+  type: parameter
+  concept: alveolar_l_maximum_grg
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 4.6
+  unit: dB
+- id: claim8
+  type: parameter
+  concept: alveolar_l_frequency
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 800
+  unit: Hz
+- id: claim9
+  type: parameter
+  concept: alveolar_l_distance
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 3.2
+- id: claim10
+  type: parameter
+  concept: plosive_d_maximum_grg
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 2.7
+  unit: dB
+- id: claim11
+  type: parameter
+  concept: plosive_d_frequency
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 5.5
+  unit: kHz
+- id: claim12
+  type: parameter
+  concept: plosive_d_distance
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 4
+- id: claim13
+  type: parameter
+  concept: nasal_m_maximum_grg
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 3.2
+  unit: dB
+- id: claim14
+  type: parameter
+  concept: nasal_m_frequency
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 7.5
+  unit: kHz
+- id: claim15
+  type: parameter
+  concept: nasal_m_distance
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0
+  value: 4
+- id: claim16
+  type: equation
+  expression: GRG = -\alpha + D(\theta_r, f) - D(\theta_d, f) + 20 \log_{10}\left(\frac{d_d}{d_r}\right)
+  provenance:
+    paper: Porschmann_2024_VoiceDirectivityGroundReflection
+    page: 0

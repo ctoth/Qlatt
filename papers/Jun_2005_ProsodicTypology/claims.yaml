@@ -1,0 +1,63 @@
+source:
+  paper: Jun_2005_ProsodicTypology
+claims:
+- id: claim1
+  type: observation
+  statement: Break index 4 boundaries must always have both a phrase accent and a
+    boundary tone
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim2
+  type: observation
+  statement: Break index 3 boundaries must always have a phrase accent but no boundary
+    tone
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim3
+  type: observation
+  statement: Every intermediate phrase must contain at least one pitch accent
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim4
+  type: observation
+  statement: Downstep (!) can only appear on H tones, never on L tones
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim5
+  type: observation
+  statement: The nuclear accent is always the last pitch accent in the intermediate
+    phrase
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim6
+  type: observation
+  statement: 'In English, pitch accent alignment: L\* at F0 minimum within syllable,
+    H\* at F0 maximum'
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim7
+  type: observation
+  statement: Accentual Phrase size should average 3-5 syllables cross-linguistically
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0
+- id: claim8
+  type: observation
+  statement: IP duration should average approximately 1.5 seconds in read speech
+  concepts: []
+  provenance:
+    paper: Jun_2005_ProsodicTypology
+    page: 0

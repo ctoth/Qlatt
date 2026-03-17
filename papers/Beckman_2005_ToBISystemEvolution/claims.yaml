@@ -1,0 +1,98 @@
+source:
+  paper: Beckman_2005_ToBISystemEvolution
+claims:
+- id: claim1
+  type: parameter
+  concept: '0'
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+  value: 0
+- id: claim2
+  type: parameter
+  concept: '1'
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+  value: 1
+- id: claim3
+  type: parameter
+  concept: '2'
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+  value: 2
+- id: claim4
+  type: parameter
+  concept: '3'
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+  value: 3
+- id: claim5
+  type: parameter
+  concept: '4'
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+  value: 4
+- id: claim6
+  type: observation
+  statement: Every intermediate phrase (BI=3) must have exactly one phrase accent
+    (H- or L-)
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim7
+  type: observation
+  statement: Every intonational phrase (BI=4) must have a phrase accent followed by
+    a boundary tone
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim8
+  type: observation
+  statement: Pitch accents must be aligned to stressed syllables of content words
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim9
+  type: observation
+  statement: The `!` diacritic implies all subsequent H tones in the phrase are produced
+    in a compressed pitch range
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim10
+  type: observation
+  statement: Break index values must be in {0, 1, 2, 3, 4} (no 5 or 6)
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim11
+  type: observation
+  statement: Every word on the Words tier must have a corresponding Break-Indices
+    tier label at the same time stamp
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim12
+  type: observation
+  statement: If BI >= 3, there must be a phrase accent on the Tones tier
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0
+- id: claim13
+  type: observation
+  statement: If BI = 4, there must be a boundary tone on the Tones tier
+  concepts: []
+  provenance:
+    paper: Beckman_2005_ToBISystemEvolution
+    page: 0

@@ -1,0 +1,125 @@
+source:
+  paper: Mozziconacci_1998_SpeechEmotionProsody
+claims:
+- id: claim1
+  type: parameter
+  concept: neutrality
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 65
+- id: claim2
+  type: parameter
+  concept: joy
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 155
+- id: claim3
+  type: parameter
+  concept: boredom
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 65
+- id: claim4
+  type: parameter
+  concept: anger
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 110
+- id: claim5
+  type: parameter
+  concept: sadness
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 102
+- id: claim6
+  type: parameter
+  concept: fear
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 200
+- id: claim7
+  type: parameter
+  concept: indignation
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 170
+- id: claim8
+  type: parameter
+  concept: low
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 65
+- id: claim9
+  type: parameter
+  concept: medium
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  lower_bound: 102
+  upper_bound: 110
+- id: claim10
+  type: parameter
+  concept: high
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  lower_bound: 155
+  upper_bound: 170
+- id: claim11
+  type: parameter
+  concept: very_high
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: Hz
+  value: 200
+- id: claim12
+  type: parameter
+  concept: narrow
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  lower_bound: 4
+  upper_bound: 5
+  unit: st
+- id: claim13
+  type: parameter
+  concept: medium
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  lower_bound: 7
+  upper_bound: 8
+  unit: st
+- id: claim14
+  type: parameter
+  concept: wide
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0
+  unit: st
+  value: 10
+- id: claim15
+  type: equation
+  expression: 'For anger:'
+  provenance:
+    paper: Mozziconacci_1998_SpeechEmotionProsody
+    page: 0

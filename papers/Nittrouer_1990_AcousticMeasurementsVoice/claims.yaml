@@ -1,0 +1,423 @@
+source:
+  paper: Nittrouer_1990_AcousticMeasurementsVoice
+claims:
+- id: claim1
+  type: parameter
+  concept: f0_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 132
+  upper_bound: 139
+- id: claim2
+  type: parameter
+  concept: f0_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 23
+  upper_bound: 29
+- id: claim3
+  type: parameter
+  concept: f0_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 197
+  upper_bound: 215
+- id: claim4
+  type: parameter
+  concept: f0_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 7
+  upper_bound: 14
+- id: claim5
+  type: parameter
+  concept: jitter_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.076
+  upper_bound: 0.088
+- id: claim6
+  type: parameter
+  concept: jitter_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.036
+  upper_bound: 0.06
+- id: claim7
+  type: parameter
+  concept: jitter_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.104
+  upper_bound: 0.153
+- id: claim8
+  type: parameter
+  concept: jitter_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.042
+  upper_bound: 0.071
+- id: claim9
+  type: parameter
+  concept: jitter_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.027
+  upper_bound: 0.05
+- id: claim10
+  type: parameter
+  concept: jitter_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 0.007
+  upper_bound: 0.028
+- id: claim11
+  type: parameter
+  concept: shimmer_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 3.0
+  upper_bound: 4.07
+- id: claim12
+  type: parameter
+  concept: shimmer_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 1.37
+  upper_bound: 2.14
+- id: claim13
+  type: parameter
+  concept: snr_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 22.2
+  upper_bound: 23.5
+- id: claim14
+  type: parameter
+  concept: snr_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 2.8
+  upper_bound: 3.0
+- id: claim15
+  type: parameter
+  concept: blsnr_mean
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 6.92
+  upper_bound: 8.37
+- id: claim16
+  type: parameter
+  concept: blsnr_sd
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  lower_bound: 2.54
+  upper_bound: 3.34
+- id: claim17
+  type: parameter
+  concept: snr_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 24.0
+- id: claim18
+  type: parameter
+  concept: snr_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 22.4
+- id: claim19
+  type: parameter
+  concept: snr_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 22.5
+- id: claim20
+  type: parameter
+  concept: snr_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 22.0
+- id: claim21
+  type: parameter
+  concept: snr_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 21.9
+- id: claim22
+  type: parameter
+  concept: blsnr_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 8.57
+- id: claim23
+  type: parameter
+  concept: blsnr_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 7.85
+- id: claim24
+  type: parameter
+  concept: blsnr_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 7.87
+- id: claim25
+  type: parameter
+  concept: blsnr_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 7.29
+- id: claim26
+  type: parameter
+  concept: blsnr_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 7.49
+- id: claim27
+  type: parameter
+  concept: shimmer_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 2.91
+- id: claim28
+  type: parameter
+  concept: shimmer_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 3.33
+- id: claim29
+  type: parameter
+  concept: shimmer_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 3.42
+- id: claim30
+  type: parameter
+  concept: shimmer_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 3.85
+- id: claim31
+  type: parameter
+  concept: shimmer_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 3.62
+- id: claim32
+  type: parameter
+  concept: f0_m_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 128
+- id: claim33
+  type: parameter
+  concept: f0_m_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 134
+- id: claim34
+  type: parameter
+  concept: f0_m_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 133
+- id: claim35
+  type: parameter
+  concept: f0_m_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 138
+- id: claim36
+  type: parameter
+  concept: f0_m_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 137
+- id: claim37
+  type: parameter
+  concept: f0_f_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 196
+- id: claim38
+  type: parameter
+  concept: f0_f_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 206
+- id: claim39
+  type: parameter
+  concept: f0_f_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 205
+- id: claim40
+  type: parameter
+  concept: f0_f_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 212
+- id: claim41
+  type: parameter
+  concept: f0_f_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 210
+- id: claim42
+  type: parameter
+  concept: h1h2_m_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 0.67
+- id: claim43
+  type: parameter
+  concept: h1h2_m_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 1.67
+- id: claim44
+  type: parameter
+  concept: h1h2_m_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 1.59
+- id: claim45
+  type: parameter
+  concept: h1h2_m_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 2.96
+- id: claim46
+  type: parameter
+  concept: h1h2_m_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 2.79
+- id: claim47
+  type: parameter
+  concept: h1h2_f_d
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 3.56
+- id: claim48
+  type: parameter
+  concept: h1h2_f_s
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 4.39
+- id: claim49
+  type: parameter
+  concept: h1h2_f_f
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 4.31
+- id: claim50
+  type: parameter
+  concept: h1h2_f_t
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 4.68
+- id: claim51
+  type: parameter
+  concept: h1h2_f_k
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+  value: 4.34
+- id: claim52
+  type: observation
+  statement: After voiceless stops, F0 should be higher than after voiced stops by
+    approximately 7-10 Hz (men) or 14-16 Hz (women)
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+- id: claim53
+  type: observation
+  statement: After voiceless stops, SNR should be lower (more noise) than after voiced
+    stops
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+- id: claim54
+  type: observation
+  statement: For female voices, H1-H2 should be approximately 2-4 dB higher than for
+    male voices
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+- id: claim55
+  type: observation
+  statement: 'The ordering for SNR across consonant contexts should be: /d/ > /s/,/f/
+    > /t/,/k/'
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+- id: claim56
+  type: observation
+  statement: Jitter for female voices should be substantially less than for male voices
+    (roughly 0.03 ms vs 0.08-0.15 ms)
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0
+- id: claim57
+  type: observation
+  statement: BLSNR (2-4 kHz) should be lower for /u/ than for /i/ or /a/
+  concepts: []
+  provenance:
+    paper: Nittrouer_1990_AcousticMeasurementsVoice
+    page: 0

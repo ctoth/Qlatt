@@ -1,0 +1,34 @@
+source:
+  paper: Chalker_1985_MouthRadiationImpedance
+claims:
+- id: claim1
+  type: equation
+  expression: 'where $\theta_0$ and $X_0$ are series expansions in $y = 2ka$, $a$
+    = piston radius:'
+  provenance:
+    paper: Chalker_1985_MouthRadiationImpedance
+    page: 0
+- id: claim2
+  type: observation
+  statement: '[ ] Compare Qlatt''s current radiation model output against the two-term
+    approximation proposed here'
+  concepts: []
+  provenance:
+    paper: Chalker_1985_MouthRadiationImpedance
+    page: 0
+- id: claim3
+  type: observation
+  statement: '[ ] Measure formant bandwidth differences between Flanagan and two-term
+    models for /a/ above 3 kHz'
+  concepts: []
+  provenance:
+    paper: Chalker_1985_MouthRadiationImpedance
+    page: 0
+- id: claim4
+  type: observation
+  statement: '[ ] Verify that piston-in-baffle two-term agrees with full series to
+    < 0.1 ohm for 0.9 cm^2 aperture'
+  concepts: []
+  provenance:
+    paper: Chalker_1985_MouthRadiationImpedance
+    page: 0

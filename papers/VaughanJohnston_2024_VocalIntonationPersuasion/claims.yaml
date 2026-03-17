@@ -1,0 +1,66 @@
+source:
+  paper: VaughanJohnston_2024_VocalIntonationPersuasion
+claims:
+- id: claim1
+  type: parameter
+  concept: pitch_shift_magnitude
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: pitch_shift
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: pitch_shift
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: pitch_shift
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: Hz
+- id: claim5
+  type: parameter
+  concept: pitch_shift
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: Hz
+- id: claim6
+  type: parameter
+  concept: sentences_manipulated
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: '%'
+- id: claim7
+  type: parameter
+  concept: sentences_manipulated
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: '%'
+- id: claim8
+  type: parameter
+  concept: sentences_manipulated
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: '%'
+- id: claim9
+  type: parameter
+  concept: words_changed
+  provenance:
+    paper: VaughanJohnston_2024_VocalIntonationPersuasion
+    page: 0
+  unit: '%'

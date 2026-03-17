@@ -1,0 +1,218 @@
+source:
+  paper: vanSon_1997_ConsonantReduction
+claims:
+- id: claim1
+  type: parameter
+  concept: plosives_velar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 63
+- id: claim2
+  type: parameter
+  concept: plosives_alveolar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 65
+- id: claim3
+  type: parameter
+  concept: plosives_labial
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 61
+- id: claim4
+  type: parameter
+  concept: plosives_total
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 189
+- id: claim5
+  type: parameter
+  concept: fricatives_velar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 77
+- id: claim6
+  type: parameter
+  concept: fricatives_palatal
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 3
+- id: claim7
+  type: parameter
+  concept: fricatives_alveolar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 63
+- id: claim8
+  type: parameter
+  concept: fricatives_labial
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 75
+- id: claim9
+  type: parameter
+  concept: fricatives_total
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 218
+- id: claim10
+  type: parameter
+  concept: nasals_velar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 14
+- id: claim11
+  type: parameter
+  concept: nasals_alveolar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 72
+- id: claim12
+  type: parameter
+  concept: nasals_labial
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 63
+- id: claim13
+  type: parameter
+  concept: nasals_total
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 149
+- id: claim14
+  type: parameter
+  concept: vowellike_velar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 60
+- id: claim15
+  type: parameter
+  concept: vowellike_palatal
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 21
+- id: claim16
+  type: parameter
+  concept: vowellike_alveolar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 94
+- id: claim17
+  type: parameter
+  concept: vowellike_labial
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 60
+- id: claim18
+  type: parameter
+  concept: vowellike_total
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 235
+- id: claim19
+  type: parameter
+  concept: total_velar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 214
+- id: claim20
+  type: parameter
+  concept: total_palatal
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 24
+- id: claim21
+  type: parameter
+  concept: total_alveolar
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 294
+- id: claim22
+  type: parameter
+  concept: total_labial
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 259
+- id: claim23
+  type: parameter
+  concept: total_total
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  value: 791
+- id: claim24
+  type: parameter
+  concept: first_formant
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: Hz
+- id: claim25
+  type: parameter
+  concept: second_formant
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: Hz
+- id: claim26
+  type: parameter
+  concept: f2_slope_difference
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: kHz (normalized)
+- id: claim27
+  type: parameter
+  concept: duration
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: ms
+- id: claim28
+  type: parameter
+  concept: center_of_gravity
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: kHz
+- id: claim29
+  type: parameter
+  concept: energy_difference
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+  unit: dB
+- id: claim30
+  type: equation
+  expression: \text{COG} = \frac{\int f \cdot E(f) \, df}{\int E(f) \, df}
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0
+- id: claim31
+  type: equation
+  expression: V_{max} = \frac{V_{1,max} + V_{2,max}}{2}
+  provenance:
+    paper: vanSon_1997_ConsonantReduction
+    page: 0

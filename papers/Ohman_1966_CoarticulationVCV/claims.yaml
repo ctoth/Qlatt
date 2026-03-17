@@ -1,0 +1,59 @@
+source:
+  paper: Ohman_1966_CoarticulationVCV
+claims:
+- id: claim1
+  type: parameter
+  concept: f2_of_y
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim2
+  type: parameter
+  concept: f2_of
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim3
+  type: parameter
+  concept: f2_of
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim4
+  type: parameter
+  concept: f2_of_u
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim5
+  type: parameter
+  concept: f2_variation_range
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim6
+  type: parameter
+  concept: measurement_accuracy
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cps
+- id: claim7
+  type: parameter
+  concept: f2_maximum_location
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: cm
+- id: claim8
+  type: parameter
+  concept: scurve_rise_duration
+  provenance:
+    paper: Ohman_1966_CoarticulationVCV
+    page: 0
+  unit: ms

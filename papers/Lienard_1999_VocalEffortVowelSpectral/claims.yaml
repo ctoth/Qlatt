@@ -1,0 +1,95 @@
+source:
+  paper: Lienard_1999_VocalEffortVowelSpectral
+claims:
+- id: claim1
+  type: parameter
+  concept: f0_rate
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 5.1
+  unit: Hz/dB
+- id: claim2
+  type: parameter
+  concept: f1_rate
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 3.5
+  unit: Hz/dB
+- id: claim3
+  type: parameter
+  concept: a1_rate
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 1.1
+  unit: dB/dB
+- id: claim4
+  type: parameter
+  concept: a2_rate
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 1.24
+  unit: dB/dB
+- id: claim5
+  type: parameter
+  concept: a3_rate
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 1.3
+  unit: dB/dB
+- id: claim6
+  type: parameter
+  concept: effort_range
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 9
+  unit: dB
+- id: claim7
+  type: parameter
+  concept: front_back_threshold
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+  value: 3.5
+  unit: Bark
+- id: claim8
+  type: equation
+  expression: \Delta F0 = 5.1 \cdot \Delta AX \text{ (Hz/dB)}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+- id: claim9
+  type: equation
+  expression: \Delta F1 \approx 3.5 \cdot \Delta AX \text{ (Hz/dB)}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+- id: claim10
+  type: equation
+  expression: A1 = 1.10 \cdot AX \text{ (dB/dB)}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+- id: claim11
+  type: equation
+  expression: A2 = 1.24 \cdot AX \text{ (dB/dB)}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+- id: claim12
+  type: equation
+  expression: A3 = 1.30 \cdot AX \text{ (dB/dB)}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0
+- id: claim13
+  type: equation
+  expression: F_{23} = \frac{A2 \cdot F2 + A3 \cdot F3}{A2 + A3}
+  provenance:
+    paper: Lienard_1999_VocalEffortVowelSpectral
+    page: 0

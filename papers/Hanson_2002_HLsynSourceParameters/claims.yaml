@@ -1,0 +1,805 @@
+source:
+  paper: Hanson_2002_HLsynSourceParameters
+claims:
+- id: claim1
+  type: parameter
+  concept: f1f4
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: ag
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: mm^2
+- id: claim4
+  type: parameter
+  concept: ap
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: mm^2
+- id: claim5
+  type: parameter
+  concept: ps
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: cm H2O
+- id: claim6
+  type: parameter
+  concept: al
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: mm^2
+- id: claim7
+  type: parameter
+  concept: ab
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: mm^2
+- id: claim8
+  type: parameter
+  concept: an
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: mm^2
+- id: claim9
+  type: parameter
+  concept: ue
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: cm^3/s
+- id: claim10
+  type: parameter
+  concept: dc
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: '%'
+- id: claim11
+  type: parameter
+  concept: l_v_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 15
+- id: claim12
+  type: parameter
+  concept: l_v_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 17
+- id: claim13
+  type: parameter
+  concept: a_v_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3
+- id: claim14
+  type: parameter
+  concept: a_v_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3.5
+- id: claim15
+  type: parameter
+  concept: l_t_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 11
+- id: claim16
+  type: parameter
+  concept: l_t_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 12
+- id: claim17
+  type: parameter
+  concept: a_t_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 2
+- id: claim18
+  type: parameter
+  concept: a_t_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 2.5
+- id: claim19
+  type: parameter
+  concept: l_g_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.7
+- id: claim20
+  type: parameter
+  concept: l_g_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim21
+  type: parameter
+  concept: l_hp_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.2
+- id: claim22
+  type: parameter
+  concept: l_hp_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.3
+- id: claim23
+  type: parameter
+  concept: l_vg_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.3
+- id: claim24
+  type: parameter
+  concept: l_vg_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.4
+- id: claim25
+  type: parameter
+  concept: l_ctextacd_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3.5
+- id: claim26
+  type: parameter
+  concept: l_ctextacd_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 4
+- id: claim27
+  type: parameter
+  concept: v_acd_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 40
+- id: claim28
+  type: parameter
+  concept: v_acd_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 50
+- id: claim29
+  type: parameter
+  concept: c_wm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.001
+- id: claim30
+  type: parameter
+  concept: c_wm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.001
+- id: claim31
+  type: parameter
+  concept: r_w_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 10
+- id: claim32
+  type: parameter
+  concept: r_w_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 10
+- id: claim33
+  type: parameter
+  concept: f_neutral
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 590
+- id: claim34
+  type: parameter
+  concept: f1_min
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 180
+- id: claim35
+  type: parameter
+  concept: f1_max
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 1100
+- id: claim36
+  type: parameter
+  concept: f1_liquid
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 450
+- id: claim37
+  type: parameter
+  concept: f1_phar
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 650
+- id: claim38
+  type: parameter
+  concept: b1_m
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 80
+- id: claim39
+  type: parameter
+  concept: b2_m
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 90
+- id: claim40
+  type: parameter
+  concept: agm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3
+- id: claim41
+  type: parameter
+  concept: agm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 4
+- id: claim42
+  type: parameter
+  concept: tlm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 10
+  unit: dB
+- id: claim43
+  type: parameter
+  concept: tlm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 5
+  unit: dB
+- id: claim44
+  type: parameter
+  concept: acx_tl_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 20
+- id: claim45
+  type: parameter
+  concept: acx_tl_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 20
+- id: claim46
+  type: parameter
+  concept: af_min_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 35
+  unit: dB
+- id: claim47
+  type: parameter
+  concept: af_min_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 35
+  unit: dB
+- id: claim48
+  type: parameter
+  concept: agx_mintextdi_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim49
+  type: parameter
+  concept: agx_mintextdi_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim50
+  type: parameter
+  concept: agx_max_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 9
+- id: claim51
+  type: parameter
+  concept: agx_max_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 11
+- id: claim52
+  type: parameter
+  concept: agx_mid_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 6
+- id: claim53
+  type: parameter
+  concept: agx_mid_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 7
+- id: claim54
+  type: parameter
+  concept: agx_min_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim55
+  type: parameter
+  concept: agx_min_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim56
+  type: parameter
+  concept: f1_mintextf0_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim57
+  type: parameter
+  concept: f1_mintextf0_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim58
+  type: parameter
+  concept: f1_mintextliq_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 400
+  unit: Hz
+- id: claim59
+  type: parameter
+  concept: f1_mintextliq_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 350
+  unit: Hz
+- id: claim60
+  type: parameter
+  concept: f1_maxtextliq_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 550
+  unit: Hz
+- id: claim61
+  type: parameter
+  concept: f1_maxtextliq_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 500
+  unit: Hz
+- id: claim62
+  type: parameter
+  concept: tl_max_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 41
+  unit: dB
+- id: claim63
+  type: parameter
+  concept: tl_max_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 41
+  unit: dB
+- id: claim64
+  type: parameter
+  concept: tl_min_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0
+  unit: dB
+- id: claim65
+  type: parameter
+  concept: tl_min_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0
+  unit: dB
+- id: claim66
+  type: parameter
+  concept: k_v_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 33
+  unit: dB
+- id: claim67
+  type: parameter
+  concept: k_v_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 33
+  unit: dB
+- id: claim68
+  type: parameter
+  concept: k_davagm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 220
+- id: claim69
+  type: parameter
+  concept: k_davagm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 200
+- id: claim70
+  type: parameter
+  concept: k_dav1agm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 120
+- id: claim71
+  type: parameter
+  concept: k_dav1agm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 100
+- id: claim72
+  type: parameter
+  concept: k_dav2agm_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 420
+- id: claim73
+  type: parameter
+  concept: k_dav2agm_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 400
+- id: claim74
+  type: parameter
+  concept: k_ah_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 27
+  unit: dB
+- id: claim75
+  type: parameter
+  concept: k_ah_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 27
+  unit: dB
+- id: claim76
+  type: parameter
+  concept: k_af_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 40
+  unit: dB
+- id: claim77
+  type: parameter
+  concept: k_af_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 40
+  unit: dB
+- id: claim78
+  type: parameter
+  concept: k_tl_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1.8
+- id: claim79
+  type: parameter
+  concept: k_tl_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1.5
+- id: claim80
+  type: parameter
+  concept: k_di_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 15
+- id: claim81
+  type: parameter
+  concept: k_di_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 15
+- id: claim82
+  type: parameter
+  concept: k_df0textdc_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3
+- id: claim83
+  type: parameter
+  concept: k_df0textdc_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 3
+- id: claim84
+  type: parameter
+  concept: k_df0textps_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 30
+- id: claim85
+  type: parameter
+  concept: k_df0textps_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 30
+- id: claim86
+  type: parameter
+  concept: k_df0textheight_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.46
+  unit: ms
+- id: claim87
+  type: parameter
+  concept: k_df0textheight_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.5
+  unit: ms
+- id: claim88
+  type: parameter
+  concept: k_acl_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 25
+- id: claim89
+  type: parameter
+  concept: k_acl_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 25
+- id: claim90
+  type: parameter
+  concept: k_pthrtextdc_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.03
+- id: claim91
+  type: parameter
+  concept: k_pthrtextdc_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.03
+- id: claim92
+  type: parameter
+  concept: k_cw_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim93
+  type: parameter
+  concept: k_cw_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 1
+- id: claim94
+  type: parameter
+  concept: k_cg_female
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.34
+- id: claim95
+  type: parameter
+  concept: k_cg_male
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  value: 0.34
+- id: claim96
+  type: parameter
+  concept: l
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 450
+- id: claim97
+  type: parameter
+  concept: l
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 400
+- id: claim98
+  type: parameter
+  concept: r
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 450
+- id: claim99
+  type: parameter
+  concept: r
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+  unit: Hz
+  value: 400
+- id: claim100
+  type: equation
+  expression: $$Pm(nT+T) = Pcw(nT+T) + R_w Uw(nT+T)$$
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim101
+  type: observation
+  statement: AV must decrease when Pm approaches ps (transglottal pressure -> 0)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim102
+  type: observation
+  statement: AF must increase with increasing Pm (when supraglottal constriction exists)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim103
+  type: observation
+  statement: AV and AF cannot both be at maximum simultaneously for any valid HL configuration
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim104
+  type: observation
+  statement: OQ must stay within [OQ_min, OQ_max] range
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim105
+  type: observation
+  statement: TL must stay within [TL_min, TL_max] range (0-41 dB)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim106
+  type: observation
+  statement: AV = 0 when agx < agx_min or agx > agm + agx_max
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim107
+  type: observation
+  statement: F0 must increase with vowel height (lower f1 -> higher F0)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim108
+  type: observation
+  statement: F0 must increase with increasing transglottal pressure (above modal)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim109
+  type: observation
+  statement: Increasing dc (stiffer folds) must raise phonation threshold pressure
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0
+- id: claim110
+  type: observation
+  statement: agx >= ag when Pm > 0 (oral pressure pushes folds apart)
+  concepts: []
+  provenance:
+    paper: Hanson_2002_HLsynSourceParameters
+    page: 0

@@ -1,0 +1,92 @@
+source:
+  paper: Qharabagh_2025_FastNotFancy
+claims:
+- id: claim1
+  type: parameter
+  concept: learning_rate
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  value: 0.0005
+- id: claim2
+  type: parameter
+  concept: batch_size
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  value: 32
+  unit: samples
+- id: claim3
+  type: parameter
+  concept: phase_1_epochs
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  value: 5
+- id: claim4
+  type: parameter
+  concept: phase_2_epochs
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  value: 20
+- id: claim5
+  type: parameter
+  concept: phase_3_epochs
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  value: 50
+- id: claim6
+  type: parameter
+  concept: espeak
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  unit: s
+  value: 0.0169
+- id: claim7
+  type: parameter
+  concept: ge2pe
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  unit: s
+  value: 0.4464
+- id: claim8
+  type: parameter
+  concept: homofast_espeak
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  unit: s
+  value: 0.0084
+- id: claim9
+  type: parameter
+  concept: homoge2pe
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  unit: s
+  value: 0.4473
+- id: claim10
+  type: parameter
+  concept: homot5
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+  unit: s
+  value: 0.4141
+- id: claim11
+  type: equation
+  expression: \text{score}(p) = \frac{\sum_{w \in \text{context}} \mathbf{1}[w \in
+    C_p]}{|C_p|}
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0
+- id: claim12
+  type: equation
+  expression: \hat{p} = \arg\max_p \text{score}(p)
+  provenance:
+    paper: Qharabagh_2025_FastNotFancy
+    page: 0

@@ -1,0 +1,120 @@
+source:
+  paper: Klatt_1979_SpeechPerceptionLexicalAccess
+claims:
+- id: claim1
+  type: parameter
+  concept: spectral_window
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  value: 25.6
+  unit: ms
+- id: claim2
+  type: parameter
+  concept: effective_duration
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: ms
+- id: claim3
+  type: parameter
+  concept: frame_rate
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  value: 10
+  unit: ms
+- id: claim4
+  type: parameter
+  concept: frequency_range
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: Hz
+- id: claim5
+  type: parameter
+  concept: dynamic_range
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: dB
+- id: claim6
+  type: parameter
+  concept: critical_bands
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  value: 30
+  unit: filters
+- id: claim7
+  type: parameter
+  concept: frequency_jnd
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: '%'
+- id: claim8
+  type: parameter
+  concept: amplitude_jnd
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: dB
+- id: claim9
+  type: parameter
+  concept: phonetic_categories
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  value: 55
+  unit: types
+- id: claim10
+  type: parameter
+  concept: diphones
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: types
+- id: claim11
+  type: parameter
+  concept: network_states
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: states
+- id: claim12
+  type: parameter
+  concept: network_paths
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: paths
+- id: claim13
+  type: parameter
+  concept: spectral_templates
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: templates
+- id: claim14
+  type: parameter
+  concept: echoic_memory
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: ms
+- id: claim15
+  type: parameter
+  concept: lexical_buffer
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  unit: hypotheses
+- id: claim16
+  type: parameter
+  concept: decision_delay
+  provenance:
+    paper: Klatt_1979_SpeechPerceptionLexicalAccess
+    page: 0
+  value: 0.5
+  unit: s

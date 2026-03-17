@@ -1,0 +1,178 @@
+source:
+  paper: Assmann_1990_ConcurrentVowelPerception
+claims:
+- id: claim1
+  type: parameter
+  concept: f1_i
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 250
+- id: claim2
+  type: parameter
+  concept: f1_a
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 650
+- id: claim3
+  type: parameter
+  concept: f1_u
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 250
+- id: claim4
+  type: parameter
+  concept: f1_openo
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 350
+- id: claim5
+  type: parameter
+  concept: f1_turnedv
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 450
+- id: claim6
+  type: parameter
+  concept: f2_i
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 2250
+- id: claim7
+  type: parameter
+  concept: f2_a
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 950
+- id: claim8
+  type: parameter
+  concept: f2_u
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 850
+- id: claim9
+  type: parameter
+  concept: f2_openo
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 750
+- id: claim10
+  type: parameter
+  concept: f2_turnedv
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 1250
+- id: claim11
+  type: parameter
+  concept: f3_i
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3050
+- id: claim12
+  type: parameter
+  concept: f3_a
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 2950
+- id: claim13
+  type: parameter
+  concept: f3_u
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 1950
+- id: claim14
+  type: parameter
+  concept: f3_openo
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 2850
+- id: claim15
+  type: parameter
+  concept: f3_turnedv
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 2650
+- id: claim16
+  type: parameter
+  concept: f4_i
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3350
+- id: claim17
+  type: parameter
+  concept: f4_a
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3350
+- id: claim18
+  type: parameter
+  concept: f4_u
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3350
+- id: claim19
+  type: parameter
+  concept: f4_openo
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3350
+- id: claim20
+  type: parameter
+  concept: f4_turnedv
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3350
+- id: claim21
+  type: parameter
+  concept: f5_i
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3850
+- id: claim22
+  type: parameter
+  concept: f5_a
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3850
+- id: claim23
+  type: parameter
+  concept: f5_u
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3850
+- id: claim24
+  type: parameter
+  concept: f5_openo
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3850
+- id: claim25
+  type: parameter
+  concept: f5_turnedv
+  provenance:
+    paper: Assmann_1990_ConcurrentVowelPerception
+    page: 0
+  value: 3850

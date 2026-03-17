@@ -1,0 +1,561 @@
+source:
+  paper: Babel_2014_VocalAttractiveness
+claims:
+- id: claim1
+  type: parameter
+  concept: female_mean
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.05
+- id: claim2
+  type: parameter
+  concept: female_sd
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.89
+- id: claim3
+  type: parameter
+  concept: female_mean
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.07
+- id: claim4
+  type: parameter
+  concept: female_sd
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.67
+- id: claim5
+  type: parameter
+  concept: male_mean
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 4.67
+- id: claim6
+  type: parameter
+  concept: male_sd
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.98
+- id: claim7
+  type: parameter
+  concept: male_mean
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 4.05
+- id: claim8
+  type: parameter
+  concept: male_sd
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.99
+- id: claim9
+  type: parameter
+  concept: intercept_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 6.73
+- id: claim10
+  type: parameter
+  concept: intercept_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.98
+- id: claim11
+  type: parameter
+  concept: intercept_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 3.4
+- id: claim12
+  type: parameter
+  concept: average_f0_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.01
+- id: claim13
+  type: parameter
+  concept: average_f0_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.01
+- id: claim14
+  type: parameter
+  concept: average_f0_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.34
+- id: claim15
+  type: parameter
+  concept: average_f0_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.19
+- id: claim16
+  type: parameter
+  concept: formant_position_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 3.27
+- id: claim17
+  type: parameter
+  concept: formant_position_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.03
+- id: claim18
+  type: parameter
+  concept: formant_position_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -3.17
+- id: claim19
+  type: parameter
+  concept: intercept_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.98
+- id: claim20
+  type: parameter
+  concept: intercept_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.11
+- id: claim21
+  type: parameter
+  concept: intercept_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.37
+- id: claim22
+  type: parameter
+  concept: average_f0_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.01
+- id: claim23
+  type: parameter
+  concept: average_f0_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.01
+- id: claim24
+  type: parameter
+  concept: average_f0_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.65
+- id: claim25
+  type: parameter
+  concept: average_f0_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.11
+- id: claim26
+  type: parameter
+  concept: formant_position_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.1
+- id: claim27
+  type: parameter
+  concept: formant_position_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.15
+- id: claim28
+  type: parameter
+  concept: formant_position_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.09
+- id: claim29
+  type: parameter
+  concept: formant_position_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.93
+- id: claim30
+  type: parameter
+  concept: intercept_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 7.93
+- id: claim31
+  type: parameter
+  concept: intercept_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.57
+- id: claim32
+  type: parameter
+  concept: intercept_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.05
+- id: claim33
+  type: parameter
+  concept: average_f0_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.02
+- id: claim34
+  type: parameter
+  concept: average_f0_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.01
+- id: claim35
+  type: parameter
+  concept: average_f0_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -2.21
+- id: claim36
+  type: parameter
+  concept: vowel_pc1_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.48
+- id: claim37
+  type: parameter
+  concept: vowel_pc1_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.17
+- id: claim38
+  type: parameter
+  concept: vowel_pc1_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 2.85
+- id: claim39
+  type: parameter
+  concept: vowel_pc3_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.52
+- id: claim40
+  type: parameter
+  concept: vowel_pc3_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.28
+- id: claim41
+  type: parameter
+  concept: vowel_pc3_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.82
+- id: claim42
+  type: parameter
+  concept: vowel_pc3_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.08
+- id: claim43
+  type: parameter
+  concept: female_voice_pc3_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.26
+- id: claim44
+  type: parameter
+  concept: female_voice_pc3_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.09
+- id: claim45
+  type: parameter
+  concept: female_voice_pc3_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -2.95
+- id: claim46
+  type: parameter
+  concept: intercept_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 5.67
+- id: claim47
+  type: parameter
+  concept: intercept_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.63
+- id: claim48
+  type: parameter
+  concept: intercept_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 8.96
+- id: claim49
+  type: parameter
+  concept: vowel_pc1_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.31
+- id: claim50
+  type: parameter
+  concept: vowel_pc1_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.18
+- id: claim51
+  type: parameter
+  concept: vowel_pc1_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.75
+- id: claim52
+  type: parameter
+  concept: vowel_pc1_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.09
+- id: claim53
+  type: parameter
+  concept: vowel_pc2_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.25
+- id: claim54
+  type: parameter
+  concept: vowel_pc2_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.13
+- id: claim55
+  type: parameter
+  concept: vowel_pc2_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.98
+- id: claim56
+  type: parameter
+  concept: vowel_pc2_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.06
+- id: claim57
+  type: parameter
+  concept: vowel_pc3_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.37
+- id: claim58
+  type: parameter
+  concept: vowel_pc3_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.25
+- id: claim59
+  type: parameter
+  concept: vowel_pc3_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.52
+- id: claim60
+  type: parameter
+  concept: vowel_pc3_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.14
+- id: claim61
+  type: parameter
+  concept: vowel_pc4_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.75
+- id: claim62
+  type: parameter
+  concept: vowel_pc4_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.33
+- id: claim63
+  type: parameter
+  concept: vowel_pc4_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -5.27
+- id: claim64
+  type: parameter
+  concept: male_voice_pc1_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.03
+- id: claim65
+  type: parameter
+  concept: male_voice_pc1_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.02
+- id: claim66
+  type: parameter
+  concept: male_voice_pc1_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.85
+- id: claim67
+  type: parameter
+  concept: male_voice_pc1_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.08
+- id: claim68
+  type: parameter
+  concept: male_voice_pc4_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -0.07
+- id: claim69
+  type: parameter
+  concept: male_voice_pc4_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.05
+- id: claim70
+  type: parameter
+  concept: male_voice_pc4_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -1.46
+- id: claim71
+  type: parameter
+  concept: male_voice_pc4_p
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 0.16
+- id: claim72
+  type: parameter
+  concept: duration_estimate
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -4.1
+- id: claim73
+  type: parameter
+  concept: duration_std_error
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: 1.26
+- id: claim74
+  type: parameter
+  concept: duration_t
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+  value: -3.26
+- id: claim75
+  type: observation
+  statement: 'For female voices: breathier voice quality (higher H1-A3, lower CPP)
+    should correlate positively with perceived attractiveness'
+  concepts: []
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+- id: claim76
+  type: observation
+  statement: 'For male voices: shorter segment durations and lower F1 for high vowels
+    should correlate with higher attractiveness'
+  concepts: []
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+- id: claim77
+  type: observation
+  statement: f0 should have a weak negative correlation with female voice attractiveness
+    (slightly lower = more attractive)
+  concepts: []
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+- id: claim78
+  type: observation
+  statement: f0 should not significantly predict male voice attractiveness when other
+    measures are controlled
+  concepts: []
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0
+- id: claim79
+  type: observation
+  statement: Male and female rater attractiveness judgments should be highly correlated
+    (r > 0.7)
+  concepts: []
+  provenance:
+    paper: Babel_2014_VocalAttractiveness
+    page: 0

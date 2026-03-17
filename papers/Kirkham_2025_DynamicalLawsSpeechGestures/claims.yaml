@@ -1,0 +1,102 @@
+source:
+  paper: Kirkham_2025_DynamicalLawsSpeechGestures
+claims:
+- id: claim1
+  type: parameter
+  concept: stiffness
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  unit: s$^{-2}$
+- id: claim2
+  type: parameter
+  concept: damping
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  value: 0
+  unit: s$^{-1}$
+- id: claim3
+  type: parameter
+  concept: target
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  unit: mm
+- id: claim4
+  type: parameter
+  concept: virtual_target
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  unit: mm
+- id: claim5
+  type: parameter
+  concept: nonlinear_coefficient
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  unit: mm$^{-2}$s$^{-2}$
+- id: claim6
+  type: parameter
+  concept: critical_damping
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+  unit: s$^{-1}$
+- id: claim7
+  type: observation
+  statement: Second-order linear model must achieve $R^2 \geq 0.64$ on any single-gesture
+    trajectory
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim8
+  type: observation
+  statement: Mean $R^2$ across gestures should be $\geq 0.98$ for second-order linear
+    model
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim9
+  type: observation
+  statement: Discovered damping coefficient $b$ should be substantially less than
+    $2\sqrt{k}$ (under-damped)
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim10
+  type: observation
+  statement: 'Virtual target $T_v$ should be approximately midpoint between $x_0$
+    and empirical $T$: $T_v \approx (x_0 + T)/2$'
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim11
+  type: observation
+  statement: Adding cubic term should improve $R_H^2$ for trajectories with $R_H^2
+    < 0.9$ under linear model
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim12
+  type: observation
+  statement: First-order models should show worse Hooke portrait fits despite comparable
+    position $R^2$
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0
+- id: claim13
+  type: observation
+  statement: Stiffness $k$ should correlate with $|T|$ (target magnitude) for LA ($r
+    = 0.94$) and TR ($r = 0.91$)
+  concepts: []
+  provenance:
+    paper: Kirkham_2025_DynamicalLawsSpeechGestures
+    page: 0

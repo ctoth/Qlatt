@@ -1,0 +1,97 @@
+source:
+  paper: Caballero_2018_SoundOfImpoliteness
+claims:
+- id: claim1
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: Hz (normalized)
+- id: claim2
+  type: parameter
+  concept: f0_range
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: Hz (normalized)
+- id: claim3
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: syl/sec
+- id: claim4
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: dB
+- id: claim5
+  type: parameter
+  concept: direct
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.06
+- id: claim6
+  type: parameter
+  concept: direct
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.1
+- id: claim7
+  type: parameter
+  concept: please
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.11
+- id: claim8
+  type: parameter
+  concept: please
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.02
+- id: claim9
+  type: parameter
+  concept: indirect
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.06
+- id: claim10
+  type: parameter
+  concept: indirect
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.15
+- id: claim11
+  type: equation
+  expression: f0_{norm} = \frac{f0_{recording} - f0_{mean(all)}}{f0_{mean(all)}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+- id: claim12
+  type: equation
+  expression: EI = \overline{Last5_{f0}} - \overline{First5_{f0}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+- id: claim13
+  type: equation
+  expression: SR = \frac{N_{syllables}}{Duration_{seconds}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0

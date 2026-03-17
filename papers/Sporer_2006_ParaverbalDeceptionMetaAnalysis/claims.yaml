@@ -1,0 +1,119 @@
+source:
+  paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+claims:
+- id: claim1
+  type: parameter
+  concept: message_duration
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 23
+- id: claim2
+  type: parameter
+  concept: number_of_words
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 8
+- id: claim3
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 16
+- id: claim4
+  type: parameter
+  concept: filled_pauses
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 15
+- id: claim5
+  type: parameter
+  concept: unfilled_pauses
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 9
+- id: claim6
+  type: parameter
+  concept: pitch
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 7
+- id: claim7
+  type: parameter
+  concept: repetitions
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 4
+- id: claim8
+  type: parameter
+  concept: response_latency
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 18
+- id: claim9
+  type: parameter
+  concept: speech_errors
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+  unit: studies
+  value: 19
+- id: claim10
+  type: equation
+  expression: 'Cohen''s d from r:'
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+- id: claim11
+  type: observation
+  statement: Pitch should increase more during high-motivation deception than low-motivation
+    (r=.529 vs .012)
+  concepts: []
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+- id: claim12
+  type: observation
+  statement: Response latency should increase with deception only under short preparation
+    (r=.190 vs -.044)
+  concepts: []
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+- id: claim13
+  type: observation
+  statement: Message duration should decrease under high motivation deception (r=-.102)
+  concepts: []
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+- id: claim14
+  type: observation
+  statement: Effect sizes for paraverbal deception cues should be small (|d| < 0.3)
+  concepts: []
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0
+- id: claim15
+  type: observation
+  statement: Unsanctioned lies should produce larger paraverbal effects than sanctioned
+    lies
+  concepts: []
+  provenance:
+    paper: Sporer_2006_ParaverbalDeceptionMetaAnalysis
+    page: 0

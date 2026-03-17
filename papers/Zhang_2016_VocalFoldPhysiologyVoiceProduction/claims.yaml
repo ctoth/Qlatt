@@ -1,0 +1,134 @@
+source:
+  paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+claims:
+- id: claim1
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.2
+  upper_bound: 1.2
+- id: claim2
+  type: parameter
+  concept: vocal_fold_length
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: cm
+  lower_bound: 1.0
+  upper_bound: 2.0
+- id: claim3
+  type: parameter
+  concept: body_ap_stiffness
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 1
+  upper_bound: 20
+- id: claim4
+  type: parameter
+  concept: cover_ap_stiffness
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 1
+  upper_bound: 8
+- id: claim5
+  type: parameter
+  concept: medial_surface_thickness
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: mm
+  lower_bound: 0.3
+  upper_bound: 4.5
+- id: claim6
+  type: parameter
+  concept: cover_transverse_stiffness
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.5
+  upper_bound: 8
+- id: claim7
+  type: parameter
+  concept: body_transverse_stiffness
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.5
+  upper_bound: 20
+- id: claim8
+  type: parameter
+  concept: subglottal_resonance_freq
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: Hz
+- id: claim9
+  type: parameter
+  concept: subglottal_bandwidth
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: Hz
+- id: claim10
+  type: parameter
+  concept: soft_low
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  value: 0.4
+- id: claim11
+  type: parameter
+  concept: mf_mid
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  value: 0.6
+- id: claim12
+  type: parameter
+  concept: mf_high
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  value: 0.6
+- id: claim13
+  type: parameter
+  concept: loud_low
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.8
+  upper_bound: 1.0
+  value: 4
+- id: claim14
+  type: parameter
+  concept: loud_mid
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.8
+  upper_bound: 1.0
+  value: 6
+- id: claim15
+  type: parameter
+  concept: loud_high
+  provenance:
+    paper: Zhang_2016_VocalFoldPhysiologyVoiceProduction
+    page: 0
+  unit: kPa
+  lower_bound: 0.8
+  upper_bound: 1.0
+  value: 8

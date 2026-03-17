@@ -1,0 +1,27 @@
+source:
+  paper: Delattre_1955_AcousticLociTransitionalCues
+claims:
+- id: claim1
+  type: parameter
+  concept: b
+  provenance:
+    paper: Delattre_1955_AcousticLociTransitionalCues
+    page: 0
+  unit: Hz
+  value: 720
+- id: claim2
+  type: parameter
+  concept: d
+  provenance:
+    paper: Delattre_1955_AcousticLociTransitionalCues
+    page: 0
+  unit: Hz
+  value: 1800
+- id: claim3
+  type: parameter
+  concept: g
+  provenance:
+    paper: Delattre_1955_AcousticLociTransitionalCues
+    page: 0
+  unit: Hz
+  value: 3000

@@ -1,0 +1,906 @@
+source:
+  paper: Fitch_1999_VocalTractMorphology
+claims:
+- id: claim1
+  type: parameter
+  concept: children_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.521
+- id: claim2
+  type: parameter
+  concept: children_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.589
+- id: claim3
+  type: parameter
+  concept: children_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 45.7
+- id: claim4
+  type: parameter
+  concept: children_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.884
+- id: claim5
+  type: parameter
+  concept: females_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.584
+- id: claim6
+  type: parameter
+  concept: females_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.702
+- id: claim7
+  type: parameter
+  concept: females_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 40.2
+- id: claim8
+  type: parameter
+  concept: females_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.832
+- id: claim9
+  type: parameter
+  concept: males_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.687
+- id: claim10
+  type: parameter
+  concept: males_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.804
+- id: claim11
+  type: parameter
+  concept: males_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 29.8
+- id: claim12
+  type: parameter
+  concept: males_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.855
+- id: claim13
+  type: parameter
+  concept: children_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.274
+- id: claim14
+  type: parameter
+  concept: children_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.318
+- id: claim15
+  type: parameter
+  concept: children_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: -0.163
+- id: claim16
+  type: parameter
+  concept: children_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.862
+- id: claim17
+  type: parameter
+  concept: females_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.215
+- id: claim18
+  type: parameter
+  concept: females_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.246
+- id: claim19
+  type: parameter
+  concept: females_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.115
+- id: claim20
+  type: parameter
+  concept: females_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.875
+- id: claim21
+  type: parameter
+  concept: males_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.277
+- id: claim22
+  type: parameter
+  concept: males_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.307
+- id: claim23
+  type: parameter
+  concept: males_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: -0.16
+- id: claim24
+  type: parameter
+  concept: males_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.903
+- id: claim25
+  type: parameter
+  concept: monkeys_ls_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.299
+- id: claim26
+  type: parameter
+  concept: monkeys_rma_slope
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.318
+- id: claim27
+  type: parameter
+  concept: monkeys_intercept
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.753
+- id: claim28
+  type: parameter
+  concept: monkeys_r
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.939
+- id: claim29
+  type: parameter
+  concept: all_ages
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 41.8
+- id: claim30
+  type: parameter
+  concept: 2_to_4
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 17.9
+- id: claim31
+  type: parameter
+  concept: 5_to_6
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 21.1
+- id: claim32
+  type: parameter
+  concept: 7_to_8
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 28.1
+- id: claim33
+  type: parameter
+  concept: 9_to_10
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 35.0
+- id: claim34
+  type: parameter
+  concept: 11_to_12
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 42.9
+- id: claim35
+  type: parameter
+  concept: 13_to_14
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 55.6
+- id: claim36
+  type: parameter
+  concept: 15_to_16
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 60.1
+- id: claim37
+  type: parameter
+  concept: 17_to_18
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 71.0
+- id: claim38
+  type: parameter
+  concept: 19_to_25
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: kg
+  value: 70.3
+- id: claim39
+  type: parameter
+  concept: f_1516
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 136.7
+- id: claim40
+  type: parameter
+  concept: m_1516
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 146.2
+- id: claim41
+  type: parameter
+  concept: f_1718
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 143.7
+- id: claim42
+  type: parameter
+  concept: m_1718
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 155.7
+- id: claim43
+  type: parameter
+  concept: f_1925
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 138.8
+- id: claim44
+  type: parameter
+  concept: m_1925
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: mm
+  value: 155.4
+- id: claim45
+  type: parameter
+  concept: lip_prepubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 13.4
+- id: claim46
+  type: parameter
+  concept: lip_peripubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 14.3
+- id: claim47
+  type: parameter
+  concept: lip_postpubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 14.7
+- id: claim48
+  type: parameter
+  concept: lip_anova_f
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 5.1
+- id: claim49
+  type: parameter
+  concept: lip_p
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.0077
+- id: claim50
+  type: parameter
+  concept: blade_prepubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 19.2
+- id: claim51
+  type: parameter
+  concept: blade_peripubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 22.3
+- id: claim52
+  type: parameter
+  concept: blade_postpubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 23.5
+- id: claim53
+  type: parameter
+  concept: blade_anova_f
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 21.3
+- id: claim54
+  type: parameter
+  concept: blade_p
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.0001
+- id: claim55
+  type: parameter
+  concept: dorsum_prepubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 22.6
+- id: claim56
+  type: parameter
+  concept: dorsum_peripubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 25.7
+- id: claim57
+  type: parameter
+  concept: dorsum_postpubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 26.2
+- id: claim58
+  type: parameter
+  concept: dorsum_anova_f
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 15.1
+- id: claim59
+  type: parameter
+  concept: dorsum_p
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.0001
+- id: claim60
+  type: parameter
+  concept: velum_prepubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 27.0
+- id: claim61
+  type: parameter
+  concept: velum_peripubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 30.9
+- id: claim62
+  type: parameter
+  concept: velum_postpubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 33.7
+- id: claim63
+  type: parameter
+  concept: velum_anova_f
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 36.5
+- id: claim64
+  type: parameter
+  concept: velum_p
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.0001
+- id: claim65
+  type: parameter
+  concept: pharynx_prepubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 33.9
+- id: claim66
+  type: parameter
+  concept: pharynx_peripubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 43.8
+- id: claim67
+  type: parameter
+  concept: pharynx_postpubertal
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 54.9
+- id: claim68
+  type: parameter
+  concept: pharynx_anova_f
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 137.0
+- id: claim69
+  type: parameter
+  concept: pharynx_p
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 0.0001
+- id: claim70
+  type: parameter
+  concept: all_ages
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 131.9
+- id: claim71
+  type: parameter
+  concept: 2_to_4
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 103.6
+- id: claim72
+  type: parameter
+  concept: 5_to_6
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 110.8
+- id: claim73
+  type: parameter
+  concept: 7_to_8
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 120.9
+- id: claim74
+  type: parameter
+  concept: 9_to_10
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 126.8
+- id: claim75
+  type: parameter
+  concept: 11_to_12
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 134.5
+- id: claim76
+  type: parameter
+  concept: 13_to_14
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 147.2
+- id: claim77
+  type: parameter
+  concept: 15_to_16
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 147.8
+- id: claim78
+  type: parameter
+  concept: 17_to_18
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 155.8
+- id: claim79
+  type: parameter
+  concept: 19_to_25
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  unit: seg
+  value: 156.7
+- id: claim80
+  type: parameter
+  concept: f_1516_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 13.2
+- id: claim81
+  type: parameter
+  concept: f_1516_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 20.8
+- id: claim82
+  type: parameter
+  concept: f_1516_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 26.5
+- id: claim83
+  type: parameter
+  concept: f_1516_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 32.0
+- id: claim84
+  type: parameter
+  concept: f_1516_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 49.1
+- id: claim85
+  type: parameter
+  concept: f_1516_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 141.5
+- id: claim86
+  type: parameter
+  concept: m_1516_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 15.7
+- id: claim87
+  type: parameter
+  concept: m_1516_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 23.3
+- id: claim88
+  type: parameter
+  concept: m_1516_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 24.8
+- id: claim89
+  type: parameter
+  concept: m_1516_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 34.3
+- id: claim90
+  type: parameter
+  concept: m_1516_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 56.0
+- id: claim91
+  type: parameter
+  concept: m_1516_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 154.0
+- id: claim92
+  type: parameter
+  concept: f_1718_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 14.4
+- id: claim93
+  type: parameter
+  concept: f_1718_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 24.0
+- id: claim94
+  type: parameter
+  concept: f_1718_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 28.0
+- id: claim95
+  type: parameter
+  concept: f_1718_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 33.3
+- id: claim96
+  type: parameter
+  concept: f_1718_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 53.2
+- id: claim97
+  type: parameter
+  concept: f_1718_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 152.9
+- id: claim98
+  type: parameter
+  concept: m_1718_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 16.7
+- id: claim99
+  type: parameter
+  concept: m_1718_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 25.2
+- id: claim100
+  type: parameter
+  concept: m_1718_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 26.4
+- id: claim101
+  type: parameter
+  concept: m_1718_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 34.7
+- id: claim102
+  type: parameter
+  concept: m_1718_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 57.8
+- id: claim103
+  type: parameter
+  concept: m_1718_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 160.8
+- id: claim104
+  type: parameter
+  concept: f_1925_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 12.8
+- id: claim105
+  type: parameter
+  concept: f_1925_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 24.8
+- id: claim106
+  type: parameter
+  concept: f_1925_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 24.6
+- id: claim107
+  type: parameter
+  concept: f_1925_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 37.2
+- id: claim108
+  type: parameter
+  concept: f_1925_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 46.9
+- id: claim109
+  type: parameter
+  concept: f_1925_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 146.4
+- id: claim110
+  type: parameter
+  concept: m_1925_lip
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 14.5
+- id: claim111
+  type: parameter
+  concept: m_1925_blade
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 25.5
+- id: claim112
+  type: parameter
+  concept: m_1925_dorsum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 26.8
+- id: claim113
+  type: parameter
+  concept: m_1925_velum
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 34.0
+- id: claim114
+  type: parameter
+  concept: m_1925_pharynx
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 60.4
+- id: claim115
+  type: parameter
+  concept: m_1925_total
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+  value: 161.2
+- id: claim116
+  type: observation
+  statement: VTL must increase monotonically with height across the population (r
+    > 0.8)
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim117
+  type: observation
+  statement: log VTL must scale linearly with log body mass, with slope near 0.33
+    (cube root)
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim118
+  type: observation
+  statement: For prepubertal subjects, male and female VTL should not differ significantly
+    when controlling for body size
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim119
+  type: observation
+  statement: For postpubertal subjects, males must have significantly longer VTL than
+    females (~13 mm difference)
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim120
+  type: observation
+  statement: Pharynx must show the largest absolute growth of any segment between
+    pre- and postpubertal stages
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim121
+  type: observation
+  statement: Pharynx segment must show significant sex*age interaction; other segments
+    (blade, dorsum) should not
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim122
+  type: observation
+  statement: The oral:pharyngeal ratio must be higher in children than adults, and
+    higher in adult females than adult males
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim123
+  type: observation
+  statement: Adult male pharynx length (~55-60 mm) must exceed adult female pharynx
+    length (~47-53 mm)
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0
+- id: claim124
+  type: observation
+  statement: '"Curved line" and "line segment" VTL measures must correlate at r >
+    0.98'
+  concepts: []
+  provenance:
+    paper: Fitch_1999_VocalTractMorphology
+    page: 0

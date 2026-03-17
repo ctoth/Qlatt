@@ -1,0 +1,114 @@
+source:
+  paper: VanZant_Berger_2019_VoicePersuades
+claims:
+- id: claim1
+  type: parameter
+  concept: volume
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 71.89
+- id: claim2
+  type: parameter
+  concept: volume_sd_norm
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 6.67
+- id: claim3
+  type: parameter
+  concept: pitch
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 84.43
+- id: claim4
+  type: parameter
+  concept: pitch_sd_norm
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 4.75
+- id: claim5
+  type: parameter
+  concept: intonation
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: -11.12
+- id: claim6
+  type: parameter
+  concept: articulation_rate
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 4.33
+- id: claim7
+  type: parameter
+  concept: pauses
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+  unit: SD
+  value: 1.15
+- id: claim8
+  type: equation
+  expression: \text{Paralinguistic Attempt} \xrightarrow{\beta} \text{Volume cues}
+    \xrightarrow{\beta} \text{Perceived Confidence} \xrightarrow{\beta} \text{Attitudes/Choice}
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim9
+  type: observation
+  statement: '**Volume increases during persuasion**: When speakers attempt paralinguistic
+    persuasion, mean volume (dB) should be higher than control condition'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim10
+  type: observation
+  statement: '**Volume variability increases during persuasion**: Coefficient of variation
+    of volume should increase during paralinguistic attempts'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim11
+  type: observation
+  statement: '**Pitch increases during persuasion**: Mean F0 (semitones) should be
+    higher during paralinguistic attempts'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim12
+  type: observation
+  statement: '**Confidence mediates persuasion**: Controlling for perceived confidence
+    should reduce the main effect of paralinguistic attempts on attitudes to non-significance'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim13
+  type: observation
+  statement: '**Paralinguistic persuasion resists detection backfire**: Even when
+    listeners know speakers'' intent, paralinguistic cues should not reduce persuasion'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0
+- id: claim14
+  type: observation
+  statement: '**Volume but not pitch predicts listener attitudes**: In mediation models,
+    volume should significantly predict attitudes while pitch should not'
+  concepts: []
+  provenance:
+    paper: VanZant_Berger_2019_VoicePersuades
+    page: 0

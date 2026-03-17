@@ -1,0 +1,40 @@
+source:
+  paper: Allen_1977_ModularAudioResponse
+claims:
+- id: claim1
+  type: parameter
+  concept: parameter_update_rate
+  provenance:
+    paper: Allen_1977_ModularAudioResponse
+    page: 0
+  value: 5
+  unit: ms
+- id: claim2
+  type: parameter
+  concept: sample_rate
+  provenance:
+    paper: Allen_1977_ModularAudioResponse
+    page: 0
+  unit: kHz
+- id: claim3
+  type: parameter
+  concept: resonances
+  provenance:
+    paper: Allen_1977_ModularAudioResponse
+    page: 0
+  unit: count
+- id: claim4
+  type: parameter
+  concept: data_word_length
+  provenance:
+    paper: Allen_1977_ModularAudioResponse
+    page: 0
+  value: 24
+  unit: bits
+- id: claim5
+  type: parameter
+  concept: morph_lexicon_size
+  provenance:
+    paper: Allen_1977_ModularAudioResponse
+    page: 0
+  unit: morphs

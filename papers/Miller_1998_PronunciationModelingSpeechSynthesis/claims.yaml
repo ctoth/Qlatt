@@ -1,0 +1,668 @@
+source:
+  paper: Miller_1998_PronunciationModelingSpeechSynthesis
+claims:
+- id: claim1
+  type: parameter
+  concept: 1_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 1
+  upper_bound: 49
+- id: claim2
+  type: parameter
+  concept: 2_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 50
+  upper_bound: 65
+- id: claim3
+  type: parameter
+  concept: 3_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 66
+  upper_bound: 96
+- id: claim4
+  type: parameter
+  concept: 4_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 97
+  upper_bound: 138
+- id: claim5
+  type: parameter
+  concept: 5_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 139
+  upper_bound: 169
+- id: claim6
+  type: parameter
+  concept: 6_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 170
+  upper_bound: 209
+- id: claim7
+  type: parameter
+  concept: 7_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 210
+  upper_bound: 215
+- id: claim8
+  type: parameter
+  concept: appendix_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 216
+- id: claim9
+  type: parameter
+  concept: references_pages
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 217
+  upper_bound: 234
+- id: claim10
+  type: parameter
+  concept: references_content
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 300
+- id: claim11
+  type: parameter
+  concept: nonphrasefinal_n
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 13
+- id: claim12
+  type: parameter
+  concept: nonphrasefinal_original_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 9
+- id: claim13
+  type: parameter
+  concept: nonphrasefinal_neural_net_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 10
+- id: claim14
+  type: parameter
+  concept: end_of_intermediate_phrase_n
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 2
+- id: claim15
+  type: parameter
+  concept: end_of_intermediate_phrase_original_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 1
+- id: claim16
+  type: parameter
+  concept: end_of_intermediate_phrase_neural_net_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 2
+- id: claim17
+  type: parameter
+  concept: end_of_intonational_phrase_n
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 10
+- id: claim18
+  type: parameter
+  concept: end_of_intonational_phrase_original_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 4
+- id: claim19
+  type: parameter
+  concept: end_of_intonational_phrase_neural_net_glottalized
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 6
+- id: claim20
+  type: parameter
+  concept: dp_insertion_cost
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 7
+  unit: —
+- id: claim21
+  type: parameter
+  concept: dp_deletion_cost
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 7
+  unit: —
+- id: claim22
+  type: parameter
+  concept: dp_default_substitution
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 10
+  unit: —
+- id: claim23
+  type: parameter
+  concept: dp_similar_phone_substitution
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  unit: —
+- id: claim24
+  type: parameter
+  concept: training_test_split
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  unit: '%'
+- id: claim25
+  type: parameter
+  concept: acoustic_nn_frame_rate
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 5
+  unit: ms
+- id: claim26
+  type: parameter
+  concept: tdnn_context_window
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 415
+  unit: ms
+- id: claim27
+  type: parameter
+  concept: window_size
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 9
+  unit: phones
+- id: claim28
+  type: parameter
+  concept: output_phone_classes
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 117
+  unit: —
+- id: claim29
+  type: parameter
+  concept: phonological_features
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 53
+  unit: binary
+- id: claim30
+  type: parameter
+  concept: boundary_features
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 14
+  unit: binary
+- id: claim31
+  type: parameter
+  concept: stress_prominence_features
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 4
+  unit: —
+- id: claim32
+  type: parameter
+  concept: male_speaking_rate
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 4.69
+  unit: syl/s
+- id: claim33
+  type: parameter
+  concept: female_speaking_rate
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 4.42
+  unit: syl/s
+- id: claim34
+  type: parameter
+  concept: corpus_size
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  unit: words
+- id: claim35
+  type: parameter
+  concept: lexicon_size
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  unit: entries
+- id: claim36
+  type: parameter
+  concept: 11_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 8
+- id: claim37
+  type: parameter
+  concept: 12_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 12
+- id: claim38
+  type: parameter
+  concept: 13_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 25
+- id: claim39
+  type: parameter
+  concept: 31_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 72
+- id: claim40
+  type: parameter
+  concept: 31_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 91
+- id: claim41
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 105
+- id: claim42
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 114
+- id: claim43
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 120
+- id: claim44
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 125
+- id: claim45
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 131
+- id: claim46
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 158
+- id: claim47
+  type: parameter
+  concept: 52_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 158
+- id: claim48
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 160
+- id: claim49
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 170
+- id: claim50
+  type: parameter
+  concept: 62_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 171
+- id: claim51
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 183
+- id: claim52
+  type: parameter
+  concept: 62_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 188
+- id: claim53
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 191
+- id: claim54
+  type: parameter
+  concept: 62_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 197
+- id: claim55
+  type: parameter
+  concept: 63_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 198
+- id: claim56
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 201
+- id: claim57
+  type: parameter
+  concept: 11_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 18
+- id: claim58
+  type: parameter
+  concept: 12_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 24
+- id: claim59
+  type: parameter
+  concept: 31_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 82
+- id: claim60
+  type: parameter
+  concept: 32_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 87
+- id: claim61
+  type: parameter
+  concept: 31_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 92
+- id: claim62
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 98
+- id: claim63
+  type: parameter
+  concept: 41_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 138
+- id: claim64
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 155
+  upper_bound: 157
+- id: claim65
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  lower_bound: 163
+  upper_bound: 164
+- id: claim66
+  type: parameter
+  concept: 51_description
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 53
+- id: claim67
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 165
+- id: claim68
+  type: parameter
+  concept: 51_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 166
+- id: claim69
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 175
+- id: claim70
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 193
+- id: claim71
+  type: parameter
+  concept: 62_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 194
+- id: claim72
+  type: parameter
+  concept: 63_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 196
+- id: claim73
+  type: parameter
+  concept: 64_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 196
+- id: claim74
+  type: parameter
+  concept: 65_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 199
+- id: claim75
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 202
+- id: claim76
+  type: parameter
+  concept: 62_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 203
+- id: claim77
+  type: parameter
+  concept: 63_64_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 204
+- id: claim78
+  type: parameter
+  concept: 71_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 213
+- id: claim79
+  type: parameter
+  concept: a1_page
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+  value: 216
+- id: claim80
+  type: observation
+  statement: /t/ deletion rate should increase when preceded by segments sharing features
+    [+coronal, -sonorant, -continuant]
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim81
+  type: observation
+  statement: /t/ should never flap outside V_V environments
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim82
+  type: observation
+  statement: /t/ glottalization should primarily occur before sonorants (n, m, r,
+    l, w, j)
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim83
+  type: observation
+  statement: Fronted [u] should appear more frequently in coronal environments than
+    non-coronal
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim84
+  type: observation
+  statement: Schwa realized as [i] should correlate with surrounding [+coronal] segments
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim85
+  type: observation
+  statement: Dark /l/ should NOT trigger coronal-conditioned fronting of adjacent
+    vowels
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim86
+  type: observation
+  statement: '"the" should surface as [Di] before vowels and [Da] before consonants'
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim87
+  type: observation
+  statement: '"a" should resist reduction in phrase-initial position (~75% unreduced)'
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim88
+  type: observation
+  statement: Window size ≥ 5 phones should capture most contextual variation (92.9%
+    at 5 vs 61.2% at 3)
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim89
+  type: observation
+  statement: Following context should be more predictive than preceding context (anticipatory
+    > perseverative)
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim90
+  type: observation
+  statement: Stridents (/s/, /z/) should have near-zero entropy (almost always canonical)
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0
+- id: claim91
+  type: observation
+  statement: Schwa and /t/ should have highest entropy of all phones
+  concepts: []
+  provenance:
+    paper: Miller_1998_PronunciationModelingSpeechSynthesis
+    page: 0

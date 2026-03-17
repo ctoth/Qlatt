@@ -1,0 +1,72 @@
+source:
+  paper: Rabiner_1968_DigitalFormantSynthesizer
+claims:
+- id: claim1
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 3500
+- id: claim2
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 4500
+- id: claim3
+  type: parameter
+  concept: f6
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 5500
+- id: claim4
+  type: parameter
+  concept: f7
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 6500
+- id: claim5
+  type: parameter
+  concept: f8
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 7500
+- id: claim6
+  type: parameter
+  concept: f9
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 8500
+- id: claim7
+  type: parameter
+  concept: f10
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+  unit: Hz
+  value: 9500
+- id: claim8
+  type: equation
+  expression: \frac{d^2f_N(t)}{dt^2} + \frac{2}{\tau_{AB}^N}\frac{df_N(t)}{dt} + \frac{1}{(\tau_{AB}^N)^2}f_N(t)
+    = \frac{P_N(t)}{(\tau_{AB}^N)^2}
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0
+- id: claim9
+  type: equation
+  expression: f, f + f_s, f + 2f_s, \ldots
+  provenance:
+    paper: Rabiner_1968_DigitalFormantSynthesizer
+    page: 0

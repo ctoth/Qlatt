@@ -1,0 +1,555 @@
+source:
+  paper: Gay_1978_SpeakingRateFormantMovements
+claims:
+- id: claim1
+  type: parameter
+  concept: initial_p_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 105
+- id: claim2
+  type: parameter
+  concept: vowel_nucleus
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 130
+- id: claim3
+  type: parameter
+  concept: final_p_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 80
+- id: claim4
+  type: parameter
+  concept: i
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 120
+- id: claim5
+  type: parameter
+  concept: i
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 105
+- id: claim6
+  type: parameter
+  concept: epsilon
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 130
+- id: claim7
+  type: parameter
+  concept: ae
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 155
+- id: claim8
+  type: parameter
+  concept: a
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 145
+- id: claim9
+  type: parameter
+  concept: openo
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 165
+- id: claim10
+  type: parameter
+  concept: upsilon
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 110
+- id: claim11
+  type: parameter
+  concept: u
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 120
+- id: claim12
+  type: parameter
+  concept: wedge
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 115
+- id: claim13
+  type: parameter
+  concept: we
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 95
+- id: claim14
+  type: parameter
+  concept: we
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 80
+- id: claim15
+  type: parameter
+  concept: tg
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 95
+- id: claim16
+  type: parameter
+  concept: tg
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 90
+- id: claim17
+  type: parameter
+  concept: kh
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 105
+- id: claim18
+  type: parameter
+  concept: kh
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 110
+- id: claim19
+  type: parameter
+  concept: lr
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 110
+- id: claim20
+  type: parameter
+  concept: lr
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  unit: ms
+  value: 105
+- id: claim21
+  type: parameter
+  concept: pip_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 100
+- id: claim22
+  type: parameter
+  concept: pip_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 50
+- id: claim23
+  type: parameter
+  concept: pip_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1810
+- id: claim24
+  type: parameter
+  concept: pip_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2120
+- id: claim25
+  type: parameter
+  concept: pip_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 6.6
+- id: claim26
+  type: parameter
+  concept: pip_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 90
+- id: claim27
+  type: parameter
+  concept: pip_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 45
+- id: claim28
+  type: parameter
+  concept: pip_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1885
+- id: claim29
+  type: parameter
+  concept: pip_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2120
+- id: claim30
+  type: parameter
+  concept: pip_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 6.5
+- id: claim31
+  type: parameter
+  concept: bip_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 105
+- id: claim32
+  type: parameter
+  concept: bip_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 45
+- id: claim33
+  type: parameter
+  concept: bip_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1960
+- id: claim34
+  type: parameter
+  concept: bip_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2120
+- id: claim35
+  type: parameter
+  concept: bip_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 3.6
+- id: claim36
+  type: parameter
+  concept: bip_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 95
+- id: claim37
+  type: parameter
+  concept: bip_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 40
+- id: claim38
+  type: parameter
+  concept: bip_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1985
+- id: claim39
+  type: parameter
+  concept: bip_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2105
+- id: claim40
+  type: parameter
+  concept: bip_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 3.2
+- id: claim41
+  type: parameter
+  concept: pap_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 95
+- id: claim42
+  type: parameter
+  concept: pap_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 50
+- id: claim43
+  type: parameter
+  concept: pap_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1340
+- id: claim44
+  type: parameter
+  concept: pap_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1170
+- id: claim45
+  type: parameter
+  concept: pap_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2.1
+- id: claim46
+  type: parameter
+  concept: pap_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 85
+- id: claim47
+  type: parameter
+  concept: pap_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 45
+- id: claim48
+  type: parameter
+  concept: pap_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1325
+- id: claim49
+  type: parameter
+  concept: pap_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1180
+- id: claim50
+  type: parameter
+  concept: pap_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 2.0
+- id: claim51
+  type: parameter
+  concept: bap_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 105
+- id: claim52
+  type: parameter
+  concept: bap_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1130
+- id: claim53
+  type: parameter
+  concept: bap_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1150
+- id: claim54
+  type: parameter
+  concept: bap_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 95
+- id: claim55
+  type: parameter
+  concept: bap_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1160
+- id: claim56
+  type: parameter
+  concept: bap_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1170
+- id: claim57
+  type: parameter
+  concept: pup_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 95
+- id: claim58
+  type: parameter
+  concept: pup_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 40
+- id: claim59
+  type: parameter
+  concept: pup_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1250
+- id: claim60
+  type: parameter
+  concept: pup_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1000
+- id: claim61
+  type: parameter
+  concept: pup_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 3.6
+- id: claim62
+  type: parameter
+  concept: pup_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 85
+- id: claim63
+  type: parameter
+  concept: pup_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 40
+- id: claim64
+  type: parameter
+  concept: pup_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1200
+- id: claim65
+  type: parameter
+  concept: pup_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 990
+- id: claim66
+  type: parameter
+  concept: pup_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 3.9
+- id: claim67
+  type: parameter
+  concept: bup_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 100
+- id: claim68
+  type: parameter
+  concept: bup_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 45
+- id: claim69
+  type: parameter
+  concept: bup_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1065
+- id: claim70
+  type: parameter
+  concept: bup_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 990
+- id: claim71
+  type: parameter
+  concept: bup_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 0.8
+- id: claim72
+  type: parameter
+  concept: bup_closure
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 90
+- id: claim73
+  type: parameter
+  concept: bup_trans
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 35
+- id: claim74
+  type: parameter
+  concept: bup_f2_onset
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1030
+- id: claim75
+  type: parameter
+  concept: bup_f2_mid
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 990
+- id: claim76
+  type: parameter
+  concept: bup_f2_rate
+  provenance:
+    paper: Gay_1978_SpeakingRateFormantMovements
+    page: 0
+  value: 1.2

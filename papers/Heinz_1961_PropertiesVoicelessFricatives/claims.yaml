@@ -1,0 +1,633 @@
+source:
+  paper: Heinz_1961_PropertiesVoicelessFricatives
+claims:
+- id: claim1
+  type: parameter
+  concept: sheep_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2400
+- id: claim2
+  type: parameter
+  concept: sheep_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 400
+- id: claim3
+  type: parameter
+  concept: sheep_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 5400
+- id: claim4
+  type: parameter
+  concept: sheep_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim5
+  type: parameter
+  concept: sheep_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3400
+- id: claim6
+  type: parameter
+  concept: sheep_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1800
+- id: claim7
+  type: parameter
+  concept: shack_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2200
+- id: claim8
+  type: parameter
+  concept: shack_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim9
+  type: parameter
+  concept: shack_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 5100
+- id: claim10
+  type: parameter
+  concept: shack_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000
+- id: claim11
+  type: parameter
+  concept: shack_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3900
+- id: claim12
+  type: parameter
+  concept: shack_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1500
+- id: claim13
+  type: parameter
+  concept: sure_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2500
+- id: claim14
+  type: parameter
+  concept: sure_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 500
+- id: claim15
+  type: parameter
+  concept: sure_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4300
+- id: claim16
+  type: parameter
+  concept: sure_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim17
+  type: parameter
+  concept: sure_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3400
+- id: claim18
+  type: parameter
+  concept: sure_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1400
+- id: claim19
+  type: parameter
+  concept: bush_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2200
+- id: claim20
+  type: parameter
+  concept: bush_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 400
+- id: claim21
+  type: parameter
+  concept: bush_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4900
+- id: claim22
+  type: parameter
+  concept: bush_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim23
+  type: parameter
+  concept: bush_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3800
+- id: claim24
+  type: parameter
+  concept: bush_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1400
+- id: claim25
+  type: parameter
+  concept: leash_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2400
+- id: claim26
+  type: parameter
+  concept: leash_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 500
+- id: claim27
+  type: parameter
+  concept: leash_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4800
+- id: claim28
+  type: parameter
+  concept: leash_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 900
+- id: claim29
+  type: parameter
+  concept: leash_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3700
+- id: claim30
+  type: parameter
+  concept: leash_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1400
+- id: claim31
+  type: parameter
+  concept: lush_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2700
+- id: claim32
+  type: parameter
+  concept: lush_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim33
+  type: parameter
+  concept: lush_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 5400
+- id: claim34
+  type: parameter
+  concept: lush_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 900
+- id: claim35
+  type: parameter
+  concept: lush_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4400
+- id: claim36
+  type: parameter
+  concept: lush_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1600
+- id: claim37
+  type: parameter
+  concept: sect_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 6400
+- id: claim38
+  type: parameter
+  concept: sect_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 900
+- id: claim39
+  type: parameter
+  concept: sect_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8000
+- id: claim40
+  type: parameter
+  concept: sect_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1400
+- id: claim41
+  type: parameter
+  concept: sect_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2900
+- id: claim42
+  type: parameter
+  concept: sect_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim43
+  type: parameter
+  concept: soothe_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3500
+- id: claim44
+  type: parameter
+  concept: soothe_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim45
+  type: parameter
+  concept: soothe_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8100
+- id: claim46
+  type: parameter
+  concept: soothe_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 700
+- id: claim47
+  type: parameter
+  concept: soothe_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2700
+- id: claim48
+  type: parameter
+  concept: soothe_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim49
+  type: parameter
+  concept: salve_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 5700
+- id: claim50
+  type: parameter
+  concept: salve_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 800
+- id: claim51
+  type: parameter
+  concept: salve_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8000
+- id: claim52
+  type: parameter
+  concept: salve_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1200
+- id: claim53
+  type: parameter
+  concept: salve_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2900
+- id: claim54
+  type: parameter
+  concept: salve_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim55
+  type: parameter
+  concept: moose_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4000
+- id: claim56
+  type: parameter
+  concept: moose_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim57
+  type: parameter
+  concept: moose_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8000
+- id: claim58
+  type: parameter
+  concept: moose_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim59
+  type: parameter
+  concept: moose_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 3300
+- id: claim60
+  type: parameter
+  concept: moose_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000
+- id: claim61
+  type: parameter
+  concept: niece_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4900
+- id: claim62
+  type: parameter
+  concept: niece_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 700
+- id: claim63
+  type: parameter
+  concept: niece_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8400
+- id: claim64
+  type: parameter
+  concept: niece_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim65
+  type: parameter
+  concept: niece_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2400
+- id: claim66
+  type: parameter
+  concept: niece_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1300
+- id: claim67
+  type: parameter
+  concept: bus_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4600
+- id: claim68
+  type: parameter
+  concept: bus_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 800
+- id: claim69
+  type: parameter
+  concept: bus_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8000
+- id: claim70
+  type: parameter
+  concept: bus_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 800
+- id: claim71
+  type: parameter
+  concept: bus_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 2300
+- id: claim72
+  type: parameter
+  concept: bus_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim73
+  type: parameter
+  concept: fear_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 7900
+- id: claim74
+  type: parameter
+  concept: fear_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 900
+- id: claim75
+  type: parameter
+  concept: fear_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8200
+- id: claim76
+  type: parameter
+  concept: fear_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 900
+- id: claim77
+  type: parameter
+  concept: fear_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 6800
+- id: claim78
+  type: parameter
+  concept: fear_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 600
+- id: claim79
+  type: parameter
+  concept: cuff_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 8400
+- id: claim80
+  type: parameter
+  concept: cuff_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000
+- id: claim81
+  type: parameter
+  concept: cuff_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 12200
+- id: claim82
+  type: parameter
+  concept: cuff_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000
+- id: claim83
+  type: parameter
+  concept: cuff_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 5900
+- id: claim84
+  type: parameter
+  concept: cuff_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim85
+  type: parameter
+  concept: aloof_pole_1_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 6800
+- id: claim86
+  type: parameter
+  concept: aloof_pole_1_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000
+- id: claim87
+  type: parameter
+  concept: aloof_pole_2_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 9000
+- id: claim88
+  type: parameter
+  concept: aloof_pole_2_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1100
+- id: claim89
+  type: parameter
+  concept: aloof_zero_freq
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 4600
+- id: claim90
+  type: parameter
+  concept: aloof_zero_bw
+  provenance:
+    paper: Heinz_1961_PropertiesVoicelessFricatives
+    page: 0
+  value: 1000

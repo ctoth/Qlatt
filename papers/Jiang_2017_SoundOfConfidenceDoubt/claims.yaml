@@ -1,0 +1,45 @@
+source:
+  paper: Jiang_2017_SoundOfConfidenceDoubt
+claims:
+- id: claim1
+  type: parameter
+  concept: normalized_mean_f0
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: ratio
+- id: claim2
+  type: parameter
+  concept: f0_variation
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: ratio
+- id: claim3
+  type: parameter
+  concept: normalized_mean_amplitude
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: ratio
+- id: claim4
+  type: parameter
+  concept: amplitude_variation
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: ratio
+- id: claim5
+  type: parameter
+  concept: normalized_duration
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: ratio
+- id: claim6
+  type: parameter
+  concept: mean_hnr
+  provenance:
+    paper: Jiang_2017_SoundOfConfidenceDoubt
+    page: 0
+  unit: dB

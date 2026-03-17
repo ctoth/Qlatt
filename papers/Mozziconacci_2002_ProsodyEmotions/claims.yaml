@@ -1,0 +1,395 @@
+source:
+  paper: Mozziconacci_2002_ProsodyEmotions
+claims:
+- id: claim1
+  type: parameter
+  concept: neutrality_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 85
+- id: claim2
+  type: parameter
+  concept: neutrality_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 67
+- id: claim3
+  type: parameter
+  concept: neutrality_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 83
+- id: claim4
+  type: parameter
+  concept: joy_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 62
+- id: claim5
+  type: parameter
+  concept: joy_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 72
+- id: claim6
+  type: parameter
+  concept: joy_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 62
+- id: claim7
+  type: parameter
+  concept: boredom_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 92
+- id: claim8
+  type: parameter
+  concept: boredom_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 85
+- id: claim9
+  type: parameter
+  concept: boredom_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 94
+- id: claim10
+  type: parameter
+  concept: anger_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 32
+- id: claim11
+  type: parameter
+  concept: anger_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 42
+- id: claim12
+  type: parameter
+  concept: anger_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 51
+- id: claim13
+  type: parameter
+  concept: sadness_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 97
+- id: claim14
+  type: parameter
+  concept: sadness_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 75
+- id: claim15
+  type: parameter
+  concept: sadness_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 47
+- id: claim16
+  type: parameter
+  concept: fear_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 60
+- id: claim17
+  type: parameter
+  concept: fear_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 42
+- id: claim18
+  type: parameter
+  concept: fear_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 41
+- id: claim19
+  type: parameter
+  concept: indignation_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 85
+- id: claim20
+  type: parameter
+  concept: indignation_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 77
+- id: claim21
+  type: parameter
+  concept: indignation_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 68
+- id: claim22
+  type: parameter
+  concept: mean_natural
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 73
+- id: claim23
+  type: parameter
+  concept: mean_resynthesized
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 66
+- id: claim24
+  type: parameter
+  concept: mean_synthetic
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 63
+- id: claim25
+  type: parameter
+  concept: neutrality_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 37
+- id: claim26
+  type: parameter
+  concept: neutrality_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 46
+- id: claim27
+  type: parameter
+  concept: neutrality_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 56
+- id: claim28
+  type: parameter
+  concept: neutrality_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 56
+- id: claim29
+  type: parameter
+  concept: joy_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 18
+- id: claim30
+  type: parameter
+  concept: joy_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 10
+- id: claim31
+  type: parameter
+  concept: joy_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 27
+- id: claim32
+  type: parameter
+  concept: joy_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 35
+- id: claim33
+  type: parameter
+  concept: boredom_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 41
+- id: claim34
+  type: parameter
+  concept: boredom_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 48
+- id: claim35
+  type: parameter
+  concept: boredom_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 19
+- id: claim36
+  type: parameter
+  concept: boredom_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 52
+- id: claim37
+  type: parameter
+  concept: anger_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 9
+- id: claim38
+  type: parameter
+  concept: anger_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 10
+- id: claim39
+  type: parameter
+  concept: anger_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 27
+- id: claim40
+  type: parameter
+  concept: anger_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 23
+- id: claim41
+  type: parameter
+  concept: sadness_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 8
+- id: claim42
+  type: parameter
+  concept: sadness_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 0
+- id: claim43
+  type: parameter
+  concept: sadness_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 33
+- id: claim44
+  type: parameter
+  concept: sadness_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 19
+- id: claim45
+  type: parameter
+  concept: fear_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 19
+- id: claim46
+  type: parameter
+  concept: fear_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 17
+- id: claim47
+  type: parameter
+  concept: fear_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 10
+- id: claim48
+  type: parameter
+  concept: fear_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 25
+- id: claim49
+  type: parameter
+  concept: indignation_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 24
+- id: claim50
+  type: parameter
+  concept: indignation_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 19
+- id: claim51
+  type: parameter
+  concept: indignation_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 4
+- id: claim52
+  type: parameter
+  concept: indignation_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 52
+- id: claim53
+  type: parameter
+  concept: mean_cond1
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 22
+- id: claim54
+  type: parameter
+  concept: mean_cond2
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 21
+- id: claim55
+  type: parameter
+  concept: mean_cond3
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 25
+- id: claim56
+  type: parameter
+  concept: mean_cond4
+  provenance:
+    paper: Mozziconacci_2002_ProsodyEmotions
+    page: 0
+  value: 37

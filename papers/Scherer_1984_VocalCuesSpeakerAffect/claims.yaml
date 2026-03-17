@@ -1,0 +1,66 @@
+source:
+  paper: Scherer_1984_VocalCuesSpeakerAffect
+claims:
+- id: claim1
+  type: parameter
+  concept: polite_full_audio
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.75
+- id: claim2
+  type: parameter
+  concept: polite_transcript
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.82
+- id: claim3
+  type: parameter
+  concept: unsure_transcript
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.46
+- id: claim4
+  type: parameter
+  concept: doubtful_full_audio
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.41
+- id: claim5
+  type: parameter
+  concept: relaxed_transcript
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: -0.09
+- id: claim6
+  type: parameter
+  concept: understanding_full_audio
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.77
+- id: claim7
+  type: parameter
+  concept: reproachful_full_audio
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.83
+- id: claim8
+  type: parameter
+  concept: reproachful_transcript
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: -0.08
+- id: claim9
+  type: parameter
+  concept: aggressive_transcript
+  provenance:
+    paper: Scherer_1984_VocalCuesSpeakerAffect
+    page: 0
+  value: 0.82

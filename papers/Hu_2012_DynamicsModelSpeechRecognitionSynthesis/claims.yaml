@@ -1,0 +1,172 @@
+source:
+  paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+claims:
+- id: claim1
+  type: parameter
+  concept: lowfrequency_formant
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: lowfrequency_amplitude
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: dB
+- id: claim3
+  type: parameter
+  concept: first_formant_frequency
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: first_formant_amplitude
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: dB
+- id: claim5
+  type: parameter
+  concept: second_formant_frequency
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: Hz
+- id: claim6
+  type: parameter
+  concept: second_formant_amplitude
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: dB
+- id: claim7
+  type: parameter
+  concept: third_formant_frequency
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: Hz
+- id: claim8
+  type: parameter
+  concept: third_formant_amplitude
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: dB
+- id: claim9
+  type: parameter
+  concept: highfrequency_amplitude
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: dB
+- id: claim10
+  type: parameter
+  concept: degree_of_voicing
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  lower_bound: 0
+  upper_bound: 63
+- id: claim11
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  unit: Hz
+- id: claim12
+  type: parameter
+  concept: glottal_pulse_markspace
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  lower_bound: 31
+  upper_bound: 33
+- id: claim13
+  type: parameter
+  concept: frame_rate
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 10
+  unit: ms
+- id: claim14
+  type: parameter
+  concept: analysis_window
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 25
+  unit: ms
+- id: claim15
+  type: parameter
+  concept: maximum_state_duration
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 15
+  unit: frames
+- id: claim16
+  type: parameter
+  concept: delta_window
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 2
+  unit: frames
+- id: claim17
+  type: parameter
+  concept: spectral_vector_dimension
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 31
+- id: claim18
+  type: parameter
+  concept: phone_categories
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  lower_bound: 1
+  upper_bound: 49
+- id: claim19
+  type: parameter
+  concept: male_optimal_states
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 4
+- id: claim20
+  type: parameter
+  concept: female_optimal_states
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 5
+- id: claim21
+  type: parameter
+  concept: maximum_optimal_states
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 6
+- id: claim22
+  type: parameter
+  concept: nonlinear_trajectory_pesqlqo
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 1.35
+- id: claim23
+  type: parameter
+  concept: piecewise_constant_pesqlqo
+  provenance:
+    paper: Hu_2012_DynamicsModelSpeechRecognitionSynthesis
+    page: 0
+  value: 1.28

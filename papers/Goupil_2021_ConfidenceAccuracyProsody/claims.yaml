@@ -1,0 +1,29 @@
+source:
+  paper: Goupil_2021_ConfidenceAccuracyProsody
+claims:
+- id: claim1
+  type: parameter
+  concept: intonation_confidence_effect
+  provenance:
+    paper: Goupil_2021_ConfidenceAccuracyProsody
+    page: 0
+  value: -0.03
+- id: claim2
+  type: equation
+  expression: \text{pitch} \sim \beta_{\text{conf}} \times \text{confidence} + \beta_{\text{acc}}
+    \times \text{accuracy} + \beta_{\text{SOA}} \times \text{SOA}
+  provenance:
+    paper: Goupil_2021_ConfidenceAccuracyProsody
+    page: 0
+- id: claim3
+  type: equation
+  expression: \text{loudness} \sim \beta_{\text{acc}} \times \text{accuracy}
+  provenance:
+    paper: Goupil_2021_ConfidenceAccuracyProsody
+    page: 0
+- id: claim4
+  type: equation
+  expression: \text{duration} \sim \beta_{\text{conf}} \times \text{confidence}
+  provenance:
+    paper: Goupil_2021_ConfidenceAccuracyProsody
+    page: 0

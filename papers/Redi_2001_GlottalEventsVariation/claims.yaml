@@ -1,0 +1,101 @@
+source:
+  paper: Redi_2001_GlottalEventsVariation
+claims:
+- id: claim1
+  type: parameter
+  concept: fs_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 55
+- id: claim2
+  type: parameter
+  concept: fs_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 55
+- id: claim3
+  type: parameter
+  concept: mk_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 52
+- id: claim4
+  type: parameter
+  concept: mk_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 52
+- id: claim5
+  type: parameter
+  concept: mm_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 80
+- id: claim6
+  type: parameter
+  concept: mm_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 80
+- id: claim7
+  type: parameter
+  concept: es_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 73
+- id: claim8
+  type: parameter
+  concept: es_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 73
+- id: claim9
+  type: parameter
+  concept: hh_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 49
+- id: claim10
+  type: parameter
+  concept: hh_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 49
+- id: claim11
+  type: parameter
+  concept: rm_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 30
+- id: claim12
+  type: parameter
+  concept: rm_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 30
+- id: claim13
+  type: parameter
+  concept: sk_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 41
+- id: claim14
+  type: parameter
+  concept: sk_rate
+  provenance:
+    paper: Redi_2001_GlottalEventsVariation
+    page: 0
+  value: 41

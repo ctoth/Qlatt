@@ -1,0 +1,291 @@
+source:
+  paper: Hillenbrand_1995_VowelAcoustics
+claims:
+- id: claim1
+  type: parameter
+  concept: i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 243
+- id: claim2
+  type: parameter
+  concept: i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 306
+- id: claim3
+  type: parameter
+  concept: i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 297
+- id: claim4
+  type: parameter
+  concept: latin_letter_small_capital_i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 192
+- id: claim5
+  type: parameter
+  concept: latin_letter_small_capital_i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 237
+- id: claim6
+  type: parameter
+  concept: latin_letter_small_capital_i
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 248
+- id: claim7
+  type: parameter
+  concept: e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 267
+- id: claim8
+  type: parameter
+  concept: e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 320
+- id: claim9
+  type: parameter
+  concept: e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 314
+- id: claim10
+  type: parameter
+  concept: latin_small_letter_open_e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 189
+- id: claim11
+  type: parameter
+  concept: latin_small_letter_open_e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 254
+- id: claim12
+  type: parameter
+  concept: latin_small_letter_open_e
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 235
+- id: claim13
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 278
+- id: claim14
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 332
+- id: claim15
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 322
+- id: claim16
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 267
+- id: claim17
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 323
+- id: claim18
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 311
+- id: claim19
+  type: parameter
+  concept: latin_small_letter_open_o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 283
+- id: claim20
+  type: parameter
+  concept: latin_small_letter_open_o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 353
+- id: claim21
+  type: parameter
+  concept: latin_small_letter_open_o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 319
+- id: claim22
+  type: parameter
+  concept: o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 265
+- id: claim23
+  type: parameter
+  concept: o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 326
+- id: claim24
+  type: parameter
+  concept: o
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 310
+- id: claim25
+  type: parameter
+  concept: latin_small_letter_upsilon
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 192
+- id: claim26
+  type: parameter
+  concept: latin_small_letter_upsilon
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 249
+- id: claim27
+  type: parameter
+  concept: latin_small_letter_upsilon
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 247
+- id: claim28
+  type: parameter
+  concept: u
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 237
+- id: claim29
+  type: parameter
+  concept: u
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 303
+- id: claim30
+  type: parameter
+  concept: u
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 278
+- id: claim31
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 188
+- id: claim32
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 226
+- id: claim33
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 234
+- id: claim34
+  type: parameter
+  concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 263
+- id: claim35
+  type: parameter
+  concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 321
+- id: claim36
+  type: parameter
+  concept: latin_small_letter_reversed_open_e_modifier_letter_rhotic_hook
+  provenance:
+    paper: Hillenbrand_1995_VowelAcoustics
+    page: 0
+  unit: ms
+  value: 307

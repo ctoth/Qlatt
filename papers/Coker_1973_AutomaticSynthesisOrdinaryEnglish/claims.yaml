@@ -1,0 +1,75 @@
+source:
+  paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+claims:
+- id: claim1
+  type: parameter
+  concept: '1'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 60
+- id: claim2
+  type: parameter
+  concept: '2'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 60
+- id: claim3
+  type: parameter
+  concept: '3'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 60
+- id: claim4
+  type: parameter
+  concept: '4'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 60
+- id: claim5
+  type: parameter
+  concept: '5'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 50
+- id: claim6
+  type: parameter
+  concept: '6'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 40
+- id: claim7
+  type: parameter
+  concept: '7'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 25
+- id: claim8
+  type: parameter
+  concept: '8'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 10
+- id: claim9
+  type: parameter
+  concept: '9'
+  provenance:
+    paper: Coker_1973_AutomaticSynthesisOrdinaryEnglish
+    page: 0
+  unit: ms
+  value: 0

@@ -1,0 +1,234 @@
+source:
+  paper: Liu_2011_FemaleVoiceAttractiveness
+claims:
+- id: claim1
+  type: parameter
+  concept: formant_shift_ratio
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  unit: ratio
+- id: claim2
+  type: parameter
+  concept: pitch_shift
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  unit: semitones
+- id: claim3
+  type: parameter
+  concept: final_f0_slope
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  unit: st/s
+- id: claim4
+  type: parameter
+  concept: voice_quality
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  unit: categorical
+- id: claim5
+  type: parameter
+  concept: voice_quality_x_final_slope_f
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 4.61
+- id: claim6
+  type: parameter
+  concept: voice_quality_x_final_slope_p
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 0.0041
+- id: claim7
+  type: parameter
+  concept: voice_quality_x_formant_shift_f
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 8.33
+- id: claim8
+  type: parameter
+  concept: voice_quality_x_pitch_shift_f
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 3.0
+- id: claim9
+  type: parameter
+  concept: voice_quality_x_pitch_shift_p
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 0.0311
+- id: claim10
+  type: parameter
+  concept: 346_formant_ratio
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 1.1
+- id: claim11
+  type: parameter
+  concept: 346_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.78
+- id: claim12
+  type: parameter
+  concept: 346_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.45
+- id: claim13
+  type: parameter
+  concept: 375_formant_ratio
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 1.0
+- id: claim14
+  type: parameter
+  concept: 375_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.93
+- id: claim15
+  type: parameter
+  concept: 375_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.22
+- id: claim16
+  type: parameter
+  concept: 320_formant_ratio
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 0.9
+- id: claim17
+  type: parameter
+  concept: 320_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.4
+- id: claim18
+  type: parameter
+  concept: 320_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 1.83
+- id: claim19
+  type: parameter
+  concept: 2_st_breathy
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 3.16
+- id: claim20
+  type: parameter
+  concept: 2_st_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.93
+- id: claim21
+  type: parameter
+  concept: 2_st_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.45
+- id: claim22
+  type: parameter
+  concept: 0_breathy
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 3.29
+- id: claim23
+  type: parameter
+  concept: 0_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.93
+- id: claim24
+  type: parameter
+  concept: 0_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.68
+- id: claim25
+  type: parameter
+  concept: 2_st_breathy
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.99
+- id: claim26
+  type: parameter
+  concept: 2_st_normal
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.52
+- id: claim27
+  type: parameter
+  concept: 2_st_pressed
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+  value: 2.09
+- id: claim28
+  type: observation
+  statement: Breathy voice quality should always be rated more attractive than normal,
+    which should always be rated more attractive than pressed, for female voices judged
+    by male listeners
+  concepts: []
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+- id: claim29
+  type: observation
+  statement: Formant condensation (simulating shorter vocal tract) should not decrease
+    attractiveness relative to neutral; formant dispersion (longer vocal tract) should
+    decrease attractiveness
+  concepts: []
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+- id: claim30
+  type: observation
+  statement: Lowering pitch by 2 st should decrease attractiveness relative to original
+    pitch
+  concepts: []
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+- id: claim31
+  type: observation
+  statement: Voice quality effect size should be larger than formant shift effect
+    size, which should be larger than pitch shift effect size
+  concepts: []
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0
+- id: claim32
+  type: observation
+  statement: Final F0 slope should have minimal impact on attractiveness ratings compared
+    to voice quality
+  concepts: []
+  provenance:
+    paper: Liu_2011_FemaleVoiceAttractiveness
+    page: 0

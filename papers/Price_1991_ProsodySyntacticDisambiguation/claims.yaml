@@ -1,0 +1,115 @@
+source:
+  paper: Price_1991_ProsodySyntacticDisambiguation
+claims:
+- id: claim1
+  type: parameter
+  concept: parenthetical_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 86
+- id: claim2
+  type: parameter
+  concept: parenthetical_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 63
+- id: claim3
+  type: parameter
+  concept: apposition_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 92
+- id: claim4
+  type: parameter
+  concept: apposition_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 70
+- id: claim5
+  type: parameter
+  concept: mainmain_vs_mainsubordinate_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 71
+- id: claim6
+  type: parameter
+  concept: mainmain_vs_mainsubordinate_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 37
+- id: claim7
+  type: parameter
+  concept: tags_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 88
+- id: claim8
+  type: parameter
+  concept: tags_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 57
+- id: claim9
+  type: parameter
+  concept: far_near_attachment_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 71
+- id: claim10
+  type: parameter
+  concept: far_near_attachment_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 23
+- id: claim11
+  type: parameter
+  concept: left_right_attachment_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 95
+- id: claim12
+  type: parameter
+  concept: left_right_attachment_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 68
+- id: claim13
+  type: parameter
+  concept: particle_preposition_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 82
+- id: claim14
+  type: parameter
+  concept: particle_preposition_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 45
+- id: claim15
+  type: parameter
+  concept: average_overall_correct
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 84
+- id: claim16
+  type: parameter
+  concept: average_overall_confident
+  provenance:
+    paper: Price_1991_ProsodySyntacticDisambiguation
+    page: 0
+  value: 52

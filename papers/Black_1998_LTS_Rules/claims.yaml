@@ -1,0 +1,69 @@
+source:
+  paper: Black_1998_LTS_Rules
+claims:
+- id: claim1
+  type: parameter
+  concept: stop_value
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  lower_bound: 1
+  upper_bound: 8
+  unit: count
+- id: claim2
+  type: parameter
+  concept: context_window
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  value: 3
+  unit: letters
+- id: claim3
+  type: parameter
+  concept: train_test_split
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  unit: ratio
+- id: claim4
+  type: parameter
+  concept: min_word_length
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  value: 4
+  unit: letters
+- id: claim5
+  type: parameter
+  concept: letters
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  unit: LTPS
+- id: claim6
+  type: parameter
+  concept: letters
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  unit: LTPS
+- id: claim7
+  type: parameter
+  concept: words
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  unit: LTPS
+- id: claim8
+  type: parameter
+  concept: words
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0
+  unit: LTPS
+- id: claim9
+  type: equation
+  expression: P(\text{alignment}) = \prod_{i} P(phone_i | letter_i)
+  provenance:
+    paper: Black_1998_LTS_Rules
+    page: 0

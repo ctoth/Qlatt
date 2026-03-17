@@ -1,0 +1,405 @@
+source:
+  paper: Hanson_1999_GlottalMaleSpeakers
+claims:
+- id: claim1
+  type: parameter
+  concept: length_of_vocal_tract
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 17
+  unit: cm
+- id: claim2
+  type: parameter
+  concept: vertical_length_of_glottis
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 0.4
+  unit: cm
+- id: claim3
+  type: parameter
+  concept: length_of_trachea
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 12
+  unit: cm
+- id: claim4
+  type: parameter
+  concept: crosssectional_area_of_vocal_tract
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 4
+  unit: cm^2
+- id: claim5
+  type: parameter
+  concept: crosssectional_area_of_trachea
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 2.5
+  unit: cm^2
+- id: claim6
+  type: parameter
+  concept: '000'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 0
+- id: claim7
+  type: parameter
+  concept: '001'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 15
+- id: claim8
+  type: parameter
+  concept: '002'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 31
+- id: claim9
+  type: parameter
+  concept: '003'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 46
+- id: claim10
+  type: parameter
+  concept: '004'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 62
+- id: claim11
+  type: parameter
+  concept: '005'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 77
+- id: claim12
+  type: parameter
+  concept: '006'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 93
+- id: claim13
+  type: parameter
+  concept: '007'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 108
+- id: claim14
+  type: parameter
+  concept: 008
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 124
+- id: claim15
+  type: parameter
+  concept: 009
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 139
+- id: claim16
+  type: parameter
+  concept: '010'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  unit: Hz
+  value: 155
+- id: claim17
+  type: parameter
+  concept: h1a1_average
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: -7.0
+- id: claim18
+  type: parameter
+  concept: h1a1_minimum
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: -11.3
+- id: claim19
+  type: parameter
+  concept: h1a1_maximum
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: -2.3
+- id: claim20
+  type: parameter
+  concept: h1a3_average
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 13.7
+- id: claim21
+  type: parameter
+  concept: h1a3_minimum
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 4.7
+- id: claim22
+  type: parameter
+  concept: b1_average
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 119
+- id: claim23
+  type: parameter
+  concept: b1_minimum
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 73
+- id: claim24
+  type: parameter
+  concept: b1_maximum
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 205
+- id: claim25
+  type: parameter
+  concept: h1h2_male_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 0.0
+- id: claim26
+  type: parameter
+  concept: h1h2_female_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 3.1
+- id: claim27
+  type: parameter
+  concept: h1h2_male_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 1.8
+- id: claim28
+  type: parameter
+  concept: h1h2_female_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 2.0
+- id: claim29
+  type: parameter
+  concept: h1a1_male_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: -6.9
+- id: claim30
+  type: parameter
+  concept: h1a1_female_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: -3.9
+- id: claim31
+  type: parameter
+  concept: h1a1_male_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 3.5
+- id: claim32
+  type: parameter
+  concept: h1a1_female_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 4.3
+- id: claim33
+  type: parameter
+  concept: h1a3_male_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 13.8
+- id: claim34
+  type: parameter
+  concept: h1a3_female_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 23.4
+- id: claim35
+  type: parameter
+  concept: h1a3_male_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 4.8
+- id: claim36
+  type: parameter
+  concept: h1a3_female_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 6.6
+- id: claim37
+  type: parameter
+  concept: n_w_male_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 1.9
+- id: claim38
+  type: parameter
+  concept: n_w_female_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 2.3
+- id: claim39
+  type: parameter
+  concept: n_w_male_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 0.5
+- id: claim40
+  type: parameter
+  concept: n_w_female_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 0.7
+- id: claim41
+  type: parameter
+  concept: b1_ae_male_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 126
+- id: claim42
+  type: parameter
+  concept: b1_ae_female_mean
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 165
+- id: claim43
+  type: parameter
+  concept: b1_ae_male_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 54
+- id: claim44
+  type: parameter
+  concept: b1_ae_female_sd
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+  value: 61
+- id: claim45
+  type: equation
+  expression: 'In frequency domain:'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim46
+  type: equation
+  expression: 'Net effect at frequency $\omega$:'
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim47
+  type: observation
+  statement: H1\*-H2\* for male speakers should be in range [-3.3, 4.2] dB (measured
+    range)
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim48
+  type: observation
+  statement: H1\*-A1 for male speakers should be in range [-16.1, 0.4] dB
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim49
+  type: observation
+  statement: H1\*-A3\* for male speakers should be in range [4.8, 24.1] dB
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim50
+  type: observation
+  statement: B1 for male /ae/ should be in range [58, 245] Hz
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim51
+  type: observation
+  statement: N_w ratings should be in range [1.0, 3.8] (measured range across speakers)
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim52
+  type: observation
+  statement: Increasing posterior glottal chink area monotonically increases B1, spectral
+    tilt, and dc airflow (Table II)
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim53
+  type: observation
+  statement: H1\*-A3\* should be on average ~9.6 dB lower for males than females
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim54
+  type: observation
+  statement: H1\*-H2\* should be on average ~3 dB lower for males than females
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0
+- id: claim55
+  type: observation
+  statement: 'For a synthesizer: increasing OQ should increase H1\*-H2\*; increasing
+    glottal chink area should increase H1\*-A1 and H1\*-A3\*'
+  concepts: []
+  provenance:
+    paper: Hanson_1999_GlottalMaleSpeakers
+    page: 0

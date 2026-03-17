@@ -1,0 +1,957 @@
+source:
+  paper: Starr_2015_SweetVoiceJapaneseFeminine
+claims:
+- id: claim1
+  type: parameter
+  concept: cs_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 123
+- id: claim2
+  type: parameter
+  concept: cs_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 231.1
+- id: claim3
+  type: parameter
+  concept: cs_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 233.8
+- id: claim4
+  type: parameter
+  concept: cs_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 5.26
+- id: claim5
+  type: parameter
+  concept: cs_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 6.97
+- id: claim6
+  type: parameter
+  concept: cs_h1a1_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.34
+- id: claim7
+  type: parameter
+  concept: cs_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 1.22
+- id: claim8
+  type: parameter
+  concept: cs_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.71
+- id: claim9
+  type: parameter
+  concept: cs_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 15.51
+- id: claim10
+  type: parameter
+  concept: cs_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 19.77
+- id: claim11
+  type: parameter
+  concept: cs_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.12
+- id: claim12
+  type: parameter
+  concept: cs_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 22.47
+- id: claim13
+  type: parameter
+  concept: cs_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.69
+- id: claim14
+  type: parameter
+  concept: cs_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.6
+- id: claim15
+  type: parameter
+  concept: cs_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.38
+- id: claim16
+  type: parameter
+  concept: ha_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 12
+- id: claim17
+  type: parameter
+  concept: ha_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 243.1
+- id: claim18
+  type: parameter
+  concept: ha_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 321.6
+- id: claim19
+  type: parameter
+  concept: ha_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 5.98
+- id: claim20
+  type: parameter
+  concept: ha_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.0
+- id: claim21
+  type: parameter
+  concept: ha_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 8.11
+- id: claim22
+  type: parameter
+  concept: ha_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 23.81
+- id: claim23
+  type: parameter
+  concept: ha_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 21.15
+- id: claim24
+  type: parameter
+  concept: ha_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.03
+- id: claim25
+  type: parameter
+  concept: ha_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 25.63
+- id: claim26
+  type: parameter
+  concept: ha_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.1
+- id: claim27
+  type: parameter
+  concept: ha_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 12.28
+- id: claim28
+  type: parameter
+  concept: ha_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 20.37
+- id: claim29
+  type: parameter
+  concept: ik_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 72
+- id: claim30
+  type: parameter
+  concept: ik_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 252.8
+- id: claim31
+  type: parameter
+  concept: ik_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 281.3
+- id: claim32
+  type: parameter
+  concept: ik_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 4.21
+- id: claim33
+  type: parameter
+  concept: ik_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 8.4
+- id: claim34
+  type: parameter
+  concept: ik_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 2.57
+- id: claim35
+  type: parameter
+  concept: ik_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 14.37
+- id: claim36
+  type: parameter
+  concept: ik_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.78
+- id: claim37
+  type: parameter
+  concept: ik_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 21.26
+- id: claim38
+  type: parameter
+  concept: ik_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.77
+- id: claim39
+  type: parameter
+  concept: ik_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 25.36
+- id: claim40
+  type: parameter
+  concept: ik_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.49
+- id: claim41
+  type: parameter
+  concept: ik_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 14.43
+- id: claim42
+  type: parameter
+  concept: ik_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 14.79
+- id: claim43
+  type: parameter
+  concept: nh_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 42
+- id: claim44
+  type: parameter
+  concept: nh_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 286.1
+- id: claim45
+  type: parameter
+  concept: nh_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 221.7
+- id: claim46
+  type: parameter
+  concept: nh_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 2.04
+- id: claim47
+  type: parameter
+  concept: nh_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 9.87
+- id: claim48
+  type: parameter
+  concept: nh_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 20.18
+- id: claim49
+  type: parameter
+  concept: nh_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 15.92
+- id: claim50
+  type: parameter
+  concept: nh_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 21.3
+- id: claim51
+  type: parameter
+  concept: nh_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.54
+- id: claim52
+  type: parameter
+  concept: nh_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 13.97
+- id: claim53
+  type: parameter
+  concept: nh_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 12.89
+- id: claim54
+  type: parameter
+  concept: nj_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 57
+- id: claim55
+  type: parameter
+  concept: nj_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 286.6
+- id: claim56
+  type: parameter
+  concept: nj_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 233.2
+- id: claim57
+  type: parameter
+  concept: nj_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 6.18
+- id: claim58
+  type: parameter
+  concept: nj_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 4.34
+- id: claim59
+  type: parameter
+  concept: nj_h1a1_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.79
+- id: claim60
+  type: parameter
+  concept: nj_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.73
+- id: claim61
+  type: parameter
+  concept: nj_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.44
+- id: claim62
+  type: parameter
+  concept: nj_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 7.58
+- id: claim63
+  type: parameter
+  concept: nj_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.82
+- id: claim64
+  type: parameter
+  concept: nj_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.32
+- id: claim65
+  type: parameter
+  concept: nj_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 24.79
+- id: claim66
+  type: parameter
+  concept: nj_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 19.48
+- id: claim67
+  type: parameter
+  concept: nj_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.28
+- id: claim68
+  type: parameter
+  concept: nj_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 12.58
+- id: claim69
+  type: parameter
+  concept: os_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 48
+- id: claim70
+  type: parameter
+  concept: os_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 241.4
+- id: claim71
+  type: parameter
+  concept: os_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 207.3
+- id: claim72
+  type: parameter
+  concept: os_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 5.25
+- id: claim73
+  type: parameter
+  concept: os_h1a1_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 4.9
+- id: claim74
+  type: parameter
+  concept: os_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 21.01
+- id: claim75
+  type: parameter
+  concept: os_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 6.7
+- id: claim76
+  type: parameter
+  concept: os_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 20.28
+- id: claim77
+  type: parameter
+  concept: os_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 15.57
+- id: claim78
+  type: parameter
+  concept: os_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 30.22
+- id: claim79
+  type: parameter
+  concept: os_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 22.45
+- id: claim80
+  type: parameter
+  concept: os_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.66
+- id: claim81
+  type: parameter
+  concept: os_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.35
+- id: claim82
+  type: parameter
+  concept: sa_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 30
+- id: claim83
+  type: parameter
+  concept: sa_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 305.8
+- id: claim84
+  type: parameter
+  concept: sa_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 20.98
+- id: claim85
+  type: parameter
+  concept: sa_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 39.0
+- id: claim86
+  type: parameter
+  concept: sa_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 3.426
+- id: claim87
+  type: parameter
+  concept: ss_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 108
+- id: claim88
+  type: parameter
+  concept: ss_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 277.3
+- id: claim89
+  type: parameter
+  concept: ss_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 305.3
+- id: claim90
+  type: parameter
+  concept: ss_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.86
+- id: claim91
+  type: parameter
+  concept: ss_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 4.49
+- id: claim92
+  type: parameter
+  concept: ss_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 21.96
+- id: claim93
+  type: parameter
+  concept: ss_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.77
+- id: claim94
+  type: parameter
+  concept: ss_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 31.71
+- id: claim95
+  type: parameter
+  concept: ss_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 24.89
+- id: claim96
+  type: parameter
+  concept: ss_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 4.28
+- id: claim97
+  type: parameter
+  concept: ss_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 8.18
+- id: claim98
+  type: parameter
+  concept: sn_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 171
+- id: claim99
+  type: parameter
+  concept: sn_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 257.4
+- id: claim100
+  type: parameter
+  concept: sn_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 260.3
+- id: claim101
+  type: parameter
+  concept: sn_h1h2_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 0.69
+- id: claim102
+  type: parameter
+  concept: sn_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 6.96
+- id: claim103
+  type: parameter
+  concept: sn_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 3.98
+- id: claim104
+  type: parameter
+  concept: sn_h1a3_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 8.06
+- id: claim105
+  type: parameter
+  concept: sn_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.01
+- id: claim106
+  type: parameter
+  concept: sn_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 22.74
+- id: claim107
+  type: parameter
+  concept: sn_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.37
+- id: claim108
+  type: parameter
+  concept: sn_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 27.5
+- id: claim109
+  type: parameter
+  concept: sn_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 18.99
+- id: claim110
+  type: parameter
+  concept: sn_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 10.99
+- id: claim111
+  type: parameter
+  concept: sn_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.5
+- id: claim112
+  type: parameter
+  concept: ty_n
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 9
+- id: claim113
+  type: parameter
+  concept: ty_f0_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 335.5
+- id: claim114
+  type: parameter
+  concept: ty_f0_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 274.8
+- id: claim115
+  type: parameter
+  concept: ty_h1h2_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 7.27
+- id: claim116
+  type: parameter
+  concept: ty_h1a1_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 1.0
+- id: claim117
+  type: parameter
+  concept: ty_h1a3_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 10.81
+- id: claim118
+  type: parameter
+  concept: ty_cpp_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 22.37
+- id: claim119
+  type: parameter
+  concept: ty_cpp_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 16.13
+- id: claim120
+  type: parameter
+  concept: ty_hnr35_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 25.21
+- id: claim121
+  type: parameter
+  concept: ty_hnr35_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 17.98
+- id: claim122
+  type: parameter
+  concept: ty_2k4k_modal
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 6.26
+- id: claim123
+  type: parameter
+  concept: ty_2k4k_brthy
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  value: 10.78
+- id: claim124
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: Hz
+- id: claim125
+  type: parameter
+  concept: h1h2
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim126
+  type: parameter
+  concept: h1a1
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim127
+  type: parameter
+  concept: h1a3
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim128
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim129
+  type: parameter
+  concept: 2k4k
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim130
+  type: parameter
+  concept: cpp
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+  unit: dB
+- id: claim131
+  type: observation
+  statement: Sweet voice H1-H2 should be higher than same-speaker nonsweet voice
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+- id: claim132
+  type: observation
+  statement: Sweet voice HNR should be higher than same-speaker nonsweet voice
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+- id: claim133
+  type: observation
+  statement: Sweet voice 2k-4k should be lower than same-speaker nonsweet voice
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+- id: claim134
+  type: observation
+  statement: Sweet voice F0 should NOT be reliably higher than nonsweet from same
+    speaker
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+- id: claim135
+  type: observation
+  statement: CPP should NOT differ significantly between sweet and nonsweet
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0
+- id: claim136
+  type: observation
+  statement: The combination of high H1-based measures + high HNR is distinctive (rules
+    out pure breathiness)
+  concepts: []
+  provenance:
+    paper: Starr_2015_SweetVoiceJapaneseFeminine
+    page: 0

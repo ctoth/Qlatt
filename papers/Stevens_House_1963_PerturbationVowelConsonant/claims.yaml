@@ -1,0 +1,2145 @@
+source:
+  paper: Stevens_House_1963_PerturbationVowelConsonant
+claims:
+- id: claim1
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim2
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 470
+- id: claim3
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 580
+- id: claim4
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 820
+- id: claim5
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 840
+- id: claim6
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 690
+- id: claim7
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 500
+- id: claim8
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 330
+- id: claim9
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2440
+- id: claim10
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2000
+- id: claim11
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1930
+- id: claim12
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1710
+- id: claim13
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim14
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1340
+- id: claim15
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1260
+- id: claim16
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1010
+- id: claim17
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 3000
+- id: claim18
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2650
+- id: claim19
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2610
+- id: claim20
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2520
+- id: claim21
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2690
+- id: claim22
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2650
+- id: claim23
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2580
+- id: claim24
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2570
+- id: claim25
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim26
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 460
+- id: claim27
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 570
+- id: claim28
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 750
+- id: claim29
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 740
+- id: claim30
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 610
+- id: claim31
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 480
+- id: claim32
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 310
+- id: claim33
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2230
+- id: claim34
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1840
+- id: claim35
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1720
+- id: claim36
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1600
+- id: claim37
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim38
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1270
+- id: claim39
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1250
+- id: claim40
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1190
+- id: claim41
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2740
+- id: claim42
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2510
+- id: claim43
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2400
+- id: claim44
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2330
+- id: claim45
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2300
+- id: claim46
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2230
+- id: claim47
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2210
+- id: claim48
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1990
+- id: claim49
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim50
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 420
+- id: claim51
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 510
+- id: claim52
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 620
+- id: claim53
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 600
+- id: claim54
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 560
+- id: claim55
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 450
+- id: claim56
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 310
+- id: claim57
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2120
+- id: claim58
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1720
+- id: claim59
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1670
+- id: claim60
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1640
+- id: claim61
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1120
+- id: claim62
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim63
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1150
+- id: claim64
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1190
+- id: claim65
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 3000
+- id: claim66
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2460
+- id: claim67
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2500
+- id: claim68
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2650
+- id: claim69
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2100
+- id: claim70
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2210
+- id: claim71
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2060
+- id: claim72
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2050
+- id: claim73
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim74
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 450
+- id: claim75
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 550
+- id: claim76
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 730
+- id: claim77
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 730
+- id: claim78
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 620
+- id: claim79
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 480
+- id: claim80
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 320
+- id: claim81
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2260
+- id: claim82
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1850
+- id: claim83
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1770
+- id: claim84
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1650
+- id: claim85
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1190
+- id: claim86
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1280
+- id: claim87
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim88
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1110
+- id: claim89
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2910
+- id: claim90
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2540
+- id: claim91
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2500
+- id: claim92
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2500
+- id: claim93
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2360
+- id: claim94
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2360
+- id: claim95
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2280
+- id: claim96
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2200
+- id: claim97
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 260
+- id: claim98
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 440
+- id: claim99
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 490
+- id: claim100
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 820
+- id: claim101
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 800
+- id: claim102
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 730
+- id: claim103
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 500
+- id: claim104
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 310
+- id: claim105
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2410
+- id: claim106
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2070
+- id: claim107
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2010
+- id: claim108
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1730
+- id: claim109
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1200
+- id: claim110
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1320
+- id: claim111
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1170
+- id: claim112
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 750
+- id: claim113
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2930
+- id: claim114
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2640
+- id: claim115
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2650
+- id: claim116
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2510
+- id: claim117
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2770
+- id: claim118
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2690
+- id: claim119
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2530
+- id: claim120
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2530
+- id: claim121
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 310
+- id: claim122
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 460
+- id: claim123
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 560
+- id: claim124
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 770
+- id: claim125
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 780
+- id: claim126
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 600
+- id: claim127
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 470
+- id: claim128
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 320
+- id: claim129
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2340
+- id: claim130
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1990
+- id: claim131
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1900
+- id: claim132
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1640
+- id: claim133
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim134
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1380
+- id: claim135
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1330
+- id: claim136
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 930
+- id: claim137
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2900
+- id: claim138
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2620
+- id: claim139
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2760
+- id: claim140
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2510
+- id: claim141
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2160
+- id: claim142
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2550
+- id: claim143
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2140
+- id: claim144
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2070
+- id: claim145
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 270
+- id: claim146
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 460
+- id: claim147
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 540
+- id: claim148
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 700
+- id: claim149
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 650
+- id: claim150
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 680
+- id: claim151
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 500
+- id: claim152
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 320
+- id: claim153
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2230
+- id: claim154
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1930
+- id: claim155
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1830
+- id: claim156
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1810
+- id: claim157
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1070
+- id: claim158
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1220
+- id: claim159
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1050
+- id: claim160
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 950
+- id: claim161
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 3030
+- id: claim162
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2680
+- id: claim163
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2660
+- id: claim164
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2770
+- id: claim165
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2170
+- id: claim166
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2510
+- id: claim167
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1990
+- id: claim168
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2050
+- id: claim169
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 280
+- id: claim170
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 450
+- id: claim171
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 530
+- id: claim172
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 760
+- id: claim173
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 740
+- id: claim174
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 670
+- id: claim175
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 490
+- id: claim176
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 320
+- id: claim177
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2320
+- id: claim178
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2000
+- id: claim179
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1910
+- id: claim180
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1730
+- id: claim181
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1160
+- id: claim182
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1310
+- id: claim183
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1180
+- id: claim184
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 880
+- id: claim185
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2950
+- id: claim186
+  type: parameter
+  concept: m_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2650
+- id: claim187
+  type: parameter
+  concept: m_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2690
+- id: claim188
+  type: parameter
+  concept: m_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2600
+- id: claim189
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2370
+- id: claim190
+  type: parameter
+  concept: m_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2580
+- id: claim191
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2220
+- id: claim192
+  type: parameter
+  concept: m_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2220
+- id: claim193
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim194
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 420
+- id: claim195
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 560
+- id: claim196
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 840
+- id: claim197
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 800
+- id: claim198
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 770
+- id: claim199
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 450
+- id: claim200
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 340
+- id: claim201
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2400
+- id: claim202
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2140
+- id: claim203
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1950
+- id: claim204
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1710
+- id: claim205
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1100
+- id: claim206
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1210
+- id: claim207
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1060
+- id: claim208
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 720
+- id: claim209
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2900
+- id: claim210
+  type: parameter
+  concept: jm_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2710
+- id: claim211
+  type: parameter
+  concept: jm_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2560
+- id: claim212
+  type: parameter
+  concept: jm_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2470
+- id: claim213
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2750
+- id: claim214
+  type: parameter
+  concept: jm_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2710
+- id: claim215
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2530
+- id: claim216
+  type: parameter
+  concept: jm_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2630
+- id: claim217
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 300
+- id: claim218
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 490
+- id: claim219
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 580
+- id: claim220
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 750
+- id: claim221
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 680
+- id: claim222
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 620
+- id: claim223
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 460
+- id: claim224
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 320
+- id: claim225
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2360
+- id: claim226
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1940
+- id: claim227
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1790
+- id: claim228
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1630
+- id: claim229
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1140
+- id: claim230
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1170
+- id: claim231
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1090
+- id: claim232
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 940
+- id: claim233
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2900
+- id: claim234
+  type: parameter
+  concept: ah_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2590
+- id: claim235
+  type: parameter
+  concept: ah_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2500
+- id: claim236
+  type: parameter
+  concept: ah_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2360
+- id: claim237
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2170
+- id: claim238
+  type: parameter
+  concept: ah_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2310
+- id: claim239
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2080
+- id: claim240
+  type: parameter
+  concept: ah_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2030
+- id: claim241
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 280
+- id: claim242
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 460
+- id: claim243
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 610
+- id: claim244
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 720
+- id: claim245
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 680
+- id: claim246
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 760
+- id: claim247
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 480
+- id: claim248
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 310
+- id: claim249
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2260
+- id: claim250
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2000
+- id: claim251
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1900
+- id: claim252
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1840
+- id: claim253
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1090
+- id: claim254
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1250
+- id: claim255
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 980
+- id: claim256
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 800
+- id: claim257
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2960
+- id: claim258
+  type: parameter
+  concept: ks_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2720
+- id: claim259
+  type: parameter
+  concept: ks_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2640
+- id: claim260
+  type: parameter
+  concept: ks_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2810
+- id: claim261
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2480
+- id: claim262
+  type: parameter
+  concept: ks_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2800
+- id: claim263
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 1990
+- id: claim264
+  type: parameter
+  concept: ks_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 2130
+- id: claim265
+  type: parameter
+  concept: 50_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 50
+- id: claim266
+  type: parameter
+  concept: 50_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 60
+- id: claim267
+  type: parameter
+  concept: 50_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 110
+- id: claim268
+  type: parameter
+  concept: 50_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 130
+- id: claim269
+  type: parameter
+  concept: 50_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim270
+  type: parameter
+  concept: 50_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 50
+- id: claim271
+  type: parameter
+  concept: 50_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 60
+- id: claim272
+  type: parameter
+  concept: 120_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 90
+- id: claim273
+  type: parameter
+  concept: 120_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 90
+- id: claim274
+  type: parameter
+  concept: 120_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim275
+  type: parameter
+  concept: 120_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 80
+- id: claim276
+  type: parameter
+  concept: 120_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 70
+- id: claim277
+  type: parameter
+  concept: 120_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim278
+  type: parameter
+  concept: 120_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim279
+  type: parameter
+  concept: 210_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 140
+- id: claim280
+  type: parameter
+  concept: 210_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 190
+- id: claim281
+  type: parameter
+  concept: 210_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 200
+- id: claim282
+  type: parameter
+  concept: 210_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 250
+- id: claim283
+  type: parameter
+  concept: 210_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 180
+- id: claim284
+  type: parameter
+  concept: 210_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 160
+- id: claim285
+  type: parameter
+  concept: 210_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 130
+- id: claim286
+  type: parameter
+  concept: 30_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 40
+- id: claim287
+  type: parameter
+  concept: 30_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 50
+- id: claim288
+  type: parameter
+  concept: 30_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim289
+  type: parameter
+  concept: 30_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 110
+- id: claim290
+  type: parameter
+  concept: 30_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 60
+- id: claim291
+  type: parameter
+  concept: 30_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 30
+- id: claim292
+  type: parameter
+  concept: 30_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 40
+- id: claim293
+  type: parameter
+  concept: 60_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim294
+  type: parameter
+  concept: 60_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim295
+  type: parameter
+  concept: 60_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 80
+- id: claim296
+  type: parameter
+  concept: 60_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 80
+- id: claim297
+  type: parameter
+  concept: 60_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 60
+- id: claim298
+  type: parameter
+  concept: 60_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 100
+- id: claim299
+  type: parameter
+  concept: 60_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 90
+- id: claim300
+  type: parameter
+  concept: 220_i
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 180
+- id: claim301
+  type: parameter
+  concept: 220_e
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 230
+- id: claim302
+  type: parameter
+  concept: 220_ae
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 190
+- id: claim303
+  type: parameter
+  concept: 220_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 220
+- id: claim304
+  type: parameter
+  concept: 220_a
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 200
+- id: claim305
+  type: parameter
+  concept: 220_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 180
+- id: claim306
+  type: parameter
+  concept: 220_u
+  provenance:
+    paper: Stevens_House_1963_PerturbationVowelConsonant
+    page: 0
+  value: 110

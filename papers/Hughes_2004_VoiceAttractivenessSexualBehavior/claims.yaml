@@ -1,0 +1,142 @@
+source:
+  paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+claims:
+- id: claim1
+  type: parameter
+  concept: male_shr
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  lower_bound: 1.01
+  upper_bound: 1.47
+  unit: ratio
+- id: claim2
+  type: parameter
+  concept: female_shr
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  lower_bound: 0.84
+  upper_bound: 1.19
+  unit: ratio
+- id: claim3
+  type: parameter
+  concept: male_whr
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  lower_bound: 0.74
+  upper_bound: 1.18
+  unit: ratio
+- id: claim4
+  type: parameter
+  concept: female_whr
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  lower_bound: 0.64
+  upper_bound: 0.97
+  unit: ratio
+- id: claim5
+  type: parameter
+  concept: male_bmi
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: kg/m^2
+- id: claim6
+  type: parameter
+  concept: female_bmi
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: kg/m^2
+- id: claim7
+  type: parameter
+  concept: voice_attractiveness_scale
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  lower_bound: 1
+  upper_bound: 5
+  unit: points
+- id: claim8
+  type: parameter
+  concept: age_first_masturbation
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: n
+  value: 36
+- id: claim9
+  type: parameter
+  concept: age_first_sex
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: n
+  value: 34
+- id: claim10
+  type: parameter
+  concept: number_of_sex_partners
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: n
+  value: 43
+- id: claim11
+  type: parameter
+  concept: number_of_epc_partners
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: n
+  value: 43
+- id: claim12
+  type: parameter
+  concept: times_chosen_as_epc_partner
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+  unit: n
+  value: 43
+- id: claim13
+  type: observation
+  statement: Voice attractiveness ratings should be positively correlated with SHR
+    in males (r ~ .5)
+  concepts: []
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+- id: claim14
+  type: observation
+  statement: Voice attractiveness ratings should be negatively correlated with WHR
+    in females (r ~ -.37)
+  concepts: []
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+- id: claim15
+  type: observation
+  statement: BMI should NOT significantly correlate with voice attractiveness in either
+    sex
+  concepts: []
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+- id: claim16
+  type: observation
+  statement: Opposite-sex voice ratings should be better predictors of sexual behavior
+    than same-sex ratings
+  concepts: []
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0
+- id: claim17
+  type: observation
+  statement: The voice-body configuration relationship should persist after controlling
+    for BMI (partial correlations should remain significant)
+  concepts: []
+  provenance:
+    paper: Hughes_2004_VoiceAttractivenessSexualBehavior
+    page: 0

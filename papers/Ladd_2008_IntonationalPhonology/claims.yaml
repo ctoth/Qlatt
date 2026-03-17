@@ -1,0 +1,166 @@
+source:
+  paper: Ladd_2008_IntonationalPhonology
+claims:
+- id: claim1
+  type: parameter
+  concept: k
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  value: 0.6
+  unit: ratio
+- id: claim2
+  type: parameter
+  concept: f_r
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  unit: Hz
+- id: claim3
+  type: parameter
+  concept: t
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  unit: ratio
+- id: claim4
+  type: parameter
+  concept: n
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  unit: ratio
+- id: claim5
+  type: parameter
+  concept: r
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  value: 1.0
+  unit: ratio
+- id: claim6
+  type: parameter
+  concept: calling_contour_interval
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  value: 3
+  unit: semitones
+- id: claim7
+  type: parameter
+  concept: peak_alignment
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  value: 35
+  unit: ms
+- id: claim8
+  type: parameter
+  concept: low_rise_slope
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  value: 6.7
+  unit: oct/sec
+- id: claim9
+  type: parameter
+  concept: peak_control_precision
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  lower_bound: 3.7
+  upper_bound: 11.5
+  unit: Hz
+- id: claim10
+  type: parameter
+  concept: declination_total_drop
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+  unit: Hz
+- id: claim11
+  type: observation
+  statement: Downstepped H* must be lower than preceding H* by a constant proportion
+    (k ~0.6)
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim12
+  type: observation
+  statement: Between two H* accents, F0 must show a sagging transition with abrupt
+    rise at onset of second accented syllable, NOT linear interpolation
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim13
+  type: observation
+  statement: Final accent in a downstep series must be lower than the constant-proportion
+    prediction (final lowering)
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim14
+  type: observation
+  statement: H% boundary tone must be higher than any preceding H in the same phrase
+    (upstep rule)
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim15
+  type: observation
+  statement: Calling contour H-to-!H interval should be approximately 3 semitones
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim16
+  type: observation
+  statement: Nuclear accent must be present in every intermediate phrase (obligatory)
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim17
+  type: observation
+  statement: For broad focus, the last accent in the phrase must fall on the last
+    content word
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim18
+  type: observation
+  statement: Moving the last accent away from the default position must imply narrow
+    focus
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim19
+  type: observation
+  statement: Peak F0 at turning points should be approximately constant per speaker
+    regardless of rise duration (segmental anchoring)
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim20
+  type: observation
+  statement: Raising the voice should primarily expand the span above a relatively
+    constant F_R floor
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0
+- id: claim21
+  type: observation
+  statement: Prenuclear peaks should be aligned later in the syllable than nuclear
+    peaks
+  concepts: []
+  provenance:
+    paper: Ladd_2008_IntonationalPhonology
+    page: 0

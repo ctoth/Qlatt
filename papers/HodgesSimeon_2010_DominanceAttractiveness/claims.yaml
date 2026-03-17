@@ -1,0 +1,38 @@
+source:
+  paper: HodgesSimeon_2010_DominanceAttractiveness
+claims:
+- id: claim1
+  type: observation
+  statement: F0-SD must negatively correlate with physical dominance ratings
+  concepts: []
+  provenance:
+    paper: HodgesSimeon_2010_DominanceAttractiveness
+    page: 0
+- id: claim2
+  type: observation
+  statement: Mean F0 must negatively correlate with attractiveness ratings
+  concepts: []
+  provenance:
+    paper: HodgesSimeon_2010_DominanceAttractiveness
+    page: 0
+- id: claim3
+  type: observation
+  statement: Intensity must positively correlate with attractiveness ratings
+  concepts: []
+  provenance:
+    paper: HodgesSimeon_2010_DominanceAttractiveness
+    page: 0
+- id: claim4
+  type: observation
+  statement: Df effect on attractiveness should be stronger for fertile-phase listeners
+  concepts: []
+  provenance:
+    paper: HodgesSimeon_2010_DominanceAttractiveness
+    page: 0
+- id: claim5
+  type: observation
+  statement: F0 and F0-SD should be partially independent (r ~ .35, not ~ 1.0)
+  concepts: []
+  provenance:
+    paper: HodgesSimeon_2010_DominanceAttractiveness
+    page: 0

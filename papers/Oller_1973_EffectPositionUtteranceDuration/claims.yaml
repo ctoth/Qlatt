@@ -1,0 +1,171 @@
+source:
+  paper: Oller_1973_EffectPositionUtteranceDuration
+claims:
+- id: claim1
+  type: parameter
+  concept: baib_diphthong_stressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 112
+- id: claim2
+  type: parameter
+  concept: baib_diphthong_unstressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 76
+- id: claim3
+  type: parameter
+  concept: sas_fricative_unstressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 136
+- id: claim4
+  type: parameter
+  concept: stast_cluster_stressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 96
+- id: claim5
+  type: parameter
+  concept: stast_cluster_unstressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 88
+- id: claim6
+  type: parameter
+  concept: ba_open_syllable_stressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 48
+- id: claim7
+  type: parameter
+  concept: ba_open_syllable_unstressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 32
+- id: claim8
+  type: parameter
+  concept: pap_voiceless_stop_stressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 40
+- id: claim9
+  type: parameter
+  concept: pap_voiceless_stop_unstressed_vowel_increment
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 0
+- id: claim10
+  type: parameter
+  concept: initial_s1_interrog_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 8
+- id: claim11
+  type: parameter
+  concept: initial_s1_interrog_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 24
+- id: claim12
+  type: parameter
+  concept: initial_s1_declar_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 8
+- id: claim13
+  type: parameter
+  concept: initial_s1_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 16
+- id: claim14
+  type: parameter
+  concept: initial_s2_declar_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 24
+- id: claim15
+  type: parameter
+  concept: initial_s2_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 32
+- id: claim16
+  type: parameter
+  concept: penult_s1_interrog_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 0
+- id: claim17
+  type: parameter
+  concept: penult_s1_interrog_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 16
+- id: claim18
+  type: parameter
+  concept: penult_s1_declar_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 8
+- id: claim19
+  type: parameter
+  concept: penult_s1_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 8
+- id: claim20
+  type: parameter
+  concept: penult_s2_declar_stressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 0
+- id: claim21
+  type: parameter
+  concept: penult_s2_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 8
+- id: claim22
+  type: parameter
+  concept: final_s1_interrog_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 40
+- id: claim23
+  type: parameter
+  concept: final_s1_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 24
+- id: claim24
+  type: parameter
+  concept: final_s2_declar_unstressed
+  provenance:
+    paper: Oller_1973_EffectPositionUtteranceDuration
+    page: 0
+  value: 0

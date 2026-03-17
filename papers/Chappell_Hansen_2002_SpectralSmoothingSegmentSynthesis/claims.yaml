@@ -1,0 +1,145 @@
+source:
+  paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+claims:
+- id: claim1
+  type: parameter
+  concept: lp_model_order
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 9
+- id: claim2
+  type: parameter
+  concept: auditory_channels
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 32
+- id: claim3
+  type: parameter
+  concept: sampling_rate
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 8000
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: interpolated_periods
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  lower_bound: 0
+  upper_bound: 10
+  unit: frames
+- id: claim5
+  type: parameter
+  concept: shaped_noise_duration
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  unit: ms
+- id: claim6
+  type: parameter
+  concept: formant_jnd
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 1.5
+  unit: dB
+- id: claim7
+  type: parameter
+  concept: formant_jnd
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 3
+  unit: dB
+- id: claim8
+  type: parameter
+  concept: formant_freq_jnd
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  unit: '%'
+- id: claim9
+  type: parameter
+  concept: formant_bw_jnd
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  unit: '%'
+- id: claim10
+  type: parameter
+  concept: number_of_speakers
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 326
+- id: claim11
+  type: parameter
+  concept: sample_mean
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 222.24
+- id: claim12
+  type: parameter
+  concept: sample_standard_deviation
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 100.27
+- id: claim13
+  type: parameter
+  concept: maximum_score
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 732
+- id: claim14
+  type: parameter
+  concept: minimum_score
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+  value: 6
+- id: claim15
+  type: equation
+  expression: d_1(\vec{x}, \vec{y}) = \sum_{k=1}^{N} |x_k - y_k|
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+- id: claim16
+  type: equation
+  expression: 'D(p_0, p_1) = \begin{cases}
+
+    \left|\ln\frac{p_1}{p_0}\right| \left\{\frac{\ln((1-r_0^2)/(1-r_1^2))}{\ln(r_1/r_0)}\right\},
+    & r_0 \neq r_1 \\
+
+    \left|\ln\frac{p_1}{p_0}\right| \{2r^2/1-r^2\}, & r = r_0 = r_1
+
+    \end{cases}'
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+- id: claim17
+  type: equation
+  expression: F_i = \frac{\theta_i}{2\pi T_s}, \quad BW_i = \frac{-\ln(r_i)}{\pi T_s}
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+- id: claim18
+  type: equation
+  expression: \theta_i = k_1\theta_1 + k_2\theta_2 \quad \text{and} \quad r_i = r_1^{k_1}
+    + r_2^{k_2}
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0
+- id: claim19
+  type: equation
+  expression: P_i = k_1 P_1 + k_2 P_2 \quad \text{and} \quad Q_i = P_i + k_1(Q_1 -
+    P_1) + k_2(Q_2 - P_2)
+  provenance:
+    paper: Chappell_Hansen_2002_SpectralSmoothingSegmentSynthesis
+    page: 0

@@ -1,0 +1,380 @@
+source:
+  paper: Deloche_2020_StatisticalStructureSpeech
+claims:
+- id: claim1
+  type: parameter
+  concept: powerlaw_exponent
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 1.2
+  unit: dimensionless
+- id: claim2
+  type: parameter
+  concept: quality_factor_at_f0
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 2
+  unit: dimensionless
+- id: claim3
+  type: parameter
+  concept: cost_function
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  lower_bound: 0.47
+  upper_bound: 1.0
+  unit: dimensionless
+- id: claim4
+  type: parameter
+  concept: contrast
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  lower_bound: 0.4
+  upper_bound: 2.1
+  unit: '%'
+- id: claim5
+  type: parameter
+  concept: time_window
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 16
+  unit: ms
+- id: claim6
+  type: parameter
+  concept: sampling_frequency
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 16
+  unit: kHz
+- id: claim7
+  type: parameter
+  concept: highpass_cutoff
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 1.5
+  unit: kHz
+- id: claim8
+  type: parameter
+  concept: smoothing
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.03
+  unit: —
+- id: claim9
+  type: parameter
+  concept: filter_count_per_dictionary
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 600
+  unit: —
+- id: claim10
+  type: parameter
+  concept: dictionary_count
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 30
+  unit: —
+- id: claim11
+  type: parameter
+  concept: semivowels_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.55
+- id: claim12
+  type: parameter
+  concept: semivowels_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.58
+- id: claim13
+  type: parameter
+  concept: vowels_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.6
+- id: claim14
+  type: parameter
+  concept: vowels_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.6
+- id: claim15
+  type: parameter
+  concept: nasals_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.9
+- id: claim16
+  type: parameter
+  concept: nasals_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.7
+- id: claim17
+  type: parameter
+  concept: overall_speech_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.75
+- id: claim18
+  type: parameter
+  concept: overall_speech_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.75
+- id: claim19
+  type: parameter
+  concept: stops_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.8
+- id: claim20
+  type: parameter
+  concept: affricates_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.65
+- id: claim21
+  type: parameter
+  concept: affricates_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.9
+- id: claim22
+  type: parameter
+  concept: fricatives_mean
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 1.0
+- id: claim23
+  type: parameter
+  concept: fricatives_mean_h
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.95
+- id: claim24
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.4
+- id: claim25
+  type: parameter
+  concept: e_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.42
+- id: claim26
+  type: parameter
+  concept: a_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.43
+- id: claim27
+  type: parameter
+  concept: a_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.48
+- id: claim28
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.55
+- id: claim29
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.55
+- id: claim30
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.6
+- id: claim31
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.62
+- id: claim32
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.63
+- id: claim33
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.65
+- id: claim34
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.58
+- id: claim35
+  type: parameter
+  concept: o_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.68
+- id: claim36
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.7
+- id: claim37
+  type: parameter
+  concept: i_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.65
+- id: claim38
+  type: parameter
+  concept: approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.68
+- id: claim39
+  type: parameter
+  concept: u_approx
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+  value: 0.72
+- id: claim40
+  type: equation
+  expression: w(t) = C \sin(\omega t + \phi) \exp\left(-\frac{(t-\tau)^2}{4\sigma_t^2}\right)
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim41
+  type: equation
+  expression: \log Q_{10}(f) = \log Q_0 + \beta(\log f - \log f_0) + 0.04\eta
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim42
+  type: equation
+  expression: h_{\text{raw}}(\beta) = \mathbb{E}(\|Y_\beta\|_1) = \mathbb{E}\left(\sum_i
+    |[W_\beta^T X]_i|\right)
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim43
+  type: equation
+  expression: h(\beta) = \mathbb{E}\left(\sum_i \gamma(f_i) |[W_\beta^T X]_i|\right)
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim44
+  type: equation
+  expression: Z = \rho_0 c \left[\frac{(kr)^2}{1+(kr)^2} + j\frac{kr}{1+(kr)^2}\right]
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim45
+  type: observation
+  statement: β for overall speech should be ~0.75 (between constant-Q and constant-resolution)
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim46
+  type: observation
+  statement: Vowels should cluster tighter in β than stops or affricates
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim47
+  type: observation
+  statement: Unrounded vowels should yield lower β than rounded vowels (wider radiation
+    → wider bandwidths)
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim48
+  type: observation
+  statement: 'Stop releases should show biphasic β: low at burst onset, high in opening/aspiration
+    phase'
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim49
+  type: observation
+  statement: Increasing sound intensity should decrease β
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim50
+  type: observation
+  statement: Sibilant fricatives [s], [ʃ] should have higher β than non-sibilant [f],
+    [θ]
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim51
+  type: observation
+  statement: Voiced fricatives should have lower β than their unvoiced counterparts
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0
+- id: claim52
+  type: observation
+  statement: h (cost/structuredness) should be < 0.7 for vowels/nasals/semivowels
+    and > 0.7 for fricatives/stops
+  concepts: []
+  provenance:
+    paper: Deloche_2020_StatisticalStructureSpeech
+    page: 0

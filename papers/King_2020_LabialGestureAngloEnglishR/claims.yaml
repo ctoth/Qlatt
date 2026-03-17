@@ -1,0 +1,34 @@
+source:
+  paper: King_2020_LabialGestureAngloEnglishR
+claims:
+- id: claim1
+  type: parameter
+  concept: f1
+  provenance:
+    paper: King_2020_LabialGestureAngloEnglishR
+    page: 0
+  unit: Hz
+  value: 421
+- id: claim2
+  type: parameter
+  concept: f2
+  provenance:
+    paper: King_2020_LabialGestureAngloEnglishR
+    page: 0
+  unit: Hz
+  value: 1236
+- id: claim3
+  type: parameter
+  concept: f3
+  provenance:
+    paper: King_2020_LabialGestureAngloEnglishR
+    page: 0
+  unit: Hz
+  value: 1881
+- id: claim4
+  type: equation
+  expression: \text{Front Cavity Volume} = \text{Sublingual Space} + \text{Lip Tube
+    Extension}
+  provenance:
+    paper: King_2020_LabialGestureAngloEnglishR
+    page: 0

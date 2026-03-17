@@ -1,0 +1,253 @@
+source:
+  paper: Titze_1989_MaleFemaleVoices
+claims:
+- id: claim1
+  type: parameter
+  concept: general_size_scale_factor
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim2
+  type: parameter
+  concept: membranous_length_scale_factor
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim3
+  type: parameter
+  concept: membranous_vocal_fold_length
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: mm
+- id: claim4
+  type: parameter
+  concept: vocal_fold_thickness
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: mm
+- id: claim5
+  type: parameter
+  concept: tissue_density
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: g/cm^3
+- id: claim6
+  type: parameter
+  concept: vocal_fold_growth_rate
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: mm/year
+- id: claim7
+  type: parameter
+  concept: vocal_fold_growth_rate
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: mm/year
+- id: claim8
+  type: parameter
+  concept: mean_airflow_scale
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim9
+  type: parameter
+  concept: avgtopeak_flow_ratio
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim10
+  type: parameter
+  concept: avgtopeak_flow_ratio
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim11
+  type: parameter
+  concept: radiated_source_power_scale
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim12
+  type: parameter
+  concept: glottal_efficiency_scale
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim13
+  type: parameter
+  concept: shape_quotient
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim14
+  type: parameter
+  concept: bulging_quotient
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim15
+  type: parameter
+  concept: abduction_quotient
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim16
+  type: parameter
+  concept: phasedelay_quotient
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim17
+  type: parameter
+  concept: register_transition
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: Hz
+- id: claim18
+  type: parameter
+  concept: register_transition
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: Hz
+- id: claim19
+  type: parameter
+  concept: nonisotropy_correction
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+  unit: dimensionless
+- id: claim20
+  type: equation
+  expression: F_0 = \frac{1700}{L_m}
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim21
+  type: equation
+  expression: F_0 = \frac{1}{2L}\left(\frac{\sigma}{\rho}\right)^{1/2} = \frac{1}{2L_0(1+\epsilon)}\left(\frac{\sigma}{\rho}\right)^{1/2}
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim22
+  type: equation
+  expression: \sigma(\epsilon) = 4L_0^2(1+\epsilon)^2 F_0^2 \rho
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim23
+  type: equation
+  expression: \sigma(\epsilon) = e^{9.21(\epsilon + 0.623)} \text{ kPa}
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim24
+  type: equation
+  expression: h(y,z,t) = \left[Q_a + \left(Q_s - \frac{4Q_b z}{T}\right)\left(1 -
+    \frac{z}{T}\right)\right]\left(1 - \frac{y}{L}\right) + \sin\frac{\pi y}{L}\sin\left(\omega
+    t - \frac{2\pi Q_p z}{T}\right)
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim25
+  type: equation
+  expression: u_0 = (2p_s/\rho)^{1/2}(2LA)(a_0/2)
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim26
+  type: equation
+  expression: p_a = p_s(2p_s/\rho)^{1/2}(2LA)(a_0/2)
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim27
+  type: equation
+  expression: p_r = \frac{\pi F_0^2}{2c} \cdot \frac{2P_s}{\rho} \cdot (2LA)^2 \sum_{n=1}^{\infty}
+    n^2 a_n^2
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim28
+  type: equation
+  expression: e = \frac{\sqrt{2}\pi k}{c} (F_0^2)(pP_s)^{-1/2}(LA) \cdot \frac{2}{a_0}
+    \sum_{n=1}^{\infty} n^2 a_n^2
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim29
+  type: observation
+  statement: F0 * L_m should approximate 1700 Hz*mm for modal phonation across speakers
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim30
+  type: observation
+  statement: Male/female membranous length ratio should be ~1.6 in adult speakers
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim31
+  type: observation
+  statement: Male/female thyroid cartilage size ratio should be ~1.2
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim32
+  type: observation
+  statement: Vocal fold thickness should scale with alpha (~1.2), not beta (~1.6)
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim33
+  type: observation
+  statement: Mean airflow ratio male/female should be ~1.5-1.9
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim34
+  type: observation
+  statement: Female stress-strain curve should be above (stiffer than) male at equal
+    strain
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim35
+  type: observation
+  statement: Contact area waveform for male voice should show a knee/inflection absent
+    in female
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0
+- id: claim36
+  type: observation
+  statement: Glottal efficiency should be higher for female voices at matched effort
+    level
+  concepts: []
+  provenance:
+    paper: Titze_1989_MaleFemaleVoices
+    page: 0

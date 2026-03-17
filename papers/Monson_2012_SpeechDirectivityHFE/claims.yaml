@@ -1,0 +1,658 @@
+source:
+  paper: Monson_2012_SpeechDirectivityHFE
+claims:
+- id: claim1
+  type: parameter
+  concept: 0_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 62.0
+- id: claim2
+  type: parameter
+  concept: 0_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 50.2
+- id: claim3
+  type: parameter
+  concept: 0_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 56.0
+- id: claim4
+  type: parameter
+  concept: 0_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 57.4
+- id: claim5
+  type: parameter
+  concept: 0_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 55.0
+- id: claim6
+  type: parameter
+  concept: 0_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 51.2
+- id: claim7
+  type: parameter
+  concept: 0_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 46.3
+- id: claim8
+  type: parameter
+  concept: 0_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 46.4
+- id: claim9
+  type: parameter
+  concept: 0_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 38.0
+- id: claim10
+  type: parameter
+  concept: 30_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 61.8
+- id: claim11
+  type: parameter
+  concept: 30_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 50.1
+- id: claim12
+  type: parameter
+  concept: 30_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 55.8
+- id: claim13
+  type: parameter
+  concept: 30_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 57.5
+- id: claim14
+  type: parameter
+  concept: 30_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 54.3
+- id: claim15
+  type: parameter
+  concept: 30_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 51.1
+- id: claim16
+  type: parameter
+  concept: 30_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 45.6
+- id: claim17
+  type: parameter
+  concept: 30_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 44.7
+- id: claim18
+  type: parameter
+  concept: 30_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 37.5
+- id: claim19
+  type: parameter
+  concept: 60_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 61.1
+- id: claim20
+  type: parameter
+  concept: 60_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 49.6
+- id: claim21
+  type: parameter
+  concept: 60_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 55.2
+- id: claim22
+  type: parameter
+  concept: 60_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 57.3
+- id: claim23
+  type: parameter
+  concept: 60_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 53.5
+- id: claim24
+  type: parameter
+  concept: 60_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 48.7
+- id: claim25
+  type: parameter
+  concept: 60_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 42.4
+- id: claim26
+  type: parameter
+  concept: 60_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 40.6
+- id: claim27
+  type: parameter
+  concept: 60_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 33.6
+- id: claim28
+  type: parameter
+  concept: 90_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 59.8
+- id: claim29
+  type: parameter
+  concept: 90_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 48.6
+- id: claim30
+  type: parameter
+  concept: 90_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 53.7
+- id: claim31
+  type: parameter
+  concept: 90_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 55.8
+- id: claim32
+  type: parameter
+  concept: 90_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 53.4
+- id: claim33
+  type: parameter
+  concept: 90_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 44.2
+- id: claim34
+  type: parameter
+  concept: 90_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 40.0
+- id: claim35
+  type: parameter
+  concept: 90_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 37.7
+- id: claim36
+  type: parameter
+  concept: 90_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 30.8
+- id: claim37
+  type: parameter
+  concept: 120_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 57.5
+- id: claim38
+  type: parameter
+  concept: 120_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 47.5
+- id: claim39
+  type: parameter
+  concept: 120_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 52.1
+- id: claim40
+  type: parameter
+  concept: 120_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 53.0
+- id: claim41
+  type: parameter
+  concept: 120_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 50.4
+- id: claim42
+  type: parameter
+  concept: 120_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 43.3
+- id: claim43
+  type: parameter
+  concept: 120_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 33.6
+- id: claim44
+  type: parameter
+  concept: 120_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 31.4
+- id: claim45
+  type: parameter
+  concept: 120_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 23.8
+- id: claim46
+  type: parameter
+  concept: 150_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 55.8
+- id: claim47
+  type: parameter
+  concept: 150_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 46.7
+- id: claim48
+  type: parameter
+  concept: 150_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 51.1
+- id: claim49
+  type: parameter
+  concept: 150_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 51.4
+- id: claim50
+  type: parameter
+  concept: 150_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 47.1
+- id: claim51
+  type: parameter
+  concept: 150_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 38.2
+- id: claim52
+  type: parameter
+  concept: 150_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 29.6
+- id: claim53
+  type: parameter
+  concept: 150_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 24.9
+- id: claim54
+  type: parameter
+  concept: 150_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 16.3
+- id: claim55
+  type: parameter
+  concept: 180_overall
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 56.0
+- id: claim56
+  type: parameter
+  concept: 180_125_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 46.6
+- id: claim57
+  type: parameter
+  concept: 180_250_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 50.9
+- id: claim58
+  type: parameter
+  concept: 180_500_hz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 51.5
+- id: claim59
+  type: parameter
+  concept: 180_1_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 48.7
+- id: claim60
+  type: parameter
+  concept: 180_2_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 38.1
+- id: claim61
+  type: parameter
+  concept: 180_4_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 27.4
+- id: claim62
+  type: parameter
+  concept: 180_8_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 20.1
+- id: claim63
+  type: parameter
+  concept: 180_16_khz
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 11.3
+- id: claim64
+  type: parameter
+  concept: overall_normal_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 6.0
+- id: claim65
+  type: parameter
+  concept: overall_loud_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 7.2
+- id: claim66
+  type: parameter
+  concept: overall_s
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 20.1
+- id: claim67
+  type: parameter
+  concept: overall_sh
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 15.6
+- id: claim68
+  type: parameter
+  concept: overall_f
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 8.8
+- id: claim69
+  type: parameter
+  concept: 2_khz_normal_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 13.1
+- id: claim70
+  type: parameter
+  concept: 2_khz_loud_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 13.2
+- id: claim71
+  type: parameter
+  concept: 2_khz_s
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 12.4
+- id: claim72
+  type: parameter
+  concept: 2_khz_sh
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 13.0
+- id: claim73
+  type: parameter
+  concept: 2_khz_f
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 10.3
+- id: claim74
+  type: parameter
+  concept: 4_khz_normal_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 18.9
+- id: claim75
+  type: parameter
+  concept: 4_khz_loud_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 19.6
+- id: claim76
+  type: parameter
+  concept: 4_khz_s
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 19.8
+- id: claim77
+  type: parameter
+  concept: 4_khz_sh
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 17.4
+- id: claim78
+  type: parameter
+  concept: 4_khz_f
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 15.1
+- id: claim79
+  type: parameter
+  concept: 8_khz_normal_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 26.3
+- id: claim80
+  type: parameter
+  concept: 8_khz_loud_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 26.7
+- id: claim81
+  type: parameter
+  concept: 8_khz_s
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 26.5
+- id: claim82
+  type: parameter
+  concept: 8_khz_sh
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 27.3
+- id: claim83
+  type: parameter
+  concept: 8_khz_f
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 23.1
+- id: claim84
+  type: parameter
+  concept: 16_khz_normal_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 26.7
+- id: claim85
+  type: parameter
+  concept: 16_khz_loud_speech
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 29.2
+- id: claim86
+  type: parameter
+  concept: 16_khz_s
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 30.1
+- id: claim87
+  type: parameter
+  concept: 16_khz_sh
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 25.6
+- id: claim88
+  type: parameter
+  concept: 16_khz_f
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+  value: 25.5
+- id: claim89
+  type: observation
+  statement: At 0 degrees, normal speech overall level should be approximately 62
+    dB SPL at 1 m (for calibrated output)
+  concepts: []
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+- id: claim90
+  type: observation
+  statement: Front-to-back (0 vs 180 degrees) attenuation should increase monotonically
+    with frequency
+  concepts: []
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+- id: claim91
+  type: observation
+  statement: Fricative /s/ should show greater front-to-back attenuation than /f/
+    at 4 kHz and above
+  concepts: []
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+- id: claim92
+  type: observation
+  statement: Below 500 Hz, directivity should be < 3 dB across all angles
+  concepts: []
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0
+- id: claim93
+  type: observation
+  statement: Production level should not significantly affect directivity below 1
+    kHz
+  concepts: []
+  provenance:
+    paper: Monson_2012_SpeechDirectivityHFE
+    page: 0

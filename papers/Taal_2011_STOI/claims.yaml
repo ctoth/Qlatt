@@ -1,0 +1,171 @@
+source:
+  paper: Taal_2011_STOI
+claims:
+- id: claim1
+  type: parameter
+  concept: sample_rate
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: frame_length
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: samples
+- id: claim3
+  type: parameter
+  concept: fft_size
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: points
+- id: claim4
+  type: parameter
+  concept: frame_overlap
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: '%'
+- id: claim5
+  type: parameter
+  concept: segment_length
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: frames
+- id: claim6
+  type: parameter
+  concept: sdr_bound
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: dB
+- id: claim7
+  type: parameter
+  concept: silent_frame_threshold
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: dB
+- id: claim8
+  type: parameter
+  concept: analysis_window_duration
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: ms
+- id: claim9
+  type: parameter
+  concept: lowest_1_3_oct_center_freq
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: Hz
+- id: claim10
+  type: parameter
+  concept: highest_1_3_oct_center_freq
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  unit: Hz
+- id: claim11
+  type: parameter
+  concept: dantale_a
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  value: -14.5435
+- id: claim12
+  type: parameter
+  concept: dantale_b
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  value: 7.0792
+- id: claim13
+  type: parameter
+  concept: ieee_a
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  value: -17.4906
+- id: claim14
+  type: parameter
+  concept: ieee_b
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+  value: 9.6921
+- id: claim15
+  type: observation
+  statement: '**Output range**: STOI $d \in [-1, 1]$, but in practice $d \in [0, 1]$
+    for speech signals'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim16
+  type: observation
+  statement: '**Monotonicity**: STOI must have a monotonic increasing relationship
+    with speech intelligibility'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim17
+  type: observation
+  statement: '**Identity**: When $y = x$ (clean = degraded), STOI should equal 1.0'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim18
+  type: observation
+  statement: '**Silence removal**: Frames below -40 dB relative to max must be excluded'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim19
+  type: observation
+  statement: '**SDR bound**: After clipping, $SDR \geq \beta$ for all samples (Eq.
+    4)'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim20
+  type: observation
+  statement: '**Normalization invariance**: Scaling the degraded signal by a constant
+    should not change STOI (due to normalization step)'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim21
+  type: observation
+  statement: '**Band count**: Exactly 15 one-third octave bands from 150 Hz to ~4.3
+    kHz'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim22
+  type: observation
+  statement: '**Segment length**: N=30 frames corresponds to exactly 384 ms at 10
+    kHz with 256-sample frames and 50% overlap (hop = 128 samples, 30 * 128 / 10000
+    = 0.384 s)'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0
+- id: claim23
+  type: observation
+  statement: '**Correlation bounds**: Each intermediate $d_{j,m} \in [-1, 1]$'
+  concepts: []
+  provenance:
+    paper: Taal_2011_STOI
+    page: 0

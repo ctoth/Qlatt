@@ -1,0 +1,34 @@
+source:
+  paper: Abramson_Whalen_2017_VOTat50
+claims:
+- id: claim1
+  type: parameter
+  concept: short_lag
+  provenance:
+    paper: Abramson_Whalen_2017_VOTat50
+    page: 0
+  lower_bound: 0
+  upper_bound: 25
+  unit: ms
+- id: claim2
+  type: parameter
+  concept: waveform_resolution
+  provenance:
+    paper: Abramson_Whalen_2017_VOTat50
+    page: 0
+  value: 1
+- id: claim3
+  type: parameter
+  concept: spectrogram_notes
+  provenance:
+    paper: Abramson_Whalen_2017_VOTat50
+    page: 0
+  value: 5
+- id: claim4
+  type: parameter
+  concept: perceptual_resolution
+  provenance:
+    paper: Abramson_Whalen_2017_VOTat50
+    page: 0
+  value: 5
+  unit: ms

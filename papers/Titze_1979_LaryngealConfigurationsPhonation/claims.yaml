@@ -1,0 +1,94 @@
+source:
+  paper: Titze_1979_LaryngealConfigurationsPhonation
+claims:
+- id: claim1
+  type: parameter
+  concept: length_nominal_value
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 1.4
+- id: claim2
+  type: parameter
+  concept: thickness_nominal_value
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.5
+- id: claim3
+  type: parameter
+  concept: superiormedial_deviation_nominal_value
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.0
+- id: claim4
+  type: parameter
+  concept: shaping_factor_nominal_value
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.05
+- id: claim5
+  type: parameter
+  concept: inferior_surface_angle_nominal_value
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.7
+- id: claim6
+  type: parameter
+  concept: transverse_shear_elasticity_mucosa
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.2
+- id: claim7
+  type: parameter
+  concept: transverse_shear_elasticity_ligament
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.4
+- id: claim8
+  type: parameter
+  concept: transverse_shear_elasticity_muscle
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 1.0
+- id: claim9
+  type: parameter
+  concept: transverse_shear_viscosity_mucosa
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.5
+- id: claim10
+  type: parameter
+  concept: transverse_shear_viscosity_muscle
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 1.0
+- id: claim11
+  type: parameter
+  concept: longitudinal_shear_elasticity_mucosa
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 0.5
+- id: claim12
+  type: parameter
+  concept: longitudinal_shear_elasticity_ligament
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 1.0
+- id: claim13
+  type: parameter
+  concept: longitudinal_shear_elasticity_muscle
+  provenance:
+    paper: Titze_1979_LaryngealConfigurationsPhonation
+    page: 0
+  value: 1.0

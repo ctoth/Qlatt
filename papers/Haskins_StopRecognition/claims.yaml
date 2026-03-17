@@ -1,0 +1,171 @@
+source:
+  paper: Haskins_StopRecognition
+claims:
+- id: claim1
+  type: parameter
+  concept: i_b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 9
+  unit: ms
+- id: claim2
+  type: parameter
+  concept: i_d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 8
+  unit: ms
+- id: claim3
+  type: parameter
+  concept: i_g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 25
+  unit: ms
+- id: claim4
+  type: parameter
+  concept: b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 10
+  unit: ms
+- id: claim5
+  type: parameter
+  concept: d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 12
+  unit: ms
+- id: claim6
+  type: parameter
+  concept: g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 15
+  unit: ms
+- id: claim7
+  type: parameter
+  concept: b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 5
+  unit: ms
+- id: claim8
+  type: parameter
+  concept: d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 13
+  unit: ms
+- id: claim9
+  type: parameter
+  concept: g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 12
+  unit: ms
+- id: claim10
+  type: parameter
+  concept: a_b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 7
+  unit: ms
+- id: claim11
+  type: parameter
+  concept: a_d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 14
+  unit: ms
+- id: claim12
+  type: parameter
+  concept: a_g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 13
+  unit: ms
+- id: claim13
+  type: parameter
+  concept: b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 9
+  unit: ms
+- id: claim14
+  type: parameter
+  concept: d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 12
+  unit: ms
+- id: claim15
+  type: parameter
+  concept: g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 8
+  unit: ms
+- id: claim16
+  type: parameter
+  concept: u_b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 6
+  unit: ms
+- id: claim17
+  type: parameter
+  concept: u_d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 6
+  unit: ms
+- id: claim18
+  type: parameter
+  concept: u_g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 7
+  unit: ms
+- id: claim19
+  type: parameter
+  concept: mean_b_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 7.7
+  unit: ms
+- id: claim20
+  type: parameter
+  concept: mean_d_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 11.7
+  unit: ms
+- id: claim21
+  type: parameter
+  concept: mean_g_vot
+  provenance:
+    paper: Haskins_StopRecognition
+    page: 0
+  value: 21.0
+  unit: ms

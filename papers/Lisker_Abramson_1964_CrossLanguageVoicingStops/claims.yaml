@@ -1,0 +1,694 @@
+source:
+  paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+claims:
+- id: claim1
+  type: parameter
+  concept: voice_onset_time
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -250
+  unit: msec
+- id: claim2
+  type: parameter
+  concept: voicing_lead
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -250
+  unit: msec
+- id: claim3
+  type: parameter
+  concept: short_lag
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 0
+  unit: msec
+- id: claim4
+  type: parameter
+  concept: long_lag
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 60
+  unit: msec
+- id: claim5
+  type: parameter
+  concept: dutch_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -85
+- id: claim6
+  type: parameter
+  concept: dutch_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 10
+- id: claim7
+  type: parameter
+  concept: dutch_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -80
+- id: claim8
+  type: parameter
+  concept: dutch_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 15
+- id: claim9
+  type: parameter
+  concept: dutch_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 25
+- id: claim10
+  type: parameter
+  concept: spanish_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -138
+- id: claim11
+  type: parameter
+  concept: spanish_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 4
+- id: claim12
+  type: parameter
+  concept: spanish_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -110
+- id: claim13
+  type: parameter
+  concept: spanish_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 9
+- id: claim14
+  type: parameter
+  concept: spanish_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -108
+- id: claim15
+  type: parameter
+  concept: spanish_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 29
+- id: claim16
+  type: parameter
+  concept: hungarian_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -90
+- id: claim17
+  type: parameter
+  concept: hungarian_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 2
+- id: claim18
+  type: parameter
+  concept: hungarian_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -87
+- id: claim19
+  type: parameter
+  concept: hungarian_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 16
+- id: claim20
+  type: parameter
+  concept: hungarian_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -58
+- id: claim21
+  type: parameter
+  concept: hungarian_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 29
+- id: claim22
+  type: parameter
+  concept: tamil_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -74
+- id: claim23
+  type: parameter
+  concept: tamil_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 12
+- id: claim24
+  type: parameter
+  concept: tamil_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -78
+- id: claim25
+  type: parameter
+  concept: tamil_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 8
+- id: claim26
+  type: parameter
+  concept: tamil_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -62
+- id: claim27
+  type: parameter
+  concept: tamil_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 24
+- id: claim28
+  type: parameter
+  concept: cantonese_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 9
+- id: claim29
+  type: parameter
+  concept: cantonese_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 77
+- id: claim30
+  type: parameter
+  concept: cantonese_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 14
+- id: claim31
+  type: parameter
+  concept: cantonese_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 75
+- id: claim32
+  type: parameter
+  concept: cantonese_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 34
+- id: claim33
+  type: parameter
+  concept: cantonese_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 87
+- id: claim34
+  type: parameter
+  concept: english_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 58
+- id: claim35
+  type: parameter
+  concept: english_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 70
+- id: claim36
+  type: parameter
+  concept: english_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 80
+- id: claim37
+  type: parameter
+  concept: e_armenian_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -96
+- id: claim38
+  type: parameter
+  concept: e_armenian_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 3
+- id: claim39
+  type: parameter
+  concept: e_armenian_ph
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 78
+- id: claim40
+  type: parameter
+  concept: e_armenian_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -102
+- id: claim41
+  type: parameter
+  concept: e_armenian_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 15
+- id: claim42
+  type: parameter
+  concept: e_armenian_th
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 59
+- id: claim43
+  type: parameter
+  concept: e_armenian_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -115
+- id: claim44
+  type: parameter
+  concept: e_armenian_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 30
+- id: claim45
+  type: parameter
+  concept: e_armenian_kh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 98
+- id: claim46
+  type: parameter
+  concept: thai_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -97
+- id: claim47
+  type: parameter
+  concept: thai_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 6
+- id: claim48
+  type: parameter
+  concept: thai_ph
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 64
+- id: claim49
+  type: parameter
+  concept: thai_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -78
+- id: claim50
+  type: parameter
+  concept: thai_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 9
+- id: claim51
+  type: parameter
+  concept: thai_th
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 65
+- id: claim52
+  type: parameter
+  concept: thai_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 25
+- id: claim53
+  type: parameter
+  concept: thai_kh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 100
+- id: claim54
+  type: parameter
+  concept: korean_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 7
+- id: claim55
+  type: parameter
+  concept: korean_ph
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 91
+- id: claim56
+  type: parameter
+  concept: korean_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 11
+- id: claim57
+  type: parameter
+  concept: korean_th
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 94
+- id: claim58
+  type: parameter
+  concept: korean_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 19
+- id: claim59
+  type: parameter
+  concept: korean_kh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 126
+- id: claim60
+  type: parameter
+  concept: hindi_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -85
+- id: claim61
+  type: parameter
+  concept: hindi_bh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -61
+- id: claim62
+  type: parameter
+  concept: hindi_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 13
+- id: claim63
+  type: parameter
+  concept: hindi_ph
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 70
+- id: claim64
+  type: parameter
+  concept: hindi_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -87
+- id: claim65
+  type: parameter
+  concept: hindi_dh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -87
+- id: claim66
+  type: parameter
+  concept: hindi_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 15
+- id: claim67
+  type: parameter
+  concept: hindi_th
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 67
+- id: claim68
+  type: parameter
+  concept: marathi_b
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -117
+- id: claim69
+  type: parameter
+  concept: marathi_bh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -95
+- id: claim70
+  type: parameter
+  concept: marathi_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 11
+- id: claim71
+  type: parameter
+  concept: marathi_ph
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 76
+- id: claim72
+  type: parameter
+  concept: marathi_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -111
+- id: claim73
+  type: parameter
+  concept: marathi_dh
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: -87
+- id: claim74
+  type: parameter
+  concept: marathi_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 10
+- id: claim75
+  type: parameter
+  concept: marathi_th
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 65
+- id: claim76
+  type: parameter
+  concept: 1_101_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 58
+- id: claim77
+  type: parameter
+  concept: 1_101_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 70
+- id: claim78
+  type: parameter
+  concept: 1_101_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 80
+- id: claim79
+  type: parameter
+  concept: 51_17_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 102
+- id: claim80
+  type: parameter
+  concept: 51_17_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 116
+- id: claim81
+  type: parameter
+  concept: 51_17_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 84
+- id: claim82
+  type: parameter
+  concept: 7_65_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 28
+- id: claim83
+  type: parameter
+  concept: 7_65_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 39
+- id: claim84
+  type: parameter
+  concept: 7_65_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 43
+- id: claim85
+  type: parameter
+  concept: 4_63_p
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 34
+- id: claim86
+  type: parameter
+  concept: 4_63_d
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 7
+- id: claim87
+  type: parameter
+  concept: 4_63_t
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 37
+- id: claim88
+  type: parameter
+  concept: 4_63_g
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 16
+- id: claim89
+  type: parameter
+  concept: 4_63_k
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+  value: 49
+- id: claim90
+  type: observation
+  statement: VOT for English /p/ should average 28-58 msec (sentences vs. isolated
+    words)
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim91
+  type: observation
+  statement: VOT for English /t/ should average 39-70 msec
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim92
+  type: observation
+  statement: VOT for English /k/ should average 43-80 msec
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim93
+  type: observation
+  statement: VOT for English /b d g/ should be 0-20 msec (short lag) for most speakers
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim94
+  type: observation
+  statement: Velar VOT > alveolar VOT > labial VOT (monotonic ordering by place)
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim95
+  type: observation
+  statement: Aspirated stops should show VOT > 50 msec
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim96
+  type: observation
+  statement: Unaspirated stops should show VOT 0-25 msec
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim97
+  type: observation
+  statement: Prevoiced stops should show VOT -50 to -250 msec
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0
+- id: claim98
+  type: observation
+  statement: In sentences, VOT magnitudes are slightly compressed vs. isolated words
+  concepts: []
+  provenance:
+    paper: Lisker_Abramson_1964_CrossLanguageVoicingStops
+    page: 0

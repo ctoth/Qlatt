@@ -1,0 +1,350 @@
+source:
+  paper: Breen_InPress_ToBIRaPReliability
+claims:
+- id: claim1
+  type: parameter
+  concept: prominence_vs_nonprominence_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 87
+- id: claim2
+  type: parameter
+  concept: prominence_vs_nonprominence_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 89
+- id: claim3
+  type: parameter
+  concept: prominence_vs_nonprominence_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.71
+- id: claim4
+  type: parameter
+  concept: prominence_vs_nonprominence_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.77
+- id: claim5
+  type: parameter
+  concept: level_of_metrical_prominence_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 77
+- id: claim6
+  type: parameter
+  concept: level_of_metrical_prominence_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.61
+- id: claim7
+  type: parameter
+  concept: pitch_accent_status_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 85
+- id: claim8
+  type: parameter
+  concept: pitch_accent_status_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.68
+- id: claim9
+  type: parameter
+  concept: type_of_pitch_accent_h_vs_l_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 86
+- id: claim10
+  type: parameter
+  concept: type_of_pitch_accent_h_vs_l_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.69
+- id: claim11
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 77
+- id: claim12
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 72
+- id: claim13
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.54
+- id: claim14
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.54
+- id: claim15
+  type: parameter
+  concept: phrasal_boundary_present_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 84
+- id: claim16
+  type: parameter
+  concept: phrasal_boundary_present_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 92
+- id: claim17
+  type: parameter
+  concept: phrasal_boundary_present_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.52
+- id: claim18
+  type: parameter
+  concept: phrasal_boundary_present_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.78
+- id: claim19
+  type: parameter
+  concept: size_of_phrasal_boundary_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 81
+- id: claim20
+  type: parameter
+  concept: size_of_phrasal_boundary_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 86
+- id: claim21
+  type: parameter
+  concept: size_of_phrasal_boundary_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.47
+- id: claim22
+  type: parameter
+  concept: size_of_phrasal_boundary_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.68
+- id: claim23
+  type: parameter
+  concept: prominence_vs_nonprominence_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 88
+- id: claim24
+  type: parameter
+  concept: prominence_vs_nonprominence_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 89
+- id: claim25
+  type: parameter
+  concept: prominence_vs_nonprominence_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.74
+- id: claim26
+  type: parameter
+  concept: prominence_vs_nonprominence_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.78
+- id: claim27
+  type: parameter
+  concept: degree_of_prominence_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 79
+- id: claim28
+  type: parameter
+  concept: degree_of_prominence_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.63
+- id: claim29
+  type: parameter
+  concept: starred_tone_vs_no_starred_tone_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 86
+- id: claim30
+  type: parameter
+  concept: starred_tone_vs_no_starred_tone_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.67
+- id: claim31
+  type: parameter
+  concept: type_of_pitch_accent_h_vs_l_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 88
+- id: claim32
+  type: parameter
+  concept: type_of_pitch_accent_h_vs_l_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.73
+- id: claim33
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 80
+- id: claim34
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 75
+- id: claim35
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.6
+- id: claim36
+  type: parameter
+  concept: type_of_pitch_accent_all_distinct_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.51
+- id: claim37
+  type: parameter
+  concept: phrasal_boundary_present_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 91
+- id: claim38
+  type: parameter
+  concept: phrasal_boundary_present_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 90
+- id: claim39
+  type: parameter
+  concept: phrasal_boundary_present_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.77
+- id: claim40
+  type: parameter
+  concept: phrasal_boundary_present_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.75
+- id: claim41
+  type: parameter
+  concept: size_of_phrasal_boundary_tobi_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 87
+- id: claim42
+  type: parameter
+  concept: size_of_phrasal_boundary_rap_tap
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 85
+- id: claim43
+  type: parameter
+  concept: size_of_phrasal_boundary_tobi_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.68
+- id: claim44
+  type: parameter
+  concept: size_of_phrasal_boundary_rap_kappa
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+  value: 0.67
+- id: claim45
+  type: observation
+  statement: Kappa for binary prominence (prominent vs non-prominent) should be >=
+    0.60 for both ToBI and RaP systems when applied by trained labelers
+  concepts: []
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+- id: claim46
+  type: observation
+  statement: RaP phrasal boundary agreement (kappa) should be >= 0.60 for naive labelers
+  concepts: []
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+- id: claim47
+  type: observation
+  statement: Agreement should be higher for read speech than spontaneous speech in
+    both systems
+  concepts: []
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+- id: claim48
+  type: observation
+  statement: The three-way RaP prominence distinction (strong, weak, none) should
+    yield lower kappa than the binary (prominent vs non-prominent) collapsed version
+  concepts: []
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0
+- id: claim49
+  type: observation
+  statement: Pairwise labeler agreement for kappa should range 0.51-0.70 for ToBI
+    and 0.57-0.69 for RaP
+  concepts: []
+  provenance:
+    paper: Breen_InPress_ToBIRaPReliability
+    page: 0

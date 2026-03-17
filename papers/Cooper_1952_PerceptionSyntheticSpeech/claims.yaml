@@ -1,0 +1,66 @@
+source:
+  paper: Cooper_1952_PerceptionSyntheticSpeech
+claims:
+- id: claim1
+  type: parameter
+  concept: burst_frequency_positions_values
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+  value: 12
+  unit: Hz
+- id: claim2
+  type: parameter
+  concept: f2_transition_degrees_values
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+  value: 11
+- id: claim3
+  type: parameter
+  concept: burst_duration_values
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+  value: 15
+  unit: ms
+- id: claim4
+  type: observation
+  statement: Rising F2 transitions before any vowel should be perceived as labial
+    (/b/ or /p/)
+  concepts: []
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+- id: claim5
+  type: observation
+  statement: High-frequency bursts (~3600-4320 Hz) should be perceived as /t/ regardless
+    of vowel context
+  concepts: []
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+- id: claim6
+  type: observation
+  statement: The frequency at which a burst is heard as /k/ should track the F2 of
+    the following vowel
+  concepts: []
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+- id: claim7
+  type: observation
+  statement: Adding a steady-state nasal resonant portion to a stop pattern should
+    shift perception from stop to nasal (b->m, d->n, g->ng)
+  concepts: []
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0
+- id: claim8
+  type: observation
+  statement: Voiced/voiceless distinction should depend on F1 transition presence
+    (rising F1 = voiced)
+  concepts: []
+  provenance:
+    paper: Cooper_1952_PerceptionSyntheticSpeech
+    page: 0

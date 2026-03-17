@@ -1,0 +1,41 @@
+source:
+  paper: Scherer_TaskLoadStressAcoustics
+claims:
+- id: claim1
+  type: observation
+  statement: Cognitive load should increase speech rate without affecting F0
+  concepts: []
+  provenance:
+    paper: Scherer_TaskLoadStressAcoustics
+    page: 0
+- id: claim2
+  type: observation
+  statement: Psychological stress should increase F0 without strongly affecting speech
+    rate
+  concepts: []
+  provenance:
+    paper: Scherer_TaskLoadStressAcoustics
+    page: 0
+- id: claim3
+  type: observation
+  statement: High load should steepen energy attack and decay gradients
+  concepts: []
+  provenance:
+    paper: Scherer_TaskLoadStressAcoustics
+    page: 0
+- id: claim4
+  type: observation
+  statement: Stress effects should show in spectral energy distribution (less energy
+    below 500 Hz, more in 500-1600 Hz)
+  concepts: []
+  provenance:
+    paper: Scherer_TaskLoadStressAcoustics
+    page: 0
+- id: claim5
+  type: observation
+  statement: 'Individual differences should be large: not all speakers show expected
+    stress patterns'
+  concepts: []
+  provenance:
+    paper: Scherer_TaskLoadStressAcoustics
+    page: 0

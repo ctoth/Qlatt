@@ -1,0 +1,115 @@
+source:
+  paper: Meek_2018_VocalParametersEthnicGroups
+claims:
+- id: claim1
+  type: parameter
+  concept: aam
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 149.19
+- id: claim2
+  type: parameter
+  concept: asm
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 168
+- id: claim3
+  type: parameter
+  concept: cm
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 133.33
+- id: claim4
+  type: parameter
+  concept: hm
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 222
+- id: claim5
+  type: parameter
+  concept: aaf
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 205.54
+- id: claim6
+  type: parameter
+  concept: asf
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 193.9
+- id: claim7
+  type: parameter
+  concept: cf
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 275.5
+- id: claim8
+  type: parameter
+  concept: hf
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 260.5
+- id: claim9
+  type: parameter
+  concept: with_posterior_chink
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 176
+- id: claim10
+  type: parameter
+  concept: without_posterior_chink
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+  unit: Hz
+  value: 133
+- id: claim11
+  type: observation
+  statement: 'Male F0 with posterior chink > male F0 without posterior chink (observed:
+    176 vs 133 Hz)'
+  concepts: []
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+- id: claim12
+  type: observation
+  statement: Female F0 generally > male F0 across all ethnic groups (consistent with
+    all data)
+  concepts: []
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+- id: claim13
+  type: observation
+  statement: All measured acoustic parameters (F0, RAP, shimmer, NHR, VTI) should
+    fall within normal clinical ranges regardless of ethnicity
+  concepts: []
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0
+- id: claim14
+  type: observation
+  statement: Perceptual identification of ethnicity from sustained vowels should exceed
+    chance (50%) levels
+  concepts: []
+  provenance:
+    paper: Meek_2018_VocalParametersEthnicGroups
+    page: 0

@@ -1,0 +1,55 @@
+source:
+  paper: Montoyo_2005_WSD_Hybrid
+claims:
+- id: claim1
+  type: parameter
+  concept: context_window
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  value: 15
+  unit: nouns
+- id: claim2
+  type: parameter
+  concept: keyword_threshold
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  lower_bound: 3
+  upper_bound: 10
+  unit: '%'
+- id: claim3
+  type: parameter
+  concept: feature_positions
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  unit: words
+- id: claim4
+  type: parameter
+  concept: collocation_positions
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  unit: pairs
+- id: claim5
+  type: parameter
+  concept: both_ok_contexts
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  value: 240
+- id: claim6
+  type: parameter
+  concept: one_ok_contexts
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  value: 398
+- id: claim7
+  type: parameter
+  concept: zero_ok_contexts
+  provenance:
+    paper: Montoyo_2005_WSD_Hybrid
+    page: 0
+  value: 161

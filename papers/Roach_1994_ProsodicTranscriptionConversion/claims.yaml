@@ -1,0 +1,35 @@
+source:
+  paper: Roach_1994_ProsodicTranscriptionConversion
+claims:
+- id: claim1
+  type: observation
+  statement: Every SEC tonetic stress mark in Tables 2/3 must map to exactly one ToBI
+    pitch accent + boundary tone combination (deterministic mapping)
+  concepts: []
+  provenance:
+    paper: Roach_1994_ProsodicTranscriptionConversion
+    page: 0
+- id: claim2
+  type: observation
+  statement: Non-final fall-rises should produce lower perceptual boundary strength
+    ratings than final fall-rises
+  concepts: []
+  provenance:
+    paper: Roach_1994_ProsodicTranscriptionConversion
+    page: 0
+- id: claim3
+  type: observation
+  statement: A converted ToBI transcription should have break index >= 4 at every
+    SEC | and || boundary
+  concepts: []
+  provenance:
+    paper: Roach_1994_ProsodicTranscriptionConversion
+    page: 0
+- id: claim4
+  type: observation
+  statement: Intermediate phrase boundaries should appear after every kinetic (non-level)
+    tone
+  concepts: []
+  provenance:
+    paper: Roach_1994_ProsodicTranscriptionConversion
+    page: 0

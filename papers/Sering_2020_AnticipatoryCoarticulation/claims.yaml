@@ -1,0 +1,121 @@
+source:
+  paper: Sering_2020_AnticipatoryCoarticulation
+claims:
+- id: claim1
+  type: parameter
+  concept: vtl_control_parameters
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 30
+  unit: dimensions
+- id: claim2
+  type: parameter
+  concept: cp_update_rate
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 110
+  unit: samples
+- id: claim3
+  type: parameter
+  concept: audio_sample_rate
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 44100
+  unit: Hz
+- id: claim4
+  type: parameter
+  concept: mel_spectrum_rate
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 200
+  unit: Hz
+- id: claim5
+  type: parameter
+  concept: mel_dimensions
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 60
+  unit: bands
+- id: claim6
+  type: parameter
+  concept: mel_window
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 23.2
+  unit: ms
+- id: claim7
+  type: parameter
+  concept: planning_iterations
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 40
+  unit: cycles
+- id: claim8
+  type: parameter
+  concept: forward_lstm_cells
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  unit: units
+- id: claim9
+  type: parameter
+  concept: inverse_lstm_cells
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  unit: units
+- id: claim10
+  type: parameter
+  concept: ultrasound_rate
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 81.6
+  unit: fps
+- id: claim11
+  type: parameter
+  concept: ultrasound_vectors
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 64
+  unit: directions
+- id: claim12
+  type: parameter
+  concept: ultrasound_pixels
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 842
+  unit: per vector
+- id: claim13
+  type: parameter
+  concept: formant_analysis_window
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 20
+  unit: ms
+- id: claim14
+  type: parameter
+  concept: pitch_floor
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 50
+  unit: Hz
+- id: claim15
+  type: parameter
+  concept: pitch_ceiling
+  provenance:
+    paper: Sering_2020_AnticipatoryCoarticulation
+    page: 0
+  value: 350
+  unit: Hz

@@ -34,4 +34,4 @@ Bandwidth is the "dark matter" of formant synthesis. Kent & Vorperian 2018 did N
 
 ## Commit
 
-Pending -- see below.
+`eb603fa`

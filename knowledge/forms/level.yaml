@@ -1,5 +1,0 @@
-name: level
-parameters:
-  scale: dB
-  reference: null
-qudt: null

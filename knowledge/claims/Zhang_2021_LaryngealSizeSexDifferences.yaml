@@ -1,0 +1,160 @@
+source:
+  paper: Zhang_2021_LaryngealSizeSexDifferences
+claims:
+- id: claim11235
+  type: parameter
+  concept: children
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: L
+  value: 6
+- id: claim11236
+  type: parameter
+  concept: adult_females
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: L
+  value: 10
+- id: claim11237
+  type: parameter
+  concept: adult_males
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: L
+  value: 17
+- id: claim11238
+  type: parameter
+  concept: vocal_fold_length
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: mm
+- id: claim11239
+  type: parameter
+  concept: vertical_thickness
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: mm
+- id: claim11240
+  type: parameter
+  concept: cover_layer_depth
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: mm
+- id: claim11241
+  type: parameter
+  concept: body_layer_depth
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: mm
+- id: claim11242
+  type: parameter
+  concept: transverse_youngs_modulus
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: kPa
+- id: claim11243
+  type: parameter
+  concept: cover_ap_shear_modulus
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: kPa
+- id: claim11244
+  type: parameter
+  concept: body_ap_shear_modulus
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: kPa
+- id: claim11245
+  type: parameter
+  concept: initial_glottal_angle
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: degrees
+- id: claim11246
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  unit: Pa
+- id: claim11247
+  type: parameter
+  concept: ap_poissons_ratio
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.495
+- id: claim11248
+  type: parameter
+  concept: loss_factor
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.4
+- id: claim11249
+  type: parameter
+  concept: f0_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.056
+- id: claim11250
+  type: parameter
+  concept: f0_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.056
+- id: claim11251
+  type: parameter
+  concept: spl_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.097
+- id: claim11252
+  type: parameter
+  concept: spl_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.097
+- id: claim11253
+  type: parameter
+  concept: 60_db_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.165
+- id: claim11254
+  type: parameter
+  concept: 60_db_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.165
+- id: claim11255
+  type: parameter
+  concept: 70_db_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.244
+- id: claim11256
+  type: parameter
+  concept: 70_db_eta2
+  provenance:
+    paper: Zhang_2021_LaryngealSizeSexDifferences
+    page: 0
+  value: 0.244

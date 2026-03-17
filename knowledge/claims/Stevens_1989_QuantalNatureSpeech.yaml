@@ -1,0 +1,113 @@
+source:
+  paper: Stevens_1989_QuantalNatureSpeech
+claims:
+- id: claim8585
+  type: parameter
+  concept: 500_hz_critical_bandwidth
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim8586
+  type: parameter
+  concept: 1000_hz_critical_bandwidth
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 150
+  unit: Hz
+- id: claim8587
+  type: parameter
+  concept: 2000_hz_critical_bandwidth
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim8588
+  type: parameter
+  concept: 3000_hz_critical_bandwidth
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 350
+  unit: Hz
+- id: claim8589
+  type: parameter
+  concept: vocal_tract_length_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 16
+- id: claim8590
+  type: parameter
+  concept: average_crosssectional_area_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 3
+- id: claim8591
+  type: parameter
+  concept: minimum_sonorant_constriction_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  lower_bound: 0.2
+  upper_bound: 0.3
+- id: claim8592
+  type: parameter
+  concept: fricative_constriction_range_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  lower_bound: 0.03
+  upper_bound: 0.2
+- id: claim8593
+  type: parameter
+  concept: critical_formant_spacing_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  value: 3.5
+- id: claim8594
+  type: parameter
+  concept: high_vowel_boundary_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  lower_bound: 3.0
+  upper_bound: 3.2
+- id: claim8595
+  type: parameter
+  concept: nasalization_threshold_typical_value
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+  lower_bound: 6
+  upper_bound: 9
+  unit: dB
+- id: claim8596
+  type: equation
+  expression: F_1 = \frac{c}{2\pi\sqrt{A_1 l_1 \left(\frac{l_c}{A_c} + \frac{l_2}{A}\right)}}
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+- id: claim8597
+  type: equation
+  expression: \Delta F = \frac{c^2}{2\pi^2 l_c l_2 F_n} \times \frac{A_c}{A}
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+- id: claim8598
+  type: equation
+  expression: P_s = \frac{\rho U^2}{2A_g^2} + \frac{\rho U^2}{2A_c^2}
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0
+- id: claim8599
+  type: equation
+  expression: p_s = K U^3 A^{-5/2}
+  provenance:
+    paper: Stevens_1989_QuantalNatureSpeech
+    page: 0

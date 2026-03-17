@@ -1,0 +1,31 @@
+source:
+  paper: Belin_2017_SoundOfTrustworthiness
+claims:
+- id: claim691
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Belin_2017_SoundOfTrustworthiness
+    page: 0
+  unit: Hz
+- id: claim692
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Belin_2017_SoundOfTrustworthiness
+    page: 0
+  unit: Hz
+- id: claim693
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Belin_2017_SoundOfTrustworthiness
+    page: 0
+  unit: Hz
+- id: claim694
+  type: parameter
+  concept: utterance_duration
+  provenance:
+    paper: Belin_2017_SoundOfTrustworthiness
+    page: 0
+  unit: ms

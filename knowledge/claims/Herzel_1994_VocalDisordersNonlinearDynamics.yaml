@@ -1,0 +1,115 @@
+source:
+  paper: Herzel_1994_VocalDisordersNonlinearDynamics
+claims:
+- id: claim4054
+  type: parameter
+  concept: sampling_rate
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+  value: 20000
+  unit: Hz
+- id: claim4055
+  type: parameter
+  concept: resolution
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+  value: 16
+  unit: bits
+- id: claim4056
+  type: parameter
+  concept: lowpass_cutoff_for_f0_detection
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+  unit: Hz
+- id: claim4057
+  type: parameter
+  concept: embedding_dimension
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+  lower_bound: 2
+  upper_bound: 3
+  unit: --
+- id: claim4058
+  type: parameter
+  concept: delay_time
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+  unit: ms
+- id: claim4059
+  type: equation
+  expression: \mathbf{x}(t) = \{x(t), x(t + \tau), \ldots, x[t + (m-1)\tau]\}
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4060
+  type: equation
+  expression: F_i = \frac{f_{i+1} + f_{i-1}}{2} - f_i
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4061
+  type: equation
+  expression: A_i = \frac{a_{i+1} + a_{i-1}}{2} - a_i
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4062
+  type: observation
+  statement: Period-doubling must produce alternating high-low pattern in amplitude
+    contours with period 2
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4063
+  type: observation
+  statement: Autocorrelation of period-doubled signal must show negative peak at lag
+    1 and positive peak at lag 2
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4064
+  type: observation
+  statement: Torus attractor must produce closed ellipsoidal curve in next-amplitude
+    map
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4065
+  type: observation
+  statement: Period-tripling must show ~120 degree rotation angle in enumerated next-amplitude
+    map
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4066
+  type: observation
+  statement: Subharmonic at F0/N must appear as peak at F0/N in narrow-band spectrogram
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4067
+  type: observation
+  statement: Phase portrait of normal phonation must approximate a closed curve (limit
+    cycle) in 2D or 3D embedding
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0
+- id: claim4068
+  type: observation
+  statement: Low-frequency modulation (~20-70 Hz) in amplitude contour should be detectable
+    by autocorrelation even when not visible in raw waveform
+  concepts: []
+  provenance:
+    paper: Herzel_1994_VocalDisordersNonlinearDynamics
+    page: 0

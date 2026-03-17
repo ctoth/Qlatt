@@ -1,0 +1,540 @@
+source:
+  paper: Lindblom_1971_AcousticConsequencesArticulatory
+claims:
+- id: claim6096
+  type: parameter
+  concept: jaw_opening
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  lower_bound: 5
+  upper_bound: 23
+- id: claim6097
+  type: parameter
+  concept: labial_width
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6098
+  type: parameter
+  concept: labial_height
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6099
+  type: parameter
+  concept: tongue_body_position
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6100
+  type: parameter
+  concept: tongue_body_shape
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6101
+  type: parameter
+  concept: larynx_lowering
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6102
+  type: parameter
+  concept: mouth_k
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 2.2
+- id: claim6103
+  type: parameter
+  concept: mouth_alpha
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.38
+- id: claim6104
+  type: parameter
+  concept: upper_pharynx_k
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0.68
+- id: claim6105
+  type: parameter
+  concept: upper_pharynx_alpha
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.9
+- id: claim6106
+  type: parameter
+  concept: lower_pharynx_k
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.1
+- id: claim6107
+  type: parameter
+  concept: lower_pharynx_alpha
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 2.21
+- id: claim6108
+  type: parameter
+  concept: i
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 250
+- id: claim6109
+  type: parameter
+  concept: e
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 315
+- id: claim6110
+  type: parameter
+  concept: epsilon
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 460
+- id: claim6111
+  type: parameter
+  concept: y
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 199
+- id: claim6112
+  type: parameter
+  concept: oe
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 410
+- id: claim6113
+  type: parameter
+  concept: u
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 246
+- id: claim6114
+  type: parameter
+  concept: o
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 452
+- id: claim6115
+  type: parameter
+  concept: a
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 650
+- id: claim6116
+  type: parameter
+  concept: a
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 683
+- id: claim6117
+  type: parameter
+  concept: ae
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 570
+- id: claim6118
+  type: parameter
+  concept: barredu
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  unit: normal
+  value: 282
+- id: claim6119
+  type: parameter
+  concept: i_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6120
+  type: parameter
+  concept: i_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6121
+  type: parameter
+  concept: i_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6122
+  type: parameter
+  concept: i_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 9
+- id: claim6123
+  type: parameter
+  concept: e_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6124
+  type: parameter
+  concept: e_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6125
+  type: parameter
+  concept: e_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6126
+  type: parameter
+  concept: e_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 11
+- id: claim6127
+  type: parameter
+  concept: epsilon_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6128
+  type: parameter
+  concept: epsilon_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6129
+  type: parameter
+  concept: epsilon_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6130
+  type: parameter
+  concept: epsilon_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 23
+- id: claim6131
+  type: parameter
+  concept: ae_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6132
+  type: parameter
+  concept: ae_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6133
+  type: parameter
+  concept: ae_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6134
+  type: parameter
+  concept: ae_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 23
+- id: claim6135
+  type: parameter
+  concept: oe_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6136
+  type: parameter
+  concept: oe_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6137
+  type: parameter
+  concept: oe_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6138
+  type: parameter
+  concept: oe_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 9
+- id: claim6139
+  type: parameter
+  concept: y_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -1.0
+- id: claim6140
+  type: parameter
+  concept: y_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6141
+  type: parameter
+  concept: y_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6142
+  type: parameter
+  concept: y_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 5
+- id: claim6143
+  type: parameter
+  concept: u_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6144
+  type: parameter
+  concept: u_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6145
+  type: parameter
+  concept: u_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6146
+  type: parameter
+  concept: u_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 5
+- id: claim6147
+  type: parameter
+  concept: o_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0.5
+- id: claim6148
+  type: parameter
+  concept: o_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6149
+  type: parameter
+  concept: o_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6150
+  type: parameter
+  concept: o_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 5
+- id: claim6151
+  type: parameter
+  concept: a_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6152
+  type: parameter
+  concept: a_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6153
+  type: parameter
+  concept: a_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6154
+  type: parameter
+  concept: a_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6155
+  type: parameter
+  concept: a_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6156
+  type: parameter
+  concept: a_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6157
+  type: parameter
+  concept: a_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6158
+  type: parameter
+  concept: a_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6159
+  type: parameter
+  concept: barredu_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6160
+  type: parameter
+  concept: barredu_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6161
+  type: parameter
+  concept: barredu_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6162
+  type: parameter
+  concept: barredu_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 5
+- id: claim6163
+  type: parameter
+  concept: oe_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0.5
+- id: claim6164
+  type: parameter
+  concept: oe_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 0
+- id: claim6165
+  type: parameter
+  concept: oe_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: -10
+- id: claim6166
+  type: parameter
+  concept: oe_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 15
+- id: claim6167
+  type: parameter
+  concept: a_d
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6168
+  type: parameter
+  concept: a_c
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 1.0
+- id: claim6169
+  type: parameter
+  concept: a_w
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 10
+- id: claim6170
+  type: parameter
+  concept: a_j
+  provenance:
+    paper: Lindblom_1971_AcousticConsequencesArticulatory
+    page: 0
+  value: 15

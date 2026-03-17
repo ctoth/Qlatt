@@ -1,0 +1,283 @@
+source:
+  paper: Shadle_2023_FricativeSpectraHighFreq
+claims:
+- id: claim8160
+  type: parameter
+  concept: s
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: Men
+- id: claim8161
+  type: parameter
+  concept: z
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: Men
+- id: claim8162
+  type: parameter
+  concept: sh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: Men
+- id: claim8163
+  type: parameter
+  concept: zh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: Men
+- id: claim8164
+  type: parameter
+  concept: f
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: dB
+- id: claim8165
+  type: parameter
+  concept: theta
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: dB
+- id: claim8166
+  type: parameter
+  concept: f_m_s
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 7
+  unit: kHz
+- id: claim8167
+  type: parameter
+  concept: f_m_sh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 3
+  unit: kHz
+- id: claim8168
+  type: parameter
+  concept: f_m_difference
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 4
+  unit: kHz
+- id: claim8169
+  type: parameter
+  concept: amp_d_s
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 32
+  unit: dB
+- id: claim8170
+  type: parameter
+  concept: amp_d_sh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 28
+  unit: dB
+- id: claim8171
+  type: parameter
+  concept: amp_d_difference
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 4
+  unit: dB
+- id: claim8172
+  type: parameter
+  concept: level_d_s
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 4
+  unit: dB
+- id: claim8173
+  type: parameter
+  concept: level_d_sh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 1
+  unit: dB
+- id: claim8174
+  type: parameter
+  concept: level_d_difference
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 3
+  unit: dB
+- id: claim8175
+  type: parameter
+  concept: highlevel_d_s
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 74
+  unit: dB
+- id: claim8176
+  type: parameter
+  concept: highlevel_d_sh
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 68
+  unit: dB
+- id: claim8177
+  type: parameter
+  concept: highlevel_d_difference
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  value: 6
+  unit: dB
+- id: claim8178
+  type: parameter
+  concept: spectral_peak
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 2
+  upper_bound: 8
+  unit: kHz
+- id: claim8179
+  type: parameter
+  concept: peak_prominence
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 20
+  upper_bound: 35
+  unit: dB
+- id: claim8180
+  type: parameter
+  concept: midfreq_spectral_level
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: dB
+- id: claim8181
+  type: parameter
+  concept: highfreq_spectral_level
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: dB
+- id: claim8182
+  type: parameter
+  concept: veryhighfreq_spectral_level
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: dB
+- id: claim8183
+  type: parameter
+  concept: midhigh_difference
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: dB
+- id: claim8184
+  type: parameter
+  concept: combined_high_level
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 60
+  upper_bound: 80
+  unit: dB
+- id: claim8185
+  type: parameter
+  concept: highfreq_maximum
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 5
+  upper_bound: 12
+  unit: kHz
+- id: claim8186
+  type: parameter
+  concept: amplitude_range
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: dB
+- id: claim8187
+  type: parameter
+  concept: spectral_slope
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+  unit: dB/kHz
+- id: claim8188
+  type: observation
+  statement: F_M for /s/ must be higher than F_M for /sh/ by at least 1-2 kHz
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8189
+  type: observation
+  statement: Amp_D for /s/ must be larger than Amp_D for /sh/
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8190
+  type: observation
+  statement: HighLevel_D should be higher for /s/ than /sh/ (more high-freq energy)
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8191
+  type: observation
+  statement: Non-sibilant AmpRange (10-20 dB) must be smaller than sibilant Amp_D
+    (20-35 dB)
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8192
+  type: observation
+  statement: F_h for non-sibilants must fall within 5-12 kHz
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8193
+  type: observation
+  statement: Female F_M for /s/ should be higher than male F_M by ~1-2 kHz
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8194
+  type: observation
+  statement: Spectral slope from peak for /s/ should be shallower (less negative)
+    than for /sh/
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0
+- id: claim8195
+  type: observation
+  statement: Non-sibilant spectra should be relatively flat from mid to high frequencies
+  concepts: []
+  provenance:
+    paper: Shadle_2023_FricativeSpectraHighFreq
+    page: 0

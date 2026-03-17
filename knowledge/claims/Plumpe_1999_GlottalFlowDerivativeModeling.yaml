@@ -1,0 +1,235 @@
+source:
+  paper: Plumpe_1999_GlottalFlowDerivativeModeling
+claims:
+- id: claim7404
+  type: parameter
+  concept: glottal_opening_time
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: s
+- id: claim7405
+  type: parameter
+  concept: shape_parameter
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: 1/s
+- id: claim7406
+  type: parameter
+  concept: openphase_frequency
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: rad/s
+- id: claim7407
+  type: parameter
+  concept: glottal_pulse_time
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: s
+- id: claim7408
+  type: parameter
+  concept: return_phase_decay
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: 1/s
+- id: claim7409
+  type: parameter
+  concept: glottal_closure_time
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: s
+- id: claim7410
+  type: parameter
+  concept: closed_quotient
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: ratio
+- id: claim7411
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: ratio
+- id: claim7412
+  type: parameter
+  concept: return_quotient
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: ratio
+- id: claim7413
+  type: parameter
+  concept: finestructure_energy
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: ratio
+- id: claim7414
+  type: parameter
+  concept: ripple_parameters
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: Hz, Hz/s, Hz/s²
+- id: claim7415
+  type: parameter
+  concept: analysis_window
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: samples
+- id: claim7416
+  type: parameter
+  concept: formant_change_window
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  unit: samples
+- id: claim7417
+  type: parameter
+  concept: f1_freq_male
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 161
+- id: claim7418
+  type: parameter
+  concept: f1_freq_female
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 155
+- id: claim7419
+  type: parameter
+  concept: f1_bw_male
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 8.7
+- id: claim7420
+  type: parameter
+  concept: f1_bw_female
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 4.2
+- id: claim7421
+  type: parameter
+  concept: f2_freq_male
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 42.7
+- id: claim7422
+  type: parameter
+  concept: f2_freq_female
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 59.4
+- id: claim7423
+  type: parameter
+  concept: f2_bw_male
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 1.2
+- id: claim7424
+  type: parameter
+  concept: f2_bw_female
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+  value: 0.9
+- id: claim7425
+  type: equation
+  expression: 'where the time-varying first formant frequency and bandwidth are:'
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7426
+  type: observation
+  statement: CQ + OQ + RQ = 1.0 (they partition the glottal cycle)
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7427
+  type: observation
+  statement: $E_e > 0$ always (absolute value of negative peak)
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7428
+  type: observation
+  statement: '$\Omega_o > \pi$ always (physical constraint: no negative open-phase
+    flow)'
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7429
+  type: observation
+  statement: $\beta > 0$ always (return phase must decay)
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7430
+  type: observation
+  statement: $0 < T_o < T_e < T_c$ (temporal ordering of glottal events)
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7431
+  type: observation
+  statement: F1 frequency SNR >> F2 frequency SNR for closed-phase detection
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7432
+  type: observation
+  statement: F1 frequency SNR >> F1 bandwidth SNR for closed-phase detection
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7433
+  type: observation
+  statement: Formant frequencies stationary during closed phase, modulated during
+    open phase
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7434
+  type: observation
+  statement: Removing singularity frames improves SID accuracy by ~15%
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7435
+  type: observation
+  statement: Source features complementary to filter features (combined > either alone)
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0
+- id: claim7436
+  type: observation
+  statement: Normalized timing parameters (CQ, OQ, RQ) are pitch-independent
+  concepts: []
+  provenance:
+    paper: Plumpe_1999_GlottalFlowDerivativeModeling
+    page: 0

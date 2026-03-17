@@ -1,0 +1,220 @@
+source:
+  paper: Elovitz_1976_NRL_LTS
+claims:
+- id: claim1969
+  type: parameter
+  concept: total_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 329
+- id: claim1970
+  type: parameter
+  concept: s_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 24
+- id: claim1971
+  type: parameter
+  concept: s_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 24
+- id: claim1972
+  type: parameter
+  concept: s_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 24
+- id: claim1973
+  type: parameter
+  concept: t_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 27
+- id: claim1974
+  type: parameter
+  concept: t_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 27
+- id: claim1975
+  type: parameter
+  concept: t_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 27
+- id: claim1976
+  type: parameter
+  concept: u_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 17
+- id: claim1977
+  type: parameter
+  concept: u_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 17
+- id: claim1978
+  type: parameter
+  concept: u_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 17
+- id: claim1979
+  type: parameter
+  concept: v_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 2
+- id: claim1980
+  type: parameter
+  concept: v_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 2
+- id: claim1981
+  type: parameter
+  concept: v_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 2
+- id: claim1982
+  type: parameter
+  concept: w_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 13
+- id: claim1983
+  type: parameter
+  concept: w_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 13
+- id: claim1984
+  type: parameter
+  concept: w_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 13
+- id: claim1985
+  type: parameter
+  concept: x_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1986
+  type: parameter
+  concept: x_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1987
+  type: parameter
+  concept: x_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1988
+  type: parameter
+  concept: y_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 11
+- id: claim1989
+  type: parameter
+  concept: y_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 11
+- id: claim1990
+  type: parameter
+  concept: y_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 11
+- id: claim1991
+  type: parameter
+  concept: z_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1992
+  type: parameter
+  concept: z_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1993
+  type: parameter
+  concept: z_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 1
+- id: claim1994
+  type: parameter
+  concept: numbers_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 10
+- id: claim1995
+  type: parameter
+  concept: numbers_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 10
+- id: claim1996
+  type: parameter
+  concept: numbers_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 10
+- id: claim1997
+  type: parameter
+  concept: 1_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 182
+- id: claim1998
+  type: parameter
+  concept: 2_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 264
+- id: claim1999
+  type: parameter
+  concept: 3_rules
+  provenance:
+    paper: Elovitz_1976_NRL_LTS
+    page: 0
+  value: 319

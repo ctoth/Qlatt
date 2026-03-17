@@ -1,0 +1,247 @@
+source:
+  paper: Laukka_2011_SpontaneousAffectIrritation
+claims:
+- id: claim5970
+  type: parameter
+  concept: f0m
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 2.29
+- id: claim5971
+  type: parameter
+  concept: f0q1
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 2.18
+- id: claim5972
+  type: parameter
+  concept: f0q5
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 2.37
+- id: claim5973
+  type: parameter
+  concept: intm
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 71.77
+- id: claim5974
+  type: parameter
+  concept: intq5
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 82.73
+- id: claim5975
+  type: parameter
+  concept: intfracrise
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.171
+- id: claim5976
+  type: parameter
+  concept: f2b
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 366.9
+- id: claim5977
+  type: parameter
+  concept: syllabledurm
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.451
+- id: claim5978
+  type: parameter
+  concept: f0m
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 2.2
+- id: claim5979
+  type: parameter
+  concept: f0sd
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.045
+- id: claim5980
+  type: parameter
+  concept: f0fracrise
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.208
+- id: claim5981
+  type: parameter
+  concept: intm
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 60.84
+- id: claim5982
+  type: parameter
+  concept: intq1
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 47.2
+- id: claim5983
+  type: parameter
+  concept: intq5
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 71.06
+- id: claim5984
+  type: parameter
+  concept: intsd
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 8.97
+- id: claim5985
+  type: parameter
+  concept: intfracrise
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.206
+- id: claim5986
+  type: parameter
+  concept: syllabledurm
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  unit: SD
+  value: 0.462
+- id: claim5987
+  type: parameter
+  concept: lda_irritation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 69.7
+- id: claim5988
+  type: parameter
+  concept: lda_resignation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 64.3
+- id: claim5989
+  type: parameter
+  concept: lda_neutral
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 50.0
+- id: claim5990
+  type: parameter
+  concept: lda_irritation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 57.6
+- id: claim5991
+  type: parameter
+  concept: lda_resignation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 42.9
+- id: claim5992
+  type: parameter
+  concept: lda_neutral
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 62.5
+- id: claim5993
+  type: parameter
+  concept: human_listeners_irritation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 56.7
+- id: claim5994
+  type: parameter
+  concept: human_listeners_resignation
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 45.3
+- id: claim5995
+  type: parameter
+  concept: human_listeners_neutral
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+  value: 71.2
+- id: claim5996
+  type: observation
+  statement: 'Irritation: F0 mean increases, intensity mean increases, F0 Q1 and Q5
+    increase relative to neutral baseline'
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+- id: claim5997
+  type: observation
+  statement: 'Resignation: F0 mean decreases, intensity mean/Q1/Q5 decrease, F0 SD
+    decreases relative to neutral baseline'
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+- id: claim5998
+  type: observation
+  statement: 'Both: syllable duration increases (slower speech rate)'
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+- id: claim5999
+  type: observation
+  statement: IntQ5 should be the single best predictor of emotion intensity (r ≈ .46)
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+- id: claim6000
+  type: observation
+  statement: F0FracRise should differentiate neutral (high) from affective (low) speech
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0
+- id: claim6001
+  type: observation
+  statement: Irritation and resignation rarely confused with each other — they are
+    acoustically distinct
+  concepts: []
+  provenance:
+    paper: Laukka_2011_SpontaneousAffectIrritation
+    page: 0

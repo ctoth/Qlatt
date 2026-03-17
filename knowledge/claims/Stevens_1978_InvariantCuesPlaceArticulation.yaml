@@ -1,0 +1,336 @@
+source:
+  paper: Stevens_1978_InvariantCuesPlaceArticulation
+claims:
+- id: claim8538
+  type: parameter
+  concept: a_f1
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 720
+- id: claim8539
+  type: parameter
+  concept: a_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1240
+- id: claim8540
+  type: parameter
+  concept: a_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2500
+- id: claim8541
+  type: parameter
+  concept: a_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3600
+- id: claim8542
+  type: parameter
+  concept: i_f1
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  lower_bound: 330
+  upper_bound: 270
+- id: claim8543
+  type: parameter
+  concept: i_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  lower_bound: 2000
+  upper_bound: 2300
+- id: claim8544
+  type: parameter
+  concept: i_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3000
+- id: claim8545
+  type: parameter
+  concept: i_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3600
+- id: claim8546
+  type: parameter
+  concept: u_f1
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  lower_bound: 370
+  upper_bound: 330
+- id: claim8547
+  type: parameter
+  concept: u_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  lower_bound: 1100
+  upper_bound: 1000
+- id: claim8548
+  type: parameter
+  concept: u_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2355
+- id: claim8549
+  type: parameter
+  concept: u_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3200
+- id: claim8550
+  type: parameter
+  concept: 1_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 900
+- id: claim8551
+  type: parameter
+  concept: 1_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2000
+- id: claim8552
+  type: parameter
+  concept: 5_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1350
+- id: claim8553
+  type: parameter
+  concept: 5_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2450
+- id: claim8554
+  type: parameter
+  concept: 8_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1580
+- id: claim8555
+  type: parameter
+  concept: 8_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2690
+- id: claim8556
+  type: parameter
+  concept: 10_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1670
+- id: claim8557
+  type: parameter
+  concept: 10_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3460
+- id: claim8558
+  type: parameter
+  concept: 14_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1610
+- id: claim8559
+  type: parameter
+  concept: 14_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1750
+- id: claim8560
+  type: parameter
+  concept: 1_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1800
+- id: claim8561
+  type: parameter
+  concept: 1_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2600
+- id: claim8562
+  type: parameter
+  concept: 1_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3200
+- id: claim8563
+  type: parameter
+  concept: 5_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1933
+- id: claim8564
+  type: parameter
+  concept: 5_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2733
+- id: claim8565
+  type: parameter
+  concept: 5_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3567
+- id: claim8566
+  type: parameter
+  concept: 8_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2067
+- id: claim8567
+  type: parameter
+  concept: 8_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2833
+- id: claim8568
+  type: parameter
+  concept: 8_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3817
+- id: claim8569
+  type: parameter
+  concept: 10_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2200
+- id: claim8570
+  type: parameter
+  concept: 10_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2900
+- id: claim8571
+  type: parameter
+  concept: 10_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3450
+- id: claim8572
+  type: parameter
+  concept: 14_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2400
+- id: claim8573
+  type: parameter
+  concept: 14_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3000
+- id: claim8574
+  type: parameter
+  concept: 14_f4
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 3400
+- id: claim8575
+  type: parameter
+  concept: 1_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 800
+- id: claim8576
+  type: parameter
+  concept: 1_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2000
+- id: claim8577
+  type: parameter
+  concept: 5_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1333
+- id: claim8578
+  type: parameter
+  concept: 5_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2467
+- id: claim8579
+  type: parameter
+  concept: 8_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1533
+- id: claim8580
+  type: parameter
+  concept: 8_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2467
+- id: claim8581
+  type: parameter
+  concept: 11_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1467
+- id: claim8582
+  type: parameter
+  concept: 11_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2333
+- id: claim8583
+  type: parameter
+  concept: 14_f2
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 1400
+- id: claim8584
+  type: parameter
+  concept: 14_f3
+  provenance:
+    paper: Stevens_1978_InvariantCuesPlaceArticulation
+    page: 0
+  value: 2000

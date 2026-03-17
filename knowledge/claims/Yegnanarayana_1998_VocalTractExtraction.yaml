@@ -1,0 +1,280 @@
+source:
+  paper: Yegnanarayana_1998_VocalTractExtraction
+claims:
+- id: claim11117
+  type: parameter
+  concept: sampling_frequency
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  unit: Hz
+- id: claim11118
+  type: parameter
+  concept: window_length
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  unit: samples
+- id: claim11119
+  type: parameter
+  concept: window_shift
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 1
+  unit: samples
+- id: claim11120
+  type: parameter
+  concept: preemphasis_coeff
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.9
+  lower_bound: 0.8
+  upper_bound: 1.0
+- id: claim11121
+  type: parameter
+  concept: prediction_order
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 9
+- id: claim11122
+  type: parameter
+  concept: frame_length
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 3.75
+  lower_bound: 2.5
+  upper_bound: 10
+  unit: ms
+- id: claim11123
+  type: parameter
+  concept: frame_length
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 2.5
+  unit: ms
+- id: claim11124
+  type: parameter
+  concept: pole_magnitude_threshold
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.8
+- id: claim11125
+  type: parameter
+  concept: min_formant_frequency
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 200
+  unit: Hz
+- id: claim11126
+  type: parameter
+  concept: multicycle_frames
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 3
+- id: claim11127
+  type: parameter
+  concept: min_snr
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 40
+  unit: dB
+- id: claim11128
+  type: parameter
+  concept: preexcitation_offset
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  unit: ms
+- id: claim11129
+  type: parameter
+  concept: postexcitation_delay
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 2
+  unit: samples
+- id: claim11130
+  type: parameter
+  concept: male_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 3.3
+- id: claim11131
+  type: parameter
+  concept: male_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 3.4
+- id: claim11132
+  type: parameter
+  concept: male_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.29
+- id: claim11133
+  type: parameter
+  concept: male_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.45
+- id: claim11134
+  type: parameter
+  concept: male_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 8.2
+- id: claim11135
+  type: parameter
+  concept: male_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 6.5
+- id: claim11136
+  type: parameter
+  concept: male_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.21
+- id: claim11137
+  type: parameter
+  concept: male_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 1.9
+- id: claim11138
+  type: parameter
+  concept: female_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 8.0
+- id: claim11139
+  type: parameter
+  concept: female_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 9.5
+- id: claim11140
+  type: parameter
+  concept: female_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.74
+- id: claim11141
+  type: parameter
+  concept: female_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 1.8
+- id: claim11142
+  type: parameter
+  concept: female_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 26.3
+- id: claim11143
+  type: parameter
+  concept: female_singlecycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 49.9
+- id: claim11144
+  type: parameter
+  concept: female_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 0.42
+- id: claim11145
+  type: parameter
+  concept: female_multicycle_hz
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+  value: 2.1
+- id: claim11146
+  type: equation
+  expression: X(m,n) = \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} w_a(k) x(k - mS) e^{-ikn(2\pi/N)}
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11147
+  type: equation
+  expression: Y(m,n) = \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} k \cdot w_a(k) x(k - mS)
+    e^{-ikn(2\pi/N)}
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11148
+  type: equation
+  expression: \tau(m,n) = \frac{X_R(m,n) Y_R(m,n) + X_I(m,n) Y_I(m,n)}{X_R^2(m,n)
+    + X_I^2(m,n)}
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11149
+  type: equation
+  expression: r(n) = \sum_{k=1}^{p} A_k \rho_k^n e^{i\theta_k n} = \sum_{l=1}^{p/2}
+    \rho_l^n (A_l e^{i\theta_l n} + \bar{A_l} e^{-i\theta_l n})
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11150
+  type: equation
+  expression: F_k = \frac{f_s}{2\pi} \theta_k
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11151
+  type: equation
+  expression: B_k = -\frac{f_s}{\pi} \ln(\rho_k)
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11152
+  type: equation
+  expression: c_{kl} = \sum_{n=p}^{N-1} s(n-k) s(n-l), \quad k,l = 1, \ldots, p
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11153
+  type: equation
+  expression: \mathbf{c}_k = \sum_{n=p}^{N-1} s(n-k) s(n), \quad k = 1, \ldots, p
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11154
+  type: equation
+  expression: \left( \sum_{k=0}^{K-1} \mathbf{C}_k \right) \mathbf{a} = -\left( \sum_{k=0}^{K-1}
+    \mathbf{c}_k \right)
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0
+- id: claim11155
+  type: equation
+  expression: s'(n) = s(n) - \alpha s(n-1), \quad 0.8 < \alpha < 1
+  provenance:
+    paper: Yegnanarayana_1998_VocalTractExtraction
+    page: 0

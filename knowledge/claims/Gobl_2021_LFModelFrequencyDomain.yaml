@@ -1,0 +1,241 @@
+source:
+  paper: Gobl_2021_LFModelFrequencyDomain
+claims:
+- id: claim3169
+  type: parameter
+  concept: main_excitation_amplitude
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 10000
+  unit: cm³/s²
+- id: claim3170
+  type: parameter
+  concept: glottal_angular_frequency
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  unit: rad/s
+- id: claim3171
+  type: parameter
+  concept: open_phase_duration
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 0.002102
+  unit: s
+- id: claim3172
+  type: parameter
+  concept: exponential_growth_rate
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 1400.6
+  unit: 1/s
+- id: claim3173
+  type: parameter
+  concept: return_phase_decay_rate
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 7539.8
+  unit: 1/s
+- id: claim3174
+  type: parameter
+  concept: return_phase_duration
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 0.001898
+  unit: s
+- id: claim3175
+  type: parameter
+  concept: open_quotient_parameter
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 1.18
+- id: claim3176
+  type: parameter
+  concept: skew_parameter
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 0.24
+- id: claim3177
+  type: parameter
+  concept: return_phase_parameter
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 0.0332
+- id: claim3178
+  type: parameter
+  concept: waveshape_parameter
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  lower_bound: 0.11
+  upper_bound: 3.0
+- id: claim3179
+  type: parameter
+  concept: return_phase_corner_freq
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+  value: 1200
+  unit: Hz
+- id: claim3180
+  type: equation
+  expression: 'U''_g(t) = \begin{cases}
+
+    -E_e \dfrac{e^{\alpha t} \sin(\omega_g(t + T_e))}{\sin \omega_g T_e} & -T_e \leq
+    t < 0 \\[2ex]
+
+    -E_e \dfrac{e^{-\varepsilon t} - e^{-\varepsilon T_b}}{1 - e^{-\varepsilon T_a}}
+    & 0 \leq t < T_b
+
+    \end{cases}'
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3181
+  type: equation
+  expression: E_0 = -E_e \cdot e^{-\alpha T_e} / \sin \omega_g T_e
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3182
+  type: equation
+  expression: T_a = (1 - e^{-\varepsilon T_b}) / \varepsilon
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3183
+  type: equation
+  expression: T_e = \frac{1 + R_k}{2 R_g f_0}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3184
+  type: equation
+  expression: \omega_g = 2\pi R_g f_0
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3185
+  type: equation
+  expression: H_{LFopen}(s) = \frac{E_e \csc \omega_g T_e \left( \cos \omega_g T_e
+    - e^{(s-\alpha)T_e} \right)}{[s - (\alpha + j\omega_g)] \times [s - (\alpha -
+    j\omega_g)]}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3186
+  type: equation
+  expression: H_{LFret}(s) = -E_e \frac{s - \varepsilon e^{-\varepsilon T_b}(1 - e^{-\varepsilon
+    T_b})^{-1}(1 - e^{-sT_b})}{s(s + \varepsilon)}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3187
+  type: equation
+  expression: H_{LF}(s) = H_{LFopen}(s) + H_{LFret}(s)
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3188
+  type: equation
+  expression: A_o(f) = E_e \times \frac{\sqrt{[\text{Re}_1(f)]^2 + [\text{Im}_1(f)]^2}}{\sqrt{\alpha^2
+    + (2\pi f - \omega_g)^2} \sqrt{\alpha^2 + (2\pi f + \omega_g)^2}}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3189
+  type: equation
+  expression: \text{Re}_1(f) = \omega_g \left( \cot \omega_g T_e - e^{-\alpha T_e}
+    \frac{\cos 2\pi f T_e}{\sin \omega_g T_e} \right) - \alpha
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3190
+  type: equation
+  expression: \text{Im}_1(f) = 2\pi f - \omega_g e^{-\alpha T_e} \frac{\sin 2\pi f
+    T_e}{\sin \omega_g T_e}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3191
+  type: equation
+  expression: \phi_o(f) = \text{atan2}(\text{Im}_1(f), \text{Re}_1(f)) - \text{atan2}(2\pi
+    f - \omega_g, -\alpha) - \text{atan2}(2\pi f + \omega_g, -\alpha)
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3192
+  type: equation
+  expression: A_r(f) = E_e \times \frac{\sqrt{[\text{Re}_2(f)]^2 + [\text{Im}_2(f)]^2}}{2\pi
+    f \sqrt{\varepsilon^2 + (2\pi f)^2}}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3193
+  type: equation
+  expression: \text{Re}_2(f) = \frac{\varepsilon e^{-\varepsilon T_b}}{1 - e^{-\varepsilon
+    T_b}} (1 - \cos 2\pi f T_b)
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3194
+  type: equation
+  expression: \text{Im}_2(f) = \frac{\varepsilon e^{-\varepsilon T_b}}{1 - e^{-\varepsilon
+    T_b}} \sin 2\pi f T_b - 2\pi f
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3195
+  type: equation
+  expression: \phi_r(f) = \text{atan2}(\text{Im}_2(f), \text{Re}_2(f)) - \text{atan2}(2\pi
+    f, \varepsilon) - \frac{\pi}{2}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3196
+  type: equation
+  expression: A_{LF}(f) = \sqrt{A_o^2 + A_r^2 + 2 A_o A_r \cos(\phi_o - \phi_r)}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3197
+  type: equation
+  expression: \phi_{LF}(f) = \text{atan2}(A_o \sin \phi_o + A_r \sin \phi_r, A_o \cos
+    \phi_o + A_r \cos \phi_r)
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3198
+  type: equation
+  expression: \text{atan2}(y, x) = \arctan\left(\frac{y}{x}\right) \cdot \text{sgn}(x)^2
+    + \pi \left( \frac{1 - \text{sgn}(x)}{2} \right) \left( 1 + \text{sgn}(y) - \text{sgn}(y)^2
+    \right)
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3199
+  type: equation
+  expression: f_k = \frac{k F_s}{N} \quad \text{for } k = 0, 1, 2, \ldots, N/2 - 1
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3200
+  type: equation
+  expression: \text{Normalization factor} = \frac{F_s}{N}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0
+- id: claim3201
+  type: equation
+  expression: \phi_{delay} = -2\pi f \cdot t_{start,n}
+  provenance:
+    paper: Gobl_2021_LFModelFrequencyDomain
+    page: 0

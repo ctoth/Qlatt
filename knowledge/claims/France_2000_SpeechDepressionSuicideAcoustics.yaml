@@ -1,0 +1,93 @@
+source:
+  paper: France_2000_SpeechDepressionSuicideAcoustics
+claims:
+- id: claim2922
+  type: parameter
+  concept: first_formant
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 331
+  upper_bound: 383
+- id: claim2923
+  type: parameter
+  concept: second_formant
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 1130
+  upper_bound: 1212
+- id: claim2924
+  type: parameter
+  concept: third_formant
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 2002
+  upper_bound: 2072
+- id: claim2925
+  type: parameter
+  concept: f1_bandwidth
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 225
+  upper_bound: 259
+- id: claim2926
+  type: parameter
+  concept: f2_bandwidth
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 598
+  upper_bound: 644
+- id: claim2927
+  type: parameter
+  concept: f3_bandwidth
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: Hz
+  lower_bound: 605
+  upper_bound: 660
+- id: claim2928
+  type: parameter
+  concept: psd_band_1
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: '%'
+  lower_bound: 0.67
+  upper_bound: 0.81
+- id: claim2929
+  type: parameter
+  concept: psd_band_2
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: '%'
+  lower_bound: 0.12
+  upper_bound: 0.16
+- id: claim2930
+  type: parameter
+  concept: psd_band_3
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: '%'
+  lower_bound: 0.04
+  upper_bound: 0.08
+- id: claim2931
+  type: parameter
+  concept: psd_band_4
+  provenance:
+    paper: France_2000_SpeechDepressionSuicideAcoustics
+    page: 0
+  unit: '%'
+  lower_bound: 0.03
+  upper_bound: 0.09

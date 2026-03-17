@@ -1,0 +1,246 @@
+source:
+  paper: Feng_1996_NasalVowelTarget
+claims:
+- id: claim2461
+  type: parameter
+  concept: first_nasal_peak
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 200
+  upper_bound: 300
+  unit: Hz
+- id: claim2462
+  type: parameter
+  concept: second_nasal_peak
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 900
+  upper_bound: 1100
+  unit: Hz
+- id: claim2463
+  type: parameter
+  concept: wall_vibration_freq
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  value: 200
+  lower_bound: 150
+  upper_bound: 220
+  unit: Hz
+- id: claim2464
+  type: parameter
+  concept: nostril_output_area
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  value: 0.6
+  lower_bound: 0.6
+  upper_bound: 1.0
+  unit: cm²
+- id: claim2465
+  type: parameter
+  concept: nasal_tract_length
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  value: 11
+  unit: cm
+- id: claim2466
+  type: parameter
+  concept: neck_length
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  value: 3
+  lower_bound: 2.7
+  upper_bound: 3
+  unit: cm
+- id: claim2467
+  type: parameter
+  concept: sinus_volume
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  value: 18
+  unit: cm³
+- id: claim2468
+  type: parameter
+  concept: sinus_resonance
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  unit: Hz
+- id: claim2469
+  type: parameter
+  concept: fn1
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 250
+  upper_bound: 300
+  unit: Hz
+- id: claim2470
+  type: parameter
+  concept: fn3
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 650
+  upper_bound: 700
+  unit: Hz
+- id: claim2471
+  type: parameter
+  concept: fn5
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 900
+  upper_bound: 1100
+  unit: Hz
+- id: claim2472
+  type: parameter
+  concept: fn8
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 1900
+  upper_bound: 2200
+  unit: Hz
+- id: claim2473
+  type: parameter
+  concept: fn9
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 2800
+  upper_bound: 3300
+  unit: Hz
+- id: claim2474
+  type: parameter
+  concept: fn10
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  unit: Hz
+  value: 4000
+- id: claim2475
+  type: parameter
+  concept: fn1
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 250
+  upper_bound: 300
+  unit: Hz
+- id: claim2476
+  type: parameter
+  concept: fn2
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 400
+  upper_bound: 450
+  unit: Hz
+- id: claim2477
+  type: parameter
+  concept: fn3
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 650
+  upper_bound: 700
+  unit: Hz
+- id: claim2478
+  type: parameter
+  concept: fn4
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 850
+  upper_bound: 900
+  unit: Hz
+- id: claim2479
+  type: parameter
+  concept: fn5
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 1200
+  upper_bound: 1300
+  unit: Hz
+- id: claim2480
+  type: parameter
+  concept: fn67
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 1500
+  upper_bound: 1700
+  unit: Hz
+- id: claim2481
+  type: parameter
+  concept: fn8
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 1800
+  upper_bound: 2200
+  unit: Hz
+- id: claim2482
+  type: parameter
+  concept: fn9
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 2800
+  upper_bound: 3300
+  unit: Hz
+- id: claim2483
+  type: parameter
+  concept: fn10
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  unit: Hz
+  value: 4000
+- id: claim2484
+  type: parameter
+  concept: latin_small_letter_open_o_combining_tilde
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 250
+  upper_bound: 700
+  unit: Hz
+- id: claim2485
+  type: parameter
+  concept: a
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 250
+  upper_bound: 950
+  unit: Hz
+- id: claim2486
+  type: parameter
+  concept: latin_small_letter_open_e_combining_tilde
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+  lower_bound: 250
+  upper_bound: 1200
+  unit: Hz
+- id: claim2487
+  type: equation
+  expression: F_0 = \sqrt{F_{Helm}^2 + F_{wall}^2}
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0
+- id: claim2488
+  type: equation
+  expression: F_{Helm} = \frac{c}{2\pi} \sqrt{\frac{S}{V \cdot L_{eff}}}
+  provenance:
+    paper: Feng_1996_NasalVowelTarget
+    page: 0

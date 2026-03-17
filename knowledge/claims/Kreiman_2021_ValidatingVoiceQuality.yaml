@@ -1,0 +1,157 @@
+source:
+  paper: Kreiman_2021_ValidatingVoiceQuality
+claims:
+- id: claim5799
+  type: parameter
+  concept: sample_matching
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -0.14
+- id: claim5800
+  type: parameter
+  concept: talker_matching
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -0.43
+- id: claim5801
+  type: parameter
+  concept: sample_matching_females
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -0.45
+- id: claim5802
+  type: parameter
+  concept: talker_matching_females
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -2.57
+- id: claim5803
+  type: parameter
+  concept: sample_matching_males
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -0.44
+- id: claim5804
+  type: parameter
+  concept: talker_matching_males
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: -0.87
+- id: claim5805
+  type: parameter
+  concept: natural_vs_fourpiece_mean_d
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 1.48
+- id: claim5806
+  type: parameter
+  concept: natural_vs_fourpiece_sd
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.58
+- id: claim5807
+  type: parameter
+  concept: natural_vs_fourpiece_min
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.4
+- id: claim5808
+  type: parameter
+  concept: natural_vs_fourpiece_max
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 2.48
+- id: claim5809
+  type: parameter
+  concept: natural_vs_h1h4_mean_d
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 1.92
+- id: claim5810
+  type: parameter
+  concept: natural_vs_h1h4_sd
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.92
+- id: claim5811
+  type: parameter
+  concept: natural_vs_h1h4_min
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.71
+- id: claim5812
+  type: parameter
+  concept: natural_vs_h1h4_max
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 3.74
+- id: claim5813
+  type: parameter
+  concept: natural_vs_h22khz_mean_d
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 1.95
+- id: claim5814
+  type: parameter
+  concept: natural_vs_h22khz_sd
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 1.03
+- id: claim5815
+  type: parameter
+  concept: natural_vs_h22khz_min
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.58
+- id: claim5816
+  type: parameter
+  concept: natural_vs_h22khz_max
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 5.06
+- id: claim5817
+  type: parameter
+  concept: natural_vs_h45khz_mean_d
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 2.25
+- id: claim5818
+  type: parameter
+  concept: natural_vs_h45khz_sd
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.94
+- id: claim5819
+  type: parameter
+  concept: natural_vs_h45khz_min
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 0.77
+- id: claim5820
+  type: parameter
+  concept: natural_vs_h45khz_max
+  provenance:
+    paper: Kreiman_2021_ValidatingVoiceQuality
+    page: 0
+  value: 4.3

@@ -1,0 +1,105 @@
+source:
+  paper: Simpson_2009_PhoneticGenderDifferences
+claims:
+- id: claim8222
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: Hz
+- id: claim8223
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: Hz
+- id: claim8224
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: Hz
+- id: claim8225
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: Hz
+- id: claim8226
+  type: parameter
+  concept: vocal_tract_length
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: cm
+- id: claim8227
+  type: parameter
+  concept: vocal_tract_length
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: cm
+- id: claim8228
+  type: parameter
+  concept: vowel_duration_difference
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: '%'
+- id: claim8229
+  type: parameter
+  concept: vot
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+  unit: ms
+- id: claim8230
+  type: observation
+  statement: Female formant frequencies should NOT be derivable from male formants
+    by a single uniform scaling constant
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+- id: claim8231
+  type: observation
+  statement: Male vowel durations should be approximately 11% shorter than female
+    vowel durations
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+- id: claim8232
+  type: observation
+  statement: In semitone representation, male and female pitch ranges should be approximately
+    equal
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+- id: claim8233
+  type: observation
+  statement: Female VOTs for voiceless plosives should be longer than male VOTs
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+- id: claim8234
+  type: observation
+  statement: Pre-pubescent boys and girls should show formant differences despite
+    similar vocal tract dimensions
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0
+- id: claim8235
+  type: observation
+  statement: Female speakers should show larger acoustic vowel space area than males
+  concepts: []
+  provenance:
+    paper: Simpson_2009_PhoneticGenderDifferences
+    page: 0

@@ -1,0 +1,139 @@
+source:
+  paper: Zhang_2016_MechanicsVoiceProductionControl
+claims:
+- id: claim11203
+  type: parameter
+  concept: vocal_fold_length
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  lower_bound: 11
+  upper_bound: 15
+  unit: mm
+- id: claim11204
+  type: parameter
+  concept: vocal_fold_length
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  lower_bound: 17
+  upper_bound: 21
+  unit: mm
+- id: claim11205
+  type: parameter
+  concept: lamina_propria_thickness
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  value: 1
+  unit: mm
+- id: claim11206
+  type: parameter
+  concept: ap_youngs_modulus
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  unit: kPa
+- id: claim11207
+  type: parameter
+  concept: transverse_youngs_modulus
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  unit: kPa
+- id: claim11208
+  type: parameter
+  concept: stressstrain_slope
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  lower_bound: 20
+  upper_bound: 200
+  unit: kPa
+- id: claim11209
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  value: 800
+  unit: Pa
+- id: claim11210
+  type: parameter
+  concept: phonation_threshold_pressure
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  unit: Pa
+- id: claim11211
+  type: parameter
+  concept: f0_increase_from_ps
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  value: 20
+  unit: Hz/kPa
+- id: claim11212
+  type: parameter
+  concept: vortex_pressure_perturbation
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+  value: 160
+  unit: Pa
+- id: claim11213
+  type: observation
+  statement: Phonation threshold pressure should decrease when eigenmode frequencies
+    are brought closer together (by any mechanism)
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11214
+  type: observation
+  statement: Increasing medial surface vertical thickness should increase closed quotient
+    and decrease H1-H2
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11215
+  type: observation
+  statement: F0 should increase with increasing cover AP stiffness more than with
+    body stiffness
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11216
+  type: observation
+  statement: Subglottal pressure should have a relatively small effect on F0 compared
+    to stiffness/tension changes
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11217
+  type: observation
+  statement: Incomplete membranous glottal closure should reduce high-frequency harmonic
+    energy
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11218
+  type: observation
+  statement: The spectral slope above ~2 kHz should be controlled primarily by the
+    abruptness of glottal closure (Ta parameter)
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0
+- id: claim11219
+  type: observation
+  statement: Voice source noise should be broadband, predominantly above 2 kHz, and
+    much weaker than the harmonic component
+  concepts: []
+  provenance:
+    paper: Zhang_2016_MechanicsVoiceProductionControl
+    page: 0

@@ -1,0 +1,107 @@
+source:
+  paper: Moore_2003_GlottalFeaturesDepression
+claims:
+- id: claim6745
+  type: parameter
+  concept: opening_phase
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: samples/ms
+- id: claim6746
+  type: parameter
+  concept: closing_phase
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: samples/ms
+- id: claim6747
+  type: parameter
+  concept: closed_phase
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: samples/ms
+- id: claim6748
+  type: parameter
+  concept: open_phase
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: samples/ms
+- id: claim6749
+  type: parameter
+  concept: total_cycle
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: samples/ms
+- id: claim6750
+  type: parameter
+  concept: opening_threshold
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: '%'
+- id: claim6751
+  type: parameter
+  concept: closing_threshold
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: '%'
+- id: claim6752
+  type: parameter
+  concept: spectral_tilt_interval_1
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: dB/octave
+- id: claim6753
+  type: parameter
+  concept: spectral_tilt_interval_2
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: dB/octave
+- id: claim6754
+  type: parameter
+  concept: spectral_bias_1
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: dB
+- id: claim6755
+  type: parameter
+  concept: spectral_bias_2
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+  unit: dB
+- id: claim6756
+  type: equation
+  expression: Speech = G(z) \cdot V(z) \cdot R(z)
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+- id: claim6757
+  type: equation
+  expression: V(z) \Rightarrow \frac{1}{A(z)} \Rightarrow \frac{1}{1 + \sum_{i=1}^{p}
+    a_i z^i}
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+- id: claim6758
+  type: equation
+  expression: Shm = \frac{\frac{1}{N-1} \sum_{i=1}^{N-1} |A_i - A_{i+1}|}{\frac{1}{N}
+    \sum_{i=1}^{N} A_i}
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0
+- id: claim6759
+  type: equation
+  expression: Shm_{dB} = \frac{1}{N-1} \sum_{i=1}^{N-1} \left| 20 \log \left( \frac{A_{i+1}}{A_i}
+    \right) \right|
+  provenance:
+    paper: Moore_2003_GlottalFeaturesDepression
+    page: 0

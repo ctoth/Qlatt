@@ -1,0 +1,336 @@
+source:
+  paper: Goudbeek_2010_ValencePotencyVocalEmotion
+claims:
+- id: claim3208
+  type: parameter
+  concept: f0_level
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 1
+- id: claim3209
+  type: parameter
+  concept: f0_variability
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 2
+- id: claim3210
+  type: parameter
+  concept: intensity_level
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 3
+- id: claim3211
+  type: parameter
+  concept: intensity_variability
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 4
+- id: claim3212
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 5
+- id: claim3213
+  type: parameter
+  concept: low_spectral_dominance
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 6
+- id: claim3214
+  type: parameter
+  concept: spectral_noise
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 7
+- id: claim3215
+  type: parameter
+  concept: 1_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 38
+- id: claim3216
+  type: parameter
+  concept: 1_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 38
+- id: claim3217
+  type: parameter
+  concept: 2_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 14
+- id: claim3218
+  type: parameter
+  concept: 2_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 52
+- id: claim3219
+  type: parameter
+  concept: 3_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 11
+- id: claim3220
+  type: parameter
+  concept: 3_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 63
+- id: claim3221
+  type: parameter
+  concept: 4_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 10
+- id: claim3222
+  type: parameter
+  concept: 4_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 73
+- id: claim3223
+  type: parameter
+  concept: 5_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 6
+- id: claim3224
+  type: parameter
+  concept: 5_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 79
+- id: claim3225
+  type: parameter
+  concept: 6_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 4
+- id: claim3226
+  type: parameter
+  concept: 6_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 83
+- id: claim3227
+  type: parameter
+  concept: 7_var
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 4
+- id: claim3228
+  type: parameter
+  concept: 7_cumul
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 87
+- id: claim3229
+  type: parameter
+  concept: arousal_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.82
+- id: claim3230
+  type: parameter
+  concept: arousal_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 6.95
+- id: claim3231
+  type: parameter
+  concept: arousal_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.01
+- id: claim3232
+  type: parameter
+  concept: valence_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.22
+- id: claim3233
+  type: parameter
+  concept: valence_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 9.82
+- id: claim3234
+  type: parameter
+  concept: valence_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.01
+- id: claim3235
+  type: parameter
+  concept: potency_control_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.23
+- id: claim3236
+  type: parameter
+  concept: potency_control_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 8.8
+- id: claim3237
+  type: parameter
+  concept: potency_control_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.03
+- id: claim3238
+  type: parameter
+  concept: low_arousal_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.29
+- id: claim3239
+  type: parameter
+  concept: low_arousal_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 3.86
+- id: claim3240
+  type: parameter
+  concept: low_arousal_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.05
+- id: claim3241
+  type: parameter
+  concept: low_arousal_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.15
+- id: claim3242
+  type: parameter
+  concept: low_arousal_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 5.43
+- id: claim3243
+  type: parameter
+  concept: low_arousal_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.02
+- id: claim3244
+  type: parameter
+  concept: high_arousal_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.49
+- id: claim3245
+  type: parameter
+  concept: high_arousal_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 3.31
+- id: claim3246
+  type: parameter
+  concept: high_arousal_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.07
+- id: claim3247
+  type: parameter
+  concept: high_arousal_r2
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.38
+- id: claim3248
+  type: parameter
+  concept: high_arousal_wald
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 7.73
+- id: claim3249
+  type: parameter
+  concept: high_arousal_p
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+  value: 0.01
+- id: claim3250
+  type: observation
+  statement: Arousal classification from F0 level + Intensity level should achieve
+    R² > 0.80
+  concepts: []
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+- id: claim3251
+  type: observation
+  statement: Spectral slope should differ significantly between positive and negative
+    valence emotions at matched arousal
+  concepts: []
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+- id: claim3252
+  type: observation
+  statement: HNR should differ significantly between high and low potency/control
+    emotions at matched arousal
+  concepts: []
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+- id: claim3253
+  type: observation
+  statement: The seven composite scores should be largely independent (low inter-correlation)
+  concepts: []
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0
+- id: claim3254
+  type: observation
+  statement: Cross-profile correlations between French and German emotional expression
+    should be positive for most emotions
+  concepts: []
+  provenance:
+    paper: Goudbeek_2010_ValencePotencyVocalEmotion
+    page: 0

@@ -1,0 +1,97 @@
+source:
+  paper: Caballero_2018_SoundOfImpoliteness
+claims:
+- id: claim1044
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: Hz (normalized)
+- id: claim1045
+  type: parameter
+  concept: f0_range
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: Hz (normalized)
+- id: claim1046
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: syl/sec
+- id: claim1047
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: dB
+- id: claim1048
+  type: parameter
+  concept: direct
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.06
+- id: claim1049
+  type: parameter
+  concept: direct
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.1
+- id: claim1050
+  type: parameter
+  concept: please
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.11
+- id: claim1051
+  type: parameter
+  concept: please
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.02
+- id: claim1052
+  type: parameter
+  concept: indirect
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: -0.06
+- id: claim1053
+  type: parameter
+  concept: indirect
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+  unit: norm
+  value: 0.15
+- id: claim1054
+  type: equation
+  expression: f0_{norm} = \frac{f0_{recording} - f0_{mean(all)}}{f0_{mean(all)}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+- id: claim1055
+  type: equation
+  expression: EI = \overline{Last5_{f0}} - \overline{First5_{f0}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0
+- id: claim1056
+  type: equation
+  expression: SR = \frac{N_{syllables}}{Duration_{seconds}}
+  provenance:
+    paper: Caballero_2018_SoundOfImpoliteness
+    page: 0

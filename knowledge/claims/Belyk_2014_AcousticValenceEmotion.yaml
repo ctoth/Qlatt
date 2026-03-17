@@ -1,0 +1,189 @@
+source:
+  paper: Belyk_2014_AcousticValenceEmotion
+claims:
+- id: claim695
+  type: parameter
+  concept: pitch
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: -100
+  unit: cents
+- id: claim696
+  type: parameter
+  concept: amplitude
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: dB
+- id: claim697
+  type: parameter
+  concept: affective_intensity
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  lower_bound: 1
+  upper_bound: 9
+  unit: 1–9 scale
+- id: claim698
+  type: parameter
+  concept: motivational
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 400
+- id: claim699
+  type: parameter
+  concept: motivational
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 200
+- id: claim700
+  type: parameter
+  concept: moral
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 350
+- id: claim701
+  type: parameter
+  concept: moral
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 100
+- id: claim702
+  type: parameter
+  concept: aesthetic
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: dB
+  value: 37
+- id: claim703
+  type: parameter
+  concept: aesthetic
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 100
+- id: claim704
+  type: parameter
+  concept: numinous
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 100
+- id: claim705
+  type: parameter
+  concept: numinous
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  unit: cents
+  value: 100
+- id: claim706
+  type: parameter
+  concept: motivational_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.78
+- id: claim707
+  type: parameter
+  concept: motivational_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.78
+- id: claim708
+  type: parameter
+  concept: moral_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.19
+- id: claim709
+  type: parameter
+  concept: moral_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.19
+- id: claim710
+  type: parameter
+  concept: aesthetic_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.32
+- id: claim711
+  type: parameter
+  concept: aesthetic_d
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+  value: 0.32
+- id: claim712
+  type: observation
+  statement: '**Family × Valence interaction**: Collapsing pitch/amplitude across
+    emotion families should yield weaker valence effects than within-family analyses'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim713
+  type: observation
+  statement: '**Motivational positive > negative**: For motivational emotions, positive
+    valence should produce higher F0 and higher amplitude'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim714
+  type: observation
+  statement: '**Moral reversal**: For moral emotions, positive valence should produce
+    higher F0 but *lower* amplitude than negative'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim715
+  type: observation
+  statement: '**Aesthetic reversal**: For aesthetic emotions, positive valence should
+    produce *lower* F0 and *lower* amplitude than negative'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim716
+  type: observation
+  statement: '**Intensity monotonicity**: Regardless of valence or family, increasing
+    affective intensity should increase both F0 and amplitude'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim717
+  type: observation
+  statement: '**Semitone normalization**: Pitch effects should be more consistent
+    across speakers when measured in cents/semitones than in Hz'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0
+- id: claim718
+  type: observation
+  statement: '**Numinous exception**: Awe and terror should NOT show significant pitch
+    differences'
+  concepts: []
+  provenance:
+    paper: Belyk_2014_AcousticValenceEmotion
+    page: 0

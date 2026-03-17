@@ -1,0 +1,383 @@
+source:
+  paper: Chen_1997_NasalizedVowelAcoustics
+claims:
+- id: claim1217
+  type: parameter
+  concept: i
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 273
+- id: claim1218
+  type: parameter
+  concept: u
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 206
+- id: claim1219
+  type: parameter
+  concept: greek_small_letter_epsilon
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 223
+- id: claim1220
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 223
+- id: claim1221
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 212
+- id: claim1222
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 217
+- id: claim1223
+  type: parameter
+  concept: avg
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 216
+- id: claim1224
+  type: parameter
+  concept: e
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 236
+- id: claim1225
+  type: parameter
+  concept: a
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 256
+- id: claim1226
+  type: parameter
+  concept: o
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 238
+- id: claim1227
+  type: parameter
+  concept: latin_small_ligature_oe_combining_tilde
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 216
+- id: claim1228
+  type: parameter
+  concept: avg
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 237
+- id: claim1229
+  type: parameter
+  concept: i
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 15
+- id: claim1230
+  type: parameter
+  concept: u
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 11
+- id: claim1231
+  type: parameter
+  concept: greek_small_letter_epsilon
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 10
+- id: claim1232
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 12
+- id: claim1233
+  type: parameter
+  concept: greek_small_letter_epsilon
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 8
+- id: claim1234
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 8
+- id: claim1235
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 8
+- id: claim1236
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 6
+- id: claim1237
+  type: parameter
+  concept: e
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 12
+- id: claim1238
+  type: parameter
+  concept: a
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 9
+- id: claim1239
+  type: parameter
+  concept: o
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 11
+- id: claim1240
+  type: parameter
+  concept: latin_small_ligature_oe_combining_tilde
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 9
+- id: claim1241
+  type: parameter
+  concept: e
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 7
+- id: claim1242
+  type: parameter
+  concept: a
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 8
+- id: claim1243
+  type: parameter
+  concept: o
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 9
+- id: claim1244
+  type: parameter
+  concept: latin_small_ligature_oe_combining_tilde
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: dB
+  value: 3
+- id: claim1245
+  type: parameter
+  concept: a1_lowering_theoretical_change
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  value: 5
+  unit: dB
+- id: claim1246
+  type: parameter
+  concept: p1_raising_theoretical_change
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  value: 13
+  unit: dB
+- id: claim1247
+  type: parameter
+  concept: p0_raising_theoretical_change
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  lower_bound: 3
+  upper_bound: 6
+  unit: dB
+- id: claim1248
+  type: parameter
+  concept: theoretical_change
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  value: 18
+  unit: dB
+- id: claim1249
+  type: parameter
+  concept: theoretical_change
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  lower_bound: 8
+  upper_bound: 11
+  unit: dB
+- id: claim1250
+  type: parameter
+  concept: oral
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 131
+- id: claim1251
+  type: parameter
+  concept: nasal
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: Hz
+  value: 238
+- id: claim1252
+  type: parameter
+  concept: nostrils
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim1253
+  type: parameter
+  concept: anterior_nasal
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 3.4
+- id: claim1254
+  type: parameter
+  concept: middle_nasal
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 4.4
+- id: claim1255
+  type: parameter
+  concept: posterior_nasal
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 3.9
+- id: claim1256
+  type: parameter
+  concept: vp_opening
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 2.0
+- id: claim1257
+  type: parameter
+  concept: pharynx
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 8.0
+- id: claim1258
+  type: parameter
+  concept: oral_cavity
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 8.0
+- id: claim1259
+  type: parameter
+  concept: sinus_ostium
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm
+  value: 0.4
+- id: claim1260
+  type: parameter
+  concept: maxillary_sinus
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+  unit: cm³
+  value: 8.8
+- id: claim1261
+  type: equation
+  expression: f_{zs} = \frac{c}{2\pi} \sqrt{\frac{S_o}{V L_o}}
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+- id: claim1262
+  type: equation
+  expression: S_f = \frac{S}{\sqrt{4\pi A}}
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+- id: claim1263
+  type: equation
+  expression: T1(F_{P0}) = \frac{(0.5B1)^2 + F1^2}{[((0.5B1)^2 + (F1-F_{P0})^2) \cdot
+    ((0.5B1)^2 + (F1+F_{P0})^2)]^{1/2}}
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0
+- id: claim1264
+  type: equation
+  expression: T2(F_{P0}) = \frac{(0.5B2)^2 + F2^2}{[((0.5B2)^2 + (F2-F_{P0})^2) \cdot
+    ((0.5B2)^2 + (F2+F_{P0})^2)]^{1/2}}
+  provenance:
+    paper: Chen_1997_NasalizedVowelAcoustics
+    page: 0

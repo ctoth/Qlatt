@@ -1,0 +1,75 @@
+source:
+  paper: Nakata_1959_SynthesisPerceptionNasals
+claims:
+- id: claim6865
+  type: parameter
+  concept: m
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: isolated
+  value: 1100
+- id: claim6866
+  type: parameter
+  concept: n
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: isolated
+  value: 1700
+- id: claim6867
+  type: parameter
+  concept: ng
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: isolated
+  value: 2300
+- id: claim6868
+  type: parameter
+  concept: i
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 270
+- id: claim6869
+  type: parameter
+  concept: i
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 390
+- id: claim6870
+  type: parameter
+  concept: e
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 530
+- id: claim6871
+  type: parameter
+  concept: a
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 730
+- id: claim6872
+  type: parameter
+  concept: o
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 570
+- id: claim6873
+  type: parameter
+  concept: u
+  provenance:
+    paper: Nakata_1959_SynthesisPerceptionNasals
+    page: 0
+  unit: Hz
+  value: 300

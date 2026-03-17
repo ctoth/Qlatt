@@ -1,0 +1,340 @@
+source:
+  paper: Kocon_2018_VowelDirectivityRunningSpeech
+claims:
+- id: claim5695
+  type: parameter
+  concept: di_a
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: dB
+- id: claim5696
+  type: parameter
+  concept: di_i
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: dB
+- id: claim5697
+  type: parameter
+  concept: di_e
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: dB
+- id: claim5698
+  type: parameter
+  concept: di_u
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: dB
+- id: claim5699
+  type: parameter
+  concept: di_o
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: dB
+- id: claim5700
+  type: parameter
+  concept: mic_distance
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 60
+  unit: cm
+- id: claim5701
+  type: parameter
+  concept: angular_resolution
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 15
+  unit: degrees
+- id: claim5702
+  type: parameter
+  concept: sampling_rate
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 44.1
+  unit: kHz
+- id: claim5703
+  type: parameter
+  concept: fft_size
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 2048
+  unit: points
+- id: claim5704
+  type: parameter
+  concept: ltas_resolution
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 21.5
+  unit: Hz
+- id: claim5705
+  type: parameter
+  concept: fade_duration
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  value: 10
+  unit: ms
+- id: claim5706
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 79
+- id: claim5707
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 99
+- id: claim5708
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 125
+- id: claim5709
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 157
+- id: claim5710
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 198
+- id: claim5711
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim5712
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 315
+- id: claim5713
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 397
+- id: claim5714
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 500
+- id: claim5715
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 630
+- id: claim5716
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 794
+- id: claim5717
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 1000
+- id: claim5718
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 1260
+- id: claim5719
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 1587
+- id: claim5720
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 2000
+- id: claim5721
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 2520
+- id: claim5722
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 3175
+- id: claim5723
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 4000
+- id: claim5724
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 5040
+- id: claim5725
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 6350
+- id: claim5726
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 8000
+- id: claim5727
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 10079
+- id: claim5728
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 12699
+- id: claim5729
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 16000
+- id: claim5730
+  type: parameter
+  concept: '00'
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+  unit: Hz
+  value: 20159
+- id: claim5731
+  type: equation
+  expression: DI_m(\omega) = 10 \log_{10} \frac{|H_{m,0}(\omega)|^2}{\frac{1}{N} \sum_{n=0}^{N-1}
+    |H_{m,n}(\omega)|^2}
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5732
+  type: observation
+  statement: DI must be non-negative (energy at 0 degrees >= average energy by definition
+    of forward-facing speech)
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5733
+  type: observation
+  statement: Weighting function at 0 degrees must be 0.0 dB for all frequencies (reference
+    direction)
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5734
+  type: observation
+  statement: Weighting function must be monotonically non-increasing from 0 to 180
+    degrees for frequencies above ~1 kHz (general trend, not strict per-band)
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5735
+  type: observation
+  statement: At frequencies below 500 Hz, attenuation at 180 degrees should be less
+    than ~7 dB
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5736
+  type: observation
+  statement: At frequencies above 8 kHz, attenuation at 180 degrees should exceed
+    20 dB
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0
+- id: claim5737
+  type: observation
+  statement: /a/ DI must exceed /o/ and /u/ DI (statistically significant finding)
+  concepts: []
+  provenance:
+    paper: Kocon_2018_VowelDirectivityRunningSpeech
+    page: 0

@@ -1,0 +1,135 @@
+source:
+  paper: Hartenstein_2025_VoiceDirectivityHELS
+claims:
+- id: claim3728
+  type: parameter
+  concept: truncation_order
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  lower_bound: 0
+  upper_bound: 12
+- id: claim3729
+  type: parameter
+  concept: regularization
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 0
+- id: claim3730
+  type: parameter
+  concept: cv_tolerance
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 0.01
+- id: claim3731
+  type: parameter
+  concept: array_radius
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 1.8
+  unit: m
+- id: claim3732
+  type: parameter
+  concept: microphone_count
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 588
+- id: claim3733
+  type: parameter
+  concept: sampling_frequency
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 50
+  unit: kHz
+- id: claim3734
+  type: parameter
+  concept: spectral_window
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 20
+  unit: ms
+- id: claim3735
+  type: parameter
+  concept: sweep_duration
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+  value: 30
+  unit: s
+- id: claim3736
+  type: equation
+  expression: p(r, \theta, \phi) = \sum_{n=0}^{+\infty} c_{mn}(k) \psi_n^m(kr, \theta,
+    \phi)
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3737
+  type: equation
+  expression: \mathbf{p} = \mathbf{H}\mathbf{c}
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3738
+  type: equation
+  expression: \hat{\mathbf{c}} = (\mathbf{H}^H \mathbf{H} + \lambda \mathbf{I})^{-1}
+    \mathbf{H}^H \mathbf{p}
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3739
+  type: equation
+  expression: D_\infty(\theta, \phi) = \sum_{n=0}^{N} \sum_{m=-n}^{n} \hat{c}_{mn}
+    j^{(n+1)} Y_n(\theta, \phi)
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3740
+  type: equation
+  expression: \mathcal{L}_{CV} = \frac{\sqrt{\sum_{q=0}^{Q-1} |p(r_q, \theta_q, \phi_q)
+    - \hat{p}(r_q, \theta_q, \phi_q)|^2}}{\sqrt{\sum_{q=0}^{Q-1} |p(r_q, \theta_q,
+    \phi_q)|^2}}
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3741
+  type: equation
+  expression: N_{opt} = \arg\min_{N \in I} \kappa(N) \quad \text{s.t.} \quad |\mathcal{L}_{CV}(N)
+    - \mathcal{L}_{min}| \leq \epsilon
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3742
+  type: observation
+  statement: Condition number κ(N) must monotonically increase with N for any frequency
+  concepts: []
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3743
+  type: observation
+  statement: Cross-validation error must decrease from N=0 before reaching a plateau
+  concepts: []
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3744
+  type: observation
+  statement: Far-field directivity at low frequency (<300 Hz) should be nearly omnidirectional
+  concepts: []
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0
+- id: claim3745
+  type: observation
+  statement: At any frequency, N_opt for singer ≥ N_opt for simple controlled source
+    (above 600 Hz)
+  concepts: []
+  provenance:
+    paper: Hartenstein_2025_VoiceDirectivityHELS
+    page: 0

@@ -1,0 +1,55 @@
+source:
+  paper: Staib_2021_CorticalVoiceProcessing
+claims:
+- id: claim8324
+  type: parameter
+  concept: tsp_frequency_correlation
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+  lower_bound: 0.01
+  upper_bound: 2
+- id: claim8325
+  type: parameter
+  concept: tsp_temporal_correlation
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+  lower_bound: 0.01
+  upper_bound: 2
+- id: claim8326
+  type: parameter
+  concept: sound_duration
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+  unit: ms
+- id: claim8327
+  type: parameter
+  concept: sound_intensity
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+  unit: dB
+- id: claim8328
+  type: parameter
+  concept: voice_similarity_rating
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+  lower_bound: 1
+  upper_bound: 10
+- id: claim8329
+  type: equation
+  expression: \text{Weights} \sim \text{Acoustic feature}_1 + \ldots + \text{Acoustic
+    feature}_{15} + \text{voice similarity} + \text{Error}
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0
+- id: claim8330
+  type: equation
+  expression: \text{Weights} \sim \text{Acoustic feature}_1 + \ldots + \text{Acoustic
+    feature}_{15} + \text{Error}
+  provenance:
+    paper: Staib_2021_CorticalVoiceProcessing
+    page: 0

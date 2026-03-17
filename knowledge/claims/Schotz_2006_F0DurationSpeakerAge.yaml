@@ -1,0 +1,160 @@
+source:
+  paper: Schotz_2006_F0DurationSpeakerAge
+claims:
+- id: claim8077
+  type: parameter
+  concept: fh_notes
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 3
+- id: claim8078
+  type: parameter
+  concept: 1_age
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 6
+- id: claim8079
+  type: parameter
+  concept: 2_age
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 36
+- id: claim8080
+  type: parameter
+  concept: 3_age
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 66
+- id: claim8081
+  type: parameter
+  concept: 4_age
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 91
+- id: claim8082
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 139
+- id: claim8083
+  type: parameter
+  concept: latin_small_letter_open_e_modifier_letter_triangular_colon
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 469
+- id: claim8084
+  type: parameter
+  concept: l
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 312
+- id: claim8085
+  type: parameter
+  concept: latin_small_letter_schwa
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 179
+- id: claim8086
+  type: parameter
+  concept: n
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 111
+- id: claim8087
+  type: parameter
+  concept: total
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  unit: 6y
+  value: 1209
+- id: claim8088
+  type: parameter
+  concept: 6_years_natural
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 4
+- id: claim8089
+  type: parameter
+  concept: 6_years_synthetic
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 2.5
+- id: claim8090
+  type: parameter
+  concept: 36_years_natural
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 6
+- id: claim8091
+  type: parameter
+  concept: 36_years_synthetic
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 4
+- id: claim8092
+  type: parameter
+  concept: 66_years_natural
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 6
+- id: claim8093
+  type: parameter
+  concept: 66_years_synthetic
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 4
+- id: claim8094
+  type: parameter
+  concept: 91_years_natural
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 5
+- id: claim8095
+  type: parameter
+  concept: 91_years_synthetic
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+  value: 3.5
+- id: claim8096
+  type: equation
+  expression: w = \frac{a_t - a_1}{a_2 - a_1}
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+- id: claim8097
+  type: equation
+  expression: P_{target} = P_1 \cdot (1-w) + P_2 \cdot w
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0
+- id: claim8098
+  type: equation
+  expression: D_{target} = D_1 \cdot (1-w) + D_2 \cdot w
+  provenance:
+    paper: Schotz_2006_F0DurationSpeakerAge
+    page: 0

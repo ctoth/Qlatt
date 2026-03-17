@@ -1,0 +1,521 @@
+source:
+  paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+claims:
+- id: claim6003
+  type: parameter
+  concept: i
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 183
+- id: claim6004
+  type: parameter
+  concept: i
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 173
+- id: claim6005
+  type: parameter
+  concept: ei
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 169
+- id: claim6006
+  type: parameter
+  concept: e
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 166
+- id: claim6007
+  type: parameter
+  concept: ae
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 162
+- id: claim6008
+  type: parameter
+  concept: schwa
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 164
+- id: claim6009
+  type: parameter
+  concept: a
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 163
+- id: claim6010
+  type: parameter
+  concept: openo
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 165
+- id: claim6011
+  type: parameter
+  concept: ou
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 170
+- id: claim6012
+  type: parameter
+  concept: u
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 171
+- id: claim6013
+  type: parameter
+  concept: u
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 182
+- id: claim6014
+  type: parameter
+  concept: au
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 159
+- id: claim6015
+  type: parameter
+  concept: ai
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 160
+- id: claim6016
+  type: parameter
+  concept: oi
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 163
+- id: claim6017
+  type: parameter
+  concept: 3r
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 170
+- id: claim6018
+  type: parameter
+  concept: p_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 175
+- id: claim6019
+  type: parameter
+  concept: p_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 174
+- id: claim6020
+  type: parameter
+  concept: b_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 165
+- id: claim6021
+  type: parameter
+  concept: b_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 166
+- id: claim6022
+  type: parameter
+  concept: t_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 176
+- id: claim6023
+  type: parameter
+  concept: t_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 168
+- id: claim6024
+  type: parameter
+  concept: d_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 163
+- id: claim6025
+  type: parameter
+  concept: d_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 168
+- id: claim6026
+  type: parameter
+  concept: k_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 176
+- id: claim6027
+  type: parameter
+  concept: k_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 170
+- id: claim6028
+  type: parameter
+  concept: g_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 163
+- id: claim6029
+  type: parameter
+  concept: g_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 164
+- id: claim6030
+  type: parameter
+  concept: m_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 162
+- id: claim6031
+  type: parameter
+  concept: m_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 168
+- id: claim6032
+  type: parameter
+  concept: n_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 161
+- id: claim6033
+  type: parameter
+  concept: n_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 167
+- id: claim6034
+  type: parameter
+  concept: f_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 173
+- id: claim6035
+  type: parameter
+  concept: f_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6036
+  type: parameter
+  concept: v_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 155
+- id: claim6037
+  type: parameter
+  concept: v_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6038
+  type: parameter
+  concept: theta_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 173
+- id: claim6039
+  type: parameter
+  concept: theta_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 170
+- id: claim6040
+  type: parameter
+  concept: dh_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 161
+- id: claim6041
+  type: parameter
+  concept: dh_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 171
+- id: claim6042
+  type: parameter
+  concept: s_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 175
+- id: claim6043
+  type: parameter
+  concept: s_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6044
+  type: parameter
+  concept: z_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6045
+  type: parameter
+  concept: sh_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 173
+- id: claim6046
+  type: parameter
+  concept: sh_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 163
+- id: claim6047
+  type: parameter
+  concept: zh_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 171
+- id: claim6048
+  type: parameter
+  concept: r_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 166
+- id: claim6049
+  type: parameter
+  concept: r_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 168
+- id: claim6050
+  type: parameter
+  concept: l_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 164
+- id: claim6051
+  type: parameter
+  concept: l_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6052
+  type: parameter
+  concept: ch_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 177
+- id: claim6053
+  type: parameter
+  concept: ch_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 174
+- id: claim6054
+  type: parameter
+  concept: j_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 161
+- id: claim6055
+  type: parameter
+  concept: j_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 168
+- id: claim6056
+  type: parameter
+  concept: h_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 174
+- id: claim6057
+  type: parameter
+  concept: w_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 167
+- id: claim6058
+  type: parameter
+  concept: wh_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 174
+- id: claim6059
+  type: parameter
+  concept: y_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 164
+- id: claim6060
+  type: parameter
+  concept: avg_avg_f0_after_initial
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6061
+  type: parameter
+  concept: avg_avg_f0_before_final
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 169
+- id: claim6062
+  type: parameter
+  concept: precontour
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 127
+- id: claim6063
+  type: parameter
+  concept: test_word_peak
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 169
+- id: claim6064
+  type: parameter
+  concept: test_word_end
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 94
+- id: claim6065
+  type: parameter
+  concept: again_beginning
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 113
+- id: claim6066
+  type: parameter
+  concept: again_peak
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 130
+- id: claim6067
+  type: parameter
+  concept: again_end
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  unit: GEP
+  value: 86
+- id: claim6068
+  type: parameter
+  concept: bi_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.64
+- id: claim6069
+  type: parameter
+  concept: br_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.27
+- id: claim6070
+  type: parameter
+  concept: ch_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.46
+- id: claim6071
+  type: parameter
+  concept: he_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.4
+- id: claim6072
+  type: parameter
+  concept: re_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.45
+- id: claim6073
+  type: parameter
+  concept: gep_ratio
+  provenance:
+    paper: Lehiste_1961_BasicConsiderationsIntonationAnalysis
+    page: 0
+  value: 1.79

@@ -1,0 +1,220 @@
+source:
+  paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+claims:
+- id: claim742
+  type: parameter
+  concept: '1'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 900
+- id: claim743
+  type: parameter
+  concept: '2'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 950
+- id: claim744
+  type: parameter
+  concept: '3'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1000
+- id: claim745
+  type: parameter
+  concept: '4'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1050
+- id: claim746
+  type: parameter
+  concept: '5'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1100
+- id: claim747
+  type: parameter
+  concept: '6'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1150
+- id: claim748
+  type: parameter
+  concept: '7'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1200
+- id: claim749
+  type: parameter
+  concept: '8'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1250
+- id: claim750
+  type: parameter
+  concept: '9'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1300
+- id: claim751
+  type: parameter
+  concept: '10'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1350
+- id: claim752
+  type: parameter
+  concept: '11'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1400
+- id: claim753
+  type: parameter
+  concept: '12'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1450
+- id: claim754
+  type: parameter
+  concept: '13'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1500
+- id: claim755
+  type: parameter
+  concept: '14'
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  unit: Hz
+  value: 1550
+- id: claim756
+  type: parameter
+  concept: btr_full_b
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 99.9
+- id: claim757
+  type: parameter
+  concept: btr_full_d
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0.1
+- id: claim758
+  type: parameter
+  concept: btr_full_g
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0
+- id: claim759
+  type: parameter
+  concept: dtr_full_b
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0.1
+- id: claim760
+  type: parameter
+  concept: dtr_full_d
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 99.4
+- id: claim761
+  type: parameter
+  concept: dtr_full_g
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0.5
+- id: claim762
+  type: parameter
+  concept: dtr_conf_b
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0
+- id: claim763
+  type: parameter
+  concept: dtr_conf_d
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 41.3
+- id: claim764
+  type: parameter
+  concept: dtr_conf_g
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 58.7
+- id: claim765
+  type: parameter
+  concept: gtr_full_b
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 1.5
+- id: claim766
+  type: parameter
+  concept: gtr_full_d
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 2.5
+- id: claim767
+  type: parameter
+  concept: gtr_full_g
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 96.0
+- id: claim768
+  type: parameter
+  concept: gtr_conf_b
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 0.4
+- id: claim769
+  type: parameter
+  concept: gtr_conf_d
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 12.1
+- id: claim770
+  type: parameter
+  concept: gtr_conf_g
+  provenance:
+    paper: Blumstein_1977_PropertyDetectorsBurstsTransitions
+    page: 0
+  value: 87.5

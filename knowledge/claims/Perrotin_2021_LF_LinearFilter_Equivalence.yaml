@@ -1,0 +1,257 @@
+source:
+  paper: Perrotin_2021_LF_LinearFilter_Equivalence
+claims:
+- id: claim7141
+  type: parameter
+  concept: rd_parameter
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  value: 1.0
+  lower_bound: 0.4
+  upper_bound: 2.7
+  unit: dimensionless
+- id: claim7142
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  value: 110
+  lower_bound: 70
+  upper_bound: 1000
+  unit: Hz
+- id: claim7143
+  type: parameter
+  concept: period
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: s
+- id: claim7144
+  type: parameter
+  concept: peak_excitation
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  value: 0.2
+  unit: arbitrary
+- id: claim7145
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 0.9
+  unit: ratio
+- id: claim7146
+  type: parameter
+  concept: asymmetry_coefficient
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  lower_bound: 0.5
+  upper_bound: 0.9
+  unit: ratio
+- id: claim7147
+  type: parameter
+  concept: return_time
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: s
+- id: claim7148
+  type: parameter
+  concept: glottal_formant_frequency
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  lower_bound: 64
+  upper_bound: 121
+  unit: Hz
+- id: claim7149
+  type: parameter
+  concept: glottal_formant_bandwidth
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: Hz
+- id: claim7150
+  type: parameter
+  concept: spectral_tilt_cutoff
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: Hz
+- id: claim7151
+  type: parameter
+  concept: open_phase_damping
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: s^-1
+- id: claim7152
+  type: parameter
+  concept: open_phase_frequency
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  unit: rad/s
+- id: claim7153
+  type: parameter
+  concept: sampling_frequency
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+  value: 96000
+  unit: Hz
+- id: claim7154
+  type: equation
+  expression: h_T(t) = G_n e^{a_n t} \sin(b_n t + \phi_n) \quad \text{if } t \in \mathcal{D}
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7155
+  type: equation
+  expression: h_{LF_{open}}(t) = \frac{-E}{\sin\left(\frac{\pi}{\alpha_m}\right)}
+    e^{a_{LF} t} \sin\left(\frac{\pi}{\alpha_m O_q T_0} t + \frac{\pi}{\alpha_m}\right),
+    \quad t \in [-O_q T_0, 0]
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7156
+  type: equation
+  expression: H_{LF_{open}}(s) = \frac{G_{LF} b_{LF} (e^{-sT_{LF}} - 1) + Es}{(a_{LF}
+    - s)^2 + b_{LF}^2}
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7157
+  type: equation
+  expression: h_{CALM_{open}}(t) = -\frac{E}{\sin(\pi(1-\alpha_m))} e^{a_{CALM} t}
+    \sin\left(\frac{\pi}{O_q T_0} t + \pi(1-\alpha_m)\right), \quad t \in [-O_q T_0,
+    0]
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7158
+  type: equation
+  expression: H_{CALM_{open}}(s) = \frac{(1 + e^{(a_{CALM}-s)T_{CALM}}) Es}{(a_{CALM}
+    - s)^2 + b_{CALM}^2}
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7159
+  type: equation
+  expression: h_{LM_{open}}(t) = \frac{E}{\sin(\pi(1-\alpha_m))} e^{a_{LM} t} \sin\left(\frac{\pi}{O_q
+    T_0} t - \pi(1-\alpha_m)\right), \quad t > 0
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7160
+  type: equation
+  expression: H_{LM_{open}}(s) = \frac{Es}{(a_{LM} - s)^2 + b_{LM}^2}
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7161
+  type: equation
+  expression: h_{LF_{closed}}(t) = \frac{-E}{\epsilon T_a} (e^{-\epsilon t} - e^{-\epsilon(T_0
+    - O_q T_0)}), \quad t \in [0, T_0 - O_q T_0]
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7162
+  type: equation
+  expression: 1 - e^{-\epsilon(T_0 - O_q T_0)} = \epsilon T_a
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7163
+  type: equation
+  expression: '\begin{cases}
+
+    R_a = (-1 + 4.8 R_d) / 100 \\
+
+    R_k = (22.4 + 11.8 R_d) / 100 \\
+
+    R_g = \frac{R_k(0.5 + 1.2 R_k)}{0.44 R_d - 4 R_a(0.5 + 1.2 R_k)}
+
+    \end{cases}
+
+    \Rightarrow
+
+    \begin{cases}
+
+    O_q = \frac{1 + R_k}{2 R_g} \\
+
+    \alpha_m = \frac{1}{1 + R_k} \\
+
+    T_a = R_a T_0
+
+    \end{cases}'
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7164
+  type: equation
+  expression: '\begin{cases}
+
+    F_g = \frac{1}{2 O_q T_0} \\
+
+    B_g = \frac{1}{O_q T_0 \tan(\pi(1-\alpha_m))} \\
+
+    A_g = E
+
+    \end{cases}'
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7165
+  type: equation
+  expression: '\begin{cases}
+
+    b_1 = -A_g \\
+
+    b_2 = A_g \\
+
+    a_1 = -2 e^{-\pi B_g / F_s} \cos(2\pi F_g / F_s) \\
+
+    a_2 = e^{-2\pi B_g / F_s}
+
+    \end{cases}'
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7166
+  type: equation
+  expression: H_{ST}(z) = \frac{b_{ST}}{1 + a_{ST} z^{-1}}
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7167
+  type: equation
+  expression: '\begin{cases}
+
+    b_{ST} = 1 - e^{-2\pi F_a / F_s} \\
+
+    a_{ST} = -e^{-2\pi F_a / F_s}
+
+    \end{cases}'
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7168
+  type: equation
+  expression: x_{LM_{open}}[n] = b_1 \delta_{goi}[n-1] + b_2 \delta_{goi}[n-2] - a_1
+    x_{LM_{open}}[n-1] - a_2 x_{LM_{open}}[n-2]
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0
+- id: claim7169
+  type: equation
+  expression: x_{LM}[n] = b_{ST} x_{LM_{open}}[n-1] - a_{ST} x_{LM}[n-1]
+  provenance:
+    paper: Perrotin_2021_LF_LinearFilter_Equivalence
+    page: 0

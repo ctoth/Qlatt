@@ -1,0 +1,464 @@
+source:
+  paper: Lisker_1964_CrossLanguageVoicingInitialStops
+claims:
+- id: claim6171
+  type: parameter
+  concept: voicing_lead
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  unit: ms
+  value: -125
+- id: claim6172
+  type: parameter
+  concept: short_lag
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  unit: ms
+  value: 0
+- id: claim6173
+  type: parameter
+  concept: long_lag
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  unit: ms
+- id: claim6174
+  type: parameter
+  concept: 1_101_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 58
+- id: claim6175
+  type: parameter
+  concept: 1_101_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 70
+- id: claim6176
+  type: parameter
+  concept: 1_101_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 80
+- id: claim6177
+  type: parameter
+  concept: 51_17_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 102
+- id: claim6178
+  type: parameter
+  concept: 51_17_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 116
+- id: claim6179
+  type: parameter
+  concept: 51_17_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 84
+- id: claim6180
+  type: parameter
+  concept: 85_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 10
+- id: claim6181
+  type: parameter
+  concept: 85_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -80
+- id: claim6182
+  type: parameter
+  concept: 85_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 15
+- id: claim6183
+  type: parameter
+  concept: 85_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 25
+- id: claim6184
+  type: parameter
+  concept: 138_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 4
+- id: claim6185
+  type: parameter
+  concept: 138_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -110
+- id: claim6186
+  type: parameter
+  concept: 138_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 9
+- id: claim6187
+  type: parameter
+  concept: 138_g
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -108
+- id: claim6188
+  type: parameter
+  concept: 138_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 29
+- id: claim6189
+  type: parameter
+  concept: 90_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 2
+- id: claim6190
+  type: parameter
+  concept: 90_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -87
+- id: claim6191
+  type: parameter
+  concept: 90_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 16
+- id: claim6192
+  type: parameter
+  concept: 90_g
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -58
+- id: claim6193
+  type: parameter
+  concept: 90_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 29
+- id: claim6194
+  type: parameter
+  concept: 74_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 12
+- id: claim6195
+  type: parameter
+  concept: 74_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -78
+- id: claim6196
+  type: parameter
+  concept: 74_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 8
+- id: claim6197
+  type: parameter
+  concept: 74_g
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -62
+- id: claim6198
+  type: parameter
+  concept: 74_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 24
+- id: claim6199
+  type: parameter
+  concept: 9_ph
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 77
+- id: claim6200
+  type: parameter
+  concept: 9_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 14
+- id: claim6201
+  type: parameter
+  concept: 9_th
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 75
+- id: claim6202
+  type: parameter
+  concept: 9_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 34
+- id: claim6203
+  type: parameter
+  concept: 9_kh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 87
+- id: claim6204
+  type: parameter
+  concept: 96_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 3
+- id: claim6205
+  type: parameter
+  concept: 96_ph
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 78
+- id: claim6206
+  type: parameter
+  concept: 96_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -102
+- id: claim6207
+  type: parameter
+  concept: 96_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 15
+- id: claim6208
+  type: parameter
+  concept: 96_th
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 59
+- id: claim6209
+  type: parameter
+  concept: 96_g
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -115
+- id: claim6210
+  type: parameter
+  concept: 96_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 30
+- id: claim6211
+  type: parameter
+  concept: 96_kh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 98
+- id: claim6212
+  type: parameter
+  concept: 97_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 6
+- id: claim6213
+  type: parameter
+  concept: 97_ph
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 64
+- id: claim6214
+  type: parameter
+  concept: 97_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -78
+- id: claim6215
+  type: parameter
+  concept: 97_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 9
+- id: claim6216
+  type: parameter
+  concept: 97_th
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 65
+- id: claim6217
+  type: parameter
+  concept: 97_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 25
+- id: claim6218
+  type: parameter
+  concept: 97_kh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 100
+- id: claim6219
+  type: parameter
+  concept: 7_pc
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 18
+- id: claim6220
+  type: parameter
+  concept: 7_ph
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 91
+- id: claim6221
+  type: parameter
+  concept: 7_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 11
+- id: claim6222
+  type: parameter
+  concept: 7_tc
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 25
+- id: claim6223
+  type: parameter
+  concept: 7_th
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 94
+- id: claim6224
+  type: parameter
+  concept: 7_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 19
+- id: claim6225
+  type: parameter
+  concept: 7_kc
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 47
+- id: claim6226
+  type: parameter
+  concept: 7_kh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 126
+- id: claim6227
+  type: parameter
+  concept: 85_bh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -61
+- id: claim6228
+  type: parameter
+  concept: 85_p
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 13
+- id: claim6229
+  type: parameter
+  concept: 85_ph
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 70
+- id: claim6230
+  type: parameter
+  concept: 85_d
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -87
+- id: claim6231
+  type: parameter
+  concept: 85_dh
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: -87
+- id: claim6232
+  type: parameter
+  concept: 85_t
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 15
+- id: claim6233
+  type: parameter
+  concept: 85_th
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  value: 67
+- id: claim6234
+  type: parameter
+  concept: b_d_g
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  unit: ms
+  lower_bound: 0
+  upper_bound: 10
+- id: claim6235
+  type: parameter
+  concept: p_t_k
+  provenance:
+    paper: Lisker_1964_CrossLanguageVoicingInitialStops
+    page: 0
+  unit: ms
+  lower_bound: 50
+  upper_bound: 80

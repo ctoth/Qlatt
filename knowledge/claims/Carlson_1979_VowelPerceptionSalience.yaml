@@ -1,0 +1,190 @@
+source:
+  paper: Carlson_1979_VowelPerceptionSalience
+claims:
+- id: claim1097
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  unit: Hz
+- id: claim1098
+  type: parameter
+  concept: formant_1
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 700
+  unit: Hz
+- id: claim1099
+  type: parameter
+  concept: formant_2
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 1800
+  unit: Hz
+- id: claim1100
+  type: parameter
+  concept: formant_3
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 2500
+  unit: Hz
+- id: claim1101
+  type: parameter
+  concept: formant_4
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 3300
+  unit: Hz
+- id: claim1102
+  type: parameter
+  concept: formant_5
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 3700
+  unit: Hz
+- id: claim1103
+  type: parameter
+  concept: bandwidth_1
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 60
+  unit: Hz
+- id: claim1104
+  type: parameter
+  concept: bandwidth_2
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 140
+  unit: Hz
+- id: claim1105
+  type: parameter
+  concept: bandwidth_3
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 150
+  unit: Hz
+- id: claim1106
+  type: parameter
+  concept: bandwidth_4
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 200
+  unit: Hz
+- id: claim1107
+  type: parameter
+  concept: bandwidth_5
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim1108
+  type: parameter
+  concept: spectral_tilt
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: -6
+  unit: dB/octave
+- id: claim1109
+  type: parameter
+  concept: voicing_amplitude
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  unit: dB
+- id: claim1110
+  type: parameter
+  concept: duration
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 305
+  unit: ms
+- id: claim1111
+  type: parameter
+  concept: random_harmonic_phase_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 10
+- id: claim1112
+  type: parameter
+  concept: negative_vt_phase_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 6.9
+- id: claim1113
+  type: parameter
+  concept: zero_vt_phase_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 5.9
+- id: claim1114
+  type: parameter
+  concept: all_formant_frequencies_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 5.5
+- id: claim1115
+  type: parameter
+  concept: f1f2_together_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 4
+- id: claim1116
+  type: parameter
+  concept: single_formant_f1_or_f2_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 3
+- id: claim1117
+  type: parameter
+  concept: telephone_bandwidth_filtering_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 8.9
+- id: claim1118
+  type: parameter
+  concept: telephone_bandwidth_filtering_notes
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  lower_bound: 300
+  upper_bound: 3000
+- id: claim1119
+  type: parameter
+  concept: spectral_tilt_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 2.5
+- id: claim1120
+  type: parameter
+  concept: av_amplitude_distance_score
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0
+  value: 2
+- id: claim1121
+  type: equation
+  expression: \text{JND}_{F1/F2} \approx 3\%
+  provenance:
+    paper: Carlson_1979_VowelPerceptionSalience
+    page: 0

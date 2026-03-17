@@ -1,0 +1,124 @@
+source:
+  paper: Nygren_2016_TransVoiceF0Testosterone
+claims:
+- id: claim7045
+  type: parameter
+  concept: srp_mf0
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: Hz
+- id: claim7046
+  type: parameter
+  concept: srp_f0mode
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: Hz
+- id: claim7047
+  type: parameter
+  concept: vrp_min_f0
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: Hz
+- id: claim7048
+  type: parameter
+  concept: vrp_max_f0
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: Hz
+- id: claim7049
+  type: parameter
+  concept: srp_leq
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: dB @ 30cm
+- id: claim7050
+  type: parameter
+  concept: vrp_max_spl
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: dB @ 30cm
+- id: claim7051
+  type: parameter
+  concept: srp_area
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  unit: ST x dB
+- id: claim7052
+  type: parameter
+  concept: lh_p_value
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  value: 0.019
+- id: claim7053
+  type: parameter
+  concept: evf_before_treatment
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  value: 0.41
+- id: claim7054
+  type: parameter
+  concept: evf_after_324_months
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+  value: 0.46
+- id: claim7055
+  type: observation
+  statement: MF0 must decrease monotonically as a group mean across 0-12 month timepoints
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7056
+  type: observation
+  statement: MF0 at 12 months should be in range 89-170 Hz (observed interindividual
+    range)
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7057
+  type: observation
+  statement: 'Group mean MF0 at 12 months: 125 Hz (95% CI 119-132 Hz)'
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7058
+  type: observation
+  statement: SPL (Leq) should remain stable (~70.5-70.8 dB) across treatment
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7059
+  type: observation
+  statement: Min F0 at 12 months should be lower than Min F0 before treatment
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7060
+  type: observation
+  statement: Max F0 at 12 months should be lower than Max F0 before treatment
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0
+- id: claim7061
+  type: observation
+  statement: Satisfaction ratings should correlate negatively with F0 (r_s approx
+    -0.65 to -0.70)
+  concepts: []
+  provenance:
+    paper: Nygren_2016_TransVoiceF0Testosterone
+    page: 0

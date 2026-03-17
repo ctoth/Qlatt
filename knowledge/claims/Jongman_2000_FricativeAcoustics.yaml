@@ -1,0 +1,138 @@
+source:
+  paper: Jongman_2000_FricativeAcoustics
+claims:
+- id: claim4896
+  type: parameter
+  concept: fv
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 5108
+- id: claim4897
+  type: parameter
+  concept: greek_small_letter_theta_latin_small_letter_eth
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 5137
+- id: claim4898
+  type: parameter
+  concept: sz
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 6133
+- id: claim4899
+  type: parameter
+  concept: latin_small_letter_esh_latin_small_letter_ezh
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 4229
+- id: claim4900
+  type: parameter
+  concept: f
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 166
+- id: claim4901
+  type: parameter
+  concept: v
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 80
+- id: claim4902
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 163
+- id: claim4903
+  type: parameter
+  concept: latin_small_letter_eth
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 88
+- id: claim4904
+  type: parameter
+  concept: s
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 178
+- id: claim4905
+  type: parameter
+  concept: z
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 118
+- id: claim4906
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 178
+- id: claim4907
+  type: parameter
+  concept: latin_small_letter_ezh
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: ms
+  value: 123
+- id: claim4908
+  type: parameter
+  concept: lpc_poles
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  value: 24
+- id: claim4909
+  type: parameter
+  concept: fv
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: slope
+  value: 0.768
+- id: claim4910
+  type: parameter
+  concept: greek_small_letter_theta_latin_small_letter_eth
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: slope
+  value: 0.53
+- id: claim4911
+  type: parameter
+  concept: sz
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: slope
+  value: 0.517
+- id: claim4912
+  type: parameter
+  concept: latin_small_letter_esh_latin_small_letter_ezh
+  provenance:
+    paper: Jongman_2000_FricativeAcoustics
+    page: 0
+  unit: slope
+  value: 0.505

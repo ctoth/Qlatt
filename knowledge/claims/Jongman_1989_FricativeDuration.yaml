@@ -1,0 +1,317 @@
+source:
+  paper: Jongman_1989_FricativeDuration
+claims:
+- id: claim4856
+  type: parameter
+  concept: min_duration_for_70_accuracy
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 30
+  unit: ms
+- id: claim4857
+  type: parameter
+  concept: z_min_duration_for_70_accuracy
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 30
+  unit: ms
+- id: claim4858
+  type: parameter
+  concept: f_min_duration_for_70_accuracy
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 50
+  unit: ms
+- id: claim4859
+  type: parameter
+  concept: s_min_duration_for_70_accuracy
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 50
+  unit: ms
+- id: claim4860
+  type: parameter
+  concept: v_min_duration_for_70_accuracy
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 50
+  unit: ms
+- id: claim4861
+  type: parameter
+  concept: f_a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 158
+  unit: ms
+- id: claim4862
+  type: parameter
+  concept: f_i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 156
+  unit: ms
+- id: claim4863
+  type: parameter
+  concept: f_u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 134
+  unit: ms
+- id: claim4864
+  type: parameter
+  concept: f_mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 149
+  unit: ms
+- id: claim4865
+  type: parameter
+  concept: s_a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 185
+  unit: ms
+- id: claim4866
+  type: parameter
+  concept: s_i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 193
+  unit: ms
+- id: claim4867
+  type: parameter
+  concept: s_u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 187
+  unit: ms
+- id: claim4868
+  type: parameter
+  concept: s_mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 188
+  unit: ms
+- id: claim4869
+  type: parameter
+  concept: a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 111
+  unit: ms
+- id: claim4870
+  type: parameter
+  concept: i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 88
+  unit: ms
+- id: claim4871
+  type: parameter
+  concept: u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 122
+  unit: ms
+- id: claim4872
+  type: parameter
+  concept: mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 107
+  unit: ms
+- id: claim4873
+  type: parameter
+  concept: a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 153
+  unit: ms
+- id: claim4874
+  type: parameter
+  concept: i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 159
+  unit: ms
+- id: claim4875
+  type: parameter
+  concept: u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 186
+  unit: ms
+- id: claim4876
+  type: parameter
+  concept: mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 166
+  unit: ms
+- id: claim4877
+  type: parameter
+  concept: v_a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 103
+  unit: ms
+- id: claim4878
+  type: parameter
+  concept: v_i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 117
+  unit: ms
+- id: claim4879
+  type: parameter
+  concept: v_u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 118
+  unit: ms
+- id: claim4880
+  type: parameter
+  concept: v_mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 113
+  unit: ms
+- id: claim4881
+  type: parameter
+  concept: z_a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 146
+  unit: ms
+- id: claim4882
+  type: parameter
+  concept: z_i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 165
+  unit: ms
+- id: claim4883
+  type: parameter
+  concept: z_u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 146
+  unit: ms
+- id: claim4884
+  type: parameter
+  concept: z_mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 152
+  unit: ms
+- id: claim4885
+  type: parameter
+  concept: a_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 132
+  unit: ms
+- id: claim4886
+  type: parameter
+  concept: i_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 82
+  unit: ms
+- id: claim4887
+  type: parameter
+  concept: u_context
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 144
+  unit: ms
+- id: claim4888
+  type: parameter
+  concept: mean
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 119
+  unit: ms
+- id: claim4889
+  type: parameter
+  concept: minimum_perceptual_duration
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4890
+  type: parameter
+  concept: minimum_perceptual_duration
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4891
+  type: parameter
+  concept: minimum_perceptual_duration
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4892
+  type: parameter
+  concept: 50_information_transmission
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4893
+  type: parameter
+  concept: 50_place_information
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4894
+  type: parameter
+  concept: manner_perception_threshold
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  unit: ms
+- id: claim4895
+  type: parameter
+  concept: voicing_perception_at_20_ms
+  provenance:
+    paper: Jongman_1989_FricativeDuration
+    page: 0
+  value: 83
+  unit: '%'

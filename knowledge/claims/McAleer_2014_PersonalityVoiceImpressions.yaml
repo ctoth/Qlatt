@@ -1,0 +1,131 @@
+source:
+  paper: McAleer_2014_PersonalityVoiceImpressions
+claims:
+- id: claim6458
+  type: parameter
+  concept: aggressiveness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: -0.74
+- id: claim6459
+  type: parameter
+  concept: attractiveness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.33
+- id: claim6460
+  type: parameter
+  concept: competence
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.7
+- id: claim6461
+  type: parameter
+  concept: confidence
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.75
+- id: claim6462
+  type: parameter
+  concept: dominance
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.15
+- id: claim6463
+  type: parameter
+  concept: likeability
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.95
+- id: claim6464
+  type: parameter
+  concept: trustworthiness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.92
+- id: claim6465
+  type: parameter
+  concept: warmth
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.91
+- id: claim6466
+  type: parameter
+  concept: aggressiveness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: -0.52
+- id: claim6467
+  type: parameter
+  concept: attractiveness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.74
+- id: claim6468
+  type: parameter
+  concept: competence
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.88
+- id: claim6469
+  type: parameter
+  concept: confidence
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.62
+- id: claim6470
+  type: parameter
+  concept: dominance
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.55
+- id: claim6471
+  type: parameter
+  concept: likeability
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.93
+- id: claim6472
+  type: parameter
+  concept: trustworthiness
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.96
+- id: claim6473
+  type: parameter
+  concept: warmth
+  provenance:
+    paper: McAleer_2014_PersonalityVoiceImpressions
+    page: 0
+  unit: Valence
+  value: 0.91

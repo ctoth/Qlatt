@@ -1,0 +1,34 @@
+source:
+  paper: Krumpholz_2022_PitchManipulationFemaleRatings
+claims:
+- id: claim5821
+  type: observation
+  statement: A 20 Hz increase in female F0 should reliably increase femininity ratings
+  concepts: []
+  provenance:
+    paper: Krumpholz_2022_PitchManipulationFemaleRatings
+    page: 0
+- id: claim5822
+  type: observation
+  statement: A 20 Hz increase in female F0 should reliably decrease perceived age
+    by ~2 years
+  concepts: []
+  provenance:
+    paper: Krumpholz_2022_PitchManipulationFemaleRatings
+    page: 0
+- id: claim5823
+  type: observation
+  statement: Voice pitch effects on attractiveness are not reliably detectable at
+    20 Hz increments for speakers already in the 200-240 Hz range
+  concepts: []
+  provenance:
+    paper: Krumpholz_2022_PitchManipulationFemaleRatings
+    page: 0
+- id: claim5824
+  type: observation
+  statement: Cross-modal pitch effects on face perception are limited to age, not
+    attractiveness
+  concepts: []
+  provenance:
+    paper: Krumpholz_2022_PitchManipulationFemaleRatings
+    page: 0

@@ -1,0 +1,320 @@
+source:
+  paper: Shadle_1985_FricativeAcoustics
+claims:
+- id: claim8120
+  type: parameter
+  concept: speed_of_sound
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm/sec
+- id: claim8121
+  type: parameter
+  concept: air_density
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: g/cm^3
+- id: claim8122
+  type: parameter
+  concept: kinematic_viscosity
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 0.15
+  unit: cm^2/sec
+- id: claim8123
+  type: parameter
+  concept: viscosity_coefficient
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dyne-s/cm^2
+- id: claim8124
+  type: parameter
+  concept: heat_conduction
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cal/cm-s-deg
+- id: claim8125
+  type: parameter
+  concept: adiabatic_constant
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 1.4
+- id: claim8126
+  type: parameter
+  concept: tract_tube_length
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 17
+  unit: cm
+- id: claim8127
+  type: parameter
+  concept: tract_inner_diameter
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 2.54
+  unit: cm
+- id: claim8128
+  type: parameter
+  concept: back_cavity_area
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 5.067
+  unit: cm^2
+- id: claim8129
+  type: parameter
+  concept: front_cavity_area
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 5.07
+  unit: cm^2
+- id: claim8130
+  type: parameter
+  concept: glottis_area
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  value: 0.97
+  unit: cm^2
+- id: claim8131
+  type: parameter
+  concept: constriction_area
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm^2
+- id: claim8132
+  type: parameter
+  concept: constriction_length
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+- id: claim8133
+  type: parameter
+  concept: flowrate_range
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cc/sec
+- id: claim8134
+  type: parameter
+  concept: circle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim8135
+  type: parameter
+  concept: circle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 2.5
+- id: claim8136
+  type: parameter
+  concept: circle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim8137
+  type: parameter
+  concept: circle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 2.5
+- id: claim8138
+  type: parameter
+  concept: circle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim8139
+  type: parameter
+  concept: rectangle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim8140
+  type: parameter
+  concept: rectangle
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: cm
+  value: 1.0
+- id: claim8141
+  type: parameter
+  concept: 1_front_cavity
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 1
+  upper_bound: 3
+- id: claim8142
+  type: parameter
+  concept: 2_front_cavity
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 4
+  upper_bound: 8
+- id: claim8143
+  type: parameter
+  concept: 3_front_cavity
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 0
+  upper_bound: 2
+- id: claim8144
+  type: parameter
+  concept: s
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 800
+  upper_bound: 4000
+  unit: Hz
+- id: claim8145
+  type: parameter
+  concept: s
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 4000
+  upper_bound: 10000
+  unit: Hz
+- id: claim8146
+  type: parameter
+  concept: sh_apical
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 300
+  upper_bound: 6000
+  unit: Hz
+- id: claim8147
+  type: parameter
+  concept: f_theta
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 800
+  upper_bound: 10000
+  unit: Hz
+- id: claim8148
+  type: parameter
+  concept: x
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  lower_bound: 300
+  upper_bound: 4000
+  unit: Hz
+- id: claim8149
+  type: parameter
+  concept: s
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 20
+- id: claim8150
+  type: parameter
+  concept: sh
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 32
+- id: claim8151
+  type: parameter
+  concept: x
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 37
+- id: claim8152
+  type: parameter
+  concept: f
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 22
+- id: claim8153
+  type: parameter
+  concept: theta
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 22
+- id: claim8154
+  type: parameter
+  concept: phi
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: dB
+  value: 24
+- id: claim8155
+  type: parameter
+  concept: '15'
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 5750
+- id: claim8156
+  type: parameter
+  concept: '20'
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 4300
+- id: claim8157
+  type: parameter
+  concept: '32'
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 2690
+- id: claim8158
+  type: parameter
+  concept: '60'
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 1440
+- id: claim8159
+  type: parameter
+  concept: '120'
+  provenance:
+    paper: Shadle_1985_FricativeAcoustics
+    page: 0
+  unit: Hz
+  value: 720

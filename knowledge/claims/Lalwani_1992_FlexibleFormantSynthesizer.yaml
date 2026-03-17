@@ -1,0 +1,570 @@
+source:
+  paper: Lalwani_1992_FlexibleFormantSynthesizer
+claims:
+- id: claim5869
+  type: parameter
+  concept: sampling_rate
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: Hz
+- id: claim5870
+  type: parameter
+  concept: frame_size
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: samples
+- id: claim5871
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: Hz
+- id: claim5872
+  type: parameter
+  concept: voicing_amplitude
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: dB
+- id: claim5873
+  type: parameter
+  concept: aspiration_noise
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: dB
+- id: claim5874
+  type: parameter
+  concept: frication_noise
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: dB
+- id: claim5875
+  type: parameter
+  concept: overall_volume
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  unit: dB
+- id: claim5876
+  type: parameter
+  concept: f1_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 150
+- id: claim5877
+  type: parameter
+  concept: f1_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 450
+- id: claim5878
+  type: parameter
+  concept: f1_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 900
+- id: claim5879
+  type: parameter
+  concept: f1_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5880
+  type: parameter
+  concept: f1_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 50
+- id: claim5881
+  type: parameter
+  concept: f1_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5882
+  type: parameter
+  concept: f2_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5883
+  type: parameter
+  concept: f2_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1450
+- id: claim5884
+  type: parameter
+  concept: f2_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2500
+- id: claim5885
+  type: parameter
+  concept: f2_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5886
+  type: parameter
+  concept: f2_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 70
+- id: claim5887
+  type: parameter
+  concept: f2_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5888
+  type: parameter
+  concept: f3_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1300
+- id: claim5889
+  type: parameter
+  concept: f3_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2450
+- id: claim5890
+  type: parameter
+  concept: f3_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 3500
+- id: claim5891
+  type: parameter
+  concept: f3_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5892
+  type: parameter
+  concept: f3_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 110
+- id: claim5893
+  type: parameter
+  concept: f3_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5894
+  type: parameter
+  concept: f4_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2500
+- id: claim5895
+  type: parameter
+  concept: f4_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 3300
+- id: claim5896
+  type: parameter
+  concept: f4_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 4500
+- id: claim5897
+  type: parameter
+  concept: f4_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 100
+- id: claim5898
+  type: parameter
+  concept: f4_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 250
+- id: claim5899
+  type: parameter
+  concept: f4_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5900
+  type: parameter
+  concept: f5_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 3500
+- id: claim5901
+  type: parameter
+  concept: f5_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 3750
+- id: claim5902
+  type: parameter
+  concept: f5_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 4900
+- id: claim5903
+  type: parameter
+  concept: f5_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 150
+- id: claim5904
+  type: parameter
+  concept: f5_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5905
+  type: parameter
+  concept: f5_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 700
+- id: claim5906
+  type: parameter
+  concept: f6_freq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 4000
+- id: claim5907
+  type: parameter
+  concept: f6_freq_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 4900
+- id: claim5908
+  type: parameter
+  concept: f6_freq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 4999
+- id: claim5909
+  type: parameter
+  concept: f6_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5910
+  type: parameter
+  concept: f6_bw_typ
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1000
+- id: claim5911
+  type: parameter
+  concept: f6_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2000
+- id: claim5912
+  type: parameter
+  concept: nasal_pole_freq
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 270
+  unit: Hz
+- id: claim5913
+  type: parameter
+  concept: nasal_pole_bw
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim5914
+  type: parameter
+  concept: nasal_zero_freq
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 270
+  unit: Hz
+- id: claim5915
+  type: parameter
+  concept: nasal_zero_bw
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim5916
+  type: parameter
+  concept: g_filt_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5917
+  type: parameter
+  concept: g_filt_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5918
+  type: parameter
+  concept: g_filt_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5919
+  type: parameter
+  concept: n_filt_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5920
+  type: parameter
+  concept: n_filt_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.0
+- id: claim5921
+  type: parameter
+  concept: n_filt_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5922
+  type: parameter
+  concept: o_filt_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5923
+  type: parameter
+  concept: o_filt_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.0
+- id: claim5924
+  type: parameter
+  concept: o_filt_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5925
+  type: parameter
+  concept: ph_filt_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5926
+  type: parameter
+  concept: ph_filt_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5927
+  type: parameter
+  concept: ph_filt_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5928
+  type: parameter
+  concept: pl_filt_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: -1.0
+- id: claim5929
+  type: parameter
+  concept: pl_filt_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.99
+- id: claim5930
+  type: parameter
+  concept: pl_filt_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5931
+  type: parameter
+  concept: st_frame_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5932
+  type: parameter
+  concept: st_frame_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5933
+  type: parameter
+  concept: st_frame_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1
+- id: claim5934
+  type: parameter
+  concept: st_smp_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5935
+  type: parameter
+  concept: st_smp_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5936
+  type: parameter
+  concept: st_smp_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1
+- id: claim5937
+  type: parameter
+  concept: for_frq_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.0
+- id: claim5938
+  type: parameter
+  concept: for_frq_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.2
+- id: claim5939
+  type: parameter
+  concept: for_frq_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2.0
+- id: claim5940
+  type: parameter
+  concept: for_bw_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.0
+- id: claim5941
+  type: parameter
+  concept: for_bw_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.2
+- id: claim5942
+  type: parameter
+  concept: for_bw_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 2.0
+- id: claim5943
+  type: parameter
+  concept: op_min
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.0
+- id: claim5944
+  type: parameter
+  concept: op_typical
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 0.8
+- id: claim5945
+  type: parameter
+  concept: op_max
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+  value: 1.0
+- id: claim5946
+  type: equation
+  expression: 'Coefficients:'
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+- id: claim5947
+  type: equation
+  expression: $$B = 2e^{-\pi BW \cdot T} \cos(2\pi FT)$$
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+- id: claim5948
+  type: equation
+  expression: 'Coefficients:'
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0
+- id: claim5949
+  type: equation
+  expression: $$B' = -B/A$$
+  provenance:
+    paper: Lalwani_1992_FlexibleFormantSynthesizer
+    page: 0

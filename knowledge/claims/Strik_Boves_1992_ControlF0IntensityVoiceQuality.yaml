@@ -1,0 +1,59 @@
+source:
+  paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+claims:
+- id: claim10175
+  type: parameter
+  concept: 1000_il
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.808
+- id: claim10176
+  type: parameter
+  concept: 1000_p_tr
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.851
+- id: claim10177
+  type: parameter
+  concept: 1000_p_or
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: -0.783
+- id: claim10178
+  type: parameter
+  concept: 1000_p_sb
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.478
+- id: claim10179
+  type: parameter
+  concept: 1000_il
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.667
+- id: claim10180
+  type: parameter
+  concept: 1000_p_tr
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.729
+- id: claim10181
+  type: parameter
+  concept: 1000_p_or
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: -0.153
+- id: claim10182
+  type: parameter
+  concept: 1000_p_sb
+  provenance:
+    paper: Strik_Boves_1992_ControlF0IntensityVoiceQuality
+    page: 0
+  value: 0.772

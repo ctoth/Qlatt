@@ -1,0 +1,78 @@
+source:
+  paper: vanSanten_1997_ProsodicModeling
+claims:
+- id: claim10777
+  type: parameter
+  concept: factor_level_value
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: ratio
+- id: claim10778
+  type: parameter
+  concept: minimum_duration
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: ms
+- id: claim10779
+  type: parameter
+  concept: net_duration
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: ms
+- id: claim10780
+  type: parameter
+  concept: coverage_index
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: probability
+- id: claim10781
+  type: parameter
+  concept: basic_diphone
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: ~1,000
+- id: claim10782
+  type: parameter
+  concept: sophisticated_nphone
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: 2,000-10,000
+- id: claim10783
+  type: parameter
+  concept: corpusbased
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: '>>10,000'
+- id: claim10784
+  type: parameter
+  concept: rulebased
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+  unit: '0'
+- id: claim10785
+  type: equation
+  expression: \text{Duration}(\mathbf{d}) = \prod_i S_i(d_i)
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+- id: claim10786
+  type: equation
+  expression: \text{DUR}(\mathbf{d}) = \sum_{i \in K} \prod_{j \in I_i} S_{i,j}(d_j)
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0
+- id: claim10787
+  type: equation
+  expression: \text{DUR}(v, c, p) = S_{1,1}(v) \cdot S_{1,2}(c) \cdot S_{1,3}(p) +
+    S_{2,1}(v)
+  provenance:
+    paper: vanSanten_1997_ProsodicModeling
+    page: 0

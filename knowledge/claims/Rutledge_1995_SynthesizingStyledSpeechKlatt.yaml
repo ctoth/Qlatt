@@ -1,0 +1,941 @@
+source:
+  paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+claims:
+- id: claim7825
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 140.4
+- id: claim7826
+  type: parameter
+  concept: angry
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 266.7
+- id: claim7827
+  type: parameter
+  concept: clear
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 150.9
+- id: claim7828
+  type: parameter
+  concept: 50_tasking
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 140.4
+- id: claim7829
+  type: parameter
+  concept: 70_tasking
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 145.5
+- id: claim7830
+  type: parameter
+  concept: fast
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 150.9
+- id: claim7831
+  type: parameter
+  concept: lombard
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 163.3
+- id: claim7832
+  type: parameter
+  concept: loud
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 250.0
+- id: claim7833
+  type: parameter
+  concept: question
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 205.1
+- id: claim7834
+  type: parameter
+  concept: slow
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 142.9
+- id: claim7835
+  type: parameter
+  concept: soft
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: Hz
+  value: 135.6
+- id: claim7836
+  type: parameter
+  concept: angry
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 9.1
+- id: claim7837
+  type: parameter
+  concept: '50'
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 17.3
+- id: claim7838
+  type: parameter
+  concept: clear
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 15.8
+- id: claim7839
+  type: parameter
+  concept: '70'
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 16.7
+- id: claim7840
+  type: parameter
+  concept: fast
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 15.5
+- id: claim7841
+  type: parameter
+  concept: loud
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 6.3
+- id: claim7842
+  type: parameter
+  concept: lombard
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 15.2
+- id: claim7843
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 17.7
+- id: claim7844
+  type: parameter
+  concept: question
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 14.0
+- id: claim7845
+  type: parameter
+  concept: slow
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 16.9
+- id: claim7846
+  type: parameter
+  concept: soft
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  unit: samples
+  value: 17.7
+- id: claim7847
+  type: parameter
+  concept: normal_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7848
+  type: parameter
+  concept: normal_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7849
+  type: parameter
+  concept: normal_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7850
+  type: parameter
+  concept: normal_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7851
+  type: parameter
+  concept: normal_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7852
+  type: parameter
+  concept: angry_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.9
+- id: claim7853
+  type: parameter
+  concept: angry_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.32
+- id: claim7854
+  type: parameter
+  concept: angry_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7855
+  type: parameter
+  concept: angry_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.71
+- id: claim7856
+  type: parameter
+  concept: angry_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.85
+- id: claim7857
+  type: parameter
+  concept: 50_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7858
+  type: parameter
+  concept: 50_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.92
+- id: claim7859
+  type: parameter
+  concept: 50_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7860
+  type: parameter
+  concept: 50_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.94
+- id: claim7861
+  type: parameter
+  concept: 50_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.05
+- id: claim7862
+  type: parameter
+  concept: 70_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.04
+- id: claim7863
+  type: parameter
+  concept: 70_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.94
+- id: claim7864
+  type: parameter
+  concept: 70_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7865
+  type: parameter
+  concept: 70_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.95
+- id: claim7866
+  type: parameter
+  concept: 70_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.05
+- id: claim7867
+  type: parameter
+  concept: clear_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.07
+- id: claim7868
+  type: parameter
+  concept: clear_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.02
+- id: claim7869
+  type: parameter
+  concept: clear_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7870
+  type: parameter
+  concept: clear_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.1
+- id: claim7871
+  type: parameter
+  concept: clear_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.05
+- id: claim7872
+  type: parameter
+  concept: fast_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.07
+- id: claim7873
+  type: parameter
+  concept: fast_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.98
+- id: claim7874
+  type: parameter
+  concept: fast_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.03
+- id: claim7875
+  type: parameter
+  concept: fast_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.94
+- id: claim7876
+  type: parameter
+  concept: fast_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.95
+- id: claim7877
+  type: parameter
+  concept: loud_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.78
+- id: claim7878
+  type: parameter
+  concept: loud_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.25
+- id: claim7879
+  type: parameter
+  concept: loud_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.16
+- id: claim7880
+  type: parameter
+  concept: loud_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.58
+- id: claim7881
+  type: parameter
+  concept: loud_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.75
+- id: claim7882
+  type: parameter
+  concept: lombard_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.16
+- id: claim7883
+  type: parameter
+  concept: lombard_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7884
+  type: parameter
+  concept: lombard_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7885
+  type: parameter
+  concept: lombard_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.06
+- id: claim7886
+  type: parameter
+  concept: lombard_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.05
+- id: claim7887
+  type: parameter
+  concept: question_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.46
+- id: claim7888
+  type: parameter
+  concept: question_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.06
+- id: claim7889
+  type: parameter
+  concept: question_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.93
+- id: claim7890
+  type: parameter
+  concept: question_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.03
+- id: claim7891
+  type: parameter
+  concept: question_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7892
+  type: parameter
+  concept: slow_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.02
+- id: claim7893
+  type: parameter
+  concept: slow_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7894
+  type: parameter
+  concept: slow_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7895
+  type: parameter
+  concept: slow_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.99
+- id: claim7896
+  type: parameter
+  concept: slow_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7897
+  type: parameter
+  concept: soft_f0
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.97
+- id: claim7898
+  type: parameter
+  concept: soft_av
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.97
+- id: claim7899
+  type: parameter
+  concept: soft_oq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7900
+  type: parameter
+  concept: soft_sq
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.82
+- id: claim7901
+  type: parameter
+  concept: soft_tl
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.18
+- id: claim7902
+  type: parameter
+  concept: normal_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7903
+  type: parameter
+  concept: normal_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7904
+  type: parameter
+  concept: normal_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7905
+  type: parameter
+  concept: normal_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.0
+- id: claim7906
+  type: parameter
+  concept: angry_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.69
+- id: claim7907
+  type: parameter
+  concept: angry_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.38
+- id: claim7908
+  type: parameter
+  concept: angry_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.87
+- id: claim7909
+  type: parameter
+  concept: angry_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.12
+- id: claim7910
+  type: parameter
+  concept: 50_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.92
+- id: claim7911
+  type: parameter
+  concept: 50_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7912
+  type: parameter
+  concept: 50_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.11
+- id: claim7913
+  type: parameter
+  concept: 50_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.14
+- id: claim7914
+  type: parameter
+  concept: 70_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.92
+- id: claim7915
+  type: parameter
+  concept: 70_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.05
+- id: claim7916
+  type: parameter
+  concept: 70_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.21
+- id: claim7917
+  type: parameter
+  concept: 70_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.25
+- id: claim7918
+  type: parameter
+  concept: clear_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.26
+- id: claim7919
+  type: parameter
+  concept: clear_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.39
+- id: claim7920
+  type: parameter
+  concept: clear_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.8
+- id: claim7921
+  type: parameter
+  concept: clear_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.92
+- id: claim7922
+  type: parameter
+  concept: fast_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.72
+- id: claim7923
+  type: parameter
+  concept: fast_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.74
+- id: claim7924
+  type: parameter
+  concept: fast_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.73
+- id: claim7925
+  type: parameter
+  concept: fast_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.02
+- id: claim7926
+  type: parameter
+  concept: loud_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.58
+- id: claim7927
+  type: parameter
+  concept: loud_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.36
+- id: claim7928
+  type: parameter
+  concept: loud_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.03
+- id: claim7929
+  type: parameter
+  concept: loud_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.84
+- id: claim7930
+  type: parameter
+  concept: lombard_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.24
+- id: claim7931
+  type: parameter
+  concept: lombard_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.2
+- id: claim7932
+  type: parameter
+  concept: lombard_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.03
+- id: claim7933
+  type: parameter
+  concept: lombard_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.01
+- id: claim7934
+  type: parameter
+  concept: question_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.13
+- id: claim7935
+  type: parameter
+  concept: question_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.1
+- id: claim7936
+  type: parameter
+  concept: question_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.04
+- id: claim7937
+  type: parameter
+  concept: question_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.15
+- id: claim7938
+  type: parameter
+  concept: slow_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.83
+- id: claim7939
+  type: parameter
+  concept: slow_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.73
+- id: claim7940
+  type: parameter
+  concept: slow_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.5
+- id: claim7941
+  type: parameter
+  concept: slow_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.06
+- id: claim7942
+  type: parameter
+  concept: soft_vowel_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 0.92
+- id: claim7943
+  type: parameter
+  concept: soft_word_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.06
+- id: claim7944
+  type: parameter
+  concept: soft_cons_dur
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.23
+- id: claim7945
+  type: parameter
+  concept: soft_cons_intensity
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+  value: 1.34
+- id: claim7946
+  type: equation
+  expression: S(z) = E(z) G(z) V(z) R(z)
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7947
+  type: observation
+  statement: 'F0 scaling: angry (1.90x) > loud (1.78x) > question (1.46x) > Lombard
+    (1.16x) > normal (1.00x)'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7948
+  type: observation
+  statement: 'AV scaling: angry (1.32x) > loud (1.25x) > question (1.06x) > normal
+    (1.00x) > soft (0.97x)'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7949
+  type: observation
+  statement: 'TL scaling: soft (1.18x) > normal (1.00x) > fast (0.95x) > angry (0.85x)
+    > loud (0.75x) -- lower TL = less spectral tilt = more high-frequency energy'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7950
+  type: observation
+  statement: 'Duration scaling: slow vowel duration (1.83x) > angry (1.69x) > loud
+    (1.58x) > normal (1.00x) > fast (0.72x)'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7951
+  type: observation
+  statement: 'Fast style reduces all durations: vowel (0.72x), word (0.74x), consonant
+    (0.73x)'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7952
+  type: observation
+  statement: 'Slow style increases all durations: vowel (1.83x), word (1.73x), consonant
+    (1.50x)'
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7953
+  type: observation
+  statement: OQ varies minimally across styles (range 0.93-1.16) -- open quotient
+    is relatively stable
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0
+- id: claim7954
+  type: observation
+  statement: All scaling factors are > 0 (multiplicative, never negative or zero)
+  concepts: []
+  provenance:
+    paper: Rutledge_1995_SynthesizingStyledSpeechKlatt
+    page: 0

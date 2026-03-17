@@ -1,0 +1,741 @@
+source:
+  paper: Holmberg_1988_GlottalAirflowPressure
+claims:
+- id: claim4145
+  type: parameter
+  concept: spl
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: dB
+  lower_bound: 73.3
+  upper_bound: 87.0
+- id: claim4146
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: Hz
+- id: claim4147
+  type: parameter
+  concept: pressure
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: cm H₂O
+- id: claim4148
+  type: parameter
+  concept: average_flow
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: l/s
+- id: claim4149
+  type: parameter
+  concept: peak_flow
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: l/s
+- id: claim4150
+  type: parameter
+  concept: minimum_flow
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: l/s
+- id: claim4151
+  type: parameter
+  concept: ac_flow
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: l/s
+- id: claim4152
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: —
+- id: claim4153
+  type: parameter
+  concept: speed_quotient
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: —
+- id: claim4154
+  type: parameter
+  concept: closing_quotient
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: —
+- id: claim4155
+  type: parameter
+  concept: ac_dc_ratio
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: —
+- id: claim4156
+  type: parameter
+  concept: max_airflow_decl_rate
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: l/s²
+- id: claim4157
+  type: parameter
+  concept: glottal_resistance
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: cm H₂O/l/s
+- id: claim4158
+  type: parameter
+  concept: vocal_efficiency
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  unit: ×10⁻⁵
+- id: claim4159
+  type: parameter
+  concept: spl_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 75.0
+- id: claim4160
+  type: parameter
+  concept: spl_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 79.5
+- id: claim4161
+  type: parameter
+  concept: spl_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 86.0
+- id: claim4162
+  type: parameter
+  concept: f0_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 113
+- id: claim4163
+  type: parameter
+  concept: f0_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 116
+- id: claim4164
+  type: parameter
+  concept: f0_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 126
+- id: claim4165
+  type: parameter
+  concept: pressure_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 5.1
+- id: claim4166
+  type: parameter
+  concept: pressure_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 6.3
+- id: claim4167
+  type: parameter
+  concept: pressure_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 9.0
+- id: claim4168
+  type: parameter
+  concept: peak_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.27
+- id: claim4169
+  type: parameter
+  concept: peak_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.38
+- id: claim4170
+  type: parameter
+  concept: peak_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.49
+- id: claim4171
+  type: parameter
+  concept: ac_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.18
+- id: claim4172
+  type: parameter
+  concept: ac_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.26
+- id: claim4173
+  type: parameter
+  concept: ac_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.38
+- id: claim4174
+  type: parameter
+  concept: min_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.09
+- id: claim4175
+  type: parameter
+  concept: min_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.12
+- id: claim4176
+  type: parameter
+  concept: min_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.11
+- id: claim4177
+  type: parameter
+  concept: open_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.73
+- id: claim4178
+  type: parameter
+  concept: open_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.6
+- id: claim4179
+  type: parameter
+  concept: open_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.57
+- id: claim4180
+  type: parameter
+  concept: speed_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 1.56
+- id: claim4181
+  type: parameter
+  concept: speed_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 1.82
+- id: claim4182
+  type: parameter
+  concept: speed_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 2.05
+- id: claim4183
+  type: parameter
+  concept: closing_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.29
+- id: claim4184
+  type: parameter
+  concept: closing_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.22
+- id: claim4185
+  type: parameter
+  concept: closing_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.19
+- id: claim4186
+  type: parameter
+  concept: ac_dc_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.39
+- id: claim4187
+  type: parameter
+  concept: ac_dc_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.6
+- id: claim4188
+  type: parameter
+  concept: ac_dc_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.74
+- id: claim4189
+  type: parameter
+  concept: mfdr_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 171.1
+- id: claim4190
+  type: parameter
+  concept: mfdr_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 279.6
+- id: claim4191
+  type: parameter
+  concept: mfdr_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 481.1
+- id: claim4192
+  type: parameter
+  concept: avg_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.25
+- id: claim4193
+  type: parameter
+  concept: avg_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.19
+- id: claim4194
+  type: parameter
+  concept: avg_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.2
+- id: claim4195
+  type: parameter
+  concept: glottal_resistance_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 23.6
+- id: claim4196
+  type: parameter
+  concept: glottal_resistance_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 37.3
+- id: claim4197
+  type: parameter
+  concept: glottal_resistance_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 48.6
+- id: claim4198
+  type: parameter
+  concept: spl_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 71.5
+- id: claim4199
+  type: parameter
+  concept: spl_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 76.4
+- id: claim4200
+  type: parameter
+  concept: spl_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 83.4
+- id: claim4201
+  type: parameter
+  concept: f0_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 205
+- id: claim4202
+  type: parameter
+  concept: f0_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 223
+- id: claim4203
+  type: parameter
+  concept: pressure_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 5.0
+- id: claim4204
+  type: parameter
+  concept: pressure_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 5.8
+- id: claim4205
+  type: parameter
+  concept: pressure_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 8.2
+- id: claim4206
+  type: parameter
+  concept: peak_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.27
+- id: claim4207
+  type: parameter
+  concept: peak_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.22
+- id: claim4208
+  type: parameter
+  concept: peak_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.27
+- id: claim4209
+  type: parameter
+  concept: ac_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.18
+- id: claim4210
+  type: parameter
+  concept: ac_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.14
+- id: claim4211
+  type: parameter
+  concept: ac_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.18
+- id: claim4212
+  type: parameter
+  concept: min_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.09
+- id: claim4213
+  type: parameter
+  concept: min_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.09
+- id: claim4214
+  type: parameter
+  concept: min_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.09
+- id: claim4215
+  type: parameter
+  concept: open_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.71
+- id: claim4216
+  type: parameter
+  concept: open_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.76
+- id: claim4217
+  type: parameter
+  concept: open_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.71
+- id: claim4218
+  type: parameter
+  concept: speed_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 1.46
+- id: claim4219
+  type: parameter
+  concept: speed_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 1.65
+- id: claim4220
+  type: parameter
+  concept: speed_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 1.46
+- id: claim4221
+  type: parameter
+  concept: closing_quotient_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.29
+- id: claim4222
+  type: parameter
+  concept: closing_quotient_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.22
+- id: claim4223
+  type: parameter
+  concept: closing_quotient_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.29
+- id: claim4224
+  type: parameter
+  concept: ac_dc_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.5
+- id: claim4225
+  type: parameter
+  concept: ac_dc_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.38
+- id: claim4226
+  type: parameter
+  concept: ac_dc_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.5
+- id: claim4227
+  type: parameter
+  concept: mfdr_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 248.9
+- id: claim4228
+  type: parameter
+  concept: mfdr_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 164.0
+- id: claim4229
+  type: parameter
+  concept: mfdr_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 248.9
+- id: claim4230
+  type: parameter
+  concept: avg_flow_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.15
+- id: claim4231
+  type: parameter
+  concept: avg_flow_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.14
+- id: claim4232
+  type: parameter
+  concept: avg_flow_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 0.15
+- id: claim4233
+  type: parameter
+  concept: glottal_resistance_soft
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 61.1
+- id: claim4234
+  type: parameter
+  concept: glottal_resistance_normal
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 42.2
+- id: claim4235
+  type: parameter
+  concept: glottal_resistance_loud
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+  value: 60.9
+- id: claim4236
+  type: observation
+  statement: Open quotient decreases from soft to loud voice for males (0.73 → 0.60
+    → 0.57)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4237
+  type: observation
+  statement: Peak flow increases monotonically from soft to loud for males (0.27 →
+    0.38 → 0.49 l/s)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4238
+  type: observation
+  statement: MFDR increases monotonically from soft to loud for males (171 → 280 →
+    481 l/s²)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4239
+  type: observation
+  statement: Pressure increases monotonically from soft to loud for both sexes
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4240
+  type: observation
+  statement: ac/dc ratio increases from soft to loud for males (0.39 → 0.60 → 0.74)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4241
+  type: observation
+  statement: Speed quotient increases from soft to loud for males (1.56 → 1.82 → 2.05)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4242
+  type: observation
+  statement: 'Within loudness conditions: SPL and MFDR positively correlated (r >
+    0.79)'
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4243
+  type: observation
+  statement: 'Within loudness conditions: SPL and vocal efficiency positively correlated
+    (r > 0.87)'
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4244
+  type: observation
+  statement: Minimum flow is never significantly different between males and females
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4245
+  type: observation
+  statement: Soft voice male and female waveforms are most similar (fewest significant
+    differences)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4246
+  type: observation
+  statement: A 6-dB SPL increase should correspond approximately to a doubling of
+    MFDR (acoustic theory)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4247
+  type: observation
+  statement: Vocal efficiency values range from 0.35×10⁻⁵ to 145.2×10⁻⁵ (×10⁵ units)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0
+- id: claim4248
+  type: observation
+  statement: ac/dc ≈ 0.5 is a rough critical boundary between "normal" and "breathy"
+    voice (Isshiki, 1981)
+  concepts: []
+  provenance:
+    paper: Holmberg_1988_GlottalAirflowPressure
+    page: 0

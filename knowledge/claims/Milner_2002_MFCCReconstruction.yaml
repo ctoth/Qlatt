@@ -1,0 +1,91 @@
+source:
+  paper: Milner_2002_MFCCReconstruction
+claims:
+- id: claim6591
+  type: parameter
+  concept: mfcc_dimensions
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 13
+- id: claim6592
+  type: parameter
+  concept: mfcc_dimensions
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 23
+- id: claim6593
+  type: parameter
+  concept: spectral_bins
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 128
+- id: claim6594
+  type: parameter
+  concept: frame_rate
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 100
+  unit: fps
+- id: claim6595
+  type: parameter
+  concept: speech_bandwidth
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 4000
+  unit: Hz
+- id: claim6596
+  type: parameter
+  concept: bit_rate
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+  value: 4.8
+  unit: kbps
+- id: claim6597
+  type: equation
+  expression: s(n) = \sum_{i=1}^{p} a_i s(n-i) + G e(n)
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6598
+  type: equation
+  expression: \sum_{i=1}^{p} a_i r_{|j-i|} = r_j \quad 1 \leq j \leq p
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6599
+  type: equation
+  expression: c_y(n) = u_n \sum_{k=0}^{K-1} (\log Y_k) \cos\left(\frac{(2k+1)n\pi}{2K}\right)
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6600
+  type: equation
+  expression: \log \hat{Y}_k = \sum_{n=0}^{K-1} u_n c_y(n) \cos\left(\frac{(2k+1)n\pi}{2K}\right)
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6601
+  type: equation
+  expression: c_w(n) = u_n \sum_{k=0}^{K-1} (\log w_k) \cos\left(\frac{(2k+1)n\pi}{2K}\right)
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6602
+  type: equation
+  expression: \mathbf{c}_x = \mathbf{c}_y - \mathbf{c}_w - \mathbf{c}_p
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0
+- id: claim6603
+  type: equation
+  expression: \hat{r}_j = \frac{1}{N} \sum_{f=0}^{N-1} |\hat{X}(f)|^2 e^{\frac{j 2\pi
+    f j}{N}}
+  provenance:
+    paper: Milner_2002_MFCCReconstruction
+    page: 0

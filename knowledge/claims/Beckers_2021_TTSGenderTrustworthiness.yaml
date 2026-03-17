@@ -1,0 +1,34 @@
+source:
+  paper: Beckers_2021_TTSGenderTrustworthiness
+claims:
+- id: claim619
+  type: observation
+  statement: Male TTS voices should receive higher trustworthiness ratings than female
+    TTS voices in news contexts
+  concepts: []
+  provenance:
+    paper: Beckers_2021_TTSGenderTrustworthiness
+    page: 0
+- id: claim620
+  type: observation
+  statement: National accent TTS voices should produce better listening experience
+    than foreign accent
+  concepts: []
+  provenance:
+    paper: Beckers_2021_TTSGenderTrustworthiness
+    page: 0
+- id: claim621
+  type: observation
+  statement: Accent similarity perception should mediate accent-experience relationship
+  concepts: []
+  provenance:
+    paper: Beckers_2021_TTSGenderTrustworthiness
+    page: 0
+- id: claim622
+  type: observation
+  statement: Voice gender should not significantly affect listening experience per
+    se
+  concepts: []
+  provenance:
+    paper: Beckers_2021_TTSGenderTrustworthiness
+    page: 0

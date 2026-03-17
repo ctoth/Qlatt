@@ -1,0 +1,6149 @@
+source:
+  paper: Story_1996_VocalTractAreaFunctionsMRI
+claims:
+- id: claim9297
+  type: parameter
+  concept: 1_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.33
+- id: claim9298
+  type: parameter
+  concept: 1_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.2
+- id: claim9299
+  type: parameter
+  concept: 1_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim9300
+  type: parameter
+  concept: 1_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.22
+- id: claim9301
+  type: parameter
+  concept: 1_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.33
+- id: claim9302
+  type: parameter
+  concept: 1_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.45
+- id: claim9303
+  type: parameter
+  concept: 1_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.61
+- id: claim9304
+  type: parameter
+  concept: 1_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.18
+- id: claim9305
+  type: parameter
+  concept: 1_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9306
+  type: parameter
+  concept: 1_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.4
+- id: claim9307
+  type: parameter
+  concept: 1_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.41
+- id: claim9308
+  type: parameter
+  concept: 1_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.55
+- id: claim9309
+  type: parameter
+  concept: 2_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.3
+- id: claim9310
+  type: parameter
+  concept: 2_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.17
+- id: claim9311
+  type: parameter
+  concept: 2_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.13
+- id: claim9312
+  type: parameter
+  concept: 2_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.26
+- id: claim9313
+  type: parameter
+  concept: 2_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9314
+  type: parameter
+  concept: 2_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.2
+- id: claim9315
+  type: parameter
+  concept: 2_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9316
+  type: parameter
+  concept: 2_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.17
+- id: claim9317
+  type: parameter
+  concept: 2_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9318
+  type: parameter
+  concept: 2_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.38
+- id: claim9319
+  type: parameter
+  concept: 2_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.38
+- id: claim9320
+  type: parameter
+  concept: 2_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.63
+- id: claim9321
+  type: parameter
+  concept: 3_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.36
+- id: claim9322
+  type: parameter
+  concept: 3_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.18
+- id: claim9323
+  type: parameter
+  concept: 3_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.16
+- id: claim9324
+  type: parameter
+  concept: 3_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.26
+- id: claim9325
+  type: parameter
+  concept: 3_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.23
+- id: claim9326
+  type: parameter
+  concept: 3_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.26
+- id: claim9327
+  type: parameter
+  concept: 3_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.19
+- id: claim9328
+  type: parameter
+  concept: 3_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.23
+- id: claim9329
+  type: parameter
+  concept: 3_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9330
+  type: parameter
+  concept: 3_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9331
+  type: parameter
+  concept: 3_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.4
+- id: claim9332
+  type: parameter
+  concept: 3_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.75
+- id: claim9333
+  type: parameter
+  concept: 4_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.34
+- id: claim9334
+  type: parameter
+  concept: 4_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.18
+- id: claim9335
+  type: parameter
+  concept: 4_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.14
+- id: claim9336
+  type: parameter
+  concept: 4_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.16
+- id: claim9337
+  type: parameter
+  concept: 4_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.15
+- id: claim9338
+  type: parameter
+  concept: 4_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim9339
+  type: parameter
+  concept: 4_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.1
+- id: claim9340
+  type: parameter
+  concept: 4_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9341
+  type: parameter
+  concept: 4_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.43
+- id: claim9342
+  type: parameter
+  concept: 4_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.43
+- id: claim9343
+  type: parameter
+  concept: 4_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.29
+- id: claim9344
+  type: parameter
+  concept: 4_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.8
+- id: claim9345
+  type: parameter
+  concept: 5_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.68
+- id: claim9346
+  type: parameter
+  concept: 5_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.1
+- id: claim9347
+  type: parameter
+  concept: 5_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.06
+- id: claim9348
+  type: parameter
+  concept: 5_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.13
+- id: claim9349
+  type: parameter
+  concept: 5_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.17
+- id: claim9350
+  type: parameter
+  concept: 5_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9351
+  type: parameter
+  concept: 5_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.07
+- id: claim9352
+  type: parameter
+  concept: 5_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.59
+- id: claim9353
+  type: parameter
+  concept: 5_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.56
+- id: claim9354
+  type: parameter
+  concept: 5_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.55
+- id: claim9355
+  type: parameter
+  concept: 5_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.13
+- id: claim9356
+  type: parameter
+  concept: 5_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.98
+- id: claim9357
+  type: parameter
+  concept: 6_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.5
+- id: claim9358
+  type: parameter
+  concept: 6_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.08
+- id: claim9359
+  type: parameter
+  concept: 6_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.78
+- id: claim9360
+  type: parameter
+  concept: 6_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim9361
+  type: parameter
+  concept: 6_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.33
+- id: claim9362
+  type: parameter
+  concept: 6_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.3
+- id: claim9363
+  type: parameter
+  concept: 6_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.3
+- id: claim9364
+  type: parameter
+  concept: 6_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.46
+- id: claim9365
+  type: parameter
+  concept: 6_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.46
+- id: claim9366
+  type: parameter
+  concept: 6_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.72
+- id: claim9367
+  type: parameter
+  concept: 6_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.53
+- id: claim9368
+  type: parameter
+  concept: 6_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.56
+- id: claim9369
+  type: parameter
+  concept: 7_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.43
+- id: claim9370
+  type: parameter
+  concept: 7_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.66
+- id: claim9371
+  type: parameter
+  concept: 7_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.25
+- id: claim9372
+  type: parameter
+  concept: 7_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.83
+- id: claim9373
+  type: parameter
+  concept: 7_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9374
+  type: parameter
+  concept: 7_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.33
+- id: claim9375
+  type: parameter
+  concept: 7_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.18
+- id: claim9376
+  type: parameter
+  concept: 7_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.6
+- id: claim9377
+  type: parameter
+  concept: 7_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.2
+- id: claim9378
+  type: parameter
+  concept: 7_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.91
+- id: claim9379
+  type: parameter
+  concept: 7_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.58
+- id: claim9380
+  type: parameter
+  concept: 7_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.45
+- id: claim9381
+  type: parameter
+  concept: 8_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.15
+- id: claim9382
+  type: parameter
+  concept: 8_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.64
+- id: claim9383
+  type: parameter
+  concept: 8_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.24
+- id: claim9384
+  type: parameter
+  concept: 8_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.5
+- id: claim9385
+  type: parameter
+  concept: 8_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.02
+- id: claim9386
+  type: parameter
+  concept: 8_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.05
+- id: claim9387
+  type: parameter
+  concept: 8_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.13
+- id: claim9388
+  type: parameter
+  concept: 8_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.11
+- id: claim9389
+  type: parameter
+  concept: 8_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.06
+- id: claim9390
+  type: parameter
+  concept: 8_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.88
+- id: claim9391
+  type: parameter
+  concept: 8_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.56
+- id: claim9392
+  type: parameter
+  concept: 8_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.22
+- id: claim9393
+  type: parameter
+  concept: 9_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.66
+- id: claim9394
+  type: parameter
+  concept: 9_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.19
+- id: claim9395
+  type: parameter
+  concept: 9_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.99
+- id: claim9396
+  type: parameter
+  concept: 9_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.35
+- id: claim9397
+  type: parameter
+  concept: 9_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.22
+- id: claim9398
+  type: parameter
+  concept: 9_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.12
+- id: claim9399
+  type: parameter
+  concept: 9_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.42
+- id: claim9400
+  type: parameter
+  concept: 9_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.82
+- id: claim9401
+  type: parameter
+  concept: 9_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.58
+- id: claim9402
+  type: parameter
+  concept: 9_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.37
+- id: claim9403
+  type: parameter
+  concept: 9_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.22
+- id: claim9404
+  type: parameter
+  concept: 9_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.2
+- id: claim9405
+  type: parameter
+  concept: 10_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.49
+- id: claim9406
+  type: parameter
+  concept: 10_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.92
+- id: claim9407
+  type: parameter
+  concept: 10_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.72
+- id: claim9408
+  type: parameter
+  concept: 10_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.99
+- id: claim9409
+  type: parameter
+  concept: 10_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.14
+- id: claim9410
+  type: parameter
+  concept: 10_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.85
+- id: claim9411
+  type: parameter
+  concept: 10_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.21
+- id: claim9412
+  type: parameter
+  concept: 10_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.01
+- id: claim9413
+  type: parameter
+  concept: 10_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.11
+- id: claim9414
+  type: parameter
+  concept: 10_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.1
+- id: claim9415
+  type: parameter
+  concept: 10_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.19
+- id: claim9416
+  type: parameter
+  concept: 10_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.67
+- id: claim9417
+  type: parameter
+  concept: 11_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.39
+- id: claim9418
+  type: parameter
+  concept: 11_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.13
+- id: claim9419
+  type: parameter
+  concept: 11_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.73
+- id: claim9420
+  type: parameter
+  concept: 11_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.69
+- id: claim9421
+  type: parameter
+  concept: 11_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.82
+- id: claim9422
+  type: parameter
+  concept: 11_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.63
+- id: claim9423
+  type: parameter
+  concept: 11_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.69
+- id: claim9424
+  type: parameter
+  concept: 11_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.72
+- id: claim9425
+  type: parameter
+  concept: 11_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.11
+- id: claim9426
+  type: parameter
+  concept: 11_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.63
+- id: claim9427
+  type: parameter
+  concept: 11_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.0
+- id: claim9428
+  type: parameter
+  concept: 11_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.02
+- id: claim9429
+  type: parameter
+  concept: 12_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.8
+- id: claim9430
+  type: parameter
+  concept: 12_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.48
+- id: claim9431
+  type: parameter
+  concept: 12_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.06
+- id: claim9432
+  type: parameter
+  concept: 12_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.35
+- id: claim9433
+  type: parameter
+  concept: 12_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.76
+- id: claim9434
+  type: parameter
+  concept: 12_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9435
+  type: parameter
+  concept: 12_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.51
+- id: claim9436
+  type: parameter
+  concept: 12_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.71
+- id: claim9437
+  type: parameter
+  concept: 12_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.26
+- id: claim9438
+  type: parameter
+  concept: 12_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.86
+- id: claim9439
+  type: parameter
+  concept: 12_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.77
+- id: claim9440
+  type: parameter
+  concept: 12_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.55
+- id: claim9441
+  type: parameter
+  concept: 13_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.78
+- id: claim9442
+  type: parameter
+  concept: 13_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.76
+- id: claim9443
+  type: parameter
+  concept: 13_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.77
+- id: claim9444
+  type: parameter
+  concept: 13_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.32
+- id: claim9445
+  type: parameter
+  concept: 13_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.66
+- id: claim9446
+  type: parameter
+  concept: 13_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.26
+- id: claim9447
+  type: parameter
+  concept: 13_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.43
+- id: claim9448
+  type: parameter
+  concept: 13_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.96
+- id: claim9449
+  type: parameter
+  concept: 13_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.3
+- id: claim9450
+  type: parameter
+  concept: 13_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.63
+- id: claim9451
+  type: parameter
+  concept: 13_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.92
+- id: claim9452
+  type: parameter
+  concept: 13_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.76
+- id: claim9453
+  type: parameter
+  concept: 14_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.35
+- id: claim9454
+  type: parameter
+  concept: 14_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.97
+- id: claim9455
+  type: parameter
+  concept: 14_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.97
+- id: claim9456
+  type: parameter
+  concept: 14_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.13
+- id: claim9457
+  type: parameter
+  concept: 14_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.8
+- id: claim9458
+  type: parameter
+  concept: 14_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9459
+  type: parameter
+  concept: 14_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.66
+- id: claim9460
+  type: parameter
+  concept: 14_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.92
+- id: claim9461
+  type: parameter
+  concept: 14_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.98
+- id: claim9462
+  type: parameter
+  concept: 14_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.43
+- id: claim9463
+  type: parameter
+  concept: 14_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.19
+- id: claim9464
+  type: parameter
+  concept: 14_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.53
+- id: claim9465
+  type: parameter
+  concept: 15_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.5
+- id: claim9466
+  type: parameter
+  concept: 15_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.43
+- id: claim9467
+  type: parameter
+  concept: 15_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.46
+- id: claim9468
+  type: parameter
+  concept: 15_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.94
+- id: claim9469
+  type: parameter
+  concept: 15_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.72
+- id: claim9470
+  type: parameter
+  concept: 15_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.23
+- id: claim9471
+  type: parameter
+  concept: 15_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.57
+- id: claim9472
+  type: parameter
+  concept: 15_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.7
+- id: claim9473
+  type: parameter
+  concept: 15_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.93
+- id: claim9474
+  type: parameter
+  concept: 15_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.8
+- id: claim9475
+  type: parameter
+  concept: 15_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.27
+- id: claim9476
+  type: parameter
+  concept: 15_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.62
+- id: claim9477
+  type: parameter
+  concept: 16_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.43
+- id: claim9478
+  type: parameter
+  concept: 16_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.32
+- id: claim9479
+  type: parameter
+  concept: 16_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.7
+- id: claim9480
+  type: parameter
+  concept: 16_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim9481
+  type: parameter
+  concept: 16_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.66
+- id: claim9482
+  type: parameter
+  concept: 16_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9483
+  type: parameter
+  concept: 16_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9484
+  type: parameter
+  concept: 16_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.66
+- id: claim9485
+  type: parameter
+  concept: 16_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.83
+- id: claim9486
+  type: parameter
+  concept: 16_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.56
+- id: claim9487
+  type: parameter
+  concept: 16_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.35
+- id: claim9488
+  type: parameter
+  concept: 16_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.4
+- id: claim9489
+  type: parameter
+  concept: 17_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.68
+- id: claim9490
+  type: parameter
+  concept: 17_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.48
+- id: claim9491
+  type: parameter
+  concept: 17_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.92
+- id: claim9492
+  type: parameter
+  concept: 17_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.85
+- id: claim9493
+  type: parameter
+  concept: 17_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.08
+- id: claim9494
+  type: parameter
+  concept: 17_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.29
+- id: claim9495
+  type: parameter
+  concept: 17_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.43
+- id: claim9496
+  type: parameter
+  concept: 17_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.52
+- id: claim9497
+  type: parameter
+  concept: 17_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.61
+- id: claim9498
+  type: parameter
+  concept: 17_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.29
+- id: claim9499
+  type: parameter
+  concept: 17_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.48
+- id: claim9500
+  type: parameter
+  concept: 17_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.32
+- id: claim9501
+  type: parameter
+  concept: 18_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.52
+- id: claim9502
+  type: parameter
+  concept: 18_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.96
+- id: claim9503
+  type: parameter
+  concept: 18_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.03
+- id: claim9504
+  type: parameter
+  concept: 18_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.26
+- id: claim9505
+  type: parameter
+  concept: 18_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.91
+- id: claim9506
+  type: parameter
+  concept: 18_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9507
+  type: parameter
+  concept: 18_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.45
+- id: claim9508
+  type: parameter
+  concept: 18_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.28
+- id: claim9509
+  type: parameter
+  concept: 18_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.97
+- id: claim9510
+  type: parameter
+  concept: 18_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.63
+- id: claim9511
+  type: parameter
+  concept: 18_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.56
+- id: claim9512
+  type: parameter
+  concept: 18_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.43
+- id: claim9513
+  type: parameter
+  concept: 19_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.15
+- id: claim9514
+  type: parameter
+  concept: 19_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.79
+- id: claim9515
+  type: parameter
+  concept: 19_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.84
+- id: claim9516
+  type: parameter
+  concept: 19_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.73
+- id: claim9517
+  type: parameter
+  concept: 19_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim9518
+  type: parameter
+  concept: 19_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.4
+- id: claim9519
+  type: parameter
+  concept: 19_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.53
+- id: claim9520
+  type: parameter
+  concept: 19_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.44
+- id: claim9521
+  type: parameter
+  concept: 19_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.75
+- id: claim9522
+  type: parameter
+  concept: 19_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.37
+- id: claim9523
+  type: parameter
+  concept: 19_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.61
+- id: claim9524
+  type: parameter
+  concept: 19_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.13
+- id: claim9525
+  type: parameter
+  concept: 20_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.09
+- id: claim9526
+  type: parameter
+  concept: 20_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.88
+- id: claim9527
+  type: parameter
+  concept: 20_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.84
+- id: claim9528
+  type: parameter
+  concept: 20_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.8
+- id: claim9529
+  type: parameter
+  concept: 20_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.06
+- id: claim9530
+  type: parameter
+  concept: 20_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.66
+- id: claim9531
+  type: parameter
+  concept: 20_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.6
+- id: claim9532
+  type: parameter
+  concept: 20_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.28
+- id: claim9533
+  type: parameter
+  concept: 20_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.93
+- id: claim9534
+  type: parameter
+  concept: 20_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.16
+- id: claim9535
+  type: parameter
+  concept: 20_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.87
+- id: claim9536
+  type: parameter
+  concept: 20_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.27
+- id: claim9537
+  type: parameter
+  concept: 21_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.51
+- id: claim9538
+  type: parameter
+  concept: 21_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.47
+- id: claim9539
+  type: parameter
+  concept: 21_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.83
+- id: claim9540
+  type: parameter
+  concept: 21_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.69
+- id: claim9541
+  type: parameter
+  concept: 21_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim9542
+  type: parameter
+  concept: 21_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.2
+- id: claim9543
+  type: parameter
+  concept: 21_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.77
+- id: claim9544
+  type: parameter
+  concept: 21_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.89
+- id: claim9545
+  type: parameter
+  concept: 21_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.53
+- id: claim9546
+  type: parameter
+  concept: 21_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.31
+- id: claim9547
+  type: parameter
+  concept: 21_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.1
+- id: claim9548
+  type: parameter
+  concept: 21_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.28
+- id: claim9549
+  type: parameter
+  concept: 22_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.95
+- id: claim9550
+  type: parameter
+  concept: 22_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.98
+- id: claim9551
+  type: parameter
+  concept: 22_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.36
+- id: claim9552
+  type: parameter
+  concept: 22_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.87
+- id: claim9553
+  type: parameter
+  concept: 22_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.17
+- id: claim9554
+  type: parameter
+  concept: 22_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.05
+- id: claim9555
+  type: parameter
+  concept: 22_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.65
+- id: claim9556
+  type: parameter
+  concept: 22_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.25
+- id: claim9557
+  type: parameter
+  concept: 22_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.65
+- id: claim9558
+  type: parameter
+  concept: 22_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.22
+- id: claim9559
+  type: parameter
+  concept: 22_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.01
+- id: claim9560
+  type: parameter
+  concept: 22_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.26
+- id: claim9561
+  type: parameter
+  concept: 23_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.03
+- id: claim9562
+  type: parameter
+  concept: 23_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.62
+- id: claim9563
+  type: parameter
+  concept: 23_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.14
+- id: claim9564
+  type: parameter
+  concept: 23_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.68
+- id: claim9565
+  type: parameter
+  concept: 23_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.39
+- id: claim9566
+  type: parameter
+  concept: 23_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.62
+- id: claim9567
+  type: parameter
+  concept: 23_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.58
+- id: claim9568
+  type: parameter
+  concept: 23_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.38
+- id: claim9569
+  type: parameter
+  concept: 23_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.95
+- id: claim9570
+  type: parameter
+  concept: 23_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.33
+- id: claim9571
+  type: parameter
+  concept: 23_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.62
+- id: claim9572
+  type: parameter
+  concept: 23_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.33
+- id: claim9573
+  type: parameter
+  concept: 24_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.66
+- id: claim9574
+  type: parameter
+  concept: 24_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.37
+- id: claim9575
+  type: parameter
+  concept: 24_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.0
+- id: claim9576
+  type: parameter
+  concept: 24_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.2
+- id: claim9577
+  type: parameter
+  concept: 24_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.55
+- id: claim9578
+  type: parameter
+  concept: 24_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.09
+- id: claim9579
+  type: parameter
+  concept: 24_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.94
+- id: claim9580
+  type: parameter
+  concept: 24_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim9581
+  type: parameter
+  concept: 24_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.99
+- id: claim9582
+  type: parameter
+  concept: 24_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.07
+- id: claim9583
+  type: parameter
+  concept: 24_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.96
+- id: claim9584
+  type: parameter
+  concept: 24_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.43
+- id: claim9585
+  type: parameter
+  concept: 25_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.38
+- id: claim9586
+  type: parameter
+  concept: 25_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.99
+- id: claim9587
+  type: parameter
+  concept: 25_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.78
+- id: claim9588
+  type: parameter
+  concept: 25_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.26
+- id: claim9589
+  type: parameter
+  concept: 25_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.89
+- id: claim9590
+  type: parameter
+  concept: 25_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.56
+- id: claim9591
+  type: parameter
+  concept: 25_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.02
+- id: claim9592
+  type: parameter
+  concept: 25_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.71
+- id: claim9593
+  type: parameter
+  concept: 25_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.07
+- id: claim9594
+  type: parameter
+  concept: 25_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.07
+- id: claim9595
+  type: parameter
+  concept: 25_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.07
+- id: claim9596
+  type: parameter
+  concept: 25_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.44
+- id: claim9597
+  type: parameter
+  concept: 26_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.05
+- id: claim9598
+  type: parameter
+  concept: 26_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.9
+- id: claim9599
+  type: parameter
+  concept: 26_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.81
+- id: claim9600
+  type: parameter
+  concept: 26_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.29
+- id: claim9601
+  type: parameter
+  concept: 26_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim9602
+  type: parameter
+  concept: 26_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.78
+- id: claim9603
+  type: parameter
+  concept: 26_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.5
+- id: claim9604
+  type: parameter
+  concept: 26_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.46
+- id: claim9605
+  type: parameter
+  concept: 26_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.39
+- id: claim9606
+  type: parameter
+  concept: 26_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.52
+- id: claim9607
+  type: parameter
+  concept: 26_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.11
+- id: claim9608
+  type: parameter
+  concept: 26_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.54
+- id: claim9609
+  type: parameter
+  concept: 27_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.6
+- id: claim9610
+  type: parameter
+  concept: 27_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.7
+- id: claim9611
+  type: parameter
+  concept: 27_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.79
+- id: claim9612
+  type: parameter
+  concept: 27_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.19
+- id: claim9613
+  type: parameter
+  concept: 27_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.46
+- id: claim9614
+  type: parameter
+  concept: 27_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.86
+- id: claim9615
+  type: parameter
+  concept: 27_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.41
+- id: claim9616
+  type: parameter
+  concept: 27_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9617
+  type: parameter
+  concept: 27_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.47
+- id: claim9618
+  type: parameter
+  concept: 27_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.74
+- id: claim9619
+  type: parameter
+  concept: 27_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.77
+- id: claim9620
+  type: parameter
+  concept: 27_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.64
+- id: claim9621
+  type: parameter
+  concept: 28_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.35
+- id: claim9622
+  type: parameter
+  concept: 28_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.44
+- id: claim9623
+  type: parameter
+  concept: 28_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.5
+- id: claim9624
+  type: parameter
+  concept: 28_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.23
+- id: claim9625
+  type: parameter
+  concept: 28_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.65
+- id: claim9626
+  type: parameter
+  concept: 28_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.02
+- id: claim9627
+  type: parameter
+  concept: 28_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.62
+- id: claim9628
+  type: parameter
+  concept: 28_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9629
+  type: parameter
+  concept: 28_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.79
+- id: claim9630
+  type: parameter
+  concept: 28_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.23
+- id: claim9631
+  type: parameter
+  concept: 28_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.67
+- id: claim9632
+  type: parameter
+  concept: 28_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.67
+- id: claim9633
+  type: parameter
+  concept: 29_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.32
+- id: claim9634
+  type: parameter
+  concept: 29_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.45
+- id: claim9635
+  type: parameter
+  concept: 29_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.37
+- id: claim9636
+  type: parameter
+  concept: 29_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.23
+- id: claim9637
+  type: parameter
+  concept: 29_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.13
+- id: claim9638
+  type: parameter
+  concept: 29_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.75
+- id: claim9639
+  type: parameter
+  concept: 29_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.29
+- id: claim9640
+  type: parameter
+  concept: 29_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.57
+- id: claim9641
+  type: parameter
+  concept: 29_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.34
+- id: claim9642
+  type: parameter
+  concept: 29_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.15
+- id: claim9643
+  type: parameter
+  concept: 29_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.47
+- id: claim9644
+  type: parameter
+  concept: 29_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.16
+- id: claim9645
+  type: parameter
+  concept: 30_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.12
+- id: claim9646
+  type: parameter
+  concept: 30_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.06
+- id: claim9647
+  type: parameter
+  concept: 30_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.36
+- id: claim9648
+  type: parameter
+  concept: 30_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.4
+- id: claim9649
+  type: parameter
+  concept: 30_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.81
+- id: claim9650
+  type: parameter
+  concept: 30_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.6
+- id: claim9651
+  type: parameter
+  concept: 30_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.34
+- id: claim9652
+  type: parameter
+  concept: 30_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.06
+- id: claim9653
+  type: parameter
+  concept: 30_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.68
+- id: claim9654
+  type: parameter
+  concept: 30_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.22
+- id: claim9655
+  type: parameter
+  concept: 30_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.34
+- id: claim9656
+  type: parameter
+  concept: 30_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.68
+- id: claim9657
+  type: parameter
+  concept: 31_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.1
+- id: claim9658
+  type: parameter
+  concept: 31_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.87
+- id: claim9659
+  type: parameter
+  concept: 31_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.43
+- id: claim9660
+  type: parameter
+  concept: 31_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.78
+- id: claim9661
+  type: parameter
+  concept: 31_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.3
+- id: claim9662
+  type: parameter
+  concept: 31_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.09
+- id: claim9663
+  type: parameter
+  concept: 31_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.78
+- id: claim9664
+  type: parameter
+  concept: 31_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.38
+- id: claim9665
+  type: parameter
+  concept: 31_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.36
+- id: claim9666
+  type: parameter
+  concept: 31_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.22
+- id: claim9667
+  type: parameter
+  concept: 31_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.25
+- id: claim9668
+  type: parameter
+  concept: 31_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.3
+- id: claim9669
+  type: parameter
+  concept: 32_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.16
+- id: claim9670
+  type: parameter
+  concept: 32_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.75
+- id: claim9671
+  type: parameter
+  concept: 32_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.83
+- id: claim9672
+  type: parameter
+  concept: 32_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.84
+- id: claim9673
+  type: parameter
+  concept: 32_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.57
+- id: claim9674
+  type: parameter
+  concept: 32_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.02
+- id: claim9675
+  type: parameter
+  concept: 32_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.24
+- id: claim9676
+  type: parameter
+  concept: 32_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.29
+- id: claim9677
+  type: parameter
+  concept: 32_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.98
+- id: claim9678
+  type: parameter
+  concept: 32_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.37
+- id: claim9679
+  type: parameter
+  concept: 32_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.9
+- id: claim9680
+  type: parameter
+  concept: 32_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.14
+- id: claim9681
+  type: parameter
+  concept: 33_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.25
+- id: claim9682
+  type: parameter
+  concept: 33_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.06
+- id: claim9683
+  type: parameter
+  concept: 33_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.08
+- id: claim9684
+  type: parameter
+  concept: 33_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.98
+- id: claim9685
+  type: parameter
+  concept: 33_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.94
+- id: claim9686
+  type: parameter
+  concept: 33_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.55
+- id: claim9687
+  type: parameter
+  concept: 33_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.07
+- id: claim9688
+  type: parameter
+  concept: 33_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.99
+- id: claim9689
+  type: parameter
+  concept: 33_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.74
+- id: claim9690
+  type: parameter
+  concept: 33_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.6
+- id: claim9691
+  type: parameter
+  concept: 33_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.32
+- id: claim9692
+  type: parameter
+  concept: 33_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.83
+- id: claim9693
+  type: parameter
+  concept: 34_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.24
+- id: claim9694
+  type: parameter
+  concept: 34_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.29
+- id: claim9695
+  type: parameter
+  concept: 34_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.59
+- id: claim9696
+  type: parameter
+  concept: 34_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.41
+- id: claim9697
+  type: parameter
+  concept: 34_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.58
+- id: claim9698
+  type: parameter
+  concept: 34_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.29
+- id: claim9699
+  type: parameter
+  concept: 34_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 7.08
+- id: claim9700
+  type: parameter
+  concept: 34_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.74
+- id: claim9701
+  type: parameter
+  concept: 34_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.48
+- id: claim9702
+  type: parameter
+  concept: 34_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.76
+- id: claim9703
+  type: parameter
+  concept: 34_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.76
+- id: claim9704
+  type: parameter
+  concept: 34_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.44
+- id: claim9705
+  type: parameter
+  concept: 35_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.38
+- id: claim9706
+  type: parameter
+  concept: 35_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.78
+- id: claim9707
+  type: parameter
+  concept: 35_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.54
+- id: claim9708
+  type: parameter
+  concept: 35_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.56
+- id: claim9709
+  type: parameter
+  concept: 35_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.79
+- id: claim9710
+  type: parameter
+  concept: 35_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.27
+- id: claim9711
+  type: parameter
+  concept: 35_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.81
+- id: claim9712
+  type: parameter
+  concept: 35_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.39
+- id: claim9713
+  type: parameter
+  concept: 35_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.69
+- id: claim9714
+  type: parameter
+  concept: 35_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.86
+- id: claim9715
+  type: parameter
+  concept: 35_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.44
+- id: claim9716
+  type: parameter
+  concept: 35_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.54
+- id: claim9717
+  type: parameter
+  concept: 36_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.28
+- id: claim9718
+  type: parameter
+  concept: 36_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.83
+- id: claim9719
+  type: parameter
+  concept: 36_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.11
+- id: claim9720
+  type: parameter
+  concept: 36_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.79
+- id: claim9721
+  type: parameter
+  concept: 36_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.51
+- id: claim9722
+  type: parameter
+  concept: 36_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.94
+- id: claim9723
+  type: parameter
+  concept: 36_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.2
+- id: claim9724
+  type: parameter
+  concept: 36_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.38
+- id: claim9725
+  type: parameter
+  concept: 36_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.57
+- id: claim9726
+  type: parameter
+  concept: 36_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.82
+- id: claim9727
+  type: parameter
+  concept: 36_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.45
+- id: claim9728
+  type: parameter
+  concept: 36_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.91
+- id: claim9729
+  type: parameter
+  concept: 37_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.36
+- id: claim9730
+  type: parameter
+  concept: 37_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.7
+- id: claim9731
+  type: parameter
+  concept: 37_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.34
+- id: claim9732
+  type: parameter
+  concept: 37_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.39
+- id: claim9733
+  type: parameter
+  concept: 37_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.49
+- id: claim9734
+  type: parameter
+  concept: 37_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.28
+- id: claim9735
+  type: parameter
+  concept: 37_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.89
+- id: claim9736
+  type: parameter
+  concept: 37_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 7.25
+- id: claim9737
+  type: parameter
+  concept: 37_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.99
+- id: claim9738
+  type: parameter
+  concept: 37_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.35
+- id: claim9739
+  type: parameter
+  concept: 37_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.92
+- id: claim9740
+  type: parameter
+  concept: 37_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 6.72
+- id: claim9741
+  type: parameter
+  concept: 38_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.65
+- id: claim9742
+  type: parameter
+  concept: 38_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.97
+- id: claim9743
+  type: parameter
+  concept: 38_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.74
+- id: claim9744
+  type: parameter
+  concept: 38_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.42
+- id: claim9745
+  type: parameter
+  concept: 38_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.69
+- id: claim9746
+  type: parameter
+  concept: 38_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.7
+- id: claim9747
+  type: parameter
+  concept: 38_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.04
+- id: claim9748
+  type: parameter
+  concept: 38_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 7.0
+- id: claim9749
+  type: parameter
+  concept: 38_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.48
+- id: claim9750
+  type: parameter
+  concept: 38_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.55
+- id: claim9751
+  type: parameter
+  concept: 38_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.05
+- id: claim9752
+  type: parameter
+  concept: 38_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.61
+- id: claim9753
+  type: parameter
+  concept: 39_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.58
+- id: claim9754
+  type: parameter
+  concept: 39_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.92
+- id: claim9755
+  type: parameter
+  concept: 39_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.19
+- id: claim9756
+  type: parameter
+  concept: 39_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.23
+- id: claim9757
+  type: parameter
+  concept: 39_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.5
+- id: claim9758
+  type: parameter
+  concept: 39_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.87
+- id: claim9759
+  type: parameter
+  concept: 39_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.29
+- id: claim9760
+  type: parameter
+  concept: 39_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.57
+- id: claim9761
+  type: parameter
+  concept: 39_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.07
+- id: claim9762
+  type: parameter
+  concept: 39_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.73
+- id: claim9763
+  type: parameter
+  concept: 39_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.25
+- id: claim9764
+  type: parameter
+  concept: 39_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.08
+- id: claim9765
+  type: parameter
+  concept: 40_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.05
+- id: claim9766
+  type: parameter
+  concept: 40_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.62
+- id: claim9767
+  type: parameter
+  concept: 40_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.6
+- id: claim9768
+  type: parameter
+  concept: 40_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.56
+- id: claim9769
+  type: parameter
+  concept: 40_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.21
+- id: claim9770
+  type: parameter
+  concept: 40_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.13
+- id: claim9771
+  type: parameter
+  concept: 40_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.49
+- id: claim9772
+  type: parameter
+  concept: 40_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.75
+- id: claim9773
+  type: parameter
+  concept: 40_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.67
+- id: claim9774
+  type: parameter
+  concept: 40_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.47
+- id: claim9775
+  type: parameter
+  concept: 40_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.63
+- id: claim9776
+  type: parameter
+  concept: 40_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.73
+- id: claim9777
+  type: parameter
+  concept: 41_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.01
+- id: claim9778
+  type: parameter
+  concept: 41_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.36
+- id: claim9779
+  type: parameter
+  concept: 41_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.31
+- id: claim9780
+  type: parameter
+  concept: 41_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.79
+- id: claim9781
+  type: parameter
+  concept: 41_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.25
+- id: claim9782
+  type: parameter
+  concept: 41_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.84
+- id: claim9783
+  type: parameter
+  concept: 41_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.48
+- id: claim9784
+  type: parameter
+  concept: 41_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.13
+- id: claim9785
+  type: parameter
+  concept: 41_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.46
+- id: claim9786
+  type: parameter
+  concept: 41_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.59
+- id: claim9787
+  type: parameter
+  concept: 41_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.45
+- id: claim9788
+  type: parameter
+  concept: 42_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.58
+- id: claim9789
+  type: parameter
+  concept: 42_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.18
+- id: claim9790
+  type: parameter
+  concept: 42_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.94
+- id: claim9791
+  type: parameter
+  concept: 42_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.11
+- id: claim9792
+  type: parameter
+  concept: 42_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.27
+- id: claim9793
+  type: parameter
+  concept: 42_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.33
+- id: claim9794
+  type: parameter
+  concept: 42_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.68
+- id: claim9795
+  type: parameter
+  concept: 42_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.64
+- id: claim9796
+  type: parameter
+  concept: 42_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.39
+- id: claim9797
+  type: parameter
+  concept: 42_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.07
+- id: claim9798
+  type: parameter
+  concept: 42_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.9
+- id: claim9799
+  type: parameter
+  concept: 43_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.98
+- id: claim9800
+  type: parameter
+  concept: 43_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.69
+- id: claim9801
+  type: parameter
+  concept: 43_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.19
+- id: claim9802
+  type: parameter
+  concept: 43_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9803
+  type: parameter
+  concept: 43_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.15
+- id: claim9804
+  type: parameter
+  concept: 43_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.1
+- id: claim9805
+  type: parameter
+  concept: 43_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.25
+- id: claim9806
+  type: parameter
+  concept: 43_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.92
+- id: claim9807
+  type: parameter
+  concept: 44_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.17
+- id: claim9808
+  type: parameter
+  concept: 44_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 5.03
+- id: claim9809
+  type: parameter
+  concept: 44_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.88
+- id: claim9810
+  type: parameter
+  concept: 44_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.14
+- id: claim9811
+  type: parameter
+  concept: 44_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.22
+- id: claim9812
+  type: parameter
+  concept: 44_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.77
+- id: claim9813
+  type: parameter
+  concept: 44_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.2
+- id: claim9814
+  type: parameter
+  concept: 44_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.99
+- id: claim9815
+  type: parameter
+  concept: nc_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9816
+  type: parameter
+  concept: nc_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9817
+  type: parameter
+  concept: nc_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9818
+  type: parameter
+  concept: nc_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9819
+  type: parameter
+  concept: nc_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9820
+  type: parameter
+  concept: nc_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9821
+  type: parameter
+  concept: nc_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9822
+  type: parameter
+  concept: nc_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9823
+  type: parameter
+  concept: nc_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9824
+  type: parameter
+  concept: nc_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9825
+  type: parameter
+  concept: nc_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9826
+  type: parameter
+  concept: nc_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9827
+  type: parameter
+  concept: vt_len_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 16.67
+- id: claim9828
+  type: parameter
+  concept: vt_len_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 16.67
+- id: claim9829
+  type: parameter
+  concept: vt_len_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 15.88
+- id: claim9830
+  type: parameter
+  concept: vt_len_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 16.67
+- id: claim9831
+  type: parameter
+  concept: vt_len_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9832
+  type: parameter
+  concept: vt_len_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9833
+  type: parameter
+  concept: vt_len_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9834
+  type: parameter
+  concept: vt_len_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9835
+  type: parameter
+  concept: vt_len_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9836
+  type: parameter
+  concept: vt_len_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 18.25
+- id: claim9837
+  type: parameter
+  concept: vt_len_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim9838
+  type: parameter
+  concept: vt_len_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 18.25
+- id: claim9839
+  type: parameter
+  concept: 1_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.57
+- id: claim9840
+  type: parameter
+  concept: 1_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.26
+- id: claim9841
+  type: parameter
+  concept: 1_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.51
+- id: claim9842
+  type: parameter
+  concept: 1_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.31
+- id: claim9843
+  type: parameter
+  concept: 1_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.38
+- id: claim9844
+  type: parameter
+  concept: 1_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.34
+- id: claim9845
+  type: parameter
+  concept: 2_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.57
+- id: claim9846
+  type: parameter
+  concept: 2_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.24
+- id: claim9847
+  type: parameter
+  concept: 2_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.47
+- id: claim9848
+  type: parameter
+  concept: 2_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.39
+- id: claim9849
+  type: parameter
+  concept: 2_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.5
+- id: claim9850
+  type: parameter
+  concept: 2_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.35
+- id: claim9851
+  type: parameter
+  concept: 3_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim9852
+  type: parameter
+  concept: 3_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.17
+- id: claim9853
+  type: parameter
+  concept: 3_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.45
+- id: claim9854
+  type: parameter
+  concept: 3_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.42
+- id: claim9855
+  type: parameter
+  concept: 3_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.4
+- id: claim9856
+  type: parameter
+  concept: 3_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.49
+- id: claim9857
+  type: parameter
+  concept: 4_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.58
+- id: claim9858
+  type: parameter
+  concept: 4_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim9859
+  type: parameter
+  concept: 4_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.3
+- id: claim9860
+  type: parameter
+  concept: 4_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.71
+- id: claim9861
+  type: parameter
+  concept: 4_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.07
+- id: claim9862
+  type: parameter
+  concept: 4_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.78
+- id: claim9863
+  type: parameter
+  concept: 5_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.18
+- id: claim9864
+  type: parameter
+  concept: 5_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.15
+- id: claim9865
+  type: parameter
+  concept: 5_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.48
+- id: claim9866
+  type: parameter
+  concept: 5_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.28
+- id: claim9867
+  type: parameter
+  concept: 5_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.38
+- id: claim9868
+  type: parameter
+  concept: 5_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.31
+- id: claim9869
+  type: parameter
+  concept: 6_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.15
+- id: claim9870
+  type: parameter
+  concept: 6_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.36
+- id: claim9871
+  type: parameter
+  concept: 6_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.67
+- id: claim9872
+  type: parameter
+  concept: 6_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.8
+- id: claim9873
+  type: parameter
+  concept: 6_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.65
+- id: claim9874
+  type: parameter
+  concept: 6_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.34
+- id: claim9875
+  type: parameter
+  concept: 7_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.96
+- id: claim9876
+  type: parameter
+  concept: 7_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.37
+- id: claim9877
+  type: parameter
+  concept: 7_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.83
+- id: claim9878
+  type: parameter
+  concept: 7_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.7
+- id: claim9879
+  type: parameter
+  concept: 7_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.29
+- id: claim9880
+  type: parameter
+  concept: 7_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.19
+- id: claim9881
+  type: parameter
+  concept: 8_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.89
+- id: claim9882
+  type: parameter
+  concept: 8_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.66
+- id: claim9883
+  type: parameter
+  concept: 8_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.96
+- id: claim9884
+  type: parameter
+  concept: 8_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.43
+- id: claim9885
+  type: parameter
+  concept: 8_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.01
+- id: claim9886
+  type: parameter
+  concept: 8_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.94
+- id: claim9887
+  type: parameter
+  concept: 9_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.7
+- id: claim9888
+  type: parameter
+  concept: 9_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.35
+- id: claim9889
+  type: parameter
+  concept: 9_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.43
+- id: claim9890
+  type: parameter
+  concept: 9_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.25
+- id: claim9891
+  type: parameter
+  concept: 9_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.92
+- id: claim9892
+  type: parameter
+  concept: 9_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.69
+- id: claim9893
+  type: parameter
+  concept: 10_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.21
+- id: claim9894
+  type: parameter
+  concept: 10_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.9
+- id: claim9895
+  type: parameter
+  concept: 10_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.14
+- id: claim9896
+  type: parameter
+  concept: 10_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.9
+- id: claim9897
+  type: parameter
+  concept: 10_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.86
+- id: claim9898
+  type: parameter
+  concept: 10_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.92
+- id: claim9899
+  type: parameter
+  concept: 11_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.57
+- id: claim9900
+  type: parameter
+  concept: 11_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.71
+- id: claim9901
+  type: parameter
+  concept: 11_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.84
+- id: claim9902
+  type: parameter
+  concept: 11_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.06
+- id: claim9903
+  type: parameter
+  concept: 11_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.03
+- id: claim9904
+  type: parameter
+  concept: 11_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.45
+- id: claim9905
+  type: parameter
+  concept: 12_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.59
+- id: claim9906
+  type: parameter
+  concept: 12_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.93
+- id: claim9907
+  type: parameter
+  concept: 12_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.69
+- id: claim9908
+  type: parameter
+  concept: 12_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.77
+- id: claim9909
+  type: parameter
+  concept: 12_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.6
+- id: claim9910
+  type: parameter
+  concept: 12_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.73
+- id: claim9911
+  type: parameter
+  concept: 13_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.97
+- id: claim9912
+  type: parameter
+  concept: 13_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.41
+- id: claim9913
+  type: parameter
+  concept: 13_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.82
+- id: claim9914
+  type: parameter
+  concept: 13_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.19
+- id: claim9915
+  type: parameter
+  concept: 13_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.46
+- id: claim9916
+  type: parameter
+  concept: 13_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.67
+- id: claim9917
+  type: parameter
+  concept: 14_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.17
+- id: claim9918
+  type: parameter
+  concept: 14_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.07
+- id: claim9919
+  type: parameter
+  concept: 14_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.86
+- id: claim9920
+  type: parameter
+  concept: 14_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.35
+- id: claim9921
+  type: parameter
+  concept: 14_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.24
+- id: claim9922
+  type: parameter
+  concept: 14_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.13
+- id: claim9923
+  type: parameter
+  concept: 15_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.25
+- id: claim9924
+  type: parameter
+  concept: 15_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.12
+- id: claim9925
+  type: parameter
+  concept: 15_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.57
+- id: claim9926
+  type: parameter
+  concept: 15_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.67
+- id: claim9927
+  type: parameter
+  concept: 15_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.47
+- id: claim9928
+  type: parameter
+  concept: 15_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.61
+- id: claim9929
+  type: parameter
+  concept: 16_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.58
+- id: claim9930
+  type: parameter
+  concept: 16_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.04
+- id: claim9931
+  type: parameter
+  concept: 16_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.81
+- id: claim9932
+  type: parameter
+  concept: 16_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim9933
+  type: parameter
+  concept: 16_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.86
+- id: claim9934
+  type: parameter
+  concept: 16_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.56
+- id: claim9935
+  type: parameter
+  concept: 17_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.74
+- id: claim9936
+  type: parameter
+  concept: 17_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.16
+- id: claim9937
+  type: parameter
+  concept: 17_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.0
+- id: claim9938
+  type: parameter
+  concept: 17_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.77
+- id: claim9939
+  type: parameter
+  concept: 17_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.74
+- id: claim9940
+  type: parameter
+  concept: 17_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.54
+- id: claim9941
+  type: parameter
+  concept: 18_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.77
+- id: claim9942
+  type: parameter
+  concept: 18_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.36
+- id: claim9943
+  type: parameter
+  concept: 18_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.66
+- id: claim9944
+  type: parameter
+  concept: 18_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.09
+- id: claim9945
+  type: parameter
+  concept: 18_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.32
+- id: claim9946
+  type: parameter
+  concept: 18_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.18
+- id: claim9947
+  type: parameter
+  concept: 19_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.49
+- id: claim9948
+  type: parameter
+  concept: 19_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.52
+- id: claim9949
+  type: parameter
+  concept: 19_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.8
+- id: claim9950
+  type: parameter
+  concept: 19_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.16
+- id: claim9951
+  type: parameter
+  concept: 19_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.83
+- id: claim9952
+  type: parameter
+  concept: 19_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.44
+- id: claim9953
+  type: parameter
+  concept: 20_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.93
+- id: claim9954
+  type: parameter
+  concept: 20_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.88
+- id: claim9955
+  type: parameter
+  concept: 20_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.97
+- id: claim9956
+  type: parameter
+  concept: 20_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.26
+- id: claim9957
+  type: parameter
+  concept: 20_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.97
+- id: claim9958
+  type: parameter
+  concept: 20_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.12
+- id: claim9959
+  type: parameter
+  concept: 21_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.33
+- id: claim9960
+  type: parameter
+  concept: 21_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.3
+- id: claim9961
+  type: parameter
+  concept: 21_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.78
+- id: claim9962
+  type: parameter
+  concept: 21_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.26
+- id: claim9963
+  type: parameter
+  concept: 21_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.16
+- id: claim9964
+  type: parameter
+  concept: 21_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.76
+- id: claim9965
+  type: parameter
+  concept: 22_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.27
+- id: claim9966
+  type: parameter
+  concept: 22_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.93
+- id: claim9967
+  type: parameter
+  concept: 22_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.58
+- id: claim9968
+  type: parameter
+  concept: 22_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.29
+- id: claim9969
+  type: parameter
+  concept: 22_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.41
+- id: claim9970
+  type: parameter
+  concept: 22_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.96
+- id: claim9971
+  type: parameter
+  concept: 23_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.57
+- id: claim9972
+  type: parameter
+  concept: 23_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.77
+- id: claim9973
+  type: parameter
+  concept: 23_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.46
+- id: claim9974
+  type: parameter
+  concept: 23_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim9975
+  type: parameter
+  concept: 23_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.11
+- id: claim9976
+  type: parameter
+  concept: 23_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim9977
+  type: parameter
+  concept: 24_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim9978
+  type: parameter
+  concept: 24_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.96
+- id: claim9979
+  type: parameter
+  concept: 24_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.44
+- id: claim9980
+  type: parameter
+  concept: 24_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.13
+- id: claim9981
+  type: parameter
+  concept: 24_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.95
+- id: claim9982
+  type: parameter
+  concept: 24_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.79
+- id: claim9983
+  type: parameter
+  concept: 25_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.84
+- id: claim9984
+  type: parameter
+  concept: 25_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.89
+- id: claim9985
+  type: parameter
+  concept: 25_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.47
+- id: claim9986
+  type: parameter
+  concept: 25_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.64
+- id: claim9987
+  type: parameter
+  concept: 25_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.64
+- id: claim9988
+  type: parameter
+  concept: 25_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.25
+- id: claim9989
+  type: parameter
+  concept: 26_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.98
+- id: claim9990
+  type: parameter
+  concept: 26_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.22
+- id: claim9991
+  type: parameter
+  concept: 26_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.41
+- id: claim9992
+  type: parameter
+  concept: 26_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.65
+- id: claim9993
+  type: parameter
+  concept: 26_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.37
+- id: claim9994
+  type: parameter
+  concept: 26_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim9995
+  type: parameter
+  concept: 27_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.73
+- id: claim9996
+  type: parameter
+  concept: 27_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.3
+- id: claim9997
+  type: parameter
+  concept: 27_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.11
+- id: claim9998
+  type: parameter
+  concept: 27_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.3
+- id: claim9999
+  type: parameter
+  concept: 27_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.89
+- id: claim10000
+  type: parameter
+  concept: 27_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.06
+- id: claim10001
+  type: parameter
+  concept: 28_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.43
+- id: claim10002
+  type: parameter
+  concept: 28_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.3
+- id: claim10003
+  type: parameter
+  concept: 28_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10004
+  type: parameter
+  concept: 28_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.12
+- id: claim10005
+  type: parameter
+  concept: 28_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.61
+- id: claim10006
+  type: parameter
+  concept: 28_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.03
+- id: claim10007
+  type: parameter
+  concept: 29_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.73
+- id: claim10008
+  type: parameter
+  concept: 29_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.14
+- id: claim10009
+  type: parameter
+  concept: 29_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10010
+  type: parameter
+  concept: 29_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.67
+- id: claim10011
+  type: parameter
+  concept: 29_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.69
+- id: claim10012
+  type: parameter
+  concept: 29_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.09
+- id: claim10013
+  type: parameter
+  concept: 30_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.08
+- id: claim10014
+  type: parameter
+  concept: 30_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.77
+- id: claim10015
+  type: parameter
+  concept: 30_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10016
+  type: parameter
+  concept: 30_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.44
+- id: claim10017
+  type: parameter
+  concept: 30_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.32
+- id: claim10018
+  type: parameter
+  concept: 30_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.1
+- id: claim10019
+  type: parameter
+  concept: 31_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.32
+- id: claim10020
+  type: parameter
+  concept: 31_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.34
+- id: claim10021
+  type: parameter
+  concept: 31_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10022
+  type: parameter
+  concept: 31_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.16
+- id: claim10023
+  type: parameter
+  concept: 31_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.04
+- id: claim10024
+  type: parameter
+  concept: 31_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.06
+- id: claim10025
+  type: parameter
+  concept: 32_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.84
+- id: claim10026
+  type: parameter
+  concept: 32_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.15
+- id: claim10027
+  type: parameter
+  concept: 32_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10028
+  type: parameter
+  concept: 32_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.51
+- id: claim10029
+  type: parameter
+  concept: 32_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.64
+- id: claim10030
+  type: parameter
+  concept: 32_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.03
+- id: claim10031
+  type: parameter
+  concept: 33_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.51
+- id: claim10032
+  type: parameter
+  concept: 33_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.22
+- id: claim10033
+  type: parameter
+  concept: 33_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10034
+  type: parameter
+  concept: 33_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.76
+- id: claim10035
+  type: parameter
+  concept: 33_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.39
+- id: claim10036
+  type: parameter
+  concept: 33_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.48
+- id: claim10037
+  type: parameter
+  concept: 34_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.25
+- id: claim10038
+  type: parameter
+  concept: 34_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.21
+- id: claim10039
+  type: parameter
+  concept: 34_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10040
+  type: parameter
+  concept: 34_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.93
+- id: claim10041
+  type: parameter
+  concept: 34_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.26
+- id: claim10042
+  type: parameter
+  concept: 34_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.27
+- id: claim10043
+  type: parameter
+  concept: 35_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.79
+- id: claim10044
+  type: parameter
+  concept: 35_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10045
+  type: parameter
+  concept: 35_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10046
+  type: parameter
+  concept: 35_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.98
+- id: claim10047
+  type: parameter
+  concept: 35_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.87
+- id: claim10048
+  type: parameter
+  concept: 35_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.28
+- id: claim10049
+  type: parameter
+  concept: 36_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.61
+- id: claim10050
+  type: parameter
+  concept: 36_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10051
+  type: parameter
+  concept: 36_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10052
+  type: parameter
+  concept: 36_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.21
+- id: claim10053
+  type: parameter
+  concept: 36_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.6
+- id: claim10054
+  type: parameter
+  concept: 36_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.35
+- id: claim10055
+  type: parameter
+  concept: 37_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.07
+- id: claim10056
+  type: parameter
+  concept: 37_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10057
+  type: parameter
+  concept: 37_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10058
+  type: parameter
+  concept: 37_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.35
+- id: claim10059
+  type: parameter
+  concept: 37_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.1
+- id: claim10060
+  type: parameter
+  concept: 37_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.4
+- id: claim10061
+  type: parameter
+  concept: 38_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.64
+- id: claim10062
+  type: parameter
+  concept: 38_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10063
+  type: parameter
+  concept: 38_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10064
+  type: parameter
+  concept: 38_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.45
+- id: claim10065
+  type: parameter
+  concept: 38_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10066
+  type: parameter
+  concept: 38_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.41
+- id: claim10067
+  type: parameter
+  concept: 39_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.84
+- id: claim10068
+  type: parameter
+  concept: 39_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10069
+  type: parameter
+  concept: 39_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10070
+  type: parameter
+  concept: 39_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.37
+- id: claim10071
+  type: parameter
+  concept: 39_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10072
+  type: parameter
+  concept: 39_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.21
+- id: claim10073
+  type: parameter
+  concept: 40_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.42
+- id: claim10074
+  type: parameter
+  concept: 40_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10075
+  type: parameter
+  concept: 40_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10076
+  type: parameter
+  concept: 40_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.47
+- id: claim10077
+  type: parameter
+  concept: 40_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.13
+- id: claim10078
+  type: parameter
+  concept: 40_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.37
+- id: claim10079
+  type: parameter
+  concept: 41_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.29
+- id: claim10080
+  type: parameter
+  concept: 41_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.59
+- id: claim10081
+  type: parameter
+  concept: 41_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 4.92
+- id: claim10082
+  type: parameter
+  concept: 41_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.75
+- id: claim10083
+  type: parameter
+  concept: 41_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.18
+- id: claim10084
+  type: parameter
+  concept: 41_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.46
+- id: claim10085
+  type: parameter
+  concept: 42_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10086
+  type: parameter
+  concept: 42_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.6
+- id: claim10087
+  type: parameter
+  concept: 42_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 3.21
+- id: claim10088
+  type: parameter
+  concept: 42_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim10089
+  type: parameter
+  concept: 42_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.48
+- id: claim10090
+  type: parameter
+  concept: 42_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.46
+- id: claim10091
+  type: parameter
+  concept: 43_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10092
+  type: parameter
+  concept: 43_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.69
+- id: claim10093
+  type: parameter
+  concept: 43_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.17
+- id: claim10094
+  type: parameter
+  concept: 43_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.7
+- id: claim10095
+  type: parameter
+  concept: 43_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.6
+- id: claim10096
+  type: parameter
+  concept: 43_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2.14
+- id: claim10097
+  type: parameter
+  concept: 44_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10098
+  type: parameter
+  concept: 44_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.17
+- id: claim10099
+  type: parameter
+  concept: 44_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.41
+- id: claim10100
+  type: parameter
+  concept: 44_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10101
+  type: parameter
+  concept: 44_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.43
+- id: claim10102
+  type: parameter
+  concept: 44_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.5
+- id: claim10103
+  type: parameter
+  concept: nc_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.04
+- id: claim10104
+  type: parameter
+  concept: nc_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.26
+- id: claim10105
+  type: parameter
+  concept: nc_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1.09
+- id: claim10106
+  type: parameter
+  concept: nc_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10107
+  type: parameter
+  concept: nc_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10108
+  type: parameter
+  concept: nc_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 0.0
+- id: claim10109
+  type: parameter
+  concept: vt_len_m
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10110
+  type: parameter
+  concept: vt_len_n
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10111
+  type: parameter
+  concept: vt_len_ng
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10112
+  type: parameter
+  concept: vt_len_p
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10113
+  type: parameter
+  concept: vt_len_t
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10114
+  type: parameter
+  concept: vt_len_k
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 17.46
+- id: claim10115
+  type: parameter
+  concept: 333_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 518
+- id: claim10116
+  type: parameter
+  concept: 333_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 624
+- id: claim10117
+  type: parameter
+  concept: 333_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 692
+- id: claim10118
+  type: parameter
+  concept: 333_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 707
+- id: claim10119
+  type: parameter
+  concept: 333_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 754
+- id: claim10120
+  type: parameter
+  concept: 333_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 654
+- id: claim10121
+  type: parameter
+  concept: 333_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 540
+- id: claim10122
+  type: parameter
+  concept: 333_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 541
+- id: claim10123
+  type: parameter
+  concept: 333_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 389
+- id: claim10124
+  type: parameter
+  concept: 333_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 500
+- id: claim10125
+  type: parameter
+  concept: 2332_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2004
+- id: claim10126
+  type: parameter
+  concept: 2332_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1853
+- id: claim10127
+  type: parameter
+  concept: 2332_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1873
+- id: claim10128
+  type: parameter
+  concept: 2332_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1161
+- id: claim10129
+  type: parameter
+  concept: 2332_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1195
+- id: claim10130
+  type: parameter
+  concept: 2332_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 944
+- id: claim10131
+  type: parameter
+  concept: 2332_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 922
+- id: claim10132
+  type: parameter
+  concept: 2332_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1045
+- id: claim10133
+  type: parameter
+  concept: 2332_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 987
+- id: claim10134
+  type: parameter
+  concept: 2332_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1357
+- id: claim10135
+  type: parameter
+  concept: 2986_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2605
+- id: claim10136
+  type: parameter
+  concept: 2986_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2475
+- id: claim10137
+  type: parameter
+  concept: 2986_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2463
+- id: claim10138
+  type: parameter
+  concept: 2986_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2591
+- id: claim10139
+  type: parameter
+  concept: 2986_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2685
+- id: claim10140
+  type: parameter
+  concept: 2986_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2739
+- id: claim10141
+  type: parameter
+  concept: 2986_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2584
+- id: claim10142
+  type: parameter
+  concept: 2986_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2568
+- id: claim10143
+  type: parameter
+  concept: 2986_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2299
+- id: claim10144
+  type: parameter
+  concept: 2986_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2124
+- id: claim10145
+  type: parameter
+  concept: 337_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 499
+- id: claim10146
+  type: parameter
+  concept: 337_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 621
+- id: claim10147
+  type: parameter
+  concept: 337_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 732
+- id: claim10148
+  type: parameter
+  concept: 337_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 689
+- id: claim10149
+  type: parameter
+  concept: 337_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 738
+- id: claim10150
+  type: parameter
+  concept: 337_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 618
+- id: claim10151
+  type: parameter
+  concept: 337_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 461
+- id: claim10152
+  type: parameter
+  concept: 337_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 461
+- id: claim10153
+  type: parameter
+  concept: 337_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 356
+- id: claim10154
+  type: parameter
+  concept: 337_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 559
+- id: claim10155
+  type: parameter
+  concept: 2340_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1894
+- id: claim10156
+  type: parameter
+  concept: 2340_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1795
+- id: claim10157
+  type: parameter
+  concept: 2340_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1689
+- id: claim10158
+  type: parameter
+  concept: 2340_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1159
+- id: claim10159
+  type: parameter
+  concept: 2340_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1093
+- id: claim10160
+  type: parameter
+  concept: 2340_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 958
+- id: claim10161
+  type: parameter
+  concept: 2340_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 861
+- id: claim10162
+  type: parameter
+  concept: 2340_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 877
+- id: claim10163
+  type: parameter
+  concept: 2340_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1108
+- id: claim10164
+  type: parameter
+  concept: 2340_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 1431
+- id: claim10165
+  type: parameter
+  concept: 3158_i
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2388
+- id: claim10166
+  type: parameter
+  concept: 3158_e
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2436
+- id: claim10167
+  type: parameter
+  concept: 3158_ae
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2370
+- id: claim10168
+  type: parameter
+  concept: 3158_v
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2454
+- id: claim10169
+  type: parameter
+  concept: 3158_a
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2757
+- id: claim10170
+  type: parameter
+  concept: 3158_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2195
+- id: claim10171
+  type: parameter
+  concept: 3158_o
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2217
+- id: claim10172
+  type: parameter
+  concept: 3158_u
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2596
+- id: claim10173
+  type: parameter
+  concept: 3158_3r
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2334
+- id: claim10174
+  type: parameter
+  concept: 3158_l
+  provenance:
+    paper: Story_1996_VocalTractAreaFunctionsMRI
+    page: 0
+  value: 2206

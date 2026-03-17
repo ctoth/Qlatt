@@ -1,0 +1,73 @@
+source:
+  paper: Schoentgen_2001_StochasticJitterModels
+claims:
+- id: claim8069
+  type: parameter
+  concept: average_cycle_length_t_s
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 0.01
+  lower_bound: 0.005
+  upper_bound: 0.018
+- id: claim8070
+  type: parameter
+  concept: coupling_constant_k_r
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 0.1
+  lower_bound: 0
+  upper_bound: 1
+- id: claim8071
+  type: parameter
+  concept: difference_abs
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim8072
+  type: parameter
+  concept: wave_velocity_c
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 200
+  lower_bound: 200
+  upper_bound: 400
+- id: claim8073
+  type: parameter
+  concept: microtremor_frequency_f_micro
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 5
+  lower_bound: 5
+  upper_bound: 8
+- id: claim8074
+  type: parameter
+  concept: microtremor_bandwidth_w
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 4
+- id: claim8075
+  type: parameter
+  concept: peak_value_of_driving_noise_b_0
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 0.23
+  lower_bound: 0
+  upper_bound: 0.65
+- id: claim8076
+  type: parameter
+  concept: peak_value_of_white_disturbances_b_r_b_l
+  provenance:
+    paper: Schoentgen_2001_StochasticJitterModels
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 1

@@ -1,0 +1,56 @@
+source:
+  paper: Rothenberg_1981_InteractiveVoiceSource
+claims:
+- id: claim7818
+  type: equation
+  expression: \bar{L}_t = L_t \cdot \frac{2 Y_{g_{MAX}}}{\tau_p}
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7819
+  type: observation
+  statement: Normalized inertance Lt in range [0.2, 1.0] should transition from symmetric
+    to sawtooth flow
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7820
+  type: observation
+  statement: 'Lt > 1.0: flow slope must be infinite at closure instant'
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7821
+  type: observation
+  statement: Increasing pharyngeal inertance L1 should increase flow pulse asymmetry
+    more than increasing oral inertance L2
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7822
+  type: observation
+  statement: f1/f0 near integer values should produce stronger high-frequency excitation
+    than half-integer values
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7823
+  type: observation
+  statement: Flow-dependent model with Lt should approximate flow-independent model
+    with 0.5*Lt
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0
+- id: claim7824
+  type: observation
+  statement: Back vowels should show greater glottal flow asymmetry than front vowels
+    (due to higher pharyngeal inertance)
+  concepts: []
+  provenance:
+    paper: Rothenberg_1981_InteractiveVoiceSource
+    page: 0

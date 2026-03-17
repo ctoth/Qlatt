@@ -1,0 +1,737 @@
+source:
+  paper: Klatt_1973_DurationStopConsonantClusters
+claims:
+- id: claim5233
+  type: parameter
+  concept: f
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 138
+- id: claim5234
+  type: parameter
+  concept: p
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 100
+- id: claim5235
+  type: parameter
+  concept: b
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 97
+- id: claim5236
+  type: parameter
+  concept: m
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 105
+- id: claim5237
+  type: parameter
+  concept: w
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 107
+- id: claim5238
+  type: parameter
+  concept: s
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 152
+- id: claim5239
+  type: parameter
+  concept: t
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 85
+- id: claim5240
+  type: parameter
+  concept: d
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 85
+- id: claim5241
+  type: parameter
+  concept: n
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 92
+- id: claim5242
+  type: parameter
+  concept: l
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 92
+- id: claim5243
+  type: parameter
+  concept: r
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 102
+- id: claim5244
+  type: parameter
+  concept: k
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 78
+- id: claim5245
+  type: parameter
+  concept: g
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  unit: ms
+  value: 78
+- id: claim5246
+  type: parameter
+  concept: sp_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 102
+- id: claim5247
+  type: parameter
+  concept: sp_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 99
+- id: claim5248
+  type: parameter
+  concept: sp_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 83
+- id: claim5249
+  type: parameter
+  concept: sp_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 84
+- id: claim5250
+  type: parameter
+  concept: st_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 110
+- id: claim5251
+  type: parameter
+  concept: st_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 109
+- id: claim5252
+  type: parameter
+  concept: st_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 53
+- id: claim5253
+  type: parameter
+  concept: st_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 66
+- id: claim5254
+  type: parameter
+  concept: sk_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 105
+- id: claim5255
+  type: parameter
+  concept: sk_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 109
+- id: claim5256
+  type: parameter
+  concept: sk_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 58
+- id: claim5257
+  type: parameter
+  concept: sk_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 61
+- id: claim5258
+  type: parameter
+  concept: sm_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 112
+- id: claim5259
+  type: parameter
+  concept: sm_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 111
+- id: claim5260
+  type: parameter
+  concept: sm_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 85
+- id: claim5261
+  type: parameter
+  concept: sm_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 88
+- id: claim5262
+  type: parameter
+  concept: sn_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 123
+- id: claim5263
+  type: parameter
+  concept: sn_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 121
+- id: claim5264
+  type: parameter
+  concept: sn_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 70
+- id: claim5265
+  type: parameter
+  concept: sn_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 72
+- id: claim5266
+  type: parameter
+  concept: sw_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 125
+- id: claim5267
+  type: parameter
+  concept: sw_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 124
+- id: claim5268
+  type: parameter
+  concept: sw_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 93
+- id: claim5269
+  type: parameter
+  concept: sw_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 90
+- id: claim5270
+  type: parameter
+  concept: sl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 133
+- id: claim5271
+  type: parameter
+  concept: sl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 133
+- id: claim5272
+  type: parameter
+  concept: sl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 67
+- id: claim5273
+  type: parameter
+  concept: sl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 72
+- id: claim5274
+  type: parameter
+  concept: fl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 118
+- id: claim5275
+  type: parameter
+  concept: fl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 129
+- id: claim5276
+  type: parameter
+  concept: fl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 53
+- id: claim5277
+  type: parameter
+  concept: fl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 66
+- id: claim5278
+  type: parameter
+  concept: pl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 100
+- id: claim5279
+  type: parameter
+  concept: pl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 94
+- id: claim5280
+  type: parameter
+  concept: pl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 83
+- id: claim5281
+  type: parameter
+  concept: pl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 92
+- id: claim5282
+  type: parameter
+  concept: bl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 88
+- id: claim5283
+  type: parameter
+  concept: bl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 91
+- id: claim5284
+  type: parameter
+  concept: bl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 73
+- id: claim5285
+  type: parameter
+  concept: bl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 66
+- id: claim5286
+  type: parameter
+  concept: pr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 90
+- id: claim5287
+  type: parameter
+  concept: pr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 94
+- id: claim5288
+  type: parameter
+  concept: pr_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 97
+- id: claim5289
+  type: parameter
+  concept: pr_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 102
+- id: claim5290
+  type: parameter
+  concept: br_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 95
+- id: claim5291
+  type: parameter
+  concept: br_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 91
+- id: claim5292
+  type: parameter
+  concept: br_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 65
+- id: claim5293
+  type: parameter
+  concept: br_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 74
+- id: claim5294
+  type: parameter
+  concept: tw_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 70
+- id: claim5295
+  type: parameter
+  concept: tw_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 70
+- id: claim5296
+  type: parameter
+  concept: tw_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 135
+- id: claim5297
+  type: parameter
+  concept: tw_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 120
+- id: claim5298
+  type: parameter
+  concept: tr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 62
+- id: claim5299
+  type: parameter
+  concept: tr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 64
+- id: claim5300
+  type: parameter
+  concept: tr_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 125
+- id: claim5301
+  type: parameter
+  concept: tr_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 121
+- id: claim5302
+  type: parameter
+  concept: dr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 63
+- id: claim5303
+  type: parameter
+  concept: dr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 64
+- id: claim5304
+  type: parameter
+  concept: dr_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 93
+- id: claim5305
+  type: parameter
+  concept: dr_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 93
+- id: claim5306
+  type: parameter
+  concept: kw_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 70
+- id: claim5307
+  type: parameter
+  concept: kw_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 64
+- id: claim5308
+  type: parameter
+  concept: kw_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 117
+- id: claim5309
+  type: parameter
+  concept: kw_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 120
+- id: claim5310
+  type: parameter
+  concept: kl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 75
+- id: claim5311
+  type: parameter
+  concept: kl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 69
+- id: claim5312
+  type: parameter
+  concept: kl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 95
+- id: claim5313
+  type: parameter
+  concept: kl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 98
+- id: claim5314
+  type: parameter
+  concept: gl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 68
+- id: claim5315
+  type: parameter
+  concept: gl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 69
+- id: claim5316
+  type: parameter
+  concept: gl_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 85
+- id: claim5317
+  type: parameter
+  concept: gl_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 72
+- id: claim5318
+  type: parameter
+  concept: kr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 67
+- id: claim5319
+  type: parameter
+  concept: kr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 69
+- id: claim5320
+  type: parameter
+  concept: kr_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 108
+- id: claim5321
+  type: parameter
+  concept: kr_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 108
+- id: claim5322
+  type: parameter
+  concept: gr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 70
+- id: claim5323
+  type: parameter
+  concept: gr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 69
+- id: claim5324
+  type: parameter
+  concept: gr_c2_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 98
+- id: claim5325
+  type: parameter
+  concept: gr_c2_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 80
+- id: claim5326
+  type: parameter
+  concept: spl_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 93
+- id: claim5327
+  type: parameter
+  concept: spl_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 96
+- id: claim5328
+  type: parameter
+  concept: spr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 97
+- id: claim5329
+  type: parameter
+  concept: spr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 96
+- id: claim5330
+  type: parameter
+  concept: str_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 102
+- id: claim5331
+  type: parameter
+  concept: str_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 105
+- id: claim5332
+  type: parameter
+  concept: skw_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 107
+- id: claim5333
+  type: parameter
+  concept: skw_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 105
+- id: claim5334
+  type: parameter
+  concept: skr_c1_meas
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 107
+- id: claim5335
+  type: parameter
+  concept: skr_c1_pred
+  provenance:
+    paper: Klatt_1973_DurationStopConsonantClusters
+    page: 0
+  value: 105

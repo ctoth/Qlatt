@@ -1,0 +1,122 @@
+source:
+  paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+claims:
+- id: claim4069
+  type: parameter
+  concept: cpp_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.85
+- id: claim4070
+  type: parameter
+  concept: cpp_bandpass_2535_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.81
+- id: claim4071
+  type: parameter
+  concept: cpp_highpass_25_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.79
+- id: claim4072
+  type: parameter
+  concept: rpk_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.29
+- id: claim4073
+  type: parameter
+  concept: rpk_bandpass_2535_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.83
+- id: claim4074
+  type: parameter
+  concept: rpk_highpass_25_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.79
+- id: claim4075
+  type: parameter
+  concept: p_a_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.09
+- id: claim4076
+  type: parameter
+  concept: p_a_bandpass_2535_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.29
+- id: claim4077
+  type: parameter
+  concept: p_a_highpass_25_khz
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.34
+- id: claim4078
+  type: parameter
+  concept: bri_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.17
+- id: claim4079
+  type: parameter
+  concept: h_l_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.26
+- id: claim4080
+  type: parameter
+  concept: h1a_unfiltered
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.44
+- id: claim4081
+  type: parameter
+  concept: 1_cumulative_r2
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.84
+- id: claim4082
+  type: parameter
+  concept: 2_cumulative_r2
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.88
+- id: claim4083
+  type: parameter
+  concept: 3_cumulative_r2
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.9
+- id: claim4084
+  type: parameter
+  concept: 4_cumulative_r2
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.92
+- id: claim4085
+  type: parameter
+  concept: 5_cumulative_r2
+  provenance:
+    paper: Hillenbrand_1994_AcousticCorrelatesBreathyVoice
+    page: 0
+  value: 0.94

@@ -1,0 +1,188 @@
+source:
+  paper: Lu_Smith_GlottalSourceSingingVoice
+claims:
+- id: claim6370
+  type: parameter
+  concept: fundamental_period
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: sec
+- id: claim6371
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 0.64
+  lower_bound: 0.49
+  upper_bound: 0.78
+  unit: ratio
+- id: claim6372
+  type: parameter
+  concept: rd_parameter
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 1.19
+  lower_bound: 0.84
+  upper_bound: 2.9
+- id: claim6373
+  type: parameter
+  concept: spectral_tilt_frequency
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 515
+  lower_bound: 161
+  upper_bound: 675
+  unit: Hz
+- id: claim6374
+  type: parameter
+  concept: deviation_constant_ka
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  lower_bound: 0.89
+  upper_bound: 1.35
+  unit: ratio
+- id: claim6375
+  type: parameter
+  concept: deviation_constant_kk
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  lower_bound: 0.9
+  upper_bound: 1.07
+  unit: ratio
+- id: claim6376
+  type: parameter
+  concept: noise_lag
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: '% period'
+- id: claim6377
+  type: parameter
+  concept: noise_strength
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 0.04
+  unit: ratio
+- id: claim6378
+  type: parameter
+  concept: noise_duty_cycle
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: '%'
+- id: claim6379
+  type: parameter
+  concept: noise_floor
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 0.02
+  unit: ratio
+- id: claim6380
+  type: parameter
+  concept: deemphasis_pole
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 0.9
+- id: claim6381
+  type: parameter
+  concept: hp_cutoff
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  value: 4000
+  lower_bound: 1200
+  upper_bound: 4000
+  unit: Hz
+- id: claim6382
+  type: parameter
+  concept: pressed
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 675
+- id: claim6383
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 515
+- id: claim6384
+  type: parameter
+  concept: breathy
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 161
+- id: claim6385
+  type: parameter
+  concept: low_f0
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 349
+- id: claim6386
+  type: parameter
+  concept: medium_f0
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 326
+- id: claim6387
+  type: parameter
+  concept: high_f0
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 301
+- id: claim6388
+  type: parameter
+  concept: vowel_a
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 349
+- id: claim6389
+  type: parameter
+  concept: vowel_e
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 319
+- id: claim6390
+  type: parameter
+  concept: vowel_i
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+  unit: Hz
+  value: 298
+- id: claim6391
+  type: equation
+  expression: $$R_g = T_o / (2 \cdot T_p)$$
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0
+- id: claim6392
+  type: equation
+  expression: $$a = \frac{27 \cdot AV}{4 \cdot (OQ^2 \cdot T_0)}$$
+  provenance:
+    paper: Lu_Smith_GlottalSourceSingingVoice
+    page: 0

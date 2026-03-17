@@ -1,0 +1,1355 @@
+source:
+  paper: Feugere_2017_CantorDigitalis
+claims:
+- id: claim2489
+  type: parameter
+  concept: pitch
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2490
+  type: parameter
+  concept: vocal_effort
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2491
+  type: parameter
+  concept: vowel_height
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2492
+  type: parameter
+  concept: vowel_backness
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2493
+  type: parameter
+  concept: roughness
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2494
+  type: parameter
+  concept: tension
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2495
+  type: parameter
+  concept: breathiness
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2496
+  type: parameter
+  concept: vocal_tract_size
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim2497
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2498
+  type: parameter
+  concept: fg
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2499
+  type: parameter
+  concept: bg
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2500
+  type: parameter
+  concept: ag
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: '1'
+- id: claim2501
+  type: parameter
+  concept: tl1_tl2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: dB
+- id: claim2502
+  type: parameter
+  concept: an
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: '1'
+- id: claim2503
+  type: parameter
+  concept: f1f6
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2504
+  type: parameter
+  concept: b1b6
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2505
+  type: parameter
+  concept: a1a6
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: dB
+- id: claim2506
+  type: parameter
+  concept: fbq
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: Hz
+- id: claim2507
+  type: parameter
+  concept: qbq
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  unit: '1'
+- id: claim2508
+  type: parameter
+  concept: i_v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2509
+  type: parameter
+  concept: i_h
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2510
+  type: parameter
+  concept: i_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 215
+- id: claim2511
+  type: parameter
+  concept: i_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1900
+- id: claim2512
+  type: parameter
+  concept: i_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2630
+- id: claim2513
+  type: parameter
+  concept: i_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3170
+- id: claim2514
+  type: parameter
+  concept: i_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3710
+- id: claim2515
+  type: parameter
+  concept: i_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2516
+  type: parameter
+  concept: i_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 18
+- id: claim2517
+  type: parameter
+  concept: i_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2518
+  type: parameter
+  concept: i_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2519
+  type: parameter
+  concept: i_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2520
+  type: parameter
+  concept: e_v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2521
+  type: parameter
+  concept: e_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 410
+- id: claim2522
+  type: parameter
+  concept: e_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2000
+- id: claim2523
+  type: parameter
+  concept: e_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2570
+- id: claim2524
+  type: parameter
+  concept: e_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2980
+- id: claim2525
+  type: parameter
+  concept: e_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2526
+  type: parameter
+  concept: e_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2527
+  type: parameter
+  concept: e_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 15
+- id: claim2528
+  type: parameter
+  concept: e_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2529
+  type: parameter
+  concept: e_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2530
+  type: parameter
+  concept: e_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2531
+  type: parameter
+  concept: v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2532
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 590
+- id: claim2533
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1700
+- id: claim2534
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2540
+- id: claim2535
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2800
+- id: claim2536
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2537
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2538
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 15
+- id: claim2539
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2540
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 50
+- id: claim2541
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2542
+  type: parameter
+  concept: y_h
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2543
+  type: parameter
+  concept: y_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 250
+- id: claim2544
+  type: parameter
+  concept: y_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1750
+- id: claim2545
+  type: parameter
+  concept: y_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2160
+- id: claim2546
+  type: parameter
+  concept: y_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3060
+- id: claim2547
+  type: parameter
+  concept: y_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2548
+  type: parameter
+  concept: y_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2549
+  type: parameter
+  concept: y_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2550
+  type: parameter
+  concept: y_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2551
+  type: parameter
+  concept: y_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2552
+  type: parameter
+  concept: y_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2553
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 350
+- id: claim2554
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1350
+- id: claim2555
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2250
+- id: claim2556
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3170
+- id: claim2557
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2558
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2559
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2560
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2561
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2562
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2563
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 620
+- id: claim2564
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1300
+- id: claim2565
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2520
+- id: claim2566
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3310
+- id: claim2567
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2568
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2569
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2570
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2571
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2572
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2573
+  type: parameter
+  concept: u_v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2574
+  type: parameter
+  concept: u_h
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2575
+  type: parameter
+  concept: u_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 290
+- id: claim2576
+  type: parameter
+  concept: u_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 750
+- id: claim2577
+  type: parameter
+  concept: u_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2300
+- id: claim2578
+  type: parameter
+  concept: u_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3080
+- id: claim2579
+  type: parameter
+  concept: u_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2580
+  type: parameter
+  concept: u_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2581
+  type: parameter
+  concept: u_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2582
+  type: parameter
+  concept: u_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2583
+  type: parameter
+  concept: u_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2584
+  type: parameter
+  concept: u_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2585
+  type: parameter
+  concept: o_v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2586
+  type: parameter
+  concept: o_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 440
+- id: claim2587
+  type: parameter
+  concept: o_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 750
+- id: claim2588
+  type: parameter
+  concept: o_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2160
+- id: claim2589
+  type: parameter
+  concept: o_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2860
+- id: claim2590
+  type: parameter
+  concept: o_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2591
+  type: parameter
+  concept: o_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2592
+  type: parameter
+  concept: o_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 12
+- id: claim2593
+  type: parameter
+  concept: o_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2594
+  type: parameter
+  concept: o_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2595
+  type: parameter
+  concept: o_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2596
+  type: parameter
+  concept: v
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2597
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 610
+- id: claim2598
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 950
+- id: claim2599
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2510
+- id: claim2600
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2830
+- id: claim2601
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3900
+- id: claim2602
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 10
+- id: claim2603
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 12
+- id: claim2604
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 20
+- id: claim2605
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 30
+- id: claim2606
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2607
+  type: parameter
+  concept: a_h
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2608
+  type: parameter
+  concept: a_f1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 700
+- id: claim2609
+  type: parameter
+  concept: a_f2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1200
+- id: claim2610
+  type: parameter
+  concept: a_f3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2500
+- id: claim2611
+  type: parameter
+  concept: a_f4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2800
+- id: claim2612
+  type: parameter
+  concept: a_f5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 3600
+- id: claim2613
+  type: parameter
+  concept: a_b1
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 13
+- id: claim2614
+  type: parameter
+  concept: a_b2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 13
+- id: claim2615
+  type: parameter
+  concept: a_b3
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2616
+  type: parameter
+  concept: a_b4
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 60
+- id: claim2617
+  type: parameter
+  concept: a_b5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 40
+- id: claim2618
+  type: parameter
+  concept: bass_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 32
+- id: claim2619
+  type: parameter
+  concept: bass_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2620
+  type: parameter
+  concept: bass_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.21
+- id: claim2621
+  type: parameter
+  concept: bass_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.2
+- id: claim2622
+  type: parameter
+  concept: bass_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2623
+  type: parameter
+  concept: bass_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.5
+- id: claim2624
+  type: parameter
+  concept: tenor_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 44
+- id: claim2625
+  type: parameter
+  concept: tenor_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2626
+  type: parameter
+  concept: tenor_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.29
+- id: claim2627
+  type: parameter
+  concept: tenor_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.15
+- id: claim2628
+  type: parameter
+  concept: tenor_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2629
+  type: parameter
+  concept: tenor_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.5
+- id: claim2630
+  type: parameter
+  concept: alto_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 44
+- id: claim2631
+  type: parameter
+  concept: alto_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2632
+  type: parameter
+  concept: alto_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.32
+- id: claim2633
+  type: parameter
+  concept: alto_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.1
+- id: claim2634
+  type: parameter
+  concept: alto_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2635
+  type: parameter
+  concept: alto_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.5
+- id: claim2636
+  type: parameter
+  concept: soprano_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 56
+- id: claim2637
+  type: parameter
+  concept: soprano_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2
+- id: claim2638
+  type: parameter
+  concept: soprano_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.35
+- id: claim2639
+  type: parameter
+  concept: soprano_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.1
+- id: claim2640
+  type: parameter
+  concept: soprano_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2641
+  type: parameter
+  concept: soprano_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.5
+- id: claim2642
+  type: parameter
+  concept: bulgarian_soprano_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 56
+- id: claim2643
+  type: parameter
+  concept: bulgarian_soprano_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 1
+- id: claim2644
+  type: parameter
+  concept: bulgarian_soprano_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.53
+- id: claim2645
+  type: parameter
+  concept: bulgarian_soprano_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.1
+- id: claim2646
+  type: parameter
+  concept: bulgarian_soprano_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2647
+  type: parameter
+  concept: bulgarian_soprano_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.66
+- id: claim2648
+  type: parameter
+  concept: baby_p0
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 68
+- id: claim2649
+  type: parameter
+  concept: baby_m
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 2
+- id: claim2650
+  type: parameter
+  concept: baby_s
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.59
+- id: claim2651
+  type: parameter
+  concept: baby_b
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.1
+- id: claim2652
+  type: parameter
+  concept: baby_r
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0.06
+- id: claim2653
+  type: parameter
+  concept: baby_t
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+  value: 0
+- id: claim2654
+  type: equation
+  expression: S(f) = G'(f) \cdot V(f)
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2655
+  type: equation
+  expression: GF(z) = \frac{-A_g z^{-1}(1 - z^{-1})}{1 - 2e^{-\pi B_g T_s} \cos(2\pi
+    F_g T_s) z^{-1} + e^{-2\pi B_g T_s} z^{-2}}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2656
+  type: equation
+  expression: ST(z) = ST_1(z) \times ST_2(z)
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2657
+  type: equation
+  expression: ST_i(z) = \frac{1 - (\nu_i - \sqrt{\nu_i^2 - 1})}{1 - (\nu_i - \sqrt{\nu_i^2
+    - 1})z^{-1}}, \quad i = 1, 2
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2658
+  type: equation
+  expression: \nu_i = 1 - \frac{\cos(2\pi \cdot 3000 \cdot T_s) - 1}{10^{T_{l_i}/10}
+    - 1}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2659
+  type: equation
+  expression: R_i(z) = \frac{A_i(1 - e^{-\pi B_i T_s})(1 - e^{-\pi B_i T_s} z^{-2})}{1
+    - 2e^{-\pi B_i T_s} \cos(2\pi F_i T_s) z^{-1} + e^{-2\pi B_i T_s} z^{-2}}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2660
+  type: equation
+  expression: BQ(z) = \frac{1 + \beta_{BQ} z^{-1} + z^{-2}}{1 + \alpha_{BQ} + \beta_{BQ}
+    z^{-1} + (1 - \alpha_{BQ}) z^{-2}}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2661
+  type: equation
+  expression: \alpha_{BQ} = \frac{\sin(2\pi F_{BQ} T_s)}{2Q_{BQ}}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2662
+  type: equation
+  expression: \beta_{BQ} = -2\cos(2\pi F_{BQ} T_s)
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2663
+  type: equation
+  expression: F_g = \frac{f_0}{2O_q}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2664
+  type: equation
+  expression: B_g = \frac{f_0}{O_q \tan(\pi(1 - \alpha_m))}
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2665
+  type: equation
+  expression: 'O_q = \begin{cases}
+
+    10^{-2(1-O_{q_0})T} & \text{if } T \leq 0.5 \\
+
+    10^{2O_{q_0}(1-T)-1} & \text{if } T > 0.5
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2666
+  type: equation
+  expression: '\alpha_m = \begin{cases}
+
+    0.5 + 2(\alpha_{m_0} - 0.5)T & \text{if } T \leq 0.5 \\
+
+    0.9 - 2(0.9 - \alpha_{m_0})(1 - T) & \text{if } T > 0.5
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2667
+  type: equation
+  expression: 'T_{l_1} = \begin{cases}
+
+    27 - 21E_p \text{ dB} & \text{for } M = 1 \\
+
+    45 - 36E_p \text{ dB} & \text{for } M = 2
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2668
+  type: equation
+  expression: 'T_{l_2} = \begin{cases}
+
+    11 - 11E_p \text{ dB} & \text{for } M = 1 \\
+
+    20 - 18.5E_p \text{ dB} & \text{for } M = 2
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2669
+  type: equation
+  expression: 'A_g = \begin{cases}
+
+    0 & \text{if } E_p \leq E_{thr} - 0.05 \cdot p_{hon} \\
+
+    \left((1 - C_{A_g})\frac{E_p - E_{thr}}{1 - E_{thr}} + C_{A_g}\right)(1 + R \cdot
+    \mathcal{N}_R)/O_q & \text{otherwise}
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2670
+  type: equation
+  expression: f_0 = 440 \cdot 2^{(P_0 + 35P + p_{heart} + p_{slow} - 69)/12}(1 + 0.3R\mathcal{N}_R)
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2671
+  type: equation
+  expression: 'p_{heart} = A_{heart} e^{-\beta t} \begin{cases}
+
+    \cos(8\pi f_c t - \frac{\pi}{2}) & \text{for } t \in [0, \frac{1}{4f_c}] \\
+
+    \cos(4\pi f_c t + \frac{\pi}{2}) & \text{for } t \in [\frac{1}{4f_c}, \frac{1}{f_c}]
+
+    \end{cases}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2672
+  type: equation
+  expression: \alpha_S = 1.7S + 0.5
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2673
+  type: equation
+  expression: K = 1.25 \times 10^{-4} f_0 + 0.975
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2674
+  type: equation
+  expression: F_i = K \cdot \alpha_S \cdot F_{iG}(V, H) \quad \text{for } i \in [1,
+    6]
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2675
+  type: equation
+  expression: F_1 = \max\left(f_0 + 50 \text{ Hz}, K\alpha_S F_{1G}(V,H) + \frac{140}{1-E_{thr}}E
+    - 70 \text{ Hz}\right)
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2676
+  type: equation
+  expression: F_2 = \max(2f_0 + 50 \text{ Hz}, K\alpha_S F_{2G}(V,H))
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0
+- id: claim2677
+  type: equation
+  expression: '\text{if } |(k+1)f_0 - F_i| < \Delta F_i: \quad A_i = A_{iG} - \left(1
+    - \frac{|(k+1)f_0 - F_i|}{\Delta F_i}\right) \cdot Att_{max_i}'
+  provenance:
+    paper: Feugere_2017_CantorDigitalis
+    page: 0

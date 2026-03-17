@@ -1,0 +1,221 @@
+source:
+  paper: Klatt_1987_TTS_Review
+claims:
+- id: claim5586
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 50
+  upper_bound: 500
+  unit: Hz
+- id: claim5587
+  type: parameter
+  concept: amplitude_of_voicing
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 70
+  unit: dB
+- id: claim5588
+  type: parameter
+  concept: first_formant_frequency
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 200
+  upper_bound: 1000
+  unit: Hz
+- id: claim5589
+  type: parameter
+  concept: first_formant_bandwidth
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim5590
+  type: parameter
+  concept: second_formant_frequency
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 500
+  upper_bound: 3000
+  unit: Hz
+- id: claim5591
+  type: parameter
+  concept: second_formant_bandwidth
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5592
+  type: parameter
+  concept: third_formant_frequency
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 1500
+  upper_bound: 4500
+  unit: Hz
+- id: claim5593
+  type: parameter
+  concept: third_formant_bandwidth
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5594
+  type: parameter
+  concept: nasal_formant_frequency
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 200
+  upper_bound: 500
+  unit: Hz
+- id: claim5595
+  type: parameter
+  concept: nasal_formant_bandwidth
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5596
+  type: parameter
+  concept: amplitude_of_aspiration
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 70
+  unit: dB
+- id: claim5597
+  type: parameter
+  concept: amplitude_of_frication
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5598
+  type: parameter
+  concept: parallel_formant_amplitudes
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5599
+  type: parameter
+  concept: bypass_amplitude
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5600
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 10
+  upper_bound: 90
+  unit: '%'
+- id: claim5601
+  type: parameter
+  concept: spectral_tilt
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  lower_bound: 0
+  upper_bound: 24
+  unit: dB
+- id: claim5602
+  type: parameter
+  concept: prose2000_words_correct
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 84
+- id: claim5603
+  type: parameter
+  concept: prose2000_anomalous
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 65
+- id: claim5604
+  type: parameter
+  concept: mitalk79_words_correct
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 93
+- id: claim5605
+  type: parameter
+  concept: mitalk79_anomalous
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 79
+- id: claim5606
+  type: parameter
+  concept: dectalk_words_correct
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 95
+- id: claim5607
+  type: parameter
+  concept: dectalk_anomalous
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 87
+- id: claim5608
+  type: parameter
+  concept: natural_speech_words_correct
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 99
+- id: claim5609
+  type: parameter
+  concept: natural_speech_anomalous
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+  value: 98
+- id: claim5610
+  type: equation
+  expression: DUR = MINDUR + \frac{(INHDUR - MINDUR) \times PRCNT}{100}
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+- id: claim5611
+  type: equation
+  expression: F2_{onset} = F2_{locus} + k \times [F2_{vowel} - F2_{locus}]
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0
+- id: claim5612
+  type: equation
+  expression: aT^2 - bT^3
+  provenance:
+    paper: Klatt_1987_TTS_Review
+    page: 0

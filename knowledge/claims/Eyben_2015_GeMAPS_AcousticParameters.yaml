@@ -1,0 +1,377 @@
+source:
+  paper: Eyben_2015_GeMAPS_AcousticParameters
+claims:
+- id: claim2202
+  type: parameter
+  concept: pitch
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: semitones
+- id: claim2203
+  type: parameter
+  concept: jitter
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2204
+  type: parameter
+  concept: formant_1_freq
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: Hz
+- id: claim2205
+  type: parameter
+  concept: formant_2_freq
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: Hz
+- id: claim2206
+  type: parameter
+  concept: formant_3_freq
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: Hz
+- id: claim2207
+  type: parameter
+  concept: formant_1_bandwidth
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: Hz
+- id: claim2208
+  type: parameter
+  concept: shimmer
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2209
+  type: parameter
+  concept: loudness
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: sone-like
+- id: claim2210
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: dB
+- id: claim2211
+  type: parameter
+  concept: alpha_ratio
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2212
+  type: parameter
+  concept: hammarberg_index
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2213
+  type: parameter
+  concept: spectral_slope_0500_hz
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: slope
+- id: claim2214
+  type: parameter
+  concept: spectral_slope_5001500_hz
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: slope
+- id: claim2215
+  type: parameter
+  concept: f1_relative_energy
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2216
+  type: parameter
+  concept: f2_relative_energy
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2217
+  type: parameter
+  concept: f3_relative_energy
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: ratio
+- id: claim2218
+  type: parameter
+  concept: h1h2
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: dB
+- id: claim2219
+  type: parameter
+  concept: h1a3
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  unit: dB
+- id: claim2220
+  type: parameter
+  concept: f0_harmonics_hnr_jitter_shimmer_window
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 60
+  unit: ms
+- id: claim2221
+  type: parameter
+  concept: f0_harmonics_hnr_jitter_shimmer_step
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 10
+  unit: ms
+- id: claim2222
+  type: parameter
+  concept: loudness_spectral_slope_formants_etc_window
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 20
+  unit: ms
+- id: claim2223
+  type: parameter
+  concept: loudness_spectral_slope_formants_etc_step
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 10
+  unit: ms
+- id: claim2224
+  type: parameter
+  concept: gemaps_llds
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 18
+- id: claim2225
+  type: parameter
+  concept: gemaps_functionals
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 52
+- id: claim2226
+  type: parameter
+  concept: gemaps_temporal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 6
+- id: claim2227
+  type: parameter
+  concept: gemaps_total
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 62
+- id: claim2228
+  type: parameter
+  concept: egemaps_llds
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 25
+- id: claim2229
+  type: parameter
+  concept: egemaps_functionals
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 78
+- id: claim2230
+  type: parameter
+  concept: egemaps_temporal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 6
+- id: claim2231
+  type: parameter
+  concept: egemaps_total
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 88
+- id: claim2232
+  type: parameter
+  concept: gemaps_params
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 62
+- id: claim2233
+  type: parameter
+  concept: gemaps_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 79.59
+- id: claim2234
+  type: parameter
+  concept: gemaps_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 65.32
+- id: claim2235
+  type: parameter
+  concept: egemaps_params
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 88
+- id: claim2236
+  type: parameter
+  concept: egemaps_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 79.71
+- id: claim2237
+  type: parameter
+  concept: egemaps_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 66.44
+- id: claim2238
+  type: parameter
+  concept: intersp09_params
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 384
+- id: claim2239
+  type: parameter
+  concept: intersp09_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 76.08
+- id: claim2240
+  type: parameter
+  concept: intersp09_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 64.88
+- id: claim2241
+  type: parameter
+  concept: intersp10_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 76.5
+- id: claim2242
+  type: parameter
+  concept: intersp10_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 64.44
+- id: claim2243
+  type: parameter
+  concept: intersp11_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 76.43
+- id: claim2244
+  type: parameter
+  concept: intersp11_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 65.96
+- id: claim2245
+  type: parameter
+  concept: intersp12_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 77.26
+- id: claim2246
+  type: parameter
+  concept: intersp12_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 66.71
+- id: claim2247
+  type: parameter
+  concept: compare_arousal
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 78.0
+- id: claim2248
+  type: parameter
+  concept: compare_valence
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+  value: 67.17
+- id: claim2249
+  type: equation
+  expression: J_{pp,rel} = \frac{\frac{1}{N'-1} \sum_{n'=2}^{N'} |T_0(n') - T_0(n'-1)|}{\frac{1}{N'}
+    \sum_{n'=1}^{N'} T_0(n')}
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+- id: claim2250
+  type: equation
+  expression: S_{pp,rel} = \frac{\frac{1}{N'-1} \sum_{n'=2}^{N'} S_{pp}(n')}{\frac{1}{N'}
+    \sum_{n'=1}^{N'} A(n')}
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+- id: claim2251
+  type: equation
+  expression: HNR_{acf,log} = 10 \log_{10} \left( \frac{ACF_{T_0}}{ACF_0 - ACF_{T_0}}
+    \right) \text{ dB}
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+- id: claim2252
+  type: equation
+  expression: \eta = \frac{\max_{m=1}^{m_{2k}} X(m)}{\max_{m=m_{2k}+1}^{M} X(m)}
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+- id: claim2253
+  type: equation
+  expression: \rho_\alpha = \frac{\sum_{m=1}^{m_{1k}} X(m)}{\sum_{m=m_{1k}+1}^{M}
+    X(m)}
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0
+- id: claim2254
+  type: equation
+  expression: S_{flux}^{(k)} = \sum_{m=m_l}^{m_u} \left( X^{(k)}(m) - X^{(k-1)}(m)
+    \right)^2
+  provenance:
+    paper: Eyben_2015_GeMAPS_AcousticParameters
+    page: 0

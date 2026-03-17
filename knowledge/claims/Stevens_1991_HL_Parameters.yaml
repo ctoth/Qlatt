@@ -1,0 +1,94 @@
+source:
+  paper: Stevens_1991_HL_Parameters
+claims:
+- id: claim8600
+  type: parameter
+  concept: natural_freq_1
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  unit: Hz
+- id: claim8601
+  type: parameter
+  concept: natural_freq_2
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  unit: Hz
+- id: claim8602
+  type: parameter
+  concept: natural_freq_3
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  unit: Hz
+- id: claim8603
+  type: parameter
+  concept: natural_freq_4
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  unit: Hz
+- id: claim8604
+  type: parameter
+  concept: fundamental_freq
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  unit: Hz
+- id: claim8605
+  type: parameter
+  concept: glottal_area
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  lower_bound: 0
+  upper_bound: 0.4
+  unit: cm^2
+- id: claim8606
+  type: parameter
+  concept: constriction_area
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  lower_bound: 0
+  upper_bound: 0.4
+  unit: cm^2
+- id: claim8607
+  type: parameter
+  concept: velopharyngeal_area
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 1.0
+  unit: cm^2
+- id: claim8608
+  type: parameter
+  concept: stridency
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  value: 0
+  unit: dB
+- id: claim8609
+  type: parameter
+  concept: pressure_manipulation
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+  value: 0
+  unit: fraction of Ps
+- id: claim8610
+  type: equation
+  expression: N \propto U^3 A^{-2.5}
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0
+- id: claim8611
+  type: equation
+  expression: U = A \sqrt{\frac{2 \Delta P}{\rho}}
+  provenance:
+    paper: Stevens_1991_HL_Parameters
+    page: 0

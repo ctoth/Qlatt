@@ -1,0 +1,479 @@
+source:
+  paper: Chen_1970_VowelLengthVariationVoicing
+claims:
+- id: claim1152
+  type: parameter
+  concept: english
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 146
+- id: claim1153
+  type: parameter
+  concept: french
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 354
+- id: claim1154
+  type: parameter
+  concept: russian
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 131
+- id: claim1155
+  type: parameter
+  concept: korean
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 91
+- id: claim1156
+  type: parameter
+  concept: english_before_voiceless
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 197
+- id: claim1157
+  type: parameter
+  concept: english_before_voiced
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 297
+- id: claim1158
+  type: parameter
+  concept: english_difference
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 100
+- id: claim1159
+  type: parameter
+  concept: english_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.66
+- id: claim1160
+  type: parameter
+  concept: english_before_voiceless
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 145
+- id: claim1161
+  type: parameter
+  concept: english_before_voiced
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 228
+- id: claim1162
+  type: parameter
+  concept: english_difference
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 83
+- id: claim1163
+  type: parameter
+  concept: english_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.64
+- id: claim1164
+  type: parameter
+  concept: english_before_voiceless
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 174
+- id: claim1165
+  type: parameter
+  concept: english_before_voiced
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 253
+- id: claim1166
+  type: parameter
+  concept: english_difference
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 79
+- id: claim1167
+  type: parameter
+  concept: english_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.69
+- id: claim1168
+  type: parameter
+  concept: german_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.9
+- id: claim1169
+  type: parameter
+  concept: spanish_before_voiceless
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 109
+- id: claim1170
+  type: parameter
+  concept: spanish_before_voiced
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 127
+- id: claim1171
+  type: parameter
+  concept: spanish_difference
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 18
+- id: claim1172
+  type: parameter
+  concept: spanish_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.86
+- id: claim1173
+  type: parameter
+  concept: norwegian_before_voiceless
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 148
+- id: claim1174
+  type: parameter
+  concept: norwegian_before_voiced
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 181
+- id: claim1175
+  type: parameter
+  concept: norwegian_difference
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 33
+- id: claim1176
+  type: parameter
+  concept: norwegian_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.82
+- id: claim1177
+  type: parameter
+  concept: laep
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 300
+- id: claim1178
+  type: parameter
+  concept: faet
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 308
+- id: claim1179
+  type: parameter
+  concept: laek
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 357
+- id: claim1180
+  type: parameter
+  concept: aempl
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 147
+- id: claim1181
+  type: parameter
+  concept: sent
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 147
+- id: claim1182
+  type: parameter
+  concept: kilt
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 120
+- id: claim1183
+  type: parameter
+  concept: baenk
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 288
+- id: claim1184
+  type: parameter
+  concept: english
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 140
+- id: claim1185
+  type: parameter
+  concept: korean
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 124
+- id: claim1186
+  type: parameter
+  concept: lap_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.76
+- id: claim1187
+  type: parameter
+  concept: lap_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.76
+- id: claim1188
+  type: parameter
+  concept: nap_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.82
+- id: claim1189
+  type: parameter
+  concept: nap_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.82
+- id: claim1190
+  type: parameter
+  concept: cup_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.56
+- id: claim1191
+  type: parameter
+  concept: cup_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.56
+- id: claim1192
+  type: parameter
+  concept: pup_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.68
+- id: claim1193
+  type: parameter
+  concept: pup_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.68
+- id: claim1194
+  type: parameter
+  concept: rip_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.56
+- id: claim1195
+  type: parameter
+  concept: rip_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.56
+- id: claim1196
+  type: parameter
+  concept: bop_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.81
+- id: claim1197
+  type: parameter
+  concept: bop_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.81
+- id: claim1198
+  type: parameter
+  concept: average_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.69
+- id: claim1199
+  type: parameter
+  concept: average_velocity
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.69
+- id: claim1200
+  type: parameter
+  concept: lap
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 80
+- id: claim1201
+  type: parameter
+  concept: nap
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 82
+- id: claim1202
+  type: parameter
+  concept: cup
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 88
+- id: claim1203
+  type: parameter
+  concept: pup
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 108
+- id: claim1204
+  type: parameter
+  concept: rip
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 58
+- id: claim1205
+  type: parameter
+  concept: bip
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 102
+- id: claim1206
+  type: parameter
+  concept: bop
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 97
+- id: claim1207
+  type: parameter
+  concept: average
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  unit: ms
+  value: 88
+- id: claim1208
+  type: parameter
+  concept: vcd_nasal_vowel_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.65
+- id: claim1209
+  type: parameter
+  concept: vcd_nasal_sonorant_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.64
+- id: claim1210
+  type: parameter
+  concept: vcd_nasal_total_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.65
+- id: claim1211
+  type: parameter
+  concept: vcd_l_vowel_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.65
+- id: claim1212
+  type: parameter
+  concept: vcd_l_sonorant_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.68
+- id: claim1213
+  type: parameter
+  concept: vcd_l_total_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.65
+- id: claim1214
+  type: parameter
+  concept: vcd_r_vowel_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.76
+- id: claim1215
+  type: parameter
+  concept: vcd_r_sonorant_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.66
+- id: claim1216
+  type: parameter
+  concept: vcd_r_total_ratio
+  provenance:
+    paper: Chen_1970_VowelLengthVariationVoicing
+    page: 0
+  value: 0.7

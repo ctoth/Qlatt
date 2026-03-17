@@ -1,0 +1,90 @@
+source:
+  paper: Sundberg_1972_SingingFormant
+claims:
+- id: claim10230
+  type: parameter
+  concept: sinus_morgagni_volume
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm³
+- id: claim10231
+  type: parameter
+  concept: larynx_tube_length
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm
+- id: claim10232
+  type: parameter
+  concept: larynx_tube_crosssection
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm²
+- id: claim10233
+  type: parameter
+  concept: larynx_tube_resonance
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: kHz
+- id: claim10234
+  type: parameter
+  concept: sinus_piriformes_depth
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm
+- id: claim10235
+  type: parameter
+  concept: sinus_piriformes_area
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm²
+- id: claim10236
+  type: parameter
+  concept: piriformes_zero_frequency
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: kHz
+- id: claim10237
+  type: parameter
+  concept: pharynx_crosssection
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: cm²
+- id: claim10238
+  type: parameter
+  concept: spectrum_gain_at_3_khz
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+  unit: dB
+- id: claim10239
+  type: equation
+  expression: f = \frac{c}{2\pi} \cdot \sqrt{\frac{A_n}{V \cdot \ell_{n,e}}}
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+- id: claim10240
+  type: equation
+  expression: \ell_{n,e} = \ell_n + 0.48 \sqrt{A} \cdot (1 - 1.25\sqrt{A_n/A})
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+- id: claim10241
+  type: equation
+  expression: f = \frac{c}{4 \cdot \ell_e}
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0
+- id: claim10242
+  type: equation
+  expression: A_n < \frac{A}{6}
+  provenance:
+    paper: Sundberg_1972_SingingFormant
+    page: 0

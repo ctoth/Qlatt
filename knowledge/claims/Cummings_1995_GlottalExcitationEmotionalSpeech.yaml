@@ -1,0 +1,606 @@
+source:
+  paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+claims:
+- id: claim1665
+  type: parameter
+  concept: normal_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -4798
+- id: claim1666
+  type: parameter
+  concept: normal_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2643
+- id: claim1667
+  type: parameter
+  concept: normal_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 17.7
+- id: claim1668
+  type: parameter
+  concept: normal_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 10.2
+- id: claim1669
+  type: parameter
+  concept: normal_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.6
+- id: claim1670
+  type: parameter
+  concept: normal_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.9
+- id: claim1671
+  type: parameter
+  concept: angry_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -9910
+- id: claim1672
+  type: parameter
+  concept: angry_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9198
+- id: claim1673
+  type: parameter
+  concept: angry_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.1
+- id: claim1674
+  type: parameter
+  concept: angry_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 6.3
+- id: claim1675
+  type: parameter
+  concept: angry_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 6.9
+- id: claim1676
+  type: parameter
+  concept: angry_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2.0
+- id: claim1677
+  type: parameter
+  concept: loud_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -9298
+- id: claim1678
+  type: parameter
+  concept: loud_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 3532
+- id: claim1679
+  type: parameter
+  concept: loud_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 6.3
+- id: claim1680
+  type: parameter
+  concept: loud_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 6.9
+- id: claim1681
+  type: parameter
+  concept: loud_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 17.0
+- id: claim1682
+  type: parameter
+  concept: loud_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2.9
+- id: claim1683
+  type: parameter
+  concept: soft_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -2632
+- id: claim1684
+  type: parameter
+  concept: soft_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1921
+- id: claim1685
+  type: parameter
+  concept: soft_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 17.7
+- id: claim1686
+  type: parameter
+  concept: soft_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 14.7
+- id: claim1687
+  type: parameter
+  concept: soft_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 18.6
+- id: claim1688
+  type: parameter
+  concept: soft_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.9
+- id: claim1689
+  type: parameter
+  concept: fast_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -3972
+- id: claim1690
+  type: parameter
+  concept: fast_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2376
+- id: claim1691
+  type: parameter
+  concept: fast_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.5
+- id: claim1692
+  type: parameter
+  concept: fast_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 11.0
+- id: claim1693
+  type: parameter
+  concept: fast_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 16.0
+- id: claim1694
+  type: parameter
+  concept: fast_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 8.4
+- id: claim1695
+  type: parameter
+  concept: slow_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -4786
+- id: claim1696
+  type: parameter
+  concept: slow_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2692
+- id: claim1697
+  type: parameter
+  concept: slow_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 16.9
+- id: claim1698
+  type: parameter
+  concept: slow_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 10.2
+- id: claim1699
+  type: parameter
+  concept: slow_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.5
+- id: claim1700
+  type: parameter
+  concept: slow_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 8.7
+- id: claim1701
+  type: parameter
+  concept: clear_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -5011
+- id: claim1702
+  type: parameter
+  concept: clear_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2686
+- id: claim1703
+  type: parameter
+  concept: clear_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.8
+- id: claim1704
+  type: parameter
+  concept: clear_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.5
+- id: claim1705
+  type: parameter
+  concept: clear_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 16.0
+- id: claim1706
+  type: parameter
+  concept: clear_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 6.9
+- id: claim1707
+  type: parameter
+  concept: question_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -4831
+- id: claim1708
+  type: parameter
+  concept: question_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 3034
+- id: claim1709
+  type: parameter
+  concept: question_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 14.0
+- id: claim1710
+  type: parameter
+  concept: question_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.4
+- id: claim1711
+  type: parameter
+  concept: question_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 14.9
+- id: claim1712
+  type: parameter
+  concept: question_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 7.0
+- id: claim1713
+  type: parameter
+  concept: lombard_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -5430
+- id: claim1714
+  type: parameter
+  concept: lombard_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2871
+- id: claim1715
+  type: parameter
+  concept: lombard_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.2
+- id: claim1716
+  type: parameter
+  concept: lombard_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.3
+- id: claim1717
+  type: parameter
+  concept: lombard_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.2
+- id: claim1718
+  type: parameter
+  concept: lombard_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 7.6
+- id: claim1719
+  type: parameter
+  concept: 50_task_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -4522
+- id: claim1720
+  type: parameter
+  concept: 50_task_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2321
+- id: claim1721
+  type: parameter
+  concept: 50_task_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 17.3
+- id: claim1722
+  type: parameter
+  concept: 50_task_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 11.1
+- id: claim1723
+  type: parameter
+  concept: 50_task_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 16.0
+- id: claim1724
+  type: parameter
+  concept: 50_task_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.8
+- id: claim1725
+  type: parameter
+  concept: 70_task_closing_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: -4100
+- id: claim1726
+  type: parameter
+  concept: 70_task_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2138
+- id: claim1727
+  type: parameter
+  concept: 70_task_closed_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 16.7
+- id: claim1728
+  type: parameter
+  concept: 70_task_closing_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 10.7
+- id: claim1729
+  type: parameter
+  concept: 70_task_opening_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 15.7
+- id: claim1730
+  type: parameter
+  concept: 70_task_top_dur
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 9.9
+- id: claim1731
+  type: parameter
+  concept: normal_closing_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.0
+- id: claim1732
+  type: parameter
+  concept: normal_opening_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.0
+- id: claim1733
+  type: parameter
+  concept: normal_closing_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.82
+- id: claim1734
+  type: parameter
+  concept: angry_closing_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2.07
+- id: claim1735
+  type: parameter
+  concept: angry_opening_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2.48
+- id: claim1736
+  type: parameter
+  concept: angry_closing_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.08
+- id: claim1737
+  type: parameter
+  concept: loud_closing_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.93
+- id: claim1738
+  type: parameter
+  concept: loud_opening_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.34
+- id: claim1739
+  type: parameter
+  concept: loud_closing_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 2.63
+- id: claim1740
+  type: parameter
+  concept: soft_closing_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 0.55
+- id: claim1741
+  type: parameter
+  concept: soft_opening_slope_ratio
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 0.73
+- id: claim1742
+  type: parameter
+  concept: soft_closing_opening_slope
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  value: 1.37
+- id: claim1743
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  unit: samples
+  value: 56.56
+- id: claim1744
+  type: parameter
+  concept: angry
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  unit: samples
+  value: 29.93
+- id: claim1745
+  type: parameter
+  concept: loud
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  unit: samples
+  value: 32.04
+- id: claim1746
+  type: parameter
+  concept: soft
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+  unit: samples
+  value: 59.43
+- id: claim1747
+  type: equation
+  expression: S(z) = G(z) \cdot V(z) \cdot R(z)
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+- id: claim1748
+  type: equation
+  expression: G(z) = \frac{S(z)}{V(z) \cdot R(z)}
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+- id: claim1749
+  type: equation
+  expression: r_{ij} = (m_i - m_j)' C^{-1} (m_i - m_j)
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0
+- id: claim1750
+  type: equation
+  expression: p(e) = \int_{(1/2)\sqrt{r_{ij}}}^{\infty} \frac{1}{\sqrt{2\pi}} e^{-y^2/2}
+    \, dy
+  provenance:
+    paper: Cummings_1995_GlottalExcitationEmotionalSpeech
+    page: 0

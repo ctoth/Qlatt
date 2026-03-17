@@ -1,0 +1,99 @@
+source:
+  paper: Maeda_1993_AcousticsVowelNasalization
+claims:
+- id: claim6446
+  type: parameter
+  concept: c_n1
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 368
+- id: claim6447
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 501
+- id: claim6448
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 1096
+- id: claim6449
+  type: parameter
+  concept: c_n2
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 1803
+- id: claim6450
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 2512
+- id: claim6451
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 3392
+- id: claim6452
+  type: parameter
+  concept: r1
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 296
+- id: claim6453
+  type: parameter
+  concept: r2
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 688
+- id: claim6454
+  type: parameter
+  concept: c_o1
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 872
+- id: claim6455
+  type: parameter
+  concept: r3
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 1744
+- id: claim6456
+  type: parameter
+  concept: r4
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 2648
+- id: claim6457
+  type: parameter
+  concept: c_o2
+  provenance:
+    paper: Maeda_1993_AcousticsVowelNasalization
+    page: 0
+  unit: Hz
+  value: 3024

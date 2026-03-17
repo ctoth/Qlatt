@@ -1,0 +1,106 @@
+source:
+  paper: Beddor_1986_NasalVowelHeight
+claims:
+- id: claim636
+  type: parameter
+  concept: nasal_formant_frequency
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  lower_bound: 200
+  upper_bound: 400
+  unit: Hz
+- id: claim637
+  type: parameter
+  concept: velar_port_opening
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 7.2
+  unit: mm²
+- id: claim638
+  type: parameter
+  concept: velar_port_opening
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 24.0
+  unit: mm²
+- id: claim639
+  type: parameter
+  concept: velar_port_opening
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 16.8
+  unit: mm²
+- id: claim640
+  type: parameter
+  concept: alveolar_occlusion_duration
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 137
+  unit: ms
+- id: claim641
+  type: parameter
+  concept: velar_port_open_during_occlusion
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 80
+  unit: ms
+- id: claim642
+  type: parameter
+  concept: vowel_continuum_steps
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+  value: 7
+- id: claim643
+  type: observation
+  statement: F1' of nasal vowel must be higher than F1 of corresponding oral vowel
+    (for all vowel heights)
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+- id: claim644
+  type: observation
+  statement: FN frequency should be in 200-400 Hz range regardless of oral vowel quality
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+- id: claim645
+  type: observation
+  statement: Centre of gravity of F1-F2 region should be higher for nasal low vowels
+    than oral low vowels
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+- id: claim646
+  type: observation
+  statement: Centre of gravity should be lower for nasal high vowels than oral high
+    vowels (due to FN pulling it down)
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+- id: claim647
+  type: observation
+  statement: Contextual nasalisation in VN sequences should produce no perceptual
+    height shift for English listeners
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0
+- id: claim648
+  type: observation
+  statement: Non-contextual nasalisation should shift perceived height toward mid
+    vowels (centralisation)
+  concepts: []
+  provenance:
+    paper: Beddor_1986_NasalVowelHeight
+    page: 0

@@ -1,0 +1,198 @@
+source:
+  paper: Titze_1991_NeurologicAperiodicity
+claims:
+- id: claim10477
+  type: parameter
+  concept: number_of_motor_units
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 100
+  lower_bound: 2
+  upper_bound: 200
+- id: claim10478
+  type: parameter
+  concept: mean_firing_rate
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 25
+  lower_bound: 5
+  upper_bound: 100
+  unit: Hz
+- id: claim10479
+  type: parameter
+  concept: force_amplitude
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  unit: N (normalized)
+- id: claim10480
+  type: parameter
+  concept: contraction_time
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  unit: ms
+- id: claim10481
+  type: parameter
+  concept: cv_of_twitch_amplitude
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 1.0
+  lower_bound: 0
+  upper_bound: 1.0
+- id: claim10482
+  type: parameter
+  concept: cv_of_interspike_interval
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 0.14
+  lower_bound: 0
+  upper_bound: 0.2
+- id: claim10483
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim10484
+  type: parameter
+  concept: sampling_window_for_cv_jit
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+  value: 5.0
+  unit: s
+- id: claim10485
+  type: equation
+  expression: f(t) = A e \alpha t \, e^{-\alpha t}
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10486
+  type: equation
+  expression: T \propto F_o^2
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10487
+  type: equation
+  expression: \Delta T \propto 2 F_o \Delta F_o
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10488
+  type: equation
+  expression: F(t) = \sum_{j=1}^{N} A \alpha e(t - t_j) e^{-\alpha(t - t_j)} \, u(t
+    - t_j)
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10489
+  type: equation
+  expression: t_j = j\mu, \quad j = 1, \ldots, N
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10490
+  type: equation
+  expression: t_j = R(j\mu, \, \nu\mu)
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10491
+  type: equation
+  expression: = \mu R(j, \nu) \quad j = 1, N
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10492
+  type: equation
+  expression: F(t) = \sum_{k=1}^{M} \sum_{j=1}^{N} A_k \alpha_k e(t - t_{jk}) e^{-\alpha(t
+    - t_{jk})} \, u(t - t_{jk})
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10493
+  type: equation
+  expression: t_{jk} = \mu R_k(j, \nu) + R'_k(0, \mu)
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10494
+  type: equation
+  expression: \text{JIT} = \frac{1}{\bar{F}_o} \frac{1}{N} \sum_{i=1}^{N} |F_{o_i}
+    - F_{o_{i-1}}|
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10495
+  type: equation
+  expression: \text{CV} = \frac{1}{\bar{F}_o} \left[ \frac{1}{N} \sum_{i=1}^{N} (F_{o_i}
+    - \bar{F}_o)^2 \right]^{1/2}
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10496
+  type: observation
+  statement: F0 perturbation (CV) must be in range [0.05%, 1.5%] for reasonable parameter
+    settings
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10497
+  type: observation
+  statement: Increasing number of motor units must decrease F0 perturbation (monotonic)
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10498
+  type: observation
+  statement: Increasing mean firing rate must decrease F0 perturbation (monotonic)
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10499
+  type: observation
+  statement: Increasing CV of ISI must increase F0 perturbation (monotonic)
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10500
+  type: observation
+  statement: Increasing CV of twitch amplitude must increase F0 perturbation (monotonic)
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10501
+  type: observation
+  statement: JIT must always be less than or equal to CV for the same F0 contour
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10502
+  type: observation
+  statement: Force contour spectrum must show a peak at the mean motor unit firing
+    frequency
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0
+- id: claim10503
+  type: observation
+  statement: At firing rates >= 90 Hz (tetanus), force ripple should approach zero
+  concepts: []
+  provenance:
+    paper: Titze_1991_NeurologicAperiodicity
+    page: 0

@@ -1,0 +1,310 @@
+source:
+  paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+claims:
+- id: claim3315
+  type: parameter
+  concept: '000'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 0
+- id: claim3316
+  type: parameter
+  concept: '001'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 25
+- id: claim3317
+  type: parameter
+  concept: '002'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 50
+- id: claim3318
+  type: parameter
+  concept: '003'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 76
+- id: claim3319
+  type: parameter
+  concept: '004'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 101
+- id: claim3320
+  type: parameter
+  concept: '005'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 126
+- id: claim3321
+  type: parameter
+  concept: '006'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 151
+- id: claim3322
+  type: parameter
+  concept: '007'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 176
+- id: claim3323
+  type: parameter
+  concept: 008
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 202
+- id: claim3324
+  type: parameter
+  concept: 009
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 227
+- id: claim3325
+  type: parameter
+  concept: '010'
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  unit: Hz
+  value: 252
+- id: claim3326
+  type: parameter
+  concept: h1h2_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 3.4
+- id: claim3327
+  type: parameter
+  concept: h1h2_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.6
+- id: claim3328
+  type: parameter
+  concept: h1h2_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 3.1
+- id: claim3329
+  type: parameter
+  concept: h1a1_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: -4.2
+- id: claim3330
+  type: parameter
+  concept: h1a1_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: -4.1
+- id: claim3331
+  type: parameter
+  concept: h1a1_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: -4.7
+- id: claim3332
+  type: parameter
+  concept: h1a3_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 24.1
+- id: claim3333
+  type: parameter
+  concept: h1a3_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 22.0
+- id: claim3334
+  type: parameter
+  concept: h1a3_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 22.5
+- id: claim3335
+  type: parameter
+  concept: b1_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 165
+- id: claim3336
+  type: parameter
+  concept: nw_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.1
+- id: claim3337
+  type: parameter
+  concept: nw_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.2
+- id: claim3338
+  type: parameter
+  concept: nw_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.3
+- id: claim3339
+  type: parameter
+  concept: ns_ae_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.1
+- id: claim3340
+  type: parameter
+  concept: ns_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 2.0
+- id: claim3341
+  type: parameter
+  concept: ns_mean
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 1.9
+- id: claim3342
+  type: parameter
+  concept: h1h2
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 10
+  unit: dB
+- id: claim3343
+  type: parameter
+  concept: h1a1
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 16
+  unit: dB
+- id: claim3344
+  type: parameter
+  concept: h1a3
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 26
+  unit: dB
+- id: claim3345
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim3346
+  type: parameter
+  concept: noise
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+  lower_bound: 1
+  upper_bound: 4
+- id: claim3347
+  type: observation
+  statement: B1 must be >= ~50 Hz (vocal-tract losses alone for closed-glottis condition)
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3348
+  type: observation
+  statement: 'As glottal chink area increases: B1 increases, spectral tilt increases,
+    noise increases (monotonic)'
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3349
+  type: observation
+  statement: H1\*-A3\* and noise ratings should correlate r > 0.7
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3350
+  type: observation
+  statement: H1\*-A1 range should be approximately -11 to +5 dB for female speakers
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3351
+  type: observation
+  statement: H1\*-A3\* range should be approximately 15-35 dB for female speakers
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3352
+  type: observation
+  statement: 'Group 1 speakers (abrupt closure): H1\*-A3\* ~ 15 dB, H1\*-A1 ~ -11
+    dB'
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3353
+  type: observation
+  statement: 'Group 2 speakers (gradual closure): H1\*-A3\* > 23 dB'
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3354
+  type: observation
+  statement: 'For slope-1 relationship: H1\*-A3\* should increase linearly with H1\*-A1
+    for speakers with abrupt closure (Group 1)'
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0
+- id: claim3355
+  type: observation
+  statement: 'Spectral tilt from glottal chink alone (Table I): max ~18 dB for A_ch
+    = 0.10 cm^2'
+  concepts: []
+  provenance:
+    paper: Hanson_1997_GlottalCharacteristicsFemaleAcoustic
+    page: 0

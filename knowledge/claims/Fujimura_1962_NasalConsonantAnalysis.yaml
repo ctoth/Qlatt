@@ -1,0 +1,225 @@
+source:
+  paper: Fujimura_1962_NasalConsonantAnalysis
+claims:
+- id: claim2932
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  unit: cps
+  value: 350
+- id: claim2933
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  unit: cps
+  value: 1050
+- id: claim2934
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  unit: cps
+  value: 1900
+- id: claim2935
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  unit: cps
+  value: 2750
+- id: claim2936
+  type: parameter
+  concept: m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  lower_bound: 750
+  upper_bound: 1250
+  unit: cps
+- id: claim2937
+  type: parameter
+  concept: n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  lower_bound: 1450
+  upper_bound: 2200
+  unit: cps
+- id: claim2938
+  type: parameter
+  concept: 60_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 40
+- id: claim2939
+  type: parameter
+  concept: '60'
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 80
+- id: claim2940
+  type: parameter
+  concept: 60_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 100
+- id: claim2941
+  type: parameter
+  concept: '60'
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 100
+- id: claim2942
+  type: parameter
+  concept: 90_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 110
+- id: claim2943
+  type: parameter
+  concept: '90'
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 230
+- id: claim2944
+  type: parameter
+  concept: 280_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 170
+- id: claim2945
+  type: parameter
+  concept: '280'
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 100
+- id: claim2946
+  type: parameter
+  concept: 170_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 100
+- id: claim2947
+  type: parameter
+  concept: 80_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 600
+- id: claim2948
+  type: parameter
+  concept: f1_m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 300
+- id: claim2949
+  type: parameter
+  concept: f1_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 300
+- id: claim2950
+  type: parameter
+  concept: f2_m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 1000
+- id: claim2951
+  type: parameter
+  concept: f2_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 1000
+- id: claim2952
+  type: parameter
+  concept: f3_m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 2300
+- id: claim2953
+  type: parameter
+  concept: f3_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 2000
+- id: claim2954
+  type: parameter
+  concept: f4_m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  value: 2000
+- id: claim2955
+  type: parameter
+  concept: antiformant_m
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  lower_bound: 750
+  upper_bound: 1250
+- id: claim2956
+  type: parameter
+  concept: antiformant_n
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+  lower_bound: 1450
+  upper_bound: 2200
+- id: claim2957
+  type: equation
+  expression: U_0(s) = T(s) \cdot U_s(s)
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+- id: claim2958
+  type: equation
+  expression: T(s) = \frac{\prod_{j=1}^{n}\left(1 - \frac{s}{s_j}\right)\left(1 -
+    \frac{s}{s_j^*}\right)}{\prod_{i=1}^{m}\left(1 - \frac{s}{s_i}\right)\left(1 -
+    \frac{s}{s_i^*}\right)} H(s)
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+- id: claim2959
+  type: equation
+  expression: P_d(s) = (s\rho / 4\pi d) \cdot \exp(-sd/c) \cdot U_0(s)
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+- id: claim2960
+  type: equation
+  expression: P_d(s) = (s\rho / 4\pi d) \cdot \exp(-sd/c) \cdot \frac{\prod_{j=1}^{n}\left(1
+    - \frac{s}{s_j}\right)\left(1 - \frac{s}{s_j^*}\right)}{\prod_{i=1}^{m}\left(1
+    - \frac{s}{s_i}\right)\left(1 - \frac{s}{s_i^*}\right)} H(s) \cdot U_s(s)
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0
+- id: claim2961
+  type: equation
+  expression: \kappa \omega E(\omega) = K(\omega) \frac{\left|\prod_{j=1}^{n}\left(1
+    - \frac{j\omega}{\sigma_j + j\omega_j}\right)\left(1 - \frac{j\omega}{\sigma_j
+    - j\omega_j}\right)\right|}{\left|\prod_{i=1}^{m}\left(1 - \frac{j\omega}{\sigma_i
+    + j\omega_i}\right)\left(1 - \frac{j\omega}{\sigma_i - j\omega_i}\right)\right|}
+  provenance:
+    paper: Fujimura_1962_NasalConsonantAnalysis
+    page: 0

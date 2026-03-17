@@ -1,0 +1,268 @@
+source:
+  paper: Barreda_2015_FormantSpeakerSize
+claims:
+- id: claim489
+  type: parameter
+  concept: baseline_f1_i
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 295
+  unit: Hz
+- id: claim490
+  type: parameter
+  concept: baseline_f2_i
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2262
+  unit: Hz
+- id: claim491
+  type: parameter
+  concept: baseline_f3_i
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2900
+  unit: Hz
+- id: claim492
+  type: parameter
+  concept: baseline_f1
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 755
+  unit: Hz
+- id: claim493
+  type: parameter
+  concept: baseline_f2
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 1576
+  unit: Hz
+- id: claim494
+  type: parameter
+  concept: baseline_f3
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2441
+  unit: Hz
+- id: claim495
+  type: parameter
+  concept: baseline_f1
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 458
+  unit: Hz
+- id: claim496
+  type: parameter
+  concept: baseline_f2
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 1100
+  unit: Hz
+- id: claim497
+  type: parameter
+  concept: baseline_f3
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2392
+  unit: Hz
+- id: claim498
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 3500
+  unit: Hz
+- id: claim499
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 3500
+  unit: Hz
+- id: claim500
+  type: parameter
+  concept: vtl_step_size
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 0.077
+  unit: log-Hz
+- id: claim501
+  type: parameter
+  concept: vtl_total_range
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 16
+  unit: '%'
+- id: claim502
+  type: parameter
+  concept: low_f0
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  unit: Hz
+- id: claim503
+  type: parameter
+  concept: high_f0
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  unit: Hz
+- id: claim504
+  type: parameter
+  concept: vowel_duration
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 200
+  unit: ms
+- id: claim505
+  type: parameter
+  concept: interstimulus_interval
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 250
+  unit: ms
+- id: claim506
+  type: parameter
+  concept: formant_bandwidth
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  unit: '% of Fc'
+- id: claim507
+  type: parameter
+  concept: women_f1
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 3.09
+- id: claim508
+  type: parameter
+  concept: women_f2
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 4.49
+- id: claim509
+  type: parameter
+  concept: women_f3
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2.09
+- id: claim510
+  type: parameter
+  concept: women_f4
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 0.62
+- id: claim511
+  type: parameter
+  concept: men_f1
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 3.22
+- id: claim512
+  type: parameter
+  concept: men_f2
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 4.34
+- id: claim513
+  type: parameter
+  concept: men_f3
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2.06
+- id: claim514
+  type: parameter
+  concept: men_f4
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 0.54
+- id: claim515
+  type: parameter
+  concept: children_f1
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2.78
+- id: claim516
+  type: parameter
+  concept: children_f2
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 4.2
+- id: claim517
+  type: parameter
+  concept: children_f3
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 2.03
+- id: claim518
+  type: parameter
+  concept: children_f4
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+  value: 0.93
+- id: claim519
+  type: equation
+  expression: p(\text{success}_i) = \text{logistic}(\theta_i) = \frac{\exp(\theta_i)}{\exp(\theta_i)
+    + 1}
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+- id: claim520
+  type: equation
+  expression: \theta_i = \alpha_0 + \alpha_F + \alpha_V + \alpha_{\Delta VTL} + \alpha_S
+    + \alpha_{F \times V} + \alpha_{\Delta VTL \times F} + \alpha_{\Delta VTL \times
+    V}
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+- id: claim521
+  type: equation
+  expression: p(\text{reference taller}_i) = \text{logistic}(\theta_i)
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+- id: claim522
+  type: equation
+  expression: \theta_i = \alpha_i + \beta_i \times VTL_i
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+- id: claim523
+  type: equation
+  expression: \alpha_i = \alpha_0 + \alpha_F + \alpha_V + \alpha_S + \alpha_{F \times
+    V}
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0
+- id: claim524
+  type: equation
+  expression: \beta_i = \beta_0 + \beta_F + \beta_V + \beta_S + \beta_{F \times V}
+  provenance:
+    paper: Barreda_2015_FormantSpeakerSize
+    page: 0

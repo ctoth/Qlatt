@@ -1,0 +1,75 @@
+source:
+  paper: Gay_1977_ArticulatoryMovementsVCV
+claims:
+- id: claim2974
+  type: parameter
+  concept: ipi
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 340
+- id: claim2975
+  type: parameter
+  concept: api
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 360
+- id: claim2976
+  type: parameter
+  concept: upi
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 360
+- id: claim2977
+  type: parameter
+  concept: iti
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 360
+- id: claim2978
+  type: parameter
+  concept: ati
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 320
+- id: claim2979
+  type: parameter
+  concept: uti
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 350
+- id: claim2980
+  type: parameter
+  concept: iki
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 320
+- id: claim2981
+  type: parameter
+  concept: aki
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 360
+- id: claim2982
+  type: parameter
+  concept: uki
+  provenance:
+    paper: Gay_1977_ArticulatoryMovementsVCV
+    page: 0
+  unit: FSC
+  value: 350

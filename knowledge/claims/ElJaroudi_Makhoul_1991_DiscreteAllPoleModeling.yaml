@@ -1,0 +1,255 @@
+source:
+  paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+claims:
+- id: claim1933
+  type: parameter
+  concept: lpc_er_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 7.0
+- id: claim1934
+  type: parameter
+  concept: lpc_er_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.3
+- id: claim1935
+  type: parameter
+  concept: lpc_er_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.6
+- id: claim1936
+  type: parameter
+  concept: lpc_er_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.0
+- id: claim1937
+  type: parameter
+  concept: lpc_i_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 6.6
+- id: claim1938
+  type: parameter
+  concept: lpc_i_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.8
+- id: claim1939
+  type: parameter
+  concept: lpc_i_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.7
+- id: claim1940
+  type: parameter
+  concept: lpc_i_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.1
+- id: claim1941
+  type: parameter
+  concept: lpc_u_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 6.3
+- id: claim1942
+  type: parameter
+  concept: lpc_u_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.3
+- id: claim1943
+  type: parameter
+  concept: lpc_u_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.0
+- id: claim1944
+  type: parameter
+  concept: lpc_u_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.9
+- id: claim1945
+  type: parameter
+  concept: dap_er_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.8
+- id: claim1946
+  type: parameter
+  concept: dap_er_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.0
+- id: claim1947
+  type: parameter
+  concept: dap_er_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.9
+- id: claim1948
+  type: parameter
+  concept: dap_er_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.2
+- id: claim1949
+  type: parameter
+  concept: dap_i_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 3.0
+- id: claim1950
+  type: parameter
+  concept: dap_i_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.2
+- id: claim1951
+  type: parameter
+  concept: dap_i_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.3
+- id: claim1952
+  type: parameter
+  concept: dap_i_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.1
+- id: claim1953
+  type: parameter
+  concept: dap_u_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.4
+- id: claim1954
+  type: parameter
+  concept: dap_u_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.8
+- id: claim1955
+  type: parameter
+  concept: dap_u_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.2
+- id: claim1956
+  type: parameter
+  concept: dap_u_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.2
+- id: claim1957
+  type: parameter
+  concept: wdap_er_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.8
+- id: claim1958
+  type: parameter
+  concept: wdap_er_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 1.1
+- id: claim1959
+  type: parameter
+  concept: wdap_er_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.9
+- id: claim1960
+  type: parameter
+  concept: wdap_er_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.1
+- id: claim1961
+  type: parameter
+  concept: wdap_i_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.3
+- id: claim1962
+  type: parameter
+  concept: wdap_i_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.2
+- id: claim1963
+  type: parameter
+  concept: wdap_i_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.7
+- id: claim1964
+  type: parameter
+  concept: wdap_i_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.1
+- id: claim1965
+  type: parameter
+  concept: wdap_u_f1
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 2.2
+- id: claim1966
+  type: parameter
+  concept: wdap_u_f2
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.8
+- id: claim1967
+  type: parameter
+  concept: wdap_u_f3
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.3
+- id: claim1968
+  type: parameter
+  concept: wdap_u_e_db
+  provenance:
+    paper: ElJaroudi_Makhoul_1991_DiscreteAllPoleModeling
+    page: 0
+  value: 0.1

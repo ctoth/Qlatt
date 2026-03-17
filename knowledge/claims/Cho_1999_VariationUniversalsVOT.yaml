@@ -1,0 +1,317 @@
+source:
+  paper: Cho_1999_VariationUniversalsVOT
+claims:
+- id: claim1364
+  type: parameter
+  concept: bilabial_p
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  lower_bound: 10
+  upper_bound: 22
+  unit: ms
+- id: claim1365
+  type: parameter
+  concept: dental_alveolar_t
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  lower_bound: 6
+  upper_bound: 76
+  unit: ms
+- id: claim1366
+  type: parameter
+  concept: velar_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  lower_bound: 20
+  upper_bound: 95
+  unit: ms
+- id: claim1367
+  type: parameter
+  concept: ph_cantonese
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 77
+- id: claim1368
+  type: parameter
+  concept: ph_english
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 58
+- id: claim1369
+  type: parameter
+  concept: ph_eastern_armenian
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 78
+- id: claim1370
+  type: parameter
+  concept: ph_korean
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 91
+- id: claim1371
+  type: parameter
+  concept: th_cantonese
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 75
+- id: claim1372
+  type: parameter
+  concept: th_english
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 70
+- id: claim1373
+  type: parameter
+  concept: th_eastern_armenian
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 59
+- id: claim1374
+  type: parameter
+  concept: th_korean
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 94
+- id: claim1375
+  type: parameter
+  concept: kh_cantonese
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 87
+- id: claim1376
+  type: parameter
+  concept: kh_english
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 80
+- id: claim1377
+  type: parameter
+  concept: kh_eastern_armenian
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 98
+- id: claim1378
+  type: parameter
+  concept: kh_korean
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 126
+- id: claim1379
+  type: parameter
+  concept: apache_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 46
+- id: claim1380
+  type: parameter
+  concept: apache_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 60
+- id: claim1381
+  type: parameter
+  concept: hupa_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 93
+- id: claim1382
+  type: parameter
+  concept: hupa_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 80
+- id: claim1383
+  type: parameter
+  concept: hupa_uvular
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 89
+- id: claim1384
+  type: parameter
+  concept: montana_salish_bilabial
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 81
+- id: claim1385
+  type: parameter
+  concept: montana_salish_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 65
+- id: claim1386
+  type: parameter
+  concept: montana_salish_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 86
+- id: claim1387
+  type: parameter
+  concept: montana_salish_uvular
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 81
+- id: claim1388
+  type: parameter
+  concept: navajo_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 108
+- id: claim1389
+  type: parameter
+  concept: navajo_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 94
+- id: claim1390
+  type: parameter
+  concept: tlingit_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 95
+- id: claim1391
+  type: parameter
+  concept: tlingit_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 84
+- id: claim1392
+  type: parameter
+  concept: tlingit_uvular
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 117
+- id: claim1393
+  type: parameter
+  concept: yapese_bilabial
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 60
+- id: claim1394
+  type: parameter
+  concept: yapese_alveolar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 64
+- id: claim1395
+  type: parameter
+  concept: yapese_velar
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 78
+- id: claim1396
+  type: parameter
+  concept: apache_unaspirated_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 31
+- id: claim1397
+  type: parameter
+  concept: apache_ejective_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 60
+- id: claim1398
+  type: parameter
+  concept: apache_aspirated_kh
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 80
+- id: claim1399
+  type: parameter
+  concept: hupa_unaspirated_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 44
+- id: claim1400
+  type: parameter
+  concept: hupa_ejective_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 80
+- id: claim1401
+  type: parameter
+  concept: hupa_aspirated_kh
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 84
+- id: claim1402
+  type: parameter
+  concept: navajo_unaspirated_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 45
+- id: claim1403
+  type: parameter
+  concept: navajo_ejective_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 94
+- id: claim1404
+  type: parameter
+  concept: navajo_aspirated_kh
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 154
+- id: claim1405
+  type: parameter
+  concept: tlingit_unaspirated_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 28
+- id: claim1406
+  type: parameter
+  concept: tlingit_ejective_k
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 84
+- id: claim1407
+  type: parameter
+  concept: tlingit_aspirated_kh
+  provenance:
+    paper: Cho_1999_VariationUniversalsVOT
+    page: 0
+  value: 128

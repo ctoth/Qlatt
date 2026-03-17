@@ -1,0 +1,100 @@
+source:
+  paper: Bjorklund_2016_SubglottalPressureSPL
+claims:
+- id: claim719
+  type: parameter
+  concept: spl_at_ps10_cm_h2o
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: dB at 0.3 m
+- id: claim720
+  type: parameter
+  concept: spl_gain_per_ps_doubling
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: dB
+- id: claim721
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: cm H2O
+- id: claim722
+  type: parameter
+  concept: sound_pressure_level
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: dB
+- id: claim723
+  type: parameter
+  concept: regression_slope
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: dB/doubling
+- id: claim724
+  type: parameter
+  concept: spl_at_reference_ps
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  unit: dB
+- id: claim725
+  type: parameter
+  concept: correlation_coefficient
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+  value: 0.83
+- id: claim726
+  type: equation
+  expression: SPL = a + b \cdot \log_2(P_s)
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim727
+  type: observation
+  statement: SPL must increase monotonically with Ps (positive correlation)
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim728
+  type: observation
+  statement: Correlation between log2(Ps) and SPL should be >= 0.7 for healthy voices
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim729
+  type: observation
+  statement: At Ps = 10 cm H2O, SPL should be in range 75-85 dB at 0.3 m
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim730
+  type: observation
+  statement: Doubling Ps should increase SPL by 8-12 dB (healthy untrained voice)
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim731
+  type: observation
+  statement: Pitch should not significantly affect the Ps-SPL slope
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0
+- id: claim732
+  type: observation
+  statement: Male SPL at equivalent Ps should be slightly higher than female SPL
+  concepts: []
+  provenance:
+    paper: Bjorklund_2016_SubglottalPressureSPL
+    page: 0

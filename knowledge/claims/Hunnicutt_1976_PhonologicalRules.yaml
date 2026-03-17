@@ -1,0 +1,17 @@
+source:
+  paper: Hunnicutt_1976_PhonologicalRules
+claims:
+- id: claim4592
+  type: parameter
+  concept: consonant_rules
+  provenance:
+    paper: Hunnicutt_1976_PhonologicalRules
+    page: 0
+  value: 127
+- id: claim4593
+  type: parameter
+  concept: vowel_rules
+  provenance:
+    paper: Hunnicutt_1976_PhonologicalRules
+    page: 0
+  value: 206

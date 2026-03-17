@@ -1,0 +1,194 @@
+source:
+  paper: Yunusova_2012_LingualConsonantTargets
+claims:
+- id: claim11156
+  type: parameter
+  concept: speaking_rate
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: ms/syl
+  value: 271.37
+- id: claim11157
+  type: parameter
+  concept: tf_sensor_placement
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: cm
+  value: 1.3
+- id: claim11158
+  type: parameter
+  concept: tb_sensor_placement
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: cm
+  value: 2.1
+- id: claim11159
+  type: parameter
+  concept: palate_height
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 13.98
+- id: claim11160
+  type: parameter
+  concept: palate_height
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 11.45
+- id: claim11161
+  type: parameter
+  concept: palate_width
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 34.99
+- id: claim11162
+  type: parameter
+  concept: palate_width
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 31.99
+- id: claim11163
+  type: parameter
+  concept: palate_length
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 35.21
+- id: claim11164
+  type: parameter
+  concept: palate_length
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 30.79
+- id: claim11165
+  type: parameter
+  concept: palate_curvature
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: SD
+  value: 1.86
+- id: claim11166
+  type: parameter
+  concept: palate_curvature
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: SD
+  value: 1.85
+- id: claim11167
+  type: parameter
+  concept: max_overlap
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: SD
+  value: 0.64
+- id: claim11168
+  type: parameter
+  concept: max_overlap
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: SD
+  value: 0.7
+- id: claim11169
+  type: parameter
+  concept: d_t
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 1.52
+- id: claim11170
+  type: parameter
+  concept: z_s
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 1.36
+- id: claim11171
+  type: parameter
+  concept: g_k
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 2.14
+- id: claim11172
+  type: parameter
+  concept: alveolars
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 1.44
+- id: claim11173
+  type: parameter
+  concept: postalveolars
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 1.27
+- id: claim11174
+  type: parameter
+  concept: stops_vs_postalveolars
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 2.93
+- id: claim11175
+  type: parameter
+  concept: fricatives_vs_postalveolars
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+  unit: mm
+  value: 4.32
+- id: claim11176
+  type: equation
+  expression: f(v) = \frac{1}{n} \sum_{i=1}^{n} \Phi(v; w_i, h)
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+- id: claim11177
+  type: equation
+  expression: \Phi(v; w_i, h) = \prod_{j=1}^{3} \frac{1}{\sqrt{2\pi}h_j} \exp[-(v_j
+    - w_{i,j})^2 / 2h_j^2]
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+- id: claim11178
+  type: equation
+  expression: h_j = n^{-1/7} \cdot \text{sd}(w_{1,j}, w_{2,j}, ..., w_{n,j})
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+- id: claim11179
+  type: equation
+  expression: \text{overlap} = \int \min[f(v), g(v)] \, dv
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0
+- id: claim11180
+  type: equation
+  expression: O_2 = 1.28 - 0.0017 \cdot R - 0.339 \cdot \alpha
+  provenance:
+    paper: Yunusova_2012_LingualConsonantTargets
+    page: 0

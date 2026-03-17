@@ -1,0 +1,43 @@
+source:
+  paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+claims:
+- id: claim990
+  type: parameter
+  concept: tl
+  provenance:
+    paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+    page: 0
+  lower_bound: 0
+  upper_bound: 24
+- id: claim991
+  type: parameter
+  concept: fl
+  provenance:
+    paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+    page: 0
+  lower_bound: 0
+  upper_bound: 100
+- id: claim992
+  type: parameter
+  concept: di
+  provenance:
+    paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+    page: 0
+  lower_bound: 0
+  upper_bound: 100
+- id: claim993
+  type: parameter
+  concept: btp
+  provenance:
+    paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+    page: 0
+  unit: glob
+  value: 180
+- id: claim994
+  type: parameter
+  concept: bnp
+  provenance:
+    paper: Burkhardt_2009_VoiceQualityFormantSynthesis
+    page: 0
+  unit: glob
+  value: 100

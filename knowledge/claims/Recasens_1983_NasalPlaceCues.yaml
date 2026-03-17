@@ -1,0 +1,304 @@
+source:
+  paper: Recasens_1983_NasalPlaceCues
+claims:
+- id: claim7534
+  type: parameter
+  concept: m_n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 200
+- id: claim7535
+  type: parameter
+  concept: m_n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 160
+- id: claim7536
+  type: parameter
+  concept: m_n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1120
+- id: claim7537
+  type: parameter
+  concept: m_n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1360
+- id: claim7538
+  type: parameter
+  concept: m_n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2100
+- id: claim7539
+  type: parameter
+  concept: n_n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 250
+- id: claim7540
+  type: parameter
+  concept: n_n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 180
+- id: claim7541
+  type: parameter
+  concept: n_n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 850
+- id: claim7542
+  type: parameter
+  concept: n_n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1550
+- id: claim7543
+  type: parameter
+  concept: n_n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2025
+- id: claim7544
+  type: parameter
+  concept: n_nz
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1780
+- id: claim7545
+  type: parameter
+  concept: n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 250
+- id: claim7546
+  type: parameter
+  concept: n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 150
+- id: claim7547
+  type: parameter
+  concept: n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1025
+- id: claim7548
+  type: parameter
+  concept: n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2100
+- id: claim7549
+  type: parameter
+  concept: n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 3125
+- id: claim7550
+  type: parameter
+  concept: nz
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2650
+- id: claim7551
+  type: parameter
+  concept: n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 350
+- id: claim7552
+  type: parameter
+  concept: n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 200
+- id: claim7553
+  type: parameter
+  concept: n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1200
+- id: claim7554
+  type: parameter
+  concept: n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2030
+- id: claim7555
+  type: parameter
+  concept: n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2540
+- id: claim7556
+  type: parameter
+  concept: nz
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 3700
+- id: claim7557
+  type: parameter
+  concept: m_n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 255
+- id: claim7558
+  type: parameter
+  concept: m_n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 69
+- id: claim7559
+  type: parameter
+  concept: m_n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1015
+- id: claim7560
+  type: parameter
+  concept: m_n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1300
+- id: claim7561
+  type: parameter
+  concept: m_n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1620
+- id: claim7562
+  type: parameter
+  concept: n_n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 285
+- id: claim7563
+  type: parameter
+  concept: n_n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 37
+- id: claim7564
+  type: parameter
+  concept: n_n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1035
+- id: claim7565
+  type: parameter
+  concept: n_n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1515
+- id: claim7566
+  type: parameter
+  concept: n_n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2130
+- id: claim7567
+  type: parameter
+  concept: n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 295
+- id: claim7568
+  type: parameter
+  concept: n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 58
+- id: claim7569
+  type: parameter
+  concept: n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1055
+- id: claim7570
+  type: parameter
+  concept: n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1760
+- id: claim7571
+  type: parameter
+  concept: n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2265
+- id: claim7572
+  type: parameter
+  concept: n1
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 295
+- id: claim7573
+  type: parameter
+  concept: n1_bw
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 50
+- id: claim7574
+  type: parameter
+  concept: n2
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1060
+- id: claim7575
+  type: parameter
+  concept: n3
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 1530
+- id: claim7576
+  type: parameter
+  concept: n4
+  provenance:
+    paper: Recasens_1983_NasalPlaceCues
+    page: 0
+  value: 2215

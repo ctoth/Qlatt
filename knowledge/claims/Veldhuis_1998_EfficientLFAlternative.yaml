@@ -1,0 +1,35 @@
+source:
+  paper: Veldhuis_1998_EfficientLFAlternative
+claims:
+- id: claim10842
+  type: parameter
+  concept: lf_sample
+  provenance:
+    paper: Veldhuis_1998_EfficientLFAlternative
+    page: 0
+  unit: us
+  value: 9.4
+- id: claim10843
+  type: parameter
+  concept: r_sample
+  provenance:
+    paper: Veldhuis_1998_EfficientLFAlternative
+    page: 0
+  unit: us
+  value: 13.6
+- id: claim10844
+  type: parameter
+  concept: lf_update
+  provenance:
+    paper: Veldhuis_1998_EfficientLFAlternative
+    page: 0
+  unit: us
+  value: 57.8
+- id: claim10845
+  type: parameter
+  concept: r_update
+  provenance:
+    paper: Veldhuis_1998_EfficientLFAlternative
+    page: 0
+  unit: us
+  value: 10.7

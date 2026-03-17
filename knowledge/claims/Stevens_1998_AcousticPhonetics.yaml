@@ -1,0 +1,2343 @@
+source:
+  paper: Stevens_1998_AcousticPhonetics
+claims:
+- id: claim8612
+  type: parameter
+  concept: trachea_crosssectional_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2.5
+  unit: cm^2
+- id: claim8613
+  type: parameter
+  concept: trachea_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8614
+  type: parameter
+  concept: vital_capacity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3
+- id: claim8615
+  type: parameter
+  concept: normal_breathing_volume_excursions
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3
+- id: claim8616
+  type: parameter
+  concept: speech_lung_volume_excursions
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3
+- id: claim8617
+  type: parameter
+  concept: lung_pressure_during_speech
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm H2O
+- id: claim8618
+  type: parameter
+  concept: vocal_fold_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8619
+  type: parameter
+  concept: cartilaginous_portion
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8620
+  type: parameter
+  concept: total_thickness
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8621
+  type: parameter
+  concept: cover_thickness_at_midpoint
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8622
+  type: parameter
+  concept: vocalis_muscle_diameter
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8623
+  type: parameter
+  concept: natural_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+- id: claim8624
+  type: parameter
+  concept: total_vocal_tract_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8625
+  type: parameter
+  concept: pharynx_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8626
+  type: parameter
+  concept: oral_cavity_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8627
+  type: parameter
+  concept: nasal_cavity_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8628
+  type: parameter
+  concept: nasal_cavity_volume
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3
+- id: claim8629
+  type: parameter
+  concept: pharyngeal_region_for_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8630
+  type: parameter
+  concept: pharyngeal_region_for_i
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8631
+  type: parameter
+  concept: oral_region
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8632
+  type: parameter
+  concept: oral_region
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8633
+  type: parameter
+  concept: velum_size
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8634
+  type: parameter
+  concept: velopharyngeal_opening
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8635
+  type: parameter
+  concept: velopharyngeal_opening
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8636
+  type: parameter
+  concept: sinus_volumes
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3 each
+- id: claim8637
+  type: parameter
+  concept: sinus_volumes
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3 each
+- id: claim8638
+  type: parameter
+  concept: lip_width
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 10
+  upper_bound: 45
+  unit: mm
+- id: claim8639
+  type: parameter
+  concept: lip_height
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 20
+  unit: mm
+- id: claim8640
+  type: parameter
+  concept: crosssectional_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 7
+  unit: cm^2
+- id: claim8641
+  type: parameter
+  concept: length_area_ratio
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0.2
+  unit: cm^-1
+- id: claim8642
+  type: parameter
+  concept: length_area_ratio
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 6.0
+  unit: cm^-1
+- id: claim8643
+  type: parameter
+  concept: air_viscosity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: dyne-s/cm^2
+- id: claim8644
+  type: parameter
+  concept: air_density
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: gm/cm^3
+- id: claim8645
+  type: parameter
+  concept: sound_velocity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm/s
+- id: claim8646
+  type: parameter
+  concept: specific_heat_ratio
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1.4
+- id: claim8647
+  type: parameter
+  concept: vowels_constriction_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0.2
+  upper_bound: 3.0
+- id: claim8648
+  type: parameter
+  concept: vowels_airflow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 200
+  upper_bound: 500
+- id: claim8649
+  type: parameter
+  concept: vowels_pressure_drop
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 3
+  upper_bound: 8
+- id: claim8650
+  type: parameter
+  concept: fricatives_constriction_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0.05
+  upper_bound: 0.2
+- id: claim8651
+  type: parameter
+  concept: fricatives_airflow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 300
+  upper_bound: 600
+- id: claim8652
+  type: parameter
+  concept: fricatives_pressure_drop
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 10
+- id: claim8653
+  type: parameter
+  concept: aspiration_constriction_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0.1
+  upper_bound: 0.4
+- id: claim8654
+  type: parameter
+  concept: aspiration_airflow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 500
+  upper_bound: 1500
+- id: claim8655
+  type: parameter
+  concept: aspiration_pressure_drop
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 10
+- id: claim8656
+  type: parameter
+  concept: stops_constriction_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0
+- id: claim8657
+  type: parameter
+  concept: stops_airflow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0
+- id: claim8658
+  type: parameter
+  concept: cyclic_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3
+- id: claim8659
+  type: parameter
+  concept: minimum_cyclic_time_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 200
+  unit: ms
+- id: claim8660
+  type: parameter
+  concept: glottal_openclose_cycle_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 80
+  upper_bound: 150
+  unit: ms
+- id: claim8661
+  type: parameter
+  concept: aspiration_interval_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: ms
+- id: claim8662
+  type: parameter
+  concept: complete_glottal_abductionadduction_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 200
+  unit: ms
+- id: claim8663
+  type: parameter
+  concept: tongue_root_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+  unit: ms
+- id: claim8664
+  type: parameter
+  concept: tongue_body_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+  unit: ms
+- id: claim8665
+  type: parameter
+  concept: soft_palate_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 200
+  upper_bound: 300
+  unit: ms
+- id: claim8666
+  type: parameter
+  concept: soft_palate_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 10
+- id: claim8667
+  type: parameter
+  concept: soft_palate_movement
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0.5
+- id: claim8668
+  type: parameter
+  concept: soft_palate_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: ms
+- id: claim8669
+  type: parameter
+  concept: soft_palate_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 7
+  upper_bound: 10
+- id: claim8670
+  type: parameter
+  concept: lips_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 50
+  upper_bound: 100
+  unit: ms
+- id: claim8671
+  type: parameter
+  concept: lips_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 200
+  upper_bound: 300
+  unit: ms
+- id: claim8672
+  type: parameter
+  concept: lips_duration
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 150
+  upper_bound: 200
+  unit: ms
+- id: claim8673
+  type: parameter
+  concept: labial_rate_of_area_change
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+- id: claim8674
+  type: parameter
+  concept: alveolar_rate_of_area_change
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 50
+  upper_bound: 100
+- id: claim8675
+  type: parameter
+  concept: velar_rate_of_area_change
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 25
+- id: claim8676
+  type: parameter
+  concept: lower_mass_per_unit_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: gm/cm
+- id: claim8677
+  type: parameter
+  concept: upper_mass_per_unit_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: gm/cm
+- id: claim8678
+  type: parameter
+  concept: compliance
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2/dyne
+- id: claim8679
+  type: parameter
+  concept: coupling_compliance
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2/dyne
+- id: claim8680
+  type: parameter
+  concept: rest_position
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8681
+  type: parameter
+  concept: vertical_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8682
+  type: parameter
+  concept: glottal_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8683
+  type: parameter
+  concept: natural_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+- id: claim8684
+  type: parameter
+  concept: natural_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+- id: claim8685
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 9.0
+- id: claim8686
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 126
+- id: claim8687
+  type: parameter
+  concept: sound_pressure_level
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 86.0
+- id: claim8688
+  type: parameter
+  concept: max_airflow_declination_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 481
+- id: claim8689
+  type: parameter
+  concept: dc_component_of_flow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 110
+- id: claim8690
+  type: parameter
+  concept: ac_flow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 380
+- id: claim8691
+  type: parameter
+  concept: average_flow
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 200
+- id: claim8692
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Measured
+  value: 0.57
+- id: claim8693
+  type: parameter
+  concept: labial_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+- id: claim8694
+  type: parameter
+  concept: alveolar_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 50
+  upper_bound: 100
+- id: claim8695
+  type: parameter
+  concept: velar_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 25
+- id: claim8696
+  type: parameter
+  concept: adult_female_tract_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 14.1
+- id: claim8697
+  type: parameter
+  concept: adult_female_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 630
+  unit: Hz
+- id: claim8698
+  type: parameter
+  concept: adult_female_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1880
+  unit: Hz
+- id: claim8699
+  type: parameter
+  concept: adult_female_f3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3140
+  unit: Hz
+- id: claim8700
+  type: parameter
+  concept: adult_male_tract_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 16.9
+- id: claim8701
+  type: parameter
+  concept: adult_male_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 520
+  unit: Hz
+- id: claim8702
+  type: parameter
+  concept: adult_male_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1570
+  unit: Hz
+- id: claim8703
+  type: parameter
+  concept: adult_male_f3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2620
+  unit: Hz
+- id: claim8704
+  type: parameter
+  concept: adult_male_tract_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 17.7
+- id: claim8705
+  type: parameter
+  concept: adult_male_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 500
+  unit: Hz
+- id: claim8706
+  type: parameter
+  concept: adult_male_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1500
+  unit: Hz
+- id: claim8707
+  type: parameter
+  concept: adult_male_f3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2500
+  unit: Hz
+- id: claim8708
+  type: parameter
+  concept: adult_male_f4
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3500
+  unit: Hz
+- id: claim8709
+  type: parameter
+  concept: f1_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 500
+  unit: Hz
+- id: claim8710
+  type: parameter
+  concept: f1_b_radiation
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2
+  unit: Hz
+- id: claim8711
+  type: parameter
+  concept: f1_b_wall
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 11
+  unit: Hz
+- id: claim8712
+  type: parameter
+  concept: f1_b_viscosity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5
+  unit: Hz
+- id: claim8713
+  type: parameter
+  concept: f1_b_heat
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3
+  unit: Hz
+- id: claim8714
+  type: parameter
+  concept: f1_b_total
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 21
+  unit: Hz
+- id: claim8715
+  type: parameter
+  concept: f2_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1500
+  unit: Hz
+- id: claim8716
+  type: parameter
+  concept: f2_b_radiation
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 16
+  unit: Hz
+- id: claim8717
+  type: parameter
+  concept: f2_b_viscosity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 8
+  unit: Hz
+- id: claim8718
+  type: parameter
+  concept: f2_b_heat
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 4
+  unit: Hz
+- id: claim8719
+  type: parameter
+  concept: f2_b_total
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 28
+  unit: Hz
+- id: claim8720
+  type: parameter
+  concept: f3_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2500
+  unit: Hz
+- id: claim8721
+  type: parameter
+  concept: f3_b_radiation
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: Hz
+- id: claim8722
+  type: parameter
+  concept: f3_b_viscosity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 11
+  unit: Hz
+- id: claim8723
+  type: parameter
+  concept: f3_b_heat
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5
+  unit: Hz
+- id: claim8724
+  type: parameter
+  concept: f3_b_total
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 66
+  unit: Hz
+- id: claim8725
+  type: parameter
+  concept: f4_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3500
+  unit: Hz
+- id: claim8726
+  type: parameter
+  concept: f4_b_radiation
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 90
+  unit: Hz
+- id: claim8727
+  type: parameter
+  concept: f4_b_viscosity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 14
+  unit: Hz
+- id: claim8728
+  type: parameter
+  concept: f4_b_heat
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 6
+  unit: Hz
+- id: claim8729
+  type: parameter
+  concept: f4_b_total
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 110
+  unit: Hz
+- id: claim8730
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 592
+- id: claim8731
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 1682
+- id: claim8732
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 2804
+- id: claim8733
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 3927
+- id: claim8734
+  type: parameter
+  concept: nasal_murmur
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim8735
+  type: parameter
+  concept: nasal_murmur
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim8736
+  type: parameter
+  concept: sinus_coupling
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+- id: claim8737
+  type: parameter
+  concept: 1_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 700
+  unit: Hz
+- id: claim8738
+  type: parameter
+  concept: 1_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 600
+  unit: Hz
+- id: claim8739
+  type: parameter
+  concept: 2_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1650
+  unit: Hz
+- id: claim8740
+  type: parameter
+  concept: 2_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1550
+  unit: Hz
+- id: claim8741
+  type: parameter
+  concept: 3_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2350
+  unit: Hz
+- id: claim8742
+  type: parameter
+  concept: 3_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2200
+  unit: Hz
+- id: claim8743
+  type: parameter
+  concept: ear_canal_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8744
+  type: parameter
+  concept: outer_diameter
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm
+- id: claim8745
+  type: parameter
+  concept: crosssectional_area
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8746
+  type: parameter
+  concept: resonance_frequency
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+- id: claim8747
+  type: parameter
+  concept: gain_at_resonance
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: dB
+- id: claim8748
+  type: parameter
+  concept: cochlear_length
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 35
+  unit: mm
+- id: claim8749
+  type: parameter
+  concept: effective_diameter
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8750
+  type: parameter
+  concept: basilar_membrane_width
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8751
+  type: parameter
+  concept: basilar_membrane_width
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0.52
+  unit: mm
+- id: claim8752
+  type: parameter
+  concept: stapes_velocity_at_1_khz
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3/s per dyne/cm^2
+- id: claim8753
+  type: parameter
+  concept: '13'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 1850
+- id: claim8754
+  type: parameter
+  concept: '14'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 2150
+- id: claim8755
+  type: parameter
+  concept: '15'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 2500
+- id: claim8756
+  type: parameter
+  concept: '16'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 2900
+- id: claim8757
+  type: parameter
+  concept: '17'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 3400
+- id: claim8758
+  type: parameter
+  concept: '18'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 4000
+- id: claim8759
+  type: parameter
+  concept: '19'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 4800
+- id: claim8760
+  type: parameter
+  concept: '20'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 5800
+- id: claim8761
+  type: parameter
+  concept: '21'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 7000
+- id: claim8762
+  type: parameter
+  concept: '22'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 8500
+- id: claim8763
+  type: parameter
+  concept: '23'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 10500
+- id: claim8764
+  type: parameter
+  concept: '24'
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: Hz
+  value: 13500
+- id: claim8765
+  type: parameter
+  concept: i
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 270
+- id: claim8766
+  type: parameter
+  concept: e
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 460
+- id: claim8767
+  type: parameter
+  concept: ae
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 660
+- id: claim8768
+  type: parameter
+  concept: a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 730
+- id: claim8769
+  type: parameter
+  concept: o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 450
+- id: claim8770
+  type: parameter
+  concept: u
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: M
+  value: 300
+- id: claim8771
+  type: parameter
+  concept: i_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0.9
+- id: claim8772
+  type: parameter
+  concept: i_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1.4
+- id: claim8773
+  type: parameter
+  concept: u_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1.6
+- id: claim8774
+  type: parameter
+  concept: u_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1.7
+- id: claim8775
+  type: parameter
+  concept: a_female
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5.2
+- id: claim8776
+  type: parameter
+  concept: a_male
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5.2
+- id: claim8777
+  type: parameter
+  concept: f1_nonnasal_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 550
+- id: claim8778
+  type: parameter
+  concept: f1_nonnasal_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 720
+- id: claim8779
+  type: parameter
+  concept: f1_nonnasal_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 720
+  unit: Hz
+- id: claim8780
+  type: parameter
+  concept: fn_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1625
+- id: claim8781
+  type: parameter
+  concept: fn_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1745
+- id: claim8782
+  type: parameter
+  concept: fn_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1500
+  unit: Hz
+- id: claim8783
+  type: parameter
+  concept: fm_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 750
+- id: claim8784
+  type: parameter
+  concept: fm_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 750
+- id: claim8785
+  type: parameter
+  concept: fm_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 910
+  unit: Hz
+- id: claim8786
+  type: parameter
+  concept: fz_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 820
+- id: claim8787
+  type: parameter
+  concept: fz_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 810
+- id: claim8788
+  type: parameter
+  concept: fz_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1145
+  unit: Hz
+- id: claim8789
+  type: parameter
+  concept: fn_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 730
+- id: claim8790
+  type: parameter
+  concept: fn_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 850
+- id: claim8791
+  type: parameter
+  concept: fn_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 910
+  unit: Hz
+- id: claim8792
+  type: parameter
+  concept: f1n_o
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 540
+- id: claim8793
+  type: parameter
+  concept: f1n_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 600
+- id: claim8794
+  type: parameter
+  concept: f1n_a
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 640
+  unit: Hz
+- id: claim8795
+  type: parameter
+  concept: time_before_implosion_with_no_effect
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: ms
+- id: claim8796
+  type: parameter
+  concept: intraoral_pressure_at_equilibrium
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm H2O
+- id: claim8797
+  type: parameter
+  concept: time_to_reach_equilibrium
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: ms
+- id: claim8798
+  type: parameter
+  concept: glottal_area_increase_during_closure
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^2
+- id: claim8799
+  type: parameter
+  concept: average_wall_displacement
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8800
+  type: parameter
+  concept: wall_displacement
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: mm
+- id: claim8801
+  type: parameter
+  concept: volume_increase_after_closure
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  unit: cm^3
+- id: claim8802
+  type: parameter
+  concept: labial_transition_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: ms
+- id: claim8803
+  type: parameter
+  concept: alveolar_transition_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 10
+- id: claim8804
+  type: parameter
+  concept: velar_transition_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: ms
+- id: claim8805
+  type: parameter
+  concept: 1_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+  unit: ms
+- id: claim8806
+  type: parameter
+  concept: 2_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1
+  upper_bound: 5
+  unit: ms
+- id: claim8807
+  type: parameter
+  concept: 3_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 15
+  unit: ms
+- id: claim8808
+  type: parameter
+  concept: 4_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 2
+  upper_bound: 15
+  unit: ms
+- id: claim8809
+  type: parameter
+  concept: 5_time
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 40
+  unit: ms
+- id: claim8810
+  type: parameter
+  concept: deltaa2_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 30
+- id: claim8811
+  type: parameter
+  concept: deltaa2_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 33
+- id: claim8812
+  type: parameter
+  concept: deltaa3_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 19
+- id: claim8813
+  type: parameter
+  concept: deltaa3_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 23
+- id: claim8814
+  type: parameter
+  concept: deltaa4_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 9
+- id: claim8815
+  type: parameter
+  concept: deltaa4_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 6
+- id: claim8816
+  type: parameter
+  concept: deltaa5_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -19
+- id: claim8817
+  type: parameter
+  concept: deltaa5_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -16
+- id: claim8818
+  type: parameter
+  concept: deltaa2_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 15
+- id: claim8819
+  type: parameter
+  concept: deltaa2_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 19
+- id: claim8820
+  type: parameter
+  concept: deltaa3_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -5
+- id: claim8821
+  type: parameter
+  concept: deltaa3_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0
+- id: claim8822
+  type: parameter
+  concept: deltaa4_measured
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -6
+- id: claim8823
+  type: parameter
+  concept: deltaa4_calculated
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -10
+- id: claim8824
+  type: parameter
+  concept: female_w_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 280
+- id: claim8825
+  type: parameter
+  concept: female_j_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 253
+- id: claim8826
+  type: parameter
+  concept: female_a1_reduction
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 12.2
+  unit: dB
+- id: claim8827
+  type: parameter
+  concept: female_a1_reduction
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 6.9
+  unit: dB
+- id: claim8828
+  type: parameter
+  concept: male_w_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 298
+- id: claim8829
+  type: parameter
+  concept: male_j_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 250
+- id: claim8830
+  type: parameter
+  concept: male_a1_reduction
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 9.1
+  unit: dB
+- id: claim8831
+  type: parameter
+  concept: male_a1_reduction
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5.1
+  unit: dB
+- id: claim8832
+  type: parameter
+  concept: female_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 360
+  upper_bound: 480
+- id: claim8833
+  type: parameter
+  concept: female_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1030
+  upper_bound: 1240
+- id: claim8834
+  type: parameter
+  concept: female_f_r
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1800
+  upper_bound: 2050
+  unit: Hz
+- id: claim8835
+  type: parameter
+  concept: male_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 330
+  upper_bound: 430
+- id: claim8836
+  type: parameter
+  concept: male_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 880
+  upper_bound: 1200
+- id: claim8837
+  type: parameter
+  concept: male_f_r
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1380
+  upper_bound: 1610
+  unit: Hz
+- id: claim8838
+  type: parameter
+  concept: prestressed_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 350
+- id: claim8839
+  type: parameter
+  concept: prestressed_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1180
+- id: claim8840
+  type: parameter
+  concept: prestressed_deltaa1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 6
+  unit: dB
+- id: claim8841
+  type: parameter
+  concept: prestressed_deltaa2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 13
+  unit: dB
+- id: claim8842
+  type: parameter
+  concept: prestressed_deltaa3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 14
+  unit: dB
+- id: claim8843
+  type: parameter
+  concept: prestressed_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 360
+- id: claim8844
+  type: parameter
+  concept: prestressed_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 900
+- id: claim8845
+  type: parameter
+  concept: prestressed_deltaa1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 9
+  unit: dB
+- id: claim8846
+  type: parameter
+  concept: prestressed_deltaa2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 13
+  unit: dB
+- id: claim8847
+  type: parameter
+  concept: prestressed_deltaa3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 12
+  unit: dB
+- id: claim8848
+  type: parameter
+  concept: poststressed_deltaa1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2
+  unit: dB
+- id: claim8849
+  type: parameter
+  concept: poststressed_deltaa2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5
+  unit: dB
+- id: claim8850
+  type: parameter
+  concept: poststressed_deltaa3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3
+  unit: dB
+- id: claim8851
+  type: parameter
+  concept: poststressed_deltaa1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1
+  unit: dB
+- id: claim8852
+  type: parameter
+  concept: poststressed_deltaa2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 5
+  unit: dB
+- id: claim8853
+  type: parameter
+  concept: poststressed_deltaa3
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 3
+  unit: dB
+- id: claim8854
+  type: parameter
+  concept: dr_vot
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: ms
+- id: claim8855
+  type: parameter
+  concept: pl_vot
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 80
+  unit: ms
+- id: claim8856
+  type: parameter
+  concept: simple_cv_voiced_vot
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 10
+  unit: ms
+- id: claim8857
+  type: parameter
+  concept: pass_a_dip_female_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 494
+- id: claim8858
+  type: parameter
+  concept: pass_a_dip_female_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1785
+- id: claim8859
+  type: parameter
+  concept: pass_a_dip_male_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 423
+- id: claim8860
+  type: parameter
+  concept: pass_a_dip_male_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1491
+  unit: Hz
+- id: claim8861
+  type: parameter
+  concept: rub_a_book_female_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 410
+- id: claim8862
+  type: parameter
+  concept: rub_a_book_female_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 1071
+- id: claim8863
+  type: parameter
+  concept: rub_a_book_male_f1
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 488
+- id: claim8864
+  type: parameter
+  concept: rub_a_book_male_f2
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 912
+  unit: Hz
+- id: claim8865
+  type: parameter
+  concept: fundamental_frequency_typical_value
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 125
+  unit: Hz
+- id: claim8866
+  type: parameter
+  concept: spectral_tilt_typical_value
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 50
+  unit: dB
+- id: claim8867
+  type: parameter
+  concept: spectral_tilt_notes
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: -6
+  unit: Hz
+- id: claim8868
+  type: parameter
+  concept: amplitude_of_voicing_typical_value
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim8869
+  type: parameter
+  concept: amplitude_of_aspiration_typical_value
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim8870
+  type: parameter
+  concept: amplitude_of_frication_typical_value
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim8871
+  type: parameter
+  concept: b1_baseline
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 50
+  upper_bound: 80
+  unit: Hz
+- id: claim8872
+  type: parameter
+  concept: b1_during_h
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 280
+  unit: Hz
+- id: claim8873
+  type: parameter
+  concept: b2_baseline
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 50
+  upper_bound: 80
+  unit: Hz
+- id: claim8874
+  type: parameter
+  concept: b3_baseline
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 80
+  upper_bound: 150
+  unit: Hz
+- id: claim8875
+  type: parameter
+  concept: labial_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+- id: claim8876
+  type: parameter
+  concept: labial_f1_transition
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: ms
+- id: claim8877
+  type: parameter
+  concept: alveolar_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+- id: claim8878
+  type: parameter
+  concept: alveolar_f1_transition
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 10
+- id: claim8879
+  type: parameter
+  concept: velar_rate
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 25
+- id: claim8880
+  type: parameter
+  concept: velar_f1_transition
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 50
+  unit: ms
+- id: claim8881
+  type: parameter
+  concept: f_front_cavity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 0.9
+- id: claim8882
+  type: parameter
+  concept: f_resonance
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 10
+  unit: kHz
+- id: claim8883
+  type: parameter
+  concept: s_front_cavity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 2.0
+- id: claim8884
+  type: parameter
+  concept: s_resonance
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 4500
+  unit: Hz
+- id: claim8885
+  type: parameter
+  concept: sh_front_cavity
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 8.5
+- id: claim8886
+  type: parameter
+  concept: lowfreq_pole_labial_m
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim8887
+  type: parameter
+  concept: lowfreq_pole_alveolar_n
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim8888
+  type: parameter
+  concept: lowfreq_pole_velar_ng
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 250
+  unit: Hz
+- id: claim8889
+  type: parameter
+  concept: lowfreq_zero_labial_m
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1000
+  upper_bound: 1200
+  unit: Hz
+- id: claim8890
+  type: parameter
+  concept: lowfreq_zero_alveolar_n
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 1600
+  upper_bound: 1900
+  unit: Hz
+- id: claim8891
+  type: parameter
+  concept: pole_bandwidth_labial_m
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim8892
+  type: parameter
+  concept: pole_bandwidth_alveolar_n
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim8893
+  type: parameter
+  concept: pole_bandwidth_velar_ng
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim8894
+  type: parameter
+  concept: f1_minimum_w
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 260
+  unit: Hz
+- id: claim8895
+  type: parameter
+  concept: f1_minimum_j
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 260
+  unit: Hz
+- id: claim8896
+  type: parameter
+  concept: f2_at_minimum_w
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 700
+  unit: Hz
+- id: claim8897
+  type: parameter
+  concept: a1_reduction_w
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 12
+  unit: dB
+- id: claim8898
+  type: parameter
+  concept: a1_reduction_j
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 5
+  upper_bound: 12
+  unit: dB
+- id: claim8899
+  type: parameter
+  concept: f1_r
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 330
+  upper_bound: 480
+  unit: Hz
+- id: claim8900
+  type: parameter
+  concept: f1_l
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 350
+  upper_bound: 360
+  unit: Hz
+- id: claim8901
+  type: parameter
+  concept: f2_r
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 880
+  upper_bound: 1240
+  unit: Hz
+- id: claim8902
+  type: parameter
+  concept: f2_l
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 900
+  upper_bound: 1180
+  unit: Hz
+- id: claim8903
+  type: parameter
+  concept: release_amplitude_rise_r
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  lower_bound: 10
+  upper_bound: 20
+  unit: ms
+- id: claim8904
+  type: parameter
+  concept: 29_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 68
+- id: claim8905
+  type: parameter
+  concept: 228_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 98
+- id: claim8906
+  type: parameter
+  concept: 39_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 140
+- id: claim8907
+  type: parameter
+  concept: 332_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 171
+- id: claim8908
+  type: parameter
+  concept: 61_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 257
+- id: claim8909
+  type: parameter
+  concept: 64_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 263
+- id: claim8910
+  type: parameter
+  concept: 617_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 287
+- id: claim8911
+  type: parameter
+  concept: 711_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 335
+- id: claim8912
+  type: parameter
+  concept: 717_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 348
+- id: claim8913
+  type: parameter
+  concept: 89_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 388
+- id: claim8914
+  type: parameter
+  concept: 834_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 424
+- id: claim8915
+  type: parameter
+  concept: 95_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 491
+- id: claim8916
+  type: parameter
+  concept: 107_page
+  provenance:
+    paper: Stevens_1998_AcousticPhonetics
+    page: 0
+  value: 571

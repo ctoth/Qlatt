@@ -1,0 +1,35 @@
+source:
+  paper: Klatt_1976_SegmentalDuration
+claims:
+- id: claim5340
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Klatt_1976_SegmentalDuration
+    page: 0
+  unit: ms
+  value: 240
+- id: claim5341
+  type: parameter
+  concept: latin_letter_small_capital_i
+  provenance:
+    paper: Klatt_1976_SegmentalDuration
+    page: 0
+  unit: ms
+  value: 160
+- id: claim5342
+  type: parameter
+  concept: b
+  provenance:
+    paper: Klatt_1976_SegmentalDuration
+    page: 0
+  unit: ms
+  value: 100
+- id: claim5343
+  type: parameter
+  concept: p
+  provenance:
+    paper: Klatt_1976_SegmentalDuration
+    page: 0
+  unit: ms
+  value: 100

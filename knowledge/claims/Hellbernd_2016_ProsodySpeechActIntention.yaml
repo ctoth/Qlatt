@@ -1,0 +1,143 @@
+source:
+  paper: Hellbernd_2016_ProsodySpeechActIntention
+claims:
+- id: claim3895
+  type: parameter
+  concept: duration
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: count
+- id: claim3896
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: Hz
+- id: claim3897
+  type: parameter
+  concept: pitch_rise
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: Hz
+- id: claim3898
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: dB
+- id: claim3899
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: dB
+- id: claim3900
+  type: parameter
+  concept: spectral_cog
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: Hz
+- id: claim3901
+  type: parameter
+  concept: spectral_sd
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  unit: Hz
+- id: claim3902
+  type: parameter
+  concept: criticism_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 25
+- id: claim3903
+  type: parameter
+  concept: criticism_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 75
+- id: claim3904
+  type: parameter
+  concept: doubt_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 50
+- id: claim3905
+  type: parameter
+  concept: doubt_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 40
+- id: claim3906
+  type: parameter
+  concept: naming_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 50
+- id: claim3907
+  type: parameter
+  concept: naming_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 20
+- id: claim3908
+  type: parameter
+  concept: suggestion_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 65
+- id: claim3909
+  type: parameter
+  concept: suggestion_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 55
+- id: claim3910
+  type: parameter
+  concept: warning_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 30
+- id: claim3911
+  type: parameter
+  concept: warning_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 90
+- id: claim3912
+  type: parameter
+  concept: wish_valence
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 70
+- id: claim3913
+  type: parameter
+  concept: wish_arousal
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: 25
+- id: claim3914
+  type: parameter
+  concept: mean_intensity_criticism
+  provenance:
+    paper: Hellbernd_2016_ProsodySpeechActIntention
+    page: 0
+  value: -0.015

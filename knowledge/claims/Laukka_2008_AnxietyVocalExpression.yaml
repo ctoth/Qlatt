@@ -1,0 +1,52 @@
+source:
+  paper: Laukka_2008_AnxietyVocalExpression
+claims:
+- id: claim5963
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: Hz
+- id: claim5964
+  type: parameter
+  concept: max_f0
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: Hz
+- id: claim5965
+  type: parameter
+  concept: f0_variability
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: Hz
+- id: claim5966
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: dB
+- id: claim5967
+  type: parameter
+  concept: highfrequency_energy
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: ratio
+- id: claim5968
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: syllables/sec
+- id: claim5969
+  type: parameter
+  concept: silent_pauses
+  provenance:
+    paper: Laukka_2008_AnxietyVocalExpression
+    page: 0
+  unit: '%'

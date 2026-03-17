@@ -1,0 +1,74 @@
+source:
+  paper: Lin_1995_CascadeIntoParallel
+claims:
+- id: claim6087
+  type: parameter
+  concept: a1
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -58
+- id: claim6088
+  type: parameter
+  concept: a2
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -65
+- id: claim6089
+  type: parameter
+  concept: a3
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -75
+- id: claim6090
+  type: parameter
+  concept: a4
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -78
+- id: claim6091
+  type: parameter
+  concept: a5
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -79
+- id: claim6092
+  type: parameter
+  concept: a6
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+  unit: dB
+  value: -80
+- id: claim6093
+  type: equation
+  expression: 'can be decomposed via partial fraction expansion into a sum (parallel
+    form):'
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+- id: claim6094
+  type: equation
+  expression: 'where the residues (alpha_i, beta_i) are computed from the pole locations
+    of ALL resonators:
+
+
+    For each pole p_i:'
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0
+- id: claim6095
+  type: equation
+  expression: 'For real second-order sections (combining conjugate pairs):'
+  provenance:
+    paper: Lin_1995_CascadeIntoParallel
+    page: 0

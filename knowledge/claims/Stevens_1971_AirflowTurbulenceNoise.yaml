@@ -1,0 +1,152 @@
+source:
+  paper: Stevens_1971_AirflowTurbulenceNoise
+claims:
+- id: claim8519
+  type: parameter
+  concept: kinetic_loss_constant
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  value: 0.9
+  lower_bound: 0.5
+  upper_bound: 1.7
+  unit: dimensionless
+- id: claim8520
+  type: parameter
+  concept: pressure_drop_exponent
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 1.0
+  upper_bound: 1.5
+  unit: dimensionless
+- id: claim8521
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  value: 8
+  lower_bound: 5
+  upper_bound: 15
+  unit: cm H₂O
+- id: claim8522
+  type: parameter
+  concept: vowel_airflow
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 50
+  upper_bound: 300
+  unit: cm³/sec
+- id: claim8523
+  type: parameter
+  concept: fricative_airflow
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 100
+  upper_bound: 1000
+  unit: cm³/sec
+- id: claim8524
+  type: parameter
+  concept: aspiration_airflow
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 300
+  upper_bound: 2000
+  unit: cm³/sec
+- id: claim8525
+  type: parameter
+  concept: fricative_constriction_area
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 0.02
+  upper_bound: 0.5
+  unit: cm²
+- id: claim8526
+  type: parameter
+  concept: vowel_constriction_area
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 0.1
+  upper_bound: 10
+  unit: cm²
+- id: claim8527
+  type: parameter
+  concept: glottal_area
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 0.02
+  upper_bound: 0.5
+  unit: cm²
+- id: claim8528
+  type: parameter
+  concept: glottal_area
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 0.05
+  upper_bound: 1.0
+  unit: cm²
+- id: claim8529
+  type: parameter
+  concept: glottal_width
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+  lower_bound: 0.1
+  upper_bound: 5.0
+  unit: mm
+- id: claim8530
+  type: equation
+  expression: \Delta P_L = k_L (\rho U^2 / 2A^2)
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8531
+  type: equation
+  expression: R = 12\mu l / bw^3
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8532
+  type: equation
+  expression: R = 128\mu l / \pi d^4
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8533
+  type: equation
+  expression: \Delta P = RU + k_L (\rho U^2 / 2A^2)
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8534
+  type: equation
+  expression: \Delta P = 0.9(\rho U^2 / 2A^2)
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8535
+  type: equation
+  expression: W = k \Delta P^3 d^2 / (\rho^2 c^3)
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8536
+  type: equation
+  expression: T_1(s) = s_1 s_1^* / (s - s_1)(s - s_1^*)
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0
+- id: claim8537
+  type: equation
+  expression: p_r \sim \Delta P^{\beta} A^{1/2}
+  provenance:
+    paper: Stevens_1971_AirflowTurbulenceNoise
+    page: 0

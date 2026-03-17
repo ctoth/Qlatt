@@ -1,0 +1,187 @@
+source:
+  paper: Delattre_1952_AcousticDeterminantsVowelColor
+claims:
+- id: claim1796
+  type: parameter
+  concept: i
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim1797
+  type: parameter
+  concept: y
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim1798
+  type: parameter
+  concept: latin_small_letter_turned_m
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim1799
+  type: parameter
+  concept: u
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 250
+- id: claim1800
+  type: parameter
+  concept: e
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 360
+- id: claim1801
+  type: parameter
+  concept: latin_small_letter_o_with_stroke
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 360
+- id: claim1802
+  type: parameter
+  concept: latin_small_letter_rams_horn
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 360
+- id: claim1803
+  type: parameter
+  concept: o
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 360
+- id: claim1804
+  type: parameter
+  concept: latin_small_letter_open_e
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 510
+- id: claim1805
+  type: parameter
+  concept: latin_small_ligature_oe
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 510
+- id: claim1806
+  type: parameter
+  concept: latin_small_letter_turned_v
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 510
+- id: claim1807
+  type: parameter
+  concept: latin_small_letter_open_o
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 510
+- id: claim1808
+  type: parameter
+  concept: latin_small_letter_ae
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim1809
+  type: parameter
+  concept: a
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim1810
+  type: parameter
+  concept: latin_small_letter_turned_alpha
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim1811
+  type: parameter
+  concept: latin_small_letter_alpha
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 750
+- id: claim1812
+  type: parameter
+  concept: u
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 240
+- id: claim1813
+  type: parameter
+  concept: o
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 480
+- id: claim1814
+  type: parameter
+  concept: latin_small_letter_open_o
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 720
+- id: claim1815
+  type: parameter
+  concept: a
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 1200
+- id: claim1816
+  type: parameter
+  concept: latin_small_letter_open_e
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 2160
+- id: claim1817
+  type: parameter
+  concept: e
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 2520
+- id: claim1818
+  type: parameter
+  concept: i
+  provenance:
+    paper: Delattre_1952_AcousticDeterminantsVowelColor
+    page: 0
+  unit: Hz
+  value: 3000

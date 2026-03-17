@@ -1,0 +1,724 @@
+source:
+  paper: EspyWilson_2000_AcousticModelingAmericanR
+claims:
+- id: claim2103
+  type: parameter
+  concept: f1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 250
+  upper_bound: 550
+  unit: Hz
+- id: claim2104
+  type: parameter
+  concept: f2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 900
+  upper_bound: 1500
+  unit: Hz
+- id: claim2105
+  type: parameter
+  concept: f3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 1300
+  upper_bound: 1950
+  unit: Hz
+- id: claim2106
+  type: parameter
+  concept: a_l_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.71
+- id: claim2107
+  type: parameter
+  concept: a_l_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.67
+- id: claim2108
+  type: parameter
+  concept: a_l_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.58
+- id: claim2109
+  type: parameter
+  concept: a_l_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.62
+- id: claim2110
+  type: parameter
+  concept: l_l_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.9
+- id: claim2111
+  type: parameter
+  concept: l_l_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.9
+- id: claim2112
+  type: parameter
+  concept: l_l_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2113
+  type: parameter
+  concept: l_l_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2114
+  type: parameter
+  concept: a_f_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.66
+- id: claim2115
+  type: parameter
+  concept: a_f_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.03
+- id: claim2116
+  type: parameter
+  concept: a_f_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.84
+- id: claim2117
+  type: parameter
+  concept: a_f_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.47
+- id: claim2118
+  type: parameter
+  concept: l_f_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2119
+  type: parameter
+  concept: l_f_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2120
+  type: parameter
+  concept: l_f_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2121
+  type: parameter
+  concept: l_f_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.5
+- id: claim2122
+  type: parameter
+  concept: a_f_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.19
+- id: claim2123
+  type: parameter
+  concept: a_f_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.58
+- id: claim2124
+  type: parameter
+  concept: a_f_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.57
+- id: claim2125
+  type: parameter
+  concept: a_f_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.05
+- id: claim2126
+  type: parameter
+  concept: l_f_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.4
+- id: claim2127
+  type: parameter
+  concept: l_f_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.4
+- id: claim2128
+  type: parameter
+  concept: l_f_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.0
+- id: claim2129
+  type: parameter
+  concept: l_f_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.7
+- id: claim2130
+  type: parameter
+  concept: a_oc_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.53
+- id: claim2131
+  type: parameter
+  concept: a_oc_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.45
+- id: claim2132
+  type: parameter
+  concept: a_oc_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.78
+- id: claim2133
+  type: parameter
+  concept: a_oc_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.87
+- id: claim2134
+  type: parameter
+  concept: l_oc_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.0
+- id: claim2135
+  type: parameter
+  concept: l_oc_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.0
+- id: claim2136
+  type: parameter
+  concept: l_oc_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.7
+- id: claim2137
+  type: parameter
+  concept: l_oc_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.0
+- id: claim2138
+  type: parameter
+  concept: a_m_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.18
+- id: claim2139
+  type: parameter
+  concept: a_m_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.07
+- id: claim2140
+  type: parameter
+  concept: a_m_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.88
+- id: claim2141
+  type: parameter
+  concept: a_m_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.7
+- id: claim2142
+  type: parameter
+  concept: l_m_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.2
+- id: claim2143
+  type: parameter
+  concept: l_m_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.2
+- id: claim2144
+  type: parameter
+  concept: l_m_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.5
+- id: claim2145
+  type: parameter
+  concept: l_m_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.2
+- id: claim2146
+  type: parameter
+  concept: a_pc_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.94
+- id: claim2147
+  type: parameter
+  concept: a_pc_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.62
+- id: claim2148
+  type: parameter
+  concept: a_pc_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.94
+- id: claim2149
+  type: parameter
+  concept: a_pc_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.93
+- id: claim2150
+  type: parameter
+  concept: l_pc_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.4
+- id: claim2151
+  type: parameter
+  concept: l_pc_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.4
+- id: claim2152
+  type: parameter
+  concept: l_pc_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.2
+- id: claim2153
+  type: parameter
+  concept: l_pc_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 4.2
+- id: claim2154
+  type: parameter
+  concept: a_b_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.56
+- id: claim2155
+  type: parameter
+  concept: a_b_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.12
+- id: claim2156
+  type: parameter
+  concept: a_b_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.53
+- id: claim2157
+  type: parameter
+  concept: a_b_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.56
+- id: claim2158
+  type: parameter
+  concept: l_b_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.3
+- id: claim2159
+  type: parameter
+  concept: l_b_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.3
+- id: claim2160
+  type: parameter
+  concept: l_b_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.6
+- id: claim2161
+  type: parameter
+  concept: l_b_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.6
+- id: claim2162
+  type: parameter
+  concept: a_b_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.29
+- id: claim2163
+  type: parameter
+  concept: a_b_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.74
+- id: claim2164
+  type: parameter
+  concept: a_b_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.12
+- id: claim2165
+  type: parameter
+  concept: a_b_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 3.25
+- id: claim2166
+  type: parameter
+  concept: l_b_pk_tipup
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 9.9
+- id: claim2167
+  type: parameter
+  concept: l_b_pk_tipdown
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 9.9
+- id: claim2168
+  type: parameter
+  concept: l_b_mi_initial
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 12.3
+- id: claim2169
+  type: parameter
+  concept: l_b_mi_syllabic
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 12.0
+- id: claim2170
+  type: parameter
+  concept: pk_tipup_section_1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.707
+- id: claim2171
+  type: parameter
+  concept: pk_tipup_section_2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.897
+- id: claim2172
+  type: parameter
+  concept: pk_tipup_section_3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.594
+- id: claim2173
+  type: parameter
+  concept: pk_tipdown_section_1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.025
+- id: claim2174
+  type: parameter
+  concept: pk_tipdown_section_2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.984
+- id: claim2175
+  type: parameter
+  concept: pk_tipdown_section_3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.465
+- id: claim2176
+  type: parameter
+  concept: mi_initial_section_1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.833
+- id: claim2177
+  type: parameter
+  concept: mi_initial_section_2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.865
+- id: claim2178
+  type: parameter
+  concept: mi_initial_section_3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.542
+- id: claim2179
+  type: parameter
+  concept: mi_initial_section_4
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.419
+- id: claim2180
+  type: parameter
+  concept: mi_initial_section_5
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.156
+- id: claim2181
+  type: parameter
+  concept: mi_syllabic_section_1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 2.88
+- id: claim2182
+  type: parameter
+  concept: mi_syllabic_section_2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1.251
+- id: claim2183
+  type: parameter
+  concept: mi_syllabic_section_3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.659
+- id: claim2184
+  type: parameter
+  concept: mi_syllabic_section_4
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 0.306
+- id: claim2185
+  type: parameter
+  concept: 3495_hz
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 202
+  upper_bound: 517
+- id: claim2186
+  type: parameter
+  concept: 13554_hz
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 989
+  upper_bound: 1698
+- id: claim2187
+  type: parameter
+  concept: 18338_hz
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 1479
+  upper_bound: 2157
+- id: claim2188
+  type: parameter
+  concept: 41108_hz
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  lower_bound: 3898
+  upper_bound: 4483
+- id: claim2189
+  type: parameter
+  concept: 19389_hz_with_sublingual
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1692.5
+  unit: Hz
+- id: claim2190
+  type: parameter
+  concept: 19389_hz_lowering
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 246
+  unit: Hz
+- id: claim2191
+  type: parameter
+  concept: 21675_hz_with_sublingual
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1947.6
+  unit: Hz
+- id: claim2192
+  type: parameter
+  concept: 21675_hz_lowering
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 220
+  unit: Hz
+- id: claim2193
+  type: parameter
+  concept: 19210_hz_with_sublingual
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1719.8
+  unit: Hz
+- id: claim2194
+  type: parameter
+  concept: 19210_hz_lowering
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 201
+  unit: Hz
+- id: claim2195
+  type: parameter
+  concept: 18835_hz_with_sublingual
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 1682.5
+  unit: Hz
+- id: claim2196
+  type: parameter
+  concept: 18835_hz_lowering
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  value: 201
+  unit: Hz
+- id: claim2197
+  type: parameter
+  concept: f1
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  unit: approx
+  lower_bound: 400
+  upper_bound: 550
+- id: claim2198
+  type: parameter
+  concept: f2
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  unit: approx
+  lower_bound: 1100
+  upper_bound: 1500
+- id: claim2199
+  type: parameter
+  concept: f3
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  unit: approx
+  lower_bound: 1700
+  upper_bound: 2000
+- id: claim2200
+  type: parameter
+  concept: f4
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0
+  unit: approx
+  lower_bound: 3300
+  upper_bound: 4300
+- id: claim2201
+  type: equation
+  expression: '(lumped approximation)
+
+
+    Or via admittance summation:'
+  provenance:
+    paper: EspyWilson_2000_AcousticModelingAmericanR
+    page: 0

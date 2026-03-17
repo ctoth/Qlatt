@@ -1,0 +1,73 @@
+source:
+  paper: Hertz_2006_HybridSynthesisRegularities
+claims:
+- id: claim4044
+  type: parameter
+  concept: acoustic_nucleus
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  unit: '**Acoustic Nucleus (AN)**'
+- id: claim4045
+  type: parameter
+  concept: acoustic_consonant_cluster
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  unit: '**Acoustic Consonant Cluster (ACC)**'
+- id: claim4046
+  type: parameter
+  concept: natural
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  unit: Familiar
+- id: claim4047
+  type: parameter
+  concept: hybrid
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  unit: Familiar
+- id: claim4048
+  type: parameter
+  concept: natural_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 1.4
+- id: claim4049
+  type: parameter
+  concept: hybrid_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 1.97
+- id: claim4050
+  type: parameter
+  concept: cbwc1_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 2.85
+- id: claim4051
+  type: parameter
+  concept: cbwc2_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 4.04
+- id: claim4052
+  type: parameter
+  concept: cbfs_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 4.21
+- id: claim4053
+  type: parameter
+  concept: rbfs_naturalness_score
+  provenance:
+    paper: Hertz_2006_HybridSynthesisRegularities
+    page: 0
+  value: 4.84

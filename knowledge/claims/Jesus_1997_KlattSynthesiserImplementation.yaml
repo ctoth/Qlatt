@@ -1,0 +1,1069 @@
+source:
+  paper: Jesus_1997_KlattSynthesiserImplementation
+claims:
+- id: claim4699
+  type: parameter
+  concept: fundamental_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4700
+  type: parameter
+  concept: fundamental_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 500
+- id: claim4701
+  type: parameter
+  concept: fundamental_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 150
+- id: claim4702
+  type: parameter
+  concept: voicing_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4703
+  type: parameter
+  concept: voicing_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4704
+  type: parameter
+  concept: voicing_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 60
+- id: claim4705
+  type: parameter
+  concept: voicing_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4706
+  type: parameter
+  concept: voicing_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4707
+  type: parameter
+  concept: voicing_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4708
+  type: parameter
+  concept: aspiration_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4709
+  type: parameter
+  concept: aspiration_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4710
+  type: parameter
+  concept: aspiration_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4711
+  type: parameter
+  concept: turbulence_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4712
+  type: parameter
+  concept: turbulence_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4713
+  type: parameter
+  concept: turbulence_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4714
+  type: parameter
+  concept: frication_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4715
+  type: parameter
+  concept: frication_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4716
+  type: parameter
+  concept: frication_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4717
+  type: parameter
+  concept: bypass_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4718
+  type: parameter
+  concept: bypass_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4719
+  type: parameter
+  concept: bypass_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4720
+  type: parameter
+  concept: spectral_tilt_at_3khz_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4721
+  type: parameter
+  concept: spectral_tilt_at_3khz_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 41
+- id: claim4722
+  type: parameter
+  concept: spectral_tilt_at_3khz_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4723
+  type: parameter
+  concept: 1st_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 150
+- id: claim4724
+  type: parameter
+  concept: 1st_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1300
+- id: claim4725
+  type: parameter
+  concept: 1st_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 350
+- id: claim4726
+  type: parameter
+  concept: 2nd_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 500
+- id: claim4727
+  type: parameter
+  concept: 2nd_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3000
+- id: claim4728
+  type: parameter
+  concept: 2nd_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2221
+- id: claim4729
+  type: parameter
+  concept: 3rd_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1200
+- id: claim4730
+  type: parameter
+  concept: 3rd_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4800
+- id: claim4731
+  type: parameter
+  concept: 3rd_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2859
+- id: claim4732
+  type: parameter
+  concept: 4th_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2400
+- id: claim4733
+  type: parameter
+  concept: 4th_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4990
+- id: claim4734
+  type: parameter
+  concept: 4th_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3664
+- id: claim4735
+  type: parameter
+  concept: 5th_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3000
+- id: claim4736
+  type: parameter
+  concept: 5th_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4990
+- id: claim4737
+  type: parameter
+  concept: 5th_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3750
+- id: claim4738
+  type: parameter
+  concept: 6th_formant_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3000
+- id: claim4739
+  type: parameter
+  concept: 6th_formant_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4990
+- id: claim4740
+  type: parameter
+  concept: 6th_formant_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4900
+- id: claim4741
+  type: parameter
+  concept: 1st_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 30
+- id: claim4742
+  type: parameter
+  concept: 1st_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4743
+  type: parameter
+  concept: 1st_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 50
+- id: claim4744
+  type: parameter
+  concept: 2nd_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4745
+  type: parameter
+  concept: 2nd_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4746
+  type: parameter
+  concept: 2nd_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 70
+- id: claim4747
+  type: parameter
+  concept: 3rd_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4748
+  type: parameter
+  concept: 3rd_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4749
+  type: parameter
+  concept: 3rd_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 110
+- id: claim4750
+  type: parameter
+  concept: 4th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4751
+  type: parameter
+  concept: 4th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4752
+  type: parameter
+  concept: 4th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 250
+- id: claim4753
+  type: parameter
+  concept: 5th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4754
+  type: parameter
+  concept: 5th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1500
+- id: claim4755
+  type: parameter
+  concept: 5th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 200
+- id: claim4756
+  type: parameter
+  concept: 6th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4757
+  type: parameter
+  concept: 6th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4000
+- id: claim4758
+  type: parameter
+  concept: 6th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4759
+  type: parameter
+  concept: 1st_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4760
+  type: parameter
+  concept: 1st_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4761
+  type: parameter
+  concept: 1st_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 50
+- id: claim4762
+  type: parameter
+  concept: 2nd_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4763
+  type: parameter
+  concept: 2nd_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4764
+  type: parameter
+  concept: 2nd_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 70
+- id: claim4765
+  type: parameter
+  concept: 3rd_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 60
+- id: claim4766
+  type: parameter
+  concept: 3rd_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4767
+  type: parameter
+  concept: 3rd_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 110
+- id: claim4768
+  type: parameter
+  concept: 4th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4769
+  type: parameter
+  concept: 4th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4770
+  type: parameter
+  concept: 4th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 250
+- id: claim4771
+  type: parameter
+  concept: 5th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4772
+  type: parameter
+  concept: 5th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1500
+- id: claim4773
+  type: parameter
+  concept: 5th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 200
+- id: claim4774
+  type: parameter
+  concept: 6th_formant_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4775
+  type: parameter
+  concept: 6th_formant_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 4000
+- id: claim4776
+  type: parameter
+  concept: 6th_formant_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4777
+  type: parameter
+  concept: 1st_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4778
+  type: parameter
+  concept: 1st_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4779
+  type: parameter
+  concept: 1st_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4780
+  type: parameter
+  concept: 2nd_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4781
+  type: parameter
+  concept: 2nd_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4782
+  type: parameter
+  concept: 2nd_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4783
+  type: parameter
+  concept: 3rd_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4784
+  type: parameter
+  concept: 3rd_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4785
+  type: parameter
+  concept: 3rd_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4786
+  type: parameter
+  concept: 4th_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4787
+  type: parameter
+  concept: 4th_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4788
+  type: parameter
+  concept: 4th_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4789
+  type: parameter
+  concept: 5th_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4790
+  type: parameter
+  concept: 5th_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4791
+  type: parameter
+  concept: 5th_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4792
+  type: parameter
+  concept: 6th_formant_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4793
+  type: parameter
+  concept: 6th_formant_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4794
+  type: parameter
+  concept: 6th_formant_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4795
+  type: parameter
+  concept: nasal_amplitude_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4796
+  type: parameter
+  concept: nasal_amplitude_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4797
+  type: parameter
+  concept: nasal_amplitude_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4798
+  type: parameter
+  concept: nasal_pole_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 180
+- id: claim4799
+  type: parameter
+  concept: nasal_pole_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 500
+- id: claim4800
+  type: parameter
+  concept: nasal_pole_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 250
+- id: claim4801
+  type: parameter
+  concept: nasal_pole_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4802
+  type: parameter
+  concept: nasal_pole_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4803
+  type: parameter
+  concept: nasal_pole_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4804
+  type: parameter
+  concept: nasal_zero_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 180
+- id: claim4805
+  type: parameter
+  concept: nasal_zero_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 500
+- id: claim4806
+  type: parameter
+  concept: nasal_zero_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 250
+- id: claim4807
+  type: parameter
+  concept: nasal_zero_bandwidth_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 40
+- id: claim4808
+  type: parameter
+  concept: nasal_zero_bandwidth_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1000
+- id: claim4809
+  type: parameter
+  concept: nasal_zero_bandwidth_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 100
+- id: claim4810
+  type: parameter
+  concept: overall_output_gain_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 0
+- id: claim4811
+  type: parameter
+  concept: overall_output_gain_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 80
+- id: claim4812
+  type: parameter
+  concept: overall_output_gain_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 47
+- id: claim4813
+  type: parameter
+  concept: number_of_cascade_resonators_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1
+- id: claim4814
+  type: parameter
+  concept: number_of_cascade_resonators_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 6
+- id: claim4815
+  type: parameter
+  concept: number_of_cascade_resonators_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5
+- id: claim4816
+  type: parameter
+  concept: sampling_frequency_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5000
+- id: claim4817
+  type: parameter
+  concept: sampling_frequency_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 10000
+- id: claim4818
+  type: parameter
+  concept: sampling_frequency_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 10000
+- id: claim4819
+  type: parameter
+  concept: frame_length_min
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5
+- id: claim4820
+  type: parameter
+  concept: frame_length_max
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5000
+- id: claim4821
+  type: parameter
+  concept: frame_length_default_typical
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5
+- id: claim4822
+  type: parameter
+  concept: i
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 225
+- id: claim4823
+  type: parameter
+  concept: e
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 390
+- id: claim4824
+  type: parameter
+  concept: e
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 651
+- id: claim4825
+  type: parameter
+  concept: a
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 714
+- id: claim4826
+  type: parameter
+  concept: '6'
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 680
+- id: claim4827
+  type: parameter
+  concept: o
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 453
+- id: claim4828
+  type: parameter
+  concept: o
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 588
+- id: claim4829
+  type: parameter
+  concept: u
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 311
+- id: claim4830
+  type: parameter
+  concept: unknown
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  unit: Hz
+  value: 179
+- id: claim4831
+  type: parameter
+  concept: i_portuguese_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 225
+- id: claim4832
+  type: parameter
+  concept: i_english_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 270
+- id: claim4833
+  type: parameter
+  concept: a_portuguese_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 714
+- id: claim4834
+  type: parameter
+  concept: a_english_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 730
+- id: claim4835
+  type: parameter
+  concept: u_portuguese_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 311
+- id: claim4836
+  type: parameter
+  concept: u_english_f1
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 300
+- id: claim4837
+  type: parameter
+  concept: 1_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1
+- id: claim4838
+  type: parameter
+  concept: 2_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1
+- id: claim4839
+  type: parameter
+  concept: 3_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 1
+- id: claim4840
+  type: parameter
+  concept: 4_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2
+- id: claim4841
+  type: parameter
+  concept: 5_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2
+- id: claim4842
+  type: parameter
+  concept: 6_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2
+- id: claim4843
+  type: parameter
+  concept: 7_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2
+- id: claim4844
+  type: parameter
+  concept: 8_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 2
+- id: claim4845
+  type: parameter
+  concept: 9_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3
+- id: claim4846
+  type: parameter
+  concept: 10_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 3
+- id: claim4847
+  type: parameter
+  concept: 11_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5
+- id: claim4848
+  type: parameter
+  concept: 12_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 5
+- id: claim4849
+  type: parameter
+  concept: 13_page
+  provenance:
+    paper: Jesus_1997_KlattSynthesiserImplementation
+    page: 0
+  value: 6

@@ -1,0 +1,94 @@
+source:
+  paper: Larrouy-Maestri_2024_EmotionalProsody
+claims:
+- id: claim5950
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: Hz
+- id: claim5951
+  type: parameter
+  concept: f0_standard_deviation
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: Hz/semitones
+- id: claim5952
+  type: parameter
+  concept: f0_range
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: Hz
+- id: claim5953
+  type: parameter
+  concept: speech_rate
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: syllables/s
+- id: claim5954
+  type: parameter
+  concept: pause_duration
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: ms
+- id: claim5955
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: dB
+- id: claim5956
+  type: parameter
+  concept: spectral_tilt
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: dB/octave
+- id: claim5957
+  type: parameter
+  concept: hammarberg_index
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: dB
+- id: claim5958
+  type: parameter
+  concept: h1h2
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: dB
+- id: claim5959
+  type: parameter
+  concept: formant_frequencies
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: Hz
+- id: claim5960
+  type: parameter
+  concept: jitter
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: '%'
+- id: claim5961
+  type: parameter
+  concept: shimmer
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: '%'
+- id: claim5962
+  type: parameter
+  concept: hnr
+  provenance:
+    paper: Larrouy-Maestri_2024_EmotionalProsody
+    page: 0
+  unit: dB

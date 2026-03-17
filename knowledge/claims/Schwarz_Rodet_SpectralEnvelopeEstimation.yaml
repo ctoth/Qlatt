@@ -1,0 +1,45 @@
+source:
+  paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+claims:
+- id: claim8099
+  type: parameter
+  concept: center_frequency
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0
+  unit: Hz
+- id: claim8100
+  type: parameter
+  concept: bandwidth
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0
+  unit: Hz
+- id: claim8101
+  type: parameter
+  concept: amplitude
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0
+  unit: dB
+- id: claim8102
+  type: parameter
+  concept: order
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0
+  unit: integer
+- id: claim8103
+  type: parameter
+  concept: break_frequency
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0
+  unit: Hz
+- id: claim8104
+  type: equation
+  expression: v_k(f) = \frac{10^{a_k/20}}{1 + \left(10^{3/20} - 1\right) \left(\frac{c_k
+    - f}{b_k/2}\right)^2}
+  provenance:
+    paper: Schwarz_Rodet_SpectralEnvelopeEstimation
+    page: 0

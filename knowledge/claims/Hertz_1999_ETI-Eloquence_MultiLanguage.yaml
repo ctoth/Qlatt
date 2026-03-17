@@ -1,0 +1,129 @@
+source:
+  paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+claims:
+- id: claim4028
+  type: parameter
+  concept: duration_phone_f
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 110
+  unit: ms
+- id: claim4029
+  type: parameter
+  concept: duration_transition
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 30
+  unit: ms
+- id: claim4030
+  type: parameter
+  concept: duration_phone_a
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 84
+  unit: ms
+- id: claim4031
+  type: parameter
+  concept: duration_phone_v
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 60
+  unit: ms
+- id: claim4032
+  type: parameter
+  concept: av_phone_f
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 0
+  unit: dB
+- id: claim4033
+  type: parameter
+  concept: av_transition
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 52
+- id: claim4034
+  type: parameter
+  concept: av_phone_v
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 30
+  unit: dB
+- id: claim4035
+  type: parameter
+  concept: af_phone_f
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 55
+  unit: dB
+- id: claim4036
+  type: parameter
+  concept: af_transition
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 0
+- id: claim4037
+  type: parameter
+  concept: af_phone_v
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 55
+  unit: dB
+- id: claim4038
+  type: parameter
+  concept: f2_start_phone_f
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1300
+  unit: Hz
+- id: claim4039
+  type: parameter
+  concept: f2_start_transition
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1000
+  unit: Hz
+- id: claim4040
+  type: parameter
+  concept: f2_start_phone_a
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1200
+  unit: Hz
+- id: claim4041
+  type: parameter
+  concept: f2_start_phone_y
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1400
+  unit: Hz
+- id: claim4042
+  type: parameter
+  concept: f2_start_phone_v
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1775
+  unit: Hz
+- id: claim4043
+  type: parameter
+  concept: f2_end_phone_v
+  provenance:
+    paper: Hertz_1999_ETI-Eloquence_MultiLanguage
+    page: 0
+  value: 1300
+  unit: Hz

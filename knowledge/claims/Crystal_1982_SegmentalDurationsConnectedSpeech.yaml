@@ -1,0 +1,783 @@
+source:
+  paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+claims:
+- id: claim1450
+  type: parameter
+  concept: vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 93.4
+- id: claim1451
+  type: parameter
+  concept: monophthongs
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 85.2
+- id: claim1452
+  type: parameter
+  concept: long_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 115.3
+- id: claim1453
+  type: parameter
+  concept: short_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 61.8
+- id: claim1454
+  type: parameter
+  concept: diphthongs
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 155.8
+- id: claim1455
+  type: parameter
+  concept: nonvocalic_sonorants
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 66.4
+- id: claim1456
+  type: parameter
+  concept: liquids
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 65.3
+- id: claim1457
+  type: parameter
+  concept: nasals
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 70.6
+- id: claim1458
+  type: parameter
+  concept: glides
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 57.4
+- id: claim1459
+  type: parameter
+  concept: stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 62.0
+- id: claim1460
+  type: parameter
+  concept: voiced_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 56.4
+- id: claim1461
+  type: parameter
+  concept: voiceless_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 67.7
+- id: claim1462
+  type: parameter
+  concept: onepart_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 46.7
+- id: claim1463
+  type: parameter
+  concept: twopart_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 82.3
+- id: claim1464
+  type: parameter
+  concept: fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 64.4
+- id: claim1465
+  type: parameter
+  concept: voiced_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 47.1
+- id: claim1466
+  type: parameter
+  concept: voiceless_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 94.5
+- id: claim1467
+  type: parameter
+  concept: affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 102.2
+- id: claim1468
+  type: parameter
+  concept: voiced_affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 92.0
+- id: claim1469
+  type: parameter
+  concept: voiceless_affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 112.4
+- id: claim1470
+  type: parameter
+  concept: vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 111.6
+- id: claim1471
+  type: parameter
+  concept: monophthongs
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 102.7
+- id: claim1472
+  type: parameter
+  concept: long_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 141.0
+- id: claim1473
+  type: parameter
+  concept: short_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 72.9
+- id: claim1474
+  type: parameter
+  concept: diphthongs
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 181.3
+- id: claim1475
+  type: parameter
+  concept: nonvocalic_sonorants
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 81.0
+- id: claim1476
+  type: parameter
+  concept: liquids
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 80.7
+- id: claim1477
+  type: parameter
+  concept: nasals
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 83.8
+- id: claim1478
+  type: parameter
+  concept: glides
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 73.2
+- id: claim1479
+  type: parameter
+  concept: stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 73.3
+- id: claim1480
+  type: parameter
+  concept: voiced_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 64.2
+- id: claim1481
+  type: parameter
+  concept: voiceless_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 82.6
+- id: claim1482
+  type: parameter
+  concept: onepart_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 58.1
+- id: claim1483
+  type: parameter
+  concept: twopart_stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 91.3
+- id: claim1484
+  type: parameter
+  concept: fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 75.6
+- id: claim1485
+  type: parameter
+  concept: voiced_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 54.1
+- id: claim1486
+  type: parameter
+  concept: voiceless_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 114.3
+- id: claim1487
+  type: parameter
+  concept: affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 118.7
+- id: claim1488
+  type: parameter
+  concept: voiced_affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 117.6
+- id: claim1489
+  type: parameter
+  concept: voiceless_affricates
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 119.7
+- id: claim1490
+  type: parameter
+  concept: vowel_parmenter_trevino_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 117
+- id: claim1491
+  type: parameter
+  concept: vowel_slowest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 117
+- id: claim1492
+  type: parameter
+  concept: vowel_slow_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 112
+- id: claim1493
+  type: parameter
+  concept: vowel_all_n14
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 102
+- id: claim1494
+  type: parameter
+  concept: vowel_fast_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 93
+- id: claim1495
+  type: parameter
+  concept: vowel_fastest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 78
+- id: claim1496
+  type: parameter
+  concept: vowel_lehiste_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 78
+- id: claim1497
+  type: parameter
+  concept: nonvocalic_sonorant_parmenter_trevino_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 82
+- id: claim1498
+  type: parameter
+  concept: nonvocalic_sonorant_slowest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 86
+- id: claim1499
+  type: parameter
+  concept: nonvocalic_sonorant_slow_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 81
+- id: claim1500
+  type: parameter
+  concept: nonvocalic_sonorant_all_n14
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 78
+- id: claim1501
+  type: parameter
+  concept: nonvocalic_sonorant_fast_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 66
+- id: claim1502
+  type: parameter
+  concept: nonvocalic_sonorant_fastest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 54
+- id: claim1503
+  type: parameter
+  concept: nonvocalic_sonorant_lehiste_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 59
+- id: claim1504
+  type: parameter
+  concept: fricative_parmenter_trevino_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 90
+- id: claim1505
+  type: parameter
+  concept: fricative_slowest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 74
+- id: claim1506
+  type: parameter
+  concept: fricative_slow_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 76
+- id: claim1507
+  type: parameter
+  concept: fricative_all_n14
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 70
+- id: claim1508
+  type: parameter
+  concept: fricative_fast_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 64
+- id: claim1509
+  type: parameter
+  concept: fricative_fastest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 55
+- id: claim1510
+  type: parameter
+  concept: fricative_lehiste_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 74
+- id: claim1511
+  type: parameter
+  concept: stop_parmenter_trevino_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 74
+- id: claim1512
+  type: parameter
+  concept: stop_slowest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 85
+- id: claim1513
+  type: parameter
+  concept: stop_slow_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 73
+- id: claim1514
+  type: parameter
+  concept: stop_all_n14
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 68
+- id: claim1515
+  type: parameter
+  concept: stop_fast_n7
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 62
+- id: claim1516
+  type: parameter
+  concept: stop_fastest_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 54
+- id: claim1517
+  type: parameter
+  concept: stop_lehiste_n1
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 50
+- id: claim1518
+  type: parameter
+  concept: stops_fast_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 481
+- id: claim1519
+  type: parameter
+  concept: stops_fast_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 49.4
+- id: claim1520
+  type: parameter
+  concept: stops_fast_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 23.6
+- id: claim1521
+  type: parameter
+  concept: stops_slow_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 466
+- id: claim1522
+  type: parameter
+  concept: stops_slow_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 56.8
+- id: claim1523
+  type: parameter
+  concept: stops_slow_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 32.0
+- id: claim1524
+  type: parameter
+  concept: voiced_fast_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 249
+- id: claim1525
+  type: parameter
+  concept: voiced_fast_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 50.3
+- id: claim1526
+  type: parameter
+  concept: voiced_fast_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 26.1
+- id: claim1527
+  type: parameter
+  concept: voiced_slow_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 239
+- id: claim1528
+  type: parameter
+  concept: voiced_slow_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 56.7
+- id: claim1529
+  type: parameter
+  concept: voiced_slow_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 27.8
+- id: claim1530
+  type: parameter
+  concept: voiceless_fast_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 232
+- id: claim1531
+  type: parameter
+  concept: voiceless_fast_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 48.5
+- id: claim1532
+  type: parameter
+  concept: voiceless_fast_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 20.5
+- id: claim1533
+  type: parameter
+  concept: voiceless_slow_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 227
+- id: claim1534
+  type: parameter
+  concept: voiceless_slow_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 56.9
+- id: claim1535
+  type: parameter
+  concept: voiceless_slow_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 40.0
+- id: claim1536
+  type: parameter
+  concept: affricates_fast_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 35
+- id: claim1537
+  type: parameter
+  concept: affricates_fast_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 42.9
+- id: claim1538
+  type: parameter
+  concept: affricates_fast_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 15.3
+- id: claim1539
+  type: parameter
+  concept: affricates_slow_n
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 35
+- id: claim1540
+  type: parameter
+  concept: affricates_slow_dur
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 49.4
+- id: claim1541
+  type: parameter
+  concept: affricates_slow_sd
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  value: 23.1
+- id: claim1542
+  type: parameter
+  concept: stop
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 128
+- id: claim1543
+  type: parameter
+  concept: voiced
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 141
+- id: claim1544
+  type: parameter
+  concept: voiceless
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 117
+- id: claim1545
+  type: parameter
+  concept: fricative
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 118
+- id: claim1546
+  type: parameter
+  concept: voiced
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 117
+- id: claim1547
+  type: parameter
+  concept: voiceless
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 120
+- id: claim1548
+  type: parameter
+  concept: all_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 102
+- id: claim1549
+  type: parameter
+  concept: long_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 128
+- id: claim1550
+  type: parameter
+  concept: short_vowels
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 67
+- id: claim1551
+  type: parameter
+  concept: stops
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 68
+- id: claim1552
+  type: parameter
+  concept: voiced_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 61
+- id: claim1553
+  type: parameter
+  concept: voiceless_fricatives
+  provenance:
+    paper: Crystal_1982_SegmentalDurationsConnectedSpeech
+    page: 0
+  unit: ms
+  value: 104

@@ -1,0 +1,51 @@
+source:
+  paper: Doval_2006_SpectrumGlottalFlowModels
+claims:
+- id: claim1915
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 0.8
+- id: claim1916
+  type: parameter
+  concept: asymmetry_coefficient
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  lower_bound: 0.5
+  upper_bound: 1.0
+- id: claim1917
+  type: parameter
+  concept: return_phase_quotient
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim1918
+  type: parameter
+  concept: '025'
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  unit: KLGLOTT88
+  value: 2.2
+- id: claim1919
+  type: parameter
+  concept: '050'
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  unit: KLGLOTT88
+  value: 1.1
+- id: claim1920
+  type: parameter
+  concept: 080
+  provenance:
+    paper: Doval_2006_SpectrumGlottalFlowModels
+    page: 0
+  unit: KLGLOTT88
+  value: 0.7

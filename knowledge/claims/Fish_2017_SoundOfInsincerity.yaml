@@ -1,0 +1,45 @@
+source:
+  paper: Fish_2017_SoundOfInsincerity
+claims:
+- id: claim2678
+  type: parameter
+  concept: speech_rate_sincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 7.01
+- id: claim2679
+  type: parameter
+  concept: speech_rate_insincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 5.45
+- id: claim2680
+  type: parameter
+  concept: speech_rate_sincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 7.59
+- id: claim2681
+  type: parameter
+  concept: speech_rate_insincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 5.9
+- id: claim2682
+  type: parameter
+  concept: speech_rate_sincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 6.44
+- id: claim2683
+  type: parameter
+  concept: speech_rate_insincere
+  provenance:
+    paper: Fish_2017_SoundOfInsincerity
+    page: 0
+  value: 5.0

@@ -1,0 +1,332 @@
+source:
+  paper: Banse_1996_VocalEmotionAcousticProfiles
+claims:
+- id: claim442
+  type: parameter
+  concept: mf0_elation
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.31
+- id: claim443
+  type: parameter
+  concept: mf0_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.45
+- id: claim444
+  type: parameter
+  concept: p75f0_elation
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.08
+- id: claim445
+  type: parameter
+  concept: p75f0_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.08
+- id: claim446
+  type: parameter
+  concept: durart_hot_anger
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.31
+- id: claim447
+  type: parameter
+  concept: durart_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.06
+- id: claim448
+  type: parameter
+  concept: durvo_hot_anger
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.45
+- id: claim449
+  type: parameter
+  concept: durvo_elation
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.51
+- id: claim450
+  type: parameter
+  concept: durvo_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.42
+- id: claim451
+  type: parameter
+  concept: do1000_hot_anger
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.55
+- id: claim452
+  type: parameter
+  concept: do1000_panic_fear
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.51
+- id: claim453
+  type: parameter
+  concept: do1000_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.3
+- id: claim454
+  type: parameter
+  concept: pe500_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.09
+- id: claim455
+  type: parameter
+  concept: pe1000_hot_anger
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -1.34
+- id: claim456
+  type: parameter
+  concept: pe1000_panic_fear
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.59
+- id: claim457
+  type: parameter
+  concept: pe1000_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.17
+- id: claim458
+  type: parameter
+  concept: v116k_elation
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.84
+- id: claim459
+  type: parameter
+  concept: v165k_disgust
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.07
+- id: claim460
+  type: parameter
+  concept: mf0_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.64
+- id: claim461
+  type: parameter
+  concept: mf0_boredom
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.17
+- id: claim462
+  type: parameter
+  concept: mf0_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.8
+- id: claim463
+  type: parameter
+  concept: mf0_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.46
+- id: claim464
+  type: parameter
+  concept: p25f0_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.62
+- id: claim465
+  type: parameter
+  concept: p25f0_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.29
+- id: claim466
+  type: parameter
+  concept: p25f0_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.37
+- id: claim467
+  type: parameter
+  concept: p75f0_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.52
+- id: claim468
+  type: parameter
+  concept: p75f0_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.69
+- id: claim469
+  type: parameter
+  concept: p75f0_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.51
+- id: claim470
+  type: parameter
+  concept: sdf0_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.26
+- id: claim471
+  type: parameter
+  concept: sdf0_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.13
+- id: claim472
+  type: parameter
+  concept: melog_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.48
+- id: claim473
+  type: parameter
+  concept: melog_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.54
+- id: claim474
+  type: parameter
+  concept: melog_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.51
+- id: claim475
+  type: parameter
+  concept: durart_boredom
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.43
+- id: claim476
+  type: parameter
+  concept: durart_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.13
+- id: claim477
+  type: parameter
+  concept: durart_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.26
+- id: claim478
+  type: parameter
+  concept: hammi_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.43
+- id: claim479
+  type: parameter
+  concept: hammi_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.4
+- id: claim480
+  type: parameter
+  concept: hammi_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.46
+- id: claim481
+  type: parameter
+  concept: do1000_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.21
+- id: claim482
+  type: parameter
+  concept: pe500_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.29
+- id: claim483
+  type: parameter
+  concept: pe500_contempt
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.05
+- id: claim484
+  type: parameter
+  concept: pe500_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.17
+- id: claim485
+  type: parameter
+  concept: pe1000_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.05
+- id: claim486
+  type: parameter
+  concept: v116k_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.35
+- id: claim487
+  type: parameter
+  concept: v116k_shame
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.15
+- id: claim488
+  type: parameter
+  concept: v165k_sadness
+  provenance:
+    paper: Banse_1996_VocalEmotionAcousticProfiles
+    page: 0
+  value: -0.37

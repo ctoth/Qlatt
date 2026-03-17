@@ -1,0 +1,131 @@
+source:
+  paper: Wiethoff_2008_CerebralEmotionalProsody
+claims:
+- id: claim10952
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: dB
+- id: claim10953
+  type: parameter
+  concept: intensity_variability
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '%'
+- id: claim10954
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: Hz
+- id: claim10955
+  type: parameter
+  concept: f0_variability
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '%'
+- id: claim10956
+  type: parameter
+  concept: duration
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: s
+- id: claim10957
+  type: parameter
+  concept: arousal_rating
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: SAM 1–9
+- id: claim10958
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '23'
+  value: 7.0
+- id: claim10959
+  type: parameter
+  concept: duration
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '23'
+  value: 8.8
+- id: claim10960
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '23'
+  value: 2.8
+- id: claim10961
+  type: parameter
+  concept: f0_variability
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '23'
+  value: 4.1
+- id: claim10962
+  type: parameter
+  concept: emotional_arousal
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+  unit: '23'
+  value: 5.6
+- id: claim10963
+  type: observation
+  statement: Emotional prosody should differ from neutral on multiple acoustic dimensions
+    simultaneously, not just one
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+- id: claim10964
+  type: observation
+  statement: 'Happy prosody: F0 variability should be highest among emotion categories
+    (~23%)'
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+- id: claim10965
+  type: observation
+  statement: 'Erotic prosody: mean F0 should be lowest (~138 Hz), duration longest
+    (~1.2s)'
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+- id: claim10966
+  type: observation
+  statement: 'Fearful prosody: mean F0 should be highest (~185 Hz)'
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+- id: claim10967
+  type: observation
+  statement: Arousal ratings for emotional categories should cluster around 5.5–6.0
+    on a 9-point scale
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0
+- id: claim10968
+  type: observation
+  statement: Neutral speech arousal should be markedly lower (~2.5)
+  concepts: []
+  provenance:
+    paper: Wiethoff_2008_CerebralEmotionalProsody
+    page: 0

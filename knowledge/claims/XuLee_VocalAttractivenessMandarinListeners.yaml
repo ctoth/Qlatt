@@ -1,0 +1,230 @@
+source:
+  paper: XuLee_VocalAttractivenessMandarinListeners
+claims:
+- id: claim11085
+  type: parameter
+  concept: breathy_h1h2
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -0.5
+- id: claim11086
+  type: parameter
+  concept: breathy_h1a1
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -0.5
+- id: claim11087
+  type: parameter
+  concept: breathy_h1a3
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 23.7
+- id: claim11088
+  type: parameter
+  concept: breathy_center_of_gravity
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 402.8
+- id: claim11089
+  type: parameter
+  concept: breathy_jitter
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 0.8
+- id: claim11090
+  type: parameter
+  concept: breathy_shimmer
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 5.2
+- id: claim11091
+  type: parameter
+  concept: breathy_hnr
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 17.8
+- id: claim11092
+  type: parameter
+  concept: modal_h1h2
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -1.3
+- id: claim11093
+  type: parameter
+  concept: modal_h1a1
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -2.3
+- id: claim11094
+  type: parameter
+  concept: modal_h1a3
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 12.0
+- id: claim11095
+  type: parameter
+  concept: modal_center_of_gravity
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 540.8
+- id: claim11096
+  type: parameter
+  concept: modal_jitter
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 0.6
+- id: claim11097
+  type: parameter
+  concept: modal_shimmer
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 6.6
+- id: claim11098
+  type: parameter
+  concept: modal_hnr
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 15.2
+- id: claim11099
+  type: parameter
+  concept: creaky_h1h2
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -1.4
+- id: claim11100
+  type: parameter
+  concept: creaky_h1a1
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -2.2
+- id: claim11101
+  type: parameter
+  concept: creaky_h1a3
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 12.2
+- id: claim11102
+  type: parameter
+  concept: creaky_center_of_gravity
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 536.4
+- id: claim11103
+  type: parameter
+  concept: creaky_jitter
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 1.2
+- id: claim11104
+  type: parameter
+  concept: creaky_shimmer
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 6.1
+- id: claim11105
+  type: parameter
+  concept: creaky_hnr
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 15.5
+- id: claim11106
+  type: parameter
+  concept: pressed_h1h2
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -3.5
+- id: claim11107
+  type: parameter
+  concept: pressed_h1a1
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: -4.6
+- id: claim11108
+  type: parameter
+  concept: pressed_h1a3
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 6.9
+- id: claim11109
+  type: parameter
+  concept: pressed_center_of_gravity
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 652.0
+- id: claim11110
+  type: parameter
+  concept: pressed_jitter
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 1.0
+- id: claim11111
+  type: parameter
+  concept: pressed_shimmer
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 9.4
+- id: claim11112
+  type: parameter
+  concept: pressed_hnr
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+  value: 14.0
+- id: claim11113
+  type: observation
+  statement: Breathy and modal voice qualities should be rated more attractive than
+    pressed voice
+  concepts: []
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+- id: claim11114
+  type: observation
+  statement: Narrowly distributed formants should increase attractiveness for both
+    genders
+  concepts: []
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+- id: claim11115
+  type: observation
+  statement: Narrow pitch range should decrease attractiveness ratings
+  concepts: []
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0
+- id: claim11116
+  type: observation
+  statement: 'For male voices: low f0 should be preferred, but medium f0 should be
+    nearly equivalent'
+  concepts: []
+  provenance:
+    paper: XuLee_VocalAttractivenessMandarinListeners
+    page: 0

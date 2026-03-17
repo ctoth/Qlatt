@@ -1,0 +1,224 @@
+source:
+  paper: OShaughnessy_1976_F0_Prosody
+claims:
+- id: claim7094
+  type: parameter
+  concept: standard_f0_range
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim7095
+  type: parameter
+  concept: bottom_of_range
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 85
+  unit: Hz
+- id: claim7096
+  type: parameter
+  concept: bor_band
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+- id: claim7097
+  type: parameter
+  concept: male_bor_center
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+- id: claim7098
+  type: parameter
+  concept: head_peak_base
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 115
+  unit: Hz
+- id: claim7099
+  type: parameter
+  concept: head_peak_max
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 185
+  unit: Hz
+- id: claim7100
+  type: parameter
+  concept: phrase_increment
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 10
+  unit: Hz
+- id: claim7101
+  type: parameter
+  concept: utterance_minimum
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+- id: claim7102
+  type: parameter
+  concept: rise_timing
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: msec before vowel
+- id: claim7103
+  type: parameter
+  concept: fall_timing
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: msec after vowel onset
+- id: claim7104
+  type: parameter
+  concept: abrupt_rise_rate
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: F0/100 msec
+- id: claim7105
+  type: parameter
+  concept: abrupt_fall_rate
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: F0/100 msec
+- id: claim7106
+  type: parameter
+  concept: jnd_for_rise
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 1.5
+  unit: semitones
+- id: claim7107
+  type: parameter
+  concept: jnd_for_fall
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 3.0
+  unit: semitones
+- id: claim7108
+  type: parameter
+  concept: smoothing_threshold
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 50
+  unit: msec
+- id: claim7109
+  type: parameter
+  concept: 1_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 14
+- id: claim7110
+  type: parameter
+  concept: 2_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 12
+- id: claim7111
+  type: parameter
+  concept: 3_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 11
+- id: claim7112
+  type: parameter
+  concept: 4_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 10
+- id: claim7113
+  type: parameter
+  concept: 5_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 9
+- id: claim7114
+  type: parameter
+  concept: 6_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 8
+- id: claim7115
+  type: parameter
+  concept: 7_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 7
+- id: claim7116
+  type: parameter
+  concept: 8_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 6
+- id: claim7117
+  type: parameter
+  concept: 9_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 3
+- id: claim7118
+  type: parameter
+  concept: 10_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 2
+- id: claim7119
+  type: parameter
+  concept: 11_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 1
+- id: claim7120
+  type: parameter
+  concept: 12_accent_value
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  value: 0
+- id: claim7121
+  type: parameter
+  concept: utterancefinal
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+  value: 126
+- id: claim7122
+  type: parameter
+  concept: phrasefinal
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+  value: 148
+- id: claim7123
+  type: parameter
+  concept: withinphrase
+  provenance:
+    paper: OShaughnessy_1976_F0_Prosody
+    page: 0
+  unit: Hz
+  value: 149

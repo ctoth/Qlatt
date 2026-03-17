@@ -1,0 +1,24 @@
+source:
+  paper: White_2014_ProsodicTimingFunction
+claims:
+- id: claim10949
+  type: parameter
+  concept: jnd_for_duration
+  provenance:
+    paper: White_2014_ProsodicTimingFunction
+    page: 0
+  unit: ms
+- id: claim10950
+  type: parameter
+  concept: wordinitial_lengthening
+  provenance:
+    paper: White_2014_ProsodicTimingFunction
+    page: 0
+  unit: ratio
+- id: claim10951
+  type: parameter
+  concept: primary_secondary_stress_difference
+  provenance:
+    paper: White_2014_ProsodicTimingFunction
+    page: 0
+  unit: '%'

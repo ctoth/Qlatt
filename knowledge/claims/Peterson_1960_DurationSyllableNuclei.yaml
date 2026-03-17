@@ -1,0 +1,410 @@
+source:
+  paper: Peterson_1960_DurationSyllableNuclei
+claims:
+- id: claim7170
+  type: parameter
+  concept: p_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 13.8
+- id: claim7171
+  type: parameter
+  concept: p_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 18.8
+- id: claim7172
+  type: parameter
+  concept: b_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 20.3
+- id: claim7173
+  type: parameter
+  concept: b_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 30.7
+- id: claim7174
+  type: parameter
+  concept: t_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 14.7
+- id: claim7175
+  type: parameter
+  concept: t_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 21.0
+- id: claim7176
+  type: parameter
+  concept: d_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 20.6
+- id: claim7177
+  type: parameter
+  concept: d_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 31.8
+- id: claim7178
+  type: parameter
+  concept: k_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 14.5
+- id: claim7179
+  type: parameter
+  concept: k_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 20.0
+- id: claim7180
+  type: parameter
+  concept: g_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 24.3
+- id: claim7181
+  type: parameter
+  concept: g_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 31.4
+- id: claim7182
+  type: parameter
+  concept: m_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 22.0
+- id: claim7183
+  type: parameter
+  concept: m_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 31.3
+- id: claim7184
+  type: parameter
+  concept: n_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 21.6
+- id: claim7185
+  type: parameter
+  concept: n_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 32.2
+- id: claim7186
+  type: parameter
+  concept: ng_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 21.8
+- id: claim7187
+  type: parameter
+  concept: ng_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 35.0
+- id: claim7188
+  type: parameter
+  concept: f_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 19.2
+- id: claim7189
+  type: parameter
+  concept: f_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 26.1
+- id: claim7190
+  type: parameter
+  concept: v_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 23.1
+- id: claim7191
+  type: parameter
+  concept: v_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 37.4
+- id: claim7192
+  type: parameter
+  concept: theta_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 20.8
+- id: claim7193
+  type: parameter
+  concept: theta_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 26.5
+- id: claim7194
+  type: parameter
+  concept: eth_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 26.0
+- id: claim7195
+  type: parameter
+  concept: eth_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 38.1
+- id: claim7196
+  type: parameter
+  concept: s_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 19.9
+- id: claim7197
+  type: parameter
+  concept: s_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 26.9
+- id: claim7198
+  type: parameter
+  concept: z_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 26.2
+- id: claim7199
+  type: parameter
+  concept: z_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 39.0
+- id: claim7200
+  type: parameter
+  concept: sh_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 21.2
+- id: claim7201
+  type: parameter
+  concept: sh_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 27.8
+- id: claim7202
+  type: parameter
+  concept: zh_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 41.0
+- id: claim7203
+  type: parameter
+  concept: r_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 22.6
+- id: claim7204
+  type: parameter
+  concept: r_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 29.6
+- id: claim7205
+  type: parameter
+  concept: l_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 21.8
+- id: claim7206
+  type: parameter
+  concept: l_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 29.3
+- id: claim7207
+  type: parameter
+  concept: ch_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 14.5
+- id: claim7208
+  type: parameter
+  concept: ch_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 19.8
+- id: claim7209
+  type: parameter
+  concept: j_short_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 19.1
+- id: claim7210
+  type: parameter
+  concept: j_long_nucleus
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  value: 30.0
+- id: claim7211
+  type: parameter
+  concept: i
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 24
+- id: claim7212
+  type: parameter
+  concept: i
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 18
+- id: claim7213
+  type: parameter
+  concept: ei
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 27
+- id: claim7214
+  type: parameter
+  concept: epsilon
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 20
+- id: claim7215
+  type: parameter
+  concept: ae
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 33
+- id: claim7216
+  type: parameter
+  concept: schwa
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 23
+- id: claim7217
+  type: parameter
+  concept: a
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 26
+- id: claim7218
+  type: parameter
+  concept: openo
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 31
+- id: claim7219
+  type: parameter
+  concept: ou
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 22
+- id: claim7220
+  type: parameter
+  concept: u
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 20
+- id: claim7221
+  type: parameter
+  concept: u
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 26
+- id: claim7222
+  type: parameter
+  concept: au
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 30
+- id: claim7223
+  type: parameter
+  concept: ai
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 22
+- id: claim7224
+  type: parameter
+  concept: oi
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 37
+- id: claim7225
+  type: parameter
+  concept: rcolored
+  provenance:
+    paper: Peterson_1960_DurationSyllableNuclei
+    page: 0
+  unit: csec
+  value: 24

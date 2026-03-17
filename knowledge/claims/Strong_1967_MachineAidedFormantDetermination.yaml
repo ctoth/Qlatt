@@ -1,0 +1,226 @@
+source:
+  paper: Strong_1967_MachineAidedFormantDetermination
+claims:
+- id: claim10183
+  type: parameter
+  concept: formant_1_frequency
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 20
+  upper_bound: 4000
+  unit: cps
+- id: claim10184
+  type: parameter
+  concept: formant_2_frequency
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 20
+  upper_bound: 4000
+  unit: cps
+- id: claim10185
+  type: parameter
+  concept: formant_3_frequency
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 20
+  upper_bound: 4000
+  unit: cps
+- id: claim10186
+  type: parameter
+  concept: formant_4_frequency
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 20
+  upper_bound: 4000
+  unit: cps
+- id: claim10187
+  type: parameter
+  concept: formant_1_amplitude
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 0
+  upper_bound: 62.5
+  unit: dB
+- id: claim10188
+  type: parameter
+  concept: formant_2_amplitude
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 0
+  upper_bound: 62.5
+  unit: dB
+- id: claim10189
+  type: parameter
+  concept: formant_3_amplitude
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 0
+  upper_bound: 62.5
+  unit: dB
+- id: claim10190
+  type: parameter
+  concept: formant_4_amplitude
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  lower_bound: 0
+  upper_bound: 62.5
+  unit: dB
+- id: claim10191
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  unit: cps
+- id: claim10192
+  type: parameter
+  concept: bandwidth_b1
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 70
+  unit: cps
+- id: claim10193
+  type: parameter
+  concept: bandwidth_b2
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 80
+  unit: cps
+- id: claim10194
+  type: parameter
+  concept: bandwidth_b3
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 100
+  unit: cps
+- id: claim10195
+  type: parameter
+  concept: bandwidth_b4
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 140
+  unit: cps
+- id: claim10196
+  type: parameter
+  concept: bandwidth_b1
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 100
+  unit: cps
+- id: claim10197
+  type: parameter
+  concept: bandwidth_b2
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 150
+  unit: cps
+- id: claim10198
+  type: parameter
+  concept: bandwidth_b3
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 200
+  unit: cps
+- id: claim10199
+  type: parameter
+  concept: bandwidth_b4
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 250
+  unit: cps
+- id: claim10200
+  type: parameter
+  concept: analysis_frame_rate
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 10
+  unit: ms
+- id: claim10201
+  type: parameter
+  concept: synthesis_interpolation
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 1
+  unit: ms
+- id: claim10202
+  type: parameter
+  concept: analysis_bandwidth
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 40
+  unit: cps
+- id: claim10203
+  type: parameter
+  concept: vowels_errors
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 21
+- id: claim10204
+  type: parameter
+  concept: vowels_total
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 500
+- id: claim10205
+  type: parameter
+  concept: initial_consonants_errors
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 99
+- id: claim10206
+  type: parameter
+  concept: initial_consonants_total
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 500
+- id: claim10207
+  type: parameter
+  concept: final_consonants_errors
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 70
+- id: claim10208
+  type: parameter
+  concept: final_consonants_total
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 500
+- id: claim10209
+  type: parameter
+  concept: all_consonants_errors
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 169
+- id: claim10210
+  type: parameter
+  concept: all_consonants_total
+  provenance:
+    paper: Strong_1967_MachineAidedFormantDetermination
+    page: 0
+  value: 1000

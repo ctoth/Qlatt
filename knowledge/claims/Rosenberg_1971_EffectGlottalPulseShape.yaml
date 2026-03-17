@@ -1,0 +1,87 @@
+source:
+  paper: Rosenberg_1971_EffectGlottalPulseShape
+claims:
+- id: claim7776
+  type: parameter
+  concept: a_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 3
+- id: claim7777
+  type: parameter
+  concept: a_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 12
+- id: claim7778
+  type: parameter
+  concept: b_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 1
+- id: claim7779
+  type: parameter
+  concept: b_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 12
+- id: claim7780
+  type: parameter
+  concept: c_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 1
+- id: claim7781
+  type: parameter
+  concept: c_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 12
+- id: claim7782
+  type: parameter
+  concept: d_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 0
+- id: claim7783
+  type: parameter
+  concept: d_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 18
+- id: claim7784
+  type: parameter
+  concept: e_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 2
+- id: claim7785
+  type: parameter
+  concept: e_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 12
+- id: claim7786
+  type: parameter
+  concept: f_slope_discontinuities
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 4
+- id: claim7787
+  type: parameter
+  concept: f_spectral_decay
+  provenance:
+    paper: Rosenberg_1971_EffectGlottalPulseShape
+    page: 0
+  value: 12

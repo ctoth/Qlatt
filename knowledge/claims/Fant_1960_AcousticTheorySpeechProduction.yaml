@@ -1,0 +1,488 @@
+source:
+  paper: Fant_1960_AcousticTheorySpeechProduction
+claims:
+- id: claim2255
+  type: parameter
+  concept: u
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 240
+- id: claim2256
+  type: parameter
+  concept: o
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 500
+- id: claim2257
+  type: parameter
+  concept: a
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 630
+- id: claim2258
+  type: parameter
+  concept: e
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 420
+- id: claim2259
+  type: parameter
+  concept: i
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 230
+- id: claim2260
+  type: parameter
+  concept: schwa
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 285
+- id: claim2261
+  type: parameter
+  concept: schwa_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 500
+- id: claim2262
+  type: parameter
+  concept: schwa_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1500
+- id: claim2263
+  type: parameter
+  concept: schwa_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2500
+- id: claim2264
+  type: parameter
+  concept: schwa_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3500
+- id: claim2265
+  type: parameter
+  concept: a_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 780
+- id: claim2266
+  type: parameter
+  concept: a_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1240
+- id: claim2267
+  type: parameter
+  concept: a_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2720
+- id: claim2268
+  type: parameter
+  concept: a_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3350
+- id: claim2269
+  type: parameter
+  concept: i_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 260
+- id: claim2270
+  type: parameter
+  concept: i_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1990
+- id: claim2271
+  type: parameter
+  concept: i_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3050
+- id: claim2272
+  type: parameter
+  concept: i_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 4130
+- id: claim2273
+  type: parameter
+  concept: y_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 220
+- id: claim2274
+  type: parameter
+  concept: y_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1800
+- id: claim2275
+  type: parameter
+  concept: y_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2280
+- id: claim2276
+  type: parameter
+  concept: y_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3800
+- id: claim2277
+  type: parameter
+  concept: ae_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 630
+- id: claim2278
+  type: parameter
+  concept: ae_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1770
+- id: claim2279
+  type: parameter
+  concept: ae_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2280
+- id: claim2280
+  type: parameter
+  concept: ae_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3400
+- id: claim2281
+  type: parameter
+  concept: a
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 57
+- id: claim2282
+  type: parameter
+  concept: o
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 54
+- id: claim2283
+  type: parameter
+  concept: u
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 69
+- id: claim2284
+  type: parameter
+  concept: i
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 43
+- id: claim2285
+  type: parameter
+  concept: e
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: Hz
+  value: 39
+- id: claim2286
+  type: parameter
+  concept: l_nonpalatalized_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 350
+- id: claim2287
+  type: parameter
+  concept: l_nonpalatalized_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  lower_bound: 620
+  upper_bound: 850
+- id: claim2288
+  type: parameter
+  concept: l_nonpalatalized_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2300
+- id: claim2289
+  type: parameter
+  concept: l_nonpalatalized_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3050
+- id: claim2290
+  type: parameter
+  concept: l_palatalized_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 210
+- id: claim2291
+  type: parameter
+  concept: l_palatalized_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 1700
+- id: claim2292
+  type: parameter
+  concept: l_palatalized_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2500
+- id: claim2293
+  type: parameter
+  concept: l_palatalized_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3100
+- id: claim2294
+  type: parameter
+  concept: r_nonpalatalized_f1
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 500
+- id: claim2295
+  type: parameter
+  concept: r_nonpalatalized_f2
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  lower_bound: 1800
+  upper_bound: 2000
+- id: claim2296
+  type: parameter
+  concept: r_nonpalatalized_f3
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 2700
+- id: claim2297
+  type: parameter
+  concept: r_nonpalatalized_f4
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 3000
+- id: claim2298
+  type: parameter
+  concept: a
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: back
+  value: 0.19
+- id: claim2299
+  type: parameter
+  concept: o
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: back
+  value: 0.33
+- id: claim2300
+  type: parameter
+  concept: u
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: back
+  value: 0.28
+- id: claim2301
+  type: parameter
+  concept: i
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: back
+  value: 0.39
+- id: claim2302
+  type: parameter
+  concept: 112_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 19
+- id: claim2303
+  type: parameter
+  concept: 135_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 55
+- id: claim2304
+  type: parameter
+  concept: 136_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 57
+- id: claim2305
+  type: parameter
+  concept: 142_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 65
+- id: claim2306
+  type: parameter
+  concept: 149ab_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  lower_bound: 76
+  upper_bound: 77
+- id: claim2307
+  type: parameter
+  concept: 1412_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 85
+- id: claim2308
+  type: parameter
+  concept: 232_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 108
+- id: claim2309
+  type: parameter
+  concept: 234_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 110
+- id: claim2310
+  type: parameter
+  concept: 235_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 112
+- id: claim2311
+  type: parameter
+  concept: 244_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 144
+- id: claim2312
+  type: parameter
+  concept: 2610_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 189
+- id: claim2313
+  type: parameter
+  concept: 2611_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 195
+- id: claim2314
+  type: parameter
+  concept: a21_page
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 271
+- id: claim2315
+  type: parameter
+  concept: speed_of_sound
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 35000
+  unit: cm/s
+- id: claim2316
+  type: parameter
+  concept: air_density
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 0.00114
+  unit: g/cm^3
+- id: claim2317
+  type: parameter
+  concept: characteristic_impedance
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  unit: acoustical ohms
+- id: claim2318
+  type: parameter
+  concept: viscosity_coefficient
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 0.000184
+  unit: g/cm*s
+- id: claim2319
+  type: parameter
+  concept: kinematic_viscosity
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 0.15
+  unit: cm^2/s
+- id: claim2320
+  type: parameter
+  concept: acoustic_resistance
+  provenance:
+    paper: Fant_1960_AcousticTheorySpeechProduction
+    page: 0
+  value: 41.4
+  unit: dyne*s/cm^3

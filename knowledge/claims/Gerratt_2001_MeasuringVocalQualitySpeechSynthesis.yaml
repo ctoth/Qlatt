@@ -1,0 +1,171 @@
+source:
+  paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+claims:
+- id: claim3059
+  type: parameter
+  concept: 1_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 6.27
+- id: claim3060
+  type: parameter
+  concept: 1_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 234.54
+- id: claim3061
+  type: parameter
+  concept: 2_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 35.13
+- id: claim3062
+  type: parameter
+  concept: 2_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 806.27
+- id: claim3063
+  type: parameter
+  concept: 3_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 10.27
+- id: claim3064
+  type: parameter
+  concept: 3_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 407.78
+- id: claim3065
+  type: parameter
+  concept: 4_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 17.34
+- id: claim3066
+  type: parameter
+  concept: 4_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 131.96
+- id: claim3067
+  type: parameter
+  concept: 5_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 485.88
+- id: claim3068
+  type: parameter
+  concept: 5_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 144.1
+- id: claim3069
+  type: parameter
+  concept: 6_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 13.97
+- id: claim3070
+  type: parameter
+  concept: 6_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 86.46
+- id: claim3071
+  type: parameter
+  concept: 7_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 33.69
+- id: claim3072
+  type: parameter
+  concept: 7_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 157.51
+- id: claim3073
+  type: parameter
+  concept: 8_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 30.97
+- id: claim3074
+  type: parameter
+  concept: 8_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 356.27
+- id: claim3075
+  type: parameter
+  concept: 9_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 433.49
+- id: claim3076
+  type: parameter
+  concept: 9_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 317.73
+- id: claim3077
+  type: parameter
+  concept: 10_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 3.58
+- id: claim3078
+  type: parameter
+  concept: 10_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 241.96
+- id: claim3079
+  type: parameter
+  concept: 11_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 295.52
+- id: claim3080
+  type: parameter
+  concept: 11_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 402.23
+- id: claim3081
+  type: parameter
+  concept: 12_synthesis
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 11.42
+- id: claim3082
+  type: parameter
+  concept: 12_visual_analog
+  provenance:
+    paper: Gerratt_2001_MeasuringVocalQualitySpeechSynthesis
+    page: 0
+  value: 554.18

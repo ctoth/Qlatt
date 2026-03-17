@@ -1,0 +1,333 @@
+source:
+  paper: Behrens_Blumstein_1988_FricativeAmplitude
+claims:
+- id: claim649
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 49
+- id: claim650
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 47
+- id: claim651
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 50
+- id: claim652
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 49
+- id: claim653
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 48
+- id: claim654
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 52
+- id: claim655
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 68
+- id: claim656
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 65
+- id: claim657
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 67
+- id: claim658
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 64
+- id: claim659
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 61
+- id: claim660
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 64
+- id: claim661
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 52
+- id: claim662
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 48
+- id: claim663
+  type: parameter
+  concept: f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 50
+- id: claim664
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 47
+- id: claim665
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 44
+- id: claim666
+  type: parameter
+  concept: greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 49
+- id: claim667
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 61
+- id: claim668
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 57
+- id: claim669
+  type: parameter
+  concept: s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 60
+- id: claim670
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 65
+- id: claim671
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 59
+- id: claim672
+  type: parameter
+  concept: latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+  value: 63
+- id: claim673
+  type: parameter
+  concept: f_f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 28.9
+- id: claim674
+  type: parameter
+  concept: f_f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 29.4
+- id: claim675
+  type: parameter
+  concept: f_f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 27.0
+- id: claim676
+  type: parameter
+  concept: greek_small_letter_theta_greek_small_letter_theta_s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 26.5
+- id: claim677
+  type: parameter
+  concept: greek_small_letter_theta_greek_small_letter_theta_latin_small_letter_esh
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 27.6
+- id: claim678
+  type: parameter
+  concept: greek_small_letter_theta_greek_small_letter_theta_o_r_i_g
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 26.3
+- id: claim679
+  type: parameter
+  concept: s_s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 18.1
+- id: claim680
+  type: parameter
+  concept: s_s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 18.2
+- id: claim681
+  type: parameter
+  concept: s_s
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 29.1
+- id: claim682
+  type: parameter
+  concept: latin_small_letter_esh_latin_small_letter_esh_f
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 23.3
+- id: claim683
+  type: parameter
+  concept: latin_small_letter_esh_latin_small_letter_esh_greek_small_letter_theta
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 25.7
+- id: claim684
+  type: parameter
+  concept: latin_small_letter_esh_latin_small_letter_esh_o_r_i_g
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: CV
+  value: 29.6
+- id: claim685
+  type: parameter
+  concept: f_noisetovowel_ratio
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+- id: claim686
+  type: parameter
+  concept: s_noisetovowel_ratio
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: dB
+- id: claim687
+  type: parameter
+  concept: s_spectral_peak
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: kHz
+- id: claim688
+  type: parameter
+  concept: spectral_peak
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: kHz
+- id: claim689
+  type: parameter
+  concept: f_spectrum
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: kHz
+- id: claim690
+  type: parameter
+  concept: spectrum
+  provenance:
+    paper: Behrens_Blumstein_1988_FricativeAmplitude
+    page: 0
+  unit: kHz

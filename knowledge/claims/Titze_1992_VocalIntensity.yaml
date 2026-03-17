@@ -1,0 +1,245 @@
+source:
+  paper: Titze_1992_VocalIntensity
+claims:
+- id: claim10504
+  type: parameter
+  concept: air_density
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 1.14
+  unit: kg/m^3
+- id: claim10505
+  type: parameter
+  concept: sound_velocity
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 350
+  unit: m/s
+- id: claim10506
+  type: parameter
+  concept: lip_radius
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 0.01
+  unit: m
+- id: claim10507
+  type: parameter
+  concept: lung_pressure
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 3.0
+  unit: kPa
+- id: claim10508
+  type: parameter
+  concept: phonation_threshold
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  lower_bound: 0.14
+  upper_bound: 0.5
+  unit: kPa
+- id: claim10509
+  type: parameter
+  concept: max_negative_flow_deriv
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  unit: m^3/s^2
+- id: claim10510
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  lower_bound: 0.4
+  upper_bound: 1.0
+- id: claim10511
+  type: parameter
+  concept: speed_quotient
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  lower_bound: 1.0
+  upper_bound: 3.0
+- id: claim10512
+  type: parameter
+  concept: spectral_slope
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 2.0
+  lower_bound: 1.5
+  upper_bound: 3.0
+- id: claim10513
+  type: parameter
+  concept: formant_frequencies
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  unit: Hz
+- id: claim10514
+  type: parameter
+  concept: formant_q
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 10
+- id: claim10515
+  type: parameter
+  concept: mic_distance
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  value: 0.5
+  unit: m
+- id: claim10516
+  type: parameter
+  concept: tenors
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  unit: kPa
+  value: 2.0
+- id: claim10517
+  type: parameter
+  concept: male_nonsingers
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  unit: kPa
+  value: 2.0
+- id: claim10518
+  type: parameter
+  concept: female_nonsingers
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+  unit: kPa
+  value: 0.65
+- id: claim10519
+  type: equation
+  expression: (Eq. 1)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10520
+  type: equation
+  expression: (Eq. 18)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10521
+  type: equation
+  expression: '(Eq. 23)
+
+
+    Where: $\alpha$ = spectral slope parameter. A spectral slope of 12 dB/octave yields
+    $\alpha = 2.0$ (typical male phonation).'
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10522
+  type: equation
+  expression: '(Eq. 27)
+
+
+    Where:'
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10523
+  type: equation
+  expression: (Eq. 29)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10524
+  type: equation
+  expression: (Eq. 31)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10525
+  type: equation
+  expression: (Eq. 33)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10526
+  type: equation
+  expression: (Eq. 34)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10527
+  type: equation
+  expression: (Eq. 35)
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10528
+  type: observation
+  statement: SPL must increase monotonically with $P_L$ when $P_L > P_{th}$ (all other
+    params constant)
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10529
+  type: observation
+  statement: SPL must increase approximately 8-9 dB per doubling of $(P_L - P_{th})$
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10530
+  type: observation
+  statement: SPL must increase approximately 8-9 dB per octave of $F_0$ (if $P_L/P_{th}$
+    ratio held constant)
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10531
+  type: observation
+  statement: $P_{th}$ must increase with $F_0$ (quadratic relationship, Eq. 37)
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10532
+  type: observation
+  statement: 'At $P_L = P_{th}$: $Q_o \to 1.0$, $Q_s \to 1.0$, flow amplitude $\to
+    0$'
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10533
+  type: observation
+  statement: Glottal power is proportional to $\dot{u}_m^2$ (6 dB per doubling of
+    MFDR)
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10534
+  type: observation
+  statement: Vocal tract gain $G(F_0)$ shows peaks when harmonics align with formants
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0
+- id: claim10535
+  type: observation
+  statement: For the same lung pressure, $\dot{u}_m$ for tenors should be 3-4x that
+    of nonsingers
+  concepts: []
+  provenance:
+    paper: Titze_1992_VocalIntensity
+    page: 0

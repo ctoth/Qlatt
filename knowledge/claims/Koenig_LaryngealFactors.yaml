@@ -1,0 +1,176 @@
+source:
+  paper: Koenig_LaryngealFactors
+claims:
+- id: claim5738
+  type: parameter
+  concept: b_m
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 10.2
+- id: claim5739
+  type: parameter
+  concept: p_m
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 42.6
+- id: claim5740
+  type: parameter
+  concept: p_sd
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 10.9
+- id: claim5741
+  type: parameter
+  concept: d_m
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 11.9
+- id: claim5742
+  type: parameter
+  concept: t_m
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 49.8
+- id: claim5743
+  type: parameter
+  concept: t_sd
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+  value: 9.9
+- id: claim5744
+  type: parameter
+  concept: voth_range_men
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 32.9
+  unit: ms
+- id: claim5745
+  type: parameter
+  concept: voth_range_women
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 52.9
+  unit: ms
+- id: claim5746
+  type: parameter
+  concept: voth_range_5yearolds
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 107.1
+  unit: ms
+- id: claim5747
+  type: parameter
+  concept: voth_range_men
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 31.3
+  unit: ms
+- id: claim5748
+  type: parameter
+  concept: voth_range_women
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 54.2
+  unit: ms
+- id: claim5749
+  type: parameter
+  concept: voth_range_5yearolds
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 80.7
+  unit: ms
+- id: claim5750
+  type: parameter
+  concept: men_mean
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 44.0
+- id: claim5751
+  type: parameter
+  concept: men_sd
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 7.3
+- id: claim5752
+  type: parameter
+  concept: women_mean
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 34.5
+- id: claim5753
+  type: parameter
+  concept: women_sd
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 7.7
+- id: claim5754
+  type: parameter
+  concept: 5yearolds_mean
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 18.5
+- id: claim5755
+  type: parameter
+  concept: 5yearolds_sd
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  value: 8.8
+- id: claim5756
+  type: parameter
+  concept: voice_onset_time
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+- id: claim5757
+  type: parameter
+  concept: vot_for_h
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: ms
+- id: claim5758
+  type: parameter
+  concept: peak_airflow_h
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: l/m
+- id: claim5759
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: cm H₂O
+- id: claim5760
+  type: parameter
+  concept: phonation_threshold_pressure
+  provenance:
+    paper: Koenig_LaryngealFactors
+    page: 0
+  unit: cm H₂O

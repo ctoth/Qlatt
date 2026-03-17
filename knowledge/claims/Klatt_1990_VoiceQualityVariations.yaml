@@ -1,0 +1,524 @@
+source:
+  paper: Klatt_1990_VoiceQualityVariations
+claims:
+- id: claim5613
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  lower_bound: 0
+  upper_bound: 5000
+- id: claim5614
+  type: parameter
+  concept: av
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5615
+  type: parameter
+  concept: oq
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 50
+- id: claim5616
+  type: parameter
+  concept: sq
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 200
+- id: claim5617
+  type: parameter
+  concept: tl
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 41
+  unit: dB
+- id: claim5618
+  type: parameter
+  concept: fl
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5619
+  type: parameter
+  concept: di
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5620
+  type: parameter
+  concept: ah
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5621
+  type: parameter
+  concept: du
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 500
+- id: claim5622
+  type: parameter
+  concept: ui
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 5
+- id: claim5623
+  type: parameter
+  concept: sr
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 10000
+- id: claim5624
+  type: parameter
+  concept: nf
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 5
+- id: claim5625
+  type: parameter
+  concept: ss
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 2
+- id: claim5626
+  type: parameter
+  concept: rs
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 8
+- id: claim5627
+  type: parameter
+  concept: sb
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 1
+- id: claim5628
+  type: parameter
+  concept: cp
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5629
+  type: parameter
+  concept: os
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5630
+  type: parameter
+  concept: gv
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5631
+  type: parameter
+  concept: gh
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5632
+  type: parameter
+  concept: gf
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5633
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 1000
+- id: claim5634
+  type: parameter
+  concept: av
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5635
+  type: parameter
+  concept: oq
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 50
+- id: claim5636
+  type: parameter
+  concept: sq
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 200
+- id: claim5637
+  type: parameter
+  concept: tl
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5638
+  type: parameter
+  concept: fl
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5639
+  type: parameter
+  concept: di
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5640
+  type: parameter
+  concept: ah
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5641
+  type: parameter
+  concept: af
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5642
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 500
+- id: claim5643
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5644
+  type: parameter
+  concept: df1
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5645
+  type: parameter
+  concept: db1
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5646
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 1500
+- id: claim5647
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 90
+- id: claim5648
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 2500
+- id: claim5649
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 150
+- id: claim5650
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 3250
+- id: claim5651
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 200
+- id: claim5652
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 3700
+- id: claim5653
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 200
+- id: claim5654
+  type: parameter
+  concept: fnp
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 280
+- id: claim5655
+  type: parameter
+  concept: bnp
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 90
+- id: claim5656
+  type: parameter
+  concept: fnz
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 280
+- id: claim5657
+  type: parameter
+  concept: bnz
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 90
+- id: claim5658
+  type: parameter
+  concept: ftp
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 2150
+- id: claim5659
+  type: parameter
+  concept: btp
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 180
+- id: claim5660
+  type: parameter
+  concept: ftz
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 2150
+- id: claim5661
+  type: parameter
+  concept: btz
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 180
+- id: claim5662
+  type: parameter
+  concept: a2fa6f
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5663
+  type: parameter
+  concept: ab
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5664
+  type: parameter
+  concept: anv
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5665
+  type: parameter
+  concept: a1va4v
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5666
+  type: parameter
+  concept: atv
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5667
+  type: parameter
+  concept: 1st
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 900
+- id: claim5668
+  type: parameter
+  concept: 2nd
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 1650
+- id: claim5669
+  type: parameter
+  concept: 3rd
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 2350
+- id: claim5670
+  type: parameter
+  concept: 2nd
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 1550
+- id: claim5671
+  type: parameter
+  concept: 3rd
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 2200
+- id: claim5672
+  type: parameter
+  concept: 4th
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  unit: Hz
+  value: 3275
+- id: claim5673
+  type: parameter
+  concept: av_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5674
+  type: parameter
+  concept: av_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5675
+  type: parameter
+  concept: oq_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 60
+- id: claim5676
+  type: parameter
+  concept: oq_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 80
+- id: claim5677
+  type: parameter
+  concept: tl_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 8
+- id: claim5678
+  type: parameter
+  concept: tl_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 24
+- id: claim5679
+  type: parameter
+  concept: ah_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  lower_bound: 0
+  upper_bound: 40
+- id: claim5680
+  type: parameter
+  concept: ah_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 52
+- id: claim5681
+  type: parameter
+  concept: di_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5682
+  type: parameter
+  concept: di_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 0
+- id: claim5683
+  type: parameter
+  concept: fl_normal
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 25
+- id: claim5684
+  type: parameter
+  concept: fl_breathy
+  provenance:
+    paper: Klatt_1990_VoiceQualityVariations
+    page: 0
+  value: 25

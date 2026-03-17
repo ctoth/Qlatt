@@ -1,0 +1,234 @@
+source:
+  paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+claims:
+- id: claim1012
+  type: parameter
+  concept: prosodic_strength
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0
+  unit: dimensionless
+- id: claim1013
+  type: parameter
+  concept: pigesture_activation
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0
+  unit: dimensionless
+- id: claim1014
+  type: parameter
+  concept: gestural_stiffness
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  unit: --
+- id: claim1015
+  type: parameter
+  concept: damping
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  unit: --
+- id: claim1016
+  type: parameter
+  concept: mass
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 1
+  unit: --
+- id: claim1017
+  type: parameter
+  concept: target_position
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  unit: --
+- id: claim1018
+  type: parameter
+  concept: lowering_duration_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.073
+- id: claim1019
+  type: parameter
+  concept: lowering_duration_stiffness
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.092
+- id: claim1020
+  type: parameter
+  concept: lowering_duration_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.0816
+- id: claim1021
+  type: parameter
+  concept: raising_duration_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.063
+- id: claim1022
+  type: parameter
+  concept: raising_duration_stiffness
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.066
+- id: claim1023
+  type: parameter
+  concept: raising_duration_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.074
+- id: claim1024
+  type: parameter
+  concept: kinematic_overlap_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.9452
+- id: claim1025
+  type: parameter
+  concept: kinematic_overlap_stiffness
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.9675
+- id: claim1026
+  type: parameter
+  concept: kinematic_overlap_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.8946
+- id: claim1027
+  type: parameter
+  concept: kinematic_overlap_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 1.0952
+- id: claim1028
+  type: parameter
+  concept: kinematic_overlap_stiffness
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 1.3515
+- id: claim1029
+  type: parameter
+  concept: kinematic_overlap_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.9865
+- id: claim1030
+  type: parameter
+  concept: raising_duration_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.052
+- id: claim1031
+  type: parameter
+  concept: raising_duration_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.068
+- id: claim1032
+  type: parameter
+  concept: lowering_duration_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.0682
+- id: claim1033
+  type: parameter
+  concept: lowering_duration_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.0801
+- id: claim1034
+  type: parameter
+  concept: time_between_peak_velocities_no_pi
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.04
+- id: claim1035
+  type: parameter
+  concept: time_between_peak_velocities_clock_slowing
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+  value: 0.048
+- id: claim1036
+  type: equation
+  expression: 'where:'
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1037
+  type: observation
+  statement: Lengthening must be greatest at the boundary edge and decrease with distance
+    from it
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1038
+  type: observation
+  statement: Clock slowing must affect both phrase-final and phrase-initial gestures
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1039
+  type: observation
+  statement: Stronger boundaries (higher alpha) must produce more lengthening
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1040
+  type: observation
+  statement: Different boundary strengths produce differences in degree, not type,
+    of effect
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1041
+  type: observation
+  statement: Clock slowing must reduce intergestural overlap (unlike stiffness modulation
+    which increases it)
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1042
+  type: observation
+  statement: Duration increase in phrase-final position should be greater than phrase-initial
+    (asymmetric effect)
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0
+- id: claim1043
+  type: observation
+  statement: Final consonants within the phrase-final syllable should lengthen more
+    than preceding vowels
+  concepts: []
+  provenance:
+    paper: Byrd_2003_ElasticPhraseBoundaryLengthening
+    page: 0

@@ -1,0 +1,96 @@
+source:
+  paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+claims:
+- id: claim1783
+  type: parameter
+  concept: f1
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1784
+  type: parameter
+  concept: f2
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1785
+  type: parameter
+  concept: f3
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1786
+  type: parameter
+  concept: f4
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1787
+  type: parameter
+  concept: f5
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1788
+  type: parameter
+  concept: b1
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1789
+  type: parameter
+  concept: b2
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1790
+  type: parameter
+  concept: b3
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1791
+  type: parameter
+  concept: b4
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1792
+  type: parameter
+  concept: b5
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  unit: Hz
+- id: claim1793
+  type: parameter
+  concept: duration_values
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  value: 270
+  unit: ms
+- id: claim1794
+  type: parameter
+  concept: spl_values
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0
+  lower_bound: 63
+  upper_bound: 70
+  unit: dB
+- id: claim1795
+  type: equation
+  expression: \Delta A_{peak} \approx 6 \text{ dB for 4-fold bandwidth reduction}
+  provenance:
+    paper: deCheveigné_1999_FormantBandwidthCompetingVowels
+    page: 0

@@ -1,0 +1,331 @@
+source:
+  paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+claims:
+- id: claim1623
+  type: parameter
+  concept: mean_sff
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: Hz
+  value: 122.73
+- id: claim1624
+  type: parameter
+  concept: sff_range
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: Hz
+  value: 100.39
+- id: claim1625
+  type: parameter
+  concept: sff_range
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: Hz
+  value: 173.86
+- id: claim1626
+  type: parameter
+  concept: pitch_sigma
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 2.18
+- id: claim1627
+  type: parameter
+  concept: pitch_sigma_range
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 0.77
+  upper_bound: 4.3
+- id: claim1628
+  type: parameter
+  concept: sff_range
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 11.33
+- id: claim1629
+  type: parameter
+  concept: sff_range
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 4.0
+  upper_bound: 21.0
+- id: claim1630
+  type: parameter
+  concept: mean_sff_males
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 125.01
+- id: claim1631
+  type: parameter
+  concept: mean_sff_females
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 213.05
+- id: claim1632
+  type: parameter
+  concept: pitch_sigma_males
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 2.12
+- id: claim1633
+  type: parameter
+  concept: pitch_sigma_females
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 2.38
+- id: claim1634
+  type: parameter
+  concept: pitch_sigma_both
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 2.25
+- id: claim1635
+  type: parameter
+  concept: pitch_sigma_range_males
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 0.57
+  upper_bound: 4.42
+- id: claim1636
+  type: parameter
+  concept: pitch_sigma_range_females
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 0.78
+  upper_bound: 4.23
+- id: claim1637
+  type: parameter
+  concept: pitch_sigma_range_both
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 0.57
+  upper_bound: 4.42
+- id: claim1638
+  type: parameter
+  concept: sff_range_males
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 11.33
+- id: claim1639
+  type: parameter
+  concept: sff_range_females
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 12.27
+- id: claim1640
+  type: parameter
+  concept: sff_range_both
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  value: 11.8
+- id: claim1641
+  type: parameter
+  concept: sff_range_males
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 4
+  upper_bound: 22
+- id: claim1642
+  type: parameter
+  concept: sff_range_females
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 5
+  upper_bound: 21
+- id: claim1643
+  type: parameter
+  concept: sff_range_both
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  lower_bound: 4
+  upper_bound: 22
+- id: claim1644
+  type: parameter
+  concept: hollien_jackson
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 3.2
+- id: claim1645
+  type: parameter
+  concept: hudson_holbrook
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 5.06
+- id: claim1646
+  type: parameter
+  concept: horii
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 2.41
+- id: claim1647
+  type: parameter
+  concept: mysak
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 2.9
+  upper_bound: 3.3
+- id: claim1648
+  type: parameter
+  concept: snidecor
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 3.04
+- id: claim1649
+  type: parameter
+  concept: linke
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 3.04
+- id: claim1650
+  type: parameter
+  concept: hudson_holbrook
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  value: 3.3
+- id: claim1651
+  type: parameter
+  concept: brown_et_al
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 2.0
+  upper_bound: 2.44
+- id: claim1652
+  type: parameter
+  concept: stoicheff
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 3.78
+  upper_bound: 4.7
+- id: claim1653
+  type: parameter
+  concept: mcglone_hollien
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+  unit: ST
+  lower_bound: 2.7
+  upper_bound: 2.96
+- id: claim1654
+  type: equation
+  expression: \text{SD} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\bar{x} - x_i)^2}
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1655
+  type: equation
+  expression: \text{ST} = 12 \cdot \log_2\left(\frac{f}{f_{\text{ref}}}\right)
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1656
+  type: observation
+  statement: Pitch sigma (in ST) must correlate positively with perceived vocal variability
+    (r > .85)
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1657
+  type: observation
+  statement: SFF range (in ST) must correlate positively with perceived vocal variability
+    (r > .80)
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1658
+  type: observation
+  statement: Pitch sigma correlation with perceived variability should be >= SFF range
+    correlation
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1659
+  type: observation
+  statement: For normal reading, pitch sigma should be in range [0.5, 5.0] ST for
+    healthy young adults
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1660
+  type: observation
+  statement: For normal reading, SFF range should be in range [4, 22] ST for healthy
+    young adults
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1661
+  type: observation
+  statement: 'Mean SFF for young adult males during reading: 100–175 Hz'
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1662
+  type: observation
+  statement: 'Mean SFF for young adult females during reading: 185–250 Hz'
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1663
+  type: observation
+  statement: Pitch sigma and SFF range must be highly correlated with each other (r
+    > .95)
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0
+- id: claim1664
+  type: observation
+  statement: No significant sex difference expected in pitch sigma or SFF range during
+    reading when measured in semitones
+  concepts: []
+  provenance:
+    paper: Cumbers_2013_PerceptualCorrelatesVocalVariability
+    page: 0

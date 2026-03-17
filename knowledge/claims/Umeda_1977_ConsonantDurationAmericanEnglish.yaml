@@ -1,0 +1,698 @@
+source:
+  paper: Umeda_1977_ConsonantDurationAmericanEnglish
+claims:
+- id: claim10596
+  type: parameter
+  concept: p
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 89
+- id: claim10597
+  type: parameter
+  concept: t
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 77
+- id: claim10598
+  type: parameter
+  concept: k
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 69
+- id: claim10599
+  type: parameter
+  concept: b
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 90
+- id: claim10600
+  type: parameter
+  concept: d
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 63
+- id: claim10601
+  type: parameter
+  concept: g
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 69
+- id: claim10602
+  type: parameter
+  concept: d3
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 58
+- id: claim10603
+  type: parameter
+  concept: tr
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 119
+- id: claim10604
+  type: parameter
+  concept: f
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 122
+- id: claim10605
+  type: parameter
+  concept: s
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 129
+- id: claim10606
+  type: parameter
+  concept: sh
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 118
+- id: claim10607
+  type: parameter
+  concept: v
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 78
+- id: claim10608
+  type: parameter
+  concept: z
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+- id: claim10609
+  type: parameter
+  concept: '3'
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+- id: claim10610
+  type: parameter
+  concept: m
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 86
+- id: claim10611
+  type: parameter
+  concept: n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 71
+- id: claim10612
+  type: parameter
+  concept: ng
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+- id: claim10613
+  type: parameter
+  concept: l
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: base
+  value: 66
+- id: claim10614
+  type: parameter
+  concept: 10_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 67
+- id: claim10615
+  type: parameter
+  concept: 10_j
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -3
+- id: claim10616
+  type: parameter
+  concept: t_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 25
+- id: claim10617
+  type: parameter
+  concept: 15_5_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 61
+- id: claim10618
+  type: parameter
+  concept: 20_15_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 57
+- id: claim10619
+  type: parameter
+  concept: 28_8_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 70
+- id: claim10620
+  type: parameter
+  concept: 11_1_5_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 33
+- id: claim10621
+  type: parameter
+  concept: 51_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 86
+- id: claim10622
+  type: parameter
+  concept: 19_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 90
+- id: claim10623
+  type: parameter
+  concept: 19_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -10
+- id: claim10624
+  type: parameter
+  concept: 0_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 68
+- id: claim10625
+  type: parameter
+  concept: 10_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 67
+- id: claim10626
+  type: parameter
+  concept: 10_m
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -17
+- id: claim10627
+  type: parameter
+  concept: 21_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 25
+- id: claim10628
+  type: parameter
+  concept: 33_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 61
+- id: claim10629
+  type: parameter
+  concept: 33_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -4
+- id: claim10630
+  type: parameter
+  concept: 16_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 57
+- id: claim10631
+  type: parameter
+  concept: 16_m
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -20
+- id: claim10632
+  type: parameter
+  concept: d_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 26
+- id: claim10633
+  type: parameter
+  concept: d_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -15
+- id: claim10634
+  type: parameter
+  concept: g_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 51
+- id: claim10635
+  type: parameter
+  concept: g_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -16
+- id: claim10636
+  type: parameter
+  concept: 2_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 70
+- id: claim10637
+  type: parameter
+  concept: 28_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 90
+- id: claim10638
+  type: parameter
+  concept: 28_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -25
+- id: claim10639
+  type: parameter
+  concept: 12_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 98
+- id: claim10640
+  type: parameter
+  concept: 12_n
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: -20
+- id: claim10641
+  type: parameter
+  concept: z_base
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 68
+- id: claim10642
+  type: parameter
+  concept: z_preceded_by_l
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 0
+- id: claim10643
+  type: parameter
+  concept: z_m
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 0
+- id: claim10644
+  type: parameter
+  concept: cc_stv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 51
+- id: claim10645
+  type: parameter
+  concept: cc_stv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 9
+- id: claim10646
+  type: parameter
+  concept: cc_sstrv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 61
+- id: claim10647
+  type: parameter
+  concept: cc_sstrv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 51
+- id: claim10648
+  type: parameter
+  concept: ccvstv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 40
+- id: claim10649
+  type: parameter
+  concept: ccvstv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 30
+- id: claim10650
+  type: parameter
+  concept: jh_stv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 56
+- id: claim10651
+  type: parameter
+  concept: jh_stv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 17
+- id: claim10652
+  type: parameter
+  concept: jh_sstrv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 58
+- id: claim10653
+  type: parameter
+  concept: jh_sstrv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 60
+- id: claim10654
+  type: parameter
+  concept: jhvstv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 46
+- id: claim10655
+  type: parameter
+  concept: jhvstv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 41
+- id: claim10656
+  type: parameter
+  concept: mm_stv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 55
+- id: claim10657
+  type: parameter
+  concept: mm_stv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 12
+- id: claim10658
+  type: parameter
+  concept: mm_sstrv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 68
+- id: claim10659
+  type: parameter
+  concept: mm_sstrv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 38
+- id: claim10660
+  type: parameter
+  concept: mmvstv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 57
+- id: claim10661
+  type: parameter
+  concept: mmvstv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 24
+- id: claim10662
+  type: parameter
+  concept: sp_stv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 40
+- id: claim10663
+  type: parameter
+  concept: sp_stv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 14
+- id: claim10664
+  type: parameter
+  concept: sp_sstrv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 42
+- id: claim10665
+  type: parameter
+  concept: sp_sstrv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 21
+- id: claim10666
+  type: parameter
+  concept: spvstv_closure
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 46
+- id: claim10667
+  type: parameter
+  concept: spvstv_aspiration
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  value: 24
+- id: claim10668
+  type: parameter
+  concept: ttv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 100
+- id: claim10669
+  type: parameter
+  concept: ntto
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 45
+- id: claim10670
+  type: parameter
+  concept: tpv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 137
+- id: claim10671
+  type: parameter
+  concept: tpv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 108
+- id: claim10672
+  type: parameter
+  concept: tbv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 106
+- id: claim10673
+  type: parameter
+  concept: tdv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 125
+- id: claim10674
+  type: parameter
+  concept: tdv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 106
+- id: claim10675
+  type: parameter
+  concept: kkv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 108
+- id: claim10676
+  type: parameter
+  concept: dbv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 99
+- id: claim10677
+  type: parameter
+  concept: dtv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 71
+- id: claim10678
+  type: parameter
+  concept: ffv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 160
+- id: claim10679
+  type: parameter
+  concept: cssv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 130
+- id: claim10680
+  type: parameter
+  concept: vfv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 143
+- id: claim10681
+  type: parameter
+  concept: vpv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 125
+- id: claim10682
+  type: parameter
+  concept: va
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 99
+- id: claim10683
+  type: parameter
+  concept: zsv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 136
+- id: claim10684
+  type: parameter
+  concept: zsc
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 113
+- id: claim10685
+  type: parameter
+  concept: nnv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 100
+- id: claim10686
+  type: parameter
+  concept: nmv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 130
+- id: claim10687
+  type: parameter
+  concept: mnv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 150
+- id: claim10688
+  type: parameter
+  concept: ngnv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 127
+- id: claim10689
+  type: parameter
+  concept: ngmv
+  provenance:
+    paper: Umeda_1977_ConsonantDurationAmericanEnglish
+    page: 0
+  unit: msec
+  value: 116

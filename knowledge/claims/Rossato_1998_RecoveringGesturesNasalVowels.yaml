@@ -1,0 +1,81 @@
+source:
+  paper: Rossato_1998_RecoveringGesturesNasalVowels
+claims:
+- id: claim7807
+  type: parameter
+  concept: velum_parameter
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+  unit: normalized
+- id: claim7808
+  type: parameter
+  concept: nasal_area
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+  unit: cm^2
+- id: claim7809
+  type: parameter
+  concept: area_ratio
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+  unit: dimensionless
+- id: claim7810
+  type: parameter
+  concept: pharyngonasal_target
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+  unit: Hz
+- id: claim7811
+  type: equation
+  expression: d = \frac{A_n}{A_n + A_{oral}}
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7812
+  type: equation
+  expression: \hat{v} = \arg\max_v p(v \mid H)
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7813
+  type: equation
+  expression: p(v \mid H) = \frac{p(H \mid v) \cdot p(v)}{p(H)}
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7814
+  type: observation
+  statement: Nasality axis should be approximately perpendicular to the first 4 PCA
+    dimensions of oral vowel cepstra (angle > 80 degrees)
+  concepts: []
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7815
+  type: observation
+  statement: For An < 0.8 cm^2, spectral changes from velum opening should be large
+    enough for reliable classification
+  concepts: []
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7816
+  type: observation
+  statement: Pharyngo-nasal transfer functions (d=1) should cluster in the F'1-F'2
+    plane near (300, 800) Hz
+  concepts: []
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0
+- id: claim7817
+  type: observation
+  statement: Area ratio d should remain discriminable across its full range, unlike
+    An which saturates
+  concepts: []
+  provenance:
+    paper: Rossato_1998_RecoveringGesturesNasalVowels
+    page: 0

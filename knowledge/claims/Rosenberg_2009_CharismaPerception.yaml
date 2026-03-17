@@ -1,0 +1,136 @@
+source:
+  paper: Rosenberg_2009_CharismaPerception
+claims:
+- id: claim7788
+  type: parameter
+  concept: proportion_h_accents_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.145
+- id: claim7789
+  type: parameter
+  concept: proportion_h_accents_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.00658
+- id: claim7790
+  type: parameter
+  concept: proportion_lh_accents_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: -0.111
+- id: claim7791
+  type: parameter
+  concept: proportion_lh_accents_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.0363
+- id: claim7792
+  type: parameter
+  concept: proportion_l_accents_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: -0.223
+- id: claim7793
+  type: parameter
+  concept: rising_phrase_boundaries_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: -0.172
+- id: claim7794
+  type: parameter
+  concept: rising_phrase_boundaries_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.00119
+- id: claim7795
+  type: parameter
+  concept: downstepped_contours_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: -0.109
+- id: claim7796
+  type: parameter
+  concept: downstepped_contours_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.0419
+- id: claim7797
+  type: parameter
+  concept: number_of_words_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.097
+- id: claim7798
+  type: parameter
+  concept: number_of_words_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.068
+- id: claim7799
+  type: parameter
+  concept: function_content_word_ratio_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.102
+- id: claim7800
+  type: parameter
+  concept: function_content_word_ratio_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.0569
+- id: claim7801
+  type: parameter
+  concept: lexical_complexity_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.123
+- id: claim7802
+  type: parameter
+  concept: lexical_complexity_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.021
+- id: claim7803
+  type: parameter
+  concept: first_person_pronouns_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.116
+- id: claim7804
+  type: parameter
+  concept: first_person_pronouns_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.0294
+- id: claim7805
+  type: parameter
+  concept: disfluency_ratio_r
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: -0.124
+- id: claim7806
+  type: parameter
+  concept: disfluency_ratio_p
+  provenance:
+    paper: Rosenberg_2009_CharismaPerception
+    page: 0
+  value: 0.0204

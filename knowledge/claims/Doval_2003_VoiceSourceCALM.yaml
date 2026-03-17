@@ -1,0 +1,181 @@
+source:
+  paper: Doval_2003_VoiceSourceCALM
+claims:
+- id: claim1888
+  type: parameter
+  concept: open_quotient
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: ratio
+  lower_bound: 0.3
+  upper_bound: 1.0
+- id: claim1889
+  type: parameter
+  concept: asymmetry_coefficient
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: ratio
+  lower_bound: 0.6
+  upper_bound: 0.8
+- id: claim1890
+  type: parameter
+  concept: maximum_excitation
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: volume velocity/s
+- id: claim1891
+  type: parameter
+  concept: fundamental_period
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: seconds
+- id: claim1892
+  type: parameter
+  concept: spectral_tilt
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: dB
+  lower_bound: 0
+  upper_bound: 24
+- id: claim1893
+  type: parameter
+  concept: sampling_period
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+  unit: seconds
+- id: claim1894
+  type: equation
+  expression: U'_g(t) = E \cdot n'_g\left(\frac{t}{O_q T_0}; \alpha_m\right) * \perp\!\!\!\perp_{T_0}(t)
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1895
+  type: equation
+  expression: \widetilde{U'_g}(f) = E O_q T_0 \tilde{n}'_g(f O_q T_0; \alpha_m)(F_0
+    \perp\!\!\!\perp_{F_0}(f))
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1896
+  type: equation
+  expression: \widetilde{U'_g}(f) \xrightarrow{f=0} I 2\pi f
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1897
+  type: equation
+  expression: \widetilde{U'_g}(f) \xrightarrow{f \to +\infty} \frac{E}{2\pi f}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1898
+  type: equation
+  expression: F_g = \frac{1}{2\pi} \sqrt{\frac{E}{I}} = \frac{f_g(\alpha_m)}{O_q T_0}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1899
+  type: equation
+  expression: A_g = \sqrt{EI} = E O_q T_0 a_g(\alpha_m)
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1900
+  type: equation
+  expression: \widetilde{U'_g}(f) \xrightarrow{f \to +\infty} \frac{E 2\pi F_c}{(2\pi
+    f)^2}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1901
+  type: equation
+  expression: H_1(s) = -E_0 e^{(a-s)T_e} \frac{(s-a)\sin(\omega_g T_e) + \omega_g
+    \cos(\omega_g T_e)}{(s-(a+j\omega_g))(s-(a-j\omega_g))}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1902
+  type: equation
+  expression: p = a_p + / - j b_p
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1903
+  type: equation
+  expression: a_p = -\frac{\pi}{O_q T_0 \tan(\pi \alpha_m)}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1904
+  type: equation
+  expression: b_p = \frac{\pi}{O_q T_0}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1905
+  type: equation
+  expression: H(z) = \frac{b_1 z}{1 + a_1 z + a_2 z^2}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1906
+  type: equation
+  expression: a_1 = -2 e^{-a_p T_e} \cos(b_p T_e)
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1907
+  type: equation
+  expression: a_2 = e^{-2 a_p T_e}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1908
+  type: equation
+  expression: b_1 = E \frac{\pi^2}{b_p^3} e^{-a_p T_e} \sin(b_p T_e)
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1909
+  type: equation
+  expression: y_n = -a_1 y_{n+1} - a_2 y_{n+2} + b_1 x_{n+1}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1910
+  type: equation
+  expression: H(z) = \frac{b_{TL}}{1 - a_{TL} z^{-1}}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1911
+  type: equation
+  expression: a_{TL} = \nu - \sqrt{\nu^2 - 1}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1912
+  type: equation
+  expression: b_{TL} = 1 - a_{TL}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1913
+  type: equation
+  expression: \nu = 1 - \frac{1}{\eta}
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0
+- id: claim1914
+  type: equation
+  expression: \eta = \frac{e^{-TL/10.0 + a_2(10.0)}}{\cos(2\pi \frac{3000}{F_s}) -
+    1} - 1
+  provenance:
+    paper: Doval_2003_VoiceSourceCALM
+    page: 0

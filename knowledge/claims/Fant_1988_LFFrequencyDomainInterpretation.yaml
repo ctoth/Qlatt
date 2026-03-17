@@ -1,0 +1,76 @@
+source:
+  paper: Fant_1988_LFFrequencyDomainInterpretation
+claims:
+- id: claim2365
+  type: parameter
+  concept: r_g
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  lower_bound: 0.7
+  upper_bound: 1.6
+- id: claim2366
+  type: parameter
+  concept: q_o
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  lower_bound: 0.3
+  upper_bound: 0.8
+- id: claim2367
+  type: parameter
+  concept: f_a
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  lower_bound: 100
+  upper_bound: 3000
+  unit: Hz
+- id: claim2368
+  type: parameter
+  concept: peak_glottal_flow
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: cm³/sec
+- id: claim2369
+  type: parameter
+  concept: excitation_amplitude
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: 10³ cm³/sec²
+- id: claim2370
+  type: parameter
+  concept: flow_excitation_ratio
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: ms
+- id: claim2371
+  type: parameter
+  concept: steepness
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: '%'
+- id: claim2372
+  type: parameter
+  concept: return_phase_cutoff
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: Hz
+- id: claim2373
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0
+  unit: Hz
+- id: claim2374
+  type: equation
+  expression: 'For $T_e < t < T_c$:'
+  provenance:
+    paper: Fant_1988_LFFrequencyDomainInterpretation
+    page: 0

@@ -1,0 +1,51 @@
+source:
+  paper: Alku_2002_NormalizedAmplitudeQuotient
+claims:
+- id: claim68
+  type: parameter
+  concept: breathy
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.15
+  upper_bound: 0.27
+- id: claim69
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.13
+  upper_bound: 0.16
+- id: claim70
+  type: parameter
+  concept: pressed
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.1
+  upper_bound: 0.15
+- id: claim71
+  type: parameter
+  concept: breathy
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.23
+  upper_bound: 0.35
+- id: claim72
+  type: parameter
+  concept: normal
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.11
+  upper_bound: 0.17
+- id: claim73
+  type: parameter
+  concept: pressed
+  provenance:
+    paper: Alku_2002_NormalizedAmplitudeQuotient
+    page: 0
+  lower_bound: 0.08
+  upper_bound: 0.11

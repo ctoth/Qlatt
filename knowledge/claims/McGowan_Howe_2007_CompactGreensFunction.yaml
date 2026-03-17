@@ -1,0 +1,94 @@
+source:
+  paper: McGowan_Howe_2007_CompactGreensFunction
+claims:
+- id: claim6474
+  type: parameter
+  concept: speed_of_sound
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: m/s
+- id: claim6475
+  type: parameter
+  concept: air_density
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: kg/m^3
+- id: claim6476
+  type: parameter
+  concept: acoustic_wavelength
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  lower_bound: 1.5
+  upper_bound: 2.5
+  unit: m
+- id: claim6477
+  type: parameter
+  concept: source_region_size
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: cm
+- id: claim6478
+  type: parameter
+  concept: jet_velocity_at_false_folds
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: cm/s
+- id: claim6479
+  type: parameter
+  concept: radius_of_curvature
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: cm
+- id: claim6480
+  type: parameter
+  concept: fence_height
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+  unit: cm
+- id: claim6481
+  type: observation
+  statement: Sharp-edge obstruction sources should produce more high-frequency energy
+    than rounded-edge sources at the same flow velocity
+  concepts: []
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+- id: claim6482
+  type: observation
+  statement: Sibilant fricative amplitude should correlate with the sharpness of the
+    nearest downstream obstruction (teeth)
+  concepts: []
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+- id: claim6483
+  type: observation
+  statement: Aspiration noise spectral rolloff should correlate with false fold radius
+    of curvature
+  concepts: []
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+- id: claim6484
+  type: observation
+  statement: Source effectiveness at rounded edges should diminish exponentially above
+    frequency V/r
+  concepts: []
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0
+- id: claim6485
+  type: observation
+  statement: For compact sources ($\ell \ll \lambda$), the far-field spectrum should
+    factor cleanly into source × transfer function components
+  concepts: []
+  provenance:
+    paper: McGowan_Howe_2007_CompactGreensFunction
+    page: 0

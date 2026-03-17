@@ -1,0 +1,100 @@
+source:
+  paper: Fant_1986_GlottalFlowModelsInteraction
+claims:
+- id: claim2351
+  type: parameter
+  concept: frequency_parameter
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: Hz
+- id: claim2352
+  type: parameter
+  concept: exponential_growth
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: 1/s
+- id: claim2353
+  type: parameter
+  concept: return_time_constant
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: ms
+- id: claim2354
+  type: parameter
+  concept: discontinuity_time
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: ms
+- id: claim2355
+  type: parameter
+  concept: closure_time
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: ms
+- id: claim2356
+  type: parameter
+  concept: first_formant
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: Hz
+- id: claim2357
+  type: parameter
+  concept: f1_bandwidth
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  lower_bound: 50
+  upper_bound: 150
+  unit: Hz
+- id: claim2358
+  type: parameter
+  concept: vocal_tract_inductance
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: mH
+- id: claim2359
+  type: parameter
+  concept: subglottal_pressure
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: cm H₂O
+- id: claim2360
+  type: parameter
+  concept: peak_glottal_area
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+  unit: cm²
+- id: claim2361
+  type: equation
+  expression: E(t) = E_0 e^{\alpha t} \sin(\omega_g t)
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+- id: claim2362
+  type: equation
+  expression: E(t) = \frac{-E_0}{\varepsilon t_a} \left[ e^{-\varepsilon(t-t_e)} -
+    e^{-\varepsilon(t_c-t_e)} \right]
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+- id: claim2363
+  type: equation
+  expression: F_a = (2\pi t_a)^{-1}
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0
+- id: claim2364
+  type: equation
+  expression: \Delta L = -10 \log_{10}[1 + (2\pi t_a f)^2]
+  provenance:
+    paper: Fant_1986_GlottalFlowModelsInteraction
+    page: 0

@@ -1,0 +1,101 @@
+source:
+  paper: Childers_1990_EGGVocalFoldPhysiology
+claims:
+- id: claim1315
+  type: parameter
+  concept: opening_instant_diff_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -2.47
+- id: claim1316
+  type: parameter
+  concept: opening_instant_diff_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -2.08
+- id: claim1317
+  type: parameter
+  concept: closing_instant_diff_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -0.48
+- id: claim1318
+  type: parameter
+  concept: closing_instant_diff_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -0.55
+- id: claim1319
+  type: parameter
+  concept: peak_instant_diff_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -4.14
+- id: claim1320
+  type: parameter
+  concept: peak_instant_diff_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: -4.14
+- id: claim1321
+  type: parameter
+  concept: oq_from_area_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 0.71
+- id: claim1322
+  type: parameter
+  concept: oq_from_area_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 0.63
+- id: claim1323
+  type: parameter
+  concept: oq_from_egg_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 0.61
+- id: claim1324
+  type: parameter
+  concept: oq_from_egg_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 0.62
+- id: claim1325
+  type: parameter
+  concept: rap_from_area_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 1.99
+- id: claim1326
+  type: parameter
+  concept: rap_from_area_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 1.32
+- id: claim1327
+  type: parameter
+  concept: rap_from_egg_complete_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 1.73
+- id: claim1328
+  type: parameter
+  concept: rap_from_egg_closed_phase_data
+  provenance:
+    paper: Childers_1990_EGGVocalFoldPhysiology
+    page: 0
+  value: 1.37

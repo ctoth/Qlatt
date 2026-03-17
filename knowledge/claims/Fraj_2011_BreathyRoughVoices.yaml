@@ -1,0 +1,251 @@
+source:
+  paper: Fraj_2011_BreathyRoughVoices
+claims:
+- id: claim2890
+  type: parameter
+  concept: jitter_control
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  lower_bound: 0.315
+  upper_bound: 4.5
+- id: claim2891
+  type: parameter
+  concept: pulsatile_noise
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  lower_bound: 0.15
+  upper_bound: 0.55
+- id: claim2892
+  type: parameter
+  concept: base_f0
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim2893
+  type: parameter
+  concept: noise_delay
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  value: 1
+  unit: ms
+- id: claim2894
+  type: parameter
+  concept: trachea_ducts
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  value: 36
+- id: claim2895
+  type: parameter
+  concept: trachea_area
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  value: 1.2
+  unit: cm²
+- id: claim2896
+  type: parameter
+  concept: vocal_tract_ducts
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  lower_bound: 40
+  upper_bound: 45
+- id: claim2897
+  type: parameter
+  concept: '0315'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 28.8
+- id: claim2898
+  type: parameter
+  concept: '0315'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 23.5
+- id: claim2899
+  type: parameter
+  concept: '0315'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 17.5
+- id: claim2900
+  type: parameter
+  concept: '063'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 30.0
+- id: claim2901
+  type: parameter
+  concept: '063'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 22.7
+- id: claim2902
+  type: parameter
+  concept: '063'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 18.5
+- id: claim2903
+  type: parameter
+  concept: '126'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 29.4
+- id: claim2904
+  type: parameter
+  concept: '126'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 21.7
+- id: claim2905
+  type: parameter
+  concept: '126'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 17.4
+- id: claim2906
+  type: parameter
+  concept: '189'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 28.8
+- id: claim2907
+  type: parameter
+  concept: '189'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 22.9
+- id: claim2908
+  type: parameter
+  concept: '189'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 19.2
+- id: claim2909
+  type: parameter
+  concept: '252'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 29.4
+- id: claim2910
+  type: parameter
+  concept: '252'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 22.2
+- id: claim2911
+  type: parameter
+  concept: '252'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 18.6
+- id: claim2912
+  type: parameter
+  concept: '345'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 29.6
+- id: claim2913
+  type: parameter
+  concept: '345'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 22.7
+- id: claim2914
+  type: parameter
+  concept: '345'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 17.7
+- id: claim2915
+  type: parameter
+  concept: '45'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 29.2
+- id: claim2916
+  type: parameter
+  concept: '45'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 22.0
+- id: claim2917
+  type: parameter
+  concept: '45'
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+  unit: dB
+  value: 18.5
+- id: claim2918
+  type: equation
+  expression: \theta(n) = \theta(n-1) + 2\pi f_0 \Delta + 2\pi b \xi(n)
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+- id: claim2919
+  type: equation
+  expression: \xi(n) = \begin{cases} +1, & p = 0.5 \\ -1, & p = 0.5 \end{cases}
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+- id: claim2920
+  type: equation
+  expression: \text{noisy\_velocity}(n) = u_g(n) + n_1 \cdot u_g(n-d) \cdot \text{noise}(n)
+    + n_2
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0
+- id: claim2921
+  type: equation
+  expression: \text{SNR (dB)} = 10 \log_{10} \frac{\sum u_g^2(n)}{\sum \text{noise}^2(n)}
+  provenance:
+    paper: Fraj_2011_BreathyRoughVoices
+    page: 0

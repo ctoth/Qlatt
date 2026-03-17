@@ -1,0 +1,1675 @@
+source:
+  paper: Klatt_1980_CascadeParallelFormantSynthesizer
+claims:
+- id: claim5360
+  type: parameter
+  concept: amplitude_of_voicing
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5361
+  type: parameter
+  concept: amplitude_of_frication
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5362
+  type: parameter
+  concept: amplitude_of_aspiration
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5363
+  type: parameter
+  concept: amplitude_of_sinusoidal_voicing
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5364
+  type: parameter
+  concept: fundamental_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 500
+  unit: Hz
+- id: claim5365
+  type: parameter
+  concept: first_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 450
+  lower_bound: 150
+  upper_bound: 900
+  unit: Hz
+- id: claim5366
+  type: parameter
+  concept: second_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1450
+  lower_bound: 500
+  upper_bound: 2500
+  unit: Hz
+- id: claim5367
+  type: parameter
+  concept: third_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2450
+  lower_bound: 1300
+  upper_bound: 3500
+  unit: Hz
+- id: claim5368
+  type: parameter
+  concept: fourth_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 3300
+  lower_bound: 2500
+  upper_bound: 4500
+  unit: Hz
+- id: claim5369
+  type: parameter
+  concept: fifth_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 3750
+  lower_bound: 3500
+  upper_bound: 4900
+  unit: Hz
+- id: claim5370
+  type: parameter
+  concept: nasal_zero_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 250
+  lower_bound: 200
+  upper_bound: 700
+  unit: Hz
+- id: claim5371
+  type: parameter
+  concept: first_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 50
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5372
+  type: parameter
+  concept: second_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 70
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5373
+  type: parameter
+  concept: third_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 110
+  lower_bound: 40
+  upper_bound: 500
+  unit: Hz
+- id: claim5374
+  type: parameter
+  concept: parallel_formant_amplitudes
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5375
+  type: parameter
+  concept: nasal_formant_amplitude
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5376
+  type: parameter
+  concept: bypass_path_amplitude
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5377
+  type: parameter
+  concept: cascade_parallel_switch
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 1
+- id: claim5378
+  type: parameter
+  concept: glottal_resonator_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 600
+  unit: Hz
+- id: claim5379
+  type: parameter
+  concept: glottal_resonator_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 100
+  lower_bound: 100
+  upper_bound: 2000
+  unit: Hz
+- id: claim5380
+  type: parameter
+  concept: glottal_zero_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1500
+  lower_bound: 0
+  upper_bound: 5000
+  unit: Hz
+- id: claim5381
+  type: parameter
+  concept: glottal_zero_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 6000
+  lower_bound: 100
+  upper_bound: 9000
+  unit: Hz
+- id: claim5382
+  type: parameter
+  concept: fourth_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 250
+  lower_bound: 100
+  upper_bound: 500
+  unit: Hz
+- id: claim5383
+  type: parameter
+  concept: fifth_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+  lower_bound: 150
+  upper_bound: 700
+  unit: Hz
+- id: claim5384
+  type: parameter
+  concept: sixth_formant_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 4900
+  lower_bound: 4000
+  upper_bound: 4999
+  unit: Hz
+- id: claim5385
+  type: parameter
+  concept: sixth_formant_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1000
+  lower_bound: 200
+  upper_bound: 2000
+  unit: Hz
+- id: claim5386
+  type: parameter
+  concept: nasal_pole_frequency
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 250
+  lower_bound: 200
+  upper_bound: 500
+  unit: Hz
+- id: claim5387
+  type: parameter
+  concept: nasal_pole_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 100
+  lower_bound: 50
+  upper_bound: 500
+  unit: Hz
+- id: claim5388
+  type: parameter
+  concept: nasal_zero_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 100
+  lower_bound: 50
+  upper_bound: 500
+  unit: Hz
+- id: claim5389
+  type: parameter
+  concept: glottal_resonator_2_bandwidth
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+  lower_bound: 100
+  upper_bound: 1000
+  unit: Hz
+- id: claim5390
+  type: parameter
+  concept: sampling_rate
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 10000
+  lower_bound: 5000
+  upper_bound: 20000
+  unit: Hz
+- id: claim5391
+  type: parameter
+  concept: samples_per_update
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 50
+  lower_bound: 1
+  upper_bound: 200
+- id: claim5392
+  type: parameter
+  concept: overall_gain
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 47
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim5393
+  type: parameter
+  concept: number_of_cascade_formants
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 5
+  lower_bound: 4
+  upper_bound: 6
+- id: claim5394
+  type: parameter
+  concept: a1_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -58
+- id: claim5395
+  type: parameter
+  concept: a2_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -65
+- id: claim5396
+  type: parameter
+  concept: a3_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -75
+- id: claim5397
+  type: parameter
+  concept: a4_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -78
+- id: claim5398
+  type: parameter
+  concept: a5_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -79
+- id: claim5399
+  type: parameter
+  concept: a6_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -80
+- id: claim5400
+  type: parameter
+  concept: an_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -58
+- id: claim5401
+  type: parameter
+  concept: ab_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -84
+- id: claim5402
+  type: parameter
+  concept: av_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -72
+- id: claim5403
+  type: parameter
+  concept: ah_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -102
+- id: claim5404
+  type: parameter
+  concept: af_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -72
+- id: claim5405
+  type: parameter
+  concept: avs_scale_factor
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: -44
+- id: claim5406
+  type: parameter
+  concept: w_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 290
+- id: claim5407
+  type: parameter
+  concept: w_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 610
+- id: claim5408
+  type: parameter
+  concept: w_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2150
+- id: claim5409
+  type: parameter
+  concept: w_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 50
+- id: claim5410
+  type: parameter
+  concept: w_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 80
+- id: claim5411
+  type: parameter
+  concept: w_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5412
+  type: parameter
+  concept: y_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 260
+- id: claim5413
+  type: parameter
+  concept: y_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2070
+- id: claim5414
+  type: parameter
+  concept: y_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 3020
+- id: claim5415
+  type: parameter
+  concept: y_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5416
+  type: parameter
+  concept: y_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 250
+- id: claim5417
+  type: parameter
+  concept: y_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 500
+- id: claim5418
+  type: parameter
+  concept: r_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 310
+- id: claim5419
+  type: parameter
+  concept: r_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1060
+- id: claim5420
+  type: parameter
+  concept: r_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1380
+- id: claim5421
+  type: parameter
+  concept: r_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 70
+- id: claim5422
+  type: parameter
+  concept: r_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 100
+- id: claim5423
+  type: parameter
+  concept: r_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 120
+- id: claim5424
+  type: parameter
+  concept: l_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 310
+- id: claim5425
+  type: parameter
+  concept: l_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1050
+- id: claim5426
+  type: parameter
+  concept: l_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2880
+- id: claim5427
+  type: parameter
+  concept: l_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 50
+- id: claim5428
+  type: parameter
+  concept: l_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 100
+- id: claim5429
+  type: parameter
+  concept: l_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 280
+- id: claim5430
+  type: parameter
+  concept: f_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 340
+- id: claim5431
+  type: parameter
+  concept: f_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1100
+- id: claim5432
+  type: parameter
+  concept: f_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2080
+- id: claim5433
+  type: parameter
+  concept: f_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5434
+  type: parameter
+  concept: f_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5435
+  type: parameter
+  concept: f_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5436
+  type: parameter
+  concept: f_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5437
+  type: parameter
+  concept: f_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5438
+  type: parameter
+  concept: f_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5439
+  type: parameter
+  concept: f_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 57
+- id: claim5440
+  type: parameter
+  concept: v_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 220
+- id: claim5441
+  type: parameter
+  concept: v_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1100
+- id: claim5442
+  type: parameter
+  concept: v_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2080
+- id: claim5443
+  type: parameter
+  concept: v_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5444
+  type: parameter
+  concept: v_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5445
+  type: parameter
+  concept: v_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5446
+  type: parameter
+  concept: v_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5447
+  type: parameter
+  concept: v_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5448
+  type: parameter
+  concept: v_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5449
+  type: parameter
+  concept: v_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 57
+- id: claim5450
+  type: parameter
+  concept: th_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 320
+- id: claim5451
+  type: parameter
+  concept: th_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1290
+- id: claim5452
+  type: parameter
+  concept: th_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2540
+- id: claim5453
+  type: parameter
+  concept: th_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5454
+  type: parameter
+  concept: th_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5455
+  type: parameter
+  concept: th_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5456
+  type: parameter
+  concept: th_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5457
+  type: parameter
+  concept: th_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5458
+  type: parameter
+  concept: th_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 28
+- id: claim5459
+  type: parameter
+  concept: th_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 48
+- id: claim5460
+  type: parameter
+  concept: dh_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 270
+- id: claim5461
+  type: parameter
+  concept: dh_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1290
+- id: claim5462
+  type: parameter
+  concept: dh_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2540
+- id: claim5463
+  type: parameter
+  concept: dh_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5464
+  type: parameter
+  concept: dh_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5465
+  type: parameter
+  concept: dh_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5466
+  type: parameter
+  concept: dh_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5467
+  type: parameter
+  concept: dh_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5468
+  type: parameter
+  concept: dh_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 28
+- id: claim5469
+  type: parameter
+  concept: dh_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 48
+- id: claim5470
+  type: parameter
+  concept: s_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 320
+- id: claim5471
+  type: parameter
+  concept: s_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1390
+- id: claim5472
+  type: parameter
+  concept: s_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2530
+- id: claim5473
+  type: parameter
+  concept: s_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5474
+  type: parameter
+  concept: s_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5475
+  type: parameter
+  concept: s_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5476
+  type: parameter
+  concept: s_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5477
+  type: parameter
+  concept: s_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5478
+  type: parameter
+  concept: s_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 52
+- id: claim5479
+  type: parameter
+  concept: s_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5480
+  type: parameter
+  concept: z_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 240
+- id: claim5481
+  type: parameter
+  concept: z_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1390
+- id: claim5482
+  type: parameter
+  concept: z_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2530
+- id: claim5483
+  type: parameter
+  concept: z_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 70
+- id: claim5484
+  type: parameter
+  concept: z_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5485
+  type: parameter
+  concept: z_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5486
+  type: parameter
+  concept: z_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5487
+  type: parameter
+  concept: z_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5488
+  type: parameter
+  concept: z_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 52
+- id: claim5489
+  type: parameter
+  concept: z_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5490
+  type: parameter
+  concept: sh_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5491
+  type: parameter
+  concept: sh_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1840
+- id: claim5492
+  type: parameter
+  concept: sh_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2750
+- id: claim5493
+  type: parameter
+  concept: sh_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5494
+  type: parameter
+  concept: sh_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5495
+  type: parameter
+  concept: sh_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 57
+- id: claim5496
+  type: parameter
+  concept: sh_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 48
+- id: claim5497
+  type: parameter
+  concept: sh_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 48
+- id: claim5498
+  type: parameter
+  concept: sh_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 46
+- id: claim5499
+  type: parameter
+  concept: sh_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5500
+  type: parameter
+  concept: p_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 400
+- id: claim5501
+  type: parameter
+  concept: p_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1100
+- id: claim5502
+  type: parameter
+  concept: p_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2150
+- id: claim5503
+  type: parameter
+  concept: p_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5504
+  type: parameter
+  concept: p_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5505
+  type: parameter
+  concept: p_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5506
+  type: parameter
+  concept: p_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5507
+  type: parameter
+  concept: p_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5508
+  type: parameter
+  concept: p_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5509
+  type: parameter
+  concept: p_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 63
+- id: claim5510
+  type: parameter
+  concept: b_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5511
+  type: parameter
+  concept: b_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1100
+- id: claim5512
+  type: parameter
+  concept: b_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2150
+- id: claim5513
+  type: parameter
+  concept: b_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5514
+  type: parameter
+  concept: b_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5515
+  type: parameter
+  concept: b_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5516
+  type: parameter
+  concept: b_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5517
+  type: parameter
+  concept: b_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5518
+  type: parameter
+  concept: b_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5519
+  type: parameter
+  concept: b_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 63
+- id: claim5520
+  type: parameter
+  concept: t_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 400
+- id: claim5521
+  type: parameter
+  concept: t_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1600
+- id: claim5522
+  type: parameter
+  concept: t_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2600
+- id: claim5523
+  type: parameter
+  concept: t_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5524
+  type: parameter
+  concept: t_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5525
+  type: parameter
+  concept: t_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 30
+- id: claim5526
+  type: parameter
+  concept: t_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 45
+- id: claim5527
+  type: parameter
+  concept: t_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 57
+- id: claim5528
+  type: parameter
+  concept: t_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 63
+- id: claim5529
+  type: parameter
+  concept: t_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5530
+  type: parameter
+  concept: d_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5531
+  type: parameter
+  concept: d_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1600
+- id: claim5532
+  type: parameter
+  concept: d_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2600
+- id: claim5533
+  type: parameter
+  concept: d_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5534
+  type: parameter
+  concept: d_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5535
+  type: parameter
+  concept: d_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 47
+- id: claim5536
+  type: parameter
+  concept: d_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5537
+  type: parameter
+  concept: d_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 62
+- id: claim5538
+  type: parameter
+  concept: d_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5539
+  type: parameter
+  concept: d_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5540
+  type: parameter
+  concept: k_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5541
+  type: parameter
+  concept: k_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1990
+- id: claim5542
+  type: parameter
+  concept: k_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2850
+- id: claim5543
+  type: parameter
+  concept: k_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 250
+- id: claim5544
+  type: parameter
+  concept: k_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5545
+  type: parameter
+  concept: k_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 53
+- id: claim5546
+  type: parameter
+  concept: k_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 43
+- id: claim5547
+  type: parameter
+  concept: k_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 45
+- id: claim5548
+  type: parameter
+  concept: k_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 45
+- id: claim5549
+  type: parameter
+  concept: k_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5550
+  type: parameter
+  concept: g_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5551
+  type: parameter
+  concept: g_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1990
+- id: claim5552
+  type: parameter
+  concept: g_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2850
+- id: claim5553
+  type: parameter
+  concept: g_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 60
+- id: claim5554
+  type: parameter
+  concept: g_a2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5555
+  type: parameter
+  concept: g_a3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 53
+- id: claim5556
+  type: parameter
+  concept: g_a4
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 43
+- id: claim5557
+  type: parameter
+  concept: g_a5
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 45
+- id: claim5558
+  type: parameter
+  concept: g_a6
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 45
+- id: claim5559
+  type: parameter
+  concept: g_ab
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 0
+- id: claim5560
+  type: parameter
+  concept: m_fnp
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 270
+- id: claim5561
+  type: parameter
+  concept: m_fnz
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 450
+- id: claim5562
+  type: parameter
+  concept: m_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 480
+- id: claim5563
+  type: parameter
+  concept: m_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1270
+- id: claim5564
+  type: parameter
+  concept: m_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2130
+- id: claim5565
+  type: parameter
+  concept: m_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5566
+  type: parameter
+  concept: m_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5567
+  type: parameter
+  concept: m_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 200
+- id: claim5568
+  type: parameter
+  concept: n_fnp
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 270
+- id: claim5569
+  type: parameter
+  concept: n_fnz
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 450
+- id: claim5570
+  type: parameter
+  concept: n_f1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 480
+- id: claim5571
+  type: parameter
+  concept: n_f2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 1340
+- id: claim5572
+  type: parameter
+  concept: n_f3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 2470
+- id: claim5573
+  type: parameter
+  concept: n_b1
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 40
+- id: claim5574
+  type: parameter
+  concept: n_b2
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5575
+  type: parameter
+  concept: n_b3
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+  value: 300
+- id: claim5576
+  type: equation
+  expression: y(nT) = Ax(nT) + By(nT-T) + Cy(nT-2T)
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5577
+  type: equation
+  expression: C = -\exp(-2\pi \cdot BW \cdot T)
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5578
+  type: equation
+  expression: B = 2\exp(-\pi \cdot BW \cdot T) \cos(2\pi \cdot F \cdot T)
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5579
+  type: equation
+  expression: A = 1 - B - C
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5580
+  type: equation
+  expression: A' = 1.0/A, \quad B' = -B/A, \quad C' = -C/A
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5581
+  type: equation
+  expression: T(f) = \frac{A}{1 - Bz^{-1} - Cz^{-2}}
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5582
+  type: equation
+  expression: T(f) = \prod_{n=1}^{5} \frac{A(n)}{1 - B(n)z^{-1} - C(n)z^{-2}}
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5583
+  type: equation
+  expression: T(f) = \prod_{n=1}^{\infty} \frac{s(n) \cdot s^*(n)}{[s + s(n)][s +
+    s^*(n)]}
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5584
+  type: equation
+  expression: p(nT) = u(nT) - u(nT - T)
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0
+- id: claim5585
+  type: equation
+  expression: y(nT) = x(nT) + y(nT - T)
+  provenance:
+    paper: Klatt_1980_CascadeParallelFormantSynthesizer
+    page: 0

@@ -1,0 +1,256 @@
+source:
+  paper: Dalston_1975_SonorantAcoustics
+claims:
+- id: claim1751
+  type: parameter
+  concept: r
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 348
+- id: claim1752
+  type: parameter
+  concept: w
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 336
+- id: claim1753
+  type: parameter
+  concept: l
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 344
+- id: claim1754
+  type: parameter
+  concept: r
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 1061
+- id: claim1755
+  type: parameter
+  concept: w
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 732
+- id: claim1756
+  type: parameter
+  concept: l
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 1179
+- id: claim1757
+  type: parameter
+  concept: r
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 1546
+- id: claim1758
+  type: parameter
+  concept: w
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 2290
+- id: claim1759
+  type: parameter
+  concept: l
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 2523
+- id: claim1760
+  type: parameter
+  concept: f1_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 39.2
+- id: claim1761
+  type: parameter
+  concept: f2_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 35.5
+- id: claim1762
+  type: parameter
+  concept: f3_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 30.9
+- id: claim1763
+  type: parameter
+  concept: f1_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 33.7
+- id: claim1764
+  type: parameter
+  concept: f2_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 50.4
+- id: claim1765
+  type: parameter
+  concept: f3_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 71.4
+- id: claim1766
+  type: parameter
+  concept: f1_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 3.9
+- id: claim1767
+  type: parameter
+  concept: f2_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 10.5
+- id: claim1768
+  type: parameter
+  concept: f3_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 12.8
+- id: claim1769
+  type: parameter
+  concept: f1_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 40.3
+- id: claim1770
+  type: parameter
+  concept: f2_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 41.2
+- id: claim1771
+  type: parameter
+  concept: f3_steadystate_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 38.9
+- id: claim1772
+  type: parameter
+  concept: f1_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 32.7
+- id: claim1773
+  type: parameter
+  concept: f2_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 52.3
+- id: claim1774
+  type: parameter
+  concept: f3_transition_duration
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 61.0
+- id: claim1775
+  type: parameter
+  concept: f1_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 8.0
+- id: claim1776
+  type: parameter
+  concept: f2_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 11.7
+- id: claim1777
+  type: parameter
+  concept: f3_transition_rate
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: SD
+  value: 14.3
+- id: claim1778
+  type: parameter
+  concept: w
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: Hz
+  value: 340
+- id: claim1779
+  type: parameter
+  concept: r
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: Hz
+  value: 350
+- id: claim1780
+  type: parameter
+  concept: l
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+  unit: Hz
+  value: 350
+- id: claim1781
+  type: equation
+  expression: \text{Transition Rate} = \frac{\Delta F \text{ (Hz)}}{\text{Transition
+    Duration (ms)}}
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0
+- id: claim1782
+  type: equation
+  expression: \text{Ratio} = \frac{F_n}{F_1}
+  provenance:
+    paper: Dalston_1975_SonorantAcoustics
+    page: 0

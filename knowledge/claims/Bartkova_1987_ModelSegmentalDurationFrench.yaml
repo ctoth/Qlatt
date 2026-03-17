@@ -1,0 +1,672 @@
+source:
+  paper: Bartkova_1987_ModelSegmentalDurationFrench
+claims:
+- id: claim525
+  type: parameter
+  concept: a
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 167
+- id: claim526
+  type: parameter
+  concept: e
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 157
+- id: claim527
+  type: parameter
+  concept: epsilon
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 134
+- id: claim528
+  type: parameter
+  concept: i
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 132
+- id: claim529
+  type: parameter
+  concept: y
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 167
+- id: claim530
+  type: parameter
+  concept: u
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 163
+- id: claim531
+  type: parameter
+  concept: o
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 186
+- id: claim532
+  type: parameter
+  concept: openo
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 170
+- id: claim533
+  type: parameter
+  concept: oe
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 185
+- id: claim534
+  type: parameter
+  concept: oeopen
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 186
+- id: claim535
+  type: parameter
+  concept: schwa
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  unit: ms
+  value: 130
+- id: claim536
+  type: parameter
+  concept: v_1_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.36
+- id: claim537
+  type: parameter
+  concept: v_1_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.56
+- id: claim538
+  type: parameter
+  concept: v_2_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.36
+- id: claim539
+  type: parameter
+  concept: v_2_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.38
+- id: claim540
+  type: parameter
+  concept: v_3_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.86
+- id: claim541
+  type: parameter
+  concept: v_3_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.1
+- id: claim542
+  type: parameter
+  concept: v_4_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim543
+  type: parameter
+  concept: v_4_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim544
+  type: parameter
+  concept: v_5_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.45
+- id: claim545
+  type: parameter
+  concept: v_5_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.59
+- id: claim546
+  type: parameter
+  concept: v_6_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.38
+- id: claim547
+  type: parameter
+  concept: v_6_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.43
+- id: claim548
+  type: parameter
+  concept: v_7_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.43
+- id: claim549
+  type: parameter
+  concept: v_7_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.45
+- id: claim550
+  type: parameter
+  concept: v_8_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.66
+- id: claim551
+  type: parameter
+  concept: v_8_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.8
+- id: claim552
+  type: parameter
+  concept: v_9_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.52
+- id: claim553
+  type: parameter
+  concept: v_9_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.6
+- id: claim554
+  type: parameter
+  concept: v_10_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.86
+- id: claim555
+  type: parameter
+  concept: v_10_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.1
+- id: claim556
+  type: parameter
+  concept: v_11_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.66
+- id: claim557
+  type: parameter
+  concept: v_11_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.8
+- id: claim558
+  type: parameter
+  concept: p_t_k_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.85
+- id: claim559
+  type: parameter
+  concept: p_t_k_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.95
+- id: claim560
+  type: parameter
+  concept: b_d_g_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.93
+- id: claim561
+  type: parameter
+  concept: b_d_g_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.02
+- id: claim562
+  type: parameter
+  concept: v_3_z_r_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.25
+- id: claim563
+  type: parameter
+  concept: v_3_z_r_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.56
+- id: claim564
+  type: parameter
+  concept: f_s_s_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.88
+- id: claim565
+  type: parameter
+  concept: f_s_s_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.08
+- id: claim566
+  type: parameter
+  concept: w_j_l_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.82
+- id: claim567
+  type: parameter
+  concept: w_j_l_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 1.05
+- id: claim568
+  type: parameter
+  concept: m_n_speaker_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.83
+- id: claim569
+  type: parameter
+  concept: m_n_speaker_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.95
+- id: claim570
+  type: parameter
+  concept: bdg_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.52
+- id: claim571
+  type: parameter
+  concept: bdg_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.32
+- id: claim572
+  type: parameter
+  concept: bdg_c_3
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.56
+- id: claim573
+  type: parameter
+  concept: bdg_c_4
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.34
+- id: claim574
+  type: parameter
+  concept: bdg_c_5
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.6
+- id: claim575
+  type: parameter
+  concept: bdg_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim576
+  type: parameter
+  concept: bdg_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.38
+- id: claim577
+  type: parameter
+  concept: bdg_c_8
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.3
+- id: claim578
+  type: parameter
+  concept: bdg_c_9
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.59
+- id: claim579
+  type: parameter
+  concept: ptk_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.57
+- id: claim580
+  type: parameter
+  concept: ptk_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.36
+- id: claim581
+  type: parameter
+  concept: ptk_c_3
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.57
+- id: claim582
+  type: parameter
+  concept: ptk_c_4
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.47
+- id: claim583
+  type: parameter
+  concept: ptk_c_5
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.62
+- id: claim584
+  type: parameter
+  concept: ptk_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.49
+- id: claim585
+  type: parameter
+  concept: ptk_c_8
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.33
+- id: claim586
+  type: parameter
+  concept: vz3_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.5
+- id: claim587
+  type: parameter
+  concept: vz3_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.42
+- id: claim588
+  type: parameter
+  concept: vz3_c_3
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.52
+- id: claim589
+  type: parameter
+  concept: vz3_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.49
+- id: claim590
+  type: parameter
+  concept: vz3_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.46
+- id: claim591
+  type: parameter
+  concept: fss_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.48
+- id: claim592
+  type: parameter
+  concept: fss_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim593
+  type: parameter
+  concept: fss_c_3
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.52
+- id: claim594
+  type: parameter
+  concept: fss_c_4
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.48
+- id: claim595
+  type: parameter
+  concept: fss_c_5
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.6
+- id: claim596
+  type: parameter
+  concept: fss_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.53
+- id: claim597
+  type: parameter
+  concept: fss_c_9
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.9
+- id: claim598
+  type: parameter
+  concept: mn_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim599
+  type: parameter
+  concept: mn_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.3
+- id: claim600
+  type: parameter
+  concept: mn_c_3
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.45
+- id: claim601
+  type: parameter
+  concept: mn_c_4
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim602
+  type: parameter
+  concept: mn_c_5
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.5
+- id: claim603
+  type: parameter
+  concept: mn_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.42
+- id: claim604
+  type: parameter
+  concept: mn_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim605
+  type: parameter
+  concept: mn_c_8
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.34
+- id: claim606
+  type: parameter
+  concept: mn_c_9
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.5
+- id: claim607
+  type: parameter
+  concept: rl_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.3
+- id: claim608
+  type: parameter
+  concept: rl_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.33
+- id: claim609
+  type: parameter
+  concept: rl_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.31
+- id: claim610
+  type: parameter
+  concept: rl_c_8
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.45
+- id: claim611
+  type: parameter
+  concept: rl_c_9
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.75
+- id: claim612
+  type: parameter
+  concept: wjy_c_1
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.3
+- id: claim613
+  type: parameter
+  concept: wjy_c_2
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.25
+- id: claim614
+  type: parameter
+  concept: wjy_c_4
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.26
+- id: claim615
+  type: parameter
+  concept: wjy_c_5
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.6
+- id: claim616
+  type: parameter
+  concept: wjy_c_6
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.33
+- id: claim617
+  type: parameter
+  concept: wjy_c_7
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.4
+- id: claim618
+  type: parameter
+  concept: wjy_c_8
+  provenance:
+    paper: Bartkova_1987_ModelSegmentalDurationFrench
+    page: 0
+  value: 0.25

@@ -1,0 +1,1046 @@
+source:
+  paper: Recasens_2012_LateralAllophones
+claims:
+- id: claim7580
+  type: parameter
+  concept: clear_l_f2_in_ili_context
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1714.83
+  unit: Hz
+- id: claim7581
+  type: parameter
+  concept: clear_l_f2_in_ala_context
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1221.9
+  unit: Hz
+- id: claim7582
+  type: parameter
+  concept: dark_l_f2_in_ili_context
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1103.73
+  unit: Hz
+- id: claim7583
+  type: parameter
+  concept: dark_l_f2_in_ala_context
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 972.11
+  unit: Hz
+- id: claim7584
+  type: parameter
+  concept: i
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  lower_bound: 1359
+  upper_bound: 2094
+  unit: Hz
+- id: claim7585
+  type: parameter
+  concept: a
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  lower_bound: 986
+  upper_bound: 1593
+  unit: Hz
+- id: claim7586
+  type: parameter
+  concept: clear_l
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: initial
+  value: 1640.14
+- id: claim7587
+  type: parameter
+  concept: dark_l
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: initial
+  value: 1067.61
+- id: claim7588
+  type: parameter
+  concept: f2_intervocalic_i
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7589
+  type: parameter
+  concept: f2_intervocalic_a
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7590
+  type: parameter
+  concept: f2_initial_i
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7591
+  type: parameter
+  concept: f2_final_i
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7592
+  type: parameter
+  concept: f1_intervocalic_i
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7593
+  type: parameter
+  concept: f1_intervocalic_a
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7594
+  type: parameter
+  concept: f3_intervocalic_a
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  unit: Hz
+- id: claim7595
+  type: parameter
+  concept: american_english_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1272
+- id: claim7596
+  type: parameter
+  concept: american_english_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 892
+- id: claim7597
+  type: parameter
+  concept: american_english_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 760
+- id: claim7598
+  type: parameter
+  concept: american_english_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 992
+- id: claim7599
+  type: parameter
+  concept: american_english_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 895
+- id: claim7600
+  type: parameter
+  concept: american_english_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 858
+- id: claim7601
+  type: parameter
+  concept: alguerese_catalan_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1621
+- id: claim7602
+  type: parameter
+  concept: alguerese_catalan_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1599
+- id: claim7603
+  type: parameter
+  concept: alguerese_catalan_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1620
+- id: claim7604
+  type: parameter
+  concept: alguerese_catalan_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1431
+- id: claim7605
+  type: parameter
+  concept: alguerese_catalan_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1327
+- id: claim7606
+  type: parameter
+  concept: alguerese_catalan_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1491
+- id: claim7607
+  type: parameter
+  concept: british_english_rp_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1600
+- id: claim7608
+  type: parameter
+  concept: british_english_rp_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1000
+- id: claim7609
+  type: parameter
+  concept: british_english_rp_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1120
+- id: claim7610
+  type: parameter
+  concept: british_english_rp_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 860
+- id: claim7611
+  type: parameter
+  concept: czech_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1518
+- id: claim7612
+  type: parameter
+  concept: czech_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1425
+- id: claim7613
+  type: parameter
+  concept: czech_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1021
+- id: claim7614
+  type: parameter
+  concept: czech_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1139
+- id: claim7615
+  type: parameter
+  concept: czech_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 992
+- id: claim7616
+  type: parameter
+  concept: czech_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 968
+- id: claim7617
+  type: parameter
+  concept: danish_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1717
+- id: claim7618
+  type: parameter
+  concept: danish_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1786
+- id: claim7619
+  type: parameter
+  concept: danish_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1617
+- id: claim7620
+  type: parameter
+  concept: danish_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1591
+- id: claim7621
+  type: parameter
+  concept: danish_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1593
+- id: claim7622
+  type: parameter
+  concept: danish_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1531
+- id: claim7623
+  type: parameter
+  concept: dutch_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1800
+- id: claim7624
+  type: parameter
+  concept: dutch_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1729
+- id: claim7625
+  type: parameter
+  concept: dutch_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 821
+- id: claim7626
+  type: parameter
+  concept: dutch_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1181
+- id: claim7627
+  type: parameter
+  concept: dutch_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1131
+- id: claim7628
+  type: parameter
+  concept: dutch_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 924
+- id: claim7629
+  type: parameter
+  concept: eastern_catalan_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1123
+- id: claim7630
+  type: parameter
+  concept: eastern_catalan_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1453
+- id: claim7631
+  type: parameter
+  concept: eastern_catalan_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1060
+- id: claim7632
+  type: parameter
+  concept: eastern_catalan_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1025
+- id: claim7633
+  type: parameter
+  concept: eastern_catalan_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1072
+- id: claim7634
+  type: parameter
+  concept: eastern_catalan_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1024
+- id: claim7635
+  type: parameter
+  concept: finnish_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1539
+- id: claim7636
+  type: parameter
+  concept: finnish_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1517
+- id: claim7637
+  type: parameter
+  concept: finnish_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1409
+- id: claim7638
+  type: parameter
+  concept: finnish_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 985
+- id: claim7639
+  type: parameter
+  concept: finnish_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 986
+- id: claim7640
+  type: parameter
+  concept: finnish_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 995
+- id: claim7641
+  type: parameter
+  concept: french_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1682
+- id: claim7642
+  type: parameter
+  concept: french_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1830
+- id: claim7643
+  type: parameter
+  concept: french_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1748
+- id: claim7644
+  type: parameter
+  concept: french_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1525
+- id: claim7645
+  type: parameter
+  concept: french_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1340
+- id: claim7646
+  type: parameter
+  concept: french_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1512
+- id: claim7647
+  type: parameter
+  concept: german_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1618
+- id: claim7648
+  type: parameter
+  concept: german_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1734
+- id: claim7649
+  type: parameter
+  concept: german_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1557
+- id: claim7650
+  type: parameter
+  concept: german_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1363
+- id: claim7651
+  type: parameter
+  concept: german_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1316
+- id: claim7652
+  type: parameter
+  concept: german_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1498
+- id: claim7653
+  type: parameter
+  concept: hungarian_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1642
+- id: claim7654
+  type: parameter
+  concept: hungarian_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1700
+- id: claim7655
+  type: parameter
+  concept: hungarian_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1343
+- id: claim7656
+  type: parameter
+  concept: hungarian_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1126
+- id: claim7657
+  type: parameter
+  concept: hungarian_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1083
+- id: claim7658
+  type: parameter
+  concept: hungarian_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1202
+- id: claim7659
+  type: parameter
+  concept: italian_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1629
+- id: claim7660
+  type: parameter
+  concept: italian_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 2094
+- id: claim7661
+  type: parameter
+  concept: italian_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1559
+- id: claim7662
+  type: parameter
+  concept: italian_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1394
+- id: claim7663
+  type: parameter
+  concept: italian_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1231
+- id: claim7664
+  type: parameter
+  concept: italian_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1391
+- id: claim7665
+  type: parameter
+  concept: leeds_british_english_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1012
+- id: claim7666
+  type: parameter
+  concept: leeds_british_english_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1024
+- id: claim7667
+  type: parameter
+  concept: leeds_british_english_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1024
+- id: claim7668
+  type: parameter
+  concept: majorcan_catalan_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 989
+- id: claim7669
+  type: parameter
+  concept: majorcan_catalan_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1228
+- id: claim7670
+  type: parameter
+  concept: majorcan_catalan_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1016
+- id: claim7671
+  type: parameter
+  concept: majorcan_catalan_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 929
+- id: claim7672
+  type: parameter
+  concept: majorcan_catalan_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1084
+- id: claim7673
+  type: parameter
+  concept: majorcan_catalan_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 973
+- id: claim7674
+  type: parameter
+  concept: newcastle_english_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1588
+- id: claim7675
+  type: parameter
+  concept: newcastle_english_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1359
+- id: claim7676
+  type: parameter
+  concept: newcastle_english_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1140
+- id: claim7677
+  type: parameter
+  concept: norwegian_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1724
+- id: claim7678
+  type: parameter
+  concept: norwegian_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1681
+- id: claim7679
+  type: parameter
+  concept: norwegian_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1604
+- id: claim7680
+  type: parameter
+  concept: norwegian_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1486
+- id: claim7681
+  type: parameter
+  concept: norwegian_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1128
+- id: claim7682
+  type: parameter
+  concept: norwegian_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1181
+- id: claim7683
+  type: parameter
+  concept: occitan_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1748
+- id: claim7684
+  type: parameter
+  concept: occitan_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1886
+- id: claim7685
+  type: parameter
+  concept: occitan_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1630
+- id: claim7686
+  type: parameter
+  concept: occitan_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1413
+- id: claim7687
+  type: parameter
+  concept: occitan_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1220
+- id: claim7688
+  type: parameter
+  concept: occitan_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1487
+- id: claim7689
+  type: parameter
+  concept: portuguese_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1046
+- id: claim7690
+  type: parameter
+  concept: portuguese_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1003
+- id: claim7691
+  type: parameter
+  concept: portuguese_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1096
+- id: claim7692
+  type: parameter
+  concept: portuguese_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 879
+- id: claim7693
+  type: parameter
+  concept: portuguese_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 871
+- id: claim7694
+  type: parameter
+  concept: portuguese_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1116
+- id: claim7695
+  type: parameter
+  concept: romanian_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1580
+- id: claim7696
+  type: parameter
+  concept: romanian_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1722
+- id: claim7697
+  type: parameter
+  concept: romanian_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1461
+- id: claim7698
+  type: parameter
+  concept: romanian_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1280
+- id: claim7699
+  type: parameter
+  concept: romanian_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1136
+- id: claim7700
+  type: parameter
+  concept: romanian_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1295
+- id: claim7701
+  type: parameter
+  concept: russian_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 964
+- id: claim7702
+  type: parameter
+  concept: russian_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1023
+- id: claim7703
+  type: parameter
+  concept: russian_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 922
+- id: claim7704
+  type: parameter
+  concept: russian_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 972
+- id: claim7705
+  type: parameter
+  concept: russian_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 938
+- id: claim7706
+  type: parameter
+  concept: russian_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 887
+- id: claim7707
+  type: parameter
+  concept: spanish_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1800
+- id: claim7708
+  type: parameter
+  concept: spanish_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1630
+- id: claim7709
+  type: parameter
+  concept: spanish_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1960
+- id: claim7710
+  type: parameter
+  concept: spanish_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1560
+- id: claim7711
+  type: parameter
+  concept: spanish_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1500
+- id: claim7712
+  type: parameter
+  concept: spanish_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1520
+- id: claim7713
+  type: parameter
+  concept: swedish_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1709
+- id: claim7714
+  type: parameter
+  concept: swedish_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1765
+- id: claim7715
+  type: parameter
+  concept: swedish_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1531
+- id: claim7716
+  type: parameter
+  concept: swedish_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1383
+- id: claim7717
+  type: parameter
+  concept: swedish_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1180
+- id: claim7718
+  type: parameter
+  concept: swedish_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1189
+- id: claim7719
+  type: parameter
+  concept: valencian_catalan_li
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1368
+- id: claim7720
+  type: parameter
+  concept: valencian_catalan_ili
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1982
+- id: claim7721
+  type: parameter
+  concept: valencian_catalan_il
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1264
+- id: claim7722
+  type: parameter
+  concept: valencian_catalan_la
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1150
+- id: claim7723
+  type: parameter
+  concept: valencian_catalan_ala
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1165
+- id: claim7724
+  type: parameter
+  concept: valencian_catalan_al
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  value: 1121
+- id: claim7725
+  type: parameter
+  concept: clear_l
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  lower_bound: 130
+  upper_bound: 863
+  unit: Hz
+- id: claim7726
+  type: parameter
+  concept: dark_l
+  provenance:
+    paper: Recasens_2012_LateralAllophones
+    page: 0
+  lower_bound: 3
+  upper_bound: 381
+  unit: Hz

@@ -1,0 +1,51 @@
+source:
+  paper: Flanagan_1958_PropertiesGlottalSoundSource
+claims:
+- id: claim2832
+  type: parameter
+  concept: '97'
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: dB
+  value: 56
+- id: claim2833
+  type: parameter
+  concept: '145'
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: dB
+  value: 57
+- id: claim2834
+  type: parameter
+  concept: '218'
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: dB
+  value: 62
+- id: claim2835
+  type: parameter
+  concept: '274'
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: dB
+  value: 67
+- id: claim2836
+  type: parameter
+  concept: a
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: cps
+  value: 125
+- id: claim2837
+  type: parameter
+  concept: b
+  provenance:
+    paper: Flanagan_1958_PropertiesGlottalSoundSource
+    page: 0
+  unit: cps
+  value: 111

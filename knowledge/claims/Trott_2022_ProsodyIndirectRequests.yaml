@@ -1,0 +1,59 @@
+source:
+  paper: Trott_2022_ProsodyIndirectRequests
+claims:
+- id: claim10545
+  type: parameter
+  concept: mean_f0
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: Hz
+- id: claim10546
+  type: parameter
+  concept: f0_range
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: Hz
+- id: claim10547
+  type: parameter
+  concept: f0_slope
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: Hz/s
+- id: claim10548
+  type: parameter
+  concept: f0_sd
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: Hz
+- id: claim10549
+  type: parameter
+  concept: duration
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: frames
+- id: claim10550
+  type: parameter
+  concept: mean_intensity
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: dB
+- id: claim10551
+  type: parameter
+  concept: intensity_sd
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: dB
+- id: claim10552
+  type: parameter
+  concept: degree_of_rise
+  provenance:
+    paper: Trott_2022_ProsodyIndirectRequests
+    page: 0
+  unit: Hz

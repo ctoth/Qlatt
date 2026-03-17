@@ -1,0 +1,396 @@
+source:
+  paper: Anumanchipalli_KLATTSTAT
+claims:
+- id: claim255
+  type: parameter
+  concept: av
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 70
+  unit: dB
+- id: claim256
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 200
+  upper_bound: 1300
+  unit: Hz
+- id: claim257
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim258
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 550
+  upper_bound: 3000
+  unit: Hz
+- id: claim259
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim260
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 1200
+  upper_bound: 4999
+  unit: Hz
+- id: claim261
+  type: parameter
+  concept: b3
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim262
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 1200
+  upper_bound: 4999
+  unit: Hz
+- id: claim263
+  type: parameter
+  concept: b4
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim264
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 1200
+  upper_bound: 4999
+  unit: Hz
+- id: claim265
+  type: parameter
+  concept: b5
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim266
+  type: parameter
+  concept: f6
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 1200
+  upper_bound: 4999
+  unit: Hz
+- id: claim267
+  type: parameter
+  concept: b6
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 2000
+  unit: Hz
+- id: claim268
+  type: parameter
+  concept: fnz
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 248
+  upper_bound: 528
+  unit: Hz
+- id: claim269
+  type: parameter
+  concept: bnz
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim270
+  type: parameter
+  concept: fnp
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 248
+  upper_bound: 528
+  unit: Hz
+- id: claim271
+  type: parameter
+  concept: bnp
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 40
+  upper_bound: 1000
+  unit: Hz
+- id: claim272
+  type: parameter
+  concept: asp
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 70
+  unit: dB
+- id: claim273
+  type: parameter
+  concept: kopen
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 40
+  lower_bound: 0
+  upper_bound: 60
+- id: claim274
+  type: parameter
+  concept: aturb
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim275
+  type: parameter
+  concept: tilt
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 24
+  unit: dB
+- id: claim276
+  type: parameter
+  concept: af
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim277
+  type: parameter
+  concept: skew
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0
+  lower_bound: 0
+  upper_bound: 40
+- id: claim278
+  type: parameter
+  concept: a1
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim279
+  type: parameter
+  concept: a2
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim280
+  type: parameter
+  concept: a3
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim281
+  type: parameter
+  concept: a4
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim282
+  type: parameter
+  concept: a5
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim283
+  type: parameter
+  concept: a6
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim284
+  type: parameter
+  concept: ab
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim285
+  type: parameter
+  concept: avp
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  lower_bound: 0
+  upper_bound: 70
+  unit: dB
+- id: claim286
+  type: parameter
+  concept: gain
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 80
+  lower_bound: 0
+  upper_bound: 80
+  unit: dB
+- id: claim287
+  type: parameter
+  concept: mcd_mean_naive
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.88
+- id: claim288
+  type: parameter
+  concept: mcd_mean_bayes
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.95
+- id: claim289
+  type: parameter
+  concept: mcd_mean_gmm_lda
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.96
+- id: claim290
+  type: parameter
+  concept: mcd_mean_gmm_ldae
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.95
+- id: claim291
+  type: parameter
+  concept: mcd_mean_mcep_lda
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.79
+- id: claim292
+  type: parameter
+  concept: mcd_mean_mcep_ldae
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 11.67
+- id: claim293
+  type: parameter
+  concept: mcd_variance_naive
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.36
+- id: claim294
+  type: parameter
+  concept: mcd_variance_bayes
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.37
+- id: claim295
+  type: parameter
+  concept: mcd_variance_gmm_lda
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.38
+- id: claim296
+  type: parameter
+  concept: mcd_variance_gmm_ldae
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.38
+- id: claim297
+  type: parameter
+  concept: mcd_variance_mcep_lda
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.26
+- id: claim298
+  type: parameter
+  concept: mcd_variance_mcep_ldae
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+  value: 0.26
+- id: claim299
+  type: equation
+  expression: S = \log_{10}(L_+ - L_- + 1)
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0
+- id: claim300
+  type: equation
+  expression: 'S = \begin{cases}
+
+    \log(L_+) & \text{if } P(+|x) > P(-|x) \\
+
+    0 & \text{if } P(+|x) < P(-|x)
+
+    \end{cases}'
+  provenance:
+    paper: Anumanchipalli_KLATTSTAT
+    page: 0

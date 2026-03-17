@@ -1,0 +1,289 @@
+source:
+  paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+claims:
+- id: claim3767
+  type: parameter
+  concept: f1
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3768
+  type: parameter
+  concept: f1i
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3769
+  type: parameter
+  concept: f2
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3770
+  type: parameter
+  concept: f2i
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3771
+  type: parameter
+  concept: f3
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3772
+  type: parameter
+  concept: f3i
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3773
+  type: parameter
+  concept: b1
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3774
+  type: parameter
+  concept: b2
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3775
+  type: parameter
+  concept: f4
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3776
+  type: parameter
+  concept: f5
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3777
+  type: parameter
+  concept: b3_b4_b5
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3778
+  type: parameter
+  concept: initial_fnp
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 400
+  unit: Hz
+- id: claim3779
+  type: parameter
+  concept: initial_fnz
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 400
+  unit: Hz
+- id: claim3780
+  type: parameter
+  concept: initial_bandwidth
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim3781
+  type: parameter
+  concept: transition_duration
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 40
+  unit: ms
+- id: claim3782
+  type: parameter
+  concept: vowel_duration
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 325
+  unit: ms
+- id: claim3783
+  type: parameter
+  concept: f0
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: Hz
+- id: claim3784
+  type: parameter
+  concept: initial_stop_burst
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 15
+  unit: ms
+- id: claim3785
+  type: parameter
+  concept: voicing_onset
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 10
+  unit: ms
+- id: claim3786
+  type: parameter
+  concept: nonnasal_interval
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 40
+  unit: ms
+- id: claim3787
+  type: parameter
+  concept: i
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: nasal
+  value: 270
+- id: claim3788
+  type: parameter
+  concept: e
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: nasal
+  value: 350
+- id: claim3789
+  type: parameter
+  concept: a
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: nasal
+  value: 700
+- id: claim3790
+  type: parameter
+  concept: o
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: nasal
+  value: 430
+- id: claim3791
+  type: parameter
+  concept: u
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  unit: nasal
+  value: 270
+- id: claim3792
+  type: parameter
+  concept: i_spacing_at_boundary
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 110
+  unit: Hz
+- id: claim3793
+  type: parameter
+  concept: i_spacing_at_nasal_endpoint
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 200
+  unit: Hz
+- id: claim3794
+  type: parameter
+  concept: e_spacing_at_boundary
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 90
+  unit: Hz
+- id: claim3795
+  type: parameter
+  concept: e_spacing_at_nasal_endpoint
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 150
+  unit: Hz
+- id: claim3796
+  type: parameter
+  concept: a_spacing_at_boundary
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 80
+  unit: Hz
+- id: claim3797
+  type: parameter
+  concept: a_spacing_at_nasal_endpoint
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim3798
+  type: parameter
+  concept: o_spacing_at_boundary
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 75
+  unit: Hz
+- id: claim3799
+  type: parameter
+  concept: o_spacing_at_nasal_endpoint
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 110
+  unit: Hz
+- id: claim3800
+  type: parameter
+  concept: u_spacing_at_boundary
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 100
+  unit: Hz
+- id: claim3801
+  type: parameter
+  concept: u_spacing_at_nasal_endpoint
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+  value: 175
+  unit: Hz
+- id: claim3802
+  type: equation
+  expression: \text{FNZ} = \frac{\text{FNP} + F1}{2}
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+- id: claim3803
+  type: equation
+  expression: \text{Spacing} = \text{FNP} - \text{FNZ} \approx 75-110 \text{ Hz}
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0
+- id: claim3804
+  type: equation
+  expression: \text{FNZ} \approx \frac{\text{FNP} + F1}{2}
+  provenance:
+    paper: Hawkins_Stevens_1985_NasalVowelCorrelates
+    page: 0

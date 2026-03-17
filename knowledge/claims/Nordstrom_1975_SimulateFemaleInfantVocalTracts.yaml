@@ -1,0 +1,801 @@
+source:
+  paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+claims:
+- id: claim6931
+  type: parameter
+  concept: 1_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1.0
+- id: claim6932
+  type: parameter
+  concept: 1_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1.0
+- id: claim6933
+  type: parameter
+  concept: 2_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.95
+- id: claim6934
+  type: parameter
+  concept: 2_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.65
+- id: claim6935
+  type: parameter
+  concept: 3_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.95
+- id: claim6936
+  type: parameter
+  concept: 3_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.8
+- id: claim6937
+  type: parameter
+  concept: 4_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.85
+- id: claim6938
+  type: parameter
+  concept: 4_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.77
+- id: claim6939
+  type: parameter
+  concept: 5_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.88
+- id: claim6940
+  type: parameter
+  concept: 5_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.73
+- id: claim6941
+  type: parameter
+  concept: 6_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.9
+- id: claim6942
+  type: parameter
+  concept: 6_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.7
+- id: claim6943
+  type: parameter
+  concept: 7_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.79
+- id: claim6944
+  type: parameter
+  concept: 7_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.61
+- id: claim6945
+  type: parameter
+  concept: 8_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.79
+- id: claim6946
+  type: parameter
+  concept: 8_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.64
+- id: claim6947
+  type: parameter
+  concept: 9_k_mouth
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.7
+- id: claim6948
+  type: parameter
+  concept: 9_k_pharynx
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 0.7
+- id: claim6949
+  type: parameter
+  concept: a_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 640
+- id: claim6950
+  type: parameter
+  concept: a_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1082
+- id: claim6951
+  type: parameter
+  concept: a_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2464
+- id: claim6952
+  type: parameter
+  concept: a_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 895
+- id: claim6953
+  type: parameter
+  concept: a_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1512
+- id: claim6954
+  type: parameter
+  concept: a_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3461
+- id: claim6955
+  type: parameter
+  concept: a_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 970
+- id: claim6956
+  type: parameter
+  concept: a_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1498
+- id: claim6957
+  type: parameter
+  concept: a_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3630
+- id: claim6958
+  type: parameter
+  concept: a_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 892
+- id: claim6959
+  type: parameter
+  concept: a_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1501
+- id: claim6960
+  type: parameter
+  concept: a_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3480
+- id: claim6961
+  type: parameter
+  concept: o_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 504
+- id: claim6962
+  type: parameter
+  concept: o_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 866
+- id: claim6963
+  type: parameter
+  concept: o_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2388
+- id: claim6964
+  type: parameter
+  concept: o_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 700
+- id: claim6965
+  type: parameter
+  concept: o_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1197
+- id: claim6966
+  type: parameter
+  concept: o_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3224
+- id: claim6967
+  type: parameter
+  concept: o_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 759
+- id: claim6968
+  type: parameter
+  concept: o_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1191
+- id: claim6969
+  type: parameter
+  concept: o_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3275
+- id: claim6970
+  type: parameter
+  concept: o_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 700
+- id: claim6971
+  type: parameter
+  concept: o_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1201
+- id: claim6972
+  type: parameter
+  concept: o_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3393
+- id: claim6973
+  type: parameter
+  concept: u_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 237
+- id: claim6974
+  type: parameter
+  concept: u_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 600
+- id: claim6975
+  type: parameter
+  concept: u_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2383
+- id: claim6976
+  type: parameter
+  concept: u_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 323
+- id: claim6977
+  type: parameter
+  concept: u_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 854
+- id: claim6978
+  type: parameter
+  concept: u_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3343
+- id: claim6979
+  type: parameter
+  concept: u_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 352
+- id: claim6980
+  type: parameter
+  concept: u_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 847
+- id: claim6981
+  type: parameter
+  concept: u_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3381
+- id: claim6982
+  type: parameter
+  concept: u_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 333
+- id: claim6983
+  type: parameter
+  concept: u_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 853
+- id: claim6984
+  type: parameter
+  concept: u_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3403
+- id: claim6985
+  type: parameter
+  concept: i_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 289
+- id: claim6986
+  type: parameter
+  concept: i_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1518
+- id: claim6987
+  type: parameter
+  concept: i_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2412
+- id: claim6988
+  type: parameter
+  concept: i_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 412
+- id: claim6989
+  type: parameter
+  concept: i_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1927
+- id: claim6990
+  type: parameter
+  concept: i_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3597
+- id: claim6991
+  type: parameter
+  concept: i_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 482
+- id: claim6992
+  type: parameter
+  concept: i_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1975
+- id: claim6993
+  type: parameter
+  concept: i_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3507
+- id: claim6994
+  type: parameter
+  concept: i_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 410
+- id: claim6995
+  type: parameter
+  concept: i_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2069
+- id: claim6996
+  type: parameter
+  concept: i_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3437
+- id: claim6997
+  type: parameter
+  concept: ibar_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 227
+- id: claim6998
+  type: parameter
+  concept: ibar_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2275
+- id: claim6999
+  type: parameter
+  concept: ibar_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3338
+- id: claim7000
+  type: parameter
+  concept: ibar_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 318
+- id: claim7001
+  type: parameter
+  concept: ibar_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3338
+- id: claim7002
+  type: parameter
+  concept: ibar_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 4007
+- id: claim7003
+  type: parameter
+  concept: ibar_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 369
+- id: claim7004
+  type: parameter
+  concept: ibar_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3202
+- id: claim7005
+  type: parameter
+  concept: ibar_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 4109
+- id: claim7006
+  type: parameter
+  concept: ibar_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 322
+- id: claim7007
+  type: parameter
+  concept: ibar_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3241
+- id: claim7008
+  type: parameter
+  concept: ibar_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 4347
+- id: claim7009
+  type: parameter
+  concept: e_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 419
+- id: claim7010
+  type: parameter
+  concept: e_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1967
+- id: claim7011
+  type: parameter
+  concept: e_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2790
+- id: claim7012
+  type: parameter
+  concept: e_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 582
+- id: claim7013
+  type: parameter
+  concept: e_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2761
+- id: claim7014
+  type: parameter
+  concept: e_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3905
+- id: claim7015
+  type: parameter
+  concept: e_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 667
+- id: claim7016
+  type: parameter
+  concept: e_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2702
+- id: claim7017
+  type: parameter
+  concept: e_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 4010
+- id: claim7018
+  type: parameter
+  concept: e_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 589
+- id: claim7019
+  type: parameter
+  concept: e_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2774
+- id: claim7020
+  type: parameter
+  concept: e_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3889
+- id: claim7021
+  type: parameter
+  concept: epsilon_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 515
+- id: claim7022
+  type: parameter
+  concept: epsilon_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1743
+- id: claim7023
+  type: parameter
+  concept: epsilon_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2636
+- id: claim7024
+  type: parameter
+  concept: epsilon_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 710
+- id: claim7025
+  type: parameter
+  concept: epsilon_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2420
+- id: claim7026
+  type: parameter
+  concept: epsilon_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3757
+- id: claim7027
+  type: parameter
+  concept: epsilon_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 806
+- id: claim7028
+  type: parameter
+  concept: epsilon_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2395
+- id: claim7029
+  type: parameter
+  concept: epsilon_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3873
+- id: claim7030
+  type: parameter
+  concept: epsilon_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 719
+- id: claim7031
+  type: parameter
+  concept: epsilon_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2443
+- id: claim7032
+  type: parameter
+  concept: epsilon_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3703
+- id: claim7033
+  type: parameter
+  concept: ae_male_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 588
+- id: claim7034
+  type: parameter
+  concept: ae_male_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 1477
+- id: claim7035
+  type: parameter
+  concept: ae_male_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2458
+- id: claim7036
+  type: parameter
+  concept: ae_length8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 807
+- id: claim7037
+  type: parameter
+  concept: ae_length8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2070
+- id: claim7038
+  type: parameter
+  concept: ae_length8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3532
+- id: claim7039
+  type: parameter
+  concept: ae_vol8_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 903
+- id: claim7040
+  type: parameter
+  concept: ae_vol8_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2051
+- id: claim7041
+  type: parameter
+  concept: ae_vol8_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3635
+- id: claim7042
+  type: parameter
+  concept: ae_uniform9_f1
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 817
+- id: claim7043
+  type: parameter
+  concept: ae_uniform9_f2
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 2066
+- id: claim7044
+  type: parameter
+  concept: ae_uniform9_f3
+  provenance:
+    paper: Nordstrom_1975_SimulateFemaleInfantVocalTracts
+    page: 0
+  value: 3470

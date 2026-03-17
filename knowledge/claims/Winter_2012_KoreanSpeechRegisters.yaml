@@ -1,0 +1,198 @@
+source:
+  paper: Winter_2012_KoreanSpeechRegisters
+claims:
+- id: claim10969
+  type: parameter
+  concept: f0_mean_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -17.2
+  unit: Hz
+- id: claim10970
+  type: parameter
+  concept: f0_mean_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 5.4
+- id: claim10971
+  type: parameter
+  concept: f0_sd_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.42
+  unit: Hz
+- id: claim10972
+  type: parameter
+  concept: f0_sd_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.13
+- id: claim10973
+  type: parameter
+  concept: f0_range_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -1.43
+- id: claim10974
+  type: parameter
+  concept: f0_range_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.56
+- id: claim10975
+  type: parameter
+  concept: intensity_mean_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.25
+  unit: dB
+- id: claim10976
+  type: parameter
+  concept: intensity_mean_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.36
+- id: claim10977
+  type: parameter
+  concept: intensity_sd_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.72
+  unit: dB
+- id: claim10978
+  type: parameter
+  concept: intensity_sd_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.15
+- id: claim10979
+  type: parameter
+  concept: intensity_range_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -2.55
+  unit: dB
+- id: claim10980
+  type: parameter
+  concept: intensity_range_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.54
+- id: claim10981
+  type: parameter
+  concept: local_jitter_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.0011
+- id: claim10982
+  type: parameter
+  concept: local_jitter_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.0004
+- id: claim10983
+  type: parameter
+  concept: local_shimmer_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.0079
+- id: claim10984
+  type: parameter
+  concept: local_shimmer_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.0014
+- id: claim10985
+  type: parameter
+  concept: hnr_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.19
+- id: claim10986
+  type: parameter
+  concept: hnr_pvalue
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.053
+- id: claim10987
+  type: parameter
+  concept: h1h2_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.66
+  unit: dB
+- id: claim10988
+  type: parameter
+  concept: h1h2_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.28
+- id: claim10989
+  type: parameter
+  concept: articulation_rate_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.38
+- id: claim10990
+  type: parameter
+  concept: articulation_rate_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.18
+- id: claim10991
+  type: parameter
+  concept: silent_pauses_formal_change
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: -0.58
+- id: claim10992
+  type: parameter
+  concept: silent_pauses_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.14
+- id: claim10993
+  type: parameter
+  concept: oral_fillers_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.097
+- id: claim10994
+  type: parameter
+  concept: nasal_fillers_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.58
+- id: claim10995
+  type: parameter
+  concept: noisy_breath_intakes_se
+  provenance:
+    paper: Winter_2012_KoreanSpeechRegisters
+    page: 0
+  value: 0.3

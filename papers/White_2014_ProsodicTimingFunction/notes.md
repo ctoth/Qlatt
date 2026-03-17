@@ -223,8 +223,10 @@ The functional framework offers:
 ### Conceptual Links (not citation-based)
 - [[Campbell_Isard_1991_SegmentDurationsSyllable]] — Campbell & Isard's syllable elasticity model with exponential weighting (0.75^(n-i)) for final lengthening complements White's reinterpretation of polysyllabic shortening as attenuated lengthening; both papers model duration variation as modulation of an underlying timing framework rather than independent segment-level rules. (Moderate)
 
+### Now in Collection (previously listed as leads)
+- [[Byrd_2003_ElasticPhraseBoundaryLengthening]] — Proposes pi-gesture clock-slowing mechanism for boundary-adjacent lengthening. Directly relevant to White's analysis of prosodic timing: the pi-gesture framework provides a dynamical mechanism for the boundary lengthening effects White describes as a "timing function."
+
 ### New Leads (Not Yet in Collection)
 - **Turk, A.E., & Shattuck-Hufnagel, S., 2000** - "Word-boundary-related duration patterns in English" - Critical for understanding domain-edge (word-initial and phrase-final) lengthening effects that are implementable in TTS.
 - **Beckman, M.E., 1992** - "Evidence for speech rhythms across languages" - Establishes cross-linguistic validity of prosodic timing effects, relevant for extending Qlatt's framework beyond English.
-- **Byrd, D., & Saltzman, E., 2003** - "The elastic phrase: modeling the dynamics of boundary-adjacent lengthening" - Proposes the p-gesture framework for implementing structural timing effects in articulatory models, directly applicable to Qlatt's runtime.
 - **White, L., Mattys, S.L., Wiget, L., 2012** - "Language categorization by adults is based on sensitivity to durational cues, not rhythm class" - Demonstrates listener sensitivity to durational variation across languages, validating the perceptual importance of accurate timing implementation in synthesis.

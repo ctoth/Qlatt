@@ -133,3 +133,4 @@ The paper carefully argues that polysyllabic shortening (stressed syllable in *p
 - `Crystal_House_1988_StopConsonantDuration` — Both measure positional duration effects at prosodic boundaries
 - `vanSanten_1994_AssignmentSegmentalDuration` — Computational duration model incorporating boundary lengthening effects
 - `Umeda_1975_VowelDurationAmericanEnglish` — Complementary vowel duration study quantifying prepausal lengthening
+- [[Byrd_2003_ElasticPhraseBoundaryLengthening]] — Byrd & Saltzman provide the dynamical mechanism (pi-gesture clock-slowing) for the phrase-final lengthening effect that Beckman & Edwards quantify experimentally. Different frameworks converging on the same phenomenon: Beckman measures the acoustic/articulatory effect, Byrd models it.

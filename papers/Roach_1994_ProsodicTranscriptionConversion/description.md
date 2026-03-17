@@ -1,1 +1,5 @@
+---
+tags: [tobi, prosody, annotation, intonation]
+---
+
 Roach (1994) presents explicit mapping tables for converting prosodic transcription between the British "Standard British" tonetic stress mark system (as used in the Spoken English Corpus) and the American ToBI system, implementing this as an automatic conversion program. The paper identifies non-final fall-rises as a fundamental gap where the two systems are incommensurable, supported by a perceptual experiment showing listeners perceive weaker but significant boundaries at non-final fall-rise locations (p < 0.001). This is relevant to Qlatt's prosodic annotation system for understanding how British intonation patterns map to ToBI labels, and for informing break-index and phrase-boundary assignment rules.

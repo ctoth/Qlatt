@@ -1,3 +1,11 @@
+---
+tags:
+  - articulatory-phonology
+  - coarticulation
+  - prosody
+  - duration
+---
+
 # Iskarous & Pouplier (2022) — Description
 
 This paper presents a comprehensive critical review of Articulatory Phonology and Task Dynamics in the 21st century, covering three domains: spatial goals and contrast (modeled as critically damped dynamical systems with gestural targets and stiffness parameters), temporal organization (syllable structure via coupled oscillators, prosodic boundary lengthening via π-gestures, and prominence via μ-gestures), and speech planning (dynamic field theory for serial ordering and phonological processes). The authors also argue for extending AP toward "Acoustic Phonology" to better integrate articulation-acoustics mappings that are currently underdeveloped in the framework. For Klatt synthesis, the paper provides theoretical grounding for formant transition shapes (critically damped or sigmoid approach curves rather than linear interpolation), coarticulation as weighted gestural blending, phrase-final lengthening as prosodic clock-slowing, and the relationship between segment duration and articulatory stiffness.

@@ -1,11 +1,5 @@
 ---
-tags:
-  - duration
-  - vowels
-  - American English
-  - speech synthesis
-  - temporal control
-  - prosody
+tags: [duration, vowels, english, speech-synthesis, prosody]
 ---
 
 # Umeda 1975 — Vowel Duration in American English

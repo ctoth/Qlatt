@@ -1,1 +1,9 @@
+---
+tags:
+  - glottal-source
+  - voice-quality
+  - fundamental-frequency
+  - speaker-characteristics
+---
+
 This paper presents systematic measurements of glottal open quotient in 18 classically trained singers, establishing empirical ranges across two laryngeal mechanisms (M1: 0.3-0.8, M2: 0.5-0.95) and quantifying correlations with vocal intensity and fundamental frequency. The key findings show that open quotient decreases with increasing vocal intensity in mechanism 1 (chest register) and decreases with increasing fundamental frequency in mechanism 2 (falsetto/head register), with these relationships being largely independent after factoring out confounding covariation. For speech synthesis, these empirical ranges and correlations provide physiologically grounded constraints for controlling the LF model's open quotient parameter, enabling realistic voice quality variation from pressed (Oq~0.3) through modal (Oq~0.5) to breathy (Oq~0.8) as a function of vocal effort and pitch.

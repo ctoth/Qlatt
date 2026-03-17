@@ -1,1 +1,9 @@
+---
+tags:
+  - nasals
+  - perception
+  - formants
+  - phoneme-acoustics
+---
+
 This paper investigates the perceptual contributions of formant transitions and nasal murmur spectra to the identification of place of articulation for nasal consonants [n], [ɲ], and [ŋ] in Catalan, providing detailed acoustic measurements (murmur formant frequencies N1–N4, antiformant NZ, and F1–F3 transition extents) alongside systematic perception experiments using synthetic speech. The key finding is that while formant transitions are generally more powerful cues than murmurs, murmurs contribute significantly — especially for velar [ŋ] — and both cue types are perceptually integrated simultaneously, paralleling how bursts and transitions combine for stop consonants. These spectral measurements and perceptual rankings are directly useful for setting nasal consonant parameters in a Klatt formant synthesizer, particularly the murmur formant/antiformant frequencies and the formant transition targets needed to produce perceptually distinct nasal places of articulation.

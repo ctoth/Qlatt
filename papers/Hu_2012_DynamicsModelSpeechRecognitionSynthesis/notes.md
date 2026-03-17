@@ -380,8 +380,10 @@ The thesis uses the reduced 49-phone TIMIT set with folding rules:
 ### Cited By (in Collection)
 - (none found)
 
+### Now in Collection (previously listed as leads)
+- [[Holmes_2001_SpeechSynthesisRecognition]] — Comprehensive textbook covering formant synthesis (cascade and parallel architectures, HMS table-driven rules) and TTS pipeline design. Provides the conceptual foundation for the parallel formant synthesizer topology that Hu's thesis uses.
+
 ### New Leads (Not Yet in Collection)
-- **Holmes & Holmes (2001)** — "Speech synthesis and recognition" — comprehensive technical reference for formant-based synthesis and recognition systems
 - **Tokuda et al. (2000)** — "Speech parameter generation algorithms for HMM-based speech synthesis" — the SPG algorithm that is central to this thesis
 - **Russell (2004)** — "A Unified Model for Speech Recognition and Synthesis" — proposes unified recognition-synthesis framework
 - **Deng & Ma (2000)** — "Spontaneous speech recognition using a statistical coarticulatory model" — statistical coarticulation modeling

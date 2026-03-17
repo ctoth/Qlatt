@@ -1,10 +1,5 @@
 ---
-tags:
-  - formant-synthesis
-  - synthesis-by-rule
-  - transitions
-  - parallel-synthesizer
-  - British-English
+tags: [speech-synthesis, transitions, klatt, english]
 ---
 
 # Holmes, Mattingly & Shearme 1964 - Speech Synthesis by Rule

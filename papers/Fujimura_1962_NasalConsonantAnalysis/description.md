@@ -1,1 +1,5 @@
+---
+tags: [nasals, formants, vocal-tract, phoneme-acoustics]
+---
+
 This paper presents a detailed acoustic analysis of English nasal consonants /m/, /n/, and /ŋ/ using pole-zero (formant-antiformant) spectrum matching, establishing that the primary distinguishing feature between nasals is the frequency of the antiformant (nasal zero): low (~1000 Hz) for /m/, medium (~1700 Hz) for /n/, and high (>3000 Hz) for /ŋ/. The key contributions include quantitative formant and antiformant bandwidth measurements, a theoretical framework relating articulatory configurations to pole-zero locations via three-tube susceptance analysis, and identification of three universal spectral characteristics of nasal murmurs (very low F1, high damping, dense mid-frequency formants). These findings directly inform Klatt synthesizer nasal zero (FNZ) parameter settings and bandwidth adjustments needed to produce distinguishable and natural-sounding nasal consonants.

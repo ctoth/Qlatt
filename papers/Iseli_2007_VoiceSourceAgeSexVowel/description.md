@@ -1,1 +1,10 @@
+---
+tags:
+  - voice-quality
+  - glottal-source
+  - vowels
+  - gender-differences
+  - aging
+---
+
 This paper introduces and validates a spectral magnitude correction formula that removes the influence of vocal tract formant frequencies and bandwidths from harmonic amplitude measurements, enabling reliable estimation of voice source parameters H1*-H2* (open quotient) and H1*-A3* (spectral tilt) from speech spectra. Applying the correction to 3145 utterances from 335 speakers ages 8-39, the authors show that age has the largest effect on all three source measures (F0, H1*-H2*, H1*-A3*), with males showing a 4 dB drop in H1*-H2* and 10 dB drop in H1*-A3* from childhood to adulthood, while vowel dependencies are stronger for females suggesting greater vocal tract-source interaction. For the Qlatt synthesizer, this work provides both the correction formula needed to validate synthesized voice source characteristics against natural speech, and quantitative age/sex/vowel-dependent targets for open quotient and spectral tilt parameters across speaker profiles.

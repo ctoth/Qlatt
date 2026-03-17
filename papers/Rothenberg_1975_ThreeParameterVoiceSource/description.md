@@ -1,10 +1,5 @@
 ---
-tags:
-  - glottal-source
-  - voice-quality
-  - speech-synthesis
-  - analog-model
-  - source-parameters
+tags: [glottal-source, voice-quality, speech-synthesis, analog-model]
 ---
 
 # Description

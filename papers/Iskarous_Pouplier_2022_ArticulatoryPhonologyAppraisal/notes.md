@@ -143,8 +143,10 @@ Speech planning modeled as activation fields over gestural representations:
 - [[Fowler_2006_CoarticulationGesturePerception]] — cross-references this for the AP framework and gestural theory
 - [[Sproat_Fujimura_1993_AllophonicVariationEnglishL]] — cross-references this for the gestural overlap framework applied to /l/ allophones
 
+### Now in Collection (previously listed as leads)
+- [[Byrd_2003_ElasticPhraseBoundaryLengthening]] — Defines the pi-gesture model for prosodic boundary lengthening via clock-slowing. This paper formalizes the mechanism that Iskarous & Pouplier discuss in Section 6 (pi-gesture time-warping of nearby constriction gestures at boundaries).
+
 ### New Leads (Not Yet in Collection)
-- Byrd & Saltzman (2003) — "The elastic phrase: modeling the dynamics of boundary-adjacent lengthening" — defines the π-gesture model for prosodic lengthening
 - Saltzman et al. (2008) — "A task-dynamic toolkit for modeling the effects of prosodic structure on articulation" — defines μ-gestures for prominence/boundary modulation
 - Roon & Gafos (2016) — "Perceiving while producing: modeling phonological planning dynamics" — dynamic field theory for speech planning
 - Nam et al. (2004) — "TADA: An enhanced, portable Task Dynamics model in Matlab" — reference implementation of task dynamics

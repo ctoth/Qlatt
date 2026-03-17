@@ -1,1 +1,8 @@
+---
+tags:
+  - coarticulation
+  - formants
+  - articulatory-phonology
+---
+
 This book chapter provides a comprehensive review of coarticulation theory, covering the three major frameworks (Speech Economy, Window Model, and Coproduction/Articulatory Phonology) along with the Degree of Articulatory Constraint (DAC) model for predicting coarticulation scope and direction based on tongue dorsum involvement. Key contributions include a systematic taxonomy of coarticulation types (anticipatory/perseverative, V-to-C/C-to-V/V-to-V/C-to-C, labial/lingual/velar/laryngeal), the locus equation formalism for quantifying C-to-V coarticulation, and empirical generalizations about coarticulatory scope across articulators. For speech synthesis, this work provides the theoretical grounding for implementing formant transition rules that account for context-dependent blending, anticipatory lookahead, and speaking-style modulation of coarticulation strength.

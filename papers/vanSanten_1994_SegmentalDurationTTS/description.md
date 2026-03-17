@@ -1,1 +1,5 @@
+---
+tags: [duration, speech-synthesis, tts]
+---
+
 This paper presents the definitive sums-of-products framework for predicting segmental duration in text-to-speech synthesis, using a category tree that groups segments into vowels, intervocalic consonants, and consonants in clusters, with separate models for each category that capture factor interactions (pitch accent x syllabic stress, postvocalic consonant class x phrasal position) through log-domain products of factor scales. The system achieves 0.93 correlation with observed durations from 41,558 segments and is perceptually preferred over the previous MITalk-style Klatt duration rules 73% of the time in forced-choice listening tests, while requiring only 32 parameters for vowels and 196 for intervocalic consonants. This work is essential for Qlatt's duration assignment because it provides the mathematical framework, category structure, and factor hierarchy needed to replace simple multiplicative duration rules with interaction-aware models that properly handle stress amplification, phrase-final lengthening, and speaking rate variation.

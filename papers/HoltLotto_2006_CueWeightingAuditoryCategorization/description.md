@@ -1,1 +1,8 @@
+---
+tags:
+  - perception
+  - acoustics
+  - cue-weighting
+---
+
 This paper investigates cue weighting in auditory categorization using nonspeech stimuli to understand how listeners integrate and prioritize multiple acoustic dimensions when learning sound categories, finding that distributional variance rather than informativeness is the primary driver of perceptual weight shifts. Through four experiments with frequency-modulated tones, the authors demonstrate that listeners exhibit inherent biases in cue weighting even when dimensions are psychophysically equated, and that passive exposure to variability along a dimension can increase its perceptual weight without explicit feedback. For speech synthesis, these findings explain why certain acoustic parameters (like formant frequency vs. duration) are differentially weighted by listeners and suggest that getting the variance structure of synthetic speech right may matter more than hitting exact acoustic targets.

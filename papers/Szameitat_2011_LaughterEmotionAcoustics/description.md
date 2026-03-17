@@ -1,1 +1,9 @@
+---
+tags:
+  - emotion
+  - arousal
+  - acoustics
+  - perception
+---
+
 This paper examines the acoustic correlates of four emotional dimensions (arousal, dominance, sender's valence, and receiver-directed valence) in 123 acted laughter sequences from 8 professional actors, correlating 43 acoustic parameters extracted via Praat with listener ratings on each dimension. The key findings show that arousal is most robustly encoded through F0, inter-bout duration, jitter, and shimmer (up to 44% shared variance), while dominance is marked by F1, peak frequency, and intensity variability, with all four dimensions predictable from 13 parameters (r = .75–.91). For speech synthesis, this work reinforces the arousal–acoustic mapping established in speech emotion studies (F0 ↑, jitter ↓, HNR ↑, high-frequency energy ↑) and extends it to non-verbal vocalizations, supporting a unified emotional dimension framework applicable to both speech prosody and non-speech vocalization synthesis.

@@ -1,1 +1,5 @@
+---
+tags: [glottal-source, voice-quality, spectrum-estimation, inverse-filtering]
+---
+
 This paper applies principal components analysis to 78 acoustic measures of the glottal source spectrum from 70 speakers (including pathological voices), revealing that existing measures are highly redundant and reduce to only four independent factors: H1-H2 (low-frequency excitation shape), overall spectral slope, high-frequency noise excitation, and H2-H4. The critical finding is that existing spectral measures fail to capture variability in the mid-to-high-frequency range (1.5-4 kHz), which accounts for over 25% of source spectral shape variance, while H1-H2 emerges as the single most robust measure across all extraction techniques and signal types. For Klatt synthesis, this work validates H1-H2/spectral tilt as the primary voice quality control parameter, establishes that aspiration noise is an independent perceptual dimension requiring separate control (supporting the TL/AH separation), and identifies a gap in current parameterization where mid-frequency spectral detail is not adequately captured by any standard measure.

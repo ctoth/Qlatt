@@ -1,1 +1,5 @@
+---
+tags: [klatt, speech-synthesis, formants]
+---
+
 This ASA conference abstract describes a mathematical method for converting cascade formant filter configurations into equivalent parallel configurations by computing the complex amplitudes (residues) from formant frequencies, bandwidths, and higher-pole correction using partial fraction expansion. The method eliminates the need for empirical amplitude scale factors (like Klatt's ndbScale) and maintains spectral continuity when switching between cascade and parallel modes. The authors integrated this into the Klatt synthesizer at Rutgers CAIP Center.

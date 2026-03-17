@@ -1,4 +1,4 @@
 ---
-tags: [emotional-prosody, prosody, f0, voice-quality, perception]
+tags: [emotional-prosody, prosody, fundamental-frequency, voice-quality, perception]
 ---
 This fMRI study investigates which acoustic parameters drive the brain's enhanced response to emotional prosody by presenting words in neutral, happy, erotic, angry, and fearful intonations and using regression analyses to partition variance among mean intensity, F0, F0 variability, intensity variability, duration, and perceived arousal. The key finding is that no single acoustic parameter alone explains the stronger right mid STG response to emotional vs. neutral prosody, but the conjoint effect of all five parameters (or arousal alone) fully accounts for the difference, demonstrating that emotional prosody perception relies on the interplay of multiple acoustic cues. For speech synthesis, this provides empirical validation that emotion-specific prosody requires simultaneous manipulation of F0, intensity, duration, and their variabilities, with concrete parameter values by emotion category (Table 1) that can inform prosody preset design.

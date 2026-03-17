@@ -1,1 +1,9 @@
+---
+tags:
+  - emotion
+  - acoustics
+  - fundamental-frequency
+  - speaking-style
+---
+
 This paper investigates how authentic anxiety affects vocal expression by analyzing speech from social phobia patients before and after treatment, finding that decreased anxiety correlates with lower mean/maximum F0, reduced high-frequency spectral energy, and fewer silent pauses. The key contribution is empirical validation of acoustic anxiety markers from authentic (not acted) speech, with proportion of pauses showing the largest effect size (partial η² = 0.21), suggesting cognitive interference may be harder to mask than physiological laryngeal changes. For speech synthesis, this provides concrete targets for generating anxious prosody: raise F0 baseline and peaks, increase spectral tilt toward high frequencies, and critically, insert more hesitation pauses throughout the utterance.

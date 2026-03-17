@@ -1,1 +1,9 @@
+---
+tags:
+  - fundamental-frequency
+  - aging
+  - gender-differences
+  - speaker-characteristics
+---
+
 This paper presents a comprehensive cross-sectional study of fundamental frequency (F0), sound pressure level (SPL), and signal-to-noise ratio (SNR) across the full human life span (ages 4-93) using 192 speakers, revealing nonlinear age trajectories that differ by sex. Key findings include that male F0 follows a U-shaped curve with minimum around age 50, female F0 declines more gradually, SNR shows sex-specific patterns linked to hormonal changes at menopause, and acoustic variability is elevated at both ends of the life span. For the Qlatt synthesizer, this work provides the empirical foundation for age-dependent voice parameter profiles, particularly F0 defaults, noise characteristics, and variability settings across child, adult, and elderly speaker categories.

@@ -1,1 +1,9 @@
+---
+tags:
+  - glottal-source
+  - emotion
+  - voice-quality
+  - inverse-filtering
+---
+
 This paper quantifies how glottal excitation waveform shape varies across eleven emotional and stress-related speech styles (angry, loud, soft, fast, slow, clear, question, Lombard, tasking) using six timing and slope parameters extracted via inverse filtering. The key finding is that closing slope, opening slope, and closed duration alone can statistically distinguish all styles with ~90% classification accuracy, with angry/loud/soft showing the most dramatic departures from normal speech. For formant synthesis, this provides concrete numeric targets for modulating glottal source parameters to achieve emotional expressiveness - angry speech needs 2x steeper slopes with symmetric opening/closing, while soft speech needs ~0.6x gentler slopes approaching sinusoidal shape.

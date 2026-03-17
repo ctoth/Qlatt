@@ -1,1 +1,9 @@
+---
+tags:
+  - voice-onset-time
+  - stops
+  - acoustics
+  - phoneme-acoustics
+---
+
 This landmark paper introduces Voice Onset Time (VOT) as a single acoustic dimension -- the time interval between stop release and the onset of glottal pulsing -- that effectively separates stop consonant categories across 11 typologically diverse languages, demonstrating that all languages draw their stop categories from approximately three universal modes on the VOT continuum (voicing lead at ~-100 ms, short lag at ~+10 ms, and long lag at ~+75 ms). The authors provide extensive spectrographic measurement data for isolated words and sentences showing that two-category languages select two of these modes, three-category languages use all three, and four-category languages require additional voice quality cues beyond VOT alone. For speech synthesis, VOT is the fundamental timing parameter governing the coordination of voicing source (AV), aspiration noise (AH), and burst (AF) parameters at stop consonant release, with systematic variation by place of articulation (velar > alveolar > labial) that must be implemented in duration rules.

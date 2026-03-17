@@ -1,4 +1,4 @@
 ---
-tags: [recording-devices, amplitude, fundamental-frequency, voice-analytics, crowdsourcing]
+tags: [recording-devices, amplitude, fundamental-frequency, speaker-characteristics, crowdsourcing]
 ---
 This paper provides causal evidence from a controlled within-subjects experiment that common consumer-grade audio-recording devices systematically distort measurements of vocal amplitude and fundamental frequency, with high-proximity devices (headset, lavalier) inflating amplitude by 5-15 dB and smartphones inflating f0 by ~11 Hz compared to a studio microphone baseline. The key findings show that these device-induced biases reduce emotion classification accuracy by up to 5 percentage points and biological sex classification by 10 percentage points, and that a random-forest bias correction can partially recover the true distribution ($R^2 = .93$). For speech synthesis research, this paper establishes critical calibration context for any work comparing synthesized output against recordings from heterogeneous devices, and provides comprehensive recording guidelines for valid voice data collection.

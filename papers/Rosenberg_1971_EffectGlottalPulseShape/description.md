@@ -1,10 +1,5 @@
 ---
-tags:
-  - glottal-source
-  - voice-quality
-  - speech-synthesis
-  - perceptual-evaluation
-  - source-filter
+tags: [glottal-source, voice-quality, speech-synthesis, perception, source-filter]
 ---
 
 # Rosenberg 1971 - Effect of Glottal Pulse Shape on the Quality of Natural Vowels

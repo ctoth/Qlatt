@@ -1,1 +1,10 @@
+---
+tags:
+  - laryngeal-source
+  - sex-differences
+  - fundamental-frequency
+  - voice-quality
+  - speaker-characteristics
+---
+
 This paper uses 216,000 computational simulations of a three-dimensional body-cover vocal fold model to systematically isolate how vocal fold length, thickness, and depth independently contribute to sex- and age-related differences in voice production across adult males, adult females, and children. The key finding is that length and thickness operate on orthogonal voice dimensions: length dominates F0, flow rate, and SPL differences (explaining why males have lower pitch and louder voices), while thickness dominates closed quotient, maximum flow declination rate, and spectral tilt H1-H2 (explaining voice quality differences), with depth having minimal effect. For the Qlatt synthesizer's speaker profile system, this provides the physical justification for parameterizing male-female-child voice presets along two independent axes (pitch/amplitude via a size parameter, and voice quality/spectral slope via a thickness parameter), and establishes that females require higher vocal fold contact pressure to achieve equivalent SPL, informing effort-dependent parameter curves.

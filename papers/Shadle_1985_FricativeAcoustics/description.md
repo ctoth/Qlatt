@@ -1,1 +1,9 @@
+---
+tags:
+  - fricatives
+  - acoustics
+  - aerodynamics
+  - source-filter
+---
+
 This thesis establishes the acoustic-phonetic foundations of fricative consonant synthesis by demonstrating that fricatives divide into three distinct classes based on their dominant sound generation mechanism: obstacle-generated sibilants like /s/ and /sh/, surface-generated fricatives with long front cavities like /x/, and surface-generated fricatives with short front cavities like /f/ and /theta/. Shadle validates a source-filter model for fricatives through mechanical tube experiments, deriving quantitative spectral parameters (A_T and A_0 dynamic ranges), transfer function poles and zeros, and documenting when fricatives transition to whistles across different constriction configurations. For speech synthesis, this work provides critical guidance on frication amplitude levels (sibilants 10-15 dB higher than non-sibilants), spectral tilt characteristics for different fricatives, resonance frequency placements based on front cavity length, and bandwidth settings that increase with frequency—enabling principled parameter selection rather than arbitrary adjustment.

@@ -1,3 +1,10 @@
+---
+tags:
+  - laryngeal-source
+  - voice-quality
+  - aerodynamics
+---
+
 # Titze 2014 - Bi-stable Vocal Fold Adduction
 
 This paper demonstrates that modal-falsetto register transitions arise from a bistability mechanism in the glottal adductory geometry: smooth changes in the convergence angle of the vocal fold medial surfaces produce abrupt changes in intraglottal pressure, creating two stable states (convergent/modal and divergent/falsetto) separated by a narrow, less stable rectangular configuration that corresponds to mixed registration. Using a two-spring model with empirically-derived intraglottal pressures from Scherer et al. (2010), Titze shows that the transition between registers is governed by the pressure ratio pe/ps (supraglottal/subglottal), the vertical stiffness gradient of the vocal folds (controlled by CT and TA muscle balance), and transglottal pressure magnitude, with the critical finding that large transglottal pressure exacerbates bistability rather than facilitating smooth registration, and that achieving stable mixed voice requires balancing upper and lower vocal fold stiffness to maintain a near-rectangular glottal shape.

@@ -1,1 +1,9 @@
+---
+tags:
+  - jitter
+  - fundamental-frequency
+  - laryngeal-source
+  - voice-quality
+---
+
 This paper develops a quantitative model of how stochastic motor neuron firing in thyroarytenoid muscle creates fundamental frequency perturbation (jitter) through twitch summation, predicting F0 perturbation magnitudes of 0.2-1.2% as a function of four parameters: number of motor units, mean firing rate, coefficient of variation of twitch amplitude, and coefficient of variation of interspike intervals. The key finding is that neurologic jitter accounts for a significant portion (0.2-0.3%) of total jitter measured in normal voices, with perturbation decreasing as motor unit count and firing rate increase, and increasing with variability in twitch amplitude and firing timing. For the Qlatt synthesizer's speaker personality system, this provides a physiologically grounded jitter model whose four parameters map directly to speaker characteristics (age, pathology, effort level), enabling more realistic F0 micro-perturbation than simple random noise, with quasi-periodic spectral components at motor unit firing frequencies (0-50 Hz) that contribute to natural voice quality.

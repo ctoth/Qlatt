@@ -1,11 +1,5 @@
 ---
-tags:
-  - voice-source
-  - glottal-airflow
-  - MFDR
-  - inverse-filtering
-  - methodology
-  - normative-data
+tags: [glottal-source, inverse-filtering, acoustics, speaker-characteristics]
 ---
 
 # Perkell, Hillman, & Holmberg 1994

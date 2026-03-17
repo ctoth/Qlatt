@@ -1,1 +1,10 @@
+---
+tags:
+  - voice-quality
+  - emotion
+  - speaker-characteristics
+  - jitter
+  - shimmer
+---
+
 This paper presents a prospective study correlating acoustic speech features with clinically-assessed depressive and manic symptoms in 51 bipolar disorder patients monitored over an average of 208 days via smartphone app. The key findings are quantitative correlations between prosodic features (loudness, pitch, speaking rate), spectral features (spectral flux, harmonicity), and voice quality measures (jitter, shimmer) with symptom severity, notably showing that male and female patterns are often exactly opposite. For speech synthesis, this work provides empirically-validated parameter targets for emotional speech production, particularly the finding that spectral flux correlates with speech clarity and that jitter/shimmer indicate voice roughness levels in different affective states.

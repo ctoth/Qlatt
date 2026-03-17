@@ -1,11 +1,5 @@
 ---
-tags:
-  - spectral-analysis
-  - linear-prediction
-  - inverse-filtering
-  - glottal-source
-  - formant-estimation
-  - all-pole-modeling
+tags: [spectral-analysis, spectrum-estimation, inverse-filtering, glottal-source, formants]
 ---
 
 # El-Jaroudi & Makhoul 1991 — Discrete All-Pole Modeling

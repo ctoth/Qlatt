@@ -1,1 +1,9 @@
+---
+tags:
+  - emotion
+  - fundamental-frequency
+  - amplitude
+  - emotional-prosody
+---
+
 This paper demonstrates that the acoustic correlates of emotional valence (positive vs negative) in vocal exclamations depend on emotion family: motivational emotions follow a "high-loud" positive pattern, moral emotions follow a "high-soft" pattern, and aesthetic emotions follow a "low-soft" pattern. The authors propose a 2×2 Pitch × Loudness framework of four "expression rules" that systematize how different emotion categories map onto vocal acoustics, resolving prior inconsistencies in the valence-coding literature. For Qlatt, this provides an empirically grounded rule set for emotion-dependent prosody modification — specifically, family-specific F0 and amplitude adjustments rather than a naive "happy=high, sad=low" mapping — should emotional speech synthesis be implemented.

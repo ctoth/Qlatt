@@ -1,4 +1,4 @@
 ---
-tags: [glottal-source, vocal-intensity, lf-model, inverse-filtering]
+tags: [glottal-source, amplitude, lf-model, inverse-filtering]
 ---
 This paper demonstrates that the relationship between sound pressure level (SPL) and the negative peak amplitude of the differentiated glottal flow (dpeak/Ee) is better modeled by two linear segments than a single line, with a "knee" occurring at the soft-to-normal phonation transition. The key finding is that the slope for soft phonation is consistently steeper than for normal/loud speech across all speakers, because rising intensity at the transition point is achieved through changes in glottal waveform shape (reduced spectral decay) rather than increased dpeak amplitude alone. For formant synthesis, this refines how voice source amplitude (Ee) maps to radiated intensity, indicating that accurate SPL control across a wide dynamic range requires accounting for spectral tilt changes alongside the primary excitation amplitude parameter.

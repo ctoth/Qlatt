@@ -1,15 +1,5 @@
 ---
-tags:
-  - TTS
-  - articulatory-synthesis
-  - duration-model
-  - stress
-  - prosody
-  - allophonic-variation
-  - pause-assignment
-  - pitch-control
-  - word-boundaries
-  - Bell-Labs
+tags: [tts, articulatory-synthesis, duration, prosody, coarticulation, fundamental-frequency, word-boundary]
 ---
 
 # Coker, Umeda, Browman (1973) — Automatic Synthesis from Ordinary English Text

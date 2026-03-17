@@ -1,1 +1,9 @@
+---
+tags:
+  - glottal-source
+  - voice-quality
+  - aerodynamics
+  - laryngeal-source
+---
+
 This paper presents simultaneous measurements of subglottal pressure, glottal airflow, electroglottography, and videokymography in a trained singer independently varying vocal register, phonation type (breathy to pressed), and vocal loudness on a sustained vowel at 294 Hz. The key finding is that loudness variation produces covarying pressure and flow (constant glottal resistance), while phonation type and register changes produce inverse pressure-flow relationships (varying glottal resistance), with characteristic laryngeal configurations documented for each phonation type along the Breathy-Flow-Neutral-Pressed continuum. For speech synthesis, these results provide empirical grounding for implementing independent voice quality and loudness controls, confirming that spectral tilt (H1-H2), MFDR, and closed quotient are the primary acoustic correlates that distinguish phonation types and registers.

@@ -1,1 +1,9 @@
+---
+tags:
+  - acoustics
+  - fundamental-frequency
+  - duration
+  - speaking-style
+---
+
 This paper systematically documents acoustic changes in speech during 24 hours of sustained wakefulness in 18 healthy adults, measuring timing, frequency (F0, formants), and spectral energy (alpha ratio) every 2-4 hours using PRAAT analysis. Key findings show that f0 variation increases, F4 variation decreases, speech rate slows on reading tasks (but speeds up on automated tasks as a compensation strategy), and spectral tilt steepens (increased alpha ratio), with peak effects occurring around 22 hours (just before dawn) and partial recovery at sunrise. This work directly validates the voice-quality-synthesis.md architecture: it confirms France (2000) that F0 mean is not the key marker (F0 *variation* changes instead), supports alpha ratio as a primary acoustic correlate of CNS state, and provides empirical targets for a `fatigued` emotion preset alongside existing anxiety/depression profiles.

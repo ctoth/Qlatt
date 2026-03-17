@@ -1,12 +1,5 @@
 ---
-tags:
-  - prosody
-  - ToBI
-  - intonation
-  - transcription reliability
-  - break indices
-  - pitch accents
-  - inter-annotator agreement
+tags: [prosody, tobi, intonation, inter-transcriber-reliability]
 ---
 
 # Pitrelli, Beckman & Hirschberg 1994 -- Evaluation of Prosodic Transcription Labeling Reliability in the ToBI Framework

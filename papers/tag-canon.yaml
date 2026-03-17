@@ -1,0 +1,292 @@
+# Tag canonicalization map for Qlatt paper collection.
+# Format: variant: canonical-form
+# Applied transitively: if A->B and B->C, then A becomes C.
+# Run: python <plugin>/scripts/canonicalize-tags.py <project-root>
+
+# --- Case normalization ---
+F0: fundamental-frequency
+f0: fundamental-frequency
+F0-control: fundamental-frequency
+F0-perturbation: fundamental-frequency
+ToBI: tobi
+TTS: tts
+LF-model: lf-model
+LTAS: spectral-analysis
+MFDR: inverse-filtering
+MRI: vocal-tract
+PSOLA: speech-synthesis
+VCV: coarticulation
+CVC-context: coarticulation
+VOT: voice-onset-time
+H1-amplitude: glottal-source
+
+# --- Space / hyphen variants ---
+"American English": american-english
+American-English: american-english
+British-English: british-english
+English: english
+english: english
+"break indices": break-indices
+"connected speech": connected-speech
+"inter-annotator agreement": inter-transcriber-reliability
+"pitch accents": pitch-accent
+"speech synthesis": speech-synthesis
+"temporal control": duration
+"transcription reliability": inter-transcriber-reliability
+
+# --- Stops ---
+stop-consonants: stops
+plosives: stops
+burst: stops
+burst-duration: stops
+burst-spectrum: stops
+closure-duration: stops
+consonant-identification: stops
+consonant-clusters: stops
+clusters: stops
+
+# --- Fricatives ---
+sibilants: fricatives
+frication: fricatives
+voiceless-consonants: fricatives
+
+# --- Consonants general ---
+consonants: phoneme-acoustics
+consonant-acoustics: phoneme-acoustics
+consonant-perception: perception
+consonant-context: coarticulation
+consonant-effects: coarticulation
+consonant-environment: coarticulation
+consonant-locus: formant-transitions
+consonant-vowel-transitions: formant-transitions
+
+# --- Vowels ---
+vowel-acoustics: vowels
+vowel-formants: formants
+vowel-length: duration
+vowel-modeling: vowels
+vowel-perception: perception
+vowel-quality: vowels
+vowel-reduction: coarticulation
+vowel-targets: vowels
+concurrent-vowels: vowels
+
+# --- Formants ---
+formant-frequencies: formants
+formant-frequency: formants
+formant-estimation: formants
+formant-extraction: formants
+formant-integration: formants
+formant-antiformant: formants
+bandwidth-estimation: formant-bandwidths
+bandwidths: formant-bandwidths
+
+# --- Glottal source ---
+glottal-airflow: glottal-source
+glottal-leakage: glottal-source
+glottal-closure: glottal-source
+glottalization: glottal-source
+voice-source: glottal-source
+voice-source-dynamics: glottal-source
+voice-source-modeling: glottal-source
+source-parameters: glottal-source
+open-quotient: glottal-source
+exponential-model: glottal-source
+
+# --- Voice quality ---
+breathy-voice: breathiness
+roughness: voice-quality
+harshness: voice-quality
+phonation: voice-quality
+phonation-mode: voice-quality
+phonation-type: voice-quality
+phonational-register: voice-quality
+vocal-fry: voice-quality
+pulse-register: voice-quality
+spectral-tilt: voice-quality
+singing: voice-quality
+voice-pathology: voice-quality
+pathological-voice: voice-quality
+
+# --- Vocal folds / laryngeal ---
+vocal-folds: laryngeal-source
+vocal-fold-model: laryngeal-source
+vocal-fold-physiology: laryngeal-source
+vocal-fold-vibration: laryngeal-source
+self-oscillation: laryngeal-source
+two-mass-model: laryngeal-source
+body-cover: laryngeal-source
+body-cover-theory: laryngeal-source
+ribbon-model: laryngeal-source
+bifurcation-analysis: laryngeal-source
+chaos: laryngeal-source
+nonlinear-dynamics: laryngeal-source
+subharmonics: laryngeal-source
+adduction: laryngeal-source
+biomechanics: laryngeal-source
+larynx-height: laryngeal-source
+laryngeal-paralysis: voice-quality
+
+# --- Aerodynamics ---
+transglottal-pressure: aerodynamics
+subglottal-pressure: aerodynamics
+noise-modeling: aerodynamics
+turbulence-noise: aerodynamics
+volume-velocity: aerodynamics
+
+# --- Prosody / intonation ---
+pitch-accent: intonation
+pitch-control: fundamental-frequency
+pitch-perception: perception
+declination: intonation
+intonational-phrase: intonation
+break-indices: tobi
+lexical-stress: prosody
+stress: prosody
+syntax: prosody
+pause-assignment: prosody
+
+# --- Duration / timing ---
+duration-model: duration
+duration-rules: duration
+segmental-timing: duration
+timing: duration
+tempo: duration
+speaking-rate: duration
+rhythm: duration
+stress-timing: duration
+segment-boundaries: duration
+segmental: duration
+segmentation: duration
+positional-effects: duration
+pre-boundary-lengthening: boundary-lengthening
+phrase-final-lengthening: boundary-lengthening
+
+# --- Synthesis ---
+synthesis: speech-synthesis
+synthesis-by-rule: speech-synthesis
+synthesis-rules: speech-synthesis
+synthesis-validation: speech-synthesis
+rule-based-synthesis: speech-synthesis
+synthetic-speech: speech-synthesis
+cascade-synthesizer: klatt
+parallel-formant-synthesiser: klatt
+parallel-synthesis: klatt
+parallel-synthesizer: klatt
+klatt-synthesizer: klatt
+terminal-analog: speech-synthesis
+concatenation: speech-synthesis
+diphone-synthesis: speech-synthesis
+analysis-by-synthesis: speech-synthesis
+computational-efficiency: speech-synthesis
+formant-synthesis: speech-synthesis
+phonetic-rules: speech-synthesis
+tts-architecture: tts
+text-to-speech: tts
+
+# --- Vocal tract ---
+vocal-tract-model: vocal-tract
+vocal-tract-scaling: vocal-tract
+area-function: vocal-tract
+area-functions: vocal-tract
+vocal-anatomy: vocal-tract
+lumped-element: vocal-tract
+resonance-levels: vocal-tract
+
+# --- Articulation ---
+articulatory-acoustics: articulatory-synthesis
+articulatory-model: articulatory-synthesis
+articulatory-phonetics: articulatory-phonology
+articulatory-timing: articulatory-phonology
+coordinative-structures: articulatory-phonology
+jaw: articulatory-phonology
+lip-rounding: articulatory-phonology
+tongue-position: articulatory-phonology
+
+# --- Speaker characteristics ---
+male-female-differences: gender-differences
+female-voice: gender-differences
+speaker-normalization: speaker-characteristics
+normative-data: speaker-characteristics
+voice-attractiveness: vocal-attractiveness
+
+# --- Perception ---
+auditory-modeling: perception
+auditory-perception: perception
+listening-tests: perception
+perceptual-evaluation: perception
+perceptual-measurement: perception
+difference-limen: perception
+selective-adaptation: perception
+cue-trading: perception
+bark-scale: perception
+sound-symbolism: perception
+speech-perception: perception
+pitch-perception: perception
+
+# --- Spectrum / signal processing ---
+spectral-processing: spectrum-estimation
+spectral-mismatch: spectrum-estimation
+spectrum-envelope: spectrum-estimation
+spectrographic-analysis: spectral-analysis
+parametrization: spectrum-estimation
+linear-prediction: spectrum-estimation
+cepstrum: spectrum-estimation
+all-pole-modeling: spectrum-estimation
+signal-to-noise-ratio: signal-processing
+speech-coding: signal-processing
+
+# --- Nasals ---
+nasal-consonants: nasals
+nasal-coupling: nasals
+nasalization: nasals
+
+# --- Acoustics ---
+acoustic-analysis: acoustics
+acoustic-cues: acoustics
+acoustic-impedance: acoustics
+acoustic-modeling: acoustics
+acoustic-nucleus: acoustics
+acoustic-theory: acoustics
+acoustic-phonetics: acoustics
+speech-acoustics: acoustics
+phonetics: acoustics
+review: acoustics
+methodology: acoustics
+
+# --- Phoneme acoustics ---
+phonetic-categories: phoneme-acoustics
+phonetic-universals: phoneme-acoustics
+phonological-features: phonology
+quantal-theory: phoneme-acoustics
+invariance: phoneme-acoustics
+place-of-articulation: phoneme-acoustics
+sonority: phoneme-acoustics
+
+# --- Misc ---
+intensity: amplitude
+loudness: amplitude
+vocal-intensity: amplitude
+stochastic-models: jitter
+microtremor: jitter
+factor-analysis: pca
+gamma-distribution: lf-model
+intrinsic-pitch: fundamental-frequency
+frequency-code: fundamental-frequency
+electroglottography: inverse-filtering
+disambiguation: text-normalization
+morphological-analysis: text-normalization
+word-boundaries: word-boundary
+undershoot: coarticulation
+allophonic-variation: coarticulation
+speech-production: source-filter
+voicing: voice-onset-time
+aspiration: aspiration-noise
+Bell-Labs: tts
+French: cross-linguistic
+american-english: english
+british-english: english
+vocal-bursts: emotion
+valence: emotion
+voice-analytics: speaker-characteristics
+vocal-parameters: speaker-characteristics

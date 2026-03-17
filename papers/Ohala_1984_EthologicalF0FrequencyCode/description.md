@@ -1,14 +1,5 @@
 ---
-tags:
-  - prosody
-  - F0
-  - intonation
-  - frequency-code
-  - cross-language
-  - affect
-  - sound-symbolism
-  - sexual-dimorphism
-  - vocal-anatomy
+tags: [prosody, fundamental-frequency, intonation, cross-language, affect, perception, sexual-dimorphism, vocal-tract]
 ---
 
 # Description

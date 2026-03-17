@@ -1,1 +1,9 @@
+---
+tags:
+  - emotion
+  - arousal
+  - acoustics
+  - perception
+---
+
 Cross-domain study of acoustic features for emotion recognition across speech, music, and environmental sound. Identifies which low-level acoustic descriptors (loudness, spectral flux, MFCCs, F0, etc.) generalize across domains for predicting arousal and valence. Introduces the Cross-Domain Correlation Coefficient (CDCC) for automatic feature selection, achieving cross-domain arousal regression up to r=0.78 and valence up to r=0.60 using support vector regression on 200 selected features from the INTERSPEECH 2013 ComParE set.

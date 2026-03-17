@@ -1,1 +1,9 @@
+---
+tags:
+  - vocal-attractiveness
+  - voice-quality
+  - perception
+  - formants
+---
+
 This conference paper tests whether Mandarin native listeners rate vocal attractiveness similarly to Western listeners, using VocalTractLab-synthesized stimuli that manipulate voice quality (breathy, modal, creaky, pressed), fundamental frequency, formant dispersion, and pitch range across 108 conditions per gender. The key findings show that breathy and modal voices are preferred over pressed voices, low f0 and narrow formant spacing increase male voice attractiveness, and narrow pitch range decreases attractiveness for both sexes, with creaky voice offering no attractiveness benefit to Mandarin listeners unlike its social cachet in American English. For speech synthesis voice profiles, this provides cross-cultural validation that voice quality preferences (breathy > modal > creaky/pressed) and formant spacing effects are partly universal, while pitch range preferences may be language-specific, and supplies concrete spectral tilt measurements (H1-H2*, H1-A1*, H1-A3*) for each voice quality type.

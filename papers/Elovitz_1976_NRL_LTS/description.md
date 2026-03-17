@@ -1,1 +1,7 @@
+---
+tags:
+  - tts
+  - letter-to-sound
+---
+
 This paper presents 329 context-sensitive letter-to-sound rules for automatically converting unrestricted English text to phonetic transcription using a simple pattern-matching system implemented in SNOBOL. The rules achieve 90% frequency-weighted accuracy on the Brown Corpus and are organized as left-context, target-letter, right-context patterns with 10 special symbols to match phonetic environments. The work is foundational for text-to-speech synthesis, establishing a practical rule-based approach that requires no dictionary and can run on minicomputers, making it directly applicable to modern TTS front-end implementation.

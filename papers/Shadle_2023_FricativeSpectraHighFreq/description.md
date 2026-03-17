@@ -1,1 +1,9 @@
+---
+tags:
+  - fricatives
+  - acoustics
+  - gender-differences
+  - spectrum-estimation
+---
+
 This paper introduces and validates refined spectral measures for English fricatives that extend analysis into the 7-15 kHz range, demonstrating that high-frequency energy significantly differentiates fricative places of articulation and captures temporal dynamics that lower-frequency measures miss. The key contributions include the HighLevelD measure (combining spectral density from 2-15 kHz) that outperforms traditional spectral moments and slope measures, empirical evidence that non-sibilant fricatives (/f/, /theta/) have flat or rising spectral envelopes at high frequencies rather than falling ones, and refined F_M spectral peak definitions with gender-specific frequency ranges. For Klatt synthesis, these findings directly inform the amplitude settings for higher parallel formants (A7-A10) by establishing that sibilant /s/ energy extends well past 7 kHz with gradual rolloff while postalveolar /sh/ rolls off more steeply, and that non-sibilant fricatives require relatively flat high-frequency energy distribution rather than the steep spectral tilt commonly applied to all fricatives.

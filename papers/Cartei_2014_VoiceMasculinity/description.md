@@ -1,1 +1,9 @@
+---
+tags:
+  - speaker-characteristics
+  - fundamental-frequency
+  - vocal-attractiveness
+  - sex-differences
+---
+
 This paper uses two-level path analysis on 37 male speakers and 20 female listeners to determine how physiological characteristics (testosterone, height) relate to perceived vocal masculinity through acoustic mediators (F0 and formant spacing deltaF). The key finding is that testosterone's effect on perceived masculinity is entirely mediated by F0, while height's effect is only partially mediated by both F0 and deltaF, with F0 being the stronger cue (rho=-.53 vs rho=-.33) and the two acoustic dimensions being independent as predicted by source-filter theory. For the Qlatt speaker personality system, this establishes that F0 is the primary parameter for controlling perceived masculinity in voice presets, with formant spacing as a secondary independent control, and that these can be manipulated orthogonally without acoustic interaction.

@@ -1,11 +1,5 @@
 ---
-tags:
-  - fricatives
-  - perception
-  - acoustic-cues
-  - sibilants
-  - formant-transitions
-  - speech-perception
+tags: [fricatives, perception, acoustics, formant-transitions]
 ---
 
 # Description

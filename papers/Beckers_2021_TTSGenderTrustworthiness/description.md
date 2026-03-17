@@ -1,1 +1,9 @@
+---
+tags:
+  - tts
+  - perception
+  - gender-differences
+  - speech-synthesis
+---
+
 This master's thesis investigates how TTS voice gender (male vs female) and accent (national Dutch vs foreign Belgian) affect perceived trustworthiness and listening experience of news content, using a 2x2 between-subjects design with 326 Dutch participants and Google WaveNet voices. The key finding is that male TTS voices are rated significantly more trustworthy than female voices (M=5.09 vs M=4.00, p<.001) for news reading, while national accent voices produce a better listening experience mediated by perceived similarity-attraction, with qualitative interviews revealing that listeners associate male voices with "seriousness" and "expertise" despite acknowledging the gender bias. For speech synthesis voice persona design, this establishes that voice gender and regional accent are significant social variables affecting listener trust and engagement, though the thesis provides no acoustic parameter data as it uses commercial black-box TTS.

@@ -1,1 +1,10 @@
+---
+tags:
+  - fricatives
+  - acoustics
+  - vocal-tract
+  - source-filter
+  - aerodynamics
+---
+
 This paper presents experimental measurements and acoustic modeling of voiceless fricative production, establishing quantitative relationships between intra-oral pressure, constriction area, and radiated sound pressure level for [f], [s], and [ʃ]. The key contributions are empirical exponent values (p≈1.3, q≈0.3 for sibilants; p≈0.8, q≈0.2 for labiodentals) in the SPL∝(Δp)^p·(A_c)^q relationship, plus demonstration that spectral tilt increases with overall amplitude and that the "obstacle effect" can be explained by source location relative to the front cavity. This work is directly relevant for Klatt-based fricative synthesis as it provides guidance on amplitude scaling differences between fricative classes and suggests that noise source spectrum should vary with amplitude level.

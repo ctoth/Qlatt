@@ -1,1 +1,9 @@
+---
+tags:
+  - glottal-source
+  - voice-quality
+  - gender-differences
+  - inverse-filtering
+---
+
 This paper quantifies how subglottal pressure variation affects glottal voice source parameters (MFDR, closed quotient, pulse amplitude, H1-H2, compliance) in 15 female and 14 male untrained speakers across three fundamental frequencies, using 10 pressure levels per condition. The key contribution is a set of analytic equations — linear regressions for MFDR and amplitude, a power function for closed quotient — with sex- and F0-differentiated constants that capture the nonlinear relationship between vocal effort and source waveform shape. These equations are directly applicable to effort-dependent voice quality control in formant synthesis, providing the mapping from a loudness/effort parameter to LF source model characteristics needed for natural-sounding speech.

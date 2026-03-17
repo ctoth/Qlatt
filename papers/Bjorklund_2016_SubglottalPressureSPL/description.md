@@ -1,1 +1,5 @@
+---
+tags: [acoustics, gender-differences, amplitude, laryngeal-source]
+---
+
 Bjorklund and Sundberg (2016) establish normative regression data relating subglottal pressure (Ps) to sound pressure level (SPL) in 31 untrained healthy speakers, finding an average correlation of r = 0.83 and quantifying that a doubling of Ps produces 11.1 dB (female) or 9.3 dB (male) increase in SPL. The study demonstrates gender differences in phonatory efficiency: males produce ~2 dB higher SPL at equivalent pressure but show a shallower slope, and pitch does not significantly affect the Ps-SPL relationship. For speaker personality modeling, this provides the quantitative mapping from respiratory effort to acoustic output level, with gender-specific parameters that should be reflected in any physiologically-grounded voice synthesis system.

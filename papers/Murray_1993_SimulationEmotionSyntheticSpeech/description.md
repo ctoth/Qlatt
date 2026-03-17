@@ -1,13 +1,5 @@
 ---
-tags:
-  - emotion
-  - prosody
-  - voice-quality
-  - F0
-  - duration
-  - intensity
-  - speech-synthesis
-  - review
+tags: [emotion, prosody, voice-quality, fundamental-frequency, duration, amplitude, speech-synthesis, acoustics]
 ---
 
 # Murray & Arnott 1993 — Toward the Simulation of Emotion in Synthetic Speech

@@ -1,1 +1,9 @@
+---
+tags:
+  - speech-synthesis
+  - glottal-source
+  - lf-model
+  - source-filter
+---
+
 This 1995 survey paper provides a comprehensive taxonomy of speech synthesis methods, comparing acoustic terminal analog (formant) synthesizers, articulatory models, and waveform concatenation approaches like PSOLA along dimensions of required speech knowledge and system flexibility. Key contributions include clear discussion of the LF glottal source model parameters (Rg, Rk, Ra) and their spectral effects, the concept of "higher-level parameters" for simplifying formant synthesizer control, and analysis of the rule-based versus data-driven trade-offs in coarticulation modeling. For Qlatt, this paper contextualizes the Klatt formant synthesizer within the broader synthesis landscape and provides insight into voice quality control through LF parameters, though the survey predates modern neural methods.

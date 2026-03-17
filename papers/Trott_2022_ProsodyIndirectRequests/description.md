@@ -1,1 +1,9 @@
+---
+tags:
+  - prosody
+  - pragmatics
+  - perception
+  - fundamental-frequency
+---
+
 This paper investigates whether prosodic features (pitch, duration, intensity) can disambiguate indirect requests from literal statements or questions in English, using both human perception experiments and machine learning classification. The key finding is that humans achieve 55% accuracy and a classifier achieves 65% accuracy using seven acoustic features, with F0 slope and number of voiced frames emerging as significant predictors that interact with grammatical form. While primarily a perception study rather than a synthesis guide, the identified prosodic correlates of speech act intent (rising F0 for questions, longer duration for marked interpretations) could inform prosody generation rules for TTS systems aiming to convey pragmatic distinctions.

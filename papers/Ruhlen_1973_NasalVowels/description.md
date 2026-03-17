@@ -1,1 +1,8 @@
+---
+tags:
+  - nasals
+  - phonology
+  - vowels
+---
+
 Cross-linguistic survey of nasal vowel systems in 50+ languages, establishing phonological universals about nasal vowel inventories. Distinguishes three levels of vowel nasalization (phonetic, phonemic, phonological) and documents that nasal vowel systems are always subsets of oral vowel inventories, with mid-vowel quality distinctions particularly vulnerable to neutralization. Traces nasal vowels diachronically to loss of nasal consonants through a five-stage evolutionary pathway exemplified by French. The appendix provides oral/nasal vowel inventories for languages spanning all major families. Primarily a typological/phonological study with indirect relevance to synthesis: constrains which nasal vowel targets are needed per language and implies that coarticulatory nasalization strength must be language-specific.

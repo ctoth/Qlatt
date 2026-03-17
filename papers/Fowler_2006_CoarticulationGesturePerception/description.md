@@ -1,1 +1,8 @@
+---
+tags:
+  - coarticulation
+  - perception
+  - formants
+---
+
 This paper presents three perceptual experiments demonstrating that listeners' compensation for coarticulation reflects gesture perception rather than general auditory spectral contrast, using /da/-to-/ga/ hybrid continua with /l/ and /r/ carryover coarticulation contexts. The key findings show that compensation occurs without preceding spectral context (ruling out contrast), coarticulatory information enhances rather than reduces sensitivity to gestural sources (opposite to contrast predictions), and speech-nonspeech comparisons produce opposite effect directions. For speech synthesis, the paper provides detailed formant measurements at syllable boundaries showing massive F3 carryover from /r/ (~1000-1500 Hz lower than /l/ contexts) that persists through stop consonant closures, and establishes that listeners are highly sensitive to coarticulatory detail, meaning synthesis must accurately model cross-boundary coarticulation to sound natural.

@@ -1,4 +1,4 @@
 ---
-tags: [fundamental-frequency, voice-quality, glottal-closure, vocal-parameters]
+tags: [fundamental-frequency, voice-quality, glottal-source, speaker-characteristics]
 ---
 This master's thesis compares acoustic vocal parameters (F0, jitter, shimmer, NHR, VTI) and videostroboscopic glottal closure patterns across African-American, Asian, Caucasian, and Hispanic speakers using sustained vowel productions from 15 participants. The study found no significant acoustic differences across groups but observed that all non-Caucasian males exhibited posterior glottal chink (associated with 43 Hz higher F0), and that naive listeners could identify speaker ethnicity from 1-second vowel samples at 83% accuracy. For speech synthesis, the work highlights that glottal closure configuration may need to be correlated with F0 defaults in speaker profile modeling, though the very small sample sizes limit the reliability of the absolute parameter values reported.

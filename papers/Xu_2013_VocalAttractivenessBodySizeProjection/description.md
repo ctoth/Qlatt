@@ -1,1 +1,10 @@
+---
+tags:
+  - vocal-attractiveness
+  - voice-quality
+  - breathiness
+  - perception
+  - emotion
+---
+
 This paper tests the body size projection hypothesis for vocal attractiveness, showing through five perception experiments (using both acoustically altered natural speech and VocalTractLab synthetic speech) that female vocal attractiveness increases with higher pitch, wider formant dispersion, and breathiness (all signaling small body size), while male vocal attractiveness increases with lower pitch and narrower formant dispersion (signaling large body size) but also with breathiness, which softens the aggressiveness associated with large body size projection. The same acoustic dimensions that drive attractiveness judgments also affect anger-happiness emotion ratings, supporting the evolutionary link between body size signaling in animal calls and human vocal communication. For speech synthesis, this work provides evidence-based guidance for voice preset design: breathy voice quality enhances perceived attractiveness regardless of speaker gender, and the acoustic parameters of attractiveness overlap substantially with those of emotional expression.

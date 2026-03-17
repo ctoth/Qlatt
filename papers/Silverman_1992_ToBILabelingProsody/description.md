@@ -1,1 +1,9 @@
+---
+tags:
+  - tobi
+  - prosody
+  - intonation
+  - annotation
+---
+
 This paper defines ToBI (Tones and Break Indices), the standard multi-tier prosodic transcription system for American English, consisting of a tonal tier (5 pitch accents based on Pierrehumbert's autosegmental phonology), a break index tier (0-4 scale of juncture strength), and a miscellaneous tier for disfluencies. Evaluation with 20 transcribers of varied experience demonstrated high inter-transcriber reliability (80%+ agreement on most categories), establishing ToBI as the de facto standard for prosodic annotation of English speech corpora. For Klatt synthesis, ToBI provides the canonical inventory of pitch accent and boundary tone types that must be mapped to F0 contour targets and timing parameters in the TTS frontend prosody module.

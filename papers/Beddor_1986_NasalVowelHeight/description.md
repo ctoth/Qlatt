@@ -1,1 +1,10 @@
+---
+tags:
+  - nasals
+  - vowels
+  - perception
+  - formants
+  - coarticulation
+---
+
 This paper investigates whether listener misperceptions of the acoustic effects of vowel nasalisation can explain cross-language phonological patterns of nasal vowel height shifts (lowering of high vowels, raising of low vowels), using articulatory synthesis, natural speech acoustics, and perceptual experiments with American English listeners. The key finding is that nasalisation introduces a pole-zero pair near F1 that shifts the spectral centre of gravity in the F1-F2 region in ways consistent with the phonological patterns, but perceptual height shifts only occur when nasalisation is phonetically inappropriate — contextual nasalisation in expected environments is correctly factored out by listeners. Directly relevant to nasalisation modeling in formant synthesis: the pole-zero pair model (FZ, FN, F1') and the importance of coupling strength for perceptual naturalness constrain how nasal parameters should be set in the Klatt cascade/parallel architecture.

@@ -1,0 +1,4 @@
+---
+tags: [laryngeal-source, gender-differences, voice-quality]
+---
+This conference paper uses the VOX multiple-mass vocal fold model to simulate how gender-related anatomical differences in laryngeal framework geometry (thyroid cartilage angle of 120 degrees in females vs. 90 degrees in males, and resulting vocal fold edge curvature) produce different contact force distributions during phonation. The key finding is that female vocal fold geometry produces spatially localized "hourglass-shaped" impact patterns concentrated near the vocal fold center, while male and linear geometries distribute forces more broadly along the fold length, which may explain the ~95% female prevalence of vocal fold nodules. For Qlatt, the paper primarily contributes gender-specific physiological parameter ranges (F0, vocal fold length, thyroid angle) useful for male/female voice presets, though its main focus is pathology mechanics rather than acoustic synthesis parameters.

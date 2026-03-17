@@ -1,1 +1,10 @@
+---
+tags:
+  - klatt
+  - speech-synthesis
+  - glottal-source
+  - voice-quality
+  - formants
+---
+
 This dissertation presents a flexible extension of Klatt's cascade/parallel formant synthesizer, providing 62 control parameters, multiple glottal source models, and improved procedures for matching cascade and parallel filter bank responses. Key contributions include the ability to create anti-formants in parallel filters via polarity control, a superior cascade-parallel matching procedure based on Q-factor scaling, and implementation details for source-tract interaction simulation, plosive bursts, mixed excitation, and nasal synthesis. This work is essential for speech synthesis systems seeking to overcome the "buzzy" and "metallic" quality limitations of standard Klatt synthesizers while maintaining flexible control over voice characteristics and consonant production.

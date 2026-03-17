@@ -1,1 +1,9 @@
+---
+tags:
+  - glottal-source
+  - voice-quality
+  - affect
+  - shimmer
+---
+
 This paper investigates glottal waveform features (timing ratios, shimmer, spectral tilt) for classifying clinical depression, achieving up to 100% classification accuracy for female speakers using spectral tilt measured to 3700 Hz. The key contribution is demonstrating that glottal source characteristics carry significant affective information beyond traditional prosodic features, with specific feature extraction methods and statistical aggregation techniques provided. For speech synthesis, this work suggests that spectral tilt and glottal phase ratios are important parameters for generating emotionally expressive voice, though the paper focuses on analysis rather than synthesis.

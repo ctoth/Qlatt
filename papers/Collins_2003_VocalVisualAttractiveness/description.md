@@ -1,1 +1,10 @@
+---
+tags:
+  - vocal-attractiveness
+  - formants
+  - fundamental-frequency
+  - speaker-characteristics
+  - perception
+---
+
 This paper investigates the relationship between vocal and visual attractiveness in women by recording 30 women producing four vowels and having male judges rate both vocal attractiveness and facial attractiveness from photographs. The key findings are that vocal and visual attractiveness are significantly correlated (r=0.404), higher F0 and formant frequencies predict higher attractiveness ratings, body size negatively predicts both vocal and visual attractiveness, and formant dispersion (F4-F5 spacing) is inversely related to speaker height. For a formant synthesizer, this provides empirical evidence linking the acoustic parameters we control (F0, formant frequencies, formant dispersion) to perceptual dimensions of speaker identity including perceived age, body size, and vocal attractiveness, which is relevant for designing voice presets that target specific speaker profiles.

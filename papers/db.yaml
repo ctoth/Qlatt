@@ -1,0 +1,16 @@
+schema_version: 1
+database_kind: research-papers
+notes_format: notes-frontmatter-v1
+description_format: description-frontmatter-tags-v1
+required_files: [notes.md, description.md]
+recommended_files: [abstract.md, citations.md]
+canonical_notes_required: [title, year]
+canonical_notes_recommended: [authors, venue, doi_url]
+canonical_notes_optional: [pages, affiliation, affiliations, institution, publisher, supervisor, supervisors, funding, pacs, note, correction_doi, citation]
+legacy_aliases:
+  author: authors
+  doi: doi_url
+  url: doi_url
+  journal: venue
+  type: venue
+  paper: title

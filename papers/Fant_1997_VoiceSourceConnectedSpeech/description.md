@@ -1,1 +1,9 @@
+---
+tags:
+  - lf-model
+  - glottal-source
+  - prosody
+  - voice-quality
+---
+
 This paper presents comprehensive rules for modeling voice source parameter variations in connected speech using the LF glottal flow model. The key contribution is the Rd waveshape parameter that unifies glottal pulse characteristics and enables prediction of default LF parameters, along with the critical finding that 1dB change in 1/Rd covaries with 2dB change in excitation amplitude Ee across all contexts. This work provides essential quantitative rules for implementing natural prosody in formant synthesizers, including phrase-level amplitude contours, stress effects, and segment-specific source modifications.

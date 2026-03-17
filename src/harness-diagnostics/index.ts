@@ -6,8 +6,9 @@ import type { DisplayState } from "./display-formatter";
 import { TapManager } from "./tap-manager";
 import { PollLoop } from "./poll-loop";
 import { AcrossPlaysAccumulator } from "./across-plays";
-import { updateParamRange } from "./check-evaluator";
+import { updateParamRange, evaluateTrackAnalysis } from "./check-evaluator";
 import { createCheckState } from "./check-evaluator";
+import type { TrackAnalysisCheckDef } from "./types";
 
 /** External state provider — lets the harness pass live references into the engine. */
 export interface ExternalState {
@@ -32,6 +33,8 @@ export function createDiagnosticsEngine(
   let currentResults: Map<string, CheckResult> = new Map();
 
   const acrossPlays = new AcrossPlaysAccumulator();
+  /** Static results from track_analysis checks — computed once per play. */
+  let trackAnalysisResults: Map<string, CheckResult> = new Map();
 
   // Register across_plays checks
   for (const [checkName, checkDef] of Object.entries(config.checks)) {
@@ -103,6 +106,20 @@ export function createDiagnosticsEngine(
           updateParamRange(state, checkDef.param, run.track);
         }
       }
+
+      // Run track_analysis checks once against the track
+      trackAnalysisResults = new Map();
+      for (const [checkName, checkDef] of Object.entries(config.checks)) {
+        if (checkDef.type === "track_analysis" && checkDef.select) {
+          const result = evaluateTrackAnalysis(
+            checkName,
+            checkDef as TrackAnalysisCheckDef,
+            run.track,
+          );
+          trackAnalysisResults.set(checkName, result);
+        }
+      }
+      pollLoop.setTrackAnalysisResults(trackAnalysisResults);
     },
 
     onPlayEnd() {

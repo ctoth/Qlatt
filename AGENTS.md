@@ -110,7 +110,7 @@ The `explain` CLI (`scripts/explain-phrase.ts`) runs the full TTS pipeline on a 
 
 Dev server: `npm run dev` → `http://localhost:8000`
 
-audio):
+Trigger speech (useful for testing audio):
 ```javascript
 Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Speak')).click()
 ```
@@ -186,6 +186,16 @@ Rust DSP modules compiled to WASM:
 - `decay-envelope` - Exponential decay for PLSTEP bursts
 - `edge-detector` - Threshold crossing detector
 - `signal-switch` - N-to-1 signal selector
+- `aerodynamic-model` - Aerodynamic tract model
+- `biquad-notch` - Biquad notch filter
+- `fujisaki-resonator` - Fujisaki model resonator
+- `impulsive-source` - Impulse train source
+- `oversampled-glottal-source` - Oversampled glottal source
+- `pitch-sync-mod` - Pitch-synchronous modulation
+- `reconstruction-filter` - Signal reconstruction filter
+- `square-source` - Square wave source
+- `tilt-filter` - Spectral tilt filter
+- `triangular-source` - Triangular wave source
 
 Shared utilities in `crates/klatt-wasm-common/`.
 
@@ -201,14 +211,17 @@ These are registered with the CEL evaluator for use in semantics expressions.
 ## Documentation
 
 - `docs/parameter-scheduling.md` - How parameters flow from text to audio (track structure, ramp vs step, semantics)
+- `docs/adding-a-synthesizer.md` - Guide for adding new synthesizer configurations
+- `docs/synthesizer-architecture.md` - Overview of synthesizer architecture
+- `docs/yaml-graph-tests.md` - Testing YAML graph definitions
 
 ## Paper Library
 
-The `papers/` directory contains ~150 processed research papers with implementation-focused notes. Each paper folder has:
+The `papers/` directory contains ~370 processed research papers with implementation-focused notes. Each paper folder has:
 - `notes.md` — extracted equations, parameter tables, algorithms (START HERE)
 - `description.md` — brief summary
 - `paper.pdf` — original PDF
-- `papers/CLAUDE.md` — index with one-paragraph descriptions of every paper
+- `papers/index.md` — index with one-paragraph descriptions of every paper
 
 **Before implementing anything from a paper, read `papers/<folder>/notes.md` first.** The extraction work is already done. Don't re-read the PDF when the notes exist.
 

@@ -493,7 +493,7 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "L",
         type: "liquid",
         alveolar: true,
-        params: { F2: 1050, F3: 2600 },
+        params: { F2: 1300, F3: 2900 },
         duration: 80,
         inherentDuration: 80,
       },
@@ -518,7 +518,7 @@ describe("declarative frontend rulepack context migration", () => {
         phoneme: "L",
         type: "liquid",
         alveolar: true,
-        params: { F2: 1050, F3: 2600 },
+        params: { F2: 1300, F3: 2900 },
         duration: 80,
         inherentDuration: 80,
       },
@@ -534,9 +534,9 @@ describe("declarative frontend rulepack context migration", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // Onset /L/: clear allophone, F2 unchanged from inventory
-    expect(out[0].params.F2).toBe(1050);
-    expect(out[0].params.F3).toBe(2600);
+    // Onset /L/: clear allophone, with a substantially lighter target than coda /l/.
+    expect(out[0].params.F2).toBe(1300);
+    expect(out[0].params.F3).toBe(2900);
   });
 
   // --- /r/ F3 lowering ---

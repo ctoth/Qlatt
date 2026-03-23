@@ -23,6 +23,7 @@ streams:
         unit: ms
         resolution: klatt
         max: 500
+        floor_field: durationFloor
   f0:
     type: point
     value_type: number

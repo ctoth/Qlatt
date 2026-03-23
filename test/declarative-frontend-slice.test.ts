@@ -163,9 +163,54 @@ describe("declarative frontend first migration slice", () => {
     expect(asp?.params).toBeDefined();
     expect(asp?.type).toBe("stop_aspiration");
     expect(asp?.weak).toBe(true);
-    // Weak phrase-final aspiration duration is derived from VOT split and weak scaling.
-    expect(asp?.duration).toBeCloseTo(27.951807228915662);
+    // Connected-speech word-initial /k/ uses the sentence-initial VOT target,
+    // then the weak/final rule scales the aspiration toward a short release tail.
+    expect(asp?.duration).toBeCloseTo(15.024096385542169);
     expect(asp?.params?.AH).toBe(43);  // K_ASP inventory AH=53 minus weak_release_amplitude_reduction_db=10
+  });
+
+  it("preserves weak phrase-final stop timing through duration locking", () => {
+    const sequence = [
+      { phoneme: "P_CL", stress: 1, word: "cap", type: "stop_closure", status: 1 },
+      { phoneme: "SIL", punctuationSymbol: ".", word: ".", type: "silence", status: 1 },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["structural", "duration"],
+      inventoryResolver: qlattInventoryResolver,
+    });
+    const rel = out.find((t) => t.phoneme === "P_REL" && t.status !== 2);
+    const asp = out.find((t) => t.phoneme === "P_ASP" && t.status !== 2);
+
+    expect(rel).toBeDefined();
+    expect(asp).toBeDefined();
+    expect(rel?.weak).toBe(true);
+    expect(asp?.weak).toBe(true);
+    expect(rel?.duration).toBe(15);
+    expect(rel?.inherentDuration).toBe(15);
+    expect(asp?.duration).toBe(15);
+    expect(asp?.inherentDuration).toBe(15);
+  });
+
+  it("lets s-cluster aspiration reduction override the fixed inserted aspiration timing", () => {
+    const sequence = [
+      { phoneme: "S", word: "spa", type: "fricative", voiceless: true, alveolar: true, params: { AF: 60 }, duration: 100, inherentDuration: 100, status: 1 },
+      { phoneme: "P_CL", word: "spa", type: "stop_closure", voiceless: true, bilabial: true, params: {}, duration: 50, inherentDuration: 50, status: 1 },
+      { phoneme: "AA", word: "spa", type: "vowel", stress: 1, low: true, params: { F1: 700, F2: 1220, AV: 64 }, duration: 180, inherentDuration: 180, status: 1 },
+    ];
+
+    const out = runDeclarativeFrontend(sequence, {
+      phases: ["structural", "duration"],
+      inventoryResolver: qlattInventoryResolver,
+    });
+    const rel = out.find((t) => t.phoneme === "P_REL" && t.status !== 2);
+    const asp = out.find((t) => t.phoneme === "P_ASP" && t.status !== 2);
+
+    expect(rel).toBeDefined();
+    expect(asp).toBeDefined();
+    expect(rel?.duration).toBe(3);
+    expect(asp?.duration).toBe(10);
+    expect(asp?.params?.AH).toBe(42);
   });
 
   it("initializes sync marks on base stream tokens during structural phase", () => {

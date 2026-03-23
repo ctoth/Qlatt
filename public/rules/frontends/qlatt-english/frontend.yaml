@@ -20,18 +20,32 @@ parameters:
         citations:
           - Klatt 1976 §III (speech rate scaling)
       vot_target_ms:
-        p:
-          value: 58
-          citations:
-            - Lisker & Abramson 1964
-        t:
-          value: 70
-          citations:
-            - Lisker & Abramson 1964
-        k:
-          value: 80
-          citations:
-            - Lisker & Abramson 1964
+        initial:
+          p:
+            value: 28
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /p/)
+          t:
+            value: 39
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /t/)
+          k:
+            value: 43
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /k/)
+        noninitial:
+          p:
+            value: 34
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /p/)
+          t:
+            value: 37
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /t/)
+          k:
+            value: 49
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /k/)
       vot_split_fallback_share:
         value: 0.5
         citations:
@@ -499,14 +513,15 @@ parameters:
         citations:
           - Allen et al. 1987 Ch.10 (nasal place assimilation F2 fallback)
       light_l_f2:
-        value: 1050
+        value: 1300
         citations:
-          - Sproat & Fujimura 1993 (onset /l/ F2)
-          - Recasens 2012
+          - Sproat & Fujimura 1993 (light/onset /l/ F2 ~1200-1400 Hz)
+          - Recasens 2012 (clear /l/ range includes ~1270-1300 Hz for American English onset contexts)
       light_l_f3:
-        value: 2600
+        value: 2900
         citations:
-          - Recasens 2012 (onset /l/ F3)
+          - Sproat & Fujimura 1993 (light/onset /l/ F3 ~2800-3200 Hz)
+          - Recasens 2012 (clear /l/ F3 is higher than dark /l/)
       f1_release_default:
         value: 280
         citations:

@@ -340,14 +340,17 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
 // ---------------------------------------------------------------------------
 
 /**
- * Assign ToBI accent types within a phrase.
+ * Assign accent types within the frontend's Pierrehumbert-style inventory.
  *
  * - Initial prenuclear accent: L+H* (common rising prenuclear default)
- * - Later prenuclear accents: H+!H* (MAE-ToBI downstepped prenuclear default)
+ * - Later prenuclear accents: H+!H*
  * - Nuclear accent in declarative (. or no punctuation): H* or H*+L
  * - Nuclear accent in continuation (, ; :): H+L*
  * - Nuclear accent in exclamation (!): H*+L
  * - Nuclear accent in question (?): L* if lone accent, L*+H if postnuclear rise is available
+ *
+ * Accent labels intentionally follow the original Pierrehumbert/Ladd symbols
+ * used by the rulepack, while break indices remain ToBI-compatible.
  *
  * Citations: Pierrehumbert 1980, Ladd 2008 Ch.3
  */
@@ -380,7 +383,7 @@ function assignAccentTypes(
  * Assign a 0-based accent index to each accent carrier within the
  * current intonational phrase. Non-accented tokens get accentIndexInPhrase = -1.
  *
- * The index is used by the ToBI downstep formula: H_n = V * k^n, where n is
+ * The index is used by the Pierrehumbert downstep formula: H_n = V * k^n, where n is
  * accentIndexInPhrase. The counter resets only at breakIndex=4 (IP boundary)
  * and intentionally continues across breakIndex=3 (intermediate phrase).
  *

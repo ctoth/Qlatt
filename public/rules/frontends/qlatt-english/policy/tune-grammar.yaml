@@ -1,6 +1,8 @@
 version: v1
 
-# Canonical English tune inventory for the current ToBI-oriented frontend.
+# Canonical English tune inventory for the current Pierrehumbert-style frontend.
+# Accent labels follow the original Pierrehumbert/Ladd inventory used by this
+# rulepack, while break indices and edge tones remain ToBI-compatible.
 # Citations:
 # - Pierrehumbert 1980
 # - Ladd 2008 Ch.3

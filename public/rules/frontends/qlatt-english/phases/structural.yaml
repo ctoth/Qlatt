@@ -126,12 +126,19 @@ rules:
       rel: "current.phoneme == \"P_CL\" ? \"P_REL\" : (current.phoneme == \"T_CL\" ? \"T_REL\" : \"K_REL\")"
       asp: "current.phoneme == \"P_CL\" ? \"P_ASP\" : (current.phoneme == \"T_CL\" ? \"T_ASP\" : \"K_ASP\")"
       next_token: next
+      prev_token: prev
+      word_initial: >-
+        prev_token == null ? true :
+        (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
       asp_target: target(asp)
       vot_target: >-
-        rel == "P_REL" ? params.policy.duration.vot_target_ms.p : (rel == "T_REL" ?
-        params.policy.duration.vot_target_ms.t : params.policy.duration.vot_target_ms.k)
+        word_initial
+        ? (rel == "P_REL" ? params.policy.duration.vot_target_ms.initial.p : (rel == "T_REL" ?
+          params.policy.duration.vot_target_ms.initial.t : params.policy.duration.vot_target_ms.initial.k))
+        : (rel == "P_REL" ? params.policy.duration.vot_target_ms.noninitial.p : (rel == "T_REL" ?
+          params.policy.duration.vot_target_ms.noninitial.t : params.policy.duration.vot_target_ms.noninitial.k))
       vot_sum: rel_target.duration + asp_target.duration
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
       rel_duration_base: vot_target * rel_share
@@ -157,18 +164,20 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: rel_params
           duration: rel_duration
-          inherentDuration: rel_target.inherentDuration
+          inherentDuration: rel_duration
           type: rel_target.type
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
         - phoneme: asp
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: asp_params
           duration: asp_duration
-          inherentDuration: asp_target.inherentDuration
+          inherentDuration: asp_duration
           type: asp_target.type
           inventorySW: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
         - copy_from: next_token
@@ -184,8 +193,8 @@ rules:
             - punctuationSymbol
     citations:
       - >-
-        Lisker & Abramson 1964 (English long-lag VOT isolated /p/=58, /t/=70, /k/=80 ms; sentence-initial /p/=28,
-        /t/=39, /k/=43 ms)
+        Lisker & Abramson 1964 (English sentence VOT defaults: initial /p/=28, /t/=39, /k/=43 ms; non-initial /p/=34,
+        /t/=37, /k/=49 ms)
       - Stevens 1998
       - Allen et al. 1987
   insert_voiceless_stop_release_and_aspiration_final:
@@ -196,12 +205,19 @@ rules:
     define:
       rel: "current.phoneme == \"P_CL\" ? \"P_REL\" : (current.phoneme == \"T_CL\" ? \"T_REL\" : \"K_REL\")"
       asp: "current.phoneme == \"P_CL\" ? \"P_ASP\" : (current.phoneme == \"T_CL\" ? \"T_ASP\" : \"K_ASP\")"
+      prev_token: prev
+      word_initial: >-
+        prev_token == null ? true :
+        (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)
       weak: "true"
       rel_target: target(rel)
       asp_target: target(asp)
       vot_target: >-
-        rel == "P_REL" ? params.policy.duration.vot_target_ms.p : (rel == "T_REL" ?
-        params.policy.duration.vot_target_ms.t : params.policy.duration.vot_target_ms.k)
+        word_initial
+        ? (rel == "P_REL" ? params.policy.duration.vot_target_ms.initial.p : (rel == "T_REL" ?
+          params.policy.duration.vot_target_ms.initial.t : params.policy.duration.vot_target_ms.initial.k))
+        : (rel == "P_REL" ? params.policy.duration.vot_target_ms.noninitial.p : (rel == "T_REL" ?
+          params.policy.duration.vot_target_ms.noninitial.t : params.policy.duration.vot_target_ms.noninitial.k))
       vot_sum: rel_target.duration + asp_target.duration
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
       rel_duration_base: vot_target * rel_share
@@ -219,22 +235,24 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: rel_params
           duration: rel_duration
-          inherentDuration: rel_target.inherentDuration
+          inherentDuration: rel_duration
           type: rel_target.type
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
         - phoneme: asp
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: asp_params
           duration: asp_duration
-          inherentDuration: asp_target.inherentDuration
+          inherentDuration: asp_duration
           type: asp_target.type
           inventorySW: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
     citations:
-      - Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release)
+      - Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release; connected-speech VOT defaults)
       - Stevens 1998
   insert_voiced_stop_release:
     kind: structural
@@ -263,9 +281,10 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: rel_params
           duration: rel_duration
-          inherentDuration: rel_target.inherentDuration
+          inherentDuration: rel_duration
           type: rel_target.type
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
         - copy_from: next_token
@@ -305,9 +324,10 @@ rules:
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
           weak: weak
+          durationFloor: 0
           params: rel_params
           duration: rel_duration
-          inherentDuration: rel_target.inherentDuration
+          inherentDuration: rel_duration
           type: rel_target.type
           inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
     citations:

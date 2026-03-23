@@ -181,6 +181,31 @@ rules:
       a4: ahead(current, 4)
       a5: ahead(current, 5)
       a6: ahead(current, 6)
+      same_word_check: "has(current.word) ? current.word : ''"
+      # Final-syllable rhyme only: allow contiguous vowel material (e.g. diphthong
+      # components), but reject tokens that still have another same-word vowel after
+      # an intervening consonant. This blocks onset material and earlier syllables.
+      same_word_vowel_after_nonvowel: >-
+        ((a1 != null && has(a1.word) && a1.word == same_word_check && a1.phoneme != 'SIL' && a1.type != 'vowel')
+          && ((a2 != null && has(a2.word) && a2.word == same_word_check && a2.type == 'vowel')
+            || (a3 != null && has(a3.word) && a3.word == same_word_check && a3.type == 'vowel')
+            || (a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
+            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
+            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
+        || ((a2 != null && has(a2.word) && a2.word == same_word_check && a2.phoneme != 'SIL' && a2.type != 'vowel')
+          && ((a3 != null && has(a3.word) && a3.word == same_word_check && a3.type == 'vowel')
+            || (a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
+            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
+            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
+        || ((a3 != null && has(a3.word) && a3.word == same_word_check && a3.phoneme != 'SIL' && a3.type != 'vowel')
+          && ((a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
+            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
+            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
+        || ((a4 != null && has(a4.word) && a4.word == same_word_check && a4.phoneme != 'SIL' && a4.type != 'vowel')
+          && ((a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
+            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
+        || ((a5 != null && has(a5.word) && a5.word == same_word_check && a5.phoneme != 'SIL' && a5.type != 'vowel')
+          && (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel'))
       # Check the current token's own breakIndex first.
       # Citation: Silverman et al. 1992 (ToBI break index tier)
       own_bi: "has(current.breakIndex) && current.breakIndex > 0 ? current.breakIndex : 0"
@@ -188,7 +213,6 @@ rules:
       # Each step checks: is the token SIL with breakIndex?  If not, is it the same word?
       # If we hit a different word, stop scanning (bi stays 0).
       # This prevents pre-boundary lengthening from leaking to mid-phrase words.
-      same_word_check: "has(current.word) ? current.word : ''"
       sil_bi_1: >-
         a1 == null ? 0 :
         (a1.phoneme == 'SIL' && has(a1.breakIndex) ? a1.breakIndex :
@@ -235,6 +259,7 @@ rules:
         (raw_bi >= 1 ? 'bi1' : 'bi0')))
       is_obstruent: >-
         current.type in ['stop_closure', 'stop_release', 'stop_aspiration', 'fricative', 'affricate']
+    constraint: "!same_word_vowel_after_nonvowel"
     apply:
       - field: duration
         op: mul

@@ -260,6 +260,154 @@ describe("duration model — break-index pre-boundary lengthening", () => {
     // Ratio ≈ 120/108 = 1.11.  The realized differential is smaller than the raw multiplier ratio.
     expect(sonorantDur / obstruentDur).toBeGreaterThan(1.05);
   });
+
+  it("keeps boundary lengthening inside the final syllable rhyme", () => {
+    const baseSequence = [
+      {
+        phoneme: "AO",
+        type: "vowel",
+        stress: 0,
+        word: "hotel",
+        params: { F1: 590, F2: 1200, AV: 58 },
+        duration: 70,
+        inherentDuration: 70,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "UH",
+        type: "vowel",
+        stress: 0,
+        word: "hotel",
+        params: { F1: 440, F2: 1020, AV: 57 },
+        duration: 60,
+        inherentDuration: 60,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "T_CL",
+        type: "stop_closure",
+        stress: 0,
+        word: "hotel",
+        alveolar: true,
+        voiceless: true,
+        params: {},
+        duration: 40,
+        inherentDuration: 40,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "T_REL",
+        type: "stop_release",
+        stress: 0,
+        word: "hotel",
+        alveolar: true,
+        voiceless: true,
+        params: { AF: 58, AH: 0 },
+        duration: 15,
+        inherentDuration: 15,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "T_ASP",
+        type: "stop_aspiration",
+        stress: 0,
+        word: "hotel",
+        alveolar: true,
+        voiceless: true,
+        params: { AH: 55 },
+        duration: 55,
+        inherentDuration: 55,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "EH",
+        type: "vowel",
+        stress: 1,
+        word: "hotel",
+        params: { F1: 580, F2: 1790, AV: 62 },
+        duration: 120,
+        inherentDuration: 120,
+        stream: "phone",
+        status: 1,
+      },
+      {
+        phoneme: "L",
+        type: "liquid",
+        stress: 0,
+        word: "hotel",
+        params: { F1: 310, F2: 1050, F3: 2600, AV: 59 },
+        duration: 60,
+        inherentDuration: 60,
+        stream: "phone",
+        status: 1,
+      },
+    ];
+    const strongBoundary = {
+      phoneme: "SIL",
+      type: "silence",
+      word: ".",
+      punctuationSymbol: ".",
+      params: {},
+      duration: 300,
+      inherentDuration: 300,
+      stream: "phone",
+      status: 1,
+      breakIndex: 4,
+    };
+    const weakBoundary = {
+      ...strongBoundary,
+      word: "",
+      punctuationSymbol: undefined,
+      breakIndex: 0,
+    };
+
+    const withBoundary = runDeclarativeFrontend(
+      [...baseSequence.map((token) => ({ ...token })), strongBoundary],
+      { phases: ["duration"] },
+    );
+    const withoutBoundary = runDeclarativeFrontend(
+      [...baseSequence.map((token) => ({ ...token })), weakBoundary],
+      { phases: ["duration"] },
+    );
+
+    const aoWithBoundary = withBoundary.find((t) => t.phoneme === "AO" && t.status !== 2);
+    const aoWithoutBoundary = withoutBoundary.find((t) => t.phoneme === "AO" && t.status !== 2);
+    const uhWithBoundary = withBoundary.find((t) => t.phoneme === "UH" && t.status !== 2);
+    const uhWithoutBoundary = withoutBoundary.find((t) => t.phoneme === "UH" && t.status !== 2);
+    const tclWithBoundary = withBoundary.find((t) => t.phoneme === "T_CL" && t.status !== 2);
+    const tclWithoutBoundary = withoutBoundary.find((t) => t.phoneme === "T_CL" && t.status !== 2);
+    const ehWithBoundary = withBoundary.find((t) => t.phoneme === "EH" && t.status !== 2);
+    const ehWithoutBoundary = withoutBoundary.find((t) => t.phoneme === "EH" && t.status !== 2);
+    const lWithBoundary = withBoundary.find((t) => t.phoneme === "L" && t.status !== 2);
+    const lWithoutBoundary = withoutBoundary.find((t) => t.phoneme === "L" && t.status !== 2);
+
+    expect(aoWithBoundary?.duration).toBe(aoWithoutBoundary?.duration);
+    expect(uhWithBoundary?.duration).toBe(uhWithoutBoundary?.duration);
+    expect(tclWithBoundary?.duration).toBe(tclWithoutBoundary?.duration);
+    expect(ehWithBoundary?.duration).toBeGreaterThan(ehWithoutBoundary?.duration ?? 0);
+    expect(lWithBoundary?.duration).toBeGreaterThan(lWithoutBoundary?.duration ?? 0);
+  });
+
+  it("uses connected-speech VOT defaults for noninitial voiceless stops", () => {
+    const track = textToKlattTrack("hotel room.", 110);
+    const segments = extractSegments(track);
+
+    const rel = findSegment(segments, "T_REL", "hotel");
+    const asp = findSegment(segments, "T_ASP", "hotel");
+
+    expect(rel).toBeDefined();
+    expect(asp).toBeDefined();
+    if (!rel || !asp) return;
+
+    expect(rel.duration * 1000).toBeCloseTo(8, 0);
+    expect(asp.duration * 1000).toBeCloseTo(29, 0);
+    expect((rel.duration + asp.duration) * 1000).toBeCloseTo(37, 0);
+  });
 });
 
 describe("duration model — accent vowel lengthening", () => {

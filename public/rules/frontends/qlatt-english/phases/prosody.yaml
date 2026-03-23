@@ -1,19 +1,19 @@
-version: v2-tobi
+version: v2-pierrehumbert
 rules:
   # ==========================================================================
-  # ToBI Intonation Model
+  # Pierrehumbert-Style Intonation Model
   #
   # Replaces the O'Shaughnessy 1976 exponential-declination F0 model with a
   # Pierrehumbert 1980 / Ladd 2008 pitch-range model using:
   #   - Accent-type-specific F0 targets (H*, L*, L+H*, L*+H, H+!H*, H*+L, H+L*, H*+H)
   #   - Iterative downstep (k^n) instead of global declination
-  #   - Initial boundary %H plus phrase accents (H-, L-) and boundary tones (L%, H%)
+  #   - ToBI-compatible initial boundary %H plus phrase accents (H-, L-) and boundary tones (L%, H%)
   #   - Register reset at IP boundaries (breakIndex >= 4)
   #
   # Citations:
-  #   - Pierrehumbert 1980 (pitch accent inventory, downstep formula, boundary tones)
+  #   - Pierrehumbert 1980 (original pitch accent inventory, downstep formula, boundary tones)
   #   - Ladd 2008 (pitch range normalization, final lowering, sagging transitions)
-  #   - Silverman et al. 1992 (ToBI labeling standard)
+  #   - Silverman et al. 1992 (break-index and edge-tone notation conventions)
   # ==========================================================================
 
   # --------------------------------------------------------------------------
@@ -623,7 +623,7 @@ rules:
   #
   # These are NOT intonational — they are segmental effects caused by the
   # aerodynamic/mechanical properties of voiceless/voiced consonants.
-  # They are orthogonal to the ToBI intonation model.
+  # They are orthogonal to the Pierrehumbert-style intonation model.
   # ==========================================================================
 
   # --------------------------------------------------------------------------

@@ -709,8 +709,8 @@ phoneme_targets:
     dac: 3  # Recasens 1997
   L:
     F1: 310
-    F2: 1050
-    F3: 2600
+    F2: 1300
+    F3: 2900
     B1: 50
     B2: 100
     B3: 200

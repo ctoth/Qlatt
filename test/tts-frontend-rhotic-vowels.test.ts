@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { textToKlattTrack, type KlattFrame } from "../src/tts-frontend";
+import { textToKlattTrack, textToKlattTrackDetailed, type KlattFrame } from "../src/tts-frontend";
 
 function averageParam(frames: KlattFrame[], key: string): number {
   if (frames.length === 0) return 0;
@@ -14,6 +14,26 @@ function rhoticFrames(track: KlattFrame[], word: string): KlattFrame[] {
 
 function rhoticTailFrames(track: KlattFrame[], word: string): KlattFrame[] {
   return track.filter((frame) => frame.word === word && frame.phoneme === "R");
+}
+
+function rhoticCodaPairs(phones: Array<{ phoneme?: string; word?: string | null; durationMs?: number }>, word: string) {
+  const pairs: Array<{ erDurationMs: number; rDurationMs: number }> = [];
+  for (let i = 0; i < phones.length - 1; i += 1) {
+    const current = phones[i];
+    const next = phones[i + 1];
+    if (
+      current?.word === word &&
+      current?.phoneme === "ER" &&
+      next?.word === word &&
+      next?.phoneme === "R"
+    ) {
+      pairs.push({
+        erDurationMs: Number(current.durationMs ?? 0),
+        rDurationMs: Number(next.durationMs ?? 0),
+      });
+    }
+  }
+  return pairs;
 }
 
 describe("tts frontend rhotic vowels", () => {
@@ -93,5 +113,23 @@ describe("tts frontend rhotic vowels", () => {
     // swallowed in connected compound words.
     expect(authorshipGap).toBeGreaterThanOrEqual(300);
     expect(commerceGap).toBeGreaterThanOrEqual(300);
+  });
+
+  it("keeps coda rhotic tails shorter than the ER nucleus in repeated unstressed words", () => {
+    const result = textToKlattTrackDetailed("other brother other brother", 110);
+
+    const otherPairs = rhoticCodaPairs(result.frontendPhones, "other");
+    const brotherPairs = rhoticCodaPairs(result.frontendPhones, "brother");
+
+    expect(otherPairs.length).toBeGreaterThan(0);
+    expect(brotherPairs.length).toBeGreaterThan(0);
+
+    // Allen et al. 1987 Table C-5 treats ER as an r-colored vowel with
+    // diphthong-like timing rather than a short vowel swallowed by a longer
+    // liquid. Stevens 1998 §9.3 likewise describes liquid formant movement as
+    // transitional. The vowel nucleus should remain the majority share.
+    for (const pair of [...otherPairs, ...brotherPairs]) {
+      expect(pair.erDurationMs).toBeGreaterThan(pair.rDurationMs);
+    }
   });
 });

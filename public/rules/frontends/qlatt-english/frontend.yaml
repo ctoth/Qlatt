@@ -253,6 +253,12 @@ parameters:
         value: 0.6
         citations:
           - Standard diphthong decomposition for formant synthesis
+      rhotic_nucleus_min_share:
+        value: 0.6
+        citations:
+          - Allen et al. 1987 Table C-5 (ER behaves as an r-colored vowel with diphthong-like internal timing)
+          - Stevens 1998 §9.3 (liquid formant movement is transitional rather than a longer independent segment)
+          - Engineering estimate (keep the vocalic nucleus dominant in short coda-rhotic tokens)
       weak_release_amplitude_reduction_db:
         value: 10
         citations:

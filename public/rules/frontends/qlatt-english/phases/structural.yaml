@@ -131,8 +131,10 @@ rules:
       r_target: target("R")
       total_dur: current.duration
       target_dur_sum: er_target.duration + r_target.duration
-      er_duration: "total_dur * (er_target.duration / target_dur_sum)"
-      r_duration: "total_dur * (r_target.duration / target_dur_sum)"
+      er_share_base: "target_dur_sum > 0 ? er_target.duration / target_dur_sum : params.policy.duration.rhotic_nucleus_min_share"
+      er_share: "max([params.policy.duration.rhotic_nucleus_min_share, er_share_base])"
+      er_duration: "total_dur * er_share"
+      r_duration: "max([0, total_dur - er_duration])"
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -141,7 +143,7 @@ rules:
         - phoneme: current.phoneme
           params: er_target.params
           duration: er_duration
-          inherentDuration: er_target.inherentDuration
+          inherentDuration: er_duration
           type: er_target.type
           stress: "has(current.stress) ? current.stress : null"
           word: "has(current.word) ? current.word : null"
@@ -149,7 +151,7 @@ rules:
         - phoneme: r_target.phoneme
           params: r_target.params
           duration: r_duration
-          inherentDuration: r_target.inherentDuration
+          inherentDuration: r_duration
           type: r_target.type
           stress: "0"
           word: "has(current.word) ? current.word : null"
@@ -157,7 +159,9 @@ rules:
           voiced: "has(r_target.voiced) ? r_target.voiced : null"
     citations:
       - Allen et al. 1987 (r-colored vowels distinguished from plain vowels in the phoneme inventory)
+      - Allen et al. 1987 Table C-5 (ER uses vowel-internal timing rather than a dominant liquid tail)
       - Espy-Wilson et al. 2000 (American English /r/ requires an explicit low-F3 rhotic constriction)
+      - Stevens 1998 §9.3 (liquid formant movement is transitional; keep the rhotic tail subordinate to the nucleus)
   insert_voiceless_stop_release_and_aspiration:
     kind: structural
     select:

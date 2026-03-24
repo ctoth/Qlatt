@@ -85,10 +85,12 @@ rules:
         current.phoneme == "EY" ? "EH" : current.phoneme == "AY" ? "AA" : current.phoneme == "OW" ? "AO" :
         current.phoneme == "OY" ? "AO" : current.phoneme == "AW" ? "AE" : "SIL"
       comp2_base: >-
-        current.phoneme == "EY" ? "IH" : current.phoneme == "AY" ? "IH" : current.phoneme == "OW" ? "UH" :
-        current.phoneme == "OY" ? "IH" : current.phoneme == "AW" ? "UH" : "SIL"
+        current.phoneme == "EY" ? "Y" : current.phoneme == "AY" ? "Y" : current.phoneme == "OW" ? "W" :
+        current.phoneme == "OY" ? "Y" : current.phoneme == "AW" ? "W" : "SIL"
       comp1_key: comp1_base + stress_suffix
-      comp2_key: comp2_base + stress_suffix
+      # The offglide remains part of the same diphthong but should not
+      # surface as a second primary-stressed vowel target.
+      comp2_key: comp2_base
       comp1_target: target(comp1_key)
       comp2_target: target(comp2_key)
       total_dur: current.duration
@@ -111,7 +113,9 @@ rules:
           duration: comp2_duration
           inherentDuration: comp2_target.inherentDuration
           type: comp2_target.type
-          stress: "has(current.stress) ? current.stress : null"
+          # The offglide is part of the same lexical diphthong but should not
+          # introduce a second stressed vowel nucleus in the expanded track.
+          stress: "0"
           word: "has(current.word) ? current.word : null"
     citations:
       - Standard diphthong decomposition for formant synthesis (nucleus + offglide)

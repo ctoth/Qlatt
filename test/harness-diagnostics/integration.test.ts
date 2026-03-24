@@ -170,6 +170,7 @@ display:
         playHistory: [],
         sessionId: 1,
         sliderParams: {},
+        sampleRate: 48000,
       }),
       onResults: (results, output) => {
         receivedResults = results;
@@ -234,6 +235,7 @@ display:
           playHistory: [],
           sessionId: 0,
           sliderParams: {},
+          sampleRate: 48000,
         }),
         onResults: () => { callCount++; },
       });
@@ -317,6 +319,7 @@ display:
         playHistory: [],
         sessionId: 1,
         sliderParams: {},
+        sampleRate: 48000,
       }),
       onResults: (results) => {
         receivedResults = results;
@@ -339,6 +342,78 @@ display:
     expect(afterPlayback!.status).not.toBe("skip");
     // Should preserve the value from during-playback
     expect(afterPlayback!.status).toBe(duringPlayback!.status);
+  });
+
+  it("setParamRange feeds param_range checks", () => {
+    const ctx = mockAudioContext();
+    const runtime = mockRuntime([]);
+    const config = parseDiagConfig(`
+poll:
+  interval_ms: 20
+  guard_ms: 50
+taps: {}
+checks:
+  f0_range:
+    type: param_range
+    param: F0
+    assert: { range_min: 80 }
+    severity: error
+    message: "F0 range too narrow"
+display:
+  sections:
+    - { id: checks, source: check_results }
+`);
+    const tapManager = new TapManager({
+      audioContext: ctx,
+      runtime,
+      taps: config.taps,
+    });
+    const acrossPlays = new AcrossPlaysAccumulator();
+    let receivedResults: Map<string, any> = new Map();
+    const track: TrackEvent[] = [
+      { time: 0, phoneme: "AH", params: { F0: 110, AV: 60 } },
+      { time: 0.5, phoneme: "AH", params: { F0: 178, AV: 60 } },
+    ];
+
+    const pollLoop = new PollLoop({
+      config,
+      tapManager,
+      acrossPlays,
+      getRunInfo: () => ({
+        phrase: "test",
+        baseF0: 110,
+        track,
+        sessionId: 1,
+        startTime: 0,
+      }),
+      getRunStartTime: () => 0,
+      getAudioTime: () => 0.25,
+      getSampleRate: () => 48000,
+      getDisplayState: () => ({
+        run: { phrase: "test", baseF0: 110, track, sessionId: 1, startTime: 0 },
+        checkResults: new Map(),
+        telemetry: new Map(),
+        telemetryMax: new Map(),
+        meterValues: new Map(),
+        meterMax: new Map(),
+        plstepEvents: [],
+        plstepTotalCount: 0,
+        playHistory: [],
+        sessionId: 0,
+        sliderParams: {},
+      }),
+      onResults: (results) => {
+        receivedResults = results;
+      },
+    });
+
+    pollLoop.setParamRange("f0_range", { min: 110, max: 200 });
+    pollLoop.tick();
+
+    const result = receivedResults.get("f0_range");
+    expect(result).toBeDefined();
+    expect(result.status).toBe("pass");
+    expect(result.value).toBe(90);
   });
 });
 
@@ -392,6 +467,62 @@ display:
     // Engine should not throw after destroy
     const results = engine.getCheckResults();
     expect(results).toBeDefined();
+  });
+
+  it("uses the current run session id in display state", () => {
+    vi.useFakeTimers();
+    let engine: ReturnType<typeof createDiagnosticsEngine> | null = null;
+    try {
+      const ctx = mockAudioContext();
+      const runtime = mockRuntime([]);
+      const config = parseDiagConfig(`
+poll:
+  interval_ms: 20
+  guard_ms: 50
+taps: {}
+checks:
+  f0_range:
+    type: param_range
+    param: F0
+    assert: { range_min: 10 }
+    severity: info
+    message: "F0 dynamic range narrow"
+display:
+  sections:
+    - { id: session, source: session_info }
+`);
+      let output = "";
+      engine = createDiagnosticsEngine(config, ctx, runtime, {
+        telemetry: new Map(),
+        telemetryMax: new Map(),
+        plstepEvents: [],
+        plstepTotalCount: 0,
+        playHistory: [],
+        sessionId: 0,
+        sliderParams: {},
+        sampleRate: 48000,
+      });
+      engine.subscribe((nextOutput) => {
+        output = nextOutput;
+      });
+      engine.onPlayStart({
+        phrase: "hello world",
+        baseF0: 110,
+        track: [
+          { time: 0, phoneme: "AH", params: { F0: 110, AV: 60 } },
+          { time: 0.5, phoneme: "AH", params: { F0: 130, AV: 60 } },
+        ],
+        sessionId: 7,
+        startTime: 0,
+      });
+      engine.start();
+      vi.advanceTimersByTime(25);
+      engine.stop();
+      expect(output).toContain("Session #7");
+    } finally {
+      vi.useRealTimers();
+      engine?.destroy();
+    }
   });
 });
 

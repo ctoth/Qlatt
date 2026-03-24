@@ -11,7 +11,7 @@ taps:
     node: outputSum
     fftSize: 2048
   post-output:
-    node: [outputLp, masterGain, outputGain]
+    node: outputGain
     fftSize: 2048
   cascade-f2:
     node: cascadeF2
@@ -117,10 +117,10 @@ checks:
   formant_amps_present:
     type: track_analysis
     select: { SW: 1, AF: { min: 1 } }
-    assert_any_of: [A2, A3, A4, A5, A6]
+    assert_any_of: [AB, A2, A3, A4, A5, A6, A7, A8, A9, A10]
     assert: { min: 1 }
     severity: warn
-    message: "SW=1 frame with AF but no formant amplitudes (A2-A6)"
+    message: "SW=1 frame with AF but no parallel spectral amplitudes (AB/A2-A10)"
 
   release_has_af:
     type: track_analysis

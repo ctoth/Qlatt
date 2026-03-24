@@ -235,6 +235,8 @@ describe("evaluateCheck", () => {
     state.paramRange = { min: 100, max: 200 }; // range = 100 >= 80
     const result = evaluateCheck("f0_range", def, new Map(), snap, state, 0);
     expect(result.status).toBe("pass");
+    expect(result.value).toBe(100);
+    expect(result.valueLabel).toBe("range");
   });
 
   it("param_range: range < range_min → fail", () => {
@@ -250,6 +252,42 @@ describe("evaluateCheck", () => {
     state.paramRange = { min: 100, max: 120 }; // range = 20 < 80
     const result = evaluateCheck("f0_range", def, new Map(), snap, state, 0);
     expect(result.status).toBe("fail");
+    expect(result.value).toBe(20);
+    expect(result.valueLabel).toBe("range");
+  });
+
+  it("param_range: info failure preserves assertionFailed", () => {
+    const def: CheckDef = {
+      type: "param_range",
+      param: "F0",
+      assert: { range_min: 80 },
+      severity: "info",
+      message: "F0 range too narrow",
+    };
+    const snap = makeSnapshot();
+    const state = createCheckState();
+    state.paramRange = { min: 100, max: 120 };
+    const result = evaluateCheck("f0_range", def, new Map(), snap, state, 0);
+    expect(result.status).toBe("pass");
+    expect(result.assertionFailed).toBe(true);
+    expect(result.valueLabel).toBe("range");
+  });
+
+  it("param_range: max_min reports max instead of range", () => {
+    const def: CheckDef = {
+      type: "param_range",
+      param: "F2",
+      assert: { max_min: 2400 },
+      severity: "warn",
+      message: "F2 never reaches 2400 Hz",
+    };
+    const snap = makeSnapshot();
+    const state = createCheckState();
+    state.paramRange = { min: 610, max: 2322 };
+    const result = evaluateCheck("f2_ceiling", def, new Map(), snap, state, 0);
+    expect(result.status).toBe("warn");
+    expect(result.value).toBe(2322);
+    expect(result.valueLabel).toBe("max");
   });
 
   // 20. rms_ratio_db with two taps
@@ -287,6 +325,20 @@ describe("updateParamRange", () => {
     expect(state.paramRange).not.toBeNull();
     expect(state.paramRange!.min).toBe(80);
     expect(state.paramRange!.max).toBe(200);
+  });
+
+  it("ignores F0=0 when accumulating F0 range", () => {
+    const state = createCheckState();
+    const track: TrackEvent[] = [
+      { time: 0, params: { F0: 0 } },
+      { time: 0.1, params: { F0: 110 } },
+      { time: 0.2, params: { F0: 180 } },
+      { time: 0.3, params: { F0: 0 } },
+    ];
+    updateParamRange(state, "F0", track);
+    expect(state.paramRange).not.toBeNull();
+    expect(state.paramRange!.min).toBe(110);
+    expect(state.paramRange!.max).toBe(180);
   });
 
   it("handles empty track", () => {
@@ -390,6 +442,22 @@ describe("evaluateTrackAnalysis", () => {
     };
     const track: TrackEvent[] = [
       { time: 0.1, phoneme: "S", params: { SW: 1, A2: 0, A3: 53 } }, // A3 passes
+    ];
+    const result = evaluateTrackAnalysis("test_check", def, track);
+    expect(result.status).toBe("pass");
+  });
+
+  it("assert_any_of: passes when bypass-only fricative has AB", () => {
+    const def: TrackAnalysisCheckDef = {
+      type: "track_analysis",
+      select: { SW: 1, AF: { min: 1 } },
+      assert_any_of: ["AB", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"],
+      assert: { min: 1 },
+      severity: "warn",
+      message: "No parallel spectral amplitudes",
+    };
+    const track: TrackEvent[] = [
+      { time: 0.1, phoneme: "F", params: { SW: 1, AF: 42, AB: 57, A2: 0, A3: 0, A4: 0, A5: 0, A6: 0 } },
     ];
     const result = evaluateTrackAnalysis("test_check", def, track);
     expect(result.status).toBe("pass");
@@ -502,8 +570,9 @@ describe("evaluateTrackAnalysis", () => {
       { time: 0.2, phoneme: "T_REL", params: { AH: 53 } }, // fails max:0
     ];
     const result = evaluateTrackAnalysis("test_check", def, track);
-    // severity=info → status=pass (info severity maps to pass)
+    // severity=info keeps pass status, but the assertion failure is still marked.
     expect(result.status).toBe("pass");
+    expect(result.assertionFailed).toBe(true);
     expect(result.collected).toHaveLength(1);
     expect(result.collected![0].value).toBe(53);
   });

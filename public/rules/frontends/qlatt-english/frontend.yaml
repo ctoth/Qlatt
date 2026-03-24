@@ -6,6 +6,7 @@ speaker_profile_path: /rules/policy/speaker-profile.yaml
 source_contour_path: /rules/policy/source-contour.yaml
 include:
   - pipeline.yaml
+  - phases/orthography.yaml
   - phases/normalize.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml
@@ -883,6 +884,90 @@ output:
   initial_silence_ms: 30
   final_silence_ms: 100
 transcription:
+  # Standard English letter-name pronunciations for declarative spelling mode.
+  # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
+  letter_names:
+    LETTER_A:
+      - EY1
+    LETTER_B:
+      - B
+      - IY1
+    LETTER_C:
+      - S
+      - IY1
+    LETTER_D:
+      - D
+      - IY1
+    LETTER_E:
+      - IY1
+    LETTER_F:
+      - EH1
+      - F
+    LETTER_G:
+      - JH
+      - IY1
+    LETTER_H:
+      - EY1
+      - CH
+    LETTER_I:
+      - AY1
+    LETTER_J:
+      - JH
+      - EY1
+    LETTER_K:
+      - K
+      - EY1
+    LETTER_L:
+      - EH1
+      - L
+    LETTER_M:
+      - EH1
+      - M
+    LETTER_N:
+      - EH1
+      - N
+    LETTER_O:
+      - OW1
+    LETTER_P:
+      - P
+      - IY1
+    LETTER_Q:
+      - K
+      - Y
+      - UW1
+    LETTER_R:
+      - AA1
+      - R
+    LETTER_S:
+      - EH1
+      - S
+    LETTER_T:
+      - T
+      - IY1
+    LETTER_U:
+      - Y
+      - UW1
+    LETTER_V:
+      - V
+      - IY1
+    LETTER_W:
+      - D
+      - AH1
+      - B
+      - AH0
+      - L
+      - Y
+      - UW0
+    LETTER_X:
+      - EH1
+      - K
+      - S
+    LETTER_Y:
+      - W
+      - AY1
+    LETTER_Z:
+      - Z
+      - IY1
   diagnostic_symbols:
     b:
       - B

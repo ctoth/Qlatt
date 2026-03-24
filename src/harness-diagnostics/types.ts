@@ -151,6 +151,10 @@ export interface CheckResult {
   severity: Severity;
   message: string;
   value?: number;
+  /** Human-readable label for value when it is not a generic scalar. */
+  valueLabel?: string;
+  /** True when the assertion failed but severity is informational. */
+  assertionFailed?: boolean;
   /** Collected events (when collect: true). */
   collected?: CollectedEvent[];
 }

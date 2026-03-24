@@ -53,7 +53,14 @@ rules:
       - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
-  # Rule 2: H* accent targets with downstep and final lowering
+  # Rule 2: H* accent targets with downstep
+  # Interpretation note:
+  # - Ladd 2008 and Pierrehumbert 1980 treat final lowering as a separate
+  #   phrase-final effect, not as a requirement that the nuclear H* peak itself
+  #   be directly scaled below an earlier prenuclear H* peak.
+  # - We therefore keep prenuclear downstep on non-nuclear accents, but leave
+  #   the nuclear H* peak at its accent height and let the following phrase
+  #   accent / boundary movement carry the final fall.
   # --------------------------------------------------------------------------
   tobi_accent_h_star:
     kind: point
@@ -68,11 +75,9 @@ rules:
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
-        pow(params.policy.f0.downstep_k, accent_idx)
-      final_lower: >-
-        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? params.policy.f0.final_lowering_factor : 1.0
+        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
       raw_height: >-
-        params.policy.f0.h_star_height * downstep_factor * final_lower
+        params.policy.f0.h_star_height * downstep_factor
       clamped_height: >-
         max([raw_height, params.policy.f0.downstep_floor_fraction])
       target_hz: >-
@@ -89,6 +94,8 @@ rules:
 
   # --------------------------------------------------------------------------
   # Rule 3: H* peak for H*+L falling accents
+  # Same interpretation as Rule 2: the fall is expressed by the trailing L,
+  # not by suppressing the H* peak itself.
   # --------------------------------------------------------------------------
   tobi_accent_h_star_plus_l_peak:
     kind: point
@@ -103,11 +110,9 @@ rules:
     define:
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
-        pow(params.policy.f0.downstep_k, accent_idx)
-      final_lower: >-
-        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? params.policy.f0.final_lowering_factor : 1.0
+        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
       raw_height: >-
-        params.policy.f0.h_star_height * downstep_factor * final_lower
+        params.policy.f0.h_star_height * downstep_factor
       clamped_height: >-
         max([raw_height, params.policy.f0.downstep_floor_fraction])
       target_hz: >-

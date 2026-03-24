@@ -7,7 +7,6 @@ import { TapManager } from "./tap-manager";
 import { PollLoop } from "./poll-loop";
 import { AcrossPlaysAccumulator } from "./across-plays";
 import { updateParamRange, evaluateTrackAnalysis } from "./check-evaluator";
-import { createCheckState } from "./check-evaluator";
 import type { TrackAnalysisCheckDef } from "./types";
 
 /** External state provider — lets the harness pass live references into the engine. */
@@ -67,8 +66,9 @@ export function createDiagnosticsEngine(
       plstepEvents: externalState?.plstepEvents ?? [],
       plstepTotalCount: externalState?.plstepTotalCount ?? 0,
       playHistory: externalState?.playHistory ?? [],
-      sessionId: externalState?.sessionId ?? currentRun?.sessionId ?? 0,
+      sessionId: currentRun?.sessionId ?? externalState?.sessionId ?? 0,
       sliderParams: externalState?.sliderParams ?? {},
+      sampleRate: audioContext.sampleRate,
     }),
     onResults: (results, output) => {
       currentResults = results;
@@ -101,9 +101,9 @@ export function createDiagnosticsEngine(
       // Update param_range accumulators from the track
       for (const [checkName, checkDef] of Object.entries(config.checks)) {
         if (checkDef.type === "param_range" && checkDef.param) {
-          // Create a fresh check state for param_range and populate it
-          const state = createCheckState();
+          const state = { collected: [], lastCollectedAt: -Infinity, paramRange: null, maxPeak: 0 };
           updateParamRange(state, checkDef.param, run.track);
+          pollLoop.setParamRange(checkName, state.paramRange);
         }
       }
 

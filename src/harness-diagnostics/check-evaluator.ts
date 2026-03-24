@@ -133,19 +133,31 @@ function evaluateParamRange(
   }
 
   const range = state.paramRange.max - state.paramRange.min;
-  let failed = false;
+  const failedRange = def.assert.range_min !== undefined && range < def.assert.range_min;
+  const failedMax = def.assert.max_min !== undefined && state.paramRange.max < def.assert.max_min;
+  const failed = failedRange || failedMax;
 
-  if (def.assert.range_min !== undefined && range < def.assert.range_min) {
-    failed = true;
-  }
-  if (def.assert.max_min !== undefined && state.paramRange.max < def.assert.max_min) {
-    failed = true;
+  let value = range;
+  let valueLabel = "range";
+
+  if (def.assert.max_min !== undefined && def.assert.range_min === undefined) {
+    value = state.paramRange.max;
+    valueLabel = "max";
+  } else if (failedMax && !failedRange) {
+    value = state.paramRange.max;
+    valueLabel = "max";
   }
 
   if (failed) {
-    return { ...base, status: severityToStatus(def.severity), value: range };
+    return {
+      ...base,
+      status: severityToStatus(def.severity),
+      value,
+      valueLabel,
+      assertionFailed: true,
+    };
   }
-  return { ...base, status: "pass", value: range };
+  return { ...base, status: "pass", value, valueLabel };
 }
 
 function evaluateTapCheck(
@@ -209,6 +221,7 @@ function evaluateTapCheck(
       ...base,
       status,
       value,
+      assertionFailed: true,
       collected: def.collect ? state.collected : undefined,
     };
   }
@@ -347,6 +360,7 @@ export function evaluateTrackAnalysis(
     ...base,
     status,
     value: worstValue,
+    assertionFailed: true,
     collected: failures.slice(0, 6),
     message: `${def.message} (${failures.length}/${matching.length} frames)`,
   };
@@ -371,6 +385,7 @@ export function updateParamRange(
   for (const event of track) {
     const val = event.params?.[paramName];
     if (typeof val !== "number") continue;
+    if (paramName === "F0" && val <= 0) continue;
 
     if (state.paramRange === null) {
       state.paramRange = { min: val, max: val };

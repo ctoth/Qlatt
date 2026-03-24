@@ -26,6 +26,7 @@ export interface TranscriptionToken {
 /** YAML-sourced transcription configuration. */
 export type TranscriptionConfig = {
   diagnostic_symbols?: Record<string, string[]>;
+  letter_names?: Record<string, string[]>;
   punctuation_tokens?: string[];
 };
 
@@ -39,6 +40,8 @@ export type TranscriptionOptions = {
   morphologyPath?: string;
   /** Override the default CMU dictionary lookup function. */
   dictLookup?: (word: string) => string[] | null;
+  /** Declarative frontend spec used for pre-phonological orthography rewriting. */
+  specSource?: unknown;
 };
 
 export interface ControlScoreAnchors {

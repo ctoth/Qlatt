@@ -337,14 +337,14 @@ params:
 
   # Output gain parameters
   masterGain:
-    description: "Master output gain — boosted to lift parallel-branch fricatives above the perceptual floor; the output DynamicsCompressorNode tames the resulting cascade peaks (see graph.yaml outputCompressor)"
+    description: "Master output gain — moderate boost to keep parallel-branch fricatives audible without overdriving the final runtime output; the output DynamicsCompressorNode still tames residual cascade peaks (see graph.yaml outputCompressor)"
     type: float
-    default: 10.0
+    default: 4.5 # engineering estimate: chosen to keep offline-rendered final output near full scale without obvious overload
 
   outputGain:
-    description: "Final output gain"
+    description: "Final output gain trim after compression/output shaping"
     type: float
-    default: 1.0
+    default: 0.5 # engineering estimate: keeps offline-rendered final output below full scale while preserving internal branch balance
 
 # Constants - values that don't change
 constants:

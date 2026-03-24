@@ -258,6 +258,7 @@ function buildTextToKlattTrackDetailed(
     ltsPath,
     morphologyPath,
     dictLookup: (frontendSpec as Record<string, unknown>).skip_dictionary ? noOpDictLookup : undefined,
+    specSource: frontendSpec,
   });
 
   // --- Prepare Parameter Sequence (Map phonemes to targets, fill params) ---

@@ -9,6 +9,7 @@ import { resolveTimingSnapshot } from "./timing-context";
 import { evaluateCheck, createCheckState, type CheckState } from "./check-evaluator";
 import { readRms, readPeak, readFftPeakFreq, readBandEnergy } from "./measurement";
 import { formatDisplay } from "./display-formatter";
+import type { ParamRangeAccum } from "./types";
 
 export interface PollLoopOptions {
   config: DiagConfig;
@@ -70,6 +71,12 @@ export class PollLoop {
   /** Set static track_analysis results (computed once in onPlayStart). */
   setTrackAnalysisResults(results: Map<string, CheckResult>): void {
     this.trackAnalysisResults = results;
+  }
+
+  setParamRange(checkName: string, paramRange: ParamRangeAccum | null): void {
+    const state = this.checkStates.get(checkName);
+    if (!state) return;
+    state.paramRange = paramRange ? { ...paramRange } : null;
   }
 
   /** Reset per-play check state. */

@@ -3,6 +3,12 @@ predicates:
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
 streams:
+  orthography:
+    type: base
+    features:
+      tokenType:
+        - word
+        - punctuation
   phone:
     type: base
     features:
@@ -29,6 +35,9 @@ streams:
     value_type: number
     unit: Hz
 phases:
+  - name: orthography
+    rules:
+      - spelling_mode_letter_names
   - name: normalize
     rules:
       - normalize_schwa

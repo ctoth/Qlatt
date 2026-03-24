@@ -153,13 +153,14 @@ describe("declarative frontend rulepack prosody phase", () => {
     const points = out.filter((t) => t.stream === "f0");
     const hStar = points.find((p) => p.tag === "f0_h_star");
     expect(hStar).toBeTruthy();
-    // accentIndex=0, nuclear: 110 + 80 * max(0.85 * 0.6^0 * 0.85, 0.25) = 110 + 80 * 0.7225 = 167.8
-    expect(hStar!.value).toBeCloseTo(167.8, 0);
+    // Nuclear H* peak is no longer directly final-lowered; lowering is carried by
+    // the trailing phrase accent / boundary movement instead of suppressing the peak itself.
+    expect(hStar!.value).toBeCloseTo(178, 0);
   });
 
   // --- Downstep sequence ---
 
-  it("applies downstep: second H* is lower than first", () => {
+  it("keeps nuclear H* from being downstepped below the prenuclear peak", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);
     const s2 = finiteOrder(2);
@@ -237,8 +238,9 @@ describe("declarative frontend rulepack prosody phase", () => {
     expect(hStars.length).toBe(2);
     // First H*: 110 + 80 * 0.85 = 178 (prenuclear, no final lowering)
     expect(hStars[0].value).toBeCloseTo(178, 0);
-    // Second H* (nuclear, index=1): 110 + 80 * max(0.85 * 0.6 * 0.85, 0.25) = 110 + 80 * 0.4335 = 144.68
-    expect(Number(hStars[1].value)).toBeLessThan(Number(hStars[0].value));
+    // Nuclear H* is exempt from direct downstep/final-lowering at the peak itself.
+    expect(hStars[1].value).toBeCloseTo(178, 0);
+    expect(Number(hStars[1].value)).toBeGreaterThanOrEqual(Number(hStars[0].value));
   });
 
   // --- L* accent target ---

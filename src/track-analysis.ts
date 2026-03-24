@@ -64,7 +64,11 @@ export function analyzeStopReleases(track: TrackEvent[], plstepEvents: any[] = [
     const p = event.params || {};
 
     const plstepMatch = plstepEvents.find(pl => {
-      const plTime = Number.isFinite(pl.relTime) ? pl.relTime : (pl.time - runStartTime);
+      const plTime = Number.isFinite(pl.scheduledRelTime)
+        ? pl.scheduledRelTime
+        : Number.isFinite(pl.relTime)
+          ? pl.relTime
+          : (pl.time - runStartTime);
       return Math.abs(plTime - event.time) < 0.02;
     });
 
@@ -288,8 +292,9 @@ export function formatPlstepEventsRelative(list: any[] | null | undefined, runSt
   if (!list || list.length === 0) return ["(none)"];
   return list.map((evt) => {
     let relTime = "n/a";
-    if (Number.isFinite(evt.time) && Number.isFinite(runStart)) relTime = (evt.time - runStart).toFixed(3);
+    if (Number.isFinite(evt.scheduledRelTime)) relTime = evt.scheduledRelTime.toFixed(3);
     else if (Number.isFinite(evt.relTime)) relTime = evt.relTime.toFixed(3);
+    else if (Number.isFinite(evt.time) && Number.isFinite(runStart)) relTime = (evt.time - runStart).toFixed(3);
     const amp = Number.isFinite(evt.amplitudeLinear) ? evt.amplitudeLinear.toFixed(4) : "n/a";
     const db = Number.isFinite(evt.amplitudeDb) ? evt.amplitudeDb.toFixed(0) : "n/a";
     return `burst t=${relTime}s amp=${amp} (${db}dB) trigger=${evt.trigger || "?"}${Number.isFinite(evt.delta) ? `+${evt.delta.toFixed(0)}dB` : ""}${evt.phoneme ? ` [${evt.phoneme}]` : ""}`;

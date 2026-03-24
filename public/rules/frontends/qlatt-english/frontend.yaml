@@ -474,6 +474,12 @@ parameters:
         value: 0.4
         citations:
           - Allen et al. 1987 Ch.9
+      vowel_reduction_rate_high_front:
+        value: 0.15
+        citations:
+          - Stevens 1998 Ch.10 (reduced vowels are context-dependent rather than uniformly central)
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (reduced vowels may remain [I]-like rather than schwa-like)
+          - "Engineering estimate: retain more front-vowel identity for unstressed IY/IH than the generic schwa-pull"
       palatal_f2_locus:
         value: 2600
         citations:

@@ -882,7 +882,8 @@ describe("declarative frontend rulepack context migration", () => {
   // --- Vowel reduction ---
 
   it("centralizes formants of unstressed vowels toward schwa", () => {
-    // IY0: F1=330, F2=1950 -- should move toward schwa (500, 1500)
+    // Unstressed high-front vowels reduce less aggressively than generic schwa:
+    // they retain front quality instead of collapsing all the way toward 1500 Hz.
     const sequence = [
       {
         phoneme: "IY",
@@ -897,10 +898,10 @@ describe("declarative frontend rulepack context migration", () => {
     ];
 
     const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
-    // F1: 330 + (500 - 330) * 0.4 = 330 + 68 = 398
-    expect(out[0].params.F1).toBeCloseTo(398, 0);
-    // F2: 1950 + (1500 - 1950) * 0.4 = 1950 - 180 = 1770
-    expect(out[0].params.F2).toBeCloseTo(1770, 0);
+    // F1: 330 + (500 - 330) * 0.15 = 355.5
+    expect(out[0].params.F1).toBeCloseTo(355.5, 0);
+    // F2: 1950 + (1500 - 1950) * 0.15 = 1882.5
+    expect(out[0].params.F2).toBeCloseTo(1882.5, 0);
   });
 
   it("does not reduce formants of stressed vowels", () => {

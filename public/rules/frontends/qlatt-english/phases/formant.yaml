@@ -507,21 +507,29 @@ rules:
       where: >-
         current.type == 'vowel' && has(current.params) && has(current.?params.F1) && (has(current.stress) ?
         current.stress == 0 : false)
+    define:
+      reduction_rate: >-
+        (current.phoneme in ['IY', 'IY0', 'IY1'] ||
+        ((has(current.front) ? current.front == true : false) && (has(current.hi) ? current.hi == true : false))) ?
+        params.policy.formant.vowel_reduction_rate_high_front :
+        params.policy.formant.vowel_reduction_rate
     apply:
       - field: params.F1
         op: set
         value: >-
           current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
-          params.policy.formant.vowel_reduction_rate
+          reduction_rate
       - field: params.F2
         op: set
         value: >-
           current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
-          params.policy.formant.vowel_reduction_rate
+          reduction_rate
     citations:
       - Allen et al. 1987
       - Klatt 1976
       - Peterson & Barney 1952 (schwa formants)
+      - Stevens 1998 (reduced vowels depend strongly on segmental context)
+      - Miller 1998 (reduced vowels can remain [I]-like instead of fully schwa-like)
   vowel_rate_undershoot:
     kind: scalar
     select:

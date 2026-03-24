@@ -1,13 +1,31 @@
 version: v1
 
-# Canonical long-phrase breaking policy for the current English frontend.
-# Citation:
+# Canonical break policy for the current English frontend.
+# Citations:
 # - O'Shaughnessy 1976
+# - Silverman et al. 1992 (ToBI break index tier)
 citations:
   - O'Shaughnessy 1976
+  - Silverman et al. 1992
 
 long_phrase_breaking:
   enabled: true
   minimum_content_words: 7
   break_index: 2
   placement: pre_midpoint_content_word_end
+
+# Punctuation-to-break-index mapping.
+# Citation: Silverman et al. 1992 (ToBI break index tier)
+punctuation_break_indices:
+  citations:
+    - Silverman et al. 1992
+  terminal:
+    symbols: [".", "?", "!"]
+    break_index: 4
+  clause:
+    symbols: [",", ";", ":"]
+    break_index: 3
+  word_boundary:
+    break_index: 1
+  default:
+    break_index: 0

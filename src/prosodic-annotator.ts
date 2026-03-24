@@ -29,6 +29,7 @@ import {
   DEFAULT_BREAK_POLICY_PATH,
   loadBreakPolicySync,
   resolveLongPhraseBreak,
+  resolvePunctuationBreakIndex,
   type BreakPolicy,
   type LongPhraseBreakDecision,
 } from "./break-policy";
@@ -57,13 +58,6 @@ interface Phrase {
   /** The punctuation symbol at the phrase boundary, or null. */
   punctuation: string | null;
 }
-
-// ---------------------------------------------------------------------------
-// Terminal and clause punctuation sets
-// ---------------------------------------------------------------------------
-
-const TERMINAL_PUNCTUATION = new Set([".", "?", "!"]);
-const CLAUSE_PUNCTUATION = new Set([",", ";", ":"]);
 
 function isSuppressedToken(token: PipelineToken | null | undefined): boolean {
   return token?.status === 2;
@@ -153,7 +147,7 @@ export function annotateProsody(
   }
 
   // Step 8: Assign break indices.
-  assignBreakIndices(result, phrases);
+  assignBreakIndices(result, phrases, breakPolicy);
 
   // Step 9: Assign accentIndexInPhrase. This depends on break indices because
   // downstep resets only at IP boundaries (breakIndex=4), not at ip boundaries
@@ -423,7 +417,7 @@ function assignAccentIndices(tokens: PipelineToken[]): void {
  *
  * Citation: Silverman et al. 1992 (ToBI break index tier)
  */
-function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
+function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[], breakPolicy: BreakPolicy): void {
   // Default all to 0.
   for (const token of tokens) {
     if (token.breakIndex == null) {
@@ -435,14 +429,14 @@ function assignBreakIndices(tokens: PipelineToken[], phrases: Phrase[]): void {
   }
 
   // Assign break indices on SIL tokens at phrase boundaries.
+  // Resolved from punctuation_break_indices in break-policy.yaml.
+  // Citation: Silverman et al. 1992 (ToBI break index tier)
   for (const phrase of phrases) {
     if (phrase.trailingSilIndex >= 0) {
       const silToken = tokens[phrase.trailingSilIndex];
-      const punct = phrase.punctuation;
-      if (punct && TERMINAL_PUNCTUATION.has(punct)) {
-        silToken.breakIndex = 4;
-      } else if (punct && CLAUSE_PUNCTUATION.has(punct)) {
-        silToken.breakIndex = 3;
+      const resolvedIndex = resolvePunctuationBreakIndex(breakPolicy, phrase.punctuation);
+      if (resolvedIndex > 0) {
+        silToken.breakIndex = resolvedIndex;
       }
     }
   }

@@ -9,10 +9,24 @@ export interface LongPhraseBreakingPolicy {
   placement: "pre_midpoint_content_word_end";
 }
 
+export interface PunctuationBreakCategory {
+  symbols?: string[];
+  break_index: number;
+}
+
+export interface PunctuationBreakIndices {
+  citations: string[];
+  terminal: PunctuationBreakCategory;
+  clause: PunctuationBreakCategory;
+  word_boundary: PunctuationBreakCategory;
+  default: PunctuationBreakCategory;
+}
+
 export interface BreakPolicy {
   version: string;
   citations: string[];
   long_phrase_breaking: LongPhraseBreakingPolicy;
+  punctuation_break_indices: PunctuationBreakIndices;
 }
 
 export interface LongPhraseBreakDecision {
@@ -68,6 +82,29 @@ function parseBreakPolicyDocument(value: unknown): BreakPolicy {
     throw new Error(`E_BREAK_POLICY_SCHEMA: unsupported placement '${placement}'`);
   }
 
+  // Parse punctuation_break_indices section
+  if (!isPlainObject(value.punctuation_break_indices)) {
+    throw new Error("E_BREAK_POLICY_SCHEMA: 'punctuation_break_indices' must be an object");
+  }
+  const pbi = value.punctuation_break_indices;
+
+  function parsePunctuationCategory(
+    obj: unknown,
+    label: string,
+    requireSymbols: boolean,
+  ): PunctuationBreakCategory {
+    if (!isPlainObject(obj)) {
+      throw new Error(`E_BREAK_POLICY_SCHEMA: '${label}' must be an object`);
+    }
+    const result: PunctuationBreakCategory = {
+      break_index: expectFiniteNumber(obj.break_index, `${label}.break_index`),
+    };
+    if (requireSymbols) {
+      result.symbols = expectStringArray(obj.symbols, `${label}.symbols`);
+    }
+    return result;
+  }
+
   return {
     version: expectNonEmptyString(value.version, "version"),
     citations: expectStringArray(value.citations ?? [], "citations"),
@@ -83,6 +120,13 @@ function parseBreakPolicyDocument(value: unknown): BreakPolicy {
       ),
       placement: "pre_midpoint_content_word_end",
     },
+    punctuation_break_indices: {
+      citations: expectStringArray(pbi.citations ?? [], "punctuation_break_indices.citations"),
+      terminal: parsePunctuationCategory(pbi.terminal, "punctuation_break_indices.terminal", true),
+      clause: parsePunctuationCategory(pbi.clause, "punctuation_break_indices.clause", true),
+      word_boundary: parsePunctuationCategory(pbi.word_boundary, "punctuation_break_indices.word_boundary", false),
+      default: parsePunctuationCategory(pbi.default, "punctuation_break_indices.default", false),
+    },
   };
 }
 
@@ -96,6 +140,34 @@ export function loadBreakPolicySync(specPath: string = DEFAULT_BREAK_POLICY_PATH
     breakPolicyCache = policy;
   }
   return policy;
+}
+
+/**
+ * Resolve a punctuation symbol to its ToBI break index.
+ *
+ * Looks through the terminal and clause categories for a symbol match,
+ * then falls back to the default break index (0).
+ *
+ * Citation: Silverman et al. 1992 (ToBI break index tier)
+ */
+export function resolvePunctuationBreakIndex(
+  policy: BreakPolicy,
+  punctuationSymbol: string | null | undefined,
+): number {
+  if (punctuationSymbol == null) {
+    return policy.punctuation_break_indices.default.break_index;
+  }
+
+  const pbi = policy.punctuation_break_indices;
+
+  if (pbi.terminal.symbols?.includes(punctuationSymbol)) {
+    return pbi.terminal.break_index;
+  }
+  if (pbi.clause.symbols?.includes(punctuationSymbol)) {
+    return pbi.clause.break_index;
+  }
+
+  return pbi.default.break_index;
 }
 
 export function resolveLongPhraseBreak(

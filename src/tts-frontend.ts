@@ -564,6 +564,7 @@ function buildTextToKlattTrackDetailed(
   // Extracts numeric values from the frontend spec's speaker policy entries
   // (which may be plain numbers or { value: N, citations: [...] } objects).
   // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent F0 parameters)
+  const frontendSpeakerPolicy = (frontendSpec as any)?.parameters?.policy?.speaker;
   let speakerParams: Record<string, unknown> | undefined;
   if (f0Model) {
     if (frontendSpeakerPolicy && typeof frontendSpeakerPolicy === "object") {

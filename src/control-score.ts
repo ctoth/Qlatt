@@ -167,7 +167,9 @@ export function buildDeclarativeControlScore(
   parameterSequence: Array<Record<string, unknown>>,
 ): DeclarativeControlScore {
   const activePhoneTokens = parameterSequence.filter(
-    (token) => token?.stream !== "f0" && token?.status !== 2,
+    (token) =>
+      (token?.stream === "phone" || token?.stream == null) &&
+      token?.status !== 2,
   );
   const f0Events = parameterSequence
     .filter((token) => token?.stream === "f0" && token?.status !== 2)

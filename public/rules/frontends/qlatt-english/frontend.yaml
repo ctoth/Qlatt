@@ -166,10 +166,14 @@ parameters:
         citations:
           - White 2014 (accent distributes across word, small effect on unstressed)
           - "Engineering estimate"
-      incompressibility_ratio:
+      incompressibility_ratio_vowel:
         value: 0.42
         citations:
           - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
+      incompressibility_ratio_consonant:
+        value: 0.6
+        citations:
+          - "Engineering estimate: consonants have higher incompressibility floor than vowels"
       # Duration cap — prevents pathological stacking of multiple lengthening rules
       max_duration_ratio:
         value: 2.0

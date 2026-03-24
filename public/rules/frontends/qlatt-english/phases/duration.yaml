@@ -417,8 +417,12 @@ rules:
       - field: duration
         op: set
         value: >-
-          current.duration < current.inherentDuration * params.policy.duration.incompressibility_ratio
-          ? current.inherentDuration * params.policy.duration.incompressibility_ratio
+          current.duration < current.inherentDuration * (current.type == 'vowel'
+          ? params.policy.duration.incompressibility_ratio_vowel
+          : params.policy.duration.incompressibility_ratio_consonant)
+          ? current.inherentDuration * (current.type == 'vowel'
+          ? params.policy.duration.incompressibility_ratio_vowel
+          : params.policy.duration.incompressibility_ratio_consonant)
           : current.duration
         tag: incompressibility
     citations:

@@ -124,10 +124,43 @@ function cloneSequence(sequence: TokenLike[]): TokenLike[] {
   }));
 }
 
-function getIncompressibleMin(token: TokenLike | null | undefined, inherent: unknown): number {
+export function getIncompressibleMin(
+  token: TokenLike | null | undefined,
+  inherent: unknown,
+  params?: Record<string, unknown> | null,
+): number {
   const inherentMs = Number(inherent);
   if (!Number.isFinite(inherentMs) || inherentMs <= 0) return 0;
-  const ratio = token?.type === "vowel" ? 0.42 : 0.6;
+
+  const DEFAULT_VOWEL_RATIO = 0.42;
+  const DEFAULT_CONSONANT_RATIO = 0.6;
+
+  const durationPolicy =
+    params &&
+    typeof params === "object" &&
+    params.policy &&
+    typeof params.policy === "object" &&
+    !Array.isArray(params.policy) &&
+    (params.policy as Record<string, unknown>).duration &&
+    typeof (params.policy as Record<string, unknown>).duration === "object"
+      ? ((params.policy as Record<string, unknown>).duration as Record<string, unknown>)
+      : null;
+
+  const vowelRatio =
+    durationPolicy &&
+    typeof durationPolicy.incompressibility_ratio_vowel === "number" &&
+    Number.isFinite(durationPolicy.incompressibility_ratio_vowel)
+      ? durationPolicy.incompressibility_ratio_vowel
+      : DEFAULT_VOWEL_RATIO;
+
+  const consonantRatio =
+    durationPolicy &&
+    typeof durationPolicy.incompressibility_ratio_consonant === "number" &&
+    Number.isFinite(durationPolicy.incompressibility_ratio_consonant)
+      ? durationPolicy.incompressibility_ratio_consonant
+      : DEFAULT_CONSONANT_RATIO;
+
+  const ratio = token?.type === "vowel" ? vowelRatio : consonantRatio;
   return inherentMs * ratio;
 }
 
@@ -1150,7 +1183,7 @@ function getScalarResolution(config: TokenLike | null): "standard" | "klatt" | n
   return null;
 }
 
-function computeKlattFloor(token: TokenLike, field: string, config: TokenLike, baseValue: number): number {
+function computeKlattFloor(token: TokenLike, field: string, config: TokenLike, baseValue: number, runtime?: RuntimeLike | null): number {
   const explicitFloor = toFiniteOrNull(config?.floor);
   if (explicitFloor != null) return explicitFloor;
 
@@ -1161,7 +1194,8 @@ function computeKlattFloor(token: TokenLike, field: string, config: TokenLike, b
     const inherent = Number.isFinite(token?.inherentDuration)
       ? Number(token.inherentDuration)
       : baseValue;
-    return getIncompressibleMin(token, inherent);
+    const params = runtime?.params && typeof runtime.params === "object" ? runtime.params as Record<string, unknown> : null;
+    return getIncompressibleMin(token, inherent, params);
   }
 
   const minVal = toFiniteOrNull(config?.min);
@@ -1195,7 +1229,7 @@ function getOrCreateScalarState(
     resolution,
     base,
     preview: base,
-    floor: resolution === "klatt" ? computeKlattFloor(token, field, config, base) : null,
+    floor: resolution === "klatt" ? computeKlattFloor(token, field, config, base, runtime) : null,
     min: toFiniteOrNull(config?.min),
     max: toFiniteOrNull(config?.max),
     round: field === "duration" || config?.unit === "ms",

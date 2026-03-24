@@ -152,6 +152,7 @@ rules:
           params: r_target.params
           duration: r_duration
           inherentDuration: r_duration
+          durationFloor: params.policy.duration.liquid_rhotic_tail_floor_ms
           type: r_target.type
           stress: "0"
           word: "has(current.word) ? current.word : null"

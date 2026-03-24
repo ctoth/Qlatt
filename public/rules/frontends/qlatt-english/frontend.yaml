@@ -259,6 +259,11 @@ parameters:
           - Allen et al. 1987 Table C-5 (ER behaves as an r-colored vowel with diphthong-like internal timing)
           - Stevens 1998 §9.3 (liquid formant movement is transitional rather than a longer independent segment)
           - Engineering estimate (keep the vocalic nucleus dominant in short coda-rhotic tokens)
+      liquid_rhotic_tail_floor_ms:
+        value: 30
+        citations:
+          - Klatt 1976 Table III (minimum consonant durations; liquids require ~30 ms for perceptible formant transition)
+          - Engineering estimate (prevents duration-rule stacking from collapsing rhotic tails below audibility)
       weak_release_amplitude_reduction_db:
         value: 10
         citations:

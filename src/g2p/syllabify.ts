@@ -9,37 +9,42 @@
  *           Selkirk (1982), The Syllable.
  */
 
-// ── Vowel set ───────────────────────────────────────────────────────────
+import { loadYamlDocumentSync } from '../yaml-loader';
 
-const VOWELS = new Set([
-  'AA', 'AE', 'AH', 'AO', 'AW', 'AX', 'AY', // AX: Elovitz schwa (Elovitz et al. 1976)
-  'EH', 'ER', 'EY',
-  'IH', 'IY',
-  'OW', 'OY',
-  'UH', 'UW',
-]);
+// ── Phonotactics data from YAML ─────────────────────────────────────────
+
+interface PhonotacticsData {
+  vowels: string[];
+  legal_onsets: string[];
+  voicing_classes: {
+    voiceless_finals: string[];
+    td_finals: string[];
+    sibilant_finals: string[];
+    voiceless_consonants: string[];
+  };
+}
+
+const phonotacticsCache = new Map<string, PhonotacticsData>();
+
+export function loadPhonotacticsSync(
+  path: string = '/rules/frontends/qlatt-english/phonotactics.yaml',
+): PhonotacticsData {
+  const cached = phonotacticsCache.get(path);
+  if (cached) return cached;
+  const data = loadYamlDocumentSync<PhonotacticsData>(path);
+  phonotacticsCache.set(path, data);
+  return data;
+}
+
+// ── Vowel set ───────────────────────────────────────────────────────────
 
 /** Returns true if the phoneme is a vowel (can bear stress). */
 export function isVowel(phoneme: string): boolean {
-  return VOWELS.has(phoneme);
+  const data = loadPhonotacticsSync();
+  return new Set(data.vowels).has(phoneme);
 }
 
 // ── Legal English onsets ────────────────────────────────────────────────
-
-/**
- * Set of legal English syllable onsets (consonant clusters).
- * All single consonants are legal; listed here are the multi-consonant
- * clusters that can begin a syllable.
- */
-const LEGAL_ONSETS = new Set([
-  // Two-consonant onsets
-  'PR', 'PL', 'TR', 'TW', 'KR', 'KL', 'KW',
-  'BR', 'BL', 'DR', 'GR', 'GL',
-  'FR', 'FL', 'THR', 'SHR',
-  'SK', 'SP', 'ST', 'SM', 'SN', 'SL', 'SW',
-  // Three-consonant onsets
-  'SKR', 'SPR', 'STR', 'SPL', 'SKW',
-]);
 
 /**
  * Check whether a sequence of consonant phonemes forms a legal onset.
@@ -47,8 +52,9 @@ const LEGAL_ONSETS = new Set([
  */
 function isLegalOnset(consonants: string[]): boolean {
   if (consonants.length <= 1) return true;
+  const data = loadPhonotacticsSync();
   const key = consonants.join('');
-  return LEGAL_ONSETS.has(key);
+  return new Set(data.legal_onsets).has(key);
 }
 
 // ── Syllabification ─────────────────────────────────────────────────────

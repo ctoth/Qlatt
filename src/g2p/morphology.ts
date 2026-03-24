@@ -8,6 +8,7 @@
 import type { DictLookup, PronunciationResult } from './types';
 import type { StressHint } from './stress';
 import { loadYamlDocumentSync } from '../yaml-loader';
+import { loadPhonotacticsSync } from './syllabify';
 
 // --- Affix data types ---
 
@@ -46,16 +47,17 @@ function getMorphologyData(path: string): MorphologyData {
   return data;
 }
 
-// --- Voicing classification for -ed and -s ---
+// --- Voicing classification for -ed and -s (loaded from phonotactics.yaml) ---
 
-// Phonemes where -ed is pronounced as T (voiceless finals)
-const VOICELESS_FINALS = new Set(['CH', 'F', 'K', 'P', 'S', 'SH', 'TH']);
-// Phonemes where -ed is pronounced as IH0 D (after t/d)
-const TD_FINALS = new Set(['T', 'D']);
-// Sibilants where -s is pronounced as IH0 Z
-const SIBILANT_FINALS = new Set(['S', 'Z', 'SH', 'ZH', 'CH', 'JH']);
-// Voiceless consonants where -s is pronounced as S
-const VOICELESS_CONSONANTS = new Set(['CH', 'F', 'K', 'P', 'T', 'TH']);
+function getVoicingClasses() {
+  const data = loadPhonotacticsSync();
+  return {
+    voicelessFinals: new Set(data.voicing_classes.voiceless_finals),
+    tdFinals: new Set(data.voicing_classes.td_finals),
+    sibilantFinals: new Set(data.voicing_classes.sibilant_finals),
+    voicelessConsonants: new Set(data.voicing_classes.voiceless_consonants),
+  };
+}
 
 /**
  * Get the last phoneme from a pronunciation array, stripping stress digits.
@@ -71,8 +73,9 @@ function lastPhoneme(phonemes: string[]): string {
  */
 function edPronunciation(rootPhonemes: string[]): string[] {
   const last = lastPhoneme(rootPhonemes);
-  if (TD_FINALS.has(last)) return ['IH0', 'D'];
-  if (VOICELESS_FINALS.has(last)) return ['T'];
+  const vc = getVoicingClasses();
+  if (vc.tdFinals.has(last)) return ['IH0', 'D'];
+  if (vc.voicelessFinals.has(last)) return ['T'];
   return ['D'];
 }
 
@@ -82,8 +85,9 @@ function edPronunciation(rootPhonemes: string[]): string[] {
  */
 function sPronunciation(rootPhonemes: string[]): string[] {
   const last = lastPhoneme(rootPhonemes);
-  if (SIBILANT_FINALS.has(last)) return ['IH0', 'Z'];
-  if (VOICELESS_CONSONANTS.has(last)) return ['S'];
+  const vc = getVoicingClasses();
+  if (vc.sibilantFinals.has(last)) return ['IH0', 'Z'];
+  if (vc.voicelessConsonants.has(last)) return ['S'];
   return ['Z'];
 }
 

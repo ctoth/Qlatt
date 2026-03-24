@@ -60,6 +60,7 @@ phases:
       - remap_stops_to_closures
       - expand_affricates_with_closure
       - expand_diphthongs
+      - expand_rhotic_vowels
       - insert_voiceless_stop_release_and_aspiration
       - insert_voiceless_stop_release_and_aspiration_final
       - insert_voiced_stop_release

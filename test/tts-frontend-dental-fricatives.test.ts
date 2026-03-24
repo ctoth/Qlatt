@@ -25,9 +25,15 @@ describe("tts frontend dental fricatives", () => {
     const thAB = maxParam(thFrames, "AB");
     const dhAB = maxParam(dhFrames, "AB");
 
-    // Klatt 1980 Table III: TH AF=60 (inventory uses 40 per Shadle 1985 scaling)
-    expect(thAf).toBeGreaterThanOrEqual(38);
-    expect(dhAf).toBeGreaterThanOrEqual(28);
+    // Allen et al. 1987 lists TH in the 60-90 range and DH in the 30-50 range;
+    // our inventory is scaled down, but dentals still should not sit on the
+    // diagnostics floor in connected speech.
+    expect(thAf).toBeGreaterThanOrEqual(44);
+    expect(dhAf).toBeGreaterThanOrEqual(34);
+    // Stevens 1998: voiced fricative noise is about 7 dB below voiceless,
+    // so the DH/TH gap should stay closer to that relationship than the
+    // current 10 dB inventory split.
+    expect(thAf - dhAf).toBeLessThanOrEqual(8);
     // Klatt 1980 Table III: dentals have A1-A5=0, A6=28, AB=48
     expect(thA6).toBeGreaterThanOrEqual(28);
     expect(dhA6).toBeGreaterThanOrEqual(28);

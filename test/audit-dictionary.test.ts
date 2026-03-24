@@ -535,10 +535,13 @@ describe("full dictionary audit", () => {
       const hh = summaryByPhone.get("HH")!;
 
       // TH/DH: Klatt 1980 Table III specifies A1-A5=0, A6=28, AB=48.
-      // AF thresholds reflect Shadle 1985 scaling (TH=40, DH=30).
-      assertMin("TH", "AF.p50", th.AF.p50, 38, th.count);
+      // AF thresholds are strengthened so dentals do not collapse onto the
+      // diagnostics floor in running speech. Stevens 1998 also puts voiced
+      // fricative noise only about 7 dB below voiceless, which rules out a
+      // much weaker DH.
+      assertMin("TH", "AF.p50", th.AF.p50, 44, th.count);
       assertMin("TH", "A6.p50", th.A6.p50, 26, th.count);
-      assertMin("DH", "AF.p50", dh.AF.p50, 28, dh.count);
+      assertMin("DH", "AF.p50", dh.AF.p50, 34, dh.count);
       assertMin("DH", "A6.p50", dh.A6.p50, 26, dh.count);
       assertMin("DH", "AV.p50", dh.AV.p50, 40, dh.count);
 

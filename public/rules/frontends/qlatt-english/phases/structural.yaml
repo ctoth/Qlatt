@@ -119,6 +119,45 @@ rules:
           word: "has(current.word) ? current.word : null"
     citations:
       - Standard diphthong decomposition for formant synthesis (nucleus + offglide)
+  expand_rhotic_vowels:
+    kind: structural
+    select:
+      stream: phone
+      where: current.phoneme == 'ER'
+    define:
+      stress_suffix: "has(current.stress) && current.stress == 1 ? \"1\" : \"0\""
+      er_key: current.phoneme + stress_suffix
+      er_target: target(er_key)
+      r_target: target("R")
+      total_dur: current.duration
+      target_dur_sum: er_target.duration + r_target.duration
+      er_duration: "total_dur * (er_target.duration / target_dur_sum)"
+      r_duration: "total_dur * (r_target.duration / target_dur_sum)"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - phoneme: current.phoneme
+          params: er_target.params
+          duration: er_duration
+          inherentDuration: er_target.inherentDuration
+          type: er_target.type
+          stress: "has(current.stress) ? current.stress : null"
+          word: "has(current.word) ? current.word : null"
+          rhotic: "has(er_target.rhotic) ? er_target.rhotic : true"
+        - phoneme: r_target.phoneme
+          params: r_target.params
+          duration: r_duration
+          inherentDuration: r_target.inherentDuration
+          type: r_target.type
+          stress: "0"
+          word: "has(current.word) ? current.word : null"
+          rhotic: "has(r_target.rhotic) ? r_target.rhotic : true"
+          voiced: "has(r_target.voiced) ? r_target.voiced : null"
+    citations:
+      - Allen et al. 1987 (r-colored vowels distinguished from plain vowels in the phoneme inventory)
+      - Espy-Wilson et al. 2000 (American English /r/ requires an explicit low-F3 rhotic constriction)
   insert_voiceless_stop_release_and_aspiration:
     kind: structural
     select:

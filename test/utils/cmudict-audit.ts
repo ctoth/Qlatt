@@ -29,6 +29,8 @@ export const STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
 export const NASAL_PHONEMES = new Set(["M", "N", "NG"]);
 export const LIQUID_PHONEMES = new Set(["L", "R"]);
 export const GLIDE_PHONEMES = new Set(["W", "Y"]);
+export const RHOTIC_VOWELS = new Set(["ER0", "ER1"]);
+export const REDUCED_VOWELS = new Set(["AH0", "IH0", "ER0"]);
 
 /** Strip stress digit from ARPABET phone (e.g. "AY1" -> "AY"). */
 export function stripStress(phone: string): string {
@@ -119,6 +121,26 @@ export function selectAuditWords(dict: Record<string, string>): [string, string]
       if (
         arpabet.split(" ").some((p) => cat.phones.includes(stripStress(p)))
       ) {
+        selected.set(word, arpabet);
+        if (++count >= cat.max) break;
+      }
+    }
+  }
+
+  // Category 4: stressed/unstressed rhotics and reduced vowels.
+  // These classes are common sources of "sounds wrong but passes sanity checks"
+  // regressions, so make sure the subset includes direct coverage.
+  const exactPhoneCategories = [
+    { phones: ["ER1"], max: 200 },
+    { phones: ["ER0"], max: 200 },
+    { phones: ["AH0"], max: 200 },
+    { phones: ["IH0"], max: 200 },
+  ];
+  for (const cat of exactPhoneCategories) {
+    let count = 0;
+    for (const [word, arpabet] of entries) {
+      if (selected.has(word)) continue;
+      if (arpabet.split(" ").some((p) => cat.phones.includes(p))) {
         selected.set(word, arpabet);
         if (++count >= cat.max) break;
       }

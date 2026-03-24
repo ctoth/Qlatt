@@ -20,6 +20,8 @@ import {
   GLIDE_PHONEMES,
   LIQUID_PHONEMES,
   NASAL_PHONEMES,
+  REDUCED_VOWELS,
+  RHOTIC_VOWELS,
   STOP_BASES,
   extractSegments,
   expectNoViolationsOrReport,
@@ -95,6 +97,14 @@ interface ContrastViolation {
   observed: number;
   expected: string;
   sampleCount: number;
+}
+
+function segmentAverageParam(segment: Segment, key: string): number {
+  if (segment.frames.length === 0) return 0;
+  return (
+    segment.frames.reduce((sum, frame) => sum + Number(frame.params?.[key] ?? 0), 0) /
+    segment.frames.length
+  );
 }
 
 // -- Helpers ----------------------------------------------------------------
@@ -1106,7 +1116,309 @@ describe("full dictionary audit", () => {
     });
   });
 
-  // -- Block 9: Segment Duration Floors -------------------------------------
+  // -- Block 9: Rhotic Integrity ---------------------------------------------
+
+  describe("rhotic integrity", () => {
+    it("keeps stressed and unstressed rhotics distinct and realizes a rhotic tail", () => {
+      const er0F1: number[] = [];
+      const er0F2: number[] = [];
+      const er0F3: number[] = [];
+      const er1F1: number[] = [];
+      const er1F2: number[] = [];
+      const er1F3: number[] = [];
+      const tailF3: number[] = [];
+      const violations: ContrastViolation[] = [];
+      let erWords = 0;
+      let wordsWithTail = 0;
+
+      for (const [word, arpabet] of auditWords) {
+        const phones = arpabet.split(" ");
+        const rhotics = phones.filter((phone) => RHOTIC_VOWELS.has(phone));
+        if (rhotics.length !== 1) continue;
+
+        const segments = segmentCache.get(word);
+        if (!segments) continue;
+
+        const erIndex = segments.findIndex((segment) => segment.phoneme === "ER");
+        if (erIndex < 0) continue;
+
+        const erSegment = segments[erIndex];
+        const nextSegment = segments[erIndex + 1];
+        const erF1 = segmentAverageParam(erSegment, "F1");
+        const erF2 = segmentAverageParam(erSegment, "F2");
+        const erF3 = segmentAverageParam(erSegment, "F3");
+
+        erWords += 1;
+        if (rhotics[0] === "ER0") {
+          er0F1.push(erF1);
+          er0F2.push(erF2);
+          er0F3.push(erF3);
+        } else {
+          er1F1.push(erF1);
+          er1F2.push(erF2);
+          er1F3.push(erF3);
+        }
+
+        if (nextSegment?.phoneme === "R") {
+          wordsWithTail += 1;
+          tailF3.push(segmentAverageParam(nextSegment, "F3"));
+        }
+      }
+
+      const er0Summary = {
+        F1: summarizeNumbers(er0F1),
+        F2: summarizeNumbers(er0F2),
+        F3: summarizeNumbers(er0F3),
+      };
+      const er1Summary = {
+        F1: summarizeNumbers(er1F1),
+        F2: summarizeNumbers(er1F2),
+        F3: summarizeNumbers(er1F3),
+      };
+      const tailSummary = summarizeNumbers(tailF3);
+
+      const minCount = isFullAudit ? 50 : 20;
+      if (er0Summary.F1.count < minCount) {
+        violations.push({
+          pair: "ER0",
+          metric: "count",
+          observed: er0Summary.F1.count,
+          expected: `>= ${minCount}`,
+          sampleCount: er0Summary.F1.count,
+        });
+      }
+      if (er1Summary.F1.count < minCount) {
+        violations.push({
+          pair: "ER1",
+          metric: "count",
+          observed: er1Summary.F1.count,
+          expected: `>= ${minCount}`,
+          sampleCount: er1Summary.F1.count,
+        });
+      }
+
+      const tailCoverage = erWords === 0 ? 0 : wordsWithTail / erWords;
+      if (tailCoverage < 0.95) {
+        violations.push({
+          pair: "ER->R",
+          metric: "tail-coverage",
+          observed: tailCoverage,
+          expected: ">= 0.95",
+          sampleCount: erWords,
+        });
+      }
+
+      if (er0Summary.F1.p50 >= er1Summary.F1.p50 - 20) {
+        violations.push({
+          pair: "ER0 vs ER1",
+          metric: "F1.p50",
+          observed: er0Summary.F1.p50,
+          expected: `< ${Math.round(er1Summary.F1.p50 - 20)}`,
+          sampleCount: Math.min(er0Summary.F1.count, er1Summary.F1.count),
+        });
+      }
+      if (er0Summary.F2.p50 < er1Summary.F2.p50) {
+        violations.push({
+          pair: "ER0 vs ER1",
+          metric: "F2.p50",
+          observed: er0Summary.F2.p50,
+          expected: `>= ${Math.round(er1Summary.F2.p50)}`,
+          sampleCount: Math.min(er0Summary.F2.count, er1Summary.F2.count),
+        });
+      }
+      if (tailSummary.p50 >= er0Summary.F3.p50 - 100) {
+        violations.push({
+          pair: "R tail vs ER0",
+          metric: "F3.p50",
+          observed: tailSummary.p50,
+          expected: `< ${Math.round(er0Summary.F3.p50 - 100)}`,
+          sampleCount: Math.min(tailSummary.count, er0Summary.F3.count),
+        });
+      }
+      if (tailSummary.p50 >= er1Summary.F3.p50 - 100) {
+        violations.push({
+          pair: "R tail vs ER1",
+          metric: "F3.p50",
+          observed: tailSummary.p50,
+          expected: `< ${Math.round(er1Summary.F3.p50 - 100)}`,
+          sampleCount: Math.min(tailSummary.count, er1Summary.F3.count),
+        });
+      }
+
+      console.log(
+        `\nrhotic integrity: ER0 n=${er0Summary.F1.count}, ER1 n=${er1Summary.F1.count}, ` +
+          `tail coverage=${(tailCoverage * 100).toFixed(1)}%`
+      );
+      console.log(
+        `  ER0: F1.p50=${er0Summary.F1.p50.toFixed(1)} F2.p50=${er0Summary.F2.p50.toFixed(1)} ` +
+          `F3.p50=${er0Summary.F3.p50.toFixed(1)}`
+      );
+      console.log(
+        `  ER1: F1.p50=${er1Summary.F1.p50.toFixed(1)} F2.p50=${er1Summary.F2.p50.toFixed(1)} ` +
+          `F3.p50=${er1Summary.F3.p50.toFixed(1)}`
+      );
+      console.log(`  R tail: F3.p50=${tailSummary.p50.toFixed(1)} n=${tailSummary.count}`);
+
+      if (violations.length > 0) {
+        console.log("  First 10 rhotic violations:");
+        for (const violation of violations.slice(0, 10)) {
+          console.log(
+            `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} rhotic integrity violations` +
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+      );
+    });
+  });
+
+  // -- Block 10: Reduced Vowel Separation -----------------------------------
+
+  describe("reduced vowel separation", () => {
+    it("keeps AH0, IH0, and ER0 acoustically distinct in the audit corpus", () => {
+      const byPhone = new Map<
+        string,
+        Array<{
+          word: string;
+          F1: number;
+          F2: number;
+          F3: number;
+        }>
+      >();
+      const targetPhones = ["AH0", "IH0", "ER0"];
+      const violations: ContrastViolation[] = [];
+
+      for (const phone of targetPhones) {
+        byPhone.set(phone, []);
+      }
+
+      for (const [word, arpabet] of auditWords) {
+        const phones = arpabet.split(" ");
+        const exactReduced = phones.filter((phone) => REDUCED_VOWELS.has(phone));
+        if (exactReduced.length !== 1) continue;
+
+        const targetPhone = exactReduced[0];
+        const targetBase = stripStress(targetPhone);
+        const segments = (segmentCache.get(word) ?? []).filter(
+          (segment) => stripStress(segment.phoneme) === targetBase
+        );
+        if (segments.length !== 1) continue;
+
+        byPhone.get(targetPhone)?.push({
+          word,
+          F1: segmentAverageParam(segments[0], "F1"),
+          F2: segmentAverageParam(segments[0], "F2"),
+          F3: segmentAverageParam(segments[0], "F3"),
+        });
+      }
+
+      const summary = new Map<
+        string,
+        {
+          count: number;
+          F1: ReturnType<typeof summarizeNumbers>;
+          F2: ReturnType<typeof summarizeNumbers>;
+          F3: ReturnType<typeof summarizeNumbers>;
+        }
+      >();
+      for (const phone of targetPhones) {
+        const observations = byPhone.get(phone) ?? [];
+        summary.set(phone, {
+          count: observations.length,
+          F1: summarizeNumbers(observations.map((entry) => entry.F1)),
+          F2: summarizeNumbers(observations.map((entry) => entry.F2)),
+          F3: summarizeNumbers(observations.map((entry) => entry.F3)),
+        });
+      }
+
+      const minCount = isFullAudit ? 50 : 20;
+      for (const phone of targetPhones) {
+        const count = summary.get(phone)?.count ?? 0;
+        if (count < minCount) {
+          violations.push({
+            pair: phone,
+            metric: "count",
+            observed: count,
+            expected: `>= ${minCount}`,
+            sampleCount: count,
+          });
+        }
+      }
+
+      const ah0 = summary.get("AH0")!;
+      const ih0 = summary.get("IH0")!;
+      const er0 = summary.get("ER0")!;
+
+      if (ah0.F1.p50 <= ih0.F1.p50 + 80) {
+        violations.push({
+          pair: "AH0 vs IH0",
+          metric: "F1.p50",
+          observed: ah0.F1.p50 - ih0.F1.p50,
+          expected: "> 80",
+          sampleCount: Math.min(ah0.count, ih0.count),
+        });
+      }
+      if (ih0.F2.p50 <= ah0.F2.p50 + 300) {
+        violations.push({
+          pair: "IH0 vs AH0",
+          metric: "F2.p50",
+          observed: ih0.F2.p50 - ah0.F2.p50,
+          expected: "> 300",
+          sampleCount: Math.min(ih0.count, ah0.count),
+        });
+      }
+      if (er0.F3.p50 >= ah0.F3.p50 - 400) {
+        violations.push({
+          pair: "ER0 vs AH0",
+          metric: "F3.p50",
+          observed: er0.F3.p50,
+          expected: `< ${Math.round(ah0.F3.p50 - 400)}`,
+          sampleCount: Math.min(er0.count, ah0.count),
+        });
+      }
+      if (er0.F3.p50 >= ih0.F3.p50 - 400) {
+        violations.push({
+          pair: "ER0 vs IH0",
+          metric: "F3.p50",
+          observed: er0.F3.p50,
+          expected: `< ${Math.round(ih0.F3.p50 - 400)}`,
+          sampleCount: Math.min(er0.count, ih0.count),
+        });
+      }
+
+      console.log("\nreduced vowel separation:");
+      for (const phone of targetPhones) {
+        const stats = summary.get(phone)!;
+        console.log(
+          `  ${phone}: count=${stats.count} F1.p50=${stats.F1.p50.toFixed(1)} ` +
+            `F2.p50=${stats.F2.p50.toFixed(1)} F3.p50=${stats.F3.p50.toFixed(1)}`
+        );
+      }
+
+      if (violations.length > 0) {
+        console.log("  First 10 reduced-vowel violations:");
+        for (const violation of violations.slice(0, 10)) {
+          console.log(
+            `    ${violation.pair}.${violation.metric}: observed=${violation.observed.toFixed(2)} ` +
+              `expected ${violation.expected} (n=${violation.sampleCount})`
+          );
+        }
+      }
+
+      expectNoViolationsOrReport(
+        violations,
+        `${violations.length} reduced-vowel separation violations` +
+          ` (first: ${violations[0]?.pair ?? "none"}.${violations[0]?.metric ?? ""})`
+      );
+    });
+  });
+
+  // -- Block 11: Segment Duration Floors ------------------------------------
 
   describe("segment duration floors", () => {
     it("segments should respect manner-class minimum durations", () => {

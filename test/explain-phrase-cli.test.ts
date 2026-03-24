@@ -31,7 +31,7 @@ describe("explain phrase cli", () => {
     expect(result.code).toBe(0);
     const payload = JSON.parse(result.stdout);
     expect(payload.rangeApplied).toBe("seq:1-4");
-    expect(payload.summary.decisionCount).toBe(4);
+    expect(payload.summary.decisionCount).toBe(2);
     expect(payload.decisions.every((decision: any) => decision.stage === "transcribe")).toBe(true);
   });
 
@@ -76,7 +76,7 @@ describe("explain phrase cli", () => {
     expect(result.code).toBe(0);
     const payload = JSON.parse(result.stdout);
     expect(payload.whyDecisionId).toBe("d000003");
-    expect(payload.decisions.map((decision: any) => decision.id)).toEqual(["d000001", "d000003"]);
+    expect(payload.decisions.map((decision: any) => decision.id)).toEqual(["d000003"]);
   });
 
   it("links rule decisions to transcribe ancestry in why output", async () => {

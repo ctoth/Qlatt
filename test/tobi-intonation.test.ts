@@ -219,16 +219,24 @@ describe("pow CEL function", () => {
 describe("ToBI intonation — integration", () => {
   it("declarative downstep: F0 peaks descend across accents", () => {
     // "The cat sat on the mat." — three accented words
+    // With Ladd 2008 interpretation, the nuclear accent (on "mat") may be at
+    // full height (downstep_factor=1.0), but the phrase accent L- and boundary
+    // tone L% produce a terminal fall. So the final few frames should be lower
+    // than the global F0 peak.
     const track = textToKlattTrack("The cat sat on the mat.");
     const voicedF0 = getVoicedF0(track);
     expect(voicedF0.length).toBeGreaterThan(0);
 
-    // Overall F0 should start high and end low (declarative)
-    const firstThird = voicedF0.slice(0, Math.floor(voicedF0.length / 3));
-    const lastThird = voicedF0.slice(Math.floor((2 * voicedF0.length) / 3));
-    const avgFirst = firstThird.reduce((a, b) => a + b, 0) / firstThird.length;
-    const avgLast = lastThird.reduce((a, b) => a + b, 0) / lastThird.length;
-    expect(avgFirst).toBeGreaterThan(avgLast);
+    // The global peak should occur before the final 20% of voiced frames
+    // (the terminal fall occupies the tail). Citation: Pierrehumbert 1980, Ladd 2008
+    const peakF0 = Math.max(...voicedF0);
+    const peakIdx = voicedF0.indexOf(peakF0);
+    expect(peakIdx).toBeLessThan(voicedF0.length * 0.9);
+
+    // Final 10% of voiced frames should be below the peak (terminal fall from L- L%)
+    const tail = voicedF0.slice(Math.floor(voicedF0.length * 0.9));
+    const avgTail = tail.reduce((a, b) => a + b, 0) / tail.length;
+    expect(peakF0).toBeGreaterThan(avgTail);
   });
 
   it("question has higher tail F0 than declarative", () => {

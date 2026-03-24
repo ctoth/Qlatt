@@ -41,4 +41,13 @@ describe("tts frontend dental fricatives", () => {
     expect(dhAB).toBeGreaterThanOrEqual(48);
     expect(thAf).toBeGreaterThan(dhAf);
   });
+
+  it("keeps coda TH from collapsing in lexical words", () => {
+    const track = textToKlattTrack("authorship", 110);
+    const thFrames = track.filter((frame) => frame.word === "authorship" && frame.phoneme === "TH");
+
+    expect(thFrames.length).toBeGreaterThan(0);
+    expect(maxParam(thFrames, "AF")).toBeGreaterThanOrEqual(48);
+    expect(maxParam(thFrames, "AB")).toBeGreaterThanOrEqual(52);
+  });
 });

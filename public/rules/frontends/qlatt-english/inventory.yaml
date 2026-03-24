@@ -451,8 +451,8 @@ phoneme_targets:
     dac: 1  # Recasens 1997
   ER0:
     F1: 400  # Espy-Wilson et al. 2000 syllabic American /r/: less open than stressed /ɝ/
-    F2: 1385
-    F3: 1665
+    F2: 1325  # engineering estimate within Espy-Wilson's /r/ F2 range (900-1500 Hz), widened from 1385 to reduce F2/F3 crowding
+    F3: 1710  # engineering estimate within Espy-Wilson's /r/ F3 range (1300-1950 Hz), slightly raised from 1665 for clearer rhotic nucleus
     B1: 70
     B2: 90
     B3: 120
@@ -607,16 +607,16 @@ phoneme_targets:
     B2: 90
     B3: 200
     AV: 0
-    AF: 46 # Shadle 1985: /theta/ is a weak non-sibilant, but still clearly audible; raised from 40 to avoid floor-hugging dental noise in connected speech while remaining well below /s/
+    AF: 50 # Shadle 1985: /theta/ is a weak non-sibilant, but still clearly audible; raised again from 46 to keep coda /th/ above the diagnostics floor while remaining well below /s/
     AH: 0
     AVS: -70
     # A1-A5 all 0: dentals have energy only at A6 and bypass (Klatt 1980 Table III)
     A6: 28  # Klatt 1980 Table III
-    AB: 50  # Klatt 1980 Table III gives bypass energy for dentals; slight lift keeps /th/ from collapsing toward silence
-    A7: 47
-    A8: 52
-    A9: 48
-    A10: 40
+    AB: 54  # Klatt 1980 Table III gives bypass energy for dentals; added lift preserves broadband dental hiss in coda position
+    A7: 49
+    A8: 54
+    A9: 50
+    A10: 42
     dur: 80
     type: fricative
     voiceless: true
@@ -630,16 +630,16 @@ phoneme_targets:
     B2: 80
     B3: 170
     AV: 47
-    AF: 39 # Stevens 1998: voiced fricative noise is about 7 dB below voiceless; raised from 30 so /dh/ stops sitting on the diagnostics floor
+    AF: 43 # Stevens 1998: voiced fricative noise is about 7 dB below voiceless; raised from 39 to preserve that gap while keeping /dh/ audible
     AH: 0
     AVS: 47
     # A1-A5 all 0: dentals have energy only at A6 and bypass (Klatt 1980 Table III)
     A6: 28  # Klatt 1980 Table III
-    AB: 50  # slight lift to preserve the dental bypass component under voicing
-    A7: 45
-    A8: 49
-    A9: 45
-    A10: 36
+    AB: 54  # slight lift to preserve the dental bypass component under voicing
+    A7: 47
+    A8: 51
+    A9: 47
+    A10: 38
     dur: 70
     type: fricative
     voiced: true

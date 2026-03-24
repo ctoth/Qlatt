@@ -75,4 +75,23 @@ describe("tts frontend rhotic vowels", () => {
     expect(averageParam(motherR, "F3")).toBeLessThan(averageParam(motherEr, "F3"));
     expect(averageParam(heardR, "F3")).toBeLessThan(averageParam(heardEr, "F3"));
   });
+
+  it("avoids over-crowding ER0 in compound words", () => {
+    const track = textToKlattTrack("authorship commercebancorp", 110);
+
+    const authorshipEr = rhoticFrames(track, "authorship");
+    const commerceEr = rhoticFrames(track, "commercebancorp");
+
+    expect(authorshipEr.length).toBeGreaterThan(0);
+    expect(commerceEr.length).toBeGreaterThan(0);
+
+    const authorshipGap = averageParam(authorshipEr, "F3") - averageParam(authorshipEr, "F2");
+    const commerceGap = averageParam(commerceEr, "F3") - averageParam(commerceEr, "F2");
+
+    // Espy-Wilson et al. 2000 place /r/ in a low-F3, mid-F2 region, but these
+    // tokens should still keep enough F2/F3 separation to avoid sounding
+    // swallowed in connected compound words.
+    expect(authorshipGap).toBeGreaterThanOrEqual(300);
+    expect(commerceGap).toBeGreaterThanOrEqual(300);
+  });
 });

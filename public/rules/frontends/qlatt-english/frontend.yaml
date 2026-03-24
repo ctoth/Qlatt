@@ -881,29 +881,29 @@ parameters:
           f0_scale: 1.5      # Burkhardt 2009: F0 increase; conservative 1.5x
 output:
   blend:
-    factor: 0.35
-    keys:
-      - F1
-      - F2
-      - F3
-      - B1
-      - B2
-      - B3
-    smooth_types:
-      - vowel
-      - nasal
-      - liquid
-      - glide
-    citations:
-      - Ohman 1966 (VCV coarticulation model)
+    factor:
+      value: 0.35
+      citations:
+        - "Engineering estimate: 35% blend factor for formant transition smoothing"
+    keys: [F1, F2, F3, B1, B2, B3]
+    smooth_types: [vowel, nasal, liquid, glide]
   min_duration:
-    stop_release_ms: 5
-    default_ms: 20
+    stop_release_ms:
+      value: 5
+      citations:
+        - "Engineering estimate: minimum 5ms for stop release burst visibility"
+    default_ms:
+      value: 20
+      citations:
+        - "Engineering estimate: minimum 20ms segment duration"
+  initial_silence_ms:
+    value: 30
     citations:
-      - Allen et al. 1987 Ch.8
-  transition_ms: 50  # Hertz 1991, Stevens & House 1956 (verdict 08)
-  initial_silence_ms: 30
-  final_silence_ms: 100
+      - "Engineering estimate: 30ms initial silence for attack transient settling"
+  final_silence_ms:
+    value: 100
+    citations:
+      - "Engineering estimate: 100ms final silence for release tail"
 transcription:
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).

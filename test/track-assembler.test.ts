@@ -178,7 +178,7 @@ describe("track-assembler", () => {
           },
         ],
         [],
-        { baseF0: 120, transitionMs: 0 }
+        { baseF0: 120, transitionMs: 0, outputConfig: {} }
       );
 
       const aaFrames = track.filter((frame) => frame.phoneme === "AA");
@@ -379,6 +379,7 @@ describe("track-assembler", () => {
       const trackWithOverride = assembleKlattTrack(phoneSequence, [], {
         baseF0: 120,
         transitionMs: 50,
+        outputConfig: {},
       });
       // The per-token value should be used; verify frames exist (basic smoke test).
       expect(trackWithOverride.length).toBeGreaterThanOrEqual(3);
@@ -402,6 +403,7 @@ describe("track-assembler", () => {
       const track = assembleKlattTrack(phoneSequence, [], {
         baseF0: 120,
         transitionMs: 50,
+        outputConfig: {},
       });
       // No per-token transition_ms, should use global 50ms.
       expect(track.length).toBeGreaterThanOrEqual(3);
@@ -434,6 +436,7 @@ describe("track-assembler", () => {
       const track = assembleKlattTrack(phoneSequence, parameterSequence, {
         baseF0: 110,
         f0Model,
+        outputConfig: {},
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
       // The voiced phone frame should have a non-zero F0.
@@ -457,6 +460,7 @@ describe("track-assembler", () => {
       ];
       const track = assembleKlattTrack(phoneSequence, parameterSequence, {
         baseF0: 110,
+        outputConfig: {},
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
     });

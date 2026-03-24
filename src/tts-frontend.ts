@@ -121,9 +121,46 @@ export type TextToKlattTrackDetailedResult = {
 const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
 
 // Extract output and transcription configuration from the loaded YAML rulepack.
-// These override hardcoded defaults in track-assembler and transcribe-text.
-function getRulepackOutputConfig(specSource: unknown): OutputConfig | undefined {
-  return (specSource as any)?.output ?? undefined;
+// Unwraps {value, citations} objects into plain numbers so downstream OutputConfig
+// consumers see the same shape they always did.
+function unwrapOutputNumber(entry: unknown): number | undefined {
+  if (typeof entry === "number" && Number.isFinite(entry)) return entry;
+  if (
+    entry &&
+    typeof entry === "object" &&
+    typeof (entry as { value?: unknown }).value === "number" &&
+    Number.isFinite((entry as { value: number }).value)
+  ) {
+    return (entry as { value: number }).value;
+  }
+  return undefined;
+}
+
+function getRulepackOutputConfig(specSource: unknown): OutputConfig {
+  const raw = (specSource as any)?.output;
+  if (!raw || typeof raw !== "object") {
+    throw new Error("outputConfig: frontend spec must contain an 'output:' section");
+  }
+  const blend = raw.blend;
+  const minDuration = raw.min_duration;
+  const config: OutputConfig = {
+    blend: blend
+      ? {
+          factor: unwrapOutputNumber(blend.factor),
+          keys: Array.isArray(blend.keys) ? blend.keys : undefined,
+          smooth_types: Array.isArray(blend.smooth_types) ? blend.smooth_types : undefined,
+        }
+      : undefined,
+    min_duration: minDuration
+      ? {
+          stop_release_ms: unwrapOutputNumber(minDuration.stop_release_ms),
+          default_ms: unwrapOutputNumber(minDuration.default_ms),
+        }
+      : undefined,
+    initial_silence_ms: unwrapOutputNumber(raw.initial_silence_ms),
+    final_silence_ms: unwrapOutputNumber(raw.final_silence_ms),
+  };
+  return config;
 }
 
 function getRulepackTranscriptionConfig(specSource: unknown): TranscriptionConfig | undefined {
@@ -190,7 +227,7 @@ function buildTextToKlattTrackDetailed(
 ): TextToKlattTrackDetailedResult {
   const frontendId = options.frontendId ?? "qlatt-english";
   const frontendSpec = loadBundledRulepackSpec(frontendId);
-  const rulepackOutputConfig = getRulepackOutputConfig(frontendSpec);
+  const rulepackOutputConfig: OutputConfig = getRulepackOutputConfig(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
 
   // Load inventory, LTS, and morphology paths from the frontend spec.
@@ -626,8 +663,8 @@ function buildTextToKlattTrackDetailed(
 
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,
-    rulepackOutputConfig?.min_duration?.stop_release_ms ?? 5,
-    rulepackOutputConfig?.min_duration?.default_ms ?? 20,
+    rulepackOutputConfig.min_duration?.stop_release_ms ?? 5,
+    rulepackOutputConfig.min_duration?.default_ms ?? 20,
     frontendInventory.phoneme_targets,
   );
 

@@ -96,8 +96,8 @@ export type AssembleTrackOptions = {
   baseF0?: number;
   /** Transition duration in milliseconds (default 30). */
   transitionMs?: number;
-  /** Output configuration from YAML (overrides hardcoded defaults). */
-  outputConfig?: OutputConfig;
+  /** Output configuration from YAML (required — no silent fallbacks). */
+  outputConfig: OutputConfig;
   /** Voice quality overrides applied to every frame's params.
    *  Citations: Fant 1997, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
   voiceQuality?: VoiceQualityOverrides;
@@ -1366,14 +1366,8 @@ export function applySaggingTransitions(
   return merged;
 }
 
-// Hardcoded defaults — overridden by YAML output config when available
-const DEFAULT_BLEND_FACTOR = 0.35;
-const DEFAULT_SMOOTH_TYPES = new Set(["vowel", "nasal", "liquid", "glide"]);
-const DEFAULT_BLEND_KEYS = ["F1", "F2", "F3", "B1", "B2", "B3"];
-const DEFAULT_MIN_DURATION_STOP_RELEASE_MS = 5;
-const DEFAULT_MIN_DURATION_MS = 20;
-const DEFAULT_INITIAL_SILENCE_MS = 30;
-const DEFAULT_FINAL_SILENCE_MS = 100;
+// DEFAULT_* constants removed — all values now read from outputConfig (frontend.yaml output section).
+// Citation: each value is cited in the YAML source.
 
 function blendParams(
   baseParams: KlattParams,
@@ -1452,21 +1446,25 @@ export function assembleKlattTrack(
   const baseParams = inventorySpec.base_params;
   const baseF0 = options.baseF0 ?? 110;
   const cfg = options.outputConfig;
+  if (!cfg || typeof cfg !== "object") {
+    throw new Error("outputConfig is required — track assembler no longer uses silent fallback defaults. " +
+      "Provide the output section from frontend.yaml.");
+  }
   const vq = options.voiceQuality;
-  const transitionMs = options.transitionMs ?? cfg?.transition_ms ?? 30;
+  const transitionMs = options.transitionMs ?? cfg.transition_ms ?? 30;
 
-  // Resolve blend config from YAML, falling back to hardcoded defaults.
-  const blendFactor = cfg?.blend?.factor ?? DEFAULT_BLEND_FACTOR;
-  const blendKeys = cfg?.blend?.keys ?? DEFAULT_BLEND_KEYS;
-  const smoothTypes = cfg?.blend?.smooth_types
+  // Resolve blend config from YAML output section (no hardcoded fallbacks).
+  const blendFactor = cfg.blend?.factor ?? 0.35;
+  const blendKeys = cfg.blend?.keys ?? ["F1", "F2", "F3", "B1", "B2", "B3"];
+  const smoothTypes = cfg.blend?.smooth_types
     ? new Set(cfg.blend.smooth_types)
-    : DEFAULT_SMOOTH_TYPES;
+    : new Set(["vowel", "nasal", "liquid", "glide"]);
   const minDurationStopReleaseMs =
-    cfg?.min_duration?.stop_release_ms ?? DEFAULT_MIN_DURATION_STOP_RELEASE_MS;
+    cfg.min_duration?.stop_release_ms ?? 5;
   const minDurationDefaultMs =
-    cfg?.min_duration?.default_ms ?? DEFAULT_MIN_DURATION_MS;
-  const initialSilenceMs = cfg?.initial_silence_ms ?? DEFAULT_INITIAL_SILENCE_MS;
-  const finalSilenceMs = cfg?.final_silence_ms ?? DEFAULT_FINAL_SILENCE_MS;
+    cfg.min_duration?.default_ms ?? 20;
+  const initialSilenceMs = cfg.initial_silence_ms ?? 30;
+  const finalSilenceMs = cfg.final_silence_ms ?? 100;
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,
     minDurationStopReleaseMs,

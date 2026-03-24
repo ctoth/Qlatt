@@ -6,7 +6,7 @@
 import toposort from 'toposort';
 import type { SemanticsDocument, EvaluationResult, RealizationRule, ParamValue, EvaluationContext } from './types';
 import type { CelEvaluator } from './cel-evaluator';
-import { resonatorMagnitudeDb, dbToLinear } from '../builtin-functions';
+import { generatePfeRules } from './pfe-codegen';
 
 export interface TopologicalEvaluator {
   evaluate(semantics: SemanticsDocument, context: EvaluationContext): EvaluationResult;
@@ -60,27 +60,49 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         return result;
       }
 
-      // Get evaluation order (may throw on cycle)
+      // Merge PFE-generated realize rules into the realize map before toposort.
+      // generatePfeRules() reads formantBanks and produces one CEL rule per
+      // parallel-source formant, replacing the former imperative PFE loop.
+      // Citation: Lin 1995 (Partial Fraction Expansion)
+      let realize = semantics.realize;
+      if (semantics.formantBanks) {
+        const pfeRules = generatePfeRules(semantics.formantBanks);
+        realize = { ...semantics.realize, ...pfeRules };
+      }
+
+      // Get evaluation order using merged realize map (includes PFE-generated rules)
       let order: string[];
       try {
-        order = this.getEvaluationOrder(semantics);
+        const edges = buildEdges(realize);
+        const allNodes = getAllNodes(realize);
+        let sorted: string[];
+        try {
+          sorted = toposort(edges);
+        } catch (e) {
+          throw new Error(`cycle: ${e instanceof Error ? e.message : String(e)}`);
+        }
+        const sortedSet = new Set(sorted);
+        for (const node of allNodes) {
+          if (!sortedSet.has(node)) {
+            sorted.unshift(node);
+          }
+        }
+        order = sorted.filter(node => allNodes.includes(node));
       } catch (e) {
-        // Re-throw cycle detection errors
         if (e instanceof Error && e.message.includes('cycle')) {
           throw new Error(`Dependency cycle detected: ${e.message}`);
         }
         throw e;
       }
 
-      // Evaluate rules in topological order
+      // Evaluate rules in topological order (PFE rules are now part of realize)
       for (const name of order) {
-        const rule = semantics.realize[name];
+        const rule = realize[name];
         if (!rule) continue;
 
         const ruleObj = typeof rule === 'string' ? { expr: rule } : rule;
 
         try {
-          // Build evaluation context for CEL using caller-provided constants
           const celContext: EvaluationContext = {
             params: result.values,
             constants: context.constants,
@@ -95,38 +117,6 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         }
       }
 
-      // After normal realize rules, compute formant bank amplitudes via PFE (Lin 1995).
-      // This replaces the old codegen layer that produced proximity corrections and
-      // static ndbScale-based a{N}Linear rules. The PFE approach computes the actual
-      // transfer function magnitude of each resonator at every other formant's frequency,
-      // yielding dynamic corrections that track formant movement.
-      if (semantics.formantBanks) {
-        const sr = (result.values.sampleRate as number) ?? 10000;
-        for (const [, bank] of Object.entries(semantics.formantBanks)) {
-          const formants = bank.formants;
-          for (let i = 0; i < formants.length; i++) {
-            const f = formants[i];
-            if (!f.parallelSource) continue; // No parallel branch for this formant
-            const idx = f.index;
-            const evalFreq = (result.values[`F${idx}`] as number) ?? f.freqDefault;
-            const ampDb = (result.values[`A${idx}`] as number) ?? 0;
-            const ndbScaleVal = f.ndbScale ?? 0;
-            // Sum correction from all OTHER formants' transfer functions at this frequency
-            let correctionDb = 0;
-            for (let j = 0; j < formants.length; j++) {
-              if (j === i) continue;
-              const jIdx = formants[j].index;
-              const otherFreq = (result.values[`F${jIdx}`] as number) ?? formants[j].freqDefault;
-              const otherBw = (result.values[`B${jIdx}`] as number) ?? formants[j].bwDefault;
-              correctionDb += resonatorMagnitudeDb(evalFreq, otherFreq, otherBw, sr);
-            }
-            const sign = f.sign ?? 1;
-            const parallelScale = (result.values.parallelScale as number) ?? 1;
-            result.values[`a${idx}Linear`] = sign * dbToLinear(ampDb + correctionDb + ndbScaleVal) * parallelScale;
-          }
-        }
-      }
-
       return result;
     },
 
@@ -135,8 +125,15 @@ export function createTopologicalEvaluator(celEvaluator: CelEvaluator): Topologi
         return [];
       }
 
-      const edges = buildEdges(semantics.realize);
-      const allNodes = getAllNodes(semantics.realize);
+      // Include PFE-generated rules so callers see the full evaluation order
+      let realize = semantics.realize;
+      if (semantics.formantBanks) {
+        const pfeRules = generatePfeRules(semantics.formantBanks);
+        realize = { ...semantics.realize, ...pfeRules };
+      }
+
+      const edges = buildEdges(realize);
+      const allNodes = getAllNodes(realize);
 
       // toposort returns nodes in dependency order
       // We need to handle nodes with no edges (they won't appear in toposort result)

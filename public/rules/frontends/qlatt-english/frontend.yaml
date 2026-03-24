@@ -10,6 +10,7 @@ include:
   - phases/normalize.yaml
   - phases/postlexical.yaml
   - phases/structural.yaml
+  - phases/annotation.yaml
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml

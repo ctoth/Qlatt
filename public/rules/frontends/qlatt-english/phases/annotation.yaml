@@ -1,0 +1,27 @@
+version: v1
+rules:
+  syllable_count_annotation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel'"
+    apply:
+      - field: word_syllable_count
+        op: set
+        value: "count_word_vowels()"
+        tag: syllable_count
+    citations:
+      - Klatt 1976 Rule 4 (polysyllabic shortening)
+
+  cluster_position_annotation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type != 'vowel' && current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    apply:
+      - field: cluster_position
+        op: set
+        value: "cluster_position_in_word()"
+        tag: cluster_position
+    citations:
+      - Klatt 1973 (cluster shortening)

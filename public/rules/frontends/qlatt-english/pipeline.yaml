@@ -65,6 +65,10 @@ phases:
       - insert_voiceless_stop_release_and_aspiration_final
       - insert_voiced_stop_release
       - insert_voiced_stop_release_final
+  - name: annotation
+    rules:
+      - syllable_count_annotation
+      - cluster_position_annotation
   - name: duration
     rules:
       - k_context_cl_f2

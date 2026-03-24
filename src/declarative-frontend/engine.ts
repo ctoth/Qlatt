@@ -1112,6 +1112,53 @@ function buildNavigationFunctions(
         previous as Record<string, any> | null | undefined,
         next as Record<string, any> | null | undefined
       ),
+    // count_word_vowels(): Count vowel tokens sharing the same word as the
+    // current token.  Returns 0 for tokens without a word or SIL tokens.
+    // Citation: Klatt 1976 Rule 4 (polysyllabic shortening)
+    count_word_vowels: (): number => {
+      const token = currentToken;
+      if (!token) return 0;
+      const word = token.word;
+      if (typeof word !== "string" || word.length === 0) return 0;
+      if (token.phoneme === "SIL") return 0;
+      const active = getActiveStreamTokens("phone");
+      let count = 0;
+      for (const t of active) {
+        if (t.type === "vowel" && t.word === word) count++;
+      }
+      return count;
+    },
+    // cluster_position_in_word(): For the current non-vowel token, count how
+    // many consecutive non-vowel tokens with the same word precede it.
+    // Position 0 = first consonant in the cluster.  Returns 0 for vowels,
+    // SIL, and tokens without a word.
+    // Citation: Klatt 1973 (cluster shortening)
+    cluster_position_in_word: (): number => {
+      const token = currentToken;
+      if (!token) return 0;
+      const word = token.word;
+      if (typeof word !== "string" || word.length === 0) return 0;
+      if (token.type === "vowel" || token.phoneme === "SIL") return 0;
+      const active = getActiveStreamTokens("phone");
+      const idx = getTokenIndex(token, "phone");
+      if (idx < 0) return 0;
+      let pos = 0;
+      // Walk backwards from the token just before the current one,
+      // counting consecutive non-vowel tokens in the same word.
+      for (let i = idx - 1; i >= 0; i--) {
+        const prev = active[i];
+        if (
+          prev.word === word &&
+          prev.type !== "vowel" &&
+          prev.phoneme !== "SIL"
+        ) {
+          pos++;
+        } else {
+          break;
+        }
+      }
+      return pos;
+    },
   };
 
   const rebindCurrentToken = (

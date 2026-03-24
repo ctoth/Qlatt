@@ -9,122 +9,106 @@
  * - Punctuation handling: pause-generating marks (, . ? ! ; :) kept as tokens;
  *   other punctuation stripped; apostrophes in contractions preserved
  * - Whitespace collapse
+ *
+ * Pipeline order and lookup tables are declared in YAML:
+ *   normalization-tables.yaml  — all lookup data
+ *   normalization-pipeline.yaml — ordered step definitions
+ *
+ * Citations:
+ *   Allen, Hunnicutt & Klatt 1987 Ch.3 (MITalk text analysis)
+ *   Ebden & Sproat 2015 (Kestrel TN framework)
  */
 
+import { loadYamlDocumentSync } from "../yaml-loader";
+
 // ---------------------------------------------------------------------------
-// Lookup tables
+// Types for YAML data
 // ---------------------------------------------------------------------------
 
-const ONES = [
-  "", "one", "two", "three", "four", "five",
-  "six", "seven", "eight", "nine",
-];
+interface NormalizationTables {
+  ones: string[];
+  teens: string[];
+  tens: string[];
+  ordinal_ones: Record<number, string>;
+  ordinal_tens: Record<number, string>;
+  abbreviations: Record<string, string>;
+  digit_words: Record<string, string>;
+  month_names: string[];
+}
 
-const TEENS = [
-  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-  "sixteen", "seventeen", "eighteen", "nineteen",
-];
+interface RegexRule {
+  pattern: string;
+  replacement: string;
+  flags?: string;
+}
 
-const TENS = [
-  "", "", "twenty", "thirty", "forty", "fifty",
-  "sixty", "seventy", "eighty", "ninety",
-];
+interface PipelineStep {
+  name: string;
+  type: "builtin" | "regex_replace" | "table_replace";
+  handler?: string;
+  pattern?: string;
+  flags?: string;
+  table?: string;
+  rules?: RegexRule[];
+  post?: string;
+}
 
-/** Special ordinal forms for numbers 1-19 and the tens. */
-const ORDINAL_ONES: Record<number, string> = {
-  1: "first",
-  2: "second",
-  3: "third",
-  4: "fourth",
-  5: "fifth",
-  6: "sixth",
-  7: "seventh",
-  8: "eighth",
-  9: "ninth",
-  10: "tenth",
-  11: "eleventh",
-  12: "twelfth",
-  13: "thirteenth",
-  14: "fourteenth",
-  15: "fifteenth",
-  16: "sixteenth",
-  17: "seventeenth",
-  18: "eighteenth",
-  19: "nineteenth",
-};
+interface NormalizationPipeline {
+  steps: PipelineStep[];
+}
 
-const ORDINAL_TENS: Record<number, string> = {
-  20: "twentieth",
-  30: "thirtieth",
-  40: "fortieth",
-  50: "fiftieth",
-  60: "sixtieth",
-  70: "seventieth",
-  80: "eightieth",
-  90: "ninetieth",
-};
+// ---------------------------------------------------------------------------
+// YAML loading (cached, following morphology.ts pattern)
+// ---------------------------------------------------------------------------
 
-/** Common abbreviations → full word expansions. */
-const ABBREVIATIONS: Record<string, string> = {
-  "dr.": "doctor",
-  "mr.": "mister",
-  "mrs.": "missus",
-  "ms.": "miss",
-  "st.": "saint",
-  "ave.": "avenue",
-  "blvd.": "boulevard",
-  "rd.": "road",
-  "sr.": "senior",
-  "jr.": "junior",
-  "prof.": "professor",
-  "gen.": "general",
-  "sgt.": "sergeant",
-  "cpl.": "corporal",
-  "pvt.": "private",
-  "capt.": "captain",
-  "lt.": "lieutenant",
-  "col.": "colonel",
-  "govt.": "government",
-  "dept.": "department",
-  "univ.": "university",
-  "assn.": "association",
-  "bros.": "brothers",
-  "inc.": "incorporated",
-  "corp.": "corporation",
-  "co.": "company",
-  "no.": "number",
-  "approx.": "approximately",
-  "vs.": "versus",
-  "etc.": "etcetera",
-};
+const TABLES_PATH = "/rules/frontends/qlatt-english/normalization-tables.yaml";
+const PIPELINE_PATH = "/rules/frontends/qlatt-english/normalization-pipeline.yaml";
 
-const DIGIT_WORDS: Record<string, string> = {
-  "0": "zero",
-  "1": "one",
-  "2": "two",
-  "3": "three",
-  "4": "four",
-  "5": "five",
-  "6": "six",
-  "7": "seven",
-  "8": "eight",
-  "9": "nine",
-};
+let tablesCache: NormalizationTables | null = null;
+let pipelineCache: NormalizationPipeline | null = null;
 
-const MONTH_NAMES = [
-  "january",
-  "february",
-  "march",
-  "april",
-  "may",
-  "june",
-  "july",
-  "august",
-  "september",
-  "october",
-  "november",
-  "december",
-];
+function getTables(): NormalizationTables {
+  if (!tablesCache) {
+    tablesCache = loadYamlDocumentSync<NormalizationTables>(TABLES_PATH);
+  }
+  return tablesCache;
+}
+
+function getPipeline(): NormalizationPipeline {
+  if (!pipelineCache) {
+    pipelineCache = loadYamlDocumentSync<NormalizationPipeline>(PIPELINE_PATH);
+  }
+  return pipelineCache;
+}
+
+// ---------------------------------------------------------------------------
+// Accessor shorthands (read from YAML tables)
+// ---------------------------------------------------------------------------
+
+function ONES(): string[] {
+  return getTables().ones;
+}
+function TEENS(): string[] {
+  return getTables().teens;
+}
+function TENS(): string[] {
+  return getTables().tens;
+}
+function ORDINAL_ONES(): Record<number, string> {
+  return getTables().ordinal_ones;
+}
+function ORDINAL_TENS(): Record<number, string> {
+  return getTables().ordinal_tens;
+}
+function ABBREVIATIONS(): Record<string, string> {
+  return getTables().abbreviations;
+}
+function DIGIT_WORDS(): Record<string, string> {
+  return getTables().digit_words;
+}
+function MONTH_NAMES(): string[] {
+  return getTables().month_names;
+}
 
 // ---------------------------------------------------------------------------
 // numberToWords
@@ -155,22 +139,22 @@ function convertChunk(n: number): string {
   if (n === 0) return "";
 
   if (n < 10) {
-    return ONES[n];
+    return ONES()[n];
   }
 
   if (n < 20) {
-    return TEENS[n - 10];
+    return TEENS()[n - 10];
   }
 
   if (n < 100) {
     const remainder = n % 10;
-    return TENS[Math.floor(n / 10)] + (remainder !== 0 ? " " + ONES[remainder] : "");
+    return TENS()[Math.floor(n / 10)] + (remainder !== 0 ? " " + ONES()[remainder] : "");
   }
 
   if (n < 1000) {
     const remainder = n % 100;
     return (
-      ONES[Math.floor(n / 100)] +
+      ONES()[Math.floor(n / 100)] +
       " hundred" +
       (remainder !== 0 ? " " + convertChunk(remainder) : "")
     );
@@ -221,16 +205,16 @@ export function ordinalToWords(s: string): string {
  */
 function convertOrdinal(n: number): string {
   // Direct lookup for 1-19
-  if (ORDINAL_ONES[n]) return ORDINAL_ONES[n];
+  if (ORDINAL_ONES()[n]) return ORDINAL_ONES()[n];
 
   // Exact tens (20, 30, ...)
-  if (n < 100 && n % 10 === 0 && ORDINAL_TENS[n]) return ORDINAL_TENS[n];
+  if (n < 100 && n % 10 === 0 && ORDINAL_TENS()[n]) return ORDINAL_TENS()[n];
 
   // Two-digit with remainder (21st, 32nd, etc.)
   if (n < 100) {
     const tensDigit = Math.floor(n / 10) * 10;
     const onesDigit = n % 10;
-    return TENS[Math.floor(n / 10)] + " " + (ORDINAL_ONES[onesDigit] ?? numberToWords(onesDigit) + "th");
+    return TENS()[Math.floor(n / 10)] + " " + (ORDINAL_ONES()[onesDigit] ?? numberToWords(onesDigit) + "th");
   }
 
   // For numbers >= 100, use cardinal for the prefix and ordinal for the last part
@@ -239,9 +223,9 @@ function convertOrdinal(n: number): string {
     const hundreds = Math.floor(n / 100);
     const remainder = n % 100;
     if (remainder === 0) {
-      return ONES[hundreds] + " hundredth";
+      return ONES()[hundreds] + " hundredth";
     }
-    return ONES[hundreds] + " hundred " + convertOrdinal(remainder);
+    return ONES()[hundreds] + " hundred " + convertOrdinal(remainder);
   }
 
   // For larger numbers, use cardinal prefix + ordinal suffix
@@ -254,7 +238,7 @@ function decimalToWords(integerPartRaw: string, fractionalPartRaw: string): stri
   const lhs = Number.isFinite(integerValue) ? numberToWords(integerValue) : integerPartRaw;
   const rhs = fractionalPartRaw
     .split("")
-    .map((digit) => DIGIT_WORDS[digit] ?? digit)
+    .map((digit) => DIGIT_WORDS()[digit] ?? digit)
     .join(" ");
   return `${lhs} point ${rhs}`;
 }
@@ -332,7 +316,7 @@ function dateToWords(monthRaw: string, dayRaw: string, yearRaw: string): string 
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
     return `${monthRaw}/${dayRaw}/${yearRaw}`;
   }
-  return `${MONTH_NAMES[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
 }
 
 function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): string {
@@ -345,7 +329,152 @@ function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): stri
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 0 || year > 999_999_999) {
     return `${yearRaw}-${monthRaw}-${dayRaw}`;
   }
-  return `${MONTH_NAMES[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+  return `${MONTH_NAMES()[month - 1]} ${convertOrdinal(day)} ${numberToWords(year)}`;
+}
+
+// ---------------------------------------------------------------------------
+// Builtin step handlers (registered by name for YAML pipeline dispatch)
+// ---------------------------------------------------------------------------
+
+/**
+ * Map of handler name → function for builtin pipeline steps.
+ * The YAML pipeline references these by name in the `handler` field.
+ */
+const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => string> = {
+  lowercase: (result) => result.toLowerCase(),
+
+  dateToWords: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    return result.replace(re, (_m: string, month: string, day: string, year: string) =>
+      dateToWords(month, day, year)
+    );
+  },
+
+  isoDateToWords: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    return result.replace(re, (_m: string, year: string, month: string, day: string) =>
+      isoDateToWords(year, month, day)
+    );
+  },
+
+  timeToWords: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    // replace() passes (match, g1, g2, [g3], offset, string) — for 2-group
+    // regexes the 4th arg is `offset` (a number), not a capture group.
+    return result.replace(re, (_m: string, hour: string, minute: string, meridiemOrOffset?: string | number) =>
+      timeToWords(hour, minute, typeof meridiemOrOffset === "string" ? meridiemOrOffset : undefined)
+    );
+  },
+
+  currencyToWords: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    // The cents group is optional — when absent, replace() passes offset (number) instead.
+    return result.replace(re, (_m: string, dollars: string, centsOrOffset?: string | number) =>
+      currencyToWords(dollars, typeof centsOrOffset === "string" ? centsOrOffset : undefined)
+    );
+  },
+
+  decimalToWords: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    return result.replace(re, (_m: string, lhs: string, rhs: string) =>
+      decimalToWords(lhs, rhs)
+    );
+  },
+
+  ordinalToWordsInline: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    return result.replace(re, (_match: string, digits: string) => {
+      return convertOrdinal(parseInt(digits, 10));
+    });
+  },
+
+  numberToWordsInline: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    return result.replace(re, (_match: string, digits: string) => {
+      return numberToWords(parseInt(digits, 10));
+    });
+  },
+
+  punctuationCleanup: (result) => {
+    const PLACEHOLDER = "\x00";
+    let text = result;
+    // Protect lexical apostrophes (fixed-point loop for multiple internal apostrophes)
+    let previous = "";
+    while (previous !== text) {
+      previous = text;
+      text = text.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
+    }
+    // Preserve trailing apostrophes for colloquial elision spellings
+    text = text.replace(/([a-z])'(?=\s|$|[,.\?!;:])/gi, `$1${PLACEHOLDER}`);
+    // Surround pause-generating punctuation with spaces
+    text = text.replace(/([,.\?!;:])/g, " $1 ");
+    // Strip all remaining punctuation
+    text = text.replace(/[^\w\s\x00,.\?!;:]/g, " ");
+    text = text.replace(new RegExp(PLACEHOLDER, "g"), "'");
+    return text;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Pipeline step dispatchers
+// ---------------------------------------------------------------------------
+
+function executeRegexReplace(result: string, step: PipelineStep): string {
+  let text = result;
+  for (const rule of step.rules ?? []) {
+    if (rule.replacement === "__initialism__") {
+      // Special handler for initialism expansion
+      const re = new RegExp(rule.pattern, rule.flags);
+      text = text.replace(re, (match: string) =>
+        match
+          .replace(/\./g, "")
+          .split("")
+          .join(" ")
+      );
+    } else {
+      const re = new RegExp(rule.pattern, rule.flags);
+      text = text.replace(re, rule.replacement);
+    }
+  }
+  if (step.post === "trim") {
+    text = text.trim();
+  }
+  return text;
+}
+
+function executeTableReplace(result: string, step: PipelineStep): string {
+  const tableName = step.table;
+  if (!tableName) return result;
+
+  const tables = getTables();
+  const table = (tables as Record<string, unknown>)[tableName] as Record<string, string> | undefined;
+  if (!table) return result;
+
+  let text = result;
+  for (const [key, expansion] of Object.entries(table)) {
+    const escaped = key.replace(/\./g, "\\.");
+    const re = new RegExp("\\b" + escaped, "gi");
+    text = text.replace(re, expansion);
+  }
+  return text;
+}
+
+function executeStep(result: string, step: PipelineStep): string {
+  switch (step.type) {
+    case "builtin": {
+      const handler = BUILTIN_HANDLERS[step.handler!];
+      if (!handler) {
+        throw new Error(`E_NORMALIZE: unknown builtin handler '${step.handler}'`);
+      }
+      return handler(result, step);
+    }
+    case "regex_replace":
+      return executeRegexReplace(result, step);
+    case "table_replace":
+      return executeTableReplace(result, step);
+    default:
+      throw new Error(`E_NORMALIZE: unknown step type '${step.type}'`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -353,113 +482,26 @@ function isoDateToWords(yearRaw: string, monthRaw: string, dayRaw: string): stri
 // ---------------------------------------------------------------------------
 
 /**
- * Normalize text for TTS consumption:
- * 1. Lowercase
- * 2. Expand abbreviations (Dr., Mr., etc.)
- * 3. Convert ordinals to words (1st -> first)
- * 4. Convert numbers to words (42 -> forty two)
- * 5. Preserve pause-generating punctuation (, . ? ! ; :) as separate tokens
- * 5b. Strip other punctuation (except apostrophes in contractions)
- * 6. Collapse whitespace
+ * Normalize text for TTS consumption.
+ *
+ * Pipeline order and lookup tables are loaded from YAML configuration:
+ *   normalization-pipeline.yaml — step sequence
+ *   normalization-tables.yaml   — lookup data
+ *
+ * Algorithmic functions (numberToWords, convertOrdinal, etc.) remain as
+ * TypeScript implementations registered as named builtin handlers.
+ *
+ * Citation: Allen, Hunnicutt & Klatt 1987 Ch.3; Ebden & Sproat 2015
  */
 export function normalizeText(text: string): string {
   if (!text) return "";
 
-  let result = text.toLowerCase();
+  const pipeline = getPipeline();
+  let result = text;
 
-  // Normalize typographic/smart quotes to ASCII equivalents so that
-  // apostrophe-protection logic (which matches ASCII ') works on text
-  // pasted from word processors, e-books, or web pages.
-  result = result.replace(/[\u2018\u2019\u201A\u2032]/g, "'");  // curly single → '
-  result = result.replace(/[\u201C\u201D\u201E]/g, '"');          // curly double → "
-  result = result.replace(/\u2026/g, "...");                      // … → ...
-
-  // Expand abbreviations (must happen before punctuation stripping so we can
-  // detect the trailing dot). We use a word-boundary-aware replacement to
-  // avoid false positives inside longer words.
-  for (const [abbrev, expansion] of Object.entries(ABBREVIATIONS)) {
-    // Build a regex that matches the abbreviation as a standalone token.
-    // Escape the dot for regex.
-    const escaped = abbrev.replace(/\./g, "\\.");
-    const re = new RegExp("\\b" + escaped, "gi");
-    result = result.replace(re, expansion);
+  for (const step of pipeline.steps) {
+    result = executeStep(result, step);
   }
-
-  // Expand dotted initialisms (e.g., U.S., U.S.A., C.D.S) into speakable letters.
-  // CMUdict includes both terminal-dot and non-terminal-dot spellings.
-  result = result.replace(/\b(?:[a-z]\.){2,}[a-z]?\.?/gi, (match) =>
-    match
-      .replace(/\./g, "")
-      .split("")
-      .join(" ")
-  );
-
-  // Semiotic class normalization pass inspired by Kestrel-style workflows:
-  // prioritize class-specific verbalization (date/time/currency/number) before
-  // generic token cleanup. See Ebden & Sproat (2014/2015), and MITalk text
-  // analysis practices in Allen, Hunnicutt & Klatt (1987).
-
-  // Convert common date forms before numeric normalization.
-  result = result.replace(/\b([0-1]?[0-9])\/([0-3]?[0-9])\/([0-9]{4})\b/g, (_m, month, day, year) =>
-    dateToWords(month, day, year)
-  );
-  result = result.replace(/\b([0-9]{4})-([0-1][0-9])-([0-3][0-9])\b/g, (_m, year, month, day) =>
-    isoDateToWords(year, month, day)
-  );
-
-  // Convert time forms like 3:05 pm, 14:30, 9:00am before punctuation splitting.
-  result = result.replace(/\b([0-2]?[0-9]):([0-5][0-9])\s*([ap]\.?m\.?)\b/gi, (_m, hour, minute, meridiem) =>
-    timeToWords(hour, minute, meridiem)
-  );
-  result = result.replace(/\b([0-2]?[0-9]):([0-5][0-9])\b/g, (_m, hour, minute) =>
-    timeToWords(hour, minute)
-  );
-
-  // Convert currency forms like $12, $12.34
-  result = result.replace(/\$([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)(?:\.([0-9]{1,2}))?/g, (_m, dollars, cents) =>
-    currencyToWords(dollars, cents)
-  );
-
-  // Convert decimal numbers before integer conversion so 3.14 does not become "three . fourteen".
-  result = result.replace(/\b([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\.([0-9]+)\b/g, (_m, lhs, rhs) =>
-    decimalToWords(lhs, rhs)
-  );
-
-  // Convert ordinals BEFORE numbers so "21st" doesn't become "twenty onest"
-  result = result.replace(/\b(\d+)(?:st|nd|rd|th)\b/gi, (_match, digits) => {
-    return convertOrdinal(parseInt(digits, 10));
-  });
-
-  // Convert numbers to words
-  result = result.replace(/\b(\d+)\b/g, (_match, digits) => {
-    return numberToWords(parseInt(digits, 10));
-  });
-
-  // Strip punctuation EXCEPT:
-  // 1. Apostrophes inside words (contractions: it's, don't)
-  // 2. Pause-generating punctuation (, . ? ! ; :) which become separate tokens
-  //    so that transcribeText() can convert them to SIL pauses.
-  // Strategy: protect lexical apostrophes with placeholder, separate pause
-  // punctuation with spaces, strip remaining punctuation, then restore.
-  const PLACEHOLDER = "\x00";
-  // Run until fixed point so multiple internal apostrophes in one token
-  // (e.g., rock'n'roll) are all preserved.
-  let previous = "";
-  while (previous !== result) {
-    previous = result;
-    result = result.replace(/([a-z])'([a-z])/gi, `$1${PLACEHOLDER}$2`);
-  }
-  // Preserve trailing apostrophes used for colloquial elision spellings
-  // (e.g., "comin'", "ol'") so CMUdict keys survive normalization.
-  result = result.replace(/([a-z])'(?=\s|$|[,.\?!;:])/gi, `$1${PLACEHOLDER}`);
-  // Surround pause-generating punctuation with spaces so they become separate tokens
-  result = result.replace(/([,.\?!;:])/g, " $1 ");
-  // Strip all remaining punctuation (quotes, parens, brackets, etc.)
-  result = result.replace(/[^\w\s\x00,.\?!;:]/g, " ");
-  result = result.replace(new RegExp(PLACEHOLDER, "g"), "'");
-
-  // Collapse whitespace and trim
-  result = result.replace(/\s+/g, " ").trim();
 
   return result;
 }

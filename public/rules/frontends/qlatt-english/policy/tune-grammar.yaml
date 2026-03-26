@@ -22,7 +22,7 @@ phrase_types:
       first: L+H*
       later: H+!H*
     nuclear:
-      with_prenuclear: H*+L
+      with_prenuclear: H*
       without_prenuclear: H*
     edge:
       initial_boundary_tone: null
@@ -56,8 +56,8 @@ phrase_types:
       first: L+H*
       later: H+!H*
     nuclear:
-      with_prenuclear: H*+L
-      without_prenuclear: H*+L
+      with_prenuclear: H*
+      without_prenuclear: H*
     edge:
       initial_boundary_tone: null
       phrase_accent: L-
@@ -72,11 +72,11 @@ phrase_types:
       - Pierrehumbert 1980
       - Ladd 2008 Ch.3
     prenuclear:
-      first: H*+H
+      first: H*
       later: H+!H*
     nuclear:
-      with_prenuclear: H+L*
-      without_prenuclear: H+L*
+      with_prenuclear: L*+H
+      without_prenuclear: L*+H
     edge:
       initial_boundary_tone: null
       phrase_accent: L-

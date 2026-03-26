@@ -338,9 +338,9 @@ function identifyNuclearAccent(tokens: PipelineToken[], phrase: Phrase): void {
  *
  * - Initial prenuclear accent: L+H* (common rising prenuclear default)
  * - Later prenuclear accents: H+!H*
- * - Nuclear accent in declarative (. or no punctuation): H* or H*+L
- * - Nuclear accent in continuation (, ; :): H+L*
- * - Nuclear accent in exclamation (!): H*+L
+ * - Nuclear accent in declarative (. or no punctuation): H*
+ * - Nuclear accent in continuation (, ; :): L*+H
+ * - Nuclear accent in exclamation (!): H*
  * - Nuclear accent in question (?): L* if lone accent, L*+H if postnuclear rise is available
  *
  * Accent labels intentionally follow the original Pierrehumbert/Ladd symbols

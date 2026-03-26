@@ -71,7 +71,7 @@ describe("tune grammar", () => {
       hasPrenuclearAccent: true,
     });
     expect(declarative.phraseType).toBe("declarative");
-    expect(declarative.nuclearAccent).toBe("H*+L");
+    expect(declarative.nuclearAccent).toBe("H*");
     expect(declarative.prenuclearFirstAccent).toBe("L+H*");
     expect(declarative.prenuclearLaterAccent).toBe("H+!H*");
     expect(declarative.initialBoundaryTone).toBeNull();
@@ -87,8 +87,8 @@ describe("tune grammar", () => {
       hasPrenuclearAccent: true,
     });
     expect(continuation.phraseType).toBe("continuation");
-    expect(continuation.nuclearAccent).toBe("H+L*");
-    expect(continuation.prenuclearFirstAccent).toBe("H*+H");
+    expect(continuation.nuclearAccent).toBe("L*+H");
+    expect(continuation.prenuclearFirstAccent).toBe("H*");
     expect(continuation.prenuclearLaterAccent).toBe("H+!H*");
     expect(continuation.phraseAccent).toBe("L-");
     expect(continuation.boundaryTone).toBe("H%");

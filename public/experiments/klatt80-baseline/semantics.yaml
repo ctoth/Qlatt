@@ -109,7 +109,7 @@ params:
   sourceMode:
     description: "Voice source selection (0=impulse, 1=LF, 2=bypass)"
     type: integer
-    default: 1
+    default: 0
     range: [0, 2]
 
   # Parallel branch scaling

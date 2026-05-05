@@ -12,6 +12,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     reportInterval;
     _reportCountdown;
     _explosionLogged;
+    explosionRmsThreshold;
     static get parameterDescriptors() {
         return [
             { name: "frequency", defaultValue: 500, minValue: 0, maxValue: 20000, automationRate: "k-rate" },
@@ -33,6 +34,13 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this._explosionLogged = false;
+        const explosionRmsThreshold = opts?.processorOptions?.explosionRmsThreshold;
+        this.explosionRmsThreshold =
+            typeof explosionRmsThreshold === "number" &&
+                Number.isFinite(explosionRmsThreshold) &&
+                explosionRmsThreshold > 0
+                ? explosionRmsThreshold
+                : 100;
         this.port.onmessage = (event) => {
             if (event?.data?.type === "ping" && this.ready) {
                 this.port.postMessage({ type: "ready", node: this.nodeId });
@@ -106,7 +114,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
                 outSum += outputChannel[i] * outputChannel[i];
             }
             const outRms = Math.sqrt(outSum / outputChannel.length);
-            if (outRms > 100) {
+            if (outRms > this.explosionRmsThreshold) {
                 this._explosionLogged = true;
                 let inSum = 0;
                 if (inputChannel) {
@@ -120,6 +128,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
                     type: "explosion",
                     node: this.nodeId,
                     outRms, inRms, freq, bw, gain,
+                    threshold: this.explosionRmsThreshold,
                     bypassAtZero: this.bypassAtZero,
                     sampleRate,
                 });

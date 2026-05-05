@@ -3,8 +3,9 @@
  * Wraps the reconstruction-filter WASM primitive.
  *
  * Klatt (1980) sends playback through an external 5 kHz analog low-pass after
- * the D/A converter (Fig. 1; Appendix A). This worklet keeps that output-stage
- * filtering in the declarative runtime path.
+ * the D/A converter (Fig. 1; Appendix A). The `bypass` option keeps that
+ * output-stage filter declarative for experiments that intentionally render
+ * higher-frequency fricative energy above the Klatt 1980 playback bandwidth.
  */
 import { initWasmModule, WasmBuffer, computeRmsPeak, resolveWasmUrl } from "./wasm-utils.js";
 const wasmUrl = resolveWasmUrl("./reconstruction-filter.wasm");
@@ -16,6 +17,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
     ready;
     debug;
     nodeId;
+    bypass;
     reportInterval;
     _reportCountdown;
     constructor(options) {
@@ -28,6 +30,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
         this.ready = false;
         this.debug = Boolean(opts?.processorOptions?.debug);
         this.nodeId = opts?.processorOptions?.nodeId || "reconstruction-filter";
+        this.bypass = Boolean(opts?.processorOptions?.bypass);
         this.reportInterval = opts?.processorOptions?.reportInterval || 50;
         this._reportCountdown = this.reportInterval;
         this.port.onmessage = (event) => {
@@ -78,11 +81,16 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
         else {
             inputView.fill(0);
         }
-        this.wasm.reconstruction_filter_process(this.state, this.inputBuffer.ptr, this.outputBuffer.ptr, blockSize);
-        this.outputBuffer.refresh();
-        if (!this.outputBuffer.view) {
-            outputChannel.fill(0);
-            return true;
+        if (this.bypass) {
+            outputView.set(inputView);
+        }
+        else {
+            this.wasm.reconstruction_filter_process(this.state, this.inputBuffer.ptr, this.outputBuffer.ptr, blockSize);
+            this.outputBuffer.refresh();
+            if (!this.outputBuffer.view) {
+                outputChannel.fill(0);
+                return true;
+            }
         }
         outputChannel.set(this.outputBuffer.view);
         this._reportMetrics(outputChannel, inputChannel);

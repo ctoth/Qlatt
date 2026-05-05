@@ -149,8 +149,8 @@ function bandMetrics(slice, sr) {
     spectralFlatness: arithmeticMean > 0 ? geometricMean / arithmeticMean : 0,
     bandPower,
     bandShare,
-    highShareAbove3000: highBandPower / totalPower,
-    hissShareAbove6000: hissBandPower / totalPower,
+    highShareAbove3000: totalPower > 0 ? highBandPower / totalPower : 0,
+    hissShareAbove6000: totalPower > 0 ? hissBandPower / totalPower : 0,
     highToSpeechRatioDb: speechBandPower > 0 && highBandPower > 0
       ? 10 * Math.log10(highBandPower / speechBandPower)
       : null,

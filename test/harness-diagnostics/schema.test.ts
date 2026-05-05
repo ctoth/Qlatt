@@ -448,4 +448,26 @@ display:
     const config = parseDiagConfig(yaml);
     expect(config.checks["f2_peak"].measure_params).toEqual({ band: [2000, 2800] });
   });
+
+  it("parses band_share with measure_params", () => {
+    const yaml = `
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  hiss:
+    tap: t
+    measure: band_share
+    measure_params: { band: [6000, 10000] }
+    assert: { max: 0.08 }
+    severity: warn
+    message: "hiss"
+display:
+  sections: []
+`;
+    const config = parseDiagConfig(yaml);
+    expect(config.checks["hiss"].measure).toBe("band_share");
+    expect(config.checks["hiss"].measure_params).toEqual({ band: [6000, 10000] });
+  });
 });

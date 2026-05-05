@@ -30,6 +30,10 @@ const DEFAULT_OUTPUT_CONFIG = {
   initial_silence_ms: 30,
   final_silence_ms: 100,
 };
+const DEFAULT_SAG_OPTIONS = {
+  sagDepthHz: 12,
+  sagMinSpanMs: 150,
+};
 
 // Suppress warnings during tests
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -193,7 +197,7 @@ describe("track-assembler", () => {
           },
         ],
         [],
-        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG }
+        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG, ...DEFAULT_SAG_OPTIONS }
       );
 
       const aaFrames = track.filter((frame) => frame.phoneme === "AA");
@@ -221,6 +225,7 @@ describe("track-assembler", () => {
           baseF0: 120,
           transitionMs: 0,
           outputConfig: { ...DEFAULT_OUTPUT_CONFIG, initial_silence_ms: 40, final_silence_ms: 0 },
+          ...DEFAULT_SAG_OPTIONS,
         }
       );
       const firstPhone = track.find((f) => f.phoneme === "AA");
@@ -399,6 +404,7 @@ describe("track-assembler", () => {
         baseF0: 120,
         transitionMs: 50,
         outputConfig: DEFAULT_OUTPUT_CONFIG,
+        ...DEFAULT_SAG_OPTIONS,
       });
       // The per-token value should be used; verify frames exist (basic smoke test).
       expect(trackWithOverride.length).toBeGreaterThanOrEqual(3);
@@ -423,6 +429,7 @@ describe("track-assembler", () => {
         baseF0: 120,
         transitionMs: 50,
         outputConfig: DEFAULT_OUTPUT_CONFIG,
+        ...DEFAULT_SAG_OPTIONS,
       });
       // No per-token transition_ms, should use global 50ms.
       expect(track.length).toBeGreaterThanOrEqual(3);
@@ -480,6 +487,7 @@ describe("track-assembler", () => {
       const track = assembleKlattTrack(phoneSequence, parameterSequence, {
         baseF0: 110,
         outputConfig: DEFAULT_OUTPUT_CONFIG,
+        ...DEFAULT_SAG_OPTIONS,
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
     });

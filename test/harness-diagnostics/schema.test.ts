@@ -491,4 +491,33 @@ display:
     expect(config.checks["hiss"].measure).toBe("band_share");
     expect(config.checks["hiss"].measure_params).toEqual({ band: [6000, 10000] });
   });
+
+  it("parses band_ratio_db with aggregate", () => {
+    const yaml = `
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  brightness:
+    tap: t
+    measure: band_ratio_db
+    measure_params:
+      numerator_band: [3000, 10000]
+      denominator_band: [300, 3000]
+    aggregate: max
+    assert: { max: 0 }
+    severity: info
+    message: "bright"
+display:
+  sections: []
+`;
+    const config = parseDiagConfig(yaml);
+    expect(config.checks["brightness"].measure).toBe("band_ratio_db");
+    expect(config.checks["brightness"].aggregate).toBe("max");
+    expect(config.checks["brightness"].measure_params).toEqual({
+      numerator_band: [3000, 10000],
+      denominator_band: [300, 3000],
+    });
+  });
 });

@@ -29,6 +29,7 @@ checks:
     assert: { min: 0.005 }
     severity: warn
     message: "Parallel branch inaudible during SW=1"
+    ignore_guard: true
 
   cascade_no_leak:
     tap: cascade-out
@@ -37,6 +38,7 @@ checks:
     assert: { max: 0.01 }
     severity: info
     message: "Cascade leaking during SW=1"
+    ignore_guard: true
 
   output_no_clip:
     tap: post-output
@@ -47,6 +49,7 @@ checks:
     collect: true
     max_collected: 6
     cooldown_ms: 200
+    ignore_guard: true
 
   output_not_silent:
     tap: post-output
@@ -55,6 +58,7 @@ checks:
     assert: { min: 0.0001 }
     severity: error
     message: "Output silent during voiced segment"
+    ignore_guard: true
 
   output_hiss_share:
     tap: post-output
@@ -64,6 +68,7 @@ checks:
     assert: { max: 0.08 }
     severity: warn
     message: "High-frequency noise share above 6 kHz is large"
+    ignore_guard: true
 
   f2_spectral_peak:
     tap: cascade-f2
@@ -81,6 +86,7 @@ checks:
     assert: { min: 0.001 }
     severity: warn
     message: "Output silent during parallel (SW=1) segments"
+    ignore_guard: true
 
   f0_range:
     type: param_range

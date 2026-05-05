@@ -31,6 +31,8 @@ export class PollLoop {
   private config: DiagConfig;
   private tapManager: TapManager;
   private acrossPlays: AcrossPlaysAccumulator;
+  private meterValues: Map<string, { rms: number; peak: number }> = new Map();
+  private meterMax: Map<string, { rms: number; peak: number; rmsTime?: number; peakTime?: number; rmsPhoneme?: string; peakPhoneme?: string }> = new Map();
   private getRunInfo: () => RunInfo | null;
   private getRunStartTime: () => number;
   private getAudioTime: () => number;
@@ -81,6 +83,8 @@ export class PollLoop {
 
   /** Reset per-play check state. */
   resetPerPlay(): void {
+    this.meterValues.clear();
+    this.meterMax.clear();
     for (const state of this.checkStates.values()) {
       state.collected = [];
       state.lastCollectedAt = -Infinity;
@@ -111,8 +115,25 @@ export class PollLoop {
       const analyser = this.tapManager.get(tapName);
       if (!analyser) continue;
 
-      // Read RMS by default (individual checks specify their measure)
-      measurements.set(tapName, readRms(analyser));
+      const rms = readRms(analyser);
+      const peak = readPeak(analyser);
+      measurements.set(tapName, rms);
+      this.meterValues.set(tapName, { rms, peak });
+      if (snapshot.inWindow) {
+        const previous = this.meterMax.get(tapName) ?? { rms: 0, peak: 0 };
+        const next = { ...previous };
+        if (Number.isFinite(rms) && rms > previous.rms) {
+          next.rms = rms;
+          next.rmsTime = snapshot.relTime;
+          next.rmsPhoneme = snapshot.event?.phoneme ?? "";
+        }
+        if (Number.isFinite(peak) && peak > previous.peak) {
+          next.peak = peak;
+          next.peakTime = snapshot.relTime;
+          next.peakPhoneme = snapshot.event?.phoneme ?? "";
+        }
+        this.meterMax.set(tapName, next);
+      }
     }
 
     // Evaluate each check (skip track_analysis — handled statically)
@@ -170,6 +191,8 @@ export class PollLoop {
     // Format display
     const displayState = this.getDisplayState();
     displayState.checkResults = mergedResults;
+    displayState.meterValues = this.meterValues;
+    displayState.meterMax = this.meterMax;
     const output = formatDisplay(this.config.display, displayState);
 
     // Deliver results

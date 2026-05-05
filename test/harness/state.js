@@ -8,6 +8,7 @@ export const state = {
 
   // Runtime instances
   newRuntime: null,
+  newRuntimeInitPromise: null,
   newInterpreter: null,
   newRuntimeGraph: null,
   newRuntimeSemantics: null,

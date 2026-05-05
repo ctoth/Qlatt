@@ -111,6 +111,7 @@ function parseChecks(raw: unknown): Record<string, CheckDef> {
       check.measure_params = d.measure_params as CheckDef["measure_params"];
     }
     if (d.collect === true) check.collect = true;
+    if (d.ignore_guard === true) check.ignore_guard = true;
     if (typeof d.max_collected === "number") check.max_collected = d.max_collected;
     if (typeof d.cooldown_ms === "number") check.cooldown_ms = d.cooldown_ms;
     if (typeof d.plays === "number") check.plays = d.plays;

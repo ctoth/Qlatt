@@ -155,6 +155,22 @@ describe("evaluateCheck", () => {
     expect(result.status).toBe("skip");
   });
 
+  it("ignore_guard evaluates inside guard window", () => {
+    const snap = makeSnapshot({ inGuard: true });
+    const measurements = new Map([["output", 0.02]]);
+    const state = createCheckState();
+    const result = evaluateCheck(
+      "rms_check",
+      { ...baseDef, ignore_guard: true },
+      measurements,
+      snap,
+      state,
+      0,
+    );
+    expect(result.status).toBe("pass");
+    expect(result.value).toBeCloseTo(0.02);
+  });
+
   // 14. inWindow=false → status='skip'
   it("not inWindow → skip", () => {
     const snap = makeSnapshot({ inWindow: false });

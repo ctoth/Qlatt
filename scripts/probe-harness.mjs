@@ -27,6 +27,25 @@ function mapEntries(value) {
   return Array.from(value.entries()).map(([key, entry]) => [key, entry]);
 }
 
+function topTelemetryMax(entries, limit = 12) {
+  return entries
+    .map(([node, data]) => ({
+      node,
+      rms: Number(data?.rms ?? 0),
+      peak: Number(data?.peak ?? 0),
+      rmsTime: data?.rmsTime ?? null,
+      peakTime: data?.peakTime ?? null,
+      rmsPhoneme: data?.rmsPhoneme ?? "",
+      peakPhoneme: data?.peakPhoneme ?? "",
+      freqMin: data?.freqMin ?? null,
+      freqMax: data?.freqMax ?? null,
+      bwMin: data?.bwMin ?? null,
+      bwMax: data?.bwMax ?? null,
+    }))
+    .sort((a, b) => b.peak - a.peak)
+    .slice(0, limit);
+}
+
 const chromePath = resolveChromePath();
 if (!chromePath) {
   console.error("No Chrome/Edge found. Set CHROME_PATH to continue.");
@@ -124,6 +143,18 @@ try {
         : null,
       telemetry: Array.from(state.telemetry.entries()),
       telemetryMax: Array.from(state.telemetryMax.entries()),
+      diagResults: state.diagEngine
+        ? Array.from(state.diagEngine.getCheckResults().entries()).map(([name, result]) => ({
+            name,
+            status: result.status,
+            severity: result.severity,
+            message: result.message,
+            value: result.value ?? null,
+            valueLabel: result.valueLabel ?? null,
+            assertionFailed: result.assertionFailed === true,
+            collected: result.collected ?? [],
+          }))
+        : [],
       plstepEvents: [...state.plstepEvents],
       plstepTotalCount: state.plstepTotalCount,
       playHistory: [...state.playHistory],
@@ -142,6 +173,12 @@ try {
     pageErrors,
     failedRequests,
     snapshot,
+    summary: {
+      topTelemetryMax: topTelemetryMax(snapshot.telemetryMax),
+      failingChecks: snapshot.diagResults.filter((entry) =>
+        entry.status === "warn" || entry.status === "fail" || entry.assertionFailed,
+      ),
+    },
   };
 
   if (outJson) {
@@ -155,6 +192,8 @@ try {
     currentExperimentId: snapshot.currentExperimentId,
     diagnosticsChars: snapshot.diagnostics.length,
     telemetryNodes: mapEntries(new Map(snapshot.telemetryMax)).length,
+    topTelemetryMax: result.summary.topTelemetryMax.slice(0, 5),
+    failingChecks: result.summary.failingChecks,
     plstepTotalCount: snapshot.plstepTotalCount,
     consoleErrors: consoleLogs.filter((entry) => entry.type === "error").length,
     pageErrors: pageErrors.length,

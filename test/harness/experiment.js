@@ -47,6 +47,7 @@ export function onExperimentChange() {
       state.newRuntime.disconnect();
       state.newRuntime = null;
     }
+    state.newRuntimeInitPromise = null;
     state.newInterpreter = null;
     console.log("[QLATT] Experiment changed to:", selected);
   }

@@ -82,9 +82,10 @@ try {
 
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForFunction(() => window.__qlatt != null, { timeout: 60000 });
-  await page.waitForSelector("#experimentSelect option[value='klatt80-baseline']", {
-    timeout: 60000,
-  });
+  await page.waitForFunction(
+    () => document.querySelector("#experimentSelect option[value='klatt80-baseline']") != null,
+    { timeout: 60000 },
+  );
 
   await page.selectOption("#experimentSelect", experimentId);
   await page.selectOption("#frontendSelect", frontendId);

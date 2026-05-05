@@ -108,6 +108,68 @@ function wordDuration(segments: SegmentInfo[], word: string): number {
 // ---------------------------------------------------------------------------
 
 describe("duration model — break-index pre-boundary lengthening", () => {
+  it("applies voiced-stop vowel lengthening before structurally expanded stop closures", () => {
+    const makeVowel = (word: string) => ({
+      phoneme: "AE",
+      type: "vowel",
+      stress: 1,
+      word,
+      params: { F1: 660, F2: 1720, AV: 64 },
+      duration: 120,
+      inherentDuration: 120,
+      stream: "phone",
+      status: 1,
+      isAccented: false,
+      isNuclearAccent: false,
+    });
+    const voicedClosure = {
+      phoneme: "D_CL",
+      type: "stop_closure",
+      voiced: true,
+      alveolar: true,
+      word: "bad",
+      params: { AV: 47 },
+      duration: 50,
+      inherentDuration: 50,
+      stream: "phone",
+      status: 1,
+    };
+    const voicelessClosure = {
+      phoneme: "T_CL",
+      type: "stop_closure",
+      voiceless: true,
+      alveolar: true,
+      word: "bat",
+      params: { AV: 0 },
+      duration: 50,
+      inherentDuration: 50,
+      stream: "phone",
+      status: 1,
+    };
+
+    const voicedResult = runDeclarativeFrontend(
+      [makeVowel("bad"), voicedClosure],
+      { phases: ["duration"] },
+    );
+    const voicelessResult = runDeclarativeFrontend(
+      [makeVowel("bat"), voicelessClosure],
+      { phases: ["duration"] },
+    );
+
+    const voicedVowel = voicedResult.find(
+      (t: Record<string, unknown>) => t.phoneme === "AE" && t.status !== 2,
+    ) as Record<string, unknown>;
+    const voicelessVowel = voicelessResult.find(
+      (t: Record<string, unknown>) => t.phoneme === "AE" && t.status !== 2,
+    ) as Record<string, unknown>;
+
+    expect(voicedVowel).toBeDefined();
+    expect(voicelessVowel).toBeDefined();
+    if (!voicedVowel || !voicelessVowel) return;
+
+    expect(voicedVowel.duration as number).toBeGreaterThan(voicelessVowel.duration as number);
+  });
+
   it("bi=4: vowel before period is at least 40% longer than same vowel mid-phrase", () => {
     // "The cat sat on the mat." — "mat" is sentence-final (bi=4), "cat" is mid-phrase
     // Both "cat" and "mat" contain AE1, so the vowel identity is controlled.

@@ -129,7 +129,7 @@ Verification:
 
 ### 9. Glottal modulation OQ and Fant source model
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Do not rely on Fant 1995 until notes exist.
@@ -140,7 +140,7 @@ Verification:
 
 ### 10. Nasal pole-zero model
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Add vowel-dependent nasal pole and zero endpoint controls.

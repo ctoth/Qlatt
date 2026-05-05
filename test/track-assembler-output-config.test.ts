@@ -24,6 +24,10 @@ describe("track-assembler output config", () => {
     initial_silence_ms: 30,
     final_silence_ms: 100,
   };
+  const defaultSagOptions = {
+    sagDepthHz: 12,
+    sagMinSpanMs: 150,
+  };
 
   describe("assembleKlattTrack rejects missing/incomplete outputConfig", () => {
     const minimalPhone = [
@@ -42,6 +46,7 @@ describe("track-assembler output config", () => {
       expect(() =>
         assembleKlattTrack(minimalPhone, minimalPhone, {
           outputConfig: undefined as unknown as OutputConfig,
+          ...defaultSagOptions,
         })
       ).toThrow(/outputConfig/i);
     });
@@ -50,6 +55,7 @@ describe("track-assembler output config", () => {
       expect(() =>
         assembleKlattTrack(minimalPhone, minimalPhone, {
           outputConfig: null as unknown as OutputConfig,
+          ...defaultSagOptions,
         })
       ).toThrow(/outputConfig/i);
     });
@@ -64,6 +70,7 @@ describe("track-assembler output config", () => {
               factor: undefined,
             },
           },
+          ...defaultSagOptions,
         })
       ).toThrow("E_OUTPUT_CONFIG_REQUIRED: output.blend.factor must be a finite number");
     });

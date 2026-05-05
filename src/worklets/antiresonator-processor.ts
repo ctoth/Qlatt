@@ -13,6 +13,7 @@ interface AntiResonatorWasmExports {
 interface AntiResonatorProcessorOptions extends BaseProcessorOptions {
   processorOptions?: BaseProcessorOptions["processorOptions"] & {
     bypassAtZero?: boolean;
+    explosionRmsThreshold?: number;
   };
 }
 
@@ -48,6 +49,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
   reportInterval: number;
   _reportCountdown: number;
   _explosionLogged: boolean;
+  explosionRmsThreshold: number;
 
   static get parameterDescriptors(): AudioParamDescriptor[] {
     return [
@@ -71,6 +73,11 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     this.reportInterval = opts?.processorOptions?.reportInterval || 50;
     this._reportCountdown = this.reportInterval;
     this._explosionLogged = false;
+    const explosionRmsThreshold = opts?.processorOptions?.explosionRmsThreshold;
+    this.explosionRmsThreshold =
+      Number.isFinite(explosionRmsThreshold) && explosionRmsThreshold > 0
+        ? explosionRmsThreshold
+        : 100;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
       if (event?.data?.type === "ping" && this.ready) {
         this.port.postMessage({ type: "ready", node: this.nodeId });
@@ -161,7 +168,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
         outSum += outputChannel[i] * outputChannel[i];
       }
       const outRms = Math.sqrt(outSum / outputChannel.length);
-      if (outRms > 100) {
+      if (outRms > this.explosionRmsThreshold) {
         this._explosionLogged = true;
         let inSum = 0;
         if (inputChannel) {
@@ -177,6 +184,7 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
           type: "explosion",
           node: this.nodeId,
           outRms, inRms, freq, bw, gain,
+          threshold: this.explosionRmsThreshold,
           bypassAtZero: this.bypassAtZero,
           sampleRate,
         });

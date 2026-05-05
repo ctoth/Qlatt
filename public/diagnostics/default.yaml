@@ -2,7 +2,7 @@
 
 taps:
   cascade-out:
-    node: cascadeOutGain
+    node: [cascadeOutGain, cascadeF1]
     fftSize: 2048
   parallel-out:
     node: parallelSum
@@ -11,7 +11,7 @@ taps:
     node: outputSum
     fftSize: 2048
   post-output:
-    node: outputGain
+    node: [outputGain, finalPolarityGain]
     fftSize: 2048
   cascade-f2:
     node: cascadeF2

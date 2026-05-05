@@ -49,6 +49,7 @@ export type MeasureKind =
   | "peak"
   | "fft_peak_freq"
   | "band_energy"
+  | "band_share"
   | "zcr"
   | "rms_ratio_db";
 

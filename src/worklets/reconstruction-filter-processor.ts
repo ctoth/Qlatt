@@ -121,6 +121,7 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
       inputView.fill(0);
     }
 
+    let renderedView = outputView;
     if (this.bypass) {
       outputView.set(inputView);
     } else {
@@ -132,13 +133,14 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
       );
 
       this.outputBuffer.refresh();
-      if (!this.outputBuffer.view) {
+      renderedView = this.outputBuffer.view;
+      if (!renderedView) {
         outputChannel.fill(0);
         return true;
       }
     }
 
-    outputChannel.set(this.outputBuffer.view);
+    outputChannel.set(renderedView);
     this._reportMetrics(outputChannel, inputChannel);
     return true;
   }

@@ -55,6 +55,14 @@ describe("declarative frontend scalar resolution", () => {
           },
         },
       },
+      parameters: {
+        policy: {
+          duration: {
+            incompressibility_ratio_vowel: 0.42,
+            incompressibility_ratio_consonant: 0.6,
+          },
+        },
+      },
       rules: {
         half_duration: {
           select: { stream: "phone", where: "true" },

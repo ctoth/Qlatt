@@ -109,7 +109,9 @@ rules:
             value: params.policy.duration.vowel_shortening_voiced_fricative_multiplier
           - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type == 'fricative')"
             value: params.policy.duration.vowel_shortening_voiced_fricative_medial_multiplier
-          - when: "n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_release'])"
+          - when: >-
+              n == null ? false : (has(n.voiced) && n.voiced == true && n.type in ['stop', 'stop_closure',
+              'stop_release'])
             value: params.policy.duration.vowel_shortening_voiced_stop_multiplier
           - when: "n == null ? false : n.type == 'nasal'"
             value: params.policy.duration.vowel_shortening_nasal_multiplier

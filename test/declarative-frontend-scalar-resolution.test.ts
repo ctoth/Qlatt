@@ -60,17 +60,19 @@ describe("declarative frontend scalar resolution", () => {
           duration: {
             incompressibility_ratio_vowel: 0.42,
             incompressibility_ratio_consonant: 0.6,
+            test_multiplier: 0.5,
+            test_offset_ms: -100,
           },
         },
       },
       rules: {
         half_duration: {
           select: { stream: "phone", where: "true" },
-          apply: [{ field: "duration", op: "mul", value: "0.5", tag: "mul" }],
+          apply: [{ field: "duration", op: "mul", value: "params.policy.duration.test_multiplier", tag: "mul" }],
         },
         subtract_duration: {
           select: { stream: "phone", where: "true" },
-          apply: [{ field: "duration", op: "add", value: "-100", tag: "add" }],
+          apply: [{ field: "duration", op: "add", value: "params.policy.duration.test_offset_ms", tag: "add" }],
         },
       },
       phases: [

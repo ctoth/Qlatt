@@ -280,11 +280,30 @@ parameters:
         citations: ["DECtalk 4.63 Paul BF*10"]
 output:
   blend:
-    default_weight: 0.5
+    factor:
+      value: 0.5
+      citations:
+        - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
+    keys: [F1, F2, F3, B1, B2, B3]
+    smooth_types: [vowel, nasal, liquid, glide]
   min_duration:
-    default: 30
+    stop_release_ms:
+      value: 5
+      citations:
+        - "Engineering estimate: minimum 5ms for stop release burst visibility"
+    default_ms:
+      value: 30
+      citations:
+        - "DECtalk 4.63 p_us_tim.c timing tables use 10ms-frame-derived segment durations; 30ms keeps legacy frontend floor"
+  initial_silence_ms:
+    value: 0
+    citations:
+      - "Engineering boundary: DECtalk frontend adds no synthetic initial silence unless rules request it"
   transition_ms: 30
-  final_silence_ms: 100
+  final_silence_ms:
+    value: 100
+    citations:
+      - "Engineering estimate: preserve legacy DECtalk frontend 100ms release tail"
 transcription:
   diagnostic_symbols:
     aa: [AA1]

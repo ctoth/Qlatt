@@ -105,6 +105,8 @@ export interface CheckDef {
   message: string;
   /** Collect failing events instead of just pass/fail. */
   collect?: boolean;
+  /** Evaluate even inside the global event-boundary guard window. */
+  ignore_guard?: boolean;
   /** Max collected events. */
   max_collected?: number;
   /** Cooldown between collected events (ms). */

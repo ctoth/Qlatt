@@ -428,6 +428,10 @@ function buildTextToKlattTrackDetailed(
       : requestedRate;
   const rate = Math.max(0.5, Math.min(2.0, normalizedRate));
 
+  // Speaker defaults/overrides are always present so declarative rules can
+  // reference the same policy surface as the runtime defaults.
+  const speakerPolicy = mergePhaseParameters({ policy: { ...speakerOverrides } });
+
   // Run phone normalization before postlexical rules so LTS-internal symbols
   // (AX/NX/WH) are mapped onto inventory-compatible ARPABET.
   // Citation: Elovitz et al. 1976; Allen et al. 1987
@@ -437,9 +441,6 @@ function buildTextToKlattTrackDetailed(
   // t_flapping must see raw T between vowels; structural would split T into
   // T_CL + T_REL + T_ASP, breaking the adjacency check.
   // Citation: Miller 1998, Pronunciation Modeling in Speech Synthesis
-  // Speaker defaults/overrides are always present so declarative rules can
-  // reference the same policy surface as the runtime defaults.
-  const speakerPolicy = mergePhaseParameters({ policy: { ...speakerOverrides } });
   parameterSequence = runPhases(parameterSequence, ["postlexical"], speakerPolicy);
   parameterSequence = runPhases(parameterSequence, ["structural"], speakerPolicy);
   // Ensure id/stream/status fields exist before prosodic annotation.

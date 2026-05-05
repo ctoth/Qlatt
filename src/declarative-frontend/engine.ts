@@ -132,9 +132,6 @@ export function getIncompressibleMin(
   const inherentMs = Number(inherent);
   if (!Number.isFinite(inherentMs) || inherentMs <= 0) return 0;
 
-  const DEFAULT_VOWEL_RATIO = 0.42;
-  const DEFAULT_CONSONANT_RATIO = 0.6;
-
   const durationPolicy =
     params &&
     typeof params === "object" &&
@@ -146,21 +143,18 @@ export function getIncompressibleMin(
       ? ((params.policy as Record<string, unknown>).duration as Record<string, unknown>)
       : null;
 
-  const vowelRatio =
-    durationPolicy &&
-    typeof durationPolicy.incompressibility_ratio_vowel === "number" &&
-    Number.isFinite(durationPolicy.incompressibility_ratio_vowel)
-      ? durationPolicy.incompressibility_ratio_vowel
-      : DEFAULT_VOWEL_RATIO;
+  if (!durationPolicy) {
+    throw new Error("E_DURATION_POLICY_REQUIRED: params.policy.duration is required for Klatt duration resolution");
+  }
 
-  const consonantRatio =
-    durationPolicy &&
-    typeof durationPolicy.incompressibility_ratio_consonant === "number" &&
-    Number.isFinite(durationPolicy.incompressibility_ratio_consonant)
-      ? durationPolicy.incompressibility_ratio_consonant
-      : DEFAULT_CONSONANT_RATIO;
-
-  const ratio = token?.type === "vowel" ? vowelRatio : consonantRatio;
+  const ratioKey =
+    token?.type === "vowel"
+      ? "incompressibility_ratio_vowel"
+      : "incompressibility_ratio_consonant";
+  const ratio = durationPolicy[ratioKey];
+  if (typeof ratio !== "number" || !Number.isFinite(ratio)) {
+    throw new Error(`E_DURATION_POLICY_REQUIRED: params.policy.duration.${ratioKey} must be a finite number`);
+  }
   return inherentMs * ratio;
 }
 

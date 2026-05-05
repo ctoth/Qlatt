@@ -3,7 +3,7 @@
 import yaml from "js-yaml";
 import type { DiagConfig, TapDef, CheckDef, PollConfig, DisplayConfig, DisplaySection } from "./types";
 
-const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "zcr", "rms_ratio_db"]);
+const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "band_share", "zcr", "rms_ratio_db"]);
 const VALID_CHECK_TYPES = new Set(["tap_check", "param_range", "event_check", "across_plays", "track_analysis"]);
 const VALID_SEVERITIES = new Set(["info", "warn", "error"]);
 

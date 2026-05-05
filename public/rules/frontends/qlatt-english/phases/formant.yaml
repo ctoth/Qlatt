@@ -18,6 +18,7 @@ rules:
               cand.hi == true : false))
             value: params.policy.formant.velar_f2_locus_front
           - default: params.policy.formant.velar_f2_locus
+        tag: velar_locus
     citations:
       - Allen et al. 1987 (velar locus)
   k_context_rel_copy:
@@ -29,6 +30,7 @@ rules:
       - field: params.F2
         op: set
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.velar_f2_locus"
+        tag: velar_locus
     citations:
       - Allen et al. 1987 (velar locus transitions)
   bilabial_f2_locus:
@@ -51,6 +53,7 @@ rules:
           - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
             value: params.policy.formant.bilabial_f2_locus_back
           - default: params.policy.formant.bilabial_f2_locus
+        tag: bilabial_locus
     citations:
       - >-
         Stevens & House 1956 (locus varies 700-1500 Hz by vowel context; 1200 Hz is midpoint approximation per Allen et
@@ -64,6 +67,7 @@ rules:
       - field: params.F2
         op: set
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus"
+        tag: bilabial_locus
     citations:
       - Stevens & House 1956
       - Allen et al. 1987 (bilabial locus transitions)
@@ -87,6 +91,7 @@ rules:
           - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
             value: params.policy.formant.alveolar_f2_locus_back
           - default: params.policy.formant.alveolar_f2_locus
+        tag: alveolar_locus
     citations:
       - Stevens & House 1956
       - Allen et al. 1987 (alveolar F2 locus ~1800 Hz)
@@ -99,6 +104,7 @@ rules:
       - field: params.F2
         op: set
         value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus"
+        tag: alveolar_locus
     citations:
       - Stevens & House 1956
       - Allen et al. 1987 (alveolar locus transitions)
@@ -114,6 +120,7 @@ rules:
           - when: "next != null ? (next.type == 'vowel' ? (has(next.back) ? next.back == true : false) : false) : false"
             value: params.policy.formant.palatal_f2_back_vowel
           - default: params.policy.formant.palatal_f2_locus
+        tag: palatal_locus
     citations:
       - Stevens & House 1956
       - Allen et al. 1987 (palatal F2 locus ~2600 Hz)
@@ -174,6 +181,7 @@ rules:
           - when: next_velar
             value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
+        tag: nasal_place
     citations:
       - Allen et al. 1987
       - Fujimura 1962
@@ -286,6 +294,7 @@ rules:
                     value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
                 tag: "'nasal_coupling'"
           - default: []
+        tag: nasal_window
     citations:
       - Hawkins & Stevens 1985 (time-varying anticipatory and carryover nasalization)
       - Chen 1997 (nasalized vowel secondary cues)
@@ -307,12 +316,14 @@ rules:
           - when: is_coda
             value: params.policy.formant.dark_l_f2
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
+        tag: lateral_allophony
       - field: params.F3
         op: set
         dispatch:
           - when: is_coda
             value: params.policy.formant.dark_l_f3
           - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
+        tag: lateral_allophony
     citations:
       - Recasens 2012 (lateral allophones)
       - Sproat & Fujimura 1993 (syllable-final /l/ darkening)
@@ -333,6 +344,7 @@ rules:
           - when: is_coda
             value: params.policy.formant.r_f3_coda
           - default: params.policy.formant.r_f3_onset
+        tag: rhoticity
     citations:
       - Espy-Wilson 2000 (acoustic modeling of American /r/)
       - Stevens 1998
@@ -352,6 +364,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
+        tag: stop_release_formant
     citations:
       - Stevens 1998 (stop consonant acoustics -- low F1 at release onset)
   burst_spectral_template:
@@ -370,6 +383,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a2_velar
           - default: "has(current.?params.A2) ? current.params.A2 : 0"
+        tag: burst_spectrum
       - field: params.A3
         op: set
         dispatch:
@@ -380,6 +394,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a3_velar
           - default: "has(current.?params.A3) ? current.params.A3 : 0"
+        tag: burst_spectrum
       - field: params.A4
         op: set
         dispatch:
@@ -390,6 +405,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a4_velar
           - default: "has(current.?params.A4) ? current.params.A4 : 0"
+        tag: burst_spectrum
       - field: params.A5
         op: set
         dispatch:
@@ -400,6 +416,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a5_velar
           - default: "has(current.?params.A5) ? current.params.A5 : 0"
+        tag: burst_spectrum
       - field: params.A6
         op: set
         dispatch:
@@ -410,6 +427,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a6_velar
           - default: "has(current.?params.A6) ? current.params.A6 : 0"
+        tag: burst_spectrum
       - field: params.A7
         op: set
         dispatch:
@@ -420,6 +438,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a7_velar
           - default: "has(current.?params.A7) ? current.params.A7 : 0"
+        tag: burst_spectrum
       - field: params.A8
         op: set
         dispatch:
@@ -430,6 +449,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a8_velar
           - default: "has(current.?params.A8) ? current.params.A8 : 0"
+        tag: burst_spectrum
       - field: params.A9
         op: set
         dispatch:
@@ -440,6 +460,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a9_velar
           - default: "has(current.?params.A9) ? current.params.A9 : 0"
+        tag: burst_spectrum
       - field: params.A10
         op: set
         dispatch:
@@ -450,6 +471,7 @@ rules:
           - when: has(current.velar) && current.velar == true
             value: params.policy.formant.burst_a10_velar
           - default: "has(current.?params.A10) ? current.params.A10 : 0"
+        tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
       - Zue 1976
@@ -519,11 +541,13 @@ rules:
         value: >-
           current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
           reduction_rate
+        tag: vowel_reduction
       - field: params.F2
         op: set
         value: >-
           current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
           reduction_rate
+        tag: vowel_reduction
     citations:
       - Allen et al. 1987
       - Klatt 1976
@@ -543,11 +567,13 @@ rules:
         value: >-
           current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
           params.policy.formant.rate_undershoot_factor
+        tag: rate_undershoot
       - field: params.F2
         op: set
         value: >-
           current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
           params.policy.formant.rate_undershoot_factor
+        tag: rate_undershoot
     citations:
       - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
       - Moon & Lindblom 1994 (rate-dependent formant undershoot)
@@ -634,6 +660,7 @@ rules:
       - field: params.SW
         op: set
         value: current.inventorySW
+        tag: branch_switch
     citations:
       - Klatt 1980
       - Allen et al. 1987
@@ -646,5 +673,6 @@ rules:
       - field: params.SW
         op: set
         value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
+        tag: branch_switch
     citations:
       - Klatt 1980

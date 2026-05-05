@@ -93,7 +93,7 @@ Verification:
 
 ### 6. Klatt 1976 duration model
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Replace multiply-then-floor duration shortening with Klatt 1976 Eq. 1 semantics for compressible duration.
@@ -105,7 +105,7 @@ Verification:
 
 ### 7. Aspiration/frication routing
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Stop routing AH through the frication source via `max(AF, AH)` in parallel mode.

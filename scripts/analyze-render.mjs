@@ -135,6 +135,9 @@ function bandMetrics(slice, sr) {
   for (const [name] of bands) {
     bandShare[name] = totalPower > 0 ? bandPower[name] / totalPower : 0;
   }
+  const speechBandPower = bandPower.low + bandPower.mid;
+  const highBandPower = bandPower.presence + bandPower.hiss + bandPower.ultra;
+  const hissBandPower = bandPower.hiss + bandPower.ultra;
 
   const arithmeticMean = totalPower / Math.max(1, size / 2);
   const geometricMean = geometricCount ? Math.exp(geometricSum / geometricCount) : 0;
@@ -146,8 +149,14 @@ function bandMetrics(slice, sr) {
     spectralFlatness: arithmeticMean > 0 ? geometricMean / arithmeticMean : 0,
     bandPower,
     bandShare,
-    highShareAbove3000: bandShare.presence + bandShare.hiss + bandShare.ultra,
-    hissShareAbove6000: bandShare.hiss + bandShare.ultra,
+    highShareAbove3000: highBandPower / totalPower,
+    hissShareAbove6000: hissBandPower / totalPower,
+    highToSpeechRatioDb: speechBandPower > 0 && highBandPower > 0
+      ? 10 * Math.log10(highBandPower / speechBandPower)
+      : null,
+    hissToSpeechRatioDb: speechBandPower > 0 && hissBandPower > 0
+      ? 10 * Math.log10(hissBandPower / speechBandPower)
+      : null,
   };
 }
 
@@ -166,9 +175,11 @@ function classifyFrame(frame) {
 }
 
 function segmentMetrics() {
-  if (track.length === 0) return { byClass: {}, loudestFrames: [] };
+  if (track.length === 0) return { byClass: {}, loudestFrames: [], releaseFrames: [], releaseSummary: null };
   const byClassSamples = new Map();
+  const releaseSamples = [];
   const frames = [];
+  const releaseFrames = [];
 
   for (let i = 0; i < track.length; i += 1) {
     const frame = track[i];
@@ -178,19 +189,32 @@ function segmentMetrics() {
     if (end <= start) continue;
     const slice = sliceForTime(start, end);
     const metrics = rmsPeak(slice);
+    const spectral = bandMetrics(slice, sampleRate);
     const cls = classifyFrame(frame);
+    const phoneme = frame.phoneme ?? "";
     if (!byClassSamples.has(cls)) byClassSamples.set(cls, []);
     byClassSamples.get(cls).push(...slice);
     frames.push({
       time: frame.time,
       endTime: end - leadTime,
-      phoneme: frame.phoneme ?? "",
+      phoneme,
       class: cls,
       duration: end - start,
       rms: metrics.rms,
       peak: metrics.peak,
       zcr: metrics.zcr,
     });
+    if (phoneme.endsWith("_REL")) {
+      releaseSamples.push(...slice);
+      releaseFrames.push({
+        time: frame.time,
+        endTime: end - leadTime,
+        phoneme,
+        duration: end - start,
+        ...metrics,
+        spectral,
+      });
+    }
   }
 
   const byClass = {};
@@ -205,6 +229,13 @@ function segmentMetrics() {
   return {
     byClass,
     loudestFrames: frames.slice(0, 12),
+    releaseFrames,
+    releaseSummary: releaseSamples.length
+      ? {
+          ...rmsPeak(releaseSamples),
+          spectral: bandMetrics(releaseSamples, sampleRate),
+        }
+      : null,
   };
 }
 
@@ -258,6 +289,10 @@ console.log(JSON.stringify({
   activeHighShareAbove3000: report.active.spectral?.highShareAbove3000,
   activeCentroidHz: report.active.spectral?.spectralCentroidHz,
   activeFlatness: report.active.spectral?.spectralFlatness,
+  activeHighToSpeechRatioDb: report.active.spectral?.highToSpeechRatioDb,
+  activeHissToSpeechRatioDb: report.active.spectral?.hissToSpeechRatioDb,
+  releaseSummary: report.segments.releaseSummary,
+  releaseFrames: report.segments.releaseFrames,
   clippedShare: report.full.clippedShare,
   loudestFrames: report.segments.loudestFrames.slice(0, 5),
   outJson,

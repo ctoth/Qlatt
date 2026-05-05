@@ -9,13 +9,15 @@
  * This replaces the original 50% duty-cycle square wave with a smooth
  * pulsatile envelope shaped by the open quotient (OQ) parameter.
  *
- * OQ is derived from the Rd voice quality parameter per Fant 1995:
- *   OQ ~= 1 - 1/(2*Rd)
+ * OQ is supplied by semantics.yaml. The default qlatt path derives it by
+ * interpolating Fant 1997 Table 1 OQi values from Rd, with explicit Klatt
+ * percent OQ overrides allowed.
  *
  * Citations:
  *   - Klatt 1980 COEWAV.FOR lines 116-122 (aspiration modulation)
  *   - Gobl 1988 (voice source dynamics in connected speech)
- *   - Fant 1995 (OQ-Rd relationship)
+ *   - Fant 1997 Table 1 (Rd-to-OQi values)
+ *   - Klatt & Klatt 1990 (Klatt OQ definition and override parameter)
  */
 import { computeRmsPeak, BaseProcessorOptions } from "./wasm-utils.js";
 
@@ -98,7 +100,7 @@ class GlottalModProcessor extends AudioWorkletProcessor {
         if (this.phase >= period) {
           this.phase %= period;
         }
-        // Pulsatile aspiration envelope shaped by OQ (Klatt 1980, Gobl 1988, Fant 1995)
+        // Pulsatile aspiration envelope shaped by OQ (Klatt 1980; Gobl 1988; Fant 1997 Table 1)
         const openDuration = oq * period;
         if (this.phase < openDuration) {
           // Open phase: sinusoidal modulation peaking at 1.0

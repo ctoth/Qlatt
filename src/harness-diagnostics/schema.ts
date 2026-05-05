@@ -3,9 +3,10 @@
 import yaml from "js-yaml";
 import type { DiagConfig, TapDef, CheckDef, PollConfig, DisplayConfig, DisplaySection } from "./types";
 
-const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "band_share", "zcr", "rms_ratio_db"]);
+const VALID_MEASURES = new Set(["rms", "peak", "fft_peak_freq", "band_energy", "band_share", "band_ratio_db", "zcr", "rms_ratio_db"]);
 const VALID_CHECK_TYPES = new Set(["tap_check", "param_range", "event_check", "across_plays", "track_analysis"]);
 const VALID_SEVERITIES = new Set(["info", "warn", "error"]);
+const VALID_AGGREGATES = new Set(["last", "max", "min"]);
 
 export function parseDiagConfig(source: string): DiagConfig {
   const raw = yaml.load(source);
@@ -95,6 +96,9 @@ function parseChecks(raw: unknown): Record<string, CheckDef> {
     if (checkType && !VALID_CHECK_TYPES.has(checkType)) {
       throw new Error(`check '${name}' has unknown type '${checkType}'`);
     }
+    if (d.aggregate && !VALID_AGGREGATES.has(d.aggregate as string)) {
+      throw new Error(`check '${name}' has unknown aggregate '${d.aggregate}'`);
+    }
 
     const check: CheckDef = {
       assert: d.assert as CheckDef["assert"],
@@ -110,6 +114,7 @@ function parseChecks(raw: unknown): Record<string, CheckDef> {
     if (d.measure_params && typeof d.measure_params === "object") {
       check.measure_params = d.measure_params as CheckDef["measure_params"];
     }
+    if (d.aggregate) check.aggregate = d.aggregate as CheckDef["aggregate"];
     if (d.collect === true) check.collect = true;
     if (d.ignore_guard === true) check.ignore_guard = true;
     if (typeof d.max_collected === "number") check.max_collected = d.max_collected;

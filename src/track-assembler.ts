@@ -91,6 +91,13 @@ function requireOutputStringArray(value: unknown, path: string): string[] {
   return value;
 }
 
+function requireOptionNumber(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_ASSEMBLE_OPTION_REQUIRED: ${name} must be a finite number`);
+  }
+  return value;
+}
+
 /** Voice quality parameter overrides injected into every frame.
  *  Resolved from voice_quality_presets in the selected frontend spec.
  *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
@@ -1532,8 +1539,8 @@ export function assembleKlattTrack(
     // Apply sagging transitions between consecutive H* accent peaks.
     // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
     // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-    const sagDepth = options.sagDepthHz ?? 12;
-    const sagMinSpan = options.sagMinSpanMs ?? 150;
+    const sagDepth = requireOptionNumber(options.sagDepthHz, "sagDepthHz");
+    const sagMinSpan = requireOptionNumber(options.sagMinSpanMs, "sagMinSpanMs");
     f0Contour = applySaggingTransitions(rawF0Contour, sagDepth, sagMinSpan);
   }
 

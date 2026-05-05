@@ -136,6 +136,21 @@ function unwrapOutputNumber(entry: unknown): number | undefined {
   return undefined;
 }
 
+function requireOutputNumber(entry: unknown, path: string): number {
+  const value = unwrapOutputNumber(entry);
+  if (value === undefined) {
+    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a finite number`);
+  }
+  return value;
+}
+
+function requireOutputStringArray(entry: unknown, path: string): string[] {
+  if (!Array.isArray(entry) || entry.length === 0 || entry.some((value) => typeof value !== "string")) {
+    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a non-empty string array`);
+  }
+  return entry;
+}
+
 function getRulepackOutputConfig(specSource: unknown): OutputConfig {
   const raw = (specSource as any)?.output;
   if (!raw || typeof raw !== "object") {
@@ -143,22 +158,24 @@ function getRulepackOutputConfig(specSource: unknown): OutputConfig {
   }
   const blend = raw.blend;
   const minDuration = raw.min_duration;
+  if (!blend || typeof blend !== "object") {
+    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.blend must be an object");
+  }
+  if (!minDuration || typeof minDuration !== "object") {
+    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.min_duration must be an object");
+  }
   const config: OutputConfig = {
-    blend: blend
-      ? {
-          factor: unwrapOutputNumber(blend.factor),
-          keys: Array.isArray(blend.keys) ? blend.keys : undefined,
-          smooth_types: Array.isArray(blend.smooth_types) ? blend.smooth_types : undefined,
-        }
-      : undefined,
-    min_duration: minDuration
-      ? {
-          stop_release_ms: unwrapOutputNumber(minDuration.stop_release_ms),
-          default_ms: unwrapOutputNumber(minDuration.default_ms),
-        }
-      : undefined,
-    initial_silence_ms: unwrapOutputNumber(raw.initial_silence_ms),
-    final_silence_ms: unwrapOutputNumber(raw.final_silence_ms),
+    blend: {
+      factor: requireOutputNumber(blend.factor, "blend.factor"),
+      keys: requireOutputStringArray(blend.keys, "blend.keys"),
+      smooth_types: requireOutputStringArray(blend.smooth_types, "blend.smooth_types"),
+    },
+    min_duration: {
+      stop_release_ms: requireOutputNumber(minDuration.stop_release_ms, "min_duration.stop_release_ms"),
+      default_ms: requireOutputNumber(minDuration.default_ms, "min_duration.default_ms"),
+    },
+    initial_silence_ms: requireOutputNumber(raw.initial_silence_ms, "initial_silence_ms"),
+    final_silence_ms: requireOutputNumber(raw.final_silence_ms, "final_silence_ms"),
   };
   return config;
 }
@@ -617,8 +634,8 @@ function buildTextToKlattTrackDetailed(
 
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,
-    rulepackOutputConfig.min_duration?.stop_release_ms ?? 5,
-    rulepackOutputConfig.min_duration?.default_ms ?? 20,
+    rulepackOutputConfig.min_duration!.stop_release_ms!,
+    rulepackOutputConfig.min_duration!.default_ms!,
     frontendInventory.phoneme_targets,
   );
 

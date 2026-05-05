@@ -9,10 +9,33 @@ const semanticsPath = resolve(__dirname, "../public/experiments/klatt80-baseline
 const semanticsRaw = readFileSync(semanticsPath, "utf-8");
 const semantics = parseYamlString<SemanticsDocument>(semanticsRaw, semanticsPath);
 
+const generatedFormantParams = {
+  F1: 500,
+  F2: 1500,
+  F3: 2500,
+  F4: 3500,
+  F5: 4500,
+  F6: 5500,
+  F7: 6500,
+  F8: 7500,
+  F9: 8500,
+  F10: 9500,
+  B1: 60,
+  B2: 90,
+  B3: 150,
+  B4: 200,
+  B5: 200,
+  B6: 500,
+  B7: 722,
+  B8: 1250,
+  B9: 2125,
+  B10: 4750,
+};
+
 function evaluate(params: Record<string, number>) {
   const { topoEvaluator } = createConfiguredEvaluator();
   const context: EvaluationContext = {
-    params,
+    params: { ...generatedFormantParams, ...params },
     constants: semantics.constants ?? {},
   };
   return topoEvaluator.evaluate(semantics, context);

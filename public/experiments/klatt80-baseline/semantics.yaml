@@ -268,6 +268,48 @@ params:
     default: 250
     unit: Hz
 
+  nasalVowelPoleTargetHz:
+    description: "Optional explicit vowel-nasalization pole endpoint. 0 = derive from F1 using Hawkins & Stevens 1985 Fig. 5 endpoint ranges."
+    type: float
+    default: 0
+    unit: Hz
+
+  nasalVowelZeroTargetHz:
+    description: "Optional explicit vowel-nasalization zero endpoint. 0 = derive as midpoint between F1 and the nasal pole endpoint per Hawkins & Stevens 1985."
+    type: float
+    default: 0
+    unit: Hz
+
+  nasalHighVowelPoleTargetHz:
+    description: "High-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [i,u] range."
+    type: float
+    default: 800
+    unit: Hz
+
+  nasalMidVowelPoleTargetHz:
+    description: "Mid-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [e,o] range."
+    type: float
+    default: 725
+    unit: Hz
+
+  nasalLowVowelPoleTargetHz:
+    description: "Low-vowel nasal pole endpoint from Hawkins & Stevens 1985 Fig. 5 approximate [a] value."
+    type: float
+    default: 800
+    unit: Hz
+
+  nasalMidVowelF1MinHz:
+    description: "F1 threshold for mid-vowel nasal endpoint selection; engineering bin boundary over Hawkins & Stevens 1985 Table I vowels."
+    type: float
+    default: 350
+    unit: Hz
+
+  nasalLowVowelF1MinHz:
+    description: "F1 threshold for low-vowel nasal endpoint selection; engineering bin boundary over Hawkins & Stevens 1985 Table I vowels."
+    type: float
+    default: 600
+    unit: Hz
+
   nasalPoleBwHz:
     description: "Core nasal pole bandwidth"
     type: float
@@ -504,10 +546,20 @@ realize:
     deps: [FNP, FNZ, BNP, BNZ]
     description: "Detect deprecated raw nasal parameter usage during migration."
 
+  nasalVowelDerivedPoleTargetHz:
+    expr: "F1 >= nasalLowVowelF1MinHz ? nasalLowVowelPoleTargetHz : (F1 >= nasalMidVowelF1MinHz ? nasalMidVowelPoleTargetHz : nasalHighVowelPoleTargetHz)"
+    deps: [F1, nasalLowVowelF1MinHz, nasalLowVowelPoleTargetHz, nasalMidVowelF1MinHz, nasalMidVowelPoleTargetHz, nasalHighVowelPoleTargetHz]
+    description: "Vowel-dependent nasal pole endpoint derived from F1 bins over Hawkins & Stevens 1985 Fig. 5."
+
+  nasalCoreFnpTarget:
+    expr: "nasalVowelPoleTargetHz > 0 ? nasalVowelPoleTargetHz : nasalVowelDerivedPoleTargetHz"
+    deps: [nasalVowelPoleTargetHz, nasalVowelDerivedPoleTargetHz]
+    description: "Active nasal pole endpoint for vowel nasalization."
+
   nasalCoreFnp:
-    expr: "nasalLegacyParamUsed == 1 && FNP > 0 ? FNP : nasalPoleBaseHz"
-    deps: [nasalLegacyParamUsed, FNP, nasalPoleBaseHz]
-    description: "Core nasal pole frequency. Klatt 1980 Table I baseline."
+    expr: "nasalLegacyParamUsed == 1 && FNP > 0 ? FNP : nasalPoleBaseHz + (nasalCoreFnpTarget - nasalPoleBaseHz) * nasalCouplingClamped"
+    deps: [nasalLegacyParamUsed, FNP, nasalPoleBaseHz, nasalCoreFnpTarget, nasalCouplingClamped]
+    description: "Core nasal pole frequency moving from the Klatt 1980 oral-cancellation baseline to the Hawkins & Stevens 1985 vowel endpoint."
 
   nasalCoreBnp:
     expr: "nasalLegacyParamUsed == 1 && BNP > 0 ? BNP : nasalPoleBwHz"
@@ -520,14 +572,14 @@ realize:
     description: "Core nasal zero bandwidth. Klatt 1980 Table I baseline."
 
   nasalCoreFnzTarget:
-    expr: "F1 > 0 ? (nasalCoreFnp + F1) / 2.0 : nasalCoreFnp"
-    deps: [F1, nasalCoreFnp]
-    description: "Hawkins & Stevens 1985: vowel nasalization target zero sits midway between the nasal pole and F1."
+    expr: "nasalVowelZeroTargetHz > 0 ? nasalVowelZeroTargetHz : (F1 > 0 ? (nasalCoreFnpTarget + F1) / 2.0 : nasalCoreFnpTarget)"
+    deps: [nasalVowelZeroTargetHz, F1, nasalCoreFnpTarget]
+    description: "Hawkins & Stevens 1985: vowel nasalization endpoint zero sits midway between the nasal pole endpoint and F1."
 
   nasalCoreFnz:
-    expr: "nasalLegacyParamUsed == 1 && FNZ > 0 ? FNZ : nasalCoreFnp + (nasalCoreFnzTarget - nasalCoreFnp) * nasalCouplingClamped"
-    deps: [nasalLegacyParamUsed, FNZ, nasalCoreFnp, nasalCoreFnzTarget, nasalCouplingClamped]
-    description: "Klatt 1980 oral cancellation baseline plus Hawkins & Stevens 1985 coupling interpolation."
+    expr: "nasalLegacyParamUsed == 1 && FNZ > 0 ? FNZ : nasalPoleBaseHz + (nasalCoreFnzTarget - nasalPoleBaseHz) * nasalCouplingClamped"
+    deps: [nasalLegacyParamUsed, FNZ, nasalPoleBaseHz, nasalCoreFnzTarget, nasalCouplingClamped]
+    description: "Core nasal zero frequency moving from oral cancellation to the Hawkins & Stevens 1985 vowel endpoint."
 
   nasalPlaceFnz:
     expr: "nasalPlaceIndex == 1 ? nasalPlaceMFnzHz : (nasalPlaceIndex == 2 ? nasalPlaceNFnzHz : (nasalPlaceIndex == 3 ? nasalPlaceNgFnzHz : 0.0))"

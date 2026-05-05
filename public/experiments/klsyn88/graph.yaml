@@ -66,6 +66,10 @@ nodes:
     type: antiresonator
     options:
       bypassAtZero: true
+      # klsyn88 uses fixed-point-scale internal signals before final 16-bit
+      # normalization; the raw nasal-zero output can legitimately exceed the
+      # Klatt80 float-scale debug threshold without clipping final output.
+      explosionRmsThreshold: 1000000
     params:
       frequency: { bind: FNZ }
       bandwidth: { bind: BNZ }

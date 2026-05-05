@@ -428,6 +428,11 @@ function buildTextToKlattTrackDetailed(
       : requestedRate;
   const rate = Math.max(0.5, Math.min(2.0, normalizedRate));
 
+  // Run phone normalization before postlexical rules so LTS-internal symbols
+  // (AX/NX/WH) are mapped onto inventory-compatible ARPABET.
+  // Citation: Elovitz et al. 1976; Allen et al. 1987
+  parameterSequence = runPhases(parameterSequence, ["normalize"], speakerPolicy);
+
   // Run postlexical rules first (t-flapping, the-reduction operate on raw phonemes).
   // t_flapping must see raw T between vowels; structural would split T into
   // T_CL + T_REL + T_ASP, breaking the adjacency check.

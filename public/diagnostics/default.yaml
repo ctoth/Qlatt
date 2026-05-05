@@ -56,6 +56,15 @@ checks:
     severity: error
     message: "Output silent during voiced segment"
 
+  output_hiss_share:
+    tap: post-output
+    when: { voiced: true }
+    measure: band_share
+    measure_params: { band: [6000, 10000] }
+    assert: { max: 0.08 }
+    severity: warn
+    message: "High-frequency noise share above 6 kHz is large"
+
   f2_spectral_peak:
     tap: cascade-f2
     when: { phoneme: "IY*" }

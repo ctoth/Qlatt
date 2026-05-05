@@ -133,6 +133,7 @@ for (const experimentId of experiments) {
   for (const phrase of phrases) {
     const prefix = `${slug(experimentId)}__${slug(phrase)}`;
     const renderJson = path.join(outDir, `${prefix}.render.json`);
+    const renderWav = path.join(outDir, `${prefix}.render.wav`);
     const analysisJson = path.join(outDir, `${prefix}.analysis.json`);
     const probeJson = path.join(outDir, `${prefix}.probe.json`);
 
@@ -154,6 +155,10 @@ for (const experimentId of experiments) {
       "1",
       "--out-json",
       renderJson,
+      "--out-wav",
+      renderWav,
+      "--compare-golden",
+      "0",
     ]);
 
     console.log(`[analyze] ${experimentId} :: ${phrase}`);
@@ -170,6 +175,7 @@ for (const experimentId of experiments) {
       phrase,
       files: {
         renderJson,
+        renderWav,
         analysisJson,
       },
       analysis: compactAnalysis(readJson(analysisJson)),

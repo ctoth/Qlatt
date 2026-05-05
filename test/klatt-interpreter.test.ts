@@ -21,6 +21,11 @@ import type { KlattRuntime, BindingSpec } from '../src/klatt-runtime';
 // Helpers: minimal mocks for AudioContext / AudioParam / KlattRuntime
 // ---------------------------------------------------------------------------
 
+const PLSTEP_CONSTANTS = {
+  plstepThreshold: 49,
+  plstepBurstOffsetDb: 75,
+};
+
 /** Create a mock AudioParam that records calls */
 function mockAudioParam(): AudioParam {
   return {
@@ -70,7 +75,7 @@ function minimalSemantics(): SemanticsDocument {
       GO: { default: 47, min: 0, max: 80 },
     },
     constants: {
-      plstepThreshold: 49,
+      ...PLSTEP_CONSTANTS,
     },
     realize: {
       // AF and AH passthrough as-is (identity expressions)
@@ -109,7 +114,7 @@ describe('Binding categorization (tagged union)', () => {
         F1: { default: 500, min: 200, max: 1000 },
         F0: { default: 120, min: 80, max: 500 },
       },
-      constants: {},
+      constants: { ...PLSTEP_CONSTANTS },
       realize: {
         AF: { expr: 'AF', ramp: true },       // ramp binding
         AH: { expr: 'AH', ramp: true },       // ramp binding
@@ -193,7 +198,7 @@ describe('Binding categorization (tagged union)', () => {
         voiceGain: { default: 0 },
         F0: { default: 120, min: 80, max: 500 },
       },
-      constants: {},
+      constants: { ...PLSTEP_CONSTANTS },
       realize: {
         AF: { expr: 'AF', ramp: true },       // ramp
         voiceGain: { expr: 'voiceGain' },      // realized (no ramp)
@@ -249,6 +254,23 @@ describe('Binding categorization (tagged union)', () => {
 });
 
 describe('PLSTEP state tracking', () => {
+  it('requires PLSTEP constants from semantics', () => {
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: mockRuntime(),
+      semantics: {
+        ...minimalSemantics(),
+        constants: {
+          plstepThreshold: 49,
+        },
+      },
+    });
+
+    expect(() =>
+      interpreter.scheduleTrack([{ time: 0.0, params: { AF: 60 } }], 0),
+    ).toThrow("E_SEMANTICS_CONSTANT_REQUIRED: constants.plstepBurstOffsetDb");
+  });
+
   it('fires PLSTEP telemetry for >49 dB AF jump', () => {
     const events: TelemetryEvent[] = [];
     const telemetryHandler = (event: TelemetryEvent) => events.push(event);

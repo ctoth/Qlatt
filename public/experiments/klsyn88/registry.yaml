@@ -55,6 +55,10 @@ primitives:
         type: bool
         default: false
         description: "When true, bypass filter if frequency is 0"
+      explosionRmsThreshold:
+        type: float
+        default: 100
+        description: "Raw worklet RMS threshold for reporting antiresonator runaway"
     params:
       frequency:
         type: float

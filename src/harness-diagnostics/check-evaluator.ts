@@ -25,6 +25,8 @@ export interface CheckState {
   paramRange: ParamRangeAccum | null;
   /** For peak checks — maximum peak observed across all ticks. */
   maxPeak: number;
+  /** For aggregate checks — accumulated extremum across active ticks. */
+  aggregateValue: number | null;
 }
 
 /** Create initial state for a check. */
@@ -34,6 +36,7 @@ export function createCheckState(): CheckState {
     lastCollectedAt: -Infinity,
     paramRange: null,
     maxPeak: 0,
+    aggregateValue: null,
   };
 }
 
@@ -194,6 +197,18 @@ function evaluateTapCheck(
       state.maxPeak = value;
     }
     value = state.maxPeak;
+  }
+
+  if (def.aggregate === "max") {
+    state.aggregateValue = state.aggregateValue === null
+      ? value
+      : Math.max(state.aggregateValue, value);
+    value = state.aggregateValue;
+  } else if (def.aggregate === "min") {
+    state.aggregateValue = state.aggregateValue === null
+      ? value
+      : Math.min(state.aggregateValue, value);
+    value = state.aggregateValue;
   }
 
   const failed = checkAssert(value, def.assert);

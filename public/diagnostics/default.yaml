@@ -16,6 +16,12 @@ taps:
   cascade-f2:
     node: cascadeF2
     fftSize: 2048
+  frication-source:
+    node: [fricationSource, noiseSource, nz]
+    fftSize: 2048
+  impulse-source:
+    node: [impulseSource, plstepEnvelope]
+    fftSize: 2048
 
 poll:
   interval_ms: 20
@@ -86,6 +92,71 @@ checks:
     assert: { min: 0.001 }
     severity: warn
     message: "Output silent during parallel (SW=1) segments"
+    ignore_guard: true
+
+  release_output_rms:
+    tap: post-output
+    when: { phoneme: "*_REL" }
+    measure: rms
+    aggregate: max
+    assert: { min: 0.001 }
+    severity: info
+    message: "Stop release output RMS"
+    ignore_guard: true
+
+  release_presence_share:
+    tap: post-output
+    when: { phoneme: "*_REL" }
+    measure: band_share
+    measure_params: { band: [3000, 6000] }
+    aggregate: max
+    assert: { max: 0.20 }
+    severity: info
+    message: "Stop release output energy share from 3-6 kHz"
+    ignore_guard: true
+
+  release_hiss_share:
+    tap: post-output
+    when: { phoneme: "*_REL" }
+    measure: band_share
+    measure_params: { band: [6000, 10000] }
+    aggregate: max
+    assert: { max: 0.05 }
+    severity: info
+    message: "Stop release output energy share above 6 kHz"
+    ignore_guard: true
+
+  release_brightness_ratio:
+    tap: post-output
+    when: { phoneme: "*_REL" }
+    measure: band_ratio_db
+    measure_params:
+      numerator_band: [3000, 10000]
+      denominator_band: [300, 3000]
+    aggregate: max
+    assert: { max: 0 }
+    severity: info
+    message: "Stop release 3-10 kHz energy relative to 300-3000 Hz"
+    ignore_guard: true
+
+  release_frication_source_rms:
+    tap: frication-source
+    when: { phoneme: "*_REL" }
+    measure: rms
+    aggregate: max
+    assert: { max: 0.05 }
+    severity: info
+    message: "Stop release frication/noise-source RMS"
+    ignore_guard: true
+
+  release_impulse_source_rms:
+    tap: impulse-source
+    when: { phoneme: "*_REL" }
+    measure: rms
+    aggregate: max
+    assert: { max: 0.05 }
+    severity: info
+    message: "Stop release impulse/PLSTEP RMS"
     ignore_guard: true
 
   f0_range:

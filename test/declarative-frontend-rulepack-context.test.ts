@@ -28,7 +28,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     expect(out[0].params.F2).toBe(1900);
     expect(out[1].params.F2).toBe(1900);
   });
@@ -52,7 +52,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     expect(out[0].params.F2).toBe(1500);
   });
 
@@ -213,7 +213,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     expect(out[0].params.SW).toBe(1);
     expect(out[1].params.SW).toBe(0);
     expect(out[2].params.SW).toBe(0);
@@ -274,7 +274,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Bilabial before front vowel: F2 pulled toward 1200 but above locus → 1350
     expect(out[0].params.F2).toBe(1350);
     // P_REL copies from P_CL
@@ -310,7 +310,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Bilabial before back vowel (AO: back=true, no hi/front): F2 = 1100
     expect(out[0].params.F2).toBe(1100);
     // B_REL copies from B_CL
@@ -336,7 +336,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // M before silence: bilabial default locus 1200
     expect(out[0].params.F2).toBe(1200);
   });
@@ -372,7 +372,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Alveolar before front vowel: 1900
     expect(out[0].params.F2).toBe(1900);
     // T_REL copies from T_CL
@@ -408,7 +408,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Alveolar before back vowel (AO: back=true, no hi/front): 1700
     expect(out[0].params.F2).toBe(1700);
     // D_REL copies from D_CL
@@ -434,7 +434,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // N before silence: alveolar default locus 1800
     expect(out[0].params.F2).toBe(1800);
   });
@@ -506,7 +506,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Coda /L/: dark allophone follows policy.formant.dark_l_f2/dark_l_f3.
     expect(out[1].params.F2).toBe(900);
     expect(out[1].params.F3).toBe(2400);
@@ -533,7 +533,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Onset /L/: clear allophone, with a substantially lighter target than coda /l/.
     expect(out[0].params.F2).toBe(1300);
     expect(out[0].params.F3).toBe(2900);
@@ -562,7 +562,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Onset /R/: F3=1600
     expect(out[0].params.F3).toBe(1600);
   });
@@ -594,7 +594,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Coda /R/: F3=1400
     expect(out[1].params.F3).toBe(1400);
   });
@@ -629,7 +629,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Labial F1=250
     expect(out[0].params.F1).toBe(250);
     // Alveolar F1=300
@@ -897,7 +897,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // F1: 330 + (500 - 330) * 0.15 = 355.5
     expect(out[0].params.F1).toBeCloseTo(355.5, 0);
     // F2: 1950 + (1500 - 1950) * 0.15 = 1882.5
@@ -918,7 +918,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Stressed vowels should not be reduced
     expect(out[0].params.F1).toBe(310);
     expect(out[0].params.F2).toBe(2020);
@@ -1154,7 +1154,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Y before back vowel: F2 = palatal_f2_back_vowel = 2400
     expect(out[0].params.F2).toBe(2400);
   });
@@ -1181,7 +1181,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Y before front vowel: default F2 = palatal_f2_locus = 2600
     expect(out[0].params.F2).toBe(2600);
   });
@@ -1300,7 +1300,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Labial diffuse-falling: A2=50, A3=40, A4=35, A5=45, A6=30
     expect(out[0].params.A2).toBe(50);
     expect(out[0].params.A3).toBe(40);
@@ -1322,7 +1322,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Alveolar diffuse-rising: A2=40, A3=50, A4=50, A5=45, A6=50
     expect(out[0].params.A2).toBe(40);
     expect(out[0].params.A3).toBe(50);
@@ -1344,7 +1344,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     // Velar compact mid-frequency: A2=45, A3=50, A4=55, A5=40, A6=35
     expect(out[0].params.A2).toBe(45);
     expect(out[0].params.A3).toBe(50);
@@ -1606,7 +1606,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const m = out.find((t) => t.phoneme === "M");
     expect(m).toBeTruthy();
     // bilabial_f2_locus sets M's F2 to 1200 (default bilabial locus before non-front non-back vowel AA)
@@ -1647,7 +1647,7 @@ describe("declarative frontend rulepack context migration", () => {
       },
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const m = out.find((t) => t.phoneme === "M");
     expect(m).toBeTruthy();
     // M's prev is S (fricative, not vowel), so vcv rule doesn't fire

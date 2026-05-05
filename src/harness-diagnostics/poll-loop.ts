@@ -7,7 +7,7 @@ import type { TapManager } from "./tap-manager";
 import type { AcrossPlaysAccumulator } from "./across-plays";
 import { resolveTimingSnapshot } from "./timing-context";
 import { evaluateCheck, createCheckState, type CheckState } from "./check-evaluator";
-import { readRms, readPeak, readFftPeakFreq, readBandEnergy, readBandShare } from "./measurement";
+import { readRms, readPeak, readFftPeakFreq, readBandEnergy, readBandShare, readBandRatioDb } from "./measurement";
 import { formatDisplay } from "./display-formatter";
 import type { ParamRangeAccum } from "./types";
 
@@ -90,6 +90,7 @@ export class PollLoop {
       state.lastCollectedAt = -Infinity;
       state.paramRange = null;
       state.maxPeak = 0;
+      state.aggregateValue = null;
     }
   }
 
@@ -216,6 +217,13 @@ export class PollLoop {
         return readBandEnergy(analyser, sampleRate, measureParams?.band ?? [0, sampleRate / 2]);
       case "band_share":
         return readBandShare(analyser, sampleRate, measureParams?.band ?? [0, sampleRate / 2]);
+      case "band_ratio_db":
+        return readBandRatioDb(
+          analyser,
+          sampleRate,
+          measureParams?.numerator_band ?? [3000, sampleRate / 2],
+          measureParams?.denominator_band ?? [300, 3000],
+        );
       default:
         return readRms(analyser);
     }

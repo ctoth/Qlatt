@@ -40,6 +40,8 @@
     "tts-dsl": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/tts-dsl.ts",
     "explain": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-phrase.ts",
     "explain:summary": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/explain-summary.ts",
+    "probe:harness": "node scripts/probe-harness.mjs",
+    "analyze:render": "node scripts/analyze-render.mjs",
     "oracle:build-dectalk": "powershell -ExecutionPolicy Bypass -File scripts/oracle/build-dectalk.ps1",
     "oracle:run": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/run-corpus.ts",
     "oracle:compare": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/compare-audio.ts"

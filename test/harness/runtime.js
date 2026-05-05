@@ -2,7 +2,7 @@
 
 import { state } from "./state.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
-import { handleTelemetry, attachTelemetryNewRuntime } from "./telemetry.js";
+import { handleTelemetry } from "./telemetry.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { updateDiagnostics } from "./diagnostics.js";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
@@ -64,7 +64,6 @@ export async function initializeNewRuntime() {
         telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler
       });
       state.newRuntime.connectToDestination();
-      attachTelemetryNewRuntime(state.newRuntime);  // Attach additional port listeners
       state.status.textContent = "Status: new runtime initialized";
       console.log("[QLATT] New runtime initialized");
 

@@ -909,7 +909,8 @@ export function renderLayeredF0(
   if (!filterConfig || typeof filterConfig !== "object") {
     throw new Error("E_F0_MODEL_REQUIRED: f0_model.filter must be an object");
   }
-  const usesOnePoleFilter = filterConfig.type === "lowpass_1pole";
+  const filterType = String(filterConfig.type);
+  const usesOnePoleFilter = filterType === "lowpass_1pole";
   let onePoleAlpha = usesOnePoleFilter
     ? requireModelNumber(filterConfig.default_alpha, "f0_model.filter.default_alpha")
     : 0;
@@ -926,8 +927,8 @@ export function renderLayeredF0(
 
   let cutoffHz = 0;
   if (!usesOnePoleFilter) {
-    if (filterConfig.type !== "lowpass_2pole") {
-      throw new Error(`E_F0_MODEL_REQUIRED: unsupported f0_model.filter.type ${String(filterConfig.type)}`);
+    if (filterType !== "lowpass_2pole") {
+      throw new Error(`E_F0_MODEL_REQUIRED: unsupported f0_model.filter.type ${filterType}`);
     }
     cutoffHz = requirePositiveModelNumber(filterConfig.default_cutoff, "f0_model.filter.default_cutoff");
     if (filterConfig.cutoff_param && speakerParams) {

@@ -4,6 +4,7 @@ import {
   readPeak,
   readFftPeakFreq,
   readBandEnergy,
+  readBandShare,
 } from "../../src/harness-diagnostics/measurement";
 
 /**
@@ -185,5 +186,39 @@ describe("readBandEnergy", () => {
     const wideResult = readBandEnergy(analyser, sampleRate, wideBand);
 
     expect(wideResult).toBeGreaterThan(narrowResult);
+  });
+});
+
+describe("readBandShare", () => {
+  it("returns fraction of spectral power inside the band", () => {
+    const sampleRate = 48000;
+    const fftSize = 2048;
+    const binCount = fftSize / 2;
+    const freqData = new Array(binCount).fill(-100);
+    for (let i = 100; i < 110; i++) freqData[i] = 0;
+    for (let i = 300; i < 310; i++) freqData[i] = 0;
+
+    const analyser = mockAnalyser([0], freqData, fftSize);
+    const binWidth = sampleRate / fftSize;
+    const result = readBandShare(analyser, sampleRate, [
+      100 * binWidth,
+      110 * binWidth,
+    ]);
+
+    expect(result).toBeGreaterThan(0.45);
+    expect(result).toBeLessThan(0.55);
+  });
+
+  it("returns near-zero when the band has no meaningful energy", () => {
+    const sampleRate = 48000;
+    const fftSize = 2048;
+    const binCount = fftSize / 2;
+    const freqData = new Array(binCount).fill(-100);
+    for (let i = 30; i < 40; i++) freqData[i] = 0;
+
+    const analyser = mockAnalyser([0], freqData, fftSize);
+    const result = readBandShare(analyser, sampleRate, [6000, 10000]);
+
+    expect(result).toBeLessThan(0.001);
   });
 });

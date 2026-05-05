@@ -4,6 +4,35 @@ import { endOrder, finiteOrder, startOrder } from "./utils/order-marks";
 import { qlattInventoryResolver } from "./utils/qlatt-english-inventory";
 
 describe("declarative frontend integration phases", () => {
+  it("normalizes LTS-internal AX phones to inventory-backed AH vowels", () => {
+    const result = runDeclarativeFrontend(
+      [
+        {
+          id: "ph0",
+          stream: "phone",
+          phoneme: "AX",
+          type: "vowel",
+          stress: 0,
+          duration: 50,
+          inherentDuration: 50,
+          params: {},
+          sync_left: startOrder(),
+          sync_right: endOrder(),
+          status: 1,
+        },
+      ],
+      {
+        phases: ["normalize"],
+        inventoryResolver: qlattInventoryResolver,
+      },
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].phoneme).toBe("AH");
+    expect(result[0].type).toBe("vowel");
+    expect(result[0].params).toMatchObject({ AV: 57 });
+  });
+
   it("executes structural->duration->prosody->finalize with resolved point timing trace", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);

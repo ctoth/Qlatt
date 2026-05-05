@@ -555,7 +555,8 @@ function buildNavigationFunctions(
 
   const getPointCursor = (stream: string): number => {
     if (pointCursorByStream?.has(stream)) {
-      return pointCursorByStream.get(stream);
+      const cursor = pointCursorByStream.get(stream);
+      return cursor ?? -1;
     }
     if (
       currentToken &&

@@ -70,6 +70,27 @@ export type OutputConfig = {
   final_silence_ms?: number;
 };
 
+function requireOutputObject(value: unknown, path: string): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be an object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function requireOutputNumber(value: unknown, path: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a finite number`);
+  }
+  return value;
+}
+
+function requireOutputStringArray(value: unknown, path: string): string[] {
+  if (!Array.isArray(value) || value.length === 0 || value.some((entry) => typeof entry !== "string")) {
+    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a non-empty string array`);
+  }
+  return value;
+}
+
 /** Voice quality parameter overrides injected into every frame.
  *  Resolved from voice_quality_presets in the selected frontend spec.
  *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
@@ -1451,20 +1472,23 @@ export function assembleKlattTrack(
       "Provide the output section from frontend.yaml.");
   }
   const vq = options.voiceQuality;
-  const transitionMs = options.transitionMs ?? cfg.transition_ms ?? 30;
+  const transitionMs =
+    typeof options.transitionMs === "number" && Number.isFinite(options.transitionMs)
+      ? options.transitionMs
+      : requireOutputNumber(cfg.transition_ms, "transition_ms");
 
-  // Resolve blend config from YAML output section (no hardcoded fallbacks).
-  const blendFactor = cfg.blend?.factor ?? 0.35;
-  const blendKeys = cfg.blend?.keys ?? ["F1", "F2", "F3", "B1", "B2", "B3"];
-  const smoothTypes = cfg.blend?.smooth_types
-    ? new Set(cfg.blend.smooth_types)
-    : new Set(["vowel", "nasal", "liquid", "glide"]);
+  // Resolve blend config from YAML output section.
+  const blendConfig = requireOutputObject(cfg.blend, "blend");
+  const blendFactor = requireOutputNumber(blendConfig.factor, "blend.factor");
+  const blendKeys = requireOutputStringArray(blendConfig.keys, "blend.keys");
+  const smoothTypes = new Set(requireOutputStringArray(blendConfig.smooth_types, "blend.smooth_types"));
+  const minDurationConfig = requireOutputObject(cfg.min_duration, "min_duration");
   const minDurationStopReleaseMs =
-    cfg.min_duration?.stop_release_ms ?? 5;
+    requireOutputNumber(minDurationConfig.stop_release_ms, "min_duration.stop_release_ms");
   const minDurationDefaultMs =
-    cfg.min_duration?.default_ms ?? 20;
-  const initialSilenceMs = cfg.initial_silence_ms ?? 30;
-  const finalSilenceMs = cfg.final_silence_ms ?? 100;
+    requireOutputNumber(minDurationConfig.default_ms, "min_duration.default_ms");
+  const initialSilenceMs = requireOutputNumber(cfg.initial_silence_ms, "initial_silence_ms");
+  const finalSilenceMs = requireOutputNumber(cfg.final_silence_ms, "final_silence_ms");
   const syncTimeByKey = buildSyncTimeMap(
     phoneSequence,
     minDurationStopReleaseMs,

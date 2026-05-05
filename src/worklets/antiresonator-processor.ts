@@ -75,7 +75,9 @@ class AntiResonatorProcessor extends AudioWorkletProcessor {
     this._explosionLogged = false;
     const explosionRmsThreshold = opts?.processorOptions?.explosionRmsThreshold;
     this.explosionRmsThreshold =
-      Number.isFinite(explosionRmsThreshold) && explosionRmsThreshold > 0
+      typeof explosionRmsThreshold === "number" &&
+      Number.isFinite(explosionRmsThreshold) &&
+      explosionRmsThreshold > 0
         ? explosionRmsThreshold
         : 100;
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {

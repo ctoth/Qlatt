@@ -98,6 +98,38 @@ function requireOptionNumber(value: unknown, name: string): number {
   return value;
 }
 
+function requireModelNumber(value: unknown, path: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_F0_MODEL_REQUIRED: ${path} must be a finite number`);
+  }
+  return value;
+}
+
+function requirePositiveModelNumber(value: unknown, path: string): number {
+  const number = requireModelNumber(value, path);
+  if (number <= 0) {
+    throw new Error(`E_F0_MODEL_REQUIRED: ${path} must be greater than zero`);
+  }
+  return number;
+}
+
+function resolveRequiredSpeakerNumber(
+  speakerParams: Record<string, unknown> | undefined,
+  paramPath: string,
+): number {
+  if (!speakerParams) {
+    throw new Error(`E_F0_MODEL_REQUIRED: speaker parameter ${paramPath} is required`);
+  }
+  let value: unknown = speakerParams;
+  for (const key of paramPath.split(".")) {
+    value = (value as Record<string, unknown>)?.[key];
+  }
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_F0_MODEL_REQUIRED: speaker parameter ${paramPath} must be a finite number`);
+  }
+  return value;
+}
+
 /** Voice quality parameter overrides injected into every frame.
  *  Resolved from voice_quality_presets in the selected frontend spec.
  *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
@@ -647,10 +679,6 @@ export type F0LayerCommand = {
   tag?: string;
 };
 
-/** Default internal frame rate for the layered F0 renderer (seconds per frame).
- *  5 ms is the legacy generic default; frontends can override it declaratively. */
-const LAYERED_F0_FRAME_PERIOD_SEC = 0.005;
-
 /** Minimum F0 output in Hz. */
 const LAYERED_F0_MIN_HZ = 50;
 /** Maximum F0 output in Hz. */
@@ -869,19 +897,22 @@ export function renderLayeredF0(
 ): F0Point[] {
   if (totalDuration <= 0) return [{ time: 0, f0: 0 }];
 
-  const framePeriod =
-    typeof modelConfig.frame_period_sec === "number" &&
-    Number.isFinite(modelConfig.frame_period_sec) &&
-    modelConfig.frame_period_sec > 0
-      ? modelConfig.frame_period_sec
-      : LAYERED_F0_FRAME_PERIOD_SEC;
+  const framePeriod = requirePositiveModelNumber(
+    modelConfig.frame_period_sec,
+    "f0_model.frame_period_sec",
+  );
   const sampleRate = 1.0 / framePeriod;
   const numFrames = Math.ceil(totalDuration / framePeriod) + 1;
 
   // Resolve control smoothing filter.
   const filterConfig = modelConfig.filter;
-  const usesOnePoleFilter = filterConfig?.type === "lowpass_1pole";
-  let onePoleAlpha = usesOnePoleFilter ? filterConfig.default_alpha ?? 0.5 : 0.5;
+  if (!filterConfig || typeof filterConfig !== "object") {
+    throw new Error("E_F0_MODEL_REQUIRED: f0_model.filter must be an object");
+  }
+  const usesOnePoleFilter = filterConfig.type === "lowpass_1pole";
+  let onePoleAlpha = usesOnePoleFilter
+    ? requireModelNumber(filterConfig.default_alpha, "f0_model.filter.default_alpha")
+    : 0;
   if (usesOnePoleFilter && filterConfig.alpha_param && speakerParams) {
     const paramPath = filterConfig.alpha_param.split(".");
     let val: unknown = speakerParams;
@@ -893,10 +924,13 @@ export function renderLayeredF0(
     }
   }
 
-  let cutoffHz = 2700;
+  let cutoffHz = 0;
   if (!usesOnePoleFilter) {
-    cutoffHz = filterConfig?.type === "lowpass_2pole" ? filterConfig.default_cutoff ?? 2700 : 2700;
-    if (filterConfig?.type === "lowpass_2pole" && filterConfig.cutoff_param && speakerParams) {
+    if (filterConfig.type !== "lowpass_2pole") {
+      throw new Error(`E_F0_MODEL_REQUIRED: unsupported f0_model.filter.type ${String(filterConfig.type)}`);
+    }
+    cutoffHz = requirePositiveModelNumber(filterConfig.default_cutoff, "f0_model.filter.default_cutoff");
+    if (filterConfig.cutoff_param && speakerParams) {
       const paramPath = filterConfig.cutoff_param.split(".");
       let val: unknown = speakerParams;
       for (const key of paramPath) {
@@ -917,31 +951,22 @@ export function renderLayeredF0(
 
   // Resolve speaker scaling parameters.
   const scaleConfig = modelConfig.speaker_scale;
-  let f0Minimum = 50;
+  let f0Minimum = 0;
   let f0ScaleFactor = 1.0;
-  const f0Reference = scaleConfig?.reference ?? 130;
+  let f0Reference = 0;
   let baseF0BiasHz = 0;
 
-  if (scaleConfig && speakerParams) {
+  if (scaleConfig) {
+    f0Reference = requireModelNumber(scaleConfig.reference, "f0_model.speaker_scale.reference");
     if (scaleConfig.minimum_param) {
-      const paramPath = scaleConfig.minimum_param.split(".");
-      let val: unknown = speakerParams;
-      for (const key of paramPath) {
-        val = (val as Record<string, unknown>)?.[key];
-      }
-      if (typeof val === "number" && Number.isFinite(val)) {
-        f0Minimum = val;
-      }
+      f0Minimum = resolveRequiredSpeakerNumber(speakerParams, scaleConfig.minimum_param);
+    } else {
+      throw new Error("E_F0_MODEL_REQUIRED: f0_model.speaker_scale.minimum_param is required");
     }
     if (scaleConfig.range_param) {
-      const paramPath = scaleConfig.range_param.split(".");
-      let val: unknown = speakerParams;
-      for (const key of paramPath) {
-        val = (val as Record<string, unknown>)?.[key];
-      }
-      if (typeof val === "number" && Number.isFinite(val)) {
-        f0ScaleFactor = val;
-      }
+      f0ScaleFactor = resolveRequiredSpeakerNumber(speakerParams, scaleConfig.range_param);
+    } else {
+      throw new Error("E_F0_MODEL_REQUIRED: f0_model.speaker_scale.range_param is required");
     }
     const baseF0Hz = (speakerParams as Record<string, unknown>)?.base_f0_hz;
     if (typeof baseF0Hz === "number" && Number.isFinite(baseF0Hz)) {
@@ -1037,7 +1062,10 @@ export function renderLayeredF0(
           persistentLevels.set(name, current + cmd.value);
         } else if (cfg.type === "impulse") {
           const impulses = activeImpulses.get(name)!;
-          const durationFrames = cmd.durationFrames ?? 20;
+          const durationFrames = requirePositiveModelNumber(
+            cmd.durationFrames,
+            `f0_layer.${name}.durationFrames`,
+          );
           impulses.push({
             value: cmd.value,
             decay: cmd.value / 4,
@@ -1102,7 +1130,10 @@ export function renderLayeredF0(
     for (const name of layerNames) {
       const cfg = modelConfig.layers[name];
       if (cfg.type !== "impulse") continue;
-      const decayMode = cfg.decay ?? "halving";
+      if (!cfg.decay) {
+        throw new Error(`E_F0_MODEL_REQUIRED: f0_model.layers.${name}.decay is required`);
+      }
+      const decayMode = cfg.decay;
       const impulses = activeImpulses.get(name)!;
 
       for (let i = impulses.length - 1; i >= 0; i--) {

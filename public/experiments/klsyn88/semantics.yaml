@@ -303,6 +303,15 @@ constants:
   F8: 7500
   B8: 600
 
+  # PLSTEP burst detection threshold and amplitude offset.
+  # Klatt 1980 PARCOE.FOR:
+  #   IF (NNAF-NAFLAS.LT.49) ...
+  #   PLSTEP=GETAMP(NNG0+NDBSCA(11)+44)
+  # With Qlatt's GO-centered dB conversion this is exposed as GO - 75 dB,
+  # matching the klatt80-baseline semantics constants.
+  plstepThreshold: 49
+  plstepBurstOffsetDb: 75
+
 realize:
   effectiveRd:
     expr: "min(2.7, max(0.3, Rd + RdPhraseOffset))"
@@ -510,3 +519,14 @@ realize:
   cascadeF8Bw:
     expr: "NFCASC >= 8 ? B8 : 0"
     deps: [NFCASC, B8]
+
+  # PLSTEP constants are consumed by the shared interpreter telemetry path.
+  # Keep them declarative here so experiment configs do not rely on hidden
+  # interpreter defaults.
+  plstepThreshold:
+    expr: "plstepThreshold"
+    deps: []
+
+  plstepBurstOffsetDb:
+    expr: "plstepBurstOffsetDb"
+    deps: []

@@ -10,6 +10,21 @@ import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
 describe("track-assembler output config", () => {
+  const defaultEquivalentConfig: OutputConfig = {
+    blend: {
+      factor: 0.35,
+      keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
+      smooth_types: ["vowel", "nasal", "liquid", "glide"],
+    },
+    min_duration: {
+      stop_release_ms: 5,
+      default_ms: 20,
+    },
+    transition_ms: 30,
+    initial_silence_ms: 30,
+    final_silence_ms: 100,
+  };
+
   describe("assembleKlattTrack rejects missing/incomplete outputConfig", () => {
     const minimalPhone = [
       {
@@ -38,24 +53,23 @@ describe("track-assembler output config", () => {
         })
       ).toThrow(/outputConfig/i);
     });
+
+    it("throws if a required output field is missing", () => {
+      expect(() =>
+        assembleKlattTrack(minimalPhone, minimalPhone, {
+          outputConfig: {
+            ...defaultEquivalentConfig,
+            blend: {
+              ...defaultEquivalentConfig.blend,
+              factor: undefined,
+            },
+          },
+        })
+      ).toThrow("E_OUTPUT_CONFIG_REQUIRED: output.blend.factor must be a finite number");
+    });
   });
 
-  describe("YAML-loaded output config produces identical results", () => {
-    // The output config with values matching the old hardcoded defaults.
-    const defaultEquivalentConfig: OutputConfig = {
-      blend: {
-        factor: 0.35,
-        keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
-        smooth_types: ["vowel", "nasal", "liquid", "glide"],
-      },
-      min_duration: {
-        stop_release_ms: 5,
-        default_ms: 20,
-      },
-      initial_silence_ms: 30,
-      final_silence_ms: 100,
-    };
-
+  describe("YAML-loaded output config produces frames", () => {
     it("produces frames with explicit config matching old defaults", () => {
       // Use the full pipeline with explicit config — this should work the same
       // as the YAML-loaded path since the values are identical.

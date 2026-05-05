@@ -68,7 +68,7 @@ Verification:
 
 ### 4. Rule tags completion
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Add tags to non-trivial scalar apply entries missing `tag`, especially formant locus and SW assignment rules.
@@ -80,7 +80,7 @@ Verification:
 
 ### 5. No silent fallback constants
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Remove silent fallback constants that duplicate declarative policy or semantics values.

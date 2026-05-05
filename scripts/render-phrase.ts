@@ -42,6 +42,7 @@ const tailTime = Number(args.get("tail-time") ?? 0.2);
 const noiseSeed = Number(args.get("noise-seed") ?? 20260214);
 const persistJson = writeGolden || args.has("out-json");
 const persistWav = writeGolden || args.has("out-wav");
+const compareGolden = !writeGolden && (args.get("compare-golden") ?? "1") !== "0";
 const allowBrowserRender =
   (args.get("allow-browser") ?? "0") === "1" ||
   process.env.QLATT_ALLOW_BROWSER_RENDER === "1";
@@ -111,7 +112,7 @@ if (persistWav) {
   writeWav(outWav, payload.samples, payload.sampleRate);
 }
 
-if (!persistWav) {
+if (!persistWav || !compareGolden) {
   process.exitCode = 0;
 } else if (!writeGolden) {
   if (!fs.existsSync(goldenPath)) {

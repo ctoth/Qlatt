@@ -73,9 +73,14 @@ primitives:
   # ===========================================================================
 
   reconstruction-filter:
-    description: "Fixed 5 kHz reconstruction low-pass modeled after Klatt (1980) Appendix A"
+    description: "Configurable output reconstruction stage; default models Klatt (1980) Appendix A 5 kHz low-pass"
     worklet: "reconstruction-filter-processor.js"
     wasm: "reconstruction-filter.wasm"
+    options:
+      bypass:
+        type: bool
+        default: false
+        description: "Bypass the Klatt 1980 5 kHz output low-pass for experiments that intentionally render higher-frequency fricative energy"
     inputs: 1
     outputs: 1
 

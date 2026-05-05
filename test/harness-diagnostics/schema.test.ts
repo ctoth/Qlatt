@@ -273,6 +273,27 @@ display:
     expect(config.checks["c"].cooldown_ms).toBe(200);
   });
 
+  it("parses ignore_guard on check", () => {
+    const yaml = `
+taps:
+  t: { node: x }
+poll:
+  interval_ms: 20
+checks:
+  c:
+    tap: t
+    measure: rms
+    assert: { min: 0.01 }
+    severity: warn
+    message: audible
+    ignore_guard: true
+display:
+  sections: []
+`;
+    const config = parseDiagConfig(yaml);
+    expect(config.checks["c"].ignore_guard).toBe(true);
+  });
+
   it("parses multi-tap check", () => {
     const yaml = `
 taps:

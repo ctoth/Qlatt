@@ -197,6 +197,14 @@ function readPolicyNumber(entry: unknown): number | undefined {
   return undefined;
 }
 
+function requirePolicyNumber(entry: unknown, path: string): number {
+  const value = readPolicyNumber(entry);
+  if (value === undefined) {
+    throw new Error(`E_POLICY_REQUIRED: parameters.policy.${path} must be a finite number`);
+  }
+  return value;
+}
+
 const SPEAKER_FORMANT_KEYS = [
   "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
 ] as const;
@@ -554,8 +562,8 @@ function buildTextToKlattTrackDetailed(
   // Read sagging transition parameters from policy.
   // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
   // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-  const sagDepthHz = readPolicyNumber(f0Policy?.sag_depth_hz);
-  const sagMinSpanMs = readPolicyNumber(f0Policy?.sag_min_span_ms);
+  const sagDepthHz = requirePolicyNumber(f0Policy?.sag_depth_hz, "f0.sag_depth_hz");
+  const sagMinSpanMs = requirePolicyNumber(f0Policy?.sag_min_span_ms, "f0.sag_min_span_ms");
 
   // Read layered additive F0 model config from the frontend spec.
   // When present, the track assembler uses the layered renderer instead of

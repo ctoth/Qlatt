@@ -607,11 +607,12 @@ realize:
     # Hanson 1995: female G3 has AH=40 dB at OQ=60%
     # Coupling: AH increases with Rd > 1.0 (breathy region)
 
-  # Klatt 80 COEWAV/PARCOE behavior: when SW=1, frication uses max(AF, AH)
-  # to prevent aspiration from being masked by lower AF values.
+  # Klatt 1980 separates AF (supraglottal frication) from AH (aspiration/
+  # breathiness); stop aspiration must not be promoted into the frication
+  # branch solely because SW=1.
   fricDbAdjusted:
-    expr: "SW == 1 ? max(AF, AH) : AF"
-    deps: [SW, AF, AH]
+    expr: "AF"
+    deps: [AF]
 
   fricGain:
     expr: "dbToLinear(GO + fricDbAdjusted + ndbScale.AF)"

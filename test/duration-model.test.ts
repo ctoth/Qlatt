@@ -107,6 +107,91 @@ function wordDuration(segments: SegmentInfo[], word: string): number {
 // Tests
 // ---------------------------------------------------------------------------
 
+describe("duration model — Klatt 1976 Eq. 1 incompressibility", () => {
+  const eq1Spec = {
+    version: "klatt-eq1-test",
+    streams: {
+      phone: {
+        type: "base",
+        scalars: {
+          duration: { unit: "ms", resolution: "klatt" },
+        },
+      },
+    },
+    phases: [
+      {
+        name: "duration",
+        rules: ["scale_duration"],
+        resolve_scalars: ["duration"],
+      },
+    ],
+    rules: {
+      scale_duration: {
+        kind: "scalar",
+        select: { stream: "phone", where: "true" },
+        apply: [
+          {
+            field: "duration",
+            op: "mul",
+            value: "params.scale",
+            tag: "klatt_eq1",
+          },
+        ],
+        citations: ["Klatt 1976 Eq. 1"],
+      },
+    },
+  };
+
+  function runEq1Case(
+    token: Record<string, unknown>,
+    scale: number,
+    ratios: { vowel: number; consonant: number },
+  ): number {
+    const out = runDeclarativeFrontend([token], {
+      specSource: eq1Spec,
+      phases: ["duration"],
+      parameters: {
+        scale,
+        policy: {
+          duration: {
+            incompressibility_ratio_vowel: ratios.vowel,
+            incompressibility_ratio_consonant: ratios.consonant,
+          },
+        },
+      },
+    }) as Array<Record<string, unknown>>;
+    return out[0].duration as number;
+  }
+
+  it("matches Klatt Table II vowel examples", () => {
+    expect(
+      runEq1Case(
+        { phoneme: "AE", type: "vowel", duration: 240, inherentDuration: 240, stream: "phone", status: 1 },
+        0.6,
+        { vowel: 105 / 240, consonant: 0.6 },
+      ),
+    ).toBe(186);
+
+    expect(
+      runEq1Case(
+        { phoneme: "IH", type: "vowel", duration: 160, inherentDuration: 160, stream: "phone", status: 1 },
+        0.4,
+        { vowel: 65 / 160, consonant: 0.6 },
+      ),
+    ).toBe(103);
+  });
+
+  it("matches Klatt Table III consonant example", () => {
+    expect(
+      runEq1Case(
+        { phoneme: "B", type: "stop_closure", duration: 100, inherentDuration: 100, stream: "phone", status: 1 },
+        0.7,
+        { vowel: 0.42, consonant: 0.6 },
+      ),
+    ).toBe(88);
+  });
+});
+
 describe("duration model — break-index pre-boundary lengthening", () => {
   it("applies voiced-stop vowel lengthening before structurally expanded stop closures", () => {
     const makeVowel = (word: string) => ({

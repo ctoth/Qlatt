@@ -131,3 +131,21 @@ export function readBandShare(
   }
   return totalEnergy > 0 ? bandEnergy / totalEnergy : 0;
 }
+
+/**
+ * Decibel ratio between two spectral bands. Positive values mean the numerator
+ * band is stronger than the denominator band.
+ */
+export function readBandRatioDb(
+  analyser: AnalyserNode,
+  sampleRate: number,
+  numeratorBand: [number, number],
+  denominatorBand: [number, number],
+): number {
+  const numerator = readBandEnergy(analyser, sampleRate, numeratorBand);
+  const denominator = readBandEnergy(analyser, sampleRate, denominatorBand);
+  if (numerator <= 0 && denominator <= 0) return 0;
+  if (denominator <= 0) return Infinity;
+  if (numerator <= 0) return -Infinity;
+  return 10 * Math.log10(numerator / denominator);
+}

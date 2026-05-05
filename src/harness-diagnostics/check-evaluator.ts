@@ -57,7 +57,10 @@ export function matchesWhen(
   if (when.phoneme !== undefined) {
     const phoneme = snapshot.event.phoneme;
     if (phoneme === undefined) return false;
-    if (when.phoneme.endsWith("*")) {
+    if (when.phoneme.startsWith("*")) {
+      const suffix = when.phoneme.slice(1);
+      if (!phoneme.endsWith(suffix)) return false;
+    } else if (when.phoneme.endsWith("*")) {
       const prefix = when.phoneme.slice(0, -1);
       if (!phoneme.startsWith(prefix)) return false;
     } else {

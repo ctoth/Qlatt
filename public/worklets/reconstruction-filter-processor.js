@@ -81,18 +81,21 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
         else {
             inputView.fill(0);
         }
+        let renderedView = outputView;
         if (this.bypass) {
             outputView.set(inputView);
         }
         else {
             this.wasm.reconstruction_filter_process(this.state, this.inputBuffer.ptr, this.outputBuffer.ptr, blockSize);
             this.outputBuffer.refresh();
-            if (!this.outputBuffer.view) {
+            const refreshedOutputView = this.outputBuffer.view;
+            if (!refreshedOutputView) {
                 outputChannel.fill(0);
                 return true;
             }
+            renderedView = refreshedOutputView;
         }
-        outputChannel.set(this.outputBuffer.view);
+        outputChannel.set(renderedView);
         this._reportMetrics(outputChannel, inputChannel);
         return true;
     }

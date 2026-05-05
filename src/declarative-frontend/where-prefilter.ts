@@ -66,7 +66,7 @@ try {
   // across machines. From src/declarative-frontend/ the sibling repo's parser
   // is at ../../../cel2js/dist/parser/index.js.
   const parserUrl = new URL("../../../cel2js/dist/parser/index.js", import.meta.url).href;
-  const mod = await import(parserUrl);
+  const mod = await import(/* @vite-ignore */ parserUrl);
   if (typeof mod?.parse === "function") {
     _parseFn = mod.parse as ParseFn;
   }

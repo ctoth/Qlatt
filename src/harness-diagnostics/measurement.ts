@@ -99,3 +99,35 @@ export function readBandEnergy(
   }
   return energy;
 }
+
+/**
+ * Fraction of total spectral power contained within a frequency band.
+ * Useful for hiss/brightness checks where absolute level is less informative
+ * than high-frequency share.
+ */
+export function readBandShare(
+  analyser: AnalyserNode,
+  sampleRate: number,
+  band: [number, number],
+): number {
+  const binCount = analyser.frequencyBinCount;
+  const buf = new Float32Array(binCount);
+  analyser.getFloatFrequencyData(buf);
+
+  const binWidth = sampleRate / analyser.fftSize;
+  let lowBin = Math.floor(band[0] / binWidth);
+  let highBin = Math.floor(band[1] / binWidth);
+  if (lowBin < 0) lowBin = 0;
+  if (highBin >= binCount) highBin = binCount - 1;
+
+  let bandEnergy = 0;
+  let totalEnergy = 0;
+  for (let i = 0; i < binCount; i += 1) {
+    const energy = Math.pow(10, buf[i] / 10);
+    totalEnergy += energy;
+    if (i >= lowBin && i <= highBin) {
+      bandEnergy += energy;
+    }
+  }
+  return totalEnergy > 0 ? bandEnergy / totalEnergy : 0;
+}

@@ -447,7 +447,7 @@ function executeTableReplace(result: string, step: PipelineStep): string {
   if (!tableName) return result;
 
   const tables = getTables();
-  const table = (tables as Record<string, unknown>)[tableName] as Record<string, string> | undefined;
+  const table = (tables as unknown as Record<string, unknown>)[tableName] as Record<string, string> | undefined;
   if (!table) return result;
 
   let text = result;

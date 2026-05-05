@@ -91,7 +91,7 @@ export function evaluateCheck(
   };
 
   // Skip conditions
-  if (snapshot.inGuard) {
+  if (snapshot.inGuard && def.ignore_guard !== true) {
     return { ...base, status: "skip" };
   }
   if (!snapshot.inWindow) {

@@ -146,6 +146,22 @@ describe("evaluateCheck", () => {
     expect(result.status).toBe("pass");
   });
 
+  it("aggregate=max keeps maximum active value", () => {
+    const def: CheckDef = {
+      ...baseDef,
+      aggregate: "max",
+      assert: { max: 0.2 },
+    };
+    const snap = makeSnapshot();
+    const state = createCheckState();
+
+    const first = evaluateCheck("max_check", def, new Map([["output", 0.08]]), snap, state, 0);
+    const second = evaluateCheck("max_check", def, new Map([["output", 0.04]]), snap, state, 20);
+
+    expect(first.value).toBeCloseTo(0.08);
+    expect(second.value).toBeCloseTo(0.08);
+  });
+
   // 13. inGuard=true → status='skip'
   it("inGuard → skip", () => {
     const snap = makeSnapshot({ inGuard: true });

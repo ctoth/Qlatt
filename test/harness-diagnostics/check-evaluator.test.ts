@@ -62,6 +62,13 @@ describe("matchesWhen", () => {
     expect(matchesWhen({ phoneme: "IY*" }, snap)).toBe(true);
   });
 
+  it("phoneme glob *_REL matches D_REL", () => {
+    const snap = makeSnapshot({
+      event: { time: 0.3, phoneme: "D_REL", params: {} },
+    });
+    expect(matchesWhen({ phoneme: "*_REL" }, snap)).toBe(true);
+  });
+
   // 5. when: { phoneme: "IY*" } does not match "AH" → false
   it("phoneme glob IY* does not match AH", () => {
     const snap = makeSnapshot({

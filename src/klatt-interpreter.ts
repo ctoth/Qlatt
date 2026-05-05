@@ -127,6 +127,19 @@ export function buildStaticContext(
   return ctx;
 }
 
+function requireFiniteConstant(
+  constants: Record<string, unknown>,
+  name: string,
+): number {
+  const value = constants[name];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(
+      `E_SEMANTICS_CONSTANT_REQUIRED: constants.${name} must be a finite number`,
+    );
+  }
+  return value;
+}
+
 /**
  * Build a per-frame evaluation context by deep-copying staticContext and overlaying frame params.
  * Uses structuredClone to protect nested objects (e.g., ndbScale) from mutation.
@@ -332,14 +345,10 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
     // Only AF (frication) triggers PLSTEP — AH (aspiration) is gradual glottal
     // noise, not a burst transient (Klatt 1980 PARCOE.FOR).
     let prevAF = 0;
-    // Read threshold from semantics constant (single source of truth), fallback to 49
-    const PLSTEP_THRESHOLD = (typeof constants['plstepThreshold'] === 'number')
-      ? constants['plstepThreshold']
-      : 49;  // dB rise threshold for burst detection (Klatt 80 PARCOE.FOR)
-    // Read burst amplitude offset from semantics constant, fallback to 75
-    const PLSTEP_BURST_OFFSET_DB = (typeof constants['plstepBurstOffsetDb'] === 'number')
-      ? constants['plstepBurstOffsetDb']
-      : 75;  // Burst amplitude = GO - 75 dB (Klatt 80 PARCOE.FOR)
+    // PLSTEP constants are declared in semantics.yaml so runtime, graph, and
+    // telemetry share the same Klatt 1980 PARCOE.FOR values.
+    const PLSTEP_THRESHOLD = requireFiniteConstant(constants, 'plstepThreshold');
+    const PLSTEP_BURST_OFFSET_DB = requireFiniteConstant(constants, 'plstepBurstOffsetDb');
 
     for (let i = 0; i < track.length; i++) {
       const frame = track[i];

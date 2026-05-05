@@ -84,7 +84,11 @@ function compactAnalysis(report) {
     spectralFlatness: activeSpectrum.spectralFlatness ?? null,
     highShareAbove3000: activeSpectrum.highShareAbove3000 ?? null,
     hissShareAbove6000: activeSpectrum.hissShareAbove6000 ?? null,
+    highToSpeechRatioDb: activeSpectrum.highToSpeechRatioDb ?? null,
+    hissToSpeechRatioDb: activeSpectrum.hissToSpeechRatioDb ?? null,
     bandShare: activeSpectrum.bandShare ?? {},
+    releaseSummary: report.segments?.releaseSummary ?? null,
+    releaseFrames: report.segments?.releaseFrames ?? [],
   };
 }
 

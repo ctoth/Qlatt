@@ -5,7 +5,7 @@
  * - Open phase: 0.5 + 0.5 * sin(pi * phase / (oq * period))
  * - Closed phase: 0.5
  *
- * Citations: Klatt 1980 COEWAV.FOR lines 116-122, Gobl 1988, Fant 1995
+ * Citations: Klatt 1980 COEWAV.FOR lines 116-122, Gobl 1988, Fant 1997 Table 1
  */
 import { describe, it, expect } from "vitest";
 

@@ -45,7 +45,7 @@ Completion criteria:
 
 ### 2. Voiced-stop duration bug
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Update the voiced-stop branch in `public/rules/frontends/qlatt-english/phases/duration.yaml` so vowels before voiced stop closures can receive the voiced-stop duration multiplier.

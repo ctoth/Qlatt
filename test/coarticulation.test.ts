@@ -86,7 +86,7 @@ describe("DAC-weighted F2 coarticulation", () => {
       vowel("AA", 1220, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const m = out.find((t: Record<string, unknown>) => t.phoneme === "M");
     expect(m).toBeTruthy();
 
@@ -118,7 +118,7 @@ describe("DAC-weighted F2 coarticulation", () => {
       vowel("AA", 1220, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const c = out.find(
       (t: Record<string, unknown>) => t.phoneme === "TEST_C"
     );
@@ -164,8 +164,8 @@ describe("DAC-weighted F2 coarticulation", () => {
       { ...rightVowel },
     ];
 
-    const outDac1 = runDeclarativeFrontend(seqDac1, { phases: ["duration"] });
-    const outDac3 = runDeclarativeFrontend(seqDac3, { phases: ["duration"] });
+    const outDac1 = runDeclarativeFrontend(seqDac1, { phases: ["formant"] });
+    const outDac3 = runDeclarativeFrontend(seqDac3, { phases: ["formant"] });
 
     const c1 = outDac1.find(
       (t: Record<string, unknown>) => t.phoneme === "TEST_D1"
@@ -202,7 +202,7 @@ describe("DAC-weighted F2 coarticulation", () => {
       vowel("AA", 1220, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const c = out.find(
       (t: Record<string, unknown>) => t.phoneme === "TEST_D2"
     );
@@ -244,9 +244,9 @@ describe("DAC-weighted F2 coarticulation", () => {
     ];
 
     const outNoDac = runDeclarativeFrontend(seqNoDac, {
-      phases: ["duration"],
+      phases: ["formant"],
     });
-    const outDac1 = runDeclarativeFrontend(seqDac1, { phases: ["duration"] });
+    const outDac1 = runDeclarativeFrontend(seqDac1, { phases: ["formant"] });
 
     const cNoDac = outNoDac.find(
       (t: Record<string, unknown>) => t.phoneme === "TEST_ND"
@@ -274,7 +274,7 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
       vowelFull("AA", 700, 1220, 2600, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const m = out.find((t: Record<string, unknown>) => t.phoneme === "M");
     expect(m).toBeTruthy();
 
@@ -310,7 +310,7 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
       vowelFull("AA", 700, 1220, 2600, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const c = out.find((t: Record<string, unknown>) => t.phoneme === "TEST_MH");
     expect(c).toBeTruthy();
 
@@ -345,7 +345,7 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
       vowelFull("AA", 700, 1220, 2600, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const c = out.find((t: Record<string, unknown>) => t.phoneme === "TEST_D3");
     expect(c).toBeTruthy();
 
@@ -372,7 +372,7 @@ describe("DAC-weighted F1, F2, F3 coarticulation [Ohman 1966]", () => {
       vowelFull("AA", 700, 1220, 2600, { low: true }),
     ];
 
-    const out = runDeclarativeFrontend(sequence, { phases: ["duration"] });
+    const out = runDeclarativeFrontend(sequence, { phases: ["formant"] });
     const c = out.find((t: Record<string, unknown>) => t.phoneme === "TEST_F2ONLY");
     expect(c).toBeTruthy();
 

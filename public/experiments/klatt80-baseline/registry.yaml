@@ -302,7 +302,7 @@ primitives:
     outputs: 1
 
   glottal-mod:
-    description: "Pulsatile aspiration modulation synchronized to glottal cycle - sinusoidal OQ envelope (Klatt 1980, Gobl 1988, Fant 1995)"
+    description: "Pulsatile aspiration modulation synchronized to glottal cycle - sinusoidal OQ envelope (Klatt 1980, Gobl 1988, Fant 1997 Table 1)"
     worklet: "glottal-mod-processor.js"
     params:
       f0:
@@ -314,6 +314,6 @@ primitives:
         type: float
         default: 0.5
         range: [0.1, 1.0]
-        description: "Open quotient controlling aspiration envelope shape (Fant 1995: OQ = 1 - 1/(2*Rd))"
+        description: "Open quotient controlling aspiration envelope shape; qlatt derives the default from Fant 1997 Table 1 OQi values"
     inputs: 1
     outputs: 1

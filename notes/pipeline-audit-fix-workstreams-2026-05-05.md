@@ -164,7 +164,7 @@ Verification:
 
 ### 12. Final verification
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Run the targeted tests created above.

@@ -140,6 +140,19 @@ function requireFiniteConstant(
   return value;
 }
 
+function requireFiniteRealizedValue(
+  values: Record<string, ParamValue>,
+  name: string,
+): number {
+  const value = values[name];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(
+      `E_SEMANTICS_VALUE_REQUIRED: realized ${name} must be a finite number`,
+    );
+  }
+  return value;
+}
+
 /**
  * Build a per-frame evaluation context by deep-copying staticContext and overlaying frame params.
  * Uses structuredClone to protect nested objects (e.g., ndbScale) from mutation.
@@ -368,7 +381,7 @@ export function createKlattInterpreter(options: KlattInterpreterOptions): KlattI
         if (deltaAF >= PLSTEP_THRESHOLD) {
           const trigger = 'AF';
           const delta = deltaAF;
-          const goDb = frame.params.GO ?? 47;
+          const goDb = requireFiniteRealizedValue(realized, 'GO');
           const burstDb = goDb - PLSTEP_BURST_OFFSET_DB;  // Klatt80 PLSTEP amplitude formula
           const burstAmplitude = dbToLinear(burstDb);
 

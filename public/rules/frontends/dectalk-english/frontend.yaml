@@ -278,6 +278,14 @@ parameters:
       baseline_fall_hz10:
         value: 180
         citations: ["DECtalk 4.63 Paul BF*10"]
+      sag_depth_hz:
+        value: 0
+        citations:
+          - "DECtalk 4.63 ph_inton1.c and Ph_drwt02.c use the layered hat-pattern F0 path; Pierrehumbert-style H*-H* sag is disabled for this frontend"
+      sag_min_span_ms:
+        value: 150
+        citations:
+          - "Inactive when sag_depth_hz is 0; retained to satisfy the explicit frontend F0 policy contract"
 output:
   blend:
     factor:

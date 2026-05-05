@@ -103,35 +103,3 @@ export function handleTelemetry(data) {
   }, 250);
 }
 
-// Attach telemetry port listeners to new runtime worklet nodes
-export function attachTelemetryNewRuntime(runtime) {
-  const nodeIds = runtime.getAllNodeIds();
-  let attached = 0;
-  for (const nodeId of nodeIds) {
-    const node = runtime.getNode(nodeId);
-    // Check if it's an AudioWorkletNode with a port
-    if (!node || !('port' in node) || !node.port) continue;
-
-    node.port.addEventListener("message", (event) => {
-      const data = event.data;
-      if (!data || typeof data !== 'object') return;
-      // Add node identifier for diagnostics display
-      if (data.type === 'metrics' && !data.node) {
-        data.node = nodeId;
-      }
-      handleTelemetry(data);
-    });
-
-    // Ensure port is started
-    if (typeof node.port.start === "function") {
-      try {
-        node.port.start();
-      } catch {
-        // Port may already be started
-      }
-    }
-    attached++;
-  }
-  console.log(`[QLATT] Attached telemetry to ${attached} new runtime nodes`);
-}
-

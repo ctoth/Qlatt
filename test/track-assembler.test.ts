@@ -294,6 +294,7 @@ describe("track-assembler", () => {
   describe("renderLayeredF0", () => {
     const minimalModel: LayeredF0ModelConfig = {
       type: "layered_additive",
+      frame_period_sec: 0.005,
       filter: { type: "lowpass_2pole", default_cutoff: 50 },
       layers: {
         baseline: { type: "profile" },
@@ -361,6 +362,7 @@ describe("track-assembler", () => {
       ];
       const profileModel: LayeredF0ModelConfig = {
         type: "layered_additive",
+        frame_period_sec: 0.005,
         filter: { type: "lowpass_2pole", default_cutoff: 90 },
         layers: {
           baseline: { type: "profile" },
@@ -440,6 +442,7 @@ describe("track-assembler", () => {
     it("uses layered renderer when f0Model is present", () => {
       const f0Model: LayeredF0ModelConfig = {
         type: "layered_additive",
+        frame_period_sec: 0.005,
         filter: { type: "lowpass_2pole", default_cutoff: 50 },
         layers: {
           hat: { type: "persistent" },

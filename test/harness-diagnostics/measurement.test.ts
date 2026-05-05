@@ -5,6 +5,7 @@ import {
   readFftPeakFreq,
   readBandEnergy,
   readBandShare,
+  readBandRatioDb,
 } from "../../src/harness-diagnostics/measurement";
 
 /**
@@ -220,5 +221,28 @@ describe("readBandShare", () => {
     const result = readBandShare(analyser, sampleRate, [6000, 10000]);
 
     expect(result).toBeLessThan(0.001);
+  });
+});
+
+describe("readBandRatioDb", () => {
+  it("returns positive dB when numerator band is stronger", () => {
+    const sampleRate = 48000;
+    const fftSize = 2048;
+    const binCount = fftSize / 2;
+    const freqData = new Array(binCount).fill(-100);
+    for (let i = 130; i < 140; i++) freqData[i] = 0;
+    for (let i = 20; i < 30; i++) freqData[i] = -20;
+
+    const analyser = mockAnalyser([0], freqData, fftSize);
+    const binWidth = sampleRate / fftSize;
+    const result = readBandRatioDb(
+      analyser,
+      sampleRate,
+      [130 * binWidth, 140 * binWidth],
+      [20 * binWidth, 30 * binWidth],
+    );
+
+    expect(result).toBeGreaterThan(19);
+    expect(result).toBeLessThan(21);
   });
 });

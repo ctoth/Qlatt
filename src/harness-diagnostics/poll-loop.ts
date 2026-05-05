@@ -147,19 +147,36 @@ export class PollLoop {
       const measure = checkDef.measure ?? "rms";
       if (checkDef.tap) {
         const analyser = this.tapManager.get(checkDef.tap);
-        if (analyser) {
-          const value = this.readMeasurement(analyser, measure, sampleRate, checkDef.measure_params);
-          measurements.set(checkDef.tap, value);
+        if (!analyser) {
+          results.set(checkName, {
+            name: checkName,
+            status: "skip",
+            severity: checkDef.severity,
+            message: `Tap '${checkDef.tap}' is not connected`,
+          });
+          continue;
         }
+        const value = this.readMeasurement(analyser, measure, sampleRate, checkDef.measure_params);
+        measurements.set(checkDef.tap, value);
       }
       // For multi-tap checks (rms_ratio_db)
       if (checkDef.taps) {
         for (const tapName of checkDef.taps) {
           const analyser = this.tapManager.get(tapName);
-          if (analyser) {
-            const value = this.readMeasurement(analyser, "rms", sampleRate, undefined);
-            measurements.set(tapName, value);
+          if (!analyser) {
+            results.set(checkName, {
+              name: checkName,
+              status: "skip",
+              severity: checkDef.severity,
+              message: `Tap '${tapName}' is not connected`,
+            });
+            continue;
           }
+          const value = this.readMeasurement(analyser, "rms", sampleRate, undefined);
+          measurements.set(tapName, value);
+        }
+        if (results.has(checkName)) {
+          continue;
         }
       }
 

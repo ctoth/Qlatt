@@ -33,6 +33,52 @@ describe("declarative frontend rulepack context migration", () => {
     expect(out[1].params.F2).toBe(1900);
   });
 
+  it("labels moved formant rule matches with the formant phase", () => {
+    const sequence = [
+      {
+        phoneme: "K_CL",
+        type: "stop_closure",
+        params: { F2: 1500 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+      {
+        phoneme: "K_REL",
+        type: "stop_release",
+        params: { F2: 1500 },
+        duration: 25,
+        inherentDuration: 25,
+      },
+      {
+        phoneme: "IY",
+        type: "vowel",
+        front: true,
+        params: { F2: 1950, AV: 58 },
+        duration: 80,
+        inherentDuration: 80,
+      },
+    ];
+
+    const result = runDeclarativeFrontend(sequence, {
+      phases: ["formant"],
+      includeTrace: true,
+    });
+
+    expect(result.sequence[0].params.F2).toBe(1900);
+    expect(result.trace).toContainEqual(
+      expect.objectContaining({
+        type: "match",
+        phase: "formant",
+        rule: "k_context_cl_f2",
+      })
+    );
+    expect(
+      result.trace.some(
+        (event) => event.rule === "k_context_cl_f2" && event.phase === "duration"
+      )
+    ).toBe(false);
+  });
+
   it("defaults K-context F2 to 1500 when no following vowel exists", () => {
     const sequence = [
       {

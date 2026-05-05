@@ -57,7 +57,7 @@ Verification:
 
 ### 3. Normalize phase execution
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Wire the declared `normalize` phone phase into the main `tts-frontend.ts` sequence before `postlexical`.
@@ -68,7 +68,7 @@ Verification:
 
 ### 4. Rule tags completion
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Add tags to non-trivial scalar apply entries missing `tag`, especially formant locus and SW assignment rules.

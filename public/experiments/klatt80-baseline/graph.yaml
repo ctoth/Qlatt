@@ -152,7 +152,8 @@ nodes:
       gain: 1.0
       cutoff: { bind: fricationCutoff }
 
-  # Glottal modulation - pulsatile sinusoidal envelope shaped by OQ (Klatt 1980, Gobl 1988, Fant 1995)
+  # Glottal modulation - pulsatile sinusoidal envelope shaped by OQ
+  # (Klatt 1980, Gobl 1988, Fant 1997 Table 1)
   glottalMod:
     type: glottal-mod
     params:

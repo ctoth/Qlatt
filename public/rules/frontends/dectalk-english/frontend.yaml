@@ -288,18 +288,21 @@ output:
     smooth_types: [vowel, nasal, liquid, glide]
   min_duration:
     stop_release_ms:
-      value: 5
+      value: 7
       citations:
-        - "Engineering estimate: minimum 5ms for stop release burst visibility"
+        - "DECtalk 4.63 ph_defs.h: NF7MS = 1 synthesis frame; frtoms(1) is approximately 7ms at NSAMP_FRAME=71"
     default_ms:
       value: 30
       citations:
-        - "DECtalk 4.63 p_us_tim.c timing tables use 10ms-frame-derived segment durations; 30ms keeps legacy frontend floor"
+        - "DECtalk 4.63 ph_defs.h: NF30MS = 5 synthesis frames; named 30ms floor preserves legacy frontend default"
   initial_silence_ms:
     value: 0
     citations:
       - "Engineering boundary: DECtalk frontend adds no synthetic initial silence unless rules request it"
-  transition_ms: 30
+  transition_ms:
+    value: 30
+    citations:
+      - "DECtalk 4.63 p_us_st1.c: default durtran assignments commonly use NF30MS; ph_defs.h defines NF30MS = 5 synthesis frames"
   final_silence_ms:
     value: 100
     citations:

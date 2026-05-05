@@ -89,13 +89,13 @@ function compactAnalysis(report) {
 }
 
 function compactProbe(report) {
-  const diagnostics = report.diagnostics ?? {};
-  const checks = diagnostics.checkResults ?? [];
+  const snapshot = report.snapshot ?? {};
+  const checks = snapshot.diagResults ?? [];
   return {
     consoleErrors: report.consoleErrors?.length ?? 0,
     pageErrors: report.pageErrors?.length ?? 0,
     failedRequests: report.failedRequests?.length ?? 0,
-    telemetryNodes: diagnostics.telemetry?.length ?? 0,
+    telemetryNodes: snapshot.telemetryMax?.length ?? snapshot.telemetry?.length ?? 0,
     topTelemetryMax: report.summary?.topTelemetryMax ?? [],
     failingChecks: report.summary?.failingChecks ?? checks.filter((check) => check.assertionFailed),
     checks: checks.map((check) => ({

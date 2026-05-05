@@ -45,7 +45,7 @@ Completion criteria:
 
 ### 2. Voiced-stop duration bug
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Update the voiced-stop branch in `public/rules/frontends/qlatt-english/phases/duration.yaml` so vowels before voiced stop closures can receive the voiced-stop duration multiplier.
@@ -57,7 +57,7 @@ Verification:
 
 ### 3. Normalize phase execution
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Wire the declared `normalize` phone phase into the main `tts-frontend.ts` sequence before `postlexical`.

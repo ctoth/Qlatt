@@ -42,6 +42,8 @@ export interface AssertDef {
 /** Measure-specific parameters (e.g., frequency band for FFT). */
 export interface MeasureParams {
   band?: [number, number];
+  numerator_band?: [number, number];
+  denominator_band?: [number, number];
 }
 
 export type MeasureKind =
@@ -50,8 +52,11 @@ export type MeasureKind =
   | "fft_peak_freq"
   | "band_energy"
   | "band_share"
+  | "band_ratio_db"
   | "zcr"
   | "rms_ratio_db";
+
+export type CheckAggregate = "last" | "max" | "min";
 
 export type CheckType =
   | "tap_check"        // default: measure a tap and assert
@@ -97,6 +102,8 @@ export interface CheckDef {
   measure?: MeasureKind;
   /** Extra params for the measurement. */
   measure_params?: MeasureParams;
+  /** How to aggregate values observed while the check is active. */
+  aggregate?: CheckAggregate;
   /** Assertion thresholds. */
   assert: AssertDef;
   /** Severity when assertion fails. */

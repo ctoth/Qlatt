@@ -16,6 +16,21 @@ import type {
   F0LayerCommand,
 } from "../src/track-assembler";
 
+const DEFAULT_OUTPUT_CONFIG = {
+  blend: {
+    factor: 0.35,
+    keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
+    smooth_types: ["vowel", "nasal", "liquid", "glide"],
+  },
+  min_duration: {
+    stop_release_ms: 5,
+    default_ms: 20,
+  },
+  transition_ms: 30,
+  initial_silence_ms: 30,
+  final_silence_ms: 100,
+};
+
 // Suppress warnings during tests
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -178,7 +193,7 @@ describe("track-assembler", () => {
           },
         ],
         [],
-        { baseF0: 120, transitionMs: 0, outputConfig: {} }
+        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG }
       );
 
       const aaFrames = track.filter((frame) => frame.phoneme === "AA");
@@ -202,7 +217,11 @@ describe("track-assembler", () => {
           },
         ],
         [],
-        { baseF0: 120, transitionMs: 0, outputConfig: { initial_silence_ms: 40, final_silence_ms: 0 } }
+        {
+          baseF0: 120,
+          transitionMs: 0,
+          outputConfig: { ...DEFAULT_OUTPUT_CONFIG, initial_silence_ms: 40, final_silence_ms: 0 },
+        }
       );
       const firstPhone = track.find((f) => f.phoneme === "AA");
       expect(firstPhone).toBeTruthy();
@@ -379,7 +398,7 @@ describe("track-assembler", () => {
       const trackWithOverride = assembleKlattTrack(phoneSequence, [], {
         baseF0: 120,
         transitionMs: 50,
-        outputConfig: {},
+        outputConfig: DEFAULT_OUTPUT_CONFIG,
       });
       // The per-token value should be used; verify frames exist (basic smoke test).
       expect(trackWithOverride.length).toBeGreaterThanOrEqual(3);
@@ -403,7 +422,7 @@ describe("track-assembler", () => {
       const track = assembleKlattTrack(phoneSequence, [], {
         baseF0: 120,
         transitionMs: 50,
-        outputConfig: {},
+        outputConfig: DEFAULT_OUTPUT_CONFIG,
       });
       // No per-token transition_ms, should use global 50ms.
       expect(track.length).toBeGreaterThanOrEqual(3);
@@ -436,7 +455,7 @@ describe("track-assembler", () => {
       const track = assembleKlattTrack(phoneSequence, parameterSequence, {
         baseF0: 110,
         f0Model,
-        outputConfig: {},
+        outputConfig: DEFAULT_OUTPUT_CONFIG,
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
       // The voiced phone frame should have a non-zero F0.
@@ -460,7 +479,7 @@ describe("track-assembler", () => {
       ];
       const track = assembleKlattTrack(phoneSequence, parameterSequence, {
         baseF0: 110,
-        outputConfig: {},
+        outputConfig: DEFAULT_OUTPUT_CONFIG,
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
     });

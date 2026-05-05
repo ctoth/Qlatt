@@ -14,30 +14,39 @@ import { getIncompressibleMin } from "../src/declarative-frontend/engine";
  */
 
 describe("getIncompressibleMin", () => {
-  describe("default behavior (no runtime params)", () => {
+  const runtimeParams = {
+    policy: {
+      duration: {
+        incompressibility_ratio_vowel: 0.42,
+        incompressibility_ratio_consonant: 0.6,
+      },
+    },
+  };
+
+  describe("with explicit policy params", () => {
     it("returns inherent * 0.42 for vowel tokens", () => {
       const vowelToken = { type: "vowel", phoneme: "AH" };
-      const result = getIncompressibleMin(vowelToken, 100);
+      const result = getIncompressibleMin(vowelToken, 100, runtimeParams);
       expect(result).toBeCloseTo(42, 5);
     });
 
     it("returns inherent * 0.6 for consonant tokens", () => {
       const consonantToken = { type: "stop_closure", phoneme: "T_CL" };
-      const result = getIncompressibleMin(consonantToken, 100);
+      const result = getIncompressibleMin(consonantToken, 100, runtimeParams);
       expect(result).toBeCloseTo(60, 5);
     });
 
     it("returns 0 for non-finite inherent duration", () => {
       const token = { type: "vowel", phoneme: "AH" };
-      expect(getIncompressibleMin(token, NaN)).toBe(0);
-      expect(getIncompressibleMin(token, Infinity)).toBe(0);
-      expect(getIncompressibleMin(token, -10)).toBe(0);
+      expect(getIncompressibleMin(token, NaN, runtimeParams)).toBe(0);
+      expect(getIncompressibleMin(token, Infinity, runtimeParams)).toBe(0);
+      expect(getIncompressibleMin(token, -10, runtimeParams)).toBe(0);
     });
 
-    it("returns 0 for null/undefined token", () => {
+    it("uses consonant ratio for null/undefined token", () => {
       // null token is treated as non-vowel (consonant ratio 0.6)
-      expect(getIncompressibleMin(null, 100)).toBeCloseTo(60, 5);
-      expect(getIncompressibleMin(undefined, 100)).toBeCloseTo(60, 5);
+      expect(getIncompressibleMin(null, 100, runtimeParams)).toBeCloseTo(60, 5);
+      expect(getIncompressibleMin(undefined, 100, runtimeParams)).toBeCloseTo(60, 5);
     });
   });
 
@@ -70,15 +79,19 @@ describe("getIncompressibleMin", () => {
       expect(result).toBeCloseTo(70, 5);
     });
 
-    it("falls back to defaults when policy params are missing", () => {
+    it("throws when policy params are missing", () => {
       const vowelToken = { type: "vowel", phoneme: "AH" };
       const emptyParams = { policy: { duration: {} } };
-      expect(getIncompressibleMin(vowelToken, 100, emptyParams)).toBeCloseTo(42, 5);
+      expect(() => getIncompressibleMin(vowelToken, 100, emptyParams)).toThrow(
+        "E_DURATION_POLICY_REQUIRED: params.policy.duration.incompressibility_ratio_vowel must be a finite number",
+      );
     });
 
-    it("falls back to defaults when params is null", () => {
+    it("throws when params is null", () => {
       const vowelToken = { type: "vowel", phoneme: "AH" };
-      expect(getIncompressibleMin(vowelToken, 100, null)).toBeCloseTo(42, 5);
+      expect(() => getIncompressibleMin(vowelToken, 100, null)).toThrow(
+        "E_DURATION_POLICY_REQUIRED: params.policy.duration is required for Klatt duration resolution",
+      );
     });
   });
 });

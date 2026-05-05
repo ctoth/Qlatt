@@ -117,7 +117,7 @@ Verification:
 
 ### 8. A7-A10 versus 5 kHz output low-pass
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Resolve the contradiction between high-frequency fricative targets and the Klatt80 output reconstruction filter.
@@ -129,7 +129,7 @@ Verification:
 
 ### 9. Glottal modulation OQ and Fant source model
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Do not rely on Fant 1995 until notes exist.

@@ -105,7 +105,7 @@ Verification:
 
 ### 7. Aspiration/frication routing
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Stop routing AH through the frication source via `max(AF, AH)` in parallel mode.
@@ -117,7 +117,7 @@ Verification:
 
 ### 8. A7-A10 versus 5 kHz output low-pass
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Resolve the contradiction between high-frequency fricative targets and the Klatt80 output reconstruction filter.

@@ -47,61 +47,69 @@ export async function speak() {
 
 export async function initializeNewRuntime() {
   if (state.newRuntime) return state.newRuntime;
-  await loadNewRuntimeConfig();
-  state.status.textContent = "Status: initializing new runtime...";
-  try {
-    state.newRuntime = await createKlattRuntime({
-      audioContext: state.ctx,
-      graph: state.newRuntimeGraph,
-      semantics: state.newRuntimeSemantics,
-      registry: state.newRuntimeRegistry,
-      workletBasePath: state.WORKLET_BASE_PATH,
-      logger: (msg) => console.log(msg),
-      telemetry: true,  // Enable worklet debug metrics
-      telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler
-    });
-    state.newRuntime.connectToDestination();
-    attachTelemetryNewRuntime(state.newRuntime);  // Attach additional port listeners
-    state.status.textContent = "Status: new runtime initialized";
-    console.log("[QLATT] New runtime initialized");
+  if (state.newRuntimeInitPromise) return state.newRuntimeInitPromise;
 
-    // Create diagnostics engine
+  state.newRuntimeInitPromise = (async () => {
+    await loadNewRuntimeConfig();
+    state.status.textContent = "Status: initializing new runtime...";
     try {
-      const configResp = await fetch(`${import.meta.env.BASE_URL}diagnostics/default.yaml`);
-      const configYaml = await configResp.text();
-      state.diagConfig = parseDiagConfig(configYaml);
-      state.diagEngine = createDiagnosticsEngine(
-        state.diagConfig,
-        state.ctx,
-        state.newRuntime,
-        {
-          telemetry: state.telemetry,
-          telemetryMax: state.telemetryMax,
-          plstepEvents: state.plstepEvents,
-          plstepTotalCount: state.plstepTotalCount,
-          playHistory: state.playHistory,
-          sessionId: state.sessionId,
-          sliderParams: {},
-        },
-      );
-      state.diagEngine.subscribe((output) => {
-        if (state.useEngineOutput) {
-          state.lastDiagnostics = output;
-          state.diagnosticsEl.value = output;
-        }
+      state.newRuntime = await createKlattRuntime({
+        audioContext: state.ctx,
+        graph: state.newRuntimeGraph,
+        semantics: state.newRuntimeSemantics,
+        registry: state.newRuntimeRegistry,
+        workletBasePath: state.WORKLET_BASE_PATH,
+        logger: (msg) => console.log(msg),
+        telemetry: true,  // Enable worklet debug metrics
+        telemetryHandler: (data) => handleTelemetry(data),  // Route to shared handler
       });
-      state.diagEngine.start();
-      console.log("[QLATT] Diagnostics engine initialized");
-    } catch (err) {
-      console.warn("[QLATT] Diagnostics engine failed to initialize:", err);
-    }
+      state.newRuntime.connectToDestination();
+      attachTelemetryNewRuntime(state.newRuntime);  // Attach additional port listeners
+      state.status.textContent = "Status: new runtime initialized";
+      console.log("[QLATT] New runtime initialized");
 
-    return state.newRuntime;
-  } catch (err) {
-    state.status.textContent = "Status: failed to initialize new runtime";
-    console.error("[QLATT] Failed to initialize new runtime:", err);
-    throw err;
-  }
+      // Create diagnostics engine
+      try {
+        const configResp = await fetch(`${import.meta.env.BASE_URL}diagnostics/default.yaml`);
+        const configYaml = await configResp.text();
+        state.diagConfig = parseDiagConfig(configYaml);
+        state.diagEngine = createDiagnosticsEngine(
+          state.diagConfig,
+          state.ctx,
+          state.newRuntime,
+          {
+            telemetry: state.telemetry,
+            telemetryMax: state.telemetryMax,
+            plstepEvents: state.plstepEvents,
+            plstepTotalCount: state.plstepTotalCount,
+            playHistory: state.playHistory,
+            sessionId: state.sessionId,
+            sliderParams: {},
+          },
+        );
+        state.diagEngine.subscribe((output) => {
+          if (state.useEngineOutput) {
+            state.lastDiagnostics = output;
+            state.diagnosticsEl.value = output;
+          }
+        });
+        state.diagEngine.start();
+        console.log("[QLATT] Diagnostics engine initialized");
+      } catch (err) {
+        console.warn("[QLATT] Diagnostics engine failed to initialize:", err);
+      }
+
+      return state.newRuntime;
+    } catch (err) {
+      state.status.textContent = "Status: failed to initialize new runtime";
+      console.error("[QLATT] Failed to initialize new runtime:", err);
+      throw err;
+    } finally {
+      state.newRuntimeInitPromise = null;
+    }
+  })();
+
+  return state.newRuntimeInitPromise;
 }
 
 export async function speakWithNewRuntime(track) {
@@ -202,7 +210,11 @@ export async function speakWithNewRuntime(track) {
     if (state.diagEngine) state.diagEngine.onPlayEnd();
     navigator.clipboard.writeText(state.diagnosticsEl.value).catch(() => {});
     // Record play history for warmup tracking
-    const outputMax = state.meterMax.get("post-output-lp");
+    const outputMax =
+      state.telemetryMax.get("post-output-lp") ??
+      state.telemetryMax.get("outputGain") ??
+      state.telemetryMax.get("masterGain") ??
+      null;
     if (outputMax) {
       state.playHistory.push({
         sessionId: currentSessionId,

@@ -133,11 +133,12 @@ class ReconstructionFilterProcessor extends AudioWorkletProcessor {
       );
 
       this.outputBuffer.refresh();
-      renderedView = this.outputBuffer.view;
-      if (!renderedView) {
+      const refreshedOutputView = this.outputBuffer.view;
+      if (!refreshedOutputView) {
         outputChannel.fill(0);
         return true;
       }
+      renderedView = refreshedOutputView;
     }
 
     outputChannel.set(renderedView);

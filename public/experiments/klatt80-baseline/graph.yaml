@@ -71,7 +71,10 @@ formantBanks:
         parallelSource: parallelFricGain
       # F7-F10: Higher formants with both cascade and parallel routing.
       # Cascade: shapes voiced speech spectrum (though contribution is small due to cascade attenuation).
-      # Parallel: shapes fricative/burst spectra above 6 kHz — /f/ peaks ~8.5 kHz, /theta/ ~7.5 kHz.
+      # Parallel: shapes fricative/burst spectra above 6 kHz; this requires the
+      # output reconstruction stage below to be bypassed in this experiment.
+      # Shadle et al. (2023) report fricative spectra to 15 kHz; Monson et al.
+      # (2014) covers perceptual significance of high-frequency energy.
       # A7-A10 default to 0; frontend rules must supply non-zero values for audible parallel output.
       # Fant neutral model spacing (1000 Hz from F6), Rabiner (1968) Q-factor bandwidths.
       - index: 7
@@ -452,10 +455,14 @@ nodes:
     params:
       gain: 1.0
 
-  # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass
-  # after the D/A converter. This dedicated DSP node models that output stage.
+  # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass after
+  # the D/A converter. This experiment bypasses that stage so the A7-A10
+  # fricative bands above 5 kHz are actually rendered; set bypass=false for a
+  # strict Klatt 1980 playback-bandwidth run.
   outputLp:
     type: reconstruction-filter
+    options:
+      bypass: true
 
   masterGain:
     type: gain

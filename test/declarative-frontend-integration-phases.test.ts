@@ -27,10 +27,12 @@ describe("declarative frontend integration phases", () => {
       },
     );
 
-    expect(result).toHaveLength(1);
-    expect(result[0].phoneme).toBe("AH");
-    expect(result[0].type).toBe("vowel");
-    expect(result[0].params).toMatchObject({ AV: 57 });
+    const suppressedOriginal = result.find((token) => token.phoneme === "AX" && token.status === 2);
+    const activeReplacement = result.find((token) => token.phoneme === "AH" && token.status === 1);
+
+    expect(suppressedOriginal).toBeDefined();
+    expect(activeReplacement?.type).toBe("vowel");
+    expect(activeReplacement?.params).toMatchObject({ AV: 57 });
   });
 
   it("executes structural->duration->prosody->finalize with resolved point timing trace", () => {

@@ -16,7 +16,8 @@ describe("nasal subsystem semantics", () => {
     });
 
     expect(result.values.nasalCoreFnp).toBe(250);
-    expect(result.values.nasalCoreFnzTarget).toBe(475);
+    expect(result.values.nasalCoreFnpTarget).toBe(800);
+    expect(result.values.nasalCoreFnzTarget).toBe(750);
     expect(result.values.nasalCoreFnz).toBe(250);
     expect(result.values.nasalRuntimeActive).toBe(0);
     expect(result.values.nasalCoreFnpBound).toBe(0);
@@ -37,14 +38,37 @@ describe("nasal subsystem semantics", () => {
       constants: semantics.constants ?? {},
     });
 
-    expect(result.values.nasalCoreFnz).toBe(475);
+    expect(result.values.nasalCoreFnpTarget).toBe(800);
+    expect(result.values.nasalCoreFnp).toBe(800);
+    expect(result.values.nasalCoreFnzTarget).toBe(750);
+    expect(result.values.nasalCoreFnz).toBe(750);
     expect(result.values.nasalPlaceFnz).toBe(3000);
     expect(result.values.nasalPlaceBnz).toBe(100);
     expect(Number(result.values.nasalSecondaryCueScale)).toBe(1);
     expect(result.values.nasalRuntimeActive).toBe(1);
-    expect(result.values.nasalCoreFnpBound).toBe(250);
-    expect(result.values.nasalCoreFnzBound).toBe(475);
+    expect(result.values.nasalCoreFnpBound).toBe(800);
+    expect(result.values.nasalCoreFnzBound).toBe(750);
     expect(Number(result.values.anLinear)).toBeGreaterThan(0.5);
+  });
+
+  it("moves both nasal pole and zero during partial vowel nasalization", async () => {
+    const { semantics } = await loadExperimentConfig("klatt80-baseline");
+    const { topoEvaluator } = createConfiguredEvaluator();
+    const result = topoEvaluator.evaluate(semantics, {
+      params: {
+        F1: 700,
+        nasalCoupling: 0.5,
+        nasalMurmurStrength: 0,
+      },
+      constants: semantics.constants ?? {},
+    });
+
+    expect(result.values.nasalCoreFnpTarget).toBe(800);
+    expect(result.values.nasalCoreFnzTarget).toBe(750);
+    expect(result.values.nasalCoreFnp).toBe(525);
+    expect(result.values.nasalCoreFnz).toBe(500);
+    expect(result.values.nasalPlaceFnz).toBe(0);
+    expect(result.values.nasalPlaceBnz).toBe(0);
   });
 
   it("keeps the parallel nasal branch silent for oral defaults", async () => {

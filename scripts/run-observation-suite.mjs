@@ -71,7 +71,7 @@ function readJson(filePath) {
 
 function compactAnalysis(report) {
   const active = report.active ?? {};
-  const activeSpectrum = report.activeSpectrum ?? {};
+  const activeSpectrum = active.spectral ?? {};
   return {
     rms: active.rms ?? null,
     peak: active.peak ?? null,
@@ -95,7 +95,7 @@ function compactProbe(report) {
     consoleErrors: report.consoleErrors?.length ?? 0,
     pageErrors: report.pageErrors?.length ?? 0,
     failedRequests: report.failedRequests?.length ?? 0,
-    telemetryNodes: report.telemetrySummary?.length ?? 0,
+    telemetryNodes: diagnostics.telemetry?.length ?? 0,
     topTelemetryMax: report.summary?.topTelemetryMax ?? [],
     failingChecks: report.summary?.failingChecks ?? checks.filter((check) => check.assertionFailed),
     checks: checks.map((check) => ({

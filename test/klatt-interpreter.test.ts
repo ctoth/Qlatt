@@ -271,6 +271,25 @@ describe('PLSTEP state tracking', () => {
     ).toThrow("E_SEMANTICS_CONSTANT_REQUIRED: constants.plstepBurstOffsetDb");
   });
 
+  it('requires realized GO for PLSTEP telemetry amplitude', () => {
+    const interpreter = createKlattInterpreter({
+      audioContext: mockAudioContext(),
+      runtime: mockRuntime(),
+      semantics: {
+        ...minimalSemantics(),
+        params: {
+          AF: { default: 0, min: 0, max: 80 },
+          AH: { default: 0, min: 0, max: 80 },
+        },
+      },
+      telemetryHandler: () => {},
+    });
+
+    expect(() =>
+      interpreter.scheduleTrack([{ time: 0.0, params: { AF: 60 } }], 0),
+    ).toThrow("E_SEMANTICS_VALUE_REQUIRED: realized GO must be a finite number");
+  });
+
   it('fires PLSTEP telemetry for >49 dB AF jump', () => {
     const events: TelemetryEvent[] = [];
     const telemetryHandler = (event: TelemetryEvent) => events.push(event);

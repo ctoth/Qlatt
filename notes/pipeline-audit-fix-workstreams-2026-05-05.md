@@ -140,7 +140,7 @@ Verification:
 
 ### 10. Nasal pole-zero model
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Add vowel-dependent nasal pole and zero endpoint controls.
@@ -152,7 +152,7 @@ Verification:
 
 ### 11. Phase boundary cleanup
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Move formant/locus/coarticulation rules out of the `duration` phase into the `formant` phase after behavior is stable.

@@ -417,25 +417,6 @@ rules:
         tag: pause_rate
     citations:
       - Goldman-Eisler 1968 (pause duration scales with speaking rate)
-  incompressibility_floor:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.phoneme != 'SIL' && has(current.inherentDuration)"
-    apply:
-      - field: duration
-        op: set
-        value: >-
-          current.duration < current.inherentDuration * (current.type == 'vowel'
-          ? params.policy.duration.incompressibility_ratio_vowel
-          : params.policy.duration.incompressibility_ratio_consonant)
-          ? current.inherentDuration * (current.type == 'vowel'
-          ? params.policy.duration.incompressibility_ratio_vowel
-          : params.policy.duration.incompressibility_ratio_consonant)
-          : current.duration
-        tag: incompressibility
-    citations:
-      - "Klatt 1976"
   duration_cap:
     kind: scalar
     select:

@@ -152,7 +152,7 @@ Verification:
 
 ### 11. Phase boundary cleanup
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Move formant/locus/coarticulation rules out of the `duration` phase into the `formant` phase after behavior is stable.
@@ -164,7 +164,7 @@ Verification:
 
 ### 12. Final verification
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Run the targeted tests created above.

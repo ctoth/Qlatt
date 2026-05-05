@@ -7,7 +7,7 @@ import type { TapManager } from "./tap-manager";
 import type { AcrossPlaysAccumulator } from "./across-plays";
 import { resolveTimingSnapshot } from "./timing-context";
 import { evaluateCheck, createCheckState, type CheckState } from "./check-evaluator";
-import { readRms, readPeak, readFftPeakFreq, readBandEnergy } from "./measurement";
+import { readRms, readPeak, readFftPeakFreq, readBandEnergy, readBandShare } from "./measurement";
 import { formatDisplay } from "./display-formatter";
 import type { ParamRangeAccum } from "./types";
 
@@ -214,6 +214,8 @@ export class PollLoop {
         return readFftPeakFreq(analyser, sampleRate, measureParams?.band);
       case "band_energy":
         return readBandEnergy(analyser, sampleRate, measureParams?.band ?? [0, sampleRate / 2]);
+      case "band_share":
+        return readBandShare(analyser, sampleRate, measureParams?.band ?? [0, sampleRate / 2]);
       default:
         return readRms(analyser);
     }

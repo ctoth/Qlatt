@@ -80,7 +80,7 @@ Verification:
 
 ### 5. No silent fallback constants
 
-Status: in_progress
+Status: completed
 
 Scope:
 - Remove silent fallback constants that duplicate declarative policy or semantics values.
@@ -93,7 +93,7 @@ Verification:
 
 ### 6. Klatt 1976 duration model
 
-Status: pending
+Status: in_progress
 
 Scope:
 - Replace multiply-then-floor duration shortening with Klatt 1976 Eq. 1 semantics for compressible duration.

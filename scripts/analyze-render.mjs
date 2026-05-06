@@ -167,6 +167,12 @@ function sliceForTime(startSec, endSec) {
   );
 }
 
+function amplitudeRatioDb(numerator, denominator) {
+  return numerator > 0 && denominator > 0
+    ? 20 * Math.log10(numerator / denominator)
+    : null;
+}
+
 function classifyFrame(frame) {
   const params = frame?.params ?? {};
   if (frame?.phoneme === "SIL") return "silence";
@@ -248,6 +254,15 @@ const activeEnd =
     : Number(payload.trackSummary?.totalTime ?? samples.length / sampleRate));
 const activeSamples = sliceForTime(activeStart, activeEnd);
 const activeMetrics = rmsPeak(activeSamples);
+const segments = segmentMetrics();
+if (segments.releaseSummary) {
+  segments.releaseSummary.relative = {
+    rmsToActiveDb: amplitudeRatioDb(segments.releaseSummary.rms, activeMetrics.rms),
+    peakToActivePeakDb: amplitudeRatioDb(segments.releaseSummary.peak, activeMetrics.peak),
+    rmsToVoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.voiced?.rms ?? 0),
+    rmsToUnvoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.unvoiced?.rms ?? 0),
+  };
+}
 
 const report = {
   input: inputPath,
@@ -268,7 +283,7 @@ const report = {
     ...activeMetrics,
     spectral: bandMetrics(activeSamples, sampleRate),
   },
-  segments: segmentMetrics(),
+  segments,
 };
 
 if (outJson) {

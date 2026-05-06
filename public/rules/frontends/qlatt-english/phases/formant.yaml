@@ -528,6 +528,28 @@ rules:
       - Allen et al. 1987 Table C-1
       - Stevens 1998 Ch.8
       - "Engineering estimate: weak coda releases attenuate the parallel burst template as well as AF"
+  weak_final_voiced_stop_closure_attenuation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'stop_closure' && has(current.voiced) && current.voiced == true"
+    define:
+      n: next
+      before_weak_release: "n != null && n.type == 'stop_release' && has(n.weak) && n.weak == true"
+    constraint: before_weak_release
+    apply:
+      - field: params.AV
+        op: add
+        value: -24
+        tag: weak_coda_devoicing
+      - field: params.AVS
+        op: set
+        value: -70
+        tag: weak_coda_devoicing
+    citations:
+      - Crystal & House 1988
+      - Miller 1998
+      - "Engineering estimate: weak final voiced-stop closures carry reduced voicing to avoid a full voiced tract tail"
   vcv_coarticulation:
     kind: scalar
     select:

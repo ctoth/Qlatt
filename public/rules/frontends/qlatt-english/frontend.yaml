@@ -53,7 +53,7 @@ parameters:
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_min_ms:
-        value: 15
+        value: 5
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_scale:

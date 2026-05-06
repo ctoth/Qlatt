@@ -478,6 +478,56 @@ rules:
       - Klatt 1980
       - Shadle et al. 2023 (fricative HF spectra above 7 kHz)
       - Monson et al. 2014 (perceptual significance of HF energy)
+  weak_stop_release_parallel_attenuation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
+    apply:
+      - field: params.A1
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A2
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A3
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A4
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A5
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A6
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A7
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A8
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A9
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+      - field: params.A10
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+    citations:
+      - Allen et al. 1987 Table C-1
+      - Stevens 1998 Ch.8
+      - "Engineering estimate: weak coda releases attenuate the parallel burst template as well as AF"
   vcv_coarticulation:
     kind: scalar
     select:

@@ -108,6 +108,7 @@ phases:
       - f1_stop_onset
       - burst_spectral_template
       - weak_stop_release_parallel_attenuation
+      - weak_final_voiced_stop_closure_attenuation
       - vcv_coarticulation
       - vowel_reduction
       - schwa_coronal_fronting

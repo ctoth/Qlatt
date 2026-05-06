@@ -54,6 +54,7 @@ function rmsPeak(slice) {
   return {
     rms,
     peak,
+    energy: sum,
     dc: slice.length ? dc / slice.length : 0,
     crestDb: rms > 0 ? 20 * Math.log10(peak / rms) : null,
     zcr: slice.length ? zeroCrossings / slice.length : 0,
@@ -173,6 +174,12 @@ function amplitudeRatioDb(numerator, denominator) {
     : null;
 }
 
+function energyRatioDb(numerator, denominator) {
+  return numerator > 0 && denominator > 0
+    ? 10 * Math.log10(numerator / denominator)
+    : null;
+}
+
 function classifyFrame(frame) {
   const params = frame?.params ?? {};
   if (frame?.phoneme === "SIL") return "silence";
@@ -260,6 +267,7 @@ if (segments.releaseSummary) {
   segments.releaseSummary.relative = {
     rmsToActiveDb: amplitudeRatioDb(segments.releaseSummary.rms, activeMetrics.rms),
     peakToActivePeakDb: amplitudeRatioDb(segments.releaseSummary.peak, activeMetrics.peak),
+    energyToActiveDb: energyRatioDb(segments.releaseSummary.energy, activeMetrics.energy),
     rmsToVoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.voiced?.rms ?? 0),
     rmsToUnvoicedDb: amplitudeRatioDb(segments.releaseSummary.rms, segments.byClass.unvoiced?.rms ?? 0),
   };

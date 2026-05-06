@@ -1678,15 +1678,24 @@ export function assembleKlattTrack(
     }
   }
 
-  // Add final silence.
-  const finalTime = currentTime + finalSilenceMs / 1000.0;
+  // Add final silence. The reset must happen at the end of the last phone;
+  // otherwise release/noise parameters are held through the trailing silence.
+  const finalSilenceSec = Math.max(0, finalSilenceMs) / 1000.0;
+  const finalTime = currentTime + finalSilenceSec;
   const finalSilParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
   if (vq) applyVoiceQualityOverrides(finalSilParams, vq);
   klattTrack.push({
-    time: finalTime,
+    time: currentTime,
     phoneme: "SIL",
     params: coerceKlattParams(finalSilParams),
   });
+  if (finalTime > currentTime) {
+    klattTrack.push({
+      time: finalTime,
+      phoneme: "SIL",
+      params: coerceKlattParams(finalSilParams),
+    });
+  }
 
   return klattTrack;
 }

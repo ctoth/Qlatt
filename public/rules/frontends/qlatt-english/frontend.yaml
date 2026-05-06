@@ -270,7 +270,7 @@ parameters:
           - Klatt 1976 Table III (minimum consonant durations; liquids require ~30 ms for perceptible formant transition)
           - Engineering estimate (prevents duration-rule stacking from collapsing rhotic tails below audibility)
       weak_release_amplitude_reduction_db:
-        value: 10
+        value: 22
         citations:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8

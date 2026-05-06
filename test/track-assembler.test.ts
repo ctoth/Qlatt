@@ -232,6 +232,36 @@ describe("track-assembler", () => {
       expect(firstPhone).toBeTruthy();
       expect(firstPhone!.time).toBeCloseTo(0.04, 6);
     });
+
+    it("starts final silence immediately after the last phone", () => {
+      const track = assembleKlattTrack(
+        [
+          {
+            phoneme: "D_REL",
+            type: "stop_release",
+            duration: 15,
+            params: { AF: 40, AV: 0, AH: 0, SW: 1, F1: 280, F2: 1800, F3: 2600 },
+          },
+        ],
+        [],
+        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG, ...DEFAULT_SAG_OPTIONS }
+      );
+
+      const release = track.find((f) => f.phoneme === "D_REL");
+      expect(release).toBeTruthy();
+      expect(release!.time).toBeCloseTo(0.03, 6);
+
+      const firstTrailingSilence = track.find(
+        (f) => f.phoneme === "SIL" && f.time > release!.time
+      );
+      expect(firstTrailingSilence).toBeTruthy();
+      expect(firstTrailingSilence!.time).toBeCloseTo(0.045, 6);
+      expect(firstTrailingSilence!.params.AF ?? 0).toBe(0);
+
+      const last = track[track.length - 1];
+      expect(last.phoneme).toBe("SIL");
+      expect(last.time).toBeCloseTo(0.145, 6);
+    });
   });
 
   // ---------------------------------------------------------------------------

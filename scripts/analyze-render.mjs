@@ -234,6 +234,7 @@ function segmentMetrics() {
   frames.sort((a, b) => b.rms - a.rms);
   return {
     byClass,
+    frames,
     loudestFrames: frames.slice(0, 12),
     releaseFrames,
     releaseSummary: releaseSamples.length

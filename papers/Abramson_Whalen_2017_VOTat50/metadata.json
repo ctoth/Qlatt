@@ -1,0 +1,13 @@
+{
+  "title": "Voice Onset Time (VOT) at 50: Theoretical and practical issues in measuring voicing distinctions",
+  "authors": [
+    "Arthur S. Abramson",
+    "D. H. Whalen"
+  ],
+  "year": "2017",
+  "arxiv_id": null,
+  "doi": "10.1016/j.wocn.2017.05.002",
+  "abstract": "Just over fifty years ago, Lisker and Abramson proposed a straightforward measure of acoustic differences among stop consonants of different voicing categories, Voice Onset Time (VOT). Since that time, hundreds of studies have used this method. Here, we review the original definition of VOT, propose some extensions to the definition, and discuss some problematic cases. We propose a set of terms for the most important aspects of VOT and a set of Praat labels that could provide some consistency for future cross-study analyses. Although additions of other aspects of realization of voicing distinctions (F0, amplitude, duration of voicelessness) could be considered, they are rejected as adding too much complexity for what has turned out to be one of the most frequently used metrics in phonetics and phonology.",
+  "url": "https://doi.org/10.1016/j.wocn.2017.05.002",
+  "pdf_url": null
+}

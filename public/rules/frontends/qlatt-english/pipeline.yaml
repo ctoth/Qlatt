@@ -7,7 +7,7 @@ predicates:
   is_vowel_or_sonorant: current.type == 'vowel' || current.type in ['nasal', 'liquid', 'glide']
   prev_same_word: has(prev.word) && has(current.word) && prev.word == current.word
   next_same_word: has(next.word) && has(current.word) && next.word == current.word
-  prev_diff_word: prev == null || (has(prev.word) && has(current.word) && prev.word != current.word)
+  prev_diff_word: prev == null || !has(prev.word) || !has(current.word) || prev.word != current.word
   is_coda: >-
     next == null || next.phoneme == 'SIL' ||
     next.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||

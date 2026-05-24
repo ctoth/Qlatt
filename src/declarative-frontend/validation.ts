@@ -811,8 +811,20 @@ function validateDispatchSpec(
     if (rowHasWhen) {
       if (isPlainObject(row.when)) {
         const wk = Object.keys(row.when as Record<string, unknown>);
-        if (wk.length !== 1 || wk[0] !== "predicate" || typeof (row.when as any).predicate !== "string") {
-          diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when object must be { predicate: <name> }`, `${rowPath}.when`));
+        const predicateValue = (row.when as Record<string, unknown>).predicate;
+        if (
+          wk.length !== 1 ||
+          wk[0] !== "predicate" ||
+          typeof predicateValue !== "string" ||
+          predicateValue.length === 0
+        ) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_RULE_EXPRESSION_INVALID",
+              `${contextLabel} row ${i} when object must be { predicate: <non-empty name> } with no extra keys`,
+              `${rowPath}.when`
+            )
+          );
         }
       } else if (typeof row.when !== "string") {
         diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when must be a string expression or condition object`, `${rowPath}.when`));

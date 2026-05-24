@@ -53,6 +53,7 @@ type NavigationBundle = {
     params: RuntimeLike,
     extraContext?: RuntimeLike | null
   ) => boolean;
+  evaluateConditionInContext: (condition: unknown, context: RuntimeLike) => boolean;
   rebindCurrentToken: (
     token: TokenLike | null,
     pointCursor?: Map<string, number> | null
@@ -1182,6 +1183,8 @@ function buildNavigationFunctions(
     functions,
     buildContext,
     evaluateCondition: evaluateConditionForToken,
+    evaluateConditionInContext: (condition, context) =>
+      evaluateConditionInContext(condition, context),
     rebindCurrentToken,
     invalidateStreamCache,
     syncCursorView,
@@ -1504,6 +1507,17 @@ function evaluateActionExpression(
   context: RuntimeLike,
   navigation: NavigationBundle
 ): unknown {
+  // `{ predicate: <name> }` shape: route to the predicate library instead of
+  // recursing as a template (which would evaluate the name as a CEL expression).
+  if (
+    expr &&
+    typeof expr === "object" &&
+    !Array.isArray(expr) &&
+    Object.keys(expr as Record<string, unknown>).length === 1 &&
+    typeof (expr as Record<string, unknown>).predicate === "string"
+  ) {
+    return navigation.evaluateConditionInContext(expr, context);
+  }
   if (expr && typeof expr === "object" && !Array.isArray(expr) && Array.isArray((expr as TokenLike).dispatch)) {
     const rows = (expr as TokenLike).dispatch as unknown[];
     let hasDefault = false;

@@ -809,14 +809,13 @@ function validateDispatchSpec(
     const rowHasWhen = Object.prototype.hasOwnProperty.call(row, "when");
     const rowHasDefault = Object.prototype.hasOwnProperty.call(row, "default");
     if (rowHasWhen) {
-      if (typeof row.when !== "string") {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_RULE_EXPRESSION_INVALID",
-            `${contextLabel} row ${i} when must be a string expression`,
-            `${rowPath}.when`
-          )
-        );
+      if (isPlainObject(row.when)) {
+        const wk = Object.keys(row.when as Record<string, unknown>);
+        if (wk.length !== 1 || wk[0] !== "predicate" || typeof (row.when as any).predicate !== "string") {
+          diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when object must be { predicate: <name> }`, `${rowPath}.when`));
+        }
+      } else if (typeof row.when !== "string") {
+        diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when must be a string expression or condition object`, `${rowPath}.when`));
       } else {
         const syntaxError = validateExpressionSyntax(row.when, { streamNames });
         if (syntaxError) {

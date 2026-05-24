@@ -638,13 +638,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: |-
-        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_release', 'stop_aspiration']
-            ? (has(prev.voiceless) ? prev.voiceless == true : false)
-            : (prev.type == 'fricative'
-               ? (has(prev.voiceless) ? prev.voiceless == true : false)
-               : false))
-           : false)
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_release', 'stop_aspiration', 'fricative']
+          - { predicate: prev_is_voiceless }
     define:
       prev_f0: prev_point('f0')
     insert_point:
@@ -666,11 +664,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: |-
-        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_closure', 'stop_release']
-            ? (has(prev.voiced) ? prev.voiced == true : false)
-            : false)
-           : false)
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_closure', 'stop_release']
+          - { predicate: prev_is_voiced }
     define:
       prev_f0: prev_point('f0')
     insert_point:

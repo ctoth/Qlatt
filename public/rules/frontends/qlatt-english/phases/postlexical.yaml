@@ -4,9 +4,10 @@ patterns:
     stream: phone
     sequence:
       - capture: d_token
-        where: >-
-          current.phoneme == 'D' &&
-          has(current.word) && has(next.word) && current.word != next.word
+        where:
+          all:
+            - current.phoneme == 'D'
+            - { predicate: next_diff_word }
       - capture: y_token
         where: >-
           current.phoneme == 'Y'
@@ -14,9 +15,10 @@ patterns:
     stream: phone
     sequence:
       - capture: t_token
-        where: >-
-          current.phoneme == 'T' &&
-          has(current.word) && has(next.word) && current.word != next.word
+        where:
+          all:
+            - current.phoneme == 'T'
+            - { predicate: next_diff_word }
       - capture: y_token
         where: >-
           current.phoneme == 'Y'

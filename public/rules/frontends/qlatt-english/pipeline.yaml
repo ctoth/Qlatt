@@ -2,6 +2,30 @@ version: v1
 predicates:
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
+  is_pausable_consonant: current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']
+  is_sonorant: current.type in ['nasal', 'liquid', 'glide']
+  is_vowel_or_sonorant: current.type == 'vowel' || current.type in ['nasal', 'liquid', 'glide']
+  prev_same_word: has(prev.word) && has(current.word) && prev.word == current.word
+  next_same_word: has(next.word) && has(current.word) && next.word == current.word
+  prev_diff_word: prev == null || (has(prev.word) && has(current.word) && prev.word != current.word)
+  is_coda: >-
+    next == null || next.phoneme == 'SIL' ||
+    next.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
+    (has(next.word) && has(current.word) && next.word != current.word)
+  # NOTE: "coronal" is the disjunction of alveolar and postalveolar feature flags.
+  # No token in this codebase carries a `coronal: true` annotation.
+  prev_coronal: (has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true)
+  next_coronal: (has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true)
+  both_coronal: ((has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true)) && ((has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true))
+  one_coronal: (has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true) || (has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true)
+  is_bilabial: has(current.bilabial) && current.bilabial == true
+  is_alveolar: has(current.alveolar) && current.alveolar == true
+  is_velar: has(current.velar) && current.velar == true
+  is_voiced: has(current.voiced) && current.voiced == true
+  is_voiceless: has(current.voiceless) && current.voiceless == true
+  is_back_vowel: has(current.back_vowel) && current.back_vowel == true
+  is_front_vowel: has(current.front_vowel) && current.front_vowel == true
+  is_high_vowel: has(current.high_vowel) && current.high_vowel == true
 streams:
   orthography:
     type: base

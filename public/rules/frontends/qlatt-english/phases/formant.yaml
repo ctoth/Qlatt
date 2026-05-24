@@ -304,23 +304,20 @@ rules:
     select:
       stream: phone
       where: current.phoneme == 'L'
-    define:
-      "n": next
-      is_coda: >-
-        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
-        (has(n.word) && has(current.word) && n.word != current.word)
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.dark_l_f2
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
         tag: lateral_allophony
       - field: params.F3
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.dark_l_f3
           - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
         tag: lateral_allophony
@@ -332,16 +329,12 @@ rules:
     select:
       stream: phone
       where: current.phoneme == 'R'
-    define:
-      "n": next
-      is_coda: >-
-        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
-        (has(n.word) && has(current.word) && n.word != current.word)
     apply:
       - field: params.F3
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.r_f3_coda
           - default: params.policy.formant.r_f3_onset
         tag: rhoticity
@@ -357,11 +350,14 @@ rules:
       - field: params.F1
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.f1_release_labial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.f1_release_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
         tag: stop_release_formant
@@ -376,99 +372,126 @@ rules:
       - field: params.A2
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a2_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a2_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a2_velar
           - default: "has(current.?params.A2) ? current.params.A2 : 0"
         tag: burst_spectrum
       - field: params.A3
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a3_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a3_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a3_velar
           - default: "has(current.?params.A3) ? current.params.A3 : 0"
         tag: burst_spectrum
       - field: params.A4
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a4_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a4_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a4_velar
           - default: "has(current.?params.A4) ? current.params.A4 : 0"
         tag: burst_spectrum
       - field: params.A5
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a5_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a5_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a5_velar
           - default: "has(current.?params.A5) ? current.params.A5 : 0"
         tag: burst_spectrum
       - field: params.A6
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a6_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a6_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a6_velar
           - default: "has(current.?params.A6) ? current.params.A6 : 0"
         tag: burst_spectrum
       - field: params.A7
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a7_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a7_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a7_velar
           - default: "has(current.?params.A7) ? current.params.A7 : 0"
         tag: burst_spectrum
       - field: params.A8
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a8_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a8_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a8_velar
           - default: "has(current.?params.A8) ? current.params.A8 : 0"
         tag: burst_spectrum
       - field: params.A9
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a9_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a9_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a9_velar
           - default: "has(current.?params.A9) ? current.params.A9 : 0"
         tag: burst_spectrum
       - field: params.A10
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.burst_a10_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.burst_a10_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.burst_a10_velar
           - default: "has(current.?params.A10) ? current.params.A10 : 0"
         tag: burst_spectrum
@@ -656,21 +679,14 @@ rules:
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
-    define:
-      prev_coronal: >-
-        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
-        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
-      next_coronal: >-
-        next != null ? (has(next.alveolar) ? next.alveolar == true :
-        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
-      both_coronal: "prev_coronal && next_coronal"
-      one_coronal: "prev_coronal || next_coronal"
-    constraint: one_coronal
+    constraint:
+      predicate: one_coronal
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: both_coronal
+          - when:
+              predicate: both_coronal
             value: >-
               current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
               params.policy.formant.schwa_coronal_fronting_rate
@@ -685,21 +701,14 @@ rules:
     select:
       stream: phone
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
-    define:
-      prev_coronal: >-
-        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
-        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
-      next_coronal: >-
-        next != null ? (has(next.alveolar) ? next.alveolar == true :
-        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
-      both_coronal: "prev_coronal && next_coronal"
-      one_coronal: "prev_coronal || next_coronal"
-    constraint: one_coronal
+    constraint:
+      predicate: one_coronal
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: both_coronal
+          - when:
+              predicate: both_coronal
             value: >-
               current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
               params.policy.formant.uw_coronal_fronting_rate

@@ -106,12 +106,14 @@ rules:
     kind: postlexical
     select:
       stream: phone
-      where: >-
-        current.phoneme == 'T' &&
-        prev != null && prev.type != 'vowel' &&
-        (has(current.word) && has(prev.word) ? current.word == prev.word : true) &&
-        next != null && next.type != 'vowel' &&
-        (has(current.word) && has(next.word) ? current.word != next.word : false)
+      where:
+        all:
+          - "current.phoneme == 'T'"
+          - "prev != null && prev.type != 'vowel'"
+          - predicate: prev_same_word
+          - "next != null && next.type != 'vowel'"
+          - not:
+              predicate: next_same_word
     apply:
       - field: duration
         op: set
@@ -140,11 +142,11 @@ rules:
     kind: postlexical
     select:
       stream: phone
-      where: >-
-        current.phoneme == 'T' &&
-        next != null &&
-        (next.type == 'nasal' || next.type == 'liquid' || next.type == 'glide') &&
-        (has(current.word) && has(next.word) ? current.word == next.word : true)
+      where:
+        all:
+          - "current.phoneme == 'T'"
+          - "next != null && (next.type == 'nasal' || next.type == 'liquid' || next.type == 'glide')"
+          - predicate: next_same_word
     define:
       gs_target: target("GS")
       gs_params: gs_target.params
@@ -195,12 +197,14 @@ rules:
     kind: postlexical
     select:
       stream: phone
-      where: >-
-        current.phoneme == 'D' &&
-        prev != null && prev.type != 'vowel' &&
-        (has(current.word) && has(prev.word) ? current.word == prev.word : true) &&
-        next != null && next.type != 'vowel' &&
-        (has(current.word) && has(next.word) ? current.word != next.word : false)
+      where:
+        all:
+          - "current.phoneme == 'D'"
+          - "prev != null && prev.type != 'vowel'"
+          - predicate: prev_same_word
+          - "next != null && next.type != 'vowel'"
+          - not:
+              predicate: next_same_word
     apply:
       - field: duration
         op: set
@@ -280,11 +284,12 @@ rules:
     kind: postlexical
     select:
       stream: phone
-      where: >-
-        current.type == 'vowel' &&
-        (has(current.stress) ? current.stress >= 1 : false) &&
-        (prev == null || (has(current.word) && has(prev.word) ? current.word != prev.word : true)) &&
-        (prev == null || prev.type == 'vowel' || has(prev.boundary))
+      where:
+        all:
+          - "current.type == 'vowel'"
+          - "has(current.stress) && current.stress >= 1"
+          - predicate: prev_diff_word
+          - "prev == null || prev.type == 'vowel' || has(prev.boundary)"
     define:
       gs_target: target("GS")
       gs_params: gs_target.params

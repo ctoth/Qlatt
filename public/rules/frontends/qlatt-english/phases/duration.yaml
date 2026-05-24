@@ -4,9 +4,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
-        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_same_word
     apply:
       - field: duration
         op: mul
@@ -18,10 +19,11 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
-        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false) && (next != null ?
-        (has(next.word) && has(current.word) ? next.word == current.word : false) : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_same_word
+          - predicate: next_same_word
     apply:
       - field: duration
         op: mul
@@ -33,9 +35,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (has(current.stress) ?
-        current.stress == 0 : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - "has(current.stress) && current.stress == 0"
     apply:
       - field: duration
         op: mul
@@ -47,9 +50,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev == null ? true :
-        (has(prev.word) && has(current.word) ? prev.word != current.word : true))
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_diff_word
     apply:
       - field: duration
         op: mul

@@ -127,9 +127,9 @@ export function createDiagnosticsEngine(
       if (currentRun) {
         for (const [checkName, checkDef] of Object.entries(config.checks)) {
           if (checkDef.type === "across_plays" && checkDef.tap) {
-            const result = currentResults.get(checkName);
-            if (result?.value !== undefined) {
-              acrossPlays.record(checkName, result.value);
+            const value = pollLoop.getAcrossPlaySample(checkName);
+            if (value !== undefined) {
+              acrossPlays.record(checkName, value);
             }
           }
         }

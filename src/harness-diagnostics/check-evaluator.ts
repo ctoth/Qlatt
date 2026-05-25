@@ -29,6 +29,15 @@ export interface CheckState {
   aggregateValue: number | null;
 }
 
+export interface EvaluationAux {
+  events?: readonly Record<string, unknown>[];
+  acrossPlayResult?: {
+    cv: number | null;
+    values: number[];
+    ready: boolean;
+  } | null;
+}
+
 /** Create initial state for a check. */
 export function createCheckState(): CheckState {
   return {
@@ -89,6 +98,7 @@ export function evaluateCheck(
   snapshot: TimingSnapshot,
   state: CheckState,
   now: number,
+  aux: EvaluationAux = {},
 ): CheckResult {
   const base: Omit<CheckResult, "status" | "value"> = {
     name,
@@ -114,18 +124,102 @@ export function evaluateCheck(
     return evaluateParamRange(name, def, state, base);
   }
 
-  // event_check — evaluated elsewhere
   if (checkType === "event_check") {
-    return { ...base, status: "pending" };
+    return evaluateEventCheck(name, def, aux, base);
   }
 
-  // across_plays — evaluated by across-plays accumulator
   if (checkType === "across_plays") {
-    return { ...base, status: "pending" };
+    return evaluateAcrossPlays(def, aux, base);
   }
 
   // Default: tap_check
   return evaluateTapCheck(name, def, measurements, snapshot, state, now, base);
+}
+
+function evaluateEventCheck(
+  name: string,
+  def: CheckDef,
+  aux: EvaluationAux,
+  base: Omit<CheckResult, "status" | "value">,
+): CheckResult {
+  const eventType = def.event;
+  const field = def.field;
+  if (!eventType || !field) {
+    return { ...base, status: "skip", message: `${name} missing event or field` };
+  }
+
+  const matching = (aux.events ?? []).filter((event) => event.type === eventType);
+  if (matching.length === 0) {
+    return { ...base, status: "pending" };
+  }
+
+  const values = matching
+    .map((event) => event[field])
+    .filter((value): value is number | string => (
+      (typeof value === "number" && Number.isFinite(value)) ||
+      typeof value === "string"
+    ));
+  if (values.length === 0) {
+    return { ...base, status: "pending" };
+  }
+
+  const distinctValues = new Set(
+    values.map((value) => typeof value === "number" ? value.toFixed(6) : value),
+  );
+  const distinctCount = distinctValues.size;
+  const failed =
+    def.assert.distinct_min !== undefined && distinctCount < def.assert.distinct_min;
+
+  if (failed) {
+    return {
+      ...base,
+      status: severityToStatus(def.severity),
+      value: distinctCount,
+      valueLabel: "distinct",
+      assertionFailed: true,
+    };
+  }
+
+  return {
+    ...base,
+    status: "pass",
+    value: distinctCount,
+    valueLabel: "distinct",
+  };
+}
+
+function evaluateAcrossPlays(
+  def: CheckDef,
+  aux: EvaluationAux,
+  base: Omit<CheckResult, "status" | "value">,
+): CheckResult {
+  const result = aux.acrossPlayResult;
+  if (!result || !result.ready || result.cv === null) {
+    return {
+      ...base,
+      status: "pending",
+      value: result?.values.length,
+      valueLabel: "plays",
+    };
+  }
+
+  const failed = def.assert.cv_max !== undefined && result.cv > def.assert.cv_max;
+  if (failed) {
+    return {
+      ...base,
+      status: severityToStatus(def.severity),
+      value: result.cv,
+      valueLabel: "cv",
+      assertionFailed: true,
+    };
+  }
+
+  return {
+    ...base,
+    status: "pass",
+    value: result.cv,
+    valueLabel: "cv",
+  };
 }
 
 function evaluateParamRange(

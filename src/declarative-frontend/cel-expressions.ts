@@ -55,6 +55,7 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "look_back_where",
   "look_back_pred",
   "look_ahead_pred",
+  "find_within_word",
   "span_ms",
   "trajectory_to_windows",
   "dectalk_obstruent_profile",
@@ -115,7 +116,7 @@ function createCelEnvironment(): Environment {
     "midpoint", "at_ratio", "at_sync", "prev_point",
     "ahead", "behind", "total", "target", "assoc",
     "max", "min", "exp", "sqrt", "abs", "log", "pow", "contains", "merge",
-    "look_back_where", "look_back_pred", "look_ahead_pred", "span_ms",
+    "look_back_where", "look_back_pred", "look_ahead_pred", "find_within_word", "span_ms",
     "trajectory_to_windows", "dectalk_obstruent_profile",
     "count_word_vowels", "cluster_position_in_word",
   ];

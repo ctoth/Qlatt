@@ -67,6 +67,29 @@ maps:
     x: LETTER_X
     y: LETTER_Y
     z: LETTER_Z
+  # Stop closure -> release segment lookup. The release/aspiration inventory
+  # entries carry stop_release / stop_aspiration token types used by burst rules.
+  phoneme_release_map:
+    P_CL: P_REL
+    T_CL: T_REL
+    K_CL: K_REL
+    B_CL: B_REL
+    D_CL: D_REL
+    G_CL: G_REL
+  phoneme_aspiration_map:
+    P_CL: P_ASP
+    T_CL: T_ASP
+    K_CL: K_ASP
+    B_CL: ""
+    D_CL: ""
+    G_CL: ""
+  phoneme_release_place_map:
+    P_CL: p
+    T_CL: t
+    K_CL: k
+    B_CL: p
+    D_CL: t
+    G_CL: k
 streams:
   orthography:
     type: base
@@ -126,10 +149,10 @@ phases:
       - expand_affricates_with_closure
       - expand_diphthongs
       - expand_rhotic_vowels
-      - insert_voiceless_stop_release_and_aspiration
-      - insert_voiceless_stop_release_and_aspiration_final
-      - insert_voiced_stop_release
-      - insert_voiced_stop_release_final
+      - insert_mapped_voiceless_release_and_aspiration
+      - insert_mapped_voiceless_release_and_aspiration_final
+      - insert_mapped_voiced_release
+      - insert_mapped_voiced_release_final
   - name: annotation
     rules:
       - syllable_count_annotation

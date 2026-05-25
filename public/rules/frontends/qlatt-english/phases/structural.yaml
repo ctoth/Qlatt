@@ -163,221 +163,101 @@ rules:
       - Allen et al. 1987 Table C-5 (ER uses vowel-internal timing rather than a dominant liquid tail)
       - Espy-Wilson et al. 2000 (American English /r/ requires an explicit low-F3 rhotic constriction)
       - Stevens 1998 §9.3 (liquid formant movement is transitional; keep the rhotic tail subordinate to the nucleus)
-  insert_voiceless_stop_release_and_aspiration:
+  insert_mapped_voiceless_release_and_aspiration:
     kind: structural
-    select:
-      stream: phone
-      where: >-
-        current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure',
-        'stop_release', 'stop_aspiration']) : false)
+    select: { stream: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
     define:
-      rel: "current.phoneme == \"P_CL\" ? \"P_REL\" : (current.phoneme == \"T_CL\" ? \"T_REL\" : \"K_REL\")"
-      asp: "current.phoneme == \"P_CL\" ? \"P_ASP\" : (current.phoneme == \"T_CL\" ? \"T_ASP\" : \"K_ASP\")"
+      rel: maps.phoneme_release_map[current.phoneme]
+      asp: maps.phoneme_aspiration_map[current.phoneme]
       next_token: next
       prev_token: prev
-      word_initial: >-
-        prev_token == null ? true :
-        (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)
+      word_initial: "prev_token == null ? true : (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)"
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
       asp_target: target(asp)
-      vot_target: >-
-        word_initial
-        ? (rel == "P_REL" ? params.policy.duration.vot_target_ms.initial.p : (rel == "T_REL" ?
-          params.policy.duration.vot_target_ms.initial.t : params.policy.duration.vot_target_ms.initial.k))
-        : (rel == "P_REL" ? params.policy.duration.vot_target_ms.noninitial.p : (rel == "T_REL" ?
-          params.policy.duration.vot_target_ms.noninitial.t : params.policy.duration.vot_target_ms.noninitial.k))
+      place_key: maps.phoneme_release_place_map[current.phoneme]
+      vot_target: "word_initial ? params.policy.duration.vot_target_ms.initial[place_key] : params.policy.duration.vot_target_ms.noninitial[place_key]"
       vot_sum: rel_target.duration + asp_target.duration
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
       rel_duration_base: vot_target * rel_share
       asp_duration_base: vot_target - rel_duration_base
-      rel_params: >-
-        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
-        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
-      asp_params: >-
-        weak ? merge(asp_target.params, {'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH -
-        params.policy.duration.weak_release_amplitude_reduction_db])}) : asp_target.params
-      rel_duration: >-
-        weak ? max([params.policy.duration.weak_release_min_ms, rel_duration_base *
-        params.policy.duration.weak_release_scale]) : rel_duration_base
-      asp_duration: >-
-        weak ? max([params.policy.duration.weak_release_min_ms, asp_duration_base *
-        params.policy.duration.weak_release_scale]) : asp_duration_base
-    splice:
-      type: replace_range
-      range_left: current.sync_right
-      range_right: next_token.sync_right
-      insert:
-        - phoneme: rel
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: rel_params
-          duration: rel_duration
-          inherentDuration: rel_duration
-          type: rel_target.type
-          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
-        - phoneme: asp
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: asp_params
-          duration: asp_duration
-          inherentDuration: asp_duration
-          type: asp_target.type
-          inventorySW: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - duration
-            - inherentDuration
-            - type
-            - punctuationSymbol
-    citations:
-      - >-
-        Lisker & Abramson 1964 (English sentence VOT defaults: initial /p/=28, /t/=39, /k/=43 ms; non-initial /p/=34,
-        /t/=37, /k/=49 ms)
-      - Stevens 1998
-      - Allen et al. 1987
-  insert_voiceless_stop_release_and_aspiration_final:
+      weak_rel_params: "{'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      weak_asp_params: "{'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      rel_params: "weak ? merge(rel_target.params, weak_rel_params) : rel_target.params"
+      asp_params: "weak ? merge(asp_target.params, weak_asp_params) : asp_target.params"
+      rel_duration: "weak ? max([params.policy.duration.weak_release_min_ms, rel_duration_base * params.policy.duration.weak_release_scale]) : rel_duration_base"
+      asp_duration: "weak ? max([params.policy.duration.weak_release_min_ms, asp_duration_base * params.policy.duration.weak_release_scale]) : asp_duration_base"
+      stress_value: "has(current.stress) ? current.stress : null"
+      word_value: "has(current.word) ? current.word : null"
+      inventory_sw_rel: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+      inventory_sw_asp: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
+    splice: { type: replace_range, range_left: current.sync_right, range_right: next_token.sync_right, insert: [
+        { phoneme: rel, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: rel_params, duration: rel_duration, inherentDuration: rel_duration, type: rel_target.type, inventorySW: inventory_sw_rel },
+        { phoneme: asp, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: asp_params, duration: asp_duration, inherentDuration: asp_duration, type: asp_target.type, inventorySW: inventory_sw_asp },
+        { copy_from: next_token, copy_fields: [phoneme, stress, word, weak, params, duration, inherentDuration, type, punctuationSymbol] } ] }
+    citations: ["Lisker & Abramson 1964 (English sentence VOT defaults: initial /p/=28, /t/=39, /k/=43 ms; non-initial /p/=34, /t/=37, /k/=49 ms)", Stevens 1998, Allen et al. 1987]
+  insert_mapped_voiceless_release_and_aspiration_final:
     kind: structural
-    select:
-      stream: phone
-      where: current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null
+    select: { stream: phone, where: "current.phoneme in ['P_CL', 'T_CL', 'K_CL'] && next == null" }
     define:
-      rel: "current.phoneme == \"P_CL\" ? \"P_REL\" : (current.phoneme == \"T_CL\" ? \"T_REL\" : \"K_REL\")"
-      asp: "current.phoneme == \"P_CL\" ? \"P_ASP\" : (current.phoneme == \"T_CL\" ? \"T_ASP\" : \"K_ASP\")"
+      rel: maps.phoneme_release_map[current.phoneme]
+      asp: maps.phoneme_aspiration_map[current.phoneme]
       prev_token: prev
-      word_initial: >-
-        prev_token == null ? true :
-        (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)
+      word_initial: "prev_token == null ? true : (has(prev_token.word) && has(current.word) ? prev_token.word != current.word : true)"
       weak: "true"
       rel_target: target(rel)
       asp_target: target(asp)
-      vot_target: >-
-        word_initial
-        ? (rel == "P_REL" ? params.policy.duration.vot_target_ms.initial.p : (rel == "T_REL" ?
-          params.policy.duration.vot_target_ms.initial.t : params.policy.duration.vot_target_ms.initial.k))
-        : (rel == "P_REL" ? params.policy.duration.vot_target_ms.noninitial.p : (rel == "T_REL" ?
-          params.policy.duration.vot_target_ms.noninitial.t : params.policy.duration.vot_target_ms.noninitial.k))
+      place_key: maps.phoneme_release_place_map[current.phoneme]
+      vot_target: "word_initial ? params.policy.duration.vot_target_ms.initial[place_key] : params.policy.duration.vot_target_ms.noninitial[place_key]"
       vot_sum: rel_target.duration + asp_target.duration
       rel_share: "vot_sum > 0 ? rel_target.duration / vot_sum : params.policy.duration.vot_split_fallback_share"
       rel_duration_base: vot_target * rel_share
       asp_duration_base: vot_target - rel_duration_base
-      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
-      asp_params: "merge(asp_target.params, {'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
+      weak_rel_params: "{'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      weak_asp_params: "{'AF': max([0, asp_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, asp_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      rel_params: "merge(rel_target.params, weak_rel_params)"
+      asp_params: "merge(asp_target.params, weak_asp_params)"
       rel_duration: max([params.policy.duration.weak_release_min_ms, rel_duration_base * params.policy.duration.weak_release_scale])
       asp_duration: max([params.policy.duration.weak_release_min_ms, asp_duration_base * params.policy.duration.weak_release_scale])
-    splice:
-      type: replace_range
-      range_left: current.sync_right
-      range_right: current.sync_right
-      insert:
-        - phoneme: rel
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: rel_params
-          duration: rel_duration
-          inherentDuration: rel_duration
-          type: rel_target.type
-          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
-        - phoneme: asp
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: asp_params
-          duration: asp_duration
-          inherentDuration: asp_duration
-          type: asp_target.type
-          inventorySW: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
-    citations:
-      - Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release; connected-speech VOT defaults)
-      - Stevens 1998
-  insert_voiced_stop_release:
+      stress_value: "has(current.stress) ? current.stress : null"
+      word_value: "has(current.word) ? current.word : null"
+      inventory_sw_rel: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+      inventory_sw_asp: "has(asp_target.inventorySW) ? asp_target.inventorySW : (has(asp_params.SW) ? asp_params.SW : 0)"
+    splice: { type: replace_range, range_left: current.sync_right, range_right: current.sync_right, insert: [
+        { phoneme: rel, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: rel_params, duration: rel_duration, inherentDuration: rel_duration, type: rel_target.type, inventorySW: inventory_sw_rel },
+        { phoneme: asp, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: asp_params, duration: asp_duration, inherentDuration: asp_duration, type: asp_target.type, inventorySW: inventory_sw_asp } ] }
+    citations: ["Lisker & Abramson 1964 (utterance-final voiceless stops receive weak release; connected-speech VOT defaults)", Stevens 1998]
+  insert_mapped_voiced_release:
     kind: structural
-    select:
-      stream: phone
-      where: >-
-        current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure',
-        'stop_release', 'stop_aspiration']) : false)
+    select: { stream: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && (next != null ? !(next.type in ['stop', 'stop_closure', 'stop_release', 'stop_aspiration']) : false)" }
     define:
-      rel: "current.phoneme == \"B_CL\" ? \"B_REL\" : (current.phoneme == \"D_CL\" ? \"D_REL\" : \"G_REL\")"
+      rel: maps.phoneme_release_map[current.phoneme]
       next_token: next
       weak: "next_token != null ? next_token.phoneme == \"SIL\" : false"
       rel_target: target(rel)
-      rel_params: >-
-        weak ? merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH -
-        params.policy.duration.weak_release_amplitude_reduction_db])}) : rel_target.params
-      rel_duration: >-
-        weak ? max([params.policy.duration.weak_release_min_ms, rel_target.duration *
-        params.policy.duration.weak_release_scale]) : rel_target.duration
-    splice:
-      type: replace_range
-      range_left: current.sync_right
-      range_right: next_token.sync_right
-      insert:
-        - phoneme: rel
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: rel_params
-          duration: rel_duration
-          inherentDuration: rel_duration
-          type: rel_target.type
-          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
-        - copy_from: next_token
-          copy_fields:
-            - phoneme
-            - stress
-            - word
-            - weak
-            - params
-            - duration
-            - inherentDuration
-            - type
-            - punctuationSymbol
-    citations:
-      - Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position)
-      - Stevens 1998
-      - Allen et al. 1987
-  insert_voiced_stop_release_final:
+      weak_rel_params: "{'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      rel_params: "weak ? merge(rel_target.params, weak_rel_params) : rel_target.params"
+      rel_duration: "weak ? max([params.policy.duration.weak_release_min_ms, rel_target.duration * params.policy.duration.weak_release_scale]) : rel_target.duration"
+      stress_value: "has(current.stress) ? current.stress : null"
+      word_value: "has(current.word) ? current.word : null"
+      inventory_sw_rel: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+    splice: { type: replace_range, range_left: current.sync_right, range_right: next_token.sync_right, insert: [
+        { phoneme: rel, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: rel_params, duration: rel_duration, inherentDuration: rel_duration, type: rel_target.type, inventorySW: inventory_sw_rel },
+        { copy_from: next_token, copy_fields: [phoneme, stress, word, weak, params, duration, inherentDuration, type, punctuationSymbol] } ] }
+    citations: ["Lisker & Abramson 1964 (English voiced stop short-lag mode for /b d g/ in initial position)", Stevens 1998, Allen et al. 1987]
+  insert_mapped_voiced_release_final:
     kind: structural
-    select:
-      stream: phone
-      where: current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && next == null
+    select: { stream: phone, where: "current.phoneme in ['B_CL', 'D_CL', 'G_CL'] && next == null" }
     define:
-      rel: "current.phoneme == \"B_CL\" ? \"B_REL\" : (current.phoneme == \"D_CL\" ? \"D_REL\" : \"G_REL\")"
+      rel: maps.phoneme_release_map[current.phoneme]
       weak: "true"
       rel_target: target(rel)
-      rel_params: "merge(rel_target.params, {'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])})"
-      rel_duration: >-
-        max([params.policy.duration.weak_release_min_ms, rel_target.duration *
-        params.policy.duration.weak_release_scale])
-    splice:
-      type: replace_range
-      range_left: current.sync_right
-      range_right: current.sync_right
-      insert:
-        - phoneme: rel
-          stress: "has(current.stress) ? current.stress : null"
-          word: "has(current.word) ? current.word : null"
-          weak: weak
-          durationFloor: 0
-          params: rel_params
-          duration: rel_duration
-          inherentDuration: rel_duration
-          type: rel_target.type
-          inventorySW: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
-    citations:
-      - Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)
-      - Stevens 1998
+      weak_rel_params: "{'AF': max([0, rel_target.params.AF - params.policy.duration.weak_release_amplitude_reduction_db]), 'AH': max([0, rel_target.params.AH - params.policy.duration.weak_release_amplitude_reduction_db])}"
+      rel_params: "merge(rel_target.params, weak_rel_params)"
+      rel_duration: "max([params.policy.duration.weak_release_min_ms, rel_target.duration * params.policy.duration.weak_release_scale])"
+      stress_value: "has(current.stress) ? current.stress : null"
+      word_value: "has(current.word) ? current.word : null"
+      inventory_sw_rel: "has(rel_target.inventorySW) ? rel_target.inventorySW : (has(rel_params.SW) ? rel_params.SW : 0)"
+    splice: { type: replace_range, range_left: current.sync_right, range_right: current.sync_right, insert: [
+        { phoneme: rel, stress: stress_value, word: word_value, weak: weak, durationFloor: 0, params: rel_params, duration: rel_duration, inherentDuration: rel_duration, type: rel_target.type, inventorySW: inventory_sw_rel } ] }
+    citations: ["Lisker & Abramson 1964 (utterance-final voiced stops receive weak release)", Stevens 1998]

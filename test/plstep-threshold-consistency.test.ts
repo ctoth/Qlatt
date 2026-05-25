@@ -2,11 +2,10 @@
  * Tests that the PLSTEP burst detection threshold (49 dB) is defined in a single
  * source of truth (semantics.yaml constant) and referenced consistently by:
  * 1. The interpreter (telemetry PLSTEP detection)
- * 2. The graph.yaml edge-detectors (audio-domain burst detection)
+ * 2. The graph.yaml AF edge-detector (audio-domain burst detection)
  *
  * From Klatt 80 PARCOE.FOR:
  *   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
- *   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
@@ -43,25 +42,17 @@ describe('PLSTEP threshold single source of truth', () => {
     expect(thresholdSpec.bind).toBe('plstepThreshold');
   });
 
-  it('graph.yaml ahEdgeDetector threshold binds to plstepThreshold', () => {
-    const ahEdge = graph.nodes.ahEdgeDetector;
-    expect(ahEdge).toBeDefined();
-    expect(ahEdge.type).toBe('edge-detector');
-    expect(ahEdge.params).toBeDefined();
-    const thresholdSpec = ahEdge.params!.threshold as { bind: string };
-    expect(thresholdSpec).toHaveProperty('bind');
-    expect(thresholdSpec.bind).toBe('plstepThreshold');
+  it('graph.yaml does not trigger PLSTEP from AH', () => {
+    expect(graph.nodes.ahEdgeDetector).toBeUndefined();
   });
 
-  it('all edge-detector thresholds reference the same constant value', () => {
+  it('the AF edge-detector threshold references the canonical constant value', () => {
     // Get the constant value
     const threshold = semantics.constants!.plstepThreshold as number;
 
-    // Both edge-detectors should bind to plstepThreshold
+    // The AF edge-detector should bind to plstepThreshold.
     const afThreshold = graph.nodes.afEdgeDetector.params!.threshold as { bind: string };
-    const ahThreshold = graph.nodes.ahEdgeDetector.params!.threshold as { bind: string };
     expect(afThreshold.bind).toBe('plstepThreshold');
-    expect(ahThreshold.bind).toBe('plstepThreshold');
 
     // The constant value should be the canonical Klatt 80 value
     expect(threshold).toBe(49);

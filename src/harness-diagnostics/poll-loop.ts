@@ -1,7 +1,7 @@
 // Poll loop — single setInterval that reads all taps, evaluates checks,
 // formats output, and delivers results via callback.
 
-import type { DiagConfig, CheckResult, RunInfo } from "./types";
+import type { DiagConfig, CheckResult, RunInfo, MeasureParams } from "./types";
 import type { DisplayState } from "./display-formatter";
 import type { TapManager } from "./tap-manager";
 import type { AcrossPlaysAccumulator } from "./across-plays";
@@ -261,7 +261,7 @@ export class PollLoop {
     analyser: AnalyserNode,
     measure: string,
     sampleRate: number,
-    measureParams?: { band?: [number, number] },
+    measureParams?: MeasureParams,
   ): number {
     switch (measure) {
       case "rms":

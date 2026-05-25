@@ -1,0 +1,153 @@
+version: v1
+
+accent_targets:
+  H*:
+    accentType: "H*"
+    is_high_peak: true
+    is_boundary: false
+    targets:
+      - anchor: at_ratio_0.45
+        height: h_star_height
+        downstep: true
+        nuclear_no_downstep: true
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  H*+L:
+    accentType: "H*+L"
+    is_high_peak: true
+    is_boundary: false
+    targets:
+      - anchor: at_ratio_0.45
+        height: h_star_height
+        downstep: true
+        nuclear_no_downstep: true
+      - anchor: sync_right
+        height: l_star_height
+        downstep: false
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  L+H*:
+    accentType: "L+H*"
+    is_high_peak: true
+    is_boundary: false
+    targets:
+      - anchor: sync_left
+        height: l_star_height
+        downstep: false
+      - anchor: at_ratio_0.45
+        height: h_star_height
+        downstep: true
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  H+!H*:
+    accentType: "H+!H*"
+    is_high_peak: true
+    is_boundary: false
+    targets:
+      - anchor: sync_left
+        value: prev_or_boundary_h_floor
+        downstep: false
+      - anchor: at_ratio_0.45
+        height: h_star_height
+        downstep: true
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  H*+H:
+    accentType: "H*+H"
+    is_high_peak: true
+    is_boundary: false
+    targets:
+      - anchor: at_ratio_0.45
+        height: h_star_height
+        downstep: true
+      - anchor: sync_right
+        value: prev_or_boundary_h_floor
+        downstep: false
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  H+L*:
+    accentType: "H+L*"
+    is_high_peak: false
+    is_boundary: false
+    targets:
+      - anchor: sync_left
+        value: prev_or_boundary_h_floor
+        downstep: false
+      - anchor: at_ratio_0.45
+        height: l_star_height
+        downstep: false
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  L*:
+    accentType: "L*"
+    is_high_peak: false
+    is_boundary: false
+    targets:
+      - anchor: at_ratio_0.45
+        height: l_star_height
+        downstep: false
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  L*+H:
+    accentType: "L*+H"
+    is_high_peak: false
+    is_boundary: false
+    targets:
+      - anchor: at_ratio_0.45
+        height: l_star_height
+        downstep: false
+      - anchor: sync_right
+        height: boundary_h_pct_fraction
+        downstep: false
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  f0_boundary_low:
+    is_high_peak: false
+    is_boundary: true
+    target:
+      height: boundary_l_pct_fraction
+    citations:
+      - "Pierrehumbert 1980"
+  f0_boundary_rise:
+    is_high_peak: false
+    is_boundary: true
+    target:
+      height: boundary_h_pct_fraction
+      upstep: true
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+  f0_register_reset:
+    is_high_peak: false
+    is_boundary: true
+    target:
+      height: base_hz
+    citations:
+      - "Pierrehumbert 1980"
+
+tag_to_accent:
+  f0_h_star: "H*"
+  f0_h_star_plus_l_peak: "H*+L"
+  f0_l_plus_h_star: "L+H*"
+  f0_h_plus_downstepped_h_star: "H+!H*"
+  f0_h_star_plus_h_peak: "H*+H"
+  f0_h_plus_l_star: "H+L*"
+  f0_l_star: "L*"
+  f0_l_star_plus_h: "L*+H"
+  f0_boundary_low: f0_boundary_low
+  f0_boundary_rise: f0_boundary_rise
+  f0_register_reset: f0_register_reset
+
+sag_policy:
+  sample_points: [0.25, 0.5, 0.75]
+  depth_multiplier: 4
+  depth_formula: "linear_minus 4 * t * (1-t)"
+  citation: "Pierrehumbert 1980"

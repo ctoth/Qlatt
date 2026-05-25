@@ -20,6 +20,7 @@ import type {
   ControlWindowSpec,
   ControlWindowTarget,
 } from "./tts-frontend-types";
+import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +39,189 @@ type ResolvedControlWindow = {
   fields: Record<string, ResolvedControlField>;
   tag?: string;
 };
+
+export const DEFAULT_ACCENT_INVENTORY_PATH =
+  "/rules/frontends/qlatt-english/accent-inventory.yaml";
+
+type AccentTargetSpec = {
+  accentType?: string;
+  is_high_peak: boolean;
+  is_boundary: boolean;
+  citations: string[];
+};
+
+type SagPolicySpec = {
+  sample_points: number[];
+  depth_multiplier: number;
+  depth_formula: string;
+  citation: string;
+};
+
+export type AccentInventory = {
+  accent_targets: Record<string, AccentTargetSpec>;
+  tag_to_accent: Record<string, string>;
+  sag_policy: SagPolicySpec;
+};
+
+let defaultAccentInventoryCache: AccentInventory | null = null;
+
+function expectAccentInventoryString(value: unknown, label: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty string`);
+  }
+  return value;
+}
+
+function expectAccentInventoryBoolean(value: unknown, label: string): boolean {
+  if (typeof value !== "boolean") {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a boolean`);
+  }
+  return value;
+}
+
+function expectAccentInventoryNumber(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a finite number`);
+  }
+  return value;
+}
+
+function expectAccentInventoryStringArray(value: unknown, label: string): string[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty string array`);
+  }
+  return value.map((entry, index) =>
+    expectAccentInventoryString(entry, `${label}[${index}]`)
+  );
+}
+
+function expectSagSamplePoints(value: unknown, label: string): number[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty number array`);
+  }
+  return value.map((entry, index) => {
+    const point = expectAccentInventoryNumber(entry, `${label}[${index}]`);
+    if (point <= 0 || point >= 1) {
+      throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label}[${index}] must be between 0 and 1`);
+    }
+    return point;
+  });
+}
+
+function parseAccentTargetSpec(value: unknown, label: string): AccentTargetSpec {
+  if (!isPlainObject(value)) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be an object`);
+  }
+  const isBoundary = expectAccentInventoryBoolean(value.is_boundary, `${label}.is_boundary`);
+  let accentType: string | undefined;
+  if (Object.prototype.hasOwnProperty.call(value, "accentType")) {
+    accentType = expectAccentInventoryString(value.accentType, `${label}.accentType`);
+  }
+  if (!isBoundary && accentType === undefined) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label}.accentType is required`);
+  }
+  return {
+    ...(accentType !== undefined ? { accentType } : {}),
+    is_high_peak: expectAccentInventoryBoolean(value.is_high_peak, `${label}.is_high_peak`),
+    is_boundary: isBoundary,
+    citations: expectAccentInventoryStringArray(value.citations, `${label}.citations`),
+  };
+}
+
+function parseSagPolicySpec(value: unknown): SagPolicySpec {
+  if (!isPlainObject(value)) {
+    throw new Error("E_ACCENT_INVENTORY_SCHEMA: sag_policy must be an object");
+  }
+  const depthMultiplier = expectAccentInventoryNumber(
+    value.depth_multiplier,
+    "sag_policy.depth_multiplier",
+  );
+  if (depthMultiplier <= 0) {
+    throw new Error("E_ACCENT_INVENTORY_SCHEMA: sag_policy.depth_multiplier must be greater than zero");
+  }
+  return {
+    sample_points: expectSagSamplePoints(value.sample_points, "sag_policy.sample_points"),
+    depth_multiplier: depthMultiplier,
+    depth_formula: expectAccentInventoryString(value.depth_formula, "sag_policy.depth_formula"),
+    citation: expectAccentInventoryString(value.citation, "sag_policy.citation"),
+  };
+}
+
+function parseAccentInventoryDocument(value: unknown): AccentInventory {
+  if (!isPlainObject(value)) {
+    throw new Error("E_ACCENT_INVENTORY_SCHEMA: top-level document must be an object");
+  }
+  if (!isPlainObject(value.accent_targets)) {
+    throw new Error("E_ACCENT_INVENTORY_SCHEMA: accent_targets must be an object");
+  }
+  if (!isPlainObject(value.tag_to_accent)) {
+    throw new Error("E_ACCENT_INVENTORY_SCHEMA: tag_to_accent must be an object");
+  }
+
+  const accentTargets = Object.fromEntries(
+    Object.entries(value.accent_targets).map(([key, entry]) => [
+      expectAccentInventoryString(key, "accent_targets key"),
+      parseAccentTargetSpec(entry, `accent_targets.${key}`),
+    ])
+  );
+  const tagToAccent = Object.fromEntries(
+    Object.entries(value.tag_to_accent).map(([key, entry]) => {
+      const tag = expectAccentInventoryString(key, "tag_to_accent key");
+      const accentKey = expectAccentInventoryString(entry, `tag_to_accent.${tag}`);
+      if (accentTargets[accentKey] === undefined) {
+        throw new Error(
+          `E_ACCENT_INVENTORY_SCHEMA: tag_to_accent.${tag} references missing accent_targets.${accentKey}`
+        );
+      }
+      return [tag, accentKey];
+    })
+  );
+
+  return {
+    accent_targets: accentTargets,
+    tag_to_accent: tagToAccent,
+    sag_policy: parseSagPolicySpec(value.sag_policy),
+  };
+}
+
+export function loadAccentInventorySync(
+  specPath: string = DEFAULT_ACCENT_INVENTORY_PATH,
+): AccentInventory {
+  if (specPath === DEFAULT_ACCENT_INVENTORY_PATH && defaultAccentInventoryCache) {
+    return defaultAccentInventoryCache;
+  }
+
+  const inventory = parseAccentInventoryDocument(loadYamlDocumentSync(specPath));
+  if (specPath === DEFAULT_ACCENT_INVENTORY_PATH) {
+    defaultAccentInventoryCache = inventory;
+  }
+  return inventory;
+}
+
+function accentTargetForTag(
+  accentInventory: AccentInventory,
+  tag: string,
+): AccentTargetSpec | null {
+  const accentKey = accentInventory.tag_to_accent[tag];
+  if (accentKey === undefined) return null;
+  const target = accentInventory.accent_targets[accentKey];
+  if (target === undefined) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: missing accent target for tag ${tag}`);
+  }
+  return target;
+}
+
+function accentIsHighPeak(
+  accentInventory: AccentInventory,
+  accentType: string | undefined,
+): boolean {
+  if (accentType === undefined) return false;
+  const target = accentInventory.accent_targets[accentType];
+  if (target === undefined) {
+    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: missing accent target ${accentType}`);
+  }
+  return target.is_high_peak;
+}
 
 // Removed: PHONEME_TARGET_MAP global — callers must provide inventorySpec via options.
 
@@ -1233,20 +1417,18 @@ export function buildF0ContourFromDeclarative(
     return [{ time: 0, f0: baseF0 }];
   }
 
+  const accentInventory = loadAccentInventorySync();
   const contour = points
     .map((point: InputToken): F0Point => {
       const tag = typeof point.tag === "string" ? point.tag : undefined;
-      // Derive accentType from rule tag.
+      const accentTarget =
+        tag !== undefined ? accentTargetForTag(accentInventory, tag) : null;
+      const accentType =
+        accentTarget !== null && !accentTarget.is_boundary
+          ? accentTarget.accentType
+          : undefined;
+      // Derive accentType from the YAML inventory's rule-tag mapping.
       // Citation: Pierrehumbert 1980 (H* and L* tone distinction)
-      let accentType: string | undefined;
-      if (tag === "f0_h_star") accentType = "H*";
-      else if (tag === "f0_h_star_plus_l_peak") accentType = "H*+L";
-      else if (tag === "f0_l_plus_h_star") accentType = "L+H*";
-      else if (tag === "f0_h_plus_downstepped_h_star") accentType = "H+!H*";
-      else if (tag === "f0_h_star_plus_h_peak") accentType = "H*+H";
-      else if (tag === "f0_h_plus_l_star") accentType = "H+L*";
-      else if (tag === "f0_l_star") accentType = "L*";
-      else if (tag === "f0_l_star_plus_h") accentType = "L*+H";
       return {
         time: resolveAnchoredTimeSeconds(point, syncTimeByKey),
         f0: Number(point.value),
@@ -1320,13 +1502,6 @@ function getInteriorF0AnchorTimes(
 // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
 // ---------------------------------------------------------------------------
 
-/** Tags that indicate a phrase boundary, preventing sag across phrases. */
-const BOUNDARY_TAGS = new Set([
-  "f0_boundary_low",
-  "f0_boundary_rise",
-  "f0_register_reset",
-]);
-
 /**
  * Insert parabolic sag points between consecutive H* accent peaks.
  *
@@ -1334,10 +1509,7 @@ const BOUNDARY_TAGS = new Set([
  * points that create the characteristic "dipping" shape between H*-H* pairs
  * described by Pierrehumbert (1980) and Ladd (2008).
  *
- * Model: f0(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
- * where t is normalized [0,1] between the two H* peaks.
- *
- * Three sag points are inserted at t=0.25, t=0.50, t=0.75 for smooth curvature.
+ * Model and sample points are loaded from accent-inventory.yaml.
  *
  * @param contour  Input F0 contour (sorted by time, with tag/accentType metadata).
  * @param sagDepthHz  Maximum sag depth in Hz at midpoint (default 12).
@@ -1348,27 +1520,19 @@ const BOUNDARY_TAGS = new Set([
  *   Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
  *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
  */
-function isHighPeakAccent(accentType: string | undefined): boolean {
-  return (
-    accentType === "H*" ||
-    accentType === "L+H*" ||
-    accentType === "H+!H*" ||
-    accentType === "H*+L" ||
-    accentType === "H*+H"
-  );
-}
-
 export function applySaggingTransitions(
   contour: F0Point[],
   sagDepthHz: number = 12,
   minSpanMs: number = 150
 ): F0Point[] {
   if (contour.length < 2 || sagDepthHz <= 0) return [...contour];
+  const accentInventory = loadAccentInventorySync();
+  const sagPolicy = accentInventory.sag_policy;
 
-  // Collect indices of high accent peaks (H* and L+H*).
+  // Collect indices of YAML-declared high accent peaks.
   const hStarIndices: number[] = [];
   for (let i = 0; i < contour.length; i++) {
-    if (isHighPeakAccent(contour[i].accentType)) {
+    if (accentIsHighPeak(accentInventory, contour[i].accentType)) {
       hStarIndices.push(i);
     }
   }
@@ -1393,21 +1557,23 @@ export function applySaggingTransitions(
     // Check no phrase boundary between the two H* points.
     let hasBoundary = false;
     for (let j = leftIdx + 1; j < rightIdx; j++) {
-      if (contour[j].tag && BOUNDARY_TAGS.has(contour[j].tag!)) {
+      const tag = contour[j].tag;
+      const accentTarget =
+        tag !== undefined ? accentTargetForTag(accentInventory, tag) : null;
+      if (accentTarget !== null && accentTarget.is_boundary) {
         hasBoundary = true;
         break;
       }
     }
     if (hasBoundary) continue;
 
-    // Insert sag points at t=0.25, t=0.50, t=0.75.
-    // Formula: f0_sag(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
+    // Formula specified by accent-inventory.yaml:
+    // f0_sag(t) = f0_linear(t) - sagDepthHz * depth_multiplier * t * (1-t)
     // where f0_linear(t) = left.f0 + (right.f0 - left.f0) * t
-    const tValues = [0.25, 0.5, 0.75];
-    for (const t of tValues) {
+    for (const t of sagPolicy.sample_points) {
       const time = left.time + span * t;
       const f0Linear = left.f0 + (right.f0 - left.f0) * t;
-      const sagAmount = sagDepthHz * 4 * t * (1 - t);
+      const sagAmount = sagDepthHz * sagPolicy.depth_multiplier * t * (1 - t);
       // Floor clamp: prevent negative F0 from extreme downstep + sag.
       const saggedF0 = Math.max(f0Linear - sagAmount, 0);
       sagPoints.push({

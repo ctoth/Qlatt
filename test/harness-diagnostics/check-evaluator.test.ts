@@ -349,6 +349,92 @@ describe("evaluateCheck", () => {
     expect(result.status).toBe("fail");
     expect(result.value).toBeCloseTo(40);
   });
+
+  it("event_check reports informational failure when PLSTEP amplitudes do not vary", () => {
+    const def: CheckDef = {
+      type: "event_check",
+      event: "plstep",
+      field: "amplitudeLinear",
+      assert: { distinct_min: 3 },
+      severity: "info",
+      message: "All PLSTEP bursts identical amplitude",
+    };
+    const state = createCheckState();
+    const result = evaluateCheck("plstep_variation", def, new Map(), makeSnapshot(), state, 0, {
+      events: [
+        { type: "plstep", amplitudeLinear: 0.0394 },
+        { type: "plstep", amplitudeLinear: 0.0394 },
+      ],
+    });
+
+    expect(result.status).toBe("pass");
+    expect(result.assertionFailed).toBe(true);
+    expect(result.value).toBe(1);
+    expect(result.valueLabel).toBe("distinct");
+  });
+
+  it("event_check passes when PLSTEP amplitudes meet distinct minimum", () => {
+    const def: CheckDef = {
+      type: "event_check",
+      event: "plstep",
+      field: "amplitudeLinear",
+      assert: { distinct_min: 3 },
+      severity: "info",
+      message: "All PLSTEP bursts identical amplitude",
+    };
+    const state = createCheckState();
+    const result = evaluateCheck("plstep_variation", def, new Map(), makeSnapshot(), state, 0, {
+      events: [
+        { type: "plstep", amplitudeLinear: 0.03 },
+        { type: "plstep", amplitudeLinear: 0.04 },
+        { type: "plstep", amplitudeLinear: 0.05 },
+      ],
+    });
+
+    expect(result.status).toBe("pass");
+    expect(result.assertionFailed).toBeUndefined();
+    expect(result.value).toBe(3);
+    expect(result.valueLabel).toBe("distinct");
+  });
+
+  it("across_plays reports pending until enough plays are recorded", () => {
+    const def: CheckDef = {
+      type: "across_plays",
+      tap: "post-output",
+      plays: 3,
+      measure: "peak",
+      assert: { cv_max: 0.05 },
+      severity: "error",
+      message: "Output varies across identical plays",
+    };
+    const result = evaluateCheck("state_leak", def, new Map(), makeSnapshot(), createCheckState(), 0, {
+      acrossPlayResult: { cv: null, values: [0.4, 0.41], ready: false },
+    });
+
+    expect(result.status).toBe("pending");
+    expect(result.value).toBe(2);
+    expect(result.valueLabel).toBe("plays");
+  });
+
+  it("across_plays fails when coefficient of variation exceeds threshold", () => {
+    const def: CheckDef = {
+      type: "across_plays",
+      tap: "post-output",
+      plays: 3,
+      measure: "peak",
+      assert: { cv_max: 0.05 },
+      severity: "error",
+      message: "Output varies across identical plays",
+    };
+    const result = evaluateCheck("state_leak", def, new Map(), makeSnapshot(), createCheckState(), 0, {
+      acrossPlayResult: { cv: 0.12, values: [0.4, 0.5, 0.6], ready: true },
+    });
+
+    expect(result.status).toBe("fail");
+    expect(result.assertionFailed).toBe(true);
+    expect(result.value).toBe(0.12);
+    expect(result.valueLabel).toBe("cv");
+  });
 });
 
 describe("updateParamRange", () => {

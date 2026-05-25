@@ -31,6 +31,7 @@ export class PollLoop {
   private config: DiagConfig;
   private tapManager: TapManager;
   private acrossPlays: AcrossPlaysAccumulator;
+  private acrossPlaySamples: Map<string, number> = new Map();
   private meterValues: Map<string, { rms: number; peak: number }> = new Map();
   private meterMax: Map<string, { rms: number; peak: number; rmsTime?: number; peakTime?: number; rmsPhoneme?: string; peakPhoneme?: string }> = new Map();
   private getRunInfo: () => RunInfo | null;
@@ -81,10 +82,15 @@ export class PollLoop {
     state.paramRange = paramRange ? { ...paramRange } : null;
   }
 
+  getAcrossPlaySample(checkName: string): number | undefined {
+    return this.acrossPlaySamples.get(checkName);
+  }
+
   /** Reset per-play check state. */
   resetPerPlay(): void {
     this.meterValues.clear();
     this.meterMax.clear();
+    this.acrossPlaySamples.clear();
     for (const state of this.checkStates.values()) {
       state.collected = [];
       state.lastCollectedAt = -Infinity;
@@ -101,6 +107,7 @@ export class PollLoop {
     const runStartTime = this.getRunStartTime();
     const sampleRate = this.getSampleRate();
     const track = runInfo?.track ?? [];
+    const externalDisplayState = this.getDisplayState();
 
     // Get timing snapshot
     const snapshot = resolveTimingSnapshot(
@@ -158,6 +165,9 @@ export class PollLoop {
         }
         const value = this.readMeasurement(analyser, measure, sampleRate, checkDef.measure_params);
         measurements.set(checkDef.tap, value);
+        if (checkDef.type === "across_plays") {
+          this.updateAcrossPlaySample(checkName, checkDef.aggregate, value);
+        }
       }
       // For multi-tap checks (rms_ratio_db)
       if (checkDef.taps) {
@@ -180,7 +190,20 @@ export class PollLoop {
         }
       }
 
-      const result = evaluateCheck(checkName, checkDef, measurements, snapshot, state, now);
+      const result = evaluateCheck(
+        checkName,
+        checkDef,
+        measurements,
+        snapshot,
+        state,
+        now,
+        {
+          events: externalDisplayState.plstepEvents,
+          acrossPlayResult: checkDef.type === "across_plays"
+            ? this.acrossPlays.getResult(checkName)
+            : null,
+        },
+      );
       results.set(checkName, result);
     }
 
@@ -207,14 +230,31 @@ export class PollLoop {
     }
 
     // Format display
-    const displayState = this.getDisplayState();
-    displayState.checkResults = mergedResults;
-    displayState.meterValues = this.meterValues;
-    displayState.meterMax = this.meterMax;
-    const output = formatDisplay(this.config.display, displayState);
+    externalDisplayState.checkResults = mergedResults;
+    externalDisplayState.meterValues = this.meterValues;
+    externalDisplayState.meterMax = this.meterMax;
+    const output = formatDisplay(this.config.display, externalDisplayState);
 
     // Deliver results
     this.onResults(mergedResults, output);
+  }
+
+  private updateAcrossPlaySample(
+    checkName: string,
+    aggregate: string | undefined,
+    value: number,
+  ): void {
+    if (!Number.isFinite(value)) return;
+    const previous = this.acrossPlaySamples.get(checkName);
+    if (previous === undefined) {
+      this.acrossPlaySamples.set(checkName, value);
+    } else if (aggregate === "last") {
+      this.acrossPlaySamples.set(checkName, value);
+    } else if (aggregate === "min") {
+      this.acrossPlaySamples.set(checkName, Math.min(previous, value));
+    } else {
+      this.acrossPlaySamples.set(checkName, Math.max(previous, value));
+    }
   }
 
   private readMeasurement(

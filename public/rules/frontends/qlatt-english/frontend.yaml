@@ -16,6 +16,20 @@ include:
   - phases/prosody.yaml
 parameters:
   policy:
+    rate:
+      undershoot_coefficient:
+        value: 0.3
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
+          - "Engineering estimate: 0.3 coefficient maps rate excess to undershoot factor"
+      f0_range_exponent:
+        value: 0.5
+        citations:
+          - Ladd 2008 Ch.9 (F0 range narrows at fast speaking rates; sqrt = exponent 0.5)
+      transition_scale_exponent:
+        value: 1.0
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
       rate_scale:
         value: 1.0
@@ -53,7 +67,9 @@ parameters:
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_min_ms:
-        value: 5
+        # Reverted from 05e057a3 and 7b285e8d: no-rationale tune commits
+        # shipped without updating load-bearing tests; Allen 1987 supports 15 ms.
+        value: 15
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_scale:
@@ -270,7 +286,7 @@ parameters:
           - Klatt 1976 Table III (minimum consonant durations; liquids require ~30 ms for perceptible formant transition)
           - Engineering estimate (prevents duration-rule stacking from collapsing rhotic tails below audibility)
       weak_release_amplitude_reduction_db:
-        value: 22
+        value: 10
         citations:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8
@@ -431,24 +447,64 @@ parameters:
         value: 0
         citations:
           - Lindblom 1963 (articulatory undershoot at fast rates)
-      bilabial_f2_locus:
-        value: 1200
-        citations:
-          - Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)
-          - Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)
-      alveolar_f2_locus:
-        value: 1800
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
-      alveolar_f2_locus_front:
-        value: 1900
-        citations:
-          - Stevens & House 1956
-      alveolar_f2_locus_back:
-        value: 1700
-        citations:
-          - Stevens & House 1956
+      place_loci:
+        velar:
+          locus_default:
+            value: 1500
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus default)
+          locus_front:
+            value: 1900
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
+          locus_back:
+            value: 1200
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
+        bilabial:
+          locus_default:
+            value: 1200
+            citations:
+              - Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)
+              - Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)
+          locus_front:
+            value: 1350
+            citations:
+              - Stevens & House 1956 (bilabial locus, front/high vowel context)
+          locus_back:
+            value: 1100
+            citations:
+              - Stevens & House 1956 (bilabial locus, back vowel context)
+        alveolar:
+          locus_default:
+            value: 1800
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 1900
+            citations:
+              - Stevens & House 1956
+          locus_back:
+            value: 1700
+            citations:
+              - Stevens & House 1956
+        palatal:
+          locus_default:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_back:
+            value: 2400
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
       dark_l_f2:
         value: 900
         citations:
@@ -496,41 +552,11 @@ parameters:
           - Stevens 1998 Ch.10 (reduced vowels are context-dependent rather than uniformly central)
           - Miller 1998, Pronunciation Modeling in Speech Synthesis (reduced vowels may remain [I]-like rather than schwa-like)
           - "Engineering estimate: retain more front-vowel identity for unstressed IY/IH than the generic schwa-pull"
-      palatal_f2_locus:
-        value: 2600
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
-      palatal_f2_back_vowel:
-        value: 2400
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
       vcv_coarticulation_rate:
         value: 0.2
         citations:
           - Ohman 1966
           - "Engineering estimate: conservative DAC weight to avoid over-compressing F2 after explicit consonant locus assignment"
-      velar_f2_locus:
-        value: 1500
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus default)
-      velar_f2_locus_back:
-        value: 1200
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
-      velar_f2_locus_front:
-        value: 1900
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
-      bilabial_f2_locus_front:
-        value: 1350
-        citations:
-          - Stevens & House 1956 (bilabial locus, front/high vowel context)
-      bilabial_f2_locus_back:
-        value: 1100
-        citations:
-          - Stevens & House 1956 (bilabial locus, back vowel context)
       nasal_n_f2_default:
         value: 1400
         citations:
@@ -549,130 +575,143 @@ parameters:
         value: 280
         citations:
           - Stevens 1998 Ch.8 (stop consonant F1 at release, default fallback)
-      burst_a2_bilabial:
-        value: 50
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a2_alveolar:
-        value: 40
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a2_velar:
-        value: 45
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a3_bilabial:
-        value: 40
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a3_alveolar:
-        value: 50
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a3_velar:
-        value: 50
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a4_bilabial:
-        value: 35
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a4_alveolar:
-        value: 50
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a4_velar:
-        value: 55
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a5_bilabial:
-        value: 45
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a5_alveolar:
-        value: 45
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a5_velar:
-        value: 40
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a6_bilabial:
-        value: 30
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a6_alveolar:
-        value: 50
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a6_velar:
-        value: 35
-        citations:
-          - Blumstein & Stevens 1979
-          - Zue 1976
-      burst_a7_bilabial:
-        value: 38
-        citations:
-          - "Monson et al. (2014) — bilabial burst HF diffuse spectrum"
-          - "Shadle et al. (2023) — non-sibilant flat HF spectrum"
-      burst_a7_alveolar:
-        value: 50
-        citations:
-          - "Shadle et al. (2023) — sibilant HF energy extends above 7 kHz"
-      burst_a7_velar:
-        value: 33
-        citations:
-          - "Shadle et al. (2023) — velar bursts compact, lower HF"
-      burst_a8_bilabial:
-        value: 42
-        citations:
-          - "Monson et al. (2014) — /f/ spectral peak ~8-9 kHz maps to F8"
-      burst_a8_alveolar:
-        value: 45
-        citations:
-          - "Shadle et al. (2023)"
-      burst_a8_velar:
-        value: 26
-        citations:
-          - "Shadle et al. (2023)"
-      burst_a9_bilabial:
-        value: 38
-        citations:
-          - "Monson et al. (2014)"
-      burst_a9_alveolar:
-        value: 38
-        citations:
-          - "Shadle et al. (2023)"
-      burst_a9_velar:
-        value: 20
-        citations:
-          - "Shadle et al. (2023)"
-      burst_a10_bilabial:
-        value: 30
-        citations:
-          - "Monson et al. (2014)"
-      burst_a10_alveolar:
-        value: 30
-        citations:
-          - "Shadle et al. (2023)"
-      burst_a10_velar:
-        value: 13
-        citations:
-          - "Shadle et al. (2023)"
+      # Chunk 7: nested burst amplitude table consumed by the `for_each_field`
+      # template in `burst_spectral_template` (phases/formant.yaml). Replaces
+      # 27 flat `burst_a<n>_<place>` keys.
+      burst_amplitudes:
+        A2:
+          bilabial:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A3:
+          bilabial:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A4:
+          bilabial:
+            value: 35
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 55
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A5:
+          bilabial:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A6:
+          bilabial:
+            value: 30
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 35
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A7:
+          bilabial:
+            value: 38
+            citations:
+              - "Monson et al. (2014) — bilabial burst HF diffuse spectrum"
+              - "Shadle et al. (2023) — non-sibilant flat HF spectrum"
+          alveolar:
+            value: 50
+            citations:
+              - "Shadle et al. (2023) — sibilant HF energy extends above 7 kHz"
+          velar:
+            value: 33
+            citations:
+              - "Shadle et al. (2023) — velar bursts compact, lower HF"
+        A8:
+          bilabial:
+            value: 42
+            citations:
+              - "Monson et al. (2014) — /f/ spectral peak ~8-9 kHz maps to F8"
+          alveolar:
+            value: 45
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 26
+            citations:
+              - "Shadle et al. (2023)"
+        A9:
+          bilabial:
+            value: 38
+            citations:
+              - "Monson et al. (2014)"
+          alveolar:
+            value: 38
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 20
+            citations:
+              - "Shadle et al. (2023)"
+        A10:
+          bilabial:
+            value: 30
+            citations:
+              - "Monson et al. (2014)"
+          alveolar:
+            value: 30
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 13
+            citations:
+              - "Shadle et al. (2023)"
       schwa_coronal_f2_target:
         value: 1600
         citations:

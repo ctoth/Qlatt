@@ -69,12 +69,12 @@ describe("declarative frontend rulepack context migration", () => {
       expect.objectContaining({
         type: "match",
         phase: "formant",
-        rule: "k_context_cl_f2",
+        rule: "place_f2_locus",
       })
     );
     expect(
       result.trace.some(
-        (event) => event.rule === "k_context_cl_f2" && event.phase === "duration"
+        (event) => event.rule === "place_f2_locus" && event.phase === "duration"
       )
     ).toBe(false);
   });

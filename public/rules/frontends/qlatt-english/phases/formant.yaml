@@ -1,129 +1,73 @@
 version: v1
 rules:
-  k_context_cl_f2:
+  place_f2_locus:
     kind: scalar
     select:
       stream: phone
-      where: current.phoneme == 'K_CL'
+      where: current.phoneme in sets.place_locus_closures
     define:
-      cand: "next != null && next.phoneme == \"K_REL\" ? ahead(current, 2) : next"
+      place: maps.place_locus_closure_place[current.phoneme]
+      release_phoneme: maps.place_locus_release_for_closure[current.phoneme]
+      cand: "release_phoneme != \"\" && next != null && next.phoneme == release_phoneme ? ahead(current, 2) : next"
+      front_or_high_vowel: >-
+        cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
+        cand.hi == true : false))
+      back_vowel: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
-            value: params.policy.formant.velar_f2_locus_back
-          - when: >-
-              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
-              cand.hi == true : false))
-            value: params.policy.formant.velar_f2_locus_front
-          - default: params.policy.formant.velar_f2_locus
-        tag: velar_locus
+          - when: "place == 'velar' && back_vowel"
+            value: params.policy.formant.place_loci.velar.locus_back
+          - when: "place == 'velar' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.velar.locus_front
+          - when: "place == 'bilabial' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.bilabial.locus_front
+          - when: "place == 'bilabial' && back_vowel"
+            value: params.policy.formant.place_loci.bilabial.locus_back
+          - when: "place == 'alveolar' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.alveolar.locus_front
+          - when: "place == 'alveolar' && back_vowel"
+            value: params.policy.formant.place_loci.alveolar.locus_back
+          - when: "place == 'palatal' && back_vowel"
+            value: params.policy.formant.place_loci.palatal.locus_back
+          - when: "place == 'palatal' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.palatal.locus_front
+          - default: >-
+              place == 'velar' ? params.policy.formant.place_loci.velar.locus_default :
+              (place == 'bilabial' ? params.policy.formant.place_loci.bilabial.locus_default :
+              (place == 'alveolar' ? params.policy.formant.place_loci.alveolar.locus_default :
+              params.policy.formant.place_loci.palatal.locus_default))
+        tag: place_locus
     citations:
-      - Allen et al. 1987 (velar locus)
-  k_context_rel_copy:
+      - Stevens & House 1956
+      - Allen et al. 1987 Ch.11 (place-dependent F2 locus transitions)
+  place_rel_copy:
     kind: scalar
     select:
       stream: phone
-      where: "current.phoneme == \"K_REL\" && (prev != null ? prev.phoneme == \"K_CL\" : false)"
-    apply:
-      - field: params.F2
-        op: set
-        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.velar_f2_locus"
-        tag: velar_locus
-    citations:
-      - Allen et al. 1987 (velar locus transitions)
-  bilabial_f2_locus:
-    kind: scalar
-    select:
-      stream: phone
-      where: current.phoneme in ['P_CL', 'B_CL', 'M']
+      where: >-
+        current.phoneme in sets.place_locus_releases && prev != null && prev.phoneme in sets.place_locus_closures &&
+        maps.place_locus_release_for_closure[prev.phoneme] == current.phoneme
     define:
-      cand: >-
-        current.phoneme == "P_CL" ? (next != null && next.phoneme == "P_REL" ? ahead(current, 2) : next) :
-        (current.phoneme == "B_CL" ? (next != null && next.phoneme == "B_REL" ? ahead(current, 2) : next) : next)
+      place: maps.place_locus_release_place[current.phoneme]
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: >-
-              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
-              cand.hi == true : false))
-            value: params.policy.formant.bilabial_f2_locus_front
-          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
-            value: params.policy.formant.bilabial_f2_locus_back
-          - default: params.policy.formant.bilabial_f2_locus
-        tag: bilabial_locus
-    citations:
-      - >-
-        Stevens & House 1956 (locus varies 700-1500 Hz by vowel context; 1200 Hz is midpoint approximation per Allen et
-        al. 1987 Ch.11)
-  bilabial_rel_copy:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.phoneme in [\"P_REL\", \"B_REL\"] && (prev != null ? prev.phoneme in [\"P_CL\", \"B_CL\"] : false)"
-    apply:
-      - field: params.F2
-        op: set
-        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.bilabial_f2_locus"
-        tag: bilabial_locus
+          - when: "prev != null && has(prev.?params.F2)"
+            value: prev.params.F2
+          - when: "place == 'velar'"
+            value: params.policy.formant.place_loci.velar.locus_default
+          - when: "place == 'bilabial'"
+            value: params.policy.formant.place_loci.bilabial.locus_default
+          - when: "place == 'alveolar'"
+            value: params.policy.formant.place_loci.alveolar.locus_default
+          - default: params.policy.formant.place_loci.palatal.locus_default
+        tag: place_locus
     citations:
       - Stevens & House 1956
-      - Allen et al. 1987 (bilabial locus transitions)
-  alveolar_f2_locus:
-    kind: scalar
-    select:
-      stream: phone
-      where: current.phoneme in ['T_CL', 'D_CL', 'N']
-    define:
-      cand: >-
-        current.phoneme == "T_CL" ? (next != null && next.phoneme == "T_REL" ? ahead(current, 2) : next) :
-        (current.phoneme == "D_CL" ? (next != null && next.phoneme == "D_REL" ? ahead(current, 2) : next) : next)
-    apply:
-      - field: params.F2
-        op: set
-        dispatch:
-          - when: >-
-              cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
-              cand.hi == true : false))
-            value: params.policy.formant.alveolar_f2_locus_front
-          - when: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
-            value: params.policy.formant.alveolar_f2_locus_back
-          - default: params.policy.formant.alveolar_f2_locus
-        tag: alveolar_locus
-    citations:
-      - Stevens & House 1956
-      - Allen et al. 1987 (alveolar F2 locus ~1800 Hz)
-  alveolar_rel_copy:
-    kind: scalar
-    select:
-      stream: phone
-      where: "current.phoneme in [\"T_REL\", \"D_REL\"] && (prev != null ? prev.phoneme in [\"T_CL\", \"D_CL\"] : false)"
-    apply:
-      - field: params.F2
-        op: set
-        value: "prev != null && has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.alveolar_f2_locus"
-        tag: alveolar_locus
-    citations:
-      - Stevens & House 1956
-      - Allen et al. 1987 (alveolar locus transitions)
-  palatal_f2_locus:
-    kind: scalar
-    select:
-      stream: phone
-      where: current.phoneme == 'Y'
-    apply:
-      - field: params.F2
-        op: set
-        dispatch:
-          - when: "next != null ? (next.type == 'vowel' ? (has(next.back) ? next.back == true : false) : false) : false"
-            value: params.policy.formant.palatal_f2_back_vowel
-          - default: params.policy.formant.palatal_f2_locus
-        tag: palatal_locus
-    citations:
-      - Stevens & House 1956
-      - Allen et al. 1987 (palatal F2 locus ~2600 Hz)
+      - Allen et al. 1987 Ch.11 (place locus transitions)
   nasal_place_assignment:
     kind: scalar
     select:
@@ -132,14 +76,7 @@ rules:
     apply:
       - field: params.nasalPlaceIndex
         op: set
-        dispatch:
-          - when: current.phoneme == 'M'
-            value: 1
-          - when: current.phoneme == 'N'
-            value: 2
-          - when: current.phoneme == 'NG'
-            value: 3
-          - default: 0
+        value: target(current.phoneme).nasal_place_index
         tag: nasal_place
       - field: params.nasalMurmurStrength
         op: set
@@ -177,7 +114,7 @@ rules:
         op: set
         dispatch:
           - when: next_bilabial
-            value: params.policy.formant.bilabial_f2_locus
+            value: params.policy.formant.place_loci.bilabial.locus_default
           - when: next_velar
             value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
@@ -304,23 +241,20 @@ rules:
     select:
       stream: phone
       where: current.phoneme == 'L'
-    define:
-      "n": next
-      is_coda: >-
-        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
-        (has(n.word) && has(current.word) && n.word != current.word)
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.dark_l_f2
           - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
         tag: lateral_allophony
       - field: params.F3
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.dark_l_f3
           - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
         tag: lateral_allophony
@@ -332,16 +266,12 @@ rules:
     select:
       stream: phone
       where: current.phoneme == 'R'
-    define:
-      "n": next
-      is_coda: >-
-        n == null || n.phoneme == 'SIL' || n.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
-        (has(n.word) && has(current.word) && n.word != current.word)
     apply:
       - field: params.F3
         op: set
         dispatch:
-          - when: is_coda
+          - when:
+              predicate: is_coda
             value: params.policy.formant.r_f3_coda
           - default: params.policy.formant.r_f3_onset
         tag: rhoticity
@@ -357,11 +287,14 @@ rules:
       - field: params.F1
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
+          - when:
+              predicate: is_bilabial
             value: params.policy.formant.f1_release_labial
-          - when: has(current.alveolar) && current.alveolar == true
+          - when:
+              predicate: is_alveolar
             value: params.policy.formant.f1_release_alveolar
-          - when: has(current.velar) && current.velar == true
+          - when:
+              predicate: is_velar
             value: params.policy.formant.f1_release_velar
           - default: params.policy.formant.f1_release_default
         tag: stop_release_formant
@@ -373,104 +306,24 @@ rules:
       stream: phone
       where: current.type in ['stop_release', 'stop_aspiration']
     apply:
-      - field: params.A2
+      # Chunk 7: one templated effect block expands to 9 concrete blocks
+      # (A2..A10) at rule-load time. Each substituted block writes its
+      # amplitude field from the nested policy table keyed by formant index
+      # and place of articulation.
+      - for_each_field: [A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
         op: set
         dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a2_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a2_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a2_velar
-          - default: "has(current.?params.A2) ? current.params.A2 : 0"
-        tag: burst_spectrum
-      - field: params.A3
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a3_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a3_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a3_velar
-          - default: "has(current.?params.A3) ? current.params.A3 : 0"
-        tag: burst_spectrum
-      - field: params.A4
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a4_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a4_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a4_velar
-          - default: "has(current.?params.A4) ? current.params.A4 : 0"
-        tag: burst_spectrum
-      - field: params.A5
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a5_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a5_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a5_velar
-          - default: "has(current.?params.A5) ? current.params.A5 : 0"
-        tag: burst_spectrum
-      - field: params.A6
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a6_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a6_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a6_velar
-          - default: "has(current.?params.A6) ? current.params.A6 : 0"
-        tag: burst_spectrum
-      - field: params.A7
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a7_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a7_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a7_velar
-          - default: "has(current.?params.A7) ? current.params.A7 : 0"
-        tag: burst_spectrum
-      - field: params.A8
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a8_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a8_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a8_velar
-          - default: "has(current.?params.A8) ? current.params.A8 : 0"
-        tag: burst_spectrum
-      - field: params.A9
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a9_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a9_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a9_velar
-          - default: "has(current.?params.A9) ? current.params.A9 : 0"
-        tag: burst_spectrum
-      - field: params.A10
-        op: set
-        dispatch:
-          - when: has(current.bilabial) && current.bilabial == true
-            value: params.policy.formant.burst_a10_bilabial
-          - when: has(current.alveolar) && current.alveolar == true
-            value: params.policy.formant.burst_a10_alveolar
-          - when: has(current.velar) && current.velar == true
-            value: params.policy.formant.burst_a10_velar
-          - default: "has(current.?params.A10) ? current.params.A10 : 0"
+          - when:
+              predicate: is_bilabial
+            value: "params.policy.formant.burst_amplitudes.{field}.bilabial"
+          - when:
+              predicate: is_alveolar
+            value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
+          - when:
+              predicate: is_velar
+            value: "params.policy.formant.burst_amplitudes.{field}.velar"
+          - default: "has(current.?params.{field}) ? current.params.{field} : 0"
         tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
@@ -484,43 +337,10 @@ rules:
       stream: phone
       where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
     apply:
-      - field: params.A1
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A2
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A3
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A4
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A5
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A6
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A7
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A8
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A9
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A10
+      # Chunk 7: one templated effect block expands to 10 concrete `add -18`
+      # blocks across A1..A10 at rule-load time.
+      - for_each_field: [A1, A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
         op: add
         value: -18
         tag: weak_release_spectrum
@@ -656,21 +476,14 @@ rules:
       where: >-
         current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
         (has(current.stress) ? current.stress == 0 : true)
-    define:
-      prev_coronal: >-
-        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
-        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
-      next_coronal: >-
-        next != null ? (has(next.alveolar) ? next.alveolar == true :
-        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
-      both_coronal: "prev_coronal && next_coronal"
-      one_coronal: "prev_coronal || next_coronal"
-    constraint: one_coronal
+    constraint:
+      predicate: one_coronal
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: both_coronal
+          - when:
+              predicate: both_coronal
             value: >-
               current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
               params.policy.formant.schwa_coronal_fronting_rate
@@ -685,21 +498,14 @@ rules:
     select:
       stream: phone
       where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
-    define:
-      prev_coronal: >-
-        prev != null ? (has(prev.alveolar) ? prev.alveolar == true :
-        (has(prev.postalveolar) ? prev.postalveolar == true : false)) : false
-      next_coronal: >-
-        next != null ? (has(next.alveolar) ? next.alveolar == true :
-        (has(next.postalveolar) ? next.postalveolar == true : false)) : false
-      both_coronal: "prev_coronal && next_coronal"
-      one_coronal: "prev_coronal || next_coronal"
-    constraint: one_coronal
+    constraint:
+      predicate: one_coronal
     apply:
       - field: params.F2
         op: set
         dispatch:
-          - when: both_coronal
+          - when:
+              predicate: both_coronal
             value: >-
               current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
               params.policy.formant.uw_coronal_fronting_rate

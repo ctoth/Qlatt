@@ -70,7 +70,7 @@ describe("DECtalk declarative helpers", () => {
         profiles,
         { phoneme: "K", type: "stop_closure" },
         { phoneme: "AA1", type: "vowel" },
-        { phoneme: "S", type: "fricative" }
+        { phoneme: "S", type: "fricative", is_obstruent: true }
       )
     ).toEqual({ A2: 50, A3: 0, A5: 38 });
 
@@ -78,7 +78,7 @@ describe("DECtalk declarative helpers", () => {
       selectDectalkObstruentProfile(
         profiles,
         { phoneme: "K", type: "stop_closure" },
-        { phoneme: "OW1", type: "vowel", back: true },
+        { phoneme: "OW1", type: "vowel", back: true, is_back_rounded: true },
         { phoneme: "SIL", type: "silence" }
       )
     ).toEqual({ A2: 50, A3: 0, A5: 35 });

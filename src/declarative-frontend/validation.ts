@@ -809,14 +809,25 @@ function validateDispatchSpec(
     const rowHasWhen = Object.prototype.hasOwnProperty.call(row, "when");
     const rowHasDefault = Object.prototype.hasOwnProperty.call(row, "default");
     if (rowHasWhen) {
-      if (typeof row.when !== "string") {
-        diagnostics.push(
-          makeDiagnostic(
-            "E_RULE_EXPRESSION_INVALID",
-            `${contextLabel} row ${i} when must be a string expression`,
-            `${rowPath}.when`
-          )
-        );
+      if (isPlainObject(row.when)) {
+        const wk = Object.keys(row.when as Record<string, unknown>);
+        const predicateValue = (row.when as Record<string, unknown>).predicate;
+        if (
+          wk.length !== 1 ||
+          wk[0] !== "predicate" ||
+          typeof predicateValue !== "string" ||
+          predicateValue.length === 0
+        ) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_RULE_EXPRESSION_INVALID",
+              `${contextLabel} row ${i} when object must be { predicate: <non-empty name> } with no extra keys`,
+              `${rowPath}.when`
+            )
+          );
+        }
+      } else if (typeof row.when !== "string") {
+        diagnostics.push(makeDiagnostic("E_RULE_EXPRESSION_INVALID", `${contextLabel} row ${i} when must be a string expression or condition object`, `${rowPath}.when`));
       } else {
         const syntaxError = validateExpressionSyntax(row.when, { streamNames });
         if (syntaxError) {
@@ -1521,6 +1532,18 @@ function validateRules(
     if (Array.isArray(r.apply)) {
       for (let i = 0; i < r.apply.length; i += 1) {
         const effect = r.apply[i];
+        // Chunk 7: `for_each_field` is expanded at parse-time (see
+        // parser.ts:expandForEachField). If it survived to validation, the
+        // parser was bypassed — defense-in-depth diagnostic.
+        if (effect && Object.prototype.hasOwnProperty.call(effect, "for_each_field")) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_FOR_EACH_FIELD_UNEXPANDED",
+              `Rule '${name}' apply[${i}] still has 'for_each_field'; expected parse-time expansion`,
+              `rules.${name}.apply[${i}].for_each_field`
+            )
+          );
+        }
         const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
         const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
         if (hasValue && hasDispatch) {
@@ -1850,6 +1873,124 @@ function validateRules(
   }
 }
 
+// Chunk 3: validate pipeline-level `string_sets:` block.
+// Shape: Record<non-empty string, string[]> where every element is a string.
+function validateStringSets(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (!Object.prototype.hasOwnProperty.call(spec, "string_sets")) return;
+  const block = spec.string_sets;
+  if (!isPlainObject(block)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_STRING_SET_INVALID",
+        "string_sets must be an object mapping name to an array of strings",
+        "string_sets"
+      )
+    );
+    return;
+  }
+  for (const [name, value] of Object.entries(block)) {
+    if (typeof name !== "string" || name.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_STRING_SET_INVALID",
+          `string_sets name must be a non-empty string (got '${String(name)}')`,
+          `string_sets.${String(name)}`
+        )
+      );
+      continue;
+    }
+    if (!Array.isArray(value)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_STRING_SET_INVALID",
+          `string_sets['${name}'] must be an array of strings`,
+          `string_sets.${name}`
+        )
+      );
+      continue;
+    }
+    for (let i = 0; i < value.length; i += 1) {
+      if (typeof value[i] !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_STRING_SET_INVALID",
+            `string_sets['${name}'][${i}] must be a string (got ${typeof value[i]})`,
+            `string_sets.${name}[${i}]`
+          )
+        );
+      }
+    }
+  }
+}
+
+// Chunk 3: validate pipeline-level `maps:` block.
+// Shape: Record<non-empty string, Record<string, string>> — a string→string
+// lookup table for each named map. Numeric or nested-object values are
+// rejected here; if a future caller needs them we can broaden the schema.
+function validateMaps(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (!Object.prototype.hasOwnProperty.call(spec, "maps")) return;
+  const block = spec.maps;
+  if (!isPlainObject(block)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_MAP_INVALID",
+        "maps must be an object mapping name to a string→string lookup table",
+        "maps"
+      )
+    );
+    return;
+  }
+  for (const [name, value] of Object.entries(block)) {
+    if (typeof name !== "string" || name.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_MAP_INVALID",
+          `maps name must be a non-empty string (got '${String(name)}')`,
+          `maps.${String(name)}`
+        )
+      );
+      continue;
+    }
+    if (!isPlainObject(value)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_MAP_INVALID",
+          `maps['${name}'] must be an object with string keys and string values`,
+          `maps.${name}`
+        )
+      );
+      continue;
+    }
+    for (const [k, v] of Object.entries(value)) {
+      if (typeof k !== "string" || k.length === 0) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_MAP_INVALID",
+            `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`,
+            `maps.${name}.${String(k)}`
+          )
+        );
+        continue;
+      }
+      if (typeof v !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_MAP_INVALID",
+            `maps['${name}']['${k}'] must be a string (got ${typeof v})`,
+            `maps.${name}.${k}`
+          )
+        );
+      }
+    }
+  }
+}
+
 export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
   const phaseByName = new Map();
@@ -1858,6 +1999,8 @@ export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   const streamByName = validateStreams(spec, diagnostics);
   validateTopology(spec, streamByName, diagnostics);
   const predicates = validatePredicates(spec, streamByName, policyState, diagnostics);
+  validateStringSets(spec, diagnostics);
+  validateMaps(spec, diagnostics);
   validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
   validateRules(spec, streamByName, predicates, policyState, diagnostics);
   const scalarFields = collectScalarFields(spec);

@@ -200,4 +200,164 @@ describe("declarative frontend navigation helpers", () => {
     const out = runRuleEngine(input, spec).sequence;
     expect(out[3].duration).toBe(71);
   });
+
+  it("exposes current.next_boundary for the nearest same-word SIL break", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+      },
+      rules: {
+        boundary_rule: {
+          select: {
+            stream: "phone",
+            where: "current.word == 'same'",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "current.next_boundary != null && current.next_boundary.breakIndex == 3 ? 17 : 0",
+              tag: "next_boundary",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["boundary_rule"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "S", type: "fricative", word: "same", duration: 70, status: 1 },
+      { stream: "phone", phoneme: "EY", type: "vowel", word: "same", duration: 100, status: 1 },
+      { stream: "phone", phoneme: "M", type: "nasal", word: "same", duration: 80, status: 1 },
+      { stream: "phone", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
+      { stream: "phone", phoneme: "N", type: "nasal", word: "other", duration: 75, status: 1 },
+      { stream: "phone", phoneme: "SIL", breakIndex: 4, duration: 40, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out[0].duration).toBe(87);
+    expect(out[1].duration).toBe(117);
+    expect(out[2].duration).toBe(97);
+    expect(out[4].duration).toBe(75);
+  });
+
+  it("exposes punctuation SIL as current.next_boundary after same-word release tokens", () => {
+    const spec = {
+      streams: {
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+      },
+      rules: {
+        boundary_rule: {
+          select: {
+            stream: "phone",
+            where: "current.phoneme == 'AE'",
+          },
+          define: {
+            boundary: "current.next_boundary",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "boundary != null && boundary.word == '.' ? 17 : 0",
+              tag: "next_boundary",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["boundary_rule"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "AE", type: "vowel", word: "mat", duration: 100, status: 1 },
+      { stream: "phone", phoneme: "T_CL", type: "stop_closure", word: "mat", duration: 40, status: 1 },
+      { stream: "phone", phoneme: "T_REL", type: "stop_release", word: "mat", duration: 15, status: 1 },
+      { stream: "phone", phoneme: "T_ASP", type: "stop_aspiration", word: "mat", duration: 15, status: 1 },
+      { stream: "phone", phoneme: "SIL", type: "silence", word: ".", duration: 300, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out[0].duration).toBe(117);
+  });
+
+  it("exposes current.syllable.is_final for the final syllable of a word", () => {
+    const spec = {
+      streams: {
+        syllable: { type: "span", spans: "phone" },
+        phone: { type: "base", scalars: { duration: { unit: "ms" } } },
+      },
+      topology: { hierarchy: ["syllable", "phone"] },
+      rules: {
+        final_syllable_rule: {
+          select: {
+            stream: "phone",
+            where: "current.syllable.is_final",
+          },
+          apply: [{ field: "duration", op: "add", value: "19", tag: "final_syllable" }],
+        },
+      },
+      phases: [{ name: "duration", rules: ["final_syllable_rule"] }],
+    };
+
+    const input = [
+      { id: "s1", stream: "syllable", status: 1 },
+      { id: "p1", stream: "phone", parent: "s1", phoneme: "B", type: "stop", word: "better", duration: 70, status: 1 },
+      { id: "p2", stream: "phone", parent: "s1", phoneme: "EH", type: "vowel", word: "better", duration: 100, status: 1 },
+      { id: "s2", stream: "syllable", status: 1 },
+      { id: "p3", stream: "phone", parent: "s2", phoneme: "T", type: "stop", word: "better", duration: 80, status: 1 },
+      { id: "p4", stream: "phone", parent: "s2", phoneme: "ER", type: "vowel", word: "better", duration: 110, status: 1 },
+      { id: "p5", stream: "phone", parent: "s2", phoneme: "SIL", breakIndex: 3, duration: 40, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out.find((t) => t.id === "p1")?.duration).toBe(70);
+    expect(out.find((t) => t.id === "p2")?.duration).toBe(100);
+    expect(out.find((t) => t.id === "p3")?.duration).toBe(99);
+    expect(out.find((t) => t.id === "p4")?.duration).toBe(129);
+  });
+
+  it("supports find_within_word() scans that stop at word boundaries", () => {
+    const spec = {
+      streams: {
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop", "liquid"] },
+          scalars: { duration: { unit: "ms" } },
+        },
+      },
+      rules: {
+        find_rule: {
+          select: {
+            stream: "phone",
+            where: "current.phoneme == 'AE'",
+          },
+          define: {
+            hit: "find_within_word(current, \"current.type == 'liquid'\")",
+          },
+          apply: [
+            {
+              field: "duration",
+              op: "add",
+              value: "hit != null && hit.phoneme == 'L' ? 23 : 0",
+              tag: "find_within_word",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["find_rule"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "K", type: "stop", word: "call", duration: 70, status: 1 },
+      { stream: "phone", phoneme: "AO", type: "vowel", word: "call", duration: 100, status: 1 },
+      { stream: "phone", phoneme: "L", type: "liquid", word: "call", duration: 80, status: 1 },
+      { stream: "phone", phoneme: "K", type: "stop", word: "cat", duration: 70, status: 1 },
+      { stream: "phone", phoneme: "AE", type: "vowel", word: "cat", duration: 100, status: 1 },
+      { stream: "phone", phoneme: "T", type: "stop", word: "cat", duration: 80, status: 1 },
+      { stream: "phone", phoneme: "L", type: "liquid", word: "later", duration: 90, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    expect(out[4].duration).toBe(100);
+  });
 });

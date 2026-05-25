@@ -32,9 +32,16 @@ f0_model:
     stress:
       type: impulse
       decay: halving
+      # DECtalk 4.63 Ph_drwt02.c: stress impulse decay = value / 4 per frame.
+      initial_decay_divisor: 4
+      # Engineering threshold: impulse removed when |value| < 0.01.
+      termination_threshold: 0.01
     boundary:
       type: impulse
       decay: halving
+      # DECtalk 4.63 Ph_drwt02.c: boundary impulse decay = value / 4 per frame.
+      initial_decay_divisor: 4
+      termination_threshold: 0.01
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula (Ph_drwt02.c line 2309):
@@ -46,8 +53,32 @@ f0_model:
     minimum_param: f0_minimum
     range_param: f0_scale_factor
     reference: 1300
+    # DECtalk frac4mul(x,y) = (x*y) >> 12 = (x*y) / 4096.
+    divisor: 4096
+    # DECtalk stores F0 internally as Hz*10; divide by 10 for output Hz.
+    output_scale: 0.1
+  # Final clamp on the rendered F0 contour.
+  # Min: creaky-voice floor (Klatt 1990).
+  # Max: upper extreme of the Peterson & Barney 1952 corpus.
+  output_clamp:
+    min_hz: 50
+    max_hz: 500
 parameters:
   policy:
+    rate:
+      undershoot_coefficient:
+        value: 0.3
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
+          - "Engineering estimate: 0.3 coefficient maps rate excess to undershoot factor"
+      f0_range_exponent:
+        value: 0.5
+        citations:
+          - Ladd 2008 Ch.9 (F0 range narrows at fast speaking rates; sqrt = exponent 0.5)
+      transition_scale_exponent:
+        value: 1.0
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
       rate_scale: 1.0
       # Qlatt's frontend API already passes a normalized rate multiplier

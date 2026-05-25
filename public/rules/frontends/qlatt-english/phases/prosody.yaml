@@ -66,13 +66,15 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
+      where:
+        all:
+          - &where_voiced_accent_stressed_vowel >-
+              has(current.isAccented) && current.isAccented == true && current.stress == 1
+              && current.params != null
+              && ((has(current.params.AV) && current.params.AV > 0)
+                  || (has(current.params.AVS) && current.params.AVS > 0))
+          - "has(current.accentType) && current.accentType == 'H*'"
+    define: &define_downstep_with_nuclear
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
         (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
@@ -101,22 +103,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H*+L'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
-      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
-      downstep_factor: >-
-        (has(current.isNuclearAccent) && current.isNuclearAccent == true) ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
-      raw_height: >-
-        params.policy.f0.h_star_height * downstep_factor
-      clamped_height: >-
-        max([raw_height, params.policy.f0.downstep_floor_fraction])
-      target_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H*+L'"
+    define: *define_downstep_with_nuclear
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
@@ -133,12 +124,10 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H*+L'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H*+L'"
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)
@@ -156,12 +145,10 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'L+H*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'L+H*'"
     define:
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
@@ -181,13 +168,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'L+H*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'L+H*'"
+    define: &define_downstep_no_nuclear
       accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
       downstep_factor: >-
         pow(params.policy.f0.downstep_k, accent_idx)
@@ -214,13 +199,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H+!H*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H+!H*'"
+    define: &define_high_anchor_from_prev
       prev_f0: prev_point('f0')
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
@@ -242,22 +225,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H+!H*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
-      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
-      downstep_factor: >-
-        pow(params.policy.f0.downstep_k, accent_idx)
-      raw_height: >-
-        params.policy.f0.h_star_height * downstep_factor
-      clamped_height: >-
-        max([raw_height, params.policy.f0.downstep_floor_fraction])
-      target_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H+!H*'"
+    define: *define_downstep_no_nuclear
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
@@ -274,22 +246,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H*+H'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
-      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
-      downstep_factor: >-
-        pow(params.policy.f0.downstep_k, accent_idx)
-      raw_height: >-
-        params.policy.f0.h_star_height * downstep_factor
-      clamped_height: >-
-        max([raw_height, params.policy.f0.downstep_floor_fraction])
-      target_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H*+H'"
+    define: *define_downstep_no_nuclear
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
@@ -306,18 +267,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H*+H'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
-      prev_f0: prev_point('f0')
-      floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-      target_hz: >-
-        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H*+H'"
+    define: *define_high_anchor_from_prev
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)
@@ -334,18 +288,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H+L*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
-    define:
-      prev_f0: prev_point('f0')
-      floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-      target_hz: >-
-        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H+L*'"
+    define: *define_high_anchor_from_prev
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
@@ -362,12 +309,10 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'H+L*'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'H+L*'"
     insert_point:
       stream: f0
       at: at_ratio(current, 0.45)
@@ -385,12 +330,10 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && (current.accentType == 'L*' || current.accentType == 'L*+H')
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && (current.accentType == 'L*' || current.accentType == 'L*+H')"
     define:
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
@@ -410,12 +353,10 @@ rules:
     kind: point
     select:
       stream: phone
-      where: >-
-        has(current.isAccented) && current.isAccented == true && current.stress == 1
-        && has(current.accentType) && current.accentType == 'L*+H'
-        && current.params != null
-        && ((has(current.params.AV) && current.params.AV > 0)
-            || (has(current.params.AVS) && current.params.AVS > 0))
+      where:
+        all:
+          - *where_voiced_accent_stressed_vowel
+          - "has(current.accentType) && current.accentType == 'L*+H'"
     define:
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
@@ -466,12 +407,7 @@ rules:
       where: >-
         current.phoneme == 'SIL'
         && has(current.phraseAccent) && current.phraseAccent == 'H-'
-    define:
-      prev_f0: prev_point('f0')
-      floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-      target_hz: >-
-        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+    define: *define_high_anchor_from_prev
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
@@ -638,13 +574,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: |-
-        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_release', 'stop_aspiration']
-            ? (has(prev.voiceless) ? prev.voiceless == true : false)
-            : (prev.type == 'fricative'
-               ? (has(prev.voiceless) ? prev.voiceless == true : false)
-               : false))
-           : false)
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_release', 'stop_aspiration', 'fricative']
+          - { predicate: prev_is_voiceless }
     define:
       prev_f0: prev_point('f0')
     insert_point:
@@ -666,11 +600,11 @@ rules:
     kind: point
     select:
       stream: phone
-      where: |-
-        current.type == 'vowel' && (prev != null ? (prev.type in ['stop_closure', 'stop_release']
-            ? (has(prev.voiced) ? prev.voiced == true : false)
-            : false)
-           : false)
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_closure', 'stop_release']
+          - { predicate: prev_is_voiced }
     define:
       prev_f0: prev_point('f0')
     insert_point:
@@ -702,13 +636,16 @@ rules:
         && (!has(current.boundaryTone) || current.boundaryTone == null)
     define:
       prev_f0: prev_point('f0')
-      continuation_rise: >-
-        current.punctuationSymbol == ',' ? params.policy.f0.continuation_rise_hz :
-        params.policy.f0.continuation_minor_rise_hz
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + continuation_rise"
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
+        + {
+          ',': params.policy.f0.continuation_rise_hz,
+          ';': params.policy.f0.continuation_minor_rise_hz,
+          ':': params.policy.f0.continuation_minor_rise_hz
+        }[current.punctuationSymbol]
       tag: f0_continuation
     citations:
       - O'Shaughnessy 1976

@@ -53,6 +53,7 @@ type NavigationBundle = {
     params: RuntimeLike,
     extraContext?: RuntimeLike | null
   ) => boolean;
+  evaluateConditionInContext: (condition: unknown, context: RuntimeLike) => boolean;
   rebindCurrentToken: (
     token: TokenLike | null,
     pointCursor?: Map<string, number> | null
@@ -648,6 +649,31 @@ function buildNavigationFunctions(
     return active[index + 1];
   };
 
+  const isBoundaryToken = (token: TokenLike | null | undefined): boolean =>
+    token?.phoneme === "SIL" ||
+    token?.punctuationSymbol != null ||
+    (Number.isFinite(Number(token?.breakIndex)) && Number(token?.breakIndex) >= 2);
+
+  const hasDifferentWord = (token: TokenLike | null | undefined, word: string): boolean =>
+    typeof token?.word === "string" && token.word.length > 0 && token.word !== word;
+
+  const getNextBoundaryToken = (token: TokenLike): TokenLike | null => {
+    const word = token?.word;
+    if (typeof word !== "string" || word.length === 0 || token.phoneme === "SIL") {
+      return null;
+    }
+    const stream = getTokenStream(token);
+    const active = getActiveStreamTokens(stream);
+    const index = getTokenIndex(token, stream);
+    if (index < 0) return null;
+    for (let i = index + 1; i < active.length; i += 1) {
+      const candidate = active[i];
+      if (isBoundaryToken(candidate)) return candidate;
+      if (hasDifferentWord(candidate, word)) return null;
+    }
+    return null;
+  };
+
   const resolveLiveToken = (tokenRef: unknown): TokenLike | null => {
     if (!tokenRef || typeof tokenRef !== "object" || Array.isArray(tokenRef)) return null;
     const tokenLike = tokenRef as TokenLike;
@@ -698,12 +724,56 @@ function buildNavigationFunctions(
   const viewCache = new WeakMap<TokenLike, TokenLike>();
   const viewToOriginal = new WeakMap<TokenLike, TokenLike>();
 
+  const getSyllableWord = (syllable: TokenLike): string | null => {
+    const ownWord = syllable?.word;
+    if (typeof ownWord === "string" && ownWord.length > 0) return ownWord;
+    const active = getActiveStreamTokens("phone");
+    for (const token of active) {
+      if (token.phoneme === "SIL") continue;
+      if (resolveAncestorInStream(token, getTokenStream(syllable)) !== syllable) continue;
+      const word = token.word;
+      if (typeof word === "string" && word.length > 0) return word;
+    }
+    return null;
+  };
+
+  const isFinalSyllable = (syllable: TokenLike): boolean => {
+    if (getTokenStream(syllable) !== "syllable") return false;
+    const word = getSyllableWord(syllable);
+    if (!word) return false;
+    const active = getActiveStreamTokens("phone");
+    for (const token of active) {
+      if (token.phoneme === "SIL" || token.word !== word) continue;
+      const ancestor = resolveAncestorInStream(token, "syllable");
+      if (ancestor && ancestor !== syllable) {
+        const syllableIndex = getTokenIndex(syllable, getTokenStream(syllable));
+        const ancestorIndex = getTokenIndex(ancestor, getTokenStream(ancestor));
+        if (syllableIndex >= 0 && ancestorIndex > syllableIndex) return false;
+      }
+    }
+    return true;
+  };
+
   const toCursorView = (token: TokenLike | null, seen: Set<TokenLike> = new Set()): TokenLike | null => {
     if (!token) return null;
     if (viewCache.has(token)) return viewCache.get(token) ?? null;
     const view: TokenLike = { ...token };
     viewToOriginal.set(view, token);
     viewCache.set(token, view);
+    if (!Object.prototype.hasOwnProperty.call(view, "next_boundary")) {
+      Object.defineProperty(view, "next_boundary", {
+        enumerable: false,
+        configurable: true,
+        get: () => toCursorView(getNextBoundaryToken(token)),
+      });
+    }
+    if (getTokenStream(token) === "syllable" && !Object.prototype.hasOwnProperty.call(view, "is_final")) {
+      Object.defineProperty(view, "is_final", {
+        enumerable: false,
+        configurable: true,
+        get: () => isFinalSyllable(token),
+      });
+    }
     if (seen.has(token)) return view;
 
     const nextSeen = new Set(seen);
@@ -736,6 +806,21 @@ function buildNavigationFunctions(
     'current', 'prev', 'next',
     'current_index', 'phrase_index', 'phrase_total',
   ]);
+  // Chunk 3: surface pipeline-level `string_sets:` and `maps:` blocks as
+  // `sets` and `maps` top-level CEL identifiers so rule expressions can write
+  // `current.word in sets.ascii_letter` and `maps.letter_to_word[current.word]`.
+  // These are additive read-only context bindings; the loader in
+  // runRuleEngine validates shape before they reach here, so we can assume
+  // string_sets is Record<string,string[]> and maps is Record<string,Record<string,string>>.
+  const stringSetsBinding =
+    runtime?.string_sets && typeof runtime.string_sets === "object" && !Array.isArray(runtime.string_sets)
+      ? (runtime.string_sets as Record<string, unknown>)
+      : {};
+  const mapsBinding =
+    runtime?.maps && typeof runtime.maps === "object" && !Array.isArray(runtime.maps)
+      ? (runtime.maps as Record<string, unknown>)
+      : {};
+
   const buildContext = (
     token: TokenLike,
     params: RuntimeLike,
@@ -745,6 +830,8 @@ function buildNavigationFunctions(
     const current = isTokenLike(extra.current) ? (extra.current as TokenLike) : token;
     const target: RuntimeLike = {
       params: params ?? {},
+      sets: stringSetsBinding,
+      maps: mapsBinding,
     };
     for (const [key, value] of Object.entries(extra)) {
       if (key === "params") continue;
@@ -1037,6 +1124,56 @@ function buildNavigationFunctions(
     return scanWhere(tokenRef, maxSteps, { predicate: name }, 1, "lookahead");
   };
 
+  const findWithinWordFn = (
+    tokenRef: unknown,
+    predicate: unknown,
+    directionArg: unknown = "ahead"
+  ): TokenLike | null => {
+    const source = resolveLiveToken(tokenRef);
+    if (!source) return null;
+    const word = source.word;
+    if (typeof word !== "string" || word.length === 0 || source.phoneme === "SIL") {
+      return null;
+    }
+
+    const rawDirection = typeof directionArg === "string" ? directionArg.toLowerCase() : "ahead";
+    const directions: Array<-1 | 1> =
+      rawDirection === "behind" ? [-1] : rawDirection === "both" ? [1, -1] : [1];
+    const stream = getTokenStream(source);
+    const active = getActiveStreamTokens(stream);
+    const sourceIndex = getTokenIndex(source, stream);
+    if (sourceIndex < 0) return null;
+
+    const scanDirection = (direction: -1 | 1): TokenLike | null => {
+      for (
+        let index = sourceIndex + direction, offset = 1;
+        index >= 0 && index < active.length;
+        index += direction, offset += 1
+      ) {
+        const candidate = active[index];
+        if (!candidate || candidate.phoneme === "SIL" || hasDifferentWord(candidate, word)) {
+          return null;
+        }
+        const context = buildContext(candidate, runtimeParams, {
+          source,
+          candidate,
+          within_word_offset: direction * offset,
+          within_word_direction: direction > 0 ? "ahead" : "behind",
+        });
+        if (evaluateConditionInContext(predicate, context)) {
+          return toCursorView(candidate);
+        }
+      }
+      return null;
+    };
+
+    for (const direction of directions) {
+      const hit = scanDirection(direction);
+      if (hit) return hit;
+    }
+    return null;
+  };
+
   const functions = {
     midpoint: midpointFn,
     at_ratio: atRatioFn,
@@ -1070,6 +1207,7 @@ function buildNavigationFunctions(
     look_back_where: lookBackWhereFn,
     look_back_pred: lookBackPredFn,
     look_ahead_pred: lookAheadPredFn,
+    find_within_word: findWithinWordFn,
     // span_ms(token_a, token_b): sum of durations (ms) of all tokens from a to b
     // inclusive.  Returns 0 if either token is null or not found.
     // Used by prosody rules to enforce minimum temporal spans between accents.
@@ -1182,6 +1320,8 @@ function buildNavigationFunctions(
     functions,
     buildContext,
     evaluateCondition: evaluateConditionForToken,
+    evaluateConditionInContext: (condition, context) =>
+      evaluateConditionInContext(condition, context),
     rebindCurrentToken,
     invalidateStreamCache,
     syncCursorView,
@@ -1504,6 +1644,17 @@ function evaluateActionExpression(
   context: RuntimeLike,
   navigation: NavigationBundle
 ): unknown {
+  // `{ predicate: <name> }` shape: route to the predicate library instead of
+  // recursing as a template (which would evaluate the name as a CEL expression).
+  if (
+    expr &&
+    typeof expr === "object" &&
+    !Array.isArray(expr) &&
+    Object.keys(expr as Record<string, unknown>).length === 1 &&
+    typeof (expr as Record<string, unknown>).predicate === "string"
+  ) {
+    return navigation.evaluateConditionInContext(expr, context);
+  }
   if (expr && typeof expr === "object" && !Array.isArray(expr) && Array.isArray((expr as TokenLike).dispatch)) {
     const rows = (expr as TokenLike).dispatch as unknown[];
     let hasDefault = false;
@@ -2835,6 +2986,17 @@ export function runRuleEngine(
     predicates:
       spec.predicates && typeof spec.predicates === "object" && !Array.isArray(spec.predicates)
         ? spec.predicates
+        : {},
+    // Chunk 3: pipeline-level reusable literal data — admitted by the
+    // validator (validateStringSets / validateMaps) and surfaced as `sets`
+    // and `maps` CEL identifiers via buildContext above.
+    string_sets:
+      spec.string_sets && typeof spec.string_sets === "object" && !Array.isArray(spec.string_sets)
+        ? spec.string_sets
+        : {},
+    maps:
+      spec.maps && typeof spec.maps === "object" && !Array.isArray(spec.maps)
+        ? spec.maps
         : {},
     patterns: spec.patterns ?? {},
     pointStreams,

@@ -1,5 +1,0 @@
-name: structural
-dimensionless: false
-note: >
-  Non-measurable organizing concepts. Cannot appear in CEL condition
-  expressions or carry parameter claims.

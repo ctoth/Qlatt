@@ -116,10 +116,6 @@ export type TextToKlattTrackDetailedResult = {
   controlScore: DeclarativeControlScore;
 };
 
-// Plain stop symbols are intentionally rewritten in the structural phase
-// (Klatt 1980 stop model: closure + release).
-const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
-
 // Extract output and transcription configuration from the loaded YAML rulepack.
 // Unwraps {value, citations} objects into plain numbers so downstream OutputConfig
 // consumers see the same shape they always did.
@@ -335,7 +331,7 @@ function buildTextToKlattTrackDetailed(
 
     // Warn if phoneme was not found (materialized falls back to SIL internally)
     const phonemeTargets = frontendInventory.phoneme_targets;
-    const isStructuralStopBase = STRUCTURAL_STOP_BASES.has(targetKeyBase);
+    const isStructuralStopBase = materialized.is_stop_base === true;
     if (
       !isStructuralStopBase &&
       !phonemeTargets[materialized.phoneme] &&
@@ -497,24 +493,41 @@ function buildTextToKlattTrackDetailed(
     provenance: provenance ?? undefined,
     baseF0: effectiveBaseF0,
   });
+  // Rate-scaling policy coefficients live in YAML (parameters.policy.rate).
+  // Citations: Lindblom 1963 (undershoot), Ladd 2008 Ch.9 (F0 range),
+  //            Broad & Fertig 1970 (transition scaling).
+  const ratePolicy = (frontendSpec as any)?.parameters?.policy?.rate;
+  const undershootCoefficient = requirePolicyNumber(
+    ratePolicy?.undershoot_coefficient,
+    "rate.undershoot_coefficient",
+  );
+  const f0RangeExponent = requirePolicyNumber(
+    ratePolicy?.f0_range_exponent,
+    "rate.f0_range_exponent",
+  );
+  const transitionScaleExponent = requirePolicyNumber(
+    ratePolicy?.transition_scale_exponent,
+    "rate.transition_scale_exponent",
+  );
+  // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
+  const rateUndershootFactor = Math.max(0, (rate - 1.0) * undershootCoefficient);
   parameterSequence = runPhases(parameterSequence, ["duration"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
       duration: { rate_scale: rate },
       // Vowel centralization increases at fast rates (Lindblom 1963).
-      // At rate=1.0: factor=0 → undershoot rule guard prevents matching.
-      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
+      formant: { rate_undershoot_factor: rateUndershootFactor },
     },
   }));
   parameterSequence = runPhases(parameterSequence, ["formant"], mergePhaseParameters({
     policy: {
       ...speakerOverrides,
-      formant: { rate_undershoot_factor: Math.max(0, (rate - 1.0) * 0.3) },
+      formant: { rate_undershoot_factor: rateUndershootFactor },
     },
   }));
   // F0 range narrows at fast speaking rates (Ladd 2008 Ch.9).
   // At rate=1.0, f0RangeFactor=1.0 and all values are unchanged.
-  const f0RangeFactor = 1.0 / Math.sqrt(rate);
+  const f0RangeFactor = Math.pow(rate, -f0RangeExponent);
   const f0Policy = (frontendSpec as any)?.parameters?.policy?.f0;
   parameterSequence = runPhases(parameterSequence, ["prosody", "finalize"], mergePhaseParameters({
     policy: {
@@ -556,8 +569,7 @@ function buildTextToKlattTrackDetailed(
   });
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---
-  // Transition durations scale inversely with rate (Broad & Fertig 1970).
-  // At rate=1.0: transitionMs/1.0 = transitionMs (unchanged).
+  // (Transition durations are scaled above per policy.rate.transition_scale_exponent.)
 
   // Read sagging transition parameters from policy.
   // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
@@ -623,7 +635,10 @@ function buildTextToKlattTrackDetailed(
   const track = assembleKlattTrack(phoneSequence, parameterSequence, {
     inventorySpec: frontendInventory,
     baseF0: effectiveBaseF0,
-    transitionMs: transitionMs / rate,
+    // Transition durations scale by rate^(-transition_scale_exponent).
+    // At rate=1.0: unchanged; at exponent=1.0: classic 1/rate inverse scaling.
+    // Citation: Broad & Fertig 1970 (transitions scale inversely with rate).
+    transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
     outputConfig: rulepackOutputConfig,
     voiceQuality: voiceQualityOverrides,
     sagDepthHz,

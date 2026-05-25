@@ -3,6 +3,7 @@ citations:
 - DECtalk 4.63 (extracted from dapi/src)
 - DECtalk 4.63 p_us_rom.h us_mindur[] (minimumDuration values)
 - Fant 1997
+- Jongman 1989
 base_params:
   F1: 500
   F2: 1500
@@ -490,6 +491,7 @@ phoneme_targets:
     voiced: true
     low: true
     back: true
+    is_back_rounded: true
   AO0:
     F1: 640
     F2: 929
@@ -504,6 +506,7 @@ phoneme_targets:
     voiced: true
     low: true
     back: true
+    is_back_rounded: true
   OW1:
     F1: 540
     F2: 1020
@@ -518,6 +521,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
     diph:
     - AO1
     - UH1
@@ -557,6 +561,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
     diph:
     - AO1
     - UH1
@@ -596,6 +601,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
     diph:
     - AO1
     - IH1
@@ -648,6 +654,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
     diph:
     - AO1
     - IH1
@@ -700,6 +707,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
   UH0:
     F1: 480
     F2: 1100
@@ -714,6 +722,7 @@ phoneme_targets:
     voiced: true
     mid: true
     back: true
+    is_back_rounded: true
   UW1:
     F1: 370
     F2: 1060
@@ -728,6 +737,7 @@ phoneme_targets:
     voiced: true
     hi: true
     back: true
+    is_back_rounded: true
   UW0:
     F1: 370
     F2: 1060
@@ -742,6 +752,7 @@ phoneme_targets:
     voiced: true
     hi: true
     back: true
+    is_back_rounded: true
   ER1:
     F1: 490
     F2: 1650
@@ -843,6 +854,7 @@ phoneme_targets:
     mid: true
     back: true
     rhotic: true
+    is_back_rounded: true
   OR0:
     F1: 510
     F2: 870
@@ -858,6 +870,7 @@ phoneme_targets:
     mid: true
     back: true
     rhotic: true
+    is_back_rounded: true
   UR1:
     F1: 420
     F2: 860
@@ -873,6 +886,7 @@ phoneme_targets:
     mid: true
     back: true
     rhotic: true
+    is_back_rounded: true
   UR0:
     F1: 420
     F2: 860
@@ -888,6 +902,7 @@ phoneme_targets:
     mid: true
     back: true
     rhotic: true
+    is_back_rounded: true
   W:
     F1: 295
     F2: 810
@@ -900,6 +915,7 @@ phoneme_targets:
     minimumDuration: 15
     type: glide
     voiced: true
+    is_back_rounded: true
   Y:
     F1: 280
     F2: 2070
@@ -943,9 +959,11 @@ phoneme_targets:
     AV: 0
     AH: 40
     dur: 80
+    fricative_min_ms: 40  # Engineering estimate; Jongman 1989 did not test /hh/
     minimumDuration: 60
     type: fricative
     voiceless: true
+    is_obstruent: true
   M:
     F1: 300
     F2: 1340
@@ -964,6 +982,7 @@ phoneme_targets:
     type: nasal
     bilabial: true
     voiced: true
+    nasal_place_index: 1  # Klatt 1980 Table I
   N:
     F1: 320
     F2: 1650
@@ -982,6 +1001,7 @@ phoneme_targets:
     type: nasal
     alveolar: true
     voiced: true
+    nasal_place_index: 2  # Klatt 1980 Table I
   NG:
     F1: 280
     F2: 2100
@@ -1000,6 +1020,7 @@ phoneme_targets:
     type: nasal
     velar: true
     voiced: true
+    nasal_place_index: 3  # Klatt 1980 Table I
   EL:
     F1: 350
     F2: 800
@@ -1040,10 +1061,12 @@ phoneme_targets:
     AV: 0
     AF: 42
     dur: 100
+    fricative_min_ms: 50  # Jongman 1989
     minimumDuration: 60
     type: fricative
     labiodental: true
     voiceless: true
+    is_obstruent: true
   V:
     F1: 325
     F2: 1100
@@ -1054,10 +1077,12 @@ phoneme_targets:
     AV: 53
     AF: 32
     dur: 100
+    fricative_min_ms: 50  # Jongman 1989
     minimumDuration: 70
     type: fricative
     labiodental: true
     voiced: true
+    is_obstruent: true
   TH:
     F1: 360
     F2: 1500
@@ -1068,10 +1093,12 @@ phoneme_targets:
     AV: 0
     AF: 40
     dur: 85
+    fricative_min_ms: 60  # Jongman 1989
     minimumDuration: 50
     type: fricative
     dental: true
     voiceless: true
+    is_obstruent: true
   DH:
     F1: 290
     F2: 1500
@@ -1082,10 +1109,12 @@ phoneme_targets:
     AV: 53
     AF: 30
     dur: 60
+    fricative_min_ms: 60  # Jongman 1989
     minimumDuration: 35
     type: fricative
     dental: true
     voiced: true
+    is_obstruent: true
   S:
     F1: 320
     F2: 1520
@@ -1096,10 +1125,12 @@ phoneme_targets:
     AV: 0
     AF: 60
     dur: 125
+    fricative_min_ms: 30  # Jongman 1989
     minimumDuration: 65
     type: fricative
     alveolar: true
     voiceless: true
+    is_obstruent: true
   Z:
     F1: 325
     F2: 1520
@@ -1110,10 +1141,12 @@ phoneme_targets:
     AV: 35
     AF: 50
     dur: 120
+    fricative_min_ms: 30  # Jongman 1989
     minimumDuration: 70
     type: fricative
     alveolar: true
     voiced: true
+    is_obstruent: true
   SH:
     F1: 300
     F2: 1600
@@ -1124,10 +1157,12 @@ phoneme_targets:
     AV: 0
     AF: 66
     dur: 125
+    fricative_min_ms: 30  # Jongman 1989
     minimumDuration: 60
     type: fricative
     postalveolar: true
     voiceless: true
+    is_obstruent: true
   ZH:
     F1: 280
     F2: 1900
@@ -1138,10 +1173,12 @@ phoneme_targets:
     AV: 53
     AF: 56
     dur: 120
+    fricative_min_ms: 30  # Jongman 1989
     minimumDuration: 70
     type: fricative
     postalveolar: true
     voiced: true
+    is_obstruent: true
   # DECtalk 4.63 us_gettar(): AP is 0 for stop closures; aspiration is added
   # later by p_us_st1.c Special Rule 2 (PAP.pspesh over the following sonorant).
   P:
@@ -1158,6 +1195,8 @@ phoneme_targets:
     type: stop_closure
     bilabial: true
     voiceless: true
+    is_obstruent: true
+    is_stop_base: true
   B:
     F1: 220
     F2: 691
@@ -1171,6 +1210,8 @@ phoneme_targets:
     type: stop_closure
     bilabial: true
     voiced: true
+    is_obstruent: true
+    is_stop_base: true
   T:
     F1: 350
     F2: 1700
@@ -1185,6 +1226,8 @@ phoneme_targets:
     type: stop_closure
     alveolar: true
     voiceless: true
+    is_obstruent: true
+    is_stop_base: true
   D:
     F1: 300
     F2: 1650
@@ -1198,6 +1241,8 @@ phoneme_targets:
     type: stop_closure
     alveolar: true
     voiced: true
+    is_obstruent: true
+    is_stop_base: true
   K:
     F1: 280
     F2: 1790
@@ -1212,6 +1257,8 @@ phoneme_targets:
     type: stop_closure
     velar: true
     voiceless: true
+    is_obstruent: true
+    is_stop_base: true
   G:
     F1: 250
     F2: 1800
@@ -1225,6 +1272,8 @@ phoneme_targets:
     type: stop_closure
     velar: true
     voiced: true
+    is_obstruent: true
+    is_stop_base: true
   P_REL:
     F1: 400
     F2: 1100
@@ -1247,6 +1296,7 @@ phoneme_targets:
     type: stop_release
     bilabial: true
     voiceless: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 44, AB: 55 }
       back_unrounded_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 44, AB: 55 }
@@ -1274,6 +1324,7 @@ phoneme_targets:
     type: stop_release
     alveolar: true
     voiceless: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 0, A4: 0, A5: 55, A6: 0, AB: 0 }
       back_unrounded_vowel: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
@@ -1301,6 +1352,7 @@ phoneme_targets:
     type: stop_release
     velar: true
     voiceless: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 50, A4: 0, A5: 36, A6: 0, AB: 0 }
       back_unrounded_vowel: { A2: 50, A3: 0, A4: 0, A5: 35, A6: 0, AB: 0 }
@@ -1329,6 +1381,7 @@ phoneme_targets:
     type: stop_release
     bilabial: true
     voiced: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 35, AB: 53 }
       back_unrounded_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 35, AB: 53 }
@@ -1357,6 +1410,7 @@ phoneme_targets:
     type: stop_release
     alveolar: true
     voiced: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 0, A4: 0, A5: 55, A6: 0, AB: 0 }
       back_unrounded_vowel: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
@@ -1385,6 +1439,7 @@ phoneme_targets:
     type: stop_release
     velar: true
     voiced: true
+    is_obstruent: true
     stopReleaseProfiles:
       front_vowel: { A2: 0, A3: 42, A4: 0, A5: 33, A6: 0, AB: 0 }
       back_unrounded_vowel: { A2: 42, A3: 0, A4: 0, A5: 33, A6: 0, AB: 0 }
@@ -1408,6 +1463,7 @@ phoneme_targets:
     type: stop_aspiration
     bilabial: true
     voiceless: true
+    is_obstruent: true
   T_ASP:
     F1: 400
     F2: 1600
@@ -1429,6 +1485,7 @@ phoneme_targets:
     type: stop_aspiration
     alveolar: true
     voiceless: true
+    is_obstruent: true
   K_ASP:
     F1: 300
     F2: 1990
@@ -1450,6 +1507,7 @@ phoneme_targets:
     type: stop_aspiration
     velar: true
     voiceless: true
+    is_obstruent: true
   DX:
     F1: 350
     F2: 1913
@@ -1468,6 +1526,7 @@ phoneme_targets:
     minimumDuration: 70
     type: stop_closure
     glottal: true
+    is_obstruent: true
   CH:
     F1: 350
     F2: 1750
@@ -1482,6 +1541,7 @@ phoneme_targets:
     type: affricate
     postalveolar: true
     voiceless: true
+    is_obstruent: true
   JH:
     F1: 280
     F2: 1730
@@ -1496,3 +1556,4 @@ phoneme_targets:
     type: affricate
     postalveolar: true
     voiced: true
+    is_obstruent: true

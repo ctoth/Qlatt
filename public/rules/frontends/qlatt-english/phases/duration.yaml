@@ -4,9 +4,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
-        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_same_word
     apply:
       - field: duration
         op: mul
@@ -18,10 +19,11 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev != null ?
-        (has(prev.word) && has(current.word) ? prev.word == current.word : false) : false) && (next != null ?
-        (has(next.word) && has(current.word) ? next.word == current.word : false) : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_same_word
+          - predicate: next_same_word
     apply:
       - field: duration
         op: mul
@@ -33,9 +35,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (has(current.stress) ?
-        current.stress == 0 : false)
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - "has(current.stress) && current.stress == 0"
     apply:
       - field: duration
         op: mul
@@ -47,9 +50,10 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: >-
-        current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate'] && (prev == null ? true :
-        (has(prev.word) && has(current.word) ? prev.word != current.word : true))
+      where:
+        all:
+          - predicate: is_pausable_consonant
+          - predicate: prev_diff_word
     apply:
       - field: duration
         op: mul
@@ -65,11 +69,14 @@ rules:
     apply:
       - field: duration
         op: set
-        value: >-
-          current.punctuationSymbol == ',' ? params.policy.duration.punctuation_pause_comma_ms :
-          (current.punctuationSymbol in [';', ':'] ? params.policy.duration.punctuation_pause_phrase_break_ms :
-          (current.punctuationSymbol in ['.', '?', '!'] ? params.policy.duration.punctuation_pause_terminal_ms :
-          current.duration))
+        dispatch:
+          - when: current.punctuationSymbol == ','
+            value: params.policy.duration.punctuation_pause_comma_ms
+          - when: current.punctuationSymbol in [';', ':']
+            value: params.policy.duration.punctuation_pause_phrase_break_ms
+          - when: current.punctuationSymbol in ['.', '?', '!']
+            value: params.policy.duration.punctuation_pause_terminal_ms
+          - default: current.duration
         tag: pause_duration
     citations:
       - Allen et al. 1987
@@ -82,9 +89,12 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: >-
-          has(current.stress) && current.stress == 1 ? params.policy.duration.stress_primary_multiplier :
-          ((has(current.stress) && current.stress == 0) ? params.policy.duration.stress_unstressed_multiplier : 1.0)
+        dispatch:
+          - when: has(current.stress) && current.stress == 1
+            value: params.policy.duration.stress_primary_multiplier
+          - when: has(current.stress) && current.stress == 0
+            value: params.policy.duration.stress_unstressed_multiplier
+          - default: 1.0
         tag: stress
     citations:
       - Klatt 1976
@@ -177,82 +187,22 @@ rules:
         current.phoneme != 'SIL' && (current.type == 'vowel'
         || (prev != null ? prev.type == 'vowel' || prev.type == 'nasal' || prev.type == 'liquid' || prev.type == 'glide' : false))
     define:
-      "n": next
-      a1: ahead(current, 1)
-      a2: ahead(current, 2)
-      a3: ahead(current, 3)
-      a4: ahead(current, 4)
-      a5: ahead(current, 5)
-      a6: ahead(current, 6)
-      same_word_check: "has(current.word) ? current.word : ''"
-      # Final-syllable rhyme only: allow contiguous vowel material (e.g. diphthong
-      # components), but reject tokens that still have another same-word vowel after
-      # an intervening consonant. This blocks onset material and earlier syllables.
-      same_word_vowel_after_nonvowel: >-
-        ((a1 != null && has(a1.word) && a1.word == same_word_check && a1.phoneme != 'SIL' && a1.type != 'vowel')
-          && ((a2 != null && has(a2.word) && a2.word == same_word_check && a2.type == 'vowel')
-            || (a3 != null && has(a3.word) && a3.word == same_word_check && a3.type == 'vowel')
-            || (a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
-            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
-            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
-        || ((a2 != null && has(a2.word) && a2.word == same_word_check && a2.phoneme != 'SIL' && a2.type != 'vowel')
-          && ((a3 != null && has(a3.word) && a3.word == same_word_check && a3.type == 'vowel')
-            || (a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
-            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
-            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
-        || ((a3 != null && has(a3.word) && a3.word == same_word_check && a3.phoneme != 'SIL' && a3.type != 'vowel')
-          && ((a4 != null && has(a4.word) && a4.word == same_word_check && a4.type == 'vowel')
-            || (a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
-            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
-        || ((a4 != null && has(a4.word) && a4.word == same_word_check && a4.phoneme != 'SIL' && a4.type != 'vowel')
-          && ((a5 != null && has(a5.word) && a5.word == same_word_check && a5.type == 'vowel')
-            || (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel')))
-        || ((a5 != null && has(a5.word) && a5.word == same_word_check && a5.phoneme != 'SIL' && a5.type != 'vowel')
-          && (a6 != null && has(a6.word) && a6.word == same_word_check && a6.type == 'vowel'))
-      # Check the current token's own breakIndex first.
+      following_nucleus_after_coda: >-
+        find_within_word(current,
+        "current.type == 'vowel' && prev != null && has(source.word)
+        && (!has(prev.word) || prev.word == source.word) && prev.type != 'vowel' && prev.phoneme != 'SIL'",
+        "ahead")
+      in_final_syllable: >-
+        has(current.syllable) && current.syllable != null
+        ? current.syllable.is_final
+        : following_nucleus_after_coda == null
       # Citation: Silverman et al. 1992 (ToBI break index tier)
       own_bi: "has(current.breakIndex) && current.breakIndex > 0 ? current.breakIndex : 0"
-      # Scan ahead for SIL, but ONLY within the same word (plus the SIL itself).
-      # Each step checks: is the token SIL with breakIndex?  If not, is it the same word?
-      # If we hit a different word, stop scanning (bi stays 0).
-      # This prevents pre-boundary lengthening from leaking to mid-phrase words.
-      sil_bi_1: >-
-        a1 == null ? 0 :
-        (a1.phoneme == 'SIL' && has(a1.breakIndex) ? a1.breakIndex :
-        (has(a1.word) && a1.word == same_word_check ? -1 : 0))
-      sil_bi_2: >-
-        sil_bi_1 != -1 ? 0 :
-        (a2 == null ? 0 :
-        (a2.phoneme == 'SIL' && has(a2.breakIndex) ? a2.breakIndex :
-        (has(a2.word) && a2.word == same_word_check ? -1 : 0)))
-      sil_bi_3: >-
-        sil_bi_2 != -1 ? 0 :
-        (a3 == null ? 0 :
-        (a3.phoneme == 'SIL' && has(a3.breakIndex) ? a3.breakIndex :
-        (has(a3.word) && a3.word == same_word_check ? -1 : 0)))
-      sil_bi_4: >-
-        sil_bi_3 != -1 ? 0 :
-        (a4 == null ? 0 :
-        (a4.phoneme == 'SIL' && has(a4.breakIndex) ? a4.breakIndex :
-        (has(a4.word) && a4.word == same_word_check ? -1 : 0)))
-      sil_bi_5: >-
-        sil_bi_4 != -1 ? 0 :
-        (a5 == null ? 0 :
-        (a5.phoneme == 'SIL' && has(a5.breakIndex) ? a5.breakIndex :
-        (has(a5.word) && a5.word == same_word_check ? -1 : 0)))
-      sil_bi_6: >-
-        sil_bi_5 != -1 ? 0 :
-        (a6 == null ? 0 :
-        (a6.phoneme == 'SIL' && has(a6.breakIndex) ? a6.breakIndex : 0))
-      # Take the first positive SIL breakIndex found (sentinels -1 mean "keep scanning").
-      ahead_bi: >-
-        sil_bi_1 > 0 ? sil_bi_1 :
-        (sil_bi_2 > 0 ? sil_bi_2 :
-        (sil_bi_3 > 0 ? sil_bi_3 :
-        (sil_bi_4 > 0 ? sil_bi_4 :
-        (sil_bi_5 > 0 ? sil_bi_5 :
-        (sil_bi_6 > 0 ? sil_bi_6 : 0)))))
-      raw_bi: "own_bi > 0 ? own_bi : (ahead_bi > 0 ? ahead_bi : 0)"
+      boundary_bi: >-
+        current.next_boundary != null && has(current.next_boundary.breakIndex)
+        ? current.next_boundary.breakIndex
+        : 0
+      raw_bi: "own_bi > 0 ? own_bi : (boundary_bi > 0 ? boundary_bi : 0)"
       # Categorize break index into named levels to avoid inline numeric literals
       # in dispatch when conditions (validation constraint).
       bi_level: >-
@@ -262,7 +212,7 @@ rules:
         (raw_bi >= 1 ? 'bi1' : 'bi0')))
       is_obstruent: >-
         current.type in ['stop_closure', 'stop_release', 'stop_aspiration', 'fricative', 'affricate']
-    constraint: "!same_word_vowel_after_nonvowel"
+    constraint: in_final_syllable
     apply:
       - field: duration
         op: mul
@@ -290,27 +240,15 @@ rules:
     select:
       stream: phone
       where: current.type == 'fricative'
+    define:
+      fricative_target: target(current.phoneme)
+      fricative_floor_ms: >-
+        has(current.fricative_min_ms) ? current.fricative_min_ms :
+        (has(fricative_target.fricative_min_ms) ? fricative_target.fricative_min_ms : 0)
     apply:
       - field: duration
         op: set
-        dispatch:
-          - when: current.phoneme in ['S', 'Z', 'SH', 'ZH']
-            value: >-
-              current.duration > params.policy.duration.fricative_min_sibilant_ms ? current.duration :
-              params.policy.duration.fricative_min_sibilant_ms
-          - when: current.phoneme in ['F', 'V']
-            value: >-
-              current.duration > params.policy.duration.fricative_min_labiodental_ms ? current.duration :
-              params.policy.duration.fricative_min_labiodental_ms
-          - when: current.phoneme in ['TH', 'DH']
-            value: >-
-              current.duration > params.policy.duration.fricative_min_dental_ms ? current.duration :
-              params.policy.duration.fricative_min_dental_ms
-          - when: current.phoneme == 'HH'
-            value: >-
-              current.duration > params.policy.duration.fricative_min_glottal_ms ? current.duration :
-              params.policy.duration.fricative_min_glottal_ms
-          - default: current.duration
+        value: "fricative_floor_ms > 0 && current.duration < fricative_floor_ms ? fricative_floor_ms : current.duration"
         tag: fricative_duration_floor
     citations:
       - >-
@@ -374,17 +312,19 @@ rules:
       stream: phone
       where: current.type == 'stop_aspiration'
     define:
-      place_af: >-
-        (has(current.alveolar) && current.alveolar == true) ? params.policy.duration.aspiration_frication_t_af_db :
-        ((has(current.velar) && current.velar == true) ? params.policy.duration.aspiration_frication_k_af_db :
-        ((has(current.bilabial) && current.bilabial == true) ? params.policy.duration.aspiration_frication_p_af_db :
-        0))
       weak_scale: >-
         (has(current.weak) && current.weak == true) ? params.policy.duration.aspiration_frication_weak_scale : 1.0
     apply:
       - field: params.AF
         op: set
-        value: "max([0, place_af * weak_scale])"
+        dispatch:
+          - when: has(current.alveolar) && current.alveolar == true
+            value: "max([0, params.policy.duration.aspiration_frication_t_af_db * weak_scale])"
+          - when: has(current.velar) && current.velar == true
+            value: "max([0, params.policy.duration.aspiration_frication_k_af_db * weak_scale])"
+          - when: has(current.bilabial) && current.bilabial == true
+            value: "max([0, params.policy.duration.aspiration_frication_p_af_db * weak_scale])"
+          - default: 0
         tag: aspiration_frication
     citations:
       - Hanson & Stevens 2003 (place-dependent frication can extend into aspiration for /t/ and /k/)

@@ -4,6 +4,50 @@ import { loadYamlSource, loadYamlSourceSync, resolveIncludePath } from "../yaml-
 
 type PlainObject = Record<string, unknown>;
 
+const ROOT_DSL_KEYS = new Set([
+  "version",
+  "inventory_path",
+  "lts_path",
+  "f0_model",
+  "parameters",
+  "input_contract",
+  "streams",
+  "topology",
+  "predicates",
+  "string_sets",
+  "maps",
+  "patterns",
+  "phases",
+  "rules",
+  "interpolation",
+  "output",
+  "transcription",
+  "include",
+]);
+
+const MERGED_CHILD_ROOT_KEYS = new Set([
+  "rules",
+  "predicates",
+  "patterns",
+  "streams",
+  "string_sets",
+  "maps",
+  "phases",
+  "topology",
+]);
+
+const ALLOWED_UNMERGED_CHILD_ROOT_KEYS = new Set(["version", "include"]);
+
+function hasNonEmptyValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some((entry) => hasNonEmptyValue(entry));
+  if (typeof value === "object") {
+    return Object.values(value as PlainObject).some((entry) => hasNonEmptyValue(entry));
+  }
+  return true;
+}
+
 export const DEFAULT_FRONTEND_ID = "qlatt-english";
 export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
   [DEFAULT_FRONTEND_ID]: "/rules/frontends/qlatt-english/frontend.yaml",
@@ -27,8 +71,18 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
  */
 function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: string): void {
-  // Merge keyed dictionaries (error on duplicate)
-  for (const key of ["rules", "predicates", "patterns", "streams"] as const) {
+  // Merge keyed dictionaries (error on duplicate).
+  // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
+  // blocks; merge them the same way as predicates so a child include can
+  // declare them.
+  for (const key of [
+    "rules",
+    "predicates",
+    "patterns",
+    "streams",
+    "string_sets",
+    "maps",
+  ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
       if (!root[key]) root[key] = {};
@@ -63,7 +117,16 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
       }
     }
   }
-  // All other fields: root wins, child ignored — nothing to do.
+
+  for (const [key, value] of Object.entries(child)) {
+    if (MERGED_CHILD_ROOT_KEYS.has(key)) continue;
+    if (ALLOWED_UNMERGED_CHILD_ROOT_KEYS.has(key)) continue;
+    if (!ROOT_DSL_KEYS.has(key)) continue;
+    if (!hasNonEmptyValue(value)) continue;
+    throw new Error(
+      `E_UNMERGED_CHILD_ROOT_KEY: included file ${childPath} declares non-empty root key "${key}", but mergeChildIntoRoot does not merge that key`
+    );
+  }
 }
 
 /**

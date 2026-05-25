@@ -1,7 +1,0 @@
-name: flow_derivative
-dimensionless: false
-unit_symbol: "cm3/s2"
-qudt: null
-dimensions:
-  L: 3
-  T: -2

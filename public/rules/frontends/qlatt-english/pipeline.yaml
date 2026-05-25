@@ -2,6 +2,120 @@ version: v1
 predicates:
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
+  is_pausable_consonant: current.type in ['stop_closure', 'fricative', 'nasal', 'liquid', 'glide', 'affricate']
+  is_sonorant: current.type in ['nasal', 'liquid', 'glide']
+  is_vowel_or_sonorant: current.type == 'vowel' || current.type in ['nasal', 'liquid', 'glide']
+  prev_same_word: has(prev.word) && has(current.word) && prev.word == current.word
+  next_same_word: has(next.word) && has(current.word) && next.word == current.word
+  prev_diff_word: prev == null || !has(prev.word) || !has(current.word) || prev.word != current.word
+  is_coda: >-
+    next == null || next.phoneme == 'SIL' ||
+    next.type in ['stop', 'stop_closure', 'fricative', 'nasal', 'affricate'] ||
+    (has(next.word) && has(current.word) && next.word != current.word)
+  # NOTE: "coronal" is the disjunction of alveolar and postalveolar feature flags.
+  # No token in this codebase carries a `coronal: true` annotation.
+  prev_coronal: (has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true)
+  next_coronal: (has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true)
+  both_coronal: ((has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true)) && ((has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true))
+  one_coronal: (has(prev.alveolar) && prev.alveolar == true) || (has(prev.postalveolar) && prev.postalveolar == true) || (has(next.alveolar) && next.alveolar == true) || (has(next.postalveolar) && next.postalveolar == true)
+  is_bilabial: has(current.bilabial) && current.bilabial == true
+  is_alveolar: has(current.alveolar) && current.alveolar == true
+  is_velar: has(current.velar) && current.velar == true
+  is_voiced: has(current.voiced) && current.voiced == true
+  is_voiceless: has(current.voiceless) && current.voiceless == true
+  is_back_vowel: has(current.back_vowel) && current.back_vowel == true
+  is_front_vowel: has(current.front_vowel) && current.front_vowel == true
+  is_high_vowel: has(current.high_vowel) && current.high_vowel == true
+  prev_is_voiced: prev != null && has(prev.voiced) && prev.voiced == true
+  prev_is_voiceless: prev != null && has(prev.voiceless) && prev.voiceless == true
+  # next_diff_word uses strict semantics (matches original bare `current.word != next.word` literal,
+  # which would throw on missing fields; we preserve "any missing = no match" by returning false).
+  next_diff_word: next != null && has(next.word) && has(current.word) && next.word != current.word
+string_sets:
+  # ASCII single-letter words. Used by `spelling_mode_letter_names`
+  # (phases/orthography.yaml) to detect runs of letter tokens like "U C L A".
+  ascii_letter: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  place_locus_closures: [K_CL, P_CL, B_CL, M, T_CL, D_CL, N, Y]
+  place_locus_releases: [K_REL, P_REL, B_REL, T_REL, D_REL]
+maps:
+  # Letter → LETTER_X pronunciation key used by spelling_mode_letter_names.
+  # The LETTER_* phonemes are defined in inventory.yaml (per Allen et al. 1987
+  # Ch. 2-3 — symbol strings pronounced with LETTER-* morphs).
+  letter_to_pronunciation:
+    a: LETTER_A
+    b: LETTER_B
+    c: LETTER_C
+    d: LETTER_D
+    e: LETTER_E
+    f: LETTER_F
+    g: LETTER_G
+    h: LETTER_H
+    i: LETTER_I
+    j: LETTER_J
+    k: LETTER_K
+    l: LETTER_L
+    m: LETTER_M
+    n: LETTER_N
+    o: LETTER_O
+    p: LETTER_P
+    q: LETTER_Q
+    r: LETTER_R
+    s: LETTER_S
+    t: LETTER_T
+    u: LETTER_U
+    v: LETTER_V
+    w: LETTER_W
+    x: LETTER_X
+    y: LETTER_Y
+    z: LETTER_Z
+  # Stop closure -> release segment lookup. The release/aspiration inventory
+  # entries carry stop_release / stop_aspiration token types used by burst rules.
+  phoneme_release_map:
+    P_CL: P_REL
+    T_CL: T_REL
+    K_CL: K_REL
+    B_CL: B_REL
+    D_CL: D_REL
+    G_CL: G_REL
+  phoneme_aspiration_map:
+    P_CL: P_ASP
+    T_CL: T_ASP
+    K_CL: K_ASP
+    B_CL: ""
+    D_CL: ""
+    G_CL: ""
+  phoneme_release_place_map:
+    P_CL: p
+    T_CL: t
+    K_CL: k
+    B_CL: p
+    D_CL: t
+    G_CL: k
+  place_locus_closure_place:
+    K_CL: velar
+    P_CL: bilabial
+    B_CL: bilabial
+    M: bilabial
+    T_CL: alveolar
+    D_CL: alveolar
+    N: alveolar
+    Y: palatal
+  place_locus_release_place:
+    K_REL: velar
+    P_REL: bilabial
+    B_REL: bilabial
+    T_REL: alveolar
+    D_REL: alveolar
+  place_locus_release_for_closure:
+    K_CL: K_REL
+    P_CL: P_REL
+    B_CL: B_REL
+    M: ""
+    T_CL: T_REL
+    D_CL: D_REL
+    N: ""
+    Y: ""
 streams:
   orthography:
     type: base
@@ -61,10 +175,10 @@ phases:
       - expand_affricates_with_closure
       - expand_diphthongs
       - expand_rhotic_vowels
-      - insert_voiceless_stop_release_and_aspiration
-      - insert_voiceless_stop_release_and_aspiration_final
-      - insert_voiced_stop_release
-      - insert_voiced_stop_release_final
+      - insert_mapped_voiceless_release_and_aspiration
+      - insert_mapped_voiceless_release_and_aspiration_final
+      - insert_mapped_voiced_release
+      - insert_mapped_voiced_release_final
   - name: annotation
     rules:
       - syllable_count_annotation
@@ -96,13 +210,8 @@ phases:
     after:
       - duration
     rules:
-      - k_context_cl_f2
-      - k_context_rel_copy
-      - bilabial_f2_locus
-      - bilabial_rel_copy
-      - alveolar_f2_locus
-      - alveolar_rel_copy
-      - palatal_f2_locus
+      - place_f2_locus
+      - place_rel_copy
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset

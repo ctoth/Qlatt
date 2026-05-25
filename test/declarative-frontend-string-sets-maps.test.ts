@@ -172,6 +172,28 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
     );
   });
 
+  it("rejects malformed top-level string_sets: at validation time", () => {
+    const spec = {
+      streams: {
+        orthography: { type: "base", features: { tokenType: ["word"] } },
+      },
+      string_sets: "abc",
+      rules: {
+        noop: {
+          select: { stream: "orthography", where: "true" },
+          apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
+        },
+      },
+      phases: [{ name: "orthography", rules: ["noop"] }],
+    };
+
+    const input = [
+      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrowError(/E_STRING_SET_INVALID/);
+  });
+
   it("rejects malformed string_sets: when an element is not a string", () => {
     const spec = {
       streams: {
@@ -207,6 +229,28 @@ describe("declarative frontend string_sets:/maps: engine schema", () => {
         // Not an object → reject.
         letter_to_word: ["a", "b"],
       },
+      rules: {
+        noop: {
+          select: { stream: "orthography", where: "true" },
+          apply: [{ field: "x", op: "set", value: "1", tag: "t" }],
+        },
+      },
+      phases: [{ name: "orthography", rules: ["noop"] }],
+    };
+
+    const input = [
+      { id: "t1", stream: "orthography", tokenType: "word", word: "a", status: 1 },
+    ];
+
+    expect(() => runRuleEngine(input, spec)).toThrowError(/E_MAP_INVALID/);
+  });
+
+  it("rejects malformed top-level maps: at validation time", () => {
+    const spec = {
+      streams: {
+        orthography: { type: "base", features: { tokenType: ["word"] } },
+      },
+      maps: ["a", "b"],
       rules: {
         noop: {
           select: { stream: "orthography", where: "true" },

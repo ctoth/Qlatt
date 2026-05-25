@@ -306,6 +306,8 @@ export function parseDslSpec(source: unknown): PlainObject {
   const parameters = isPlainObject(raw.parameters) ? raw.parameters : {};
   const topology = isPlainObject(raw.topology) ? raw.topology : {};
   const interpolation = isPlainObject(raw.interpolation) ? raw.interpolation : {};
+  const hasStringSets = Object.prototype.hasOwnProperty.call(raw, "string_sets");
+  const hasMaps = Object.prototype.hasOwnProperty.call(raw, "maps");
   const extraRootFields = Object.fromEntries(
     Object.entries(raw)
       .filter(([key]) => !ROOT_DSL_KEYS.has(key))
@@ -337,8 +339,8 @@ export function parseDslSpec(source: unknown): PlainObject {
     // Chunk 3: carry pipeline-level string_sets / maps blocks through to the
     // runtime. Shape is validated downstream by validation.ts
     // (validateStringSets / validateMaps).
-    string_sets: isPlainObject(raw.string_sets) ? cloneValue(raw.string_sets) : {},
-    maps: isPlainObject(raw.maps) ? cloneValue(raw.maps) : {},
+    string_sets: hasStringSets ? cloneValue(raw.string_sets) : {},
+    maps: hasMaps ? cloneValue(raw.maps) : {},
     patterns: Object.fromEntries(
       Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
     ),

@@ -17,6 +17,7 @@ citations:
   - Fant 1997
   - Hanson et al. 2001
   - Klatt 1980
+  - Jongman 1989
 base_params:
   F1: 500
   F2: 1500
@@ -490,6 +491,7 @@ phoneme_targets:
     A9: 38
     A10: 30
     dur: 100
+    fricative_min_ms: 30  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiceless: true
@@ -513,6 +515,7 @@ phoneme_targets:
     A9: 36
     A10: 28
     dur: 90
+    fricative_min_ms: 30  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiced: true
@@ -538,6 +541,7 @@ phoneme_targets:
     A9: 22
     A10: 15
     dur: 100
+    fricative_min_ms: 30  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiceless: true
@@ -563,6 +567,7 @@ phoneme_targets:
     A9: 20
     A10: 13
     dur: 90
+    fricative_min_ms: 30  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiced: true
@@ -586,6 +591,7 @@ phoneme_targets:
     A9: 52
     A10: 45
     dur: 90
+    fricative_min_ms: 50  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiceless: true
@@ -609,6 +615,7 @@ phoneme_targets:
     A9: 48
     A10: 40
     dur: 80
+    fricative_min_ms: 50  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiced: true
@@ -633,6 +640,7 @@ phoneme_targets:
     A9: 50
     A10: 42
     dur: 80
+    fricative_min_ms: 60  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiceless: true
@@ -657,6 +665,7 @@ phoneme_targets:
     A9: 47
     A10: 38
     dur: 70
+    fricative_min_ms: 60  # Jongman 1989
     type: fricative
     is_obstruent: true
     voiced: true
@@ -675,6 +684,7 @@ phoneme_targets:
     AVS: -70
     SW: 0
     dur: 80
+    fricative_min_ms: 40  # Engineering estimate; Jongman 1989 did not test /hh/
     type: fricative
     is_obstruent: true
     voiceless: true

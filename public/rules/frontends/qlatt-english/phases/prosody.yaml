@@ -700,13 +700,16 @@ rules:
         && (!has(current.boundaryTone) || current.boundaryTone == null)
     define:
       prev_f0: prev_point('f0')
-      continuation_rise: >-
-        current.punctuationSymbol == ',' ? params.policy.f0.continuation_rise_hz :
-        params.policy.f0.continuation_minor_rise_hz
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: "(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) + continuation_rise"
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
+        + {
+          ',': params.policy.f0.continuation_rise_hz,
+          ';': params.policy.f0.continuation_minor_rise_hz,
+          ':': params.policy.f0.continuation_minor_rise_hz
+        }[current.punctuationSymbol]
       tag: f0_continuation
     citations:
       - O'Shaughnessy 1976

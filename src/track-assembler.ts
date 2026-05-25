@@ -804,6 +804,17 @@ export type DecayMode = "halving" | "linear" | "exponential";
 export type LayerConfig = {
   type: LayerType;
   decay?: DecayMode;
+  /** For impulse layers: divisor for initial decay step.
+   *  `decay = value / initial_decay_divisor`.
+   *  Default 4 — matches DECtalk 4.63 ph_drwt02.c stress impulse rate.
+   *  Citation: DECtalk 4.63 Ph_drwt02.c (stress decay rate). */
+  initial_decay_divisor?: number;
+  /** For impulse layers: |value| below which the impulse is removed.
+   *  Default 0.01.  Engineering threshold to avoid carrying dead impulses. */
+  termination_threshold?: number;
+  /** For impulse layers with `decay: exponential`: per-frame multiplier.
+   *  Default 0.9 (≈ 10 frame half-life at the configured frame cadence). */
+  exponential_factor?: number;
 };
 
 /** Low-pass filter configuration. */
@@ -822,6 +833,14 @@ export type SpeakerScaleConfig = {
   minimum_param?: string;
   range_param?: string;
   reference?: number;
+  /** DECtalk frac4mul divisor: `(filtered - reference) * range / divisor`.
+   *  Default 4096 (12-bit right shift in DECtalk integer arithmetic).
+   *  Citation: DECtalk 4.63 Ph_drwt02.c frac4mul(x,y) = (x*y) >> 12. */
+  divisor?: number;
+  /** Final unit-conversion multiplier on the scaled output.
+   *  Default 0.1 (Hz*10 → Hz, matches DECtalk internal Hz*10 representation).
+   *  Citation: DECtalk 4.63 Ph_drwt02.c (f0 stored as Hz*10 internally). */
+  output_scale?: number;
 };
 
 /** Top-level layered additive F0 model config from frontend YAML.
@@ -840,6 +859,11 @@ export type LayeredF0ModelConfig = {
   layers: Record<string, LayerConfig>;
   combine?: "sum";
   speaker_scale?: SpeakerScaleConfig;
+  /** Final clamp applied to the rendered F0 in Hz.
+   *  Defaults: min_hz=50, max_hz=500 — covers the typical adult speaker range
+   *  from a creaky male floor (~50 Hz, Klatt 1990) to a high-pitched female
+   *  ceiling (~500 Hz, Peterson & Barney 1952 corpus extrema). */
+  output_clamp?: { min_hz?: number; max_hz?: number };
 };
 
 /** A command inserted into an F0 layer by a rule.
@@ -863,10 +887,27 @@ export type F0LayerCommand = {
   tag?: string;
 };
 
-/** Minimum F0 output in Hz. */
-const LAYERED_F0_MIN_HZ = 50;
-/** Maximum F0 output in Hz. */
-const LAYERED_F0_MAX_HZ = 500;
+/** Default minimum F0 output in Hz when `f0_model.output_clamp.min_hz` is unset.
+ *  50 Hz is the conventional creaky-voice floor for adult speakers.
+ *  Citation: Klatt 1990 §2.1 (voice quality continuum, creak ≥ 50 Hz). */
+const LAYERED_F0_MIN_HZ_DEFAULT = 50;
+/** Default maximum F0 output in Hz when `f0_model.output_clamp.max_hz` is unset.
+ *  500 Hz covers the upper extreme of the Peterson & Barney 1952 corpus. */
+const LAYERED_F0_MAX_HZ_DEFAULT = 500;
+/** Default DECtalk frac4mul divisor for speaker scaling: `(x*y) >> 12`.
+ *  Citation: DECtalk 4.63 Ph_drwt02.c. */
+const SPEAKER_SCALE_DIVISOR_DEFAULT = 4096;
+/** Default speaker_scale output multiplier (Hz*10 → Hz).
+ *  Citation: DECtalk 4.63 Ph_drwt02.c (internal Hz*10 representation). */
+const SPEAKER_SCALE_OUTPUT_DEFAULT = 0.1;
+/** Default initial-decay divisor for impulse layers: `decay = value / 4`.
+ *  Citation: DECtalk 4.63 Ph_drwt02.c (stress impulse decay rate). */
+const IMPULSE_INITIAL_DECAY_DIVISOR_DEFAULT = 4;
+/** Default impulse termination threshold (impulse removed when |value| drops below).
+ *  Engineering estimate: avoids accumulating dead impulses in the active list. */
+const IMPULSE_TERMINATION_THRESHOLD_DEFAULT = 0.01;
+/** Default exponential-decay per-frame multiplier. */
+const IMPULSE_EXPONENTIAL_FACTOR_DEFAULT = 0.9;
 
 // ---------------------------------------------------------------------------
 // 2-Pole IIR Low-Pass Filter
@@ -1140,6 +1181,8 @@ export function renderLayeredF0(
   let f0ScaleFactor = 1.0;
   let f0Reference = 0;
   let baseF0BiasHz = 0;
+  const scaleDivisor = scaleConfig?.divisor ?? SPEAKER_SCALE_DIVISOR_DEFAULT;
+  const scaleOutput = scaleConfig?.output_scale ?? SPEAKER_SCALE_OUTPUT_DEFAULT;
 
   if (scaleConfig) {
     f0Reference = requireModelNumber(scaleConfig.reference, "f0_model.speaker_scale.reference");
@@ -1155,9 +1198,13 @@ export function renderLayeredF0(
     }
     const baseF0Hz = (speakerParams as Record<string, unknown>)?.base_f0_hz;
     if (typeof baseF0Hz === "number" && Number.isFinite(baseF0Hz)) {
-      baseF0BiasHz = baseF0Hz - f0Minimum / 10;
+      baseF0BiasHz = baseF0Hz - f0Minimum * scaleOutput;
     }
   }
+
+  // Resolve output clamp bounds (default to historical hardcoded values).
+  const minHz = modelConfig.output_clamp?.min_hz ?? LAYERED_F0_MIN_HZ_DEFAULT;
+  const maxHz = modelConfig.output_clamp?.max_hz ?? LAYERED_F0_MAX_HZ_DEFAULT;
 
   // Organize commands by layer.
   const layerNames = Object.keys(modelConfig.layers);
@@ -1253,7 +1300,7 @@ export function renderLayeredF0(
           );
           impulses.push({
             value: cmd.value,
-            decay: cmd.value / 4,
+            decay: cmd.value / (cfg.initial_decay_divisor ?? IMPULSE_INITIAL_DECAY_DIVISOR_DEFAULT),
             remainingFrames: durationFrames,
           });
         } else if (cfg.type === "profile") {
@@ -1303,12 +1350,12 @@ export function renderLayeredF0(
     // Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
     let f0Hz: number;
     if (scaleConfig) {
-      f0Hz = (f0Minimum + (filtered - f0Reference) * f0ScaleFactor / 4096) / 10;
+      f0Hz = (f0Minimum + (filtered - f0Reference) * f0ScaleFactor / scaleDivisor) * scaleOutput;
       f0Hz += baseF0BiasHz;
     } else {
       f0Hz = filtered;
     }
-    f0Hz = Math.max(LAYERED_F0_MIN_HZ, Math.min(LAYERED_F0_MAX_HZ, f0Hz));
+    f0Hz = Math.max(minHz, Math.min(maxHz, f0Hz));
     rawF0Values[frame] = f0Hz;
 
     // Advance impulse decay for all impulse layers.
@@ -1320,12 +1367,16 @@ export function renderLayeredF0(
       }
       const decayMode = cfg.decay;
       const impulses = activeImpulses.get(name)!;
+      const terminationThreshold =
+        cfg.termination_threshold ?? IMPULSE_TERMINATION_THRESHOLD_DEFAULT;
+      const exponentialFactor =
+        cfg.exponential_factor ?? IMPULSE_EXPONENTIAL_FACTOR_DEFAULT;
 
       for (let i = impulses.length - 1; i >= 0; i--) {
         const imp = impulses[i];
         imp.remainingFrames--;
 
-        if (imp.remainingFrames <= 0 || Math.abs(imp.value) < 0.01) {
+        if (imp.remainingFrames <= 0 || Math.abs(imp.value) < terminationThreshold) {
           impulses.splice(i, 1);
           continue;
         }
@@ -1336,7 +1387,7 @@ export function renderLayeredF0(
         } else if (decayMode === "linear") {
           imp.value -= imp.decay;
         } else if (decayMode === "exponential") {
-          imp.value *= 0.9;
+          imp.value *= exponentialFactor;
         }
       }
     }

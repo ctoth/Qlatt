@@ -101,7 +101,13 @@ export function createDiagnosticsEngine(
       // Update param_range accumulators from the track
       for (const [checkName, checkDef] of Object.entries(config.checks)) {
         if (checkDef.type === "param_range" && checkDef.param) {
-          const state = { collected: [], lastCollectedAt: -Infinity, paramRange: null, maxPeak: 0 };
+          const state = {
+            collected: [],
+            lastCollectedAt: -Infinity,
+            paramRange: null,
+            maxPeak: 0,
+            aggregateValue: null,
+          };
           updateParamRange(state, checkDef.param, run.track);
           pollLoop.setParamRange(checkName, state.paramRange);
         }

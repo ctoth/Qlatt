@@ -1,134 +1,197 @@
-# Verdict: NO-MERGE
+# MERGE
 
-Workflow used: `prompts/chunk-3-codex-verifier.md`, default NO-MERGE.
+Workflow used: `prompts/chunk-3-codex-verifier.md`, rerun against commit `1f6e0b9c` with default NO-MERGE until the gate evidence cleared it.
 
-NO-MERGE reason: Gate 7 is not clean. `npm run test:golden` exited 1. The `lf-source-wasm-compare` RMS is within the prompt's bound (`0.32504812202227573 <= 0.326`), but the child script still exits 1 because `maxDelta = 0.790002666` exceeds its internal `1e-5` threshold. The prompt says any other anomaly is NO-MERGE.
+Current checkout note: the repo was on `declarative-cleanup` at `caf9cb02`, whose only intervening commit over `1f6e0b9c` is the prior verifier report. `git diff --name-status 1f6e0b9c..HEAD -- <gate-owned paths>` was empty, so the code/test/config surfaces exercised by the test gates matched `1f6e0b9c`.
 
-## Gate 1 - Commit Shape
+## Gate 1 - Commit shape
 
 PASS.
 
-`git show --stat --oneline 1f6e0b9c` lists only:
+`git show --name-only --format= 1f6e0b9c` lists exactly:
 
+- `public/rules/frontends/qlatt-english/phases/orthography.yaml`
+- `public/rules/frontends/qlatt-english/pipeline.yaml`
 - `src/declarative-frontend/engine.ts`
 - `src/declarative-frontend/parser.ts`
 - `src/declarative-frontend/rule-pack.ts`
 - `src/declarative-frontend/validation.ts`
-- `public/rules/frontends/qlatt-english/pipeline.yaml`
-- `public/rules/frontends/qlatt-english/phases/orthography.yaml`
 - `test/declarative-frontend-string-sets-maps.test.ts`
 
-No extra path was present.
+No other paths were in the commit.
 
-## Gate 2 - TDD Evidence
-
-PASS.
-
-I read `test/declarative-frontend-string-sets-maps.test.ts`. It has real assertions for:
-
-- `string_sets:` membership in `where:` conditions: `expect(out[0].isLetter).toBe(true)`, `expect(out[1].isLetter).toBeUndefined()`, `expect(out[2].isLetter).toBe(true)`.
-- `maps:` lookup in `value:` expressions: `expect(out[0].pronunciationKey).toBe("ALPHA")`, `expect(out[1].pronunciationKey).toBe("BRAVO")`.
-- validator rejection of malformed shapes: `expect(() => runRuleEngine(...)).toThrowError(/E_STRING_SET_INVALID/)` and `/E_MAP_INVALID/`.
-
-Spot-check result: the checked tests contain `expect(...).toBe(...)` or `expect(...).toThrowError(...)`, not blanket pass assertions.
-
-## Gate 3 - Deletion Verification
+## Gate 2 - TDD evidence
 
 PASS.
 
-Both required searches returned zero matches against commit `1f6e0b9c`:
+I read `test/declarative-frontend-string-sets-maps.test.ts` from `1f6e0b9c`. It has real assertions for:
 
-- `git grep -nE "\['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'\]" 1f6e0b9c -- public/rules/frontends/qlatt-english/phases/orthography.yaml`
-- `git grep -nE "current\.word == 'a' \?" 1f6e0b9c -- public/rules/frontends/qlatt-english/phases/orthography.yaml`
+- `string_sets:` membership in `where:`: `expect(out[0].isLetter).toBe(true)`, `expect(out[1].isLetter).toBeUndefined()`, `expect(out[2].isLetter).toBe(true)`.
+- `maps:` lookup in `value:`: `expect(out[0].pronunciationKey).toBe("ALPHA")`, `expect(out[1].pronunciationKey).toBe("BRAVO")`.
+- malformed shapes rejected by validation: multiple `expect(() => runRuleEngine(...)).toThrowError(/E_STRING_SET_INVALID/)` and `/E_MAP_INVALID/`.
 
-## Gate 4 - Line-Count Delta
+Spot-check result: the first, second, and third tests all contain concrete `expect(...)` assertions. The third missing-key test asserts `toThrowError(/No such key/)`.
 
-PASS.
-
-`git show 1f6e0b9c:public/rules/frontends/qlatt-english/phases/orthography.yaml | Measure-Object -Line` reports 26 lines. The overshoot is not padding: the rule preserves the original "run of at least three single-letter words" semantics with a three-position disjunction:
-
-- middle token: `prev + current + next`
-- left-edge token: `current + next + ahead(current, 2)`
-- right-edge token: `behind(current, 2) + prev + current`
-
-The comment explains this, and the body is the needed disjunction plus the map lookup.
-
-## Gate 5 - Schema Visibility And Validation
+## Gate 3 - Deletion verification
 
 PASS.
 
-`engine.ts` binds both blocks directly into CEL evaluation context:
+Both target-commit greps returned no matches:
 
-- `sets: stringSetsBinding`
-- `maps: mapsBinding`
+```text
+git grep -nE "\['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'\]" 1f6e0b9c -- public/rules/frontends/qlatt-english/phases/orthography.yaml
+exit=1
 
-Rule authors can use `sets.ascii_letter` and `maps.letter_to_pronunciation[current.word]` directly; no extra author-side setup is required.
+git grep -nE "current\.word == 'a' \?" 1f6e0b9c -- public/rules/frontends/qlatt-english/phases/orthography.yaml
+exit=1
+```
 
-`validation.ts` adds `E_STRING_SET_INVALID` and `E_MAP_INVALID`. These match the existing validator convention of `E_*` uppercase error codes such as `E_STREAM_SCHEMA`, `E_CEL_INVALID`, and `E_RULE_EXPRESSION_INVALID`.
+## Gate 4 - Line-count delta
 
-## Gate 6 - `rule-pack.ts` Merge-Fix Probe
+PASS.
 
-PASS for chunk 3; non-blocking latent bug found.
+`git show 1f6e0b9c:public/rules/frontends/qlatt-english/phases/orthography.yaml | Measure-Object -Line` reports 26 lines. The prompt expected the coder-reported 27, but the target-commit content measured here is 26.
 
-`parser.ts` declares these `ROOT_DSL_KEYS`, with merge status in `mergeChildIntoRoot`:
+The overshoot beyond the 20-line target is not padding. The body is the three-case disjunction needed to preserve "run of at least three single-letter words" semantics:
 
-| ROOT_DSL_KEY | Merge status in `mergeChildIntoRoot` |
+- middle token: `prev` and `next` are letters
+- left-edge token: `next` and `ahead(current, 2)` are letters
+- right-edge token: `prev` and `behind(current, 2)` are letters
+
+That preserves the distinction between spelling runs like "U C L A" and ordinary one/two-letter contexts such as article "a".
+
+## Gate 5 - Schema visibility and validator codes
+
+PASS.
+
+`engine.ts` binds the new data into CEL context directly:
+
+- runtime carries `string_sets` and `maps` from the parsed spec.
+- `buildContext` exposes them as top-level identifiers `sets` and `maps` beside `params`.
+- Rule authors can write `current.word in sets.ascii_letter` and `maps.letter_to_pronunciation[current.word]` without any extra setup.
+
+`validation.ts` adds dedicated validators and error codes:
+
+- `E_STRING_SET_INVALID`
+- `E_MAP_INVALID`
+
+Those follow the existing all-caps `E_*` validator error-code convention.
+
+## Gate 6 - `rule-pack.ts` merge-fix probe
+
+PASS for chunk 3, with a non-blocking latent merge-surface finding.
+
+`ROOT_DSL_KEYS` in `parser.ts`, verbatim:
+
+- `version`
+- `inventory_path`
+- `lts_path`
+- `f0_model`
+- `parameters`
+- `input_contract`
+- `streams`
+- `topology`
+- `predicates`
+- `string_sets`
+- `maps`
+- `patterns`
+- `phases`
+- `rules`
+- `interpolation`
+- `output`
+- `transcription`
+- `include`
+
+Merge status in `rule-pack.ts`:
+
+| Key | Merge status |
 |---|---|
-| `version` | Dropped from child; root wins |
-| `inventory_path` | Dropped from child; root wins |
-| `lts_path` | Dropped from child; root wins |
-| `f0_model` | Dropped from child; root wins |
-| `parameters` | Dropped from child; root wins |
-| `input_contract` | Dropped from child; root wins |
-| `streams` | Merged by key; duplicate key errors |
-| `topology` | Merged only for `hierarchy`, `parallel`, and `point` arrays with dedup |
-| `predicates` | Merged by key; duplicate key errors |
-| `string_sets` | Merged by key; duplicate key errors |
-| `maps` | Merged by key; duplicate key errors |
-| `patterns` | Merged by key; duplicate key errors |
-| `phases` | Concatenated root first, then child |
-| `rules` | Merged by key; duplicate key errors |
-| `interpolation` | Dropped from child; root wins |
-| `output` | Dropped from child; root wins |
-| `transcription` | Dropped from child; root wins |
-| `include` | Consumed by recursive include resolution; not merged as root data |
+| `version` | root wins; child value ignored |
+| `inventory_path` | root wins; child value ignored |
+| `lts_path` | root wins; child value ignored |
+| `f0_model` | root wins; child value ignored |
+| `parameters` | root wins; child value ignored |
+| `input_contract` | root wins; child value ignored |
+| `streams` | merged by key; duplicate key errors |
+| `topology` | merged by subkey `hierarchy`, `parallel`, `point` with dedup |
+| `predicates` | merged by key; duplicate key errors |
+| `string_sets` | merged by key; duplicate key errors |
+| `maps` | merged by key; duplicate key errors |
+| `patterns` | merged by key; duplicate key errors |
+| `phases` | concatenated root first, then child |
+| `rules` | merged by key; duplicate key errors |
+| `interpolation` | root wins; child value ignored |
+| `output` | root wins; child value ignored |
+| `transcription` | root wins; child value ignored |
+| `include` | consumed during recursive include resolution; not merged upward as a root field |
 
-Non-blocking finding: existing root-level keys beyond the four old dictionaries plus chunk 3's two new keys are still silently dropped when they appear in child includes. The most likely risky dropped keys are `parameters`, `input_contract`, `interpolation`, `output`, `transcription`, `inventory_path`, `lts_path`, and `f0_model`.
+Non-blocking finding: `parameters`, `interpolation`, `output`, and `transcription` are ROOT_DSL_KEYS that can carry meaningful root-level data but are silently dropped when declared in child includes. This is not chunk 3's responsibility, but it is the same class of include-surface risk that caused `string_sets`/`maps` to be dropped before the chunk fix.
 
-## Gate 7 - Locked Baselines
-
-NO-MERGE.
-
-`npx vitest run` exited 1 with exactly the locked 9 failures:
-
-- 2 failures in `test/declarative-frontend-slice.test.ts`
-- 6 snapshot failures in `test/tts-frontend-snapshot.test.ts`
-- 1 golden-summary failure in `test/tts-frontend-declarative-golden-summary.test.ts`
-
-Summary: `Test Files 3 failed | 120 passed (123)`, `Tests 9 failed | 1085 passed (1094)`.
-
-`npm run test:golden` exited 1. Child-script isolation:
-
-- `scripts/klatt-tract-wasm-compare.ts`: exit 0.
-- `scripts/lf-source-wasm-compare.ts`: exit 1, output `rmsError = 0.32504812202227573`, `maxDelta = 0.790002666`.
-- `scripts/render-phrase.ts`: exit 0.
-
-The RMS satisfies the prompt threshold, but the command itself failed because `scripts/lf-source-wasm-compare.ts` enforces `maxDelta > 1e-5` as failure. This is an anomaly under the gate wording.
-
-## Gate 8 - Pathspec Audit
+## Gate 7 - Locked baselines
 
 PASS.
 
-`git show --name-only --format= 1f6e0b9c` contains zero `knowledge/` paths.
+Full Vitest command:
 
-Note: the current worktree has many unrelated dirty `knowledge/` paths, but they are not in commit `1f6e0b9c` and I did not use them as evidence for the commit audit.
+```text
+npx.cmd vitest run
+```
 
-## Gate 9 - Missing-Key Semantics Decision
+The PowerShell `npx.ps1` wrapper misparsed inside my first timeout job as `npm exec px vitest run`; I reran through `npx.cmd`, which starts the same local `npx` command path correctly on Windows.
 
-PASS with note.
+Result:
 
-The missing-key test asserts a specific regex:
+```text
+Test Files  3 failed | 120 passed (123)
+Tests       9 failed | 1085 passed (1094)
+Snapshots   6 failed
+Duration    77.57s
+```
 
-`expect(() => runRuleEngine(input, spec)).toThrowError(/No such key/)`
+The 9 failures are the locked set:
 
-That is specific enough to distinguish the chosen cel-js missing-key behavior from a generic throw, though it does not assert the full key name.
+- 2 in `test/declarative-frontend-slice.test.ts`
+- 6 in `test/tts-frontend-snapshot.test.ts`
+- 1 in `test/tts-frontend-declarative-golden-summary.test.ts`
+
+Golden command:
+
+```text
+npm.cmd run test:golden
+```
+
+Result: exited `1`, as locked.
+
+Observed wasm comparison values:
+
+```text
+resonator:     rmsError 0.0000010582808756434203, maxDelta 0.00000187047980833039
+antiresonator: rmsError 0.00017063198707248313,   maxDelta 0.002229056500027582
+lf-source:     rmsError 0.32504812202227573,      maxDelta 0.790002666
+```
+
+`lf-source` remains inside the locked bounds named in the prompt: `rmsError <= 0.326` and `maxDelta <= 0.791`.
+
+## Gate 8 - Pathspec audit
+
+PASS.
+
+`git show --stat 1f6e0b9c` and `git show --name-only --format= 1f6e0b9c` show zero `knowledge/` paths.
+
+## Gate 9 - Missing-key semantics decision
+
+PASS with a non-blocking looseness note.
+
+The missing-key test documents the selected semantics: unguarded `maps.letter_to_word[current.word]` propagates cel-js missing-key failure, and rule authors are expected to guard lookups with membership tests.
+
+The assertion is specific enough to require the cel-js message family:
+
+```ts
+expect(() => runRuleEngine(input, spec)).toThrowError(/No such key/);
+```
+
+Non-blocking note: it does not assert the exact key text, such as `No such key: q`; it only matches `/No such key/`.
+
+## Verdict
+
+MERGE. All blocking gates passed. The only findings are non-blocking: child include merge currently drops other meaningful ROOT_DSL_KEYS, and the missing-key assertion could be tightened to the exact missing-key message.

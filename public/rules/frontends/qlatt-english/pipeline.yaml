@@ -36,6 +36,8 @@ string_sets:
   # (phases/orthography.yaml) to detect runs of letter tokens like "U C L A".
   ascii_letter: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                  'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  place_locus_closures: [K_CL, P_CL, B_CL, M, T_CL, D_CL, N, Y]
+  place_locus_releases: [K_REL, P_REL, B_REL, T_REL, D_REL]
 maps:
   # Letter → LETTER_X pronunciation key used by spelling_mode_letter_names.
   # The LETTER_* phonemes are defined in inventory.yaml (per Allen et al. 1987
@@ -90,6 +92,30 @@ maps:
     B_CL: p
     D_CL: t
     G_CL: k
+  place_locus_closure_place:
+    K_CL: velar
+    P_CL: bilabial
+    B_CL: bilabial
+    M: bilabial
+    T_CL: alveolar
+    D_CL: alveolar
+    N: alveolar
+    Y: palatal
+  place_locus_release_place:
+    K_REL: velar
+    P_REL: bilabial
+    B_REL: bilabial
+    T_REL: alveolar
+    D_REL: alveolar
+  place_locus_release_for_closure:
+    K_CL: K_REL
+    P_CL: P_REL
+    B_CL: B_REL
+    M: ""
+    T_CL: T_REL
+    D_CL: D_REL
+    N: ""
+    Y: ""
 streams:
   orthography:
     type: base
@@ -184,13 +210,8 @@ phases:
     after:
       - duration
     rules:
-      - k_context_cl_f2
-      - k_context_rel_copy
-      - bilabial_f2_locus
-      - bilabial_rel_copy
-      - alveolar_f2_locus
-      - alveolar_rel_copy
-      - palatal_f2_locus
+      - place_f2_locus
+      - place_rel_copy
       - dark_l_allophony
       - r_f3_lowering
       - f1_stop_onset

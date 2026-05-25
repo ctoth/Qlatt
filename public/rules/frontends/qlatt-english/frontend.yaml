@@ -447,24 +447,64 @@ parameters:
         value: 0
         citations:
           - Lindblom 1963 (articulatory undershoot at fast rates)
-      bilabial_f2_locus:
-        value: 1200
-        citations:
-          - Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)
-          - Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)
-      alveolar_f2_locus:
-        value: 1800
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
-      alveolar_f2_locus_front:
-        value: 1900
-        citations:
-          - Stevens & House 1956
-      alveolar_f2_locus_back:
-        value: 1700
-        citations:
-          - Stevens & House 1956
+      place_loci:
+        velar:
+          locus_default:
+            value: 1500
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus default)
+          locus_front:
+            value: 1900
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
+          locus_back:
+            value: 1200
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
+        bilabial:
+          locus_default:
+            value: 1200
+            citations:
+              - Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)
+              - Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)
+          locus_front:
+            value: 1350
+            citations:
+              - Stevens & House 1956 (bilabial locus, front/high vowel context)
+          locus_back:
+            value: 1100
+            citations:
+              - Stevens & House 1956 (bilabial locus, back vowel context)
+        alveolar:
+          locus_default:
+            value: 1800
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 1900
+            citations:
+              - Stevens & House 1956
+          locus_back:
+            value: 1700
+            citations:
+              - Stevens & House 1956
+        palatal:
+          locus_default:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_back:
+            value: 2400
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
       dark_l_f2:
         value: 900
         citations:
@@ -512,41 +552,11 @@ parameters:
           - Stevens 1998 Ch.10 (reduced vowels are context-dependent rather than uniformly central)
           - Miller 1998, Pronunciation Modeling in Speech Synthesis (reduced vowels may remain [I]-like rather than schwa-like)
           - "Engineering estimate: retain more front-vowel identity for unstressed IY/IH than the generic schwa-pull"
-      palatal_f2_locus:
-        value: 2600
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
-      palatal_f2_back_vowel:
-        value: 2400
-        citations:
-          - Stevens & House 1956
-          - Allen et al. 1987 Ch.11
       vcv_coarticulation_rate:
         value: 0.2
         citations:
           - Ohman 1966
           - "Engineering estimate: conservative DAC weight to avoid over-compressing F2 after explicit consonant locus assignment"
-      velar_f2_locus:
-        value: 1500
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus default)
-      velar_f2_locus_back:
-        value: 1200
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
-      velar_f2_locus_front:
-        value: 1900
-        citations:
-          - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
-      bilabial_f2_locus_front:
-        value: 1350
-        citations:
-          - Stevens & House 1956 (bilabial locus, front/high vowel context)
-      bilabial_f2_locus_back:
-        value: 1100
-        citations:
-          - Stevens & House 1956 (bilabial locus, back vowel context)
       nasal_n_f2_default:
         value: 1400
         citations:

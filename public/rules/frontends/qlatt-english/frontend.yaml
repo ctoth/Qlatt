@@ -53,7 +53,9 @@ parameters:
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_min_ms:
-        value: 5
+        # Reverted from 05e057a3 and 7b285e8d: no-rationale tune commits
+        # shipped without updating load-bearing tests; Allen 1987 supports 15 ms.
+        value: 15
         citations:
           - Allen et al. 1987 Table C-1
       weak_release_scale:
@@ -270,7 +272,7 @@ parameters:
           - Klatt 1976 Table III (minimum consonant durations; liquids require ~30 ms for perceptible formant transition)
           - Engineering estimate (prevents duration-rule stacking from collapsing rhotic tails below audibility)
       weak_release_amplitude_reduction_db:
-        value: 22
+        value: 10
         citations:
           - Allen et al. 1987 Table C-1
           - Stevens 1998 Ch.8

@@ -80,7 +80,7 @@ export async function initializeNewRuntime() {
             telemetry: state.telemetry,
             telemetryMax: state.telemetryMax,
             plstepEvents: state.plstepEvents,
-            plstepTotalCount: state.plstepTotalCount,
+            plstepTotalCount: () => state.plstepTotalCount,
             playHistory: state.playHistory,
             sessionId: state.sessionId,
             sliderParams: {},

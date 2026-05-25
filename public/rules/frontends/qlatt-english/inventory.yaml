@@ -184,6 +184,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    is_back_rounded: true
     dac: 2  # Recasens 1997
   OW1:
     F1: 497
@@ -197,6 +198,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    is_back_rounded: true
     dac: 2  # Recasens 1997
     diph:
       - AO1
@@ -213,6 +215,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    is_back_rounded: true
     dac: 3  # Recasens 1997
   UW1:
     F1: 378
@@ -226,6 +229,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    is_back_rounded: true
     dac: 3  # Recasens 1997
   AH1:
     F1: 623
@@ -296,6 +300,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    is_back_rounded: true
     dac: 2  # Recasens 1997
     diph:
       - AO1
@@ -393,6 +398,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    is_back_rounded: true
     dac: 2  # Recasens 1997
   OW0:
     F1: 560
@@ -406,6 +412,7 @@ phoneme_targets:
     type: vowel
     mid: true
     back: true
+    is_back_rounded: true
     dac: 2  # Recasens 1997
     diph:
       - AO0
@@ -422,6 +429,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    is_back_rounded: true
     dac: 3  # Recasens 1997
   UW0:
     F1: 378
@@ -435,6 +443,7 @@ phoneme_targets:
     type: vowel
     hi: true
     back: true
+    is_back_rounded: true
     dac: 3  # Recasens 1997
   AH0:
     F1: 623
@@ -482,6 +491,7 @@ phoneme_targets:
     A10: 30
     dur: 100
     type: fricative
+    is_obstruent: true
     voiceless: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -504,6 +514,7 @@ phoneme_targets:
     A10: 28
     dur: 90
     type: fricative
+    is_obstruent: true
     voiced: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -528,6 +539,7 @@ phoneme_targets:
     A10: 15
     dur: 100
     type: fricative
+    is_obstruent: true
     voiceless: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -552,6 +564,7 @@ phoneme_targets:
     A10: 13
     dur: 90
     type: fricative
+    is_obstruent: true
     voiced: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -574,6 +587,7 @@ phoneme_targets:
     A10: 45
     dur: 90
     type: fricative
+    is_obstruent: true
     voiceless: true
     labiodental: true
     dac: 1  # Recasens 1997
@@ -596,6 +610,7 @@ phoneme_targets:
     A10: 40
     dur: 80
     type: fricative
+    is_obstruent: true
     voiced: true
     labiodental: true
     dac: 1  # Recasens 1997
@@ -619,6 +634,7 @@ phoneme_targets:
     A10: 42
     dur: 80
     type: fricative
+    is_obstruent: true
     voiceless: true
     dental: true
     dac: 1  # Recasens 1997
@@ -642,6 +658,7 @@ phoneme_targets:
     A10: 38
     dur: 70
     type: fricative
+    is_obstruent: true
     voiced: true
     dental: true
     dac: 1  # Recasens 1997
@@ -659,6 +676,7 @@ phoneme_targets:
     SW: 0
     dur: 80
     type: fricative
+    is_obstruent: true
     voiceless: true
     glottal: true
     dac: 1  # Recasens 1997
@@ -675,6 +693,7 @@ phoneme_targets:
     voiced: true
     bilabial: true
     nasal_segment: true
+    nasal_place_index: 1  # Klatt 1980 Table I
     nasal_place: m
     dac: 1  # Recasens 1997
   'N':
@@ -690,6 +709,7 @@ phoneme_targets:
     voiced: true
     alveolar: true
     nasal_segment: true
+    nasal_place_index: 2  # Klatt 1980 Table I
     nasal_place: n
     dac: 2  # Recasens 1997
   NG:
@@ -705,6 +725,7 @@ phoneme_targets:
     voiced: true
     velar: true
     nasal_segment: true
+    nasal_place_index: 3  # Klatt 1980 Table I
     nasal_place: ng
     dac: 3  # Recasens 1997
   L:
@@ -743,6 +764,7 @@ phoneme_targets:
     AV: 59
     dur: 80
     type: glide
+    is_back_rounded: true
     voiced: true
     labiovelar: true
     dac: 1  # Recasens 1997; Volenec 2015
@@ -759,6 +781,32 @@ phoneme_targets:
     voiced: true
     palatal: true
     dac: 3  # Recasens 1997
+  # Plain stop bases are abstract symbols rewritten to closure/release targets
+  # by the structural phase (Klatt 1980 stop model).
+  P:
+    dur: 100
+    type: silence
+    is_stop_base: true
+  T:
+    dur: 100
+    type: silence
+    is_stop_base: true
+  K:
+    dur: 100
+    type: silence
+    is_stop_base: true
+  B:
+    dur: 100
+    type: silence
+    is_stop_base: true
+  D:
+    dur: 100
+    type: silence
+    is_stop_base: true
+  G:
+    dur: 100
+    type: silence
+    is_stop_base: true
   P_CL:
     F1: 200
     F2: 800
@@ -769,6 +817,7 @@ phoneme_targets:
     AV: 0
     dur: 50
     type: stop_closure
+    is_obstruent: true
     voiceless: true
     bilabial: true
     dac: 1  # Recasens 1997
@@ -782,6 +831,7 @@ phoneme_targets:
     AV: 0
     dur: 50  # Crystal & House 1988
     type: stop_closure
+    is_obstruent: true
     voiceless: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -795,6 +845,7 @@ phoneme_targets:
     AV: 0
     dur: 60
     type: stop_closure
+    is_obstruent: true
     voiceless: true
     velar: true
     dac: 3  # Recasens 1997
@@ -809,6 +860,7 @@ phoneme_targets:
     AVS: -70
     dur: 45
     type: stop_closure
+    is_obstruent: true
     voiced: true
     bilabial: true
     dac: 1  # Recasens 1997
@@ -823,6 +875,7 @@ phoneme_targets:
     AVS: -70
     dur: 50  # Crystal & House 1988
     type: stop_closure
+    is_obstruent: true
     voiced: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -837,6 +890,7 @@ phoneme_targets:
     AVS: -70
     dur: 55
     type: stop_closure
+    is_obstruent: true
     voiced: true
     velar: true
     dac: 3  # Recasens 1997
@@ -857,6 +911,7 @@ phoneme_targets:
     SW: 1
     dur: 5
     type: stop_release
+    is_obstruent: true
     voiceless: true
     bilabial: true
     dac: 1  # Recasens 1997
@@ -881,6 +936,7 @@ phoneme_targets:
     SW: 1
     dur: 15
     type: stop_release
+    is_obstruent: true
     voiceless: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -905,6 +961,7 @@ phoneme_targets:
     SW: 1
     dur: 25  # Zue 1976, Stevens 1993
     type: stop_release
+    is_obstruent: true
     voiceless: true
     velar: true
     dac: 3  # Recasens 1997
@@ -928,6 +985,7 @@ phoneme_targets:
     SW: 1
     dur: 5
     type: stop_release
+    is_obstruent: true
     voiced: true
     bilabial: true
     dac: 1  # Recasens 1997
@@ -954,6 +1012,7 @@ phoneme_targets:
     SW: 1
     dur: 10
     type: stop_release
+    is_obstruent: true
     voiced: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -980,6 +1039,7 @@ phoneme_targets:
     SW: 1
     dur: 20
     type: stop_release
+    is_obstruent: true
     voiced: true
     velar: true
     dac: 3  # Recasens 1997
@@ -1000,6 +1060,7 @@ phoneme_targets:
     A10: 28
     dur: 53
     type: stop_aspiration
+    is_obstruent: true
     voiceless: true
     bilabial: true
     dac: 1  # Recasens 1997
@@ -1023,6 +1084,7 @@ phoneme_targets:
     A10: 25
     dur: 56
     type: stop_aspiration
+    is_obstruent: true
     voiceless: true
     alveolar: true
     dac: 2  # Recasens 1997
@@ -1046,6 +1108,7 @@ phoneme_targets:
     A10: 15
     dur: 58  # Zue 1976 — restores labial < alveolar < velar ordering
     type: stop_aspiration
+    is_obstruent: true
     voiceless: true
     velar: true
     dac: 3  # Recasens 1997
@@ -1064,6 +1127,7 @@ phoneme_targets:
     AVS: -70
     dur: 16
     type: stop_closure
+    is_obstruent: true
     voiceless: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -1080,6 +1144,7 @@ phoneme_targets:
     AVS: -70
     dur: 14
     type: stop_closure
+    is_obstruent: true
     voiced: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -1113,6 +1178,7 @@ phoneme_targets:
     SW: 1
     dur: 54
     type: affricate
+    is_obstruent: true
     voiceless: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -1143,6 +1209,7 @@ phoneme_targets:
     SW: 1
     dur: 51
     type: affricate
+    is_obstruent: true
     voiced: true
     postalveolar: true
     dac: 3  # Recasens 1997
@@ -1189,6 +1256,7 @@ phoneme_targets:
     AVS: -70
     dur: 30       # engineering estimate: brief glottal closure ~20-40 ms
     type: stop_closure
+    is_obstruent: true
     voiceless: true
     glottal: true
     dac: 1        # Recasens 1997: glottal = minimal constraint

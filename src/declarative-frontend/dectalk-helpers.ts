@@ -24,32 +24,6 @@ type ControlWindow = {
   fields: Record<string, ControlField>;
 };
 
-const OBSTRUENT_TYPES = new Set([
-  "fricative",
-  "affricate",
-  "stop_closure",
-  "stop_release",
-  "stop_aspiration",
-]);
-
-const BACK_ROUNDED_REF_PHONEMES = new Set([
-  "AO0",
-  "AO1",
-  "OW0",
-  "OW1",
-  "OY0",
-  "OY1",
-  "UH0",
-  "UH1",
-  "UW0",
-  "UW1",
-  "OR0",
-  "OR1",
-  "UR0",
-  "UR1",
-  "W",
-]);
-
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "bigint") return Number(value);
@@ -233,8 +207,7 @@ function resolveFollowingClass(current: TokenLike, previous: TokenLike, next: To
     return "back_unrounded_vowel";
   }
   const referenceType = typeof reference.type === "string" ? reference.type : "";
-  const referencePhoneme = typeof reference.phoneme === "string" ? reference.phoneme : "";
-  if (OBSTRUENT_TYPES.has(referenceType)) {
+  if (reference.is_obstruent === true) {
     return "obstruent";
   }
   if (
@@ -244,7 +217,7 @@ function resolveFollowingClass(current: TokenLike, previous: TokenLike, next: To
   ) {
     return "front_vowel";
   }
-  if (BACK_ROUNDED_REF_PHONEMES.has(referencePhoneme)) {
+  if (reference.is_back_rounded === true) {
     return "back_rounded_vowel";
   }
   return "back_unrounded_vowel";

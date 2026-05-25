@@ -132,14 +132,7 @@ rules:
     apply:
       - field: params.nasalPlaceIndex
         op: set
-        dispatch:
-          - when: current.phoneme == 'M'
-            value: 1
-          - when: current.phoneme == 'N'
-            value: 2
-          - when: current.phoneme == 'NG'
-            value: 3
-          - default: 0
+        value: target(current.phoneme).nasal_place_index
         tag: nasal_place
       - field: params.nasalMurmurStrength
         op: set

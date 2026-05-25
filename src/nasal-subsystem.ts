@@ -11,13 +11,6 @@ const STEVENS_1998 = "Stevens 1998 Ch.10";
 const CHEN_1997 = "Chen 1997";
 const MAEDA_1982 = "Maeda 1982";
 
-export const NASAL_PLACE_INDEX: Record<string, number> = {
-  none: 0,
-  m: 1,
-  n: 2,
-  ng: 3,
-};
-
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
@@ -70,9 +63,9 @@ function emitRulesStageEvents(
     const placeIndex = Number(token?.params?.nasalPlaceIndex ?? 0);
     if (placeIndex > 0) {
       const place =
-        placeIndex === NASAL_PLACE_INDEX.m ? "m" :
-        placeIndex === NASAL_PLACE_INDEX.n ? "n" :
-        placeIndex === NASAL_PLACE_INDEX.ng ? "ng" :
+        placeIndex === 1 ? "m" :
+        placeIndex === 2 ? "n" :
+        placeIndex === 3 ? "ng" :
         "none";
       const placeDecision = provenance.add({
         stage: "rules",

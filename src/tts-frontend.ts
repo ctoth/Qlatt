@@ -116,10 +116,6 @@ export type TextToKlattTrackDetailedResult = {
   controlScore: DeclarativeControlScore;
 };
 
-// Plain stop symbols are intentionally rewritten in the structural phase
-// (Klatt 1980 stop model: closure + release).
-const STRUCTURAL_STOP_BASES = new Set(["P", "T", "K", "B", "D", "G"]);
-
 // Extract output and transcription configuration from the loaded YAML rulepack.
 // Unwraps {value, citations} objects into plain numbers so downstream OutputConfig
 // consumers see the same shape they always did.
@@ -335,7 +331,7 @@ function buildTextToKlattTrackDetailed(
 
     // Warn if phoneme was not found (materialized falls back to SIL internally)
     const phonemeTargets = frontendInventory.phoneme_targets;
-    const isStructuralStopBase = STRUCTURAL_STOP_BASES.has(targetKeyBase);
+    const isStructuralStopBase = materialized.is_stop_base === true;
     if (
       !isStructuralStopBase &&
       !phonemeTargets[materialized.phoneme] &&

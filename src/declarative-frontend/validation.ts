@@ -1861,6 +1861,124 @@ function validateRules(
   }
 }
 
+// Chunk 3: validate pipeline-level `string_sets:` block.
+// Shape: Record<non-empty string, string[]> where every element is a string.
+function validateStringSets(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (!Object.prototype.hasOwnProperty.call(spec, "string_sets")) return;
+  const block = spec.string_sets;
+  if (!isPlainObject(block)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_STRING_SET_INVALID",
+        "string_sets must be an object mapping name to an array of strings",
+        "string_sets"
+      )
+    );
+    return;
+  }
+  for (const [name, value] of Object.entries(block)) {
+    if (typeof name !== "string" || name.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_STRING_SET_INVALID",
+          `string_sets name must be a non-empty string (got '${String(name)}')`,
+          `string_sets.${String(name)}`
+        )
+      );
+      continue;
+    }
+    if (!Array.isArray(value)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_STRING_SET_INVALID",
+          `string_sets['${name}'] must be an array of strings`,
+          `string_sets.${name}`
+        )
+      );
+      continue;
+    }
+    for (let i = 0; i < value.length; i += 1) {
+      if (typeof value[i] !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_STRING_SET_INVALID",
+            `string_sets['${name}'][${i}] must be a string (got ${typeof value[i]})`,
+            `string_sets.${name}[${i}]`
+          )
+        );
+      }
+    }
+  }
+}
+
+// Chunk 3: validate pipeline-level `maps:` block.
+// Shape: Record<non-empty string, Record<string, string>> — a string→string
+// lookup table for each named map. Numeric or nested-object values are
+// rejected here; if a future caller needs them we can broaden the schema.
+function validateMaps(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (!Object.prototype.hasOwnProperty.call(spec, "maps")) return;
+  const block = spec.maps;
+  if (!isPlainObject(block)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_MAP_INVALID",
+        "maps must be an object mapping name to a string→string lookup table",
+        "maps"
+      )
+    );
+    return;
+  }
+  for (const [name, value] of Object.entries(block)) {
+    if (typeof name !== "string" || name.length === 0) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_MAP_INVALID",
+          `maps name must be a non-empty string (got '${String(name)}')`,
+          `maps.${String(name)}`
+        )
+      );
+      continue;
+    }
+    if (!isPlainObject(value)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_MAP_INVALID",
+          `maps['${name}'] must be an object with string keys and string values`,
+          `maps.${name}`
+        )
+      );
+      continue;
+    }
+    for (const [k, v] of Object.entries(value)) {
+      if (typeof k !== "string" || k.length === 0) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_MAP_INVALID",
+            `maps['${name}'] keys must be non-empty strings (got '${String(k)}')`,
+            `maps.${name}.${String(k)}`
+          )
+        );
+        continue;
+      }
+      if (typeof v !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_MAP_INVALID",
+            `maps['${name}']['${k}'] must be a string (got ${typeof v})`,
+            `maps.${name}.${k}`
+          )
+        );
+      }
+    }
+  }
+}
+
 export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
   const phaseByName = new Map();
@@ -1869,6 +1987,8 @@ export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   const streamByName = validateStreams(spec, diagnostics);
   validateTopology(spec, streamByName, diagnostics);
   const predicates = validatePredicates(spec, streamByName, policyState, diagnostics);
+  validateStringSets(spec, diagnostics);
+  validateMaps(spec, diagnostics);
   validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
   validateRules(spec, streamByName, predicates, policyState, diagnostics);
   const scalarFields = collectScalarFields(spec);

@@ -737,6 +737,21 @@ function buildNavigationFunctions(
     'current', 'prev', 'next',
     'current_index', 'phrase_index', 'phrase_total',
   ]);
+  // Chunk 3: surface pipeline-level `string_sets:` and `maps:` blocks as
+  // `sets` and `maps` top-level CEL identifiers so rule expressions can write
+  // `current.word in sets.ascii_letter` and `maps.letter_to_word[current.word]`.
+  // These are additive read-only context bindings; the loader in
+  // runRuleEngine validates shape before they reach here, so we can assume
+  // string_sets is Record<string,string[]> and maps is Record<string,Record<string,string>>.
+  const stringSetsBinding =
+    runtime?.string_sets && typeof runtime.string_sets === "object" && !Array.isArray(runtime.string_sets)
+      ? (runtime.string_sets as Record<string, unknown>)
+      : {};
+  const mapsBinding =
+    runtime?.maps && typeof runtime.maps === "object" && !Array.isArray(runtime.maps)
+      ? (runtime.maps as Record<string, unknown>)
+      : {};
+
   const buildContext = (
     token: TokenLike,
     params: RuntimeLike,
@@ -746,6 +761,8 @@ function buildNavigationFunctions(
     const current = isTokenLike(extra.current) ? (extra.current as TokenLike) : token;
     const target: RuntimeLike = {
       params: params ?? {},
+      sets: stringSetsBinding,
+      maps: mapsBinding,
     };
     for (const [key, value] of Object.entries(extra)) {
       if (key === "params") continue;
@@ -2849,6 +2866,17 @@ export function runRuleEngine(
     predicates:
       spec.predicates && typeof spec.predicates === "object" && !Array.isArray(spec.predicates)
         ? spec.predicates
+        : {},
+    // Chunk 3: pipeline-level reusable literal data — admitted by the
+    // validator (validateStringSets / validateMaps) and surfaced as `sets`
+    // and `maps` CEL identifiers via buildContext above.
+    string_sets:
+      spec.string_sets && typeof spec.string_sets === "object" && !Array.isArray(spec.string_sets)
+        ? spec.string_sets
+        : {},
+    maps:
+      spec.maps && typeof spec.maps === "object" && !Array.isArray(spec.maps)
+        ? spec.maps
         : {},
     patterns: spec.patterns ?? {},
     pointStreams,

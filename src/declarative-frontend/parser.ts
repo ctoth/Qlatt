@@ -70,6 +70,9 @@ const ROOT_DSL_KEYS = new Set([
   "streams",
   "topology",
   "predicates",
+  // Chunk 3: pipeline-level reusable string-set and string-keyed map blocks.
+  "string_sets",
+  "maps",
   "patterns",
   "phases",
   "rules",
@@ -266,6 +269,11 @@ export function parseDslSpec(source: unknown): PlainObject {
         normalizeConditionSpec(predicateSpec),
       ])
     ),
+    // Chunk 3: carry pipeline-level string_sets / maps blocks through to the
+    // runtime. Shape is validated downstream by validation.ts
+    // (validateStringSets / validateMaps).
+    string_sets: isPlainObject(raw.string_sets) ? cloneValue(raw.string_sets) : {},
+    maps: isPlainObject(raw.maps) ? cloneValue(raw.maps) : {},
     patterns: Object.fromEntries(
       Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
     ),

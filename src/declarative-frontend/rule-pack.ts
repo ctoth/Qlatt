@@ -27,8 +27,18 @@ export const DEFAULT_RULEPACK_PATH = BUNDLED_FRONTEND_RULEPACK_PATHS[DEFAULT_FRO
  * - All other fields (version, parameters, output, etc.): root wins, child ignored
  */
 function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: string): void {
-  // Merge keyed dictionaries (error on duplicate)
-  for (const key of ["rules", "predicates", "patterns", "streams"] as const) {
+  // Merge keyed dictionaries (error on duplicate).
+  // Chunk 3: `string_sets` and `maps` are pipeline-level reusable literal-data
+  // blocks; merge them the same way as predicates so a child include can
+  // declare them.
+  for (const key of [
+    "rules",
+    "predicates",
+    "patterns",
+    "streams",
+    "string_sets",
+    "maps",
+  ] as const) {
     const childDict = (child[key] ?? {}) as Record<string, unknown>;
     for (const [k, v] of Object.entries(childDict)) {
       if (!root[key]) root[key] = {};

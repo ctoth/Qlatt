@@ -1,65 +1,26 @@
 version: v1
 
+# A letter is interpreted as a letter-name iff it sits in a run of at least
+# three single-letter words (e.g. "U C L A"). The 3-disjunction below
+# enumerates the three positions a token can occupy in such a run: middle
+# (prev+next), left-edge (next+ahead2), right-edge (prev+behind2).
 rules:
   spelling_mode_letter_names:
     kind: scalar
     select:
       stream: orthography
       where: >-
-        current.tokenType == 'word' &&
-        current.word in ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-          'n','o','p','q','r','s','t','u','v','w','x','y','z'] &&
-        (
-          (
-            prev != null &&
-            prev.tokenType == 'word' &&
-            prev.word in ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-              'n','o','p','q','r','s','t','u','v','w','x','y','z'] &&
-            next != null &&
-            next.tokenType == 'word' &&
-            next.word in ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-              'n','o','p','q','r','s','t','u','v','w','x','y','z']
-          ) ||
-          (
-            next != null &&
-            next.tokenType == 'word' &&
-            next.word in ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-              'n','o','p','q','r','s','t','u','v','w','x','y','z'] &&
-            ahead(current, 2) != null &&
-            ahead(current, 2).tokenType == 'word' &&
-            ahead(current, 2).word in ['a','b','c','d','e','f','g','h','i','j','k',
-              'l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-          ) ||
-          (
-            prev != null &&
-            prev.tokenType == 'word' &&
-            prev.word in ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-              'n','o','p','q','r','s','t','u','v','w','x','y','z'] &&
-            behind(current, 2) != null &&
-            behind(current, 2).tokenType == 'word' &&
-            behind(current, 2).word in ['a','b','c','d','e','f','g','h','i','j','k',
-              'l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-          )
-        )
-    define:
-      pronunciation_key: >-
-        current.word == 'a' ? 'LETTER_A' : current.word == 'b' ? 'LETTER_B' :
-        current.word == 'c' ? 'LETTER_C' : current.word == 'd' ? 'LETTER_D' :
-        current.word == 'e' ? 'LETTER_E' : current.word == 'f' ? 'LETTER_F' :
-        current.word == 'g' ? 'LETTER_G' : current.word == 'h' ? 'LETTER_H' :
-        current.word == 'i' ? 'LETTER_I' : current.word == 'j' ? 'LETTER_J' :
-        current.word == 'k' ? 'LETTER_K' : current.word == 'l' ? 'LETTER_L' :
-        current.word == 'm' ? 'LETTER_M' : current.word == 'n' ? 'LETTER_N' :
-        current.word == 'o' ? 'LETTER_O' : current.word == 'p' ? 'LETTER_P' :
-        current.word == 'q' ? 'LETTER_Q' : current.word == 'r' ? 'LETTER_R' :
-        current.word == 's' ? 'LETTER_S' : current.word == 't' ? 'LETTER_T' :
-        current.word == 'u' ? 'LETTER_U' : current.word == 'v' ? 'LETTER_V' :
-        current.word == 'w' ? 'LETTER_W' : current.word == 'x' ? 'LETTER_X' :
-        current.word == 'y' ? 'LETTER_Y' : current.word == 'z' ? 'LETTER_Z' : ''
+        current.tokenType == 'word' && current.word in sets.ascii_letter &&
+        ((prev != null && prev.tokenType == 'word' && prev.word in sets.ascii_letter &&
+          next != null && next.tokenType == 'word' && next.word in sets.ascii_letter) ||
+         (next != null && next.tokenType == 'word' && next.word in sets.ascii_letter &&
+          ahead(current, 2) != null && ahead(current, 2).tokenType == 'word' && ahead(current, 2).word in sets.ascii_letter) ||
+         (prev != null && prev.tokenType == 'word' && prev.word in sets.ascii_letter &&
+          behind(current, 2) != null && behind(current, 2).tokenType == 'word' && behind(current, 2).word in sets.ascii_letter))
     apply:
       - field: pronunciationKey
         op: set
-        value: pronunciation_key
+        value: maps.letter_to_pronunciation[current.word]
         tag: orthography
     citations:
       - Allen et al. 1987 Ch.2-3 (symbol strings pronounced with LETTER-* morphs)

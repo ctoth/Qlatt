@@ -31,6 +31,42 @@ predicates:
   # next_diff_word uses strict semantics (matches original bare `current.word != next.word` literal,
   # which would throw on missing fields; we preserve "any missing = no match" by returning false).
   next_diff_word: next != null && has(next.word) && has(current.word) && next.word != current.word
+string_sets:
+  # ASCII single-letter words. Used by `spelling_mode_letter_names`
+  # (phases/orthography.yaml) to detect runs of letter tokens like "U C L A".
+  ascii_letter: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+maps:
+  # Letter → LETTER_X pronunciation key used by spelling_mode_letter_names.
+  # The LETTER_* phonemes are defined in inventory.yaml (per Allen et al. 1987
+  # Ch. 2-3 — symbol strings pronounced with LETTER-* morphs).
+  letter_to_pronunciation:
+    a: LETTER_A
+    b: LETTER_B
+    c: LETTER_C
+    d: LETTER_D
+    e: LETTER_E
+    f: LETTER_F
+    g: LETTER_G
+    h: LETTER_H
+    i: LETTER_I
+    j: LETTER_J
+    k: LETTER_K
+    l: LETTER_L
+    m: LETTER_M
+    n: LETTER_N
+    o: LETTER_O
+    p: LETTER_P
+    q: LETTER_Q
+    r: LETTER_R
+    s: LETTER_S
+    t: LETTER_T
+    u: LETTER_U
+    v: LETTER_V
+    w: LETTER_W
+    x: LETTER_X
+    y: LETTER_Y
+    z: LETTER_Z
 streams:
   orthography:
     type: base

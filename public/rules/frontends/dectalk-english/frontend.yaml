@@ -48,6 +48,20 @@ f0_model:
     reference: 1300
 parameters:
   policy:
+    rate:
+      undershoot_coefficient:
+        value: 0.3
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
+          - "Engineering estimate: 0.3 coefficient maps rate excess to undershoot factor"
+      f0_range_exponent:
+        value: 0.5
+        citations:
+          - Ladd 2008 Ch.9 (F0 range narrows at fast speaking rates; sqrt = exponent 0.5)
+      transition_scale_exponent:
+        value: 1.0
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
     duration:
       rate_scale: 1.0
       # Qlatt's frontend API already passes a normalized rate multiplier

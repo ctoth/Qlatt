@@ -14,10 +14,15 @@ export interface ExternalState {
   telemetry: Map<string, any>;
   telemetryMax: Map<string, any>;
   plstepEvents: any[];
-  plstepTotalCount: number;
+  plstepTotalCount: number | (() => number);
   playHistory: any[];
   sessionId: number;
   sliderParams: Record<string, number>;
+}
+
+function readPlstepTotalCount(externalState?: ExternalState): number {
+  const count = externalState?.plstepTotalCount;
+  return typeof count === "function" ? count() : count ?? 0;
 }
 
 export function createDiagnosticsEngine(
@@ -64,7 +69,7 @@ export function createDiagnosticsEngine(
       meterValues: new Map(),
       meterMax: new Map(),
       plstepEvents: externalState?.plstepEvents ?? [],
-      plstepTotalCount: externalState?.plstepTotalCount ?? 0,
+      plstepTotalCount: readPlstepTotalCount(externalState),
       playHistory: externalState?.playHistory ?? [],
       sessionId: currentRun?.sessionId ?? externalState?.sessionId ?? 0,
       sliderParams: externalState?.sliderParams ?? {},

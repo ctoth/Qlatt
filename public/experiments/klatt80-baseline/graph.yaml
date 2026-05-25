@@ -163,12 +163,11 @@ nodes:
   # ---------------------------------------------------------------------------
   # PLSTEP BURST MECHANISM
   # ---------------------------------------------------------------------------
-  # Klatt 80 PLSTEP: DC step injection triggered by AF or AH rise >= 49 dB
+  # Klatt 80 PLSTEP: DC step injection triggered by AF rise >= 49 dB
   # Creates transient rarefaction pulse at stop/fricative onsets
   #
   # From PARCOE.FOR:
   #   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
-  #   IF (NNAH - NAHLAS >= 49) PLSTEP = GETAMP(G0 - 28)
   # Decay: 0.995 per sample at 10kHz (~92ms time constant)
 
   # Edge detector for AF (frication amplitude)
@@ -178,14 +177,7 @@ nodes:
       threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
       input: { bind: AF }  # Monitor frication amplitude
 
-  # Edge detector for AH (aspiration amplitude)
-  ahEdgeDetector:
-    type: edge-detector
-    params:
-      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
-      input: { bind: AH }  # Monitor aspiration amplitude
-
-  # Sum triggers (OR gate - either AF or AH trigger fires the envelope)
+  # Sum triggers into the envelope.
   plstepTriggerSum:
     type: gain
     params:
@@ -586,7 +578,6 @@ connections:
   # PLSTEP burst - edge detection triggers decay envelope
   # ---------------------------------------------------------------------------
   - [afEdgeDetector, plstepTriggerSum]
-  - [ahEdgeDetector, plstepTriggerSum]
   - [plstepTriggerSum, plstepEnvelope]  # Connect sum output to trigger input
   - [plstepEnvelope, outputSum]
 

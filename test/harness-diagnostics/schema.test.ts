@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { parseDiagConfig } from "../../src/harness-diagnostics/schema";
 
 const MINIMAL_CONFIG = `
@@ -22,6 +24,19 @@ display:
 `;
 
 describe("parseDiagConfig", () => {
+  it("default diagnostics tap post-gain frication and PLSTEP envelope", () => {
+    const config = parseDiagConfig(
+      readFileSync(resolve(__dirname, "../../public/diagnostics/default.yaml"), "utf8"),
+    );
+    expect(config.taps["frication-source"].node).toEqual([
+      "parallelFricGain",
+      "fricationSource",
+      "noiseSource",
+      "nz",
+    ]);
+    expect(config.taps["impulse-source"].node).toBe("plstepEnvelope");
+  });
+
   it("parses minimal valid config", () => {
     const config = parseDiagConfig(MINIMAL_CONFIG);
     expect(config.taps["post-output"]).toEqual({ node: "outputGain", fftSize: 2048 });

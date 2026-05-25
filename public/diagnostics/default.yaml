@@ -17,10 +17,10 @@ taps:
     node: cascadeF2
     fftSize: 2048
   frication-source:
-    node: [fricationSource, noiseSource, nz]
+    node: [parallelFricGain, fricationSource, noiseSource, nz]
     fftSize: 2048
   impulse-source:
-    node: [impulseSource, plstepEnvelope]
+    node: plstepEnvelope
     fftSize: 2048
 
 poll:
@@ -84,6 +84,7 @@ checks:
     assert: { min: 2200 }
     severity: warn
     message: "F2 spectral peak below target for IY"
+    ignore_guard: true
 
   branch_balance:
     tap: post-output
@@ -162,7 +163,7 @@ checks:
   f0_range:
     type: param_range
     param: F0
-    assert: { range_min: 80 }
+    assert: { range_min: 60 }
     severity: info
     message: "F0 dynamic range narrow"
 

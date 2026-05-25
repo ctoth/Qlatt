@@ -401,6 +401,7 @@ display:
         playHistory: [],
         sessionId: 0,
         sliderParams: {},
+        sampleRate: 48000,
       }),
       onResults: (results) => {
         receivedResults = results;
@@ -500,7 +501,6 @@ display:
         playHistory: [],
         sessionId: 0,
         sliderParams: {},
-        sampleRate: 48000,
       });
       engine.subscribe((nextOutput) => {
         output = nextOutput;

@@ -60,6 +60,71 @@ function cloneObject(value: unknown): PlainObject {
   return isPlainObject(value) ? { ...value } : {};
 }
 
+/**
+ * Chunk 7 — `for_each_field` template expansion.
+ *
+ * An effect block may carry a `for_each_field: [<name1>, <name2>, ...]` key.
+ * At rule-load time it expands into N concrete effect blocks, one per listed
+ * field name. The literal substring `{field}` (and `{field_lower}` for a
+ * lowercased variant) in any string value inside the effect — including
+ * `field`, `value`, nested `dispatch[*].value` / `dispatch[*].when` strings —
+ * is replaced by the field name.
+ *
+ * Rejects malformed shape: non-array, empty array, non-string entries. The
+ * expander is called from `normalizeRule` before validation runs.
+ */
+function substituteFieldPlaceholders(value: unknown, fieldName: string): unknown {
+  if (typeof value === "string") {
+    if (value.indexOf("{field") === -1) return value;
+    return value
+      .replaceAll("{field_lower}", fieldName.toLowerCase())
+      .replaceAll("{field}", fieldName);
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => substituteFieldPlaceholders(entry, fieldName));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        substituteFieldPlaceholders(entry, fieldName),
+      ])
+    );
+  }
+  return value;
+}
+
+function expandForEachField(entries: unknown[]): PlainObject[] {
+  const out: PlainObject[] = [];
+  for (const entry of entries) {
+    if (!isPlainObject(entry) || !Object.prototype.hasOwnProperty.call(entry, "for_each_field")) {
+      out.push(cloneObject(entry));
+      continue;
+    }
+    const fields = (entry as PlainObject).for_each_field;
+    if (!Array.isArray(fields) || fields.length === 0) {
+      throw new Error(
+        `E_FOR_EACH_FIELD_INVALID: 'for_each_field' must be a non-empty array of field names, got ${JSON.stringify(fields)}`
+      );
+    }
+    for (const f of fields) {
+      if (typeof f !== "string" || f.length === 0) {
+        throw new Error(
+          `E_FOR_EACH_FIELD_INVALID: 'for_each_field' entries must be non-empty strings, got ${JSON.stringify(f)}`
+        );
+      }
+    }
+    // Strip the directive itself from the template before cloning.
+    const { for_each_field: _, ...template } = entry as PlainObject;
+    for (const fieldName of fields as string[]) {
+      const cloned = cloneValue(template) as PlainObject;
+      const substituted = substituteFieldPlaceholders(cloned, fieldName) as PlainObject;
+      out.push(substituted);
+    }
+  }
+  return out;
+}
+
 const ROOT_DSL_KEYS = new Set([
   "version",
   "inventory_path",
@@ -204,7 +269,7 @@ function normalizeRule(rule: unknown): PlainObject {
           };
         })()
       : null,
-    apply: Array.isArray(rule.apply) ? rule.apply.map((entry) => cloneObject(entry)) : [],
+    apply: Array.isArray(rule.apply) ? expandForEachField(rule.apply) : [],
     contour: isPlainObject(rule.contour) ? cloneObject(rule.contour) : null,
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
     insert_point: isPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,

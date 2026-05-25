@@ -1532,6 +1532,18 @@ function validateRules(
     if (Array.isArray(r.apply)) {
       for (let i = 0; i < r.apply.length; i += 1) {
         const effect = r.apply[i];
+        // Chunk 7: `for_each_field` is expanded at parse-time (see
+        // parser.ts:expandForEachField). If it survived to validation, the
+        // parser was bypassed — defense-in-depth diagnostic.
+        if (effect && Object.prototype.hasOwnProperty.call(effect, "for_each_field")) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_FOR_EACH_FIELD_UNEXPANDED",
+              `Rule '${name}' apply[${i}] still has 'for_each_field'; expected parse-time expansion`,
+              `rules.${name}.apply[${i}].for_each_field`
+            )
+          );
+        }
         const hasValue = effect && Object.prototype.hasOwnProperty.call(effect, "value");
         const hasDispatch = effect && Object.prototype.hasOwnProperty.call(effect, "dispatch");
         if (hasValue && hasDispatch) {

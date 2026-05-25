@@ -362,131 +362,24 @@ rules:
       stream: phone
       where: current.type in ['stop_release', 'stop_aspiration']
     apply:
-      - field: params.A2
+      # Chunk 7: one templated effect block expands to 9 concrete blocks
+      # (A2..A10) at rule-load time. Each substituted block writes its
+      # amplitude field from the nested policy table keyed by formant index
+      # and place of articulation.
+      - for_each_field: [A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
         op: set
         dispatch:
           - when:
               predicate: is_bilabial
-            value: params.policy.formant.burst_a2_bilabial
+            value: "params.policy.formant.burst_amplitudes.{field}.bilabial"
           - when:
               predicate: is_alveolar
-            value: params.policy.formant.burst_a2_alveolar
+            value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
           - when:
               predicate: is_velar
-            value: params.policy.formant.burst_a2_velar
-          - default: "has(current.?params.A2) ? current.params.A2 : 0"
-        tag: burst_spectrum
-      - field: params.A3
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a3_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a3_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a3_velar
-          - default: "has(current.?params.A3) ? current.params.A3 : 0"
-        tag: burst_spectrum
-      - field: params.A4
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a4_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a4_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a4_velar
-          - default: "has(current.?params.A4) ? current.params.A4 : 0"
-        tag: burst_spectrum
-      - field: params.A5
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a5_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a5_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a5_velar
-          - default: "has(current.?params.A5) ? current.params.A5 : 0"
-        tag: burst_spectrum
-      - field: params.A6
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a6_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a6_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a6_velar
-          - default: "has(current.?params.A6) ? current.params.A6 : 0"
-        tag: burst_spectrum
-      - field: params.A7
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a7_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a7_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a7_velar
-          - default: "has(current.?params.A7) ? current.params.A7 : 0"
-        tag: burst_spectrum
-      - field: params.A8
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a8_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a8_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a8_velar
-          - default: "has(current.?params.A8) ? current.params.A8 : 0"
-        tag: burst_spectrum
-      - field: params.A9
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a9_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a9_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a9_velar
-          - default: "has(current.?params.A9) ? current.params.A9 : 0"
-        tag: burst_spectrum
-      - field: params.A10
-        op: set
-        dispatch:
-          - when:
-              predicate: is_bilabial
-            value: params.policy.formant.burst_a10_bilabial
-          - when:
-              predicate: is_alveolar
-            value: params.policy.formant.burst_a10_alveolar
-          - when:
-              predicate: is_velar
-            value: params.policy.formant.burst_a10_velar
-          - default: "has(current.?params.A10) ? current.params.A10 : 0"
+            value: "params.policy.formant.burst_amplitudes.{field}.velar"
+          - default: "has(current.?params.{field}) ? current.params.{field} : 0"
         tag: burst_spectrum
     citations:
       - Blumstein & Stevens 1979 (burst spectral invariance)
@@ -500,43 +393,10 @@ rules:
       stream: phone
       where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
     apply:
-      - field: params.A1
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A2
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A3
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A4
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A5
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A6
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A7
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A8
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A9
-        op: add
-        value: -18
-        tag: weak_release_spectrum
-      - field: params.A10
+      # Chunk 7: one templated effect block expands to 10 concrete `add -18`
+      # blocks across A1..A10 at rule-load time.
+      - for_each_field: [A1, A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
         op: add
         value: -18
         tag: weak_release_spectrum

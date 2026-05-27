@@ -1752,14 +1752,6 @@ const INVENTORY_SEGMENT_FIELDS = [
   "inherentDuration",
   "params",
   "inventorySW",
-  "voiceless",
-  "voiced",
-  "bilabial",
-  "alveolar",
-  "velar",
-  "postalveolar",
-  "palatal",
-  "rhotic",
 ];
 
 function materializeInventorySegment(

@@ -1,130 +1,119 @@
-import { describe, expect, it, vi } from "vitest";
-import {
-  assembleKlattTrack,
-} from "../src/track-assembler";
-import type { OutputConfig } from "../src/track-assembler";
-import { textToKlattTrack } from "../src/tts-frontend";
+import { describe, expect, it } from "vitest";
 import { loadBundledRulepackSpec } from "../src/declarative-frontend/rule-pack";
+import { parseDslSpec } from "../src/declarative-frontend/parser";
+import { validateDslSpec } from "../src/declarative-frontend/validation";
 
-// Suppress warnings during tests
-const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+function outputOf(frontendId: string): Record<string, any> {
+  const spec = loadBundledRulepackSpec(frontendId);
+  return (spec as Record<string, any>).output;
+}
 
-describe("track-assembler output config", () => {
-  const defaultEquivalentConfig: OutputConfig = {
-    blend: {
-      factor: 0.35,
-      keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
-      smooth_types: ["vowel", "nasal", "liquid", "glide"],
-    },
-    min_duration: {
-      stop_release_ms: 5,
-      default_ms: 20,
-    },
-    transition_ms: 30,
-    initial_silence_ms: 30,
-    final_silence_ms: 100,
-  };
-  const defaultSagOptions = {
-    sagDepthHz: 12,
-    sagMinSpanMs: 150,
-  };
+describe("track lowering output config", () => {
+  it("loads qlatt lowering policy with cited timeline and transition sections", () => {
+    const output = outputOf("qlatt-english");
+    const lowering = output.lowering;
 
-  describe("assembleKlattTrack rejects missing/incomplete outputConfig", () => {
-    const minimalPhone = [
-      {
-        id: "ph_0",
-        phoneme: "SIL",
-        type: "silence",
-        stream: "phone",
-        status: 1,
-        duration: 50,
-        params: { F0: 0, F1: 0, F2: 0, F3: 0, AV: 0, AF: 0 },
+    expect(lowering.id).toBe("qlatt-english-track-lowering");
+    expect(lowering.timeline.initial_silence_ms.value).toBe(30);
+    expect(lowering.timeline.final_silence_ms.value).toBe(100);
+    expect(lowering.timeline.duration_floors.stop_release_ms.value).toBe(5);
+    expect(lowering.timeline.duration_floors.default_ms.value).toBe(20);
+    expect(lowering.transitions.default_transition_ms.value).toBe(30);
+    expect(lowering.transitions.blend.factor.value).toBe(0.35);
+    expect(lowering.transitions.blend.keys).toEqual(["F1", "F2", "F3", "B1", "B2", "B3"]);
+    expect(lowering.transitions.blend.smooth_types).toEqual(["vowel", "nasal", "liquid", "glide"]);
+    expect(Array.isArray(lowering.transitions.blend.factor.citations)).toBe(true);
+  });
+
+  it("loads qlatt point-interpolation F0 lowering policy", () => {
+    const lowering = outputOf("qlatt-english").lowering;
+
+    expect(lowering.f0.renderer.type).toBe("point_interpolation");
+    expect(lowering.f0.sag.operator).toBe("parabolic_hstar_sag");
+    expect(lowering.f0.sag.depth_hz.value).toBe(12);
+    expect(lowering.f0.sag.min_span_ms.value).toBe(150);
+    expect(lowering.f0.output_clamp.min_hz.value).toBe(0);
+    expect(lowering.overlays.operation_order).toEqual(["voice_quality", "timed_controls", "f0"]);
+  });
+
+  it("loads dectalk layered F0 lowering policy", () => {
+    const lowering = outputOf("dectalk-english").lowering;
+
+    expect(lowering.id).toBe("dectalk-english-track-lowering");
+    expect(lowering.f0.renderer.type).toBe("layered_additive");
+    expect(lowering.f0.layered_model_ref).toBe("f0_model");
+    expect(lowering.f0.sag.operator).toBe("disabled");
+    expect(lowering.f0.sag.depth_hz.value).toBe(0);
+    expect(lowering.timeline.duration_floors.stop_release_ms.value).toBe(7);
+    expect(lowering.transitions.blend.factor.value).toBe(0.5);
+  });
+
+  it("rejects missing lowering sections with stable validation codes", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+      output: {
+        lowering: {
+          id: "bad",
+          timeline: {},
+        },
       },
-    ];
-
-    it("throws if outputConfig is missing", () => {
-      expect(() =>
-        assembleKlattTrack(minimalPhone, minimalPhone, {
-          outputConfig: undefined as unknown as OutputConfig,
-          ...defaultSagOptions,
-        })
-      ).toThrow(/outputConfig/i);
     });
 
-    it("throws if outputConfig is null", () => {
-      expect(() =>
-        assembleKlattTrack(minimalPhone, minimalPhone, {
-          outputConfig: null as unknown as OutputConfig,
-          ...defaultSagOptions,
-        })
-      ).toThrow(/outputConfig/i);
-    });
+    const codes = validateDslSpec(spec).map((diagnostic) => diagnostic.code);
 
-    it("throws if a required output field is missing", () => {
-      expect(() =>
-        assembleKlattTrack(minimalPhone, minimalPhone, {
-          outputConfig: {
-            ...defaultEquivalentConfig,
-            blend: {
-              ...defaultEquivalentConfig.blend,
-              factor: undefined,
+    expect(codes).toContain("E_LOWERING_SPEC_REQUIRED");
+    expect(codes).toContain("E_LOWERING_SPEC_NUMBER");
+  });
+
+  it("rejects uncited numeric lowering policy", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+      output: {
+        lowering: {
+          id: "bad",
+          timeline: {
+            initial_silence_ms: { value: 0 },
+            final_silence_ms: { value: 0, citations: ["test"] },
+            duration_floors: {
+              stop_release_ms: { value: 5, citations: ["test"] },
+              default_ms: { value: 20, citations: ["test"] },
+            },
+            event_points: {
+              include_segment_start: true,
+              include_control_boundaries: true,
+              include_f0_anchors: true,
+              include_transition_steady_time: true,
             },
           },
-          ...defaultSagOptions,
-        })
-      ).toThrow("E_OUTPUT_CONFIG_REQUIRED: output.blend.factor must be a finite number");
+          transitions: {
+            default_transition_ms: { value: 30, citations: ["test"] },
+            blend: {
+              factor: { value: 0.35, citations: ["test"] },
+              keys: ["F1"],
+              smooth_types: ["vowel"],
+            },
+          },
+          f0: {
+            renderer: { type: "point_interpolation" },
+            sag: {
+              operator: "disabled",
+              depth_hz: { value: 0, citations: ["test"] },
+              min_span_ms: { value: 150, citations: ["test"] },
+            },
+            output_clamp: {
+              min_hz: { value: 0, citations: ["test"] },
+              max_hz: { value: 500, citations: ["test"] },
+            },
+          },
+          overlays: {
+            operation_order: ["voice_quality", "timed_controls", "f0"],
+          },
+        },
+      },
     });
-  });
 
-  describe("YAML-loaded output config produces frames", () => {
-    it("produces frames with explicit config matching old defaults", () => {
-      // Use the full pipeline with explicit config — this should work the same
-      // as the YAML-loaded path since the values are identical.
-      const track = textToKlattTrack("hello");
-      expect(track.length).toBeGreaterThan(0);
-      // Every frame must have a time and params
-      for (const frame of track) {
-        expect(typeof frame.time).toBe("number");
-        expect(frame.params).toBeDefined();
-      }
-    });
-  });
+    const diagnostics = validateDslSpec(spec);
 
-  describe("frontend.yaml output section loads with all 7 values", () => {
-    it("loads output config with blend.factor, blend.keys, blend.smooth_types, min_duration.stop_release_ms, min_duration.default_ms, initial_silence_ms, final_silence_ms", () => {
-      const spec = loadBundledRulepackSpec("qlatt-english");
-      const output = (spec as Record<string, unknown>).output as Record<string, unknown>;
-      expect(output).toBeDefined();
-
-      // blend section — factor is a {value, citations} object in raw YAML
-      const blend = output.blend as Record<string, unknown>;
-      expect(blend).toBeDefined();
-      const blendFactor = blend.factor as Record<string, unknown>;
-      expect(blendFactor).toBeDefined();
-      expect(blendFactor.value).toBe(0.35);
-      expect(Array.isArray(blendFactor.citations)).toBe(true);
-      expect(Array.isArray(blend.keys)).toBe(true);
-      expect((blend.keys as string[]).length).toBe(6);
-      expect(Array.isArray(blend.smooth_types)).toBe(true);
-      expect((blend.smooth_types as string[]).length).toBe(4);
-
-      // min_duration section — numeric fields are {value, citations} objects
-      const minDuration = output.min_duration as Record<string, unknown>;
-      expect(minDuration).toBeDefined();
-      const stopReleaseMs = minDuration.stop_release_ms as Record<string, unknown>;
-      expect(stopReleaseMs.value).toBe(5);
-      expect(Array.isArray(stopReleaseMs.citations)).toBe(true);
-      const defaultMs = minDuration.default_ms as Record<string, unknown>;
-      expect(defaultMs.value).toBe(20);
-      expect(Array.isArray(defaultMs.citations)).toBe(true);
-
-      // Top-level output values — {value, citations} objects
-      const initialSilence = output.initial_silence_ms as Record<string, unknown>;
-      expect(initialSilence.value).toBe(30);
-      expect(Array.isArray(initialSilence.citations)).toBe(true);
-      const finalSilence = output.final_silence_ms as Record<string, unknown>;
-      expect(finalSilence.value).toBe(100);
-      expect(Array.isArray(finalSilence.citations)).toBe(true);
-    });
+    expect(diagnostics.some((diagnostic) => diagnostic.code === "E_LOWERING_SPEC_CITATION")).toBe(true);
   });
 });

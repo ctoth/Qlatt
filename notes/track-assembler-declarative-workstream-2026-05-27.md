@@ -92,7 +92,7 @@ Order check: every listed dependency appears earlier than its dependent item.
 
 ## Phase 1 - Control-Score Target Schema
 
-Status: pending
+Status: completed
 
 Scope:
 - Replace `DeclarativeControlScore` v1 with a complete score shape that can drive track lowering without raw token access.

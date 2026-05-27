@@ -150,7 +150,7 @@ Verification:
 
 ## Phase 3 - Score Builder Completion
 
-Status: pending
+Status: completed
 
 Scope:
 - Update `buildDeclarativeControlScore()` so it is the only production reader of raw rule-engine token shapes for track-lowering data.

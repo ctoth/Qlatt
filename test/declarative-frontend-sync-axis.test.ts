@@ -8,6 +8,49 @@ type TokenLike = {
   sync_right?: { kind?: string; rank?: string } | null;
 };
 
+const loweringOutput = {
+  lowering: {
+    id: "test-track-lowering",
+    timeline: {
+      initial_silence_ms: { value: 0, citations: ["test"] },
+      final_silence_ms: { value: 0, citations: ["test"] },
+      duration_floors: {
+        stop_release_ms: { value: 5, citations: ["test"] },
+        default_ms: { value: 20, citations: ["test"] },
+      },
+      event_points: {
+        include_segment_start: true,
+        include_control_boundaries: true,
+        include_f0_anchors: true,
+        include_transition_steady_time: true,
+      },
+    },
+    transitions: {
+      default_transition_ms: { value: 30, citations: ["test"] },
+      blend: {
+        factor: { value: 0.35, citations: ["test"] },
+        keys: ["F1"],
+        smooth_types: ["vowel"],
+      },
+    },
+    f0: {
+      renderer: { type: "point_interpolation" },
+      sag: {
+        operator: "disabled",
+        depth_hz: { value: 0, citations: ["test"] },
+        min_span_ms: { value: 150, citations: ["test"] },
+      },
+      output_clamp: {
+        min_hz: { value: 0, citations: ["test"] },
+        max_hz: { value: 500, citations: ["test"] },
+      },
+    },
+    overlays: {
+      operation_order: ["voice_quality", "timed_controls", "f0"],
+    },
+  },
+};
+
 describe("declarative frontend sync axis bootstrap", () => {
   it("initializes missing base sync marks using START/FINITE/END order keys", () => {
     const spec = {
@@ -16,6 +59,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       },
       rules: {},
       phases: [{ name: "structural", rules: [] }],
+      output: loweringOutput,
     };
 
     const input = [
@@ -61,6 +105,7 @@ describe("declarative frontend sync axis bootstrap", () => {
         },
       },
       phases: [{ name: "structural", rules: ["insert_pair", "suppress_right_neighbor"] }],
+      output: loweringOutput,
     };
 
     const input = [
@@ -103,6 +148,7 @@ describe("declarative frontend sync axis bootstrap", () => {
         },
       },
       phases: [{ name: "structural", rules: ["insert_pair", "suppress_middle"] }],
+      output: loweringOutput,
     };
 
     const input = [
@@ -132,6 +178,7 @@ describe("declarative frontend sync axis bootstrap", () => {
       },
       rules: {},
       phases: [{ name: "structural", rules: [] }],
+      output: loweringOutput,
     };
 
     const input = [

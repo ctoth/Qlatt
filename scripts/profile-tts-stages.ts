@@ -19,7 +19,11 @@ import {
   type InventorySpec,
 } from "../src/declarative-frontend/inventory";
 import { runDeclarativeFrontend } from "../src/declarative-frontend";
-import { assembleKlattTrack } from "../src/track-assembler";
+import { lowerControlScoreToKlattTrack } from "../src/track-assembler";
+import {
+  buildDeclarativeControlScore,
+  validateDeclarativeControlScore,
+} from "../src/control-score";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 import {
   preloadCmuDictionaryFromPath,
@@ -37,8 +41,7 @@ const PHONEME_TARGET_MAP = INVENTORY.phoneme_targets as Record<string, Record<st
 
 type FrontendToken = Record<string, any>;
 
-// Extract output config from rulepack (mirrors tts-frontend.ts)
-const RULEPACK_OUTPUT_CONFIG = (QLATT_ENGLISH_RULEPACK as any)?.output ?? undefined;
+const RULEPACK_LOWERING_SPEC = (QLATT_ENGLISH_RULEPACK as any)?.output?.lowering;
 
 /**
  * Build parameter sequence using materializePhonemeTarget -- mirrors the
@@ -91,8 +94,8 @@ const inventory = { inventoryResolver };
     "runPhases(duration)": 0,
     reIdAndTag: 0,
     "runPhases(prosody+finalize)": 0,
-    filterPhoneSequence: 0,
-    assembleKlattTrack: 0,
+    buildControlScore: 0,
+    lowerControlScore: 0,
   };
   let errorCount = 0;
   const inventoryResolver = (phoneme: string) =>
@@ -167,22 +170,23 @@ const inventory = { inventoryResolver };
       }) as FrontendToken[];
       stageTimings["runPhases(prosody+finalize)"] += performance.now() - t;
 
-      // Stage 9: filter phone sequence
+      // Stage 9: build validated control score
       t = performance.now();
-      const phoneSequence = parameterSequence.filter(
-        (token: FrontendToken) => token?.stream !== "f0" && token?.status !== 2
-      );
-      stageTimings.filterPhoneSequence += performance.now() - t;
+      const controlScore = buildDeclarativeControlScore("qlatt-english", parameterSequence, {
+        loweringSpecId: RULEPACK_LOWERING_SPEC.id,
+        policyPaths: ["/rules/control-score.yaml", "/rules/frontends/qlatt-english/frontend.yaml"],
+      });
+      validateDeclarativeControlScore(controlScore);
+      stageTimings.buildControlScore += performance.now() - t;
 
-      // Stage 10: assembleKlattTrack
+      // Stage 10: lowerControlScoreToKlattTrack
       t = performance.now();
-      assembleKlattTrack(phoneSequence, parameterSequence, {
+      lowerControlScoreToKlattTrack(controlScore, RULEPACK_LOWERING_SPEC, {
         inventorySpec: INVENTORY,
         baseF0: 110,
         transitionMs: 30,
-        outputConfig: RULEPACK_OUTPUT_CONFIG,
       });
-      stageTimings.assembleKlattTrack += performance.now() - t;
+      stageTimings.lowerControlScore += performance.now() - t;
 
     } catch {
       errorCount++;

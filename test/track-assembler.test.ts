@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
 import {
-  assembleKlattTrack,
+  lowerControlScoreToKlattTrack,
   buildF0ContourFromDeclarative,
   compareAxisMark,
   parseTrailingInteger,
@@ -14,26 +14,135 @@ import {
 import type {
   LayeredF0ModelConfig,
   F0LayerCommand,
+  TrackLoweringSpec,
 } from "../src/track-assembler";
+import type { InventorySpec } from "../src/declarative-frontend/inventory";
+import type {
+  ControlScoreSegment,
+  DeclarativeControlScore,
+} from "../src/tts-frontend-types";
 
-const DEFAULT_OUTPUT_CONFIG = {
-  blend: {
-    factor: 0.35,
-    keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
-    smooth_types: ["vowel", "nasal", "liquid", "glide"],
+const TEST_LOWERING_SPEC: TrackLoweringSpec = {
+  id: "test-lowering",
+  timeline: {
+    initial_silence_ms: { value: 30, citations: ["test"] },
+    final_silence_ms: { value: 100, citations: ["test"] },
+    duration_floors: {
+      stop_release_ms: { value: 5, citations: ["test"] },
+      default_ms: { value: 20, citations: ["test"] },
+    },
+    event_points: {
+      include_segment_start: true,
+      include_control_boundaries: true,
+      include_f0_anchors: true,
+      include_transition_steady_time: true,
+    },
   },
-  min_duration: {
-    stop_release_ms: 5,
-    default_ms: 20,
+  transitions: {
+    default_transition_ms: { value: 30, citations: ["test"] },
+    blend: {
+      factor: { value: 0.35, citations: ["test"] },
+      keys: ["F1", "F2", "F3", "B1", "B2", "B3"],
+      smooth_types: ["vowel", "nasal", "liquid", "glide"],
+    },
   },
-  transition_ms: 30,
-  initial_silence_ms: 30,
-  final_silence_ms: 100,
+  f0: {
+    renderer: { type: "point_interpolation" },
+    sag: {
+      operator: "parabolic_hstar_sag",
+      depth_hz: { value: 12, citations: ["test"] },
+      min_span_ms: { value: 150, citations: ["test"] },
+    },
+    output_clamp: {
+      min_hz: { value: 0, citations: ["test"] },
+      max_hz: { value: 500, citations: ["test"] },
+    },
+  },
+  overlays: { operation_order: ["voice_quality", "timed_controls", "f0"] },
 };
-const DEFAULT_SAG_OPTIONS = {
-  sagDepthHz: 12,
-  sagMinSpanMs: 150,
+const TEST_INVENTORY: InventorySpec = {
+  base_params: {
+    F0: 0,
+    F1: 500,
+    F2: 1500,
+    F3: 2500,
+    B1: 90,
+    B2: 110,
+    B3: 170,
+    AV: 0,
+    AF: 0,
+    AH: 0,
+    SW: 0,
+  },
+  phoneme_targets: {
+    SIL: { F0: 0, F1: 500, F2: 1500, F3: 2500, B1: 90, B2: 110, B3: 170, AV: 0, AF: 0, AH: 0, SW: 0 },
+    D_REL: { dur: 15, AF: 40, AV: 0, AH: 0, SW: 1, F1: 280, F2: 1800, F3: 2600 },
+  },
 };
+
+function makeSegment(
+  id: string,
+  phoneme: string,
+  type: string,
+  durationMs: number,
+  params: Record<string, number>,
+  transitionMs?: number,
+): ControlScoreSegment {
+  return {
+    id,
+    phoneme,
+    type,
+    prosody: {},
+    alignment: {
+      onset_mark: `${id}:onset`,
+      release_mark: `${id}:release`,
+      ...(transitionMs !== undefined ? { transition_ms: transitionMs } : {}),
+    },
+    duration: { realized_target_ms: durationMs },
+    params,
+  };
+}
+
+function makeScore(
+  segments: ControlScoreSegment[],
+  overrides: Partial<Omit<DeclarativeControlScore, "version" | "frontend_id" | "segments" | "timeline_marks" | "lowering_refs">> = {},
+): DeclarativeControlScore {
+  return {
+    version: "v2",
+    frontend_id: "test",
+    segments,
+    timeline_marks: segments.flatMap((segment) => [
+      ...(segment.alignment.onset_mark
+        ? [{ id: segment.alignment.onset_mark, segment_id: segment.id, edge: "onset" as const }]
+        : []),
+      ...(segment.alignment.release_mark
+        ? [{ id: segment.alignment.release_mark, segment_id: segment.id, edge: "release" as const }]
+        : []),
+    ]),
+    timed_controls: overrides.timed_controls ?? [],
+    f0_points: overrides.f0_points ?? [],
+    f0_layer_commands: overrides.f0_layer_commands ?? [],
+    global_overlays: overrides.global_overlays ?? [],
+    lowering_refs: { spec_id: TEST_LOWERING_SPEC.id, policy_paths: ["/rules/control-score.yaml"] },
+  };
+}
+
+function lowerTestScore(
+  score: DeclarativeControlScore,
+  options: {
+    spec?: TrackLoweringSpec;
+    baseF0?: number;
+    transitionMs?: number;
+    f0Model?: LayeredF0ModelConfig;
+  } = {},
+) {
+  return lowerControlScoreToKlattTrack(score, options.spec ?? TEST_LOWERING_SPEC, {
+    inventorySpec: TEST_INVENTORY,
+    baseF0: options.baseF0 ?? 120,
+    ...(options.transitionMs !== undefined ? { transitionMs: options.transitionMs } : {}),
+    ...(options.f0Model ? { f0Model: options.f0Model } : {}),
+  });
+}
 
 // Suppress warnings during tests
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -107,7 +216,7 @@ describe("track-assembler", () => {
     });
   });
 
-  describe("assembleKlattTrack", () => {
+  describe("lowerControlScoreToKlattTrack", () => {
     it("produces monotonically increasing times", () => {
       const track = textToKlattTrack("hello", 120, 30);
       for (let i = 1; i < track.length; i++) {
@@ -170,34 +279,27 @@ describe("track-assembler", () => {
     });
 
     it("applies control_windows to the next segment with field-wise ops", () => {
-      const track = assembleKlattTrack(
-        [
-          {
-            phoneme: "T",
-            type: "stop_closure",
-            duration: 100,
-            params: { AV: 0, AH: 0, B1: 120, B2: 140, SW: 0 },
-            control_windows: [
-              {
-                target: "next",
-                prefix_ms: 20,
-                fields: {
-                  AH: { op: "set", value: 40 },
-                  AV: { op: "set", value: 0 },
-                  B1: { op: "add", value: 50 },
-                },
+      const segments = [
+        makeSegment("seg_t", "T", "stop_closure", 100, { AV: 0, AH: 0, B1: 120, B2: 140, SW: 0 }),
+        makeSegment("seg_aa", "AA", "vowel", 100, { AV: 60, AH: 0, B1: 200, B2: 220, SW: 0 }),
+      ];
+      const track = lowerTestScore(
+        makeScore(segments, {
+          timed_controls: [
+            {
+              id: "control_next_aspiration",
+              target_segment_id: "seg_aa",
+              start_offset_ms: 0,
+              end_offset_ms: 20,
+              fields: {
+                AH: { op: "set", value: 40 },
+                AV: { op: "set", value: 0 },
+                B1: { op: "add", value: 50 },
               },
-            ],
-          },
-          {
-            phoneme: "AA",
-            type: "vowel",
-            duration: 100,
-            params: { AV: 60, AH: 0, B1: 200, B2: 220, SW: 0 },
-          },
-        ],
-        [],
-        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG, ...DEFAULT_SAG_OPTIONS }
+            },
+          ],
+        }),
+        { transitionMs: 0 },
       );
 
       const aaFrames = track.filter((frame) => frame.phoneme === "AA");
@@ -211,22 +313,21 @@ describe("track-assembler", () => {
     });
 
     it("respects output.initial_silence_ms override when assembling", () => {
-      const track = assembleKlattTrack(
-        [
-          {
-            phoneme: "AA",
-            type: "vowel",
-            duration: 100,
-            params: { AV: 60, AH: 0, B1: 100, B2: 120, F1: 700, F2: 1200, F3: 2500 },
-          },
-        ],
-        [],
+      const track = lowerTestScore(
+        makeScore([
+          makeSegment("seg_aa", "AA", "vowel", 100, { AV: 60, AH: 0, B1: 100, B2: 120, F1: 700, F2: 1200, F3: 2500 }),
+        ]),
         {
-          baseF0: 120,
           transitionMs: 0,
-          outputConfig: { ...DEFAULT_OUTPUT_CONFIG, initial_silence_ms: 40, final_silence_ms: 0 },
-          ...DEFAULT_SAG_OPTIONS,
-        }
+          spec: {
+            ...TEST_LOWERING_SPEC,
+            timeline: {
+              ...TEST_LOWERING_SPEC.timeline,
+              initial_silence_ms: { value: 40, citations: ["test"] },
+              final_silence_ms: { value: 0, citations: ["test"] },
+            },
+          },
+        },
       );
       const firstPhone = track.find((f) => f.phoneme === "AA");
       expect(firstPhone).toBeTruthy();
@@ -234,17 +335,11 @@ describe("track-assembler", () => {
     });
 
     it("starts final silence immediately after the last phone", () => {
-      const track = assembleKlattTrack(
-        [
-          {
-            phoneme: "D_REL",
-            type: "stop_release",
-            duration: 15,
-            params: { AF: 40, AV: 0, AH: 0, SW: 1, F1: 280, F2: 1800, F3: 2600 },
-          },
-        ],
-        [],
-        { baseF0: 120, transitionMs: 0, outputConfig: DEFAULT_OUTPUT_CONFIG, ...DEFAULT_SAG_OPTIONS }
+      const track = lowerTestScore(
+        makeScore([
+          makeSegment("seg_d_rel", "D_REL", "stop_release", 15, { AF: 40, AV: 0, AH: 0, SW: 1, F1: 280, F2: 1800, F3: 2600 }),
+        ]),
+        { transitionMs: 0 },
       );
 
       const release = track.find((f) => f.phoneme === "D_REL");
@@ -414,61 +509,31 @@ describe("track-assembler", () => {
 
   describe("per-token transition_ms override", () => {
     it("uses per-token transition_ms when present on the phone", () => {
-      // A stop token with transition_ms=30 should use 30ms, not the global 50ms.
-      const phoneSequence = [
-        {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          transition_ms: 25,
-          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
-        },
-        {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
-        },
-      ];
-      // With per-token transition_ms=25 on first phone, the steady-state point
-      // should be at targetTime - 25ms (0.025s), not targetTime - 50ms.
-      const trackWithOverride = assembleKlattTrack(phoneSequence, [], {
-        baseF0: 120,
-        transitionMs: 50,
-        outputConfig: DEFAULT_OUTPUT_CONFIG,
-        ...DEFAULT_SAG_OPTIONS,
-      });
+      const trackWithOverride = lowerTestScore(
+        makeScore([
+          makeSegment("seg_ah_1", "AH", "vowel", 200, { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 }, 25),
+          makeSegment("seg_ah_2", "AH", "vowel", 200, { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 }),
+        ]),
+        { transitionMs: 50 },
+      );
       // The per-token value should be used; verify frames exist (basic smoke test).
       expect(trackWithOverride.length).toBeGreaterThanOrEqual(3);
     });
 
     it("falls back to global transitionMs when token lacks transition_ms", () => {
-      const phoneSequence = [
-        {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
-        },
-        {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          params: { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 },
-        },
-      ];
-      const track = assembleKlattTrack(phoneSequence, [], {
-        baseF0: 120,
-        transitionMs: 50,
-        outputConfig: DEFAULT_OUTPUT_CONFIG,
-        ...DEFAULT_SAG_OPTIONS,
-      });
+      const track = lowerTestScore(
+        makeScore([
+          makeSegment("seg_ah_1", "AH", "vowel", 200, { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 }),
+          makeSegment("seg_ah_2", "AH", "vowel", 200, { AV: 60, AH: 0, B1: 80, B2: 70, B3: 100, F1: 700, F2: 1200, F3: 2600 }),
+        ]),
+        { transitionMs: 50 },
+      );
       // No per-token transition_ms, should use global 50ms.
       expect(track.length).toBeGreaterThanOrEqual(3);
     });
   });
 
-  describe("assembleKlattTrack with f0Model", () => {
+  describe("lowerControlScoreToKlattTrack with f0Model", () => {
     it("uses layered renderer when f0Model is present", () => {
       const f0Model: LayeredF0ModelConfig = {
         type: "layered_additive",
@@ -478,24 +543,31 @@ describe("track-assembler", () => {
           hat: { type: "persistent" },
         },
       };
-      // Minimal phone sequence with one voiced phone.
-      const phoneSequence = [
-        {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          params: { F0: 0, F1: 700, F2: 1200, F3: 2600, B1: 80, B2: 70, B3: 100, AV: 60, AF: 0, AH: 0 },
+      const layeredSpec: TrackLoweringSpec = {
+        ...TEST_LOWERING_SPEC,
+        f0: {
+          ...TEST_LOWERING_SPEC.f0,
+          renderer: { type: "layered_additive", layered_model_ref: "f0_model" },
         },
-      ];
-      // One f0_layer token commanding the hat layer.
-      const parameterSequence = [
-        ...phoneSequence,
-        { stream: "f0_layer", layer: "hat", value: 10, time: 0, status: 1 },
-      ];
-      const track = assembleKlattTrack(phoneSequence, parameterSequence, {
+      };
+      const track = lowerTestScore(makeScore(
+        [
+          makeSegment("seg_ah", "AH", "vowel", 200, { F0: 0, F1: 700, F2: 1200, F3: 2600, B1: 80, B2: 70, B3: 100, AV: 60, AF: 0, AH: 0 }),
+        ],
+        {
+          f0_layer_commands: [
+            {
+              id: "hat_0",
+              timing: { kind: "absolute", time_ms: 0 },
+              layer: "hat",
+              value: 10,
+            },
+          ],
+        },
+      ), {
         baseF0: 110,
         f0Model,
-        outputConfig: DEFAULT_OUTPUT_CONFIG,
+        spec: layeredSpec,
       });
       expect(track.length).toBeGreaterThanOrEqual(2);
       // The voiced phone frame should have a non-zero F0.
@@ -504,24 +576,20 @@ describe("track-assembler", () => {
     });
 
     it("uses declarative path when f0Model is absent", () => {
-      // This is the existing behavior -- no f0Model option.
-      const phoneSequence = [
+      const track = lowerTestScore(makeScore(
+        [
+          makeSegment("seg_ah", "AH", "vowel", 200, { F0: 0, F1: 700, F2: 1200, F3: 2600, B1: 80, B2: 70, B3: 100, AV: 60, AF: 0, AH: 0 }),
+        ],
         {
-          phoneme: "AH",
-          type: "vowel",
-          duration: 200,
-          params: { F0: 0, F1: 700, F2: 1200, F3: 2600, B1: 80, B2: 70, B3: 100, AV: 60, AF: 0, AH: 0 },
+          f0_points: [
+            {
+              id: "f0_pt_0",
+              timing: { kind: "absolute", time_ms: 50 },
+              value_hz: 120,
+            },
+          ],
         },
-      ];
-      const parameterSequence = [
-        ...phoneSequence,
-        { stream: "f0", value: 120, time: 50, status: 1, id: "f0_pt_0", anchor_left: "start", anchor_right: "end", ratio: 0 },
-      ];
-      const track = assembleKlattTrack(phoneSequence, parameterSequence, {
-        baseF0: 110,
-        outputConfig: DEFAULT_OUTPUT_CONFIG,
-        ...DEFAULT_SAG_OPTIONS,
-      });
+      ), { baseF0: 110 });
       expect(track.length).toBeGreaterThanOrEqual(2);
     });
   });

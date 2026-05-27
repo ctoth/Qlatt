@@ -184,6 +184,57 @@ describe("declarative frontend point actions and helpers", () => {
     expect(points[1]).toMatchObject({ anchor_left: s1, anchor_right: s1, value: 95, tag: "f0_tail" });
   });
 
+  it("can insert contour points by point phase across all selected tokens", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = finiteOrder(2);
+    const s3 = endOrder();
+
+    const spec = {
+      parameters: {
+        policy: {
+          f0: {
+            base_hz: 100,
+            step_hz: 5,
+          },
+        },
+      },
+      streams: { phone: { type: "base" }, f0: { type: "point" } },
+      rules: {
+        paired_targets: {
+          select: { stream: "phone", where: "true" },
+          insert_points_order: "by_point",
+          insert_points: [
+            {
+              stream: "f0",
+              at: "at_sync(current.sync_left)",
+              value: "params.policy.f0.base_hz + current_index",
+              tag: "lead",
+            },
+            {
+              stream: "f0",
+              at: "at_sync(current.sync_right)",
+              value: "(prev_point('f0') == null ? params.policy.f0.base_hz : prev_point('f0').value) + params.policy.f0.step_hz",
+              tag: "tail",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "prosody", rules: ["paired_targets"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const points = out.filter((t) => t.stream === "f0");
+
+    expect(points.map((point) => point.tag)).toEqual(["lead", "lead", "tail", "tail"]);
+    expect(points.map((point) => point.value)).toEqual([100, 101, 105, 106]);
+  });
+
   it("supports prev_point and total helpers", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);

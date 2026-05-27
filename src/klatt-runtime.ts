@@ -172,13 +172,20 @@ export async function registerWorklets(
   );
 }
 
-type AudioWorkletNodeConstructor = typeof AudioWorkletNode;
+type AudioWorkletNodeConstructor = {
+  new (
+    context: BaseAudioContext,
+    name: string,
+    options?: AudioWorkletNodeOptions,
+  ): AudioWorkletNode;
+  prototype: AudioWorkletNode;
+};
 
 export function isAudioWorkletNode(
   node: AudioNode,
   audioWorkletNodeCtor: AudioWorkletNodeConstructor | undefined,
 ): node is AudioWorkletNode {
-  return Boolean(audioWorkletNodeCtor) && node instanceof audioWorkletNodeCtor;
+  return audioWorkletNodeCtor !== undefined && node instanceof audioWorkletNodeCtor;
 }
 
 /**

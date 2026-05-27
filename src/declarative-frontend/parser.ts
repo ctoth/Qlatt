@@ -273,6 +273,9 @@ function normalizeRule(rule: unknown): PlainObject {
     contour: isPlainObject(rule.contour) ? cloneObject(rule.contour) : null,
     splice: isPlainObject(rule.splice) ? cloneObject(rule.splice) : null,
     insert_point: isPlainObject(rule.insert_point) ? cloneObject(rule.insert_point) : null,
+    insert_points: Array.isArray(rule.insert_points)
+      ? rule.insert_points.map((entry) => cloneObject(entry))
+      : [],
     insert_f0_layer: isPlainObject(rule.insert) && asString(rule.kind, null) === "f0_layer"
       ? cloneObject(rule.insert)
       : null,

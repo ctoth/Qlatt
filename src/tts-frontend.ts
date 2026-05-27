@@ -9,15 +9,12 @@ import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
 import { transcribeText } from "./transcribe-text";
 import {
-  assembleKlattTrack,
-  buildSyncTimeMap,
-  extractLayerCommands,
+  lowerControlScoreToKlattTrack,
 } from "./track-assembler";
 import type {
-  OutputConfig,
   VoiceQualityOverrides,
   LayeredF0ModelConfig,
-  F0LayerCommand,
+  TrackLoweringSpec,
 } from "./track-assembler";
 import type { TranscriptionConfig, KlattFrame } from "./tts-frontend-types";
 import {
@@ -112,72 +109,15 @@ export type FrontendPhoneSummary = {
 export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
   frontendPhones: FrontendPhoneSummary[];
-  f0LayerCommands?: F0LayerCommand[];
   controlScore: DeclarativeControlScore;
 };
 
-// Extract output and transcription configuration from the loaded YAML rulepack.
-// Unwraps {value, citations} objects into plain numbers so downstream OutputConfig
-// consumers see the same shape they always did.
-function unwrapOutputNumber(entry: unknown): number | undefined {
-  if (typeof entry === "number" && Number.isFinite(entry)) return entry;
-  if (
-    entry &&
-    typeof entry === "object" &&
-    typeof (entry as { value?: unknown }).value === "number" &&
-    Number.isFinite((entry as { value: number }).value)
-  ) {
-    return (entry as { value: number }).value;
+function getTrackLoweringSpec(specSource: unknown): TrackLoweringSpec {
+  const lowering = (specSource as { output?: { lowering?: unknown } })?.output?.lowering;
+  if (!lowering || typeof lowering !== "object" || Array.isArray(lowering)) {
+    throw new Error("E_TRACK_LOWERING_SPEC_REQUIRED: frontend spec must contain output.lowering");
   }
-  return undefined;
-}
-
-function requireOutputNumber(entry: unknown, path: string): number {
-  const value = unwrapOutputNumber(entry);
-  if (value === undefined) {
-    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a finite number`);
-  }
-  return value;
-}
-
-function requireOutputStringArray(entry: unknown, path: string): string[] {
-  if (!Array.isArray(entry) || entry.length === 0 || entry.some((value) => typeof value !== "string")) {
-    throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a non-empty string array`);
-  }
-  return entry;
-}
-
-function getRulepackOutputConfig(specSource: unknown): OutputConfig {
-  const output = (specSource as any)?.output;
-  const raw = output?.lowering;
-  if (!raw || typeof raw !== "object") {
-    throw new Error("outputConfig: frontend spec must contain an 'output.lowering:' section");
-  }
-  const timeline = raw.timeline;
-  const transitions = raw.transitions;
-  const blend = transitions?.blend;
-  const minDuration = timeline?.duration_floors;
-  if (!blend || typeof blend !== "object") {
-    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.lowering.transitions.blend must be an object");
-  }
-  if (!minDuration || typeof minDuration !== "object") {
-    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.lowering.timeline.duration_floors must be an object");
-  }
-  const config: OutputConfig = {
-    blend: {
-      factor: requireOutputNumber(blend.factor, "lowering.transitions.blend.factor"),
-      keys: requireOutputStringArray(blend.keys, "lowering.transitions.blend.keys"),
-      smooth_types: requireOutputStringArray(blend.smooth_types, "lowering.transitions.blend.smooth_types"),
-    },
-    min_duration: {
-      stop_release_ms: requireOutputNumber(minDuration.stop_release_ms, "lowering.timeline.duration_floors.stop_release_ms"),
-      default_ms: requireOutputNumber(minDuration.default_ms, "lowering.timeline.duration_floors.default_ms"),
-    },
-    transition_ms: requireOutputNumber(transitions?.default_transition_ms, "lowering.transitions.default_transition_ms"),
-    initial_silence_ms: requireOutputNumber(timeline?.initial_silence_ms, "lowering.timeline.initial_silence_ms"),
-    final_silence_ms: requireOutputNumber(timeline?.final_silence_ms, "lowering.timeline.final_silence_ms"),
-  };
-  return config;
+  return lowering as TrackLoweringSpec;
 }
 
 function getRulepackTranscriptionConfig(specSource: unknown): TranscriptionConfig | undefined {
@@ -252,7 +192,7 @@ function buildTextToKlattTrackDetailed(
 ): TextToKlattTrackDetailedResult {
   const frontendId = options.frontendId ?? "qlatt-english";
   const frontendSpec = loadBundledRulepackSpec(frontendId);
-  const rulepackOutputConfig: OutputConfig = getRulepackOutputConfig(frontendSpec);
+  const loweringSpec = getTrackLoweringSpec(frontendSpec);
   const rulepackTranscriptionConfig = getRulepackTranscriptionConfig(frontendSpec);
 
   // Load inventory, LTS, and morphology paths from the frontend spec.
@@ -563,15 +503,6 @@ function buildTextToKlattTrackDetailed(
     (token: PipelineToken) => token?.stream !== "f0" && token?.stream !== "f0_layer" && token?.status !== 2
   );
 
-  // --- Assemble final Klatt track (delegated to track-assembler) ---
-  // (Transition durations are scaled above per policy.rate.transition_scale_exponent.)
-
-  // Read sagging transition parameters from policy.
-  // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
-  // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-  const sagDepthHz = requirePolicyNumber(f0Policy?.sag_depth_hz, "f0.sag_depth_hz");
-  const sagMinSpanMs = requirePolicyNumber(f0Policy?.sag_min_span_ms, "f0.sag_min_span_ms");
-
   // Read layered additive F0 model config from the frontend spec.
   // When present, the track assembler uses the layered renderer instead of
   // the declarative point-interpolation path.
@@ -645,17 +576,13 @@ function buildTextToKlattTrackDetailed(
     citations: ["/rules/control-score.yaml"],
   });
 
-  const track = assembleKlattTrack(phoneSequence, parameterSequence, {
+  const track = lowerControlScoreToKlattTrack(controlScore, loweringSpec, {
     inventorySpec: frontendInventory,
     baseF0: effectiveBaseF0,
     // Transition durations scale by rate^(-transition_scale_exponent).
     // At rate=1.0: unchanged; at exponent=1.0: classic 1/rate inverse scaling.
     // Citation: Broad & Fertig 1970 (transitions scale inversely with rate).
     transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
-    outputConfig: rulepackOutputConfig,
-    voiceQuality: voiceQualityOverrides,
-    sagDepthHz,
-    sagMinSpanMs,
     f0Model,
     speakerParams,
   });
@@ -668,20 +595,10 @@ function buildTextToKlattTrackDetailed(
     tokenDecisionIds,
   );
 
-  const syncTimeByKey = buildSyncTimeMap(
-    phoneSequence,
-    rulepackOutputConfig.min_duration!.stop_release_ms!,
-    rulepackOutputConfig.min_duration!.default_ms!,
-    frontendInventory.phoneme_targets,
-  );
-
   return {
     track,
     frontendPhones,
     controlScore,
-    ...(f0Model
-      ? { f0LayerCommands: extractLayerCommands(parameterSequence, syncTimeByKey) }
-      : {}),
   };
 }
 

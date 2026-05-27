@@ -92,14 +92,17 @@ export function analyzeStopReleases(track: TrackEvent[], plstepEvents: any[] = [
       if (Math.abs(duration - expected.dur) > 3) {
         release.issues.push(`dur: ${duration.toFixed(0)}ms vs expected ${expected.dur}ms`);
       }
-      if (expected.AF && Math.abs((p.AF ?? 0) - expected.AF) > 5) {
-        release.issues.push(`AF: ${p.AF ?? 0} vs expected ${expected.AF}`);
+      const af = getParam(p, "AF");
+      const ah = getParam(p, "AH");
+      const a3 = getParam(p, "A3");
+      if (expected.AF && Math.abs(af - expected.AF) > 5) {
+        release.issues.push(`AF: ${af} vs expected ${expected.AF}`);
       }
-      if (expected.AH && Math.abs((p.AH ?? 0) - expected.AH) > 5) {
-        release.issues.push(`AH: ${p.AH ?? 0} vs expected ${expected.AH}`);
+      if (expected.AH && Math.abs(ah - expected.AH) > 5) {
+        release.issues.push(`AH: ${ah} vs expected ${expected.AH}`);
       }
-      if (expected.A3 && Math.abs((p.A3 ?? 0) - expected.A3) > 5) {
-        release.issues.push(`A3: ${p.A3 ?? 0} vs expected ${expected.A3}`);
+      if (expected.A3 && Math.abs(a3 - expected.A3) > 5) {
+        release.issues.push(`A3: ${a3} vs expected ${expected.A3}`);
       }
     }
     if ((p.AF ?? 0) > 40 && !plstepMatch) {
@@ -136,16 +139,20 @@ export function buildTimeline(track: TrackEvent[]): string[] {
     const event = track[i];
     const nextEvent = track[i + 1];
     const dur = nextEvent ? ((nextEvent.time - event.time) * 1000).toFixed(0) : "?";
-    const sw = event.params?.SW;
+    const sw = getParam(event.params, "SW");
     const branch = sw === 1 ? "PARALLEL" : "CASCADE ";
     const time = event.time.toFixed(3);
     const phoneme = (event.phoneme ?? "").padEnd(8);
     const sources: string[] = [];
     const params = event.params ?? {};
-    if ((params.AV ?? 0) > 0) sources.push(`AV=${(params.AV ?? 0).toFixed(0)}`);
-    if ((params.AVS ?? 0) > 0) sources.push(`AVS=${(params.AVS ?? 0).toFixed(0)}`);
-    if ((params.AF ?? 0) > 0) sources.push(`AF=${(params.AF ?? 0).toFixed(0)}`);
-    if ((params.AH ?? 0) > 0) sources.push(`AH=${(params.AH ?? 0).toFixed(0)}`);
+    const av = getParam(params, "AV");
+    const avs = getParam(params, "AVS");
+    const af = getParam(params, "AF");
+    const ah = getParam(params, "AH");
+    if (av > 0) sources.push(`AV=${av.toFixed(0)}`);
+    if (avs > 0) sources.push(`AVS=${avs.toFixed(0)}`);
+    if (af > 0) sources.push(`AF=${af.toFixed(0)}`);
+    if (ah > 0) sources.push(`AH=${ah.toFixed(0)}`);
     let parallelInfo = "";
     if (sw === 1) {
       const a1 = event.params?.A1 ?? 0, a2 = event.params?.A2 ?? 0;

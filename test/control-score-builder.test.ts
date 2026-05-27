@@ -107,6 +107,32 @@ describe("declarative control score builder", () => {
     validateDeclarativeControlScore(score);
   });
 
+  it("projects all numeric formant pairs present on the token params", () => {
+    const score = buildDeclarativeControlScore("test", [
+      {
+        id: "ph_0",
+        stream: "phone",
+        status: 1,
+        phoneme: "AA",
+        type: "vowel",
+        duration: 100,
+        params: {
+          F1: 700,
+          B1: 80,
+          F11: 10500,
+          B11: 5250,
+          AV: 60,
+        },
+      },
+    ]);
+
+    expect(score.segments[0].filter?.formants).toEqual([
+      { index: 1, frequency_hz: 700, bandwidth_hz: 80 },
+      { index: 11, frequency_hz: 10500, bandwidth_hz: 5250 },
+    ]);
+    validateDeclarativeControlScore(score);
+  });
+
   it("emits F0 points and layered F0 commands with resolved timing", () => {
     const score = buildDeclarativeControlScore("test", [
       {

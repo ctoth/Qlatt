@@ -19,6 +19,7 @@ type BuildDeclarativeControlScoreOptions = {
 };
 
 const CONTROL_FIELD_OPS = new Set(["set", "add", "mul", "max", "min", "unset"]);
+const FORMANT_FREQUENCY_PARAM = /^F([1-9]\d*)$/;
 
 function toFiniteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
@@ -44,7 +45,15 @@ function readNumericMap(value: unknown): Record<string, number> {
 
 function readFormantPlan(params: Record<string, unknown>): ControlScoreSegment["filter"] {
   const formants: NonNullable<ControlScoreSegment["filter"]>["formants"] = [];
-  for (let index = 1; index <= 10; index += 1) {
+  const formantIndices = Object.keys(params)
+    .map((key) => {
+      const match = key.match(FORMANT_FREQUENCY_PARAM);
+      return match ? Number(match[1]) : NaN;
+    })
+    .filter((index) => Number.isInteger(index) && index > 0)
+    .sort((left, right) => left - right);
+
+  for (const index of formantIndices) {
     const frequency = toFiniteNumber(params[`F${index}`]);
     const bandwidth = toFiniteNumber(params[`B${index}`]);
     if (frequency == null) continue;

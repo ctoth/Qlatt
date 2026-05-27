@@ -17,7 +17,7 @@ describe("declarative control score builder", () => {
       expect(score.version).toBe("v2");
       expect(score.frontend_id).toBe("qlatt-english");
       expect(score.segments.length).toBeGreaterThan(0);
-      expect(score.timeline_marks.length).toBeGreaterThan(0);
+      expect(Array.isArray(score.timeline_marks)).toBe(true);
       expect(score.f0_points.length).toBeGreaterThan(0);
       expect(score.lowering_refs.spec_id).toBe("qlatt-english-track-lowering");
 
@@ -160,6 +160,10 @@ describe("declarative control score builder", () => {
       duration_frames: 20,
       tag: "stress",
     });
+    expect(score.timeline_marks).toEqual([
+      { id: "m0", segment_id: "ph_0", edge: "onset" },
+      { id: "m1", segment_id: "ph_0", edge: "release" },
+    ]);
     validateDeclarativeControlScore(score);
   });
 

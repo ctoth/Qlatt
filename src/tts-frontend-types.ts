@@ -32,7 +32,7 @@ export type TranscriptionConfig = {
 
 export type TranscriptionOptions = {
   provenance?: ProvenanceCollector | null;
-  /** Transcription config from YAML (overrides hardcoded defaults). */
+  /** Required transcription tables from the frontend YAML. */
   transcriptionConfig?: TranscriptionConfig;
   /** Path to LTS rules YAML. Required for G2P LTS fallback. */
   ltsPath?: string;

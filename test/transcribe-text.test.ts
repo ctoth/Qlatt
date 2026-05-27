@@ -4,8 +4,6 @@ import {
   isPunctuationToken,
   getDiagnosticSymbolPronunciation,
   shouldUseDiagnosticSymbolMode,
-  PUNCTUATION_TOKENS,
-  DIAGNOSTIC_SYMBOL_PHONEMES,
 } from "../src/transcribe-text";
 import type { TranscriptionToken } from "../src/tts-frontend-types";
 
@@ -47,6 +45,18 @@ describe("transcribe-text", () => {
       expect(result.length).toBe(1);
       expect(result[0].phoneme).toBe("B");
       expect(result[0].stress).toBeNull();
+    });
+
+    it("rejects missing transcription tables instead of falling back to TS defaults", () => {
+      expect(() =>
+        transcribeText("/b/", {
+          transcriptionConfig: {
+            diagnostic_symbols: {},
+            letter_names: {},
+            punctuation_tokens: [],
+          },
+        })
+      ).toThrow("E_TRANSCRIPTION_CONFIG_REQUIRED");
     });
 
     it("handles empty/whitespace input", () => {
@@ -216,21 +226,17 @@ describe("transcribe-text", () => {
     });
   });
 
-  describe("constants", () => {
-    it("PUNCTUATION_TOKENS contains expected punctuation", () => {
-      expect(PUNCTUATION_TOKENS.has(",")).toBe(true);
-      expect(PUNCTUATION_TOKENS.has(".")).toBe(true);
-      expect(PUNCTUATION_TOKENS.has("?")).toBe(true);
-      expect(PUNCTUATION_TOKENS.has("!")).toBe(true);
-      expect(PUNCTUATION_TOKENS.has(";")).toBe(true);
-      expect(PUNCTUATION_TOKENS.has(":")).toBe(true);
-      expect(PUNCTUATION_TOKENS.size).toBe(6);
+  describe("bundled YAML transcription helpers", () => {
+    it("uses the bundled YAML punctuation table by default", () => {
+      for (const p of [",", ".", "?", "!", ";", ":"]) {
+        expect(isPunctuationToken(p)).toBe(true);
+      }
+      expect(isPunctuationToken("/b/")).toBe(false);
     });
 
-    it("DIAGNOSTIC_SYMBOL_PHONEMES covers all ARPABET consonants", () => {
-      expect(Object.keys(DIAGNOSTIC_SYMBOL_PHONEMES).length).toBe(24);
-      expect(DIAGNOSTIC_SYMBOL_PHONEMES["b"]).toEqual(["B"]);
-      expect(DIAGNOSTIC_SYMBOL_PHONEMES["zh"]).toEqual(["ZH"]);
+    it("uses the bundled YAML diagnostic symbol table by default", () => {
+      expect(getDiagnosticSymbolPronunciation("/b/")).toEqual(["B"]);
+      expect(getDiagnosticSymbolPronunciation("/zh/")).toEqual(["ZH"]);
     });
   });
 });

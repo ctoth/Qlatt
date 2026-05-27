@@ -19,7 +19,7 @@ import { QLATT_ENGLISH_RULEPACK } from "./declarative-frontend/rule-pack";
 import { pronounce } from "./g2p";
 import type { DictLookup, PronunciationResult } from "./g2p/types";
 import { runPhasesWithProvenance } from "./tts-frontend-provenance";
-import type { TranscriptionToken, TranscriptionOptions } from "./tts-frontend-types";
+import type { TranscriptionConfig, TranscriptionToken, TranscriptionOptions } from "./tts-frontend-types";
 
 // ---------------------------------------------------------------------------
 // Citation constants for provenance tracking
@@ -34,68 +34,6 @@ const SYMBOL_PRONUNCIATION_CITATION =
   "Diagnostic symbol mode: direct ARPABET symbol-to-phoneme mapping for explicit segment-list utterances";
 const LETTER_NAME_PRONUNCIATION_CITATION =
   "Allen et al. 1987 Ch.2-3 (symbol strings pronounced as LETTER-* morphs)";
-
-// ---------------------------------------------------------------------------
-// Default constants — overridden by YAML transcription config when available
-// ---------------------------------------------------------------------------
-
-export const PUNCTUATION_TOKENS = new Set([",", ".", "?", "!", ";", ":"]);
-
-export const DIAGNOSTIC_SYMBOL_PHONEMES: Record<string, string[]> = {
-  b: ["B"],
-  ch: ["CH"],
-  d: ["D"],
-  dh: ["DH"],
-  f: ["F"],
-  g: ["G"],
-  hh: ["HH"],
-  jh: ["JH"],
-  k: ["K"],
-  l: ["L"],
-  m: ["M"],
-  n: ["N"],
-  ng: ["NG"],
-  p: ["P"],
-  r: ["R"],
-  s: ["S"],
-  sh: ["SH"],
-  t: ["T"],
-  th: ["TH"],
-  v: ["V"],
-  w: ["W"],
-  y: ["Y"],
-  z: ["Z"],
-  zh: ["ZH"],
-};
-
-export const LETTER_NAME_PHONEMES: Record<string, string[]> = {
-  LETTER_A: ["EY1"],
-  LETTER_B: ["B", "IY1"],
-  LETTER_C: ["S", "IY1"],
-  LETTER_D: ["D", "IY1"],
-  LETTER_E: ["IY1"],
-  LETTER_F: ["EH1", "F"],
-  LETTER_G: ["JH", "IY1"],
-  LETTER_H: ["EY1", "CH"],
-  LETTER_I: ["AY1"],
-  LETTER_J: ["JH", "EY1"],
-  LETTER_K: ["K", "EY1"],
-  LETTER_L: ["EH1", "L"],
-  LETTER_M: ["EH1", "M"],
-  LETTER_N: ["EH1", "N"],
-  LETTER_O: ["OW1"],
-  LETTER_P: ["P", "IY1"],
-  LETTER_Q: ["K", "Y", "UW1"],
-  LETTER_R: ["AA1", "R"],
-  LETTER_S: ["EH1", "S"],
-  LETTER_T: ["T", "IY1"],
-  LETTER_U: ["Y", "UW1"],
-  LETTER_V: ["V", "IY1"],
-  LETTER_W: ["D", "AH1", "B", "AH0", "L", "Y", "UW0"],
-  LETTER_X: ["EH1", "K", "S"],
-  LETTER_Y: ["W", "AY1"],
-  LETTER_Z: ["Z", "IY1"],
-};
 
 type OrderMark =
   | { kind: "START" }
@@ -120,6 +58,12 @@ type OrthographyInputToken = {
   symbol?: string;
   pronunciationKey?: string;
   parentDecisionId?: string;
+};
+
+type RequiredTranscriptionTables = {
+  diagnosticSymbols: Record<string, string[]>;
+  letterNames: Record<string, string[]>;
+  punctuationTokens: Set<string>;
 };
 
 // ---------------------------------------------------------------------------
@@ -165,20 +109,21 @@ const cmuDictLookup: DictLookup = (word: string): string[] | null => {
 // ---------------------------------------------------------------------------
 
 export function isPunctuationToken(word: string): boolean {
-  return PUNCTUATION_TOKENS.has(word);
+  return isPunctuationTokenWithTables(word, getDefaultTranscriptionTables());
 }
 
 export function getDiagnosticSymbolPronunciation(word: string): string[] | null {
-  const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
-  const phones = DIAGNOSTIC_SYMBOL_PHONEMES[normalized];
-  return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
+  return getDiagnosticSymbolPronunciationWithTables(word, getDefaultTranscriptionTables());
 }
 
 export function shouldUseDiagnosticSymbolMode(words: string[]): boolean {
-  const nonPunctuation = words.filter((word) => word.length > 0 && !isPunctuationToken(word));
+  const tables = getDefaultTranscriptionTables();
+  const nonPunctuation = words.filter(
+    (word) => word.length > 0 && !isPunctuationTokenWithTables(word, tables),
+  );
   return (
     nonPunctuation.length > 0 &&
-    nonPunctuation.every((word) => getDiagnosticSymbolPronunciation(word) !== null)
+    nonPunctuation.every((word) => getDiagnosticSymbolPronunciationWithTables(word, tables) !== null)
   );
 }
 
@@ -186,15 +131,77 @@ function finiteOrder(rank: number): OrderMark {
   return { kind: "FINITE", rank: rank.toString(36).padStart(12, "0") };
 }
 
-function buildOrthographyTokens(words: string[]): OrthographyToken[] {
+function requireStringArray(value: unknown, path: string): string[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty string array`);
+  }
+  return value.map((entry, index) => {
+    if (typeof entry !== "string" || entry.length === 0) {
+      throw new Error(
+        `E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path}[${index}] must be a non-empty string`,
+      );
+    }
+    return entry;
+  });
+}
+
+function requirePronunciationMap(value: unknown, path: string): Record<string, string[]> {
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).length === 0) {
+    throw new Error(`E_TRANSCRIPTION_CONFIG_REQUIRED: transcription.${path} must be a non-empty map`);
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+      key,
+      requireStringArray(entry, `${path}.${key}`),
+    ]),
+  );
+}
+
+function getSpecTranscriptionConfig(specSource: unknown): TranscriptionConfig | undefined {
+  return (specSource as { transcription?: TranscriptionConfig })?.transcription;
+}
+
+function requireTranscriptionTables(config: TranscriptionConfig | undefined): RequiredTranscriptionTables {
+  if (!config || typeof config !== "object") {
+    throw new Error("E_TRANSCRIPTION_CONFIG_REQUIRED: transcription config is required");
+  }
+  return {
+    diagnosticSymbols: requirePronunciationMap(config.diagnostic_symbols, "diagnostic_symbols"),
+    letterNames: requirePronunciationMap(config.letter_names, "letter_names"),
+    punctuationTokens: new Set(requireStringArray(config.punctuation_tokens, "punctuation_tokens")),
+  };
+}
+
+function getDefaultTranscriptionTables(): RequiredTranscriptionTables {
+  return requireTranscriptionTables(getSpecTranscriptionConfig(QLATT_ENGLISH_RULEPACK));
+}
+
+function isPunctuationTokenWithTables(
+  word: string,
+  tables: RequiredTranscriptionTables,
+): boolean {
+  return tables.punctuationTokens.has(word);
+}
+
+function getDiagnosticSymbolPronunciationWithTables(
+  word: string,
+  tables: RequiredTranscriptionTables,
+): string[] | null {
+  const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
+  const phones = tables.diagnosticSymbols[normalized];
+  return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
+}
+
+function buildOrthographyTokens(words: string[], tables: RequiredTranscriptionTables): OrthographyToken[] {
   return words
     .filter((word) => word.length > 0)
     .map((word, index, entries) => ({
       id: `orth_${index}`,
       stream: "orthography" as const,
       word,
-      tokenType: isPunctuationToken(word) ? "punctuation" : "word",
-      punctuationSymbol: isPunctuationToken(word) ? word : null,
+      tokenType: isPunctuationTokenWithTables(word, tables) ? "punctuation" : "word",
+      punctuationSymbol: isPunctuationTokenWithTables(word, tables) ? word : null,
       pronunciationKey: null,
       sync_left: index === 0 ? { kind: "START" as const } : finiteOrder(index - 1),
       sync_right: index === entries.length - 1 ? { kind: "END" as const } : finiteOrder(index),
@@ -205,9 +212,10 @@ function buildOrthographyTokens(words: string[]): OrthographyToken[] {
 function rewriteOrthographyTokens(
   words: string[],
   provenance: TranscriptionOptions["provenance"],
+  tables: RequiredTranscriptionTables,
   specSource?: unknown,
 ): OrthographyInputToken[] {
-  const orthographyTokens = buildOrthographyTokens(words);
+  const orthographyTokens = buildOrthographyTokens(words, tables);
   if (orthographyTokens.length === 0) return [];
 
   const tokenDecisionIds = new Map<string, string>();
@@ -256,34 +264,25 @@ function rewriteOrthographyTokens(
  */
 export function transcribeText(text: string, options: TranscriptionOptions = {}): TranscriptionToken[] {
   const provenance = options.provenance ?? null;
-  const cfg = options.transcriptionConfig;
   const effectiveDictLookup = options.dictLookup ?? cmuDictLookup;
   const ltsPath = options.ltsPath;
   const morphologyPath = options.morphologyPath;
   const specSource = options.specSource ?? QLATT_ENGLISH_RULEPACK;
+  const cfg = options.transcriptionConfig ?? getSpecTranscriptionConfig(specSource);
+  const transcriptionTables = requireTranscriptionTables(cfg);
 
-  // Resolve effective lookup tables from YAML config, falling back to hardcoded defaults.
-  const effectiveSymbols: Record<string, string[]> =
-    cfg?.diagnostic_symbols && Object.keys(cfg.diagnostic_symbols).length > 0
-      ? cfg.diagnostic_symbols
-      : DIAGNOSTIC_SYMBOL_PHONEMES;
-  const effectiveLetterNames: Record<string, string[]> =
-    cfg?.letter_names && Object.keys(cfg.letter_names).length > 0
-      ? cfg.letter_names
-      : LETTER_NAME_PHONEMES;
-  const effectivePunctuation: Set<string> =
-    cfg?.punctuation_tokens && cfg.punctuation_tokens.length > 0
-      ? new Set(cfg.punctuation_tokens)
-      : PUNCTUATION_TOKENS;
-
-  const isEffectivePunctuation = (word: string): boolean => effectivePunctuation.has(word);
+  const isEffectivePunctuation = (word: string): boolean =>
+    isPunctuationTokenWithTables(word, transcriptionTables);
   const getEffectiveSymbol = (word: string): string[] | null => {
-    const normalized = word.toLowerCase().replace(/^\/+|\/+$/g, "");
-    const phones = effectiveSymbols[normalized];
-    return Array.isArray(phones) && phones.length > 0 ? [...phones] : null;
+    return getDiagnosticSymbolPronunciationWithTables(word, transcriptionTables);
   };
 
-  const orthographyWords = rewriteOrthographyTokens(text.split(" "), provenance, specSource);
+  const orthographyWords = rewriteOrthographyTokens(
+    text.split(" "),
+    provenance,
+    transcriptionTables,
+    specSource,
+  );
   const flatPhonemeList: TranscriptionToken[] = [];
   const hasDirectDictionaryEntry = (token: string): boolean =>
     typeof CMU_DICT_MAP[token.toLowerCase()] === "string";
@@ -341,7 +340,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
 
       const letterPronunciation =
         typeof inputToken.pronunciationKey === "string"
-          ? effectiveLetterNames[inputToken.pronunciationKey] ?? null
+          ? transcriptionTables.letterNames[inputToken.pronunciationKey] ?? null
           : null;
       const symbolPronunciation =
         letterPronunciation == null && useSymbolMode ? getEffectiveSymbol(sourceWord) : null;

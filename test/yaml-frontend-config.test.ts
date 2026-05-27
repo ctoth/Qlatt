@@ -1,7 +1,7 @@
 /**
  * Tests that verify the YAML frontend config sections (`output:` and
  * `transcription:`) in the default bundled frontend contain the expected values, matching
- * the hardcoded defaults in track-assembler.ts and transcribe-text.ts.
+ * the frontend runtime requirements.
  */
 import { describe, expect, it } from "vitest";
 import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";

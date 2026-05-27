@@ -1954,6 +1954,187 @@ function validateStringSets(
   }
 }
 
+function hasCitationArray(value: unknown): boolean {
+  return Array.isArray(value) &&
+    value.some((entry) => typeof entry === "string" && entry.trim().length > 0);
+}
+
+function validateCitedNumber(
+  value: unknown,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  label: string
+): void {
+  if (!isPlainObject(value)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_NUMBER", `${label} must be a { value, citations } object`, path)
+    );
+    return;
+  }
+  if (typeof value.value !== "number" || !Number.isFinite(value.value)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_NUMBER", `${label}.value must be a finite number`, `${path}.value`)
+    );
+  }
+  if (!hasCitationArray(value.citations)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_LOWERING_SPEC_CITATION",
+        `${label}.citations must contain at least one citation`,
+        `${path}.citations`
+      )
+    );
+  }
+}
+
+function validateStringArray(
+  value: unknown,
+  diagnostics: ValidationDiagnostic[],
+  path: string,
+  label: string
+): void {
+  if (!Array.isArray(value) || value.length === 0 || value.some((entry) => typeof entry !== "string" || entry.length === 0)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_ARRAY", `${label} must be a non-empty string array`, path)
+    );
+  }
+}
+
+function validateEventPointPolicy(value: unknown, diagnostics: ValidationDiagnostic[]): void {
+  if (!isPlainObject(value)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_LOWERING_SPEC_REQUIRED",
+        "output.lowering.timeline.event_points must be an object",
+        "output.lowering.timeline.event_points"
+      )
+    );
+    return;
+  }
+  for (const field of ["include_segment_start", "include_control_boundaries", "include_f0_anchors", "include_transition_steady_time"]) {
+    if (typeof value[field] !== "boolean") {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_LOWERING_SPEC_BOOLEAN",
+          `output.lowering.timeline.event_points.${field} must be boolean`,
+          `output.lowering.timeline.event_points.${field}`
+        )
+      );
+    }
+  }
+}
+
+function validateLoweringSpec(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
+  if (!isPlainObject(spec.output)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output")
+    );
+    return;
+  }
+  const lowering = spec.output.lowering;
+  if (!isPlainObject(lowering)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output.lowering")
+    );
+    return;
+  }
+  if (typeof lowering.id !== "string" || lowering.id.length === 0) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.id is required", "output.lowering.id")
+    );
+  }
+
+  const timeline = lowering.timeline;
+  if (!isPlainObject(timeline)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.timeline must be an object", "output.lowering.timeline")
+    );
+  } else {
+    validateCitedNumber(timeline.initial_silence_ms, diagnostics, "output.lowering.timeline.initial_silence_ms", "output.lowering.timeline.initial_silence_ms");
+    validateCitedNumber(timeline.final_silence_ms, diagnostics, "output.lowering.timeline.final_silence_ms", "output.lowering.timeline.final_silence_ms");
+    if (!isPlainObject(timeline.duration_floors)) {
+      diagnostics.push(
+        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.timeline.duration_floors must be an object", "output.lowering.timeline.duration_floors")
+      );
+    } else {
+      validateCitedNumber(timeline.duration_floors.stop_release_ms, diagnostics, "output.lowering.timeline.duration_floors.stop_release_ms", "output.lowering.timeline.duration_floors.stop_release_ms");
+      validateCitedNumber(timeline.duration_floors.default_ms, diagnostics, "output.lowering.timeline.duration_floors.default_ms", "output.lowering.timeline.duration_floors.default_ms");
+    }
+    validateEventPointPolicy(timeline.event_points, diagnostics);
+  }
+
+  const transitions = lowering.transitions;
+  if (!isPlainObject(transitions)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.transitions must be an object", "output.lowering.transitions")
+    );
+  } else {
+    validateCitedNumber(transitions.default_transition_ms, diagnostics, "output.lowering.transitions.default_transition_ms", "output.lowering.transitions.default_transition_ms");
+    if (!isPlainObject(transitions.blend)) {
+      diagnostics.push(
+        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.transitions.blend must be an object", "output.lowering.transitions.blend")
+      );
+    } else {
+      validateCitedNumber(transitions.blend.factor, diagnostics, "output.lowering.transitions.blend.factor", "output.lowering.transitions.blend.factor");
+      validateStringArray(transitions.blend.keys, diagnostics, "output.lowering.transitions.blend.keys", "output.lowering.transitions.blend.keys");
+      validateStringArray(transitions.blend.smooth_types, diagnostics, "output.lowering.transitions.blend.smooth_types", "output.lowering.transitions.blend.smooth_types");
+    }
+  }
+
+  const f0 = lowering.f0;
+  if (!isPlainObject(f0)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0 must be an object", "output.lowering.f0")
+    );
+  } else {
+    const rendererType = isPlainObject(f0.renderer) ? f0.renderer.type : undefined;
+    if (rendererType !== "point_interpolation" && rendererType !== "layered_additive") {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_LOWERING_SPEC_RENDERER",
+          "output.lowering.f0.renderer.type must be point_interpolation or layered_additive",
+          "output.lowering.f0.renderer.type"
+        )
+      );
+    }
+    if (rendererType === "layered_additive" && (typeof f0.layered_model_ref !== "string" || f0.layered_model_ref.length === 0)) {
+      diagnostics.push(
+        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.layered_model_ref is required for layered_additive", "output.lowering.f0.layered_model_ref")
+      );
+    }
+    if (!isPlainObject(f0.sag)) {
+      diagnostics.push(
+        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.sag must be an object", "output.lowering.f0.sag")
+      );
+    } else {
+      if (typeof f0.sag.operator !== "string" || f0.sag.operator.length === 0) {
+        diagnostics.push(
+          makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.sag.operator is required", "output.lowering.f0.sag.operator")
+        );
+      }
+      validateCitedNumber(f0.sag.depth_hz, diagnostics, "output.lowering.f0.sag.depth_hz", "output.lowering.f0.sag.depth_hz");
+      validateCitedNumber(f0.sag.min_span_ms, diagnostics, "output.lowering.f0.sag.min_span_ms", "output.lowering.f0.sag.min_span_ms");
+    }
+    if (!isPlainObject(f0.output_clamp)) {
+      diagnostics.push(
+        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.output_clamp must be an object", "output.lowering.f0.output_clamp")
+      );
+    } else {
+      validateCitedNumber(f0.output_clamp.min_hz, diagnostics, "output.lowering.f0.output_clamp.min_hz", "output.lowering.f0.output_clamp.min_hz");
+      validateCitedNumber(f0.output_clamp.max_hz, diagnostics, "output.lowering.f0.output_clamp.max_hz", "output.lowering.f0.output_clamp.max_hz");
+    }
+  }
+
+  const overlays = lowering.overlays;
+  if (!isPlainObject(overlays)) {
+    diagnostics.push(
+      makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.overlays must be an object", "output.lowering.overlays")
+    );
+  } else {
+    validateStringArray(overlays.operation_order, diagnostics, "output.lowering.overlays.operation_order", "output.lowering.overlays.operation_order");
+  }
+}
+
 // Chunk 3: validate pipeline-level `maps:` block.
 // Shape: Record<non-empty string, Record<string, string>> — a string→string
 // lookup table for each named map. Numeric or nested-object values are
@@ -2028,6 +2209,7 @@ export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   validateTopology(spec, streamByName, diagnostics);
   const predicates = validatePredicates(spec, streamByName, policyState, diagnostics);
   validateStringSets(spec, diagnostics);
+  validateLoweringSpec(spec, diagnostics);
   validateMaps(spec, diagnostics);
   validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
   validateRules(spec, streamByName, predicates, policyState, diagnostics);

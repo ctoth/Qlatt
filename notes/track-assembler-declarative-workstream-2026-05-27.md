@@ -85,7 +85,7 @@ Order check: every listed dependency appears earlier than its dependent item.
 - Before each edit slice, run `git status --short`.
 - Commit each intentionally edited source, test, or documentation slice before starting the next slice.
 - Use path-limited `git status --short -- <paths>` and `git diff -- <paths>` before every commit.
-- Commit with explicit paths only: `git commit -- <explicit paths> -m "..."`
+- Commit with explicit paths only: `git commit -m "..." -- <explicit paths>`
 - Do not commit generated diagnostics, caches, screenshots, audio output, or regenerated golden files.
 - After every passing substantial targeted test run, reread this document and continue to the next unchecked phase.
 - If a phase is blocked, stop and report the exact phase and unfinished checklist item.
@@ -168,7 +168,7 @@ Verification:
 
 ## Phase 4 - Mechanical Lowering API
 
-Status: pending
+Status: completed
 
 Scope:
 - Replace the raw-token assembler API with a score-based lowering API.

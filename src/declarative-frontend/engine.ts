@@ -2139,6 +2139,29 @@ function applyInsertPointSpec(
   sequence.push(pointToken);
 }
 
+function applyInsertPointSpecs(
+  pointSpecs: unknown,
+  resolveTarget: (targetName: string) => TokenLike | null,
+  params: RuntimeLike,
+  sequence: TokenLike[],
+  runtime: RuntimeLike,
+  defaultTargetName = "current",
+  extraContext: RuntimeLike | null = null
+) {
+  if (!Array.isArray(pointSpecs)) return;
+  for (const pointSpec of pointSpecs) {
+    applyInsertPointSpec(
+      pointSpec,
+      resolveTarget,
+      params,
+      sequence,
+      runtime,
+      defaultTargetName,
+      extraContext
+    );
+  }
+}
+
 /**
  * Insert an F0 layer command token into the sequence.
  *
@@ -2468,6 +2491,15 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       "current",
       extraContext
     );
+    applyInsertPointSpecs(
+      rule.insert_points,
+      (targetName) => (targetName === "current" ? token : null),
+      runtime.params,
+      sequence,
+      runtime,
+      "current",
+      extraContext
+    );
     applyInsertF0LayerSpec(
       rule.insert_f0_layer,
       (targetName) => (targetName === "current" ? token : null),
@@ -2602,6 +2634,15 @@ function applyPatternRule(rule: TokenLike, sequence: TokenLike[], runtime: Runti
       defaultTarget,
       extraContext
     );
+    applyInsertPointSpecs(
+      rule.insert_points,
+      (targetName) => captures[targetName] ?? null,
+      runtime.params,
+      sequence,
+      runtime,
+      defaultTarget,
+      extraContext
+    );
     applyInsertF0LayerSpec(
       rule.insert_f0_layer,
       (targetName) => captures[targetName] ?? null,
@@ -2652,6 +2693,7 @@ function isStructuralRule(rule: TokenLike | null | undefined): boolean {
   if (!rule || typeof rule !== "object") return false;
   if (rule.splice) return true;
   if (rule.insert_point) return true;
+  if (Array.isArray(rule.insert_points) && rule.insert_points.length > 0) return true;
   if (rule.insert_f0_layer) return true;
   if (rule.suppress || rule.delete) return true;
   if (Array.isArray(rule.associate) && rule.associate.length > 0) return true;

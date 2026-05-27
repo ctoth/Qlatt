@@ -108,6 +108,7 @@ rules:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H*+L'"
     define: *define_downstep_with_nuclear
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_ratio(current, 0.45)
@@ -145,6 +146,7 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
       low_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_sync(current.sync_left)
@@ -184,6 +186,7 @@ rules:
         max([raw_height, params.policy.f0.downstep_floor_fraction])
       peak_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_sync(current.sync_left)
@@ -209,6 +212,7 @@ rules:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H*+H'"
     define: *define_downstep_no_nuclear
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_ratio(current, 0.45)
@@ -245,6 +249,7 @@ rules:
         prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
       low_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_sync(current.sync_left)
@@ -297,6 +302,7 @@ rules:
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+    insert_points_order: by_point
     insert_points:
       - stream: f0
         at: at_ratio(current, 0.45)

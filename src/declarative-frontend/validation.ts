@@ -1819,14 +1819,42 @@ function validateRules(
       }
     }
 
+    const pointInsertSpecs: Array<{ spec: PlainObject; path: string; label: string }> = [];
     if (isPlainObject(r.insert_point)) {
-      const valueExpr = r.insert_point.value;
+      pointInsertSpecs.push({
+        spec: r.insert_point,
+        path: `rules.${name}.insert_point`,
+        label: `Rule '${name}' insert_point`,
+      });
+    }
+    if (Array.isArray(r.insert_points)) {
+      for (let i = 0; i < r.insert_points.length; i += 1) {
+        if (isPlainObject(r.insert_points[i])) {
+          pointInsertSpecs.push({
+            spec: r.insert_points[i],
+            path: `rules.${name}.insert_points[${i}]`,
+            label: `Rule '${name}' insert_points[${i}]`,
+          });
+        } else {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_RULE_EXPRESSION_INVALID",
+              `Rule '${name}' insert_points[${i}] must be an object`,
+              `rules.${name}.insert_points[${i}]`
+            )
+          );
+        }
+      }
+    }
+
+    for (const { spec: pointSpec, path: pointPath, label: pointLabel } of pointInsertSpecs) {
+      const valueExpr = pointSpec.value;
       if (valueExpr != null && typeof valueExpr !== "string") {
         diagnostics.push(
           makeDiagnostic(
             "E_RULE_EXPRESSION_INVALID",
-            `Rule '${name}' has non-string insert_point.value expression`,
-            `rules.${name}.insert_point.value`
+            `${pointLabel} has non-string value expression`,
+            `${pointPath}.value`
           )
         );
       }
@@ -1834,8 +1862,8 @@ function validateRules(
         diagnostics.push(
           makeDiagnostic(
             "E_POINT_FWD_REF",
-            `Rule '${name}' uses next_point forward reference in point value`,
-            `rules.${name}.insert_point.value`
+            `${pointLabel} uses next_point forward reference in point value`,
+            `${pointPath}.value`
           )
         );
       }
@@ -1845,8 +1873,8 @@ function validateRules(
           diagnostics.push(
             makeDiagnostic(
               "E_CEL_INVALID",
-              `Rule '${name}' has invalid CEL insert_point.value expression: ${syntaxError}`,
-              `rules.${name}.insert_point.value`
+              `${pointLabel} has invalid CEL value expression: ${syntaxError}`,
+              `${pointPath}.value`
             )
           );
         } else {
@@ -1855,17 +1883,17 @@ function validateRules(
             streamByName,
             ruleStreamName,
             diagnostics,
-            `rules.${name}.insert_point.value`,
-            `Rule '${name}' insert_point.value`
+            `${pointPath}.value`,
+            `${pointLabel}.value`
           );
           validatePolicyReferencesAndLiterals(
             valueExpr,
-            `rules.${name}.insert_point.value`,
-            `Rule '${name}' insert_point.value`,
+            `${pointPath}.value`,
+            `${pointLabel}.value`,
             diagnostics,
             policyState,
-            typeof r.insert_point.stream === "string" &&
-              r.insert_point.stream.toLowerCase() === "f0"
+            typeof pointSpec.stream === "string" &&
+              pointSpec.stream.toLowerCase() === "f0"
           );
         }
       }

@@ -13,13 +13,20 @@ interface NormalizationTables {
   month_names: string[];
 }
 
+interface RegexRule {
+  pattern: string;
+  replacement?: string;
+  handler?: string;
+  flags?: string;
+}
+
 interface PipelineStep {
   name: string;
   type: string;
   handler?: string;
   pattern?: string;
   table?: string;
-  rules?: Array<{ pattern: string; replacement: string; flags?: string }>;
+  rules?: RegexRule[];
   citations: string[];
 }
 
@@ -115,6 +122,14 @@ describe("text normalization YAML pipeline", () => {
     for (const step of pipeline.steps) {
       expect(validTypes.has(step.type), `step ${step.name} has invalid type '${step.type}'`).toBe(true);
     }
+  });
+
+  it("uses named regex handlers instead of magic replacement sentinels", () => {
+    const regexRules = pipeline.steps.flatMap((step) => step.rules ?? []);
+    expect(regexRules.map((rule) => rule.replacement)).not.toContain("__initialism__");
+
+    const initialismStep = pipeline.steps.find((step) => step.name === "expand_initialisms");
+    expect(initialismStep?.rules?.[0]).toMatchObject({ handler: "expandInitialism" });
   });
 });
 

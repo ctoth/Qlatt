@@ -38,7 +38,8 @@ interface NormalizationTables {
 
 interface RegexRule {
   pattern: string;
-  replacement: string;
+  replacement?: string;
+  handler?: string;
   flags?: string;
 }
 
@@ -415,6 +416,14 @@ const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => s
   },
 };
 
+const REGEX_REPLACE_HANDLERS: Record<string, (match: string) => string> = {
+  expandInitialism: (match) =>
+    match
+      .replace(/\./g, "")
+      .split("")
+      .join(" "),
+};
+
 // ---------------------------------------------------------------------------
 // Pipeline step dispatchers
 // ---------------------------------------------------------------------------
@@ -422,19 +431,20 @@ const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => s
 function executeRegexReplace(result: string, step: PipelineStep): string {
   let text = result;
   for (const rule of step.rules ?? []) {
-    if (rule.replacement === "__initialism__") {
-      // Special handler for initialism expansion
+    if (rule.handler) {
+      const handler = REGEX_REPLACE_HANDLERS[rule.handler];
+      if (!handler) {
+        throw new Error(`E_NORMALIZE: unknown regex_replace handler '${rule.handler}'`);
+      }
       const re = new RegExp(rule.pattern, rule.flags);
-      text = text.replace(re, (match: string) =>
-        match
-          .replace(/\./g, "")
-          .split("")
-          .join(" ")
-      );
-    } else {
-      const re = new RegExp(rule.pattern, rule.flags);
-      text = text.replace(re, rule.replacement);
+      text = text.replace(re, handler);
+      continue;
     }
+    if (typeof rule.replacement !== "string") {
+      throw new Error(`E_NORMALIZE: regex_replace rule in step '${step.name}' must define replacement or handler`);
+    }
+    const re = new RegExp(rule.pattern, rule.flags);
+    text = text.replace(re, rule.replacement);
   }
   if (step.post === "trim") {
     text = text.trim();

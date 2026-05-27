@@ -47,7 +47,7 @@ steps:
     description: "Expand dotted initialisms (U.S.A. -> u s a)"
     rules:
       - pattern: "\\b(?:[a-z]\\.){2,}[a-z]?\\.?"
-        replacement: "__initialism__"
+        handler: expandInitialism
         flags: "gi"
     citations:
       - Allen, Hunnicutt & Klatt 1987 Ch.3

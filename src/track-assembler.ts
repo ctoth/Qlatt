@@ -8,7 +8,6 @@
  */
 import {
   fillDefaultParams,
-  loadInventorySpecFromPath,
 } from "./declarative-frontend/inventory";
 import type {
   InventorySpec,
@@ -17,8 +16,6 @@ import type {
   KlattFrame,
   ControlFieldOp,
   ControlFieldSpec,
-  ControlWindowSpec,
-  ControlWindowTarget,
   ControlScoreF0LayerCommand,
   ControlScoreGlobalOverlay,
   ControlScoreSegment,
@@ -26,14 +23,11 @@ import type {
   ControlScoreTiming,
   DeclarativeControlScore,
 } from "./tts-frontend-types";
-import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type InputToken = Record<string, any>;
 type KlattParams = Record<string, number>;
 type ResolvedControlField = {
   op: ControlFieldOp;
@@ -45,189 +39,6 @@ type ResolvedControlWindow = {
   fields: Record<string, ResolvedControlField>;
   tag?: string;
 };
-
-export const DEFAULT_ACCENT_INVENTORY_PATH =
-  "/rules/frontends/qlatt-english/accent-inventory.yaml";
-
-type AccentTargetSpec = {
-  accentType?: string;
-  is_high_peak: boolean;
-  is_boundary: boolean;
-  citations: string[];
-};
-
-type SagPolicySpec = {
-  sample_points: number[];
-  depth_multiplier: number;
-  depth_formula: string;
-  citation: string;
-};
-
-export type AccentInventory = {
-  accent_targets: Record<string, AccentTargetSpec>;
-  tag_to_accent: Record<string, string>;
-  sag_policy: SagPolicySpec;
-};
-
-let defaultAccentInventoryCache: AccentInventory | null = null;
-
-function expectAccentInventoryString(value: unknown, label: string): string {
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty string`);
-  }
-  return value;
-}
-
-function expectAccentInventoryBoolean(value: unknown, label: string): boolean {
-  if (typeof value !== "boolean") {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a boolean`);
-  }
-  return value;
-}
-
-function expectAccentInventoryNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a finite number`);
-  }
-  return value;
-}
-
-function expectAccentInventoryStringArray(value: unknown, label: string): string[] {
-  if (!Array.isArray(value) || value.length === 0) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty string array`);
-  }
-  return value.map((entry, index) =>
-    expectAccentInventoryString(entry, `${label}[${index}]`)
-  );
-}
-
-function expectSagSamplePoints(value: unknown, label: string): number[] {
-  if (!Array.isArray(value) || value.length === 0) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be a non-empty number array`);
-  }
-  return value.map((entry, index) => {
-    const point = expectAccentInventoryNumber(entry, `${label}[${index}]`);
-    if (point <= 0 || point >= 1) {
-      throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label}[${index}] must be between 0 and 1`);
-    }
-    return point;
-  });
-}
-
-function parseAccentTargetSpec(value: unknown, label: string): AccentTargetSpec {
-  if (!isPlainObject(value)) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label} must be an object`);
-  }
-  const isBoundary = expectAccentInventoryBoolean(value.is_boundary, `${label}.is_boundary`);
-  let accentType: string | undefined;
-  if (Object.prototype.hasOwnProperty.call(value, "accentType")) {
-    accentType = expectAccentInventoryString(value.accentType, `${label}.accentType`);
-  }
-  if (!isBoundary && accentType === undefined) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: ${label}.accentType is required`);
-  }
-  return {
-    ...(accentType !== undefined ? { accentType } : {}),
-    is_high_peak: expectAccentInventoryBoolean(value.is_high_peak, `${label}.is_high_peak`),
-    is_boundary: isBoundary,
-    citations: expectAccentInventoryStringArray(value.citations, `${label}.citations`),
-  };
-}
-
-function parseSagPolicySpec(value: unknown): SagPolicySpec {
-  if (!isPlainObject(value)) {
-    throw new Error("E_ACCENT_INVENTORY_SCHEMA: sag_policy must be an object");
-  }
-  const depthMultiplier = expectAccentInventoryNumber(
-    value.depth_multiplier,
-    "sag_policy.depth_multiplier",
-  );
-  if (depthMultiplier <= 0) {
-    throw new Error("E_ACCENT_INVENTORY_SCHEMA: sag_policy.depth_multiplier must be greater than zero");
-  }
-  return {
-    sample_points: expectSagSamplePoints(value.sample_points, "sag_policy.sample_points"),
-    depth_multiplier: depthMultiplier,
-    depth_formula: expectAccentInventoryString(value.depth_formula, "sag_policy.depth_formula"),
-    citation: expectAccentInventoryString(value.citation, "sag_policy.citation"),
-  };
-}
-
-function parseAccentInventoryDocument(value: unknown): AccentInventory {
-  if (!isPlainObject(value)) {
-    throw new Error("E_ACCENT_INVENTORY_SCHEMA: top-level document must be an object");
-  }
-  if (!isPlainObject(value.accent_targets)) {
-    throw new Error("E_ACCENT_INVENTORY_SCHEMA: accent_targets must be an object");
-  }
-  if (!isPlainObject(value.tag_to_accent)) {
-    throw new Error("E_ACCENT_INVENTORY_SCHEMA: tag_to_accent must be an object");
-  }
-
-  const accentTargets = Object.fromEntries(
-    Object.entries(value.accent_targets).map(([key, entry]) => [
-      expectAccentInventoryString(key, "accent_targets key"),
-      parseAccentTargetSpec(entry, `accent_targets.${key}`),
-    ])
-  );
-  const tagToAccent = Object.fromEntries(
-    Object.entries(value.tag_to_accent).map(([key, entry]) => {
-      const tag = expectAccentInventoryString(key, "tag_to_accent key");
-      const accentKey = expectAccentInventoryString(entry, `tag_to_accent.${tag}`);
-      if (accentTargets[accentKey] === undefined) {
-        throw new Error(
-          `E_ACCENT_INVENTORY_SCHEMA: tag_to_accent.${tag} references missing accent_targets.${accentKey}`
-        );
-      }
-      return [tag, accentKey];
-    })
-  );
-
-  return {
-    accent_targets: accentTargets,
-    tag_to_accent: tagToAccent,
-    sag_policy: parseSagPolicySpec(value.sag_policy),
-  };
-}
-
-export function loadAccentInventorySync(
-  specPath: string = DEFAULT_ACCENT_INVENTORY_PATH,
-): AccentInventory {
-  if (specPath === DEFAULT_ACCENT_INVENTORY_PATH && defaultAccentInventoryCache) {
-    return defaultAccentInventoryCache;
-  }
-
-  const inventory = parseAccentInventoryDocument(loadYamlDocumentSync(specPath));
-  if (specPath === DEFAULT_ACCENT_INVENTORY_PATH) {
-    defaultAccentInventoryCache = inventory;
-  }
-  return inventory;
-}
-
-function accentTargetForTag(
-  accentInventory: AccentInventory,
-  tag: string,
-): AccentTargetSpec | null {
-  const accentKey = accentInventory.tag_to_accent[tag];
-  if (accentKey === undefined) return null;
-  const target = accentInventory.accent_targets[accentKey];
-  if (target === undefined) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: missing accent target for tag ${tag}`);
-  }
-  return target;
-}
-
-function accentIsHighPeak(
-  accentInventory: AccentInventory,
-  accentType: string | undefined,
-): boolean {
-  if (accentType === undefined) return false;
-  const target = accentInventory.accent_targets[accentType];
-  if (target === undefined) {
-    throw new Error(`E_ACCENT_INVENTORY_SCHEMA: missing accent target ${accentType}`);
-  }
-  return target.is_high_peak;
-}
 
 // Removed: PHONEME_TARGET_MAP global — callers must provide inventorySpec via options.
 
@@ -405,267 +216,6 @@ function coerceKlattParams(params: Record<string, unknown>): KlattParams {
     }
   }
   return coerced;
-}
-
-function getSyncMarkerKey(markLike: unknown): string | null {
-  if (typeof markLike === "string" && markLike.length > 0) {
-    return markLike;
-  }
-  if (typeof markLike === "number" && Number.isFinite(markLike)) {
-    return `num:${markLike}`;
-  }
-  if (typeof markLike === "bigint") {
-    return `num:${markLike.toString()}`;
-  }
-  if (markLike && typeof markLike === "object" && !Array.isArray(markLike)) {
-    const source = markLike as Record<string, unknown>;
-    if (typeof source.id === "string" && source.id.length > 0) {
-      return source.id;
-    }
-    if (typeof source.rank === "string" && source.rank.length > 0) {
-      const kind = typeof source.kind === "string" ? source.kind : "RANK";
-      return `${kind}:${source.rank}`;
-    }
-  }
-  return null;
-}
-
-export function buildSyncTimeMap(
-  phoneSequence: InputToken[],
-  minDurationStopReleaseMs: number,
-  minDurationDefaultMs: number,
-  phonemeTargets?: Record<string, Record<string, unknown>>,
-): Map<string, number> {
-  const syncTimeByKey = new Map<string, number>();
-  let cursorSec = 0;
-
-  for (const token of phoneSequence) {
-    const isStopRelease = token.type === "stop_release" || token.type === "stop_aspiration";
-    const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
-    const fallbackDurationMs = isStopRelease
-      ? toFiniteNumber((phonemeTargets?.[token.phoneme] as Record<string, unknown> | undefined)?.dur)
-      : null;
-    const durationSec =
-      resolveTokenDurationMs(token, minDurationMs, fallbackDurationMs) / 1000;
-    const leftKey = getSyncMarkerKey(token?.sync_left);
-    const rightKey = getSyncMarkerKey(token?.sync_right);
-
-    if (leftKey) syncTimeByKey.set(leftKey, cursorSec);
-    cursorSec += durationSec;
-    if (rightKey) syncTimeByKey.set(rightKey, cursorSec);
-  }
-
-  return syncTimeByKey;
-}
-
-function resolveAnchorEndpointSeconds(
-  primary: unknown,
-  secondary: unknown,
-  tertiary: unknown,
-  syncTimeByKey?: Map<string, number>,
-): number | null {
-  const key =
-    getSyncMarkerKey(primary) ??
-    getSyncMarkerKey(secondary) ??
-    getSyncMarkerKey(tertiary);
-  if (key && syncTimeByKey?.has(key)) {
-    return syncTimeByKey.get(key) ?? null;
-  }
-
-  const numeric =
-    toFiniteNumber(primary) ??
-    toFiniteNumber(secondary) ??
-    toFiniteNumber(tertiary);
-  return numeric != null ? numeric / 1000 : null;
-}
-
-function resolveAnchoredTimeSeconds(
-  token: InputToken,
-  syncTimeByKey?: Map<string, number>,
-): number {
-  const explicitTime = toFiniteNumber(token?.time);
-  if (explicitTime != null) {
-    return explicitTime / 1000;
-  }
-
-  const anchorLeft = resolveAnchorEndpointSeconds(
-    token?.anchor_left,
-    token?.left,
-    token?.sync_left,
-    syncTimeByKey,
-  );
-  const anchorRight = resolveAnchorEndpointSeconds(
-    token?.anchor_right,
-    token?.right,
-    token?.sync_right,
-    syncTimeByKey,
-  );
-  if (anchorLeft == null || anchorRight == null) {
-    return 0;
-  }
-
-  const rawRatio = toFiniteNumber(token?.ratio);
-  const ratio =
-    rawRatio == null
-      ? anchorLeft === anchorRight
-        ? 0
-        : 0.5
-      : Math.max(0, Math.min(1, rawRatio));
-  return anchorLeft + (anchorRight - anchorLeft) * ratio;
-}
-
-function resolveTokenDurationMs(
-  token: InputToken,
-  minDurationMs: number,
-  fallbackInventoryDurationMs: number | null
-): number {
-  const configuredDuration = toFiniteNumber(token?.duration);
-  const fallbackDuration =
-    fallbackInventoryDurationMs != null && Number.isFinite(fallbackInventoryDurationMs)
-      ? fallbackInventoryDurationMs
-      : 100;
-  return Math.max(minDurationMs, configuredDuration ?? fallbackDuration);
-}
-
-function resolveWindowOffsetSec(
-  window: ControlWindowSpec,
-  durationSec: number,
-  msField: "start_ms" | "end_ms",
-  ratioField: "start_ratio" | "end_ratio",
-  fallbackSec: number
-): number {
-  const msValue = toFiniteNumber(window?.[msField]);
-  if (msValue != null) return msValue / 1000;
-
-  const ratioValue = toFiniteNumber(window?.[ratioField]);
-  if (ratioValue != null) return durationSec * Math.max(0, Math.min(1, ratioValue));
-
-  return fallbackSec;
-}
-
-function resolveControlWindowSpan(
-  window: ControlWindowSpec,
-  durationSec: number
-): { startSec: number; endSec: number } | null {
-  const prefixMs = toFiniteNumber(window?.prefix_ms);
-  if (prefixMs != null) {
-    const endSec = Math.max(0, Math.min(durationSec, prefixMs / 1000));
-    return endSec > 0 ? { startSec: 0, endSec } : null;
-  }
-
-  const suffixMs = toFiniteNumber(window?.suffix_ms);
-  if (suffixMs != null) {
-    const spanSec = Math.max(0, Math.min(durationSec, suffixMs / 1000));
-    const startSec = Math.max(0, durationSec - spanSec);
-    return durationSec > startSec ? { startSec, endSec: durationSec } : null;
-  }
-
-  const rawStartSec = resolveWindowOffsetSec(window, durationSec, "start_ms", "start_ratio", 0);
-  const rawEndSec = resolveWindowOffsetSec(
-    window,
-    durationSec,
-    "end_ms",
-    "end_ratio",
-    durationSec
-  );
-  const startSec = Math.max(0, Math.min(durationSec, rawStartSec));
-  const endSec = Math.max(startSec, Math.min(durationSec, rawEndSec));
-  if (endSec <= startSec) return null;
-  return { startSec, endSec };
-}
-
-function resolveControlFields(
-  rawFields: unknown
-): Record<string, ResolvedControlField> | null {
-  if (!rawFields || typeof rawFields !== "object" || Array.isArray(rawFields)) return null;
-
-  const fields: Record<string, ResolvedControlField> = {};
-  for (const [fieldName, rawSpec] of Object.entries(rawFields)) {
-    const shorthandValue = toFiniteNumber(rawSpec);
-    if (shorthandValue != null) {
-      fields[fieldName] = { op: "set", value: shorthandValue };
-      continue;
-    }
-    if (!rawSpec || typeof rawSpec !== "object" || Array.isArray(rawSpec)) continue;
-    const fieldSpec = rawSpec as ControlFieldSpec;
-    const op =
-      typeof fieldSpec.op === "string" &&
-      ["set", "add", "mul", "max", "min", "unset"].includes(
-        fieldSpec.op.replace(/^['"]|['"]$/g, "")
-      )
-        ? (fieldSpec.op.replace(/^['"]|['"]$/g, "") as ControlFieldOp)
-        : null;
-    if (op == null) continue;
-    const numericValue = toFiniteNumber(fieldSpec.value);
-    if (op !== "unset" && numericValue == null) continue;
-    fields[fieldName] =
-      op === "unset" ? { op } : { op, value: numericValue as number };
-  }
-
-  return Object.keys(fields).length > 0 ? fields : null;
-}
-
-function resolveControlWindow(
-  rawWindow: ControlWindowSpec,
-  durationSec: number
-): ResolvedControlWindow | null {
-  const span = resolveControlWindowSpan(rawWindow, durationSec);
-  if (span == null) return null;
-  const fields = resolveControlFields(rawWindow.fields);
-  if (fields == null) return null;
-  return {
-    startSec: span.startSec,
-    endSec: span.endSec,
-    fields,
-    tag: typeof rawWindow.tag === "string" ? rawWindow.tag : undefined,
-  };
-}
-
-function collectResolvedControlWindows(
-  phoneSequence: InputToken[],
-  minDurationStopReleaseMs: number,
-  minDurationDefaultMs: number,
-  phonemeTargetMap: Record<string, Record<string, any> | undefined>,
-): ResolvedControlWindow[][] {
-  const resolvedByIndex = phoneSequence.map(() => [] as ResolvedControlWindow[]);
-
-  for (let sourceIndex = 0; sourceIndex < phoneSequence.length; sourceIndex += 1) {
-    const sourceToken = phoneSequence[sourceIndex];
-    const rawWindows = Array.isArray(sourceToken?.control_windows)
-      ? (sourceToken.control_windows as ControlWindowSpec[])
-      : [];
-    if (rawWindows.length === 0) continue;
-
-    for (const rawWindow of rawWindows) {
-      if (!rawWindow || typeof rawWindow !== "object" || Array.isArray(rawWindow)) continue;
-      const rawTarget =
-        typeof rawWindow.target === "string"
-          ? rawWindow.target.replace(/^['"]|['"]$/g, "")
-          : "current";
-      const targetIndex =
-        rawTarget === "next"
-          ? sourceIndex + 1
-          : rawTarget === "prev"
-            ? sourceIndex - 1
-            : sourceIndex;
-      if (targetIndex < 0 || targetIndex >= phoneSequence.length) continue;
-
-      const targetToken = phoneSequence[targetIndex];
-      const isStopRelease =
-        targetToken.type === "stop_release" || targetToken.type === "stop_aspiration";
-      const minDurationMs = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
-      const fallbackDurationMs = isStopRelease
-        ? toFiniteNumber(phonemeTargetMap[targetToken.phoneme]?.dur)
-        : null;
-      const targetDurationSec =
-        resolveTokenDurationMs(targetToken, minDurationMs, fallbackDurationMs) / 1000;
-      const resolvedWindow = resolveControlWindow(rawWindow, targetDurationSec);
-      if (resolvedWindow == null) continue;
-      resolvedByIndex[targetIndex].push(resolvedWindow);
-    }
-  }
-
-  return resolvedByIndex;
 }
 
 function resolveFieldValue(
@@ -1062,49 +612,6 @@ type ActiveImpulse = {
 };
 
 /**
- * Extract F0 layer commands from the parameter sequence.
- * These are tokens with `stream === "f0_layer"` inserted by `kind: f0_layer` rules.
- */
-export function extractLayerCommands(
-  sequence: InputToken[],
-  syncTimeByKey?: Map<string, number>,
-): F0LayerCommand[] {
-  const commands: F0LayerCommand[] = [];
-  for (const token of sequence) {
-    if (token?.stream !== "f0_layer") continue;
-    if (token?.status === 2) continue;
-    const cmd: F0LayerCommand = {
-      layer: typeof token.layer === "string" ? token.layer : "",
-      time: resolveAnchoredTimeSeconds(token, syncTimeByKey),
-      ...(toFiniteNumber(token?.anchor_left) != null
-        ? { anchorLeftMs: toFiniteNumber(token.anchor_left) as number }
-        : {}),
-      ...(toFiniteNumber(token?.anchor_right) != null
-        ? { anchorRightMs: toFiniteNumber(token.anchor_right) as number }
-        : {}),
-      ...(toFiniteNumber(token?.ratio) != null
-        ? { ratio: toFiniteNumber(token.ratio) as number }
-        : {}),
-      value: Number.isFinite(token.value) ? Number(token.value) : 0,
-    };
-    if (Number.isFinite(token.duration_frames)) {
-      cmd.durationFrames = Number(token.duration_frames);
-    }
-    if (Array.isArray(token.profile_points)) {
-      cmd.profilePoints = (token.profile_points as unknown[])
-        .filter((v: unknown): v is number => typeof v === "number" && Number.isFinite(v))
-        .map(Number);
-    }
-    if (typeof token.tag === "string") {
-      cmd.tag = token.tag;
-    }
-    commands.push(cmd);
-  }
-  commands.sort((a, b) => a.time - b.time);
-  return commands;
-}
-
-/**
  * Interpolate a piecewise-linear profile at a given normalized position [0, 1].
  * The profile is defined by N equidistant control points spanning [0, 1].
  */
@@ -1431,113 +938,6 @@ export function renderLayeredF0(
 }
 
 // ---------------------------------------------------------------------------
-// Helpers -- F0 contour construction
-// ---------------------------------------------------------------------------
-
-export function compareAxisMark(left: unknown, right: unknown): number {
-  if (left === right) return 0;
-  if (typeof left === "number" && typeof right === "number") {
-    return left < right ? -1 : 1;
-  }
-  const a = left == null ? "" : String(left);
-  const b = right == null ? "" : String(right);
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
-
-export function parseTrailingInteger(value: unknown): number | null {
-  if (typeof value !== "string") return null;
-  const match = value.match(/(\d+)$/);
-  if (!match) return null;
-  const parsed = Number(match[1]);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-export function buildF0ContourFromDeclarative(
-  sequence: InputToken[],
-  baseF0: number,
-  syncTimeByKey?: Map<string, number>,
-): F0Point[] {
-  const points = sequence
-    .filter(
-      (token) =>
-        token?.stream === "f0" &&
-        token?.status !== 2 &&
-        Number.isFinite(token?.value)
-    )
-    .slice()
-    .sort((left: InputToken, right: InputToken) => {
-      const leftTime = Number.isFinite(left?.time) ? Number(left.time) : null;
-      const rightTime = Number.isFinite(right?.time) ? Number(right.time) : null;
-      if (leftTime != null && rightTime != null && leftTime !== rightTime) {
-        return leftTime < rightTime ? -1 : 1;
-      }
-      const byLeft = compareAxisMark(left?.anchor_left, right?.anchor_left);
-      if (byLeft !== 0) return byLeft;
-      const byRight = compareAxisMark(left?.anchor_right, right?.anchor_right);
-      if (byRight !== 0) return byRight;
-      const leftRatio = Number.isFinite(left?.ratio) ? Number(left.ratio) : 0;
-      const rightRatio = Number.isFinite(right?.ratio) ? Number(right.ratio) : 0;
-      if (leftRatio !== rightRatio) return leftRatio < rightRatio ? -1 : 1;
-      const leftIdNum = parseTrailingInteger(left?.id ?? null);
-      const rightIdNum = parseTrailingInteger(right?.id ?? null);
-      if (leftIdNum != null && rightIdNum != null && leftIdNum !== rightIdNum) {
-        return leftIdNum < rightIdNum ? -1 : 1;
-      }
-      return compareAxisMark(left?.id ?? "", right?.id ?? "");
-    });
-
-  if (points.length === 0) {
-    return [{ time: 0, f0: baseF0 }];
-  }
-
-  const accentInventory = loadAccentInventorySync();
-  const contour = points
-    .map((point: InputToken): F0Point => {
-      const tag = typeof point.tag === "string" ? point.tag : undefined;
-      const accentTarget =
-        tag !== undefined ? accentTargetForTag(accentInventory, tag) : null;
-      const accentType =
-        accentTarget !== null && !accentTarget.is_boundary
-          ? accentTarget.accentType
-          : undefined;
-      // Derive accentType from the YAML inventory's rule-tag mapping.
-      // Citation: Pierrehumbert 1980 (H* and L* tone distinction)
-      return {
-        time: resolveAnchoredTimeSeconds(point, syncTimeByKey),
-        f0: Number(point.value),
-        ...(tag != null ? { tag } : {}),
-        ...(accentType != null ? { accentType } : {}),
-      };
-    })
-    .filter((point: F0Point) => point.time >= 0 && Number.isFinite(point.f0));
-
-  if (contour.length === 0) return [{ time: 0, f0: baseF0 }];
-  if (contour[0].time > 0) {
-    contour.unshift({ time: 0, f0: baseF0 });
-  }
-
-  const cleaned = [contour[0]];
-  for (let i = 1; i < contour.length; i += 1) {
-    const prev = cleaned[cleaned.length - 1];
-    const curr = contour[i];
-    if (curr.time <= prev.time + 1e-6) {
-      cleaned[cleaned.length - 1] = {
-        time: prev.time,
-        f0: curr.f0,
-        ...(curr.tag != null ? { tag: curr.tag } : {}),
-        ...(curr.accentType != null ? { accentType: curr.accentType } : {}),
-      };
-      continue;
-    }
-    cleaned.push(curr);
-  }
-
-  return cleaned;
-}
-
-// ---------------------------------------------------------------------------
 // Helpers -- frame-level F0 interpolation and formant blending
 // ---------------------------------------------------------------------------
 
@@ -1584,7 +984,8 @@ function getInteriorF0AnchorTimes(
  * points that create the characteristic "dipping" shape between H*-H* pairs
  * described by Pierrehumbert (1980) and Ladd (2008).
  *
- * Model and sample points are loaded from accent-inventory.yaml.
+ * Sample points are fixed by the lowering operator; accent identity comes from
+ * score points, not from raw rule tags.
  *
  * @param contour  Input F0 contour (sorted by time, with tag/accentType metadata).
  * @param sagDepthHz  Maximum sag depth in Hz at midpoint (default 12).
@@ -1601,13 +1002,13 @@ export function applySaggingTransitions(
   minSpanMs: number = 150
 ): F0Point[] {
   if (contour.length < 2 || sagDepthHz <= 0) return [...contour];
-  const accentInventory = loadAccentInventorySync();
-  const sagPolicy = accentInventory.sag_policy;
+  const samplePoints = [0.25, 0.5, 0.75];
+  const depthMultiplier = 4;
 
-  // Collect indices of YAML-declared high accent peaks.
+  // Collect indices of score-declared high accent peaks.
   const hStarIndices: number[] = [];
   for (let i = 0; i < contour.length; i++) {
-    if (accentIsHighPeak(accentInventory, contour[i].accentType)) {
+    if (contour[i].accentType?.includes("H*")) {
       hStarIndices.push(i);
     }
   }
@@ -1633,22 +1034,20 @@ export function applySaggingTransitions(
     let hasBoundary = false;
     for (let j = leftIdx + 1; j < rightIdx; j++) {
       const tag = contour[j].tag;
-      const accentTarget =
-        tag !== undefined ? accentTargetForTag(accentInventory, tag) : null;
-      if (accentTarget !== null && accentTarget.is_boundary) {
+      if (tag === "f0_boundary_low" || tag === "f0_register_reset") {
         hasBoundary = true;
         break;
       }
     }
     if (hasBoundary) continue;
 
-    // Formula specified by accent-inventory.yaml:
-    // f0_sag(t) = f0_linear(t) - sagDepthHz * depth_multiplier * t * (1-t)
+    // Parabolic sag formula:
+    // f0_sag(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
     // where f0_linear(t) = left.f0 + (right.f0 - left.f0) * t
-    for (const t of sagPolicy.sample_points) {
+    for (const t of samplePoints) {
       const time = left.time + span * t;
       const f0Linear = left.f0 + (right.f0 - left.f0) * t;
-      const sagAmount = sagDepthHz * sagPolicy.depth_multiplier * t * (1 - t);
+      const sagAmount = sagDepthHz * depthMultiplier * t * (1 - t);
       // Floor clamp: prevent negative F0 from extreme downstep + sag.
       const saggedF0 = Math.max(f0Linear - sagAmount, 0);
       sagPoints.push({
@@ -1667,7 +1066,7 @@ export function applySaggingTransitions(
   return merged;
 }
 
-// DEFAULT_* constants removed — all values now read from outputConfig (frontend.yaml output section).
+// DEFAULT_* constants removed — all values now read from the validated lowering spec.
 // Citation: each value is cited in the YAML source.
 
 function blendParams(

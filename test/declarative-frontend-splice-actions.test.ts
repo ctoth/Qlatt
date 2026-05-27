@@ -387,8 +387,6 @@ describe("declarative frontend splice actions", () => {
               inherentDuration: 17,
               params: { AF: 55, AH: 35 },
               inventorySW: 1,
-              voiceless: true,
-              alveolar: true,
             }
           : null,
     }).sequence;
@@ -403,8 +401,6 @@ describe("declarative frontend splice actions", () => {
       inherentDuration: 12,
       params: { AF: 55, AH: 20 },
       inventorySW: 1,
-      voiceless: true,
-      alveolar: true,
     });
     expect(inserted?.sync_left).toEqual(s1);
     expect(inserted?.sync_right).toEqual(s2);

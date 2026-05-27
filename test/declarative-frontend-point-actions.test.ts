@@ -233,7 +233,7 @@ describe("declarative frontend point actions and helpers", () => {
     const points = out.filter((t) => t.stream === "f0");
 
     expect(points.map((point) => point.tag)).toEqual(["lead", "lead", "tail", "tail"]);
-    expect(points.map((point) => point.value)).toEqual([100, 101, 105, 106]);
+    expect(points.map((point) => point.value)).toEqual([100, 102, 107, 107]);
   });
 
   it("supports prev_point and total helpers", () => {

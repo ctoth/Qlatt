@@ -221,7 +221,7 @@ Verification:
 
 ## Phase 6 - Old-Path Deletion and Search Gates
 
-Status: pending
+Status: completed
 
 Scope:
 - Delete the old raw-token API and tests tied only to that API.

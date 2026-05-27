@@ -19,6 +19,12 @@ import type {
   ControlFieldSpec,
   ControlWindowSpec,
   ControlWindowTarget,
+  ControlScoreF0LayerCommand,
+  ControlScoreGlobalOverlay,
+  ControlScoreSegment,
+  ControlScoreTimedControl,
+  ControlScoreTiming,
+  DeclarativeControlScore,
 } from "./tts-frontend-types";
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 
@@ -238,20 +244,62 @@ export type F0Point = {
   accentType?: string;
 };
 
-/** YAML-sourced output configuration for track assembly. */
-export type OutputConfig = {
-  blend?: {
-    factor?: number;
-    keys?: string[];
-    smooth_types?: string[];
+type CitedNumberSpec = {
+  value: number;
+  citations?: string[];
+};
+
+export type TrackLoweringSpec = {
+  id: string;
+  timeline: {
+    initial_silence_ms: CitedNumberSpec;
+    final_silence_ms: CitedNumberSpec;
+    duration_floors: {
+      stop_release_ms: CitedNumberSpec;
+      default_ms: CitedNumberSpec;
+    };
+    event_points: {
+      include_segment_start: boolean;
+      include_control_boundaries: boolean;
+      include_f0_anchors: boolean;
+      include_transition_steady_time: boolean;
+    };
   };
-  min_duration?: {
-    stop_release_ms?: number;
-    default_ms?: number;
+  transitions: {
+    default_transition_ms: CitedNumberSpec;
+    blend: {
+      factor: CitedNumberSpec;
+      keys: string[];
+      smooth_types: string[];
+    };
   };
-  transition_ms?: number;
-  initial_silence_ms?: number;
-  final_silence_ms?: number;
+  f0: {
+    renderer: {
+      type: "point_interpolation" | "layered_additive";
+      layered_model_ref?: string;
+    };
+    sag: {
+      operator: "parabolic_hstar_sag" | "disabled";
+      depth_hz: CitedNumberSpec;
+      min_span_ms: CitedNumberSpec;
+    };
+    output_clamp: {
+      min_hz: CitedNumberSpec;
+      max_hz: CitedNumberSpec;
+    };
+  };
+  overlays: {
+    operation_order: string[];
+  };
+};
+
+export type TrackLoweringContext = {
+  inventorySpec: InventorySpec;
+  baseF0: number;
+  /** Runtime-scaled transition duration. Policy lives in TrackLoweringSpec. */
+  transitionMs?: number;
+  f0Model?: LayeredF0ModelConfig;
+  speakerParams?: Record<string, unknown>;
 };
 
 function requireOutputObject(value: unknown, path: string): Record<string, unknown> {
@@ -266,6 +314,13 @@ function requireOutputNumber(value: unknown, path: string): number {
     throw new Error(`E_OUTPUT_CONFIG_REQUIRED: output.${path} must be a finite number`);
   }
   return value;
+}
+
+function requireCitedNumber(value: CitedNumberSpec | undefined, path: string): number {
+  if (!value || typeof value !== "object" || typeof value.value !== "number" || !Number.isFinite(value.value)) {
+    throw new Error(`E_TRACK_LOWERING_SPEC_REQUIRED: ${path}.value must be a finite number`);
+  }
+  return value.value;
 }
 
 function requireOutputStringArray(value: unknown, path: string): string[] {
@@ -332,37 +387,6 @@ export type VoiceQualityOverrides = {
   jitter: number;
 };
 
-/** Options passed to {@link assembleKlattTrack}. */
-export type AssembleTrackOptions = {
-  /** Inventory spec providing phoneme targets and base params. Defaults to qlatt-english. */
-  inventorySpec?: InventorySpec;
-  /** Base F0 in Hz (default 110). */
-  baseF0?: number;
-  /** Transition duration in milliseconds (default 30). */
-  transitionMs?: number;
-  /** Output configuration from YAML (required — no silent fallbacks). */
-  outputConfig: OutputConfig;
-  /** Voice quality overrides applied to every frame's params.
-   *  Citations: Fant 1997, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
-  voiceQuality?: VoiceQualityOverrides;
-  /** Sagging transition depth in Hz between consecutive H* accents (default 12).
-   *  Citation: Pierrehumbert 1980, Ladd 2008 pp.155-157 */
-  sagDepthHz?: number;
-  /** Minimum inter-accent span in ms for sag to apply (default 150).
-   *  Citation: Pierrehumbert 1980 (closer H*s show less/no dipping) */
-  sagMinSpanMs?: number;
-  /** Layered additive F0 model configuration from the frontend spec.
-   *  When present and type === "layered_additive", the layered renderer is
-   *  used instead of the declarative point-interpolation path.
-   *  Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
-   *  Rabiner 1968 (three-component F0) */
-  f0Model?: LayeredF0ModelConfig;
-  /** Speaker parameters for the layered F0 model's speaker scaling.
-   *  When present, these are passed to renderLayeredF0() so it can resolve
-   *  speaker-dependent scaling parameters (f0_minimum, f0_scale_factor, etc.).
-   *  Citations: DECtalk 4.63 ph_vset.c (speaker-dependent F0 scaling) */
-  speakerParams?: Record<string, unknown>;
-};
 
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value === "bigint") {
@@ -1700,125 +1724,261 @@ function applyVoiceQualityOverrides(
   }
 }
 
+function scoreFieldsToResolved(
+  fields: Record<string, ControlFieldSpec>,
+): Record<string, ResolvedControlField> {
+  return Object.fromEntries(
+    Object.entries(fields).map(([fieldName, field]) => [
+      fieldName,
+      field.op === "unset"
+        ? { op: field.op }
+        : { op: field.op, value: field.value },
+    ]),
+  );
+}
+
+function applyGlobalOverlays(
+  params: KlattParams,
+  overlays: ControlScoreGlobalOverlay[],
+): void {
+  for (const overlay of overlays) {
+    applyControlFields(params, scoreFieldsToResolved(overlay.fields));
+  }
+}
+
+function resolveScoreSegmentDurationMs(
+  segment: ControlScoreSegment,
+  minDurationStopReleaseMs: number,
+  minDurationDefaultMs: number,
+  phonemeTargetMap: Record<string, Record<string, unknown> | undefined>,
+): number {
+  const isStopRelease = segment.type === "stop_release" || segment.type === "stop_aspiration";
+  const minimumDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
+  const fallbackDuration = isStopRelease
+    ? toFiniteNumber(phonemeTargetMap[segment.phoneme]?.dur)
+    : null;
+  const explicitDuration = toFiniteNumber(segment.duration.realized_target_ms);
+  const candidate = explicitDuration ?? fallbackDuration ?? minimumDuration;
+  return Math.max(minimumDuration, candidate);
+}
+
+function buildScoreTimeline(
+  score: DeclarativeControlScore,
+  loweringSpec: TrackLoweringSpec,
+  phonemeTargetMap: Record<string, Record<string, unknown> | undefined>,
+): {
+  durationsMs: number[];
+  segmentStartsMs: number[];
+  segmentEndsMs: number[];
+  markTimeById: Map<string, number>;
+} {
+  const minDurationStopReleaseMs = requireCitedNumber(
+    loweringSpec.timeline.duration_floors.stop_release_ms,
+    "timeline.duration_floors.stop_release_ms",
+  );
+  const minDurationDefaultMs = requireCitedNumber(
+    loweringSpec.timeline.duration_floors.default_ms,
+    "timeline.duration_floors.default_ms",
+  );
+  const durationsMs: number[] = [];
+  const segmentStartsMs: number[] = [];
+  const segmentEndsMs: number[] = [];
+  const segmentTimeById = new Map<string, { startMs: number; endMs: number }>();
+  let cursorMs = 0;
+
+  for (const segment of score.segments) {
+    const durationMs = resolveScoreSegmentDurationMs(
+      segment,
+      minDurationStopReleaseMs,
+      minDurationDefaultMs,
+      phonemeTargetMap,
+    );
+    durationsMs.push(durationMs);
+    segmentStartsMs.push(cursorMs);
+    cursorMs += durationMs;
+    segmentEndsMs.push(cursorMs);
+    segmentTimeById.set(segment.id, {
+      startMs: cursorMs - durationMs,
+      endMs: cursorMs,
+    });
+  }
+
+  const markTimeById = new Map<string, number>();
+  for (const mark of score.timeline_marks) {
+    if (mark.time_ms !== undefined) {
+      markTimeById.set(mark.id, mark.time_ms);
+      continue;
+    }
+    const segmentTimes = segmentTimeById.get(mark.segment_id);
+    if (segmentTimes === undefined) continue;
+    markTimeById.set(mark.id, mark.edge === "onset" ? segmentTimes.startMs : segmentTimes.endMs);
+  }
+
+  return { durationsMs, segmentStartsMs, segmentEndsMs, markTimeById };
+}
+
+function resolveScoreTimingMs(
+  timing: ControlScoreTiming,
+  markTimeById: Map<string, number>,
+): number {
+  if (timing.kind === "absolute") return timing.time_ms;
+  const left = markTimeById.get(timing.anchor_left);
+  const right = markTimeById.get(timing.anchor_right);
+  if (left === undefined || right === undefined) return 0;
+  return left + (right - left) * timing.ratio;
+}
+
+function buildF0ContourFromScore(
+  score: DeclarativeControlScore,
+  baseF0: number,
+  markTimeById: Map<string, number>,
+): F0Point[] {
+  if (score.f0_points.length === 0) {
+    return [{ time: 0, f0: baseF0 }];
+  }
+
+  const deduped = new Map<number, F0Point>();
+  for (const point of score.f0_points) {
+    const time = Math.max(0, resolveScoreTimingMs(point.timing, markTimeById) / 1000);
+    deduped.set(time, {
+      time,
+      f0: point.value_hz,
+      ...(point.tag ? { tag: point.tag } : {}),
+      ...(point.accent_type ? { accentType: point.accent_type } : {}),
+    });
+  }
+
+  const contour = [...deduped.values()].sort((left, right) => left.time - right.time);
+  if (contour.length === 0 || contour[0].time > 0) {
+    contour.unshift({ time: 0, f0: baseF0 });
+  }
+  return contour;
+}
+
+function scoreLayerCommandsToRendererCommands(
+  commands: ControlScoreF0LayerCommand[],
+  markTimeById: Map<string, number>,
+): F0LayerCommand[] {
+  return commands.map((command) => ({
+    layer: command.layer,
+    time: Math.max(0, resolveScoreTimingMs(command.timing, markTimeById) / 1000),
+    value: command.value,
+    ...(command.duration_frames !== undefined ? { durationFrames: command.duration_frames } : {}),
+    ...(command.profile_points !== undefined ? { profilePoints: command.profile_points } : {}),
+    ...(command.tag !== undefined ? { tag: command.tag } : {}),
+  }));
+}
+
+function collectScoreControlWindowsByIndex(
+  score: DeclarativeControlScore,
+  durationsMs: number[],
+): ResolvedControlWindow[][] {
+  const segmentIndexById = new Map(
+    score.segments.map((segment, index) => [segment.id, index]),
+  );
+  const byIndex: ResolvedControlWindow[][] = score.segments.map(() => []);
+
+  for (const control of score.timed_controls) {
+    const index = segmentIndexById.get(control.target_segment_id);
+    if (index === undefined) continue;
+    const durationMs = durationsMs[index] ?? 0;
+    const startMs = Math.max(0, Math.min(durationMs, control.start_offset_ms));
+    const endMs = Math.max(startMs, Math.min(durationMs, control.end_offset_ms));
+    if (endMs <= startMs) continue;
+    byIndex[index].push({
+      startSec: startMs / 1000,
+      endSec: endMs / 1000,
+      fields: scoreFieldsToResolved(control.fields),
+      ...(control.tag ? { tag: control.tag } : {}),
+    });
+  }
+
+  return byIndex;
+}
+
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
 /**
- * Convert a phone sequence and full parameter sequence (including F0 stream)
- * into an array of Klatt frames (the "track").
- *
- * @param phoneSequence  Phones only (stream !== "f0", status !== 2).
- * @param parameterSequence  Full sequence including F0 stream tokens.
- * @param options  Base F0 and transition duration.
- * @returns KlattFrame[] with monotonically increasing times.
+ * Lower a declarative control score into Klatt frames.
  */
-export function assembleKlattTrack(
-  phoneSequence: InputToken[],
-  parameterSequence: InputToken[],
-  options: AssembleTrackOptions,
+export function lowerControlScoreToKlattTrack(
+  score: DeclarativeControlScore,
+  loweringSpec: TrackLoweringSpec,
+  context: TrackLoweringContext,
 ): KlattFrame[] {
-  const inventorySpec = options.inventorySpec ?? loadInventorySpecFromPath('/rules/frontends/qlatt-english/inventory.yaml');
-  const phonemeTargetMap = inventorySpec.phoneme_targets as Record<string, Record<string, any> | undefined>;
+  const inventorySpec = context.inventorySpec;
+  const phonemeTargetMap = inventorySpec.phoneme_targets as Record<string, Record<string, unknown> | undefined>;
   const baseParams = inventorySpec.base_params;
-  const baseF0 = options.baseF0 ?? 110;
-  const cfg = options.outputConfig;
-  if (!cfg || typeof cfg !== "object") {
-    throw new Error("outputConfig is required — track assembler no longer uses silent fallback defaults. " +
-      "Provide the output section from frontend.yaml.");
-  }
-  const vq = options.voiceQuality;
+  const baseF0 = context.baseF0;
   const transitionMs =
-    typeof options.transitionMs === "number" && Number.isFinite(options.transitionMs)
-      ? options.transitionMs
-      : requireOutputNumber(cfg.transition_ms, "transition_ms");
+    typeof context.transitionMs === "number" && Number.isFinite(context.transitionMs)
+      ? context.transitionMs
+      : requireCitedNumber(loweringSpec.transitions.default_transition_ms, "transitions.default_transition_ms");
+  const blendFactor = requireCitedNumber(loweringSpec.transitions.blend.factor, "transitions.blend.factor");
+  const blendKeys = loweringSpec.transitions.blend.keys;
+  const smoothTypes = new Set(loweringSpec.transitions.blend.smooth_types);
+  const initialSilenceMs = requireCitedNumber(loweringSpec.timeline.initial_silence_ms, "timeline.initial_silence_ms");
+  const finalSilenceMs = requireCitedNumber(loweringSpec.timeline.final_silence_ms, "timeline.final_silence_ms");
+  const timeline = buildScoreTimeline(score, loweringSpec, phonemeTargetMap);
 
-  // Resolve blend config from YAML output section.
-  const blendConfig = requireOutputObject(cfg.blend, "blend");
-  const blendFactor = requireOutputNumber(blendConfig.factor, "blend.factor");
-  const blendKeys = requireOutputStringArray(blendConfig.keys, "blend.keys");
-  const smoothTypes = new Set(requireOutputStringArray(blendConfig.smooth_types, "blend.smooth_types"));
-  const minDurationConfig = requireOutputObject(cfg.min_duration, "min_duration");
-  const minDurationStopReleaseMs =
-    requireOutputNumber(minDurationConfig.stop_release_ms, "min_duration.stop_release_ms");
-  const minDurationDefaultMs =
-    requireOutputNumber(minDurationConfig.default_ms, "min_duration.default_ms");
-  const initialSilenceMs = requireOutputNumber(cfg.initial_silence_ms, "initial_silence_ms");
-  const finalSilenceMs = requireOutputNumber(cfg.final_silence_ms, "final_silence_ms");
-  const syncTimeByKey = buildSyncTimeMap(
-    phoneSequence,
-    minDurationStopReleaseMs,
-    minDurationDefaultMs,
-    inventorySpec.phoneme_targets,
+  const segmentParams = score.segments.map((segment) => {
+    const params = segment.params && Object.keys(segment.params).length > 0
+      ? coerceKlattParams(segment.params)
+      : fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
+    applyGlobalOverlays(params, score.global_overlays);
+    return params;
+  });
+  const resolvedControlWindowsByIndex = collectScoreControlWindowsByIndex(
+    score,
+    timeline.durationsMs,
   );
 
-  // Build the F0 contour.
-  // If f0Model is present, use the layered additive renderer.
-  // Otherwise, use the existing declarative point-interpolation path.
-  // Citations: Fujisaki (command-response), Klatt 1982 (hat-pattern),
-  //            Rabiner 1968 (three-component F0)
   let f0Contour: F0Point[];
-  if (options.f0Model && options.f0Model.type === "layered_additive") {
-    // Compute total duration from phone sequence for the layered renderer.
-    let totalDuration = 0;
-    for (const ph of phoneSequence) {
-      const isStopRel = ph.type === "stop_release" || ph.type === "stop_aspiration";
-      const minDur = isStopRel ? minDurationStopReleaseMs : minDurationDefaultMs;
-      const fallbackDur = isStopRel ? toFiniteNumber(phonemeTargetMap[ph.phoneme]?.dur) : null;
-      totalDuration += resolveTokenDurationMs(ph, minDur, fallbackDur) / 1000.0;
+  if (loweringSpec.f0.renderer.type === "layered_additive") {
+    if (!context.f0Model || context.f0Model.type !== "layered_additive") {
+      throw new Error("E_TRACK_LOWERING_CONTEXT: layered_additive renderer requires context.f0Model");
     }
-    totalDuration += initialSilenceMs / 1000.0;
-    totalDuration += finalSilenceMs / 1000.0;
-
-    const layerCommands = extractLayerCommands(parameterSequence, syncTimeByKey);
+    const totalDuration =
+      (initialSilenceMs + timeline.durationsMs.reduce((sum, value) => sum + value, 0) + finalSilenceMs) / 1000;
     f0Contour = renderLayeredF0(
-      layerCommands,
-      options.f0Model,
+      scoreLayerCommandsToRendererCommands(score.f0_layer_commands, timeline.markTimeById),
+      context.f0Model,
       totalDuration,
-      options.speakerParams,
+      context.speakerParams,
     );
   } else {
-    // Existing declarative point-interpolation path.
-    const rawF0Contour = buildF0ContourFromDeclarative(
-      parameterSequence,
+    const rawF0Contour = buildF0ContourFromScore(
+      score,
       baseF0,
-      syncTimeByKey,
+      timeline.markTimeById,
     );
-
-    // Apply sagging transitions between consecutive H* accent peaks.
-    // Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
-    // Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-    const sagDepth = requireOptionNumber(options.sagDepthHz, "sagDepthHz");
-    const sagMinSpan = requireOptionNumber(options.sagMinSpanMs, "sagMinSpanMs");
-    f0Contour = applySaggingTransitions(rawF0Contour, sagDepth, sagMinSpan);
+    if (loweringSpec.f0.sag.operator === "disabled") {
+      f0Contour = rawF0Contour;
+    } else {
+      f0Contour = applySaggingTransitions(
+        rawF0Contour,
+        requireCitedNumber(loweringSpec.f0.sag.depth_hz, "f0.sag.depth_hz"),
+        requireCitedNumber(loweringSpec.f0.sag.min_span_ms, "f0.sag.min_span_ms"),
+      );
+    }
   }
 
   const klattTrack: KlattFrame[] = [];
   let currentTime = Math.max(0, initialSilenceMs) / 1000.0;
-  const transitionSec = Math.max(0, transitionMs) / 1000.0;
-  const resolvedControlWindowsByIndex = collectResolvedControlWindows(
-    phoneSequence,
-    minDurationStopReleaseMs,
-    minDurationDefaultMs,
-    phonemeTargetMap,
-  );
 
   // Start silent.
   const silParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
-  if (vq) applyVoiceQualityOverrides(silParams, vq);
+  applyGlobalOverlays(silParams, score.global_overlays);
   klattTrack.push({
     time: 0,
     params: coerceKlattParams(silParams),
   });
 
-  for (let i = 0; i < phoneSequence.length; i++) {
-    const ph = phoneSequence[i] as InputToken;
-    // Respect explicit rule-assigned durations; fall back to inventory defaults only
-    // when a release/aspiration token did not receive a declarative duration.
-    const isStopRelease = ph.type === "stop_release" || ph.type === "stop_aspiration";
-    const minDuration = isStopRelease ? minDurationStopReleaseMs : minDurationDefaultMs;
-    const fallbackDuration = isStopRelease ? toFiniteNumber(phonemeTargetMap[ph.phoneme]?.dur) : null;
-    const phDuration = resolveTokenDurationMs(ph, minDuration, fallbackDuration) / 1000.0;
+  for (let i = 0; i < score.segments.length; i++) {
+    const segment = score.segments[i];
+    const phDuration = timeline.durationsMs[i] / 1000.0;
     const segmentStart = currentTime;
 
     if (phDuration <= 0) {
@@ -1826,36 +1986,28 @@ export function assembleKlattTrack(
     }
     const targetTime = segmentStart + phDuration;
 
-    // Use the params object directly from the sequence (already filled and potentially modified by rules)
-    const finalParams: KlattParams = ph.params
-      ? coerceKlattParams(ph.params)
-      : fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
-
-    // Apply voice quality overrides (Rd, OQ, TL, flutter, jitter, AH offset).
-    // Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
-    if (vq) applyVoiceQualityOverrides(finalParams, vq);
+    const finalParams = segmentParams[i];
     const controlWindows = resolvedControlWindowsByIndex[i] ?? [];
 
-    // Determine and set F0.
     const segmentVoiced = segmentCanVoice(finalParams, controlWindows);
     const interiorF0Anchors = segmentVoiced
       ? getInteriorF0AnchorTimes(f0Contour, segmentStart, targetTime)
       : [];
 
     if (targetTime > segmentStart) {
-      const nextPh = phoneSequence[i + 1] as InputToken | undefined;
-      // Per-token transition override (Stevens & House 1956, Hertz 1991).
-      const phTransitionSec = Math.max(0, ph.transition_ms ?? transitionMs) / 1000.0;
+      const nextSegment = score.segments[i + 1];
+      const nextParams = segmentParams[i + 1];
+      const phTransitionSec = Math.max(0, segment.alignment.transition_ms ?? transitionMs) / 1000.0;
       const canSmooth =
         phTransitionSec > 0 &&
-        smoothTypes.has(ph.type) &&
-        smoothTypes.has(nextPh?.type);
+        smoothTypes.has(segment.type) &&
+        smoothTypes.has(nextSegment?.type);
       const steadyTime = canSmooth
         ? Math.max(segmentStart + 0.02, targetTime - phTransitionSec)
         : null;
       const transitionParams =
         steadyTime && steadyTime > segmentStart && steadyTime < targetTime
-          ? blendParams(finalParams, nextPh?.params, blendKeys, blendFactor)
+          ? blendParams(finalParams, nextParams, blendKeys, blendFactor)
           : null;
       const eventTimes = buildSegmentEventTimes(
         segmentStart,
@@ -1863,7 +2015,7 @@ export function assembleKlattTrack(
         steadyTime,
         interiorF0Anchors,
         controlWindows,
-        nextPh == null && controlWindows.length > 0
+        nextSegment == null && controlWindows.length > 0
       );
 
       for (const eventTime of eventTimes) {
@@ -1877,7 +2029,7 @@ export function assembleKlattTrack(
         );
         const voicedAtEvent = (eventParams.AV ?? 0) > 0 || (eventParams.AVS ?? 0) > 0;
         let eventF0 =
-          ph.phoneme === "SIL" || !voicedAtEvent ? 0 : getF0AtTime(f0Contour, eventTime);
+          segment.phoneme === "SIL" || !voicedAtEvent ? 0 : getF0AtTime(f0Contour, eventTime);
         if (voicedAtEvent && eventF0 < 1) {
           eventF0 = baseF0 / 2;
         }
@@ -1885,8 +2037,8 @@ export function assembleKlattTrack(
 
         klattTrack.push({
           time: eventTime,
-          phoneme: ph.phoneme,
-          word: ph.word,
+          phoneme: segment.phoneme,
+          word: segment.word,
           params: coerceKlattParams(eventParams),
         });
       }
@@ -1900,7 +2052,7 @@ export function assembleKlattTrack(
   const finalSilenceSec = Math.max(0, finalSilenceMs) / 1000.0;
   const finalTime = currentTime + finalSilenceSec;
   const finalSilParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
-  if (vq) applyVoiceQualityOverrides(finalSilParams, vq);
+  applyGlobalOverlays(finalSilParams, score.global_overlays);
   klattTrack.push({
     time: currentTime,
     phoneme: "SIL",

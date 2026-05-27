@@ -2,12 +2,21 @@ import type {
   ControlFieldSpec,
   ControlScoreF0LayerCommand,
   ControlScoreF0Point,
+  ControlScoreGlobalOverlay,
   ControlScoreSegment,
+  ControlScoreTimedControl,
   ControlScoreTiming,
   DeclarativeControlScore,
 } from "./tts-frontend-types";
+import type { Diagnostics } from "./diagnostics";
 
 type TokenLike = Record<string, unknown>;
+type BuildDeclarativeControlScoreOptions = {
+  loweringSpecId?: string;
+  policyPaths?: string[];
+  voiceQuality?: Record<string, unknown> | null;
+  diagnostics?: Diagnostics | null;
+};
 
 const CONTROL_FIELD_OPS = new Set(["set", "add", "mul", "max", "min", "unset"]);
 
@@ -17,6 +26,10 @@ function toFiniteNumber(value: unknown): number | undefined {
 
 function toNonEmptyString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function stripQuotes(value: string): string {
+  return value.replace(/^['"]|['"]$/g, "");
 }
 
 function readNumericMap(value: unknown): Record<string, number> {
@@ -152,7 +165,42 @@ function buildSegment(token: TokenLike): ControlScoreSegment {
   };
 }
 
-function timingFromToken(token: TokenLike): ControlScoreTiming {
+function getSyncMarkerKey(value: unknown): string | null {
+  if (typeof value === "string" && value.length > 0) return value;
+  if (value && typeof value === "object") {
+    const source = value as Record<string, unknown>;
+    if (typeof source.mark === "string" && source.mark.length > 0) return source.mark;
+    if (typeof source.id === "string" && source.id.length > 0) return source.id;
+    if (typeof source.rank === "string" && source.rank.length > 0) {
+      const kind = typeof source.kind === "string" ? source.kind : "RANK";
+      return `${kind}:${source.rank}`;
+    }
+  }
+  return null;
+}
+
+function buildSyncTimeMap(segments: ControlScoreSegment[]): Map<string, number> {
+  const syncTimeByKey = new Map<string, number>();
+  let cursorMs = 0;
+  for (const segment of segments) {
+    if (segment.alignment.onset_mark) syncTimeByKey.set(segment.alignment.onset_mark, cursorMs);
+    cursorMs += segment.duration.realized_target_ms;
+    if (segment.alignment.release_mark) syncTimeByKey.set(segment.alignment.release_mark, cursorMs);
+  }
+  return syncTimeByKey;
+}
+
+function resolveAnchorEndpointMs(
+  primary: unknown,
+  secondary: unknown,
+  syncTimeByKey: Map<string, number>,
+): number | null {
+  const key = getSyncMarkerKey(primary) ?? getSyncMarkerKey(secondary);
+  if (key && syncTimeByKey.has(key)) return syncTimeByKey.get(key) ?? null;
+  return toFiniteNumber(primary) ?? toFiniteNumber(secondary) ?? null;
+}
+
+function timingFromToken(token: TokenLike, syncTimeByKey: Map<string, number>): ControlScoreTiming {
   const absoluteMs = toFiniteNumber(token.time);
   if (absoluteMs != null) return { kind: "absolute", time_ms: absoluteMs };
 
@@ -163,22 +211,29 @@ function timingFromToken(token: TokenLike): ControlScoreTiming {
     return { kind: "anchored", anchor_left: anchorLeft, anchor_right: anchorRight, ratio };
   }
 
+  const leftMs = resolveAnchorEndpointMs(token.anchor_left, token.sync_left, syncTimeByKey);
+  const rightMs = resolveAnchorEndpointMs(token.anchor_right, token.sync_right, syncTimeByKey);
+  if (leftMs != null && rightMs != null) {
+    const resolvedRatio = Math.max(0, Math.min(1, ratio ?? (leftMs === rightMs ? 0 : 0.5)));
+    return { kind: "absolute", time_ms: leftMs + (rightMs - leftMs) * resolvedRatio };
+  }
+
   return { kind: "absolute", time_ms: 0 };
 }
 
-function buildF0Point(token: TokenLike): ControlScoreF0Point | null {
+function buildF0Point(token: TokenLike, syncTimeByKey: Map<string, number>): ControlScoreF0Point | null {
   const valueHz = toFiniteNumber(token.value);
   if (valueHz == null) return null;
   return {
     id: toNonEmptyString(token.id) ?? "",
-    timing: timingFromToken(token),
+    timing: timingFromToken(token, syncTimeByKey),
     value_hz: valueHz,
     ...(toNonEmptyString(token.tag) ? { tag: toNonEmptyString(token.tag)! } : {}),
     ...(toNonEmptyString(token.accentType) ? { accent_type: toNonEmptyString(token.accentType)! } : {}),
   };
 }
 
-function buildF0LayerCommand(token: TokenLike): ControlScoreF0LayerCommand | null {
+function buildF0LayerCommand(token: TokenLike, syncTimeByKey: Map<string, number>): ControlScoreF0LayerCommand | null {
   const value = toFiniteNumber(token.value);
   if (value == null) return null;
   const profilePoints = Array.isArray(token.profile_points)
@@ -186,13 +241,140 @@ function buildF0LayerCommand(token: TokenLike): ControlScoreF0LayerCommand | nul
     : undefined;
   return {
     id: toNonEmptyString(token.id) ?? "",
-    timing: timingFromToken(token),
+    timing: timingFromToken(token, syncTimeByKey),
     layer: toNonEmptyString(token.layer) ?? "",
     value,
     ...(toFiniteNumber(token.duration_frames) != null ? { duration_frames: toFiniteNumber(token.duration_frames)! } : {}),
     ...(profilePoints && profilePoints.length > 0 ? { profile_points: profilePoints } : {}),
     ...(toNonEmptyString(token.tag) ? { tag: toNonEmptyString(token.tag)! } : {}),
   };
+}
+
+function resolveWindowOffsetMs(
+  window: Record<string, unknown>,
+  durationMs: number,
+  msField: "start_ms" | "end_ms",
+  ratioField: "start_ratio" | "end_ratio",
+  fallbackMs: number,
+): number {
+  const msValue = toFiniteNumber(window[msField]);
+  if (msValue != null) return msValue;
+  const ratioValue = toFiniteNumber(window[ratioField]);
+  if (ratioValue != null) return durationMs * Math.max(0, Math.min(1, ratioValue));
+  return fallbackMs;
+}
+
+function resolveWindowSpanMs(
+  window: Record<string, unknown>,
+  durationMs: number,
+): { startMs: number; endMs: number } | null {
+  const prefixMs = toFiniteNumber(window.prefix_ms);
+  if (prefixMs != null) {
+    const endMs = Math.max(0, Math.min(durationMs, prefixMs));
+    return endMs > 0 ? { startMs: 0, endMs } : null;
+  }
+
+  const suffixMs = toFiniteNumber(window.suffix_ms);
+  if (suffixMs != null) {
+    const spanMs = Math.max(0, Math.min(durationMs, suffixMs));
+    const startMs = Math.max(0, durationMs - spanMs);
+    return durationMs > startMs ? { startMs, endMs: durationMs } : null;
+  }
+
+  const rawStartMs = resolveWindowOffsetMs(window, durationMs, "start_ms", "start_ratio", 0);
+  const rawEndMs = resolveWindowOffsetMs(window, durationMs, "end_ms", "end_ratio", durationMs);
+  const startMs = Math.max(0, Math.min(durationMs, rawStartMs));
+  const endMs = Math.max(startMs, Math.min(durationMs, rawEndMs));
+  return endMs > startMs ? { startMs, endMs } : null;
+}
+
+function readControlFieldOps(rawFields: unknown): Record<string, ControlFieldSpec> | null {
+  if (!rawFields || typeof rawFields !== "object" || Array.isArray(rawFields)) return null;
+  const fields: Record<string, ControlFieldSpec> = {};
+  for (const [fieldName, rawSpec] of Object.entries(rawFields)) {
+    const shorthand = toFiniteNumber(rawSpec);
+    if (shorthand != null) {
+      fields[fieldName] = { op: "set", value: shorthand };
+      continue;
+    }
+    if (!rawSpec || typeof rawSpec !== "object" || Array.isArray(rawSpec)) continue;
+    const spec = rawSpec as Record<string, unknown>;
+    const rawOp = toNonEmptyString(spec.op);
+    const op = rawOp ? stripQuotes(rawOp) : null;
+    if (!op || !CONTROL_FIELD_OPS.has(op)) continue;
+    const value = toFiniteNumber(spec.value);
+    fields[fieldName] = op === "unset"
+      ? { op: "unset" }
+      : { op: op as ControlFieldSpec["op"], value: value ?? 0 };
+  }
+  return Object.keys(fields).length > 0 ? fields : null;
+}
+
+function buildTimedControls(
+  tokens: TokenLike[],
+  segments: ControlScoreSegment[],
+  diagnostics?: Diagnostics | null,
+): ControlScoreTimedControl[] {
+  const controls: ControlScoreTimedControl[] = [];
+  for (let sourceIndex = 0; sourceIndex < tokens.length; sourceIndex += 1) {
+    const rawWindows = Array.isArray(tokens[sourceIndex]?.control_windows)
+      ? tokens[sourceIndex].control_windows as unknown[]
+      : [];
+    for (let windowIndex = 0; windowIndex < rawWindows.length; windowIndex += 1) {
+      const rawWindow = rawWindows[windowIndex];
+      if (!rawWindow || typeof rawWindow !== "object" || Array.isArray(rawWindow)) {
+        diagnostics?.warn("Dropped malformed control window from control score", { sourceIndex, windowIndex }, "CONTROL_SCORE_WINDOW_DROPPED");
+        continue;
+      }
+      const window = rawWindow as Record<string, unknown>;
+      const target = stripQuotes(toNonEmptyString(window.target) ?? "current");
+      const targetIndex = target === "next"
+        ? sourceIndex + 1
+        : target === "prev"
+          ? sourceIndex - 1
+          : sourceIndex;
+      const targetSegment = segments[targetIndex];
+      if (!targetSegment) {
+        diagnostics?.warn("Dropped control window with out-of-range target", { sourceIndex, windowIndex, target }, "CONTROL_SCORE_WINDOW_TARGET");
+        continue;
+      }
+      const span = resolveWindowSpanMs(window, targetSegment.duration.realized_target_ms);
+      const fields = readControlFieldOps(window.fields);
+      if (!span || !fields) {
+        diagnostics?.warn("Dropped control window with invalid span or fields", { sourceIndex, windowIndex }, "CONTROL_SCORE_WINDOW_DROPPED");
+        continue;
+      }
+      controls.push({
+        id: `${tokens[sourceIndex]?.id ?? `segment_${sourceIndex}`}:control_window:${windowIndex}`,
+        target_segment_id: targetSegment.id,
+        start_offset_ms: span.startMs,
+        end_offset_ms: span.endMs,
+        fields,
+        ...(toNonEmptyString(window.tag) ? { tag: stripQuotes(toNonEmptyString(window.tag)!) } : {}),
+      });
+    }
+  }
+  return controls;
+}
+
+function buildGlobalOverlays(voiceQuality?: Record<string, unknown> | null): ControlScoreGlobalOverlay[] {
+  if (!voiceQuality) return [];
+  const fields: Record<string, ControlFieldSpec> = {};
+  const rd = toFiniteNumber(voiceQuality.rd);
+  if (rd != null) fields.Rd = { op: "set", value: rd };
+  const oq = toFiniteNumber(voiceQuality.oq);
+  if (oq != null && oq !== 0) fields.OQ = { op: "set", value: oq };
+  const tl = toFiniteNumber(voiceQuality.tl);
+  if (tl != null && tl !== 0) fields.TL = { op: "add", value: tl };
+  const flutter = toFiniteNumber(voiceQuality.flutter);
+  if (flutter != null) fields.flutter = { op: "set", value: flutter };
+  const jitter = toFiniteNumber(voiceQuality.jitter);
+  if (jitter != null) fields.jitter = { op: "set", value: jitter };
+  const ahOffset = toFiniteNumber(voiceQuality.ah_offset_db);
+  if (ahOffset != null && ahOffset !== 0) fields.AH = { op: "add", value: ahOffset };
+  return Object.keys(fields).length > 0
+    ? [{ id: "voice_quality", fields, tag: "voice_quality" }]
+    : [];
 }
 
 function assertNonEmptyString(value: unknown, error: string): string {
@@ -247,6 +429,7 @@ function assertTiming(timing: unknown, label: string): void {
 export function buildDeclarativeControlScore(
   frontendId: string,
   parameterSequence: Array<Record<string, unknown>>,
+  options: BuildDeclarativeControlScoreOptions = {},
 ): DeclarativeControlScore {
   const activePhoneTokens = parameterSequence.filter(
     (token) =>
@@ -254,13 +437,14 @@ export function buildDeclarativeControlScore(
       token?.status !== 2,
   );
   const segments = activePhoneTokens.map(buildSegment);
+  const syncTimeByKey = buildSyncTimeMap(segments);
   const f0Points = parameterSequence
     .filter((token) => token?.stream === "f0" && token?.status !== 2)
-    .map(buildF0Point)
+    .map((token) => buildF0Point(token, syncTimeByKey))
     .filter((event): event is ControlScoreF0Point => event !== null);
   const f0LayerCommands = parameterSequence
     .filter((token) => token?.stream === "f0_layer" && token?.status !== 2)
-    .map(buildF0LayerCommand)
+    .map((token) => buildF0LayerCommand(token, syncTimeByKey))
     .filter((event): event is ControlScoreF0LayerCommand => event !== null);
 
   return {
@@ -275,13 +459,13 @@ export function buildDeclarativeControlScore(
         ? [{ id: segment.alignment.release_mark, segment_id: segment.id, edge: "release" as const }]
         : []),
     ]),
-    timed_controls: [],
+    timed_controls: buildTimedControls(activePhoneTokens, segments, options.diagnostics),
     f0_points: f0Points,
     f0_layer_commands: f0LayerCommands,
-    global_overlays: [],
+    global_overlays: buildGlobalOverlays(options.voiceQuality),
     lowering_refs: {
-      spec_id: `${frontendId}:track-lowering`,
-      policy_paths: ["/rules/control-score.yaml", `/rules/frontends/${frontendId}/frontend.yaml`],
+      spec_id: options.loweringSpecId ?? `${frontendId}:track-lowering`,
+      policy_paths: options.policyPaths ?? ["/rules/control-score.yaml", `/rules/frontends/${frontendId}/frontend.yaml`],
     },
   };
 }

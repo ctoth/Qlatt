@@ -208,6 +208,13 @@ function buildTextToKlattTrackDetailed(
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
+  provenance?.add({
+    stage: "frontend",
+    type: "lowering_spec_validated",
+    subject: `lowering_spec:${loweringSpec.id}`,
+    reason: `Loaded validated track lowering spec ${loweringSpec.id}`,
+    citations: [`/rules/frontends/${frontendId}/frontend.yaml`],
+  });
   const speakerProfilePath =
     typeof (frontendSpec as { speaker_profile_path?: unknown })?.speaker_profile_path === "string"
       ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
@@ -585,6 +592,13 @@ function buildTextToKlattTrackDetailed(
     transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
     f0Model,
     speakerParams,
+  });
+  provenance?.add({
+    stage: "frontend",
+    type: "control_score_lowered",
+    subject: `track:${frontendId}`,
+    reason: `Lowered declarative control score ${controlScore.frontend_id} with lowering spec ${loweringSpec.id} into ${track.length} Klatt frames`,
+    citations: controlScore.lowering_refs.policy_paths,
   });
 
   emitNasalSubsystemExplainability(

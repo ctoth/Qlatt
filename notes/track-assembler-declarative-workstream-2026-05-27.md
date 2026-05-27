@@ -123,7 +123,7 @@ Verification:
 
 ## Phase 2 - Lowering Spec Schema
 
-Status: pending
+Status: completed
 
 Scope:
 - Replace the current flat `output:` handling with a validated lowering spec under frontend YAML.

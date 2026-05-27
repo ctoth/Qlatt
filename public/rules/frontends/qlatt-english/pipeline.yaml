@@ -233,18 +233,13 @@ phases:
       - tobi_baseline_init
       - tobi_initial_boundary_high
       - tobi_accent_h_star
-      - tobi_accent_h_star_plus_l_peak
-      - tobi_accent_h_star_plus_l_tail
-      - tobi_accent_l_plus_h_star_lead
-      - tobi_accent_l_plus_h_star_peak
-      - tobi_accent_h_plus_downstepped_h_star_lead
-      - tobi_accent_h_plus_downstepped_h_star_peak
-      - tobi_accent_h_star_plus_h_peak
-      - tobi_accent_h_star_plus_h_tail
-      - tobi_accent_h_plus_l_star_lead
-      - tobi_accent_h_plus_l_star_peak
+      - tobi_accent_h_star_plus_l
+      - tobi_accent_l_plus_h_star
+      - tobi_accent_h_plus_downstepped_h_star
+      - tobi_accent_h_star_plus_h
+      - tobi_accent_h_plus_l_star
       - tobi_accent_l_star
-      - tobi_accent_l_star_plus_h_trailing
+      - tobi_accent_l_star_plus_h
       - tobi_unaccented_declination
       - tobi_phrase_accent_high
       - tobi_phrase_accent_low

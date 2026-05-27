@@ -95,11 +95,11 @@ rules:
       - "O'Shaughnessy 1976"
 
   # --------------------------------------------------------------------------
-  # Rule 3: H* peak for H*+L falling accents
+  # Rule 3: H*+L falling accent contour
   # Same interpretation as Rule 2: the fall is expressed by the trailing L,
   # not by suppressing the H* peak itself.
   # --------------------------------------------------------------------------
-  tobi_accent_h_star_plus_l_peak:
+  tobi_accent_h_star_plus_l:
     kind: point
     select:
       stream: phone
@@ -108,63 +108,24 @@ rules:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H*+L'"
     define: *define_downstep_with_nuclear
-    insert_point:
-      stream: f0
-      at: at_ratio(current, 0.45)
-      value: target_hz
-      tag: f0_h_star_plus_l_peak
+    insert_points:
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: target_hz
+        tag: f0_h_star_plus_l_peak
+      - stream: f0
+        at: at_sync(current.sync_right)
+        value: >-
+          params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+        tag: f0_h_star_plus_l_tail
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
 
   # --------------------------------------------------------------------------
-  # Rule 4: Trailing L for H*+L falling accents
+  # Rule 4: L+H* prenuclear accent contour
   # --------------------------------------------------------------------------
-  tobi_accent_h_star_plus_l_tail:
-    kind: point
-    select:
-      stream: phone
-      where:
-        all:
-          - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && current.accentType == 'H*+L'"
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_right)
-      value: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
-      tag: f0_h_star_plus_l_tail
-    citations:
-      - "Pierrehumbert 1980"
-      - "Ladd 2008"
-
-  # --------------------------------------------------------------------------
-  # Rule 5: Leading L for L+H* prenuclear accents
-  # --------------------------------------------------------------------------
-  tobi_accent_l_plus_h_star_lead:
-    kind: point
-    select:
-      stream: phone
-      where:
-        all:
-          - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && current.accentType == 'L+H*'"
-    define:
-      target_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_left)
-      value: target_hz
-      tag: f0_l_leading
-    citations:
-      - "Pierrehumbert 1980"
-      - "Ladd 2008"
-
-  # --------------------------------------------------------------------------
-  # Rule 6: H* peak for L+H* prenuclear accents
-  # --------------------------------------------------------------------------
-  tobi_accent_l_plus_h_star_peak:
+  tobi_accent_l_plus_h_star:
     kind: point
     select:
       stream: phone
@@ -182,20 +143,25 @@ rules:
         max([raw_height, params.policy.f0.downstep_floor_fraction])
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
-    insert_point:
-      stream: f0
-      at: at_ratio(current, 0.45)
-      value: target_hz
-      tag: f0_l_plus_h_star
+      low_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+    insert_points:
+      - stream: f0
+        at: at_sync(current.sync_left)
+        value: low_hz
+        tag: f0_l_leading
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: target_hz
+        tag: f0_l_plus_h_star
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
-      - "Ladd 2008"
 
   # --------------------------------------------------------------------------
-  # Rule 7: H lead for H+!H* downstepped prenuclear accents
+  # Rule 5: H+!H* downstepped prenuclear accent contour
   # --------------------------------------------------------------------------
-  tobi_accent_h_plus_downstepped_h_star_lead:
+  tobi_accent_h_plus_downstepped_h_star:
     kind: point
     select:
       stream: phone
@@ -203,46 +169,38 @@ rules:
         all:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H+!H*'"
-    define: &define_high_anchor_from_prev
+    define:
       prev_f0: prev_point('f0')
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-      target_hz: >-
+      lead_hz: >-
         prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_left)
-      value: target_hz
-      tag: f0_h_leading
+      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
+      downstep_factor: >-
+        pow(params.policy.f0.downstep_k, accent_idx)
+      raw_height: >-
+        params.policy.f0.h_star_height * downstep_factor
+      clamped_height: >-
+        max([raw_height, params.policy.f0.downstep_floor_fraction])
+      peak_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+    insert_points:
+      - stream: f0
+        at: at_sync(current.sync_left)
+        value: lead_hz
+        tag: f0_h_leading
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: peak_hz
+        tag: f0_h_plus_downstepped_h_star
     citations:
       - "Ladd 2008"
       - "Pierrehumbert 1980"
 
   # --------------------------------------------------------------------------
-  # Rule 8: !H* peak for H+!H* prenuclear accents
+  # Rule 6: H*+H sustained accent contour
   # --------------------------------------------------------------------------
-  tobi_accent_h_plus_downstepped_h_star_peak:
-    kind: point
-    select:
-      stream: phone
-      where:
-        all:
-          - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && current.accentType == 'H+!H*'"
-    define: *define_downstep_no_nuclear
-    insert_point:
-      stream: f0
-      at: at_ratio(current, 0.45)
-      value: target_hz
-      tag: f0_h_plus_downstepped_h_star
-    citations:
-      - "Ladd 2008"
-      - "Pierrehumbert 1980"
-
-  # --------------------------------------------------------------------------
-  # Rule 9: H peak plus trailing H for H*+H sustained accents
-  # --------------------------------------------------------------------------
-  tobi_accent_h_star_plus_h_peak:
+  tobi_accent_h_star_plus_h:
     kind: point
     select:
       stream: phone
@@ -251,40 +209,27 @@ rules:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H*+H'"
     define: *define_downstep_no_nuclear
-    insert_point:
-      stream: f0
-      at: at_ratio(current, 0.45)
-      value: target_hz
-      tag: f0_h_star_plus_h_peak
+    insert_points:
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: target_hz
+        tag: f0_h_star_plus_h_peak
+      - stream: f0
+        at: at_sync(current.sync_right)
+        value: >-
+          max([
+            target_hz,
+            params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+          ])
+        tag: f0_h_star_plus_h_tail
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
 
   # --------------------------------------------------------------------------
-  # Rule 10: Trailing H for H*+H sustained accents
+  # Rule 7: H+L* low-star accent contour
   # --------------------------------------------------------------------------
-  tobi_accent_h_star_plus_h_tail:
-    kind: point
-    select:
-      stream: phone
-      where:
-        all:
-          - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && current.accentType == 'H*+H'"
-    define: *define_high_anchor_from_prev
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_right)
-      value: target_hz
-      tag: f0_h_star_plus_h_tail
-    citations:
-      - "Pierrehumbert 1980"
-      - "Ladd 2008"
-
-  # --------------------------------------------------------------------------
-  # Rule 11: Leading H for H+L* low-star accents
-  # --------------------------------------------------------------------------
-  tobi_accent_h_plus_l_star_lead:
+  tobi_accent_h_plus_l_star:
     kind: point
     select:
       stream: phone
@@ -292,33 +237,23 @@ rules:
         all:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'H+L*'"
-    define: *define_high_anchor_from_prev
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_left)
-      value: target_hz
-      tag: f0_h_plus_l_star_lead
-    citations:
-      - "Pierrehumbert 1980"
-      - "Ladd 2008"
-
-  # --------------------------------------------------------------------------
-  # Rule 12: L* star for H+L* accents
-  # --------------------------------------------------------------------------
-  tobi_accent_h_plus_l_star_peak:
-    kind: point
-    select:
-      stream: phone
-      where:
-        all:
-          - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && current.accentType == 'H+L*'"
-    insert_point:
-      stream: f0
-      at: at_ratio(current, 0.45)
-      value: >-
+    define:
+      prev_f0: prev_point('f0')
+      high_floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      lead_hz: >-
+        prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
+      low_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
-      tag: f0_h_plus_l_star
+    insert_points:
+      - stream: f0
+        at: at_sync(current.sync_left)
+        value: lead_hz
+        tag: f0_h_plus_l_star_lead
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: low_hz
+        tag: f0_h_plus_l_star
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -333,7 +268,7 @@ rules:
       where:
         all:
           - *where_voiced_accent_stressed_vowel
-          - "has(current.accentType) && (current.accentType == 'L*' || current.accentType == 'L*+H')"
+          - "has(current.accentType) && current.accentType == 'L*'"
     define:
       target_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
@@ -347,9 +282,9 @@ rules:
       - Ladd 2008
 
   # --------------------------------------------------------------------------
-  # Rule 14: Trailing H for L*+H rising accents
+  # Rule 9: L*+H rising accent contour
   # --------------------------------------------------------------------------
-  tobi_accent_l_star_plus_h_trailing:
+  tobi_accent_l_star_plus_h:
     kind: point
     select:
       stream: phone
@@ -358,13 +293,19 @@ rules:
           - *where_voiced_accent_stressed_vowel
           - "has(current.accentType) && current.accentType == 'L*+H'"
     define:
+      low_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       floor_hz: >-
         params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
-    insert_point:
-      stream: f0
-      at: at_sync(current.sync_right)
-      value: floor_hz
-      tag: f0_l_star_plus_h
+    insert_points:
+      - stream: f0
+        at: at_ratio(current, 0.45)
+        value: low_hz
+        tag: f0_l_star
+      - stream: f0
+        at: at_sync(current.sync_right)
+        value: floor_hz
+        tag: f0_l_star_plus_h
     citations:
       - "Ladd 2008"
       - "Pierrehumbert 1980"
@@ -407,7 +348,12 @@ rules:
       where: >-
         current.phoneme == 'SIL'
         && has(current.phraseAccent) && current.phraseAccent == 'H-'
-    define: *define_high_anchor_from_prev
+    define:
+      prev_f0: prev_point('f0')
+      floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      target_hz: >-
+        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)

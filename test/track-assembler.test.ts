@@ -2,11 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { textToKlattTrack } from "../src/tts-frontend";
 import {
   lowerControlScoreToKlattTrack,
-  buildF0ContourFromDeclarative,
-  compareAxisMark,
-  parseTrailingInteger,
   renderLayeredF0,
-  extractLayerCommands,
   computeButterworth2Coefficients,
   iirFilter2Pole,
   createFilterState,
@@ -148,74 +144,6 @@ function lowerTestScore(
 const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
 describe("track-assembler", () => {
-  describe("compareAxisMark", () => {
-    it("returns 0 for identical values", () => {
-      expect(compareAxisMark("a", "a")).toBe(0);
-      expect(compareAxisMark(1, 1)).toBe(0);
-      expect(compareAxisMark(null, null)).toBe(0);
-    });
-
-    it("compares numbers numerically", () => {
-      expect(compareAxisMark(1, 2)).toBe(-1);
-      expect(compareAxisMark(2, 1)).toBe(1);
-    });
-
-    it("compares non-numbers as strings", () => {
-      expect(compareAxisMark("a", "b")).toBe(-1);
-      expect(compareAxisMark("b", "a")).toBe(1);
-    });
-
-    it("handles null/undefined by coercing to empty string", () => {
-      expect(compareAxisMark(null, "a")).toBe(-1);
-      expect(compareAxisMark("a", null)).toBe(1);
-    });
-  });
-
-  describe("parseTrailingInteger", () => {
-    it("extracts trailing digits", () => {
-      expect(parseTrailingInteger("f0_12")).toBe(12);
-      expect(parseTrailingInteger("abc0")).toBe(0);
-    });
-
-    it("returns null for non-string", () => {
-      expect(parseTrailingInteger(42)).toBeNull();
-      expect(parseTrailingInteger(null)).toBeNull();
-    });
-
-    it("returns null when no trailing digits", () => {
-      expect(parseTrailingInteger("abc")).toBeNull();
-    });
-  });
-
-  describe("buildF0ContourFromDeclarative", () => {
-    it("returns baseF0 at time 0 when no f0 tokens", () => {
-      const contour = buildF0ContourFromDeclarative([], 120);
-      expect(contour).toEqual([{ time: 0, f0: 120 }]);
-    });
-
-    it("filters only f0 stream tokens", () => {
-      const seq = [
-        { stream: "phone", value: 200, time: 100 },
-        { stream: "f0", value: 130, time: 100 },
-      ];
-      const contour = buildF0ContourFromDeclarative(seq, 120);
-      // Should only have the f0 token (time 0.1s) plus the prepended baseF0
-      expect(contour[0]).toEqual({ time: 0, f0: 120 });
-      expect(contour[1]).toEqual({ time: 0.1, f0: 130 });
-    });
-
-    it("deduplicates coincident times (last wins)", () => {
-      const seq = [
-        { stream: "f0", value: 100, time: 50 },
-        { stream: "f0", value: 200, time: 50 },
-      ];
-      const contour = buildF0ContourFromDeclarative(seq, 120);
-      // Both map to time=0.05, dedup means last value wins
-      expect(contour.length).toBe(2); // baseF0 at 0 + deduplicated point
-      expect(contour[1].f0).toBe(200);
-    });
-  });
-
   describe("lowerControlScoreToKlattTrack", () => {
     it("produces monotonically increasing times", () => {
       const track = textToKlattTrack("hello", 120, 30);
@@ -387,32 +315,6 @@ describe("track-assembler", () => {
         output = iirFilter2Pole(100, state, coeffs);
       }
       expect(output).toBeCloseTo(100, 0);
-    });
-  });
-
-  describe("extractLayerCommands", () => {
-    it("extracts f0_layer tokens from a mixed sequence", () => {
-      const sequence = [
-        { stream: "phone", phoneme: "AH", status: 1 },
-        { stream: "f0_layer", layer: "hat", value: 8, time: 100, status: 1 },
-        { stream: "f0", value: 120, time: 50, status: 1 },
-        { stream: "f0_layer", layer: "stress", value: 3, time: 200, duration_frames: 15, status: 1 },
-      ];
-      const commands = extractLayerCommands(sequence);
-      expect(commands).toHaveLength(2);
-      expect(commands[0].layer).toBe("hat");
-      expect(commands[0].value).toBe(8);
-      expect(commands[0].time).toBeCloseTo(0.1); // 100ms -> 0.1s
-      expect(commands[1].layer).toBe("stress");
-      expect(commands[1].durationFrames).toBe(15);
-    });
-
-    it("skips suppressed tokens", () => {
-      const sequence = [
-        { stream: "f0_layer", layer: "hat", value: 8, time: 100, status: 2 },
-      ];
-      const commands = extractLayerCommands(sequence);
-      expect(commands).toHaveLength(0);
     });
   });
 

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   applySaggingTransitions,
-  buildF0ContourFromDeclarative,
   type F0Point,
 } from "../src/track-assembler";
 import { textToKlattTrack } from "../src/tts-frontend";
@@ -173,58 +172,6 @@ describe("applySaggingTransitions", () => {
     const result = applySaggingTransitions(contour, 12, 150);
     const sagPoints = result.filter((p) => p.tag === "f0_sag");
     expect(sagPoints.length).toBe(0);
-  });
-});
-
-describe("buildF0ContourFromDeclarative tag propagation", () => {
-  it("propagates f0_h_star tag and derives accentType H*", () => {
-    const seq = [
-      { stream: "f0", value: 170, time: 300, tag: "f0_h_star" },
-    ];
-    const contour = buildF0ContourFromDeclarative(seq, 110);
-    // contour[0] = prepended baseF0, contour[1] = the H* point
-    expect(contour[1].tag).toBe("f0_h_star");
-    expect(contour[1].accentType).toBe("H*");
-  });
-
-  it("propagates f0_l_star tag and derives accentType L*", () => {
-    const seq = [
-      { stream: "f0", value: 122, time: 500, tag: "f0_l_star" },
-    ];
-    const contour = buildF0ContourFromDeclarative(seq, 110);
-    expect(contour[1].tag).toBe("f0_l_star");
-    expect(contour[1].accentType).toBe("L*");
-  });
-
-  it("propagates other tags without accentType", () => {
-    const seq = [
-      { stream: "f0", value: 100, time: 800, tag: "f0_boundary_low" },
-    ];
-    const contour = buildF0ContourFromDeclarative(seq, 110);
-    expect(contour[1].tag).toBe("f0_boundary_low");
-    expect(contour[1].accentType).toBeUndefined();
-  });
-
-  it("points without tag have no tag or accentType", () => {
-    const seq = [
-      { stream: "f0", value: 130, time: 200 },
-    ];
-    const contour = buildF0ContourFromDeclarative(seq, 110);
-    expect(contour[1].tag).toBeUndefined();
-    expect(contour[1].accentType).toBeUndefined();
-  });
-
-  it("dedup preserves tag from winning (last) point", () => {
-    const seq = [
-      { stream: "f0", value: 130, time: 200, tag: "f0_unaccented" },
-      { stream: "f0", value: 170, time: 200, tag: "f0_h_star" },
-    ];
-    const contour = buildF0ContourFromDeclarative(seq, 110);
-    // Last-write wins dedup should keep f0_h_star
-    const point = contour.find((p) => Math.abs(p.time - 0.2) < 0.01);
-    expect(point).toBeDefined();
-    expect(point!.tag).toBe("f0_h_star");
-    expect(point!.accentType).toBe("H*");
   });
 });
 

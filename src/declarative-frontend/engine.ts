@@ -2473,6 +2473,11 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
     rule?.contour && typeof rule.contour === "object" && !Array.isArray(rule.contour)
       ? rule.contour
       : null;
+  const phasedPointInsertions: Array<{ token: TokenLike; extraContext: RuntimeLike }> = [];
+  const usePhasedPointInsertion =
+    rule.insert_points_order === "by_point" &&
+    Array.isArray(rule.insert_points) &&
+    rule.insert_points.length > 0;
 
   for (const token of selected) {
     // Rebind currentToken instead of rebuilding the entire bundle
@@ -2548,15 +2553,19 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       "current",
       extraContext
     );
-    applyInsertPointSpecs(
-      rule.insert_points,
-      (targetName) => (targetName === "current" ? token : null),
-      runtime.params,
-      sequence,
-      runtime,
-      "current",
-      extraContext
-    );
+    if (usePhasedPointInsertion) {
+      phasedPointInsertions.push({ token, extraContext });
+    } else {
+      applyInsertPointSpecs(
+        rule.insert_points,
+        (targetName) => (targetName === "current" ? token : null),
+        runtime.params,
+        sequence,
+        runtime,
+        "current",
+        extraContext
+      );
+    }
     applyInsertF0LayerSpec(
       rule.insert_f0_layer,
       (targetName) => (targetName === "current" ? token : null),
@@ -2581,6 +2590,22 @@ function applySelectRule(rule: TokenLike, sequence: TokenLike[], runtime: Runtim
       mode: "select",
       token: token?.id ?? null,
     });
+  }
+
+  if (usePhasedPointInsertion) {
+    for (let pointIndex = 0; pointIndex < rule.insert_points.length; pointIndex += 1) {
+      for (const { token, extraContext } of phasedPointInsertions) {
+        applyInsertPointSpec(
+          rule.insert_points[pointIndex],
+          (targetName) => (targetName === "current" ? token : null),
+          runtime.params,
+          sequence,
+          runtime,
+          "current",
+          extraContext
+        );
+      }
+    }
   }
 
   return sequence;

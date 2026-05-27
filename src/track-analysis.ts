@@ -78,10 +78,10 @@ export function analyzeStopReleases(track: TrackEvent[], plstepEvents: any[] = [
       duration: duration.toFixed(1),
       expected,
       actual: {
-        AF: p.AF ?? 0, AH: p.AH ?? 0, AV: p.AV ?? 0, AVS: p.AVS ?? 0,
-        A1: p.A1 ?? 0, A2: p.A2 ?? 0, A3: p.A3 ?? 0,
-        A4: p.A4 ?? 0, A5: p.A5 ?? 0, A6: p.A6 ?? 0,
-        AB: p.AB ?? 0, F1: p.F1 ?? 0, F2: p.F2 ?? 0, F3: p.F3 ?? 0, SW: p.SW ?? 0,
+        AF: getParam(p, "AF"), AH: getParam(p, "AH"), AV: getParam(p, "AV"), AVS: getParam(p, "AVS"),
+        A1: getParam(p, "A1"), A2: getParam(p, "A2"), A3: getParam(p, "A3"),
+        A4: getParam(p, "A4"), A5: getParam(p, "A5"), A6: getParam(p, "A6"),
+        AB: getParam(p, "AB"), F1: getParam(p, "F1"), F2: getParam(p, "F2"), F3: getParam(p, "F3"), SW: getParam(p, "SW"),
       },
       plstepTriggered: !!plstepMatch,
       plstepAmp: plstepMatch?.amplitudeLinear,
@@ -155,10 +155,10 @@ export function buildTimeline(track: TrackEvent[]): string[] {
     if (ah > 0) sources.push(`AH=${ah.toFixed(0)}`);
     let parallelInfo = "";
     if (sw === 1) {
-      const a1 = event.params?.A1 ?? 0, a2 = event.params?.A2 ?? 0;
-      const a3 = event.params?.A3 ?? 0, a4 = event.params?.A4 ?? 0;
-      const a5 = event.params?.A5 ?? 0, a6 = event.params?.A6 ?? 0;
-      const ab = event.params?.AB ?? 0;
+      const a1 = getParam(params, "A1"), a2 = getParam(params, "A2");
+      const a3 = getParam(params, "A3"), a4 = getParam(params, "A4");
+      const a5 = getParam(params, "A5"), a6 = getParam(params, "A6");
+      const ab = getParam(params, "AB");
       if (a1 > 0 || a2 > 0 || a3 > 0 || a4 > 0 || a5 > 0 || a6 > 0 || ab > 0) {
         parallelInfo = `A=${a1}/${a2}/${a3}/${a4}/${a5}/${a6}`;
         if (ab > 0) parallelInfo += ` AB=${ab}`;

@@ -148,30 +148,34 @@ function requireOutputStringArray(entry: unknown, path: string): string[] {
 }
 
 function getRulepackOutputConfig(specSource: unknown): OutputConfig {
-  const raw = (specSource as any)?.output;
+  const output = (specSource as any)?.output;
+  const raw = output?.lowering;
   if (!raw || typeof raw !== "object") {
-    throw new Error("outputConfig: frontend spec must contain an 'output:' section");
+    throw new Error("outputConfig: frontend spec must contain an 'output.lowering:' section");
   }
-  const blend = raw.blend;
-  const minDuration = raw.min_duration;
+  const timeline = raw.timeline;
+  const transitions = raw.transitions;
+  const blend = transitions?.blend;
+  const minDuration = timeline?.duration_floors;
   if (!blend || typeof blend !== "object") {
-    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.blend must be an object");
+    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.lowering.transitions.blend must be an object");
   }
   if (!minDuration || typeof minDuration !== "object") {
-    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.min_duration must be an object");
+    throw new Error("E_OUTPUT_CONFIG_REQUIRED: output.lowering.timeline.duration_floors must be an object");
   }
   const config: OutputConfig = {
     blend: {
-      factor: requireOutputNumber(blend.factor, "blend.factor"),
-      keys: requireOutputStringArray(blend.keys, "blend.keys"),
-      smooth_types: requireOutputStringArray(blend.smooth_types, "blend.smooth_types"),
+      factor: requireOutputNumber(blend.factor, "lowering.transitions.blend.factor"),
+      keys: requireOutputStringArray(blend.keys, "lowering.transitions.blend.keys"),
+      smooth_types: requireOutputStringArray(blend.smooth_types, "lowering.transitions.blend.smooth_types"),
     },
     min_duration: {
-      stop_release_ms: requireOutputNumber(minDuration.stop_release_ms, "min_duration.stop_release_ms"),
-      default_ms: requireOutputNumber(minDuration.default_ms, "min_duration.default_ms"),
+      stop_release_ms: requireOutputNumber(minDuration.stop_release_ms, "lowering.timeline.duration_floors.stop_release_ms"),
+      default_ms: requireOutputNumber(minDuration.default_ms, "lowering.timeline.duration_floors.default_ms"),
     },
-    initial_silence_ms: requireOutputNumber(raw.initial_silence_ms, "initial_silence_ms"),
-    final_silence_ms: requireOutputNumber(raw.final_silence_ms, "final_silence_ms"),
+    transition_ms: requireOutputNumber(transitions?.default_transition_ms, "lowering.transitions.default_transition_ms"),
+    initial_silence_ms: requireOutputNumber(timeline?.initial_silence_ms, "lowering.timeline.initial_silence_ms"),
+    final_silence_ms: requireOutputNumber(timeline?.final_silence_ms, "lowering.timeline.final_silence_ms"),
   };
   return config;
 }
@@ -556,17 +560,8 @@ function buildTextToKlattTrackDetailed(
     return nextToken;
   });
   const phoneSequence = parameterSequence.filter(
-    (token: PipelineToken) => token?.stream !== "f0" && token?.status !== 2
+    (token: PipelineToken) => token?.stream !== "f0" && token?.stream !== "f0_layer" && token?.status !== 2
   );
-  const controlScore = buildDeclarativeControlScore(frontendId, parameterSequence);
-  validateDeclarativeControlScore(controlScore);
-  provenance?.add({
-    stage: "frontend",
-    type: "control_score_created",
-    subject: `control_score:${frontendId}`,
-    reason: `Created declarative control score with ${controlScore.tokens.length} phone tokens and ${controlScore.f0_events.length} F0 events`,
-    citations: ["/rules/control-score.yaml"],
-  });
 
   // --- Assemble final Klatt track (delegated to track-assembler) ---
   // (Transition durations are scaled above per policy.rate.transition_scale_exponent.)
@@ -631,6 +626,24 @@ function buildTextToKlattTrackDetailed(
       return summary;
     }
   );
+
+  const loweringSpecId = (frontendSpec as any)?.output?.lowering?.id;
+  const controlScore = buildDeclarativeControlScore(frontendId, parameterSequence, {
+    loweringSpecId: typeof loweringSpecId === "string" && loweringSpecId.length > 0
+      ? loweringSpecId
+      : `${frontendId}:track-lowering`,
+    policyPaths: ["/rules/control-score.yaml", `/rules/frontends/${frontendId}/frontend.yaml`],
+    voiceQuality: voiceQualityOverrides ?? null,
+    diagnostics,
+  });
+  validateDeclarativeControlScore(controlScore);
+  provenance?.add({
+    stage: "frontend",
+    type: "control_score_created",
+    subject: `control_score:${frontendId}`,
+    reason: `Created declarative control score with ${controlScore.segments.length} segments, ${controlScore.timed_controls.length} timed controls, ${controlScore.f0_points.length} F0 points, and ${controlScore.f0_layer_commands.length} F0 layer commands`,
+    citations: ["/rules/control-score.yaml"],
+  });
 
   const track = assembleKlattTrack(phoneSequence, parameterSequence, {
     inventorySpec: frontendInventory,

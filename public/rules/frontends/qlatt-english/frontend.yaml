@@ -920,30 +920,68 @@ parameters:
           jitter: 0
           f0_scale: 1.5      # Burkhardt 2009: F0 increase; conservative 1.5x
 output:
-  blend:
-    factor:
-      value: 0.35
-      citations:
-        - "Engineering estimate: 35% blend factor for formant transition smoothing"
-    keys: [F1, F2, F3, B1, B2, B3]
-    smooth_types: [vowel, nasal, liquid, glide]
-  min_duration:
-    stop_release_ms:
-      value: 5
-      citations:
-        - "Engineering estimate: minimum 5ms for stop release burst visibility"
-    default_ms:
-      value: 20
-      citations:
-        - "Engineering estimate: minimum 20ms segment duration"
-  initial_silence_ms:
-    value: 30
-    citations:
-      - "Engineering estimate: 30ms initial silence for attack transient settling"
-  final_silence_ms:
-    value: 100
-    citations:
-      - "Engineering estimate: 100ms final silence for release tail"
+  lowering:
+    id: qlatt-english-track-lowering
+    timeline:
+      initial_silence_ms:
+        value: 30
+        citations:
+          - "Engineering estimate: 30ms initial silence for attack transient settling"
+      final_silence_ms:
+        value: 100
+        citations:
+          - "Engineering estimate: 100ms final silence for release tail"
+      duration_floors:
+        stop_release_ms:
+          value: 5
+          citations:
+            - "Engineering estimate: minimum 5ms for stop release burst visibility"
+        default_ms:
+          value: 20
+          citations:
+            - "Engineering estimate: minimum 20ms segment duration"
+      event_points:
+        include_segment_start: true
+        include_control_boundaries: true
+        include_f0_anchors: true
+        include_transition_steady_time: true
+    transitions:
+      default_transition_ms:
+        value: 30
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
+      blend:
+        factor:
+          value: 0.35
+          citations:
+            - "Engineering estimate: 35% blend factor for formant transition smoothing"
+        keys: [F1, F2, F3, B1, B2, B3]
+        smooth_types: [vowel, nasal, liquid, glide]
+    f0:
+      renderer:
+        type: point_interpolation
+      sag:
+        operator: parabolic_hstar_sag
+        depth_hz:
+          value: 12
+          citations:
+            - Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
+            - Ladd 2008 pp.155-157 (sagging transition between H* accents)
+        min_span_ms:
+          value: 150
+          citations:
+            - Pierrehumbert 1980 (closer H* accents show less/no dipping)
+      output_clamp:
+        min_hz:
+          value: 0
+          citations:
+            - "Engineering boundary: point interpolation may intentionally emit 0 Hz for unvoiced frames"
+        max_hz:
+          value: 500
+          citations:
+            - Peterson & Barney 1952 (upper adult F0 corpus extreme)
+    overlays:
+      operation_order: [voice_quality, timed_controls, f0]
 transcription:
   # Standard English letter-name pronunciations for declarative spelling mode.
   # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).

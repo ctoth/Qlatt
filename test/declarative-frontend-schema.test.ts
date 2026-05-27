@@ -2,6 +2,49 @@ import { describe, expect, it } from "vitest";
 import { parseDslSpec } from "../src/declarative-frontend/parser";
 import { validateDslSpec } from "../src/declarative-frontend/validation";
 
+const loweringOutput = {
+  lowering: {
+    id: "test-track-lowering",
+    timeline: {
+      initial_silence_ms: { value: 0, citations: ["test"] },
+      final_silence_ms: { value: 0, citations: ["test"] },
+      duration_floors: {
+        stop_release_ms: { value: 5, citations: ["test"] },
+        default_ms: { value: 20, citations: ["test"] },
+      },
+      event_points: {
+        include_segment_start: true,
+        include_control_boundaries: true,
+        include_f0_anchors: true,
+        include_transition_steady_time: true,
+      },
+    },
+    transitions: {
+      default_transition_ms: { value: 30, citations: ["test"] },
+      blend: {
+        factor: { value: 0.35, citations: ["test"] },
+        keys: ["F1", "F2"],
+        smooth_types: ["vowel"],
+      },
+    },
+    f0: {
+      renderer: { type: "point_interpolation" },
+      sag: {
+        operator: "parabolic_hstar_sag",
+        depth_hz: { value: 0, citations: ["test"] },
+        min_span_ms: { value: 150, citations: ["test"] },
+      },
+      output_clamp: {
+        min_hz: { value: 0, citations: ["test"] },
+        max_hz: { value: 500, citations: ["test"] },
+      },
+    },
+    overlays: {
+      operation_order: ["voice_quality", "timed_controls", "f0"],
+    },
+  },
+};
+
 describe("declarative frontend schema coverage", () => {
   it("normalizes v11 top-level sections beyond phase/rule slice", () => {
     const spec = parseDslSpec({
@@ -33,7 +76,7 @@ describe("declarative frontend schema coverage", () => {
       },
       phases: [{ name: "duration", rules: ["stress_lengthening"], resolve_scalars: ["duration"] }],
       interpolation: { points: { f0: { method: "monotone_cubic" } } },
-      output: { format: "klatt_frames" },
+      output: loweringOutput,
     });
 
     expect(spec.streams.phone.type).toBe("base");
@@ -41,7 +84,19 @@ describe("declarative frontend schema coverage", () => {
     expect(spec.topology.hierarchy).toEqual(["syllable", "phone"]);
     expect(spec.patterns.cv.sequence).toHaveLength(2);
     expect(spec.interpolation.points.f0.method).toBe("monotone_cubic");
-    expect(spec.output.format).toBe("klatt_frames");
+    expect(spec.output.lowering.id).toBe("test-track-lowering");
+  });
+
+  it("requires the complete track lowering output spec", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+      output: { lowering: { id: "incomplete" } },
+    });
+
+    const diagnostics = validateDslSpec(spec);
+    const codes = diagnostics.map((d) => d.code);
+
+    expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(true);
   });
 
   it("validates cross references for streams, patterns, rules and phase resolution", () => {
@@ -404,6 +459,7 @@ rules:
         },
       },
       phases: [{ name: "duration", rules: ["good"] }],
+      output: loweringOutput,
     });
 
     const diagnostics = validateDslSpec(spec);

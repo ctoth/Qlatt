@@ -2224,7 +2224,7 @@ function applyInsertPointSpecs(
  *
  * Handles the `kind: f0_layer` rule semantics, creating a token with
  * `stream: "f0_layer"` that carries the layer name, value, and timing info.
- * The track assembler's `extractLayerCommands()` reads these tokens.
+ * The control-score builder reads these tokens into `f0_layer_commands`.
  *
  * Citations:
  *   Fujisaki, H. "Information, Prosody, and Modeling" -- command-response additive F0

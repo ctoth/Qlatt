@@ -1745,6 +1745,69 @@ function materializeSpliceCopyFields(
   return copied;
 }
 
+const INVENTORY_SEGMENT_FIELDS = [
+  "phoneme",
+  "type",
+  "duration",
+  "inherentDuration",
+  "params",
+  "inventorySW",
+  "voiceless",
+  "voiced",
+  "bilabial",
+  "alveolar",
+  "velar",
+  "postalveolar",
+  "palatal",
+  "rhotic",
+];
+
+function materializeInventorySegment(
+  template: TokenLike,
+  context: RuntimeLike,
+  navigation: NavigationBundle
+): TokenLike {
+  if (!template.segment || typeof template.segment !== "object" || Array.isArray(template.segment)) {
+    return {};
+  }
+
+  const segmentSpec = template.segment as TokenLike;
+  const targetValue = Object.prototype.hasOwnProperty.call(segmentSpec, "target")
+    ? evaluateActionExpression(segmentSpec.target, context, navigation)
+    : null;
+  const target =
+    targetValue && typeof targetValue === "object" && !Array.isArray(targetValue)
+      ? (targetValue as TokenLike)
+      : {};
+
+  const segmentFields: TokenLike = {
+    ...materializeSpliceCopyFields(segmentSpec, context, navigation),
+  };
+
+  for (const field of INVENTORY_SEGMENT_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(target, field)) {
+      segmentFields[field] = cloneValue(target[field]);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(segmentSpec, "phoneme")) {
+    segmentFields.phoneme = evaluateActionExpression(segmentSpec.phoneme, context, navigation);
+  }
+
+  if (
+    segmentSpec.fields &&
+    typeof segmentSpec.fields === "object" &&
+    !Array.isArray(segmentSpec.fields)
+  ) {
+    Object.assign(
+      segmentFields,
+      deepEvaluateTemplate(segmentSpec.fields, context, navigation)
+    );
+  }
+
+  return segmentFields;
+}
+
 function nextInsertedTokenId(runtime: RuntimeLike, stream: unknown): string {
   const key = typeof stream === "string" && stream.length > 0 ? stream : "token";
   if (!runtime.insertCounters) runtime.insertCounters = new Map();
@@ -1792,10 +1855,11 @@ function buildSpliceInsertions(
   const segments = runtime.axis.splitMarkRange(bounds.leftId, bounds.rightId, specs.length);
   return specs.map((spec, index) => {
     const template = spec && typeof spec === "object" ? spec : {};
+    const segmentFields = materializeInventorySegment(template, context, navigation);
     const copiedFields = materializeSpliceCopyFields(template, context, navigation);
     const evaluatedTemplate = Object.fromEntries(
       Object.entries(template).filter(
-        ([key]) => key !== "copy_from" && key !== "copy_fields"
+        ([key]) => key !== "copy_from" && key !== "copy_fields" && key !== "segment"
       )
     );
     const evaluated = deepEvaluateTemplate(evaluatedTemplate, context, navigation);
@@ -1808,6 +1872,7 @@ function buildSpliceInsertions(
       sync_right: segments[index].rightId,
     });
     const token: TokenLike = {
+      ...segmentFields,
       ...copiedFields,
       ...evaluatedObject,
       stream: evaluatedObject.stream ?? stream,

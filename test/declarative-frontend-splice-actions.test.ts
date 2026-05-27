@@ -320,6 +320,96 @@ describe("declarative frontend splice actions", () => {
     expect(inserted?.sync_right).toEqual(s2);
   });
 
+  it("materializes inventory segment templates with copied fields and overrides", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      streams: {
+        phone: { type: "base" },
+      },
+      rules: {
+        add_release: {
+          select: { stream: "phone", where: "current.id == 'p1'" },
+          define: {
+            rel_target: "target('REL')",
+          },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [
+              {
+                segment: {
+                  target: "rel_target",
+                  copy_from: "current",
+                  copy_fields: ["stress", "word"],
+                  fields: {
+                    weak: "true",
+                    duration: "12",
+                    inherentDuration: "12",
+                    params: "merge(rel_target.params, {'AH': 20})",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        suppress_right_neighbor: {
+          select: { stream: "phone", where: "current.id == 'p2'" },
+          suppress: true,
+        },
+      },
+      phases: [{ name: "sandhi", rules: ["add_release", "suppress_right_neighbor"] }],
+    };
+
+    const input = [
+      {
+        id: "p1",
+        stream: "phone",
+        sync_left: s0,
+        sync_right: s1,
+        status: 1,
+        stress: 1,
+        word: "top",
+      },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec, {
+      inventoryResolver: (phoneme) =>
+        phoneme === "REL"
+          ? {
+              phoneme: "REL",
+              type: "stop_release",
+              duration: 17,
+              inherentDuration: 17,
+              params: { AF: 55, AH: 35 },
+              inventorySW: 1,
+              voiceless: true,
+              alveolar: true,
+            }
+          : null,
+    }).sequence;
+    const inserted = out.find((t) => t.phoneme === "REL");
+
+    expect(inserted).toMatchObject({
+      type: "stop_release",
+      stress: 1,
+      word: "top",
+      weak: true,
+      duration: 12,
+      inherentDuration: 12,
+      params: { AF: 55, AH: 20 },
+      inventorySW: 1,
+      voiceless: true,
+      alveolar: true,
+    });
+    expect(inserted?.sync_left).toEqual(s1);
+    expect(inserted?.sync_right).toEqual(s2);
+  });
+
   it("supports dispatch in splice insert field expressions", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);

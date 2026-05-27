@@ -44,13 +44,9 @@ export type TranscriptionOptions = {
   specSource?: unknown;
 };
 
-export interface ControlScoreAnchors {
-  onset?: string;
-  release?: string;
-}
-
 export interface ControlScoreAlignmentPlan {
-  anchors: ControlScoreAnchors;
+  onset_mark?: string;
+  release_mark?: string;
   transition_ms?: number;
 }
 
@@ -81,7 +77,26 @@ export interface ControlScoreFilterPlan {
   };
 }
 
-export interface ControlScorePhoneToken {
+export type ControlScoreTiming =
+  | {
+      kind: "absolute";
+      time_ms: number;
+    }
+  | {
+      kind: "anchored";
+      anchor_left: string;
+      anchor_right: string;
+      ratio: number;
+    };
+
+export interface ControlScoreTimelineMark {
+  id: string;
+  segment_id: string;
+  edge: "onset" | "release";
+  time_ms?: number;
+}
+
+export interface ControlScoreSegment {
   id: string;
   phoneme: string;
   type: string;
@@ -100,26 +115,59 @@ export interface ControlScorePhoneToken {
   };
   alignment: ControlScoreAlignmentPlan;
   duration: ControlScoreDurationPlan;
+  params: Record<string, number>;
   source?: ControlScoreSourcePlan;
   filter?: ControlScoreFilterPlan;
-  control_windows?: ControlWindowSpec[];
 }
 
-export interface ControlScoreF0Event {
+export interface ControlScoreTimedControl {
   id: string;
-  time_ms?: number;
+  target_segment_id: string;
+  start_offset_ms: number;
+  end_offset_ms: number;
+  fields: Record<string, ControlFieldSpec>;
+  tag?: string;
+}
+
+export interface ControlScoreF0Point {
+  id: string;
+  timing: ControlScoreTiming;
   value_hz: number;
   tag?: string;
-  anchor_left?: unknown;
-  anchor_right?: unknown;
-  ratio?: number;
+  accent_type?: string;
+}
+
+export interface ControlScoreF0LayerCommand {
+  id: string;
+  timing: ControlScoreTiming;
+  layer: string;
+  value: number;
+  duration_frames?: number;
+  profile_points?: number[];
+  tag?: string;
+}
+
+export interface ControlScoreGlobalOverlay {
+  id: string;
+  fields: Record<string, ControlFieldSpec>;
+  tag?: string;
+}
+
+export interface ControlScoreLoweringRefs {
+  spec_id: string;
+  policy_paths: string[];
 }
 
 export interface DeclarativeControlScore {
-  version: "v1";
+  version: "v2";
   frontend_id: string;
-  tokens: ControlScorePhoneToken[];
-  f0_events: ControlScoreF0Event[];
+  segments: ControlScoreSegment[];
+  timeline_marks: ControlScoreTimelineMark[];
+  timed_controls: ControlScoreTimedControl[];
+  f0_points: ControlScoreF0Point[];
+  f0_layer_commands: ControlScoreF0LayerCommand[];
+  global_overlays: ControlScoreGlobalOverlay[];
+  lowering_refs: ControlScoreLoweringRefs;
 }
 
 /** The segment a control window applies to.

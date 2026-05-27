@@ -202,7 +202,7 @@ describe("declarative frontend point actions and helpers", () => {
       streams: { phone: { type: "base" }, f0: { type: "point" } },
       rules: {
         paired_targets: {
-          select: { stream: "phone", where: "true" },
+          select: { stream: "phone", where: "current.id in ['p1', 'p2']" },
           insert_points_order: "by_point",
           insert_points: [
             {
@@ -225,6 +225,7 @@ describe("declarative frontend point actions and helpers", () => {
 
     const input = [
       { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "gap", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
       { id: "p2", stream: "phone", sync_left: s2, sync_right: s3, status: 1 },
     ];
 

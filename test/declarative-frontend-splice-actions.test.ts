@@ -349,7 +349,7 @@ describe("declarative frontend splice actions", () => {
                     weak: "true",
                     duration: "12",
                     inherentDuration: "12",
-                    params: "merge(rel_target.params, {'AH': 20})",
+                    params: "merge(rel_target.params, {'AH': 20.0})",
                   },
                 },
               },

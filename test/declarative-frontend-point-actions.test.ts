@@ -134,6 +134,56 @@ describe("declarative frontend point actions and helpers", () => {
     expect(points[1].ratio).toBe(0);
   });
 
+  it("inserts multiple point tokens from one contour rule", () => {
+    const s0 = startOrder();
+    const s1 = finiteOrder(1);
+    const s2 = endOrder();
+
+    const spec = {
+      parameters: {
+        policy: {
+          f0: {
+            low_hz: 95,
+            high_hz: 145,
+          },
+        },
+      },
+      streams: { phone: { type: "base" }, f0: { type: "point" } },
+      rules: {
+        rise_fall: {
+          select: { stream: "phone", where: "current.id == 'p1'" },
+          insert_points: [
+            {
+              stream: "f0",
+              at: "at_ratio(current, 0.25)",
+              value: "params.policy.f0.high_hz",
+              tag: "f0_peak",
+            },
+            {
+              stream: "f0",
+              at: "at_sync(current.sync_right)",
+              value: "params.policy.f0.low_hz",
+              tag: "f0_tail",
+            },
+          ],
+        },
+      },
+      phases: [{ name: "prosody", rules: ["rise_fall"] }],
+    };
+
+    const input = [
+      { id: "p1", stream: "phone", sync_left: s0, sync_right: s1, status: 1 },
+      { id: "p2", stream: "phone", sync_left: s1, sync_right: s2, status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+    const points = out.filter((t) => t.stream === "f0");
+
+    expect(points).toHaveLength(2);
+    expect(points[0]).toMatchObject({ ratio: 0.25, value: 145, tag: "f0_peak" });
+    expect(points[1]).toMatchObject({ anchor_left: s1, anchor_right: s1, value: 95, tag: "f0_tail" });
+  });
+
   it("supports prev_point and total helpers", () => {
     const s0 = startOrder();
     const s1 = finiteOrder(1);

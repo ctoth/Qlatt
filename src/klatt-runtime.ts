@@ -179,7 +179,7 @@ type AudioWorkletNodeConstructor = {
     options?: AudioWorkletNodeOptions,
   ): AudioWorkletNode;
   prototype: AudioWorkletNode;
-};
+} & Function;
 
 export function isAudioWorkletNode(
   node: AudioNode,

@@ -78,6 +78,7 @@ function getTables(): NormalizationTables {
 function getPipeline(): NormalizationPipeline {
   if (!pipelineCache) {
     pipelineCache = loadYamlDocumentSync<NormalizationPipeline>(PIPELINE_PATH);
+    validateNormalizationPipelineConfig(pipelineCache, getTables());
   }
   return pipelineCache;
 }
@@ -424,6 +425,47 @@ const REGEX_REPLACE_HANDLERS: Record<string, (match: string) => string> = {
       .join(" "),
 };
 
+export function validateNormalizationPipelineConfig(
+  pipeline: NormalizationPipeline,
+  tables: NormalizationTables,
+): void {
+  if (!pipeline || !Array.isArray(pipeline.steps)) {
+    throw new Error("E_NORMALIZE_CONFIG: normalization pipeline must define steps");
+  }
+
+  for (const step of pipeline.steps) {
+    if (step.type === "builtin") {
+      if (!step.handler || !BUILTIN_HANDLERS[step.handler]) {
+        throw new Error(`E_NORMALIZE_CONFIG: builtin step '${step.name}' references unknown handler`);
+      }
+      continue;
+    }
+
+    if (step.type === "table_replace") {
+      if (!step.table || !(step.table in tables)) {
+        throw new Error(`E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table`);
+      }
+      continue;
+    }
+
+    if (step.type === "regex_replace") {
+      for (const rule of step.rules ?? []) {
+        if (rule.handler && !REGEX_REPLACE_HANDLERS[rule.handler]) {
+          throw new Error(`E_NORMALIZE_CONFIG: regex_replace step '${step.name}' references unknown handler`);
+        }
+        if (!rule.handler && typeof rule.replacement !== "string") {
+          throw new Error(
+            `E_NORMALIZE_CONFIG: regex_replace step '${step.name}' must define replacement or handler`,
+          );
+        }
+      }
+      continue;
+    }
+
+    throw new Error(`E_NORMALIZE_CONFIG: step '${step.name}' has unknown type '${step.type}'`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Pipeline step dispatchers
 // ---------------------------------------------------------------------------
@@ -454,11 +496,15 @@ function executeRegexReplace(result: string, step: PipelineStep): string {
 
 function executeTableReplace(result: string, step: PipelineStep): string {
   const tableName = step.table;
-  if (!tableName) return result;
+  if (!tableName) {
+    throw new Error(`E_NORMALIZE_CONFIG: table_replace step '${step.name}' must define table`);
+  }
 
   const tables = getTables();
   const table = (tables as unknown as Record<string, unknown>)[tableName] as Record<string, string> | undefined;
-  if (!table) return result;
+  if (!table) {
+    throw new Error(`E_NORMALIZE_CONFIG: table_replace step '${step.name}' references missing table '${tableName}'`);
+  }
 
   let text = result;
   for (const [key, expansion] of Object.entries(table)) {

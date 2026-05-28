@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText } from "../src/g2p/text-normalize";
+import { normalizeText, validateNormalizationPipelineConfig } from "../src/g2p/text-normalize";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 interface NormalizationTables {
@@ -86,6 +86,9 @@ describe("text normalization YAML tables", () => {
 });
 
 describe("text normalization YAML pipeline", () => {
+  const tables = loadYamlDocumentSync<NormalizationTables>(
+    "/rules/frontends/qlatt-english/normalization-tables.yaml"
+  );
   const pipeline = loadYamlDocumentSync<NormalizationPipeline>(
     "/rules/frontends/qlatt-english/normalization-pipeline.yaml"
   );
@@ -130,6 +133,24 @@ describe("text normalization YAML pipeline", () => {
 
     const initialismStep = pipeline.steps.find((step) => step.name === "expand_initialisms");
     expect(initialismStep?.rules?.[0]).toMatchObject({ handler: "expandInitialism" });
+  });
+
+  it("rejects table_replace steps that reference missing tables", () => {
+    expect(() =>
+      validateNormalizationPipelineConfig(
+        {
+          steps: [
+            {
+              name: "bad_table",
+              type: "table_replace",
+              table: "missing_table",
+              citations: ["test"],
+            },
+          ],
+        },
+        tables,
+      )
+    ).toThrow("E_NORMALIZE_CONFIG");
   });
 });
 

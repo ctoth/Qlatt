@@ -249,7 +249,7 @@ Verification:
 
 ## Phase 7 - Provenance and Diagnostics
 
-Status: pending
+Status: completed
 
 Scope:
 - Add provenance records for lowering-spec validation and score-to-frame lowering.

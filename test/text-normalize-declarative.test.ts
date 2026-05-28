@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { normalizeText, validateNormalizationPipelineConfig } from "../src/g2p/text-normalize";
+import {
+  normalizeText,
+  validateNormalizationPipelineConfig,
+  validateNormalizationTables,
+} from "../src/g2p/text-normalize";
 import { loadYamlDocumentSync } from "../src/yaml-loader";
 
 interface NormalizationTables {
@@ -151,6 +155,79 @@ describe("text normalization YAML pipeline", () => {
         tables,
       )
     ).toThrow("E_NORMALIZE_CONFIG");
+  });
+});
+
+describe("validateNormalizationTables", () => {
+  const validTables = loadYamlDocumentSync<unknown>(
+    "/rules/frontends/qlatt-english/normalization-tables.yaml",
+  );
+
+  function withOverride(overrides: Record<string, unknown>): unknown {
+    return { ...(validTables as Record<string, unknown>), ...overrides };
+  }
+
+  it("accepts the shipped tables", () => {
+    expect(() => validateNormalizationTables(validTables)).not.toThrow();
+  });
+
+  it("rejects non-object input", () => {
+    expect(() => validateNormalizationTables(null)).toThrow("E_NORMALIZE_CONFIG");
+    expect(() => validateNormalizationTables("hi")).toThrow("E_NORMALIZE_CONFIG");
+    expect(() => validateNormalizationTables([])).toThrow("E_NORMALIZE_CONFIG");
+  });
+
+  it("rejects missing required array", () => {
+    const { ones: _omit, ...rest } = validTables as Record<string, unknown>;
+    expect(() => validateNormalizationTables(rest)).toThrow(/E_NORMALIZE_CONFIG.*ones/);
+  });
+
+  it.each([
+    ["ones", 10],
+    ["teens", 10],
+    ["tens", 10],
+    ["month_names", 12],
+  ] as const)("rejects %s of wrong length", (name, expected) => {
+    expect(() => validateNormalizationTables(withOverride({ [name]: [] }))).toThrow(
+      new RegExp(`E_NORMALIZE_CONFIG.*${name}.*${expected}`),
+    );
+  });
+
+  it("rejects array entries that are not strings", () => {
+    const ones = [...(validTables as { ones: string[] }).ones];
+    ones[0] = 0 as unknown as string;
+    expect(() => validateNormalizationTables(withOverride({ ones }))).toThrow(
+      /E_NORMALIZE_CONFIG.*ones.*string/,
+    );
+  });
+
+  it("rejects missing required map", () => {
+    const { abbreviations: _omit, ...rest } = validTables as Record<string, unknown>;
+    expect(() => validateNormalizationTables(rest)).toThrow(/E_NORMALIZE_CONFIG.*abbreviations/);
+  });
+
+  it("rejects digit_words with wrong size", () => {
+    expect(() =>
+      validateNormalizationTables(withOverride({ digit_words: { "0": "zero" } })),
+    ).toThrow(/E_NORMALIZE_CONFIG.*digit_words.*10/);
+  });
+
+  it("rejects empty abbreviations map", () => {
+    expect(() => validateNormalizationTables(withOverride({ abbreviations: {} }))).toThrow(
+      /E_NORMALIZE_CONFIG.*abbreviations.*empty/,
+    );
+  });
+
+  it("rejects map entries that are not strings", () => {
+    expect(() =>
+      validateNormalizationTables(withOverride({ abbreviations: { "dr.": 42 } })),
+    ).toThrow(/E_NORMALIZE_CONFIG.*abbreviations.*string/);
+  });
+
+  it("rejects map that is actually an array", () => {
+    expect(() => validateNormalizationTables(withOverride({ ordinal_ones: [] }))).toThrow(
+      /E_NORMALIZE_CONFIG.*ordinal_ones.*map/,
+    );
   });
 });
 

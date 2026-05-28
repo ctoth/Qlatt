@@ -70,7 +70,9 @@ let pipelineCache: NormalizationPipeline | null = null;
 
 function getTables(): NormalizationTables {
   if (!tablesCache) {
-    tablesCache = loadYamlDocumentSync<NormalizationTables>(TABLES_PATH);
+    const loaded = loadYamlDocumentSync<unknown>(TABLES_PATH);
+    validateNormalizationTables(loaded);
+    tablesCache = loaded;
   }
   return tablesCache;
 }
@@ -424,6 +426,71 @@ const REGEX_REPLACE_HANDLERS: Record<string, (match: string) => string> = {
       .split("")
       .join(" "),
 };
+
+function assertStringArray(value: unknown, name: string, expectedLength: number): void {
+  if (!Array.isArray(value)) {
+    throw new Error(`E_NORMALIZE_CONFIG: table '${name}' must be an array`);
+  }
+  if (value.length !== expectedLength) {
+    throw new Error(
+      `E_NORMALIZE_CONFIG: table '${name}' must have exactly ${expectedLength} entries (got ${value.length})`,
+    );
+  }
+  for (let i = 0; i < value.length; i++) {
+    if (typeof value[i] !== "string") {
+      throw new Error(`E_NORMALIZE_CONFIG: table '${name}' entry ${i} must be a string`);
+    }
+  }
+}
+
+function assertStringMap(value: unknown, name: string, expectedSize: number | null): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`E_NORMALIZE_CONFIG: table '${name}' must be a map`);
+  }
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (expectedSize !== null && entries.length !== expectedSize) {
+    throw new Error(
+      `E_NORMALIZE_CONFIG: table '${name}' must have exactly ${expectedSize} entries (got ${entries.length})`,
+    );
+  }
+  if (entries.length === 0) {
+    throw new Error(`E_NORMALIZE_CONFIG: table '${name}' must not be empty`);
+  }
+  for (const [key, v] of entries) {
+    if (typeof v !== "string") {
+      throw new Error(`E_NORMALIZE_CONFIG: table '${name}' entry '${key}' must be a string`);
+    }
+  }
+}
+
+export function validateNormalizationTables(
+  tables: unknown,
+): asserts tables is NormalizationTables {
+  if (!tables || typeof tables !== "object" || Array.isArray(tables)) {
+    throw new Error("E_NORMALIZE_CONFIG: normalization tables must be an object");
+  }
+  const t = tables as Record<string, unknown>;
+
+  const fixedArrays: Array<[keyof NormalizationTables, number]> = [
+    ["ones", 10],
+    ["teens", 10],
+    ["tens", 10],
+    ["month_names", 12],
+  ];
+  for (const [name, expected] of fixedArrays) {
+    assertStringArray(t[name], name, expected);
+  }
+
+  const fixedMaps: Array<[keyof NormalizationTables, number | null]> = [
+    ["ordinal_ones", null],
+    ["ordinal_tens", null],
+    ["abbreviations", null],
+    ["digit_words", 10],
+  ];
+  for (const [name, expected] of fixedMaps) {
+    assertStringMap(t[name], name, expected);
+  }
+}
 
 export function validateNormalizationPipelineConfig(
   pipeline: NormalizationPipeline,

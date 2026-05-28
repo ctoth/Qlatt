@@ -9,49 +9,64 @@ import { QLATT_ENGLISH_RULEPACK } from "../src/declarative-frontend/rule-pack";
 const spec = QLATT_ENGLISH_RULEPACK as Record<string, any>;
 
 describe("YAML frontend config — output section", () => {
-  const output = spec.output;
+  const output = spec.output.lowering;
 
-  it("output section exists", () => {
+  it("lowering output section exists", () => {
     expect(output).toBeDefined();
     expect(typeof output).toBe("object");
   });
 
-  it("blend.factor is 0.35 (with citations)", () => {
-    expect(output.blend.factor).toEqual({ value: 0.35, citations: expect.any(Array) });
-    expect(output.blend.factor.value).toBe(0.35);
+  it("transitions.blend.factor is 0.35 (with citations)", () => {
+    expect(output.transitions.blend.factor).toEqual({
+      value: 0.35,
+      citations: expect.any(Array),
+    });
+    expect(output.transitions.blend.factor.value).toBe(0.35);
   });
 
-  it("blend.keys matches [F1, F2, F3, B1, B2, B3]", () => {
-    expect(output.blend.keys).toEqual(["F1", "F2", "F3", "B1", "B2", "B3"]);
+  it("transitions.blend.keys matches [F1, F2, F3, B1, B2, B3]", () => {
+    expect(output.transitions.blend.keys).toEqual(["F1", "F2", "F3", "B1", "B2", "B3"]);
   });
 
-  it("blend.smooth_types matches [vowel, nasal, liquid, glide]", () => {
-    expect(output.blend.smooth_types).toEqual(["vowel", "nasal", "liquid", "glide"]);
+  it("transitions.blend.smooth_types matches [vowel, nasal, liquid, glide]", () => {
+    expect(output.transitions.blend.smooth_types).toEqual(["vowel", "nasal", "liquid", "glide"]);
   });
 
-  it("min_duration.stop_release_ms is 5 (with citations)", () => {
-    expect(output.min_duration.stop_release_ms).toEqual({ value: 5, citations: expect.any(Array) });
-    expect(output.min_duration.stop_release_ms.value).toBe(5);
+  it("timeline.duration_floors.stop_release_ms is 5 (with citations)", () => {
+    expect(output.timeline.duration_floors.stop_release_ms).toEqual({
+      value: 5,
+      citations: expect.any(Array),
+    });
+    expect(output.timeline.duration_floors.stop_release_ms.value).toBe(5);
   });
 
-  it("min_duration.default_ms is 20 (with citations)", () => {
-    expect(output.min_duration.default_ms).toEqual({ value: 20, citations: expect.any(Array) });
-    expect(output.min_duration.default_ms.value).toBe(20);
+  it("timeline.duration_floors.default_ms is 20 (with citations)", () => {
+    expect(output.timeline.duration_floors.default_ms).toEqual({
+      value: 20,
+      citations: expect.any(Array),
+    });
+    expect(output.timeline.duration_floors.default_ms.value).toBe(20);
   });
 
-  it("initial_silence_ms is 30 (with citations)", () => {
-    expect(output.initial_silence_ms).toEqual({ value: 30, citations: expect.any(Array) });
-    expect(output.initial_silence_ms.value).toBe(30);
+  it("timeline.initial_silence_ms is 30 (with citations)", () => {
+    expect(output.timeline.initial_silence_ms).toEqual({
+      value: 30,
+      citations: expect.any(Array),
+    });
+    expect(output.timeline.initial_silence_ms.value).toBe(30);
   });
 
-  it("final_silence_ms is 100 (with citations)", () => {
-    expect(output.final_silence_ms).toEqual({ value: 100, citations: expect.any(Array) });
-    expect(output.final_silence_ms.value).toBe(100);
+  it("timeline.final_silence_ms is 100 (with citations)", () => {
+    expect(output.timeline.final_silence_ms).toEqual({
+      value: 100,
+      citations: expect.any(Array),
+    });
+    expect(output.timeline.final_silence_ms.value).toBe(100);
   });
 
-  it("blend.factor has citations", () => {
-    expect(Array.isArray(output.blend.factor.citations)).toBe(true);
-    expect(output.blend.factor.citations.length).toBeGreaterThan(0);
+  it("transitions.blend.factor has citations", () => {
+    expect(Array.isArray(output.transitions.blend.factor.citations)).toBe(true);
+    expect(output.transitions.blend.factor.citations.length).toBeGreaterThan(0);
   });
 });
 

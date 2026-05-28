@@ -2024,7 +2024,19 @@ function validateEventPointPolicy(value: unknown, diagnostics: ValidationDiagnos
   }
 }
 
-function validateLoweringSpec(spec: PlainObject, diagnostics: ValidationDiagnostic[]): void {
+export type ValidateDslSpecOptions = {
+  requireLoweringSpec?: boolean;
+};
+
+function validateLoweringSpec(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[],
+  options: ValidateDslSpecOptions,
+): void {
+  const hasOutput = Object.prototype.hasOwnProperty.call(spec, "output");
+  if (!hasOutput && options.requireLoweringSpec !== true) {
+    return;
+  }
   if (!isPlainObject(spec.output)) {
     diagnostics.push(
       makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output")
@@ -2200,7 +2212,10 @@ function validateMaps(
   }
 }
 
-export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
+export function validateDslSpec(
+  spec: PlainObject,
+  options: ValidateDslSpecOptions = {},
+): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
   const phaseByName = new Map();
   const phaseNames = [];
@@ -2209,7 +2224,7 @@ export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   validateTopology(spec, streamByName, diagnostics);
   const predicates = validatePredicates(spec, streamByName, policyState, diagnostics);
   validateStringSets(spec, diagnostics);
-  validateLoweringSpec(spec, diagnostics);
+  validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
   validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
   validateRules(spec, streamByName, predicates, policyState, diagnostics);
@@ -2327,8 +2342,11 @@ export function validateDslSpec(spec: PlainObject): ValidationDiagnostic[] {
   return diagnostics;
 }
 
-export function assertValidSpec(spec: PlainObject): ValidationDiagnostic[] {
-  const diagnostics = validateDslSpec(spec);
+export function assertValidSpec(
+  spec: PlainObject,
+  options: ValidateDslSpecOptions = {},
+): ValidationDiagnostic[] {
+  const diagnostics = validateDslSpec(spec, options);
   const errors = diagnostics.filter((d) => d.severity === "error");
   if (errors.length > 0) {
     const detail = errors.map((d) => `${d.code} at ${d.path}: ${d.message}`).join("\n");

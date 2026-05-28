@@ -234,7 +234,7 @@ export function loadRulepackSpecFromPath(specPath: string = DEFAULT_RULEPACK_PAT
 
   const spec = parseDslSpec(source);
   resolveIncludesSync(spec, specPath);
-  assertValidSpec(spec);
+  assertValidSpec(spec, { requireLoweringSpec: true });
   (spec as any)[SPEC_VALIDATED] = true;
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;
@@ -259,7 +259,7 @@ export async function preloadRulepackSpecFromPath(
 
   const spec = parseDslSpec(source);
   await resolveIncludesAsync(spec, specPath);
-  assertValidSpec(spec);
+  assertValidSpec(spec, { requireLoweringSpec: true });
   (spec as any)[SPEC_VALIDATED] = true;
   BUNDLED_RULEPACK_CACHE.set(specPath, spec);
   return spec;

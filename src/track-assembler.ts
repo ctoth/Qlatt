@@ -281,29 +281,39 @@ function buildSegmentEventTimes(
   steadyTime: number | null,
   interiorF0Anchors: number[],
   controlWindows: ResolvedControlWindow[],
+  eventPolicy: TrackLoweringSpec["timeline"]["event_points"],
   includeSegmentEnd = false
 ): number[] {
   const epsilon = 1e-6;
-  const times = [segmentStart];
+  const times = eventPolicy.include_segment_start ? [segmentStart] : [];
 
-  for (const anchorTime of interiorF0Anchors) {
-    if (anchorTime > segmentStart + epsilon && anchorTime < segmentEnd - epsilon) {
-      times.push(anchorTime);
+  if (eventPolicy.include_f0_anchors) {
+    for (const anchorTime of interiorF0Anchors) {
+      if (anchorTime > segmentStart + epsilon && anchorTime < segmentEnd - epsilon) {
+        times.push(anchorTime);
+      }
     }
   }
 
-  if (steadyTime != null && steadyTime > segmentStart + epsilon && steadyTime < segmentEnd - epsilon) {
+  if (
+    eventPolicy.include_transition_steady_time &&
+    steadyTime != null &&
+    steadyTime > segmentStart + epsilon &&
+    steadyTime < segmentEnd - epsilon
+  ) {
     times.push(steadyTime);
   }
 
-  for (const window of controlWindows) {
-    const startTime = segmentStart + window.startSec;
-    const endTime = segmentStart + window.endSec;
-    if (startTime > segmentStart + epsilon && startTime < segmentEnd - epsilon) {
-      times.push(startTime);
-    }
-    if (endTime > segmentStart + epsilon && endTime < segmentEnd - epsilon) {
-      times.push(endTime);
+  if (eventPolicy.include_control_boundaries) {
+    for (const window of controlWindows) {
+      const startTime = segmentStart + window.startSec;
+      const endTime = segmentStart + window.endSec;
+      if (startTime > segmentStart + epsilon && startTime < segmentEnd - epsilon) {
+        times.push(startTime);
+      }
+      if (endTime > segmentStart + epsilon && endTime < segmentEnd - epsilon) {
+        times.push(endTime);
+      }
     }
   }
 
@@ -1414,6 +1424,7 @@ export function lowerControlScoreToKlattTrack(
         steadyTime,
         interiorF0Anchors,
         controlWindows,
+        loweringSpec.timeline.event_points,
         nextSegment == null && controlWindows.length > 0
       );
 

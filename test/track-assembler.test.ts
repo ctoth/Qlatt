@@ -240,6 +240,54 @@ describe("track-assembler", () => {
       expect(aaFrames[1].params.B1).toBe(200);
     });
 
+    it("emits only event classes enabled by the lowering spec", () => {
+      const spec: TrackLoweringSpec = {
+        ...TEST_LOWERING_SPEC,
+        timeline: {
+          ...TEST_LOWERING_SPEC.timeline,
+          initial_silence_ms: { value: 0, citations: ["test"] },
+          final_silence_ms: { value: 0, citations: ["test"] },
+          event_points: {
+            include_segment_start: false,
+            include_control_boundaries: true,
+            include_f0_anchors: false,
+            include_transition_steady_time: false,
+          },
+        },
+      };
+      const segments = [
+        makeSegment("seg_aa", "AA", "vowel", 100, { AV: 60, AH: 0, B1: 100, B2: 120, F1: 700, F2: 1200, F3: 2500 }),
+        makeSegment("seg_iy", "IY", "vowel", 100, { AV: 60, AH: 0, B1: 80, B2: 90, F1: 300, F2: 2200, F3: 2800 }),
+      ];
+
+      const track = lowerTestScore(
+        makeScore(segments, {
+          timed_controls: [
+            {
+              id: "control_aa",
+              target_segment_id: "seg_aa",
+              start_offset_ms: 40,
+              end_offset_ms: 60,
+              fields: { AH: { op: "set", value: 30 } },
+            },
+          ],
+          f0_points: [
+            {
+              id: "f0_mid",
+              timing: { kind: "absolute", time_ms: 50 },
+              value_hz: 140,
+            },
+          ],
+        }),
+        { spec, transitionMs: 30 },
+      );
+
+      const aaTimes = track
+        .filter((frame) => frame.phoneme === "AA")
+        .map((frame) => Number(frame.time.toFixed(6)));
+      expect(aaTimes).toEqual([0.04, 0.06]);
+    });
+
     it("respects output.initial_silence_ms override when assembling", () => {
       const track = lowerTestScore(
         makeScore([

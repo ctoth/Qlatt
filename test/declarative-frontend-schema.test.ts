@@ -99,6 +99,26 @@ describe("declarative frontend schema coverage", () => {
     expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(true);
   });
 
+  it("allows engine-only specs to omit track lowering output by default", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+    });
+
+    const codes = validateDslSpec(spec).map((d) => d.code);
+
+    expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(false);
+  });
+
+  it("requires track lowering output when strict rulepack validation is requested", () => {
+    const spec = parseDslSpec({
+      streams: { phone: { type: "base" } },
+    });
+
+    const codes = validateDslSpec(spec, { requireLoweringSpec: true }).map((d) => d.code);
+
+    expect(codes.includes("E_LOWERING_SPEC_REQUIRED")).toBe(true);
+  });
+
   it("validates cross references for streams, patterns, rules and phase resolution", () => {
     const spec = parseDslSpec({
       streams: {

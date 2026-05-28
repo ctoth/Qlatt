@@ -2033,11 +2033,10 @@ function validateLoweringSpec(
   diagnostics: ValidationDiagnostic[],
   options: ValidateDslSpecOptions,
 ): void {
-  const hasOutput = Object.prototype.hasOwnProperty.call(spec, "output");
-  if (!hasOutput && options.requireLoweringSpec !== true) {
-    return;
-  }
   if (!isPlainObject(spec.output)) {
+    if (options.requireLoweringSpec !== true) {
+      return;
+    }
     diagnostics.push(
       makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output")
     );
@@ -2045,6 +2044,9 @@ function validateLoweringSpec(
   }
   const lowering = spec.output.lowering;
   if (!isPlainObject(lowering)) {
+    if (options.requireLoweringSpec !== true) {
+      return;
+    }
     diagnostics.push(
       makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "Spec must declare output.lowering", "output.lowering")
     );

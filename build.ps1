@@ -16,6 +16,7 @@ cargo build --release --target wasm32-unknown-unknown -p fujisaki-resonator
 cargo build --release --target wasm32-unknown-unknown -p aerodynamic-model
 cargo build --release --target wasm32-unknown-unknown -p biquad-notch
 cargo build --release --target wasm32-unknown-unknown -p reconstruction-filter
+cargo build --release --target wasm32-unknown-unknown -p f0-filters
 
 $targetDir = "target/wasm32-unknown-unknown/release"
 $destDir = "public/worklets"
@@ -37,5 +38,6 @@ Copy-Item "$targetDir/fujisaki_resonator.wasm" "$destDir/fujisaki-resonator.wasm
 Copy-Item "$targetDir/aerodynamic_model.wasm" "$destDir/aerodynamic-model.wasm" -Force
 Copy-Item "$targetDir/biquad_notch.wasm" "$destDir/biquad-notch.wasm" -Force
 Copy-Item "$targetDir/reconstruction_filter.wasm" "$destDir/reconstruction-filter.wasm" -Force
+Copy-Item "$targetDir/f0_filters.wasm" "$destDir/f0-filters.wasm" -Force
 
 Write-Host "WASM artifacts copied to $destDir."

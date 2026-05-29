@@ -38,6 +38,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "f0-filters"
+version = "0.1.0"
+dependencies = [
+ "klatt-wasm-common",
+]
+
+[[package]]
 name = "fujisaki-resonator"
 version = "0.1.0"
 dependencies = [

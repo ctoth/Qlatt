@@ -8,6 +8,7 @@ import { updateDiagnostics } from "./diagnostics.js";
 import { createKlattRuntime } from "../../src/klatt-runtime.ts";
 import { createKlattInterpreter } from "../../src/klatt-interpreter.ts";
 import { textToKlattTrack } from "../../src/tts-frontend";
+import { preloadF0Filters } from "../../src/f0-filters-loader.ts";
 import {
   summarizeTrack,
   summarizeParallel,
@@ -36,6 +37,10 @@ export function slugify(text) {
 
 export async function speak() {
   await state.ctx.resume();
+  // The layered-additive F0 renderer (dectalk-english) calls a synchronous
+  // WASM kernel; in the browser its bytes must be fetched and injected before
+  // the synchronous textToKlattTrack() below. Idempotent after the first call.
+  await preloadF0Filters(`${state.WORKLET_BASE_PATH}f0-filters.wasm`);
   const phrase = document.getElementById("phrase").value.trim();
   const baseF0 = Number(document.getElementById("baseF0").value) || 110;
   const rate = Number(document.getElementById("rate").value) || 1.0;

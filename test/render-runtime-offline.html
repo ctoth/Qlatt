@@ -12,6 +12,9 @@
       import { createKlattInterpreter } from "../src/klatt-interpreter.ts";
       import { summarizeTrack } from "../src/rendering/track-summary.ts";
       import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
+      import { preloadF0Filters } from "../src/f0-filters-loader.ts";
+
+      const F0_FILTERS_WASM_URL = `${import.meta.env.BASE_URL}worklets/f0-filters.wasm`;
 
       async function renderOfflineRuntime({
         phrase,
@@ -26,6 +29,11 @@
         track,
         includeTrack = false,
       }) {
+        // Layered-additive F0 frontends (e.g. dectalk-english) call a
+        // synchronous WASM kernel; preload its bytes before the sync call.
+        if (!Array.isArray(track)) {
+          await preloadF0Filters(F0_FILTERS_WASM_URL);
+        }
         const frontend = Array.isArray(track)
           ? { track, frontendPhones: [] }
           : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {

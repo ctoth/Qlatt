@@ -9,6 +9,7 @@
 import {
   fillDefaultParams,
 } from "./declarative-frontend/inventory";
+import { getF0FilterExports, RENDER_OK } from "./f0-filters-loader";
 import type {
   InventorySpec,
 } from "./declarative-frontend/inventory";
@@ -614,13 +615,6 @@ export function onePoleLowpass(
 // Layer rendering helpers
 // ---------------------------------------------------------------------------
 
-/** State for a single active impulse. */
-type ActiveImpulse = {
-  value: number;
-  decay: number;
-  remainingFrames: number;
-};
-
 /**
  * Interpolate a piecewise-linear profile at a given normalized position [0, 1].
  * The profile is defined by N equidistant control points spanning [0, 1].
@@ -713,8 +707,6 @@ export function renderLayeredF0(
   const filterCoeffs = usesOnePoleFilter
     ? null
     : computeButterworth2Coefficients(cutoffHz, sampleRate);
-  const filterState = usesOnePoleFilter ? null : createFilterState();
-  const onePoleState = usesOnePoleFilter ? createOnePoleFilterState() : null;
 
   // Resolve speaker scaling parameters.
   const scaleConfig = modelConfig.speaker_scale;
@@ -760,178 +752,218 @@ export function renderLayeredF0(
     }
   }
 
-  // Per-layer state.
-  const persistentLevels = new Map<string, number>();
-  const activeImpulses = new Map<string, ActiveImpulse[]>();
-  const profileData = new Map<string, number[]>();
-
+  // Pre-fill steady-state value to avoid the IIR startup transient.
+  // Computed from commands at time <= 0 and profile layers at normalized
+  // position 0.  interpolateProfile(points, 0) === points[0] exactly, so this
+  // is bit-identical to evaluating the profile interpolation in the kernel.
+  let initTotal = 0;
   for (const name of layerNames) {
     const cfg = modelConfig.layers[name];
-    if (cfg.type === "persistent") persistentLevels.set(name, 0);
-    if (cfg.type === "impulse") activeImpulses.set(name, []);
-    if (cfg.type === "profile") profileData.set(name, []);
+    const cmds = commandsByLayer.get(name)!;
+    if (cfg.type === "persistent") {
+      let level = 0;
+      for (const cmd of cmds) {
+        if (cmd.time <= framePeriod * 0.5) level += cmd.value;
+        else break;
+      }
+      initTotal += level;
+    } else if (cfg.type === "profile") {
+      for (const cmd of cmds) {
+        if (cmd.time <= framePeriod * 0.5 && cmd.profilePoints && cmd.profilePoints.length > 0) {
+          initTotal += interpolateProfile(cmd.profilePoints, 0);
+        }
+      }
+    }
+    // Impulses start at 0 and decay, so they don't contribute to steady-state.
   }
 
-  // Per-layer command cursors.
-  const commandCursors = new Map<string, number>();
+  // ----- Marshal config + layers + commands into flat f64 buffers for the
+  // f0-filters WASM kernel.  The per-frame DSP loop (command processing, layer
+  // summation, IIR filtering, speaker scaling, clamp, impulse decay) lives in
+  // crates/f0-filters; this is a byte-exact extraction (f64 throughout).
+  const DECAY_MODE_CODES: Record<DecayMode, number> = {
+    halving: 0,
+    linear: 1,
+    exponential: 2,
+  };
+  // Sentinel for a truthy-but-unsupported decay string. The kernel's decay
+  // switch has a no-op default for any unrecognized code, exactly reproducing
+  // master's behavior (an unsupported decay matched no branch → impulse value
+  // left unchanged until removal). Must NOT collide with 0/1/2.
+  const DECAY_MODE_UNKNOWN = -1;
+  const LAYER_TYPE_CODES: Record<LayerType, number> = {
+    profile: 0,
+    persistent: 1,
+    impulse: 2,
+  };
+  const LAYER_STRIDE = 7;
+  const CMD_STRIDE = 5;
+
+  // The frame loop processes a command only when its cursor reaches it, i.e.
+  // when `cmd.time <= time + framePeriod*0.5` for some rendered frame. The
+  // largest such threshold occurs at the final frame. The cursor advances in
+  // array order and STOPS at the first command failing this test (a NaN time
+  // never satisfies it and freezes the cursor). master validated
+  // `durationFrames` only for commands the loop actually processed, so we
+  // replicate that exact reachability here — eager validation of unreachable or
+  // NaN-time commands would throw where master did not.
+  const maxProcessThreshold =
+    numFrames > 0 ? (numFrames - 1) * framePeriod + framePeriod * 0.5 : Number.NEGATIVE_INFINITY;
+
+  // Flatten per-layer command lists (preserving order) and pool profile points.
+  const layerDescs: number[] = [];
+  const cmdDescs: number[] = [];
+  const profilePool: number[] = [];
   for (const name of layerNames) {
-    commandCursors.set(name, 0);
-  }
+    const cfg = modelConfig.layers[name];
+    const cmds = commandsByLayer.get(name)!;
+    const cmdStart = cmdDescs.length / CMD_STRIDE;
 
-  // Pre-fill filter state to avoid startup transient.
-  // Compute the initial steady-state value from commands at time <= 0 and
-  // profile layers at normalized position 0.  This lets the IIR filter start
-  // converged instead of ramping from zero.
-  {
-    let initTotal = 0;
-    for (const name of layerNames) {
-      const cfg = modelConfig.layers[name];
-      const cmds = commandsByLayer.get(name)!;
-      if (cfg.type === "persistent") {
-        let level = 0;
-        for (const cmd of cmds) {
-          if (cmd.time <= framePeriod * 0.5) level += cmd.value;
-          else break;
-        }
-        initTotal += level;
-      } else if (cfg.type === "profile") {
-        for (const cmd of cmds) {
-          if (cmd.time <= framePeriod * 0.5 && cmd.profilePoints && cmd.profilePoints.length > 0) {
-            initTotal += interpolateProfile(cmd.profilePoints, 0);
-          }
-        }
-      }
-      // Impulses start at 0 and decay, so they don't contribute to the initial steady-state.
-    }
-    if (initTotal !== 0) {
-      if (usesOnePoleFilter) {
-        onePoleState!.y = initTotal;
-      } else {
-        filterState!.y1 = initTotal;
-        filterState!.y2 = initTotal;
-        filterState!.x1 = initTotal;
-        filterState!.x2 = initTotal;
-      }
-    }
-  }
-
-  // Process frames.
-  const rawF0Values = new Float64Array(numFrames);
-
-  for (let frame = 0; frame < numFrames; frame++) {
-    const time = frame * framePeriod;
-
-    // Process pending commands for each layer up to current time.
-    for (const name of layerNames) {
-      const cfg = modelConfig.layers[name];
-      const cmds = commandsByLayer.get(name)!;
-      let cursor = commandCursors.get(name)!;
-
-      while (cursor < cmds.length && cmds[cursor].time <= time + framePeriod * 0.5) {
-        const cmd = cmds[cursor];
-
-        if (cfg.type === "persistent") {
-          const current = persistentLevels.get(name) ?? 0;
-          persistentLevels.set(name, current + cmd.value);
-        } else if (cfg.type === "impulse") {
-          const impulses = activeImpulses.get(name)!;
-          const durationFrames = requirePositiveModelNumber(
-            cmd.durationFrames,
-            `f0_layer.${name}.durationFrames`,
-          );
-          impulses.push({
-            value: cmd.value,
-            decay: cmd.value / (cfg.initial_decay_divisor ?? IMPULSE_INITIAL_DECAY_DIVISOR_DEFAULT),
-            remainingFrames: durationFrames,
-          });
-        } else if (cfg.type === "profile") {
-          if (cmd.profilePoints && cmd.profilePoints.length > 0) {
-            profileData.set(name, cmd.profilePoints);
-          }
-        }
-
-        cursor++;
-      }
-      commandCursors.set(name, cursor);
-    }
-
-    // Sum all layers.
-    let total = 0;
-
-    for (const name of layerNames) {
-      const cfg = modelConfig.layers[name];
-
-      if (cfg.type === "profile") {
-        const points = profileData.get(name);
-        if (points && points.length > 0) {
-          const normalizedPos = totalDuration > 0 ? time / totalDuration : 0;
-          total += interpolateProfile(points, normalizedPos);
-        }
-      } else if (cfg.type === "persistent") {
-        total += persistentLevels.get(name) ?? 0;
-      } else if (cfg.type === "impulse") {
-        const impulses = activeImpulses.get(name)!;
-        for (const imp of impulses) {
-          total += imp.value;
-        }
-      }
-    }
-
-    // Apply IIR low-pass filter.
-    const filtered = usesOnePoleFilter
-      ? onePoleLowpass(total, onePoleState!, onePoleAlpha)
-      : iirFilter2Pole(total, filterState!, filterCoeffs!);
-
-    // Speaker scaling: only when speaker_scale is configured in the model.
-    // When speaker_scale is absent, the filtered value is used directly as Hz.
-    // When present, applies the DECtalk formula (Ph_drwt02.c line 2309):
-    //   f0prime = f0minimum + frac4mul(f0prime - 1300, f0scalefac)
-    // where frac4mul(x,y) = (x * y) >> 12 = x * y / 4096
-    // The result is in Hz*10, so divide by 10 for final Hz.
-    // Citation: DECtalk 4.63 Ph_drwt02.c (speaker-dependent F0 scaling)
-    let f0Hz: number;
-    if (scaleConfig) {
-      f0Hz = (f0Minimum + (filtered - f0Reference) * f0ScaleFactor / scaleDivisor) * scaleOutput;
-      f0Hz += baseF0BiasHz;
-    } else {
-      f0Hz = filtered;
-    }
-    f0Hz = Math.max(minHz, Math.min(maxHz, f0Hz));
-    rawF0Values[frame] = f0Hz;
-
-    // Advance impulse decay for all impulse layers.
-    for (const name of layerNames) {
-      const cfg = modelConfig.layers[name];
-      if (cfg.type !== "impulse") continue;
+    // Validate per-layer fields exactly where the TS reference did (so the
+    // same inputs throw the same errors).
+    let decayCode = 0;
+    let terminationThreshold = 0;
+    let exponentialFactor = 0;
+    let initialDecayDivisor = 0;
+    if (cfg.type === "impulse") {
+      // master: `if (!cfg.decay) throw` runs on the first frame for every
+      // impulse layer regardless of whether it has commands.
       if (!cfg.decay) {
         throw new Error(`E_F0_MODEL_REQUIRED: f0_model.layers.${name}.decay is required`);
       }
-      const decayMode = cfg.decay;
-      const impulses = activeImpulses.get(name)!;
-      const terminationThreshold =
-        cfg.termination_threshold ?? IMPULSE_TERMINATION_THRESHOLD_DEFAULT;
-      const exponentialFactor =
-        cfg.exponential_factor ?? IMPULSE_EXPONENTIAL_FACTOR_DEFAULT;
+      decayCode = DECAY_MODE_CODES[cfg.decay] ?? DECAY_MODE_UNKNOWN;
+      terminationThreshold = cfg.termination_threshold ?? IMPULSE_TERMINATION_THRESHOLD_DEFAULT;
+      exponentialFactor = cfg.exponential_factor ?? IMPULSE_EXPONENTIAL_FACTOR_DEFAULT;
+      initialDecayDivisor = cfg.initial_decay_divisor ?? IMPULSE_INITIAL_DECAY_DIVISOR_DEFAULT;
+    }
 
-      for (let i = impulses.length - 1; i >= 0; i--) {
-        const imp = impulses[i];
-        imp.remainingFrames--;
+    // Track whether the cursor is still "live": once a command fails the
+    // reachability test the cursor freezes and no later command is processed.
+    let cursorLive = true;
+    for (const cmd of cmds) {
+      const reachable = cursorLive && cmd.time <= maxProcessThreshold;
+      if (!reachable) cursorLive = false;
 
-        if (imp.remainingFrames <= 0 || Math.abs(imp.value) < terminationThreshold) {
-          impulses.splice(i, 1);
-          continue;
+      let durationFrames = 0;
+      let profileStart = 0;
+      let profileCount = 0;
+      if (cfg.type === "impulse") {
+        // Validate (and thus possibly throw) only for commands the frame loop
+        // would actually process — matching master's trigger condition.
+        if (reachable) {
+          durationFrames = requirePositiveModelNumber(
+            cmd.durationFrames,
+            `f0_layer.${name}.durationFrames`,
+          );
+        } else if (typeof cmd.durationFrames === "number" && Number.isFinite(cmd.durationFrames)) {
+          // Unreachable command: pass its raw duration through (the kernel will
+          // not process it, so the value is inert), but never throw.
+          durationFrames = cmd.durationFrames;
         }
-
-        if (decayMode === "halving") {
-          imp.value -= imp.decay;
-          imp.decay = imp.decay / 2;
-        } else if (decayMode === "linear") {
-          imp.value -= imp.decay;
-        } else if (decayMode === "exponential") {
-          imp.value *= exponentialFactor;
+      } else if (cfg.type === "profile") {
+        if (cmd.profilePoints && cmd.profilePoints.length > 0) {
+          profileStart = profilePool.length;
+          profileCount = cmd.profilePoints.length;
+          for (const p of cmd.profilePoints) profilePool.push(p);
         }
       }
+      cmdDescs.push(cmd.time, cmd.value, durationFrames, profileStart, profileCount);
     }
+
+    const cmdCount = cmds.length;
+    layerDescs.push(
+      LAYER_TYPE_CODES[cfg.type],
+      decayCode,
+      initialDecayDivisor,
+      terminationThreshold,
+      exponentialFactor,
+      cmdStart,
+      cmdCount,
+    );
+  }
+
+  const nLayers = layerNames.length;
+  const nCmds = cmdDescs.length / CMD_STRIDE;
+  const nProfiles = profilePool.length;
+
+  // Scalar header (must match the index layout in crates/f0-filters/src/lib.rs).
+  const scalars = [
+    framePeriod,
+    totalDuration,
+    usesOnePoleFilter ? 1 : 0,
+    onePoleAlpha,
+    filterCoeffs?.b0 ?? 0,
+    filterCoeffs?.b1 ?? 0,
+    filterCoeffs?.b2 ?? 0,
+    filterCoeffs?.a1 ?? 0,
+    filterCoeffs?.a2 ?? 0,
+    scaleConfig ? 1 : 0,
+    f0Minimum,
+    f0ScaleFactor,
+    f0Reference,
+    scaleDivisor,
+    scaleOutput,
+    baseF0BiasHz,
+    minHz,
+    maxHz,
+    initTotal,
+  ];
+
+  const exports = getF0FilterExports();
+  const f64 = (values: number[] | Float64Array): { ptr: number; len: number } => {
+    const len = values.length;
+    if (len === 0) return { ptr: 0, len: 0 };
+    const ptr = exports.alloc_f64(len);
+    new Float64Array(exports.memory.buffer, ptr, len).set(values);
+    return { ptr, len };
+  };
+
+  // Allocate every buffer into zero-initialized pointer records so the
+  // finally block can free whatever was actually allocated, even if a later
+  // allocation, the render_f0 call, or the readback throws/traps. Leaking into
+  // the cached singleton instance would otherwise grow its memory unboundedly.
+  let scalarsBuf = { ptr: 0, len: 0 };
+  let layersBuf = { ptr: 0, len: 0 };
+  let cmdsBuf = { ptr: 0, len: 0 };
+  let profilesBuf = { ptr: 0, len: 0 };
+  let outPtr = 0;
+  let rawF0Values: Float64Array;
+  try {
+    scalarsBuf = f64(scalars);
+    layersBuf = f64(layerDescs);
+    cmdsBuf = f64(cmdDescs);
+    profilesBuf = f64(profilePool);
+    outPtr = exports.alloc_f64(numFrames);
+
+    const status = exports.render_f0(
+      scalarsBuf.ptr,
+      scalarsBuf.len,
+      layersBuf.ptr,
+      nLayers,
+      cmdsBuf.ptr,
+      nCmds,
+      profilesBuf.ptr,
+      nProfiles,
+      outPtr,
+      numFrames,
+    );
+    if (status !== RENDER_OK) {
+      // Malformed FFI shape: the kernel left the output untouched rather than
+      // trapping. Surface it instead of silently returning zeros.
+      throw new Error(`E_F0_RENDER_FAILED: f0-filters render_f0 returned status ${status}`);
+    }
+
+    // Read the rendered F0 values back out of WASM memory. Re-create the view
+    // after the call in case any allocation grew (and detached) the buffer.
+    rawF0Values = new Float64Array(
+      new Float64Array(exports.memory.buffer, outPtr, numFrames),
+    );
+  } finally {
+    if (scalarsBuf.ptr) exports.dealloc_f64(scalarsBuf.ptr, scalarsBuf.len);
+    if (layersBuf.ptr) exports.dealloc_f64(layersBuf.ptr, layersBuf.len);
+    if (cmdsBuf.ptr) exports.dealloc_f64(cmdsBuf.ptr, cmdsBuf.len);
+    if (profilesBuf.ptr) exports.dealloc_f64(profilesBuf.ptr, profilesBuf.len);
+    if (outPtr) exports.dealloc_f64(outPtr, numFrames);
   }
 
   // Convert to F0Point[] for the track assembler to query.

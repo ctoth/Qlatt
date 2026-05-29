@@ -9,6 +9,9 @@
     <script type="module">
       import { KlattSynth } from "../src/klatt-synth.ts";
       import { textToKlattTrackDetailed } from "../src/tts-frontend.ts";
+      import { preloadF0Filters } from "../src/f0-filters-loader.ts";
+
+      const F0_FILTERS_WASM_URL = `${import.meta.env.BASE_URL}worklets/f0-filters.wasm`;
 
       function summarizeTrack(track) {
         const totalTime = track.length ? track[track.length - 1].time : 0;
@@ -48,6 +51,11 @@
         openPhaseRatio,
         noiseSeed,
       }) {
+        // Layered-additive F0 frontends (e.g. dectalk-english) call a
+        // synchronous WASM kernel; preload its bytes before the sync call.
+        if (!Array.isArray(track)) {
+          await preloadF0Filters(F0_FILTERS_WASM_URL);
+        }
         const frontend = Array.isArray(track)
           ? { track, frontendPhones: [] }
           : textToKlattTrackDetailed(phrase, baseF0, transitionMs, {

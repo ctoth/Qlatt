@@ -1011,22 +1011,115 @@ function getInteriorF0AnchorTimes(
 // DEFAULT_* constants removed — all values now read from the validated lowering spec.
 // Citation: each value is cited in the YAML source.
 
-function blendParams(
-  baseParams: KlattParams,
-  nextParams: KlattParams | null | undefined,
+// ---------------------------------------------------------------------------
+// Generic inter-segment boundary-value transition primitive
+//
+// DECtalk model (notes/chunk-dt-tier4-transition-design.md §1.0): a transition
+// is a boundary value `bouval` placed AT a segment edge that ramps LINEARLY to
+// the segment's steady target over a span. Two edges per segment:
+//   - "forward"  smoothing = the segment START edge (boundary with previous).
+//   - "backward" smoothing = the segment END   edge (boundary with next).
+// DECtalk's no-locus DEFAULT boundary value is the 50% neighbor midpoint
+// (`(tarend+tarnex)/2` backward), which is exactly Qlatt's legacy symmetric
+// blend. This primitive generalizes that single fixed midpoint blend into a
+// per-parameter, per-edge boundary value + span, where the boundary value and
+// span are supplied by a resolver. A LATER chunk (t4a-data) overrides the
+// resolver to inject locus-derived boundary values and per-parameter `durtran`
+// spans; in THIS chunk the resolver returns the legacy midpoint + shared span,
+// so output is byte-identical.
+//
+// The primitive is GENERIC: it is driven entirely by the `transitions` config
+// (keys, factor, smooth_types, span). No frontend-name or per-phoneme literals.
+// ---------------------------------------------------------------------------
+
+type BoundaryEdge = "forward" | "backward";
+
+/**
+ * Per-(parameter,edge) boundary value and ramp span resolved for a boundary.
+ * - `value` is the parameter value AT the segment edge (`bouval`); the track
+ *   ramps linearly between this and the segment's steady target across `spanSec`.
+ * - `spanSec` is the transition duration (`durtran`) for this parameter/edge.
+ *   A later chunk may vary it per parameter; today it is the shared span.
+ */
+type BoundaryValue = {
+  value: number;
+  spanSec: number;
+};
+
+/**
+ * Resolves the boundary value (`bouval`) for one smoothed parameter at one
+ * segment edge. Returning `null` means "no transition for this parameter/edge"
+ * (the steady target is held). The default resolver reproduces the legacy
+ * symmetric 50% midpoint blend; a later chunk supplies a locus-aware resolver.
+ */
+type BoundaryValueResolver = (args: {
+  key: string;
+  edge: BoundaryEdge;
+  steadyParams: KlattParams;
+  neighborParams: KlattParams | null | undefined;
+  spanSec: number;
+  factor: number;
+}) => BoundaryValue | null;
+
+/**
+ * Legacy resolver: `bouval = steady + (neighbor - steady) * factor` with the
+ * shared span. With `factor = 0.5` this is the 50% midpoint between this
+ * segment's steady value and the neighbor's steady value — byte-identical to
+ * the previous `blendParams` behavior.
+ */
+const midpointBoundaryResolver: BoundaryValueResolver = ({
+  key,
+  steadyParams,
+  neighborParams,
+  spanSec,
+  factor,
+}) => {
+  if (!neighborParams) return null;
+  const a = steadyParams[key];
+  const b = neighborParams[key];
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return { value: a + (b - a) * factor, spanSec };
+};
+
+/**
+ * Generic boundary-value transition primitive.
+ *
+ * Produces the parameter set that holds AT the segment edge (the `bouval` set):
+ * for each smoothed key it asks the resolver for a boundary value; keys with no
+ * boundary value retain their steady target. The interpreter then ramps
+ * linearly between the steady params (held until `steadyTime`) and this returned
+ * set, reproducing the linear boundary-value ramp.
+ *
+ * In this chunk only the END (backward) edge is emitted with the shared span,
+ * matching legacy behavior exactly. The `edge`/`spanSec` plumbing exists so a
+ * later chunk can emit per-parameter forward and backward edges with locus
+ * boundary values and per-parameter spans WITHOUT another engine change.
+ */
+function resolveBoundaryParams(
+  steadyParams: KlattParams,
+  neighborParams: KlattParams | null | undefined,
   blendKeys: string[],
-  blendFactor: number,
+  factor: number,
+  spanSec: number,
+  edge: BoundaryEdge,
+  resolver: BoundaryValueResolver = midpointBoundaryResolver,
 ): KlattParams {
-  if (!nextParams) return { ...baseParams };
-  const blended = { ...baseParams };
+  if (!neighborParams) return { ...steadyParams };
+  const result = { ...steadyParams };
   for (const key of blendKeys) {
-    const a = baseParams[key];
-    const b = nextParams[key];
-    if (Number.isFinite(a) && Number.isFinite(b)) {
-      blended[key] = a + (b - a) * blendFactor;
+    const boundary = resolver({
+      key,
+      edge,
+      steadyParams,
+      neighborParams,
+      spanSec,
+      factor,
+    });
+    if (boundary != null && Number.isFinite(boundary.value)) {
+      result[key] = boundary.value;
     }
   }
-  return blended;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -1361,7 +1454,14 @@ export function lowerControlScoreToKlattTrack(
         : null;
       const transitionParams =
         steadyTime && steadyTime > segmentStart && steadyTime < targetTime
-          ? blendParams(finalParams, nextParams, blendKeys, blendFactor)
+          ? resolveBoundaryParams(
+              finalParams,
+              nextParams,
+              blendKeys,
+              blendFactor,
+              phTransitionSec,
+              "backward",
+            )
           : null;
       const eventTimes = buildSegmentEventTimes(
         segmentStart,

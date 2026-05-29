@@ -172,6 +172,12 @@ function applySpeakerProfileToParams(
     rd_ref: number;
     spectral_tilt_offset_db: number;
   },
+  voiceFrameStamp?: {
+    /** Full numeric parameter record of the selected voice. */
+    params: Record<string, number>;
+    /** Declared list of fields to stamp (absolute set) onto frame params. */
+    fields: readonly string[];
+  },
 ): void {
   if (!params) return;
 
@@ -186,6 +192,23 @@ function applySpeakerProfileToParams(
       const value = params[key];
       if (typeof value === "number" && Number.isFinite(value) && value > 0) {
         params[key] = value * speaker.formant_scale;
+      }
+    }
+  }
+
+  // Generic, data-declared speaker-field -> frame-param stamping. The set of
+  // fields is data (frontend.yaml `speakers.speaker_frame_params`); the loop is
+  // a voice-agnostic copy with no per-voice or per-field branches. DECtalk voice
+  // formants are ABSOLUTE speaker-config values (ph_vset.c writes them once into
+  // the chip's resonator registers), so they are SET after the formant_scale
+  // loop — they are not re-multiplied by formant_scale. The selected voice's
+  // value overrides the inventory base_params default for that frame param.
+  // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent resonator config).
+  if (voiceFrameStamp) {
+    for (const field of voiceFrameStamp.fields) {
+      const value = voiceFrameStamp.params[field];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        params[field] = value;
       }
     }
   }
@@ -261,15 +284,16 @@ function buildTextToKlattTrackDetailed(
   // branches; the registry maps names to YAML files.
   let speakerOverride: SpeakerProfileOverride | undefined;
   let selectedVoice: ResolvedVoice | null = null;
+  let voiceRegistry: ReturnType<typeof getVoiceRegistry> = null;
   if (typeof options.speaker === "string") {
-    const registry = getVoiceRegistry(frontendSpec);
-    if (!registry) {
+    voiceRegistry = getVoiceRegistry(frontendSpec);
+    if (!voiceRegistry) {
       throw new Error(
         `E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' declares no speakers registry; ` +
           `cannot select voice '${options.speaker}'`,
       );
     }
-    selectedVoice = resolveVoice(registry, options.speaker);
+    selectedVoice = resolveVoice(voiceRegistry, options.speaker);
     speakerOverride = selectedVoice.override;
   } else {
     speakerOverride = options.speaker;
@@ -553,6 +577,14 @@ function buildTextToKlattTrackDetailed(
       },
     },
   }));
+  // Build the generic per-frame voice stamp: the selected voice's numeric params
+  // plus the frontend's data-declared `speaker_frame_params` field list. When no
+  // voice is selected (default) or the list is empty, no stamp is applied — the
+  // default voice stays byte-identical. No per-voice branches: both pieces are data.
+  const voiceFrameStamp =
+    selectedVoice && voiceRegistry && voiceRegistry.speakerFrameParams.length > 0
+      ? { params: selectedVoice.params, fields: voiceRegistry.speakerFrameParams }
+      : undefined;
   parameterSequence = parameterSequence.map((token: PipelineToken) => {
     if (
       token?.stream === "f0" ||
@@ -566,7 +598,12 @@ function buildTextToKlattTrackDetailed(
       ...token,
       params: { ...(token.params as Record<string, number>) },
     };
-    applySpeakerProfileToParams(nextToken.params, resolvedSpeaker, sourceContour.baseline);
+    applySpeakerProfileToParams(
+      nextToken.params,
+      resolvedSpeaker,
+      sourceContour.baseline,
+      voiceFrameStamp,
+    );
     return nextToken;
   });
   const phoneSequence = parameterSequence.filter(

@@ -23,6 +23,24 @@ include:
 speakers:
   dir: /rules/frontends/dectalk-english/speakers
   default: paul
+  # Declarative speaker-field -> frame-param bindings. Each name in this list is
+  # BOTH the voice-YAML field and the same-named per-frame Klatt param; the
+  # selected voice's value is stamped (absolute set) onto every frame's params,
+  # overriding the inventory base_params default. This is the generic mechanism
+  # that lets a voice's higher-formant timbre shape audio (not just pitch).
+  #
+  # Scope = [F4, B4] only. F5/B5 are deliberately EXCLUDED: every DECtalk voice
+  # stores F5=B5=6000 (identical across voices, so they cannot distinguish a
+  # voice) while the inventory default is F5=4500/B5=600 — stamping them would
+  # silently change the default voice (Paul) without any per-voice benefit.
+  # F4/B4 differ between voices (Paul 3500/260, Betty 4550/400) yet Paul's equal
+  # the inventory default, so Paul stays byte-identical. Adding more fields here
+  # later is a pure data edit; the TS is a generic copy loop with no per-voice or
+  # per-field branches.
+  # Citation: DECtalk 4.63 ph_vset.c (F4->r4cb, B4->r4cc speaker config).
+  speaker_frame_params:
+    - F4
+    - B4
   voices:
     - paul
     - harry

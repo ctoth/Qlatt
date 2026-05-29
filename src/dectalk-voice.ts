@@ -15,6 +15,10 @@ export interface VoiceRegistry {
   dir: string;
   default: string;
   voices: string[];
+  /** Declarative list of speaker fields stamped (absolute set) onto every
+   *  frame's same-named Klatt param. Pure data — the TS applies it generically
+   *  with no per-voice or per-field branches. Empty when not declared. */
+  speakerFrameParams: string[];
 }
 
 export interface ResolvedVoice {
@@ -49,7 +53,10 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
   const voices = Array.isArray(speakers.voices)
     ? speakers.voices.filter((v): v is string => typeof v === "string")
     : [];
-  return { dir, default: def, voices };
+  const speakerFrameParams = Array.isArray(speakers.speaker_frame_params)
+    ? speakers.speaker_frame_params.filter((v): v is string => typeof v === "string")
+    : [];
+  return { dir, default: def, voices, speakerFrameParams };
 }
 
 function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {

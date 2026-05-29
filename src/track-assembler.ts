@@ -60,6 +60,22 @@ type CitedNumberSpec = {
   citations?: string[];
 };
 
+/** One formant's locus entry: target locus + percent kept toward vowel + span. */
+type LocusEntry = {
+  locus_hz: number;
+  prcnt: number;
+  durtran_ms: number;
+};
+
+/** Per-formant locus entries for one (obstruent, vowel-category) pairing. */
+type LocusFormantBlock = Record<string, LocusEntry>;
+
+/** loci[obstruentPhoneme][sontyx "1"|"2"|"3"][formant] -> LocusEntry. */
+type LocusTable = Record<string, Record<string, LocusFormantBlock>>;
+
+/** vowel_category[sonorantPhoneme] -> per-edge sontyx (1|2|3). */
+type VowelCategoryTable = Record<string, { forward?: number; backward?: number }>;
+
 export type TrackLoweringSpec = {
   id: string;
   timeline: {
@@ -83,6 +99,25 @@ export type TrackLoweringSpec = {
       keys: string[];
       smooth_types: string[];
     };
+    /**
+     * Optional obstruent->sonorant formant LOCUS data (DECtalk-style). When
+     * present, a vowel adjacent to an obstruent ramps F1-F3 toward the
+     * consonant's locus at that edge (forward = vowel-after-obstruent start,
+     * backward = vowel-before-obstruent end). DATA only: per obstruent phoneme
+     * -> per vowel-category sontyx ("1"|"2"|"3") -> per formant (F1/F2/F3) ->
+     * {locus_hz, prcnt, durtran_ms}. A frontend that omits this keeps the
+     * legacy midpoint-only smoothing (no obstruent transitions). The engine is
+     * generic — zero per-phoneme literals; everything obstruent-specific is here.
+     * Citation: DECtalk 4.63 ph_sttr2.c setloc; p_us_rom.h us_maleloc.
+     */
+    loci?: LocusTable;
+    /**
+     * Optional sonorant vowel-category (sontyx) per phoneme per edge, used to
+     * select which `loci` sontyx block applies. forward edge uses begtyp,
+     * backward uses endtyp (clamped 1/2/3). A sonorant with no entry falls back
+     * to the legacy midpoint blend at that edge.
+     */
+    vowel_category?: VowelCategoryTable;
   };
   f0: {
     renderer: {
@@ -278,7 +313,8 @@ function buildSegmentEventTimes(
   interiorF0Anchors: number[],
   controlWindows: ResolvedControlWindow[],
   eventPolicy: TrackLoweringSpec["timeline"]["event_points"],
-  includeSegmentEnd = false
+  includeSegmentEnd = false,
+  forwardSteadyTime: number | null = null
 ): number[] {
   const epsilon = 1e-6;
   const times = eventPolicy.include_segment_start ? [segmentStart] : [];
@@ -298,6 +334,19 @@ function buildSegmentEventTimes(
     steadyTime < segmentEnd - epsilon
   ) {
     times.push(steadyTime);
+  }
+
+  // Forward (segment-start) locus transition: the inner edge of the start
+  // window needs an event point so the interpreter ramps from the boundary
+  // value (held at the start) up to the steady target at this time. Gated by
+  // the same event-point policy as the backward steady time.
+  if (
+    eventPolicy.include_transition_steady_time &&
+    forwardSteadyTime != null &&
+    forwardSteadyTime > segmentStart + epsilon &&
+    forwardSteadyTime < segmentEnd - epsilon
+  ) {
+    times.push(forwardSteadyTime);
   }
 
   if (eventPolicy.include_control_boundaries) {
@@ -330,21 +379,52 @@ function buildSegmentEventTimes(
   return deduped;
 }
 
+/**
+ * Per-segment boundary smoothing for the formant transition windows.
+ * - `backwardParams`/`backwardSteadyTime`: the END-edge boundary value held from
+ *   `backwardSteadyTime` to the segment end (events at/after it use these).
+ *   This is the legacy single transition window (midpoint or, when an obstruent
+ *   follows and locus data exists, the locus boundary value).
+ * - `forwardParams`/`forwardSteadyTime`: the optional START-edge boundary value
+ *   held from the segment start until `forwardSteadyTime` (events at/before it
+ *   use these), ramping toward steady. Used for a vowel preceded by an obstruent
+ *   (DECtalk forward smoothing). `null` when no forward locus applies.
+ */
+type SegmentBoundarySmoothing = {
+  backwardParams: KlattParams | null;
+  backwardSteadyTime: number | null;
+  forwardParams: KlattParams | null;
+  forwardSteadyTime: number | null;
+};
+
 function applyControlWindowsAtOffset(
   baseParams: KlattParams,
-  transitionParams: KlattParams | null,
-  steadyTime: number | null,
+  smoothing: SegmentBoundarySmoothing,
   segmentStart: number,
   eventTime: number,
   controlWindows: ResolvedControlWindow[]
 ): KlattParams {
   const epsilon = 1e-6;
   const segmentOffset = Math.max(0, eventTime - segmentStart);
-  const useTransitionParams =
-    steadyTime != null && eventTime >= steadyTime - epsilon && transitionParams != null;
-  const resolved: KlattParams = {
-    ...(useTransitionParams ? transitionParams : baseParams),
-  };
+
+  // Choose the boundary param set for this event. Forward (start) and backward
+  // (end) windows are disjoint in time by construction (forwardSteadyTime <=
+  // backwardSteadyTime), so at most one applies; the steady target applies in
+  // the interior between them.
+  const useForward =
+    smoothing.forwardParams != null &&
+    smoothing.forwardSteadyTime != null &&
+    eventTime <= smoothing.forwardSteadyTime + epsilon;
+  const useBackward =
+    smoothing.backwardParams != null &&
+    smoothing.backwardSteadyTime != null &&
+    eventTime >= smoothing.backwardSteadyTime - epsilon;
+
+  let source: KlattParams = baseParams;
+  if (useForward) source = smoothing.forwardParams as KlattParams;
+  else if (useBackward) source = smoothing.backwardParams as KlattParams;
+
+  const resolved: KlattParams = { ...source };
 
   for (const window of controlWindows) {
     if (segmentOffset + epsilon < window.startSec) continue;
@@ -1123,6 +1203,76 @@ function resolveBoundaryParams(
 }
 
 // ---------------------------------------------------------------------------
+// Locus-based obstruent<->sonorant boundary transitions (DECtalk-style)
+//
+// When the lowering spec declares `transitions.loci`, a vowel adjacent to an
+// obstruent ramps its F1-F3 toward the consonant's locus at that edge instead
+// of getting no transition (legacy behavior excluded obstruent boundaries
+// entirely). The mechanism is the same boundary-value linear ramp as the
+// midpoint blend, but the boundary value is `bouval = locus + prcnt*(curval -
+// locus)/100` (curval = the vowel's steady target), read from DATA.
+//
+// GENERIC: this code branches only on the existence of locus DATA and a generic
+// "is this neighbor an obstruent with locus data" check (neighbor not in
+// smooth_types AND its phoneme present in the loci table). There are no
+// per-phoneme or frontend-name literals — a frontend with no `loci` is a no-op.
+// Citation: DECtalk 4.63 ph_sttr2.c setloc (the bouval formula and indexing).
+// ---------------------------------------------------------------------------
+
+/** Result of resolving the locus window for one segment edge. */
+type LocusBoundary = {
+  /** Per-key boundary value (`bouval`) held AT the edge; ramps to steady. */
+  params: KlattParams;
+  /** Window span (seconds) = max per-formant durtran among the locus keys. */
+  spanSec: number;
+};
+
+/**
+ * Resolve the locus boundary for a sonorant `vowelSeg` at one `edge`, given the
+ * adjacent obstruent `obstruentSeg`. Returns `null` when no locus applies
+ * (missing data, no vowel category, no entry for this obstruent/category) so the
+ * caller falls back to the legacy behavior. Reads only the passed-in DATA.
+ */
+function resolveLocusBoundary(
+  steadyParams: KlattParams,
+  vowelPhoneme: string,
+  obstruentPhoneme: string,
+  edge: BoundaryEdge,
+  blendKeys: string[],
+  loci: LocusTable | undefined,
+  vowelCategory: VowelCategoryTable | undefined,
+): LocusBoundary | null {
+  if (!loci || !vowelCategory) return null;
+  const obstruentBlock = loci[obstruentPhoneme];
+  if (!obstruentBlock) return null;
+  const category = vowelCategory[vowelPhoneme];
+  if (!category) return null;
+  const sontyx = edge === "forward" ? category.forward : category.backward;
+  if (sontyx == null) return null;
+  const formantBlock = obstruentBlock[String(sontyx)];
+  if (!formantBlock) return null;
+
+  const params: KlattParams = { ...steadyParams };
+  let maxSpanSec = 0;
+  let applied = false;
+  for (const key of blendKeys) {
+    const entry = formantBlock[key];
+    if (!entry) continue; // only F1/F2/F3 have locus entries; B1-B3 keep steady
+    const curval = steadyParams[key];
+    if (!Number.isFinite(curval)) continue;
+    // bouval = locus + prcnt * (curval - locus) / 100  (ph_sttr2.c:328-329)
+    const bouval = entry.locus_hz + (entry.prcnt * (curval - entry.locus_hz)) / 100;
+    if (!Number.isFinite(bouval)) continue;
+    params[key] = bouval;
+    applied = true;
+    const spanSec = Math.max(0, entry.durtran_ms) / 1000;
+    if (spanSec > maxSpanSec) maxSpanSec = spanSec;
+  }
+  if (!applied || maxSpanSec <= 0) return null;
+  return { params, spanSec: maxSpanSec };
+}
+
+// ---------------------------------------------------------------------------
 // Voice quality overlay
 // ---------------------------------------------------------------------------
 
@@ -1373,6 +1523,31 @@ export function lowerControlScoreToKlattTrack(
   const blendFactor = requireCitedNumber(loweringSpec.transitions.blend.factor, "transitions.blend.factor");
   const blendKeys = loweringSpec.transitions.blend.keys;
   const smoothTypes = new Set(loweringSpec.transitions.blend.smooth_types);
+  // Optional locus data (DECtalk-style obstruent transitions). A frontend that
+  // omits `loci` keeps the legacy midpoint-only smoothing: every locus lookup
+  // returns null below, so the obstruent edges stay untouched (no-op).
+  const loci = loweringSpec.transitions.loci;
+  const vowelCategory = loweringSpec.transitions.vowel_category;
+  // Find the obstruent phoneme adjacent to a sonorant at `index`, scanning in
+  // `direction` (-1 = previous, +1 = next). A stop is represented as a closure
+  // segment plus glue release/aspiration segments (the shared engine convention:
+  // a `<base>` stop_closure followed by `<base>_REL` stop_release / aspiration),
+  // so we skip stop_release/stop_aspiration segments to reach the underlying
+  // obstruent — matching DECtalk's single `fonobst` per stop. Returns the
+  // obstruent phoneme only when it is NOT a smoothed sonorant type AND has a
+  // locus block; otherwise null. GENERIC: branches on `type` + locus DATA only,
+  // no per-phoneme or frontend-name literals.
+  const locusGlueTypes = new Set(["stop_release", "stop_aspiration"]);
+  const adjacentLocusObstruent = (index: number, direction: -1 | 1): string | null => {
+    if (loci == null) return null;
+    let j = index + direction;
+    while (score.segments[j] != null && locusGlueTypes.has(score.segments[j].type)) {
+      j += direction;
+    }
+    const seg = score.segments[j];
+    if (seg == null || smoothTypes.has(seg.type)) return null;
+    return loci[seg.phoneme] != null ? seg.phoneme : null;
+  };
   const initialSilenceMs = requireCitedNumber(loweringSpec.timeline.initial_silence_ms, "timeline.initial_silence_ms");
   const finalSilenceMs = requireCitedNumber(loweringSpec.timeline.final_silence_ms, "timeline.final_silence_ms");
   const timeline = buildScoreTimeline(score, loweringSpec, phonemeTargetMap);
@@ -1445,39 +1620,109 @@ export function lowerControlScoreToKlattTrack(
       const nextSegment = score.segments[i + 1];
       const nextParams = segmentParams[i + 1];
       const phTransitionSec = Math.max(0, segment.alignment.transition_ms ?? transitionMs) / 1000.0;
-      const canSmooth =
+      const isSmoothedSonorant = smoothTypes.has(segment.type);
+
+      // -------------------------------------------------------------------
+      // BACKWARD (segment END) edge.
+      // -------------------------------------------------------------------
+      let backwardParams: KlattParams | null = null;
+      let backwardSteadyTime: number | null = null;
+      // Legacy sonorant<->sonorant midpoint blend (UNCHANGED): both this and the
+      // next segment are smoothed types.
+      const canMidpointSmooth =
         phTransitionSec > 0 &&
-        smoothTypes.has(segment.type) &&
+        isSmoothedSonorant &&
         smoothTypes.has(nextSegment?.type);
-      const steadyTime = canSmooth
-        ? Math.max(segmentStart + 0.02, targetTime - phTransitionSec)
-        : null;
-      const transitionParams =
-        steadyTime && steadyTime > segmentStart && steadyTime < targetTime
-          ? resolveBoundaryParams(
+      if (canMidpointSmooth) {
+        const steadyTime = Math.max(segmentStart + 0.02, targetTime - phTransitionSec);
+        if (steadyTime > segmentStart && steadyTime < targetTime) {
+          backwardParams = resolveBoundaryParams(
+            finalParams,
+            nextParams,
+            blendKeys,
+            blendFactor,
+            phTransitionSec,
+            "backward",
+          );
+          backwardSteadyTime = steadyTime;
+        }
+      } else if (isSmoothedSonorant) {
+        // Vowel before an obstruent: ramp F1-F3 toward the obstruent's locus
+        // over the last `durtran` of this segment (DECtalk backward smoothing).
+        const obstruentPhoneme = adjacentLocusObstruent(i, 1);
+        const locus = obstruentPhoneme
+          ? resolveLocusBoundary(
               finalParams,
-              nextParams,
-              blendKeys,
-              blendFactor,
-              phTransitionSec,
+              segment.phoneme,
+              obstruentPhoneme,
               "backward",
+              blendKeys,
+              loci,
+              vowelCategory,
             )
           : null;
+        if (locus) {
+          const span = Math.min(locus.spanSec, phDuration);
+          const steadyTime = Math.max(segmentStart + 0.02, targetTime - span);
+          if (steadyTime > segmentStart && steadyTime < targetTime) {
+            backwardParams = locus.params;
+            backwardSteadyTime = steadyTime;
+          }
+        }
+      }
+
+      // -------------------------------------------------------------------
+      // FORWARD (segment START) edge — vowel after an obstruent.
+      // -------------------------------------------------------------------
+      let forwardParams: KlattParams | null = null;
+      let forwardSteadyTime: number | null = null;
+      const forwardObstruent = isSmoothedSonorant ? adjacentLocusObstruent(i, -1) : null;
+      if (forwardObstruent) {
+        const locus = resolveLocusBoundary(
+          finalParams,
+          segment.phoneme,
+          forwardObstruent,
+          "forward",
+          blendKeys,
+          loci,
+          vowelCategory,
+        );
+        if (locus) {
+          const span = Math.min(locus.spanSec, phDuration);
+          let candidate = Math.min(targetTime - 0.02, segmentStart + span);
+          // Keep the forward window from overrunning the backward window.
+          if (backwardSteadyTime != null) {
+            candidate = Math.min(candidate, backwardSteadyTime);
+          }
+          if (candidate > segmentStart && candidate < targetTime) {
+            forwardParams = locus.params;
+            forwardSteadyTime = candidate;
+          }
+        }
+      }
+
+      const smoothing: SegmentBoundarySmoothing = {
+        backwardParams,
+        backwardSteadyTime,
+        forwardParams,
+        forwardSteadyTime,
+      };
+
       const eventTimes = buildSegmentEventTimes(
         segmentStart,
         targetTime,
-        steadyTime,
+        backwardSteadyTime,
         interiorF0Anchors,
         controlWindows,
         loweringSpec.timeline.event_points,
-        nextSegment == null && controlWindows.length > 0
+        nextSegment == null && controlWindows.length > 0,
+        forwardSteadyTime
       );
 
       for (const eventTime of eventTimes) {
         const eventParams = applyControlWindowsAtOffset(
           finalParams,
-          transitionParams,
-          steadyTime,
+          smoothing,
           segmentStart,
           eventTime,
           controlWindows

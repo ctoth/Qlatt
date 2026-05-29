@@ -2048,6 +2048,87 @@ function validateEventPointPolicy(value: unknown, diagnostics: ValidationDiagnos
   }
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * Validate the optional obstruent<->sonorant locus tables. Both `loci` and
+ * `vowel_category` are optional. When present:
+ *   loci[obstruent][sontyx "1"|"2"|"3"][formant] -> {locus_hz, prcnt, durtran_ms}
+ *   vowel_category[sonorant] -> {forward?: 1|2|3, backward?: 1|2|3}
+ * The engine treats a missing/partial entry as "no locus" (legacy fallback), so
+ * this only flags structurally malformed data, not coverage gaps.
+ */
+function validateLocusTables(
+  loci: unknown,
+  vowelCategory: unknown,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (loci !== undefined) {
+    const base = "output.lowering.transitions.loci";
+    if (!isPlainObject(loci)) {
+      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+    } else {
+      for (const [obstruent, block] of Object.entries(loci)) {
+        const obPath = `${base}.${obstruent}`;
+        if (!isPlainObject(block)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${obPath} must be an object`, obPath));
+          continue;
+        }
+        for (const [sontyx, formants] of Object.entries(block)) {
+          const sxPath = `${obPath}.${sontyx}`;
+          if (sontyx !== "1" && sontyx !== "2" && sontyx !== "3") {
+            diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} key must be "1", "2", or "3"`, sxPath));
+          }
+          if (!isPlainObject(formants)) {
+            diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} must be an object`, sxPath));
+            continue;
+          }
+          for (const [formant, entry] of Object.entries(formants)) {
+            const fPath = `${sxPath}.${formant}`;
+            if (!isPlainObject(entry)) {
+              diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath} must be an object`, fPath));
+              continue;
+            }
+            for (const field of ["locus_hz", "prcnt", "durtran_ms"]) {
+              if (!isFiniteNumber((entry as Record<string, unknown>)[field])) {
+                diagnostics.push(
+                  makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath}.${field} must be a finite number`, `${fPath}.${field}`)
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (vowelCategory !== undefined) {
+    const base = "output.lowering.transitions.vowel_category";
+    if (!isPlainObject(vowelCategory)) {
+      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+    } else {
+      for (const [sonorant, edges] of Object.entries(vowelCategory)) {
+        const sPath = `${base}.${sonorant}`;
+        if (!isPlainObject(edges)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sPath} must be an object`, sPath));
+          continue;
+        }
+        for (const edge of ["forward", "backward"]) {
+          const value = (edges as Record<string, unknown>)[edge];
+          if (value === undefined) continue;
+          if (value !== 1 && value !== 2 && value !== 3) {
+            diagnostics.push(
+              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sPath}.${edge} must be 1, 2, or 3`, `${sPath}.${edge}`)
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
 export type ValidateDslSpecOptions = {
   requireLoweringSpec?: boolean;
 };
@@ -2117,6 +2198,9 @@ function validateLoweringSpec(
       validateStringArray(transitions.blend.keys, diagnostics, "output.lowering.transitions.blend.keys", "output.lowering.transitions.blend.keys");
       validateStringArray(transitions.blend.smooth_types, diagnostics, "output.lowering.transitions.blend.smooth_types", "output.lowering.transitions.blend.smooth_types");
     }
+    // Optional obstruent<->sonorant locus tables (DECtalk-style). Both blocks
+    // are optional; a frontend that omits them keeps midpoint-only smoothing.
+    validateLocusTables(transitions.loci, transitions.vowel_category, diagnostics);
   }
 
   const f0 = lowering.f0;

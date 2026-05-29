@@ -422,6 +422,392 @@ output:
             - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
         keys: [F1, F2, F3, B1, B2, B3]
         smooth_types: [vowel, nasal, liquid, glide]
+      # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
+      # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
+      # dectalk repo scripts/extract_loci.py, reshaped by
+      # scripts/gen-dectalk-loci-yaml.mjs. setloc indexing:
+      #   ploc = us_plocu[obstruent_code + 59*(sontyx-1)]; if 0 -> no locus
+      #   ploc += 3*(formant); {locus_hz, prcnt, durtran_ms} = us_maleloc[ploc..ploc+2]
+      #   bouval = locus_hz + prcnt*(curval - locus_hz)/100
+      # sontyx (vowel category): 1=front-unrounded, 2=back-unrounded, 3=back-rounded.
+      # Citation: DECtalk 4.63 ph_sttr2.c:71-329 (setloc); p_us_rom.h:4449 (us_maleloc).
+      # NOTE: the two setloc prcnt adjustments (ph_sttr2.c:294-307, rounded-soncon
+      # and F2 back-cavity) are DEFERRED to a later chunk; the core locus pull is exact.
+      loci:
+        B:
+          "1":
+            F1: { locus_hz: 330, prcnt: 55, durtran_ms: 20 }
+            F2: { locus_hz: 900, prcnt: 56, durtran_ms: 30 }
+            F3: { locus_hz: 2200, prcnt: 25, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 330, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 30 }
+            F3: { locus_hz: 2250, prcnt: 40, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 330, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 720, prcnt: 36, durtran_ms: 50 }
+            F3: { locus_hz: 1800, prcnt: 40, durtran_ms: 40 }
+        CH:
+          "1":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1750, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 2750, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 10, durtran_ms: 40 }
+            F3: { locus_hz: 2450, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1480, prcnt: 20, durtran_ms: 60 }
+            F3: { locus_hz: 1820, prcnt: 20, durtran_ms: 60 }
+        CZ:
+          "1":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 20 }
+            F2: { locus_hz: 1610, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1711, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2150, prcnt: 50, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1610, prcnt: 70, durtran_ms: 36 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+        D:
+          "1":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1800, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 95 }
+            F3: { locus_hz: 2601, prcnt: 30, durtran_ms: 85 }
+        DF:
+          "1":
+            F1: { locus_hz: 320, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1740, prcnt: 96, durtran_ms: 35 }
+            F3: { locus_hz: 2390, prcnt: 60, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 35 }
+            F3: { locus_hz: 2090, prcnt: 61, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2090, prcnt: 42, durtran_ms: 100 }
+        DH:
+          "1":
+            F1: { locus_hz: 400, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 35 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1400, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 400, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+        DX:
+          "1":
+            F1: { locus_hz: 350, prcnt: 45, durtran_ms: 35 }
+            F2: { locus_hz: 1740, prcnt: 96, durtran_ms: 35 }
+            F3: { locus_hz: 2350, prcnt: 60, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1640, prcnt: 40, durtran_ms: 35 }
+            F3: { locus_hz: 2150, prcnt: 61, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2090, prcnt: 42, durtran_ms: 100 }
+        DZ:
+          "1":
+            F1: { locus_hz: 340, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1350, prcnt: 20, durtran_ms: 50 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+        EN:
+          "1":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 35 }
+            F2: { locus_hz: 1550, prcnt: 75, durtran_ms: 35 }
+            F3: { locus_hz: 2400, prcnt: 40, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1420, prcnt: 25, durtran_ms: 75 }
+            F3: { locus_hz: 2400, prcnt: 30, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1550, prcnt: 25, durtran_ms: 95 }
+            F3: { locus_hz: 2420, prcnt: 30, durtran_ms: 95 }
+        F:
+          "1":
+            F1: { locus_hz: 300, prcnt: 63, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 92, durtran_ms: 35 }
+            F3: { locus_hz: 2080, prcnt: 35, durtran_ms: 30 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 60, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 35 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 60, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 35 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+        G:
+          "1":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2100, prcnt: 20, durtran_ms: 50 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 16, durtran_ms: 60 }
+            F3: { locus_hz: 2100, prcnt: 0, durtran_ms: 90 }
+          "3":
+            F1: { locus_hz: 250, prcnt: 45, durtran_ms: 40 }
+            F2: { locus_hz: 1600, prcnt: 42, durtran_ms: 65 }
+            F3: { locus_hz: 1920, prcnt: 15, durtran_ms: 80 }
+        JH:
+          "1":
+            F1: { locus_hz: 240, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1750, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 2750, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 245, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 5, durtran_ms: 120 }
+            F3: { locus_hz: 2450, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 245, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 10, durtran_ms: 90 }
+            F3: { locus_hz: 1970, prcnt: 10, durtran_ms: 100 }
+        K:
+          "1":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 1990, prcnt: 20, durtran_ms: 55 }
+            F3: { locus_hz: 3000, prcnt: 125, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 16, durtran_ms: 50 }
+            F3: { locus_hz: 2000, prcnt: 20, durtran_ms: 90 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 1400, prcnt: 60, durtran_ms: 75 }
+            F3: { locus_hz: 2050, prcnt: 15, durtran_ms: 80 }
+        M:
+          "1":
+            F1: { locus_hz: 280, prcnt: 30, durtran_ms: 30 }
+            F2: { locus_hz: 1200, prcnt: 10, durtran_ms: 25 }
+            F3: { locus_hz: 2000, prcnt: 30, durtran_ms: 40 }
+          "2":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 88, durtran_ms: 40 }
+            F3: { locus_hz: 2000, prcnt: 80, durtran_ms: 25 }
+          "3":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 970, prcnt: 10, durtran_ms: 40 }
+            F3: { locus_hz: 1550, prcnt: 80, durtran_ms: 25 }
+        N:
+          "1":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 35 }
+            F2: { locus_hz: 1350, prcnt: 75, durtran_ms: 35 }
+            F3: { locus_hz: 2600, prcnt: 40, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1520, prcnt: 25, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1500, prcnt: 30, durtran_ms: 80 }
+            F3: { locus_hz: 2420, prcnt: 0, durtran_ms: 95 }
+        NX:
+          "1":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 2100, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 3000, prcnt: 105, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 1800, prcnt: 20, durtran_ms: 70 }
+            F3: { locus_hz: 2150, prcnt: 20, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 1920, prcnt: 25, durtran_ms: 70 }
+        P:
+          "1":
+            F1: { locus_hz: 350, prcnt: 55, durtran_ms: 20 }
+            F2: { locus_hz: 950, prcnt: 56, durtran_ms: 50 }
+            F3: { locus_hz: 2200, prcnt: 25, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 50 }
+            F3: { locus_hz: 1900, prcnt: 40, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 50 }
+            F3: { locus_hz: 1900, prcnt: 40, durtran_ms: 50 }
+        S:
+          "1":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 2550, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 2530, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1320, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2460, prcnt: 0, durtran_ms: 65 }
+        SH:
+          "1":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1630, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2640, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1600, prcnt: 27, durtran_ms: 70 }
+            F3: { locus_hz: 2270, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1630, prcnt: 27, durtran_ms: 90 }
+            F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+        T:
+          "1":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1700, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 10, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 10, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 5, durtran_ms: 95 }
+            F3: { locus_hz: 2300, prcnt: 0, durtran_ms: 95 }
+        TH:
+          "1":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 35 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 55 }
+        TX:
+          "1":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1800, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 95 }
+            F3: { locus_hz: 2300, prcnt: 0, durtran_ms: 95 }
+        TZ:
+          "1":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 70 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 150 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 290, prcnt: 70, durtran_ms: 35 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 80 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 40 }
+            F2: { locus_hz: 1600, prcnt: 20, durtran_ms: 90 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 40 }
+        V:
+          "1":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 92, durtran_ms: 35 }
+            F3: { locus_hz: 2080, prcnt: 35, durtran_ms: 40 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 325, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+        Z:
+          "1":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 35, durtran_ms: 50 }
+            F3: { locus_hz: 2550, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 35, durtran_ms: 60 }
+            F3: { locus_hz: 2630, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1520, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2460, prcnt: 0, durtran_ms: 65 }
+        ZH:
+          "1":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1830, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2640, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1800, prcnt: 27, durtran_ms: 70 }
+            F3: { locus_hz: 2270, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1830, prcnt: 27, durtran_ms: 90 }
+            F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+      # Sonorant vowel-category (sontyx) per phoneme per edge (DATA), from
+      # us_begtyp[] (forward / segment-start edge) and us_endtyp[] (backward /
+      # segment-end edge), clamped per setloc (rounded-soncon->3, low->2).
+      # Citation: DECtalk 4.63 p_us_rom.h us_begtyp/us_endtyp; ph_sttr2.c:95-145.
+      vowel_category:
+        AA: { forward: 2, backward: 2 }
+        AE: { forward: 1, backward: 1 }
+        AH: { forward: 2, backward: 2 }
+        AO: { forward: 3, backward: 3 }
+        AR: { forward: 2, backward: 3 }
+        AW: { forward: 2, backward: 3 }
+        AX: { forward: 2, backward: 2 }
+        AY: { forward: 2, backward: 1 }
+        EH: { forward: 1, backward: 1 }
+        EL: { forward: 3, backward: 3 }
+        ER: { forward: 1, backward: 3 }
+        EY: { forward: 1, backward: 1 }
+        IH: { forward: 1, backward: 1 }
+        IR: { forward: 1, backward: 3 }
+        IX: { forward: 1, backward: 1 }
+        IY: { forward: 1, backward: 1 }
+        LL: { forward: 3, backward: 3 }
+        LX: { forward: 3, backward: 3 }
+        OR: { forward: 3, backward: 3 }
+        OW: { forward: 3, backward: 3 }
+        OY: { forward: 3, backward: 1 }
+        R: { forward: 3, backward: 3 }
+        RR: { forward: 3, backward: 3 }
+        RX: { forward: 3, backward: 3 }
+        TZ: { forward: 1, backward: 1 }
+        UH: { forward: 3, backward: 3 }
+        UR: { forward: 3, backward: 3 }
+        UW: { forward: 3, backward: 3 }
+        W: { forward: 3, backward: 3 }
+        Y: { forward: 1, backward: 1 }
+        YU: { forward: 1, backward: 3 }
     f0:
       renderer:
         type: layered_additive

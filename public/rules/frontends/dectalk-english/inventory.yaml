@@ -1533,6 +1533,40 @@ phoneme_targets:
     minimumDuration: 20
     type: flap
     voiced: true
+  # TX — glottalized voiceless /t/ allophone (ph_aloph.c:912-927 A16).
+  # Target sourced from DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr/us_mindur,
+  # US_TX code 52 (extracted via scripts/probe_tx_dz.py in the DECtalk source tree).
+  TX:
+    F1: 280
+    F2: 1600
+    F3: 2600
+    B1: 110
+    B2: 100
+    B3: 170
+    AV: 0
+    dur: 70
+    minimumDuration: 50
+    type: stop_closure
+    alveolar: true
+    voiceless: true
+    is_obstruent: true
+  # DZ — dentalized voiced stop allophone of /dh/ after /t,tx,d/ (ph_aloph.c:1066-1082
+  # Rule 4). Target sourced from DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr/us_mindur,
+  # US_DZ code 35 (extracted via scripts/probe_tx_dz.py in the DECtalk source tree).
+  DZ:
+    F1: 300
+    F2: 1400
+    F3: 2600
+    B1: 90
+    B2: 110
+    B3: 200
+    AV: 50
+    dur: 60
+    minimumDuration: 35
+    type: stop_closure
+    dental: true
+    voiced: true
+    is_obstruent: true
   GS:
     AV: 54
     dur: 100

@@ -37,6 +37,19 @@ phases:
       - dectalk_phrase_initial_vowel_lengthening
       - dectalk_rate_scaling
     resolve_scalars: [duration]
+  - name: postlexical
+    # Order encodes DECtalk ph_aloph.c source precedence (each rule has goto
+    # endrul3, so the rewrites are mutually exclusive per /t,d/): palatalization
+    # (L878) wins over glottalization (L912) wins over flapping (L958).  The
+    # dental /dh/ -> DZ rule (L1066) runs LAST because it reads the preceding
+    # token's already-rewritten phoneme (last_outph) as its trigger.
+    rules:
+      - dectalk_palatalize_t
+      - dectalk_palatalize_d
+      - dectalk_glottalize_t
+      - dectalk_flap_t
+      - dectalk_flap_d
+      - dectalk_dental_dh
   - name: structural
     rules:
       - dectalk_apply_diphthong_trajectories

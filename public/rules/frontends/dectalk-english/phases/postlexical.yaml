@@ -138,3 +138,189 @@ rules:
       - "DECtalk 4.63 ph_aloph.c:958-1040 (A18 flapping rule: unstressed intervocalic /d/ -> DX, number_words >= 3 gate)"
       - "DECtalk 4.63 ph_defs.h (FSYLL/FSON1/FNASAL feature definitions used by the trigger)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DX flap target)"
+
+  # -------------------------------------------------------------------------
+  # PALATALIZATION (ph_aloph.c:878-891).  /t/ -> CH, /d/ -> JH when the next
+  # phoneme is an unstressed palatal glide /y/ ("got you" -> "gotcha",
+  # "did you" -> "didja").  Source trigger:
+  #   if ((next == USP_YU || next == USP_YX) && (sentstruc[n+1] & FSTRESS) IS_MINUS)
+  #       T -> CH (goto endrul3);  D -> JH (goto endrul3)
+  # USP_YX resolves to US_Y (p_all_ph.h:80), USP_YU to US_YU; this port's
+  # inventory has only the plain glide Y, so "next in {YU,YX}" maps to
+  # next.phoneme == 'Y'.  The `goto endrul3` means palatalization is mutually
+  # exclusive with (and takes precedence over) glottalization and flapping for
+  # the same /t,d/; the pipeline orders these rules first to honor that.
+  # -------------------------------------------------------------------------
+  dectalk_palatalize_t:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'T'
+    define:
+      n: next
+      ch: "target('CH')"
+      next_unstressed_y: >-
+        n != null && n.phoneme == 'Y' && (!has(n.stress) || n.stress != 1)
+    constraint: next_unstressed_y
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'CH'"
+          type: ch.type
+          params: ch.params
+          duration: ch.duration
+          inherentDuration: ch.inherentDuration
+          minimumDuration: "has(ch.minimumDuration) ? ch.minimumDuration : ch.duration"
+          voiced: "has(ch.voiced) ? ch.voiced : false"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:878-891 (palatalize /t/ -> CH before unstressed /y/)"
+      - "DECtalk 4.63 p_all_ph.h:71,80 (USP_YU = US_YU, USP_YX = US_Y palatal glide)"
+
+  dectalk_palatalize_d:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'D'
+    define:
+      n: next
+      jh: "target('JH')"
+      next_unstressed_y: >-
+        n != null && n.phoneme == 'Y' && (!has(n.stress) || n.stress != 1)
+    constraint: next_unstressed_y
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'JH'"
+          type: jh.type
+          params: jh.params
+          duration: jh.duration
+          inherentDuration: jh.inherentDuration
+          minimumDuration: "has(jh.minimumDuration) ? jh.minimumDuration : jh.duration"
+          voiced: "has(jh.voiced) ? jh.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:878-891 (palatalize /d/ -> JH before unstressed /y/)"
+      - "DECtalk 4.63 p_all_ph.h:71,80 (USP_YU = US_YU, USP_YX = US_Y palatal glide)"
+
+  # -------------------------------------------------------------------------
+  # GLOTTALIZATION (ph_aloph.c:912-927).  An unreleased /t/ in a glottalizing
+  # context becomes a glottalized /t/ (TX) when preceded by a sonorant, or a
+  # plain /d/ otherwise.  Source trigger:
+  #   if (curr == USP_T && (place_feature(phonemes[n-2]) & FLABIAL) IS_MINUS)
+  #     if ( next == USP_LL || next == USP_DH
+  #          || ( ((curr_instruc & FBOUNDARY) >= FMBNEXT)
+  #               && ((feature(next) & FSON2) || next == USP_HX) )
+  #          || next == USP_EN )
+  #        { curr = USP_D;  if (feature(last_outph) & FSON1) curr = USP_TX;  goto endrul3; }
+  # Feature membership (ph_defs.h): FLABIAL = {P,B,M,F,V}; FSON2 = {W,Y,R,L,YU,
+  # M,N,NG,EL,EN}; FSON1 = vowels/glides/liquids/nasals (this port's `type`).
+  # Port symbol mapping: USP_LL -> the port's plain lateral L (the port does not
+  # distinguish DECtalk's lexical /LL/); USP_HX -> HH; USP_EN -> EN.  The /t/->TX
+  # vs /t/->D choice is selected at runtime by glot_target.  `goto endrul3` makes
+  # this mutually exclusive with flapping; the pipeline orders it before flap_t.
+  # The next==EN clause is the "button"/"mountain" syllabic-nasal case the mission
+  # names; it only fires when the transcription actually emits EN after the /t/.
+  # -------------------------------------------------------------------------
+  dectalk_glottalize_t:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'T'
+    define:
+      p: prev
+      n: next
+      b2: "behind(current, 2)"
+      prev2_not_labial: >-
+        b2 == null || !(b2.phoneme in ['P', 'B', 'M', 'F', 'V'])
+      next_word_boundary: >-
+        n == null ? true :
+        (has(n.word) && has(current.word) ? n.word != current.word : true)
+      next_son2: >-
+        n != null && (n.phoneme in ['W', 'Y', 'R', 'L', 'M', 'N', 'NG', 'EL', 'EN'])
+      glottalizing_context: >-
+        n != null && (
+          n.phoneme == 'L' ||
+          n.phoneme == 'DH' ||
+          (next_word_boundary && (next_son2 || n.phoneme == 'HH')) ||
+          n.phoneme == 'EN'
+        )
+      prev_son1: >-
+        p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal'])
+      glot_target: "prev_son1 ? 'TX' : 'D'"
+      gt: "target(glot_target)"
+    constraint: "prev2_not_labial && glottalizing_context"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: glot_target
+          type: gt.type
+          params: gt.params
+          duration: "min([current.duration, gt.duration])"
+          inherentDuration: gt.inherentDuration
+          minimumDuration: "has(gt.minimumDuration) ? gt.minimumDuration : gt.duration"
+          voiced: "has(gt.voiced) ? gt.voiced : false"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:912-927 (glottalize /t/ -> TX when preceded by a sonorant, else -> D, in a glottalizing context)"
+      - "DECtalk 4.63 ph_defs.h (FLABIAL/FSON1/FSON2 feature definitions used by the trigger)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_TX glottalized-/t/ target)"
+
+  # -------------------------------------------------------------------------
+  # DENTALIZATION (ph_aloph.c:1066-1082 Rule 4).  An unstressed /dh/ becomes a
+  # dentalized voiced stop (DZ) when the preceding (already-rewritten) phoneme is
+  # /t/, /tx/ or /d/ ("at the" -> "a-DZ-uh", "let the").  Source trigger:
+  #   if (curr == USP_DH && (curr_instruc & FSTRESS) IS_MINUS)
+  #     if (last_outph == USP_T || last_outph == USP_TX || last_outph == USP_D)
+  #        curr = USP_DZ;
+  # `last_outph` is the OUTPUT of the prior token after earlier allophone rules,
+  # so this rule runs LAST in the postlexical phase (after glottalization may have
+  # turned a preceding /t/ into TX).  The commented-out "last_outph == N -> N"
+  # branch (temp out per KEN) and the #ifdef HLSYN r-block are not ported.
+  # -------------------------------------------------------------------------
+  dectalk_dental_dh:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'DH'
+    define:
+      p: prev
+      dz: "target('DZ')"
+      current_unstressed: "!has(current.stress) || current.stress != 1"
+      prev_is_stop: >-
+        p != null && (p.phoneme in ['T', 'TX', 'D'])
+    constraint: "current_unstressed && prev_is_stop"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'DZ'"
+          type: dz.type
+          params: dz.params
+          duration: "min([current.duration, dz.duration])"
+          inherentDuration: dz.inherentDuration
+          minimumDuration: "has(dz.minimumDuration) ? dz.minimumDuration : dz.duration"
+          voiced: "has(dz.voiced) ? dz.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:1066-1082 (Rule 4: unstressed /dh/ -> DZ after /t,tx,d/)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DZ dentalized-stop target)"

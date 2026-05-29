@@ -106,6 +106,31 @@ steps:
     citations:
       - Ebden & Sproat 2015
 
+  # DECtalk-specific: read "N/D" fractions before the cardinal/ordinal number
+  # steps so the slash form is consumed as a single fraction. Detection mirrors
+  # ls_proc_is_frac (l_us_pr1.c:980-1015): numerator 1-2 digits no leading 0,
+  # '/', denominator 1-3 digits no leading 0 (a 3-digit denominator must equal
+  # max_3digit_denominator = 100), optional trailing '%'. Speaking mirrors
+  # ls_proc_do_frac (l_us_pr1.c:1034-1069): numerator cardinal; denominator as an
+  # ordinal (with a plural "s" when the numerator is plural), except the
+  # special_denominators below ("2" -> half/halves). Per the source, only "2" is
+  # special — "3/4" reads "three fourths", NOT the colloquial "three quarters".
+  - name: expand_fractions
+    type: builtin
+    handler: readFractionInline
+    pattern: "\\b(\\d{1,2})/(\\d{1,3})(%?)"
+    flags: "g"
+    fraction_policy:
+      special_denominators:
+        "2":
+          singular: "half"
+          plural: "halves"
+      percent_word: "percent"
+      max_3digit_denominator: 100
+    citations:
+      - "DECtalk 4.63 l_us_pr1.c:980-1015 (ls_proc_is_frac)"
+      - "DECtalk 4.63 l_us_pr1.c:1034-1069 (ls_proc_do_frac)"
+
   - name: expand_ordinals
     type: builtin
     handler: ordinalToWordsInline

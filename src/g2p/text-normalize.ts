@@ -54,10 +54,40 @@ interface PipelineStep {
   post?: string;
   /** Year-detection/speaking policy for the readYearInline builtin (data-driven). */
   year_policy?: YearPolicy;
+  /** Fraction-reading policy for the readFractionInline builtin (data-driven). */
+  fraction_policy?: FractionPolicy;
 }
 
 interface NormalizationPipeline {
   steps: PipelineStep[];
+}
+
+/**
+ * Fraction-reading policy, supplied as DATA by a frontend's normalization step.
+ * The handler is generic; this is the only DECtalk-specific knowledge.
+ *
+ * Mirrors DECtalk 4.63 `ls_proc_is_frac` / `ls_proc_do_frac`
+ * (l_us_pr1.c:980-1069): numerator 1-2 digits (no leading 0), '/', denominator
+ * 1-3 digits (no leading 0; if 3 digits it must be exactly the value in
+ * `max_3digit_denominator`, i.e. 100), optional trailing '%'. The numerator is
+ * spoken cardinal; the denominator is spoken as an ordinal, except denominators
+ * listed in `special_denominators` (DECtalk special-cases only "2" -> half/halves).
+ * When the numerator is plural (value != 1) the ordinal denominator takes a
+ * trailing plural marker ("fourth" -> "fourths").
+ */
+interface FractionPolicy {
+  /**
+   * Denominators with irregular spoken words, keyed by the denominator digit
+   * string (DECtalk: only "2"). Each maps the singular and plural spoken forms.
+   */
+  special_denominators?: Record<string, { singular: string; plural: string }>;
+  /** Word spoken for a trailing '%' (DECtalk: "percent"). */
+  percent_word?: string;
+  /**
+   * The only 3-digit denominator DECtalk accepts (100). A 3-digit denominator
+   * other than this value is not treated as a fraction.
+   */
+  max_3digit_denominator?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -363,6 +393,69 @@ export function readYear(digits: string): string {
   return `${read2Digits(ab)} ${read2Digits(cd)}`;
 }
 
+// ---------------------------------------------------------------------------
+// readFraction (generic, config-driven "N/D" fraction reading)
+// ---------------------------------------------------------------------------
+
+const DEFAULT_FRACTION_MAX_3DIGIT_DENOM = 100;
+
+/**
+ * True iff `numerator`/`denominator` qualify as a fraction under `policy`,
+ * mirroring DECtalk `ls_proc_is_frac` (l_us_pr1.c:980-1015). Both strings are
+ * expected to be all-digit (the calling pipeline step's regex guarantees this).
+ *   - numerator: 1-2 digits, no leading '0'
+ *   - denominator: 1-3 digits, no leading '0'; a 3-digit denominator must equal
+ *     `max_3digit_denominator` (DECtalk: 100).
+ */
+export function isFraction(
+  numerator: string,
+  denominator: string,
+  policy: FractionPolicy = {},
+): boolean {
+  const max3 = policy.max_3digit_denominator ?? DEFAULT_FRACTION_MAX_3DIGIT_DENOM;
+  if (!/^[1-9]\d?$/.test(numerator)) return false; // 1-2 digits, no leading 0
+  if (!/^[1-9]\d{0,2}$/.test(denominator)) return false; // 1-3 digits, no leading 0
+  if (denominator.length === 3 && Number(denominator) !== max3) return false;
+  return true;
+}
+
+/**
+ * Speak a (validated) "N/D" fraction with an optional trailing '%', per DECtalk
+ * `ls_proc_do_frac` (l_us_pr1.c:1034-1069), generic and config-table-driven:
+ *   - numerator spoken cardinal (numberToWords)
+ *   - denominator: if listed in `special_denominators` (DECtalk: only "2" ->
+ *     half/halves) use that word, choosing plural when the numerator is plural
+ *     (value != 1); otherwise speak the denominator as an ordinal (convertOrdinal)
+ *     and append a plural "s" when the numerator is plural.
+ *   - trailing '%' -> `percent_word`.
+ *
+ * NOTE on parity: DECtalk only special-cases denominator "2"; "3/4" reads
+ * "three fourths" (ordinal), NOT the colloquial "three quarters". This mirrors
+ * the actual 4.63 source (l_us_pr1.c:1050-1063), not the colloquial form.
+ */
+export function readFraction(
+  numerator: string,
+  denominator: string,
+  percent: boolean,
+  policy: FractionPolicy = {},
+): string {
+  const numValue = parseInt(numerator, 10);
+  const plural = numValue !== 1; // DECtalk pflag: TRUE unless numerator is exactly 1
+  const numWords = numberToWords(numValue);
+
+  const special = policy.special_denominators?.[denominator];
+  let denomWords: string;
+  if (special) {
+    denomWords = plural ? special.plural : special.singular;
+  } else {
+    const ordinal = convertOrdinal(parseInt(denominator, 10));
+    denomWords = plural ? `${ordinal}s` : ordinal;
+  }
+
+  const percentSuffix = percent ? ` ${policy.percent_word ?? "percent"}` : "";
+  return `${numWords} ${denomWords}${percentSuffix}`;
+}
+
 function decimalToWords(integerPartRaw: string, fractionalPartRaw: string): string {
   const integerPart = integerPartRaw.replace(/,/g, "");
   const integerValue = parseInt(integerPart, 10);
@@ -537,6 +630,24 @@ const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => s
     return result.replace(re, (match: string, digits: string) => {
       return isYear(digits, policy) ? readYear(digits) : match;
     });
+  },
+
+  // Reads "N/D" (and "N/D%") fractions matched by the step regex. Tokens that
+  // do NOT satisfy the configured fraction predicate (e.g. a 3-digit denominator
+  // other than 100) are left verbatim for later number steps. Entirely
+  // data-driven: special-denominator words, the percent word, and the predicate
+  // bound come from `fraction_policy`, so this handler carries no per-frontend logic.
+  readFractionInline: (result, step) => {
+    const re = new RegExp(step.pattern!, step.flags);
+    const policy = step.fraction_policy ?? {};
+    return result.replace(
+      re,
+      (match: string, numerator: string, denominator: string, percentOrOffset?: string | number) => {
+        if (!isFraction(numerator, denominator, policy)) return match;
+        const percent = percentOrOffset === "%";
+        return readFraction(numerator, denominator, percent, policy);
+      },
+    );
   },
 
   punctuationCleanup: (result) => {

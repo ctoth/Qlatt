@@ -230,6 +230,43 @@ parameters:
       cluster_shortening: 0.70
       post_voiceless_plosive_lengthening_ms: 19
       phrase_initial_vowel_lengthening_ms: 19
+      # --- chunk dt-11: syllable-keyed Rule 4 monosyllable branch + added
+      #     numbered rules 10/11/19/20/23/24 and the Rule 9 [nt] cluster case.
+      #     Multipliers from ph_defs.h N*PRCNT (FRAC_ONE=16384 == 1.0); additive
+      #     ms from NF*MS frame counts at the established 6.33 ms/frame factor
+      #     (NF20MS=3fr=19ms, NF40MS=6fr=38ms already in use above).
+      # Rule 4 (p_us_tim.c:355-373) monosyllable: secondary N85PRCNT(=0.85),
+      # unstressed N70PRCNT(=0.70); primary-stressed monosyllable unchanged
+      # (the N90 arg is dead code -- mlsh1 runs only when FSTRESS_1 IS_MINUS).
+      monosyllable_secondary_shortening: 0.85
+      monosyllable_unstressed_shortening: 0.70
+      # Rule 4 (p_us_tim.c:374-394) non-monosyllable, non-word-final segment:
+      # N85PRCNT (FFIRSTSYL/FMEDIALSYL/FFINALSYL all 0.85 in this build).
+      polysyllable_nonfinal_shortening: 0.85
+      # Rule 7 (p_us_tim.c:452-456) unstressed word-MEDIAL syllabic: prcnt>>1
+      # (== x0.5).  Non-medial unstressed syllabic stays N70PRCNT (0.70 above).
+      unstressed_medial_syllabic_shortening: 0.50
+      # Rule 10 (p_us_tim.c:647-655) first vowel of a two-vowel sequence: +NF30MS.
+      two_vowel_first_lengthening_ms: 32
+      # Rule 11 (p_us_tim.c:657-664) word-initial stressed vowel of a polysyllable:
+      # +NF25MS.
+      word_initial_stressed_vowel_lengthening_ms: 25
+      # Rule 19 (p_us_tim.c:819-826) function-word-final unstressed monosyllable
+      # TH (e.g. "with"): N60PRCNT.
+      function_word_final_th_shortening: 0.60
+      # Rule 20 (p_us_tim.c:828-836) unstressed monosyllable IY before a vowel
+      # ("the/me/he"): N150PRCNT.
+      the_iy_prevocalic_lengthening: 1.50
+      # Rule 23 (p_us_tim.c:859-868) vowel before a /t/ flap DF ("writing" vs
+      # "riding"): N35PRCNT.
+      pre_df_flap_shortening: 0.35
+      # Rule 24 (p_us_tim.c:882-889) segment before NG ("ing"): N60PRCNT.
+      pre_ng_shortening: 0.60
+      # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
+      # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
+      # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not
+      # here; only the durational shortening of the /n/ is modelled.
+      nt_cluster_nasal_shortening: 0.10
       citations:
         - "DECtalk 4.63 p_us_tim.c"
         - "DECtalk 4.63 ph_defs.h (NF*MS constants)"

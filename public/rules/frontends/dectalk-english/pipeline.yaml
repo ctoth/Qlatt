@@ -52,15 +52,31 @@ phases:
     # first reproduces this -- once fusion deletes the /R/, A5 has nothing to
     # match, leaving A5 to catch only the residual prevocalic (e.g. word-initial)
     # /R/ before a syllabic.
+    #
+    # The three minor rewrites added in chunk dt-9 slot in at their source
+    # positions:
+    #   - dectalk_geminate_delete (A1, ph_aloph.c:558) runs FIRST -- in the source
+    #     it executes before the FBLOCK skip and every other allophone rule.
+    #   - dectalk_assimilate_sibilant_sh (A4, L715) keys on /s,z/, a segment class
+    #     disjoint from the /t,d/ and /R/ rules, so its position is non-conflicting;
+    #     it is placed right after geminate to mirror its early source position
+    #     (L715, ahead of glottalization at L912).
+    #   - dectalk_syllabic_n_after_tx (A19/Rule 3a, L1042) reads the PRIOR token's
+    #     already-rewritten output (== TX from glottalization), so it MUST follow
+    #     glottalization and flapping; it sits just before the dental /dh/ rule
+    #     (L1066), which stays LAST because it likewise reads last_outph.
     rules:
+      - dectalk_geminate_delete
+      - dectalk_assimilate_sibilant_sh
       - dectalk_palatalize_t
       - dectalk_palatalize_d
       - dectalk_glottalize_t
       - dectalk_flap_t
       - dectalk_flap_d
-      - dectalk_dental_dh
       - dectalk_fuse_vowel_r
       - dectalk_prevocalic_r_rr
+      - dectalk_syllabic_n_after_tx
+      - dectalk_dental_dh
   - name: structural
     rules:
       - dectalk_apply_diphthong_trajectories

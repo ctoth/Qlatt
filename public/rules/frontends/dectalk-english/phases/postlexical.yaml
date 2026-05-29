@@ -37,6 +37,120 @@ version: v1
 # to actually realize the flap.  This matches the qlatt-english t_flapping rule.
 # ---------------------------------------------------------------------------
 rules:
+  # -------------------------------------------------------------------------
+  # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
+  # immediately followed by an identical phoneme, the first copy is deleted, so a
+  # geminate (a doubled obstruent across a word/morpheme join) is realized as a
+  # single longer-than-normal obstruent ("bus stop" S S -> S, "big game"? no --
+  # only identical phonemes; "less so" S S -> S, "bookkeeper" K K -> K).  Source:
+  #   if (phonemes[n] == phonemes[n+1]
+  #       && (phone_feature(phonemes[n]) & FOBST))
+  #       dodelete = TRUE;
+  # FOBST (ph_defs.h) = obstruents: stops + fricatives + affricates.  This port
+  # represents that membership in `type` exactly as the duration rules already do
+  # (duration.yaml:36-37 / 268-270): type in
+  # ['fricative','stop_closure','affricate'].  At the postlexical stage a raw stop
+  # is still a single closure token (the structural release/aspiration split runs
+  # later), so 'stop_closure' is the right obstruent-stop type here.  The rule
+  # compares the RAW input phonemes, so it keys on `current.phoneme` vs
+  # `next.phoneme` (no prior allophone rewrite has fired on these yet -- this is
+  # the FIRST postlexical rule, mirroring its position before the FBLOCK skip at
+  # ph_aloph.c:563).
+  #
+  # Mechanism: DECtalk's `dodelete` removes the FIRST copy, leaving the second to
+  # carry the (now longer) segment.  A bare `delete: true` on a base-stream token
+  # would leave a time gap and trip the engine's contiguity check
+  # (E_BASE_NOT_CONTIGUOUS), so we express the deletion as a structural splice over
+  # the [current, next] range that re-inserts a single copy of the SECOND
+  # (surviving) obstruent spanning the whole range -- removing the first copy while
+  # keeping the stream contiguous.  This is the same delete-via-replace_range
+  # mechanism the vowel+R fusion and syllabic-n rules use.
+  # -------------------------------------------------------------------------
+  dectalk_geminate_delete:
+    kind: postlexical
+    select:
+      stream: phone
+      where: >-
+        current.type in ['fricative', 'stop_closure', 'affricate']
+    define:
+      n: next
+      same_as_next: >-
+        n != null && has(n.phoneme) && n.phoneme == current.phoneme
+    constraint: same_as_next
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: n.sync_right
+      insert:
+        - copy_from: n
+          copy_fields:
+            - phoneme
+            - type
+            - params
+            - stress
+            - word
+            - inherentDuration
+            - minimumDuration
+            - voiced
+            - trajectory
+          duration: "current.duration + n.duration"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:558-562 (A1: delete an obstruent identical to the following phoneme; geminate reduction)"
+      - "DECtalk 4.63 ph_defs.h (FOBST obstruent feature = stops + fricatives + affricates)"
+
+  # -------------------------------------------------------------------------
+  # CORONAL SIBILANT ASSIMILATION (ph_aloph.c:715-722, A4).  An /s/ or /z/ that
+  # is immediately followed by /SH/ assimilates to the postalveolar place of the
+  # following sibilant: S -> SH, Z -> ZH ("this ship" -> "thi-SH ship", "those
+  # shoes" Z -> ZH).  There is NO stress / boundary / position gate in the
+  # source -- it is a pure next-phoneme test:
+  #   if (phonemes[n+1] == USP_SH) {
+  #     if (curr_inph == USP_S)  curr_outph = USP_SH;
+  #     if (curr_inph == USP_Z)  curr_outph = USP_ZH;
+  #   }
+  # (The #ifdef GERMAN_out S/TS block just above and the #ifdef talk schwa block
+  # just below are compiled out and not ported.)  SH and ZH are already in the
+  # inventory (postalveolar fricatives).  S/Z operate on a different segment class
+  # than the /t,d/ and /R/ allophone rules, so this rule never conflicts with
+  # them; it is placed early (after geminate) to mirror its source position
+  # (L715, ahead of glottalization at L912).
+  #
+  # Mechanism: a structural splice over the single /s,z/ token, swapping in the
+  # SH/ZH inventory target's acoustics (a bare `op:set phoneme` would rename the
+  # token without re-materializing the fricative's formant/AF params -- the same
+  # reason every other rewrite in this phase uses splice + target()).
+  # -------------------------------------------------------------------------
+  dectalk_assimilate_sibilant_sh:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme in ['S', 'Z']
+    define:
+      n: next
+      next_is_sh: "n != null && n.phoneme == 'SH'"
+      assim_name: "current.phoneme == 'S' ? 'SH' : 'ZH'"
+      at: "target(assim_name)"
+    constraint: next_is_sh
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: assim_name
+          type: at.type
+          params: at.params
+          duration: "min([current.duration, at.duration])"
+          inherentDuration: at.inherentDuration
+          minimumDuration: "has(at.minimumDuration) ? at.minimumDuration : at.duration"
+          voiced: "has(at.voiced) ? at.voiced : (current.phoneme == 'Z')"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:715-722 (A4: /s/ -> SH, /z/ -> ZH before /SH/)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_SH/US_ZH postalveolar fricative targets)"
+
   dectalk_flap_t:
     kind: postlexical
     select:
@@ -293,6 +407,74 @@ rules:
   # turned a preceding /t/ into TX).  The commented-out "last_outph == N -> N"
   # branch (temp out per KEN) and the #ifdef HLSYN r-block are not ported.
   # -------------------------------------------------------------------------
+  # -------------------------------------------------------------------------
+  # SYLLABIC-N AFTER GLOTTALIZED /t/ (ph_aloph.c:1042-1051, "Rule 3a").  When the
+  # PREVIOUS OUTPUT token is a glottalized /t/ (TX, produced by the glottalization
+  # rule above) and the current phoneme is an unstressed vowel (other than /UW/)
+  # followed by a nasal, the vowel is deleted and the following nasal becomes a
+  # syllabic /EN/ ("certain" K ER TX AX N -> K ER TX EN; "mountain").  Source:
+  #   if (allophons[nallotot-1] == USP_TX) {                 // prev OUTPUT == TX
+  #     if (phone_feature(phonemes[n+1]) & FNASAL            // next is a nasal
+  #         && (curr_instruc & FSTRESS) IS_MINUS             // current unstressed
+  #         && phonemes[n] != USP_UW) {                      // current is not /UW/
+  #       phonemes[n+1] = USP_EN;                            // next -> EN
+  #       dodelete = TRUE;                                   // delete current vowel
+  #     }
+  #   }
+  # FNASAL (ph_defs.h) = nasals M N NG (the same set the glottalization rule's
+  # FSON2 clause names); use next.type == 'nasal'.  EN is already in the inventory
+  # (syllabic schwa+nasal).  The current phoneme between a TX and a nasal is a
+  # vowel by construction; we additionally gate on current.type == 'vowel' so the
+  # rule can only collapse a genuine vowel nucleus (faithful to the recon's
+  # "current is an unstressed vowel").
+  #
+  # PRECEDENCE: this reads the PRIOR token's already-rewritten output (== TX), so
+  # it must run AFTER glottalization (which produces TX) and after flapping; it is
+  # placed here, just before the dental /dh/ rule (which is last because it too
+  # reads last_outph).  The #ifdef HLSYN r-block between this and the dental rule
+  # (L1052-1063) is compiled out and not ported.
+  #
+  # Mechanism: a structural splice over the [vowel, nasal] range, replacing both
+  # with ONE syllabic EN token copied from the EN inventory target (inheriting the
+  # NASAL's word; EN is inherently unstressed so no stress is carried).  This both
+  # deletes the vowel and rewrites the nasal to EN in a single edit, matching
+  # DECtalk's `phonemes[n+1]=EN; dodelete=TRUE`.
+  # -------------------------------------------------------------------------
+  dectalk_syllabic_n_after_tx:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      p: prev
+      n: next
+      en: "target('EN')"
+      prev_is_tx: "p != null && p.phoneme == 'TX'"
+      current_unstressed: "!has(current.stress) || current.stress != 1"
+      current_not_uw: "current.phoneme != 'UW'"
+      next_is_nasal: "n != null && (n.type == 'nasal' || n.phoneme in ['M', 'N', 'NG'])"
+    constraint: >-
+      prev_is_tx && current_unstressed && current_not_uw && next_is_nasal
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: n.sync_right
+      insert:
+        - copy_from: n
+          copy_fields:
+            - word
+          phoneme: "'EN'"
+          type: en.type
+          params: en.params
+          duration: en.duration
+          inherentDuration: en.inherentDuration
+          minimumDuration: "has(en.minimumDuration) ? en.minimumDuration : en.duration"
+          voiced: "has(en.voiced) ? en.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:1042-1051 (Rule 3a: after TX, an unstressed vowel (not /UW/) + nasal collapse to syllabic EN)"
+      - "DECtalk 4.63 ph_defs.h (FNASAL nasal feature = M/N/NG)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_EN syllabic-nasal target)"
+
   dectalk_dental_dh:
     kind: postlexical
     select:

@@ -62,6 +62,9 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "count_word_vowels",
   "cluster_position_in_word",
   "word_count",
+  "syllable_index",
+  "syllable_role",
+  "syllable_position_in_word",
 ]);
 
 const FUNCTION_CALL_PATTERN = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
@@ -120,6 +123,7 @@ function createCelEnvironment(): Environment {
     "look_back_where", "look_back_pred", "look_ahead_pred", "find_within_word", "span_ms",
     "trajectory_to_windows", "dectalk_obstruent_profile",
     "count_word_vowels", "cluster_position_in_word", "word_count",
+    "syllable_index", "syllable_role", "syllable_position_in_word",
   ];
 
   // Functions that take zero arguments (use implicit currentToken via closure).
@@ -127,6 +131,9 @@ function createCelEnvironment(): Environment {
     "count_word_vowels",
     "cluster_position_in_word",
     "word_count",
+    "syllable_index",
+    "syllable_role",
+    "syllable_position_in_word",
   ]);
 
   const knownFunctions: Array<[string, string[]]> = knownFunctionNames.map((name) => [

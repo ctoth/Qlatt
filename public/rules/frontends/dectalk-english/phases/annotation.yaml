@@ -1,0 +1,55 @@
+version: v1
+# Syllable-structure annotation (DECtalk 4.63 ph_syl.c maximal-onset + affix).
+#
+# These rules write per-token syllable metadata (syllable_index, syllable_role,
+# syllable_position_in_word) using the generic data-driven `syllabify` builtins.
+# The linguistic DATA (onset clusters, nuclei, affixes, ARPABET->ascky map) lives
+# in the pipeline-level `syllabification:` block, extracted from p_us_sy1.c by
+# scripts/dt10-extract-syllable-tables.ts.  The builtins run the maximal-onset +
+# affix-stripping algorithm over each word once (memoized) and return this
+# token's field.  ANNOTATION ONLY -- nothing in the render path reads these
+# fields yet, so output is byte-identical.
+#
+# Selection excludes SIL/silence and word-less tokens (the builtins return null
+# for them anyway; the guard avoids writing null fields).
+rules:
+  syllable_index_annotation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    apply:
+      - field: syllable_index
+        op: set
+        value: "syllable_index()"
+        tag: syllabification
+    citations:
+      - DECtalk 4.63 ph_syl.c ph_syllab (backward maximal-onset syllabification)
+      - DECtalk 4.63 p_us_sy1.c us_syl_cons/us_syl_vowels (onset-cluster + nucleus tables)
+
+  syllable_role_annotation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    apply:
+      - field: syllable_role
+        op: set
+        value: "syllable_role()"
+        tag: syllabification
+    citations:
+      - DECtalk 4.63 ph_syl.c ph_syllab (onset/nucleus/coda assignment via SBOUND placement)
+      - DECtalk 4.63 p_us_sy1.c us_syl_vowels (nucleus membership)
+
+  syllable_position_annotation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL' && has(current.word) && current.word != ''"
+    apply:
+      - field: syllable_position_in_word
+        op: set
+        value: "syllable_position_in_word()"
+        tag: syllabification
+    citations:
+      - DECtalk 4.63 ph_syl.c ph_syllab (word-position from syllable index + count)

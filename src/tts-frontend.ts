@@ -114,6 +114,11 @@ export type FrontendPhoneSummary = {
   word?: string;
   durationMs: number;
   minimumDurationMs?: number;
+  /** Syllable structure annotation (present only when the frontend declares a
+   *  `syllabification:` table block and the annotation phase wrote it). */
+  syllableIndex?: number;
+  syllableRole?: string;
+  syllablePositionInWord?: string;
 };
 
 export type TextToKlattTrackDetailedResult = {
@@ -739,6 +744,18 @@ function buildTextToKlattTrackDetailed(
       }
       if (Number.isFinite(minimumDuration)) {
         summary.minimumDurationMs = minimumDuration;
+      }
+      // Syllable annotation fields are written by the (optional) declarative
+      // syllabify annotation pass; surface them when present so downstream
+      // tooling (probes, duration rules) can read syllable structure.
+      if (typeof token?.syllable_index === "number") {
+        summary.syllableIndex = token.syllable_index;
+      }
+      if (typeof token?.syllable_role === "string") {
+        summary.syllableRole = token.syllable_role;
+      }
+      if (typeof token?.syllable_position_in_word === "string") {
+        summary.syllablePositionInWord = token.syllable_position_in_word;
       }
       return summary;
     }

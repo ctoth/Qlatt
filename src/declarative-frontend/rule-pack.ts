@@ -16,6 +16,7 @@ const ROOT_DSL_KEYS = new Set([
   "predicates",
   "string_sets",
   "maps",
+  "syllabification",
   "patterns",
   "phases",
   "rules",
@@ -32,6 +33,7 @@ const MERGED_CHILD_ROOT_KEYS = new Set([
   "streams",
   "string_sets",
   "maps",
+  "syllabification",
   "phases",
   "topology",
 ]);
@@ -92,6 +94,15 @@ function mergeChildIntoRoot(root: PlainObject, child: PlainObject, childPath: st
       }
       rootDict[k] = v;
     }
+  }
+
+  // Syllabification: a single whole-object block (not a keyed dictionary).  A
+  // child include may supply it; error if both root and child declare one.
+  if (child.syllabification !== undefined && hasNonEmptyValue(child.syllabification)) {
+    if (root.syllabification !== undefined && hasNonEmptyValue(root.syllabification)) {
+      throw new Error(`Duplicate syllabification block in included file ${childPath}`);
+    }
+    root.syllabification = child.syllabification;
   }
 
   // Phases: concat (root first, then child in include order)

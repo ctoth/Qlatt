@@ -2244,6 +2244,86 @@ function validateLoweringSpec(
   }
 }
 
+// dt-10: validate the pipeline-level `syllabification:` block (DATA tables for
+// the generic syllabify pass).  Shape:
+//   nuclei: string (ascky chars that are syllable nuclei)
+//   onset_clusters: string[] (legal onset clusters in ascky chars)
+//   affixes: string[] (affix strings in ascky chars)
+//   ascky: Record<string, single-char string> (ARPABET symbol -> ascky char)
+// Absent block is fine (frontend opts out of syllabification).
+function validateSyllabification(
+  spec: PlainObject,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (!Object.prototype.hasOwnProperty.call(spec, "syllabification")) return;
+  const block = spec.syllabification;
+  if (!isPlainObject(block)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_SYLLABIFICATION_INVALID",
+        "syllabification must be an object with nuclei/onset_clusters/affixes/ascky",
+        "syllabification"
+      )
+    );
+    return;
+  }
+  const b = block as PlainObject;
+  if (typeof b.nuclei !== "string" || b.nuclei.length === 0) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_SYLLABIFICATION_INVALID",
+        "syllabification.nuclei must be a non-empty string of ascky chars",
+        "syllabification.nuclei"
+      )
+    );
+  }
+  for (const key of ["onset_clusters", "affixes"] as const) {
+    const arr = b[key];
+    if (!Array.isArray(arr)) {
+      diagnostics.push(
+        makeDiagnostic(
+          "E_SYLLABIFICATION_INVALID",
+          `syllabification.${key} must be an array of strings`,
+          `syllabification.${key}`
+        )
+      );
+      continue;
+    }
+    for (let i = 0; i < arr.length; i += 1) {
+      if (typeof arr[i] !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SYLLABIFICATION_INVALID",
+            `syllabification.${key}[${i}] must be a string (got ${typeof arr[i]})`,
+            `syllabification.${key}[${i}]`
+          )
+        );
+      }
+    }
+  }
+  if (!isPlainObject(b.ascky)) {
+    diagnostics.push(
+      makeDiagnostic(
+        "E_SYLLABIFICATION_INVALID",
+        "syllabification.ascky must be an object mapping ARPABET symbol to a single ascky char",
+        "syllabification.ascky"
+      )
+    );
+  } else {
+    for (const [k, v] of Object.entries(b.ascky as PlainObject)) {
+      if (typeof v !== "string" || v.length !== 1) {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_SYLLABIFICATION_INVALID",
+            `syllabification.ascky['${k}'] must be a single character (got '${String(v)}')`,
+            `syllabification.ascky.${k}`
+          )
+        );
+      }
+    }
+  }
+}
+
 // Chunk 3: validate pipeline-level `maps:` block.
 // Shape: Record<non-empty string, Record<string, string>> — a string→string
 // lookup table for each named map. Numeric or nested-object values are
@@ -2323,6 +2403,7 @@ export function validateDslSpec(
   validateStringSets(spec, diagnostics);
   validateLoweringSpec(spec, diagnostics, options);
   validateMaps(spec, diagnostics);
+  validateSyllabification(spec, diagnostics);
   validatePatterns(spec, streamByName, predicates, policyState, diagnostics);
   validateRules(spec, streamByName, predicates, policyState, diagnostics);
   const scalarFields = collectScalarFields(spec);

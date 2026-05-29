@@ -217,6 +217,27 @@ parameters:
       # Question boundary fall (internal Hz*10).
       # Source: ph_inton1.c F0_QSYLL_FALL = 80.
       question_fall_hz: 80
+      # Boundary GESTURE impulse pairs (internal Hz*10), emitted on the final
+      # stressed vowel into the `boundary` impulse layer.  These are the
+      # explicit F0 gestures DECtalk adds on top of the hat-fall for questions
+      # and commas (ph_inton1.c make_f0_command IMPULSE pairs).
+      #
+      # Yes/no question terminal rise: a small dip then a large rise at the end
+      # of the clause-final stressed vowel.  The +451 rise dominates the reduced
+      # question fall (question_fall_hz=80), producing a terminal RISE.
+      # Source: ph_inton1.c:219-220 (F0_QGesture1=-151, F0_QGesture2=+451),
+      #         :1351-1352 (emitted on the final stressed vowel for FQUENEXT).
+      question_gesture_dip_hz: -151
+      question_gesture_rise_hz: 451
+      # Comma continuation rise: an upward IMPULSE pair at a comma boundary, so
+      # F0 continues/rises rather than falling fully (signals "more to come").
+      # Source: ph_inton1.c:221-222 (F0_CGesture1=+171, F0_CGesture2=+250),
+      #         :1367-1368 (emitted on the final stressed vowel for FCBNEXT comma).
+      comma_gesture1_hz: 171
+      comma_gesture2_hz: 250
+      # Gesture IMPULSE length in native DECtalk control frames.
+      # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
+      boundary_gesture_duration_frames: 24
       # Stress impulse magnitudes (internal Hz*10 units).
       # Source: ph_inton1.c f0_mstress_level[] = {1, 71, 31, 281}.
       stress_level_primary_hz: 71

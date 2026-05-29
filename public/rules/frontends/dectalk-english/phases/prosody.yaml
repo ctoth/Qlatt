@@ -145,6 +145,29 @@ rules:
         look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
       is_hat_ends: >-
         nearest_forward == null || nearest_forward.phoneme == "SIL"
+      # Clause type of the boundary this hat ends into.  When is_hat_ends is
+      # true via the SIL branch, nearest_forward IS the terminal SIL, whose
+      # punctuationSymbol names the clause type ('.', '!', '?', ',', ';', ':').
+      # Null (utterance-internal SIL or no SIL) falls through to declarative.
+      # DECtalk 4.63 ph_inton1.c keys f0fall on the boundary feature
+      # (FQUENEXT/FCBNEXT/FPERNEXT) of the clause-final stressed vowel.
+      terminal: >-
+        nearest_forward != null && nearest_forward.phoneme == "SIL"
+        && has(nearest_forward.punctuationSymbol)
+        ? nearest_forward.punctuationSymbol
+        : null
+      # Clause-dependent terminal fall depth (DECtalk internal Hz*10):
+      #   '?' -> F0_QSYLL_FALL = 80   (smallest; the rise gesture dominates)
+      #   ',' -> F0_COMMA_FALL = 120
+      #   ';'/':' -> F0_NON_FINAL_FALL = 150
+      #   '.'/'!'/null -> F0_FINAL_FALL = 180  (largest)
+      # Source: ph_inton1.c:1125 (final), :1137 (comma), :1142 (non-final),
+      # :1210 (question).
+      clause_fall_hz: >-
+        terminal == "?" ? params.policy.f0.question_fall_hz
+        : terminal == "," ? params.policy.f0.comma_fall_hz
+        : (terminal == ";" || terminal == ":") ? params.policy.f0.non_final_fall_hz
+        : params.policy.f0.final_fall_hz
       has_following_sonorant: >-
         next != null
         && (next.type == "vowel" || next.type == "liquid" || next.type == "nasal" || next.type == "glide")
@@ -158,9 +181,10 @@ rules:
           )
       fall_ratio: >-
         current.duration > 0 ? fall_delay_ms / current.duration : 0
-      # Total fall: hat_rise (cancel the rise) + final_fall (below baseline).
+      # Total fall: hat_rise (cancel the rise) + clause_fall (below baseline,
+      # depth selected by terminal clause type per DECtalk f0fall).
       fall_hz: >-
-        params.policy.f0.hat_rise_hz + params.policy.f0.final_fall_hz
+        params.policy.f0.hat_rise_hz + clause_fall_hz
     constraint: is_hat_ends
     insert:
       layer: hat
@@ -170,7 +194,165 @@ rules:
       tag: f0_hat_fall
     citations:
       - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS timing and negative STEP)"
+      - "DECtalk 4.63 ph_inton1.c:1125,:1137,:1142,:1210 (clause-type f0fall: final 180 / comma 120 / non-final 150 / question 80)"
       - "Klatt 1982 (hat fall: cancel rise + phrase-final lowering)"
+
+  # --------------------------------------------------------------------------
+  # Rule 3b: Question Terminal Rise (boundary IMPULSE pair)
+  #
+  # Fires on the clause-final STRESSED vowel of a phrase that ends in '?'.
+  # Emits the DECtalk yes/no-question gesture pair into the `boundary` impulse
+  # layer: a small dip (-151) earlier in the vowel, then a large rise (+451) at
+  # the very end of the vowel.  Combined with the reduced question hat-fall
+  # (question_fall_hz=80, applied by dectalk_hat_fall above), the +451 rise
+  # dominates and the contour RISES at the clause end -- DECtalk's signature
+  # yes/no terminal rise.
+  #
+  # The live DECtalk path (ph_inton1.c:1308-1378, guarded FCBNEXT||FQUENEXT)
+  # requires a STRESSED final syllable; the unstressed-final question rise
+  # (Rule 6) is #ifdef CUT_THIS_RULE and dead in 4.63.  So this rule, like the
+  # live source, fires only on the final STRESSED vowel (is_hat_ends).
+  # wh- vs yes/no is NOT distinguished by ph_inton1.c -- all '?' rise.
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4 comment: positive pulse for
+  #     question terminal rise)
+  #   - DECtalk 4.63 ph_inton1.c:1351-1352 (F0_QGesture1=-151, F0_QGesture2=+451
+  #     IMPULSE pair on the final stressed vowel, length 24)
+  # --------------------------------------------------------------------------
+  # The f0_layer rule kind emits exactly one impulse per rule (parser maps a
+  # single `insert:` to insert_f0_layer).  DECtalk's gesture is a PAIR of
+  # impulses, so each gesture is two rules: a dip then a rise.  Both share the
+  # same final-stressed-vowel selector and clause-terminal detection.
+  dectalk_question_dip:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_hat_ends: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      terminal: >-
+        nearest_forward != null && nearest_forward.phoneme == "SIL"
+        && has(nearest_forward.punctuationSymbol)
+        ? nearest_forward.punctuationSymbol
+        : null
+    constraint: 'is_hat_ends && terminal == "?"'
+    # Small dip earlier in the vowel (DECtalk F0_QGesture1=-151).
+    insert:
+      layer: boundary
+      at: 'merge(current, {"ratio": 0.75})'
+      value: params.policy.f0.question_gesture_dip_hz
+      duration_frames: params.policy.f0.boundary_gesture_duration_frames
+      tag: f0_question_dip
+    citations:
+      - "DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4: positive pulse for question terminal rise)"
+      - "DECtalk 4.63 ph_inton1.c:1351 (F0_QGesture1=-151 IMPULSE on final stressed vowel)"
+
+  dectalk_question_rise:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_hat_ends: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      terminal: >-
+        nearest_forward != null && nearest_forward.phoneme == "SIL"
+        && has(nearest_forward.punctuationSymbol)
+        ? nearest_forward.punctuationSymbol
+        : null
+    constraint: 'is_hat_ends && terminal == "?"'
+    # Large rise at the very end of the vowel (DECtalk F0_QGesture2=+451 at
+    # delay = allodurs[nphon] = end of vowel).  Dominates the reduced question
+    # hat-fall, producing the terminal RISE.
+    insert:
+      layer: boundary
+      at: 'merge(current, {"ratio": 1.0})'
+      value: params.policy.f0.question_gesture_rise_hz
+      duration_frames: params.policy.f0.boundary_gesture_duration_frames
+      tag: f0_question_rise
+    citations:
+      - "DECtalk 4.63 ph_inton1.c:1288-1292 (Rule 4: positive pulse for question terminal rise)"
+      - "DECtalk 4.63 ph_inton1.c:1352 (F0_QGesture2=+451 IMPULSE on final stressed vowel, length 24)"
+
+  # --------------------------------------------------------------------------
+  # Rule 3c: Comma Continuation Rise (boundary IMPULSE pair)
+  #
+  # Fires on the clause-final STRESSED vowel of a clause that ends in ','.
+  # Emits the DECtalk comma gesture pair (+171, +250) into the `boundary`
+  # impulse layer, producing a continuation rise at the comma so the contour
+  # signals "more to come" rather than falling fully.  Paired with the reduced
+  # comma hat-fall (comma_fall_hz=120, applied by dectalk_hat_fall above).
+  #
+  # Citations:
+  #   - DECtalk 4.63 ph_inton1.c:1367-1368 (F0_CGesture1=+171, F0_CGesture2=+250
+  #     IMPULSE pair on the final stressed vowel for a comma boundary)
+  #   - DECtalk 4.63 ph_inton1.c:1364 (comma gesture timed delayf0 -= NF20MS)
+  # --------------------------------------------------------------------------
+  dectalk_comma_rise1:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_hat_ends: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      terminal: >-
+        nearest_forward != null && nearest_forward.phoneme == "SIL"
+        && has(nearest_forward.punctuationSymbol)
+        ? nearest_forward.punctuationSymbol
+        : null
+    constraint: 'is_hat_ends && terminal == ","'
+    insert:
+      layer: boundary
+      at: 'merge(current, {"ratio": 0.75})'
+      value: params.policy.f0.comma_gesture1_hz
+      duration_frames: params.policy.f0.boundary_gesture_duration_frames
+      tag: f0_comma_rise
+    citations:
+      - "DECtalk 4.63 ph_inton1.c:1367 (F0_CGesture1=+171 comma IMPULSE)"
+      - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
+
+  dectalk_comma_rise2:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.type == "vowel"
+        && has(current.stress) && current.stress == 1
+    define:
+      nearest_forward: >-
+        look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')
+      is_hat_ends: >-
+        nearest_forward == null || nearest_forward.phoneme == "SIL"
+      terminal: >-
+        nearest_forward != null && nearest_forward.phoneme == "SIL"
+        && has(nearest_forward.punctuationSymbol)
+        ? nearest_forward.punctuationSymbol
+        : null
+    constraint: 'is_hat_ends && terminal == ","'
+    insert:
+      layer: boundary
+      at: 'merge(current, {"ratio": 1.0})'
+      value: params.policy.f0.comma_gesture2_hz
+      duration_frames: params.policy.f0.boundary_gesture_duration_frames
+      tag: f0_comma_rise
+    citations:
+      - "DECtalk 4.63 ph_inton1.c:1368 (F0_CGesture2=+250 comma IMPULSE)"
+      - "DECtalk 4.63 ph_inton1.c:1364 (comma gesture timing delayf0 -= NF20MS)"
 
   # --------------------------------------------------------------------------
   # Rule 4: Stress Impulse (decaying pulse into stress layer)

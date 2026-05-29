@@ -51,6 +51,42 @@ speakers:
   speaker_frame_params:
     - F4
     - B4
+  # Declarative per-voice GAIN offsets. Each entry maps a voice-YAML gain field
+  # to a per-frame Klatt dB parameter. The applied value is a PAUL-RELATIVE
+  # additive dB offset: frame[param] += selectedVoice[gain] - defaultVoice[gain].
+  # The default voice (Paul, `default:` above) yields offset 0 for every entry,
+  # so Paul stays byte-identical; other voices get their differential spectral
+  # balance (vocal CHARACTER, not just pitch). The reference is the default
+  # voice's own values (data, not a hardcoded constant). The TS is a generic
+  # offset loop with no per-voice or per-gain branches.
+  #
+  # Why additive-onto-the-frame-dB-param and not a new semantics term: every
+  # gain in klatt80-baseline/semantics.yaml is dbToLinear(GO + <frameDbParam>
+  # + ...). Adding the offset to <frameDbParam> is identical to adding a term
+  # inside the formula, but touches NO shared semantics (other frontends declare
+  # no offsets -> unaffected).
+  #
+  # Mapping (DECtalk ph_vset.c chip register -> Qlatt frame dB param):
+  #   GV -> azgain (voicing) -> AV (voiceGain) and AVS (parallel voicing avsGain)
+  #   GH -> apgain (aspiration) -> AH (aspGain)
+  #   GF -> afgain (frication)  -> AF (fricGain / fricGainScaled)
+  #   LO -> r1ca, G4 -> r2ca, G3 -> r3ca, G2 -> r4ca, G1 -> r5ca
+  #         (parallel resonator gains) -> parallel formant amplitudes A1..A5
+  # GN (rnpgain / nasal) is intentionally OMITTED: the Qlatt nasal parallel gain
+  # (anLinear) derives from nasalMurmurStrength, not a per-frame AN dB param, so
+  # GN has no additive destination on this path. Documented; not forced.
+  # Citation: DECtalk 4.63 ph_vset.c (GV->azgain 808/810, GF->afgain 816,
+  # GH->apgain 818, G1-G4->r5ca/r4ca/r3ca/r2ca 765-772, LO->r1ca 775).
+  speaker_gain_offsets:
+    - { gain: GV, param: AV }
+    - { gain: GV, param: AVS }
+    - { gain: GH, param: AH }
+    - { gain: GF, param: AF }
+    - { gain: LO, param: A1 }
+    - { gain: G4, param: A2 }
+    - { gain: G3, param: A3 }
+    - { gain: G2, param: A4 }
+    - { gain: G1, param: A5 }
   voices:
     - paul
     - harry

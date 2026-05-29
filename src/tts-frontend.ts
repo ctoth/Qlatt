@@ -178,6 +178,12 @@ function applySpeakerProfileToParams(
     /** Declared list of fields to stamp (absolute set) onto frame params. */
     fields: readonly string[];
   },
+  voiceGainOffsets?: readonly {
+    /** Per-frame Klatt dB param the offset is added to. */
+    param: string;
+    /** Paul-relative additive dB offset (selectedVoice[gain] - default[gain]). */
+    offsetDb: number;
+  }[],
 ): void {
   if (!params) return;
 
@@ -209,6 +215,26 @@ function applySpeakerProfileToParams(
       const value = voiceFrameStamp.params[field];
       if (typeof value === "number" && Number.isFinite(value)) {
         params[field] = value;
+      }
+    }
+  }
+
+  // Generic, data-declared per-voice GAIN offsets, applied as Paul-relative
+  // ADDITIVE dB offsets onto the per-frame gain dB params (AV/AVS/AH/AF/A1..A5).
+  // Every offset is (selectedVoice[gain] - defaultVoice[gain]); the default
+  // voice (Paul) yields 0 for every entry, so Paul/default frames are
+  // byte-identical. The mapping (which gain -> which frame param) is data
+  // (frontend.yaml speakers.speaker_gain_offsets); this loop is voice-agnostic
+  // with no per-voice or per-gain branches. Adding the offset to the frame's
+  // dB param is identical to adding a term inside dbToLinear(GO + <param> + ...)
+  // in semantics, but touches no shared semantics formula.
+  // Citation: DECtalk 4.63 ph_vset.c (per-speaker source/parallel gain config).
+  if (voiceGainOffsets) {
+    for (const { param, offsetDb } of voiceGainOffsets) {
+      if (offsetDb === 0) continue;
+      const current = params[param];
+      if (typeof current === "number" && Number.isFinite(current)) {
+        params[param] = current + offsetDb;
       }
     }
   }
@@ -602,6 +628,33 @@ function buildTextToKlattTrackDetailed(
     selectedVoice && voiceRegistry && voiceRegistry.speakerFrameParams.length > 0
       ? { params: selectedVoice.params, fields: voiceRegistry.speakerFrameParams }
       : undefined;
+  // Build the generic per-voice GAIN offset list: each declared
+  // speaker_gain_offsets entry becomes a Paul-relative additive dB offset
+  // (selectedVoice[gain] - defaultVoice[gain]) onto the mapped frame dB param.
+  // The reference is the registry default voice's own values (DATA, resolved
+  // from `speakers.default` — not a hardcoded constant). The default voice
+  // therefore yields 0 for every entry (byte-identical). No per-voice branches.
+  const voiceGainOffsets =
+    selectedVoice && voiceRegistry && voiceRegistry.speakerGainOffsets.length > 0
+      ? (() => {
+          const reference = resolveVoice(voiceRegistry, voiceRegistry.default).params;
+          return voiceRegistry.speakerGainOffsets
+            .map(({ gain, param }) => {
+              const voiceVal = selectedVoice!.params[gain];
+              const refVal = reference[gain];
+              if (
+                typeof voiceVal !== "number" ||
+                !Number.isFinite(voiceVal) ||
+                typeof refVal !== "number" ||
+                !Number.isFinite(refVal)
+              ) {
+                return null;
+              }
+              return { param, offsetDb: voiceVal - refVal };
+            })
+            .filter((e): e is { param: string; offsetDb: number } => e !== null);
+        })()
+      : undefined;
   parameterSequence = parameterSequence.map((token: PipelineToken) => {
     if (
       token?.stream === "f0" ||
@@ -620,6 +673,7 @@ function buildTextToKlattTrackDetailed(
       resolvedSpeaker,
       sourceContour.baseline,
       voiceFrameStamp,
+      voiceGainOffsets,
     );
     return nextToken;
   });

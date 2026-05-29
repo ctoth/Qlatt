@@ -11,6 +11,14 @@
 import { isPlainObject, loadYamlDocumentSync } from "./yaml-loader";
 import type { SpeakerProfileOverride } from "./speaker-profile";
 
+/** One declarative per-voice gain offset binding: the voice-YAML gain field
+ *  `gain` is applied as a Paul-relative additive dB offset onto the per-frame
+ *  Klatt dB parameter `param`. Pure data — the TS applies it generically. */
+export interface SpeakerGainOffset {
+  gain: string;
+  param: string;
+}
+
 export interface VoiceRegistry {
   dir: string;
   default: string;
@@ -19,6 +27,10 @@ export interface VoiceRegistry {
    *  frame's same-named Klatt param. Pure data — the TS applies it generically
    *  with no per-voice or per-field branches. Empty when not declared. */
   speakerFrameParams: string[];
+  /** Declarative per-voice gain offset bindings (voice gain field -> frame dB
+   *  param). Applied as Paul-relative additive offsets by generic infra with no
+   *  per-voice or per-gain branches. Empty when not declared. */
+  speakerGainOffsets: SpeakerGainOffset[];
 }
 
 export interface ResolvedVoice {
@@ -56,7 +68,16 @@ export function getVoiceRegistry(frontendSpec: unknown): VoiceRegistry | null {
   const speakerFrameParams = Array.isArray(speakers.speaker_frame_params)
     ? speakers.speaker_frame_params.filter((v): v is string => typeof v === "string")
     : [];
-  return { dir, default: def, voices, speakerFrameParams };
+  const speakerGainOffsets = Array.isArray(speakers.speaker_gain_offsets)
+    ? speakers.speaker_gain_offsets
+        .filter(isPlainObject)
+        .filter(
+          (e): e is { gain: string; param: string } =>
+            typeof e.gain === "string" && typeof e.param === "string",
+        )
+        .map((e) => ({ gain: e.gain, param: e.param }))
+    : [];
+  return { dir, default: def, voices, speakerFrameParams, speakerGainOffsets };
 }
 
 function toNumberRecord(doc: Record<string, unknown>): Record<string, number> {

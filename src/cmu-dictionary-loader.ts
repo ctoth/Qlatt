@@ -1,5 +1,14 @@
 import { normalizePath, isNodeRuntime, readFileFromFsSync } from "./path-utils";
 
+function readDictionarySourceFromUrlSync(specPath: string): string | null {
+  if (typeof XMLHttpRequest !== "function") return null;
+  const request = new XMLHttpRequest();
+  request.open("GET", specPath, false);
+  request.send();
+  if (request.status < 200 || request.status >= 300) return null;
+  return typeof request.responseText === "string" ? request.responseText : null;
+}
+
 export type CmuDictionary = Record<string, string>;
 export const DEFAULT_CMU_DICTIONARY_PATH = "/cmu-dictionary.json";
 
@@ -68,6 +77,46 @@ export async function preloadCmuDictionaryFromPath(
       } catch {
         // Try next candidate path.
       }
+    }
+  }
+
+  const known = listBundledCmuDictionaryPaths();
+  throw new Error(
+    `E_CMU_DICT_PATH_UNKNOWN: '${specPath}' could not be loaded` +
+      (known.length > 0 ? ` (known: ${known.join(", ")})` : "")
+  );
+}
+
+/**
+ * Synchronous per-path dictionary loader.
+ *
+ * Mirrors {@link loadYamlSourceSync}'s strategy (sync XHR in the browser, sync
+ * filesystem read under Node) so the synchronous TTS pipeline can load a
+ * per-frontend dictionary declared via `dictionary_path`. Caches per path in
+ * the same {@link DICTIONARY_CACHE} the async loader uses, so a path loaded
+ * either way is shared. Generic: a path -> a parsed flat word->pron map.
+ */
+export function loadCmuDictionaryFromPathSync(specPath: string): CmuDictionary {
+  const cached = DICTIONARY_CACHE.get(specPath);
+  if (cached) return cached;
+
+  const attempts = normalizeAttempts(specPath);
+
+  for (const attempt of attempts) {
+    const fromUrl = readDictionarySourceFromUrlSync(attempt);
+    if (typeof fromUrl === "string") {
+      const parsed = parseDictionary(fromUrl, attempt);
+      DICTIONARY_CACHE.set(specPath, parsed);
+      return parsed;
+    }
+  }
+
+  for (const attempt of attempts) {
+    const source = readFileFromFsSync(attempt);
+    if (typeof source === "string") {
+      const parsed = parseDictionary(source, attempt);
+      DICTIONARY_CACHE.set(specPath, parsed);
+      return parsed;
     }
   }
 

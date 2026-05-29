@@ -40,6 +40,13 @@ export type TranscriptionOptions = {
   morphologyPath?: string;
   /** Override the default CMU dictionary lookup function. */
   dictLookup?: (word: string) => string[] | null;
+  /**
+   * Per-frontend pronunciation dictionary map (flat word -> "ARPABET ..."),
+   * already loaded from the frontend's `dictionary_path`. When provided, both
+   * dictionary lookup AND compound-recovery (`hasDirectDictionaryEntry`) use
+   * this map instead of the global CMU default. Generic: a map, not word lists.
+   */
+  dictionaryMap?: Record<string, string | undefined>;
   /** Declarative frontend spec used for pre-phonological orthography rewriting. */
   specSource?: unknown;
 };

@@ -4,6 +4,7 @@ import {
   type InventorySpec,
   type FrontendResources,
 } from "./declarative-frontend/inventory";
+import { loadCmuDictionaryFromPathSync } from "./cmu-dictionary-loader";
 import { normalizeText } from "./g2p/text-normalize";
 import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
@@ -211,16 +212,34 @@ function buildTextToKlattTrackDetailed(
   // Load inventory, LTS, and morphology paths from the frontend spec.
   // Every resource path originates in frontend.yaml — no hardcoded defaults.
   const resources = loadFrontendResources(frontendSpec as Record<string, unknown>);
-  const { inventory: frontendInventory, ltsPath, morphologyPath } = resources;
+  const { inventory: frontendInventory, ltsPath, morphologyPath, dictionaryPath } = resources;
   const inventoryCitation = resources.inventoryPath;
 
-  // No-op dictionary lookup for frontends with custom LTS rules (their phoneme set
-  // won't match CMU dictionary entries).
+  // No-op dictionary lookup for frontends with custom LTS rules that declare
+  // neither the global CMU default nor a per-frontend `dictionary_path`.
   const noOpDictLookup = (): null => null;
+
+  // Per-frontend pronunciation dictionary (generic: a path -> a map). When a
+  // frontend declares `dictionary_path`, it does dictionary-first lookup
+  // against that map with LTS fallback (the g2p chain handles the fallback).
+  // Frontends without it keep prior behavior (global CMU map, or no-op when
+  // `skip_dictionary` is set).
+  const frontendDictionaryMap = dictionaryPath
+    ? loadCmuDictionaryFromPathSync(dictionaryPath)
+    : undefined;
 
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
+  // Explainability (AGENTS.md principle 3): a per-frontend dictionary load is a
+  // non-trivial decision — make it observable rather than silent.
+  if (frontendDictionaryMap) {
+    diagnostics?.info(
+      `Loaded per-frontend dictionary '${dictionaryPath}' (${Object.keys(frontendDictionaryMap).length} entries)`,
+      { dictionaryPath, entries: Object.keys(frontendDictionaryMap).length },
+      "I_FRONTEND_DICTIONARY_LOADED",
+    );
+  }
   provenance?.add({
     stage: "frontend",
     type: "lowering_spec_validated",
@@ -302,7 +321,15 @@ function buildTextToKlattTrackDetailed(
     transcriptionConfig: rulepackTranscriptionConfig,
     ltsPath,
     morphologyPath,
-    dictLookup: (frontendSpec as Record<string, unknown>).skip_dictionary ? noOpDictLookup : undefined,
+    // Dictionary selection (generic, no per-frontend branches):
+    //  - `dictionary_path` declared -> use that loaded map (dict-first, LTS fallback).
+    //  - else `skip_dictionary` -> no-op lookup (pure LTS).
+    //  - else -> undefined -> global CMU default map.
+    dictionaryMap: frontendDictionaryMap,
+    dictLookup:
+      frontendDictionaryMap == null && (frontendSpec as Record<string, unknown>).skip_dictionary
+        ? noOpDictLookup
+        : undefined,
     specSource: frontendSpec,
   });
 

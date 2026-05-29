@@ -20,6 +20,13 @@ export type FrontendResources = {
   inventoryPath: string;
   ltsPath?: string;
   morphologyPath?: string;
+  /**
+   * Optional per-frontend pronunciation dictionary path (JSON, flat
+   * word -> "ARPABET ..." map). When set, this frontend does dictionary-first
+   * lookup against this file instead of the global CMU default. Generic:
+   * a path -> a map -> lookup. Frontends without it keep the global behavior.
+   */
+  dictionaryPath?: string;
 };
 
 const BUNDLED_INVENTORY_CACHE = new Map<string, InventorySpec>();
@@ -269,5 +276,6 @@ export function loadFrontendResources(
     inventoryPath,
     ltsPath: (spec.lts_path as string) || undefined,
     morphologyPath: (spec.morphology_path as string) || undefined,
+    dictionaryPath: (spec.dictionary_path as string) || undefined,
   };
 }

@@ -1,7 +1,11 @@
 version: v13-cel
 inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
-skip_dictionary: true
+# DECtalk is dictionary-first with LTS fallback (DECtalk 4.63 ls_task.c:697:
+# main dictionary search precedes the LTS rule engine; rules run only on miss).
+# This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
+# same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
+dictionary_path: /dectalk-dictionary.json
 include:
   - pipeline.yaml
   - phases/structural.yaml

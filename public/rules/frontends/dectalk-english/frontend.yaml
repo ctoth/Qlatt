@@ -6,6 +6,16 @@ lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
 # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
 # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
 dictionary_path: /dectalk-dictionary.json
+# Per-frontend text-normalization policy (DATA). Selects this frontend's own
+# normalization tables + pipeline instead of the shared qlatt-english defaults.
+# The dectalk pipeline adds a year-reading step ("1984" -> "nineteen eighty
+# four") that the shared pipeline omits; the predicate and speaking form are
+# declared as data in normalization-pipeline.yaml. A frontend that declares no
+# `normalization` block keeps the qlatt-english default normalization.
+# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
+normalization:
+  tables_path: /rules/frontends/dectalk-english/normalization-tables.yaml
+  pipeline_path: /rules/frontends/dectalk-english/normalization-pipeline.yaml
 include:
   - pipeline.yaml
   - phases/postlexical.yaml

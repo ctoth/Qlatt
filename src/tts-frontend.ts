@@ -338,7 +338,24 @@ function buildTextToKlattTrackDetailed(
   });
 
   const tokenDecisionIds = new Map<string, string>();
-  const normalized = normalizeText(inputText);
+  // Per-frontend text-normalization policy (generic, data-driven). A frontend
+  // may declare a `normalization` block naming its own tables/pipeline YAML
+  // paths; absent that, normalizeText uses the qlatt-english defaults, so any
+  // frontend without the block is byte-identical to before. No per-frontend
+  // branch here — we only forward whatever paths the spec declares.
+  const normalizationSpec = (frontendSpec as { normalization?: unknown }).normalization;
+  const normalizationConfig =
+    normalizationSpec && typeof normalizationSpec === "object"
+      ? {
+          tablesPath: (normalizationSpec as { tables_path?: unknown }).tables_path as
+            | string
+            | undefined,
+          pipelinePath: (normalizationSpec as { pipeline_path?: unknown }).pipeline_path as
+            | string
+            | undefined,
+        }
+      : undefined;
+  const normalized = normalizeText(inputText, normalizationConfig);
   // Transcribe returns a flat list of phoneme objects with word info
   let parameterSequence: PipelineToken[] = transcribeText(normalized, {
     provenance,

@@ -8,6 +8,27 @@ include:
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+# Declarative voice registry. Each entry names a voice YAML under `dir`; a
+# caller selects one by name via the textToKlattTrack `speaker` option (a
+# string voice name). The selected voice's parameters populate the speaker
+# policy (parameters.policy.speaker) and the F0 speaker-scaling fields. When
+# no voice is selected, `default` is used — keeping Paul byte-identical to the
+# legacy inline speaker policy below.
+# Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
+speakers:
+  dir: /rules/frontends/dectalk-english/speakers
+  default: paul
+  voices:
+    - paul
+    - harry
+    - frank
+    - dennis
+    - betty
+    - ursula
+    - wendy
+    - rita
+    - kit
+    - chris
 f0_model:
   type: layered_additive
   # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.

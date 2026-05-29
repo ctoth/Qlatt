@@ -35,7 +35,9 @@ import {
   loadSpeakerProfileSync,
   resolveSpeakerProfile,
   type ResolvedSpeakerProfile,
+  type SpeakerProfileOverride,
 } from "./speaker-profile";
+import { getVoiceRegistry, resolveVoice, type ResolvedVoice } from "./dectalk-voice";
 import {
   DEFAULT_SOURCE_CONTOUR_PATH,
   loadSourceContourSync,
@@ -73,23 +75,30 @@ export type TextToKlattTrackOptions = {
   /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
    *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
   rate?: number;
-  /** Speaker profile overrides. Merged into params.policy.speaker in the CEL context.
+  /** Speaker selection. Either:
+   *   - a voice NAME (string) registered in the frontend's `speakers:` block
+   *     (e.g. "paul", "betty"); the named voice's YAML populates the speaker
+   *     policy and F0 speaker-scaling fields. Frontend must declare a registry.
+   *   - a partial numeric OVERRIDE object, merged into params.policy.speaker.
    *  Defaults are defined in the selected frontend spec under parameters.policy.speaker.
-   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990 */
-  speaker?: {
-    /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
-     *  Citation: O'Shaughnessy 1976 */
-    base_f0_hz?: number;
-    /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
-     *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
-    formant_scale?: number;
-    /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
-     *  Citation: Fant 1997 Table 1 */
-    rd_default?: number;
-    /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
-     *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
-    spectral_tilt_offset_db?: number;
-  };
+   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990,
+   *  DECtalk 4.63 ph_vset.c (voice tables) */
+  speaker?:
+    | string
+    | {
+        /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
+         *  Citation: O'Shaughnessy 1976 */
+        base_f0_hz?: number;
+        /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
+         *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
+        formant_scale?: number;
+        /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
+         *  Citation: Fant 1997 Table 1 */
+        rd_default?: number;
+        /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
+         *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
+        spectral_tilt_offset_db?: number;
+      };
   /** Voice quality preset. Controls glottal source shape (Rd), aspiration noise (AH),
    *  spectral tilt (TL), flutter, and jitter. 'modal' or undefined = no change.
    *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
@@ -110,6 +119,10 @@ export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
   frontendPhones: FrontendPhoneSummary[];
   controlScore: DeclarativeControlScore;
+  /** Resolved speaker profile (base_f0_hz, formant_scale, rd_default, spectral_tilt_offset_db). */
+  resolvedSpeaker: ResolvedSpeakerProfile;
+  /** Speaker policy parameters fed to the layered F0 model (when present). */
+  speakerParams?: Record<string, unknown>;
 };
 
 function getTrackLoweringSpec(specSource: unknown): TrackLoweringSpec {
@@ -220,9 +233,32 @@ function buildTextToKlattTrackDetailed(
       ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
       : DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfileSpec = loadSpeakerProfileSync(speakerProfilePath);
+
+  // Resolve the `speaker` option into (a) a numeric profile override and
+  // (b) an optional selected voice whose full parameter record feeds the F0
+  // speaker policy. A string `speaker` is a voice NAME resolved against the
+  // frontend's declarative `speakers:` registry; an object is a direct
+  // partial override. This is generic infrastructure — there are no per-voice
+  // branches; the registry maps names to YAML files.
+  let speakerOverride: SpeakerProfileOverride | undefined;
+  let selectedVoice: ResolvedVoice | null = null;
+  if (typeof options.speaker === "string") {
+    const registry = getVoiceRegistry(frontendSpec);
+    if (!registry) {
+      throw new Error(
+        `E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' declares no speakers registry; ` +
+          `cannot select voice '${options.speaker}'`,
+      );
+    }
+    selectedVoice = resolveVoice(registry, options.speaker);
+    speakerOverride = selectedVoice.override;
+  } else {
+    speakerOverride = options.speaker;
+  }
+
   const resolvedSpeaker = resolveSpeakerProfile({
     baseF0,
-    speakerOverride: options.speaker,
+    speakerOverride,
     profileSpec: speakerProfileSpec,
   });
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
@@ -536,6 +572,14 @@ function buildTextToKlattTrackDetailed(
           extracted[key] = val;
         }
       }
+      // When a registered voice is selected, its numeric parameters override
+      // the inline policy defaults for every field the voice declares. This is
+      // a generic merge — the voice record is data loaded by name, not code.
+      if (selectedVoice) {
+        for (const [key, val] of Object.entries(selectedVoice.params)) {
+          extracted[key] = val;
+        }
+      }
       extracted.base_f0_hz = resolvedSpeaker.base_f0_hz;
       if (Object.keys(extracted).length > 0) {
         speakerParams = extracted;
@@ -614,6 +658,8 @@ function buildTextToKlattTrackDetailed(
     track,
     frontendPhones,
     controlScore,
+    resolvedSpeaker,
+    speakerParams,
   };
 }
 

@@ -1,0 +1,54 @@
+# DECtalk voice "Ursula" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Ursula
+sex: female
+base_f0_hz: 220
+formant_scale: 1.17
+rd_default: 0.8
+spectral_tilt_offset_db: 0
+f0_minimum: 2080
+f0_scale_factor: 4715
+f0_lp_filter: 1950
+f0_lp_filter_alpha: 0.47607421875
+hat_rise_hz10: 110
+scale_str_rise: 18
+assertiveness: 4100
+baseline_fall_hz10: 180
+falling_target: 80
+F4: 4450
+B4: 260
+F5: 6000
+B5: 6000
+F7: 4400
+F8: 4900
+GF: 65
+GH: 65
+GV: 63
+GN: 70
+G1: 69
+G2: 77
+G3: 55
+G4: 59
+LO: 66
+AGO: 300
+AGVO: 800
+AGUO: 1900
+UNVOW: 0
+CHINK: 65
+smoothness: 40
+breathiness: 0
+richness: 30
+nopen_fraction: 10
+laryngealization: 0
+head_size: 94
+quickness: 30

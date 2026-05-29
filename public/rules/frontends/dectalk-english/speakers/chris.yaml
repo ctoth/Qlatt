@@ -1,0 +1,54 @@
+# DECtalk voice "Chris" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Chris
+sex: female
+base_f0_hz: 110
+formant_scale: 1.17
+rd_default: 0.8
+spectral_tilt_offset_db: 0
+f0_minimum: 980
+f0_scale_factor: 3690
+f0_lp_filter: 2100
+f0_lp_filter_alpha: 0.5126953125
+hat_rise_hz10: 100
+scale_str_rise: 20
+assertiveness: 4100
+baseline_fall_hz10: 180
+falling_target: 73
+F4: 3600
+B4: 260
+F5: 6000
+B5: 280
+F7: 3600
+F8: 4700
+GF: 65
+GH: 65
+GV: 60
+GN: 71
+G1: 71
+G2: 65
+G3: 65
+G4: 66
+LO: 70
+AGO: 400
+AGVO: 800
+AGUO: 1900
+UNVOW: 0
+CHINK: 50
+smoothness: 0
+breathiness: 0
+richness: 70
+nopen_fraction: 0
+laryngealization: 0
+head_size: 125
+quickness: 40

@@ -36,6 +36,10 @@ export interface VoiceRegistry {
 export interface ResolvedVoice {
   /** Voice name as selected. */
   name: string;
+  /** Biological-sex data field from the voice YAML (`sex: male|female`), if
+   *  declared. Generic data — used to select the male vs female formant locus
+   *  table; never a per-voice-name branch. Undefined when the YAML omits it. */
+  sex?: string;
   /** Numeric speaker-profile overrides (base_f0_hz, formant_scale, ...). */
   override: SpeakerProfileOverride;
   /** Full numeric parameter record for this voice (feeds the F0 speaker
@@ -126,5 +130,7 @@ export function resolveVoice(registry: VoiceRegistry, voiceName: string): Resolv
     : [];
   citations.unshift(docPath);
 
-  return { name, override, params, citations };
+  const sex = typeof doc.sex === "string" ? doc.sex : undefined;
+
+  return { name, sex, override, params, citations };
 }

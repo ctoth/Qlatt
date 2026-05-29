@@ -112,6 +112,18 @@ export type TrackLoweringSpec = {
      */
     loci?: LocusTable;
     /**
+     * Optional FEMALE locus table (DECtalk us_femloc). Same shape and same
+     * vowel_category classification as `loci` (the male/us_maleloc table); only
+     * the absolute locus Hz differ. Selected per the chosen voice's `sex` field
+     * (context.voiceSex === "female") — generic, no per-voice-name branches. A
+     * frontend without this, or a male/unspecified voice, uses `loci`. The
+     * female loci are ABSOLUTE female-appropriate Hz and are used directly (the
+     * vowel target curval is already formant-scaled), matching DECtalk where
+     * us_femloc is the absolute female table — no double formant scaling.
+     * Citation: DECtalk 4.63 ph_sttr2.c:159-169 (setloc malfem); p_us_rom.h:5366.
+     */
+    loci_female?: LocusTable;
+    /**
      * Optional sonorant vowel-category (sontyx) per phoneme per edge, used to
      * select which `loci` sontyx block applies. forward edge uses begtyp,
      * backward uses endtyp (clamped 1/2/3). A sonorant with no entry falls back
@@ -141,6 +153,14 @@ export type TrackLoweringContext = {
   transitionMs?: number;
   f0Model?: LayeredF0ModelConfig;
   speakerParams?: Record<string, unknown>;
+  /**
+   * Selected voice's biological-sex data field (from the voice YAML `sex:`).
+   * When "female" and the lowering spec declares `transitions.loci_female`, the
+   * female locus table is used for obstruent formant transitions; otherwise the
+   * male `loci` table (or none) is used. Generic — the engine branches only on
+   * this data string, never on a voice name.
+   */
+  voiceSex?: string;
   diagnostics?: Diagnostics | null;
 };
 
@@ -1526,7 +1546,19 @@ export function lowerControlScoreToKlattTrack(
   // Optional locus data (DECtalk-style obstruent transitions). A frontend that
   // omits `loci` keeps the legacy midpoint-only smoothing: every locus lookup
   // returns null below, so the obstruent edges stay untouched (no-op).
-  const loci = loweringSpec.transitions.loci;
+  //
+  // Male vs female table selection is GENERIC: the chosen voice's `sex` data
+  // field (context.voiceSex) picks `loci_female` when it is "female" AND that
+  // table is declared; everything else (male, unspecified, or no female table)
+  // uses the male `loci`. No per-voice-name branches — the only branch is on the
+  // data string "female". The female loci are absolute female Hz (DECtalk
+  // us_femloc) used as-is; the vowel curval is already formant-scaled, so there
+  // is no double formant scaling. vowel_category is sex-independent (it derives
+  // from begtyp/endtyp, not the locus table) and is shared by both tables.
+  const loci =
+    context.voiceSex === "female" && loweringSpec.transitions.loci_female != null
+      ? loweringSpec.transitions.loci_female
+      : loweringSpec.transitions.loci;
   const vowelCategory = loweringSpec.transitions.vowel_category;
   // Find the obstruent phoneme adjacent to a sonorant at `index`, scanning in
   // `direction` (-1 = previous, +1 = next). A stop is represented as a closure

@@ -2053,56 +2053,71 @@ function isFiniteNumber(value: unknown): value is number {
 }
 
 /**
- * Validate the optional obstruent<->sonorant locus tables. Both `loci` and
- * `vowel_category` are optional. When present:
- *   loci[obstruent][sontyx "1"|"2"|"3"][formant] -> {locus_hz, prcnt, durtran_ms}
+ * Validate one optional locus table (`loci` or `loci_female`) at `base`. Shape:
+ *   table[obstruent][sontyx "1"|"2"|"3"][formant] -> {locus_hz, prcnt, durtran_ms}
+ * Both tables share this structure (male us_maleloc / female us_femloc); only the
+ * locus Hz differ. The engine treats a missing/partial entry as "no locus", so
+ * this flags only structurally malformed data, not coverage gaps.
+ */
+function validateLocusTable(
+  table: unknown,
+  base: string,
+  diagnostics: ValidationDiagnostic[]
+): void {
+  if (table === undefined) return;
+  if (!isPlainObject(table)) {
+    diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+    return;
+  }
+  for (const [obstruent, block] of Object.entries(table)) {
+    const obPath = `${base}.${obstruent}`;
+    if (!isPlainObject(block)) {
+      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${obPath} must be an object`, obPath));
+      continue;
+    }
+    for (const [sontyx, formants] of Object.entries(block)) {
+      const sxPath = `${obPath}.${sontyx}`;
+      if (sontyx !== "1" && sontyx !== "2" && sontyx !== "3") {
+        diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} key must be "1", "2", or "3"`, sxPath));
+      }
+      if (!isPlainObject(formants)) {
+        diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} must be an object`, sxPath));
+        continue;
+      }
+      for (const [formant, entry] of Object.entries(formants)) {
+        const fPath = `${sxPath}.${formant}`;
+        if (!isPlainObject(entry)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath} must be an object`, fPath));
+          continue;
+        }
+        for (const field of ["locus_hz", "prcnt", "durtran_ms"]) {
+          if (!isFiniteNumber((entry as Record<string, unknown>)[field])) {
+            diagnostics.push(
+              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath}.${field} must be a finite number`, `${fPath}.${field}`)
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Validate the optional obstruent<->sonorant locus tables. `loci` (male),
+ * `loci_female`, and `vowel_category` are all optional. When present:
+ *   loci/loci_female[obstruent][sontyx][formant] -> {locus_hz, prcnt, durtran_ms}
  *   vowel_category[sonorant] -> {forward?: 1|2|3, backward?: 1|2|3}
  * The engine treats a missing/partial entry as "no locus" (legacy fallback), so
  * this only flags structurally malformed data, not coverage gaps.
  */
 function validateLocusTables(
   loci: unknown,
+  lociFemale: unknown,
   vowelCategory: unknown,
   diagnostics: ValidationDiagnostic[]
 ): void {
-  if (loci !== undefined) {
-    const base = "output.lowering.transitions.loci";
-    if (!isPlainObject(loci)) {
-      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
-    } else {
-      for (const [obstruent, block] of Object.entries(loci)) {
-        const obPath = `${base}.${obstruent}`;
-        if (!isPlainObject(block)) {
-          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${obPath} must be an object`, obPath));
-          continue;
-        }
-        for (const [sontyx, formants] of Object.entries(block)) {
-          const sxPath = `${obPath}.${sontyx}`;
-          if (sontyx !== "1" && sontyx !== "2" && sontyx !== "3") {
-            diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} key must be "1", "2", or "3"`, sxPath));
-          }
-          if (!isPlainObject(formants)) {
-            diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${sxPath} must be an object`, sxPath));
-            continue;
-          }
-          for (const [formant, entry] of Object.entries(formants)) {
-            const fPath = `${sxPath}.${formant}`;
-            if (!isPlainObject(entry)) {
-              diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath} must be an object`, fPath));
-              continue;
-            }
-            for (const field of ["locus_hz", "prcnt", "durtran_ms"]) {
-              if (!isFiniteNumber((entry as Record<string, unknown>)[field])) {
-                diagnostics.push(
-                  makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${fPath}.${field} must be a finite number`, `${fPath}.${field}`)
-                );
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  validateLocusTable(loci, "output.lowering.transitions.loci", diagnostics);
+  validateLocusTable(lociFemale, "output.lowering.transitions.loci_female", diagnostics);
 
   if (vowelCategory !== undefined) {
     const base = "output.lowering.transitions.vowel_category";
@@ -2198,9 +2213,15 @@ function validateLoweringSpec(
       validateStringArray(transitions.blend.keys, diagnostics, "output.lowering.transitions.blend.keys", "output.lowering.transitions.blend.keys");
       validateStringArray(transitions.blend.smooth_types, diagnostics, "output.lowering.transitions.blend.smooth_types", "output.lowering.transitions.blend.smooth_types");
     }
-    // Optional obstruent<->sonorant locus tables (DECtalk-style). Both blocks
-    // are optional; a frontend that omits them keeps midpoint-only smoothing.
-    validateLocusTables(transitions.loci, transitions.vowel_category, diagnostics);
+    // Optional obstruent<->sonorant locus tables (DECtalk-style). The male
+    // (`loci`), female (`loci_female`), and `vowel_category` blocks are all
+    // optional; a frontend that omits them keeps midpoint-only smoothing.
+    validateLocusTables(
+      transitions.loci,
+      transitions.loci_female,
+      transitions.vowel_category,
+      diagnostics,
+    );
   }
 
   const f0 = lowering.f0;

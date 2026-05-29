@@ -788,6 +788,10 @@ function buildTextToKlattTrackDetailed(
     transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
     f0Model,
     speakerParams,
+    // Selected voice's `sex` data field selects the male vs female formant locus
+    // table generically (no per-voice-name branch). Undefined for the default
+    // voice / when no voice is selected -> male table (byte-identical to before).
+    voiceSex: selectedVoice?.sex,
     diagnostics,
   });
   provenance?.add({

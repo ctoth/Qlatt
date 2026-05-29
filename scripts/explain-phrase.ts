@@ -25,6 +25,8 @@ type ParsedArgs = {
   transitionMs: number;
   verbose: boolean;
   whyDecisionId: string | null;
+  frontendId: string;
+  speaker: string | null;
 };
 
 type ExplainSummary = {
@@ -131,6 +133,12 @@ function parseArgv(argv: string[]): ParsedArgs {
     transitionMs,
     verbose: flags.get("verbose") === "true",
     whyDecisionId: flags.get("why") ?? null,
+    // Which frontend to run (e.g. "dectalk-english"). Defaults to the
+    // bundled default frontend so existing invocations are unchanged.
+    frontendId: flags.get("frontend") ?? "qlatt-english",
+    // Optional speaker/voice name for frontends with a speakers registry
+    // (e.g. dectalk-english "paul"/"betty"). Null = frontend default.
+    speaker: flags.get("speaker") ?? null,
   };
 }
 
@@ -267,7 +275,11 @@ export async function runExplainCli(argv: string[], io: CliIo = defaultIo()): Pr
     const args = parseArgv(argv);
 
     const provenance = createProvenanceCollector();
-    textToKlattTrack(args.phrase, args.baseF0, args.transitionMs, { provenance });
+    textToKlattTrack(args.phrase, args.baseF0, args.transitionMs, {
+      provenance,
+      frontendId: args.frontendId,
+      ...(args.speaker ? { speaker: args.speaker } : {}),
+    });
 
     const allDecisions = provenance.getDecisions();
     let decisions = allDecisions;

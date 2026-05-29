@@ -1897,6 +1897,30 @@ function validateRules(
           );
         }
       }
+
+      // Optional per-point `when:` guard — a CEL boolean expression.
+      const whenExpr = pointSpec.when;
+      if (whenExpr != null && typeof whenExpr !== "string") {
+        diagnostics.push(
+          makeDiagnostic(
+            "E_RULE_EXPRESSION_INVALID",
+            `${pointLabel} has non-string when expression`,
+            `${pointPath}.when`
+          )
+        );
+      }
+      if (typeof whenExpr === "string" && whenExpr.length > 0) {
+        const whenSyntaxError = validateExpressionSyntax(whenExpr, { streamNames });
+        if (whenSyntaxError) {
+          diagnostics.push(
+            makeDiagnostic(
+              "E_CEL_INVALID",
+              `${pointLabel} has invalid CEL when expression: ${whenSyntaxError}`,
+              `${pointPath}.when`
+            )
+          );
+        }
+      }
     }
   }
 }
@@ -2115,19 +2139,6 @@ function validateLoweringSpec(
       diagnostics.push(
         makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.layered_model_ref is required for layered_additive", "output.lowering.f0.layered_model_ref")
       );
-    }
-    if (!isPlainObject(f0.sag)) {
-      diagnostics.push(
-        makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.sag must be an object", "output.lowering.f0.sag")
-      );
-    } else {
-      if (typeof f0.sag.operator !== "string" || f0.sag.operator.length === 0) {
-        diagnostics.push(
-          makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.f0.sag.operator is required", "output.lowering.f0.sag.operator")
-        );
-      }
-      validateCitedNumber(f0.sag.depth_hz, diagnostics, "output.lowering.f0.sag.depth_hz", "output.lowering.f0.sag.depth_hz");
-      validateCitedNumber(f0.sag.min_span_ms, diagnostics, "output.lowering.f0.sag.min_span_ms", "output.lowering.f0.sag.min_span_ms");
     }
     if (!isPlainObject(f0.output_clamp)) {
       diagnostics.push(

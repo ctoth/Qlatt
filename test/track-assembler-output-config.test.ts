@@ -29,9 +29,6 @@ describe("track lowering output config", () => {
     const lowering = outputOf("qlatt-english").lowering;
 
     expect(lowering.f0.renderer.type).toBe("point_interpolation");
-    expect(lowering.f0.sag.operator).toBe("parabolic_hstar_sag");
-    expect(lowering.f0.sag.depth_hz.value).toBe(12);
-    expect(lowering.f0.sag.min_span_ms.value).toBe(150);
     expect(lowering.f0.output_clamp.min_hz.value).toBe(0);
     expect(lowering.overlays.operation_order).toEqual(["voice_quality", "timed_controls", "f0"]);
   });
@@ -42,8 +39,6 @@ describe("track lowering output config", () => {
     expect(lowering.id).toBe("dectalk-english-track-lowering");
     expect(lowering.f0.renderer.type).toBe("layered_additive");
     expect(lowering.f0.layered_model_ref).toBe("f0_model");
-    expect(lowering.f0.sag.operator).toBe("disabled");
-    expect(lowering.f0.sag.depth_hz.value).toBe(0);
     expect(lowering.timeline.duration_floors.stop_release_ms.value).toBe(7);
     expect(lowering.transitions.blend.factor.value).toBe(0.5);
   });
@@ -95,11 +90,6 @@ describe("track lowering output config", () => {
           },
           f0: {
             renderer: { type: "point_interpolation" },
-            sag: {
-              operator: "disabled",
-              depth_hz: { value: 0, citations: ["test"] },
-              min_span_ms: { value: 150, citations: ["test"] },
-            },
             output_clamp: {
               min_hz: { value: 0, citations: ["test"] },
               max_hz: { value: 500, citations: ["test"] },

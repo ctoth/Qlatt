@@ -145,9 +145,3 @@ tag_to_accent:
   f0_boundary_low: f0_boundary_low
   f0_boundary_rise: f0_boundary_rise
   f0_register_reset: f0_register_reset
-
-sag_policy:
-  sample_points: [0.25, 0.5, 0.75]
-  depth_multiplier: 4
-  depth_formula: "linear_minus 4 * t * (1-t)"
-  citation: "Pierrehumbert 1980"

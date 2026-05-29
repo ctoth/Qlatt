@@ -12,6 +12,7 @@ import {
 import type {
   InventorySpec,
 } from "./declarative-frontend/inventory";
+import type { Diagnostics } from "./diagnostics";
 import type {
   KlattFrame,
   ControlFieldOp,
@@ -43,9 +44,7 @@ type ResolvedControlWindow = {
 // Removed: PHONEME_TARGET_MAP global — callers must provide inventorySpec via options.
 
 /** An F0 contour point (time in seconds, f0 in Hz).
- *  Optional metadata for provenance and sag-injection passes.
- *  Citations: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation),
- *             Ladd 2008 pp.155-157 (sagging transition between H* accents) */
+ *  Optional tag/accentType metadata for provenance. */
 export type F0Point = {
   time: number;
   f0: number;
@@ -89,11 +88,6 @@ export type TrackLoweringSpec = {
       type: "point_interpolation" | "layered_additive";
       layered_model_ref?: string;
     };
-    sag: {
-      operator: "parabolic_hstar_sag" | "disabled";
-      depth_hz: CitedNumberSpec;
-      min_span_ms: CitedNumberSpec;
-    };
     output_clamp: {
       min_hz: CitedNumberSpec;
       max_hz: CitedNumberSpec;
@@ -111,6 +105,7 @@ export type TrackLoweringContext = {
   transitionMs?: number;
   f0Model?: LayeredF0ModelConfig;
   speakerParams?: Record<string, unknown>;
+  diagnostics?: Diagnostics | null;
 };
 
 function requireOutputObject(value: unknown, path: string): Record<string, unknown> {
@@ -981,101 +976,6 @@ function getInteriorF0AnchorTimes(
   return anchors;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers -- sagging transitions (H*-H* interpolation)
-// Citation: Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
-// Citation: Ladd 2008 pp.155-157 (sagging transition between H* accents)
-// ---------------------------------------------------------------------------
-
-/**
- * Insert parabolic sag points between consecutive H* accent peaks.
- *
- * Pure function: takes an F0 contour and returns a new contour with additional
- * points that create the characteristic "dipping" shape between H*-H* pairs
- * described by Pierrehumbert (1980) and Ladd (2008).
- *
- * Sample points are fixed by the lowering operator; accent identity comes from
- * score points, not from raw rule tags.
- *
- * @param contour  Input F0 contour (sorted by time, with tag/accentType metadata).
- * @param sagDepthHz  Maximum sag depth in Hz at midpoint (default 12).
- * @param minSpanMs  Minimum inter-accent span in ms for sag to apply (default 150).
- * @returns New contour with sag points inserted (sorted by time).
- *
- * Citations:
- *   Pierrehumbert 1980 (H*-H* nonmonotonic interpolation)
- *   Ladd 2008 pp.155-157 (sagging transition between H* accents)
- */
-export function applySaggingTransitions(
-  contour: F0Point[],
-  sagDepthHz: number = 12,
-  minSpanMs: number = 150
-): F0Point[] {
-  if (contour.length < 2 || sagDepthHz <= 0) return [...contour];
-  const samplePoints = [0.25, 0.5, 0.75];
-  const depthMultiplier = 4;
-
-  // Collect indices of score-declared high accent peaks.
-  const hStarIndices: number[] = [];
-  for (let i = 0; i < contour.length; i++) {
-    if (contour[i].accentType?.includes("H*")) {
-      hStarIndices.push(i);
-    }
-  }
-
-  if (hStarIndices.length < 2) return [...contour];
-
-  const minSpanSec = minSpanMs / 1000;
-  const sagPoints: F0Point[] = [];
-
-  // For each consecutive H*-H* pair, check eligibility and insert sag points.
-  for (let k = 0; k < hStarIndices.length - 1; k++) {
-    const leftIdx = hStarIndices[k];
-    const rightIdx = hStarIndices[k + 1];
-    const left = contour[leftIdx];
-    const right = contour[rightIdx];
-
-    // Check span threshold.
-    // Citation: Pierrehumbert 1980 (closer H*s show less/no dipping)
-    const span = right.time - left.time;
-    if (span < minSpanSec) continue;
-
-    // Check no phrase boundary between the two H* points.
-    let hasBoundary = false;
-    for (let j = leftIdx + 1; j < rightIdx; j++) {
-      const tag = contour[j].tag;
-      if (tag === "f0_boundary_low" || tag === "f0_register_reset") {
-        hasBoundary = true;
-        break;
-      }
-    }
-    if (hasBoundary) continue;
-
-    // Parabolic sag formula:
-    // f0_sag(t) = f0_linear(t) - sagDepthHz * 4 * t * (1-t)
-    // where f0_linear(t) = left.f0 + (right.f0 - left.f0) * t
-    for (const t of samplePoints) {
-      const time = left.time + span * t;
-      const f0Linear = left.f0 + (right.f0 - left.f0) * t;
-      const sagAmount = sagDepthHz * depthMultiplier * t * (1 - t);
-      // Floor clamp: prevent negative F0 from extreme downstep + sag.
-      const saggedF0 = Math.max(f0Linear - sagAmount, 0);
-      sagPoints.push({
-        time,
-        f0: saggedF0,
-        tag: "f0_sag",
-      });
-    }
-  }
-
-  if (sagPoints.length === 0) return [...contour];
-
-  // Merge and sort by time.
-  const merged = [...contour, ...sagPoints];
-  merged.sort((a, b) => a.time - b.time);
-  return merged;
-}
-
 // DEFAULT_* constants removed — all values now read from the validated lowering spec.
 // Citation: each value is cited in the YAML source.
 
@@ -1241,14 +1141,34 @@ function buildF0ContourFromScore(
   score: DeclarativeControlScore,
   baseF0: number,
   markTimeById: Map<string, number>,
+  diagnostics?: Diagnostics | null,
 ): F0Point[] {
   if (score.f0_points.length === 0) {
     return [{ time: 0, f0: baseF0 }];
   }
 
+  // Dedup coincident-time points: the last point in pipeline order wins (rules
+  // run in pipeline order and push in order, so a later phase — e.g. a boundary
+  // tone — deterministically overrides an earlier accent tail at the same
+  // instant). The resolution is stable given fixed rule+token order; we surface
+  // every dropped point as a diagnostic so the silent overwrite is explainable.
   const deduped = new Map<number, F0Point>();
   for (const point of score.f0_points) {
     const time = Math.max(0, resolveScoreTimingMs(point.timing, markTimeById) / 1000);
+    const displaced = deduped.get(time);
+    if (displaced) {
+      diagnostics?.warn(
+        "Coincident F0 points: later pipeline point overrides earlier at the same instant",
+        {
+          timeMs: time * 1000,
+          keptTag: point.tag ?? null,
+          keptHz: point.value_hz,
+          droppedTag: displaced.tag ?? null,
+          droppedHz: displaced.f0,
+        },
+        "F0_POINT_COINCIDENT_OVERRIDE",
+      );
+    }
     deduped.set(time, {
       time,
       f0: point.value_hz,
@@ -1362,16 +1282,9 @@ export function lowerControlScoreToKlattTrack(
       score,
       baseF0,
       timeline.markTimeById,
+      context.diagnostics,
     );
-    if (loweringSpec.f0.sag.operator === "disabled") {
-      f0Contour = rawF0Contour;
-    } else {
-      f0Contour = applySaggingTransitions(
-        rawF0Contour,
-        requireCitedNumber(loweringSpec.f0.sag.depth_hz, "f0.sag.depth_hz"),
-        requireCitedNumber(loweringSpec.f0.sag.min_span_ms, "f0.sag.min_span_ms"),
-      );
-    }
+    f0Contour = rawF0Contour;
   }
 
   const klattTrack: KlattFrame[] = [];

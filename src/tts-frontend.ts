@@ -592,6 +592,7 @@ function buildTextToKlattTrackDetailed(
     transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
     f0Model,
     speakerParams,
+    diagnostics,
   });
   provenance?.add({
     stage: "frontend",

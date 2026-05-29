@@ -44,11 +44,6 @@ const TEST_LOWERING_SPEC: TrackLoweringSpec = {
   },
   f0: {
     renderer: { type: "point_interpolation" },
-    sag: {
-      operator: "parabolic_hstar_sag",
-      depth_hz: { value: 12, citations: ["test"] },
-      min_span_ms: { value: 150, citations: ["test"] },
-    },
     output_clamp: {
       min_hz: { value: 0, citations: ["test"] },
       max_hz: { value: 500, citations: ["test"] },

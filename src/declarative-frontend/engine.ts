@@ -2168,6 +2168,16 @@ function applyInsertPointSpec(
     currentToken: target,
     pointCursorByStream: new Map([[stream, activePointCount]]),
   });
+  // Optional per-point guard: a CEL boolean evaluated against the same context
+  // as `at`/`value`. When present and falsy, this point is not emitted. This
+  // lets a single point rule enumerate slots for several variants (e.g. ToBI
+  // accent types) and self-select which slots fire per token. Absent `when`
+  // preserves the original unconditional-emit behavior.
+  if (typeof pointSpec.when === "string" && pointSpec.when.length > 0) {
+    const whenContext = pointFunctions.buildContext(target, params, extraContext);
+    const whenResult = evaluateExpression(pointSpec.when, whenContext, pointFunctions.functions);
+    if (!whenResult) return;
+  }
   const anchor = evaluateAnchorExpression(pointSpec.at, target, params, pointFunctions, extraContext);
   const anchorLeftId = resolveMarkId(runtime, anchor.anchor_left);
   const anchorRightId = resolveMarkId(runtime, anchor.anchor_right);

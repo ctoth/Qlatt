@@ -232,21 +232,13 @@ phases:
     rules:
       - tobi_baseline_init
       - tobi_initial_boundary_high
-      - tobi_accent_h_star
-      - tobi_accent_h_star_plus_l
-      - tobi_accent_l_plus_h_star
-      - tobi_accent_h_plus_downstepped_h_star
-      - tobi_accent_h_star_plus_h
-      - tobi_accent_h_plus_l_star
-      - tobi_accent_l_star
-      - tobi_accent_l_star_plus_h
+      - tobi_accent
       - tobi_unaccented_declination
       - tobi_phrase_accent_high
       - tobi_phrase_accent_low
       - tobi_boundary_low
       - tobi_boundary_rise
       - tobi_register_reset
-      - sagging_transition
       - connected_speech_source_contour
       - f0_voiceless_onset_perturbation
       - f0_voiced_onset_perturbation

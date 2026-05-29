@@ -204,14 +204,6 @@ parameters:
       # The source IMPULSE path is a longer step-plus-ramp; Qlatt keeps a
       # 20-frame declarative approximation here. # engineering approximation
       stress_impulse_duration_frames: 20
-      sag_depth_hz:
-        value: 0
-        citations:
-          - "DECtalk 4.63 ph_inton1.c and Ph_drwt02.c use the layered hat-pattern F0 path; Pierrehumbert-style H*-H* sag is disabled for this frontend"
-      sag_min_span_ms:
-        value: 150
-        citations:
-          - "Inactive when sag_depth_hz is 0; retained to satisfy the explicit frontend F0 policy contract"
       citations:
         - "DECtalk 4.63 ph_inton1.c (hat-pattern F0 model)"
         - "DECtalk 4.63 Ph_drwt02.c (baseline profiles, speaker scaling)"
@@ -359,16 +351,6 @@ output:
       renderer:
         type: layered_additive
       layered_model_ref: f0_model
-      sag:
-        operator: disabled
-        depth_hz:
-          value: 0
-          citations:
-            - "DECtalk 4.63 ph_inton1.c and Ph_drwt02.c use the layered hat-pattern F0 path; Pierrehumbert-style H*-H* sag is disabled for this frontend"
-        min_span_ms:
-          value: 150
-          citations:
-            - "Inactive when sag depth is 0; retained to satisfy the explicit lowering spec contract"
       output_clamp:
         min_hz:
           value: 50

@@ -38,11 +38,20 @@ phases:
       - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: postlexical
-    # Order encodes DECtalk ph_aloph.c source precedence (each rule has goto
+    # Order encodes DECtalk ph_aloph.c source precedence (each /t,d/ rule has goto
     # endrul3, so the rewrites are mutually exclusive per /t,d/): palatalization
     # (L878) wins over glottalization (L912) wins over flapping (L958).  The
     # dental /dh/ -> DZ rule (L1066) runs LAST because it reads the preceding
     # token's already-rewritten phoneme (last_outph) as its trigger.
+    #
+    # The /R/ rules (rhotic) operate on a different segment class than the /t,d/
+    # rules, so they do not conflict with them.  Within the /R/ rules, fusion
+    # (A13, L835-872) runs BEFORE prevocalic R->RR (A5, L636-648): in the source
+    # A5 sets RR but A13 re-reads the input /R/ and, for an inter-vocalic /R/,
+    # deletes it and fuses into the preceding vowel (fusion wins).  Running fusion
+    # first reproduces this -- once fusion deletes the /R/, A5 has nothing to
+    # match, leaving A5 to catch only the residual prevocalic (e.g. word-initial)
+    # /R/ before a syllabic.
     rules:
       - dectalk_palatalize_t
       - dectalk_palatalize_d
@@ -50,6 +59,8 @@ phases:
       - dectalk_flap_t
       - dectalk_flap_d
       - dectalk_dental_dh
+      - dectalk_fuse_vowel_r
+      - dectalk_prevocalic_r_rr
   - name: structural
     rules:
       - dectalk_apply_diphthong_trajectories

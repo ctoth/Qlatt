@@ -3,6 +3,7 @@ citations:
 - DECtalk 4.63 (extracted from dapi/src)
 - DECtalk 4.63 p_us_rom.h us_mindur[] (minimumDuration values)
 - DECtalk 4.63 p_us_rom.h us_maltar[]/us_inhdr[]/us_mindur[] (US_DF code 56 alveolar /t/-flap target)
+- DECtalk 4.63 p_us_rom.h us_maltar[]/us_mindur[] (US_RR retroflex /r/ target: schwa+r fusion and R-before-syllabic)
 - Fant 1997
 - Jongman 1989
 base_params:
@@ -941,6 +942,25 @@ phoneme_targets:
     minimumDuration: 30
     type: liquid
     voiced: true
+  # Retroflex /r/ vowel (US_RR).  Target from DECtalk us_maltar[] (steady portion
+  # of the RR diphthong: F1 450->390, F2/F3 steady 1320/1540) and us_mindur[]
+  # (inherent 180 / minimum 90).  RR is the vowel produced by AX+R fusion ("letter",
+  # "actor" -> ...RR) and by the A5 R-before-syllabic rewrite; it is a syllabic
+  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).  No stress variant:
+  # AX is the reduced schwa and RR inherits its unstressed quality.
+  RR:
+    F1: 390
+    F2: 1320
+    F3: 1540
+    B1: 90
+    B2: 110
+    B3: 250
+    AV: 65
+    dur: 180
+    minimumDuration: 90
+    type: vowel
+    voiced: true
+    rhotic: true
   L:
     F1: 400
     F2: 800

@@ -324,3 +324,146 @@ rules:
     citations:
       - "DECtalk 4.63 ph_aloph.c:1066-1082 (Rule 4: unstressed /dh/ -> DZ after /t,tx,d/)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DZ dentalized-stop target)"
+
+  # -------------------------------------------------------------------------
+  # POSTVOCALIC VOWEL+R FUSION (ph_aloph.c:835-872, "Rule 2" A13).  A postvocalic
+  # /R/ fuses INTO the preceding vowel, producing a single rhotic-vowel token and
+  # DELETING the /R/ ("card" K AA R D -> K AR D, "start" -> S T AR T, "fear" ->
+  # F IR, "cure" K Y UW R -> K Y UR).  Source (inside `if (curr_inph == USP_R)`,
+  # under the postvocalic gate at L823):
+  #   symlas = phonemes[n-1];
+  #   AX            -> allophons[last] = RR  (+ dodelete)
+  #   IY | IH       -> IR
+  #   EY | EH | AE  -> ER
+  #   AA | AH       -> AR
+  #   OW | AO       -> OR
+  #   UW | UH       -> UR
+  # The gate (L823-824): (curr FSTRESS|FWINITC) IS_MINUS  &&  prev FVOWEL+.
+  #   FSTRESS IS_MINUS  -> the /R/ is unstressed (a liquid carrying no main stress).
+  #   FWINITC IS_MINUS  -> the /R/ is NOT a word-initial consonant (so "red", "real"
+  #                        word-initial /R/ never fuses; they are handled by A5).
+  #   prev FVOWEL+      -> the preceding phone is a vowel (postvocalic).
+  # Note A12 (L832: curr_outph = USP_RX) sets RX FIRST, but for every vowel in the
+  # fusion map A13 then deletes the /R/, so RX never survives for a real vowel and
+  # is intentionally NOT added to the inventory (it would be dead).
+  #
+  # STRESS PRESERVATION: the fused rhotic vowel inherits the ORIGINAL vowel's
+  # stress.  The inventory has stressed/unstressed variants (AR1/AR0 ...), so the
+  # target name is DERIVED: fused_base + (prev.stress == 1 ? '1' : '0').  RR is the
+  # AX (schwa) case and has no stress variant (always the reduced rhotic), so its
+  # name is the bare 'RR'.  This is data-driven (a CEL lookup chain), not a
+  # per-stress branch.
+  #
+  # Mechanism: a structural splice over the [vowel, R] range, replacing it with ONE
+  # token copied from the vowel (keeping its stress/word) but adopting the fused
+  # rhotic vowel's target (phoneme, type, params, durations).  This both rewrites
+  # the vowel and deletes the /R/ in a single edit (DECtalk's "replace last output
+  # + dodelete").
+  # -------------------------------------------------------------------------
+  dectalk_fuse_vowel_r:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'R'
+    define:
+      p: prev
+      current_unstressed: "!has(current.stress) || current.stress != 1"
+      r_not_word_initial: >-
+        p != null &&
+        (!has(p.word) || !has(current.word) ? true : p.word == current.word)
+      prev_is_vowel: "p != null && p.type == 'vowel'"
+      fused_base: >-
+        !prev_is_vowel ? '' : (
+          p.phoneme == 'AX' ? 'RR' :
+          (p.phoneme in ['IY', 'IH'] ? 'IR' :
+          (p.phoneme in ['EY', 'EH', 'AE'] ? 'ER' :
+          (p.phoneme in ['AA', 'AH'] ? 'AR' :
+          (p.phoneme in ['OW', 'AO'] ? 'OR' :
+          (p.phoneme in ['UW', 'UH'] ? 'UR' : ''))))))
+      prev_stressed: "has(p.stress) && p.stress == 1"
+      fused_name: >-
+        fused_base == '' ? '' :
+        (fused_base == 'RR' ? 'RR' :
+        (prev_stressed ? fused_base + '1' : fused_base + '0'))
+      fv: "fused_name == '' ? null : target(fused_name)"
+    constraint: >-
+      current_unstressed && r_not_word_initial && prev_is_vowel &&
+      fused_base != '' && fv != null
+    splice:
+      type: replace_range
+      range_left: p.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: p
+          copy_fields:
+            - stress
+            - word
+          phoneme: fused_name
+          type: fv.type
+          params: fv.params
+          duration: fv.duration
+          inherentDuration: fv.inherentDuration
+          minimumDuration: "has(fv.minimumDuration) ? fv.minimumDuration : fv.duration"
+          voiced: "has(fv.voiced) ? fv.voiced : true"
+          trajectory: "has(fv.trajectory) ? fv.trajectory : null"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:835-872 (A13 postvocalic vowel+R fusion: prev vowel rewritten to rhotic vowel, /R/ deleted)"
+      - "DECtalk 4.63 ph_aloph.c:823-824 (postvocalic gate: (FSTRESS|FWINITC) IS_MINUS && prev FVOWEL+)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (IR/ER/AR/OR/UR/RR rhotic-vowel targets)"
+
+  # -------------------------------------------------------------------------
+  # PREVOCALIC R -> RR (ph_aloph.c:636-648, "Rule 2" A5).  A /R/ before a syllabic
+  # (and not across a word boundary to the right) is realized with the retroflex
+  # RR target ("real" R IY L -> RR IY L, word-internal onset /r/).  Source (in the
+  # `switch (curr_inph) case GRP_R` block, runs before the postvocalic block):
+  #   if ((phone_feature(next) & FSYLL) IS_PLUS)
+  #     if ((sentstruc[n] & FWBNEXT) IS_MINUS)  curr_outph = GRP_RR;
+  # There is NO stress / word-initial gate here -- it fires on any prevocalic /R/.
+  #
+  # ORDERING vs fusion: in the source A5 sets curr_outph=RR but the later A13 block
+  # re-reads curr_inph==USP_R and, when the /R/ is ALSO postvocalic (a vowel before
+  # it), deletes the /R/ and fuses -- so fusion wins for an inter-vocalic /R/
+  # ("story" OW R IY -> OR IY, not RR).  We honor this by running fusion FIRST: if
+  # fusion fired, the /R/ token is gone and this rule has nothing to match.  This
+  # rule therefore only catches a prevocalic /R/ whose preceding context is NOT a
+  # fusable vowel -- principally word-initial /R/ before a syllabic ("real",
+  # "right") -- exactly the residue A5 handles in the source.
+  #
+  # Mechanism: an in-place rename is insufficient (the engine does not re-
+  # materialize params on a bare phoneme rename), so a structural splice over the
+  # single /R/ token swaps in the RR target's acoustics, matching the fusion and
+  # flapping rules' approach.
+  # -------------------------------------------------------------------------
+  dectalk_prevocalic_r_rr:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'R'
+    define:
+      n: next
+      rr: "target('RR')"
+      next_syllabic: >-
+        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
+      next_word_boundary: >-
+        n == null ? true :
+        (has(n.word) && has(current.word) ? n.word != current.word : true)
+    constraint: "next_syllabic && !next_word_boundary"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'RR'"
+          type: rr.type
+          params: rr.params
+          duration: rr.duration
+          inherentDuration: rr.inherentDuration
+          minimumDuration: "has(rr.minimumDuration) ? rr.minimumDuration : rr.duration"
+          voiced: "has(rr.voiced) ? rr.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:636-648 (A5: /R/ before a syllabic, not across a word boundary, -> RR)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (US_RR retroflex /r/ target)"

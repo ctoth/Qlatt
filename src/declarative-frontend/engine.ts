@@ -1261,6 +1261,30 @@ function buildNavigationFunctions(
       }
       return count;
     },
+    // word_count(): Positional count of words in the phone stream (DECtalk
+    // number_words). Counts maximal runs of consecutive tokens sharing the
+    // same word, so a repeated surface word ("the cat the dog" -> 4) is NOT
+    // deduplicated; SIL/pause breaks a run. Used by phrase-level gates such
+    // as the flapping rule, which only fires once the utterance has at least
+    // three words.
+    // Citation: DECtalk 4.63 ph_aloph.c (number_words >= 3 phrase gate)
+    word_count: (): number => {
+      const active = getActiveStreamTokens("phone");
+      let count = 0;
+      let prevWord: string | undefined;
+      for (const t of active) {
+        if (t.phoneme === "SIL") {
+          prevWord = undefined;
+          continue;
+        }
+        const word = t.word;
+        if (typeof word === "string" && word.length > 0) {
+          if (word !== prevWord) count++;
+          prevWord = word;
+        }
+      }
+      return count;
+    },
     // cluster_position_in_word(): For the current non-vowel token, count how
     // many consecutive non-vowel tokens with the same word precede it.
     // Position 0 = first consonant in the cluster.  Returns 0 for vowels,

@@ -8,6 +8,7 @@ lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
 dictionary_path: /dectalk-dictionary.json
 include:
   - pipeline.yaml
+  - phases/postlexical.yaml
   - phases/structural.yaml
   - phases/duration.yaml
   - phases/formant.yaml

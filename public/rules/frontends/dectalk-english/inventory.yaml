@@ -2,6 +2,7 @@ version: v1
 citations:
 - DECtalk 4.63 (extracted from dapi/src)
 - DECtalk 4.63 p_us_rom.h us_mindur[] (minimumDuration values)
+- DECtalk 4.63 p_us_rom.h us_maltar[]/us_inhdr[]/us_mindur[] (US_DF code 56 alveolar /t/-flap target)
 - Fant 1997
 - Jongman 1989
 base_params:
@@ -1518,6 +1519,18 @@ phoneme_targets:
     AV: 50
     dur: 30
     minimumDuration: 30
+    type: flap
+    voiced: true
+  DF:
+    F1: 350
+    F2: 1913
+    F3: 2350
+    B1: 90
+    B2: 100
+    B3: 170
+    AV: 30
+    dur: 30
+    minimumDuration: 20
     type: flap
     voiced: true
   GS:

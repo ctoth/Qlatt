@@ -1,0 +1,140 @@
+version: v1
+# ---------------------------------------------------------------------------
+# DECtalk 4.63 postlexical allophone rewrites (ph_aloph.c phalloph(), US branch).
+#
+# This phase runs after phone normalization and BEFORE the structural phase, so
+# the rules see raw /t,d/ before the stop is split into closure/release/
+# aspiration segments (matching the qlatt-english postlexical convention and
+# DECtalk's allophone-before-acoustics ordering).
+#
+# A18 FLAPPING (ph_aloph.c:958-1040): intervocalic unstressed /t/ -> DF and
+# /d/ -> DX, gated on a phrase of at least three words.  The signature
+# "butter" -> "budder", "city" -> "ciddy" behavior.
+#
+# Trigger (verbatim from the source), DECtalk feature bits mapped to Qlatt token
+# fields (ph_defs.h: FSYLL = vowels + EL/EM/EN; FSON1 = +sonorant except
+# /si/,/h/ = vowels/glides/liquids/nasals; FNASAL = nasals):
+#   if (number_words >= 3)                              -> word_count() >= 3
+#   && curr in {T,D} && (FSTRESS IS_MINUS)             -> current unstressed T/D
+#   && (last_outph FSON1+) && last_outph not M/NX/N    -> prev sonorant, not a true nasal
+#   && (next_inph FSYLL+)                              -> next is syllabic (vowel or EL/EM/EN)
+#   && ( (curr FBOUNDARY >= FMBNEXT)                   -> /t,d/ is word-final
+#        || word-internal "weak next vowel":            (the FWINITC word-initial
+#           ((prevStressed && next==OW) ||               branch in the source is
+#            next in {AX,IX,RR,IY,EL}) )                 commented out; not ported)
+#
+# Symbol mapping (this port's stress-stripped ARPABET -> DECtalk weak-vowel set):
+# the phoneme symbol carries no stress digit (stress lives in `.stress`), so a
+# reduced nucleus {AX,IX,RR,IY} is a vowel with stress != 1, and EL/EN are the
+# syllabic sonorants.  The word-initial FWINITC clause in the source is dead
+# code (commented out), so it is intentionally omitted.
+#
+# Mechanism: a structural splice over the single T/D token, replacing it with one
+# token that keeps the original stress/word but adopts the DF/DX inventory target
+# (phoneme, type, params, durations).  A bare `apply op:set phoneme` would only
+# rename the token and leave the stop's acoustics (engine applyEffectToToken does
+# not re-materialize params on rename), so the splice + target() form is needed
+# to actually realize the flap.  This matches the qlatt-english t_flapping rule.
+# ---------------------------------------------------------------------------
+rules:
+  dectalk_flap_t:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'T'
+    define:
+      p: prev
+      n: next
+      df: "target('DF')"
+      phrase_ok: "word_count() >= 3"
+      current_unstressed: "!has(current.stress) || current.stress != 1"
+      prev_son1: >-
+        p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
+        !(p.phoneme in ['M', 'N', 'NG'])
+      prev_is_stressed_vowel: >-
+        p != null && p.type == 'vowel' && (has(p.stress) && p.stress == 1)
+      next_syllabic: >-
+        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
+      next_word_boundary: >-
+        n == null ? true :
+        (has(n.word) && has(current.word) ? n.word != current.word : true)
+      next_weak_vowel: >-
+        n != null && (
+          (n.type == 'vowel' && (!has(n.stress) || n.stress != 1)) ||
+          n.phoneme in ['EL', 'EN'] ||
+          (prev_is_stressed_vowel && n.phoneme == 'OW')
+        )
+    constraint: >-
+      phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
+      (next_word_boundary || next_weak_vowel)
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'DF'"
+          type: df.type
+          params: df.params
+          duration: "min([current.duration, df.duration])"
+          inherentDuration: df.inherentDuration
+          minimumDuration: "has(df.minimumDuration) ? df.minimumDuration : df.duration"
+          voiced: "has(df.voiced) ? df.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:958-1040 (A18 flapping rule: unstressed intervocalic /t/ -> DF, number_words >= 3 gate)"
+      - "DECtalk 4.63 ph_defs.h (FSYLL/FSON1/FNASAL feature definitions used by the trigger)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DF flap target)"
+
+  dectalk_flap_d:
+    kind: postlexical
+    select:
+      stream: phone
+      where: current.phoneme == 'D'
+    define:
+      p: prev
+      n: next
+      dx: "target('DX')"
+      phrase_ok: "word_count() >= 3"
+      current_unstressed: "!has(current.stress) || current.stress != 1"
+      prev_son1: >-
+        p != null && (p.type in ['vowel', 'glide', 'liquid', 'nasal']) &&
+        !(p.phoneme in ['M', 'N', 'NG'])
+      prev_is_stressed_vowel: >-
+        p != null && p.type == 'vowel' && (has(p.stress) && p.stress == 1)
+      next_syllabic: >-
+        n != null && (n.type == 'vowel' || n.phoneme in ['EL', 'EM', 'EN'])
+      next_word_boundary: >-
+        n == null ? true :
+        (has(n.word) && has(current.word) ? n.word != current.word : true)
+      next_weak_vowel: >-
+        n != null && (
+          (n.type == 'vowel' && (!has(n.stress) || n.stress != 1)) ||
+          n.phoneme in ['EL', 'EN'] ||
+          (prev_is_stressed_vowel && n.phoneme == 'OW')
+        )
+    constraint: >-
+      phrase_ok && current_unstressed && prev_son1 && next_syllabic &&
+      (next_word_boundary || next_weak_vowel)
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'DX'"
+          type: dx.type
+          params: dx.params
+          duration: "min([current.duration, dx.duration])"
+          inherentDuration: dx.inherentDuration
+          minimumDuration: "has(dx.minimumDuration) ? dx.minimumDuration : dx.duration"
+          voiced: "has(dx.voiced) ? dx.voiced : true"
+    citations:
+      - "DECtalk 4.63 ph_aloph.c:958-1040 (A18 flapping rule: unstressed intervocalic /d/ -> DX, number_words >= 3 gate)"
+      - "DECtalk 4.63 ph_defs.h (FSYLL/FSON1/FNASAL feature definitions used by the trigger)"
+      - "DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr (US_DX flap target)"

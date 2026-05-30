@@ -193,6 +193,16 @@ nodes:
     params:
       gain: { bind: impulseSourceSwitch }
 
+  # Source spectral tilt (DECtalk OUT_TLT). One-pole lowpass on the voiced
+  # impulse source ONLY (matches DECtalk, where TILT is a source param and the
+  # LF branch — off at sourceMode=0 — carries its own tl). tilt=0 is a unity
+  # passthrough, so Paul (TL=0) is byte-identical.
+  # Citations: DECtalk 4.63 ph_draw.c OUT_TLT; klsyn88 c/parwv.c 706-711.
+  tiltFilter:
+    type: tilt-filter
+    params:
+      tilt: { bind: TL }
+
   sourceSum:
     type: gain
     params:
@@ -459,7 +469,8 @@ connections:
   - [lfSource, lfSourceGain]
   - [lfSourceGain, sourceSum]
   - [impulseSource, impulseGain]
-  - [impulseGain, sourceSum]
+  - [impulseGain, tiltFilter]
+  - [tiltFilter, sourceSum]
 
   # ---------------------------------------------------------------------------
   # Glottal shaping - cascade path

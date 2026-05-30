@@ -1,0 +1,32 @@
+# DECtalk 4.63 English — primitive registry (child of klatt80-baseline)
+#
+# This experiment `extends: klatt80-baseline` (see public/experiments/manifest.json),
+# so loadExperimentConfig merges these primitives ON TOP of the baseline registry
+# (mergeRegistry, src/experiments/load-experiment-config.ts). It therefore only
+# needs to declare primitives the baseline does NOT provide.
+#
+# tilt-filter: source spectral-tilt one-pole lowpass. The compiled worklet and
+# wasm already ship in public/worklets/. The primitive is declared identically in
+# stevens91/registry.yaml and klsyn88/registry.yaml; the baseline registry omits
+# it, so dectalk must add it here to instantiate a tiltFilter node on the source
+# path. Drives the per-frame TL parameter (DECtalk OUT_TLT source spectral tilt).
+#
+# Citations:
+#   - DECtalk 4.63 ph_draw.c OUT_TLT source spectral tilt (per-frame TILT param)
+#   - klsyn88 c/parwv.c lines 706-711 (linearized TLTdb->decay table; see crate)
+
+bacon: "0.1"
+
+primitives:
+  tilt-filter:
+    description: "Source spectral tilt filter — one-pole lowpass driven by TL (DECtalk OUT_TLT)"
+    worklet: "tilt-filter-processor.js"
+    wasm: "tilt-filter.wasm"
+    params:
+      tilt:
+        type: float
+        default: 0
+        unit: "dB"
+        description: "Spectral tilt in dB (TLTdb 0-34; tilt=0 -> unity passthrough)"
+    inputs: 1
+    outputs: 1

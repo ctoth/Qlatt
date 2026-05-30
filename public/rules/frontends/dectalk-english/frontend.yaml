@@ -123,8 +123,15 @@ f0_model:
   layers:
     baseline:
       type: profile
+    # The hat layer is a GLIDE (ramped persistent): hat commands accumulate a
+    # held total exactly like a persistent STEP, but each command ramps to its
+    # delta over its `duration_frames` span (a zero/absent span = instant step).
+    # This lets the hat RISE be a smooth linear movement to the accent target
+    # (DECtalk renders the hat rise as a GLIDE, ph_inton1.c:715) instead of an
+    # instantaneous jump, while the fall and boundary reset keep span 0 (instant)
+    # so the accumulated-total accounting (rise + fall + reset) is unchanged.
     hat:
-      type: persistent
+      type: glide
     stress:
       type: impulse
       decay: halving
@@ -138,6 +145,14 @@ f0_model:
       # DECtalk 4.63 Ph_drwt02.c: boundary impulse decay = value / 4 per frame.
       initial_decay_divisor: 4
       termination_threshold: 0.01
+    # Question terminal-rise GLIDE layer. The yes/no question rise (+451) is
+    # rendered here as a GLIDE that ramps to the target over the final vowel and
+    # HOLDS, producing a smooth, sustained terminal RISE into the '?' boundary
+    # (DECtalk's GLIDE-form question gesture, ph_inton1.c:1635) rather than a
+    # decaying impulse spike. The earlier small dip (-151) stays an impulse on
+    # the `boundary` layer above. Reset to 0 at the next SIL keeps it clause-local.
+    question_glide:
+      type: glide
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula (Ph_drwt02.c line 2309):
@@ -345,6 +360,19 @@ parameters:
       # Gesture IMPULSE length in native DECtalk control frames.
       # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
       boundary_gesture_duration_frames: 24
+      # Hat-rise GLIDE span in native DECtalk control frames. DECtalk renders the
+      # hat rise as a GLIDE (linear F0 movement to the hat target) over 30 frames
+      # rather than an instantaneous step, giving a smooth onset of the accent.
+      # Source: ph_inton1.c:715 (make_f0_command GLIDE, hatsize, length 30).
+      hat_rise_glide_frames: 30
+      # Question terminal-rise GLIDE span in native DECtalk control frames. The
+      # +451 yes/no rise is rendered as a GLIDE that climbs to the target over
+      # the final vowel rather than a transient impulse, so the contour rises
+      # smoothly into the question boundary and HOLDS the elevated F0.
+      # Source: ph_inton1.c:1635 (make_f0_command GLIDE, F0_QGesture2, span =
+      # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
+      # final vowel). # engineering span estimate (final-vowel-length proxy)
+      question_rise_glide_frames: 24
       # Stress impulse magnitudes (internal Hz*10 units).
       # Source: ph_inton1.c f0_mstress_level[] = {1, 71, 31, 281}.
       stress_level_primary_hz: 71

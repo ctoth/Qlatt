@@ -22,6 +22,15 @@ use core::f64::consts::PI;
 const LAYER_PROFILE: i32 = 0;
 const LAYER_PERSISTENT: i32 = 1;
 const LAYER_IMPULSE: i32 = 2;
+// A glide is a *ramped persistent*: on each command it ramps linearly from the
+// current accumulated value toward (current + value) over `duration_frames`
+// frames, then HOLDS the accumulated total (it does not decay). This mirrors
+// DECtalk's GLIDE command (Ph_drwt02.c:1891-1892, :2161-2184): glide_inc =
+// f0command/length accumulated per frame until the target is reached, after
+// which glide_tot persists summed into f0in. Generic: the magnitude (value) and
+// span (duration_frames) come from the declarative command data, no gesture
+// constants here.
+const LAYER_GLIDE: i32 = 3;
 
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
@@ -110,6 +119,16 @@ struct ActiveImpulse {
     remaining_frames: f64,
 }
 
+/// A single in-progress glide ramp (mirrors the TS `ActiveGlide` object).
+/// Each frame while `remaining_frames > 0`, `inc` is added to the layer's held
+/// `glide_tot`; once the ramp completes the accumulated total persists (no
+/// decay). Mirrors DECtalk Ph_drwt02.c GLIDE (glide_inc = f0command/length,
+/// glide_tot += glide_inc per frame until target, then held).
+struct ActiveGlide {
+    inc: f64,
+    remaining_frames: f64,
+}
+
 /// Per-layer descriptor (decoded from the flat marshalled arrays).
 struct LayerDesc {
     layer_type: i32,
@@ -176,6 +195,11 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
     let n_layers = inp.layers.len();
     let mut persistent_levels = vec![0.0f64; n_layers];
     let mut active_impulses: Vec<Vec<ActiveImpulse>> = (0..n_layers).map(|_| Vec::new()).collect();
+    // Glide layers: a held accumulated total per layer, plus the set of ramps
+    // still in progress. The held total is what the layer contributes each frame
+    // (a ramped persistent that holds after the ramp completes).
+    let mut glide_totals = vec![0.0f64; n_layers];
+    let mut active_glides: Vec<Vec<ActiveGlide>> = (0..n_layers).map(|_| Vec::new()).collect();
     // profile_data: index into profile_points + count for the currently active profile.
     let mut profile_active: Vec<Option<(usize, usize)>> = vec![None; n_layers];
     let mut command_cursors = vec![0usize; n_layers];
@@ -206,6 +230,21 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                         LAYER_PROFILE => {
                             if cmd.profile_count > 0 {
                                 profile_active[li] = Some((cmd.profile_start, cmd.profile_count));
+                            }
+                        }
+                        LAYER_GLIDE => {
+                            // Linear ramp of `value` over `duration_frames`. A
+                            // non-positive span is a degenerate (instantaneous)
+                            // ramp: apply the whole delta to the held total now
+                            // (behaves like a persistent STEP), no in-progress
+                            // ramp added.
+                            if cmd.duration_frames > 0.0 {
+                                active_glides[li].push(ActiveGlide {
+                                    inc: cmd.value / cmd.duration_frames,
+                                    remaining_frames: cmd.duration_frames,
+                                });
+                            } else {
+                                glide_totals[li] += cmd.value;
                             }
                         }
                         _ => {}
@@ -243,6 +282,9 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                     for imp in &active_impulses[li] {
                         total += imp.value;
                     }
+                }
+                LAYER_GLIDE => {
+                    total += glide_totals[li];
                 }
                 _ => {}
             }
@@ -300,6 +342,28 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
                         impulses[i].value *= exponential_factor;
                     }
                     _ => {}
+                }
+            }
+        }
+
+        // Advance glide ramps for all glide layers. Each in-progress ramp adds
+        // `inc` to the layer's held total for `remaining_frames` frames, then is
+        // removed (the accumulated total persists). Advancing AFTER the frame is
+        // emitted means a glide command activated at frame F contributes 0 on
+        // frame F and reaches its full delta after `duration_frames` frames —
+        // a smooth linear movement, not an instantaneous jump.
+        for li in 0..n_layers {
+            if inp.layers[li].layer_type != LAYER_GLIDE {
+                continue;
+            }
+            let glides = &mut active_glides[li];
+            let mut i = glides.len();
+            while i > 0 {
+                i -= 1;
+                glide_totals[li] += glides[i].inc;
+                glides[i].remaining_frames -= 1.0;
+                if glides[i].remaining_frames <= 0.0 {
+                    glides.remove(i);
                 }
             }
         }
@@ -829,6 +893,175 @@ mod tests {
         // Frame 3: remaining_frames hit 0 during the decay step of frame 2's
         // tail → impulse removed; contribution gone.
         assert_eq!(out[3], 0.0);
+    }
+
+    // ---- Glide layer: linear ramp to target, then hold -----------------------
+
+    #[test]
+    fn glide_ramps_linearly_then_holds() {
+        // A single glide command of delta 100 over 10 frames. With a pass-through
+        // filter the output should ramp linearly 0 -> 100 over frames 1..=10 and
+        // then HOLD at 100 (no decay), unlike an impulse.
+        let span = 10.0f64;
+        let delta = 100.0f64;
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_GLIDE,
+            decay_mode: 0,
+            initial_decay_divisor: 4.0,
+            termination_threshold: 0.01,
+            exponential_factor: 0.9,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let cmds = vec![CmdDesc {
+            time: 0.0,
+            value: delta,
+            duration_frames: span,
+            profile_start: 0,
+            profile_count: 0,
+        }];
+        let num_frames = 30usize;
+        let inp = RenderInputs {
+            frame_period: 0.005,
+            total_duration: 0.005 * num_frames as f64,
+            num_frames,
+            uses_one_pole: true,
+            one_pole_alpha: 1.0, // pass-through to observe the raw ramp
+            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            has_scale: false,
+            f0_minimum: 0.0,
+            f0_scale_factor: 1.0,
+            f0_reference: 0.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            base_f0_bias_hz: 0.0,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &[],
+        };
+        let mut out = vec![0.0; num_frames];
+        render(&inp, &mut out);
+
+        // Frame 0: ramp not yet advanced -> 0.
+        assert_eq!(out[0], 0.0);
+        // Monotonic non-decreasing across the whole contour.
+        for w in out.windows(2) {
+            assert!(w[1] >= w[0] - 1e-12, "not monotonic: {} -> {}", w[0], w[1]);
+        }
+        // Linear during the ramp: frame f (1..=span) == delta * f / span.
+        for f in 1..=(span as usize) {
+            let expected = delta * (f as f64) / span;
+            assert!((out[f] - expected).abs() < 1e-9, "frame {f}: {} != {expected}", out[f]);
+        }
+        // Reaches the target exactly at the end of the span and HOLDS after.
+        assert!((out[span as usize] - delta).abs() < 1e-9);
+        for f in (span as usize)..num_frames {
+            assert!((out[f] - delta).abs() < 1e-9, "glide did not hold at frame {f}: {}", out[f]);
+        }
+    }
+
+    #[test]
+    fn glide_zero_span_is_instant_step() {
+        // A degenerate glide (duration_frames <= 0) applies the whole delta at
+        // once and holds it (behaves like a persistent STEP).
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_GLIDE,
+            decay_mode: 0,
+            initial_decay_divisor: 4.0,
+            termination_threshold: 0.01,
+            exponential_factor: 0.9,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let cmds = vec![CmdDesc {
+            time: 0.0,
+            value: 42.0,
+            duration_frames: 0.0,
+            profile_start: 0,
+            profile_count: 0,
+        }];
+        let inp = RenderInputs {
+            frame_period: 0.005,
+            total_duration: 0.05,
+            num_frames: 5,
+            uses_one_pole: true,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            has_scale: false,
+            f0_minimum: 0.0,
+            f0_scale_factor: 1.0,
+            f0_reference: 0.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            base_f0_bias_hz: 0.0,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &[],
+        };
+        let mut out = vec![0.0; 5];
+        render(&inp, &mut out);
+        for (f, &v) in out.iter().enumerate() {
+            assert!((v - 42.0).abs() < 1e-12, "frame {f}: {v} != 42.0");
+        }
+    }
+
+    #[test]
+    fn glide_negative_delta_ramps_down_monotonically() {
+        // Property: a negative-delta glide ramps DOWN monotonically and reaches
+        // the (negative) target, then holds — mirrors a hat-fall glide.
+        let span = 8.0f64;
+        let delta = -160.0f64;
+        let layers = vec![LayerDesc {
+            layer_type: LAYER_GLIDE,
+            decay_mode: 0,
+            initial_decay_divisor: 4.0,
+            termination_threshold: 0.01,
+            exponential_factor: 0.9,
+            cmd_start: 0,
+            cmd_count: 1,
+        }];
+        let cmds = vec![CmdDesc {
+            time: 0.0,
+            value: delta,
+            duration_frames: span,
+            profile_start: 0,
+            profile_count: 0,
+        }];
+        let num_frames = 20usize;
+        let inp = RenderInputs {
+            frame_period: 0.005,
+            total_duration: 0.005 * num_frames as f64,
+            num_frames,
+            uses_one_pole: true,
+            one_pole_alpha: 1.0,
+            coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
+            has_scale: false,
+            f0_minimum: 0.0,
+            f0_scale_factor: 1.0,
+            f0_reference: 0.0,
+            scale_divisor: 4096.0,
+            scale_output: 0.1,
+            base_f0_bias_hz: 0.0,
+            min_hz: -1e9,
+            max_hz: 1e9,
+            init_total: 0.0,
+            layers: &layers,
+            cmds: &cmds,
+            profile_points: &[],
+        };
+        let mut out = vec![0.0; num_frames];
+        render(&inp, &mut out);
+        for w in out.windows(2) {
+            assert!(w[1] <= w[0] + 1e-12, "not monotonically decreasing: {} -> {}", w[0], w[1]);
+        }
+        assert!((out[span as usize] - delta).abs() < 1e-9);
+        assert!((out[num_frames - 1] - delta).abs() < 1e-9, "did not hold the floor");
     }
 
     // ---- render_f0 FFI shape validation status codes -------------------------

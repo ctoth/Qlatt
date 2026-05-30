@@ -500,8 +500,13 @@ function applyControlWindowsAtOffset(
 /** Layer type semantics.
  *  - `profile`: piecewise-linear shape mapped across phrase duration
  *  - `persistent`: STEP semantics -- value persists until next command or reset
- *  - `impulse`: decaying transient pulse */
-export type LayerType = "profile" | "persistent" | "impulse";
+ *  - `impulse`: decaying transient pulse
+ *  - `glide`: linear ramp of `value` toward the accumulated target over
+ *    `durationFrames` frames, then HOLD (a ramped persistent -- a STEP that
+ *    takes a span of frames to arrive instead of jumping). Mirrors DECtalk's
+ *    GLIDE command (Ph_drwt02.c:1891-1892, :2161-2184). A non-positive
+ *    `durationFrames` degenerates to an instantaneous STEP. */
+export type LayerType = "profile" | "persistent" | "impulse" | "glide";
 
 /** Decay mode for impulse layers. */
 export type DecayMode = "halving" | "linear" | "exponential";
@@ -916,6 +921,7 @@ export function renderLayeredF0(
     profile: 0,
     persistent: 1,
     impulse: 2,
+    glide: 3,
   };
   const LAYER_STRIDE = 7;
   const CMD_STRIDE = 5;
@@ -986,6 +992,15 @@ export function renderLayeredF0(
           profileStart = profilePool.length;
           profileCount = cmd.profilePoints.length;
           for (const p of cmd.profilePoints) profilePool.push(p);
+        }
+      } else if (cfg.type === "glide") {
+        // A glide ramps `cmd.value` over `cmd.durationFrames` frames (the span).
+        // A non-positive / missing span degenerates to an instantaneous STEP in
+        // the kernel (LAYER_GLIDE arm), so pass any finite span straight through
+        // and default a missing one to 0 (instant). No validation throw — a
+        // zero-span glide is a legitimate (step-like) command.
+        if (typeof cmd.durationFrames === "number" && Number.isFinite(cmd.durationFrames)) {
+          durationFrames = cmd.durationFrames;
         }
       }
       cmdDescs.push(cmd.time, cmd.value, durationFrames, profileStart, profileCount);

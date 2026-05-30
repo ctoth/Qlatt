@@ -45,18 +45,28 @@ speakers:
   # overriding the inventory base_params default. This is the generic mechanism
   # that lets a voice's higher-formant timbre shape audio (not just pitch).
   #
-  # Scope = [F4, B4] only. F5/B5 are deliberately EXCLUDED: every DECtalk voice
-  # stores F5=B5=6000 (identical across voices, so they cannot distinguish a
-  # voice) while the inventory default is F5=4500/B5=600 — stamping them would
-  # silently change the default voice (Paul) without any per-voice benefit.
-  # F4/B4 differ between voices (Paul 3500/260, Betty 4550/400) yet Paul's equal
-  # the inventory default, so Paul stays byte-identical. Adding more fields here
-  # later is a pure data edit; the TS is a generic copy loop with no per-voice or
-  # per-field branches.
-  # Citation: DECtalk 4.63 ph_vset.c (F4->r4cb, B4->r4cc speaker config).
+  # Scope = [F4, B4, F5, B5]. F5/B5 ARE genuinely per-voice in DECtalk: the
+  # P_us_vdf1.h 8 kHz voice structs set Harry 3850/180, Kit 4700/600, Rita
+  # 4800/700, Wendy 4800/600, Dennis 3800/280 — a real, distinct 5th cascade
+  # resonator. The remaining voices (Paul/Betty/Frank/Ursula, and Chris's F5)
+  # store the ZAPF/ZAPB sentinel (= 6000 in the non-MSDOS 8 kHz build,
+  # ph_defs.h:726) meaning "no 5th cascade resonator." Cascade formant index 5
+  # has freqRange [3500,6000]; a resonator at 6000 Hz with 6000 Hz bandwidth is
+  # so broad it is effectively flat — a faithful render of the disabled formant.
+  # NOTE: this deliberately moves Paul off the old inventory default F5=4500/
+  # B5=600 (a spurious active 5th formant Paul should not have) to the ZAPF
+  # sentinel — Paul is no longer byte-identical here, BY DESIGN: it now matches
+  # the real DECtalk Paul, which has no active F5. (HS head-size F4/F5 scaling,
+  # ph_vset.c:712, for non-100-HS voices is a separate follow-up; F5 stamped raw
+  # for now.) The TS is a generic copy loop with no per-voice/per-field branches;
+  # adding fields here is a pure data edit.
+  # Citation: DECtalk 4.63 ph_vset.c (F4->r4cb, B4->r4cc, F5->r5cb, B5->r5cc);
+  # P_us_vdf1.h 8 kHz voice structs; ph_defs.h:726 ZAPF/ZAPB=6000.
   speaker_frame_params:
     - F4
     - B4
+    - F5
+    - B5
   # Declarative per-voice GAIN offsets. Each entry maps a voice-YAML gain field
   # to a per-frame Klatt dB parameter. The applied value is a PAUL-RELATIVE
   # additive dB offset: frame[param] += selectedVoice[gain] - defaultVoice[gain].

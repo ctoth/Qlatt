@@ -110,7 +110,13 @@ export function initWasmModuleSync(
   // through unchanged so its byteOffset/byteLength are honored — a caller that
   // injects a Uint8Array.subarray() must compile only that window, not the
   // entire backing buffer.
-  const source: BufferSource = bytes instanceof ArrayBuffer ? bytes : bytes;
+  // WebAssembly.Module accepts any BufferSource at runtime, including views
+  // backed by SharedArrayBuffer. The DOM `BufferSource` type is narrower —
+  // it excludes ArrayBufferView<SharedArrayBuffer> — so the ArrayBuffer |
+  // ArrayBufferView union isn't directly assignable under TS 5.9's lib. The
+  // F0-kernel bytes are always ArrayBuffer-backed; assert the runtime-valid
+  // type rather than copy. (Replaces a no-op `? bytes : bytes` ternary.)
+  const source = bytes as BufferSource;
   const module = new WebAssembly.Module(source);
   return new WebAssembly.Instance(module, imports);
 }

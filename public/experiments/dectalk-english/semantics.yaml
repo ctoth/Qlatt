@@ -14,10 +14,10 @@
 params:
   # DECtalk 4.63 uses impulse-train source, not LF model
   sourceMode:
-    description: "Voice source selection (0=impulse for DECtalk)"
+    description: "Voice source selection (0=impulse [default], 1=LF, 2=bypass, 3=klsyn88 KLGLOTT88)"
     type: integer
     default: 0
-    range: [0, 2]
+    range: [0, 3]
 
   lfMode:
     description: "LF model mode (0=disabled for DECtalk impulse source)"
@@ -52,3 +52,21 @@ params:
     type: float
     default: 4750
     range: [100, 8000]
+
+realize:
+  # klsyn88 KLGLOTT88 source gate. Active only at sourceMode 3. step (not ramped):
+  # source selection must switch instantaneously, like the other source switches.
+  klglottSourceSwitch:
+    expr: "sourceMode == 3 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+    description: "Gates the klglott (KLGLOTT88) source on at sourceMode 3"
+
+  # Override the inherited baseline rule (sourceMode != 1 ? 1 : 0). With a 4th mode,
+  # the impulse source must be ON only at sourceMode 0 — otherwise it would also play
+  # at sourceMode 3 and double the voice.
+  impulseSourceSwitch:
+    expr: "sourceMode == 0 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+    description: "Impulse source active only at sourceMode 0 (was !=1; narrowed for mode 3)"

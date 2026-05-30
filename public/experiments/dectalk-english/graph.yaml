@@ -120,6 +120,35 @@ nodes:
       gain: 1.0
       openPhaseRatio: { bind: openPhaseRatio }
 
+  # klsyn88 KLGLOTT88 source (oversampled-glottal-source crate). Active when
+  # sourceMode == 3 (selectable; default stays 0=impulse so Paul is byte-identical).
+  # Emits voice (port 0) and integrated turbulence noise (port 1). We use VOICE
+  # (port 0) ONLY; port 1 is intentionally left unconnected so dectalk's seeded
+  # noiseSource/fricationSource stay the aspiration/frication path (no double-noise).
+  # av binds raw AV dB but the crate uses av only to gate noise modulation — it does
+  # NOT scale voice level, so the master GO+AV loudness is still applied downstream
+  # at voiceGain (no double-apply). tilt binds the per-phoneme TL (crate applies its
+  # own tilt internally; the impulse-path tiltFilter is off at sourceMode 3).
+  # Citations: DECtalk 4.63 VTM/vtm3.c KLGLOTT88; klsyn88 parwv.c.
+  klglottSource:
+    type: oversampled-glottal-source
+    params:
+      f0:           { bind: F0 }
+      av:           { bind: AV }
+      aturb:        { bind: AH }
+      tilt:         { bind: TL }
+      openQuotient: 50.0
+      skew:         0.0
+      asymmetry:    50.0
+      source:       2.0
+      seed:         305419889.0
+
+  # Gain gate for the klglott source (gain = klglottSourceSwitch, 1 at sourceMode 3).
+  klglottGain:
+    type: gain
+    params:
+      gain: { bind: klglottSourceSwitch }
+
   noiseSource:
     type: noise-source
     # Fixed seed -> deterministic noise (DECtalk is reproducible: same text =>
@@ -480,6 +509,11 @@ connections:
   - [impulseSource, impulseGain]
   - [impulseGain, tiltFilter]
   - [tiltFilter, sourceSum]
+  # klglott (KLGLOTT88) voice = port 0 only → gain gate → sourceSum. Port 1 (noise)
+  # intentionally unconnected (dectalk keeps its seeded noiseSource/fricationSource).
+  # Skips tiltFilter: the crate applies its own spectral tilt internally.
+  - [{ node: klglottSource, port: 0 }, klglottGain]
+  - [klglottGain, sourceSum]
 
   # ---------------------------------------------------------------------------
   # Glottal shaping - cascade path

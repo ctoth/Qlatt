@@ -30,3 +30,34 @@ primitives:
         description: "Spectral tilt in dB (TLTdb 0-34; tilt=0 -> unity passthrough)"
     inputs: 1
     outputs: 1
+
+  # oversampled-glottal-source: the klsyn88 KLGLOTT88 source (differentiated
+  # parabolic pulse at²−bt³, generated at 4x sample rate then 2-pole decimated,
+  # with internal spectral tilt, open-phase breathiness, and integrated noise).
+  # This is DECtalk's actual glottal generator (VTM vtm3.c KLGLOTT88) vs the
+  # minimal impulse-train doublet the dectalk graph used before. The compiled
+  # worklet + wasm already ship in public/worklets/ (built by build.ps1). NOT
+  # inherited: dectalk extends klatt80-baseline, not klsyn88, so it must be
+  # declared here to instantiate a klglottSource node. Block copied verbatim
+  # from klsyn88/registry.yaml (the working consumer of this crate).
+  #
+  # Citations:
+  #   - DECtalk 4.63 VTM/vtm3.c:982 KLGLOTT88 pulse; :950,1366 4x oversample+decimate
+  #   - Klatt & Klatt 1990 (KLGLOTT88 voicing source model)
+  #   - klsyn88 c/parwv.c (pitch_synch_par_reset; natural source coefficients)
+  oversampled-glottal-source:
+    description: "klsyn88 oversampled glottal source (KLGLOTT88) with integrated noise and tilt"
+    worklet: "oversampled-glottal-source-processor.js"
+    wasm: "oversampled-glottal-source.wasm"
+    params:
+      f0:           { type: float, unit: "Hz", default: 120, description: "Fundamental frequency" }
+      av:           { type: float, unit: "dB", default: 60, description: "Voicing amplitude (AV); gates open-phase noise modulation only — does not scale voice level" }
+      aturb:        { type: float, unit: "dB", default: 0, description: "Turbulence/aspiration noise amplitude (drives open-phase breathiness)" }
+      tilt:         { type: float, unit: "dB", default: 0, description: "Source spectral tilt (TL); 0 = no tilt" }
+      openQuotient: { type: float, default: 50, description: "Open quotient in percent (Kopen)" }
+      skew:         { type: float, default: 0, description: "Skewness (Kskew)" }
+      asymmetry:    { type: float, default: 50, description: "Triangular-source asymmetry percent (natural source: unused)" }
+      source:       { type: float, default: 2, description: "Source type (1=impulse, 2=natural/KLGLOTT88, 3=triangular, 4=square)" }
+      seed:         { type: float, default: 1, description: "Random seed (31-bit) for deterministic noise" }
+    inputs: 0
+    outputs: 2

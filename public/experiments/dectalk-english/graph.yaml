@@ -122,12 +122,21 @@ nodes:
 
   noiseSource:
     type: noise-source
+    # Fixed seed -> deterministic noise (DECtalk is reproducible: same text =>
+    # same audio). Without a seed the worklet falls back to Math.random(), which
+    # the live/browser runtime hits (node seeds via per-node override), causing
+    # the spy's state_leak failure (output varies across identical plays).
+    # Distinct from fricationSource so aspiration/frication noise are uncorrelated.
+    options:
+      seed: 305419896
     params:
       gain: 1.0
       cutoff: { bind: noiseCutoff }
 
   fricationSource:
     type: noise-source
+    options:
+      seed: 2271560481
     params:
       gain: 1.0
       cutoff: { bind: fricationCutoff }

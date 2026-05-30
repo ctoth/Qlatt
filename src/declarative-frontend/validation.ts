@@ -2114,10 +2114,68 @@ function validateLocusTables(
   loci: unknown,
   lociFemale: unknown,
   vowelCategory: unknown,
+  prcntAdjust: {
+    obstruentPlace?: unknown;
+    roundedSonorantConsonant?: unknown;
+    f2Back?: unknown;
+  },
   diagnostics: ValidationDiagnostic[]
 ): void {
   validateLocusTable(loci, "output.lowering.transitions.loci", diagnostics);
   validateLocusTable(lociFemale, "output.lowering.transitions.loci_female", diagnostics);
+
+  // Optional setloc prcnt-adjustment DATA (ph_sttr2.c:294-307). All optional.
+  const { obstruentPlace, roundedSonorantConsonant, f2Back } = prcntAdjust;
+  if (obstruentPlace !== undefined) {
+    const base = "output.lowering.transitions.obstruent_place";
+    if (!isPlainObject(obstruentPlace)) {
+      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+    } else {
+      for (const [phoneme, flags] of Object.entries(obstruentPlace)) {
+        const pPath = `${base}.${phoneme}`;
+        if (!isPlainObject(flags)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath} must be an object`, pPath));
+          continue;
+        }
+        const v = (flags as Record<string, unknown>).palatal_or_dental;
+        if (v !== undefined && typeof v !== "boolean") {
+          diagnostics.push(
+            makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath}.palatal_or_dental must be a boolean`, `${pPath}.palatal_or_dental`)
+          );
+        }
+      }
+    }
+  }
+  if (roundedSonorantConsonant !== undefined) {
+    validateStringArray(
+      roundedSonorantConsonant,
+      diagnostics,
+      "output.lowering.transitions.rounded_sonorant_consonant",
+      "output.lowering.transitions.rounded_sonorant_consonant"
+    );
+  }
+  if (f2Back !== undefined) {
+    const base = "output.lowering.transitions.f2_back";
+    if (!isPlainObject(f2Back)) {
+      diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${base} must be an object`, base));
+    } else {
+      for (const [phoneme, flags] of Object.entries(f2Back)) {
+        const pPath = `${base}.${phoneme}`;
+        if (!isPlainObject(flags)) {
+          diagnostics.push(makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath} must be an object`, pPath));
+          continue;
+        }
+        for (const edge of ["forward", "backward"]) {
+          const v = (flags as Record<string, unknown>)[edge];
+          if (v !== undefined && typeof v !== "boolean") {
+            diagnostics.push(
+              makeDiagnostic("E_LOWERING_SPEC_REQUIRED", `${pPath}.${edge} must be a boolean`, `${pPath}.${edge}`)
+            );
+          }
+        }
+      }
+    }
+  }
 
   if (vowelCategory !== undefined) {
     const base = "output.lowering.transitions.vowel_category";
@@ -2220,6 +2278,11 @@ function validateLoweringSpec(
       transitions.loci,
       transitions.loci_female,
       transitions.vowel_category,
+      {
+        obstruentPlace: transitions.obstruent_place,
+        roundedSonorantConsonant: transitions.rounded_sonorant_consonant,
+        f2Back: transitions.f2_back,
+      },
       diagnostics,
     );
   }

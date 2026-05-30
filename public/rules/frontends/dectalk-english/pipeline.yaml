@@ -323,6 +323,8 @@ phases:
       - dectalk_sw_explicit_override
       - dectalk_sw_default_assignment
       - dectalk_obstruent_parallel_amplitudes
+      - dectalk_special_coartic_f3
+      - dectalk_special_coartic_f2
   - name: prosody
     rules:
       - dectalk_baseline_declination

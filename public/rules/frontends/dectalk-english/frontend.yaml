@@ -418,6 +418,58 @@ parameters:
       # frication tail. Qlatt models this as a 30 ms suffix window at the
       # 100 Hz frame cadence used by the runtime. # engineering approximation
       weak_interdental_fricative_tail_ms: 30
+      # DECtalk 4.63 us_special_coartic() (p_us_st1.c:314-410): per-vowel F2/F3
+      # TARGET offsets for diphthongized vowels in specific neighbour contexts.
+      # DATA consumed by the special_coartic scalar rules in phases/formant.yaml.
+      # The diphpos-dependent sub-cases (AY/OY before LX -250/-350; unstressed
+      # YU 2nd-half +400) are DEFERRED: diphpos (diphthong-half index) is not
+      # exposed to scalar rules in this engine (diphthongs are trajectory
+      # waypoints). The diphpos-independent cases are implemented here.
+      special_coartic:
+        # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
+        alveolar:
+          value: [D, EN, N, S, T, TX, Z]
+          citations:
+            - "DECtalk 4.63 p_us_rom.h us_place[] (FALVEL bit); ph_defs.h:342"
+        # DECtalk front vowels USP_IY..USP_AE (+IX) (p_us_st1.c:346/365). The
+        # phoneme symbol carries NO stress digit in rules (tts-frontend.ts:452
+        # strips the suffix; stress lives in .stress), so these are bare ARPABET
+        # names; IX/USP_IX has no allophone in this inventory.
+        front_vowels:
+          value: [IY, IH, EY, EH, AE]
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:346 (front-vowel range USP_IY..USP_AE, plus USP_IX)"
+        # F3 of a vowel adjacent to W/R/RX -> -150 Hz (p_us_st1.c:329-339).
+        f3_near_w_r_offset_hz:
+          value: -150
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:336 (F3 target -150 near W/R/RX)"
+        # F2 of a front vowel before LX or after W/LL/LX -> -150 Hz
+        # (p_us_st1.c:344-369).
+        f2_front_near_lateral_offset_hz:
+          value: -150
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:348/367 (front-vowel F2 -150 near LX/W/LL)"
+        # F2 of UW adjacent to an alveolar -> +200 Hz (p_us_st1.c:370-385).
+        f2_uw_near_alveolar_offset_hz:
+          value: 200
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:375/383 (UW/YU F2 +200 adjacent alveolar)"
+        # Unstressed vowels: effect grows by 50% (temp += temp/2; p_us_st1.c:387-389).
+        unstressed_gain:
+          value: 1.5
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:389 (unstressed coartic effect *1.5)"
+        # Phrase-final stressed vowels: effect halved (temp >>= 1; p_us_st1.c:398-401).
+        phrase_final_gain:
+          value: 0.5
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:400 (phrase-final stressed coartic *0.5)"
+        # Maximum |offset| clamp (p_us_st1.c:403-406).
+        max_offset_hz:
+          value: 400
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:403-406 (|temp| <= 400 Hz clamp)"
       citations:
         - "DECtalk 4.63 ph_setar.c"
         - "DECtalk 4.63 p_us_st1.c (source-amplitude special rules)"
@@ -1221,6 +1273,50 @@ output:
         W: { forward: 3, backward: 3 }
         Y: { forward: 1, backward: 1 }
         YU: { forward: 1, backward: 3 }
+      # setloc prcnt-adjustment DATA (ph_sttr2.c:294-307), extracted from
+      # DECtalk 4.63 PH/p_us_rom.h us_place[] + us_begtyp[] via the dectalk repo
+      # scripts/extract_place_coartic.py, reshaped by
+      # scripts/gen-dectalk-place-coartic-yaml.mjs. Consumed by the generic locus
+      # resolver (resolveLocusBoundary): no per-phoneme literals in code.
+      # obstruent_place[obstruent].palatal_or_dental = us_place & (FPALATL|FDENTAL)
+      # (ph_defs.h:340-341). Adjustment (a) fires only for NON-palatal/dental obstruents.
+      obstruent_place:
+        B: { palatal_or_dental: false }
+        CH: { palatal_or_dental: true }
+        CZ: { palatal_or_dental: false }
+        D: { palatal_or_dental: false }
+        DF: { palatal_or_dental: false }
+        DH: { palatal_or_dental: true }
+        DX: { palatal_or_dental: false }
+        DZ: { palatal_or_dental: true }
+        EN: { palatal_or_dental: false }
+        F: { palatal_or_dental: false }
+        G: { palatal_or_dental: false }
+        JH: { palatal_or_dental: true }
+        K: { palatal_or_dental: false }
+        M: { palatal_or_dental: false }
+        N: { palatal_or_dental: false }
+        NX: { palatal_or_dental: false }
+        P: { palatal_or_dental: false }
+        S: { palatal_or_dental: false }
+        SH: { palatal_or_dental: true }
+        T: { palatal_or_dental: false }
+        TH: { palatal_or_dental: true }
+        TX: { palatal_or_dental: false }
+        TZ: { palatal_or_dental: true }
+        V: { palatal_or_dental: false }
+        Z: { palatal_or_dental: false }
+        ZH: { palatal_or_dental: true }
+      # rounded_sonorant_consonant = sonorants with begtyp==ROUNDED_SONOR_CONS(5)
+      # (ph_defs.h:176). Adjustment (a): prcnt=(prcnt>>1)+50 for F2/F3.
+      rounded_sonorant_consonant: [EL, LL, LX, R, W]
+      # f2_back[vowel] = { forward: us_place & F2BACKI, backward: & F2BACKF }
+      # (ph_defs.h:345-346). Adjustment (b) on F2: prcnt += 25-(prcnt>>2); durtran=(durtran>>1)+2.
+      f2_back:
+        EY: { forward: false, backward: true }
+        IY: { forward: false, backward: true }
+        Y: { forward: true, backward: true }
+        YU: { forward: true, backward: false }
     f0:
       renderer:
         type: layered_additive

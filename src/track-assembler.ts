@@ -130,6 +130,32 @@ export type TrackLoweringSpec = {
      * to the legacy midpoint blend at that edge.
      */
     vowel_category?: VowelCategoryTable;
+    /**
+     * Optional per-phoneme place flag for the setloc prcnt adjustment (a): a
+     * rounded sonorant consonant adjacent to a NON-palatal/NON-dental obstruent
+     * has its F2/F3 locus transition extent reduced. DATA only — `palatal_or_dental`
+     * is `us_place[phoneme] & (FPALATL|FDENTAL)`. Used by the locus resolver to
+     * decide whether the obstruent qualifies; a phoneme with no entry is treated
+     * as not palatal/dental. Citation: DECtalk 4.63 ph_sttr2.c:294-298;
+     * p_us_rom.h us_place[]; ph_defs.h:340-341 (FDENTAL/FPALATL bits).
+     */
+    obstruent_place?: Record<string, { palatal_or_dental?: boolean }>;
+    /**
+     * Optional list of sonorant phonemes whose `begtyp`/`endtyp` is
+     * ROUNDED_SONOR_CONS (DECtalk value 5: e.g. /w/, /l/, /r/, /el/). The setloc
+     * prcnt adjustment (a) only fires when the sonorant side is one of these.
+     * DATA only. Citation: DECtalk 4.63 ph_sttr2.c:294 (typso==ROUNDED_SONOR_CONS);
+     * ph_defs.h:176; p_us_rom.h us_begtyp[].
+     */
+    rounded_sonorant_consonant?: string[];
+    /**
+     * Optional per-vowel F2-back-cavity-affiliation flags for the setloc prcnt
+     * adjustment (b): an F2 transition into a back-cavity-affiliated vowel (e.g.
+     * [iy]) has reduced extent and shortened duration. forward = `us_place &
+     * F2BACKI`, backward = `& F2BACKF`. DATA only. Citation: DECtalk 4.63
+     * ph_sttr2.c:303-307; p_us_rom.h us_place[]; ph_defs.h:345-346.
+     */
+    f2_back?: Record<string, { forward?: boolean; backward?: boolean }>;
   };
   f0: {
     renderer: {
@@ -1253,6 +1279,13 @@ type LocusBoundary = {
  * (missing data, no vowel category, no entry for this obstruent/category) so the
  * caller falls back to the legacy behavior. Reads only the passed-in DATA.
  */
+/** Optional place/feature DATA for the setloc prcnt adjustments (ph_sttr2.c:294-307). */
+type LocusPrcntAdjustments = {
+  obstruent_place?: Record<string, { palatal_or_dental?: boolean }>;
+  rounded_sonorant_consonant?: string[];
+  f2_back?: Record<string, { forward?: boolean; backward?: boolean }>;
+};
+
 function resolveLocusBoundary(
   steadyParams: KlattParams,
   vowelPhoneme: string,
@@ -1261,6 +1294,7 @@ function resolveLocusBoundary(
   blendKeys: string[],
   loci: LocusTable | undefined,
   vowelCategory: VowelCategoryTable | undefined,
+  prcntAdjust?: LocusPrcntAdjustments,
 ): LocusBoundary | null {
   if (!loci || !vowelCategory) return null;
   const obstruentBlock = loci[obstruentPhoneme];
@@ -1272,6 +1306,19 @@ function resolveLocusBoundary(
   const formantBlock = obstruentBlock[String(sontyx)];
   if (!formantBlock) return null;
 
+  // setloc prcnt adjustments (DATA-gated; ph_sttr2.c:294-307). All branches are
+  // on DATA tables only — no per-phoneme literals. Undefined tables => no-op
+  // (legacy core locus pull preserved exactly).
+  const roundedSoncon =
+    prcntAdjust?.rounded_sonorant_consonant?.includes(vowelPhoneme) ?? false;
+  // place(fonobst) & (FPALATL|FDENTAL); a missing entry is treated as not set.
+  const obstPalatalOrDental =
+    prcntAdjust?.obstruent_place?.[obstruentPhoneme]?.palatal_or_dental ?? false;
+  const f2BackAffil =
+    (edge === "forward"
+      ? prcntAdjust?.f2_back?.[vowelPhoneme]?.forward
+      : prcntAdjust?.f2_back?.[vowelPhoneme]?.backward) ?? false;
+
   const params: KlattParams = { ...steadyParams };
   let maxSpanSec = 0;
   let applied = false;
@@ -1280,12 +1327,28 @@ function resolveLocusBoundary(
     if (!entry) continue; // only F1/F2/F3 have locus entries; B1-B3 keep steady
     const curval = steadyParams[key];
     if (!Number.isFinite(curval)) continue;
+
+    let prcnt = entry.prcnt;
+    let durtranMs = entry.durtran_ms;
+    // (a) Reduce F2/F3 transition extent for a rounded sonorant consonant next
+    //     to a non-palatal/non-dental obstruent (ph_sttr2.c:294-298):
+    //     prcnt = (prcnt >> 1) + 50. `np > &PF1` means F2 or F3 (not F1).
+    if (roundedSoncon && (key === "F2" || key === "F3") && !obstPalatalOrDental) {
+      prcnt = Math.floor(prcnt / 2) + 50;
+    }
+    // (b) Reduce F2 transition extent into a back-cavity-affiliated vowel
+    //     (ph_sttr2.c:303-307): prcnt += 25 - (prcnt >> 2); durtran = (durtran >> 1) + 2.
+    if (key === "F2" && f2BackAffil) {
+      prcnt += 25 - Math.floor(prcnt / 4);
+      durtranMs = Math.floor(durtranMs / 2) + 2;
+    }
+
     // bouval = locus + prcnt * (curval - locus) / 100  (ph_sttr2.c:328-329)
-    const bouval = entry.locus_hz + (entry.prcnt * (curval - entry.locus_hz)) / 100;
+    const bouval = entry.locus_hz + (prcnt * (curval - entry.locus_hz)) / 100;
     if (!Number.isFinite(bouval)) continue;
     params[key] = bouval;
     applied = true;
-    const spanSec = Math.max(0, entry.durtran_ms) / 1000;
+    const spanSec = Math.max(0, durtranMs) / 1000;
     if (spanSec > maxSpanSec) maxSpanSec = spanSec;
   }
   if (!applied || maxSpanSec <= 0) return null;
@@ -1560,6 +1623,13 @@ export function lowerControlScoreToKlattTrack(
       ? loweringSpec.transitions.loci_female
       : loweringSpec.transitions.loci;
   const vowelCategory = loweringSpec.transitions.vowel_category;
+  // Optional DATA for the setloc prcnt adjustments (ph_sttr2.c:294-307). Undefined
+  // tables make resolveLocusBoundary skip the adjustments (legacy core locus pull).
+  const prcntAdjust: LocusPrcntAdjustments = {
+    obstruent_place: loweringSpec.transitions.obstruent_place,
+    rounded_sonorant_consonant: loweringSpec.transitions.rounded_sonorant_consonant,
+    f2_back: loweringSpec.transitions.f2_back,
+  };
   // Find the obstruent phoneme adjacent to a sonorant at `index`, scanning in
   // `direction` (-1 = previous, +1 = next). A stop is represented as a closure
   // segment plus glue release/aspiration segments (the shared engine convention:
@@ -1691,6 +1761,7 @@ export function lowerControlScoreToKlattTrack(
               blendKeys,
               loci,
               vowelCategory,
+              prcntAdjust,
             )
           : null;
         if (locus) {
@@ -1718,6 +1789,7 @@ export function lowerControlScoreToKlattTrack(
           blendKeys,
           loci,
           vowelCategory,
+          prcntAdjust,
         );
         if (locus) {
           const span = Math.min(locus.spanSec, phDuration);

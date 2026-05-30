@@ -326,6 +326,18 @@ function buildTextToKlattTrackDetailed(
     }
     selectedVoice = resolveVoice(voiceRegistry, options.speaker);
     speakerOverride = selectedVoice.override;
+  } else if (options.speaker === undefined) {
+    // No `speaker` option: if the frontend declares a `speakers:` registry,
+    // resolve its DECLARED default voice (registry.default) via the exact same
+    // path as an explicit string selection. Generic — the default voice name is
+    // data from the registry, not hardcoded here. Frontends without a registry
+    // (e.g. qlatt-english) fall through with speakerOverride undefined, keeping
+    // the generic speaker profile as before.
+    voiceRegistry = getVoiceRegistry(frontendSpec);
+    if (voiceRegistry) {
+      selectedVoice = resolveVoice(voiceRegistry, voiceRegistry.default);
+      speakerOverride = selectedVoice.override;
+    }
   } else {
     speakerOverride = options.speaker;
   }

@@ -1,0 +1,95 @@
+version: v1
+
+# DECtalk-specific source contour. Unlike the shared qlatt-english contour
+# (/rules/policy/source-contour.yaml, source_mode: 1 = LF glottal source), the
+# DECtalk frontend uses the IMPULSE-train glottal source (source_mode: 0).
+#
+# Why: DECtalk's characteristic timbre comes from its impulse-excited Klatt
+# source, which is spectrally much brighter than the smooth LF model. Running
+# the dectalk frontend on the shared LF contour (source_mode: 1) made the
+# output audibly muffled — measured ~2.9x less >3 kHz energy than the impulse
+# source on the same phrase. The dectalk experiment's own semantics already
+# documents sourceMode default 0 (impulse); this contour stops the shared
+# policy from overriding it to 1 via applySpeakerProfileToParams.
+#
+# Citations:
+# - Klatt 1980 (cascade synthesizer, impulse-excited glottal source)
+# - DECtalk 4.63 (impulse-train source character)
+citations:
+  - Klatt 1980
+  - DECtalk 4.63 impulse-train glottal source
+
+baseline:
+  source_mode: 0
+  citations:
+    - Klatt 1980 (impulse-excited source)
+    - "DECtalk 4.63: bright impulse-train glottal source (not the LF model)"
+
+# Voice-quality presets carried over from the shared contour so the
+# `voiceQuality` option still resolves. Rd-based shaping has limited effect on
+# the impulse source, but tl/ah_offset/flutter/jitter remain meaningful.
+voice_quality_presets:
+  modal:
+    rd: 0.7
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  breathy:
+    rd: 2.0
+    oq: 0
+    tl: 0
+    ah_offset_db: 20
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+      - Gobl 2003
+      - Klatt & Klatt 1990
+  pressed:
+    rd: 0.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  creaky:
+    rd: 0.8
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 20
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+      - Burkhardt 2009
+  whispery:
+    rd: 2.0
+    oq: 0
+    tl: 10
+    ah_offset_db: 30
+    flutter: 0
+    jitter: 5
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+  falsetto:
+    rd: 2.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 50
+    jitter: 0
+    f0_scale: 1.5
+    citations:
+      - Burkhardt 2009
+      - Fant 1997 Table 1

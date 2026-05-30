@@ -509,11 +509,17 @@ connections:
   - [impulseSource, impulseGain]
   - [impulseGain, tiltFilter]
   - [tiltFilter, sourceSum]
-  # klglott (KLGLOTT88) voice = port 0 only → gain gate → sourceSum. Port 1 (noise)
-  # intentionally unconnected (dectalk keeps its seeded noiseSource/fricationSource).
-  # Skips tiltFilter: the crate applies its own spectral tilt internally.
+  # klglott (KLGLOTT88) voice = port 0 only → gain gate. Port 1 (noise) intentionally
+  # unconnected (dectalk keeps its seeded noiseSource/fricationSource). The crate is a
+  # SELF-CONTAINED glottal source (radiation + spectral tilt baked in), so — exactly as
+  # klsyn88 wires it (voice → voiceGain → cascadeMix) — it feeds the cascade and parallel
+  # voice-mix points DIRECTLY, bypassing the impulse-tuned glottal resonators rgp/rgz and
+  # the radiationDiff stage. This also leaves sourceSum empty at sourceMode 3 (lf+impulse
+  # both gated off, klglott no longer feeds it), so rgp/rgz see silence — no antiresonator
+  # blow-up. The downstream voiceGain/avsGain still apply the GO+AV master loudness once.
   - [{ node: klglottSource, port: 0 }, klglottGain]
-  - [klglottGain, sourceSum]
+  - [klglottGain, voiceGain]
+  - [klglottGain, avsGain]
 
   # ---------------------------------------------------------------------------
   # Glottal shaping - cascade path

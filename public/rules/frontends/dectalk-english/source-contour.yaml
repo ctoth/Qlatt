@@ -2,28 +2,31 @@ version: v1
 
 # DECtalk-specific source contour. Unlike the shared qlatt-english contour
 # (/rules/policy/source-contour.yaml, source_mode: 1 = LF glottal source), the
-# DECtalk frontend uses the IMPULSE-train glottal source (source_mode: 0).
+# DECtalk frontend uses the KLGLOTT88 oversampled glottal source (source_mode: 3).
 #
-# Why: DECtalk's characteristic timbre comes from its impulse-excited Klatt
-# source, which is spectrally much brighter than the smooth LF model. Running
-# the dectalk frontend on the shared LF contour (source_mode: 1) made the
-# output audibly muffled — measured ~2.9x less >3 kHz energy than the impulse
-# source on the same phrase. The dectalk experiment's own semantics already
-# documents sourceMode default 0 (impulse); this contour stops the shared
-# policy from overriding it to 1 via applySpeakerProfileToParams.
+# Why: DECtalk's actual voicing source is KLGLOTT88 — a differentiated parabolic
+# pulse (at²−bt³) generated at 4x sample rate and 2-pole decimated, with internal
+# spectral tilt and open-phase breathiness (DECtalk 4.63 VTM/vtm3.c). The earlier
+# stand-in here was an impulse-train doublet (source_mode 0), chosen only because
+# it was spectrally brighter than the LF model (source_mode 1, which made output
+# audibly muffled). dt-vtm1/dt-vtm1b replaced that stand-in with the real
+# KLGLOTT88 crate: measured ~+42% brightness over the impulse doublet, level-
+# matched. The crate feeds voiceGain/avsGain directly (klsyn88-style), bypassing
+# the impulse-tuned glottal resonators. source_mode 0/1 remain selectable.
 #
 # Citations:
-# - Klatt 1980 (cascade synthesizer, impulse-excited glottal source)
-# - DECtalk 4.63 (impulse-train source character)
+# - Klatt & Klatt 1990 (KLGLOTT88 voicing source)
+# - DECtalk 4.63 VTM/vtm3.c (KLGLOTT88 4x-oversampled glottal source)
+# - klsyn88 parwv.c (natural source coefficients)
 citations:
-  - Klatt 1980
-  - DECtalk 4.63 impulse-train glottal source
+  - Klatt & Klatt 1990
+  - DECtalk 4.63 VTM/vtm3.c KLGLOTT88 source
 
 baseline:
-  source_mode: 0
+  source_mode: 3
   citations:
-    - Klatt 1980 (impulse-excited source)
-    - "DECtalk 4.63: bright impulse-train glottal source (not the LF model)"
+    - Klatt & Klatt 1990 (KLGLOTT88 voicing source)
+    - "DECtalk 4.63 VTM/vtm3.c: KLGLOTT88 oversampled glottal source (the real DECtalk source)"
 
 # Voice-quality presets carried over from the shared contour so the
 # `voiceQuality` option still resolves. Rd-based shaping has limited effect on

@@ -26,6 +26,7 @@ base_params:
   F0: 0
   sourceMode: 3  # KLGLOTT88 oversampled glottal source (the real DECtalk source; dt-vtm1b)
   lfMode: 0
+  breathiness: 0  # per-voice BR stamps over this; base 0 = no breathiness (DECtalk ph_vset.c:786)
   Rd: 2.7
   RdRef: 1.0
   OQ: 50

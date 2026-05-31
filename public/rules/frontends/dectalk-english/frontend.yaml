@@ -67,6 +67,10 @@ speakers:
     - B4
     - F5
     - B5
+    # Per-voice breathiness BR -> frame param `breathiness` -> KLGLOTT88 aturb
+    # (DECtalk ph_vset.c:786 aturb=BR). Paul BR=0 (no breath); Betty 25, Kit 47,
+    # Wendy 55, Frank/Dennis 30, Rita 36 -> audibly breathy voicing.
+    - breathiness
   # Declarative per-voice GAIN offsets. Each entry maps a voice-YAML gain field
   # to a per-frame Klatt dB parameter. The applied value is a PAUL-RELATIVE
   # additive dB offset: frame[param] += selectedVoice[gain] - defaultVoice[gain].

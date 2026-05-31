@@ -135,7 +135,11 @@ nodes:
     params:
       f0:           { bind: F0 }
       av:           { bind: AV }
-      aturb:        { bind: AH }
+      # aturb = per-voice breathiness BR (DECtalk ph_vset.c:786 aturb=BR), NOT
+      # aspiration AH: AH is the /h/ aspiration handled by the seeded noiseSource;
+      # the crate's open-phase turbulence is the voice's intrinsic breathiness.
+      # Paul BR=0 -> no crate turbulence; Betty 25 / Wendy 55 -> breathy voicing.
+      aturb:        { bind: breathiness }
       tilt:         { bind: TL }
       openQuotient: 50.0
       skew:         0.0

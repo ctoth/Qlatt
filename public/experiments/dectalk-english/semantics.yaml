@@ -25,6 +25,17 @@ params:
     default: 0
     range: [0, 2]
 
+  # Per-voice breathiness (DECtalk BR). ph_vset.c:786 sets aturb = BR, i.e. the
+  # voice's breathiness drives the KLGLOTT88 source's open-phase turbulence noise
+  # amplitude. Stamped per-voice via speaker_frame_params; bound to klglottSource
+  # aturb. Paul BR=0 -> no breathiness. (B1-widening BR^2/2, ph_vset.c:703, is a
+  # separate follow-up pending Hz-unit verification.)
+  breathiness:
+    description: "Per-voice breathiness BR -> KLGLOTT88 aturb (turbulence amplitude). DECtalk ph_vset.c:786."
+    type: float
+    default: 0
+    range: [0, 100]
+
   # The DECtalk experiment trims the graph to eight formants, but it still
   # inherits the baseline high-formant helper realize rules. Keep the baseline
   # sentinel defaults defined so those inherited rules evaluate cleanly even

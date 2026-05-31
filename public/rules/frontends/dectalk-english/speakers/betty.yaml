@@ -25,7 +25,7 @@ scale_str_rise: 15
 assertiveness: 4100
 baseline_fall_hz10: 100
 falling_target: 30
-F4: 4550
+F4: 4554
 B4: 400
 F5: 6000
 B5: 6000

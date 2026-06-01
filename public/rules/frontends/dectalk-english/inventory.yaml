@@ -24,7 +24,7 @@ base_params:
   AH: 0
   AVS: -70
   F0: 0
-  sourceMode: 3  # KLGLOTT88 oversampled glottal source (the real DECtalk source; dt-vtm1b)
+  sourceMode: 0  # impulse (browser-verified). KLGLOTT88 (3) is browser-silent — reverted 2026-05-31 pending fix.
   lfMode: 0
   breathiness: 0  # per-voice BR stamps over this; base 0 = no breathiness (DECtalk ph_vset.c:786)
   Rd: 2.7

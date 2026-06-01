@@ -23,7 +23,13 @@ citations:
   - DECtalk 4.63 VTM/vtm3.c KLGLOTT88 source
 
 baseline:
-  source_mode: 3
+  # REVERTED 2026-05-31 to 0 (impulse): KLGLOTT88 (mode 3) renders voiced audio in
+  # node but is SILENT in the BROWSER (klglottSource max rms=0; only the noise path
+  # survives -> "h" + hiss, no vowels), and brings back state_leak (its noise runs
+  # unseeded in-browser). Impulse (0) is browser-verified good. KLGLOTT88 stays
+  # selectable as mode 3 pending a browser-runtime fix (param/wasm not reaching the
+  # oversampled-glottal-source worklet in the browser). See chunk-dt-vtm-browser.
+  source_mode: 0
   citations:
     - Klatt & Klatt 1990 (KLGLOTT88 voicing source)
     - "DECtalk 4.63 VTM/vtm3.c: KLGLOTT88 oversampled glottal source (the real DECtalk source)"

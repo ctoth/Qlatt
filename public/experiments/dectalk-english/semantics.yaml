@@ -14,9 +14,9 @@
 params:
   # DECtalk 4.63 uses impulse-train source, not LF model
   sourceMode:
-    description: "Voice source selection (0=impulse, 1=LF, 2=bypass, 3=KLGLOTT88 [default, the real DECtalk source])"
+    description: "Voice source selection (0=impulse [default; browser-verified], 1=LF, 2=bypass, 3=KLGLOTT88 [browser-silent, under investigation])"
     type: integer
-    default: 3
+    default: 0
     range: [0, 3]
 
   lfMode:

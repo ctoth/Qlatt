@@ -112,6 +112,9 @@ try {
     durationMs: entry.endMs === null ? null : entry.endMs - entry.startMs,
     status: entry.status,
   }));
+  await page.evaluate(() => {
+    window.stop();
+  });
 
   console.log(JSON.stringify({
     url,

@@ -595,6 +595,15 @@ output:
             - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
         keys: [F1, F2, F3, B1, B2, B3]
         smooth_types: [vowel, nasal, liquid, glide]
+        # DECtalk smooths every parameter at every boundary (p_us_st1.c
+        # us_forw/back_smooth_rules; default 50% midpoint, ph_setar.c:784-785,
+        # 903-904). Enable the universal midpoint fallback so obstruent-adjacent
+        # and no-locus boundaries — and B1-B3 at obstruent boundaries — get a
+        # transition instead of stepping abruptly. Only F1-F3/B1-B3 move; burst
+        # amplitudes (AF/AH/PLSTEP) ride control windows and stay crisp. The
+        # ~25 obstruents with locus data still use their locus (more specific);
+        # this only fills the gaps. qlatt-english omits this flag -> unchanged.
+        smooth_all_boundaries: true
       # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
       # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
       # dectalk repo scripts/extract_loci.py, reshaped by

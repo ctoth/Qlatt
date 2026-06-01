@@ -98,6 +98,21 @@ export type TrackLoweringSpec = {
       factor: CitedNumberSpec;
       keys: string[];
       smooth_types: string[];
+      /**
+       * Optional: when true, the 50% midpoint blend becomes the UNIVERSAL
+       * fallback — every segment boundary that the more-specific rules
+       * (sonorant<->sonorant midpoint, obstruent locus) leave untransitioned
+       * gets a midpoint formant/bandwidth ramp anyway. This matches DECtalk,
+       * which smooths every parameter at every boundary (p_us_st1.c forw/back
+       * smooth rules), instead of only sonorant pairs + obstruents with locus
+       * data. Only the blend `keys` (F1-F3/B1-B3) are smoothed; amplitudes
+       * (AV/AF/AH) and burst events ride control windows and are untouched, so
+       * stop-burst crispness is preserved. A frontend that omits this (or sets
+       * false) keeps the legacy coverage exactly. Citation: DECtalk 4.63
+       * p_us_st1.c us_forw_smooth_rules / us_back_smooth_rules (default 50%
+       * midpoint at every boundary; ph_setar.c:784-785,903-904).
+       */
+      smooth_all_boundaries?: boolean;
     };
     /**
      * Optional obstruent->sonorant formant LOCUS data (DECtalk-style). When
@@ -1621,6 +1636,10 @@ export function lowerControlScoreToKlattTrack(
   const blendFactor = requireCitedNumber(loweringSpec.transitions.blend.factor, "transitions.blend.factor");
   const blendKeys = loweringSpec.transitions.blend.keys;
   const smoothTypes = new Set(loweringSpec.transitions.blend.smooth_types);
+  // When set, the midpoint blend is the universal fallback at every boundary the
+  // specific rules leave untransitioned (DECtalk smooths every boundary). Default
+  // off -> legacy coverage (qlatt-english omits it and is byte-identical).
+  const smoothAllBoundaries = loweringSpec.transitions.blend.smooth_all_boundaries === true;
   // Optional locus data (DECtalk-style obstruent transitions). A frontend that
   // omits `loci` keeps the legacy midpoint-only smoothing: every locus lookup
   // returns null below, so the obstruent edges stay untouched (no-op).
@@ -1816,6 +1835,51 @@ export function lowerControlScoreToKlattTrack(
           if (candidate > segmentStart && candidate < targetTime) {
             forwardParams = locus.params;
             forwardSteadyTime = candidate;
+          }
+        }
+      }
+
+      // -------------------------------------------------------------------
+      // UNIVERSAL MIDPOINT FALLBACK (DECtalk: smooth every boundary).
+      // For any edge the specific rules above left untransitioned, apply the
+      // 50% midpoint formant/bandwidth blend toward the neighbor. Gated by data
+      // (smooth_all_boundaries); only blend keys (F1-F3/B1-B3) move, so burst
+      // amplitudes are untouched. Covers obstruent edges and no-locus
+      // boundaries, which legacy coverage stepped through abruptly.
+      // -------------------------------------------------------------------
+      if (smoothAllBoundaries && phTransitionSec > 0) {
+        if (backwardParams == null && nextParams) {
+          const steadyTime = Math.max(segmentStart + 0.02, targetTime - phTransitionSec);
+          if (steadyTime > segmentStart && steadyTime < targetTime) {
+            backwardParams = resolveBoundaryParams(
+              finalParams,
+              nextParams,
+              blendKeys,
+              blendFactor,
+              phTransitionSec,
+              "backward",
+            );
+            backwardSteadyTime = steadyTime;
+          }
+        }
+        if (forwardParams == null && i > 0) {
+          const prevParams = segmentParams[i - 1];
+          if (prevParams) {
+            let candidate = Math.min(targetTime - 0.02, segmentStart + phTransitionSec);
+            if (backwardSteadyTime != null) {
+              candidate = Math.min(candidate, backwardSteadyTime);
+            }
+            if (candidate > segmentStart && candidate < targetTime) {
+              forwardParams = resolveBoundaryParams(
+                finalParams,
+                prevParams,
+                blendKeys,
+                blendFactor,
+                phTransitionSec,
+                "forward",
+              );
+              forwardSteadyTime = candidate;
+            }
           }
         }
       }

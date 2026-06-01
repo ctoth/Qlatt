@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>QLATT - Klatt Formant Synthesizer</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/test/test-harness.css" />
+    <link
+      rel="preload"
+      href="/test/test-harness.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript><link rel="stylesheet" href="/test/test-harness.css" /></noscript>
   </head>
   <body>
     <main>

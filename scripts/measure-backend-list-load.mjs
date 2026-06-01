@@ -74,9 +74,16 @@ try {
   const started = Date.now();
   await page.goto(url, { waitUntil: "commit", timeout: 60000 });
   const committed = Date.now();
-  await page.waitForSelector("#experimentSelect option[value='klatt80-baseline']", {
-    timeout: 60000,
-  });
+  await page.waitForFunction(() => {
+    const select = document.getElementById("experimentSelect");
+    if (!(select instanceof HTMLSelectElement)) return false;
+    return Array.from(select.options).some(
+      (option) =>
+        option.value === "klatt80-baseline" &&
+        option.textContent !== null &&
+        option.textContent.trim() !== "Loading...",
+    );
+  }, { timeout: 60000 });
   const dropdownReady = Date.now();
   const timings = await page.evaluate(() => {
     const nav = performance.getEntriesByType("navigation")[0];

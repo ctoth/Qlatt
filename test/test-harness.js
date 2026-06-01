@@ -3,10 +3,31 @@
 import { state } from "./harness/state.js";
 import { renderControls, bindControls, applyUrlParams } from "./harness/controls.js";
 import { loadExperimentManifest, onExperimentChange } from "./harness/experiment.js";
-import { start, stop, speak } from "./harness/runtime.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { updateDiagnostics } from "./harness/diagnostics.js";
 import { refreshSpeakerOptions } from "./harness/speaker.js";
+
+let runtimeModulePromise = null;
+
+function loadRuntimeModule() {
+  runtimeModulePromise ??= import("./harness/runtime.js");
+  return runtimeModulePromise;
+}
+
+async function startRuntime() {
+  const { start } = await loadRuntimeModule();
+  await start();
+}
+
+async function stopRuntime() {
+  const { stop } = await loadRuntimeModule();
+  await stop();
+}
+
+async function speakWithRuntime() {
+  const { speak } = await loadRuntimeModule();
+  await speak();
+}
 
 // Render controls immediately
 renderControls();
@@ -55,9 +76,9 @@ document.getElementById("frontendSelect")?.addEventListener("change", () => {
 })();
 
 // DOM event listeners
-document.getElementById("startBtn").addEventListener("click", start);
-document.getElementById("stopBtn").addEventListener("click", stop);
-document.getElementById("speakBtn").addEventListener("click", speak);
+document.getElementById("startBtn").addEventListener("click", startRuntime);
+document.getElementById("stopBtn").addEventListener("click", stopRuntime);
+document.getElementById("speakBtn").addEventListener("click", speakWithRuntime);
 document.getElementById("rate").addEventListener("input", () => {
   document.getElementById("rateValue").textContent =
     Number(document.getElementById("rate").value).toFixed(2) + "x";

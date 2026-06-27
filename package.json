@@ -45,7 +45,9 @@
     "observe:suite": "node scripts/run-observation-suite.mjs",
     "oracle:build-dectalk": "powershell -ExecutionPolicy Bypass -File scripts/oracle/build-dectalk.ps1",
     "oracle:run": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/run-corpus.ts",
-    "oracle:compare": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/compare-audio.ts"
+    "oracle:compare": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/compare-audio.ts",
+    "measure": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/measure/measure.ts",
+    "lint:audio": "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/lint-audio.ts"
   },
   "dependencies": {
     "@marcbachmann/cel-js": "^7.5.1",

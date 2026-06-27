@@ -4,7 +4,13 @@
     "scripts/dev-server.ts",
     "scripts/export-declarative-corpus-summary.ts",
     "scripts/explain-phrase.ts",
-    "scripts/explain-summary.ts"
+    "scripts/explain-summary.ts",
+    "scripts/measure/measure.ts",
+    "scripts/lint-audio.ts",
+    "scripts/oracle/klatt-frames-to-doc.ts",
+    "scripts/oracle/compare-klsyn88.ts",
+    "scripts/oracle/klatt-frames-to-paramdoc.ts",
+    "scripts/oracle/run-klatt80-oracle.ts"
   ],
   "exclude": ["node_modules", "dist", "public"]
 }

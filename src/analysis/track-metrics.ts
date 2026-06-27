@@ -28,7 +28,7 @@ function mean(values: number[]): number {
   return values.reduce((acc, value) => acc + value, 0) / values.length;
 }
 
-function isVoicedFrame(frame: FrameLike): boolean {
+export function isVoicedFrame(frame: FrameLike): boolean {
   const av = Number(frame?.params?.AV ?? 0);
   const avs = Number(frame?.params?.AVS ?? 0);
   return av > 0 || avs > 0;

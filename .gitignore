@@ -8,6 +8,9 @@ dist/
 tmp/
 /worklets/
 
+# Python sidecar environments (uv-managed)
+.venv/
+
 # Build artifacts
 *.pdf
 *.png

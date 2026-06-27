@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-06-27T15:30:53.4855081-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": "rejected",
+  "baseline": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.7050002209104,
+    "nextTargetPhrase": "glide-young-yard",
+    "nextTargetPhraseF2MeanAbs": 265.26930388909314
+  },
+  "attempts": [
+    {
+      "name": "raw postvocalic LL to LX target",
+      "runRoot": "J:\\Qlatt-oracle-output\\dectalk-postvocalic-lx-1",
+      "warnings": 1,
+      "durationDeltaSec": -0.15080000000000005,
+      "targetPhraseF2MeanAbs": 283.51007311986257,
+      "decision": "rejected"
+    },
+    {
+      "name": "postvocalic LL to LX target preserving timing fields",
+      "runRoot": "J:\\Qlatt-oracle-output\\dectalk-postvocalic-lx-preserve-duration-1",
+      "warnings": 1,
+      "durationDeltaSec": -0.0748000000000002,
+      "targetPhraseF2MeanAbs": 268.81221886885044,
+      "decision": "rejected"
+    }
+  ],
+  "end": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.7050002209104
+  },
+  "sourceState": "reverted"
+}

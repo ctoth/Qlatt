@@ -823,7 +823,7 @@ phoneme_targets:
     B2: 110
     B3: 200
     AV: 65
-    dur: 250
+    dur: 225  # DECtalk 4.63 -lt oracle trace for "church." (ER group remains too long after affricate shortening)
     minimumDuration: 120
     type: vowel
     voiced: true

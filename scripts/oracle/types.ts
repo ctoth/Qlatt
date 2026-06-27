@@ -81,6 +81,7 @@ export type AudioComparisonReport = {
     intelligibility: {
       stoi: number | null;
       estoi: number | null;
+      stoiSkippedReason?: string;
     };
     acoustic: {
       rmsError: number;

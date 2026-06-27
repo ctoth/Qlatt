@@ -38,6 +38,8 @@ type CompareAudioArgs = {
   maxLagMs: number;
 };
 
+const STOI_MINIMUM_SAMPLES = 30 * 128 + 256;
+
 function parseArgv(argv: string[]): CompareAudioArgs {
   const flags = new Map<string, string>();
   for (let i = 0; i < argv.length; i += 1) {
@@ -252,7 +254,11 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
 
   let stoiValue: number | null = null;
   let estoiValue: number | null = null;
-  if (overlapLength > 0) {
+  const stoiSkippedReason =
+    overlapLength > 0 && overlapLength < STOI_MINIMUM_SAMPLES
+      ? `aligned window ${overlapLength} samples is shorter than STOI minimum ${STOI_MINIMUM_SAMPLES}`
+      : null;
+  if (overlapLength >= STOI_MINIMUM_SAMPLES) {
     stoiValue = stoi(oracleAligned, qlattAligned, cfg.comparisonSampleRate).score;
     estoiValue = stoi(oracleAligned, qlattAligned, cfg.comparisonSampleRate, {
       extended: true,
@@ -374,6 +380,7 @@ export function compareAudioFiles(args: CompareAudioArgs): AudioComparisonReport
       intelligibility: {
         stoi: stoiValue,
         estoi: estoiValue,
+        ...(stoiSkippedReason ? { stoiSkippedReason } : {}),
       },
       acoustic: {
         rmsError: rmsError(oracleAligned, qlattAligned),

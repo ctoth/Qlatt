@@ -109,10 +109,10 @@ function summarizeReports(reports: AudioComparisonReport[]): Record<string, unkn
       (value): value is number =>
         typeof value === "number" && Number.isFinite(value),
     );
-  const avg = (values: number[]): number =>
+  const avg = (values: number[]): number | null =>
     values.length
       ? values.reduce((sum, value) => sum + value, 0) / values.length
-      : 0;
+      : null;
   const tokenSimilarities = reports
     .map((report) => report.metrics.symbolic?.tokenSimilarity)
     .filter(

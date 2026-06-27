@@ -484,6 +484,7 @@ rules:
         params.policy.speaker.scale_str_rise / 32.0
       impulse_hz: >-
         (stress_component + position_component) * scale_factor
+        * params.policy.f0.stress_impulse_initial_multiplier
     insert:
       layer: stress
       at: at_sync(current.sync_left)
@@ -492,6 +493,7 @@ rules:
       tag: f0_stress_impulse
     citations:
       - "DECtalk 4.63 ph_inton1.c Rule 2 (stress impulse)"
+      - "DECtalk 4.63 Ph_drwt02.c IMPULSE case (non-reading path sets tarimp = f0command << 1)"
       - "Klatt 1982 (stress-component F0 impulse)"
 
   # --------------------------------------------------------------------------

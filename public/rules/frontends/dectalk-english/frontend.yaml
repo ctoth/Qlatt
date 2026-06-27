@@ -403,6 +403,10 @@ parameters:
       # Simplified from f0_mphrase_position[] = {140,90,60,40,10,10,10}.
       # Using average of first 4 positions: (140+90+60+40)/4 = 82.5.
       stress_phrase_position_hz: 82.5
+      # DECtalk's non-reading IMPULSE path realizes the command as
+      # tarimp = f0command << 1 before per-frame decay.
+      # Source: Ph_drwt02.c IMPULSE case.
+      stress_impulse_initial_multiplier: 2
       # Stress impulse duration in native DECtalk control frames.
       # The source IMPULSE path is a longer step-plus-ramp; Qlatt keeps a
       # 20-frame declarative approximation here. # engineering approximation

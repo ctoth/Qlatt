@@ -271,3 +271,48 @@ Compared with the previous kept scoreboard, the selected target improved:
 `F2` meanAbs `162.977828312996` -> `158.022712688796`, with no increase in
 50-phrase command failures or convergence warnings. Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-release-sil-smooth-50\trace-summary.json`.
+
+## F2 article `a` AX0 target materialization
+
+The next F2 target phrase was `nasal-sing-song` ("Sing a long song."). L0 was
+exact, but the trace showed Qlatt's reduced article `a` was a 216 ms AX token
+where DECtalk's corresponding phone group was about 57.6 ms. Inspecting the
+postlexical rule found the root cause: `dectalk_reduce_article_a` emitted
+phoneme `AX`, but populated it with `target('AX')`. DECtalk inventory vowels
+are stress-suffixed (`AX0`/`AX1`), so that unsuffixed lookup fell back to the
+`SIL` target. The article therefore carried silence-like duration and floor
+data before duration rules ran.
+
+The kept slice changes the article reduction to materialize `target('AX0')`,
+the explicit unstressed schwa inventory target, while still emitting phoneme
+`AX` to match DECtalk's `-lp` log.
+
+Verification:
+
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-article-ax0-1` -> 0 failures,
+  1 warning, token similarity 1.0; `nasal-sing-song` F2 meanAbs
+  `111.55613026819921`, AX duration `94` ms, duration delta `0.0468` s.
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-article-ax0-5` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-article-ax0-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-article-ax0-50` -> 0 failures,
+  46 warnings, token similarity 1.0.
+- `npm run explain -- "a cat." --frontend dectalk-english --speaker paul --stage rules --verbose --strict-citations --format json --out "J:\Qlatt-oracle-output\dectalk-article-ax0-50\function-a-cat-explain.json"`
+- `npm run typecheck:core`
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 151.1316468981995
+- `F3`: meanAbs 100.57135677105555
+- `F1`: meanAbs 67.02589811417356
+- `F0`: meanAbs 59.91977283479464
+- `B3`: meanAbs 54.9528970048639
+- `B1`: meanAbs 37.10862701595699
+- `B2`: meanAbs 29.410913900503456
+- `A2`: meanAbs 2.54330574281082
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `158.022712688796` -> `151.1316468981995`, with no increase in
+50-phrase command failures or convergence warnings. Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-article-ax0-50\trace-summary.json`.

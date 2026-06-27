@@ -50,7 +50,7 @@ rules:
       stream: phone
       where: "current.phoneme == 'EY'"
     define:
-      ax: "target('AX')"
+      ax: "target('AX0')"
       unstressed: "!has(current.stress) || current.stress != 1"
       is_article_a: "has(current.word) && current.word == 'a'"
     constraint: "is_article_a && unstressed"
@@ -74,6 +74,7 @@ rules:
     citations:
       - "DECtalk 4.63 Dic_us.txt (article dictionary entry: a,N,e...)"
       - "DECtalk 4.63 oracle -lp for 'a cat.' (runtime phoneme log emits AX for unstressed article a)"
+      - "DECtalk 4.63 US_DF code 17 (AX0 unstressed schwa target; explicit AX0 inventory lookup avoids SIL fallback)"
 
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is

@@ -77,10 +77,11 @@ rules:
 
   # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
-  # immediately followed by an identical phoneme, the first copy is deleted, so a
-  # geminate (a doubled obstruent across a word/morpheme join) is realized as a
-  # single longer-than-normal obstruent ("bus stop" S S -> S, "big game"? no --
-  # only identical phonemes; "less so" S S -> S, "bookkeeper" K K -> K).  Source:
+  # immediately followed by an identical phoneme, the first copy is deleted.  In
+  # DECtalk's `phonemes[]` stream, word-boundary markers sit between ordinary
+  # words, so cross-word pairs such as "Pat tapped" are not adjacent and must not
+  # collapse.  Within a lexical word, an adjacent doubled obstruent is realized as
+  # a single longer-than-normal obstruent ("bookkeeper" K K -> K).  Source:
   #   if (phonemes[n] == phonemes[n+1]
   #       && (phone_feature(phonemes[n]) & FOBST))
   #       dodelete = TRUE;
@@ -114,7 +115,9 @@ rules:
       n: next
       same_as_next: >-
         n != null && has(n.phoneme) && n.phoneme == current.phoneme
-    constraint: same_as_next
+      same_word: >-
+        has(n.word) && has(current.word) && n.word == current.word
+    constraint: "same_as_next && same_word"
     splice:
       type: replace_range
       range_left: current.sync_left

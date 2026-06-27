@@ -5511,6 +5511,11 @@ rules_by_letter:
     right: ''
     phonemes: [IH1]
   Z:
+  # DECtalk 4.63 -lp oracle for "Safe zones feel fuzzy." emits z'own z.
+  - left: ' '
+    letters: ZONES
+    right: ' '
+    phonemes: [Z, OW1, N, Z]
   - left: ' '
     letters: ZOO
     right: '[AEIOU]'

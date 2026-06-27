@@ -29,7 +29,7 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: current.phoneme != 'SIL'
+      where: current.phoneme != 'SIL' && !(current.type in ['stop_release', 'stop_aspiration'])
     define:
       "n": next
       at_boundary: "n == null ? true : n.phoneme == 'SIL'"

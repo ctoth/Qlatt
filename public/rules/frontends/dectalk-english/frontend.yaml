@@ -466,10 +466,10 @@ parameters:
       # fricative. The original code uses the normal source-smoothing path;
       # Qlatt approximates that with a 40 ms prefix window. # engineering approximation
       voiced_fricative_voicing_onset_ms: 40
-      # DECtalk 4.63 p_us_st1.c backward smoothing:
-      # a syllabic voiced non-nasal segment offsets into silence with a long
-      # breathy tail (PAP.pspesh = 52, NF130MS).
-      vowel_breathy_offset_ms: 130
+      # DECtalk 4.63 p_us_st1.c backward smoothing uses an NF130MS source span,
+      # but the rendered AP tail decays to zero over ~90 ms in the DECtalk
+      # trace for the single-word final-vowel case.
+      vowel_breathy_offset_ms: 90
       vowel_breathy_offset_db: 52
       # DECtalk 4.63 p_us_st1.c special hack for /th, dh/:
       # fric gains are suppressed until durfon - 3, leaving only a weak final

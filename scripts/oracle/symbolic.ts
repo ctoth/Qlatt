@@ -212,6 +212,8 @@ const QLATT_TO_DECTALK_TOKEN: Record<string, string> = {
   CH: "ch",
   JH: "jh",
   DX: "dx",
+  TX: "t",
+  DZ: "dh",
   Q: "q",
 };
 

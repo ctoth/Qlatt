@@ -68,6 +68,20 @@ function runCommand(
   });
 }
 
+function normalizeQlattRate(input: OracleAdapterInput): number {
+  const requestedRate = Number.isFinite(input.rate) ? (input.rate as number) : 1;
+  const frontendId = input.frontendId ?? "dectalk-english";
+  if (frontendId !== "dectalk-english") {
+    return requestedRate;
+  }
+
+  // The DECtalk oracle corpus uses raw [:ra N] WPM controls. The Qlatt frontend
+  // API expects a normalized multiplier, and dectalk-english/frontend.yaml keeps
+  // rate_reference at 1.0 specifically so WPM normalization stays in this adapter.
+  // DECtalk 4.63 samples use [:ra 180] as the neutral/default corpus rate.
+  return requestedRate > 10 ? requestedRate / 180 : requestedRate;
+}
+
 export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArtifact> {
   fs.mkdirSync(input.outDir, { recursive: true });
 
@@ -82,6 +96,7 @@ export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArti
   const metadataPath = path.join(input.outDir, "qlatt.artifact.json");
   const stdoutPath = path.join(input.outDir, "qlatt.stdout.log");
   const stderrPath = path.join(input.outDir, "qlatt.stderr.log");
+  const qlattRate = normalizeQlattRate(input);
 
   const args = [
     "--loader",
@@ -107,7 +122,7 @@ export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArti
     "--experiment-id",
     input.frontendId ?? "dectalk-english",
     "--rate",
-    String(input.rate ?? 1),
+    String(qlattRate),
     "--sample-rate",
     String(input.sampleRate ?? 22050),
     "--transition-ms",
@@ -129,6 +144,11 @@ export async function renderQlatt(input: OracleAdapterInput): Promise<OracleArti
   fs.writeFileSync(stderrPath, result.stderr, "utf8");
 
   const notes: string[] = [];
+  if (Number.isFinite(input.rate) && qlattRate !== input.rate) {
+    notes.push(
+      `Mapped DECtalk rate ${input.rate} WPM to Qlatt normalized rate ${qlattRate}.`,
+    );
+  }
   if (!fs.existsSync(wavPath)) {
     notes.push("Qlatt WAV was not produced.");
   }

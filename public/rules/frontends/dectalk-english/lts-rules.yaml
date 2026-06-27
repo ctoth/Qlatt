@@ -2096,6 +2096,13 @@ rules_by_letter:
     right: ''
     phonemes: [G]
   H:
+  # DECtalk 4.63 numeric hundreds remainder path emits phundred followed by
+  # pand, not lexical "hundred" + lexical "and": l_us_pr1.c:422-440,
+  # l_us_con.c:745-747 (phundred) and 895-897 (pand).
+  - left: ' '
+    letters: HUNDREDAND
+    right: ' '
+    phonemes: [HH, AH1, N, D, R, AX0, D, EH0, N, D]
   # DECtalk 4.63 parity: preserve the stressed diphthong in the exact function word.
   - left: ' '
     letters: HOW

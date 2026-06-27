@@ -54,6 +54,8 @@ interface PipelineStep {
   post?: string;
   /** Year-detection/speaking policy for the readYearInline builtin (data-driven). */
   year_policy?: YearPolicy;
+  /** Cardinal-number speaking policy for the numberToWordsInline builtin (data-driven). */
+  number_policy?: NumberPolicy;
   /** Fraction-reading policy for the readFractionInline builtin (data-driven). */
   fraction_policy?: FractionPolicy;
 }
@@ -88,6 +90,22 @@ interface FractionPolicy {
    * other than this value is not treated as a fraction.
    */
   max_3digit_denominator?: number;
+}
+
+/**
+ * Cardinal-number speaking policy, supplied as DATA by a frontend's
+ * normalization pipeline step. The default keeps qlatt-english's historical
+ * "one hundred one" style; DECtalk data can request the source-observed
+ * "one hundred and one" joiner without adding a frontend branch here.
+ */
+interface NumberPolicy {
+  /** Word inserted between "hundred" and a non-zero remainder (DECtalk: "and"). */
+  hundreds_remainder_joiner?: string;
+  /**
+   * Internal compound word used for non-round hundreds. This is for frontends
+   * whose number reader emits a phone-list constant rather than ordinary words.
+   */
+  hundreds_remainder_compound_word?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -188,19 +206,19 @@ function MONTH_NAMES(): string[] {
  *   numberToWords(1234)    -> "one thousand two hundred thirty four"
  *   numberToWords(1000000) -> "one million"
  */
-export function numberToWords(num: number): string {
+export function numberToWords(num: number, policy: NumberPolicy = {}): string {
   if (num === 0) return "zero";
   if (num < 0 || num > 999_999_999 || !Number.isFinite(num)) {
     return String(num);
   }
-  return convertChunk(num).trim();
+  return convertChunk(num, policy).trim();
 }
 
 /**
  * Recursively convert a number to words using the standard English
  * grouping: millions, thousands, hundreds.
  */
-function convertChunk(n: number): string {
+function convertChunk(n: number, policy: NumberPolicy): string {
   if (n === 0) return "";
 
   if (n < 10) {
@@ -218,10 +236,18 @@ function convertChunk(n: number): string {
 
   if (n < 1000) {
     const remainder = n % 100;
+    const compoundWord =
+      remainder !== 0 ? policy.hundreds_remainder_compound_word : undefined;
+    const hundredsWord = compoundWord ?? "hundred";
+    const joiner =
+      compoundWord != null ? " " :
+      policy.hundreds_remainder_joiner != null
+        ? ` ${policy.hundreds_remainder_joiner} `
+        : " ";
     return (
       ONES()[Math.floor(n / 100)] +
-      " hundred" +
-      (remainder !== 0 ? " " + convertChunk(remainder) : "")
+      ` ${hundredsWord}` +
+      (remainder !== 0 ? joiner + convertChunk(remainder, policy) : "")
     );
   }
 
@@ -229,9 +255,9 @@ function convertChunk(n: number): string {
     const thousands = Math.floor(n / 1000);
     const remainder = n % 1000;
     return (
-      convertChunk(thousands) +
+      convertChunk(thousands, policy) +
       " thousand" +
-      (remainder !== 0 ? " " + convertChunk(remainder) : "")
+      (remainder !== 0 ? " " + convertChunk(remainder, policy) : "")
     );
   }
 
@@ -239,9 +265,9 @@ function convertChunk(n: number): string {
   const millions = Math.floor(n / 1_000_000);
   const remainder = n % 1_000_000;
   return (
-    convertChunk(millions) +
+    convertChunk(millions, policy) +
     " million" +
-    (remainder !== 0 ? " " + convertChunk(remainder) : "")
+    (remainder !== 0 ? " " + convertChunk(remainder, policy) : "")
   );
 }
 
@@ -615,7 +641,7 @@ const BUILTIN_HANDLERS: Record<string, (result: string, step: PipelineStep) => s
   numberToWordsInline: (result, step) => {
     const re = new RegExp(step.pattern!, step.flags);
     return result.replace(re, (_match: string, digits: string) => {
-      return numberToWords(parseInt(digits, 10));
+      return numberToWords(parseInt(digits, 10), step.number_policy);
     });
   },
 

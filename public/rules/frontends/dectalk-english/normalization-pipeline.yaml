@@ -164,7 +164,15 @@ steps:
     handler: numberToWordsInline
     pattern: "\\b(\\d+)\\b"
     flags: "g"
+    # DECtalk's digit-group reader emits phundred immediately followed by pand
+    # for a non-round hundreds group. Keep that phone-list constant as one
+    # internal word so postlexical flapping does not treat "hundred" as
+    # word-final before an ordinary lexical "and".
+    number_policy:
+      hundreds_remainder_compound_word: "hundredand"
     citations:
+      - "DECtalk 4.63 l_us_pr1.c:422-440 (ls_proc_do_digit_group emits pand after non-round hundreds)"
+      - "DECtalk 4.63 l_us_con.c:745-747,895-897 (phundred + pand phone-list constants)"
       - Allen, Hunnicutt & Klatt 1987 Ch.3
 
   - name: punctuation_cleanup

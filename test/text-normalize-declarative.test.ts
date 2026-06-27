@@ -169,3 +169,15 @@ describe("normalizeText parity after declarativization", () => {
     expect(normalizeText("U.S.A.")).toBe("u s a");
   });
 });
+
+describe("dectalk-english normalization policy", () => {
+  const dectalkConfig = {
+    tablesPath: "/rules/frontends/dectalk-english/normalization-tables.yaml",
+    pipelinePath: "/rules/frontends/dectalk-english/normalization-pipeline.yaml",
+  };
+
+  it("keeps default hundreds style but uses DECtalk's numeric hundreds compound", () => {
+    expect(normalizeText("room 101.")).toBe("room one hundred one .");
+    expect(normalizeText("room 101.", dectalkConfig)).toBe("room one hundredand one .");
+  });
+});

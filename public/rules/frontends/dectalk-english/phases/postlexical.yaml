@@ -217,8 +217,7 @@ rules:
         (has(n.word) && has(current.word) ? n.word != current.word : true)
       next_weak_vowel: >-
         n != null && (
-          (n.type == 'vowel' && (!has(n.stress) || n.stress != 1)) ||
-          n.phoneme in ['EL', 'EN'] ||
+          n.phoneme in ['AX', 'RR', 'IY', 'IX', 'EL'] ||
           (prev_is_stressed_vowel && n.phoneme == 'OW')
         )
     constraint: >-
@@ -268,8 +267,7 @@ rules:
         (has(n.word) && has(current.word) ? n.word != current.word : true)
       next_weak_vowel: >-
         n != null && (
-          (n.type == 'vowel' && (!has(n.stress) || n.stress != 1)) ||
-          n.phoneme in ['EL', 'EN'] ||
+          n.phoneme in ['AX', 'RR', 'IY', 'IX', 'EL'] ||
           (prev_is_stressed_vowel && n.phoneme == 'OW')
         )
     constraint: >-

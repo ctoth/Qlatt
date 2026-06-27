@@ -1029,7 +1029,7 @@ phoneme_targets:
     B2: 110
     B3: 250
     AV: 65
-    dur: 180
+    dur: 150  # DECtalk 4.63 -lt oracle trace for "Thin thieves thought that they thrilled." (A5 RR run ~=128ms after duration rules)
     minimumDuration: 90
     type: vowel
     voiced: true

@@ -137,15 +137,10 @@ f0_model:
   layers:
     baseline:
       type: profile
-    # The hat layer is a GLIDE (ramped persistent): hat commands accumulate a
-    # held total exactly like a persistent STEP, but each command ramps to its
-    # delta over its `duration_frames` span (a zero/absent span = instant step).
-    # This lets the hat RISE be a smooth linear movement to the accent target
-    # (DECtalk renders the hat rise as a GLIDE, ph_inton1.c:715) instead of an
-    # instantaneous jump, while the fall and boundary reset keep span 0 (instant)
-    # so the accumulated-total accounting (rise + fall + reset) is unchanged.
+    # English DECtalk emits hat commands as STEP commands. The adjacent GLIDE
+    # branch in ph_inton1.c is under GERMAN; this frontend targets US English.
     hat:
-      type: glide
+      type: persistent
     stress:
       type: impulse
       decay: halving

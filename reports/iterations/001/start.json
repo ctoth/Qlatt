@@ -1,0 +1,29 @@
+{
+  "iteration": 1,
+  "startedAt": "2026-06-27",
+  "branch": "master",
+  "baselineCommit": "e906d43b",
+  "gate": "50-phrase DECtalk convergence corpus",
+  "stateSemantics": "fail is the convergence warning count, not run command failures",
+  "state": {
+    "total": 50,
+    "pass": 4,
+    "fail": 46,
+    "skip": 0
+  },
+  "evidence": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-per-formant-f3-45-50\\dectalk-us-v1\\summary.json",
+    "phraseCount": 50,
+    "runFailures": 0,
+    "warnings": 46,
+    "avgStoi": 0.23917792258270495,
+    "avgEstoi": 0.06919070907600217,
+    "avgTokenSimilarity": 1,
+    "avgTraceDurationDeltaSec": 0.023727999999999944,
+    "avgTraceF0MinDeltaHz": -0.8883766512942316,
+    "avgTraceF0MaxDeltaHz": -4.860573497103874,
+    "avgTraceAvDelta": 2.818446180208406,
+    "avgTraceApToAhDelta": -1.4978996142526362,
+    "worstByStoi": "g2p-measure"
+  }
+}

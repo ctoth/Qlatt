@@ -259,6 +259,7 @@ phases:
       - dectalk_the_iy_prevocalic_lengthening
       - dectalk_pre_df_flap_shortening
       - dectalk_pre_ng_shortening
+      - dectalk_short_phrase_duration_bonus
       - dectalk_rate_scaling
     resolve_scalars: [duration]
   - name: postlexical

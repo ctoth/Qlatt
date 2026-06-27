@@ -298,6 +298,11 @@ parameters:
       pre_df_flap_shortening: 0.35
       # Rule 24 (p_us_tim.c:882-889) segment before NG ("ing"): N60PRCNT.
       pre_ng_shortening: 0.60
+      # Rule 17 (p_us_tim.c:790-805) short utterances add 30 to prcnt before
+      # the durinh/durmin interpolation.  The YAML duration model applies this
+      # as the equivalent fraction of the compressible duration range.
+      short_phrase_prcnt_bonus: 30
+      prcnt_denominator: 128
       # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
       # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
       # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not

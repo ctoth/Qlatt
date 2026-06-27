@@ -560,6 +560,29 @@ rules:
       - "DECtalk 4.63 p_us_tim.c:882-889 Rule 24 (segment before NG, N60PRCNT)"
 
   # ---------------------------------------------------------------------------
+  # Rule 17: Short-utterance duration bonus
+  # DECtalk p_us_tim.c:790-805 adds 30 to prcnt when nallotot < 10 and the
+  # segment has a compressible duration range.  The declarative duration model
+  # applies the equivalent fraction of (durinh - durmin) as an additive bonus.
+  # ---------------------------------------------------------------------------
+  dectalk_short_phrase_duration_bonus:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL' && has(current.inherentDuration) && has(current.minimumDuration)
+    define:
+      compressible_range_ms: current.inherentDuration - current.minimumDuration
+      short_utterance: word_count() < 10
+    constraint: short_utterance && compressible_range_ms > 0
+    apply:
+      - field: duration
+        op: add
+        value: (params.policy.duration.short_phrase_prcnt_bonus / params.policy.duration.prcnt_denominator) * compressible_range_ms
+        tag: short_phrase
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (short-utterance prcnt += 30)"
+
+  # ---------------------------------------------------------------------------
   # Rate scaling
   # All non-silence durations are scaled by 1/rate_scale.
   # ---------------------------------------------------------------------------

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-06-27T14:45:18.2541543-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "baseline": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-soncon-vowel-f2-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-soncon-vowel-f2-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 146.40834089282495,
+    "nextTargetPhrase": "prosody-hello-world",
+    "nextTargetPhraseF2MeanAbs": 246.24700460829496
+  }
+}

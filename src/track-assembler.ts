@@ -2046,6 +2046,52 @@ export function lowerControlScoreToKlattTrack(
       }
 
       if (
+        backwardParams != null &&
+        segment.type === "vowel" &&
+        (nextSegment?.type === "nasal" || nextSegment?.type === "liquid" || nextSegment?.type === "glide") &&
+        nextParams
+      ) {
+        const currentF2 = finalParams.F2;
+        const nextF2 = nextParams.F2;
+        const f2SpanSec = Math.min(0.045, phDuration);
+        const f2SteadyTime = Math.max(segmentStart + 0.02, targetTime - f2SpanSec);
+        if (
+          Number.isFinite(currentF2) &&
+          Number.isFinite(nextF2) &&
+          f2SteadyTime > segmentStart &&
+          f2SteadyTime < targetTime
+        ) {
+          const defaultBoundary = (currentF2 + nextF2) / 2;
+          backwardParams = {
+            ...backwardParams,
+            // Iteration 004 is converging F2: DECtalk's US backward smoothing
+            // vowel-to-sonorant-consonant rule uses 75/25, then NF45MS.
+            F2: (defaultBoundary + nextF2) / 2,
+          };
+          backwardSteadyTimesByKey = {
+            ...(backwardSteadyTimesByKey ?? {}),
+            F2: f2SteadyTime,
+          };
+          context.diagnostics?.info(
+            "Applied vowel to sonorant-consonant F2 transition",
+            {
+              segmentIndex: i,
+              segmentId: segment.id,
+              word: segment.word ?? null,
+              currentPhoneme: segment.phoneme,
+              nextPhoneme: nextSegment.phoneme,
+              currentF2,
+              nextF2,
+              boundaryF2: backwardParams.F2,
+              steadyTimeMs: f2SteadyTime * 1000,
+              citation: "DECtalk 4.63 p_us_st1.c:837-849 (FORM_FREQ vowel-soncon backward smoothing uses 75/25 with NF45MS)",
+            },
+            "I_VOWEL_SONCON_F2_TRANSITION_APPLIED",
+          );
+        }
+      }
+
+      if (
         forwardParams != null &&
         segment.type === "vowel" &&
         (prevSegment?.type === "nasal" || prevSegment?.type === "liquid" || prevSegment?.type === "glide") &&

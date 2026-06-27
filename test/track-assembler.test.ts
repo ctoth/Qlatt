@@ -449,6 +449,43 @@ describe("track-assembler", () => {
       expect(ahFrameAt(0.105)?.params.F2).toBeCloseTo(1170, 6);
       expect(ahFrameAt(0.06)?.params.B2).toBeCloseTo(135, 6);
     });
+
+    it("applies DECtalk vowel to sonorant-consonant 75/25 F2 smoothing", () => {
+      const spec: TrackLoweringSpec = {
+        ...TEST_LOWERING_SPEC,
+        timeline: {
+          ...TEST_LOWERING_SPEC.timeline,
+          initial_silence_ms: { value: 0, citations: ["test"] },
+          final_silence_ms: { value: 0, citations: ["test"] },
+        },
+        transitions: {
+          ...TEST_LOWERING_SPEC.transitions,
+          blend: {
+            ...TEST_LOWERING_SPEC.transitions.blend,
+            factor: { value: 0.5, citations: ["test"] },
+            smooth_all_boundaries: true,
+          },
+        },
+      };
+      const score = makeScore([
+        makeSegment("seg_eh", "EH", "vowel", 100, { AV: 64, AH: 0, AF: 0, F1: 560, F2: 1670, F3: 2500, B1: 90, B2: 180, B3: 220 }),
+        makeSegment("seg_l", "L", "liquid", 60, { AV: 60, AH: 0, AF: 0, F1: 360, F2: 800, F3: 2700, B1: 70, B2: 130, B3: 180 }),
+      ], {
+        f0_points: [
+          { id: "f0_inside_backward_f2_transition", timing: { kind: "absolute", time_ms: 80 }, value_hz: 120 },
+          { id: "f0_near_backward_f2_boundary", timing: { kind: "absolute", time_ms: 95 }, value_hz: 120 },
+        ],
+      });
+
+      const track = lowerTestScore(score, { spec });
+      const ehFrameAt = (time: number) =>
+        track.find((frame) => frame.phoneme === "EH" && Math.abs(frame.time - time) < 1e-6);
+
+      expect(ehFrameAt(0.055)?.params.F2).toBeCloseTo(1670, 6);
+      expect(ehFrameAt(0.08)?.params.F2).toBeCloseTo(1307.5, 6);
+      expect(ehFrameAt(0.095)?.params.F2).toBeCloseTo(1090, 6);
+      expect(ehFrameAt(0.095)?.params.B2).toBeCloseTo(155, 6);
+    });
   });
 
   // ---------------------------------------------------------------------------

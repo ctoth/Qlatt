@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-06-27T15:54:46.3366481-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": "rejected",
+  "baseline": {
+    "commit": "0c97007e",
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.70500022091034,
+    "targetPhrase": "glide-young-yard",
+    "targetPhraseF2MeanAbs": 265.26930388909335
+  },
+  "attempt": {
+    "name": "syllable stress lookup for duration Rule 7",
+    "runRoots": [
+      "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-duration-1b",
+      "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-duration-1c",
+      "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-duration-1d"
+    ],
+    "warnings": 1,
+    "durationDeltaSec": 0.010199999999999765,
+    "targetPhraseF2MeanAbs": 265.26930388909335,
+    "decision": "rejected",
+    "reason": "No output or metric change after syntax-corrected rule expressions"
+  },
+  "end": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.70500022091034
+  },
+  "sourceState": "reverted"
+}

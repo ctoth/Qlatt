@@ -5443,6 +5443,16 @@ rules_by_letter:
     right: ''
     phonemes: [K, S]
   Y:
+  # DECtalk 4.63 -lp oracle for "Young yaks yelled." emits yx'aek s.
+  - left: ' '
+    letters: YAKS
+    right: ' '
+    phonemes: [Y, AE1, K, S]
+  # DECtalk 4.63 -lp oracle for "Young yaks yelled." emits yx'ehlld.
+  - left: ' '
+    letters: YELLED
+    right: ' '
+    phonemes: [Y, EH1, LL, D]
   # DECtalk 4.63 parity: preserve the high back glide-vowel sequence in the exact function word.
   - left: ' '
     letters: YOU

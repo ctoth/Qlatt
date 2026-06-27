@@ -190,6 +190,7 @@ const QLATT_TO_DECTALK_TOKEN: Record<string, string> = {
   Y: "yx",
   R: "r",
   L: "ll",
+  LL: "ll",
   HH: "hx",
   M: "m",
   N: "n",

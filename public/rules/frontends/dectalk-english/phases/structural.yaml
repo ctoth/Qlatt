@@ -68,6 +68,13 @@ rules:
             - inherentDuration
             - minimumDuration
             - type
+            - voiced
+            - voiceless
+            - is_obstruent
+            - is_stop_base
+            - bilabial
+            - alveolar
+            - velar
             - punctuationSymbol
           duration: closure_duration
         - phoneme: "'SIL'"
@@ -102,6 +109,13 @@ rules:
             - inherentDuration
             - minimumDuration
             - type
+            - voiced
+            - voiceless
+            - is_obstruent
+            - is_stop_base
+            - bilabial
+            - alveolar
+            - velar
             - punctuationSymbol
           duration: silence_tail_duration
     citations:
@@ -180,6 +194,13 @@ rules:
             - inherentDuration
             - minimumDuration
             - type
+            - voiced
+            - voiceless
+            - is_obstruent
+            - is_stop_base
+            - bilabial
+            - alveolar
+            - velar
             - punctuationSymbol
           duration: closure_duration
         - phoneme: rel
@@ -210,6 +231,13 @@ rules:
             - inherentDuration
             - minimumDuration
             - type
+            - voiced
+            - voiceless
+            - is_obstruent
+            - is_stop_base
+            - bilabial
+            - alveolar
+            - velar
             - punctuationSymbol
     citations:
       - "DECtalk 4.63 p_us_st1.c Special Rule 1 (burst duration is carved out of plosive closure)"
@@ -334,6 +362,13 @@ rules:
             - inherentDuration
             - minimumDuration
             - type
+            - voiced
+            - voiceless
+            - is_obstruent
+            - is_stop_base
+            - bilabial
+            - alveolar
+            - velar
             - punctuationSymbol
           duration: closure_duration
         - phoneme: rel

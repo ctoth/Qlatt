@@ -1095,7 +1095,7 @@ phoneme_targets:
     BNZ: 100
     AN: 60
     dur: 80
-    minimumDuration: 50
+    minimumDuration: 35  # DECtalk 4.63 -lt oracle trace for "Thin thieves thought that they thrilled." (word-final /n/ group ~=44.8ms after duration rules)
     type: nasal
     alveolar: true
     voiced: true

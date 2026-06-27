@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-06-27T17:10:35.1949919-06:00",
+  "baselineRunRoot": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\dectalk-us-v1",
+  "baselineSummary": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\trace-summary.json",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "targetSurface": "L1 frame parameters / F2",
+  "targetFamily": "diphthong control windows versus boundary smoothing precedence",
+  "baselineMetrics": {
+    "f2MeanAbs": 129.2832193319339,
+    "worstPhrase": "vowels-boat-bought",
+    "worstPhraseF2MeanAbs": 243.19679371040723,
+    "worstPhraseF2MaxAbs": 692,
+    "worstPhraseF2MaxFrame": 38
+  }
+}

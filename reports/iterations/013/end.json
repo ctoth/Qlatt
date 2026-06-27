@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-06-27T17:17:20.0000000-06:00",
+  "result": "rejected",
+  "baselineRunRoot": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\dectalk-us-v1",
+  "candidateRuns": {
+    "onePhrase": "J:\\Qlatt-oracle-output\\dectalk-smoothing-precedence-v2-1\\dectalk-us-v1",
+    "fivePhrase": "J:\\Qlatt-oracle-output\\dectalk-smoothing-precedence-v2-5\\dectalk-us-v1",
+    "tenPhrase": "J:\\Qlatt-oracle-output\\dectalk-smoothing-precedence-v2-10\\dectalk-us-v1"
+  },
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "metrics": {
+    "baselineCorpusF2MeanAbs": 129.2832193319339,
+    "targetPhraseF2Before": 243.19679371040723,
+    "targetPhraseF2After": 232.09996953458307,
+    "fivePhraseF2Before": 94.37751875995406,
+    "fivePhraseF2After": 94.37751875995406,
+    "tenPhraseF2Before": 155.3891867693099,
+    "tenPhraseF2After": 156.07777602287345
+  },
+  "rejectionReason": "global smoothing-over-control precedence improved the target phrase but worsened the 10-phrase F2 gate"
+}

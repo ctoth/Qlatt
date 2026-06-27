@@ -376,3 +376,42 @@ Protocol outcome: rejected and source/test changes reverted. The iteration log
 treats convergence warnings as the failure count, so the warning regression
 `46` -> `47` blocks keeping this candidate even though the selected F2
 aggregate improved.
+
+## F2-only locus ramp interpolation
+
+The retry kept the same root cause and source evidence as the rejected broad
+candidate, but narrowed the implementation to the active target family only:
+F2 locus windows with per-key `durtran` timing now interpolate linearly between
+steady target and `bouval`; F1/F3/B1-B3 transition behavior is left unchanged
+for this iteration.
+
+Verification:
+
+- `npm test -- track-assembler` -> 30 tests passed.
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-f2-locus-ramp-1` -> 0 failures,
+  1 warning, token similarity 1.0; `g2p-thought` F2 meanAbs
+  `275.3460915662651` (`307.09777108433735` before this slice).
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-f2-locus-ramp-5` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-f2-locus-ramp-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-f2-locus-ramp-50` -> 0 failures,
+  46 warnings, token similarity 1.0.
+- `npm run typecheck:core`
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 148.67747563128384
+- `F3`: meanAbs 100.57135677105555
+- `F1`: meanAbs 67.02589811417356
+- `F0`: meanAbs 59.91977283479464
+- `B3`: meanAbs 54.9528970048639
+- `B1`: meanAbs 37.10862701595699
+- `B2`: meanAbs 29.410913900503456
+- `AV`: meanAbs 8.52188753306596
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `151.1316468981995` -> `148.67747563128384`, with no increase in
+50-phrase convergence warnings (`46` -> `46`) and no command failures. Current
+evidence path:
+`J:\Qlatt-oracle-output\dectalk-f2-locus-ramp-50\trace-summary.json`.

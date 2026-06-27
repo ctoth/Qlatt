@@ -363,7 +363,7 @@ describe("track-assembler", () => {
       expect(last.params.F2).toBe(800);
     });
 
-    it("keeps locus durtran timing per formant", () => {
+    it("interpolates F2 locus ramps using durtran timing", () => {
       const makeSpec = (f3DurtranMs: number): TrackLoweringSpec => ({
         ...TEST_LOWERING_SPEC,
         timeline: {
@@ -390,27 +390,28 @@ describe("track-assembler", () => {
       const score = makeScore([
         makeSegment("seg_t", "T", "fricative", 50, { AV: 0, AH: 0, AF: 40, F1: 300, F2: 1300, F3: 2700 }),
         makeSegment("seg_r", "R", "liquid", 100, { AV: 60, AH: 0, AF: 0, F1: 400, F2: 1500, F3: 1700 }),
-      ]);
+      ], {
+        f0_points: [
+          { id: "f0_mid_transition", timing: { kind: "absolute", time_ms: 80 }, value_hz: 120 },
+        ],
+      });
 
       const baseTrack = lowerTestScore(score, { spec: makeSpec(55), transitionMs: 0 });
       const shortF3Track = lowerTestScore(score, { spec: makeSpec(45), transitionMs: 0 });
 
-      const lastTimeWithParamValue = (
+      const frameAt = (
         track: ReturnType<typeof lowerTestScore>,
-        key: "F2" | "F3",
-        value: number,
-      ) => Math.max(
-        ...track
-          .filter((frame) => frame.phoneme === "R" && frame.params[key] === value)
-          .map((frame) => frame.time),
-      );
-      const baseF3BoundaryEnd = lastTimeWithParamValue(baseTrack, "F3", 2700);
-      const shortF3BoundaryEnd = lastTimeWithParamValue(shortF3Track, "F3", 2700);
-      const shortF2BoundaryEnd = lastTimeWithParamValue(shortF3Track, "F2", 1300);
+        time: number,
+      ) => track.find((frame) => frame.phoneme === "R" && Math.abs(frame.time - time) < 1e-6);
 
-      expect(baseF3BoundaryEnd).toBeCloseTo(0.105, 6);
-      expect(shortF3BoundaryEnd).toBeCloseTo(0.095, 6);
-      expect(shortF2BoundaryEnd).toBeCloseTo(0.105, 6);
+      expect(frameAt(baseTrack, 0.05)?.params.F2).toBeCloseTo(1300, 6);
+      expect(frameAt(baseTrack, 0.08)?.params.F2).toBeCloseTo(1409.090909, 6);
+      expect(frameAt(baseTrack, 0.105)?.params.F2).toBeCloseTo(1500, 6);
+      expect(frameAt(baseTrack, 0.08)?.params.F3).toBeCloseTo(2700, 6);
+
+      expect(frameAt(shortF3Track, 0.08)?.params.F2).toBeCloseTo(1409.090909, 6);
+      expect(frameAt(shortF3Track, 0.095)?.params.F3).toBeCloseTo(2700, 6);
+      expect(frameAt(shortF3Track, 0.105)?.params.F2).toBeCloseTo(1500, 6);
     });
   });
 

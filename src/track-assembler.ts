@@ -473,6 +473,7 @@ function applyControlWindowsAtOffset(
   baseParams: KlattParams,
   smoothing: SegmentBoundarySmoothing,
   segmentStart: number,
+  segmentEnd: number,
   eventTime: number,
   controlWindows: ResolvedControlWindow[]
 ): KlattParams {
@@ -485,7 +486,17 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.forwardParams)) {
       const steadyTime = smoothing.forwardSteadyTimesByKey?.[key] ?? smoothing.forwardSteadyTime;
       if (steadyTime != null && eventTime <= steadyTime + epsilon) {
-        resolved[key] = value;
+        // Iteration 001 is converging F2 only: apply DECtalk setloc's linear
+        // durtran ramp to F2 locus windows while leaving other families stable.
+        const useF2LocusRamp = key === "F2" && smoothing.forwardSteadyTimesByKey?.[key] != null;
+        const steadyValue = baseParams[key];
+        const duration = steadyTime - segmentStart;
+        if (useF2LocusRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+          const fraction = Math.max(0, Math.min(1, (eventTime - segmentStart) / duration));
+          resolved[key] = value + (steadyValue - value) * fraction;
+        } else {
+          resolved[key] = value;
+        }
       }
     }
   }
@@ -494,7 +505,17 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.backwardParams)) {
       const steadyTime = smoothing.backwardSteadyTimesByKey?.[key] ?? smoothing.backwardSteadyTime;
       if (steadyTime != null && eventTime >= steadyTime - epsilon) {
-        resolved[key] = value;
+        // Iteration 001 is converging F2 only: apply DECtalk setloc's linear
+        // durtran ramp to F2 locus windows while leaving other families stable.
+        const useF2LocusRamp = key === "F2" && smoothing.backwardSteadyTimesByKey?.[key] != null;
+        const steadyValue = baseParams[key];
+        const duration = segmentEnd - steadyTime;
+        if (useF2LocusRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+          const fraction = Math.max(0, Math.min(1, (eventTime - steadyTime) / duration));
+          resolved[key] = steadyValue + (value - steadyValue) * fraction;
+        } else {
+          resolved[key] = value;
+        }
       }
     }
   }
@@ -2054,6 +2075,7 @@ export function lowerControlScoreToKlattTrack(
           finalParams,
           smoothing,
           segmentStart,
+          targetTime,
           eventTime,
           controlWindows
         );

@@ -107,8 +107,10 @@ rules:
   # Rule 3: Non-phrase-final syllabic shortening
   # Vowels not at a phrase boundary are shortened by 0.70.
   # DECtalk traces for monosyllables such as "dog." do not apply this shortening
-  # to the only vowel before a word-final consonant; Rule 4's monosyllable branch
-  # is the controlling stress-duration rule for that case.
+  # to the only vowel before a word-final consonant when that word is phrase-final;
+  # Rule 4's monosyllable branch is the controlling stress-duration rule there.
+  # In multiword traces, the only vowel of a non-final monosyllabic word is still
+  # shortened by Rule 3.
   # ---------------------------------------------------------------------------
   dectalk_non_final_shortening:
     kind: scalar
@@ -117,9 +119,24 @@ rules:
       where: current.type == 'vowel'
     define:
       "n": next
+      a1: "ahead(current, 1)"
+      a2: "ahead(current, 2)"
+      a3: "ahead(current, 3)"
+      a4: "ahead(current, 4)"
+      a5: "ahead(current, 5)"
+      a6: "ahead(current, 6)"
       at_boundary: "n == null ? true : n.phoneme == 'SIL'"
       syll_pos: "syllable_position_in_word()"
-    constraint: "!at_boundary && syll_pos != 'only'"
+      same_current_word: "has(current.word)"
+      later_word_before_boundary: >-
+        same_current_word && (
+        (a1 != null && a1.phoneme != 'SIL' && has(a1.word) && a1.word != current.word) ||
+        (a2 != null && a2.phoneme != 'SIL' && has(a2.word) && a2.word != current.word) ||
+        (a3 != null && a3.phoneme != 'SIL' && has(a3.word) && a3.word != current.word) ||
+        (a4 != null && a4.phoneme != 'SIL' && has(a4.word) && a4.word != current.word) ||
+        (a5 != null && a5.phoneme != 'SIL' && has(a5.word) && a5.word != current.word) ||
+        (a6 != null && a6.phoneme != 'SIL' && has(a6.word) && a6.word != current.word))
+    constraint: "!at_boundary && (syll_pos != 'only' || later_word_before_boundary)"
     apply:
       - field: duration
         op: mul
@@ -128,6 +145,7 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
       - "DECtalk 4.63 -lt oracle trace for 'dog.' (only vowel is not Rule-3 shortened before final /g/)"
+      - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (only vowels in non-final monosyllabic words are Rule-3 shortened)"
 
   # ---------------------------------------------------------------------------
   # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.

@@ -334,18 +334,29 @@ rules:
       where: current.type == 'vowel'
     define:
       "n": next
+      nn: "ahead(current, 2)"
+      syll_pos: "syllable_position_in_word()"
       next_voiceless: >-
         n == null ? false :
         (has(n.voiceless) ? n.voiceless == true : false)
       next_is_fricative: "n == null ? false : n.type == 'fricative'"
       next_is_plosive: "n == null ? false : n.type == 'stop_closure'"
       next_is_affricate: "n == null ? false : n.type == 'affricate'"
+      next_same_word: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? n.word == current.word : false)
+      next_is_word_final: >-
+        n == null ? false :
+        (nn == null ? true :
+        (has(nn.word) && has(n.word) ? nn.word != n.word : true))
+      skip_monosyllable_final_fricative: >-
+        next_is_fricative && syll_pos == 'only' && next_same_word && next_is_word_final
     constraint: next_voiceless
     apply:
       - field: duration
         op: mul
         dispatch:
-          - when: next_is_fricative
+          - when: next_is_fricative && !skip_monosyllable_final_fricative
             value: params.policy.duration.pre_voiceless_fricative_shortening
           - when: next_is_plosive || next_is_affricate
             value: params.policy.duration.pre_voiceless_plosive_shortening
@@ -354,6 +365,7 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 9 (postvocalic voiceless shortening)"
       - "DECtalk 4.63 -lt oracle trace for 'church.' (rhotic vowel shortens before voiceless affricate /ch/)"
+      - "DECtalk 4.63 -lt oracle trace for 'this.' (only vowel is not shortened before word-final /s/)"
 
   # ---------------------------------------------------------------------------
   # Rule 9b: Postvocalic voiced obstruent lengthening / pre-nasal shortening

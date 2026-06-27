@@ -106,7 +106,7 @@ phoneme_targets:
     B2: 100
     B3: 190
     AV: 65
-    dur: 130
+    dur: 140  # DECtalk 4.63 -lt oracle trace for "this." (IH1 group ~=153.6ms after short-phrase bonus)
     minimumDuration: 80
     type: vowel
     voiced: true

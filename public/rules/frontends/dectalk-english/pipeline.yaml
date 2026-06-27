@@ -330,6 +330,7 @@ phases:
       - dectalk_special_coartic_f2
   - name: prosody
     rules:
+      - dectalk_short_declarative_baseline_declination
       - dectalk_baseline_declination
       - dectalk_hat_rise
       - dectalk_hat_fall

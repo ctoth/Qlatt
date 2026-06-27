@@ -23,13 +23,14 @@ rules:
   # ==========================================================================
 
   # --------------------------------------------------------------------------
-  # Rule 1: Baseline Declination Profile
+  # Rule 1: Baseline Declination Profile (long declaratives)
   #
   # Fires at the first phoneme of each phrase (first non-SIL after SIL, or
   # the very first phoneme).  Inserts a 17-point piecewise-linear profile
   # into the baseline layer that spans the entire utterance duration.
   #
-  # Source: Ph_drwt02.c f0basetypes[0][] (declarative clause type).
+  # Source: Ph_drwt02.c f0basetypes[0][] (declarative clause type,
+  # number_words > 3).
   # Values are in DECtalk internal units (Hz*10); speaker scaling converts
   # to final Hz.
   #
@@ -44,6 +45,7 @@ rules:
       where: >-
         current.phoneme != "SIL"
         && (prev == null || prev.phoneme == "SIL")
+        && word_count() > 3
     insert:
       layer: baseline
       at: at_sync(current.sync_left)
@@ -68,7 +70,48 @@ rules:
         - 863
       tag: f0_baseline
     citations:
-      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[0][] (declarative baseline)"
+      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[0][] (declarative baseline, number_words > 3)"
+      - "Klatt 1982 (baseline declination component)"
+
+  # --------------------------------------------------------------------------
+  # Rule 1b: Short Declarative Baseline
+  #
+  # DECtalk uses a separate, flatter profile for declarative clauses with one
+  # to three words: clausetype 0 selects f0basetypes[4][] when number_words <= 3.
+  # --------------------------------------------------------------------------
+  dectalk_short_declarative_baseline_declination:
+    kind: f0_layer
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != "SIL"
+        && (prev == null || prev.phoneme == "SIL")
+        && word_count() <= 3
+    insert:
+      layer: baseline
+      at: at_sync(current.sync_left)
+      value: 0
+      profile_points:
+        - 1160
+        - 1150
+        - 1140
+        - 1152
+        - 1132
+        - 1140
+        - 1130
+        - 1124
+        - 1110
+        - 1100
+        - 1080
+        - 1060
+        - 1040
+        - 1020
+        - 980
+        - 960
+        - 950
+      tag: f0_baseline
+    citations:
+      - "DECtalk 4.63 Ph_drwt02.c f0basetypes[4][] (short declarative baseline, number_words <= 3)"
       - "Klatt 1982 (baseline declination component)"
 
   # --------------------------------------------------------------------------

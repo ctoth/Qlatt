@@ -1264,7 +1264,7 @@ phoneme_targets:
     B3: 300
     AV: 0
     AF: 66
-    dur: 125
+    dur: 145  # DECtalk 4.63 -lt oracle trace for "she." (initial SH group ~=140.8ms after duration percentages)
     fricative_min_ms: 30  # Jongman 1989
     minimumDuration: 60
     type: fricative

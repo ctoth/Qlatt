@@ -250,7 +250,7 @@ rules:
       stream: phone
       where: current.phoneme != 'SIL'
     define:
-      is_emphasized: "has(current.isAccented) ? current.isAccented == true : false"
+      is_emphasized: "has(current.stress) ? current.stress == 3 : false"
       is_vowel: current.type == 'vowel'
     constraint: is_emphasized
     apply:

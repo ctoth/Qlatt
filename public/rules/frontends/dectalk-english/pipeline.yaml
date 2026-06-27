@@ -321,6 +321,7 @@ phases:
       - syllable_index_annotation
       - syllable_role_annotation
       - syllable_position_annotation
+      - dectalk_single_word_fallback_primary_stress
   - name: formant
     rules:
       - dectalk_sw_explicit_override

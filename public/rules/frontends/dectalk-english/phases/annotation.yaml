@@ -53,3 +53,29 @@ rules:
         tag: syllabification
     citations:
       - DECtalk 4.63 ph_syl.c ph_syllab (word-position from syllable index + count)
+
+  dectalk_single_word_fallback_primary_stress:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && word_count() == 1"
+    define:
+      prev_primary_or_boundary: >-
+        look_back_where(current, 100,
+          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
+      next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
+      prior_vowel_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel'",
+          "behind")
+      no_primary_in_clause: >-
+        (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
+        && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
+    constraint: "no_primary_in_clause && prior_vowel_in_word == null"
+    apply:
+      - field: stress
+        op: set
+        value: 1
+        tag: fallback_primary_stress
+    citations:
+      - "DECtalk 4.63 ph_sort2.c find_syll_to_stress (no primary stress: stress first vowel of last word)"

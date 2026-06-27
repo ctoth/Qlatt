@@ -7,4 +7,4 @@ gate.
 
 | Iteration | Start | End | Result | Commit |
 | --- | ---: | ---: | --- | --- |
-| 001 | 46 / 50 not passing | pending | In progress | pending |
+| 001 | 46 / 50 not passing | pending | In progress; rejected locus ramp candidate (`46` -> `47` warnings) | pending |

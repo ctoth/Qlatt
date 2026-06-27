@@ -316,3 +316,63 @@ Compared with the previous kept scoreboard, the selected target improved:
 `F2` meanAbs `158.022712688796` -> `151.1316468981995`, with no increase in
 50-phrase command failures or convergence warnings. Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-article-ax0-50\trace-summary.json`.
+
+## F2 locus transition ramp interpolation
+
+The next F2 target phrase was `g2p-thought` ("thought."). L0 was exact
+(`TH AO T`), and duration was not the primary cause (`-0.0432` s). The trace
+showed Qlatt holding the AO final F2 locus boundary as a step plateau:
+`929` Hz through the vowel, then `1661.45` Hz from the computed steady time
+forward. DECtalk instead linearly ramps from the steady AO target toward the
+T locus boundary across the final transition window (`ph_sttr2.c` `setloc`:
+`bouval = locus + prcnt * (curval-locus) / 100`, then the draw path ramps over
+`durtran`).
+
+Rejected hypothesis: AO was not missing from `f2_back`. Source check showed
+`US_AO` is index `10` in `l_all_ph.h`, `us_place[10]` is `0` in
+`p_us_rom.h`, and `F2BACKI/F2BACKF` are octal `0100/0200`. Adding AO to
+`f2_back` would be wrong.
+
+The rejected candidate fixed the existing lowering helper so forward/backward boundary
+windows interpolate between boundary and steady values at each emitted event,
+instead of stepping to the boundary value for the whole window. A focused
+`track-assembler` test now covers per-formant `durtran` interpolation.
+
+Verification:
+
+- `npm test -- track-assembler` -> 30 tests passed.
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-locus-ramp-1` -> 0 failures,
+  1 warning, token similarity 1.0; `g2p-thought` F2 meanAbs
+  `264.6563325301205` (`307.09777108433735` before this slice).
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-locus-ramp-5` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-locus-ramp-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-locus-ramp-50` -> 0 failures,
+  47 warnings, token similarity 1.0.
+- `npm run typecheck:core`
+
+After the candidate, the 50-phrase L1 ranking was:
+
+- `F2`: meanAbs 148.76620422399034
+- `F3`: meanAbs 102.9531842572751
+- `F1`: meanAbs 61.75314662794993
+- `F0`: meanAbs 59.91977283479464
+- `B3`: meanAbs 54.62971287459596
+- `B1`: meanAbs 36.27972066560149
+- `B2`: meanAbs 28.187314003070686
+- `A2`: meanAbs 2.54330574281082
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `151.1316468981995` -> `148.76620422399034`. The 50-phrase
+command failure count stayed at `0`, but convergence warnings increased
+`46` -> `47`: `g2p-phone` crossed from `pass` to `warn` because audio
+correlation moved `0.10603166117651532` -> `0.09864482933588825`; its token
+similarity and trace duration/F0/AV/AP summary fields were unchanged. Current
+evidence path:
+`J:\Qlatt-oracle-output\dectalk-locus-ramp-50\trace-summary.json`.
+
+Protocol outcome: rejected and source/test changes reverted. The iteration log
+treats convergence warnings as the failure count, so the warning regression
+`46` -> `47` blocks keeping this candidate even though the selected F2
+aggregate improved.

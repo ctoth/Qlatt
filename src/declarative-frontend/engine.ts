@@ -1303,6 +1303,29 @@ function buildNavigationFunctions(
       }
       return count;
     },
+    // clause_phone_count(): Count active non-silence phone tokens in the
+    // current SIL-delimited clause. DECtalk duration Rule 17 keys on nallotot
+    // for the current timing clause, not the whole punctuation-separated input.
+    // Citation: DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (nallotot < 10)
+    clause_phone_count: (): number => {
+      const token = currentToken;
+      if (!token || token.phoneme === "SIL") return 0;
+      const active = getActiveStreamTokens("phone");
+      const idx = getTokenIndex(token, "phone");
+      if (idx < 0) return 0;
+
+      let start = idx;
+      while (start > 0 && active[start - 1].phoneme !== "SIL") start--;
+
+      let end = idx;
+      while (end + 1 < active.length && active[end + 1].phoneme !== "SIL") end++;
+
+      let count = 0;
+      for (let i = start; i <= end; i++) {
+        if (active[i].phoneme !== "SIL") count++;
+      }
+      return count;
+    },
     // cluster_position_in_word(): For the current non-vowel token, count how
     // many consecutive non-vowel tokens with the same word precede it.
     // Position 0 = first consonant in the cluster.  Returns 0 for vowels,

@@ -172,3 +172,54 @@ Compared with the previous kept scoreboard, the selected target improved:
 `F2` meanAbs `172.98701851693832` -> `169.20365816195923`, with no increase in
 50-phrase command failures or convergence warnings. Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-r-stress-block-50\trace-summary.json`.
+
+## F2 clause-local short-utterance timing
+
+The next F2 target phrase was `prosody-list` ("Red, green, blue, and gold.").
+L0 was exact, but the trace showed Qlatt's spoken list items were too short.
+Rule 17 used `phone_count() < 10`, which counted the whole non-silence utterance;
+the DECtalk timing source computes this count over the current clause. In the
+oracle phrase, each comma-delimited color is a short timing clause, so DECtalk
+applies the short-utterance duration bonus to each list item.
+
+Representative evidence before the fix:
+
+- `prosody-list` F2 meanAbs: `361.619825708061` in
+  `J:\Qlatt-oracle-output\dectalk-r-stress-block-50\trace-summary.json`.
+- Qlatt trace duration delta: `-0.2584` s against the DECtalk trace.
+
+The kept slice adds a zero-argument CEL helper, `clause_phone_count()`, that
+counts phones between the nearest surrounding `SIL` boundaries. The DECtalk
+Rule 17 duration YAML now uses that helper for the short-utterance condition
+while leaving the existing whole-stream `phone_count()` helper intact.
+
+Verification:
+
+- `npx vitest run test/declarative-frontend-cel-expressions.test.ts` -> 4 tests
+  passed.
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-clause-count-1` -> 0 failures,
+  1 warning, token similarity 1.0; `prosody-list` F2 meanAbs
+  `202.6644880174292`, duration delta `-0.0324` s.
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-clause-count-5` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-clause-count-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-clause-count-50` -> 0 failures,
+  46 warnings, token similarity 1.0.
+- `npm run typecheck:core`
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 162.977828312996
+- `F3`: meanAbs 100.7435557641437
+- `F1`: meanAbs 75.99938561310694
+- `F0`: meanAbs 60.42895510087597
+- `B3`: meanAbs 58.61848280570015
+- `B1`: meanAbs 37.7205392951617
+- `B2`: meanAbs 31.012245072105127
+- `A2`: meanAbs 2.54330574281082
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `169.20365816195923` -> `162.977828312996`, with no increase in
+50-phrase command failures or convergence warnings. Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-clause-count-50\trace-summary.json`.

@@ -63,6 +63,7 @@ const DEFAULT_ALLOWED_FUNCTIONS = new Set([
   "cluster_position_in_word",
   "word_count",
   "phone_count",
+  "clause_phone_count",
   "syllable_index",
   "syllable_role",
   "syllable_position_in_word",
@@ -124,6 +125,7 @@ function createCelEnvironment(): Environment {
     "look_back_where", "look_back_pred", "look_ahead_pred", "find_within_word", "span_ms",
     "trajectory_to_windows", "dectalk_obstruent_profile",
     "count_word_vowels", "cluster_position_in_word", "word_count", "phone_count",
+    "clause_phone_count",
     "syllable_index", "syllable_role", "syllable_position_in_word",
   ];
 
@@ -133,6 +135,7 @@ function createCelEnvironment(): Environment {
     "cluster_position_in_word",
     "word_count",
     "phone_count",
+    "clause_phone_count",
     "syllable_index",
     "syllable_role",
     "syllable_position_in_word",

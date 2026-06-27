@@ -114,4 +114,48 @@ describe("declarative frontend CEL expressions", () => {
     expect(out[0].duration).toBe(35);
     expect(out[0].params.AF).toBe(47);
   });
+
+  it("counts phones in the current SIL-delimited clause", () => {
+    const spec = {
+      streams: {
+        phone: {
+          type: "base",
+          features: { type: ["vowel", "stop", "silence"] },
+          scalars: { whole: {}, clause: {} },
+        },
+      },
+      rules: {
+        count_scope: {
+          select: {
+            stream: "phone",
+            where: "current.phoneme != 'SIL'",
+          },
+          apply: [
+            { field: "whole", op: "set", value: "phone_count()", tag: "count" },
+            { field: "clause", op: "set", value: "clause_phone_count()", tag: "count" },
+          ],
+        },
+      },
+      phases: [{ name: "duration", rules: ["count_scope"] }],
+    };
+
+    const input = [
+      { stream: "phone", phoneme: "R", type: "stop", status: 1 },
+      { stream: "phone", phoneme: "EH", type: "vowel", status: 1 },
+      { stream: "phone", phoneme: "D", type: "stop", status: 1 },
+      { stream: "phone", phoneme: "SIL", type: "silence", status: 1 },
+      { stream: "phone", phoneme: "B", type: "stop", status: 1 },
+      { stream: "phone", phoneme: "L", type: "stop", status: 1 },
+      { stream: "phone", phoneme: "UW", type: "vowel", status: 1 },
+      { stream: "phone", phoneme: "SIL", type: "silence", status: 1 },
+    ];
+
+    const out = runRuleEngine(input, spec).sequence;
+
+    expect(out[0].whole).toBe(6);
+    expect(out[0].clause).toBe(3);
+    expect(out[4].whole).toBe(6);
+    expect(out[4].clause).toBe(3);
+    expect(out[3].clause).toBeUndefined();
+  });
 });

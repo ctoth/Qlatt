@@ -658,9 +658,12 @@ rules:
 
   # ---------------------------------------------------------------------------
   # Rule 17: Short-utterance duration bonus
-  # DECtalk p_us_tim.c:790-805 adds 30 to prcnt when nallotot < 10 and the
-  # segment has a compressible duration range.  The declarative duration model
-  # applies the equivalent fraction of (durinh - durmin) as an additive bonus.
+  # DECtalk p_us_tim.c:790-805 adds 30 to prcnt when the current timing clause's
+  # nallotot < 10 and the segment has a compressible duration range.  Comma
+  # pauses split timing clauses, so a list like "Red, green, blue..." must be
+  # evaluated per comma-delimited clause rather than over the whole utterance.
+  # The declarative duration model applies the equivalent fraction of
+  # (durinh - durmin) as an additive bonus.
   # ---------------------------------------------------------------------------
   dectalk_short_phrase_duration_bonus:
     kind: scalar
@@ -669,7 +672,7 @@ rules:
       where: current.phoneme != 'SIL' && has(current.inherentDuration) && has(current.minimumDuration)
     define:
       compressible_range_ms: current.inherentDuration - current.minimumDuration
-      short_utterance: phone_count() < 10
+      short_utterance: clause_phone_count() < 10
     constraint: short_utterance && compressible_range_ms > 0
     apply:
       - field: duration
@@ -678,6 +681,7 @@ rules:
         tag: short_phrase
     citations:
       - "DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (short-utterance prcnt += 30)"
+      - "DECtalk 4.63 oracle -lt/-lp trace for 'Red, green, blue, and gold.' (comma-delimited clauses receive short-clause timing)"
 
   # ---------------------------------------------------------------------------
   # Rate scaling

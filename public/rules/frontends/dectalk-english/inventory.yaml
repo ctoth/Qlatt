@@ -176,7 +176,7 @@ phoneme_targets:
     B3: 200
     AV: 63
     dur: 140
-    minimumDuration: 140
+    minimumDuration: 90  # DECtalk 4.63 -lt oracle trace for "Thin thieves thought that they thrilled." (unstressed "they" EY group ~=96ms)
     type: vowel
     voiced: true
     mid: true

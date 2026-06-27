@@ -15,6 +15,7 @@ type ParsedArgs = {
   corpusPath: string;
   outRoot: string;
   continueOnError: boolean;
+  limit?: number;
 };
 
 function parseArgv(argv: string[]): ParsedArgs {
@@ -33,8 +34,17 @@ function parseArgv(argv: string[]): ParsedArgs {
 
   if (flags.has("help")) {
     throw new Error(
-      "Usage: run-corpus [--corpus path] [--out-root dir] [--continue-on-error 1]",
+      "Usage: run-corpus [--corpus path] [--out-root dir] [--limit n] [--continue-on-error 1]",
     );
+  }
+
+  const limitText = flags.get("limit");
+  const limit =
+    limitText == null || limitText === ""
+      ? undefined
+      : Number.parseInt(limitText, 10);
+  if (limitText != null && (!Number.isFinite(limit) || limit <= 0)) {
+    throw new Error("--limit must be a positive integer");
   }
 
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -57,6 +67,7 @@ function parseArgv(argv: string[]): ParsedArgs {
     continueOnError:
       flags.get("continue-on-error") === "1" ||
       flags.get("continue-on-error") === "true",
+    ...(limit != null ? { limit } : {}),
   };
 }
 
@@ -188,9 +199,11 @@ async function main(): Promise<number> {
     const corpus = loadCorpus(args.corpusPath);
     const runRoot = path.join(args.outRoot, corpus.corpusId);
     fs.mkdirSync(runRoot, { recursive: true });
+    const selectedEntries =
+      args.limit != null ? corpus.entries.slice(0, args.limit) : corpus.entries;
 
     const reports: AudioComparisonReport[] = [];
-    for (const baseEntry of corpus.entries) {
+    for (const baseEntry of selectedEntries) {
       const entry = mergeDefaults(corpus.defaults, baseEntry);
       const entryDir = path.join(runRoot, entry.id);
       fs.mkdirSync(entryDir, { recursive: true });
@@ -252,6 +265,7 @@ async function main(): Promise<number> {
       schemaVersion: "v1",
       corpusId: corpus.corpusId,
       corpusPath: args.corpusPath,
+      ...(args.limit != null ? { limit: args.limit } : {}),
       generatedAt: new Date().toISOString(),
       summary: summarizeReports(reports),
       reports: reports.map((report) => ({

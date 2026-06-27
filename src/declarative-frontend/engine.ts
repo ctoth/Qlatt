@@ -1291,6 +1291,18 @@ function buildNavigationFunctions(
       }
       return count;
     },
+    // phone_count(): Count active non-silence phone tokens in the current
+    // utterance. This mirrors DECtalk duration gates keyed on nallotot rather
+    // than number_words.
+    // Citation: DECtalk 4.63 p_us_tim.c:790-805 Rule 17 (nallotot < 10)
+    phone_count: (): number => {
+      const active = getActiveStreamTokens("phone");
+      let count = 0;
+      for (const t of active) {
+        if (t.phoneme !== "SIL") count++;
+      }
+      return count;
+    },
     // cluster_position_in_word(): For the current non-vowel token, count how
     // many consecutive non-vowel tokens with the same word precede it.
     // Position 0 = first consonant in the cluster.  Returns 0 for vowels,

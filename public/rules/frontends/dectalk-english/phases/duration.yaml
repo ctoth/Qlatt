@@ -572,7 +572,7 @@ rules:
       where: current.phoneme != 'SIL' && has(current.inherentDuration) && has(current.minimumDuration)
     define:
       compressible_range_ms: current.inherentDuration - current.minimumDuration
-      short_utterance: word_count() < 10
+      short_utterance: phone_count() < 10
     constraint: short_utterance && compressible_range_ms > 0
     apply:
       - field: duration

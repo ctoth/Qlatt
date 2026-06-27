@@ -328,6 +328,56 @@ describe("track-assembler", () => {
       expect(last.phoneme).toBe("SIL");
       expect(last.time).toBeCloseTo(0.145, 6);
     });
+
+    it("keeps locus durtran timing per formant", () => {
+      const makeSpec = (f3DurtranMs: number): TrackLoweringSpec => ({
+        ...TEST_LOWERING_SPEC,
+        timeline: {
+          ...TEST_LOWERING_SPEC.timeline,
+          initial_silence_ms: { value: 0, citations: ["test"] },
+          final_silence_ms: { value: 0, citations: ["test"] },
+        },
+        transitions: {
+          ...TEST_LOWERING_SPEC.transitions,
+          loci: {
+            T: {
+              "3": {
+                F1: { locus_hz: 300, prcnt: 0, durtran_ms: 30 },
+                F2: { locus_hz: 1300, prcnt: 0, durtran_ms: 55 },
+                F3: { locus_hz: 2700, prcnt: 0, durtran_ms: f3DurtranMs },
+              },
+            },
+          },
+          vowel_category: {
+            R: { forward: 3, backward: 3 },
+          },
+        },
+      });
+      const score = makeScore([
+        makeSegment("seg_t", "T", "fricative", 50, { AV: 0, AH: 0, AF: 40, F1: 300, F2: 1300, F3: 2700 }),
+        makeSegment("seg_r", "R", "liquid", 100, { AV: 60, AH: 0, AF: 0, F1: 400, F2: 1500, F3: 1700 }),
+      ]);
+
+      const baseTrack = lowerTestScore(score, { spec: makeSpec(55), transitionMs: 0 });
+      const shortF3Track = lowerTestScore(score, { spec: makeSpec(45), transitionMs: 0 });
+
+      const lastTimeWithParamValue = (
+        track: ReturnType<typeof lowerTestScore>,
+        key: "F2" | "F3",
+        value: number,
+      ) => Math.max(
+        ...track
+          .filter((frame) => frame.phoneme === "R" && frame.params[key] === value)
+          .map((frame) => frame.time),
+      );
+      const baseF3BoundaryEnd = lastTimeWithParamValue(baseTrack, "F3", 2700);
+      const shortF3BoundaryEnd = lastTimeWithParamValue(shortF3Track, "F3", 2700);
+      const shortF2BoundaryEnd = lastTimeWithParamValue(shortF3Track, "F2", 1300);
+
+      expect(baseF3BoundaryEnd).toBeCloseTo(0.105, 6);
+      expect(shortF3BoundaryEnd).toBeCloseTo(0.095, 6);
+      expect(shortF2BoundaryEnd).toBeCloseTo(0.105, 6);
+    });
   });
 
   // ---------------------------------------------------------------------------

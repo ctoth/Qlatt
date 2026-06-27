@@ -375,7 +375,8 @@ function buildSegmentEventTimes(
   controlWindows: ResolvedControlWindow[],
   eventPolicy: TrackLoweringSpec["timeline"]["event_points"],
   includeSegmentEnd = false,
-  forwardSteadyTime: number | null = null
+  forwardSteadyTime: number | null = null,
+  additionalTransitionSteadyTimes: readonly number[] = [],
 ): number[] {
   const epsilon = 1e-6;
   const times = eventPolicy.include_segment_start ? [segmentStart] : [];
@@ -408,6 +409,14 @@ function buildSegmentEventTimes(
     forwardSteadyTime < segmentEnd - epsilon
   ) {
     times.push(forwardSteadyTime);
+  }
+
+  if (eventPolicy.include_transition_steady_time) {
+    for (const transitionTime of additionalTransitionSteadyTimes) {
+      if (transitionTime > segmentStart + epsilon && transitionTime < segmentEnd - epsilon) {
+        times.push(transitionTime);
+      }
+    }
   }
 
   if (eventPolicy.include_control_boundaries) {
@@ -454,8 +463,10 @@ function buildSegmentEventTimes(
 type SegmentBoundarySmoothing = {
   backwardParams: KlattParams | null;
   backwardSteadyTime: number | null;
+  backwardSteadyTimesByKey: Record<string, number> | null;
   forwardParams: KlattParams | null;
   forwardSteadyTime: number | null;
+  forwardSteadyTimesByKey: Record<string, number> | null;
 };
 
 function applyControlWindowsAtOffset(
@@ -468,24 +479,25 @@ function applyControlWindowsAtOffset(
   const epsilon = 1e-6;
   const segmentOffset = Math.max(0, eventTime - segmentStart);
 
-  // Choose the boundary param set for this event. Forward (start) and backward
-  // (end) windows are disjoint in time by construction (forwardSteadyTime <=
-  // backwardSteadyTime), so at most one applies; the steady target applies in
-  // the interior between them.
-  const useForward =
-    smoothing.forwardParams != null &&
-    smoothing.forwardSteadyTime != null &&
-    eventTime <= smoothing.forwardSteadyTime + epsilon;
-  const useBackward =
-    smoothing.backwardParams != null &&
-    smoothing.backwardSteadyTime != null &&
-    eventTime >= smoothing.backwardSteadyTime - epsilon;
+  const resolved: KlattParams = { ...baseParams };
 
-  let source: KlattParams = baseParams;
-  if (useForward) source = smoothing.forwardParams as KlattParams;
-  else if (useBackward) source = smoothing.backwardParams as KlattParams;
+  if (smoothing.forwardParams != null) {
+    for (const [key, value] of Object.entries(smoothing.forwardParams)) {
+      const steadyTime = smoothing.forwardSteadyTimesByKey?.[key] ?? smoothing.forwardSteadyTime;
+      if (steadyTime != null && eventTime <= steadyTime + epsilon) {
+        resolved[key] = value;
+      }
+    }
+  }
 
-  const resolved: KlattParams = { ...source };
+  if (smoothing.backwardParams != null) {
+    for (const [key, value] of Object.entries(smoothing.backwardParams)) {
+      const steadyTime = smoothing.backwardSteadyTimesByKey?.[key] ?? smoothing.backwardSteadyTime;
+      if (steadyTime != null && eventTime >= steadyTime - epsilon) {
+        resolved[key] = value;
+      }
+    }
+  }
 
   for (const window of controlWindows) {
     if (segmentOffset + epsilon < window.startSec) continue;
@@ -1319,6 +1331,8 @@ type LocusBoundary = {
     adjustedDurtranMs: number;
     boundaryHz: number;
     adjustments: string[];
+    steadyTimeMs?: number;
+    appliedSpanMs?: number;
   }[];
   roundedSonorantConsonant: boolean;
   obstruentPalatalOrDental: boolean;
@@ -1812,6 +1826,7 @@ export function lowerControlScoreToKlattTrack(
       // -------------------------------------------------------------------
       let backwardParams: KlattParams | null = null;
       let backwardSteadyTime: number | null = null;
+      let backwardSteadyTimesByKey: Record<string, number> | null = null;
       // Legacy sonorant<->sonorant midpoint blend (UNCHANGED): both this and the
       // next segment are smoothed types.
       const canMidpointSmooth =
@@ -1848,11 +1863,24 @@ export function lowerControlScoreToKlattTrack(
             )
           : null;
         if (locus) {
-          const span = Math.min(locus.spanSec, phDuration);
-          const steadyTime = Math.max(segmentStart + 0.02, targetTime - span);
-          if (steadyTime > segmentStart && steadyTime < targetTime) {
+          const steadyTimesByKey: Record<string, number> = {};
+          const diagnosticFormants = locus.formants.map((formant) => {
+            const formantSpan = Math.min(Math.max(0, formant.adjustedDurtranMs) / 1000, phDuration);
+            const formantSteadyTime = Math.max(segmentStart + 0.02, targetTime - formantSpan);
+            if (formantSteadyTime > segmentStart && formantSteadyTime < targetTime) {
+              steadyTimesByKey[formant.key] = formantSteadyTime;
+            }
+            return {
+              ...formant,
+              steadyTimeMs: formantSteadyTime * 1000,
+              appliedSpanMs: formantSpan * 1000,
+            };
+          });
+          const steadyTimes = Object.values(steadyTimesByKey);
+          if (steadyTimes.length > 0) {
             backwardParams = locus.params;
-            backwardSteadyTime = steadyTime;
+            backwardSteadyTimesByKey = steadyTimesByKey;
+            backwardSteadyTime = Math.min(...steadyTimes);
             context.diagnostics?.info(
               "Applied obstruent locus transition at sonorant end",
               {
@@ -1867,13 +1895,12 @@ export function lowerControlScoreToKlattTrack(
                 vowelCategory: locus.category,
                 segmentStartMs: segmentStart * 1000,
                 segmentEndMs: targetTime * 1000,
-                steadyTimeMs: steadyTime * 1000,
+                steadyTimeMs: backwardSteadyTime * 1000,
                 spanMs: locus.spanSec * 1000,
-                appliedSpanMs: span * 1000,
                 roundedSonorantConsonant: locus.roundedSonorantConsonant,
                 obstruentPalatalOrDental: locus.obstruentPalatalOrDental,
                 f2BackAffiliated: locus.f2BackAffiliated,
-                formants: locus.formants,
+                formants: diagnosticFormants,
                 citation: "DECtalk 4.63 ph_sttr2.c setloc; p_us_rom.h us_maleloc/us_femloc",
               },
               "I_LOCUS_TRANSITION_APPLIED",
@@ -1887,6 +1914,7 @@ export function lowerControlScoreToKlattTrack(
       // -------------------------------------------------------------------
       let forwardParams: KlattParams | null = null;
       let forwardSteadyTime: number | null = null;
+      let forwardSteadyTimesByKey: Record<string, number> | null = null;
       const forwardObstruent = isSmoothedSonorant ? adjacentLocusObstruent(i, -1) : null;
       if (forwardObstruent) {
         const locus = resolveLocusBoundary(
@@ -1900,15 +1928,28 @@ export function lowerControlScoreToKlattTrack(
           prcntAdjust,
         );
         if (locus) {
-          const span = Math.min(locus.spanSec, phDuration);
-          let candidate = Math.min(targetTime - 0.02, segmentStart + span);
-          // Keep the forward window from overrunning the backward window.
-          if (backwardSteadyTime != null) {
-            candidate = Math.min(candidate, backwardSteadyTime);
-          }
-          if (candidate > segmentStart && candidate < targetTime) {
+          const steadyTimesByKey: Record<string, number> = {};
+          const diagnosticFormants = locus.formants.map((formant) => {
+            const formantSpan = Math.min(Math.max(0, formant.adjustedDurtranMs) / 1000, phDuration);
+            let formantSteadyTime = Math.min(targetTime - 0.02, segmentStart + formantSpan);
+            // Keep the forward window from overrunning the backward window.
+            if (backwardSteadyTime != null) {
+              formantSteadyTime = Math.min(formantSteadyTime, backwardSteadyTime);
+            }
+            if (formantSteadyTime > segmentStart && formantSteadyTime < targetTime) {
+              steadyTimesByKey[formant.key] = formantSteadyTime;
+            }
+            return {
+              ...formant,
+              steadyTimeMs: formantSteadyTime * 1000,
+              appliedSpanMs: formantSpan * 1000,
+            };
+          });
+          const steadyTimes = Object.values(steadyTimesByKey);
+          if (steadyTimes.length > 0) {
             forwardParams = locus.params;
-            forwardSteadyTime = candidate;
+            forwardSteadyTimesByKey = steadyTimesByKey;
+            forwardSteadyTime = Math.max(...steadyTimes);
             context.diagnostics?.info(
               "Applied obstruent locus transition at sonorant start",
               {
@@ -1923,13 +1964,12 @@ export function lowerControlScoreToKlattTrack(
                 vowelCategory: locus.category,
                 segmentStartMs: segmentStart * 1000,
                 segmentEndMs: targetTime * 1000,
-                steadyTimeMs: candidate * 1000,
+                steadyTimeMs: forwardSteadyTime * 1000,
                 spanMs: locus.spanSec * 1000,
-                appliedSpanMs: span * 1000,
                 roundedSonorantConsonant: locus.roundedSonorantConsonant,
                 obstruentPalatalOrDental: locus.obstruentPalatalOrDental,
                 f2BackAffiliated: locus.f2BackAffiliated,
-                formants: locus.formants,
+                formants: diagnosticFormants,
                 citation: "DECtalk 4.63 ph_sttr2.c setloc; p_us_rom.h us_maleloc/us_femloc",
               },
               "I_LOCUS_TRANSITION_APPLIED",
@@ -1986,9 +2026,16 @@ export function lowerControlScoreToKlattTrack(
       const smoothing: SegmentBoundarySmoothing = {
         backwardParams,
         backwardSteadyTime,
+        backwardSteadyTimesByKey,
         forwardParams,
         forwardSteadyTime,
+        forwardSteadyTimesByKey,
       };
+
+      const additionalTransitionSteadyTimes = [
+        ...Object.values(backwardSteadyTimesByKey ?? {}),
+        ...Object.values(forwardSteadyTimesByKey ?? {}),
+      ];
 
       const eventTimes = buildSegmentEventTimes(
         segmentStart,
@@ -1998,7 +2045,8 @@ export function lowerControlScoreToKlattTrack(
         controlWindows,
         loweringSpec.timeline.event_points,
         nextSegment == null && controlWindows.length > 0,
-        forwardSteadyTime
+        forwardSteadyTime,
+        additionalTransitionSteadyTimes,
       );
 
       for (const eventTime of eventTimes) {

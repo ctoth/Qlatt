@@ -65,3 +65,14 @@ The render artifact contains an `I_LOCUS_TRANSITION_APPLIED` diagnostic for the
 Therefore the active row for this target is the male
 `transitions.loci.TH."3".F3` entry. The previous edit to
 `transitions.loci_female.TH."3".F3` was an inactive-row substitution.
+
+## Follow-up Finding
+
+After the active row was proven, changing only
+`transitions.loci.TH."3".F3.durtran_ms` still would not change the event timing
+under the old lowering code because `resolveLocusBoundary()` collapsed
+per-formant `durtran_ms` values into one `spanSec = max(F1,F2,F3)`.
+
+For the `thrilled` `TH -> RR` boundary, F2 remained 55 ms, so F3 55 -> 45 ms
+was masked by the shared 55 ms span. The lowering fix is to keep per-formant
+transition times through event generation and smoothing application.

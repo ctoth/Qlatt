@@ -904,7 +904,7 @@ output:
           "3":
             F1: { locus_hz: 360, prcnt: 10, durtran_ms: 50 }
             F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
-            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 55 }
+            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 45 }
         TX:
           "1":
             F1: { locus_hz: 320, prcnt: 43, durtran_ms: 35 }

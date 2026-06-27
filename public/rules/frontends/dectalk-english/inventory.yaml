@@ -1382,7 +1382,7 @@ phoneme_targets:
     B2: 120
     B3: 180
     AV: 47
-    dur: 70
+    dur: 86  # DECtalk 4.63 -lt oracle trace for "dog." (final /g/ closure+release ~=96ms)
     minimumDuration: 30
     type: stop_closure
     velar: true
@@ -1554,9 +1554,9 @@ phoneme_targets:
     A9: 20
     A10: 13
     SW: 1
-    dur: 26
-    minimumDuration: 26
-    burstDuration: 26
+    dur: 38  # DECtalk 4.63 -lt oracle trace for "dog." (G_REL group ~=38.4ms)
+    minimumDuration: 38
+    burstDuration: 38
     type: stop_release
     velar: true
     voiced: true

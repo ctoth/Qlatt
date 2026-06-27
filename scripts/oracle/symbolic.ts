@@ -198,6 +198,33 @@ const QLATT_TO_DECTALK_TOKEN: Record<string, string> = {
   Q: "q",
 };
 
+const QLATT_SYLLABIC_PHONEMES = new Set([
+  "IY",
+  "IH",
+  "EY",
+  "EH",
+  "AE",
+  "AA",
+  "AY",
+  "AW",
+  "AH",
+  "AO",
+  "OW",
+  "OY",
+  "UH",
+  "UW",
+  "ER",
+  "AX",
+  "IX",
+  "IR",
+  "AR",
+  "OR",
+  "UR",
+  "EL",
+  "EM",
+  "EN",
+]);
+
 function normalizeComparisonToken(token: string): string {
   switch (token) {
     // DECtalk's phoneme log uses AX/IX-style reduced vowels where Qlatt's
@@ -211,6 +238,49 @@ function normalizeComparisonToken(token: string): string {
     default:
       return token;
   }
+}
+
+function isSameWord(left: QlattSegment, right: QlattSegment): boolean {
+  return (
+    left.word != null &&
+    right.word != null &&
+    left.word.length > 0 &&
+    left.word === right.word
+  );
+}
+
+function mapQlattComparisonSegment(
+  segment: QlattSegment,
+  nextSegment: QlattSegment | undefined,
+): string | null {
+  if (segment.phoneme === "RR") {
+    // DECtalk ph_aloph.c:636-648 changes prevocalic /R/ to the RR acoustic
+    // target, but the phoneme log remains an onset `r`; postvocalic AX+R
+    // fusion uses RR as a rhotic vowel, logged as `rr` and normalized to `er`.
+    return nextSegment != null &&
+      isSameWord(segment, nextSegment) &&
+      QLATT_SYLLABIC_PHONEMES.has(nextSegment.phoneme)
+      ? "r"
+      : "er";
+  }
+
+  return QLATT_TO_DECTALK_TOKEN[segment.phoneme] ?? null;
+}
+
+function mapQlattComparisonSegments(segments: QlattSegment[]): string[] {
+  const comparisonSegments = segments.filter(
+    (segment) => !isStructuralTransientPhoneme(segment.rawPhoneme),
+  );
+  return collapseQlattComparisonTokens(
+    comparisonSegments
+      .map((segment, index) =>
+        mapQlattComparisonSegment(segment, comparisonSegments[index + 1]),
+      )
+      .filter(
+        (token): token is string => typeof token === "string" && token.length > 0,
+      )
+      .map(normalizeComparisonToken),
+  );
 }
 
 function collapseQlattComparisonTokens(tokens: string[]): string[] {
@@ -483,15 +553,7 @@ export function extractQlattSymbolic(payload: unknown): {
     });
 
     const phonemeSequence = qlattSegments.map((segment) => segment.phoneme);
-    const comparisonPhonemes = qlattSegments
-      .filter((segment) => !isStructuralTransientPhoneme(segment.rawPhoneme))
-      .map((segment) => segment.phoneme);
-    const comparisonTokens = collapseQlattComparisonTokens(
-      comparisonPhonemes
-      .map((phoneme) => QLATT_TO_DECTALK_TOKEN[phoneme] ?? null)
-      .filter((token): token is string => typeof token === "string" && token.length > 0)
-      .map(normalizeComparisonToken),
-    );
+    const comparisonTokens = mapQlattComparisonSegments(qlattSegments);
     const labeledBurstRegions = qlattSegments
       .filter(
         (segment) =>
@@ -588,13 +650,7 @@ export function extractQlattSymbolic(payload: unknown): {
     }
   }
 
-  const comparisonTokens = collapseQlattComparisonTokens(
-    segments
-    .filter((segment) => !isStructuralTransientPhoneme(segment.rawPhoneme))
-    .map((segment) => QLATT_TO_DECTALK_TOKEN[segment.phoneme] ?? null)
-    .filter((token): token is string => typeof token === "string" && token.length > 0)
-    .map(normalizeComparisonToken),
-  );
+  const comparisonTokens = mapQlattComparisonSegments(segments);
 
   const labeledBurstRegions = segments
     .filter(

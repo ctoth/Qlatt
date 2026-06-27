@@ -331,6 +331,7 @@ phases:
       - dectalk_obstruent_parallel_amplitudes
       - dectalk_special_coartic_f3
       - dectalk_special_coartic_f2
+      - dectalk_silence_carries_formants
   - name: prosody
     rules:
       - dectalk_short_declarative_baseline_declination

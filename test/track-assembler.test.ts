@@ -329,6 +329,40 @@ describe("track-assembler", () => {
       expect(last.time).toBeCloseTo(0.145, 6);
     });
 
+    it("does not append a duplicate final reset when the score already ends in silence", () => {
+      const track = lowerTestScore(
+        makeScore([
+          makeSegment("seg_aa", "AA", "vowel", 100, { AV: 60, AH: 0, AF: 0, F1: 700, F2: 1200, F3: 2500 }),
+          makeSegment("seg_sil", "SIL", "silence", 50, {
+            AV: 0,
+            AH: 0,
+            AF: 0,
+            F1: 490,
+            F2: 800,
+            F3: 2320,
+            B1: 100,
+            B2: 70,
+            B3: 180,
+          }),
+        ]),
+        {
+          transitionMs: 0,
+          spec: {
+            ...TEST_LOWERING_SPEC,
+            timeline: {
+              ...TEST_LOWERING_SPEC.timeline,
+              initial_silence_ms: { value: 0, citations: ["test"] },
+              final_silence_ms: { value: 0, citations: ["test"] },
+            },
+          },
+        },
+      );
+
+      const last = track[track.length - 1];
+      expect(last.phoneme).toBe("SIL");
+      expect(last.params.F2).toBe(800);
+    });
+
     it("keeps locus durtran timing per formant", () => {
       const makeSpec = (f3DurtranMs: number): TrackLoweringSpec => ({
         ...TEST_LOWERING_SPEC,

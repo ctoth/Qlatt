@@ -237,3 +237,38 @@ rules:
       - "DECtalk 4.63 p_us_st1.c:341-369 (front-vowel F2 -150 near LX/W/LL)"
       - "DECtalk 4.63 p_us_st1.c:370-385 (UW F2 +200 adjacent alveolar)"
       - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
+
+  dectalk_silence_carries_formants:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme == 'SIL' && prev != null && prev.phoneme != 'SIL'"
+    apply:
+      - field: params.F1
+        op: set
+        value: "has(prev.?params.F1) ? prev.params.F1 : current.params.F1"
+        tag: silence_boundary
+      - field: params.F2
+        op: set
+        value: "has(prev.?params.F2) ? prev.params.F2 : current.params.F2"
+        tag: silence_boundary
+      - field: params.F3
+        op: set
+        value: "has(prev.?params.F3) ? prev.params.F3 : current.params.F3"
+        tag: silence_boundary
+      - field: params.B1
+        op: set
+        value: "has(prev.?params.B1) ? prev.params.B1 : current.params.B1"
+        tag: silence_boundary
+      - field: params.B2
+        op: set
+        value: "has(prev.?params.B2) ? prev.params.B2 : current.params.B2"
+        tag: silence_boundary
+      - field: params.B3
+        op: set
+        value: "has(prev.?params.B3) ? prev.params.B3 : current.params.B3"
+        tag: silence_boundary
+    citations:
+      - "DECtalk 4.63 oracle -lt trace: terminal GEN_SIL carries the preceding formant trajectory while AV/AP/A2-A6/AB fall silent"
+      - "DECtalk 4.63 VTM/vtmiont.c:681-683 (VTM consumes OUT_F1/OUT_F2/OUT_F3 directly from parambuff)"
+      - "DECtalk 4.63 p_us_st1.c:778-785 (GEN_SIL boundary smoothing reads prior parstochip for terminal parameter state)"

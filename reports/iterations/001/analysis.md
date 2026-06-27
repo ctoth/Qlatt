@@ -82,3 +82,47 @@ Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-per-formant-f3-45-50\trace-summary-a2decoded.json`.
 
 Next target: `F2`, because it is now the largest measured L1 discrepancy.
+
+## F2 terminal-silence formant carry
+
+The first F2 target phrase was `g2p-yellow`. L0 was already exact, but the
+trace showed the final silence resetting Qlatt F2 to the neutral `SIL` target
+while DECtalk kept the preceding formant state during terminal `GEN_SIL`.
+Representative mismatch before the fix: final-silence frame F2 oracle `818`
+vs Qlatt `1500`.
+
+The kept slice makes DECtalk terminal `SIL` carry F1-F3 and B1-B3 from the
+preceding phone, while amplitude/noise parameters still fall silent. The
+track assembler also preserves the final end marker when the score already
+ends in silence; the first 5-phrase attempt proved that dropping the marker
+truncated several phrases by about 0.57 s, so that attempt was rejected before
+the final implementation was kept.
+
+Verification:
+
+- `npx vitest run test/track-assembler.test.ts` -> 25 tests passed.
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-sil-inherit-1c` -> 0 failures,
+  0 warnings, token similarity 1.0.
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-sil-inherit-5b` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-sil-inherit-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-sil-inherit-50` -> 0 failures,
+  46 warnings, token similarity 1.0.
+- `npm run typecheck:core`
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 172.98701851693832
+- `F3`: meanAbs 105.39595784623262
+- `F1`: meanAbs 78.40274767471628
+- `B3`: meanAbs 61.421281679324174
+- `F0`: meanAbs 59.97648324799537
+- `B1`: meanAbs 38.27015956992918
+- `B2`: meanAbs 32.39760218448673
+- `A2`: meanAbs 2.5398924822937112
+
+Compared with the previous decoded scoreboard, the selected target improved:
+`F2` meanAbs `208.234138578377` -> `172.98701851693832`, with no increase in
+50-phrase command failures or convergence warnings. Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-sil-inherit-50\trace-summary.json`.

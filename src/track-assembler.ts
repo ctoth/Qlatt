@@ -2081,7 +2081,12 @@ export function lowerControlScoreToKlattTrack(
   // otherwise release/noise parameters are held through the trailing silence.
   const finalSilenceSec = Math.max(0, finalSilenceMs) / 1000.0;
   const finalTime = currentTime + finalSilenceSec;
-  const finalSilParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
+  const lastSegment = score.segments[score.segments.length - 1];
+  const scoreAlreadyEndsInSilence = finalSilenceSec === 0 && lastSegment?.phoneme === "SIL";
+  const finalSilParams =
+    scoreAlreadyEndsInSilence && segmentParams[segmentParams.length - 1]
+      ? { ...segmentParams[segmentParams.length - 1] }
+      : fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
   applyGlobalOverlays(finalSilParams, score.global_overlays);
   klattTrack.push({
     time: currentTime,

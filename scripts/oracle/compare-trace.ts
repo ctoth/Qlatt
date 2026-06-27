@@ -17,6 +17,12 @@ type TrackEvent = {
   params?: Record<string, unknown>;
 };
 
+type FrontendPhone = {
+  phoneme?: string;
+  durationMs?: number;
+  minimumDurationMs?: number;
+};
+
 type ParamSummary = {
   compared: number;
   meanAbs: number;
@@ -24,6 +30,26 @@ type ParamSummary = {
   maxFrame: number | null;
   oracleAtMax: number | null;
   qlattAtMax: number | null;
+};
+
+type OraclePhoneGroup = {
+  phoneIndex: number;
+  firstFrame: number;
+  lastFrame: number;
+  frameCount: number;
+  durationSec: number;
+  ph: number;
+  ph2: number;
+  du: number;
+};
+
+type TrackRun = {
+  phoneme: string;
+  firstEvent: number;
+  lastEvent: number;
+  startSec: number;
+  endSec: number;
+  durationSec: number;
 };
 
 const PARAM_MAP: Array<{
@@ -84,13 +110,24 @@ function finiteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function loadTrack(filePath: string): TrackEvent[] {
+function loadPayload(filePath: string): {
+  track: TrackEvent[];
+  frontendPhones: FrontendPhone[];
+} {
   const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, unknown>;
   const track = parsed.track;
   if (!Array.isArray(track)) {
     throw new Error(`Qlatt payload has no track array: ${filePath}`);
   }
-  return track.filter((event): event is TrackEvent => event != null && typeof event === "object");
+  const frontendPhones = Array.isArray(parsed.frontendPhones)
+    ? parsed.frontendPhones.filter(
+        (phone): phone is FrontendPhone => phone != null && typeof phone === "object",
+      )
+    : [];
+  return {
+    track: track.filter((event): event is TrackEvent => event != null && typeof event === "object"),
+    frontendPhones,
+  };
 }
 
 function eventAt(track: TrackEvent[], timeSec: number): TrackEvent | null {
@@ -157,10 +194,70 @@ function summarizeParam(
   };
 }
 
+function groupOraclePhones(
+  oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
+): OraclePhoneGroup[] {
+  const groups: OraclePhoneGroup[] = [];
+  for (const frame of oracleFrames) {
+    const last = groups[groups.length - 1];
+    if (last && last.phoneIndex === frame.phoneIndex) {
+      last.lastFrame = frame.frame;
+      last.frameCount += 1;
+      last.durationSec = last.frameCount * FRAME_PERIOD_SEC;
+      continue;
+    }
+    groups.push({
+      phoneIndex: frame.phoneIndex,
+      firstFrame: frame.frame,
+      lastFrame: frame.frame,
+      frameCount: 1,
+      durationSec: FRAME_PERIOD_SEC,
+      ph: frame.out.PH,
+      ph2: frame.out.PH2,
+      du: frame.out.DU,
+    });
+  }
+  return groups;
+}
+
+function groupTrackRuns(track: TrackEvent[]): TrackRun[] {
+  const runs: TrackRun[] = [];
+  for (let index = 0; index < track.length; index += 1) {
+    const event = track[index]!;
+    const phoneme = event.phoneme ?? "";
+    if (!phoneme) continue;
+    const eventTime = finiteNumber(event.time);
+    if (eventTime == null) continue;
+    const last = runs[runs.length - 1];
+    if (last && last.phoneme === phoneme) {
+      last.lastEvent = index;
+      continue;
+    }
+    runs.push({
+      phoneme,
+      firstEvent: index,
+      lastEvent: index,
+      startSec: eventTime,
+      endSec: eventTime,
+      durationSec: 0,
+    });
+  }
+
+  for (let index = 0; index < runs.length; index += 1) {
+    const run = runs[index]!;
+    const next = runs[index + 1];
+    const fallbackEnd = finiteNumber(track[track.length - 1]?.time) ?? run.startSec;
+    run.endSec = next?.startSec ?? fallbackEnd;
+    run.durationSec = Math.max(0, run.endSec - run.startSec);
+  }
+  return runs;
+}
+
 function main(): number {
   const args = parseArgs(process.argv.slice(2));
   const oracle = parseDectalkTraceFile(args.oracleTrace);
-  const track = loadTrack(args.qlattPayload);
+  const payload = loadPayload(args.qlattPayload);
+  const track = payload.track;
   const lastTrackTime = finiteNumber(track[track.length - 1]?.time) ?? 0;
 
   const params = Object.fromEntries(
@@ -189,6 +286,13 @@ function main(): number {
     oracleDurationSec: oracle.summary.durationSec,
     qlattDurationSec: lastTrackTime,
     durationDeltaSec: lastTrackTime - Number(oracle.summary.durationSec ?? 0),
+    oraclePhoneGroups: groupOraclePhones(oracle.frames),
+    qlattTrackRuns: groupTrackRuns(track),
+    qlattFrontendPhones: payload.frontendPhones.map((phone) => ({
+      phoneme: phone.phoneme ?? "",
+      durationMs: finiteNumber(phone.durationMs),
+      minimumDurationMs: finiteNumber(phone.minimumDurationMs),
+    })),
     params,
     ranked,
   };

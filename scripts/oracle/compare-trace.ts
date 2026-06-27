@@ -52,6 +52,13 @@ type TrackRun = {
   durationSec: number;
 };
 
+const US_PHONE = 1 << 8;
+const USP_W = US_PHONE + 24;
+const USP_R = US_PHONE + 26;
+const USP_LL = US_PHONE + 27;
+const USP_HX = US_PHONE + 28;
+const USP_CZ = US_PHONE + 58;
+
 const PARAM_MAP: Array<{
   label: string;
   oracle?: keyof DectalkTraceFrame["out"];
@@ -72,7 +79,7 @@ const PARAM_MAP: Array<{
   { label: "B3", oracle: "B3", qlatt: "B3" },
   { label: "AV", oracle: "AV", qlatt: "AV" },
   { label: "AP", oracle: "AP", qlatt: "AH" },
-  { label: "A2", oracle: "A2", qlatt: "A2" },
+  { label: "A2", oracleValue: dectalkA2Db, qlatt: "A2" },
   { label: "A3", oracle: "A3", qlatt: "A3" },
   { label: "A4", oracle: "A4", qlatt: "A4" },
   { label: "A5", oracle: "A5", qlatt: "A5" },
@@ -114,6 +121,63 @@ function parseArgs(argv: string[]): Args {
 
 function finiteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function dectalkA2Db(frame: DectalkTraceFrame): number | null {
+  const raw = finiteNumber(frame.out.A2);
+  if (raw == null) return null;
+
+  const phone = finiteNumber(frame.out.PH);
+  if (raw === 4000) {
+    if (phone === USP_R || phone === USP_LL) return 45;
+    if (phone === USP_W) return 50;
+    return 0;
+  }
+
+  // DECtalk 4.63 VTM/vtmiont.c HLSYN decodes OUT_A2 sentinels into NA2F dB.
+  let decoded: number | null;
+  switch (raw) {
+    case 1000:
+      decoded = 30;
+      break;
+    case 1100:
+      decoded = 40;
+      break;
+    case 1200:
+    case 1300:
+      decoded = 0;
+      break;
+    case 2000: {
+      const f2 = finiteNumber(frame.out.F2);
+      decoded = f2 == null ? null : f2 > 1700 ? 0 : 3;
+      break;
+    }
+    case 3000: {
+      const f3 = finiteNumber(frame.out.F3);
+      if (f3 == null) {
+        decoded = null;
+      } else if (f3 > 2600) {
+        decoded = 0;
+      } else if (f3 !== 2400) {
+        decoded = 10;
+      } else {
+        decoded = null;
+      }
+      break;
+    }
+    case 3100:
+    case 3200:
+    case 3300:
+      decoded = 10;
+      break;
+    default:
+      decoded = raw < 1000 ? raw : null;
+      break;
+  }
+
+  if (phone === USP_HX) return 30;
+  if (phone === USP_CZ) return 50;
+  return decoded;
 }
 
 function loadPayload(filePath: string): {

@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-06-27T16:06:27.7270255-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": "rejected",
+  "reason": "Explicit syllable stress annotation improved the target phrase F2 on the one-phrase gate but regressed the weighted first-five F2 aggregate and duration error.",
+  "baseline": {
+    "commit": "9c4479f7",
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "firstFiveWeightedF2MeanAbs": 96.22480940034815,
+    "firstFiveWeightedAbsDurationDeltaSec": 0.0027894088669951317,
+    "targetPhrase": "glide-young-yard",
+    "targetPhraseF2MeanAbs": 265.26930388909335
+  },
+  "candidate": {
+    "onePhraseRunRoot": "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-annotation-guard-1",
+    "fivePhraseRunRoot": "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-annotation-guard-5",
+    "fivePhraseSummary": "J:\\Qlatt-oracle-output\\dectalk-syllable-stress-annotation-guard-5\\trace-summary.json",
+    "targetPhraseF2MeanAbs": 219.3462750582751,
+    "targetPhraseTraceDurationDeltaSec": 0.13319999999999954,
+    "firstFiveWeightedF2MeanAbs": 96.89979799460761,
+    "firstFiveWeightedAbsDurationDeltaSec": 0.028250738916256183
+  }
+}

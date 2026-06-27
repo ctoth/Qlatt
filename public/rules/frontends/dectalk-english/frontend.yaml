@@ -576,9 +576,9 @@ output:
     id: dectalk-english-track-lowering
     timeline:
       initial_silence_ms:
-        value: 26
+        value: 19.2
         citations:
-          - "DECtalk 4.63 p_us_tim.c: clause-initial GEN_SIL before voiced obstruent uses 4 control frames"
+          - "DECtalk 4.63 -lt oracle trace: clause-initial GEN_SIL before voiced obstruent spans 3 synthesis frames at 6.4ms"
       final_silence_ms:
         value: 0
         citations:

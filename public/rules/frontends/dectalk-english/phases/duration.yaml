@@ -339,6 +339,7 @@ rules:
         (has(n.voiceless) ? n.voiceless == true : false)
       next_is_fricative: "n == null ? false : n.type == 'fricative'"
       next_is_plosive: "n == null ? false : n.type == 'stop_closure'"
+      next_is_affricate: "n == null ? false : n.type == 'affricate'"
     constraint: next_voiceless
     apply:
       - field: duration
@@ -346,12 +347,13 @@ rules:
         dispatch:
           - when: next_is_fricative
             value: params.policy.duration.pre_voiceless_fricative_shortening
-          - when: next_is_plosive
+          - when: next_is_plosive || next_is_affricate
             value: params.policy.duration.pre_voiceless_plosive_shortening
           - default: 1.0
         tag: pre_voiceless
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 9 (postvocalic voiceless shortening)"
+      - "DECtalk 4.63 -lt oracle trace for 'church.' (rhotic vowel shortens before voiceless affricate /ch/)"
 
   # ---------------------------------------------------------------------------
   # Rule 9b: Postvocalic voiced obstruent lengthening / pre-nasal shortening

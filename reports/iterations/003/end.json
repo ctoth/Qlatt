@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-06-27T14:41:52.8433791-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-soncon-vowel-f2-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-soncon-vowel-f2-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 146.40834089282495,
+    "previousTargetMeanAbs": 146.8509545970659,
+    "warnings": 46,
+    "commandFailures": 0,
+    "tokenSimilarity": 1.0
+  }
+}

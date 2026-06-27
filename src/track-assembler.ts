@@ -486,12 +486,12 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.forwardParams)) {
       const steadyTime = smoothing.forwardSteadyTimesByKey?.[key] ?? smoothing.forwardSteadyTime;
       if (steadyTime != null && eventTime <= steadyTime + epsilon) {
-        // Iteration 001 is converging F2 only: apply DECtalk setloc's linear
-        // durtran ramp to F2 locus windows while leaving other families stable.
-        const useF2LocusRamp = key === "F2" && smoothing.forwardSteadyTimesByKey?.[key] != null;
+        // F2 convergence slices apply DECtalk's linear durtran ramp for keyed
+        // F2 transition windows while leaving other families stable.
+        const useF2TransitionRamp = key === "F2" && smoothing.forwardSteadyTimesByKey?.[key] != null;
         const steadyValue = baseParams[key];
         const duration = steadyTime - segmentStart;
-        if (useF2LocusRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+        if (useF2TransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
           const fraction = Math.max(0, Math.min(1, (eventTime - segmentStart) / duration));
           resolved[key] = value + (steadyValue - value) * fraction;
         } else {
@@ -505,12 +505,12 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.backwardParams)) {
       const steadyTime = smoothing.backwardSteadyTimesByKey?.[key] ?? smoothing.backwardSteadyTime;
       if (steadyTime != null && eventTime >= steadyTime - epsilon) {
-        // Iteration 001 is converging F2 only: apply DECtalk setloc's linear
-        // durtran ramp to F2 locus windows while leaving other families stable.
-        const useF2LocusRamp = key === "F2" && smoothing.backwardSteadyTimesByKey?.[key] != null;
+        // F2 convergence slices apply DECtalk's linear durtran ramp for keyed
+        // F2 transition windows while leaving other families stable.
+        const useF2TransitionRamp = key === "F2" && smoothing.backwardSteadyTimesByKey?.[key] != null;
         const steadyValue = baseParams[key];
         const duration = segmentEnd - steadyTime;
-        if (useF2LocusRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+        if (useF2TransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
           const fraction = Math.max(0, Math.min(1, (eventTime - steadyTime) / duration));
           resolved[key] = steadyValue + (value - steadyValue) * fraction;
         } else {
@@ -1936,6 +1936,8 @@ export function lowerControlScoreToKlattTrack(
       let forwardParams: KlattParams | null = null;
       let forwardSteadyTime: number | null = null;
       let forwardSteadyTimesByKey: Record<string, number> | null = null;
+      const prevSegment = score.segments[i - 1];
+      const prevParams = segmentParams[i - 1];
       const forwardObstruent = isSmoothedSonorant ? adjacentLocusObstruent(i, -1) : null;
       if (forwardObstruent) {
         const locus = resolveLocusBoundary(
@@ -2023,7 +2025,6 @@ export function lowerControlScoreToKlattTrack(
           }
         }
         if (forwardParams == null && i > 0) {
-          const prevParams = segmentParams[i - 1];
           if (prevParams) {
             let candidate = Math.min(targetTime - 0.02, segmentStart + phTransitionSec);
             if (backwardSteadyTime != null) {
@@ -2041,6 +2042,52 @@ export function lowerControlScoreToKlattTrack(
               forwardSteadyTime = candidate;
             }
           }
+        }
+      }
+
+      if (
+        forwardParams != null &&
+        segment.type === "vowel" &&
+        (prevSegment?.type === "nasal" || prevSegment?.type === "liquid" || prevSegment?.type === "glide") &&
+        prevParams
+      ) {
+        const currentF2 = finalParams.F2;
+        const previousF2 = prevParams.F2;
+        const f2SpanSec = Math.min(0.045, phDuration);
+        const f2SteadyTime = Math.min(targetTime - 0.02, segmentStart + f2SpanSec);
+        if (
+          Number.isFinite(currentF2) &&
+          Number.isFinite(previousF2) &&
+          f2SteadyTime > segmentStart &&
+          f2SteadyTime < targetTime
+        ) {
+          const defaultBoundary = (previousF2 + currentF2) / 2;
+          forwardParams = {
+            ...forwardParams,
+            // Iteration 003 is converging F2: DECtalk's US forward smoothing
+            // sonorant-consonant-to-vowel rule uses 25/75, then NF45MS.
+            F2: (defaultBoundary + previousF2) / 2,
+          };
+          forwardSteadyTimesByKey = {
+            ...(forwardSteadyTimesByKey ?? {}),
+            F2: f2SteadyTime,
+          };
+          context.diagnostics?.info(
+            "Applied sonorant-consonant to vowel F2 transition",
+            {
+              segmentIndex: i,
+              segmentId: segment.id,
+              word: segment.word ?? null,
+              previousPhoneme: prevSegment.phoneme,
+              currentPhoneme: segment.phoneme,
+              previousF2,
+              currentF2,
+              boundaryF2: forwardParams.F2,
+              steadyTimeMs: f2SteadyTime * 1000,
+              citation: "DECtalk 4.63 p_us_st1.c:442-455 (FORM_FREQ soncon-vowel forward smoothing uses 25/75 with NF45MS)",
+            },
+            "I_SONCON_VOWEL_F2_TRANSITION_APPLIED",
+          );
         }
       }
 

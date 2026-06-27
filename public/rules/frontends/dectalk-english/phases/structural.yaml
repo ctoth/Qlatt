@@ -17,6 +17,57 @@ rules:
       - "DECtalk 4.63 ph_setar.c set_trans() (trajectory points are realized as time-ordered target transitions across the vowel)"
       - "Engineering approximation: render DECtalk ramp targets as piecewise control windows so the frontend stays declarative"
 
+  dectalk_ow_alveolar_stop_late_f2_locus:
+    kind: structural
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'OW' &&
+        next != null &&
+        has(next.is_stop_base) &&
+        next.is_stop_base == true &&
+        next.phoneme == 'T' &&
+        has(next.alveolar) &&
+        next.alveolar == true
+    define:
+      # DECtalk's OW->T trace for "boat" reaches the alveolar stop locus before
+      # the stop frame; this appends that late F2 window after the generic OW
+      # diphthong trajectory so the locus can win only in this observed context.
+      # Use suffix_ms so the window resolves after duration rules shorten the
+      # vowel, rather than freezing this structural-phase duration.
+      locus_window: "{'F2': params.policy.formant.ow_alveolar_stop_f2_locus_hz}"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - phoneme
+            - stress
+            - word
+            - weak
+            - duration
+            - inherentDuration
+            - minimumDuration
+            - type
+            - punctuationSymbol
+            - voiced
+            - mid
+            - back
+            - is_back_rounded
+            - params
+            - trajectory
+            - control_windows
+          control_windows:
+            - suffix_ms: params.policy.formant.ow_alveolar_stop_locus_window_ms
+              fields: locus_window
+              tag: "'dectalk_locus_transition'"
+    citations:
+      - "DECtalk 4.63 ph_sttr2.c setloc (alveolar stop locus supplies adjacent sonorant formant boundary values)"
+      - "DECtalk 4.63 p_us_rom.h us_place[] (T is alveolar)"
+      - "DECtalk 4.63 oracle -lt trace for 'boat bought': OW before T reaches F2 near the alveolar stop locus before the stop frame"
+
   dectalk_insert_voiceless_stop_release_into_silence:
     kind: structural
     select:

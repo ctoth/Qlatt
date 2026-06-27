@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-06-27T17:23:40.2398456-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "baseline": {
+    "run": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\dectalk-us-v1",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\trace-summary.json",
+    "f2MeanAbs": 129.2832193319339,
+    "targetPhrase": "vowels-boat-bought",
+    "targetPhraseF2MeanAbs": 243.19679371040723
+  }
+}

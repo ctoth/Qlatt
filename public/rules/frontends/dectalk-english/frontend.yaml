@@ -494,6 +494,19 @@ parameters:
       # YU 2nd-half +400) are DEFERRED: diphpos (diphthong-half index) is not
       # exposed to scalar rules in this engine (diphthongs are trajectory
       # waypoints). The diphpos-independent cases are implemented here.
+      # DECtalk oracle trace for "boat" shows OW before alveolar T reaches the
+      # stop locus before the stop frame; implemented as a narrow trajectory
+      # override window in structural.yaml.
+      ow_alveolar_stop_locus_window_ms:
+        value: 45
+        citations:
+          - "DECtalk 4.63 ph_sttr2.c setloc (obstruent locus transition span)"
+          - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T late F2 locus window)"
+      ow_alveolar_stop_f2_locus_hz:
+        value: 1650
+        citations:
+          - "DECtalk 4.63 p_us_rom.h us_maleloc/us_femloc (alveolar stop F2 locus region)"
+          - "DECtalk 4.63 oracle -lt trace for 'boat bought' (OW->T F2 tail reaches the alveolar locus)"
       special_coartic:
         # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
         alveolar:

@@ -119,6 +119,23 @@ const DECTALK_US_TOKENS = new Set([
   ">",
 ]);
 
+const DECTALK_RHOTIC_LOG_TOKENS: Record<string, string> = {
+  // DECtalk 4.63 ph_aloph.c:823-872 fuses vowel + /R/ internally.
+  // The -lp log prints those fused allophones with the source vowel spelling.
+  iyr: "ir",
+  ihr: "ir",
+  eyr: "er",
+  ehr: "er",
+  aer: "er",
+  aar: "ar",
+  ahr: "ar",
+  owr: "or",
+  aor: "or",
+  uwr: "ur",
+  uhr: "ur",
+  axr: "rr",
+};
+
 const NON_COMPARISON_TOKENS = new Set([
   "_",
   "~",
@@ -457,9 +474,16 @@ export function parseDectalkUsPhonemeLog(rawText: string): OracleSymbolicPayload
       continue;
     }
 
-    const tri = normalized.slice(i, i + 2);
-    if (tri === "/\\") {
-      tokens.push(tri);
+    const rhoticLogToken = DECTALK_RHOTIC_LOG_TOKENS[normalized.slice(i, i + 3)];
+    if (rhoticLogToken != null) {
+      tokens.push(rhoticLogToken);
+      i += 3;
+      continue;
+    }
+
+    const slashPair = normalized.slice(i, i + 2);
+    if (slashPair === "/\\") {
+      tokens.push(slashPair);
       i += 2;
       continue;
     }

@@ -79,3 +79,27 @@ rules:
         tag: fallback_primary_stress
     citations:
       - "DECtalk 4.63 ph_sort2.c find_syll_to_stress (no primary stress: stress first vowel of last word)"
+
+  dectalk_onset_y_stress:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'Y'
+        && has(current.word) && current.word != ''
+        && has(current.syllable_role) && current.syllable_role == 'onset'
+        && has(current.syllable_index)
+    define:
+      stressed_nucleus: >-
+        find_within_word(current,
+          "current.type == 'vowel' && has(current.stress) && current.stress != 0 && has(current.syllable_index) && current.syllable_index == source.syllable_index",
+          "both")
+    constraint: "stressed_nucleus != null"
+    apply:
+      - field: stress
+        op: set
+        value: stressed_nucleus.stress
+        tag: consonant_stress
+    citations:
+      - "DECtalk 4.63 p_us_sr1.c:73-162 get_stress_of_conson (stress legal consonant cluster before stressed vowel)"
+      - "DECtalk 4.63 p_us_sr1.c:179-228 us_phcluster (legal pre-vocalic onset clusters)"

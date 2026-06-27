@@ -126,3 +126,49 @@ Compared with the previous decoded scoreboard, the selected target improved:
 `F2` meanAbs `208.234138578377` -> `172.98701851693832`, with no increase in
 50-phrase command failures or convergence warnings. Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-sil-inherit-50\trace-summary.json`.
+
+## F2 stressed R-to-RR blocker
+
+The next F2 target phrase was `liquid-red-lorry` ("Red lorries roll along.").
+L0 was exact, but the trace showed Qlatt converting word-initial stressed `R`
+to `RR` before `EH` and `OW`, while DECtalk kept those phones as US_R. The
+DECtalk phoneme log exposes the source adjacency as `r ' eh` and `r ' ow`;
+`ph_aloph.c` A5 checks only the immediate next input phone, so the intervening
+stress marker prevents the FSYLL test from firing. Qlatt stores stress on the
+vowel token, so the YAML rule now treats a stressed next vowel as the same
+blocker.
+
+Representative evidence before the fix:
+
+- `liquid-red-lorry` F2 meanAbs: `339.4046` in
+  `J:\Qlatt-oracle-output\dectalk-sil-inherit-50\trace-summary.json`.
+- Qlatt segments began `RR EH ... RR OW ...`, extending the utterance by
+  `0.2564` s against the DECtalk trace.
+
+Verification:
+
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-r-stress-block-1` -> 0 failures,
+  1 warning, token similarity 1.0; `liquid-red-lorry` F2 meanAbs
+  `146.41258278145696`, duration delta `0.1034` s.
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-r-stress-block-5` -> 0 failures,
+  5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-r-stress-block-10` -> 0 failures,
+  10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-r-stress-block-50` -> 0 failures,
+  46 warnings, token similarity 1.0.
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 169.20365816195923
+- `F3`: meanAbs 103.0629260175783
+- `F1`: meanAbs 78.04102739141567
+- `F0`: meanAbs 60.872714825719726
+- `B3`: meanAbs 59.51873026708763
+- `B1`: meanAbs 37.80928406860654
+- `B2`: meanAbs 31.405708678214864
+- `A2`: meanAbs 2.564638621042751
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `172.98701851693832` -> `169.20365816195923`, with no increase in
+50-phrase command failures or convergence warnings. Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-r-stress-block-50\trace-summary.json`.

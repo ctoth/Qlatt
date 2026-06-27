@@ -649,8 +649,13 @@ rules:
   # ("story" OW R IY -> OR IY, not RR).  We honor this by running fusion FIRST: if
   # fusion fired, the /R/ token is gone and this rule has nothing to match.  This
   # rule therefore only catches a prevocalic /R/ whose preceding context is NOT a
-  # fusable vowel -- principally word-initial /R/ before a syllabic ("real",
-  # "right") -- exactly the residue A5 handles in the source.
+  # fusable vowel.
+  #
+  # DECtalk's source test looks only at the immediate next input phone.  In the
+  # trace stream, stressed nuclei keep their stress mark between /R/ and the
+  # vowel (for example `r ' eh` in "Red" and `r ' ow` in "roll"), so A5 does not
+  # see FSYLL and leaves the phone as US_R.  Qlatt stores that stress mark on the
+  # vowel token, so we must treat a stressed next vowel as the same blocker.
   #
   # Mechanism: an in-place rename is insufficient (the engine does not re-
   # materialize params on a bare phoneme rename), so a structural splice over the
@@ -670,7 +675,8 @@ rules:
       next_word_boundary: >-
         n == null ? true :
         (has(n.word) && has(current.word) ? n.word != current.word : true)
-    constraint: "next_syllabic && !next_word_boundary"
+      next_has_stress_marker: "n != null && has(n.stress) && n.stress > 0"
+    constraint: "next_syllabic && !next_word_boundary && !next_has_stress_marker"
     splice:
       type: replace_range
       range_left: current.sync_left
@@ -690,3 +696,4 @@ rules:
     citations:
       - "DECtalk 4.63 ph_aloph.c:636-648 (A5: /R/ before a syllabic, not across a word boundary, -> RR)"
       - "DECtalk 4.63 p_us_rom.h us_maltar/us_mindur (US_RR retroflex /r/ target)"
+      - "DECtalk 4.63 oracle -lt/-lp trace for 'Red lorries roll along.' (word-initial stressed R remains US_R: r ' eh, r ' ow)"

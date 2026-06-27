@@ -259,7 +259,7 @@ rules:
         tag: word_final_obstruent
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 6 (non-word-initial consonant shortening)"
-      - "DECtalk 4.63 -lt oracle trace for 'this.' (word-final voiceless fricative /s/ uses NF40MS-class lengthening)"
+      - "DECtalk 4.63 -lt oracle trace for 'this.' (word-final voiceless fricative /s/ needs trace-derived extra lengthening)"
 
   # ---------------------------------------------------------------------------
   # Rule 7: Unstressed segment shortening

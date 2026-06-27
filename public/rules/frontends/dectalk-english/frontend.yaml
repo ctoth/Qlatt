@@ -250,7 +250,7 @@ parameters:
       polysyllabic_shortening: 0.80
       non_initial_consonant_shortening: 0.85
       word_final_obstruent_lengthening_ms: 19
-      word_final_voiceless_fricative_lengthening_ms: 38
+      word_final_voiceless_fricative_lengthening_ms: 46
       unstressed_syllabic_shortening: 0.70
       unstressed_consonant_shortening: 0.70
       unstressed_glide_shortening: 0.50

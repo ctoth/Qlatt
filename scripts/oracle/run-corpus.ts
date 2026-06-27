@@ -16,6 +16,7 @@ type ParsedArgs = {
   outRoot: string;
   continueOnError: boolean;
   limit?: number;
+  phraseIds?: string[];
 };
 
 function parseArgv(argv: string[]): ParsedArgs {
@@ -34,7 +35,7 @@ function parseArgv(argv: string[]): ParsedArgs {
 
   if (flags.has("help")) {
     throw new Error(
-      "Usage: run-corpus [--corpus path] [--out-root dir] [--limit n] [--continue-on-error 1]",
+      "Usage: run-corpus [--corpus path] [--out-root dir] [--limit n] [--phrase-id id[,id...]] [--continue-on-error 1]",
     );
   }
 
@@ -45,6 +46,18 @@ function parseArgv(argv: string[]): ParsedArgs {
       : Number.parseInt(limitText, 10);
   if (limitText != null && (!Number.isFinite(limit) || limit <= 0)) {
     throw new Error("--limit must be a positive integer");
+  }
+
+  const phraseIdsText = flags.get("phrase-id");
+  const phraseIds =
+    phraseIdsText == null || phraseIdsText === ""
+      ? undefined
+      : phraseIdsText
+          .split(",")
+          .map((value) => value.trim())
+          .filter((value) => value.length > 0);
+  if (phraseIdsText != null && (!phraseIds || phraseIds.length === 0)) {
+    throw new Error("--phrase-id must name at least one phrase id");
   }
 
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -68,6 +81,7 @@ function parseArgv(argv: string[]): ParsedArgs {
       flags.get("continue-on-error") === "1" ||
       flags.get("continue-on-error") === "true",
     ...(limit != null ? { limit } : {}),
+    ...(phraseIds != null ? { phraseIds } : {}),
   };
 }
 
@@ -94,6 +108,24 @@ function mergeDefaults(
     ...(defaults ?? {}),
     ...entry,
   };
+}
+
+function selectEntries(
+  entries: OracleCorpusEntry[],
+  phraseIds: string[] | undefined,
+  limit: number | undefined,
+): OracleCorpusEntry[] {
+  const selected =
+    phraseIds == null
+      ? entries
+      : phraseIds.map((phraseId) => {
+          const entry = entries.find((candidate) => candidate.id === phraseId);
+          if (!entry) {
+            throw new Error(`Unknown --phrase-id '${phraseId}'`);
+          }
+          return entry;
+        });
+  return limit != null ? selected.slice(0, limit) : selected;
 }
 
 function summarizeReports(reports: AudioComparisonReport[]): Record<string, unknown> {
@@ -199,8 +231,11 @@ async function main(): Promise<number> {
     const corpus = loadCorpus(args.corpusPath);
     const runRoot = path.join(args.outRoot, corpus.corpusId);
     fs.mkdirSync(runRoot, { recursive: true });
-    const selectedEntries =
-      args.limit != null ? corpus.entries.slice(0, args.limit) : corpus.entries;
+    const selectedEntries = selectEntries(
+      corpus.entries,
+      args.phraseIds,
+      args.limit,
+    );
 
     const reports: AudioComparisonReport[] = [];
     for (const baseEntry of selectedEntries) {
@@ -266,6 +301,7 @@ async function main(): Promise<number> {
       corpusId: corpus.corpusId,
       corpusPath: args.corpusPath,
       ...(args.limit != null ? { limit: args.limit } : {}),
+      ...(args.phraseIds != null ? { phraseIds: args.phraseIds } : {}),
       generatedAt: new Date().toISOString(),
       summary: summarizeReports(reports),
       reports: reports.map((report) => ({

@@ -509,7 +509,7 @@ phoneme_targets:
     B2: 80
     B3: 180
     AV: 62
-    dur: 160
+    dur: 147  # DECtalk 4.63 -lt oracle trace for "the." (AX group ~=204.8ms after clause-final and short-phrase rules)
     minimumDuration: 60
     type: vowel
     voiced: true

@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-06-27T14:12:02.0238610-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "baseline": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-f2-locus-ramp-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-f2-locus-ramp-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 148.67747563128384
+  }
+}

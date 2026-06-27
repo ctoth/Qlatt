@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-06-27T14:22:00.9833165-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-stop-closure-sil-smooth-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-stop-closure-sil-smooth-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 146.8509545970659,
+    "previousTargetMeanAbs": 148.67747563128384,
+    "warnings": 46,
+    "commandFailures": 0,
+    "tokenSimilarity": 1.0
+  }
+}

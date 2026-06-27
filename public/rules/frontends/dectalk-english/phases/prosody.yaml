@@ -146,7 +146,9 @@ rules:
       is_hat_begins: >-
         nearest_back == null || nearest_back.phoneme == "SIL"
       rise_hz: >-
-        params.policy.f0.hat_rise_hz
+        word_count() < params.policy.f0.short_phrase_hat_word_limit
+        ? params.policy.f0.hat_rise_hz / params.policy.f0.short_phrase_hat_divisor
+        : params.policy.f0.hat_rise_hz
     constraint: is_hat_begins
     insert:
       layer: hat
@@ -160,6 +162,7 @@ rules:
       tag: f0_hat_rise
     citations:
       - "DECtalk 4.63 ph_inton1.c:713-715 (FHAT_BEGINS hat rise; GLIDE form length 30)"
+      - "DECtalk 4.63 ph_inton1.c (number_words < 3 quarters all hat gestures)"
       - "Klatt 1982 (hat rise at first accent in phrase)"
 
   # --------------------------------------------------------------------------
@@ -216,6 +219,10 @@ rules:
         : terminal == "," ? params.policy.f0.comma_fall_hz
         : (terminal == ";" || terminal == ":") ? params.policy.f0.non_final_fall_hz
         : params.policy.f0.final_fall_hz
+      hat_size_hz: >-
+        word_count() < params.policy.f0.short_phrase_hat_word_limit
+        ? params.policy.f0.hat_rise_hz / params.policy.f0.short_phrase_hat_divisor
+        : params.policy.f0.hat_rise_hz
       has_following_sonorant: >-
         next != null
         && (next.type == "vowel" || next.type == "liquid" || next.type == "nasal" || next.type == "glide")
@@ -232,7 +239,7 @@ rules:
       # Total fall: hat_rise (cancel the rise) + clause_fall (below baseline,
       # depth selected by terminal clause type per DECtalk f0fall).
       fall_hz: >-
-        params.policy.f0.hat_rise_hz + clause_fall_hz
+        hat_size_hz + clause_fall_hz
     constraint: is_hat_ends
     insert:
       layer: hat
@@ -243,6 +250,7 @@ rules:
     citations:
       - "DECtalk 4.63 ph_inton1.c Rule 3 (FHAT_ENDS timing and negative STEP)"
       - "DECtalk 4.63 ph_inton1.c:1125,:1137,:1142,:1210 (clause-type f0fall: final 180 / comma 120 / non-final 150 / question 80)"
+      - "DECtalk 4.63 ph_inton1.c (number_words < 3 quarters all hat gestures)"
       - "Klatt 1982 (hat fall: cancel rise + phrase-final lowering)"
 
   # --------------------------------------------------------------------------

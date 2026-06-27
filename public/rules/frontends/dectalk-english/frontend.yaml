@@ -340,6 +340,11 @@ parameters:
       # Hat rise (internal Hz*10 units).
       # Paul: HR=18, general path -> size_hat_rise = HR*10 = 180.
       hat_rise_hz: 180
+      # DECtalk quarters all hat gestures for short phrases
+      # (pDph_t->number_words < 3) before emitting the F0 command.
+      # Source: ph_inton1.c around the FHAT_BEGINS command path.
+      short_phrase_hat_word_limit: 3
+      short_phrase_hat_divisor: 4
       # Final fall below baseline at declarative sentence end (internal Hz*10).
       # Source: ph_inton1.c F0_FINAL_FALL = 180.
       final_fall_hz: 180

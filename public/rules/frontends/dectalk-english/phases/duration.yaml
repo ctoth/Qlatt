@@ -236,6 +236,9 @@ rules:
       is_word_final: "!same_word_as_next"
       is_obstruent_non_plosive: >-
         current.type in ['fricative', 'affricate']
+      is_word_final_voiceless_fricative: >-
+        is_word_final && current.type == 'fricative'
+        && (has(current.voiceless) ? current.voiceless == true : false)
     constraint: "!is_word_initial"
     apply:
       - field: duration
@@ -248,12 +251,15 @@ rules:
       - field: duration
         op: add
         dispatch:
+          - when: is_word_final_voiceless_fricative
+            value: params.policy.duration.word_final_voiceless_fricative_lengthening_ms
           - when: is_word_final && is_obstruent_non_plosive
             value: params.policy.duration.word_final_obstruent_lengthening_ms
           - default: 0
         tag: word_final_obstruent
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 6 (non-word-initial consonant shortening)"
+      - "DECtalk 4.63 -lt oracle trace for 'this.' (word-final voiceless fricative /s/ uses NF40MS-class lengthening)"
 
   # ---------------------------------------------------------------------------
   # Rule 7: Unstressed segment shortening

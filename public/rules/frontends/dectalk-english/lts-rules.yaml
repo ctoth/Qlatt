@@ -3133,6 +3133,11 @@ rules_by_letter:
     right: ''
     phonemes: [K]
   L:
+  # DECtalk 4.63 -lp oracle for "Red lorries roll along." emits ll'aor iyz.
+  - left: ' '
+    letters: LORRIES
+    right: ' '
+    phonemes: [L, OR1, IY0, Z]
   - left: ''
     letters: LATERAL
     right: ' '

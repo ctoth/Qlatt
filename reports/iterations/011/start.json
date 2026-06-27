@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-06-27T16:48:44.2620011-06:00",
+  "baselineRunRoot": "J:\\Qlatt-oracle-output\\dectalk-onset-y-stress-50\\dectalk-us-v1",
+  "baselineSummary": "J:\\Qlatt-oracle-output\\dectalk-onset-y-stress-50\\trace-summary.json",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "targetSurface": "L1 frame parameters / F2",
+  "targetFamily": "DECtalk OW diphthong trajectory",
+  "baselineMetrics": {
+    "f2MeanAbs": 132.74605745805388,
+    "worstPhrase": "vowels-boat-bought",
+    "worstPhraseF2MeanAbs": 250.9756398642534,
+    "worstPhraseF2MaxAbs": 810,
+    "worstPhraseF2MaxFrame": 0
+  }
+}

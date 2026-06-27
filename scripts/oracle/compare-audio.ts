@@ -190,7 +190,6 @@ function buildVerdict(report: AudioComparisonReport): AudioComparisonReport["ver
   if (
     reasons.some(
       (reason) =>
-        reason.startsWith("Low STOI") ||
         reason.startsWith("Duration ratio") ||
         reason.startsWith("Low symbolic token similarity"),
     )

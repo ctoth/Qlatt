@@ -31,6 +31,8 @@ const LAYER_IMPULSE: i32 = 2;
 // span (duration_frames) come from the declarative command data, no gesture
 // constants here.
 const LAYER_GLIDE: i32 = 3;
+const FILTER_ONE_POLE: i32 = 1;
+const FILTER_COEFFICIENT_2POLE: i32 = 2;
 
 // Decay mode tags for impulse layers.
 const DECAY_HALVING: i32 = 0;
@@ -89,6 +91,14 @@ fn one_pole_lowpass(input: f64, y: &mut f64, alpha: f64) -> f64 {
     let clamped_alpha = alpha.max(0.0).min(1.0);
     *y += clamped_alpha * (input - *y);
     *y
+}
+
+/// Two cascaded first-order low-pass poles using the same coefficient.
+/// Mirrors DECtalk 4.63 Ph_drwt02.c filter_commands(): f0a1/f0b then
+/// f0a2/f0b, with f0a1's fixed-point scaling collapsed into alpha here.
+fn coefficient_2pole_lowpass(input: f64, y1: &mut f64, y2: &mut f64, alpha: f64) -> f64 {
+    let first = one_pole_lowpass(input, y1, alpha);
+    one_pole_lowpass(first, y2, alpha)
 }
 
 /// Piecewise-linear interpolation over equidistant control points in [0,1].
@@ -154,7 +164,7 @@ struct RenderInputs<'a> {
     frame_period: f64,
     total_duration: f64,
     num_frames: usize,
-    uses_one_pole: bool,
+    filter_mode: i32,
     one_pole_alpha: f64,
     coeffs: IIRFilterCoefficients,
     has_scale: bool,
@@ -177,12 +187,17 @@ struct RenderInputs<'a> {
 fn render(inp: &RenderInputs, out: &mut [f64]) {
     let mut filter_state = IIRFilterState::default();
     let mut one_pole_y = 0.0f64;
+    let mut coefficient_2pole_y1 = 0.0f64;
+    let mut coefficient_2pole_y2 = 0.0f64;
 
     // Pre-fill filter state to avoid startup transient (init_total computed in TS
     // — it is exact: persistent cmd.value sums + profile point[0]).
     if inp.init_total != 0.0 {
-        if inp.uses_one_pole {
+        if inp.filter_mode == FILTER_ONE_POLE {
             one_pole_y = inp.init_total;
+        } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE {
+            coefficient_2pole_y1 = inp.init_total;
+            coefficient_2pole_y2 = inp.init_total;
         } else {
             filter_state.y1 = inp.init_total;
             filter_state.y2 = inp.init_total;
@@ -291,8 +306,15 @@ fn render(inp: &RenderInputs, out: &mut [f64]) {
         }
 
         // Apply IIR low-pass filter.
-        let filtered = if inp.uses_one_pole {
+        let filtered = if inp.filter_mode == FILTER_ONE_POLE {
             one_pole_lowpass(total, &mut one_pole_y, inp.one_pole_alpha)
+        } else if inp.filter_mode == FILTER_COEFFICIENT_2POLE {
+            coefficient_2pole_lowpass(
+                total,
+                &mut coefficient_2pole_y1,
+                &mut coefficient_2pole_y2,
+                inp.one_pole_alpha,
+            )
         } else {
             iir_filter_2pole(total, &mut filter_state, &inp.coeffs)
         };
@@ -453,7 +475,7 @@ pub unsafe extern "C" fn render_f0(
 
     let frame_period = s[0];
     let total_duration = s[1];
-    let uses_one_pole = s[2] != 0.0;
+    let filter_mode = s[2] as i32;
     let one_pole_alpha = s[3];
     let coeffs = IIRFilterCoefficients {
         b0: s[4],
@@ -539,7 +561,7 @@ pub unsafe extern "C" fn render_f0(
         frame_period,
         total_duration,
         num_frames,
-        uses_one_pole,
+        filter_mode,
         one_pole_alpha,
         coeffs,
         has_scale,
@@ -666,6 +688,24 @@ mod tests {
         assert!((prev - 100.0).abs() < 1e-3);
     }
 
+    #[test]
+    fn coefficient_2pole_is_two_cascaded_one_poles() {
+        // DECtalk Ph_drwt02.c filters F0 commands through two first-order poles
+        // with the same coefficient. With alpha=0.5 and a unit step:
+        // y1: 0.5, 0.75, 0.875
+        // y2: 0.25, 0.5, 0.6875
+        let mut y1 = 0.0;
+        let mut y2 = 0.0;
+        let values = [
+            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
+            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
+            coefficient_2pole_lowpass(1.0, &mut y1, &mut y2, 0.5),
+        ];
+        assert!((values[0] - 0.25).abs() < 1e-12);
+        assert!((values[1] - 0.5).abs() < 1e-12);
+        assert!((values[2] - 0.6875).abs() < 1e-12);
+    }
+
     // ---- Interpolation: monotonic between points -----------------------------
 
     #[test]
@@ -725,7 +765,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 5.0,
             num_frames: 1001,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0, // pass-through filter to observe raw decay
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -773,7 +813,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 5.0,
             num_frames: 1001,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -815,7 +855,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 0.05,
             num_frames: 11,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -867,7 +907,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 0.05,
             num_frames: 6,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -925,7 +965,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 0.005 * num_frames as f64,
             num_frames,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0, // pass-through to observe the raw ramp
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -987,7 +1027,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 0.05,
             num_frames: 5,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,
@@ -1038,7 +1078,7 @@ mod tests {
             frame_period: 0.005,
             total_duration: 0.005 * num_frames as f64,
             num_frames,
-            uses_one_pole: true,
+            filter_mode: FILTER_ONE_POLE,
             one_pole_alpha: 1.0,
             coeffs: IIRFilterCoefficients { b0: 0.0, b1: 0.0, b2: 0.0, a1: 0.0, a2: 0.0 },
             has_scale: false,

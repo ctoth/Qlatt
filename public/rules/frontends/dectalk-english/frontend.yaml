@@ -128,10 +128,9 @@ f0_model:
     - "Klatt 1982 (hat-pattern: baseline + hat + stress + segmental)"
     - "Rabiner 1968 (three-component: archetypal + stress + consonant)"
   filter:
-    type: lowpass_1pole
-    # Generic first-order low-pass smoothing. For DECtalk 4.63 this uses the
-    # speaker's native F0 smoothing coefficient directly, normalized to [0, 1].
-    # Citation: DECtalk 4.63 Ph_drwt02.c filter_commands()
+    type: lowpass_2pole_coefficient
+    # DECtalk 4.63 Ph_drwt02.c filter_commands() cascades two first-order poles
+    # using the speaker's native F0 smoothing coefficient, normalized to [0, 1].
     alpha_param: policy.speaker.f0_lp_filter_alpha.value
     default_alpha: 0.5126953125
   layers:

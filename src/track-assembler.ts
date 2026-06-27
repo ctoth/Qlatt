@@ -552,6 +552,10 @@ export type FilterConfig = {
   type: "lowpass_1pole";
   alpha_param?: string;
   default_alpha?: number;
+} | {
+  type: "lowpass_2pole_coefficient";
+  alpha_param?: string;
+  default_alpha?: number;
 };
 
 /** Speaker scaling configuration. */
@@ -812,10 +816,11 @@ export function renderLayeredF0(
   }
   const rawFilterType = String(filterConfig.type);
   const usesOnePoleFilter = filterConfig.type === "lowpass_1pole";
-  let onePoleAlpha = usesOnePoleFilter
+  const usesCoefficient2PoleFilter = filterConfig.type === "lowpass_2pole_coefficient";
+  let onePoleAlpha = (usesOnePoleFilter || usesCoefficient2PoleFilter)
     ? requireModelNumber(filterConfig.default_alpha, "f0_model.filter.default_alpha")
     : 0;
-  if (usesOnePoleFilter && filterConfig.alpha_param && speakerParams) {
+  if ((usesOnePoleFilter || usesCoefficient2PoleFilter) && filterConfig.alpha_param && speakerParams) {
     const paramPath = filterConfig.alpha_param.split(".");
     let val: unknown = speakerParams;
     for (const key of paramPath) {
@@ -827,7 +832,7 @@ export function renderLayeredF0(
   }
 
   let cutoffHz = 0;
-  if (!usesOnePoleFilter) {
+  if (!usesOnePoleFilter && !usesCoefficient2PoleFilter) {
     if (rawFilterType !== "lowpass_2pole") {
       throw new Error(`E_F0_MODEL_REQUIRED: unsupported f0_model.filter.type ${rawFilterType}`);
     }
@@ -845,7 +850,7 @@ export function renderLayeredF0(
     cutoffHz = Math.max(1, Math.min(cutoffHz, sampleRate * 0.45));
   }
 
-  const filterCoeffs = usesOnePoleFilter
+  const filterCoeffs = (usesOnePoleFilter || usesCoefficient2PoleFilter)
     ? null
     : computeButterworth2Coefficients(cutoffHz, sampleRate);
 
@@ -1041,7 +1046,7 @@ export function renderLayeredF0(
   const scalars = [
     framePeriod,
     totalDuration,
-    usesOnePoleFilter ? 1 : 0,
+    usesOnePoleFilter ? 1 : usesCoefficient2PoleFilter ? 2 : 0,
     onePoleAlpha,
     filterCoeffs?.b0 ?? 0,
     filterCoeffs?.b1 ?? 0,

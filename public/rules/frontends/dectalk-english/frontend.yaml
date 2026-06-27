@@ -244,7 +244,7 @@ parameters:
       clause_final_lengthening_ms: 38
       clause_final_voiced_obstruent_ms: 19
       non_final_shortening: 0.70
-      non_final_low_vowel_shortening: 0.60
+      non_final_low_vowel_shortening: 0.55
       stress_secondary: 0.85
       stress_unstressed: 0.70
       medial_syllable_shortening: 0.85

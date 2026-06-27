@@ -1306,6 +1306,23 @@ type LocusBoundary = {
   params: KlattParams;
   /** Window span (seconds) = max per-formant durtran among the locus keys. */
   spanSec: number;
+  /** Selected DECtalk vowel category (`sontyx`) used for this edge. */
+  category: number;
+  /** Per-formant row values and adjusted values that produced `params`. */
+  formants: {
+    key: string;
+    locusHz: number;
+    steadyHz: number;
+    sourcePrcnt: number;
+    adjustedPrcnt: number;
+    sourceDurtranMs: number;
+    adjustedDurtranMs: number;
+    boundaryHz: number;
+    adjustments: string[];
+  }[];
+  roundedSonorantConsonant: boolean;
+  obstruentPalatalOrDental: boolean;
+  f2BackAffiliated: boolean;
 };
 
 /**
@@ -1355,6 +1372,7 @@ function resolveLocusBoundary(
       : prcntAdjust?.f2_back?.[vowelPhoneme]?.backward) ?? false;
 
   const params: KlattParams = { ...steadyParams };
+  const formants: LocusBoundary["formants"] = [];
   let maxSpanSec = 0;
   let applied = false;
   for (const key of blendKeys) {
@@ -1363,31 +1381,55 @@ function resolveLocusBoundary(
     const curval = steadyParams[key];
     if (!Number.isFinite(curval)) continue;
 
+    const sourcePrcnt = entry.prcnt;
+    const sourceDurtranMs = entry.durtran_ms;
     let prcnt = entry.prcnt;
     let durtranMs = entry.durtran_ms;
+    const adjustments: string[] = [];
     // (a) Reduce F2/F3 transition extent for a rounded sonorant consonant next
     //     to a non-palatal/non-dental obstruent (ph_sttr2.c:294-298):
     //     prcnt = (prcnt >> 1) + 50. `np > &PF1` means F2 or F3 (not F1).
     if (roundedSoncon && (key === "F2" || key === "F3") && !obstPalatalOrDental) {
       prcnt = Math.floor(prcnt / 2) + 50;
+      adjustments.push("rounded_sonorant_non_palatal_or_dental_obstruent");
     }
     // (b) Reduce F2 transition extent into a back-cavity-affiliated vowel
     //     (ph_sttr2.c:303-307): prcnt += 25 - (prcnt >> 2); durtran = (durtran >> 1) + 2.
     if (key === "F2" && f2BackAffil) {
       prcnt += 25 - Math.floor(prcnt / 4);
       durtranMs = Math.floor(durtranMs / 2) + 2;
+      adjustments.push("f2_back_affiliation");
     }
 
     // bouval = locus + prcnt * (curval - locus) / 100  (ph_sttr2.c:328-329)
     const bouval = entry.locus_hz + (prcnt * (curval - entry.locus_hz)) / 100;
     if (!Number.isFinite(bouval)) continue;
     params[key] = bouval;
+    formants.push({
+      key,
+      locusHz: entry.locus_hz,
+      steadyHz: curval,
+      sourcePrcnt,
+      adjustedPrcnt: prcnt,
+      sourceDurtranMs,
+      adjustedDurtranMs: durtranMs,
+      boundaryHz: bouval,
+      adjustments,
+    });
     applied = true;
     const spanSec = Math.max(0, durtranMs) / 1000;
     if (spanSec > maxSpanSec) maxSpanSec = spanSec;
   }
   if (!applied || maxSpanSec <= 0) return null;
-  return { params, spanSec: maxSpanSec };
+  return {
+    params,
+    spanSec: maxSpanSec,
+    category: sontyx,
+    formants,
+    roundedSonorantConsonant: roundedSoncon,
+    obstruentPalatalOrDental: obstPalatalOrDental,
+    f2BackAffiliated: f2BackAffil,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1657,10 +1699,12 @@ export function lowerControlScoreToKlattTrack(
   // us_femloc) used as-is; the vowel curval is already formant-scaled, so there
   // is no double formant scaling. vowel_category is sex-independent (it derives
   // from begtyp/endtyp, not the locus table) and is shared by both tables.
-  const loci =
-    context.voiceSex === "female" && loweringSpec.transitions.loci_female != null
-      ? loweringSpec.transitions.loci_female
-      : loweringSpec.transitions.loci;
+  const usesFemaleLocusTable =
+    context.voiceSex === "female" && loweringSpec.transitions.loci_female != null;
+  const loci = usesFemaleLocusTable
+    ? loweringSpec.transitions.loci_female
+    : loweringSpec.transitions.loci;
+  const locusTableId = usesFemaleLocusTable ? "loci_female" : "loci";
   const vowelCategory = loweringSpec.transitions.vowel_category;
   // Optional DATA for the setloc prcnt adjustments (ph_sttr2.c:294-307). Undefined
   // tables make resolveLocusBoundary skip the adjustments (legacy core locus pull).
@@ -1809,6 +1853,31 @@ export function lowerControlScoreToKlattTrack(
           if (steadyTime > segmentStart && steadyTime < targetTime) {
             backwardParams = locus.params;
             backwardSteadyTime = steadyTime;
+            context.diagnostics?.info(
+              "Applied obstruent locus transition at sonorant end",
+              {
+                segmentIndex: i,
+                segmentId: segment.id,
+                word: segment.word ?? null,
+                edge: "backward",
+                sonorantPhoneme: segment.phoneme,
+                obstruentPhoneme,
+                voiceSex: context.voiceSex ?? null,
+                locusTable: locusTableId,
+                vowelCategory: locus.category,
+                segmentStartMs: segmentStart * 1000,
+                segmentEndMs: targetTime * 1000,
+                steadyTimeMs: steadyTime * 1000,
+                spanMs: locus.spanSec * 1000,
+                appliedSpanMs: span * 1000,
+                roundedSonorantConsonant: locus.roundedSonorantConsonant,
+                obstruentPalatalOrDental: locus.obstruentPalatalOrDental,
+                f2BackAffiliated: locus.f2BackAffiliated,
+                formants: locus.formants,
+                citation: "DECtalk 4.63 ph_sttr2.c setloc; p_us_rom.h us_maleloc/us_femloc",
+              },
+              "I_LOCUS_TRANSITION_APPLIED",
+            );
           }
         }
       }
@@ -1840,6 +1909,31 @@ export function lowerControlScoreToKlattTrack(
           if (candidate > segmentStart && candidate < targetTime) {
             forwardParams = locus.params;
             forwardSteadyTime = candidate;
+            context.diagnostics?.info(
+              "Applied obstruent locus transition at sonorant start",
+              {
+                segmentIndex: i,
+                segmentId: segment.id,
+                word: segment.word ?? null,
+                edge: "forward",
+                sonorantPhoneme: segment.phoneme,
+                obstruentPhoneme: forwardObstruent,
+                voiceSex: context.voiceSex ?? null,
+                locusTable: locusTableId,
+                vowelCategory: locus.category,
+                segmentStartMs: segmentStart * 1000,
+                segmentEndMs: targetTime * 1000,
+                steadyTimeMs: candidate * 1000,
+                spanMs: locus.spanSec * 1000,
+                appliedSpanMs: span * 1000,
+                roundedSonorantConsonant: locus.roundedSonorantConsonant,
+                obstruentPalatalOrDental: locus.obstruentPalatalOrDental,
+                f2BackAffiliated: locus.f2BackAffiliated,
+                formants: locus.formants,
+                citation: "DECtalk 4.63 ph_sttr2.c setloc; p_us_rom.h us_maleloc/us_femloc",
+              },
+              "I_LOCUS_TRANSITION_APPLIED",
+            );
           }
         }
       }

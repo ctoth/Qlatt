@@ -7,6 +7,7 @@ import {
 import { createKlattInterpreter } from "../../../src/klatt-interpreter.ts";
 import { createKlattRuntime } from "../../../src/klatt-runtime.ts";
 import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
+import { createDiagnostics } from "../../../src/diagnostics.ts";
 import { loadExperimentConfig } from "../../../src/experiments/load-experiment-config.ts";
 import { summarizeTrack } from "../../../src/rendering/track-summary.ts";
 import type {
@@ -49,6 +50,7 @@ export const nodeRuntimeBackend: RenderBackend = {
     return request.renderHost === "auto" || request.renderHost === "node";
   },
   async render(request: RenderRequest): Promise<RenderPayload> {
+    const diagnostics = createDiagnostics({ maxEntries: 1000 });
     const frontend = textToKlattTrackDetailed(
       request.phrase,
       request.baseF0,
@@ -56,6 +58,7 @@ export const nodeRuntimeBackend: RenderBackend = {
       {
         frontendId: request.frontendId,
         rate: request.rate,
+        diagnostics,
       },
     );
     const track = frontend.track;
@@ -133,6 +136,7 @@ export const nodeRuntimeBackend: RenderBackend = {
           metrics: { rms, peak },
           trackSummary: summarizeTrack(track),
           frontendPhones: frontend.frontendPhones,
+          diagnostics: diagnostics.getEntries(),
           ...(frontend.f0LayerCommands ? { f0LayerCommands: frontend.f0LayerCommands } : {}),
           samples,
         };

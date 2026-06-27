@@ -33,6 +33,7 @@ export interface RenderPayload {
   trackSummary: RenderTrackSummary;
   frontendPhones?: unknown;
   f0LayerCommands?: unknown;
+  diagnostics?: unknown;
   track?: unknown;
   samples: number[];
 }

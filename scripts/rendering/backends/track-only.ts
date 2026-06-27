@@ -1,4 +1,5 @@
 import { textToKlattTrackDetailed } from "../../../src/tts-frontend.ts";
+import { createDiagnostics } from "../../../src/diagnostics.ts";
 import { summarizeTrack } from "../../../src/rendering/track-summary.ts";
 import type {
   RenderBackend,
@@ -12,6 +13,7 @@ export const trackOnlyBackend: RenderBackend = {
     return !request.persistWav;
   },
   async render(request: RenderRequest): Promise<RenderPayload> {
+    const diagnostics = createDiagnostics({ maxEntries: 1000 });
     const frontend = textToKlattTrackDetailed(
       request.phrase,
       request.baseF0,
@@ -19,6 +21,7 @@ export const trackOnlyBackend: RenderBackend = {
       {
         frontendId: request.frontendId,
         rate: request.rate,
+        diagnostics,
       },
     );
     const track = frontend.track;
@@ -42,6 +45,7 @@ export const trackOnlyBackend: RenderBackend = {
       metrics: { rms: 0, peak: 0 },
       trackSummary: summarizeTrack(track),
       frontendPhones: frontend.frontendPhones,
+      diagnostics: diagnostics.getEntries(),
       ...(frontend.f0LayerCommands ? { f0LayerCommands: frontend.f0LayerCommands } : {}),
       samples: [],
     };

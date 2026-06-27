@@ -140,12 +140,16 @@ rules:
     apply:
       - field: duration
         op: mul
-        value: params.policy.duration.non_final_shortening
+        dispatch:
+          - when: has(current.low) && current.low == true
+            value: params.policy.duration.non_final_low_vowel_shortening
+          - default: params.policy.duration.non_final_shortening
         tag: non_final
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
       - "DECtalk 4.63 -lt oracle trace for 'dog.' (only vowel is not Rule-3 shortened before final /g/)"
       - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (only vowels in non-final monosyllabic words are Rule-3 shortened)"
+      - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (non-final low vowels /AO AE/ shorten more strongly)"
 
   # ---------------------------------------------------------------------------
   # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.

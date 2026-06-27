@@ -1,0 +1,135 @@
+# Text normalization lookup tables for dectalk-english frontend.
+#
+# English number/ordinal word tables. These are the same English words used by
+# qlatt-english (DECtalk's l_us_con.c phoneme tables spell the identical words);
+# the dectalk frontend keeps its own copy so its normalization pipeline is fully
+# self-contained data, including the year-reading step the shared pipeline omits.
+#
+# Citations:
+#   - Allen, Hunnicutt & Klatt 1987 Ch.3 (MITalk text analysis)
+#   - DECtalk 4.63 l_us_con.c (punits/pteens/ptens/pordin number-word tables)
+
+ones:
+  - ""
+  - "one"
+  - "two"
+  - "three"
+  - "four"
+  - "five"
+  - "six"
+  - "seven"
+  - "eight"
+  - "nine"
+
+teens:
+  - "ten"
+  - "eleven"
+  - "twelve"
+  - "thirteen"
+  - "fourteen"
+  - "fifteen"
+  - "sixteen"
+  - "seventeen"
+  - "eighteen"
+  - "nineteen"
+
+tens:
+  - ""
+  - ""
+  - "twenty"
+  - "thirty"
+  - "forty"
+  - "fifty"
+  - "sixty"
+  - "seventy"
+  - "eighty"
+  - "ninety"
+
+ordinal_ones:
+  1: "first"
+  2: "second"
+  3: "third"
+  4: "fourth"
+  5: "fifth"
+  6: "sixth"
+  7: "seventh"
+  8: "eighth"
+  9: "ninth"
+  10: "tenth"
+  11: "eleventh"
+  12: "twelfth"
+  13: "thirteenth"
+  14: "fourteenth"
+  15: "fifteenth"
+  16: "sixteenth"
+  17: "seventeenth"
+  18: "eighteenth"
+  19: "nineteenth"
+
+ordinal_tens:
+  20: "twentieth"
+  30: "thirtieth"
+  40: "fortieth"
+  50: "fiftieth"
+  60: "sixtieth"
+  70: "seventieth"
+  80: "eightieth"
+  90: "ninetieth"
+
+abbreviations:
+  "dr.": "doctor"
+  "mr.": "mister"
+  "mrs.": "missus"
+  "ms.": "miss"
+  "st.": "saint"
+  "ave.": "avenue"
+  "blvd.": "boulevard"
+  "rd.": "road"
+  "sr.": "senior"
+  "jr.": "junior"
+  "prof.": "professor"
+  "gen.": "general"
+  "sgt.": "sergeant"
+  "cpl.": "corporal"
+  "pvt.": "private"
+  "capt.": "captain"
+  "lt.": "lieutenant"
+  "col.": "colonel"
+  "govt.": "government"
+  "dept.": "department"
+  "univ.": "university"
+  "assn.": "association"
+  "bros.": "brothers"
+  "inc.": "incorporated"
+  "corp.": "corporation"
+  "co.": "company"
+  "no.": "number"
+  "approx.": "approximately"
+  "vs.": "versus"
+  "etc.": "etcetera"
+
+digit_words:
+  "0": "zero"
+  "1": "one"
+  "2": "two"
+  "3": "three"
+  "4": "four"
+  "5": "five"
+  "6": "six"
+  "7": "seven"
+  "8": "eight"
+  "9": "nine"
+
+month_names:
+  - "january"
+  - "february"
+  - "march"
+  - "april"
+  - "may"
+  - "june"
+  - "july"
+  - "august"
+  - "september"
+  - "october"
+  - "november"
+  - "december"

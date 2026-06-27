@@ -2,6 +2,8 @@ version: v1
 citations:
 - DECtalk 4.63 (extracted from dapi/src)
 - DECtalk 4.63 p_us_rom.h us_mindur[] (minimumDuration values)
+- DECtalk 4.63 p_us_rom.h us_maltar[]/us_inhdr[]/us_mindur[] (US_DF code 56 alveolar /t/-flap target)
+- DECtalk 4.63 p_us_rom.h us_maltar[]/us_mindur[] (US_RR retroflex /r/ target: schwa+r fusion and R-before-syllabic)
 - Fant 1997
 - Jongman 1989
 base_params:
@@ -22,8 +24,9 @@ base_params:
   AH: 0
   AVS: -70
   F0: 0
-  sourceMode: 0
+  sourceMode: 0  # impulse (browser-verified). KLGLOTT88 (3) is browser-silent — reverted 2026-05-31 pending fix.
   lfMode: 0
+  breathiness: 0  # per-voice BR stamps over this; base 0 = no breathiness (DECtalk ph_vset.c:786)
   Rd: 2.7
   RdRef: 1.0
   OQ: 50
@@ -59,11 +62,13 @@ base_params:
   GO: 47
 phoneme_targets:
   SIL:
+    TL: 0
     AV: 0
     dur: 305
     minimumDuration: 7
     type: silence
   IY1:
+    TL: 3
     F1: 340
     F2: 2100
     F3: 2880
@@ -78,6 +83,7 @@ phoneme_targets:
     hi: true
     front: true
   IY0:
+    TL: 3
     F1: 340
     F2: 2100
     F3: 2880
@@ -92,6 +98,7 @@ phoneme_targets:
     hi: true
     front: true
   IH1:
+    TL: 3
     F1: 460
     F2: 1780
     F3: 2520
@@ -105,6 +112,7 @@ phoneme_targets:
     voiced: true
     mid: true
   IH0:
+    TL: 3
     F1: 460
     F2: 1780
     F3: 2520
@@ -118,6 +126,7 @@ phoneme_targets:
     voiced: true
     mid: true
   EY1:
+    TL: 3
     F1: 520
     F2: 1670
     F3: 2420
@@ -158,6 +167,7 @@ phoneme_targets:
       - value: 2522
         time: null
   EY0:
+    TL: 3
     F1: 520
     F2: 1670
     F3: 2420
@@ -198,6 +208,7 @@ phoneme_targets:
       - value: 2522
         time: null
   EH1:
+    TL: 3
     F1: 560
     F2: 1670
     F3: 2500
@@ -211,6 +222,7 @@ phoneme_targets:
     voiced: true
     mid: true
   EH0:
+    TL: 3
     F1: 560
     F2: 1670
     F3: 2500
@@ -224,6 +236,7 @@ phoneme_targets:
     voiced: true
     mid: true
   AE1:
+    TL: 3
     F1: 680
     F2: 1600
     F3: 2430
@@ -237,6 +250,7 @@ phoneme_targets:
     voiced: true
     low: true
   AE0:
+    TL: 3
     F1: 680
     F2: 1600
     F3: 2430
@@ -250,6 +264,7 @@ phoneme_targets:
     voiced: true
     low: true
   AA1:
+    TL: 3
     F1: 780
     F2: 1200
     F3: 2670
@@ -263,6 +278,7 @@ phoneme_targets:
     voiced: true
     low: true
   AA0:
+    TL: 3
     F1: 780
     F2: 1200
     F3: 2670
@@ -276,6 +292,7 @@ phoneme_targets:
     voiced: true
     low: true
   AY1:
+    TL: 3
     F1: 730
     F2: 1200
     F3: 2680
@@ -318,6 +335,7 @@ phoneme_targets:
       - value: 2450
         time: null
   AY0:
+    TL: 3
     F1: 730
     F2: 1200
     F3: 2680
@@ -360,6 +378,7 @@ phoneme_targets:
       - value: 2450
         time: null
   AW1:
+    TL: 3
     F1: 710
     F2: 1200
     F3: 2650
@@ -405,6 +424,7 @@ phoneme_targets:
       - value: 100
         time: null
   AW0:
+    TL: 3
     F1: 710
     F2: 1200
     F3: 2650
@@ -450,6 +470,7 @@ phoneme_targets:
       - value: 100
         time: null
   AH1:
+    TL: 3
     F1: 620
     F2: 1170
     F3: 2600
@@ -464,6 +485,7 @@ phoneme_targets:
     low: true
     back: true
   AH0:
+    TL: 3
     F1: 620
     F2: 1170
     F3: 2600
@@ -478,6 +500,7 @@ phoneme_targets:
     low: true
     back: true
   AO1:
+    TL: 3
     F1: 640
     F2: 929
     F3: 2640
@@ -493,6 +516,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   AO0:
+    TL: 3
     F1: 640
     F2: 929
     F3: 2640
@@ -508,6 +532,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   OW1:
+    TL: 3
     F1: 540
     F2: 1020
     F3: 2440
@@ -548,6 +573,7 @@ phoneme_targets:
       - value: 2320
         time: null
   OW0:
+    TL: 3
     F1: 540
     F2: 1020
     F3: 2440
@@ -588,6 +614,7 @@ phoneme_targets:
       - value: 2320
         time: null
   OY1:
+    TL: 3
     F1: 540
     F2: 900
     F3: 2500
@@ -641,6 +668,7 @@ phoneme_targets:
       - value: 220
         time: null
   OY0:
+    TL: 3
     F1: 540
     F2: 900
     F3: 2500
@@ -694,6 +722,7 @@ phoneme_targets:
       - value: 220
         time: null
   UH1:
+    TL: 3
     F1: 480
     F2: 1100
     F3: 2420
@@ -709,6 +738,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   UH0:
+    TL: 3
     F1: 480
     F2: 1100
     F3: 2420
@@ -724,6 +754,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   UW1:
+    TL: 3
     F1: 370
     F2: 1060
     F3: 2300
@@ -739,6 +770,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   UW0:
+    TL: 3
     F1: 370
     F2: 1060
     F3: 2300
@@ -754,6 +786,7 @@ phoneme_targets:
     back: true
     is_back_rounded: true
   ER1:
+    TL: 3
     F1: 490
     F2: 1650
     F3: 2500
@@ -768,6 +801,7 @@ phoneme_targets:
     mid: true
     rhotic: true
   ER0:
+    TL: 3
     F1: 490
     F2: 1650
     F3: 2500
@@ -782,6 +816,7 @@ phoneme_targets:
     mid: true
     rhotic: true
   IR1:
+    TL: 3
     F1: 350
     F2: 1850
     F3: 2800
@@ -797,6 +832,7 @@ phoneme_targets:
     front: true
     rhotic: true
   IR0:
+    TL: 3
     F1: 350
     F2: 1850
     F3: 2800
@@ -812,6 +848,7 @@ phoneme_targets:
     front: true
     rhotic: true
   AR1:
+    TL: 3
     F1: 660
     F2: 1210
     F3: 2450
@@ -826,6 +863,7 @@ phoneme_targets:
     low: true
     rhotic: true
   AR0:
+    TL: 3
     F1: 660
     F2: 1210
     F3: 2450
@@ -840,6 +878,7 @@ phoneme_targets:
     low: true
     rhotic: true
   OR1:
+    TL: 3
     F1: 510
     F2: 870
     F3: 2300
@@ -856,6 +895,7 @@ phoneme_targets:
     rhotic: true
     is_back_rounded: true
   OR0:
+    TL: 3
     F1: 510
     F2: 870
     F3: 2300
@@ -872,6 +912,7 @@ phoneme_targets:
     rhotic: true
     is_back_rounded: true
   UR1:
+    TL: 3
     F1: 420
     F2: 860
     F3: 2100
@@ -888,6 +929,7 @@ phoneme_targets:
     rhotic: true
     is_back_rounded: true
   UR0:
+    TL: 3
     F1: 420
     F2: 860
     F3: 2100
@@ -904,6 +946,7 @@ phoneme_targets:
     rhotic: true
     is_back_rounded: true
   W:
+    TL: 7
     F1: 295
     F2: 810
     F3: 2177
@@ -917,6 +960,7 @@ phoneme_targets:
     voiced: true
     is_back_rounded: true
   Y:
+    TL: 3
     F1: 280
     F2: 2070
     F3: 2570
@@ -929,6 +973,7 @@ phoneme_targets:
     type: glide
     voiced: true
   R:
+    TL: 3
     F1: 350
     F2: 1050
     F3: 1400
@@ -940,7 +985,28 @@ phoneme_targets:
     minimumDuration: 30
     type: liquid
     voiced: true
+  # Retroflex /r/ vowel (US_RR).  Target from DECtalk us_maltar[] (steady portion
+  # of the RR diphthong: F1 450->390, F2/F3 steady 1320/1540) and us_mindur[]
+  # (inherent 180 / minimum 90).  RR is the vowel produced by AX+R fusion ("letter",
+  # "actor" -> ...RR) and by the A5 R-before-syllabic rewrite; it is a syllabic
+  # rhotic, hence type: vowel + rhotic: true (like ER/AR/...).  No stress variant:
+  # AX is the reduced schwa and RR inherits its unstressed quality.
+  RR:
+    TL: 3
+    F1: 390
+    F2: 1320
+    F3: 1540
+    B1: 90
+    B2: 110
+    B3: 250
+    AV: 65
+    dur: 180
+    minimumDuration: 90
+    type: vowel
+    voiced: true
+    rhotic: true
   L:
+    TL: 3
     F1: 400
     F2: 800
     F3: 2800
@@ -953,6 +1019,7 @@ phoneme_targets:
     type: liquid
     voiced: true
   HH:
+    TL: 20
     B1: 300
     B2: 200
     B3: 220
@@ -965,6 +1032,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   M:
+    TL: 6
     F1: 300
     F2: 1340
     F3: 2500
@@ -984,6 +1052,7 @@ phoneme_targets:
     voiced: true
     nasal_place_index: 1  # Klatt 1980 Table I
   N:
+    TL: 6
     F1: 320
     F2: 1650
     F3: 2600
@@ -1003,6 +1072,7 @@ phoneme_targets:
     voiced: true
     nasal_place_index: 2  # Klatt 1980 Table I
   NG:
+    TL: 6
     F1: 280
     F2: 2100
     F3: 2600
@@ -1022,6 +1092,7 @@ phoneme_targets:
     voiced: true
     nasal_place_index: 3  # Klatt 1980 Table I
   EL:
+    TL: 3
     F1: 350
     F2: 800
     F3: 2850
@@ -1034,6 +1105,7 @@ phoneme_targets:
     type: liquid
     voiced: true
   EN:
+    TL: 6
     F1: 280
     F2: 1544
     F3: 2400
@@ -1052,6 +1124,7 @@ phoneme_targets:
     alveolar: true
     voiced: true
   F:
+    TL: 7
     F1: 340
     F2: 1100
     F3: 2080
@@ -1068,6 +1141,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   V:
+    TL: 7
     F1: 325
     F2: 1100
     F3: 2144
@@ -1084,6 +1158,7 @@ phoneme_targets:
     voiced: true
     is_obstruent: true
   TH:
+    TL: 7
     F1: 360
     F2: 1500
     F3: 2700
@@ -1100,6 +1175,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   DH:
+    TL: 7
     F1: 290
     F2: 1500
     F3: 2560
@@ -1116,6 +1192,7 @@ phoneme_targets:
     voiced: true
     is_obstruent: true
   S:
+    TL: 7
     F1: 320
     F2: 1520
     F3: 2550
@@ -1132,6 +1209,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   Z:
+    TL: 7
     F1: 325
     F2: 1520
     F3: 2200
@@ -1148,6 +1226,7 @@ phoneme_targets:
     voiced: true
     is_obstruent: true
   SH:
+    TL: 7
     F1: 300
     F2: 1600
     F3: 2550
@@ -1164,6 +1243,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   ZH:
+    TL: 7
     F1: 280
     F2: 1900
     F3: 2550
@@ -1182,6 +1262,7 @@ phoneme_targets:
   # DECtalk 4.63 us_gettar(): AP is 0 for stop closures; aspiration is added
   # later by p_us_st1.c Special Rule 2 (PAP.pspesh over the following sonorant).
   P:
+    TL: 7
     F1: 350
     F2: 1051
     F3: 2150
@@ -1198,6 +1279,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   B:
+    TL: 40
     F1: 220
     F2: 691
     F3: 2177
@@ -1213,6 +1295,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   T:
+    TL: 7
     F1: 350
     F2: 1700
     F3: 2600
@@ -1229,6 +1312,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   D:
+    TL: 40
     F1: 300
     F2: 1650
     F3: 2600
@@ -1244,6 +1328,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   K:
+    TL: 7
     F1: 280
     F2: 1790
     F3: 2200
@@ -1260,6 +1345,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   G:
+    TL: 40
     F1: 250
     F2: 1800
     F3: 2500
@@ -1275,6 +1361,7 @@ phoneme_targets:
     is_obstruent: true
     is_stop_base: true
   P_REL:
+    TL: 7
     F1: 400
     F2: 1100
     F3: 2150
@@ -1303,6 +1390,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 44, AB: 55 }
       obstruent: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 44, AB: 55 }
   T_REL:
+    TL: 7
     F1: 400
     F2: 1600
     F3: 2600
@@ -1331,6 +1419,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
       obstruent: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
   K_REL:
+    TL: 7
     F1: 300
     F2: 1990
     F3: 2850
@@ -1359,6 +1448,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 50, A3: 0, A4: 0, A5: 35, A6: 0, AB: 0 }
       obstruent: { A2: 50, A3: 0, A4: 0, A5: 38, A6: 0, AB: 0 }
   B_REL:
+    TL: 40
     F1: 220
     F2: 691
     F3: 2177
@@ -1388,6 +1478,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 35, AB: 53 }
       obstruent: { A2: 0, A3: 0, A4: 0, A5: 0, A6: 35, AB: 53 }
   D_REL:
+    TL: 40
     F1: 300
     F2: 1650
     F3: 2600
@@ -1417,6 +1508,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
       obstruent: { A2: 0, A3: 0, A4: 56, A5: 45, A6: 0, AB: 0 }
   G_REL:
+    TL: 40
     F1: 250
     F2: 1800
     F3: 2500
@@ -1446,6 +1538,7 @@ phoneme_targets:
       back_rounded_vowel: { A2: 42, A3: 0, A4: 0, A5: 33, A6: 0, AB: 0 }
       obstruent: { A2: 42, A3: 0, A4: 0, A5: 33, A6: 0, AB: 0 }
   P_ASP:
+    TL: 7
     F1: 400
     F2: 1100
     F3: 2150
@@ -1465,6 +1558,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   T_ASP:
+    TL: 7
     F1: 400
     F2: 1600
     F3: 2600
@@ -1487,6 +1581,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   K_ASP:
+    TL: 7
     F1: 300
     F2: 1990
     F3: 2850
@@ -1509,6 +1604,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   DX:
+    TL: 7
     F1: 350
     F2: 1913
     F3: 2305
@@ -1520,7 +1616,57 @@ phoneme_targets:
     minimumDuration: 30
     type: flap
     voiced: true
+  DF:
+    TL: 7
+    F1: 350
+    F2: 1913
+    F3: 2350
+    B1: 90
+    B2: 100
+    B3: 170
+    AV: 30
+    dur: 30
+    minimumDuration: 20
+    type: flap
+    voiced: true
+  # TX — glottalized voiceless /t/ allophone (ph_aloph.c:912-927 A16).
+  # Target sourced from DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr/us_mindur,
+  # US_TX code 52 (extracted via scripts/probe_tx_dz.py in the DECtalk source tree).
+  TX:
+    TL: 40
+    F1: 280
+    F2: 1600
+    F3: 2600
+    B1: 110
+    B2: 100
+    B3: 170
+    AV: 0
+    dur: 70
+    minimumDuration: 50
+    type: stop_closure
+    alveolar: true
+    voiceless: true
+    is_obstruent: true
+  # DZ — dentalized voiced stop allophone of /dh/ after /t,tx,d/ (ph_aloph.c:1066-1082
+  # Rule 4). Target sourced from DECtalk 4.63 p_us_rom.h us_maltar/us_inhdr/us_mindur,
+  # US_DZ code 35 (extracted via scripts/probe_tx_dz.py in the DECtalk source tree).
+  DZ:
+    TL: 40
+    F1: 300
+    F2: 1400
+    F3: 2600
+    B1: 90
+    B2: 110
+    B3: 200
+    AV: 50
+    dur: 60
+    minimumDuration: 35
+    type: stop_closure
+    dental: true
+    voiced: true
+    is_obstruent: true
   GS:
+    TL: 3
     AV: 54
     dur: 100
     minimumDuration: 70
@@ -1528,6 +1674,7 @@ phoneme_targets:
     glottal: true
     is_obstruent: true
   CH:
+    TL: 7
     F1: 350
     F2: 1750
     F3: 2700
@@ -1543,6 +1690,7 @@ phoneme_targets:
     voiceless: true
     is_obstruent: true
   JH:
+    TL: 40
     F1: 280
     F2: 1730
     F3: 2700

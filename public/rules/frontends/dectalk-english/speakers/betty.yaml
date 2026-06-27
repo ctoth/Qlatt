@@ -1,0 +1,54 @@
+# DECtalk voice "Betty" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Betty
+sex: female
+base_f0_hz: 208
+formant_scale: 1.17
+rd_default: 0.9
+spectral_tilt_offset_db: 2.5
+f0_minimum: 1960
+f0_scale_factor: 4920
+f0_lp_filter: 2175
+f0_lp_filter_alpha: 0.531005859375
+hat_rise_hz10: 100
+scale_str_rise: 15
+assertiveness: 4100
+baseline_fall_hz10: 100
+falling_target: 30
+F4: 4554
+B4: 400
+F5: 6000
+B5: 6000
+F7: 4150
+F8: 6000
+GF: 63
+GH: 63
+GV: 60
+GN: 63
+G1: 66
+G2: 65
+G3: 60
+G4: 65
+LO: 63
+AGO: 400
+AGVO: 750
+AGUO: 1900
+UNVOW: 0
+CHINK: 45
+smoothness: 50
+breathiness: 25
+richness: 40
+nopen_fraction: 0
+laryngealization: 0
+head_size: 100
+quickness: 45

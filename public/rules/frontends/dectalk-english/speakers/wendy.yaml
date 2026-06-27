@@ -1,0 +1,54 @@
+# DECtalk voice "Wendy" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Wendy
+sex: female
+base_f0_hz: 200
+formant_scale: 1.17
+rd_default: 1.02
+spectral_tilt_offset_db: 5.5
+f0_minimum: 1880
+f0_scale_factor: 3280
+f0_lp_filter: 1650
+f0_lp_filter_alpha: 0.40283203125
+hat_rise_hz10: 150
+scale_str_rise: 28
+assertiveness: 2050
+baseline_fall_hz10: 100
+falling_target: 100
+F4: 4279
+B4: 400
+F5: 4564
+B5: 600
+F7: 4200
+F8: 4900
+GF: 65
+GH: 65
+GV: 60
+GN: 71
+G1: 69
+G2: 78
+G3: 56
+G4: 57
+LO: 68
+AGO: 850
+AGVO: 1100
+AGUO: 1900
+UNVOW: 30
+CHINK: 75
+smoothness: 100
+breathiness: 55
+richness: 30
+nopen_fraction: 10
+laryngealization: 0
+head_size: 105
+quickness: 10

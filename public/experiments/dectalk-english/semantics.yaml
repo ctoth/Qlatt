@@ -14,16 +14,27 @@
 params:
   # DECtalk 4.63 uses impulse-train source, not LF model
   sourceMode:
-    description: "Voice source selection (0=impulse for DECtalk)"
+    description: "Voice source selection (0=impulse [default; browser-verified], 1=LF, 2=bypass, 3=KLGLOTT88 [browser-silent, under investigation])"
     type: integer
     default: 0
-    range: [0, 2]
+    range: [0, 3]
 
   lfMode:
     description: "LF model mode (0=disabled for DECtalk impulse source)"
     type: integer
     default: 0
     range: [0, 2]
+
+  # Per-voice breathiness (DECtalk BR). ph_vset.c:786 sets aturb = BR, i.e. the
+  # voice's breathiness drives the KLGLOTT88 source's open-phase turbulence noise
+  # amplitude. Stamped per-voice via speaker_frame_params; bound to klglottSource
+  # aturb. Paul BR=0 -> no breathiness. (B1-widening BR^2/2, ph_vset.c:703, is a
+  # separate follow-up pending Hz-unit verification.)
+  breathiness:
+    description: "Per-voice breathiness BR -> KLGLOTT88 aturb (turbulence amplitude). DECtalk ph_vset.c:786."
+    type: float
+    default: 0
+    range: [0, 100]
 
   # The DECtalk experiment trims the graph to eight formants, but it still
   # inherits the baseline high-formant helper realize rules. Keep the baseline
@@ -52,3 +63,31 @@ params:
     type: float
     default: 4750
     range: [100, 8000]
+
+realize:
+  # klsyn88 KLGLOTT88 source gate. Active only at sourceMode 3. step (not ramped):
+  # source selection must switch instantaneously, like the other source switches.
+  klglottSourceSwitch:
+    expr: "sourceMode == 3 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+    description: "Gates the klglott (KLGLOTT88) source on at sourceMode 3"
+
+  # Override the inherited baseline rule (sourceMode != 1 ? 1 : 0). With a 4th mode,
+  # the impulse source must be ON only at sourceMode 0 — otherwise it would also play
+  # at sourceMode 3 and double the voice.
+  impulseSourceSwitch:
+    expr: "sourceMode == 0 ? 1.0 : 0.0"
+    deps: [sourceMode]
+    step: true
+    description: "Impulse source active only at sourceMode 0 (was !=1; narrowed for mode 3)"
+
+  # At sourceMode 3 the klglott source feeds voiceGain/avsGain directly, so the impulse
+  # diff route must contribute nothing. Baseline expr gives 1 at any mode not 1/2; narrow
+  # so mode 3 is also 0. (bypass/direct switches are already 0 at mode 3.) Shared by the
+  # cascade (sourceDiffGain) and parallel (avsDiffGain) paths.
+  sourceDiffSwitch:
+    expr: "(sourceMode == 2 || sourceMode == 3) ? 0.0 : (sourceMode == 1 ? 0.0 : 1.0)"
+    deps: [sourceMode]
+    step: true
+    description: "Impulse diff route active only at sourceMode 0 (off at mode 3: klglott feeds voiceGain directly)"

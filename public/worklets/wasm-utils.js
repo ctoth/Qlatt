@@ -64,6 +64,34 @@ export async function initWasmModule(url, imports = {}, wasmBytes = null) {
     const bytes = await response.arrayBuffer();
     return await WebAssembly.instantiate(bytes, imports);
 }
+/**
+ * Synchronously instantiate a WASM module from raw bytes.
+ *
+ * Unlike {@link initWasmModule} (which is async and used by AudioWorklet
+ * processors via `instantiateStreaming`), this uses the synchronous
+ * `WebAssembly.Module` / `WebAssembly.Instance` constructors. It exists for the
+ * control-rate F0 kernel, which runs inside the fully-synchronous track
+ * assembler (CLI, tests, and the main-thread frontend) where introducing an
+ * `await` would force the entire assembly call-chain async.
+ *
+ * The synchronous compile path has a 4KB size limit only in browser main-thread
+ * contexts; the F0 kernel is well under that. In Node there is no such limit.
+ */
+export function initWasmModuleSync(bytes, imports = {}) {
+    // WebAssembly.Module accepts any BufferSource. Pass an ArrayBufferView
+    // through unchanged so its byteOffset/byteLength are honored — a caller that
+    // injects a Uint8Array.subarray() must compile only that window, not the
+    // entire backing buffer.
+    // WebAssembly.Module accepts any BufferSource at runtime, including views
+    // backed by SharedArrayBuffer. The DOM `BufferSource` type is narrower —
+    // it excludes ArrayBufferView<SharedArrayBuffer> — so the ArrayBuffer |
+    // ArrayBufferView union isn't directly assignable under TS 5.9's lib. The
+    // F0-kernel bytes are always ArrayBuffer-backed; assert the runtime-valid
+    // type rather than copy. (Replaces a no-op `? bytes : bytes` ternary.)
+    const source = bytes;
+    const module = new WebAssembly.Module(source);
+    return new WebAssembly.Instance(module, imports);
+}
 export class WasmBuffer {
     exports;
     ptr;

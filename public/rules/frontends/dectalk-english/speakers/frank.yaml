@@ -1,0 +1,54 @@
+# DECtalk voice "Frank" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Frank
+sex: male
+base_f0_hz: 135
+formant_scale: 1
+rd_default: 0.82
+spectral_tilt_offset_db: 3
+f0_minimum: 700
+f0_scale_factor: 4100
+f0_lp_filter: 2100
+f0_lp_filter_alpha: 0.5126953125
+hat_rise_hz10: 0
+scale_str_rise: 25
+assertiveness: 4100
+baseline_fall_hz10: 180
+falling_target: 30
+F4: 3505
+B4: 260
+F5: 6000
+B5: 6000
+F7: 3350
+F8: 3850
+GF: 65
+GH: 65
+GV: 55
+GN: 73
+G1: 76
+G2: 76
+G3: 63
+G4: 62
+LO: 56
+AGO: 290
+AGVO: 700
+AGUO: 1900
+UNVOW: 0
+CHINK: 70
+smoothness: 40
+breathiness: 30
+richness: 30
+nopen_fraction: 10
+laryngealization: 0
+head_size: 97
+quickness: 0

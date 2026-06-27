@@ -3,9 +3,31 @@
 import { state } from "./harness/state.js";
 import { renderControls, bindControls, applyUrlParams } from "./harness/controls.js";
 import { loadExperimentManifest, onExperimentChange } from "./harness/experiment.js";
-import { start, stop, speak } from "./harness/runtime.js";
 import { attachSpectrogram, clearSpectrogram } from "./harness/spectrogram.js";
 import { updateDiagnostics } from "./harness/diagnostics.js";
+import { refreshSpeakerOptions } from "./harness/speaker.js";
+
+let runtimeModulePromise = null;
+
+function loadRuntimeModule() {
+  runtimeModulePromise ??= import("./harness/runtime.js");
+  return runtimeModulePromise;
+}
+
+async function startRuntime() {
+  const { start } = await loadRuntimeModule();
+  await start();
+}
+
+async function stopRuntime() {
+  const { stop } = await loadRuntimeModule();
+  await stop();
+}
+
+async function speakWithRuntime() {
+  const { speak } = await loadRuntimeModule();
+  await speak();
+}
 
 // Render controls immediately
 renderControls();
@@ -16,6 +38,34 @@ loadExperimentManifest().then(() => {
   if (experimentSelect) {
     experimentSelect.addEventListener("change", onExperimentChange);
   }
+  // Auto-pair frontend -> experiment on load (e.g. dectalk-english frontend
+  // selects the dectalk-english synth graph) and populate the voice dropdown.
+  pairExperimentToFrontend();
+  refreshSpeakerOptions();
+});
+
+// Generic frontend -> experiment auto-pairing: when an experiment exists whose
+// id equals the selected frontend id, select it (and fire its change handler so
+// the matching synth graph is loaded). Otherwise leave the experiment as-is, so
+// qlatt-english keeps whatever experiment is selected (default klatt80-baseline).
+function pairExperimentToFrontend() {
+  const frontendSelect = document.getElementById("frontendSelect");
+  const experimentSelect = document.getElementById("experimentSelect");
+  if (!frontendSelect || !experimentSelect) return;
+  const frontendId = frontendSelect.value;
+  const hasMatch = Array.from(experimentSelect.options).some(
+    (o) => o.value === frontendId,
+  );
+  if (hasMatch && experimentSelect.value !== frontendId) {
+    experimentSelect.value = frontendId;
+    experimentSelect.dispatchEvent(new Event("change"));
+  }
+}
+
+// Frontend change: re-pair the experiment graph and repopulate the voices.
+document.getElementById("frontendSelect")?.addEventListener("change", () => {
+  pairExperimentToFrontend();
+  refreshSpeakerOptions();
 });
 
 // Initialize
@@ -26,9 +76,9 @@ loadExperimentManifest().then(() => {
 })();
 
 // DOM event listeners
-document.getElementById("startBtn").addEventListener("click", start);
-document.getElementById("stopBtn").addEventListener("click", stop);
-document.getElementById("speakBtn").addEventListener("click", speak);
+document.getElementById("startBtn").addEventListener("click", startRuntime);
+document.getElementById("stopBtn").addEventListener("click", stopRuntime);
+document.getElementById("speakBtn").addEventListener("click", speakWithRuntime);
 document.getElementById("rate").addEventListener("input", () => {
   document.getElementById("rateValue").textContent =
     Number(document.getElementById("rate").value).toFixed(2) + "x";

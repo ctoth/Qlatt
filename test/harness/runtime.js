@@ -2,6 +2,7 @@
 
 import { state } from "./state.js";
 import { loadNewRuntimeConfig } from "./experiment.js";
+import { getSelectedSpeaker } from "./speaker.js";
 import { handleTelemetry } from "./telemetry.js";
 import { startSpectrogram } from "./spectrogram.js";
 import { updateDiagnostics } from "./diagnostics.js";
@@ -46,7 +47,13 @@ export async function speak() {
   const rate = Number(document.getElementById("rate").value) || 1.0;
   const frontendId = document.getElementById("frontendSelect")?.value || "qlatt-english";
   if (!phrase) return;
-  const track = textToKlattTrack(phrase, baseF0, 30, { rate, frontendId });
+  // Selected voice (string name) comes from the frontend's declarative speakers
+  // registry; null when the active frontend has no registry, in which case we
+  // pass no `speaker` option (default voice / current behavior).
+  const speaker = getSelectedSpeaker();
+  const options = { rate, frontendId };
+  if (speaker) options.speaker = speaker;
+  const track = textToKlattTrack(phrase, baseF0, 30, options);
   await speakWithNewRuntime(track);
 }
 

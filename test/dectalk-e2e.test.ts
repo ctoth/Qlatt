@@ -207,3 +207,36 @@ describe("dectalk-english end-to-end", () => {
     expect(totalDurationMs(fast)).toBeLessThan(totalDurationMs(slow));
   });
 });
+
+// ---------------------------------------------------------------------------
+// dt-2b: dictionary-first lookup. dectalk-english declares dictionary_path, so
+// words in the converted DECtalk dictionary use the curated pronunciation
+// instead of LTS guesswork. These lock that behavior against regression.
+// ---------------------------------------------------------------------------
+describe("dectalk-english dictionary-first (dt-2b)", () => {
+  // Bare content phonemes (stress digits are not carried on track.phoneme),
+  // excluding silence, in order.
+  function contentPhonemes(phrase: string): string[] {
+    const track = textToKlattTrack(phrase, 110, 30, { frontendId: "dectalk-english" });
+    return extractSegments(track)
+      .map((s) => s.phoneme)
+      .filter((p) => p !== "SIL");
+  }
+
+  it("uses the dictionary pronunciation for 'colonel' (K ER N EL), not the LTS spelling-out", () => {
+    const phs = contentPhonemes("colonel.");
+    // Dictionary: K ER1 N EL. The old LTS path produced K AA L AA N EH L —
+    // it contained no ER at all and doubled AA. Assert the dict signature.
+    expect(phs).toContain("ER");
+    expect(phs.filter((p) => p === "AA").length).toBe(0);
+    expect(phs[0]).toBe("K");
+  });
+
+  it("uses the dictionary pronunciation for 'nuclear' (N UW K L IY ER), avoiding the LTS 'nucular' shape", () => {
+    const phs = contentPhonemes("nuclear.");
+    // Dictionary: N UW1 K L IY0 ER0 — ends in ER, has IY before it.
+    expect(phs).toContain("ER");
+    expect(phs).toContain("IY");
+    expect(phs[0]).toBe("N");
+  });
+});

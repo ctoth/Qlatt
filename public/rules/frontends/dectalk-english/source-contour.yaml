@@ -1,0 +1,104 @@
+version: v1
+
+# DECtalk-specific source contour. Unlike the shared qlatt-english contour
+# (/rules/policy/source-contour.yaml, source_mode: 1 = LF glottal source), the
+# DECtalk frontend uses the KLGLOTT88 oversampled glottal source (source_mode: 3).
+#
+# Why: DECtalk's actual voicing source is KLGLOTT88 — a differentiated parabolic
+# pulse (at²−bt³) generated at 4x sample rate and 2-pole decimated, with internal
+# spectral tilt and open-phase breathiness (DECtalk 4.63 VTM/vtm3.c). The earlier
+# stand-in here was an impulse-train doublet (source_mode 0), chosen only because
+# it was spectrally brighter than the LF model (source_mode 1, which made output
+# audibly muffled). dt-vtm1/dt-vtm1b replaced that stand-in with the real
+# KLGLOTT88 crate: measured ~+42% brightness over the impulse doublet, level-
+# matched. The crate feeds voiceGain/avsGain directly (klsyn88-style), bypassing
+# the impulse-tuned glottal resonators. source_mode 0/1 remain selectable.
+#
+# Citations:
+# - Klatt & Klatt 1990 (KLGLOTT88 voicing source)
+# - DECtalk 4.63 VTM/vtm3.c (KLGLOTT88 4x-oversampled glottal source)
+# - klsyn88 parwv.c (natural source coefficients)
+citations:
+  - Klatt & Klatt 1990
+  - DECtalk 4.63 VTM/vtm3.c KLGLOTT88 source
+
+baseline:
+  # REVERTED 2026-05-31 to 0 (impulse): KLGLOTT88 (mode 3) renders voiced audio in
+  # node but is SILENT in the BROWSER (klglottSource max rms=0; only the noise path
+  # survives -> "h" + hiss, no vowels), and brings back state_leak (its noise runs
+  # unseeded in-browser). Impulse (0) is browser-verified good. KLGLOTT88 stays
+  # selectable as mode 3 pending a browser-runtime fix (param/wasm not reaching the
+  # oversampled-glottal-source worklet in the browser). See chunk-dt-vtm-browser.
+  source_mode: 0
+  citations:
+    - Klatt & Klatt 1990 (KLGLOTT88 voicing source)
+    - "DECtalk 4.63 VTM/vtm3.c: KLGLOTT88 oversampled glottal source (the real DECtalk source)"
+
+# Voice-quality presets carried over from the shared contour so the
+# `voiceQuality` option still resolves. Rd-based shaping has limited effect on
+# the impulse source, but tl/ah_offset/flutter/jitter remain meaningful.
+voice_quality_presets:
+  modal:
+    rd: 0.7
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  breathy:
+    rd: 2.0
+    oq: 0
+    tl: 0
+    ah_offset_db: 20
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+      - Gobl 2003
+      - Klatt & Klatt 1990
+  pressed:
+    rd: 0.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 0
+    f0_scale: 1.0
+    citations:
+      - Fant 1997 Table 1
+  creaky:
+    rd: 0.8
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 0
+    jitter: 20
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+      - Burkhardt 2009
+  whispery:
+    rd: 2.0
+    oq: 0
+    tl: 10
+    ah_offset_db: 30
+    flutter: 0
+    jitter: 5
+    f0_scale: 1.0
+    citations:
+      - Gobl 2003
+  falsetto:
+    rd: 2.5
+    oq: 0
+    tl: 0
+    ah_offset_db: 0
+    flutter: 50
+    jitter: 0
+    f0_scale: 1.5
+    citations:
+      - Burkhardt 2009
+      - Fant 1997 Table 1

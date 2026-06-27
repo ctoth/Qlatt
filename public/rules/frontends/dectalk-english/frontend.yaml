@@ -1,13 +1,123 @@
 version: v13-cel
 inventory_path: /rules/frontends/dectalk-english/inventory.yaml
 lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
-skip_dictionary: true
+# DECtalk is dictionary-first with LTS fallback (DECtalk 4.63 ls_task.c:697:
+# main dictionary search precedes the LTS rule engine; rules run only on miss).
+# This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
+# same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
+dictionary_path: /dectalk-dictionary.json
+# DECtalk uses the bright IMPULSE-train glottal source (source_mode: 0), not the
+# shared LF contour (source_mode: 1) which left the output audibly muffled
+# (measured ~2.9x less >3 kHz energy). This per-frontend contour stops the shared
+# policy from overriding the dectalk semantics' intended impulse source.
+source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
+# Per-frontend text-normalization policy (DATA). Selects this frontend's own
+# normalization tables + pipeline instead of the shared qlatt-english defaults.
+# The dectalk pipeline adds a year-reading step ("1984" -> "nineteen eighty
+# four") that the shared pipeline omits; the predicate and speaking form are
+# declared as data in normalization-pipeline.yaml. A frontend that declares no
+# `normalization` block keeps the qlatt-english default normalization.
+# Citation: DECtalk 4.63 ls_util.c:598-622 (is_year), l_us_pr1.c:367-398.
+normalization:
+  tables_path: /rules/frontends/dectalk-english/normalization-tables.yaml
+  pipeline_path: /rules/frontends/dectalk-english/normalization-pipeline.yaml
 include:
   - pipeline.yaml
+  - phases/postlexical.yaml
   - phases/structural.yaml
+  - phases/annotation.yaml
   - phases/duration.yaml
   - phases/formant.yaml
   - phases/prosody.yaml
+# Declarative voice registry. Each entry names a voice YAML under `dir`; a
+# caller selects one by name via the textToKlattTrack `speaker` option (a
+# string voice name). The selected voice's parameters populate the speaker
+# policy (parameters.policy.speaker) and the F0 speaker-scaling fields. When
+# no voice is selected, `default` is used — keeping Paul byte-identical to the
+# legacy inline speaker policy below.
+# Citation: DECtalk 4.63 ph_vset.c (speaker-dependent parameter tables).
+speakers:
+  dir: /rules/frontends/dectalk-english/speakers
+  default: paul
+  # Declarative speaker-field -> frame-param bindings. Each name in this list is
+  # BOTH the voice-YAML field and the same-named per-frame Klatt param; the
+  # selected voice's value is stamped (absolute set) onto every frame's params,
+  # overriding the inventory base_params default. This is the generic mechanism
+  # that lets a voice's higher-formant timbre shape audio (not just pitch).
+  #
+  # Scope = [F4, B4, F5, B5]. F5/B5 ARE genuinely per-voice in DECtalk: the
+  # P_us_vdf1.h 8 kHz voice structs set Harry 3850/180, Kit 4700/600, Rita
+  # 4800/700, Wendy 4800/600, Dennis 3800/280 — a real, distinct 5th cascade
+  # resonator. The remaining voices (Paul/Betty/Frank/Ursula, and Chris's F5)
+  # store the ZAPF/ZAPB sentinel (= 6000 in the non-MSDOS 8 kHz build,
+  # ph_defs.h:726) meaning "no 5th cascade resonator." Cascade formant index 5
+  # has freqRange [3500,6000]; a resonator at 6000 Hz with 6000 Hz bandwidth is
+  # so broad it is effectively flat — a faithful render of the disabled formant.
+  # NOTE: this deliberately moves Paul off the old inventory default F5=4500/
+  # B5=600 (a spurious active 5th formant Paul should not have) to the ZAPF
+  # sentinel — Paul is no longer byte-identical here, BY DESIGN: it now matches
+  # the real DECtalk Paul, which has no active F5. (HS head-size F4/F5 scaling,
+  # ph_vset.c:712, for non-100-HS voices is a separate follow-up; F5 stamped raw
+  # for now.) The TS is a generic copy loop with no per-voice/per-field branches;
+  # adding fields here is a pure data edit.
+  # Citation: DECtalk 4.63 ph_vset.c (F4->r4cb, B4->r4cc, F5->r5cb, B5->r5cc);
+  # P_us_vdf1.h 8 kHz voice structs; ph_defs.h:726 ZAPF/ZAPB=6000.
+  speaker_frame_params:
+    - F4
+    - B4
+    - F5
+    - B5
+    # Per-voice breathiness BR -> frame param `breathiness` -> KLGLOTT88 aturb
+    # (DECtalk ph_vset.c:786 aturb=BR). Paul BR=0 (no breath); Betty 25, Kit 47,
+    # Wendy 55, Frank/Dennis 30, Rita 36 -> audibly breathy voicing.
+    - breathiness
+  # Declarative per-voice GAIN offsets. Each entry maps a voice-YAML gain field
+  # to a per-frame Klatt dB parameter. The applied value is a PAUL-RELATIVE
+  # additive dB offset: frame[param] += selectedVoice[gain] - defaultVoice[gain].
+  # The default voice (Paul, `default:` above) yields offset 0 for every entry,
+  # so Paul stays byte-identical; other voices get their differential spectral
+  # balance (vocal CHARACTER, not just pitch). The reference is the default
+  # voice's own values (data, not a hardcoded constant). The TS is a generic
+  # offset loop with no per-voice or per-gain branches.
+  #
+  # Why additive-onto-the-frame-dB-param and not a new semantics term: every
+  # gain in klatt80-baseline/semantics.yaml is dbToLinear(GO + <frameDbParam>
+  # + ...). Adding the offset to <frameDbParam> is identical to adding a term
+  # inside the formula, but touches NO shared semantics (other frontends declare
+  # no offsets -> unaffected).
+  #
+  # Mapping (DECtalk ph_vset.c chip register -> Qlatt frame dB param):
+  #   GV -> azgain (voicing) -> AV (voiceGain) and AVS (parallel voicing avsGain)
+  #   GH -> apgain (aspiration) -> AH (aspGain)
+  #   GF -> afgain (frication)  -> AF (fricGain / fricGainScaled)
+  #   LO -> r1ca, G4 -> r2ca, G3 -> r3ca, G2 -> r4ca, G1 -> r5ca
+  #         (parallel resonator gains) -> parallel formant amplitudes A1..A5
+  # GN (rnpgain / nasal) is intentionally OMITTED: the Qlatt nasal parallel gain
+  # (anLinear) derives from nasalMurmurStrength, not a per-frame AN dB param, so
+  # GN has no additive destination on this path. Documented; not forced.
+  # Citation: DECtalk 4.63 ph_vset.c (GV->azgain 808/810, GF->afgain 816,
+  # GH->apgain 818, G1-G4->r5ca/r4ca/r3ca/r2ca 765-772, LO->r1ca 775).
+  speaker_gain_offsets:
+    - { gain: GV, param: AV }
+    - { gain: GV, param: AVS }
+    - { gain: GH, param: AH }
+    - { gain: GF, param: AF }
+    - { gain: LO, param: A1 }
+    - { gain: G4, param: A2 }
+    - { gain: G3, param: A3 }
+    - { gain: G2, param: A4 }
+    - { gain: G1, param: A5 }
+  voices:
+    - paul
+    - harry
+    - frank
+    - dennis
+    - betty
+    - ursula
+    - wendy
+    - rita
+    - kit
+    - chris
 f0_model:
   type: layered_additive
   # DECtalk's clause loop advances in 6.4 ms synthesis/control frames.
@@ -27,8 +137,15 @@ f0_model:
   layers:
     baseline:
       type: profile
+    # The hat layer is a GLIDE (ramped persistent): hat commands accumulate a
+    # held total exactly like a persistent STEP, but each command ramps to its
+    # delta over its `duration_frames` span (a zero/absent span = instant step).
+    # This lets the hat RISE be a smooth linear movement to the accent target
+    # (DECtalk renders the hat rise as a GLIDE, ph_inton1.c:715) instead of an
+    # instantaneous jump, while the fall and boundary reset keep span 0 (instant)
+    # so the accumulated-total accounting (rise + fall + reset) is unchanged.
     hat:
-      type: persistent
+      type: glide
     stress:
       type: impulse
       decay: halving
@@ -42,6 +159,14 @@ f0_model:
       # DECtalk 4.63 Ph_drwt02.c: boundary impulse decay = value / 4 per frame.
       initial_decay_divisor: 4
       termination_threshold: 0.01
+    # Question terminal-rise GLIDE layer. The yes/no question rise (+451) is
+    # rendered here as a GLIDE that ramps to the target over the final vowel and
+    # HOLDS, producing a smooth, sustained terminal RISE into the '?' boundary
+    # (DECtalk's GLIDE-form question gesture, ph_inton1.c:1635) rather than a
+    # decaying impulse spike. The earlier small dip (-151) stays an impulse on
+    # the `boundary` layer above. Reset to 0 at the next SIL keeps it clause-local.
+    question_glide:
+      type: glide
   combine: sum
   # Speaker scaling: converts internal Hz*10 units to final Hz using the
   # DECtalk formula (Ph_drwt02.c line 2309):
@@ -139,6 +264,43 @@ parameters:
       cluster_shortening: 0.70
       post_voiceless_plosive_lengthening_ms: 19
       phrase_initial_vowel_lengthening_ms: 19
+      # --- chunk dt-11: syllable-keyed Rule 4 monosyllable branch + added
+      #     numbered rules 10/11/19/20/23/24 and the Rule 9 [nt] cluster case.
+      #     Multipliers from ph_defs.h N*PRCNT (FRAC_ONE=16384 == 1.0); additive
+      #     ms from NF*MS frame counts at the established 6.33 ms/frame factor
+      #     (NF20MS=3fr=19ms, NF40MS=6fr=38ms already in use above).
+      # Rule 4 (p_us_tim.c:355-373) monosyllable: secondary N85PRCNT(=0.85),
+      # unstressed N70PRCNT(=0.70); primary-stressed monosyllable unchanged
+      # (the N90 arg is dead code -- mlsh1 runs only when FSTRESS_1 IS_MINUS).
+      monosyllable_secondary_shortening: 0.85
+      monosyllable_unstressed_shortening: 0.70
+      # Rule 4 (p_us_tim.c:374-394) non-monosyllable, non-word-final segment:
+      # N85PRCNT (FFIRSTSYL/FMEDIALSYL/FFINALSYL all 0.85 in this build).
+      polysyllable_nonfinal_shortening: 0.85
+      # Rule 7 (p_us_tim.c:452-456) unstressed word-MEDIAL syllabic: prcnt>>1
+      # (== x0.5).  Non-medial unstressed syllabic stays N70PRCNT (0.70 above).
+      unstressed_medial_syllabic_shortening: 0.50
+      # Rule 10 (p_us_tim.c:647-655) first vowel of a two-vowel sequence: +NF30MS.
+      two_vowel_first_lengthening_ms: 32
+      # Rule 11 (p_us_tim.c:657-664) word-initial stressed vowel of a polysyllable:
+      # +NF25MS.
+      word_initial_stressed_vowel_lengthening_ms: 25
+      # Rule 19 (p_us_tim.c:819-826) function-word-final unstressed monosyllable
+      # TH (e.g. "with"): N60PRCNT.
+      function_word_final_th_shortening: 0.60
+      # Rule 20 (p_us_tim.c:828-836) unstressed monosyllable IY before a vowel
+      # ("the/me/he"): N150PRCNT.
+      the_iy_prevocalic_lengthening: 1.50
+      # Rule 23 (p_us_tim.c:859-868) vowel before a /t/ flap DF ("writing" vs
+      # "riding"): N35PRCNT.
+      pre_df_flap_shortening: 0.35
+      # Rule 24 (p_us_tim.c:882-889) segment before NG ("ing"): N60PRCNT.
+      pre_ng_shortening: 0.60
+      # Rule 9 [nt] cluster (p_us_tim.c:628-639): word-internal /n/ before a
+      # non-word-initial unstressed /t/ shortened to N10PRCNT.  The companion
+      # N->D rewrite (L635) is allophonic and lives in the postlexical phase, not
+      # here; only the durational shortening of the /n/ is modelled.
+      nt_cluster_nasal_shortening: 0.10
       citations:
         - "DECtalk 4.63 p_us_tim.c"
         - "DECtalk 4.63 ph_defs.h (NF*MS constants)"
@@ -191,6 +353,40 @@ parameters:
       # Question boundary fall (internal Hz*10).
       # Source: ph_inton1.c F0_QSYLL_FALL = 80.
       question_fall_hz: 80
+      # Boundary GESTURE impulse pairs (internal Hz*10), emitted on the final
+      # stressed vowel into the `boundary` impulse layer.  These are the
+      # explicit F0 gestures DECtalk adds on top of the hat-fall for questions
+      # and commas (ph_inton1.c make_f0_command IMPULSE pairs).
+      #
+      # Yes/no question terminal rise: a small dip then a large rise at the end
+      # of the clause-final stressed vowel.  The +451 rise dominates the reduced
+      # question fall (question_fall_hz=80), producing a terminal RISE.
+      # Source: ph_inton1.c:219-220 (F0_QGesture1=-151, F0_QGesture2=+451),
+      #         :1351-1352 (emitted on the final stressed vowel for FQUENEXT).
+      question_gesture_dip_hz: -151
+      question_gesture_rise_hz: 451
+      # Comma continuation rise: an upward IMPULSE pair at a comma boundary, so
+      # F0 continues/rises rather than falling fully (signals "more to come").
+      # Source: ph_inton1.c:221-222 (F0_CGesture1=+171, F0_CGesture2=+250),
+      #         :1367-1368 (emitted on the final stressed vowel for FCBNEXT comma).
+      comma_gesture1_hz: 171
+      comma_gesture2_hz: 250
+      # Gesture IMPULSE length in native DECtalk control frames.
+      # Source: ph_inton1.c:1352 (make_f0_command ... length 24).
+      boundary_gesture_duration_frames: 24
+      # Hat-rise GLIDE span in native DECtalk control frames. DECtalk renders the
+      # hat rise as a GLIDE (linear F0 movement to the hat target) over 30 frames
+      # rather than an instantaneous step, giving a smooth onset of the accent.
+      # Source: ph_inton1.c:715 (make_f0_command GLIDE, hatsize, length 30).
+      hat_rise_glide_frames: 30
+      # Question terminal-rise GLIDE span in native DECtalk control frames. The
+      # +451 yes/no rise is rendered as a GLIDE that climbs to the target over
+      # the final vowel rather than a transient impulse, so the contour rises
+      # smoothly into the question boundary and HOLDS the elevated F0.
+      # Source: ph_inton1.c:1635 (make_f0_command GLIDE, F0_QGesture2, span =
+      # allodurs[nphon]; ~24 control frames at the 6.4 ms cadence for a ~150 ms
+      # final vowel). # engineering span estimate (final-vowel-length proxy)
+      question_rise_glide_frames: 24
       # Stress impulse magnitudes (internal Hz*10 units).
       # Source: ph_inton1.c f0_mstress_level[] = {1, 71, 31, 281}.
       stress_level_primary_hz: 71
@@ -269,6 +465,58 @@ parameters:
       # frication tail. Qlatt models this as a 30 ms suffix window at the
       # 100 Hz frame cadence used by the runtime. # engineering approximation
       weak_interdental_fricative_tail_ms: 30
+      # DECtalk 4.63 us_special_coartic() (p_us_st1.c:314-410): per-vowel F2/F3
+      # TARGET offsets for diphthongized vowels in specific neighbour contexts.
+      # DATA consumed by the special_coartic scalar rules in phases/formant.yaml.
+      # The diphpos-dependent sub-cases (AY/OY before LX -250/-350; unstressed
+      # YU 2nd-half +400) are DEFERRED: diphpos (diphthong-half index) is not
+      # exposed to scalar rules in this engine (diphthongs are trajectory
+      # waypoints). The diphpos-independent cases are implemented here.
+      special_coartic:
+        # us_place & FALVEL alveolars (p_us_st1.c:373/381; ph_defs.h:342).
+        alveolar:
+          value: [D, EN, N, S, T, TX, Z]
+          citations:
+            - "DECtalk 4.63 p_us_rom.h us_place[] (FALVEL bit); ph_defs.h:342"
+        # DECtalk front vowels USP_IY..USP_AE (+IX) (p_us_st1.c:346/365). The
+        # phoneme symbol carries NO stress digit in rules (tts-frontend.ts:452
+        # strips the suffix; stress lives in .stress), so these are bare ARPABET
+        # names; IX/USP_IX has no allophone in this inventory.
+        front_vowels:
+          value: [IY, IH, EY, EH, AE]
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:346 (front-vowel range USP_IY..USP_AE, plus USP_IX)"
+        # F3 of a vowel adjacent to W/R/RX -> -150 Hz (p_us_st1.c:329-339).
+        f3_near_w_r_offset_hz:
+          value: -150
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:336 (F3 target -150 near W/R/RX)"
+        # F2 of a front vowel before LX or after W/LL/LX -> -150 Hz
+        # (p_us_st1.c:344-369).
+        f2_front_near_lateral_offset_hz:
+          value: -150
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:348/367 (front-vowel F2 -150 near LX/W/LL)"
+        # F2 of UW adjacent to an alveolar -> +200 Hz (p_us_st1.c:370-385).
+        f2_uw_near_alveolar_offset_hz:
+          value: 200
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:375/383 (UW/YU F2 +200 adjacent alveolar)"
+        # Unstressed vowels: effect grows by 50% (temp += temp/2; p_us_st1.c:387-389).
+        unstressed_gain:
+          value: 1.5
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:389 (unstressed coartic effect *1.5)"
+        # Phrase-final stressed vowels: effect halved (temp >>= 1; p_us_st1.c:398-401).
+        phrase_final_gain:
+          value: 0.5
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:400 (phrase-final stressed coartic *0.5)"
+        # Maximum |offset| clamp (p_us_st1.c:403-406).
+        max_offset_hz:
+          value: 400
+          citations:
+            - "DECtalk 4.63 p_us_st1.c:403-406 (|temp| <= 400 Hz clamp)"
       citations:
         - "DECtalk 4.63 ph_setar.c"
         - "DECtalk 4.63 p_us_st1.c (source-amplitude special rules)"
@@ -347,6 +595,784 @@ output:
             - "Engineering estimate: preserves legacy DECtalk frontend 50% formant-transition blend"
         keys: [F1, F2, F3, B1, B2, B3]
         smooth_types: [vowel, nasal, liquid, glide]
+        # DECtalk smooths every parameter at every boundary (p_us_st1.c
+        # us_forw/back_smooth_rules; default 50% midpoint, ph_setar.c:784-785,
+        # 903-904). Enable the universal midpoint fallback so obstruent-adjacent
+        # and no-locus boundaries — and B1-B3 at obstruent boundaries — get a
+        # transition instead of stepping abruptly. Only F1-F3/B1-B3 move; burst
+        # amplitudes (AF/AH/PLSTEP) ride control windows and stay crisp. The
+        # ~25 obstruents with locus data still use their locus (more specific);
+        # this only fills the gaps. qlatt-english omits this flag -> unchanged.
+        smooth_all_boundaries: true
+      # Obstruent->sonorant formant LOCUS tables (DATA), extracted from
+      # DECtalk 4.63 PH/p_us_rom.h us_maleloc[] (Paul / male voice) via the
+      # dectalk repo scripts/extract_loci.py, reshaped by
+      # scripts/gen-dectalk-loci-yaml.mjs. setloc indexing:
+      #   ploc = us_plocu[obstruent_code + 59*(sontyx-1)]; if 0 -> no locus
+      #   ploc += 3*(formant); {locus_hz, prcnt, durtran_ms} = us_maleloc[ploc..ploc+2]
+      #   bouval = locus_hz + prcnt*(curval - locus_hz)/100
+      # sontyx (vowel category): 1=front-unrounded, 2=back-unrounded, 3=back-rounded.
+      # Citation: DECtalk 4.63 ph_sttr2.c:71-329 (setloc); p_us_rom.h:4449 (us_maleloc).
+      # NOTE: the two setloc prcnt adjustments (ph_sttr2.c:294-307, rounded-soncon
+      # and F2 back-cavity) are DEFERRED to a later chunk; the core locus pull is exact.
+      loci:
+        B:
+          "1":
+            F1: { locus_hz: 330, prcnt: 55, durtran_ms: 20 }
+            F2: { locus_hz: 900, prcnt: 56, durtran_ms: 30 }
+            F3: { locus_hz: 2200, prcnt: 25, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 330, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 30 }
+            F3: { locus_hz: 2250, prcnt: 40, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 330, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 720, prcnt: 36, durtran_ms: 50 }
+            F3: { locus_hz: 1800, prcnt: 40, durtran_ms: 40 }
+        CH:
+          "1":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1750, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 2750, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 10, durtran_ms: 40 }
+            F3: { locus_hz: 2450, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 54, durtran_ms: 55 }
+            F2: { locus_hz: 1480, prcnt: 20, durtran_ms: 60 }
+            F3: { locus_hz: 1820, prcnt: 20, durtran_ms: 60 }
+        CZ:
+          "1":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 20 }
+            F2: { locus_hz: 1610, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1711, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2150, prcnt: 50, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 300, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1610, prcnt: 70, durtran_ms: 36 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+        D:
+          "1":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1800, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 250, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 95 }
+            F3: { locus_hz: 2601, prcnt: 30, durtran_ms: 85 }
+        DF:
+          "1":
+            F1: { locus_hz: 320, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1740, prcnt: 96, durtran_ms: 35 }
+            F3: { locus_hz: 2390, prcnt: 60, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 35 }
+            F3: { locus_hz: 2090, prcnt: 61, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2090, prcnt: 42, durtran_ms: 100 }
+        DH:
+          "1":
+            F1: { locus_hz: 400, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 35 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1400, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 400, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+        DX:
+          "1":
+            F1: { locus_hz: 350, prcnt: 45, durtran_ms: 35 }
+            F2: { locus_hz: 1740, prcnt: 96, durtran_ms: 35 }
+            F3: { locus_hz: 2350, prcnt: 60, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1640, prcnt: 40, durtran_ms: 35 }
+            F3: { locus_hz: 2150, prcnt: 61, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1340, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2090, prcnt: 42, durtran_ms: 100 }
+        DZ:
+          "1":
+            F1: { locus_hz: 340, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1350, prcnt: 20, durtran_ms: 50 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2720, prcnt: 11, durtran_ms: 55 }
+        EN:
+          "1":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 35 }
+            F2: { locus_hz: 1550, prcnt: 75, durtran_ms: 35 }
+            F3: { locus_hz: 2400, prcnt: 40, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1420, prcnt: 25, durtran_ms: 75 }
+            F3: { locus_hz: 2400, prcnt: 30, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1550, prcnt: 25, durtran_ms: 95 }
+            F3: { locus_hz: 2420, prcnt: 30, durtran_ms: 95 }
+        F:
+          "1":
+            F1: { locus_hz: 300, prcnt: 63, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 92, durtran_ms: 35 }
+            F3: { locus_hz: 2080, prcnt: 35, durtran_ms: 30 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 60, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 35 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 60, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 35 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+        G:
+          "1":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2100, prcnt: 20, durtran_ms: 50 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 16, durtran_ms: 60 }
+            F3: { locus_hz: 2100, prcnt: 0, durtran_ms: 90 }
+          "3":
+            F1: { locus_hz: 250, prcnt: 45, durtran_ms: 40 }
+            F2: { locus_hz: 1600, prcnt: 42, durtran_ms: 65 }
+            F3: { locus_hz: 1920, prcnt: 15, durtran_ms: 80 }
+        JH:
+          "1":
+            F1: { locus_hz: 240, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1750, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 2750, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 245, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 5, durtran_ms: 120 }
+            F3: { locus_hz: 2450, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 245, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1680, prcnt: 10, durtran_ms: 90 }
+            F3: { locus_hz: 1970, prcnt: 10, durtran_ms: 100 }
+        K:
+          "1":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 1990, prcnt: 20, durtran_ms: 55 }
+            F3: { locus_hz: 3000, prcnt: 125, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 16, durtran_ms: 50 }
+            F3: { locus_hz: 2000, prcnt: 20, durtran_ms: 90 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 1400, prcnt: 60, durtran_ms: 75 }
+            F3: { locus_hz: 2050, prcnt: 15, durtran_ms: 80 }
+        M:
+          "1":
+            F1: { locus_hz: 280, prcnt: 30, durtran_ms: 30 }
+            F2: { locus_hz: 1200, prcnt: 10, durtran_ms: 25 }
+            F3: { locus_hz: 2000, prcnt: 30, durtran_ms: 40 }
+          "2":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 88, durtran_ms: 40 }
+            F3: { locus_hz: 2000, prcnt: 80, durtran_ms: 25 }
+          "3":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 970, prcnt: 10, durtran_ms: 40 }
+            F3: { locus_hz: 1550, prcnt: 80, durtran_ms: 25 }
+        N:
+          "1":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 35 }
+            F2: { locus_hz: 1350, prcnt: 75, durtran_ms: 35 }
+            F3: { locus_hz: 2600, prcnt: 40, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1520, prcnt: 25, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 450, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1500, prcnt: 30, durtran_ms: 80 }
+            F3: { locus_hz: 2420, prcnt: 0, durtran_ms: 95 }
+        NX:
+          "1":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 2100, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 3000, prcnt: 105, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 1800, prcnt: 20, durtran_ms: 70 }
+            F3: { locus_hz: 2150, prcnt: 20, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 25, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 1920, prcnt: 25, durtran_ms: 70 }
+        P:
+          "1":
+            F1: { locus_hz: 350, prcnt: 55, durtran_ms: 20 }
+            F2: { locus_hz: 950, prcnt: 56, durtran_ms: 50 }
+            F3: { locus_hz: 2200, prcnt: 25, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 50 }
+            F3: { locus_hz: 1900, prcnt: 40, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 45, durtran_ms: 25 }
+            F2: { locus_hz: 920, prcnt: 46, durtran_ms: 50 }
+            F3: { locus_hz: 1900, prcnt: 40, durtran_ms: 50 }
+        S:
+          "1":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 2550, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 2530, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1320, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2460, prcnt: 0, durtran_ms: 65 }
+        SH:
+          "1":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1630, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2640, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1600, prcnt: 27, durtran_ms: 70 }
+            F3: { locus_hz: 2270, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1630, prcnt: 27, durtran_ms: 90 }
+            F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+        T:
+          "1":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1700, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 10, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 10, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 5, durtran_ms: 95 }
+            F3: { locus_hz: 2300, prcnt: 0, durtran_ms: 95 }
+        TH:
+          "1":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 45 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 35 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 55 }
+          "3":
+            F1: { locus_hz: 360, prcnt: 10, durtran_ms: 50 }
+            F2: { locus_hz: 1300, prcnt: 12, durtran_ms: 55 }
+            F3: { locus_hz: 2700, prcnt: 11, durtran_ms: 55 }
+        TX:
+          "1":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 35 }
+            F2: { locus_hz: 1800, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2650, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 75 }
+            F3: { locus_hz: 2600, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 43, durtran_ms: 40 }
+            F2: { locus_hz: 1700, prcnt: 40, durtran_ms: 95 }
+            F3: { locus_hz: 2300, prcnt: 0, durtran_ms: 95 }
+        TZ:
+          "1":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 70 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 150 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 290, prcnt: 70, durtran_ms: 35 }
+            F2: { locus_hz: 1500, prcnt: 20, durtran_ms: 80 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 40 }
+            F2: { locus_hz: 1600, prcnt: 20, durtran_ms: 90 }
+            F3: { locus_hz: 2600, prcnt: 50, durtran_ms: 40 }
+        V:
+          "1":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 92, durtran_ms: 35 }
+            F3: { locus_hz: 2080, prcnt: 35, durtran_ms: 40 }
+          "2":
+            F1: { locus_hz: 300, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 325, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 91, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 65, durtran_ms: 40 }
+        Z:
+          "1":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 35, durtran_ms: 50 }
+            F3: { locus_hz: 2550, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1440, prcnt: 35, durtran_ms: 60 }
+            F3: { locus_hz: 2630, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 310, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1520, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2460, prcnt: 0, durtran_ms: 65 }
+        ZH:
+          "1":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1830, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2640, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 285, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1800, prcnt: 27, durtran_ms: 70 }
+            F3: { locus_hz: 2270, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 340, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1830, prcnt: 27, durtran_ms: 90 }
+            F3: { locus_hz: 2100, prcnt: 20, durtran_ms: 110 }
+      loci_female:
+        B:
+          "1":
+            F1: { locus_hz: 360, prcnt: 40, durtran_ms: 20 }
+            F2: { locus_hz: 1350, prcnt: 60, durtran_ms: 25 }
+            F3: { locus_hz: 2690, prcnt: 55, durtran_ms: 35 }
+          "2":
+            F1: { locus_hz: 360, prcnt: 50, durtran_ms: 20 }
+            F2: { locus_hz: 1130, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2530, prcnt: 48, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 360, prcnt: 50, durtran_ms: 20 }
+            F2: { locus_hz: 1130, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2530, prcnt: 48, durtran_ms: 40 }
+        CH:
+          "1":
+            F1: { locus_hz: 400, prcnt: 34, durtran_ms: 55 }
+            F2: { locus_hz: 2100, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 3300, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 420, prcnt: 40, durtran_ms: 55 }
+            F2: { locus_hz: 1900, prcnt: 10, durtran_ms: 70 }
+            F3: { locus_hz: 3200, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 420, prcnt: 34, durtran_ms: 55 }
+            F2: { locus_hz: 2050, prcnt: 10, durtran_ms: 90 }
+            F3: { locus_hz: 3100, prcnt: 10, durtran_ms: 100 }
+        CZ:
+          "1":
+            F1: { locus_hz: 330, prcnt: 70, durtran_ms: 20 }
+            F2: { locus_hz: 1710, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2260, prcnt: 50, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 330, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1710, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2260, prcnt: 50, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 330, prcnt: 70, durtran_ms: 30 }
+            F2: { locus_hz: 1710, prcnt: 70, durtran_ms: 30 }
+            F3: { locus_hz: 2260, prcnt: 50, durtran_ms: 60 }
+        D:
+          "1":
+            F1: { locus_hz: 270, prcnt: 33, durtran_ms: 35 }
+            F2: { locus_hz: 2150, prcnt: 66, durtran_ms: 35 }
+            F3: { locus_hz: 2800, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 270, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2050, prcnt: 40, durtran_ms: 80 }
+            F3: { locus_hz: 2790, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 270, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 1900, prcnt: 40, durtran_ms: 80 }
+            F3: { locus_hz: 2700, prcnt: 20, durtran_ms: 80 }
+        DF:
+          "1":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1800, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2400, prcnt: 50, durtran_ms: 30 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1900, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1800, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 30 }
+        DH:
+          "1":
+            F1: { locus_hz: 340, prcnt: 30, durtran_ms: 45 }
+            F2: { locus_hz: 1300, prcnt: 35, durtran_ms: 60 }
+            F3: { locus_hz: 3180, prcnt: 35, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 400, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 400, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+        DX:
+          "1":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1900, prcnt: 50, durtran_ms: 30 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 30 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1800, prcnt: 50, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1800, prcnt: 50, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 50, durtran_ms: 30 }
+        DZ:
+          "1":
+            F1: { locus_hz: 340, prcnt: 30, durtran_ms: 45 }
+            F2: { locus_hz: 1300, prcnt: 35, durtran_ms: 60 }
+            F3: { locus_hz: 3180, prcnt: 35, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 400, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 400, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+        EN:
+          "1":
+            F1: { locus_hz: 450, prcnt: 24, durtran_ms: 35 }
+            F2: { locus_hz: 2300, prcnt: 75, durtran_ms: 35 }
+            F3: { locus_hz: 3200, prcnt: 35, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 450, prcnt: 22, durtran_ms: 30 }
+            F2: { locus_hz: 2200, prcnt: 65, durtran_ms: 75 }
+            F3: { locus_hz: 3140, prcnt: 30, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 450, prcnt: 24, durtran_ms: 30 }
+            F2: { locus_hz: 2160, prcnt: 65, durtran_ms: 80 }
+            F3: { locus_hz: 2590, prcnt: 30, durtran_ms: 80 }
+        F:
+          "1":
+            F1: { locus_hz: 350, prcnt: 65, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 87, durtran_ms: 40 }
+            F3: { locus_hz: 2600, prcnt: 35, durtran_ms: 30 }
+          "2":
+            F1: { locus_hz: 350, prcnt: 75, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 85, durtran_ms: 30 }
+            F3: { locus_hz: 2000, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 350, prcnt: 75, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 85, durtran_ms: 30 }
+            F3: { locus_hz: 2000, prcnt: 65, durtran_ms: 40 }
+        G:
+          "1":
+            F1: { locus_hz: 300, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2200, prcnt: 13, durtran_ms: 70 }
+            F3: { locus_hz: 2500, prcnt: 50, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 340, prcnt: 43, durtran_ms: 50 }
+            F2: { locus_hz: 1900, prcnt: 10, durtran_ms: 80 }
+            F3: { locus_hz: 2370, prcnt: 10, durtran_ms: 80 }
+          "3":
+            F1: { locus_hz: 370, prcnt: 45, durtran_ms: 40 }
+            F2: { locus_hz: 1710, prcnt: 71, durtran_ms: 65 }
+            F3: { locus_hz: 2300, prcnt: 15, durtran_ms: 80 }
+        JH:
+          "1":
+            F1: { locus_hz: 370, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 2000, prcnt: 25, durtran_ms: 70 }
+            F3: { locus_hz: 3300, prcnt: 19, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 380, prcnt: 40, durtran_ms: 55 }
+            F2: { locus_hz: 1900, prcnt: 10, durtran_ms: 70 }
+            F3: { locus_hz: 3200, prcnt: 10, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 380, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 2050, prcnt: 10, durtran_ms: 90 }
+            F3: { locus_hz: 3100, prcnt: 10, durtran_ms: 100 }
+        K:
+          "1":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 2200, prcnt: 18, durtran_ms: 40 }
+            F3: { locus_hz: 2400, prcnt: 10, durtran_ms: 50 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 1800, prcnt: 10, durtran_ms: 70 }
+            F3: { locus_hz: 2100, prcnt: 15, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 250, prcnt: 46, durtran_ms: 35 }
+            F2: { locus_hz: 1710, prcnt: 71, durtran_ms: 65 }
+            F3: { locus_hz: 2300, prcnt: 0, durtran_ms: 80 }
+        M:
+          "1":
+            F1: { locus_hz: 300, prcnt: 30, durtran_ms: 30 }
+            F2: { locus_hz: 1380, prcnt: 10, durtran_ms: 35 }
+            F3: { locus_hz: 2100, prcnt: 30, durtran_ms: 20 }
+          "2":
+            F1: { locus_hz: 480, prcnt: 30, durtran_ms: 35 }
+            F2: { locus_hz: 1, prcnt: 88, durtran_ms: 40 }
+            F3: { locus_hz: 2100, prcnt: 48, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 300, prcnt: 20, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 88, durtran_ms: 40 }
+            F3: { locus_hz: 1750, prcnt: 80, durtran_ms: 30 }
+        N:
+          "1":
+            F1: { locus_hz: 480, prcnt: 30, durtran_ms: 60 }
+            F2: { locus_hz: 2130, prcnt: 39, durtran_ms: 35 }
+            F3: { locus_hz: 3250, prcnt: 50, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 250, prcnt: 60, durtran_ms: 45 }
+            F2: { locus_hz: 2050, prcnt: 0, durtran_ms: 75 }
+            F3: { locus_hz: 3200, prcnt: 0, durtran_ms: 30 }
+          "3":
+            F1: { locus_hz: 480, prcnt: 30, durtran_ms: 60 }
+            F2: { locus_hz: 2020, prcnt: 0, durtran_ms: 50 }
+            F3: { locus_hz: 2400, prcnt: 20, durtran_ms: 50 }
+        NX:
+          "1":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 40 }
+            F2: { locus_hz: 2760, prcnt: 10, durtran_ms: 70 }
+            F3: { locus_hz: 2900, prcnt: 114, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 40 }
+            F2: { locus_hz: 1530, prcnt: 20, durtran_ms: 70 }
+            F3: { locus_hz: 2620, prcnt: 20, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 280, prcnt: 20, durtran_ms: 40 }
+            F2: { locus_hz: 1650, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 2500, prcnt: 25, durtran_ms: 70 }
+        P:
+          "1":
+            F1: { locus_hz: 260, prcnt: 50, durtran_ms: 30 }
+            F2: { locus_hz: 1570, prcnt: 47, durtran_ms: 25 }
+            F3: { locus_hz: 1660, prcnt: 73, durtran_ms: 35 }
+          "2":
+            F1: { locus_hz: 260, prcnt: 50, durtran_ms: 35 }
+            F2: { locus_hz: 1240, prcnt: 8, durtran_ms: 30 }
+            F3: { locus_hz: 1900, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 260, prcnt: 45, durtran_ms: 70 }
+            F2: { locus_hz: 1240, prcnt: 8, durtran_ms: 30 }
+            F3: { locus_hz: 1900, prcnt: 65, durtran_ms: 40 }
+        S:
+          "1":
+            F1: { locus_hz: 330, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 2000, prcnt: 30, durtran_ms: 50 }
+            F3: { locus_hz: 2980, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 390, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1800, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 3070, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 390, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1900, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2880, prcnt: 0, durtran_ms: 65 }
+        SH:
+          "1":
+            F1: { locus_hz: 360, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 2000, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2940, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 360, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1850, prcnt: 7, durtran_ms: 70 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 400, prcnt: 32, durtran_ms: 55 }
+            F2: { locus_hz: 1840, prcnt: 7, durtran_ms: 90 }
+            F3: { locus_hz: 2700, prcnt: 20, durtran_ms: 110 }
+        T:
+          "1":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 35 }
+            F2: { locus_hz: 2160, prcnt: 60, durtran_ms: 35 }
+            F3: { locus_hz: 3150, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2050, prcnt: 0, durtran_ms: 80 }
+            F3: { locus_hz: 2990, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 1900, prcnt: 0, durtran_ms: 70 }
+            F3: { locus_hz: 2900, prcnt: 20, durtran_ms: 70 }
+        TH:
+          "1":
+            F1: { locus_hz: 360, prcnt: 30, durtran_ms: 45 }
+            F2: { locus_hz: 1300, prcnt: 40, durtran_ms: 70 }
+            F3: { locus_hz: 3180, prcnt: 35, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 440, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 440, prcnt: 30, durtran_ms: 50 }
+            F2: { locus_hz: 1800, prcnt: 42, durtran_ms: 70 }
+            F3: { locus_hz: 3060, prcnt: 11, durtran_ms: 70 }
+        TX:
+          "1":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 35 }
+            F2: { locus_hz: 2150, prcnt: 60, durtran_ms: 35 }
+            F3: { locus_hz: 3150, prcnt: 30, durtran_ms: 45 }
+          "2":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 45 }
+            F2: { locus_hz: 2050, prcnt: 0, durtran_ms: 80 }
+            F3: { locus_hz: 2990, prcnt: 0, durtran_ms: 50 }
+          "3":
+            F1: { locus_hz: 470, prcnt: 33, durtran_ms: 40 }
+            F2: { locus_hz: 1900, prcnt: 0, durtran_ms: 70 }
+            F3: { locus_hz: 2900, prcnt: 20, durtran_ms: 70 }
+        TZ:
+          "1":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 70 }
+            F2: { locus_hz: 1600, prcnt: 20, durtran_ms: 150 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+          "2":
+            F1: { locus_hz: 330, prcnt: 70, durtran_ms: 35 }
+            F2: { locus_hz: 1610, prcnt: 20, durtran_ms: 80 }
+            F3: { locus_hz: 2160, prcnt: 50, durtran_ms: 60 }
+          "3":
+            F1: { locus_hz: 501, prcnt: 50, durtran_ms: 40 }
+            F2: { locus_hz: 1600, prcnt: 20, durtran_ms: 90 }
+            F3: { locus_hz: 2260, prcnt: 50, durtran_ms: 60 }
+        V:
+          "1":
+            F1: { locus_hz: 330, prcnt: 65, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 85, durtran_ms: 40 }
+            F3: { locus_hz: 2600, prcnt: 35, durtran_ms: 40 }
+          "2":
+            F1: { locus_hz: 330, prcnt: 75, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 84, durtran_ms: 30 }
+            F3: { locus_hz: 2000, prcnt: 65, durtran_ms: 40 }
+          "3":
+            F1: { locus_hz: 330, prcnt: 75, durtran_ms: 30 }
+            F2: { locus_hz: 1, prcnt: 84, durtran_ms: 30 }
+            F3: { locus_hz: 2000, prcnt: 65, durtran_ms: 40 }
+        Z:
+          "1":
+            F1: { locus_hz: 320, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 2000, prcnt: 30, durtran_ms: 50 }
+            F3: { locus_hz: 2980, prcnt: 0, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 35, durtran_ms: 40 }
+            F2: { locus_hz: 1800, prcnt: 40, durtran_ms: 50 }
+            F3: { locus_hz: 3070, prcnt: 0, durtran_ms: 70 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 40, durtran_ms: 40 }
+            F2: { locus_hz: 1900, prcnt: 15, durtran_ms: 60 }
+            F3: { locus_hz: 2880, prcnt: 0, durtran_ms: 65 }
+        ZH:
+          "1":
+            F1: { locus_hz: 320, prcnt: 26, durtran_ms: 55 }
+            F2: { locus_hz: 2000, prcnt: 30, durtran_ms: 70 }
+            F3: { locus_hz: 2940, prcnt: 51, durtran_ms: 70 }
+          "2":
+            F1: { locus_hz: 320, prcnt: 26, durtran_ms: 55 }
+            F2: { locus_hz: 1850, prcnt: 7, durtran_ms: 70 }
+            F3: { locus_hz: 2700, prcnt: 0, durtran_ms: 85 }
+          "3":
+            F1: { locus_hz: 320, prcnt: 30, durtran_ms: 55 }
+            F2: { locus_hz: 1840, prcnt: 7, durtran_ms: 90 }
+            F3: { locus_hz: 2700, prcnt: 20, durtran_ms: 110 }
+      # Sonorant vowel-category (sontyx) per phoneme per edge (DATA), from
+      # us_begtyp[] (forward / segment-start edge) and us_endtyp[] (backward /
+      # segment-end edge), clamped per setloc (rounded-soncon->3, low->2).
+      # Citation: DECtalk 4.63 p_us_rom.h us_begtyp/us_endtyp; ph_sttr2.c:95-145.
+      vowel_category:
+        AA: { forward: 2, backward: 2 }
+        AE: { forward: 1, backward: 1 }
+        AH: { forward: 2, backward: 2 }
+        AO: { forward: 3, backward: 3 }
+        AR: { forward: 2, backward: 3 }
+        AW: { forward: 2, backward: 3 }
+        AX: { forward: 2, backward: 2 }
+        AY: { forward: 2, backward: 1 }
+        EH: { forward: 1, backward: 1 }
+        EL: { forward: 3, backward: 3 }
+        ER: { forward: 1, backward: 3 }
+        EY: { forward: 1, backward: 1 }
+        IH: { forward: 1, backward: 1 }
+        IR: { forward: 1, backward: 3 }
+        IX: { forward: 1, backward: 1 }
+        IY: { forward: 1, backward: 1 }
+        LL: { forward: 3, backward: 3 }
+        LX: { forward: 3, backward: 3 }
+        OR: { forward: 3, backward: 3 }
+        OW: { forward: 3, backward: 3 }
+        OY: { forward: 3, backward: 1 }
+        R: { forward: 3, backward: 3 }
+        RR: { forward: 3, backward: 3 }
+        RX: { forward: 3, backward: 3 }
+        TZ: { forward: 1, backward: 1 }
+        UH: { forward: 3, backward: 3 }
+        UR: { forward: 3, backward: 3 }
+        UW: { forward: 3, backward: 3 }
+        W: { forward: 3, backward: 3 }
+        Y: { forward: 1, backward: 1 }
+        YU: { forward: 1, backward: 3 }
+      # setloc prcnt-adjustment DATA (ph_sttr2.c:294-307), extracted from
+      # DECtalk 4.63 PH/p_us_rom.h us_place[] + us_begtyp[] via the dectalk repo
+      # scripts/extract_place_coartic.py, reshaped by
+      # scripts/gen-dectalk-place-coartic-yaml.mjs. Consumed by the generic locus
+      # resolver (resolveLocusBoundary): no per-phoneme literals in code.
+      # obstruent_place[obstruent].palatal_or_dental = us_place & (FPALATL|FDENTAL)
+      # (ph_defs.h:340-341). Adjustment (a) fires only for NON-palatal/dental obstruents.
+      obstruent_place:
+        B: { palatal_or_dental: false }
+        CH: { palatal_or_dental: true }
+        CZ: { palatal_or_dental: false }
+        D: { palatal_or_dental: false }
+        DF: { palatal_or_dental: false }
+        DH: { palatal_or_dental: true }
+        DX: { palatal_or_dental: false }
+        DZ: { palatal_or_dental: true }
+        EN: { palatal_or_dental: false }
+        F: { palatal_or_dental: false }
+        G: { palatal_or_dental: false }
+        JH: { palatal_or_dental: true }
+        K: { palatal_or_dental: false }
+        M: { palatal_or_dental: false }
+        N: { palatal_or_dental: false }
+        NX: { palatal_or_dental: false }
+        P: { palatal_or_dental: false }
+        S: { palatal_or_dental: false }
+        SH: { palatal_or_dental: true }
+        T: { palatal_or_dental: false }
+        TH: { palatal_or_dental: true }
+        TX: { palatal_or_dental: false }
+        TZ: { palatal_or_dental: true }
+        V: { palatal_or_dental: false }
+        Z: { palatal_or_dental: false }
+        ZH: { palatal_or_dental: true }
+      # rounded_sonorant_consonant = sonorants with begtyp==ROUNDED_SONOR_CONS(5)
+      # (ph_defs.h:176). Adjustment (a): prcnt=(prcnt>>1)+50 for F2/F3.
+      rounded_sonorant_consonant: [EL, LL, LX, R, W]
+      # f2_back[vowel] = { forward: us_place & F2BACKI, backward: & F2BACKF }
+      # (ph_defs.h:345-346). Adjustment (b) on F2: prcnt += 25-(prcnt>>2); durtran=(durtran>>1)+2.
+      f2_back:
+        EY: { forward: false, backward: true }
+        IY: { forward: false, backward: true }
+        Y: { forward: true, backward: true }
+        YU: { forward: true, backward: false }
     f0:
       renderer:
         type: layered_additive

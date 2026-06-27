@@ -75,34 +75,48 @@ const CMU_DICT_MAP: Record<string, string | undefined> = await preloadCmuDiction
 );
 
 /**
- * Adapter: wrap the CMU_DICT_MAP (string values) as a DictLookup (string[] | null).
+ * Build a dictionary lookup adapter over a flat word -> "ARPABET ..." map.
+ *
+ * Generic: the same elision/apostrophe/trailing-`.`/alternate-pronunciation
+ * candidate logic applies to ANY dictionary map (the global CMU default or a
+ * per-frontend dictionary loaded from `dictionary_path`). No per-frontend
+ * branches — only the backing map differs.
+ *
  * Also handles alternate pronunciation entries like "read(1)".
  */
-const cmuDictLookup: DictLookup = (word: string): string[] | null => {
-  const lowerWord = word.toLowerCase();
-  const candidates: string[] = [lowerWord];
+function makeDictLookup(map: Record<string, string | undefined>): DictLookup {
+  return (word: string): string[] | null => {
+    const lowerWord = word.toLowerCase();
+    const candidates: string[] = [lowerWord];
 
-  // Handle elided spellings where the dictionary key keeps leading apostrophe
-  // (e.g., "'cuse") but normalized input token may not ("cuse").
-  if (!lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
-  // Handle converse elision: input may omit or include trailing apostrophe.
-  if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
-  if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
-  // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
-  if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
+    // Handle elided spellings where the dictionary key keeps leading apostrophe
+    // (e.g., "'cuse") but normalized input token may not ("cuse").
+    if (!lowerWord.startsWith("'")) candidates.push(`'${lowerWord}`);
+    // Handle converse elision: input may omit or include trailing apostrophe.
+    if (!lowerWord.endsWith("'")) candidates.push(`${lowerWord}'`);
+    if (lowerWord.endsWith("'") && lowerWord.length > 1) candidates.push(lowerWord.slice(0, -1));
+    // Normalization strips trailing punctuation tokens; recover abbreviations like "cr.".
+    if (!lowerWord.endsWith(".")) candidates.push(`${lowerWord}.`);
 
-  for (const candidate of candidates) {
-    const entry = CMU_DICT_MAP[candidate];
-    if (entry) return entry.split(" ");
-  }
+    for (const candidate of candidates) {
+      const entry = map[candidate];
+      if (entry) return entry.split(" ");
+    }
 
-  // Handle alternate pronunciations like "read(1)" -> "read"
-  if (word.includes("(")) {
-    const base = CMU_DICT_MAP[word.replace(/\(\d+\)$/, "")];
-    if (base) return base.split(" ");
-  }
-  return null;
-};
+    // Handle alternate pronunciations like "read(1)" -> "read"
+    if (word.includes("(")) {
+      const base = map[word.replace(/\(\d+\)$/, "")];
+      if (base) return base.split(" ");
+    }
+    return null;
+  };
+}
+
+/**
+ * Adapter over the global CMU map. Used by frontends that declare no
+ * per-frontend `dictionary_path`.
+ */
+const cmuDictLookup: DictLookup = makeDictLookup(CMU_DICT_MAP);
 
 // ---------------------------------------------------------------------------
 // Helper functions
@@ -264,7 +278,16 @@ function rewriteOrthographyTokens(
  */
 export function transcribeText(text: string, options: TranscriptionOptions = {}): TranscriptionToken[] {
   const provenance = options.provenance ?? null;
-  const effectiveDictLookup = options.dictLookup ?? cmuDictLookup;
+  // Resolve the backing dictionary map for this call: a per-frontend map (from
+  // `dictionary_path`) when supplied, else the global CMU default. Both the
+  // lookup and compound-recovery probe must read the SAME map so a frontend's
+  // dictionary fully replaces the default (no global-map leak in compound
+  // recovery). An explicit `dictLookup` override still wins for the lookup
+  // (used e.g. for diagnostic injection in tests).
+  const effectiveDictMap = options.dictionaryMap ?? CMU_DICT_MAP;
+  const effectiveDictLookup =
+    options.dictLookup ??
+    (options.dictionaryMap ? makeDictLookup(options.dictionaryMap) : cmuDictLookup);
   const ltsPath = options.ltsPath;
   const morphologyPath = options.morphologyPath;
   const specSource = options.specSource ?? QLATT_ENGLISH_RULEPACK;
@@ -285,7 +308,7 @@ export function transcribeText(text: string, options: TranscriptionOptions = {})
   );
   const flatPhonemeList: TranscriptionToken[] = [];
   const hasDirectDictionaryEntry = (token: string): boolean =>
-    typeof CMU_DICT_MAP[token.toLowerCase()] === "string";
+    typeof effectiveDictMap[token.toLowerCase()] === "string";
 
   // Use effective lookup functions for symbol mode detection
   const nonPunctuation = orthographyWords.filter((w) => w.word.length > 0 && !w.isPunctuation);

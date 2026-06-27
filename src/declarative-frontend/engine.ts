@@ -22,6 +22,12 @@ import {
   buildTrajectoryControlWindows,
   selectDectalkObstruentProfile,
 } from "./dectalk-helpers";
+import {
+  parseSyllabificationTables,
+  syllabifyWord,
+  type SyllabificationTables,
+  type SyllableAnnotation,
+} from "./syllabify";
 
 /**
  * Internal engine token type. Intentionally loose (`any` index) because the
@@ -1261,6 +1267,30 @@ function buildNavigationFunctions(
       }
       return count;
     },
+    // word_count(): Positional count of words in the phone stream (DECtalk
+    // number_words). Counts maximal runs of consecutive tokens sharing the
+    // same word, so a repeated surface word ("the cat the dog" -> 4) is NOT
+    // deduplicated; SIL/pause breaks a run. Used by phrase-level gates such
+    // as the flapping rule, which only fires once the utterance has at least
+    // three words.
+    // Citation: DECtalk 4.63 ph_aloph.c (number_words >= 3 phrase gate)
+    word_count: (): number => {
+      const active = getActiveStreamTokens("phone");
+      let count = 0;
+      let prevWord: string | undefined;
+      for (const t of active) {
+        if (t.phoneme === "SIL") {
+          prevWord = undefined;
+          continue;
+        }
+        const word = t.word;
+        if (typeof word === "string" && word.length > 0) {
+          if (word !== prevWord) count++;
+          prevWord = word;
+        }
+      }
+      return count;
+    },
     // cluster_position_in_word(): For the current non-vowel token, count how
     // many consecutive non-vowel tokens with the same word precede it.
     // Position 0 = first consonant in the cluster.  Returns 0 for vowels,
@@ -1292,6 +1322,54 @@ function buildNavigationFunctions(
       }
       return pos;
     },
+    // --- Syllabification annotation builtins (generic, data-driven) ---
+    // These run the maximal-onset + affix-stripping algorithm from syllabify.ts
+    // over the current token's WORD (the contiguous run of phone tokens sharing
+    // its `word`), consuming the frontend's `syllabification:` tables (DATA).
+    // The per-word result is memoized so all three accessors + every token in
+    // the word reuse a single computation.  When the frontend declares no
+    // syllabification tables, the accessors return null and any annotation rule
+    // that writes them becomes a no-op.
+    // Citation: DECtalk 4.63 ph_syl.c ph_syllab (maximal onset + affix strip).
+    syllable_index: (): number | string | null => syllableField("syllableIndex"),
+    syllable_role: (): number | string | null => syllableField("role"),
+    syllable_position_in_word: (): number | string | null => syllableField("positionInWord"),
+  };
+
+  // Memoize syllabification per same-word run, keyed by the run's start index in
+  // the active phone stream (NOT the word string, so a repeated surface word
+  // gets its own run).  Maps run-start index -> annotation per token-in-run.
+  const syllableRunCache = new Map<number, SyllableAnnotation[]>();
+  const syllableField = (
+    field: keyof SyllableAnnotation,
+  ): number | string | null => {
+    const tables = runtime?.syllabification as SyllabificationTables | null;
+    if (!tables) return null; // no tables declared -> no-op
+    const token = currentToken;
+    if (!token) return null;
+    const word = token.word;
+    if (typeof word !== "string" || word.length === 0) return null;
+    const active = getActiveStreamTokens("phone");
+    const idx = getTokenIndex(token, "phone");
+    if (idx < 0) return null;
+    // Find the start of the contiguous same-word run containing idx.
+    let runStart = idx;
+    while (runStart > 0 && active[runStart - 1]?.word === word) runStart--;
+    let cached = syllableRunCache.get(runStart);
+    if (!cached) {
+      let runEnd = idx;
+      while (runEnd + 1 < active.length && active[runEnd + 1]?.word === word) runEnd++;
+      const phonemes = [];
+      for (let i = runStart; i <= runEnd; i++) {
+        phonemes.push(String(active[i]?.phoneme ?? ""));
+      }
+      cached = syllabifyWord(phonemes, tables);
+      syllableRunCache.set(runStart, cached);
+    }
+    const ann = cached[idx - runStart];
+    if (!ann) return null;
+    const v = ann[field];
+    return typeof v === "number" || typeof v === "string" ? v : null;
   };
 
   const rebindCurrentToken = (
@@ -1306,6 +1384,9 @@ function buildNavigationFunctions(
     cache.clear();
     indexMaps.clear();
     activeIdIndexComplete = false;
+    // Token indices change after a structural mutation, so the run-indexed
+    // syllabification memo is stale and must be dropped.
+    syllableRunCache.clear();
   };
 
   // Sync a field value to the cached cursor view so that later CEL expressions
@@ -3132,6 +3213,11 @@ export function runRuleEngine(
       spec.maps && typeof spec.maps === "object" && !Array.isArray(spec.maps)
         ? spec.maps
         : {},
+    // Pipeline-level syllabification tables (DATA): onset clusters, nuclei,
+    // affixes, and the phoneme->ascky map.  Parsed/validated into normalized
+    // tables here so the syllabify builtins can run the maximal-onset algorithm.
+    // null when the frontend declares no `syllabification:` block (no-op).
+    syllabification: parseSyllabificationTables(spec.syllabification),
     patterns: spec.patterns ?? {},
     pointStreams,
     baseStreams,

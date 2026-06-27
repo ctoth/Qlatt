@@ -1,0 +1,54 @@
+# DECtalk voice "Harry" — converted from DECtalk 4.63 voice tables.
+# Imported by scripts/dt1-import-voices.ts from the canonical converted
+# source (dectalk/463 ph_vset.c / Ph_drwt02.c voice parameter set).
+# f0_lp_filter_alpha is derived: f0_lp_filter / 4096
+# (DECtalk 4.63 Ph_drwt02.c frac4mul coefficient).
+#
+# F4-F8, per-voice gains (GF/GH/GV/GN/G1-G4/LO), and glottal params
+# (AGO/AGVO/AGUO/UNVOW/CHINK, smoothness/breathiness/richness/...) are
+# STORED here but not yet wired into the synthesis graph (deferred chunk).
+citations:
+  - "DECtalk 4.63 ph_vset.c (speaker-dependent parameter set)"
+  - "DECtalk 4.63 Ph_drwt02.c (F0 scaling and filter coefficients)"
+name: Harry
+sex: male
+base_f0_hz: 90
+formant_scale: 1
+rd_default: 0.7
+spectral_tilt_offset_db: 0
+f0_minimum: 780
+f0_scale_factor: 4100
+f0_lp_filter: 1725
+f0_lp_filter_alpha: 0.421142578125
+hat_rise_hz10: 100
+scale_str_rise: 20
+assertiveness: 4100
+baseline_fall_hz10: 50
+falling_target: 10
+F4: 2973
+B4: 200
+F5: 3468
+B5: 180
+F7: 3200
+F8: 4000
+GF: 63
+GH: 63
+GV: 60
+GN: 62
+G1: 67
+G2: 50
+G3: 54
+G4: 62
+LO: 57
+AGO: 500
+AGVO: 750
+AGUO: 2300
+UNVOW: 0
+CHINK: 30
+smoothness: 62
+breathiness: 0
+richness: 86
+nopen_fraction: 0
+laryngealization: 0
+head_size: 110
+quickness: 15

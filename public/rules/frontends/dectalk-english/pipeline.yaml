@@ -5,6 +5,214 @@ predicates:
   is_stressed_vowel_or_boundary: >-
     (current.type == "vowel" && has(current.stress) && current.stress == 1)
     || current.phoneme == "SIL"
+# Syllabification tables (DATA) for the generic `syllabify` pass.  Extracted
+# from DECtalk 4.63 by scripts/dt10-extract-syllable-tables.ts:
+#   - nuclei         <- p_us_sy1.c us_syl_vowels
+#   - onset_clusters <- p_us_sy1.c us_syl_cons (legal onsets, longest-first)
+#   - affixes        <- p_us_sy1.c us_common_affixes
+#   - ascky          <- p_us_sy1.c us_ascky_check[] indexed by the US_* phone
+#                       enum (l_all_ph.h); the phone NAME is the port ARPABET
+#                       symbol (port renames HX->HH, NX->NG, Q->GS).
+# The r-colored vowels IR/ER/AR/OR/UR are mapped to the syllabic-r nucleus char
+# 'R' (= US_RR) although DECtalk's us_ascky_check marks them 0: DECtalk
+# syllabifies BEFORE r-fusion (the word still has a separate /R/), whereas the
+# Qlatt port fuses in the postlexical phase before this annotation pass, so the
+# fused rhotic vowel is the syllable nucleus here.
+# Citation: DECtalk 4.63 p_us_sy1.c (us_syl_vowels, us_syl_cons,
+#   us_common_affixes, us_ascky_check); l_all_ph.h (US_* phone enum).
+syllabification:
+  nuclei: "a@AeEiIoOuU^WRc|xLN"
+  onset_clusters:
+    - "spl"
+    - "spr"
+    - "str"
+    - "skw"
+    - "skl"
+    - "skr"
+    - " Sm"
+    - " SL"
+    - "pl"
+    - "pr"
+    - "bl"
+    - "br"
+    - "fl"
+    - "fr"
+    - "tw"
+    - "tr"
+    - "dw"
+    - "dr"
+    - "Tw"
+    - "Tr"
+    - "kw"
+    - "kl"
+    - "kr"
+    - "gw"
+    - "gl"
+    - "gr"
+    - "sw"
+    - "sl"
+    - "sp"
+    - "st"
+    - "sk"
+    - "sm"
+    - "sn"
+    - "Sw"
+    - "Sl"
+    - "Sr"
+    - " Y"
+    - "y"
+    - "f"
+    - "t"
+    - "d"
+    - "T"
+    - "k"
+    - "g"
+    - "s"
+    - "S"
+    - "p"
+    - "w"
+    - "l"
+    - "r"
+    - "h"
+    - "D"
+    - "z"
+    - "Z"
+    - "C"
+    - "J"
+    - "n"
+    - "m"
+    - "v"
+    - "b"
+  affixes:
+    - "sElvz"
+    - "kwIst"
+    - "flEks"
+    - "sfir"
+    - "stAn"
+    - "gr@f"
+    - "ples"
+    - "plen"
+    - "skop"
+    - "baks"
+    - "ston"
+    - "wRT"
+    - "lxnd"
+    - "l@nd"
+    - "k@st"
+    - "fI|S"
+    - "h@nd"
+    - "yard"
+    - "kcpf"
+    - "mxnt"
+    - "mEnt"
+    - "sElf"
+    - "st@t"
+    - "SI|p"
+    - "sAt"
+    - "vIl"
+    - "b@k"
+    - "bot"
+    - "lAf"
+    - "lAk"
+    - "pAp"
+    - "wck"
+    - "wcS"
+    - "wUd"
+    - "wRk"
+    - "kek"
+    - "bcl"
+    - "bEl"
+    - "del"
+    - "hIl"
+    - "hol"
+    - "hUd"
+    - "l|s"
+    - "m@n"
+    - "mxn"
+    - "mor"
+    - "nEk"
+    - "n|s"
+    - "Sap"
+    - "Z|n"
+    - "S|n"
+    - "tel"
+    - "tin"
+    - "tAm"
+    - "wRd"
+    - "wer"
+    - "wIl"
+    - "wAz"
+    - "b@g"
+    - "k@p"
+    - "kar"
+    - "k@t"
+    - "dxm"
+    - "flA"
+    - "mxn"
+    - "m@n"
+    - "mEn"
+    - "n^t"
+    - "pad"
+    - "ek"
+    - "bO"
+    - "de"
+    - "fL"
+    - "|J"
+    - "sc"
+    - "we"
+  ascky:
+    IY: "i"
+    IH: "I"
+    EY: "e"
+    EH: "E"
+    AE: "@"
+    AA: "a"
+    AY: "A"
+    AW: "W"
+    AH: "^"
+    AO: "c"
+    OW: "o"
+    OY: "O"
+    UH: "U"
+    UW: "u"
+    RR: "R"
+    YU: "Y"
+    AX: "x"
+    IX: "|"
+    W: "w"
+    Y: "y"
+    R: "r"
+    LL: "l"
+    HH: "h"
+    M: "m"
+    N: "n"
+    NG: "G"
+    EL: "L"
+    EN: "N"
+    F: "f"
+    V: "v"
+    TH: "T"
+    DH: "D"
+    S: "s"
+    Z: "z"
+    SH: "S"
+    ZH: "Z"
+    P: "p"
+    B: "b"
+    T: "t"
+    D: "d"
+    K: "k"
+    G: "g"
+    DX: "&"
+    TX: "Q"
+    GS: "q"
+    CH: "C"
+    JH: "J"
+    IR: "R"
+    ER: "R"
+    AR: "R"
+    OR: "R"
+    UR: "R"
 streams:
   phone:
     type: base
@@ -26,17 +234,71 @@ phases:
       - dectalk_pause_duration
       - dectalk_clause_final_lengthening
       - dectalk_non_final_shortening
-      - dectalk_stress_shortening
+      # Rule 4 splits into a monosyllable stress branch and a polysyllable
+      # non-word-final branch (DECtalk p_us_tim.c:355-373 vs :374-394), keyed on
+      # the real syllable_position_in_word() annotation; Rule 5 follows.
+      - dectalk_monosyllable_stress_shortening
+      - dectalk_polysyllable_nonfinal_shortening
       - dectalk_polysyllabic_shortening
       - dectalk_non_initial_consonant_shortening
       - dectalk_unstressed_shortening
       - dectalk_emphasis_lengthening
       - dectalk_postvocalic_voiceless_shortening
       - dectalk_postvocalic_voiced_lengthening
+      # Rule 9 [nt] cluster nasal shortening (p_us_tim.c:628-639).
+      - dectalk_nt_cluster_nasal_shortening
       - dectalk_consonant_cluster_shortening
       - dectalk_phrase_initial_vowel_lengthening
+      # Added numbered rules 10/11/19/20/23/24 (p_us_tim.c:647-889), in source
+      # order, keyed on syllable annotations and flap/NG allophones.
+      - dectalk_two_vowel_first_lengthening
+      - dectalk_word_initial_stressed_vowel_lengthening
+      - dectalk_function_word_final_th_shortening
+      - dectalk_the_iy_prevocalic_lengthening
+      - dectalk_pre_df_flap_shortening
+      - dectalk_pre_ng_shortening
       - dectalk_rate_scaling
     resolve_scalars: [duration]
+  - name: postlexical
+    # Order encodes DECtalk ph_aloph.c source precedence (each /t,d/ rule has goto
+    # endrul3, so the rewrites are mutually exclusive per /t,d/): palatalization
+    # (L878) wins over glottalization (L912) wins over flapping (L958).  The
+    # dental /dh/ -> DZ rule (L1066) runs LAST because it reads the preceding
+    # token's already-rewritten phoneme (last_outph) as its trigger.
+    #
+    # The /R/ rules (rhotic) operate on a different segment class than the /t,d/
+    # rules, so they do not conflict with them.  Within the /R/ rules, fusion
+    # (A13, L835-872) runs BEFORE prevocalic R->RR (A5, L636-648): in the source
+    # A5 sets RR but A13 re-reads the input /R/ and, for an inter-vocalic /R/,
+    # deletes it and fuses into the preceding vowel (fusion wins).  Running fusion
+    # first reproduces this -- once fusion deletes the /R/, A5 has nothing to
+    # match, leaving A5 to catch only the residual prevocalic (e.g. word-initial)
+    # /R/ before a syllabic.
+    #
+    # The three minor rewrites added in chunk dt-9 slot in at their source
+    # positions:
+    #   - dectalk_geminate_delete (A1, ph_aloph.c:558) runs FIRST -- in the source
+    #     it executes before the FBLOCK skip and every other allophone rule.
+    #   - dectalk_assimilate_sibilant_sh (A4, L715) keys on /s,z/, a segment class
+    #     disjoint from the /t,d/ and /R/ rules, so its position is non-conflicting;
+    #     it is placed right after geminate to mirror its early source position
+    #     (L715, ahead of glottalization at L912).
+    #   - dectalk_syllabic_n_after_tx (A19/Rule 3a, L1042) reads the PRIOR token's
+    #     already-rewritten output (== TX from glottalization), so it MUST follow
+    #     glottalization and flapping; it sits just before the dental /dh/ rule
+    #     (L1066), which stays LAST because it likewise reads last_outph.
+    rules:
+      - dectalk_geminate_delete
+      - dectalk_assimilate_sibilant_sh
+      - dectalk_palatalize_t
+      - dectalk_palatalize_d
+      - dectalk_glottalize_t
+      - dectalk_flap_t
+      - dectalk_flap_d
+      - dectalk_fuse_vowel_r
+      - dectalk_prevocalic_r_rr
+      - dectalk_syllabic_n_after_tx
+      - dectalk_dental_dh
   - name: structural
     rules:
       - dectalk_apply_diphthong_trajectories
@@ -48,16 +310,30 @@ phases:
       - dectalk_add_voiced_fricative_soft_voicing_onset
       - dectalk_add_voiceless_fricative_breathy_onset
       - dectalk_add_vowel_breathy_offset
+  # Syllable-structure annotation.  tts-frontend.ts runs the `annotation` phase
+  # after structural and before duration, so syllable fields are available to
+  # later duration rules.  ANNOTATION ONLY -- nothing reads these fields yet.
+  - name: annotation
+    rules:
+      - syllable_index_annotation
+      - syllable_role_annotation
+      - syllable_position_annotation
   - name: formant
     rules:
       - dectalk_sw_explicit_override
       - dectalk_sw_default_assignment
       - dectalk_obstruent_parallel_amplitudes
+      - dectalk_special_coartic_f3
+      - dectalk_special_coartic_f2
   - name: prosody
     rules:
       - dectalk_baseline_declination
       - dectalk_hat_rise
       - dectalk_hat_fall
+      - dectalk_question_dip
+      - dectalk_question_rise
+      - dectalk_comma_rise1
+      - dectalk_comma_rise2
       - dectalk_stress_impulse
       - dectalk_boundary_reset
       - dectalk_connected_speech_source_contour
@@ -65,4 +341,4 @@ phases:
     after: [duration, structural, formant, prosody]
     rules: []
     compute_times: true
-    resolve_points: [f0]
+    resolve_points: [f0, f0_layer]

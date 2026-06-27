@@ -145,3 +145,95 @@ rules:
     citations:
       - "DECtalk 4.63 p_us_st1.c (A2-A6/AB selected through ptram + p_amp by following segment class)"
       - "DECtalk 4.63 p_us_rom.h (us_ptram/us_malamp US obstruent amplitude tables)"
+
+  # DECtalk 4.63 us_special_coartic() (p_us_st1.c:314-410): per-vowel F3 TARGET
+  # offset for vowels adjacent to W/R/RX. The function returns an Hz `temp` added
+  # to the formant target; here we add it to the steady F3. unstressed *1.5,
+  # phrase-final-stressed *0.5 scaling and the +-400 clamp mirror the source.
+  # /RR/ (syllabic-r) is excluded (p_us_st1.c:331). W/R/RX are DECtalk phoneme
+  # identities (cited literals), not a derivable place class.
+  dectalk_special_coartic_f3:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && current.phoneme != 'RR'"
+    define:
+      # The preceding token of a vowel after a stop is the stop_release glue
+      # (<BASE>_REL); DECtalk's fonlas is the base stop. Skip release/aspiration
+      # glue to reach the base neighbour (generic, by type — no phoneme literals).
+      prev_base: >-
+        look_back_where(current, 3,
+          'candidate.type != "stop_release" && candidate.type != "stop_aspiration"')
+      prev_ph: "prev_base == null ? '' : prev_base.phoneme"
+      next_ph: "next == null ? '' : next.phoneme"
+      near_w_r: >-
+        prev_ph in ['W', 'R', 'RX'] || next_ph in ['W', 'R', 'RX']
+      raw_offset: >-
+        near_w_r ? params.policy.formant.special_coartic.f3_near_w_r_offset_hz : 0.0
+      is_unstressed: "!has(current.stress) || current.stress != 1"
+      is_phrase_final: "next == null || next.phoneme == 'SIL'"
+      scaled: >-
+        is_unstressed ? (raw_offset * params.policy.formant.special_coartic.unstressed_gain) :
+        (is_phrase_final ? (raw_offset * params.policy.formant.special_coartic.phrase_final_gain) : raw_offset)
+      clamp_hi: params.policy.formant.special_coartic.max_offset_hz
+      offset: >-
+        scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
+    apply:
+      - field: params.F3
+        op: add
+        value: offset
+        tag: coarticulation
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:329-339 (F3 -150 Hz for vowels adjacent to W/R/RX)"
+      - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"
+
+  # DECtalk 4.63 us_special_coartic() F2 TARGET offsets (p_us_st1.c:341-407):
+  #   - front vowel (USP_IY..AE) before [LX] or after [W]/[LL]/[LX] -> -150 Hz
+  #   - [UW] adjacent to an alveolar (us_place & FALVEL) -> +200 Hz
+  # las/nex effects are NOT cumulative (a single `temp`); the dispatch picks the
+  # first matching case in DECtalk order, then applies the same unstressed/
+  # phrase-final scaling and clamp as F3. DEFERRED (need diphpos, not exposed):
+  # AY/OY before LX (-250/-350) and unstressed YU 2nd-half (+400); also there is
+  # no YU/IX allophone in this inventory. front_vowels / alveolar are DATA lists.
+  dectalk_special_coartic_f2:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel'"
+    define:
+      # Skip stop_release/aspiration glue to reach the base preceding phoneme
+      # (DECtalk fonlas); the following stop neighbour is already the base
+      # closure token, so `next` needs no glue-skip.
+      prev_base: >-
+        look_back_where(current, 3,
+          'candidate.type != "stop_release" && candidate.type != "stop_aspiration"')
+      prev_ph: "prev_base == null ? '' : prev_base.phoneme"
+      next_ph: "next == null ? '' : next.phoneme"
+      is_front: "current.phoneme in params.policy.formant.special_coartic.front_vowels"
+      front_near_lateral: >-
+        is_front && (next_ph == 'LX' || prev_ph in ['W', 'LL', 'LX'])
+      is_uw: "current.phoneme == 'UW'"
+      uw_near_alveolar: >-
+        is_uw && (
+          prev_ph in params.policy.formant.special_coartic.alveolar ||
+          next_ph in params.policy.formant.special_coartic.alveolar)
+      raw_offset: >-
+        front_near_lateral ? params.policy.formant.special_coartic.f2_front_near_lateral_offset_hz :
+        (uw_near_alveolar ? params.policy.formant.special_coartic.f2_uw_near_alveolar_offset_hz : 0.0)
+      is_unstressed: "!has(current.stress) || current.stress != 1"
+      is_phrase_final: "next == null || next.phoneme == 'SIL'"
+      scaled: >-
+        is_unstressed ? (raw_offset * params.policy.formant.special_coartic.unstressed_gain) :
+        (is_phrase_final ? (raw_offset * params.policy.formant.special_coartic.phrase_final_gain) : raw_offset)
+      clamp_hi: params.policy.formant.special_coartic.max_offset_hz
+      offset: >-
+        scaled > clamp_hi ? clamp_hi : (scaled < (0.0 - clamp_hi) ? (0.0 - clamp_hi) : scaled)
+    apply:
+      - field: params.F2
+        op: add
+        value: offset
+        tag: coarticulation
+    citations:
+      - "DECtalk 4.63 p_us_st1.c:341-369 (front-vowel F2 -150 near LX/W/LL)"
+      - "DECtalk 4.63 p_us_st1.c:370-385 (UW F2 +200 adjacent alveolar)"
+      - "DECtalk 4.63 p_us_st1.c:386-406 (unstressed *1.5, phrase-final *0.5, |temp|<=400 clamp)"

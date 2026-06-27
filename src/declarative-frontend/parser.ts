@@ -138,6 +138,9 @@ const ROOT_DSL_KEYS = new Set([
   // Chunk 3: pipeline-level reusable string-set and string-keyed map blocks.
   "string_sets",
   "maps",
+  // dt-10: pipeline-level syllabification tables (onset clusters, nuclei,
+  // affixes, ARPABET->ascky map) consumed by the generic syllabify pass.
+  "syllabification",
   "patterns",
   "phases",
   "rules",
@@ -311,6 +314,7 @@ export function parseDslSpec(source: unknown): PlainObject {
   const interpolation = isPlainObject(raw.interpolation) ? raw.interpolation : {};
   const hasStringSets = Object.prototype.hasOwnProperty.call(raw, "string_sets");
   const hasMaps = Object.prototype.hasOwnProperty.call(raw, "maps");
+  const hasSyllabification = Object.prototype.hasOwnProperty.call(raw, "syllabification");
   const extraRootFields = Object.fromEntries(
     Object.entries(raw)
       .filter(([key]) => !ROOT_DSL_KEYS.has(key))
@@ -344,6 +348,10 @@ export function parseDslSpec(source: unknown): PlainObject {
     // (validateStringSets / validateMaps).
     string_sets: hasStringSets ? cloneValue(raw.string_sets) : {},
     maps: hasMaps ? cloneValue(raw.maps) : {},
+    // dt-10: carry the syllabification table block through to the runtime.
+    // Shape validated downstream by validation.ts (validateSyllabification),
+    // parsed into normalized tables by engine.ts (parseSyllabificationTables).
+    ...(hasSyllabification ? { syllabification: cloneValue(raw.syllabification) } : {}),
     patterns: Object.fromEntries(
       Object.entries(patterns).map(([name, pattern]) => [name, normalizePattern(pattern)])
     ),

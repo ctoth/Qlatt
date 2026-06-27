@@ -4,6 +4,7 @@ import {
   type InventorySpec,
   type FrontendResources,
 } from "./declarative-frontend/inventory";
+import { loadCmuDictionaryFromPathSync } from "./cmu-dictionary-loader";
 import { normalizeText } from "./g2p/text-normalize";
 import { loadBundledRulepackSpec } from "./declarative-frontend/rule-pack";
 import type { ProvenanceCollector } from "./provenance";
@@ -35,7 +36,9 @@ import {
   loadSpeakerProfileSync,
   resolveSpeakerProfile,
   type ResolvedSpeakerProfile,
+  type SpeakerProfileOverride,
 } from "./speaker-profile";
+import { getVoiceRegistry, resolveVoice, type ResolvedVoice } from "./dectalk-voice";
 import {
   DEFAULT_SOURCE_CONTOUR_PATH,
   loadSourceContourSync,
@@ -73,23 +76,30 @@ export type TextToKlattTrackOptions = {
   /** Speech rate multiplier: 1.0 = normal, 2.0 = double speed, 0.5 = half speed.
    *  Clamped to [0.5, 2.0]. Citation: Klatt 1976 §III */
   rate?: number;
-  /** Speaker profile overrides. Merged into params.policy.speaker in the CEL context.
+  /** Speaker selection. Either:
+   *   - a voice NAME (string) registered in the frontend's `speakers:` block
+   *     (e.g. "paul", "betty"); the named voice's YAML populates the speaker
+   *     policy and F0 speaker-scaling fields. Frontend must declare a registry.
+   *   - a partial numeric OVERRIDE object, merged into params.policy.speaker.
    *  Defaults are defined in the selected frontend spec under parameters.policy.speaker.
-   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990 */
-  speaker?: {
-    /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
-     *  Citation: O'Shaughnessy 1976 */
-    base_f0_hz?: number;
-    /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
-     *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
-    formant_scale?: number;
-    /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
-     *  Citation: Fant 1997 Table 1 */
-    rd_default?: number;
-    /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
-     *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
-    spectral_tilt_offset_db?: number;
-  };
+   *  Citations: O'Shaughnessy 1976, Kent & Vorperian 2018, Fant 1997, Klatt & Klatt 1990,
+   *  DECtalk 4.63 ph_vset.c (voice tables) */
+  speaker?:
+    | string
+    | {
+        /** Baseline fundamental frequency in Hz. Male default: 110, Female: ~200, Child: ~260.
+         *  Citation: O'Shaughnessy 1976 */
+        base_f0_hz?: number;
+        /** Uniform formant frequency multiplier. Male: 1.0, Female: ~1.17, Child: ~1.3.
+         *  Citation: Kent & Vorperian 2018 (approximation; real scaling is non-uniform) */
+        formant_scale?: number;
+        /** Default Rd parameter for LF glottal source. Male: 0.7, Female: ~1.4.
+         *  Citation: Fant 1997 Table 1 */
+        rd_default?: number;
+        /** Additive spectral tilt offset in dB. Male: 0, Female: ~6.
+         *  Citation: Klatt & Klatt 1990 (H1-H2 gender difference) */
+        spectral_tilt_offset_db?: number;
+      };
   /** Voice quality preset. Controls glottal source shape (Rd), aspiration noise (AH),
    *  spectral tilt (TL), flutter, and jitter. 'modal' or undefined = no change.
    *  Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009 */
@@ -104,12 +114,21 @@ export type FrontendPhoneSummary = {
   word?: string;
   durationMs: number;
   minimumDurationMs?: number;
+  /** Syllable structure annotation (present only when the frontend declares a
+   *  `syllabification:` table block and the annotation phase wrote it). */
+  syllableIndex?: number;
+  syllableRole?: string;
+  syllablePositionInWord?: string;
 };
 
 export type TextToKlattTrackDetailedResult = {
   track: KlattFrame[];
   frontendPhones: FrontendPhoneSummary[];
   controlScore: DeclarativeControlScore;
+  /** Resolved speaker profile (base_f0_hz, formant_scale, rd_default, spectral_tilt_offset_db). */
+  resolvedSpeaker: ResolvedSpeakerProfile;
+  /** Speaker policy parameters fed to the layered F0 model (when present). */
+  speakerParams?: Record<string, unknown>;
 };
 
 function getTrackLoweringSpec(specSource: unknown): TrackLoweringSpec {
@@ -158,6 +177,18 @@ function applySpeakerProfileToParams(
     rd_ref: number;
     spectral_tilt_offset_db: number;
   },
+  voiceFrameStamp?: {
+    /** Full numeric parameter record of the selected voice. */
+    params: Record<string, number>;
+    /** Declared list of fields to stamp (absolute set) onto frame params. */
+    fields: readonly string[];
+  },
+  voiceGainOffsets?: readonly {
+    /** Per-frame Klatt dB param the offset is added to. */
+    param: string;
+    /** Paul-relative additive dB offset (selectedVoice[gain] - default[gain]). */
+    offsetDb: number;
+  }[],
 ): void {
   if (!params) return;
 
@@ -172,6 +203,43 @@ function applySpeakerProfileToParams(
       const value = params[key];
       if (typeof value === "number" && Number.isFinite(value) && value > 0) {
         params[key] = value * speaker.formant_scale;
+      }
+    }
+  }
+
+  // Generic, data-declared speaker-field -> frame-param stamping. The set of
+  // fields is data (frontend.yaml `speakers.speaker_frame_params`); the loop is
+  // a voice-agnostic copy with no per-voice or per-field branches. DECtalk voice
+  // formants are ABSOLUTE speaker-config values (ph_vset.c writes them once into
+  // the chip's resonator registers), so they are SET after the formant_scale
+  // loop — they are not re-multiplied by formant_scale. The selected voice's
+  // value overrides the inventory base_params default for that frame param.
+  // Citation: DECtalk 4.63 ph_vset.c (speaker-dependent resonator config).
+  if (voiceFrameStamp) {
+    for (const field of voiceFrameStamp.fields) {
+      const value = voiceFrameStamp.params[field];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        params[field] = value;
+      }
+    }
+  }
+
+  // Generic, data-declared per-voice GAIN offsets, applied as Paul-relative
+  // ADDITIVE dB offsets onto the per-frame gain dB params (AV/AVS/AH/AF/A1..A5).
+  // Every offset is (selectedVoice[gain] - defaultVoice[gain]); the default
+  // voice (Paul) yields 0 for every entry, so Paul/default frames are
+  // byte-identical. The mapping (which gain -> which frame param) is data
+  // (frontend.yaml speakers.speaker_gain_offsets); this loop is voice-agnostic
+  // with no per-voice or per-gain branches. Adding the offset to the frame's
+  // dB param is identical to adding a term inside dbToLinear(GO + <param> + ...)
+  // in semantics, but touches no shared semantics formula.
+  // Citation: DECtalk 4.63 ph_vset.c (per-speaker source/parallel gain config).
+  if (voiceGainOffsets) {
+    for (const { param, offsetDb } of voiceGainOffsets) {
+      if (offsetDb === 0) continue;
+      const current = params[param];
+      if (typeof current === "number" && Number.isFinite(current)) {
+        params[param] = current + offsetDb;
       }
     }
   }
@@ -198,16 +266,34 @@ function buildTextToKlattTrackDetailed(
   // Load inventory, LTS, and morphology paths from the frontend spec.
   // Every resource path originates in frontend.yaml — no hardcoded defaults.
   const resources = loadFrontendResources(frontendSpec as Record<string, unknown>);
-  const { inventory: frontendInventory, ltsPath, morphologyPath } = resources;
+  const { inventory: frontendInventory, ltsPath, morphologyPath, dictionaryPath } = resources;
   const inventoryCitation = resources.inventoryPath;
 
-  // No-op dictionary lookup for frontends with custom LTS rules (their phoneme set
-  // won't match CMU dictionary entries).
+  // No-op dictionary lookup for frontends with custom LTS rules that declare
+  // neither the global CMU default nor a per-frontend `dictionary_path`.
   const noOpDictLookup = (): null => null;
+
+  // Per-frontend pronunciation dictionary (generic: a path -> a map). When a
+  // frontend declares `dictionary_path`, it does dictionary-first lookup
+  // against that map with LTS fallback (the g2p chain handles the fallback).
+  // Frontends without it keep prior behavior (global CMU map, or no-op when
+  // `skip_dictionary` is set).
+  const frontendDictionaryMap = dictionaryPath
+    ? loadCmuDictionaryFromPathSync(dictionaryPath)
+    : undefined;
 
   const provenance = options.provenance ?? null;
   const requestedRate = options.rate ?? 1.0;
   const diagnostics = options.diagnostics ?? null;
+  // Explainability (AGENTS.md principle 3): a per-frontend dictionary load is a
+  // non-trivial decision — make it observable rather than silent.
+  if (frontendDictionaryMap) {
+    diagnostics?.info(
+      `Loaded per-frontend dictionary '${dictionaryPath}' (${Object.keys(frontendDictionaryMap).length} entries)`,
+      { dictionaryPath, entries: Object.keys(frontendDictionaryMap).length },
+      "I_FRONTEND_DICTIONARY_LOADED",
+    );
+  }
   provenance?.add({
     stage: "frontend",
     type: "lowering_spec_validated",
@@ -220,9 +306,45 @@ function buildTextToKlattTrackDetailed(
       ? (frontendSpec as { speaker_profile_path: string }).speaker_profile_path
       : DEFAULT_SPEAKER_PROFILE_PATH;
   const speakerProfileSpec = loadSpeakerProfileSync(speakerProfilePath);
+
+  // Resolve the `speaker` option into (a) a numeric profile override and
+  // (b) an optional selected voice whose full parameter record feeds the F0
+  // speaker policy. A string `speaker` is a voice NAME resolved against the
+  // frontend's declarative `speakers:` registry; an object is a direct
+  // partial override. This is generic infrastructure — there are no per-voice
+  // branches; the registry maps names to YAML files.
+  let speakerOverride: SpeakerProfileOverride | undefined;
+  let selectedVoice: ResolvedVoice | null = null;
+  let voiceRegistry: ReturnType<typeof getVoiceRegistry> = null;
+  if (typeof options.speaker === "string") {
+    voiceRegistry = getVoiceRegistry(frontendSpec);
+    if (!voiceRegistry) {
+      throw new Error(
+        `E_VOICE_REGISTRY_MISSING: frontend '${frontendId}' declares no speakers registry; ` +
+          `cannot select voice '${options.speaker}'`,
+      );
+    }
+    selectedVoice = resolveVoice(voiceRegistry, options.speaker);
+    speakerOverride = selectedVoice.override;
+  } else if (options.speaker === undefined) {
+    // No `speaker` option: if the frontend declares a `speakers:` registry,
+    // resolve its DECLARED default voice (registry.default) via the exact same
+    // path as an explicit string selection. Generic — the default voice name is
+    // data from the registry, not hardcoded here. Frontends without a registry
+    // (e.g. qlatt-english) fall through with speakerOverride undefined, keeping
+    // the generic speaker profile as before.
+    voiceRegistry = getVoiceRegistry(frontendSpec);
+    if (voiceRegistry) {
+      selectedVoice = resolveVoice(voiceRegistry, voiceRegistry.default);
+      speakerOverride = selectedVoice.override;
+    }
+  } else {
+    speakerOverride = options.speaker;
+  }
+
   const resolvedSpeaker = resolveSpeakerProfile({
     baseF0,
-    speakerOverride: options.speaker,
+    speakerOverride,
     profileSpec: speakerProfileSpec,
   });
   let effectiveBaseF0 = resolvedSpeaker.base_f0_hz;
@@ -259,14 +381,39 @@ function buildTextToKlattTrackDetailed(
   });
 
   const tokenDecisionIds = new Map<string, string>();
-  const normalized = normalizeText(inputText);
+  // Per-frontend text-normalization policy (generic, data-driven). A frontend
+  // may declare a `normalization` block naming its own tables/pipeline YAML
+  // paths; absent that, normalizeText uses the qlatt-english defaults, so any
+  // frontend without the block is byte-identical to before. No per-frontend
+  // branch here — we only forward whatever paths the spec declares.
+  const normalizationSpec = (frontendSpec as { normalization?: unknown }).normalization;
+  const normalizationConfig =
+    normalizationSpec && typeof normalizationSpec === "object"
+      ? {
+          tablesPath: (normalizationSpec as { tables_path?: unknown }).tables_path as
+            | string
+            | undefined,
+          pipelinePath: (normalizationSpec as { pipeline_path?: unknown }).pipeline_path as
+            | string
+            | undefined,
+        }
+      : undefined;
+  const normalized = normalizeText(inputText, normalizationConfig);
   // Transcribe returns a flat list of phoneme objects with word info
   let parameterSequence: PipelineToken[] = transcribeText(normalized, {
     provenance,
     transcriptionConfig: rulepackTranscriptionConfig,
     ltsPath,
     morphologyPath,
-    dictLookup: (frontendSpec as Record<string, unknown>).skip_dictionary ? noOpDictLookup : undefined,
+    // Dictionary selection (generic, no per-frontend branches):
+    //  - `dictionary_path` declared -> use that loaded map (dict-first, LTS fallback).
+    //  - else `skip_dictionary` -> no-op lookup (pure LTS).
+    //  - else -> undefined -> global CMU default map.
+    dictionaryMap: frontendDictionaryMap,
+    dictLookup:
+      frontendDictionaryMap == null && (frontendSpec as Record<string, unknown>).skip_dictionary
+        ? noOpDictLookup
+        : undefined,
     specSource: frontendSpec,
   });
 
@@ -490,6 +637,41 @@ function buildTextToKlattTrackDetailed(
       },
     },
   }));
+  // Build the generic per-frame voice stamp: the selected voice's numeric params
+  // plus the frontend's data-declared `speaker_frame_params` field list. When no
+  // voice is selected (default) or the list is empty, no stamp is applied — the
+  // default voice stays byte-identical. No per-voice branches: both pieces are data.
+  const voiceFrameStamp =
+    selectedVoice && voiceRegistry && voiceRegistry.speakerFrameParams.length > 0
+      ? { params: selectedVoice.params, fields: voiceRegistry.speakerFrameParams }
+      : undefined;
+  // Build the generic per-voice GAIN offset list: each declared
+  // speaker_gain_offsets entry becomes a Paul-relative additive dB offset
+  // (selectedVoice[gain] - defaultVoice[gain]) onto the mapped frame dB param.
+  // The reference is the registry default voice's own values (DATA, resolved
+  // from `speakers.default` — not a hardcoded constant). The default voice
+  // therefore yields 0 for every entry (byte-identical). No per-voice branches.
+  const voiceGainOffsets =
+    selectedVoice && voiceRegistry && voiceRegistry.speakerGainOffsets.length > 0
+      ? (() => {
+          const reference = resolveVoice(voiceRegistry, voiceRegistry.default).params;
+          return voiceRegistry.speakerGainOffsets
+            .map(({ gain, param }) => {
+              const voiceVal = selectedVoice!.params[gain];
+              const refVal = reference[gain];
+              if (
+                typeof voiceVal !== "number" ||
+                !Number.isFinite(voiceVal) ||
+                typeof refVal !== "number" ||
+                !Number.isFinite(refVal)
+              ) {
+                return null;
+              }
+              return { param, offsetDb: voiceVal - refVal };
+            })
+            .filter((e): e is { param: string; offsetDb: number } => e !== null);
+        })()
+      : undefined;
   parameterSequence = parameterSequence.map((token: PipelineToken) => {
     if (
       token?.stream === "f0" ||
@@ -503,7 +685,13 @@ function buildTextToKlattTrackDetailed(
       ...token,
       params: { ...(token.params as Record<string, number>) },
     };
-    applySpeakerProfileToParams(nextToken.params, resolvedSpeaker, sourceContour.baseline);
+    applySpeakerProfileToParams(
+      nextToken.params,
+      resolvedSpeaker,
+      sourceContour.baseline,
+      voiceFrameStamp,
+      voiceGainOffsets,
+    );
     return nextToken;
   });
   const phoneSequence = parameterSequence.filter(
@@ -536,6 +724,14 @@ function buildTextToKlattTrackDetailed(
           extracted[key] = val;
         }
       }
+      // When a registered voice is selected, its numeric parameters override
+      // the inline policy defaults for every field the voice declares. This is
+      // a generic merge — the voice record is data loaded by name, not code.
+      if (selectedVoice) {
+        for (const [key, val] of Object.entries(selectedVoice.params)) {
+          extracted[key] = val;
+        }
+      }
       extracted.base_f0_hz = resolvedSpeaker.base_f0_hz;
       if (Object.keys(extracted).length > 0) {
         speakerParams = extracted;
@@ -560,6 +756,18 @@ function buildTextToKlattTrackDetailed(
       }
       if (Number.isFinite(minimumDuration)) {
         summary.minimumDurationMs = minimumDuration;
+      }
+      // Syllable annotation fields are written by the (optional) declarative
+      // syllabify annotation pass; surface them when present so downstream
+      // tooling (probes, duration rules) can read syllable structure.
+      if (typeof token?.syllable_index === "number") {
+        summary.syllableIndex = token.syllable_index;
+      }
+      if (typeof token?.syllable_role === "string") {
+        summary.syllableRole = token.syllable_role;
+      }
+      if (typeof token?.syllable_position_in_word === "string") {
+        summary.syllablePositionInWord = token.syllable_position_in_word;
       }
       return summary;
     }
@@ -592,6 +800,10 @@ function buildTextToKlattTrackDetailed(
     transitionMs: transitionMs * Math.pow(rate, -transitionScaleExponent),
     f0Model,
     speakerParams,
+    // Selected voice's `sex` data field selects the male vs female formant locus
+    // table generically (no per-voice-name branch). Undefined for the default
+    // voice / when no voice is selected -> male table (byte-identical to before).
+    voiceSex: selectedVoice?.sex,
     diagnostics,
   });
   provenance?.add({
@@ -614,6 +826,8 @@ function buildTextToKlattTrackDetailed(
     track,
     frontendPhones,
     controlScore,
+    resolvedSpeaker,
+    speakerParams,
   };
 }
 

@@ -75,54 +75,88 @@ rules:
       - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
 
   # ---------------------------------------------------------------------------
-  # Rule 4: Stress-based duration scaling
-  # Primary stressed vowels: no change (1.0).
-  # Secondary stressed: *= 0.85.
-  # Unstressed: *= 0.70.
+  # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.
+  # DECtalk p_us_tim.c:355-373 -- the Rule-4 stress shortening applies ONLY to
+  # monosyllabic words ((FTYPESYL)==FMONOSYL == syllable_position_in_word()=='only').
+  # Primary-stressed monosyllable: no change (the N90PRCNT arg is dead code, the
+  # mlsh1 runs only inside the FSTRESS_1 IS_MINUS block).  Secondary: x0.85.
+  # Unstressed: x0.70.  Polysyllable vowels are handled by Rule 4 (non-monosyllable
+  # branch) + Rule 5 below, not here.
   # ---------------------------------------------------------------------------
-  dectalk_stress_shortening:
+  dectalk_monosyllable_stress_shortening:
     kind: scalar
     select:
       stream: phone
-      where: current.type == 'vowel'
+      where: current.type == 'vowel' && has(current.syllable_position_in_word)
     define:
       stress_val: "has(current.stress) ? current.stress : 0"
+      is_monosyllable: current.syllable_position_in_word == 'only'
+    constraint: "is_monosyllable && stress_val != 1"
     apply:
       - field: duration
         op: mul
         dispatch:
-          - when: stress_val == 1
-            value: 1.0
           - when: stress_val == params.policy.duration.stress_secondary_level
-            value: params.policy.duration.stress_secondary
-          - default: params.policy.duration.stress_unstressed
+            value: params.policy.duration.monosyllable_secondary_shortening
+          - default: params.policy.duration.monosyllable_unstressed_shortening
         tag: stress
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 4 (stress-based shortening)"
+      - "DECtalk 4.63 p_us_tim.c:355-373 Rule 4 (monosyllable stress shortening)"
+      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMONOSYL classification)"
       - "DECtalk 4.63 ph_defs.h N85PRCNT=0.85 secondary, N70PRCNT=0.70 unstressed"
 
   # ---------------------------------------------------------------------------
-  # Rule 5: Polysyllabic word shortening
-  # Vowels in multi-syllable words are shortened by 0.80.
-  # Detected by checking if prev in same word is a vowel.
+  # Rule 4 (non-monosyllable branch): shorten polysyllable vowels that are NOT
+  # the final segment before a word boundary.
+  # DECtalk p_us_tim.c:374-394 -- non-FMONOSYL && (strucbou < FWBNEXT), i.e. the
+  # vowel is in a polysyllabic word and is not the last segment of that word.
+  # All of FFIRSTSYL/FMEDIALSYL/FFINALSYL map to N85PRCNT (0.85) in this build.
+  # "Not the last segment of the word" is expressed via same-word-as-next (the
+  # port's Rule 6 uses the same is_word_final test).
+  # ---------------------------------------------------------------------------
+  dectalk_polysyllable_nonfinal_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel' && has(current.syllable_position_in_word)
+    define:
+      "n": next
+      is_polysyllable: current.syllable_position_in_word != 'only'
+      same_word_as_next: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? n.word == current.word : false)
+      is_word_final_segment: "!same_word_as_next"
+    constraint: "is_polysyllable && !is_word_final_segment"
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.polysyllable_nonfinal_shortening
+        tag: medial_syllable
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:374-394 Rule 4 (non-monosyllable, non-word-final shortening, N85PRCNT)"
+      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FFIRSTSYL/FMEDIALSYL/FFINALSYL classification)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 5: Polysyllabic word shortening (vowels in multi-syllable words *= 0.80).
+  # DECtalk p_us_tim.c:398-406 -- (FTYPESYL) != FMONOSYL, i.e. the word has more
+  # than one syllable.  Uses the real syllabification (syllable_position_in_word()
+  # != 'only') instead of the previous look_back_where(...) vowel-in-same-word
+  # approximation.
   # ---------------------------------------------------------------------------
   dectalk_polysyllabic_shortening:
     kind: scalar
     select:
       stream: phone
-      where: current.type == 'vowel' && has(current.word)
-    define:
-      same_word: current.word
-      other_vowel: >-
-        look_back_where(current, 10, "current.type == 'vowel' && has(current.word) && current.word == source.word")
-    constraint: other_vowel != null
+      where: current.type == 'vowel' && has(current.syllable_position_in_word)
+    constraint: current.syllable_position_in_word != 'only'
     apply:
       - field: duration
         op: mul
         value: params.policy.duration.polysyllabic_shortening
         tag: polysyllabic
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 5 (polysyllabic shortening, N80PRCNT)"
+      - "DECtalk 4.63 p_us_tim.c:398-406 Rule 5 (polysyllabic shortening, N80PRCNT)"
+      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMONOSYL classification)"
 
   # ---------------------------------------------------------------------------
   # Rule 6: Non-word-initial consonant shortening
@@ -169,6 +203,12 @@ rules:
   # ---------------------------------------------------------------------------
   # Rule 7: Unstressed segment shortening
   # Non-primary-stressed segments get additional shortening.
+  # DECtalk p_us_tim.c:429-495.  For an unstressed SYLLABIC segment in a word-
+  # MEDIAL syllable ((FTYPESYL)==FMEDIALSYL, L452-456) the multiplier is prcnt>>1
+  # (== x0.5); a non-medial unstressed syllabic gets N70PRCNT (x0.70, L459-463).
+  # Glides (w/y/r/l, L479-483) get prcnt>>1 (x0.5); other consonants N70PRCNT.
+  # The durmin (minimum-duration) halving for unstressed non-obstruents
+  # (L432-447) is a separate floor adjustment; see dectalk_unstressed_floor_*.
   # ---------------------------------------------------------------------------
   dectalk_unstressed_shortening:
     kind: scalar
@@ -180,11 +220,16 @@ rules:
       is_primary: stress_val == 1
       is_vowel: current.type == 'vowel'
       is_glide: current.type == 'glide'
+      is_medial_syllabic: >-
+        is_vowel && has(current.syllable_position_in_word)
+        && current.syllable_position_in_word == 'medial'
     constraint: "!is_primary"
     apply:
       - field: duration
         op: mul
         dispatch:
+          - when: is_medial_syllabic
+            value: params.policy.duration.unstressed_medial_syllabic_shortening
           - when: is_vowel
             value: params.policy.duration.unstressed_syllabic_shortening
           - when: is_glide
@@ -192,7 +237,8 @@ rules:
           - default: params.policy.duration.unstressed_consonant_shortening
         tag: unstressed
     citations:
-      - "DECtalk 4.63 p_us_tim.c Rule 7 (unstressed shortening)"
+      - "DECtalk 4.63 p_us_tim.c:429-495 Rule 7 (unstressed shortening; medial syllabic prcnt>>1)"
+      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FMEDIALSYL classification)"
 
   # ---------------------------------------------------------------------------
   # Rule 8: Emphasis lengthening
@@ -331,6 +377,187 @@ rules:
         tag: phrase_initial
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 15 (phrase-initial vowel after silence)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 9 ([nt] cluster sub-case): shorten a word-internal /n/ before a
+  # non-word-initial unstressed /t/ ("winter", "twenty").
+  # DECtalk p_us_tim.c:628-639 -- when phocur==N and phonex==T and the /t/ is
+  # neither word-initial nor stressed, the /n/ multiplier becomes N10PRCNT (0.10).
+  # The companion allophonic rewrite of the /t/ to /d/ (L635) is a phoneme
+  # rewrite handled in the postlexical phase, not here; only the durational
+  # shortening of the /n/ is modelled.
+  # ---------------------------------------------------------------------------
+  dectalk_nt_cluster_nasal_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'N'
+    define:
+      "n": next
+      next_is_t: "n == null ? false : n.phoneme == 'T'"
+      next_same_word: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? n.word == current.word : false)
+      next_stress: "n == null ? 0 : (has(n.stress) ? n.stress : 0)"
+      next_t_unstressed_internal: "next_is_t && next_same_word && next_stress != 1"
+    constraint: next_t_unstressed_internal
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.nt_cluster_nasal_shortening
+        tag: nt_cluster
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:628-639 Rule 9 ([nt] cluster /n/ shortening, N10PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 10: lengthen the first vowel of a two-vowel sequence (hiatus).
+  # DECtalk p_us_tim.c:647-655 -- a syllabic followed by another syllabic gets
+  # +NF30MS.
+  # ---------------------------------------------------------------------------
+  dectalk_two_vowel_first_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+      next_is_vowel: "n == null ? false : n.type == 'vowel'"
+    constraint: next_is_vowel
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.two_vowel_first_lengthening_ms
+        tag: two_vowel
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:647-655 Rule 10 (first vowel of two-vowel sequence, NF30MS)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 11: lengthen a word-initial stressed vowel of a polysyllabic word.
+  # DECtalk p_us_tim.c:657-664 -- (FTYPESYL)==FFIRSTSYL && FSTRESS_1 &&
+  # (struclas & FWINITC) IS_MINUS, i.e. the first-syllable primary-stressed vowel
+  # whose preceding segment is NOT this word's initial consonant -> the vowel is
+  # word-initial (vowel-initial polysyllable, e.g. "apple", "easy") -> +NF25MS.
+  # ---------------------------------------------------------------------------
+  dectalk_word_initial_stressed_vowel_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel' && has(current.syllable_position_in_word)
+    define:
+      "p": prev
+      stress_val: "has(current.stress) ? current.stress : 0"
+      is_first_syllable: current.syllable_position_in_word == 'first'
+      is_word_initial_segment: >-
+        p == null ? true :
+        (has(p.word) && has(current.word) ? p.word != current.word : true)
+    constraint: "is_first_syllable && stress_val == 1 && is_word_initial_segment"
+    apply:
+      - field: duration
+        op: add
+        value: params.policy.duration.word_initial_stressed_vowel_lengthening_ms
+        tag: word_initial_stressed
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:657-664 Rule 11 (word-initial stressed vowel of polysyllable, NF25MS)"
+      - "DECtalk 4.63 ph_sort2.c:69-111 init_med_final (FFIRSTSYL classification)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 19: shorten a function-word-final unstressed monosyllable /th/ (e.g.
+  # "with").  DECtalk p_us_tim.c:819-826 -- phocur==TH && (FTYPESYL)==FMONOSYL &&
+  # (strucbou >= FWBNEXT, word-final) && unstressed -> N60PRCNT.
+  # ---------------------------------------------------------------------------
+  dectalk_function_word_final_th_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'TH' && has(current.syllable_position_in_word)
+    define:
+      "n": next
+      stress_val: "has(current.stress) ? current.stress : 0"
+      is_monosyllable: current.syllable_position_in_word == 'only'
+      same_word_as_next: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? n.word == current.word : false)
+      is_word_final_segment: "!same_word_as_next"
+    constraint: "is_monosyllable && is_word_final_segment && stress_val != 1"
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.function_word_final_th_shortening
+        tag: function_word_th
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:819-826 Rule 19 (function-word-final TH, N60PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 20: lengthen the unstressed monosyllable IY of "the/me/he" before a
+  # vowel.  DECtalk p_us_tim.c:828-836 -- phocur==IY && (FTYPESYL)==FMONOSYL &&
+  # unstressed && (strucbou > FMBNEXT, a following word boundary) -> N150PRCNT.
+  # The "before a vowel" is the word boundary placing another word after this
+  # monosyllable; modelled as the IY being the word-final segment with a vowel
+  # starting the next word.
+  # ---------------------------------------------------------------------------
+  dectalk_the_iy_prevocalic_lengthening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'IY' && has(current.syllable_position_in_word)
+    define:
+      "n": next
+      stress_val: "has(current.stress) ? current.stress : 0"
+      is_monosyllable: current.syllable_position_in_word == 'only'
+      next_other_word_vowel: >-
+        n == null ? false :
+        (has(n.word) && has(current.word) ? (n.word != current.word && n.type == 'vowel') : false)
+    constraint: "is_monosyllable && stress_val != 1 && next_other_word_vowel"
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.the_iy_prevocalic_lengthening
+        tag: the_iy
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:828-836 Rule 20 (the/me/he IY before vowel, N150PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 23: shorten a vowel before a /t/-flap DF ("writing" vs "riding").
+  # DECtalk p_us_tim.c:859-868 -- phonex==DF -> N35PRCNT.  DF is produced by the
+  # postlexical flapping rules (chunk dt-9); it is a distinct flap allophone.
+  # ---------------------------------------------------------------------------
+  dectalk_pre_df_flap_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'vowel'
+    define:
+      "n": next
+      next_is_df: "n == null ? false : n.phoneme == 'DF'"
+    constraint: next_is_df
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.pre_df_flap_shortening
+        tag: pre_df_flap
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:859-868 Rule 23 (vowel before DF flap, N35PRCNT)"
+
+  # ---------------------------------------------------------------------------
+  # Rule 24: shorten a segment before NG ("ing" too long).
+  # DECtalk p_us_tim.c:882-889 -- allophons[nphon+1]==NX (port NG) -> N60PRCNT.
+  # ---------------------------------------------------------------------------
+  dectalk_pre_ng_shortening:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme != 'SIL'
+    define:
+      "n": next
+      next_is_ng: "n == null ? false : n.phoneme == 'NG'"
+    constraint: next_is_ng
+    apply:
+      - field: duration
+        op: mul
+        value: params.policy.duration.pre_ng_shortening
+        tag: pre_ng
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:882-889 Rule 24 (segment before NG, N60PRCNT)"
 
   # ---------------------------------------------------------------------------
   # Rate scaling

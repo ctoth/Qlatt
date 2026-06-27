@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { parseDectalkTraceFile } from "./dectalk-trace";
+import { parseDectalkTraceFile, type DectalkTraceFrame } from "./dectalk-trace";
 
 const FRAME_PERIOD_SEC = 0.0064;
 
@@ -35,26 +35,32 @@ type PhraseSummary = {
 };
 
 const PARAM_MAP: Array<{
-  oracle: string;
+  label: string;
+  oracle?: keyof DectalkTraceFrame["out"];
+  oracleValue?: (frame: DectalkTraceFrame) => number | null;
   qlatt: string;
   qlattScale?: number;
 }> = [
-  { oracle: "T0", qlatt: "F0", qlattScale: 10 },
-  { oracle: "F1", qlatt: "F1" },
-  { oracle: "F2", qlatt: "F2" },
-  { oracle: "F3", qlatt: "F3" },
-  { oracle: "B1", qlatt: "B1" },
-  { oracle: "B2", qlatt: "B2" },
-  { oracle: "B3", qlatt: "B3" },
-  { oracle: "AV", qlatt: "AV" },
-  { oracle: "AP", qlatt: "AH" },
-  { oracle: "A2", qlatt: "A2" },
-  { oracle: "A3", qlatt: "A3" },
-  { oracle: "A4", qlatt: "A4" },
-  { oracle: "A5", qlatt: "A5" },
-  { oracle: "A6", qlatt: "A6" },
-  { oracle: "AB", qlatt: "AB" },
-  { oracle: "TLT", qlatt: "TL" },
+  {
+    label: "F0",
+    oracleValue: (frame) => finiteNumber(frame.f0prime) == null ? null : frame.f0prime / 10,
+    qlatt: "F0",
+  },
+  { label: "F1", oracle: "F1", qlatt: "F1" },
+  { label: "F2", oracle: "F2", qlatt: "F2" },
+  { label: "F3", oracle: "F3", qlatt: "F3" },
+  { label: "B1", oracle: "B1", qlatt: "B1" },
+  { label: "B2", oracle: "B2", qlatt: "B2" },
+  { label: "B3", oracle: "B3", qlatt: "B3" },
+  { label: "AV", oracle: "AV", qlatt: "AV" },
+  { label: "AP", oracle: "AP", qlatt: "AH" },
+  { label: "A2", oracle: "A2", qlatt: "A2" },
+  { label: "A3", oracle: "A3", qlatt: "A3" },
+  { label: "A4", oracle: "A4", qlatt: "A4" },
+  { label: "A5", oracle: "A5", qlatt: "A5" },
+  { label: "A6", oracle: "A6", qlatt: "A6" },
+  { label: "AB", oracle: "AB", qlatt: "AB" },
+  { label: "TLT", oracle: "TLT", qlatt: "TL" },
 ];
 
 function parseArgs(argv: string[]): Args {
@@ -120,7 +126,8 @@ function qlattValue(event: TrackEvent | null, key: string, scale = 1): number | 
 function summarizeParam(
   oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
   track: TrackEvent[],
-  oracleKey: string,
+  oracleKey: keyof DectalkTraceFrame["out"] | undefined,
+  oracleValueForFrame: ((frame: DectalkTraceFrame) => number | null) | undefined,
   qlattKey: string,
   qlattScale = 1,
 ): ParamSummary {
@@ -133,9 +140,9 @@ function summarizeParam(
 
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
     const oracleFrame = oracleFrames[frameIndex]!;
-    const oracleValue = finiteNumber(
-      oracleFrame.out[oracleKey as keyof typeof oracleFrame.out],
-    );
+    const oracleValue =
+      oracleValueForFrame?.(oracleFrame) ??
+      (oracleKey == null ? null : finiteNumber(oracleFrame.out[oracleKey]));
     const event = eventAt(track, frameIndex * FRAME_PERIOD_SEC);
     const qlatt = qlattValue(event, qlattKey, qlattScale);
     if (oracleValue == null || qlatt == null) continue;
@@ -184,11 +191,12 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
 
   const params = Object.fromEntries(
     PARAM_MAP.map((entry) => [
-      entry.oracle,
+      entry.label,
       summarizeParam(
         oracle.frames,
         track,
         entry.oracle,
+        entry.oracleValue,
         entry.qlatt,
         entry.qlattScale ?? 1,
       ),
@@ -211,7 +219,7 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
 }
 
 function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
-  const byParam = PARAM_MAP.map(({ oracle }) => {
+  const byParam = PARAM_MAP.map(({ label }) => {
     let compared = 0;
     let weightedAbs = 0;
     let maxAbs = 0;
@@ -221,7 +229,7 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
     let qlattAtMax: number | null = null;
 
     for (const phrase of phrases) {
-      const summary = phrase.params[oracle];
+      const summary = phrase.params[label];
       if (!summary) continue;
       compared += summary.compared;
       weightedAbs += summary.meanAbs * summary.compared;
@@ -235,7 +243,7 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
     }
 
     return {
-      param: oracle,
+      param: label,
       compared,
       meanAbs: compared > 0 ? weightedAbs / compared : 0,
       maxAbs,

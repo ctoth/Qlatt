@@ -26,3 +26,23 @@ committed state rather than trying to treat earlier chat-only notes as the recor
 The next source slice should be selected from current 50-phrase evidence. The
 largest actionable discrepancy must be identified from oracle-vs-Qlatt trace output
 before editing YAML or TypeScript.
+
+## Scoreboard correction
+
+The first aggregate scoreboard run ranked `T0` highest, but that was a measurement
+bug: the comparator was checking oracle `OUT_T0` against Qlatt `F0 * 10`.
+DECtalk source binds the frontend `F0` parameter to `OUT_T0`, assigns
+`parstochip[OUT_T0] = f0prime`, and labels the value as Hz*10 in `vtm_i.h`.
+The correct per-frame comparison is oracle `f0prime / 10` against Qlatt `F0`.
+
+After correcting the measurement, the 50-phrase L1 ranking is:
+
+- `A2`: meanAbs 548.2396962198139
+- `F2`: meanAbs 208.234138578377
+- `F3`: meanAbs 128.45517791620446
+- `F1`: meanAbs 78.0924396279546
+- `B3`: meanAbs 72.360098984555
+- `F0`: meanAbs 59.97648324799537
+
+Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-per-formant-f3-45-50\trace-summary-f0hz.json`.

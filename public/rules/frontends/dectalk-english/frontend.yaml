@@ -343,6 +343,8 @@ parameters:
       # Final fall below baseline at declarative sentence end (internal Hz*10).
       # Source: ph_inton1.c F0_FINAL_FALL = 180.
       final_fall_hz: 180
+      # DECtalk frac4mul divisor used when speaker assertiveness scales f0fall.
+      assertiveness_divisor: 4096
       # DECtalk 4.63 ph_inton1.c Rule 3:
       # hat fall starts dur - 180 ms from the stressed vowel onset, with a
       # minimum onset delay of 25 ms.

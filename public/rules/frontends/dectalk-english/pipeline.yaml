@@ -219,7 +219,9 @@ streams:
     features:
       type: [vowel, stop_closure, stop_release, stop_aspiration, fricative, affricate, silence, liquid, nasal, glide, flap]
     scalars:
-      duration: { unit: ms, resolution: klatt, max: 500, floor_field: minimumDuration }
+      # DECtalk ph_defs.h defines NF640MS=100 frames; terminal nfperiod=94
+      # frames must survive scalar validation for punctuation pauses.
+      duration: { unit: ms, resolution: klatt, max: 640, floor_field: minimumDuration }
   f0:
     type: point
     value_type: number

@@ -4670,7 +4670,7 @@ rules_by_letter:
   - left: ' '
     letters: THE
     right: ' '
-    phonemes: [DH, AH0]
+    phonemes: [DH, AX0]
   # DECtalk 4.63 parity: preserve the unstressed high back vowel in the exact lexical item.
   - left: ' '
     letters: TODAY

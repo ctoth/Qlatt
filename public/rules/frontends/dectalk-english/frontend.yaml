@@ -241,7 +241,9 @@ parameters:
       weak_release_amplitude_reduction_db: 10
       stress_secondary_level: 2
       pause_comma_ms: 150
-      pause_period_ms: 300
+      # DECtalk 4.63 English sets nfperiod=94 frames in ph_claus.c, and
+      # p_us_tim.c applies it directly at the neutral [:ra 180] rate.
+      pause_period_ms: 602
       pause_clause_initial_ms: 32
       clause_final_lengthening_ms: 38
       clause_final_voiced_obstruent_ms: 19
@@ -562,13 +564,13 @@ output:
     id: dectalk-english-track-lowering
     timeline:
       initial_silence_ms:
+        value: 26
+        citations:
+          - "DECtalk 4.63 p_us_tim.c: clause-initial GEN_SIL before voiced obstruent uses 4 control frames"
+      final_silence_ms:
         value: 0
         citations:
-          - "Engineering boundary: DECtalk frontend adds no synthetic initial silence unless rules request it"
-      final_silence_ms:
-        value: 100
-        citations:
-          - "Engineering estimate: preserve legacy DECtalk frontend 100ms release tail"
+          - "DECtalk 4.63 p_us_tim.c: terminal punctuation silence is emitted as GEN_SIL duration"
       duration_floors:
         stop_release_ms:
           value: 7

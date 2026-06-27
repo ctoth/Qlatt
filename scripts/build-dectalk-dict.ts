@@ -28,7 +28,7 @@
  * The two tables fully determine char -> raw-ARPABET. A small documented FIXUP
  * map then reconciles the raw lowercase DECtalk ARPABET to the exact uppercase
  * symbol set in `public/rules/frontends/dectalk-english/inventory.yaml`
- * (e.g. rr->ER, hx->HH, ll->L, nx->NG, ax->AH, ix->IH, yu->Y+UW).
+ * (e.g. rr->ER, ax->AX, hx->HH, ll->L, nx->NG, ix->IH, yu->Y+UW).
  *
  * Stress: `'` = primary stress, backtick = secondary stress; both immediately
  * precede the stressed vowel. The DECtalk-target inventory only defines stress
@@ -113,7 +113,7 @@ const VOWEL_RAW = new Set([
 // expansion (Y glide + UW vowel, "you"/"cute").
 const FIXUP_VOWEL: Record<string, string> = {
   rr: "ER", // r-colored vowel -> ER (inventory has no RR)
-  ax: "AH", // reduced schwa -> AH (inventory has no AX; gets stress 0)
+  ax: "AX", // reduced schwa -> AX (DECtalk US_DF code 17; gets stress 0)
   ix: "IH", // reduced barred-i -> IH (inventory has no IX; gets stress 0)
   // yu handled specially in mapToken (splits to Y + UW)
 };

@@ -34,7 +34,7 @@ const SRC_PATH = "C:\\Users\\Q\\src\\dectalk\\463\\dapi\\src\\dic\\Dic_us.txt";
 // vowels carry a digit and consonants do not.
 const VOWEL_ROOTS = new Set([
   "IY", "IH", "EY", "EH", "AE", "AA", "AY", "AW", "AH", "AO", "OW", "OY",
-  "UH", "UW", "ER", "IR", "AR", "OR", "UR",
+  "UH", "UW", "AX", "ER", "IR", "AR", "OR", "UR",
 ]);
 
 /** Extract phoneme symbol keys from the inventory YAML (2-space-indented keys

@@ -499,6 +499,35 @@ phoneme_targets:
     voiced: true
     low: true
     back: true
+  # DECtalk 4.63 US_DF code 17 (AX): reduced schwa target from us_maltar/us_inhdr/us_mindur.
+  AX1:
+    TL: 3
+    F1: 550
+    F2: 1260
+    F3: 2600
+    B1: 90
+    B2: 80
+    B3: 180
+    AV: 62
+    dur: 160
+    minimumDuration: 60
+    type: vowel
+    voiced: true
+    mid: true
+  AX0:
+    TL: 3
+    F1: 550
+    F2: 1260
+    F3: 2600
+    B1: 90
+    B2: 80
+    B3: 180
+    AV: 62
+    dur: 160
+    minimumDuration: 60
+    type: vowel
+    voiced: true
+    mid: true
   AO1:
     TL: 3
     F1: 640

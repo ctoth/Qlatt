@@ -38,6 +38,44 @@ version: v1
 # ---------------------------------------------------------------------------
 rules:
   # -------------------------------------------------------------------------
+  # INDEFINITE ARTICLE REDUCTION ("a" EY0 -> AX0).  The DECtalk dictionary keeps
+  # the article's lexical form as /e/ (Dic_us.txt: a,N,e...), but the runtime
+  # phoneme log for neutral "a cat." emits AX ("^ ax k ' aet .").  Model that as
+  # a postlexical function-word reduction so the dictionary remains source-faithful
+  # while ordinary unstressed article use matches the oracle.
+  # -------------------------------------------------------------------------
+  dectalk_reduce_article_a:
+    kind: postlexical
+    select:
+      stream: phone
+      where: "current.phoneme == 'EY'"
+    define:
+      ax: "target('AX')"
+      unstressed: "!has(current.stress) || current.stress != 1"
+      is_article_a: "has(current.word) && current.word == 'a'"
+    constraint: "is_article_a && unstressed"
+    splice:
+      type: replace_range
+      range_left: current.sync_left
+      range_right: current.sync_right
+      insert:
+        - copy_from: current
+          copy_fields:
+            - stress
+            - word
+          phoneme: "'AX'"
+          type: ax.type
+          params: ax.params
+          duration: ax.duration
+          inherentDuration: ax.inherentDuration
+          minimumDuration: "has(ax.minimumDuration) ? ax.minimumDuration : ax.duration"
+          voiced: "has(ax.voiced) ? ax.voiced : true"
+          trajectory: "has(ax.trajectory) ? ax.trajectory : null"
+    citations:
+      - "DECtalk 4.63 Dic_us.txt (article dictionary entry: a,N,e...)"
+      - "DECtalk 4.63 oracle -lp for 'a cat.' (runtime phoneme log emits AX for unstressed article a)"
+
+  # -------------------------------------------------------------------------
   # GEMINATE OBSTRUENT DELETION (ph_aloph.c:558-562, A1).  When an obstruent is
   # immediately followed by an identical phoneme, the first copy is deleted, so a
   # geminate (a doubled obstruent across a word/morpheme join) is realized as a

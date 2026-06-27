@@ -291,6 +291,7 @@ phases:
     #     glottalization and flapping; it sits just before the dental /dh/ rule
     #     (L1066), which stays LAST because it likewise reads last_outph.
     rules:
+      - dectalk_reduce_article_a
       - dectalk_geminate_delete
       - dectalk_assimilate_sibilant_sh
       - dectalk_palatalize_t

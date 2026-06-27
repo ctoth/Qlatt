@@ -604,6 +604,11 @@ rules_by_letter:
     right: ''
     phonemes: [AE1]
   B:
+  # DECtalk 4.63 -lp oracle for "The big dog barked." emits b'aar k t.
+  - left: ' '
+    letters: BARKED
+    right: ' '
+    phonemes: [B, AR0, K, T]
   - left: ''
     letters: BOROUGH
     right: ' '

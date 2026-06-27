@@ -107,8 +107,8 @@ rules:
   # Rule 3: Non-phrase-final syllabic shortening
   # Vowels not at a phrase boundary are shortened by 0.70.
   # DECtalk traces for monosyllables such as "dog." do not apply this shortening
-  # to the only vowel before a voiced word-final obstruent; Rule 4 plus Rule 9b
-  # control that case.
+  # to the only vowel before a word-final consonant; Rule 4's monosyllable branch
+  # is the controlling stress-duration rule for that case.
   # ---------------------------------------------------------------------------
   dectalk_non_final_shortening:
     kind: scalar
@@ -119,11 +119,7 @@ rules:
       "n": next
       at_boundary: "n == null ? true : n.phoneme == 'SIL'"
       syll_pos: "syllable_position_in_word()"
-      next_voiced_obstruent: >-
-        n != null
-        && n.type in ['fricative', 'stop_closure', 'affricate']
-        && (has(n.voiced) ? n.voiced == true : false)
-    constraint: "!at_boundary && !(syll_pos == 'only' && next_voiced_obstruent)"
+    constraint: "!at_boundary && syll_pos != 'only'"
     apply:
       - field: duration
         op: mul
@@ -131,7 +127,7 @@ rules:
         tag: non_final
     citations:
       - "DECtalk 4.63 p_us_tim.c Rule 3 (non-phrase-final shortening, N70PRCNT)"
-      - "DECtalk 4.63 -lt oracle trace for 'dog.' (only vowel is not Rule-3 shortened before final voiced /g/)"
+      - "DECtalk 4.63 -lt oracle trace for 'dog.' (only vowel is not Rule-3 shortened before final /g/)"
 
   # ---------------------------------------------------------------------------
   # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.

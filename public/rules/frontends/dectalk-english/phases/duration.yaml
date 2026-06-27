@@ -1,6 +1,56 @@
 version: v1
 rules:
   # ---------------------------------------------------------------------------
+  # Fallback primary stress retargeting
+  # DECtalk promotes the first vowel of a one-word phrase to primary stress when
+  # no lexical primary stress is present.  The stress mark must be applied before
+  # duration resolution so the primary-stress inventory target contributes its
+  # inherent/minimum durations and acoustic params.
+  # ---------------------------------------------------------------------------
+  dectalk_single_word_fallback_primary_retarget:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && word_count() == 1"
+    define:
+      prev_primary_or_boundary: >-
+        look_back_where(current, 100,
+          '(candidate.type == "vowel" && has(candidate.stress) && candidate.stress == 1) || candidate.phoneme == "SIL"')
+      next_primary_or_boundary: "look_ahead_pred(current, 100, 'is_stressed_vowel_or_boundary')"
+      prior_vowel_in_word: >-
+        find_within_word(current,
+          "current.type == 'vowel'",
+          "behind")
+      no_primary_in_clause: >-
+        (prev_primary_or_boundary == null || prev_primary_or_boundary.phoneme == 'SIL')
+        && (next_primary_or_boundary == null || next_primary_or_boundary.phoneme == 'SIL')
+      primary_target: "target(current.phoneme + '1')"
+    constraint: "no_primary_in_clause && prior_vowel_in_word == null"
+    apply:
+      - field: stress
+        op: set
+        value: 1
+        tag: fallback_primary_stress
+      - field: params
+        op: set
+        value: primary_target.params
+        tag: fallback_primary_stress
+      - field: duration
+        op: set
+        value: primary_target.duration
+        tag: fallback_primary_stress
+      - field: inherentDuration
+        op: set
+        value: primary_target.inherentDuration
+        tag: fallback_primary_stress
+      - field: minimumDuration
+        op: set
+        value: primary_target.minimumDuration
+        tag: fallback_primary_stress
+    citations:
+      - "DECtalk 4.63 ph_sort2.c find_syll_to_stress (no primary stress: stress first vowel of last word)"
+
+  # ---------------------------------------------------------------------------
   # Rule 1: Silence / Pause durations
   # DECtalk sets pause length based on punctuation type.
   # ---------------------------------------------------------------------------

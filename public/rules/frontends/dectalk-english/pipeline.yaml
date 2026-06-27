@@ -233,6 +233,7 @@ streams:
 phases:
   - name: duration
     rules:
+      - dectalk_single_word_fallback_primary_retarget
       - dectalk_pause_duration
       - dectalk_clause_final_lengthening
       - dectalk_non_final_shortening

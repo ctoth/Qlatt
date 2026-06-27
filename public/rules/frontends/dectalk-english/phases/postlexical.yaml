@@ -142,9 +142,10 @@ rules:
   # -------------------------------------------------------------------------
   # CORONAL SIBILANT ASSIMILATION (ph_aloph.c:715-722, A4).  An /s/ or /z/ that
   # is immediately followed by /SH/ assimilates to the postalveolar place of the
-  # following sibilant: S -> SH, Z -> ZH ("this ship" -> "thi-SH ship", "those
-  # shoes" Z -> ZH).  There is NO stress / boundary / position gate in the
-  # source -- it is a pure next-phoneme test:
+  # following sibilant: S -> SH, Z -> ZH.  As with A1 geminate deletion,
+  # DECtalk's word-boundary markers prevent ordinary cross-word pairs such as
+  # "these shoes" from being adjacent in `phonemes[]`; within a lexical word, the
+  # source is a pure next-phoneme test:
   #   if (phonemes[n+1] == USP_SH) {
   #     if (curr_inph == USP_S)  curr_outph = USP_SH;
   #     if (curr_inph == USP_Z)  curr_outph = USP_ZH;
@@ -169,9 +170,10 @@ rules:
     define:
       n: next
       next_is_sh: "n != null && n.phoneme == 'SH'"
+      same_word: "n != null && has(n.word) && has(current.word) && n.word == current.word"
       assim_name: "current.phoneme == 'S' ? 'SH' : 'ZH'"
       at: "target(assim_name)"
-    constraint: next_is_sh
+    constraint: "next_is_sh && same_word"
     splice:
       type: replace_range
       range_left: current.sync_left

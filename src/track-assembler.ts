@@ -1810,12 +1810,22 @@ export function lowerControlScoreToKlattTrack(
   const klattTrack: KlattFrame[] = [];
   let currentTime = Math.max(0, initialSilenceMs) / 1000.0;
 
-  // Start silent.
+  // Start silent.  DECtalk's clause-initial GEN_SIL preloads the following
+  // phone's formant region while keeping source/noise amplitudes silent.
   const silParams = fillDefaultParams(phonemeTargetMap["SIL"], baseParams);
   applyGlobalOverlays(silParams, score.global_overlays);
+  const initialParams = coerceKlattParams(silParams);
+  if (initialSilenceMs > 0 && segmentParams.length > 0) {
+    for (const key of blendKeys) {
+      const value = segmentParams[0][key];
+      if (value != null) {
+        initialParams[key] = value;
+      }
+    }
+  }
   klattTrack.push({
     time: 0,
-    params: coerceKlattParams(silParams),
+    params: initialParams,
   });
 
   for (let i = 0; i < score.segments.length; i++) {

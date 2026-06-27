@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-06-27T17:07:37.6607022-06:00",
+  "result": "kept",
+  "baselineRunRoot": "J:\\Qlatt-oracle-output\\dectalk-onset-y-stress-50\\dectalk-us-v1",
+  "candidateRuns": {
+    "onePhrase": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-1\\dectalk-us-v1",
+    "fivePhrase": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-5\\dectalk-us-v1",
+    "tenPhrase": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-10\\dectalk-us-v1",
+    "fiftyPhrase": "J:\\Qlatt-oracle-output\\dectalk-initial-formants-50\\dectalk-us-v1"
+  },
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "metrics": {
+    "baselineCorpusF2MeanAbs": 132.74605745805388,
+    "candidateCorpusF2MeanAbs": 129.2832193319339,
+    "targetPhraseF2Before": 250.9756398642534,
+    "targetPhraseF2After": 243.19679371040723,
+    "fivePhraseF2Before": 96.22480940034815,
+    "fivePhraseF2After": 94.37751875995406,
+    "tenPhraseF2Before": 157.09181206763927,
+    "tenPhraseF2After": 155.3891867693099,
+    "frame0F2MaxPhraseCountBefore": 15,
+    "frame0F2MaxPhraseCountAfter": 1,
+    "warningsBefore": 46,
+    "warningsAfter": 46,
+    "tokenSimilarityAfter": 1
+  }
+}

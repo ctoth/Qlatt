@@ -242,7 +242,11 @@ rules:
     kind: scalar
     select:
       stream: phone
-      where: "current.phoneme == 'SIL' && prev != null && prev.phoneme != 'SIL'"
+      where: >-
+        current.phoneme == 'SIL' &&
+        prev != null &&
+        prev.phoneme != 'SIL' &&
+        !(prev.type in ['stop_release', 'stop_aspiration'])
     apply:
       - field: params.F1
         op: set
@@ -272,3 +276,4 @@ rules:
       - "DECtalk 4.63 oracle -lt trace: terminal GEN_SIL carries the preceding formant trajectory while AV/AP/A2-A6/AB fall silent"
       - "DECtalk 4.63 VTM/vtmiont.c:681-683 (VTM consumes OUT_F1/OUT_F2/OUT_F3 directly from parambuff)"
       - "DECtalk 4.63 p_us_st1.c:778-785 (GEN_SIL boundary smoothing reads prior parstochip for terminal parameter state)"
+      - "DECtalk 4.63 oracle -lt/-lp trace for 'dog.': terminal GEN_SIL after stop release continues formant smoothing instead of copying the release target"

@@ -223,3 +223,51 @@ Compared with the previous kept scoreboard, the selected target improved:
 `F2` meanAbs `169.20365816195923` -> `162.977828312996`, with no increase in
 50-phrase command failures or convergence warnings. Current evidence path:
 `J:\Qlatt-oracle-output\dectalk-clause-count-50\trace-summary.json`.
+
+## F2 stop-release-to-terminal-silence smoothing
+
+The next F2 target phrase was `g2p-dog` ("dog."). L0 and total trace duration
+were already exact enough (`-0.0004` s), but the trace showed Qlatt freezing the
+final `G_REL` formant target into terminal `SIL`. DECtalk does not copy the
+release target there: the raw `-lt` trace continues smoothing through the
+release into terminal `GEN_SIL` (`G_REL`/`SIL` F2 around `1378`, `1319`,
+`1259`, then slowly rising), while Qlatt held `1800`.
+
+Representative evidence before the fix:
+
+- `g2p-dog` F2 meanAbs: `329.91114942528736` in
+  `J:\Qlatt-oracle-output\dectalk-clause-count-50\trace-summary.json`.
+- Max mismatch at frame `81`: oracle F2 `1259`, Qlatt F2 `1800`.
+
+The kept slice narrows `dectalk_silence_carries_formants` so terminal `SIL`
+does not copy formants from stop release/aspiration glue. That lets the existing
+boundary smoothing path act on the release-to-silence edge instead of freezing
+the release inventory target.
+
+Verification:
+
+- 1 phrase: `J:\Qlatt-oracle-output\dectalk-release-sil-smooth-1` -> 0
+  failures, 1 warning, token similarity 1.0; `g2p-dog` F2 meanAbs
+  `247.1525287356322`, max mismatch oracle F2 `1259` vs Qlatt F2 `1650`.
+- 5 phrases: `J:\Qlatt-oracle-output\dectalk-release-sil-smooth-5` -> 0
+  failures, 5 warnings, token similarity 1.0.
+- 10 phrases: `J:\Qlatt-oracle-output\dectalk-release-sil-smooth-10` -> 0
+  failures, 10 warnings, token similarity 1.0.
+- 50 phrases: `J:\Qlatt-oracle-output\dectalk-release-sil-smooth-50` -> 0
+  failures, 46 warnings, token similarity 1.0.
+
+After the kept slice, the 50-phrase L1 ranking is:
+
+- `F2`: meanAbs 158.022712688796
+- `F3`: meanAbs 102.7891227920471
+- `F1`: meanAbs 69.92309924054953
+- `F0`: meanAbs 60.42895510087597
+- `B3`: meanAbs 57.139943681201466
+- `B1`: meanAbs 38.373752026623436
+- `B2`: meanAbs 30.668444406519328
+- `A2`: meanAbs 2.54330574281082
+
+Compared with the previous kept scoreboard, the selected target improved:
+`F2` meanAbs `162.977828312996` -> `158.022712688796`, with no increase in
+50-phrase command failures or convergence warnings. Current evidence path:
+`J:\Qlatt-oracle-output\dectalk-release-sil-smooth-50\trace-summary.json`.

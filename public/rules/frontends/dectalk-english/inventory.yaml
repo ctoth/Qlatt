@@ -537,7 +537,7 @@ phoneme_targets:
     B2: 170
     B3: 140
     AV: 64
-    dur: 240
+    dur: 245  # DECtalk 4.63 -lt oracle trace for "dog." (AO group ~=307.2ms)
     minimumDuration: 100
     type: vowel
     voiced: true

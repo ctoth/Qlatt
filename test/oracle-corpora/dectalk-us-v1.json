@@ -78,6 +78,286 @@
       "group": "prosody",
       "tags": ["question", "terminal-rise"],
       "expectedFocus": "Question contour behavior"
+    },
+    {
+      "id": "g2p-cat",
+      "text": "cat.",
+      "group": "g2p",
+      "tags": ["vowel-quality", "final-stop"],
+      "expectedFocus": "Short front vowel plus final voiceless stop"
+    },
+    {
+      "id": "g2p-cake",
+      "text": "cake.",
+      "group": "g2p",
+      "tags": ["diphthong", "final-stop"],
+      "expectedFocus": "Tense vowel and final velar stop"
+    },
+    {
+      "id": "g2p-moon",
+      "text": "moon.",
+      "group": "g2p",
+      "tags": ["vowel-quality", "nasal"],
+      "expectedFocus": "High back vowel and final nasal"
+    },
+    {
+      "id": "g2p-fish",
+      "text": "fish.",
+      "group": "g2p",
+      "tags": ["fricative", "digraph"],
+      "expectedFocus": "Initial labiodental frication and final SH"
+    },
+    {
+      "id": "g2p-thought",
+      "text": "thought.",
+      "group": "g2p",
+      "tags": ["th", "low-vowel", "final-stop"],
+      "expectedFocus": "TH onset, rounded vowel, and final stop"
+    },
+    {
+      "id": "g2p-measure",
+      "text": "measure.",
+      "group": "g2p",
+      "tags": ["zh", "reduced-vowel"],
+      "expectedFocus": "Medial ZH and reduced final syllable"
+    },
+    {
+      "id": "g2p-yellow",
+      "text": "yellow.",
+      "group": "g2p",
+      "tags": ["glide", "liquid"],
+      "expectedFocus": "Initial palatal glide and final low diphthong"
+    },
+    {
+      "id": "g2p-queen",
+      "text": "queen.",
+      "group": "g2p",
+      "tags": ["cluster", "vowel-quality"],
+      "expectedFocus": "KW onset and high front vowel"
+    },
+    {
+      "id": "g2p-judge",
+      "text": "judge.",
+      "group": "g2p",
+      "tags": ["affricate", "final-affricate"],
+      "expectedFocus": "Initial and final JH affricates"
+    },
+    {
+      "id": "g2p-phone",
+      "text": "phone.",
+      "group": "g2p",
+      "tags": ["digraph", "diphthong"],
+      "expectedFocus": "PH spelling and tense vowel"
+    },
+    {
+      "id": "function-a-cat",
+      "text": "a cat.",
+      "group": "function-words",
+      "tags": ["article", "schwa"],
+      "expectedFocus": "Indefinite article reduction before a noun"
+    },
+    {
+      "id": "function-an-apple",
+      "text": "an apple.",
+      "group": "function-words",
+      "tags": ["article", "vowel-onset"],
+      "expectedFocus": "Article choice and vowel-onset lexical item"
+    },
+    {
+      "id": "function-to-school",
+      "text": "to school.",
+      "group": "function-words",
+      "tags": ["reduced-vowel", "cluster"],
+      "expectedFocus": "Reduced function word before consonant cluster"
+    },
+    {
+      "id": "function-of-it",
+      "text": "of it.",
+      "group": "function-words",
+      "tags": ["function-word", "vowel-onset"],
+      "expectedFocus": "Function word voicing and vowel-onset transition"
+    },
+    {
+      "id": "function-for-you",
+      "text": "for you.",
+      "group": "function-words",
+      "tags": ["rhotic", "glide"],
+      "expectedFocus": "Reduced rhotic function word before Y"
+    },
+    {
+      "id": "function-can-we",
+      "text": "can we go?",
+      "group": "function-words",
+      "tags": ["question", "function-word"],
+      "expectedFocus": "Auxiliary reduction and question contour"
+    },
+    {
+      "id": "numbers-one-two-three",
+      "text": "one two three.",
+      "group": "normalization",
+      "tags": ["numbers", "cardinal"],
+      "expectedFocus": "Simple number word timing"
+    },
+    {
+      "id": "numbers-room-101",
+      "text": "room 101.",
+      "group": "normalization",
+      "tags": ["numbers", "digits"],
+      "expectedFocus": "Numeric normalization inside a short phrase"
+    },
+    {
+      "id": "numbers-12-dogs",
+      "text": "12 dogs.",
+      "group": "normalization",
+      "tags": ["numbers", "plural"],
+      "expectedFocus": "Cardinal number plus plural noun"
+    },
+    {
+      "id": "punct-comma",
+      "text": "Yes, we can.",
+      "group": "punctuation",
+      "tags": ["comma", "declarative"],
+      "expectedFocus": "Comma pause and final declarative fall"
+    },
+    {
+      "id": "punct-question",
+      "text": "Can you hear me?",
+      "group": "punctuation",
+      "tags": ["question", "terminal-rise"],
+      "expectedFocus": "Question punctuation and terminal contour"
+    },
+    {
+      "id": "punct-exclaim",
+      "text": "Stop now!",
+      "group": "punctuation",
+      "tags": ["exclamation", "stop"],
+      "expectedFocus": "Exclamation punctuation and stop release"
+    },
+    {
+      "id": "stops-big-dog",
+      "text": "The big dog barked.",
+      "group": "stops",
+      "tags": ["voiced-stop", "final-cluster"],
+      "expectedFocus": "Voiced stops and final consonant cluster"
+    },
+    {
+      "id": "stops-take-two",
+      "text": "Take two tickets.",
+      "group": "stops",
+      "tags": ["voiceless-stop", "cluster"],
+      "expectedFocus": "Initial voiceless stops and plural final cluster"
+    },
+    {
+      "id": "stops-give-back",
+      "text": "Give back the bag.",
+      "group": "stops",
+      "tags": ["voiced-stop", "function-word"],
+      "expectedFocus": "Voiced stops across word boundaries"
+    },
+    {
+      "id": "fric-safe-zone",
+      "text": "Safe zones feel fuzzy.",
+      "group": "fricatives",
+      "tags": ["sibilant", "labiodental"],
+      "expectedFocus": "Voiced and voiceless fricative contrast"
+    },
+    {
+      "id": "fric-these-shoes",
+      "text": "These shoes shine.",
+      "group": "fricatives",
+      "tags": ["dh", "sh", "sibilant"],
+      "expectedFocus": "Voiced dental fricative and SH transitions"
+    },
+    {
+      "id": "fric-vision",
+      "text": "Vision is usual.",
+      "group": "fricatives",
+      "tags": ["zh", "sibilant"],
+      "expectedFocus": "ZH frication in common words"
+    },
+    {
+      "id": "nasal-many-men",
+      "text": "Many men make money.",
+      "group": "nasals",
+      "tags": ["nasal", "repetition"],
+      "expectedFocus": "M and N nasal timing across repeated words"
+    },
+    {
+      "id": "nasal-sing-song",
+      "text": "Sing a long song.",
+      "group": "nasals",
+      "tags": ["ng", "vowel-transition"],
+      "expectedFocus": "Velar nasal and vowel transitions"
+    },
+    {
+      "id": "liquid-red-lorry",
+      "text": "Red lorries roll along.",
+      "group": "liquids",
+      "tags": ["r", "l"],
+      "expectedFocus": "Alternating R and L liquids"
+    },
+    {
+      "id": "liquid-clear-light",
+      "text": "Clear light glowed.",
+      "group": "liquids",
+      "tags": ["l", "cluster"],
+      "expectedFocus": "Clear L and consonant clusters"
+    },
+    {
+      "id": "glide-we-will",
+      "text": "We will wait.",
+      "group": "glides",
+      "tags": ["w", "function-word"],
+      "expectedFocus": "W glide repetition and vowel onset"
+    },
+    {
+      "id": "glide-young-yard",
+      "text": "Young yaks yelled.",
+      "group": "glides",
+      "tags": ["y", "final-cluster"],
+      "expectedFocus": "Initial Y glide and final clusters"
+    },
+    {
+      "id": "prosody-short-decl",
+      "text": "This is a test.",
+      "group": "prosody",
+      "tags": ["declarative", "function-word"],
+      "expectedFocus": "Short declarative contour with function words"
+    },
+    {
+      "id": "prosody-list",
+      "text": "Red, green, blue, and gold.",
+      "group": "prosody",
+      "tags": ["list", "comma"],
+      "expectedFocus": "List intonation and comma timing"
+    },
+    {
+      "id": "prosody-wh-question",
+      "text": "Where are they going?",
+      "group": "prosody",
+      "tags": ["question", "wh"],
+      "expectedFocus": "Wh-question contour and reductions"
+    },
+    {
+      "id": "vowels-beat-bit",
+      "text": "Beat bit bait bet bat.",
+      "group": "vowels",
+      "tags": ["vowel-contrast", "stops"],
+      "expectedFocus": "Front vowel contrast in matched stop frames"
+    },
+    {
+      "id": "vowels-boat-bought",
+      "text": "Boat boot bought but bite.",
+      "group": "vowels",
+      "tags": ["vowel-contrast", "diphthong"],
+      "expectedFocus": "Back vowel and diphthong contrast"
+    },
+    {
+      "id": "mixed-rain-spain",
+      "text": "The rain in Spain stays mainly in the plain.",
+      "group": "mixed",
+      "tags": ["vowels", "sibilant", "nasal"],
+      "expectedFocus": "Mixed consonant and vowel coverage in a longer sentence"
     }
   ]
 }

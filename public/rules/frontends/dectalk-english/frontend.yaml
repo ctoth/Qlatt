@@ -143,9 +143,11 @@ f0_model:
       type: persistent
     stress:
       type: impulse
-      decay: halving
-      # DECtalk 4.63 Ph_drwt02.c: stress impulse decay = value / 4 per frame.
-      initial_decay_divisor: 4
+      decay: linear
+      # DECtalk 4.63 Ph_drwt02.c IMPULSE doubles stress tarimp and subtracts
+      # original_command / 4 per frame. The stress rule already doubles tarimp,
+      # so the equivalent linear decrement is doubled_value / 8.
+      initial_decay_divisor: 8
       # Engineering threshold: impulse removed when |value| < 0.01.
       termination_threshold: 0.01
     boundary:

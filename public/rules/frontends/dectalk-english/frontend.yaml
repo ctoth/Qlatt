@@ -255,6 +255,12 @@ parameters:
       unstressed_syllabic_shortening: 0.70
       unstressed_consonant_shortening: 0.70
       unstressed_glide_shortening: 0.50
+      # Rule 7 (p_us_tim.c:432-447) lowers durmin for unstressed non-obstruents:
+      # no stress halves durmin, secondary stress subtracts durmin/4, then clamps
+      # to at least 3 DECtalk frames.  At the 6.4 ms control cadence this is 19 ms.
+      unstressed_no_stress_min_duration_factor: 0.50
+      unstressed_secondary_min_duration_factor: 0.75
+      unstressed_min_duration_floor_ms: 19
       emphasis_lengthening_ms: 19
       emphasis_syllabic_extra_ms: 38
       pre_voiceless_fricative_shortening: 0.80

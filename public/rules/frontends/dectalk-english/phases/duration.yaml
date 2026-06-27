@@ -152,6 +152,32 @@ rules:
       - "DECtalk 4.63 -lt oracle trace for 'Thin thieves thought that they thrilled.' (non-final low vowels /AO AE/ shorten more strongly)"
 
   # ---------------------------------------------------------------------------
+  # Rule 7 durmin adjustment: unstressed non-obstruents reduce their minimum
+  # duration before DECtalk's final durxx = prcnt*(durinh-durmin)+durmin formula.
+  # This must run before duration scalar multipliers capture the Qlatt floor.
+  # ---------------------------------------------------------------------------
+  dectalk_unstressed_nonobstruent_floor_adjustment:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL' && has(current.minimumDuration) && has(current.inherentDuration)"
+    define:
+      stress_val: "has(current.stress) ? current.stress : 0"
+      is_obstruent: "current.type in ['fricative', 'stop_closure', 'affricate']"
+      compressible: current.minimumDuration < current.inherentDuration
+    constraint: "!is_obstruent && compressible && stress_val != 1"
+    apply:
+      - field: minimumDuration
+        op: set
+        dispatch:
+          - when: stress_val == params.policy.duration.stress_secondary_level
+            value: max([params.policy.duration.unstressed_min_duration_floor_ms, current.minimumDuration * params.policy.duration.unstressed_secondary_min_duration_factor])
+          - default: max([params.policy.duration.unstressed_min_duration_floor_ms, current.minimumDuration * params.policy.duration.unstressed_no_stress_min_duration_factor])
+        tag: unstressed_floor
+    citations:
+      - "DECtalk 4.63 p_us_tim.c:432-447 Rule 7 (unstressed non-obstruent durmin adjustment)"
+
+  # ---------------------------------------------------------------------------
   # Rule 4 (monosyllable branch): stress-based shortening of MONOSYLLABLE vowels.
   # DECtalk p_us_tim.c:355-373 -- the Rule-4 stress shortening applies ONLY to
   # monosyllabic words ((FTYPESYL)==FMONOSYL == syllable_position_in_word()=='only').

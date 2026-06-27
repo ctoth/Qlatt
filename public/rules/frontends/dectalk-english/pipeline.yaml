@@ -236,6 +236,9 @@ phases:
       - dectalk_single_word_fallback_primary_retarget
       - dectalk_pause_duration
       - dectalk_clause_final_lengthening
+      # Rule 7 durmin adjustment must precede duration multipliers because the
+      # Qlatt scalar resolver captures minimumDuration as the duration floor.
+      - dectalk_unstressed_nonobstruent_floor_adjustment
       - dectalk_non_final_shortening
       # Rule 4 splits into a monosyllable stress branch and a polysyllable
       # non-word-final branch (DECtalk p_us_tim.c:355-373 vs :374-394), keyed on

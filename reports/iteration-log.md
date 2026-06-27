@@ -11,3 +11,4 @@ gate.
 | 002 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `146.8509545970659`; terminal stop-closure silence no longer inherits closure F2 locus | this commit |
 | 003 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `146.40834089282495`; F2 uses DECtalk sonorant-consonant-to-vowel 25/75 forward smoothing | this commit |
 | 004 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `146.1441958925807`; F2 uses DECtalk vowel-to-sonorant-consonant 75/25 backward smoothing | this commit |
+| 005 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `134.7050002209104`; unstressed non-obstruents use DECtalk Rule 7 `durmin` floor adjustment | this commit |

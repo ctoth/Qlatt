@@ -13,3 +13,4 @@ gate.
 | 004 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `146.1441958925807`; F2 uses DECtalk vowel-to-sonorant-consonant 75/25 backward smoothing | this commit |
 | 005 | 46 / 50 not passing | 46 / 50 not passing | F2 meanAbs down to `134.7050002209104`; unstressed non-obstruents use DECtalk Rule 7 `durmin` floor adjustment | this commit |
 | 006 | 46 / 50 not passing | 46 / 50 not passing | Rejected postvocalic `LL -> LX`: raw target worsened target phrase F2 to `283.51007311986257`; timing-preserved rewrite still worsened to `268.81221886885044` from `265.26930388909314` | report-only |
+| 007 | 46 / 50 not passing | 46 / 50 not passing | Rejected source-faithful `LL` inventory target: removed token mismatch but shortened final `LL` from `219ms` to `41ms` and worsened target phrase F2 to `277.0227104825` from `265.26930388909335` | report-only |

@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-06-27T15:33:18.8563647-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "baseline": {
+    "commit": "b4f00189",
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.70500022091034,
+    "nextTargetPhrase": "glide-young-yard",
+    "nextTargetPhraseF2MeanAbs": 265.26930388909335
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-06-27T15:37:23.3154535-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "failureDefinition": "corpus convergence warning count",
+  "result": "rejected",
+  "baseline": {
+    "commit": "b4f00189",
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.70500022091034,
+    "nextTargetPhrase": "glide-young-yard",
+    "nextTargetPhraseF2MeanAbs": 265.26930388909335
+  },
+  "attempt": {
+    "name": "source-faithful LL inventory target",
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-ll-target-1",
+    "warnings": 1,
+    "durationDeltaSec": -0.17180000000000017,
+    "targetPhraseF2MeanAbs": 277.0227104825,
+    "tokenSimilarity": 1,
+    "decision": "rejected"
+  },
+  "end": {
+    "runRoot": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-unstressed-floor-50\\trace-summary.json",
+    "targetFamily": "F2",
+    "targetMeanAbs": 134.70500022091034
+  },
+  "sourceState": "reverted"
+}

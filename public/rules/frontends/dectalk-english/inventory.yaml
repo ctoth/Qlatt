@@ -832,8 +832,8 @@ phoneme_targets:
   ER0:
     TL: 3
     F1: 490
-    F2: 1650
-    F3: 2500
+    F2: 1320  # DECtalk 4.63 p_us_rom.h us_maltar RR steady F2; oracle -lt "measure." ER0 tail ~=1319 Hz
+    F3: 1540  # DECtalk 4.63 p_us_rom.h us_maltar RR steady F3; oracle -lt "measure." ER0 tail trends toward 1540-1620 Hz
     B1: 80
     B2: 110
     B3: 200

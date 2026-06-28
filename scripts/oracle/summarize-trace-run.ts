@@ -16,6 +16,17 @@ type TrackEvent = {
   params?: Record<string, unknown>;
 };
 
+type TrackSelection = {
+  event: TrackEvent;
+  index: number;
+};
+
+type SegmentPhase = {
+  startSec: number | null;
+  endSec: number | null;
+  phase: number | null;
+};
+
 type ParamBucketSummary = {
   compared: number;
   meanAbs: number;
@@ -23,6 +34,17 @@ type ParamBucketSummary = {
   maxFrame: number | null;
   oracleAtMax: number | null;
   qlattAtMax: number | null;
+  maxOraclePhone: string | null;
+  maxOracleOutputPhone: string | null;
+  maxQlattPhone: string | null;
+  maxSegmentMatch: boolean | null;
+  maxOracleSegmentStartSec: number | null;
+  maxOracleSegmentEndSec: number | null;
+  maxOracleSegmentPhase: number | null;
+  maxQlattSegmentStartSec: number | null;
+  maxQlattSegmentEndSec: number | null;
+  maxQlattSegmentPhase: number | null;
+  maxSegmentPhaseDelta: number | null;
 };
 
 type ParamSummary = {
@@ -36,6 +58,13 @@ type ParamSummary = {
   maxOracleOutputPhone: string | null;
   maxQlattPhone: string | null;
   maxSegmentMatch: boolean | null;
+  maxOracleSegmentStartSec: number | null;
+  maxOracleSegmentEndSec: number | null;
+  maxOracleSegmentPhase: number | null;
+  maxQlattSegmentStartSec: number | null;
+  maxQlattSegmentEndSec: number | null;
+  maxQlattSegmentPhase: number | null;
+  maxSegmentPhaseDelta: number | null;
   sameSegment: ParamBucketSummary;
   differentSegment: ParamBucketSummary;
   unknownSegment: ParamBucketSummary;
@@ -316,6 +345,17 @@ function emptyBucket(): ParamBucketSummary {
     maxFrame: null,
     oracleAtMax: null,
     qlattAtMax: null,
+    maxOraclePhone: null,
+    maxOracleOutputPhone: null,
+    maxQlattPhone: null,
+    maxSegmentMatch: null,
+    maxOracleSegmentStartSec: null,
+    maxOracleSegmentEndSec: null,
+    maxOracleSegmentPhase: null,
+    maxQlattSegmentStartSec: null,
+    maxQlattSegmentEndSec: null,
+    maxQlattSegmentPhase: null,
+    maxSegmentPhaseDelta: null,
   };
 }
 
@@ -326,6 +366,12 @@ function accumulateBucket(
   oracleValue: number,
   qlattValueForFrame: number,
   abs: number,
+  oraclePhone: string | null,
+  oracleOutputPhone: string | null,
+  qlattPhone: string | null,
+  segmentMatch: boolean,
+  oraclePhase: SegmentPhase,
+  qlattPhase: SegmentPhase,
 ): number {
   bucket.compared += 1;
   const nextSum = sumAbs + abs;
@@ -335,6 +381,20 @@ function accumulateBucket(
     bucket.maxFrame = frameIndex;
     bucket.oracleAtMax = oracleValue;
     bucket.qlattAtMax = qlattValueForFrame;
+    bucket.maxOraclePhone = oraclePhone;
+    bucket.maxOracleOutputPhone = oracleOutputPhone;
+    bucket.maxQlattPhone = qlattPhone;
+    bucket.maxSegmentMatch = segmentMatch;
+    bucket.maxOracleSegmentStartSec = oraclePhase.startSec;
+    bucket.maxOracleSegmentEndSec = oraclePhase.endSec;
+    bucket.maxOracleSegmentPhase = oraclePhase.phase;
+    bucket.maxQlattSegmentStartSec = qlattPhase.startSec;
+    bucket.maxQlattSegmentEndSec = qlattPhase.endSec;
+    bucket.maxQlattSegmentPhase = qlattPhase.phase;
+    bucket.maxSegmentPhaseDelta =
+      oraclePhase.phase != null && qlattPhase.phase != null
+        ? qlattPhase.phase - oraclePhase.phase
+        : null;
   }
   return nextSum;
 }
@@ -405,13 +465,14 @@ function loadTrack(filePath: string): TrackEvent[] {
   return track.filter((event): event is TrackEvent => event != null && typeof event === "object");
 }
 
-function eventAt(track: TrackEvent[], timeSec: number): TrackEvent | null {
-  let selected: TrackEvent | null = null;
-  for (const event of track) {
+function eventSelectionAt(track: TrackEvent[], timeSec: number): TrackSelection | null {
+  let selected: TrackSelection | null = null;
+  for (let index = 0; index < track.length; index += 1) {
+    const event = track[index]!;
     const eventTime = finiteNumber(event.time);
     if (eventTime == null) continue;
     if (eventTime <= timeSec + 1e-9) {
-      selected = event;
+      selected = { event, index };
       continue;
     }
     break;
@@ -419,10 +480,91 @@ function eventAt(track: TrackEvent[], timeSec: number): TrackEvent | null {
   return selected;
 }
 
+function eventAt(track: TrackEvent[], timeSec: number): TrackEvent | null {
+  return eventSelectionAt(track, timeSec)?.event ?? null;
+}
+
 function qlattValue(event: TrackEvent | null, key: string, scale = 1): number | null {
   if (!event?.params || typeof event.params !== "object") return null;
   const value = finiteNumber(event.params[key]);
   return value == null ? null : value * scale;
+}
+
+function clampUnit(value: number): number {
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+function oracleSegmentPhaseAt(
+  oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
+  frameIndex: number,
+): SegmentPhase {
+  const frame = oracleFrames[frameIndex];
+  if (!frame) return { startSec: null, endSec: null, phase: null };
+  let firstFrame = frameIndex;
+  while (
+    firstFrame > 0 &&
+    oracleFrames[firstFrame - 1]?.phoneIndex === frame.phoneIndex
+  ) {
+    firstFrame -= 1;
+  }
+  let lastFrame = frameIndex;
+  while (
+    lastFrame + 1 < oracleFrames.length &&
+    oracleFrames[lastFrame + 1]?.phoneIndex === frame.phoneIndex
+  ) {
+    lastFrame += 1;
+  }
+  const startSec = firstFrame * FRAME_PERIOD_SEC;
+  const endSec = (lastFrame + 1) * FRAME_PERIOD_SEC;
+  const spanSec = endSec - startSec;
+  const frameSec = frameIndex * FRAME_PERIOD_SEC;
+  return {
+    startSec,
+    endSec,
+    phase: spanSec > 0 ? clampUnit((frameSec - startSec) / spanSec) : null,
+  };
+}
+
+function qlattSegmentPhaseAt(
+  track: TrackEvent[],
+  selection: TrackSelection | null,
+  timeSec: number,
+): SegmentPhase {
+  if (selection == null) return { startSec: null, endSec: null, phase: null };
+  const selectedPhone = normalizeQlattPhone(selection.event.phoneme);
+  if (selectedPhone == null) return { startSec: null, endSec: null, phase: null };
+
+  let firstIndex = selection.index;
+  while (
+    firstIndex > 0 &&
+    normalizeQlattPhone(track[firstIndex - 1]?.phoneme) === selectedPhone
+  ) {
+    firstIndex -= 1;
+  }
+
+  let lastIndex = selection.index;
+  while (
+    lastIndex + 1 < track.length &&
+    normalizeQlattPhone(track[lastIndex + 1]?.phoneme) === selectedPhone
+  ) {
+    lastIndex += 1;
+  }
+
+  const startSec = finiteNumber(track[firstIndex]?.time);
+  const nextTime = finiteNumber(track[lastIndex + 1]?.time);
+  const fallbackEndSec = finiteNumber(track[track.length - 1]?.time);
+  const endSec = nextTime ?? fallbackEndSec;
+  if (startSec == null || endSec == null) {
+    return { startSec, endSec, phase: null };
+  }
+  const spanSec = endSec - startSec;
+  return {
+    startSec,
+    endSec,
+    phase: spanSec > 0 ? clampUnit((timeSec - startSec) / spanSec) : null,
+  };
 }
 
 function summarizeParam(
@@ -444,6 +586,13 @@ function summarizeParam(
   let maxOracleOutputPhone: string | null = null;
   let maxQlattPhone: string | null = null;
   let maxSegmentMatch: boolean | null = null;
+  let maxOracleSegmentStartSec: number | null = null;
+  let maxOracleSegmentEndSec: number | null = null;
+  let maxOracleSegmentPhase: number | null = null;
+  let maxQlattSegmentStartSec: number | null = null;
+  let maxQlattSegmentEndSec: number | null = null;
+  let maxQlattSegmentPhase: number | null = null;
+  let maxSegmentPhaseDelta: number | null = null;
   let sameSegmentSumAbs = 0;
   let differentSegmentSumAbs = 0;
   let unknownSegmentSumAbs = 0;
@@ -456,7 +605,9 @@ function summarizeParam(
     const oracleValue =
       oracleValueForFrame?.(oracleFrame) ??
       (oracleKey == null ? null : finiteNumber(oracleFrame.out[oracleKey]));
-    const event = eventAt(track, frameIndex * FRAME_PERIOD_SEC);
+    const frameTimeSec = frameIndex * FRAME_PERIOD_SEC;
+    const selection = eventSelectionAt(track, frameTimeSec);
+    const event = selection?.event ?? null;
     const qlatt = qlattValue(event, qlattKey, qlattScale);
     if (oracleValue == null || qlatt == null) continue;
 
@@ -466,6 +617,8 @@ function summarizeParam(
     const qlattPhone = normalizeQlattPhone(event?.phoneme);
     const knownSegmentPhones = oraclePhone != null && qlattPhone != null;
     const segmentMatch = knownSegmentPhones && oraclePhone === qlattPhone;
+    const oraclePhase = oracleSegmentPhaseAt(oracleFrames, frameIndex);
+    const qlattPhase = qlattSegmentPhaseAt(track, selection, frameTimeSec);
     compared += 1;
     sumAbs += abs;
     if (!knownSegmentPhones) {
@@ -476,6 +629,12 @@ function summarizeParam(
         oracleValue,
         qlatt,
         abs,
+        oraclePhone,
+        oracleOutputPhone,
+        qlattPhone,
+        segmentMatch,
+        oraclePhase,
+        qlattPhase,
       );
     } else if (segmentMatch) {
       sameSegmentSumAbs = accumulateBucket(
@@ -485,6 +644,12 @@ function summarizeParam(
         oracleValue,
         qlatt,
         abs,
+        oraclePhone,
+        oracleOutputPhone,
+        qlattPhone,
+        segmentMatch,
+        oraclePhase,
+        qlattPhase,
       );
     } else {
       differentSegmentSumAbs = accumulateBucket(
@@ -494,6 +659,12 @@ function summarizeParam(
         oracleValue,
         qlatt,
         abs,
+        oraclePhone,
+        oracleOutputPhone,
+        qlattPhone,
+        segmentMatch,
+        oraclePhase,
+        qlattPhase,
       );
     }
     if (abs > maxAbs) {
@@ -505,6 +676,16 @@ function summarizeParam(
       maxOracleOutputPhone = oracleOutputPhone;
       maxQlattPhone = qlattPhone;
       maxSegmentMatch = segmentMatch;
+      maxOracleSegmentStartSec = oraclePhase.startSec;
+      maxOracleSegmentEndSec = oraclePhase.endSec;
+      maxOracleSegmentPhase = oraclePhase.phase;
+      maxQlattSegmentStartSec = qlattPhase.startSec;
+      maxQlattSegmentEndSec = qlattPhase.endSec;
+      maxQlattSegmentPhase = qlattPhase.phase;
+      maxSegmentPhaseDelta =
+        oraclePhase.phase != null && qlattPhase.phase != null
+          ? qlattPhase.phase - oraclePhase.phase
+          : null;
     }
   }
 
@@ -519,6 +700,13 @@ function summarizeParam(
     maxOracleOutputPhone,
     maxQlattPhone,
     maxSegmentMatch,
+    maxOracleSegmentStartSec,
+    maxOracleSegmentEndSec,
+    maxOracleSegmentPhase,
+    maxQlattSegmentStartSec,
+    maxQlattSegmentEndSec,
+    maxQlattSegmentPhase,
+    maxSegmentPhaseDelta,
     sameSegment,
     differentSegment,
     unknownSegment,
@@ -625,6 +813,13 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
     let maxOracleOutputPhone: string | null = null;
     let maxQlattPhone: string | null = null;
     let maxSegmentMatch: boolean | null = null;
+    let maxOracleSegmentStartSec: number | null = null;
+    let maxOracleSegmentEndSec: number | null = null;
+    let maxOracleSegmentPhase: number | null = null;
+    let maxQlattSegmentStartSec: number | null = null;
+    let maxQlattSegmentEndSec: number | null = null;
+    let maxQlattSegmentPhase: number | null = null;
+    let maxSegmentPhaseDelta: number | null = null;
 
     for (const phrase of phrases) {
       const summary = phrase.params[label];
@@ -648,6 +843,13 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
         maxOracleOutputPhone = summary.maxOracleOutputPhone;
         maxQlattPhone = summary.maxQlattPhone;
         maxSegmentMatch = summary.maxSegmentMatch;
+        maxOracleSegmentStartSec = summary.maxOracleSegmentStartSec;
+        maxOracleSegmentEndSec = summary.maxOracleSegmentEndSec;
+        maxOracleSegmentPhase = summary.maxOracleSegmentPhase;
+        maxQlattSegmentStartSec = summary.maxQlattSegmentStartSec;
+        maxQlattSegmentEndSec = summary.maxQlattSegmentEndSec;
+        maxQlattSegmentPhase = summary.maxQlattSegmentPhase;
+        maxSegmentPhaseDelta = summary.maxSegmentPhaseDelta;
       }
     }
 
@@ -664,6 +866,13 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
       maxOracleOutputPhone,
       maxQlattPhone,
       maxSegmentMatch,
+      maxOracleSegmentStartSec,
+      maxOracleSegmentEndSec,
+      maxOracleSegmentPhase,
+      maxQlattSegmentStartSec,
+      maxQlattSegmentEndSec,
+      maxQlattSegmentPhase,
+      maxSegmentPhaseDelta,
       sameSegmentCompared: sameCompared,
       sameSegmentMeanAbs: sameCompared > 0 ? sameWeightedAbs / sameCompared : 0,
       differentSegmentCompared: differentCompared,

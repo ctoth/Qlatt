@@ -486,12 +486,12 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.forwardParams)) {
       const steadyTime = smoothing.forwardSteadyTimesByKey?.[key] ?? smoothing.forwardSteadyTime;
       if (steadyTime != null && eventTime <= steadyTime + epsilon) {
-        // F2 convergence slices apply DECtalk's linear durtran ramp for keyed
-        // F2 transition windows while leaving other families stable.
-        const useF2TransitionRamp = key === "F2" && smoothing.forwardSteadyTimesByKey?.[key] != null;
+        // DECtalk applies the linear durtran ramp per formant; only keys with a
+        // resolved per-key steady time participate.
+        const useTransitionRamp = smoothing.forwardSteadyTimesByKey?.[key] != null;
         const steadyValue = baseParams[key];
         const duration = steadyTime - segmentStart;
-        if (useF2TransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+        if (useTransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
           const fraction = Math.max(0, Math.min(1, (eventTime - segmentStart) / duration));
           resolved[key] = value + (steadyValue - value) * fraction;
         } else {
@@ -505,12 +505,12 @@ function applyControlWindowsAtOffset(
     for (const [key, value] of Object.entries(smoothing.backwardParams)) {
       const steadyTime = smoothing.backwardSteadyTimesByKey?.[key] ?? smoothing.backwardSteadyTime;
       if (steadyTime != null && eventTime >= steadyTime - epsilon) {
-        // F2 convergence slices apply DECtalk's linear durtran ramp for keyed
-        // F2 transition windows while leaving other families stable.
-        const useF2TransitionRamp = key === "F2" && smoothing.backwardSteadyTimesByKey?.[key] != null;
+        // DECtalk applies the linear durtran ramp per formant; only keys with a
+        // resolved per-key steady time participate.
+        const useTransitionRamp = smoothing.backwardSteadyTimesByKey?.[key] != null;
         const steadyValue = baseParams[key];
         const duration = segmentEnd - steadyTime;
-        if (useF2TransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
+        if (useTransitionRamp && Number.isFinite(steadyValue) && duration > epsilon) {
           const fraction = Math.max(0, Math.min(1, (eventTime - steadyTime) / duration));
           resolved[key] = steadyValue + (value - steadyValue) * fraction;
         } else {

@@ -12,7 +12,17 @@ type Args = {
 
 type TrackEvent = {
   time?: number;
+  phoneme?: string;
   params?: Record<string, unknown>;
+};
+
+type ParamBucketSummary = {
+  compared: number;
+  meanAbs: number;
+  maxAbs: number;
+  maxFrame: number | null;
+  oracleAtMax: number | null;
+  qlattAtMax: number | null;
 };
 
 type ParamSummary = {
@@ -22,6 +32,13 @@ type ParamSummary = {
   maxFrame: number | null;
   oracleAtMax: number | null;
   qlattAtMax: number | null;
+  maxOraclePhone: string | null;
+  maxOracleOutputPhone: string | null;
+  maxQlattPhone: string | null;
+  maxSegmentMatch: boolean | null;
+  sameSegment: ParamBucketSummary;
+  differentSegment: ParamBucketSummary;
+  unknownSegment: ParamBucketSummary;
 };
 
 type PhraseSummary = {
@@ -30,6 +47,12 @@ type PhraseSummary = {
   qlattDurationSec: number;
   oracleDurationSec: number;
   durationDeltaSec: number;
+  alignment: {
+    frames: number;
+    sameSegment: number;
+    differentSegment: number;
+    unknown: number;
+  };
   params: Record<string, ParamSummary>;
   ranked: Array<{ param: string } & ParamSummary>;
 };
@@ -40,6 +63,133 @@ const USP_R = US_PHONE + 26;
 const USP_LL = US_PHONE + 27;
 const USP_HX = US_PHONE + 28;
 const USP_CZ = US_PHONE + 58;
+
+const PHONE_BY_CODE: Record<number, string> = {
+  0: "SIL",
+  1: "IY",
+  2: "IH",
+  3: "EY",
+  4: "EH",
+  5: "AE",
+  6: "AA",
+  7: "AY",
+  8: "AW",
+  9: "AH",
+  10: "AO",
+  11: "OW",
+  12: "OY",
+  13: "UH",
+  14: "UW",
+  15: "ER",
+  16: "YU",
+  17: "AH",
+  18: "IH",
+  19: "IR",
+  20: "ER",
+  21: "AR",
+  22: "OR",
+  23: "UR",
+  24: "W",
+  25: "Y",
+  26: "R",
+  27: "L",
+  28: "HH",
+  29: "R",
+  30: "L",
+  31: "M",
+  32: "N",
+  33: "NG",
+  34: "EL",
+  35: "DH",
+  36: "EN",
+  37: "F",
+  38: "V",
+  39: "TH",
+  40: "DH",
+  41: "S",
+  42: "Z",
+  43: "SH",
+  44: "ZH",
+  45: "P",
+  46: "B",
+  47: "T",
+  48: "D",
+  49: "K",
+  50: "G",
+  51: "DX",
+  52: "T",
+  53: "Q",
+  54: "CH",
+  55: "JH",
+  56: "DF",
+  57: "TZ",
+  58: "CZ",
+};
+
+const ORACLE_TOKEN_TO_QLATT: Record<string, string> = {
+  _: "SIL",
+  iy: "IY",
+  ih: "IH",
+  ey: "EY",
+  eh: "EH",
+  ae: "AE",
+  aa: "AA",
+  ay: "AY",
+  aw: "AW",
+  ah: "AH",
+  ao: "AO",
+  ow: "OW",
+  oy: "OY",
+  uh: "UH",
+  uw: "UW",
+  rr: "ER",
+  er: "ER",
+  ax: "AH",
+  ix: "IH",
+  ir: "IR",
+  ar: "AR",
+  or: "OR",
+  ur: "UR",
+  w: "W",
+  yx: "Y",
+  r: "R",
+  ll: "L",
+  hx: "HH",
+  rx: "R",
+  lx: "L",
+  m: "M",
+  n: "N",
+  nx: "NG",
+  el: "EL",
+  dz: "DH",
+  en: "EN",
+  f: "F",
+  v: "V",
+  th: "TH",
+  dh: "DH",
+  s: "S",
+  z: "Z",
+  sh: "SH",
+  zh: "ZH",
+  p: "P",
+  b: "B",
+  t: "T",
+  d: "D",
+  k: "K",
+  g: "G",
+  dx: "DX",
+  tx: "T",
+  q: "Q",
+  ch: "CH",
+  jh: "JH",
+  df: "DF",
+  tz: "TZ",
+  cz: "CZ",
+  ".": "SIL",
+  "?": "SIL",
+  "!": "SIL",
+  ",": "SIL",
+};
 
 const PARAM_MAP: Array<{
   label: string;
@@ -99,6 +249,94 @@ function parseArgs(argv: string[]): Args {
 
 function finiteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function phoneCodeToQlatt(value: unknown): string | null {
+  const numeric = finiteNumber(value);
+  if (numeric == null) return null;
+  const code = numeric >= US_PHONE ? numeric - US_PHONE : numeric;
+  return PHONE_BY_CODE[code] ?? null;
+}
+
+function oracleTokenToQlatt(token: unknown): string | null {
+  if (typeof token !== "string") return null;
+  const trimmed = token.trim().toLowerCase();
+  if (!trimmed) return null;
+  return ORACLE_TOKEN_TO_QLATT[trimmed] ?? null;
+}
+
+function normalizeQlattPhone(phoneme: unknown): string | null {
+  if (typeof phoneme !== "string") return null;
+  const trimmed = phoneme.trim().toUpperCase().replace(/[0-2]$/u, "");
+  if (!trimmed) return null;
+  if (trimmed.endsWith("_REL") || trimmed.endsWith("_ASP")) {
+    return trimmed.slice(0, trimmed.lastIndexOf("_"));
+  }
+  if (trimmed === "LL" || trimmed === "LX") return "L";
+  if (trimmed === "RR") return "ER";
+  if (trimmed === "AX") return "AH";
+  if (trimmed === "IX") return "IH";
+  if (trimmed === "HH") return "HH";
+  return trimmed;
+}
+
+function loadOracleComparisonTokens(phraseDir: string): string[] {
+  const artifactPath = path.join(phraseDir, "oracle", "oracle.json");
+  if (!fs.existsSync(artifactPath)) return [];
+  const parsed = JSON.parse(fs.readFileSync(artifactPath, "utf8")) as Record<string, unknown>;
+  const symbolic = parsed.symbolic;
+  if (!symbolic || typeof symbolic !== "object") return [];
+  const comparisonTokens = (symbolic as { comparisonTokens?: unknown }).comparisonTokens;
+  if (!Array.isArray(comparisonTokens)) return [];
+  return comparisonTokens
+    .map((token) => (typeof token === "string" ? token : ""))
+    .filter((token) => token.length > 0);
+}
+
+function oracleSourcePhoneForFrame(
+  frame: DectalkTraceFrame,
+  comparisonTokens: string[],
+): string | null {
+  const tokenIndex = frame.phoneIndex - 1;
+  const tokenPhone =
+    tokenIndex >= 0 && tokenIndex < comparisonTokens.length
+      ? oracleTokenToQlatt(comparisonTokens[tokenIndex])
+      : null;
+  if (tokenPhone != null) return tokenPhone;
+  if (frame.phoneIndex <= 0) return "SIL";
+  if (frame.phoneIndex > comparisonTokens.length + 1) return "SIL";
+  return phoneCodeToQlatt(frame.out.PH);
+}
+
+function emptyBucket(): ParamBucketSummary {
+  return {
+    compared: 0,
+    meanAbs: 0,
+    maxAbs: 0,
+    maxFrame: null,
+    oracleAtMax: null,
+    qlattAtMax: null,
+  };
+}
+
+function accumulateBucket(
+  bucket: ParamBucketSummary,
+  sumAbs: number,
+  frameIndex: number,
+  oracleValue: number,
+  qlattValueForFrame: number,
+  abs: number,
+): number {
+  bucket.compared += 1;
+  const nextSum = sumAbs + abs;
+  bucket.meanAbs = nextSum / bucket.compared;
+  if (abs > bucket.maxAbs) {
+    bucket.maxAbs = abs;
+    bucket.maxFrame = frameIndex;
+    bucket.oracleAtMax = oracleValue;
+    bucket.qlattAtMax = qlattValueForFrame;
+  }
+  return nextSum;
 }
 
 function dectalkA2Db(frame: DectalkTraceFrame): number | null {
@@ -190,6 +428,7 @@ function qlattValue(event: TrackEvent | null, key: string, scale = 1): number | 
 function summarizeParam(
   oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
   track: TrackEvent[],
+  oracleComparisonTokens: string[],
   oracleKey: keyof DectalkTraceFrame["out"] | undefined,
   oracleValueForFrame: ((frame: DectalkTraceFrame) => number | null) | undefined,
   qlattKey: string,
@@ -201,6 +440,16 @@ function summarizeParam(
   let maxFrame: number | null = null;
   let oracleAtMax: number | null = null;
   let qlattAtMax: number | null = null;
+  let maxOraclePhone: string | null = null;
+  let maxOracleOutputPhone: string | null = null;
+  let maxQlattPhone: string | null = null;
+  let maxSegmentMatch: boolean | null = null;
+  let sameSegmentSumAbs = 0;
+  let differentSegmentSumAbs = 0;
+  let unknownSegmentSumAbs = 0;
+  const sameSegment = emptyBucket();
+  const differentSegment = emptyBucket();
+  const unknownSegment = emptyBucket();
 
   for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
     const oracleFrame = oracleFrames[frameIndex]!;
@@ -212,13 +461,50 @@ function summarizeParam(
     if (oracleValue == null || qlatt == null) continue;
 
     const abs = Math.abs(qlatt - oracleValue);
+    const oraclePhone = oracleSourcePhoneForFrame(oracleFrame, oracleComparisonTokens);
+    const oracleOutputPhone = phoneCodeToQlatt(oracleFrame.out.PH);
+    const qlattPhone = normalizeQlattPhone(event?.phoneme);
+    const knownSegmentPhones = oraclePhone != null && qlattPhone != null;
+    const segmentMatch = knownSegmentPhones && oraclePhone === qlattPhone;
     compared += 1;
     sumAbs += abs;
+    if (!knownSegmentPhones) {
+      unknownSegmentSumAbs = accumulateBucket(
+        unknownSegment,
+        unknownSegmentSumAbs,
+        frameIndex,
+        oracleValue,
+        qlatt,
+        abs,
+      );
+    } else if (segmentMatch) {
+      sameSegmentSumAbs = accumulateBucket(
+        sameSegment,
+        sameSegmentSumAbs,
+        frameIndex,
+        oracleValue,
+        qlatt,
+        abs,
+      );
+    } else {
+      differentSegmentSumAbs = accumulateBucket(
+        differentSegment,
+        differentSegmentSumAbs,
+        frameIndex,
+        oracleValue,
+        qlatt,
+        abs,
+      );
+    }
     if (abs > maxAbs) {
       maxAbs = abs;
       maxFrame = frameIndex;
       oracleAtMax = oracleValue;
       qlattAtMax = qlatt;
+      maxOraclePhone = oraclePhone;
+      maxOracleOutputPhone = oracleOutputPhone;
+      maxQlattPhone = qlattPhone;
+      maxSegmentMatch = segmentMatch;
     }
   }
 
@@ -229,6 +515,41 @@ function summarizeParam(
     maxFrame,
     oracleAtMax,
     qlattAtMax,
+    maxOraclePhone,
+    maxOracleOutputPhone,
+    maxQlattPhone,
+    maxSegmentMatch,
+    sameSegment,
+    differentSegment,
+    unknownSegment,
+  };
+}
+
+function summarizeAlignment(
+  oracleFrames: ReturnType<typeof parseDectalkTraceFile>["frames"],
+  track: TrackEvent[],
+  oracleComparisonTokens: string[],
+): PhraseSummary["alignment"] {
+  let sameSegment = 0;
+  let differentSegment = 0;
+  let unknown = 0;
+  for (let frameIndex = 0; frameIndex < oracleFrames.length; frameIndex += 1) {
+    const oraclePhone = oracleSourcePhoneForFrame(oracleFrames[frameIndex]!, oracleComparisonTokens);
+    const event = eventAt(track, frameIndex * FRAME_PERIOD_SEC);
+    const qlattPhone = normalizeQlattPhone(event?.phoneme);
+    if (oraclePhone == null || qlattPhone == null) {
+      unknown += 1;
+    } else if (oraclePhone === qlattPhone) {
+      sameSegment += 1;
+    } else {
+      differentSegment += 1;
+    }
+  }
+  return {
+    frames: oracleFrames.length,
+    sameSegment,
+    differentSegment,
+    unknown,
   };
 }
 
@@ -251,6 +572,7 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
   const qlattPayload = path.join(phraseDir, "qlatt", "qlatt.json");
   const oracle = parseDectalkTraceFile(oracleTrace);
   const track = loadTrack(qlattPayload);
+  const oracleComparisonTokens = loadOracleComparisonTokens(phraseDir);
   const lastTrackTime = finiteNumber(track[track.length - 1]?.time) ?? 0;
 
   const params = Object.fromEntries(
@@ -259,6 +581,7 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
       summarizeParam(
         oracle.frames,
         track,
+        oracleComparisonTokens,
         entry.oracle,
         entry.oracleValue,
         entry.qlatt,
@@ -277,6 +600,7 @@ function summarizePhrase(phraseDir: string): PhraseSummary {
     qlattDurationSec: lastTrackTime,
     oracleDurationSec: Number(oracle.summary.durationSec ?? 0),
     durationDeltaSec: lastTrackTime - Number(oracle.summary.durationSec ?? 0),
+    alignment: summarizeAlignment(oracle.frames, track, oracleComparisonTokens),
     params,
     ranked,
   };
@@ -286,23 +610,44 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
   const byParam = PARAM_MAP.map(({ label }) => {
     let compared = 0;
     let weightedAbs = 0;
+    let sameCompared = 0;
+    let sameWeightedAbs = 0;
+    let differentCompared = 0;
+    let differentWeightedAbs = 0;
+    let unknownCompared = 0;
+    let unknownWeightedAbs = 0;
     let maxAbs = 0;
     let maxPhraseId: string | null = null;
     let maxFrame: number | null = null;
     let oracleAtMax: number | null = null;
     let qlattAtMax: number | null = null;
+    let maxOraclePhone: string | null = null;
+    let maxOracleOutputPhone: string | null = null;
+    let maxQlattPhone: string | null = null;
+    let maxSegmentMatch: boolean | null = null;
 
     for (const phrase of phrases) {
       const summary = phrase.params[label];
       if (!summary) continue;
       compared += summary.compared;
       weightedAbs += summary.meanAbs * summary.compared;
+      sameCompared += summary.sameSegment.compared;
+      sameWeightedAbs += summary.sameSegment.meanAbs * summary.sameSegment.compared;
+      differentCompared += summary.differentSegment.compared;
+      differentWeightedAbs +=
+        summary.differentSegment.meanAbs * summary.differentSegment.compared;
+      unknownCompared += summary.unknownSegment.compared;
+      unknownWeightedAbs += summary.unknownSegment.meanAbs * summary.unknownSegment.compared;
       if (summary.maxAbs > maxAbs) {
         maxAbs = summary.maxAbs;
         maxPhraseId = phrase.phraseId;
         maxFrame = summary.maxFrame;
         oracleAtMax = summary.oracleAtMax;
         qlattAtMax = summary.qlattAtMax;
+        maxOraclePhone = summary.maxOraclePhone;
+        maxOracleOutputPhone = summary.maxOracleOutputPhone;
+        maxQlattPhone = summary.maxQlattPhone;
+        maxSegmentMatch = summary.maxSegmentMatch;
       }
     }
 
@@ -315,6 +660,17 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
       maxFrame,
       oracleAtMax,
       qlattAtMax,
+      maxOraclePhone,
+      maxOracleOutputPhone,
+      maxQlattPhone,
+      maxSegmentMatch,
+      sameSegmentCompared: sameCompared,
+      sameSegmentMeanAbs: sameCompared > 0 ? sameWeightedAbs / sameCompared : 0,
+      differentSegmentCompared: differentCompared,
+      differentSegmentMeanAbs:
+        differentCompared > 0 ? differentWeightedAbs / differentCompared : 0,
+      unknownSegmentCompared: unknownCompared,
+      unknownSegmentMeanAbs: unknownCompared > 0 ? unknownWeightedAbs / unknownCompared : 0,
     };
   }).sort((left, right) => right.meanAbs - left.meanAbs);
 
@@ -330,6 +686,15 @@ function summarizeCorpus(phrases: PhraseSummary[]): Record<string, unknown> {
 
   return {
     phraseCount: phrases.length,
+    alignment: phrases.reduce(
+      (total, phrase) => ({
+        frames: total.frames + phrase.alignment.frames,
+        sameSegment: total.sameSegment + phrase.alignment.sameSegment,
+        differentSegment: total.differentSegment + phrase.alignment.differentSegment,
+        unknown: total.unknown + phrase.alignment.unknown,
+      }),
+      { frames: 0, sameSegment: 0, differentSegment: 0, unknown: 0 },
+    ),
     byParam,
     worstPhraseParam,
   };

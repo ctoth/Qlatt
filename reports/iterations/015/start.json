@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-06-27T18:00:11.4080479-06:00",
+  "total": 50,
+  "pass": 4,
+  "fail": 46,
+  "skip": 0,
+  "baseline": {
+    "run": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1",
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\trace-summary.json",
+    "f2MeanAbs": 129.0926740635663,
+    "warnings": 46,
+    "avgTokenSimilarity": 1
+  }
+}

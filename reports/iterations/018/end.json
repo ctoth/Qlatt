@@ -1,0 +1,27 @@
+{
+  "iteration": 18,
+  "result": "kept",
+  "kind": "methodology-harness",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-methodology-016-50\\trace-summary.json",
+    "fixedOracleRoot": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1",
+    "warnings": {
+      "notPassing": 46,
+      "total": 50
+    },
+    "f2MeanAbs": 129.0926740635663
+  },
+  "verification": [
+    "npm run oracle:run -- --phrase-id g2p-measure --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-cached-oracle-018-1b --continue-on-error 1",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/summarize-trace-run.ts --run-root J:\\Qlatt-oracle-output\\dectalk-cached-oracle-018-1b\\dectalk-us-v1 --out J:\\Qlatt-oracle-output\\dectalk-cached-oracle-018-1b\\trace-summary.json",
+    "npm run typecheck:core",
+    "process check found no active oracle:run, run-corpus.ts, or say.exe process"
+  ],
+  "cachedOracleSmoke": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-cached-oracle-018-1b\\dectalk-us-v1\\summary.json",
+    "oracleRootRecorded": true,
+    "tokenSimilarity": 1,
+    "failures": 0,
+    "warnings": 1
+  }
+}

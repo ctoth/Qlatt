@@ -14,6 +14,7 @@ import { renderQlatt } from "./adapters/render-qlatt";
 type ParsedArgs = {
   corpusPath: string;
   outRoot: string;
+  oracleRoot?: string;
   continueOnError: boolean;
   limit?: number;
   phraseIds?: string[];
@@ -35,7 +36,7 @@ function parseArgv(argv: string[]): ParsedArgs {
 
   if (flags.has("help")) {
     throw new Error(
-      "Usage: run-corpus [--corpus path] [--out-root dir] [--limit n] [--phrase-id id[,id...]] [--continue-on-error 1]",
+      "Usage: run-corpus [--corpus path] [--out-root dir] [--oracle-root existing-corpus-run-dir] [--limit n] [--phrase-id id[,id...]] [--continue-on-error 1]",
     );
   }
 
@@ -77,6 +78,9 @@ function parseArgv(argv: string[]): ParsedArgs {
       flags.get("out-root") ??
         path.join(scriptDir, "..", "..", "test", "oracle-output"),
     ),
+    ...(flags.get("oracle-root")
+      ? { oracleRoot: path.resolve(flags.get("oracle-root") as string) }
+      : {}),
     continueOnError:
       flags.get("continue-on-error") === "1" ||
       flags.get("continue-on-error") === "true",
@@ -225,6 +229,92 @@ function summarizeReports(reports: AudioComparisonReport[]): Record<string, unkn
   };
 }
 
+function copyDirectoryContents(sourceDir: string, targetDir: string): void {
+  if (!fs.existsSync(sourceDir)) {
+    throw new Error(`Cached oracle directory does not exist: ${sourceDir}`);
+  }
+  fs.mkdirSync(targetDir, { recursive: true });
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const targetPath = path.join(targetDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDirectoryContents(sourcePath, targetPath);
+    } else if (entry.isFile()) {
+      fs.copyFileSync(sourcePath, targetPath);
+    }
+  }
+}
+
+function loadCachedOracleArtifact(
+  oracleRoot: string,
+  entry: OracleCorpusEntry,
+  targetOracleDir: string,
+): Awaited<ReturnType<typeof renderDectalk>> {
+  const cachedOracleDir = path.join(oracleRoot, entry.id, "oracle");
+  copyDirectoryContents(cachedOracleDir, targetOracleDir);
+
+  const metadataPath = path.join(targetOracleDir, "oracle.json");
+  const wavPath = path.join(targetOracleDir, "oracle.wav");
+  const tracePath = path.join(targetOracleDir, "oracle.trace.jsonl");
+  if (!fs.existsSync(metadataPath)) {
+    throw new Error(`Cached oracle metadata is missing: ${metadataPath}`);
+  }
+  if (!fs.existsSync(wavPath)) {
+    throw new Error(`Cached oracle WAV is missing: ${wavPath}`);
+  }
+  if (!fs.existsSync(tracePath)) {
+    throw new Error(`Cached oracle trace is missing: ${tracePath}`);
+  }
+
+  const artifact = JSON.parse(fs.readFileSync(metadataPath, "utf8")) as Awaited<
+    ReturnType<typeof renderDectalk>
+  >;
+  const stdoutPath = path.join(targetOracleDir, "oracle.stdout.log");
+  const stderrPath = path.join(targetOracleDir, "oracle.stderr.log");
+  const phonemeLogPath = path.join(targetOracleDir, "oracle.phonemes.txt");
+  const phonemeStdoutPath = path.join(targetOracleDir, "oracle.phoneme.stdout.log");
+  const phonemeStderrPath = path.join(targetOracleDir, "oracle.phoneme.stderr.log");
+  const cachedArtifact = {
+    ...artifact,
+    wavPath,
+    metadataPath,
+    ...(fs.existsSync(stdoutPath) ? { stdoutPath } : {}),
+    ...(fs.existsSync(stderrPath) ? { stderrPath } : {}),
+    notes: [
+      ...(artifact.notes ?? []),
+      `Reused cached DECtalk oracle from ${cachedOracleDir}; DECtalk was not rerun.`,
+    ],
+    ...(artifact.symbolic
+      ? {
+          symbolic: {
+            ...artifact.symbolic,
+            phonemeLogPath,
+          },
+        }
+      : {}),
+    ...(artifact.trace
+      ? {
+          trace: {
+            ...artifact.trace,
+            tracePath,
+          },
+        }
+      : {}),
+    extraPaths: {
+      ...(artifact.extraPaths ?? {}),
+      ...(fs.existsSync(stdoutPath) ? { stdout: stdoutPath } : {}),
+      ...(fs.existsSync(stderrPath) ? { stderr: stderrPath } : {}),
+      ...(fs.existsSync(tracePath) ? { trace: tracePath } : {}),
+      ...(fs.existsSync(phonemeLogPath) ? { phonemeLog: phonemeLogPath } : {}),
+      ...(fs.existsSync(phonemeStdoutPath) ? { phonemeStdout: phonemeStdoutPath } : {}),
+      ...(fs.existsSync(phonemeStderrPath) ? { phonemeStderr: phonemeStderrPath } : {}),
+    },
+  };
+
+  fs.writeFileSync(metadataPath, `${JSON.stringify(cachedArtifact, null, 2)}\n`, "utf8");
+  return cachedArtifact;
+}
+
 async function main(): Promise<number> {
   try {
     const args = parseArgv(process.argv.slice(2));
@@ -244,14 +334,18 @@ async function main(): Promise<number> {
       fs.mkdirSync(entryDir, { recursive: true });
 
       try {
-        const oracleArtifact = await renderDectalk({
-          phraseId: entry.id,
-          phrase: entry.text,
-          outDir: path.join(entryDir, "oracle"),
-          voiceId: entry.voiceId,
-          rate: entry.rate,
-          sampleRate: entry.sampleRate,
-        });
+        const oracleOutDir = path.join(entryDir, "oracle");
+        const oracleArtifact =
+          args.oracleRoot != null
+            ? loadCachedOracleArtifact(args.oracleRoot, entry, oracleOutDir)
+            : await renderDectalk({
+                phraseId: entry.id,
+                phrase: entry.text,
+                outDir: oracleOutDir,
+                voiceId: entry.voiceId,
+                rate: entry.rate,
+                sampleRate: entry.sampleRate,
+              });
 
         const qlattArtifact = await renderQlatt({
           phraseId: entry.id,
@@ -300,6 +394,7 @@ async function main(): Promise<number> {
       schemaVersion: "v1",
       corpusId: corpus.corpusId,
       corpusPath: args.corpusPath,
+      ...(args.oracleRoot != null ? { oracleRoot: args.oracleRoot } : {}),
       ...(args.limit != null ? { limit: args.limit } : {}),
       ...(args.phraseIds != null ? { phraseIds: args.phraseIds } : {}),
       generatedAt: new Date().toISOString(),

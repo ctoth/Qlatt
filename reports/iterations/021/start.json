@@ -1,0 +1,12 @@
+{
+  "iteration": 21,
+  "kind": "convergence-source",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50\\trace-summary.json",
+    "fixedOracleRoot": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1",
+    "targetPhraseId": "g2p-church",
+    "targetF3SameSegmentMeanAbs": 191.303,
+    "targetF2SameSegmentMeanAbs": 89.729
+  },
+  "hypothesis": "Adding the source-backed DECtalk US_ER trajectory to ER1 should reduce the remaining g2p-church ER/ER/ER phase-aligned F3 hotspot."
+}

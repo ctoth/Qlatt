@@ -1,0 +1,24 @@
+{
+  "iteration": 21,
+  "result": "rejected",
+  "kind": "convergence-source",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50\\trace-summary.json",
+    "targetPhraseId": "g2p-church",
+    "targetF3SameSegmentMeanAbs": 191.303,
+    "targetF2SameSegmentMeanAbs": 89.729
+  },
+  "trial": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er1-trajectory-021-1\\trace-summary.json",
+    "failures": 0,
+    "warnings": 1,
+    "tokenSimilarity": 1,
+    "targetF3SameSegmentMeanAbs": 234.528,
+    "targetF2SameSegmentMeanAbs": 103.876
+  },
+  "restore": "git restore -- public/rules/frontends/dectalk-english/inventory.yaml",
+  "verification": [
+    "npm run oracle:run -- --phrase-id g2p-church --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-er1-trajectory-021-1 --continue-on-error 1",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/summarize-trace-run.ts --run-root J:\\Qlatt-oracle-output\\dectalk-er1-trajectory-021-1\\dectalk-us-v1 --out J:\\Qlatt-oracle-output\\dectalk-er1-trajectory-021-1\\trace-summary.json"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "iteration": 17,
+  "kind": "diagnostic-tooling",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-methodology-016-50\\trace-summary.json",
+    "warnings": {
+      "notPassing": 46,
+      "total": 50
+    },
+    "f2MeanAbs": 129.0926740635663,
+    "sameSegmentF2MeanAbs": 120.65204164209926
+  }
+}

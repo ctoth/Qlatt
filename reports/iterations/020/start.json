@@ -1,0 +1,24 @@
+{
+  "iteration": 20,
+  "kind": "convergence-source",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er0-rhotic-target-019-50\\trace-summary.json",
+    "fixedOracleRoot": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1",
+    "warnings": {
+      "notPassing": 46,
+      "total": 50
+    },
+    "f2MeanAbs": 126.14112188334613,
+    "f2SameSegmentMeanAbs": 116.9865065706473,
+    "f3MeanAbs": 87.05570270500895,
+    "f3SameSegmentMeanAbs": 79.47908585142359
+  },
+  "target": {
+    "phraseId": "g2p-church",
+    "param": "F3",
+    "bucket": "sameSegment",
+    "phones": "ER/ER/ER",
+    "meanAbs": 226.97471910112358,
+    "phaseDelta": 0.0346
+  }
+}

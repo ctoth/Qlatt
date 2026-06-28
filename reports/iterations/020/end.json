@@ -1,0 +1,47 @@
+{
+  "iteration": 20,
+  "result": "kept",
+  "kind": "convergence-source",
+  "baseline": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er0-rhotic-target-019-50\\trace-summary.json",
+    "fixedOracleRoot": "J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1",
+    "warnings": {
+      "notPassing": 46,
+      "total": 50
+    },
+    "f2MeanAbs": 126.14112188334613,
+    "f2SameSegmentMeanAbs": 116.9865065706473,
+    "f3MeanAbs": 87.05570270500895,
+    "f3SameSegmentMeanAbs": 79.47908585142359
+  },
+  "resultSummary": {
+    "summary": "J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50\\trace-summary.json",
+    "warnings": {
+      "notPassing": 46,
+      "total": 50
+    },
+    "failures": 0,
+    "tokenSimilarity": 1,
+    "f2MeanAbs": 125.33449260000893,
+    "f2SameSegmentMeanAbs": 116.28123922971945,
+    "f3MeanAbs": 87.2055875074665,
+    "f3SameSegmentMeanAbs": 78.19802334460566,
+    "f3DifferentSegmentMeanAbs": 122.96211490424646,
+    "combinedF2F3MeanAbs": 212.54008010747542
+  },
+  "targetResult": {
+    "phraseId": "g2p-church",
+    "f3SameSegmentMeanAbsBefore": 226.97471910112358,
+    "f3SameSegmentMeanAbsAfter": 191.303,
+    "f2SameSegmentMeanAbsAfter": 89.729
+  },
+  "knownCaveat": "F3 overall meanAbs regressed slightly from 87.05570270500895 to 87.2055875074665 while same-segment F3 and combined F2+F3 improved.",
+  "verification": [
+    "npm run oracle:run -- --phrase-id g2p-church --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-1 --continue-on-error 1",
+    "npm run oracle:run -- --limit 5 --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-5 --continue-on-error 1",
+    "npm run oracle:run -- --limit 10 --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-10 --continue-on-error 1",
+    "npm run oracle:run -- --limit 50 --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50 --continue-on-error 1",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/summarize-trace-run.ts --run-root J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50\\dectalk-us-v1 --out J:\\Qlatt-oracle-output\\dectalk-er1-tail-target-020-50\\trace-summary.json",
+    "npm run typecheck:core"
+  ]
+}

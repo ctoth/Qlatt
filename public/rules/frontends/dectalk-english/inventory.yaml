@@ -817,8 +817,8 @@ phoneme_targets:
   ER1:
     TL: 3
     F1: 490
-    F2: 1650
-    F3: 2500
+    F2: 1500  # DECtalk 4.63 p_us_rom.h us_maltar/us_maldip US_ER male tail F2
+    F3: 1750  # DECtalk 4.63 p_us_rom.h us_maltar/us_maldip US_ER male tail F3
     B1: 80
     B2: 110
     B3: 200

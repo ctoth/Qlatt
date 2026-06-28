@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-06-28T01:42:00.000Z",
+  "iteration": 23,
+  "baselineCommit": "d244d65e",
+  "baselineRunRoot": "J:\\Qlatt-oracle-output\\dectalk-formant-ramp-022-50",
+  "warnings": {
+    "notPassing": 46,
+    "total": 50
+  },
+  "target": {
+    "phraseId": "g2p-church",
+    "param": "F3",
+    "bucket": "sameSegment",
+    "meanAbs": 165.269341894061
+  },
+  "hypothesis": "The raw DECtalk dictionary row for church is C'RC, whose R maps to US_RR. Converting raw rr to Qlatt RR instead of ER might improve the remaining g2p-church F3 same-segment mismatch."
+}

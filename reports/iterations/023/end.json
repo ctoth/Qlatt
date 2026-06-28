@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-06-28T01:48:00.000Z",
+  "iteration": 23,
+  "result": "rejected",
+  "runRoots": {
+    "onePhrase": "J:\\Qlatt-oracle-output\\dectalk-rr-dict-023-1"
+  },
+  "target": {
+    "phraseId": "g2p-church",
+    "param": "F3",
+    "bucket": "sameSegment",
+    "meanAbsBefore": 165.269341894061,
+    "meanAbsAfter": 228.67777777777775
+  },
+  "secondaryMetrics": {
+    "F2": {
+      "sameSegmentMeanAbsBefore": 89.72897271268057,
+      "sameSegmentMeanAbsAfter": 86.52444444444446
+    },
+    "F3": {
+      "meanAbsBefore": 162.8378904249872,
+      "meanAbsAfter": 213.0555555555555,
+      "differentSegmentMeanAbsBefore": 172.78095238095239,
+      "differentSegmentMeanAbsAfter": 161.23232323232327
+    }
+  },
+  "tests": [
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/build-dectalk-dict.ts",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/validate-dectalk-dict.ts",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/verify-dectalk-dict.ts church",
+    "npm run oracle:run -- --phrase-id g2p-church --oracle-root J:\\Qlatt-oracle-output\\dectalk-ow-t-f2-014-50\\dectalk-us-v1 --out-root J:\\Qlatt-oracle-output\\dectalk-rr-dict-023-1 --continue-on-error 1",
+    "node --loader ts-node/esm/transpile-only --experimental-specifier-resolution=node scripts/oracle/summarize-trace-run.ts --run-root J:\\Qlatt-oracle-output\\dectalk-rr-dict-023-1\\dectalk-us-v1 --out J:\\Qlatt-oracle-output\\dectalk-rr-dict-023-1\\trace-summary.json"
+  ],
+  "restoredSource": [
+    "src/declarative-frontend/inventory.ts",
+    "scripts/build-dectalk-dict.ts",
+    "scripts/validate-dectalk-dict.ts",
+    "public/dectalk-dictionary.json"
+  ]
+}

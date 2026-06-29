@@ -1,0 +1,153 @@
+version: v1
+# ===========================================================================
+# VOICE-QUALITY phase — dynamic glottal-source (Rd) control for qlatt-beauty
+# ===========================================================================
+# The inventory + speaker voice-quality preset set a STATIC base Rd; this phase
+# adds the DYNAMIC, contextual layers of the five-factor additive Rd model
+# (Fant 1997):
+#
+#   Rd_effective = Rd_base(speaker/preset)
+#                + dRd_stress + dRd_effort + dRd_phrase   (THIS phase)
+#
+# CHANNEL CHOICE — why we write params.RdPhraseOffset, not params.Rd:
+#   The track-lowering "voice_quality" overlay (track-assembler.ts
+#   applyVoiceQualityOverrides) runs AFTER all rule phases and does
+#   `params.Rd = preset.rd` — an ABSOLUTE assignment that clobbers any
+#   per-token params.Rd a rule writes. The backend, however, combines BOTH
+#   channels:  effectiveRd = clamp(Rd + RdPhraseOffset, 0.3, 2.7)  (semantics).
+#   RdPhraseOffset is NOT touched by the overlay, so it is the surviving
+#   additive channel for dynamic Rd. Every delta below is op:add into
+#   RdPhraseOffset and reaches the LF source via effectiveRd.
+#
+# COVARIATION & BRILLIANCE come for free from the backend (no double-counting):
+#   * Rd-AV covariation (Fant 1997): eeGainDb = 40*log10(RdRef / effectiveRd)
+#     is folded into voiceGain. Lowering effectiveRd (stress/effort) raises
+#     eeGainDb -> louder + tenser. Writing params.AV here would apply the term
+#     twice, so we DO NOT.
+#   * Spectral tilt / brilliance: backend derives Ra = max(-1+4.8*effectiveRd,0)
+#     from effectiveRd, so a more-adducted stressed vowel automatically gets a
+#     flatter tilt (= brighter). No separate params.TL write is needed.
+#
+# Clamping to [0.3, 2.7] is enforced by the backend effectiveRd expression.
+rules:
+
+  # -------------------------------------------------------------------------
+  # Factor 1 — STRESS -> Rd (glottal adduction)
+  #
+  # Primary-stressed syllables are more strongly adducted (pressed, lower Rd =
+  # clearer/brighter); unstressed syllables relax toward breathiness (higher
+  # Rd). Stress in this frontend is binary (1 = primary, 0 = unstressed).
+  # Fant 1997: Rd decreases by ~0.1-0.3 under stress. Cummings & Clements 1995:
+  # closing slope steepens 1.04-1.15x for stressed syllables.
+  # -------------------------------------------------------------------------
+  stress_rd_adduction:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && has(current.stress)"
+    apply:
+      - field: params.RdPhraseOffset
+        op: add
+        dispatch:
+          - when: "current.stress == 1"
+            value: "-0.15"
+          - when: "current.stress == 0"
+            value: "0.10"
+          - default: 0
+        tag: voice_quality_stress
+    citations:
+      - Fant 1997
+      - Cummings & Clements 1995
+
+  # -------------------------------------------------------------------------
+  # Factor 2 — EFFORT -> Rd
+  #
+  # Vocal effort is derived from stress (a louder, more effortful primary
+  # stress; a reduced, low-effort unstressed syllable). Liénard & Di Benedetto
+  # 1999: Rd decreases by 0.05 per dB of added effort. EFFORT_BY_STRESS =
+  # {primary:+3 dB, unstressed:-1.5 dB} (spec §2.3). The companion F0/F1 effort
+  # shifts live on the prosody/formant axes; this rule owns only the Rd term.
+  # -------------------------------------------------------------------------
+  effort_rd_adduction:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && has(current.stress)"
+    define:
+      # Effort in dB relative to neutral, mapped from binary stress.
+      effort_db: "current.stress == 1 ? 3.0 : (current.stress == 0 ? -1.5 : 0.0)"
+    apply:
+      - field: params.RdPhraseOffset
+        op: add
+        # rdPerDb = -0.05 (Liénard 1999): louder/more effortful => lower Rd.
+        value: "effort_db * -0.05"
+        tag: voice_quality_effort
+    citations:
+      - Liénard & Di Benedetto 1999
+
+  # -------------------------------------------------------------------------
+  # Factor 3 — PHRASE Rd CONTOUR (Fant 1997, "Voice Source in Connected Speech")
+  #
+  # A phrase-position contour added to Rd over the utterance:
+  #   1. Onset attack  — starts ~0.2 lower (pressed) and rises to 0 over the
+  #                      first 50 ms (a crisp phrase-initial "attack").
+  #   2. Declination   — Rd drifts +0.1 per second (gradual relaxation).
+  #   3. Final breath  — over the last ~300 ms Rd rises by up to +0.3
+  #                      (characteristic phrase-final breathiness).
+  #
+  # Implemented with the engine's `contour:` mechanism, which supplies
+  # contour.elapsed_sec / contour.phrase_duration_sec from the resolved segment
+  # durations (this phase runs after `duration`). Selection spans all
+  # non-silence segments so the contour clock tracks the real phrase timeline.
+  #
+  # NOTE (coordination): the prosody phase's connected_speech_source_contour
+  # also op-adds a small phrase-final term to RdPhraseOffset (<=~0.06 here);
+  # ours is the primary Fant-1997 Rd-axis contour. They stack additively;
+  # flagged for reconciliation with TRACK PROS.
+  # -------------------------------------------------------------------------
+  phrase_rd_contour:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.phoneme != 'SIL'"
+    contour:
+      domain: phrase
+      # Silverman et al. 1992 ToBI: BI>=3 marks an intermediate phrase break,
+      # where the source contour resets.
+      reset_break_index: 3
+      apply:
+        - field: params.RdPhraseOffset
+          op: add
+          value: rd_phrase_delta
+          tag: voice_quality_phrase
+    define:
+      # Onset attack: -0.2 at t=0, ramping to 0 by 50 ms.
+      onset_delta: >-
+        contour.elapsed_sec < 0.05
+        ? -0.2 * (1.0 - contour.elapsed_sec / 0.05)
+        : 0.0
+      # Gentle declination: +0.1 Rd per second of elapsed phrase time.
+      declination_delta: "0.1 * contour.elapsed_sec"
+      time_to_end: "contour.phrase_duration_sec - contour.elapsed_sec"
+      # Phrase-final breathiness: up to +0.3 over the last 300 ms.
+      final_delta: >-
+        time_to_end < 0.3
+        ? 0.3 * (1.0 - time_to_end / 0.3)
+        : 0.0
+      rd_phrase_delta: "onset_delta + declination_delta + final_delta"
+    citations:
+      - Fant 1997
+      - Silverman et al. 1992
+
+  # NOTE — phrase-final aspiration (AH) breathiness:
+  # The plan also calls for coupling aspiration noise (AH) to the breathy
+  # phrase end (Klatt 1990 §12: AH is the #1 breathiness cue). That is NOT
+  # implemented as a rule here because AH is an inventory base_param
+  # materialized at track ASSEMBLY (fillDefaultParams), so it is undefined
+  # during the rule phases; an op:add would either be dropped or clobber the
+  # 35 dB base. Instead the phrase-final breathiness rides factor 3 above:
+  # the backend turns the higher phrase-final effectiveRd into a higher open
+  # quotient (OQ, Fant 1997 Table 1), wider F1 bandwidth (glottal leakage),
+  # and steeper spectral tilt (Ra) — an audibly breathier voice — without
+  # touching the AH base. Re-homing the AH lift onto the assembly-time
+  # voice-quality overlay is left for TRACK PROS / the lowering owner.

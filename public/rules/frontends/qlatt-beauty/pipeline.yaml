@@ -1,4 +1,10 @@
 version: v1
+# Pull in the voice-quality phase rule definitions (TRACK VQ). frontend.yaml's
+# top-level include list is owned by another track; nested includes are resolved
+# recursively by the rule-pack loader, so registering the phase file here keeps
+# all VQ wiring inside pipeline.yaml + phases/voice-quality.yaml.
+include:
+  - phases/voice-quality.yaml
 predicates:
   is_question_boundary: current.phoneme == 'SIL' && current.punctuationSymbol == '?'
   is_stressed_vowel: current.type == 'vowel' && has(current.stress) && current.stress == 1
@@ -210,6 +216,16 @@ phases:
     after:
       - duration
     rules:
+      # --- TRACK VQ: dynamic voice-quality (Rd) layers ---
+      # The frontend executes phases by a fixed name list in tts-frontend.ts
+      # (normalize, postlexical, structural, annotation, duration, formant,
+      # prosody, finalize); there is no standalone "voice_quality" phase slot.
+      # These rules run inside the formant phase (after duration, before
+      # prosody) — i.e. "with formant" per the build plan. Definitions live in
+      # phases/voice-quality.yaml (included at the top of this file).
+      - stress_rd_adduction
+      - effort_rd_adduction
+      - phrase_rd_contour
       - place_f2_locus
       - place_rel_copy
       - dark_l_allophony

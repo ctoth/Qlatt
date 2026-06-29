@@ -34,6 +34,10 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
             { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "k-rate" },
             { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" },
             { name: "seed", defaultValue: 1, minValue: 1, maxValue: 2147483647, automationRate: "k-rate" },
+            // Klatt & Klatt 1990 eq. 1 F0 flutter (percent). Default 0 = no-op.
+            { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" },
+            // Klatt & Klatt 1990 §3 diplophonia (percent). Default 0 = no-op.
+            { name: "diplophonia", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" },
         ];
     }
     constructor(options) {
@@ -58,6 +62,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
             asymmetry: new WasmBuffer(UNINITIALIZED_ALLOC),
             source: new WasmBuffer(UNINITIALIZED_ALLOC),
             seed: new WasmBuffer(UNINITIALIZED_ALLOC),
+            flutter: new WasmBuffer(UNINITIALIZED_ALLOC),
+            diplophonia: new WasmBuffer(UNINITIALIZED_ALLOC),
         };
         this.port.onmessage = (event) => {
             if (event?.data?.type === "ping" && this.ready) {
@@ -107,6 +113,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
         const asymValues = parameters.asymmetry ?? new Float32Array([50]);
         const sourceValues = parameters.source ?? new Float32Array([2]);
         const seedValues = parameters.seed ?? new Float32Array([1]);
+        const flutterValues = parameters.flutter ?? new Float32Array([0]);
+        const diplophoniaValues = parameters.diplophonia ?? new Float32Array([0]);
         const f0Len = fillParamBuffer(this.paramBuffers.f0, f0Values, blockSize);
         const avLen = fillParamBuffer(this.paramBuffers.av, avValues, blockSize);
         const aturbLen = fillParamBuffer(this.paramBuffers.aturb, aturbValues, blockSize);
@@ -116,6 +124,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
         const asymLen = fillParamBuffer(this.paramBuffers.asymmetry, asymValues, blockSize);
         const sourceLen = fillParamBuffer(this.paramBuffers.source, sourceValues, blockSize);
         const seedLen = fillParamBuffer(this.paramBuffers.seed, seedValues, blockSize);
+        const flutterLen = fillParamBuffer(this.paramBuffers.flutter, flutterValues, blockSize);
+        const diplophoniaLen = fillParamBuffer(this.paramBuffers.diplophonia, diplophoniaValues, blockSize);
         this.voiceBuffer.ensure(blockSize);
         this.noiseBuffer.ensure(blockSize);
         if (!this.voiceBuffer.view || !this.noiseBuffer.view) {
@@ -123,7 +133,7 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
             noiseChannel.fill(0);
             return true;
         }
-        this.wasm.oversampled_glottal_source_process(this.state, this.paramBuffers.f0.ptr, f0Len, this.paramBuffers.av.ptr, avLen, this.paramBuffers.aturb.ptr, aturbLen, this.paramBuffers.tilt.ptr, tiltLen, this.paramBuffers.openQuotient.ptr, oqLen, this.paramBuffers.skew.ptr, skewLen, this.paramBuffers.asymmetry.ptr, asymLen, this.paramBuffers.source.ptr, sourceLen, this.paramBuffers.seed.ptr, seedLen, this.voiceBuffer.ptr, this.noiseBuffer.ptr, blockSize);
+        this.wasm.oversampled_glottal_source_process(this.state, this.paramBuffers.f0.ptr, f0Len, this.paramBuffers.av.ptr, avLen, this.paramBuffers.aturb.ptr, aturbLen, this.paramBuffers.tilt.ptr, tiltLen, this.paramBuffers.openQuotient.ptr, oqLen, this.paramBuffers.skew.ptr, skewLen, this.paramBuffers.asymmetry.ptr, asymLen, this.paramBuffers.source.ptr, sourceLen, this.paramBuffers.seed.ptr, seedLen, this.paramBuffers.flutter.ptr, flutterLen, this.paramBuffers.diplophonia.ptr, diplophoniaLen, this.voiceBuffer.ptr, this.noiseBuffer.ptr, blockSize);
         this.voiceBuffer.refresh();
         this.noiseBuffer.refresh();
         if (!this.voiceBuffer.view || !this.noiseBuffer.view) {

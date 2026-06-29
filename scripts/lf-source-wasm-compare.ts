@@ -20,6 +20,13 @@ interface LfSourceExports extends WasmAllocExports {
     f0Len: number,
     rdPtr: number,
     rdLen: number,
+    oqPtr: number,
+    oqLen: number,
+    tlPtr: number,
+    tlLen: number,
+    flutter: number,
+    jitter: number,
+    di: number,
     outPtr: number,
     len: number
   ): void;
@@ -55,12 +62,21 @@ if (!f0Buffer.view || !rdBuffer.view) {
 f0Buffer.view[0] = f0;
 rdBuffer.view[0] = rd;
 
+// 14-arg ABI: oq/tl overrides (0 = derive from Rd) and flutter/jitter/di all
+// disabled so this golden exercises the pure Rd-driven LFLM path.
 wasm.lf_source_process(
   state,
   f0Buffer.ptr,
   1,
   rdBuffer.ptr,
   1,
+  0, // oqPtr (null -> derive OQ from Rd)
+  0, // oqLen
+  0, // tlPtr (null -> derive tilt from Rd)
+  0, // tlLen
+  0, // flutter
+  0, // jitter
+  0, // di
   outputBuffer.ptr,
   length
 );

@@ -136,7 +136,17 @@ primitives:
       lfMode:
         type: int
         default: 1
-        description: "LF model mode selection"
+        description: "LF model mode selection (0=Legacy, 1=LFLM, 2=LFCALM)"
+      oq:
+        type: float
+        unit: "%"
+        default: 0
+        description: "Klatt 1990 open-quotient override in percent. 0 = derive from Rd"
+      tl:
+        type: float
+        unit: "dB"
+        default: 0
+        description: "Klatt 1990 spectral-tilt override in dB at 3 kHz. 0 = derive from Rd"
     inputs: 0
     outputs: 1
 
@@ -372,6 +382,16 @@ primitives:
         type: float
         default: 1
         description: "Random seed (31-bit)"
+      flutter:
+        type: float
+        unit: "%"
+        default: 0
+        description: "F0 flutter percent (Klatt & Klatt 1990 eq. 1). 0 = no-op. Adds deterministic quasi-random F0 wander at 12.7/7.1/4.7 Hz."
+      diplophonia:
+        type: float
+        unit: "%"
+        default: 0
+        description: "Diplophonia percent (Klatt & Klatt 1990 §3). 0 = no-op. Delays alternate glottal pulses by (DI/100)(1-OQ/100)T0 and attenuates them by 1-DI/100, producing an F0/2 subharmonic."
     inputs: 0
     outputs: 2
 

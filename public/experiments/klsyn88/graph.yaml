@@ -23,6 +23,36 @@ nodes:
       asymmetry: { bind: as }
       source: { bind: ss }
       seed: { bind: seed }
+      flutter: { bind: FL }
+      diplophonia: { bind: DI }
+
+  # LF glottal source (Klatt & Klatt 1990 SS=3, "modified LF model", Fant 1985).
+  # Rd-driven crate with Klatt OQ/TL overrides; SQ enters via lfRd. Only routed
+  # onto the voice path when SS=3 (see voiceSwitch); inert otherwise.
+  lfSource:
+    type: lf-source
+    params:
+      f0: { bind: F0 }
+      rd: { bind: lfRd }
+      oq: { bind: effectiveKopen }
+      tl: { bind: effectiveTiltDb }
+      lfMode: { bind: lfModeVal }
+      flutter: { bind: FL }
+      di: { bind: DI }
+
+  # Makeup gain: LF crate output (~1.0 normalized) -> klsyn88 voice scale.
+  lfScale:
+    type: gain
+    params:
+      gain: { bind: lfMakeupGain }
+
+  # Source selector: SS=3 -> LF (input1), otherwise oversampled KLGLOTT88 (input0).
+  # selector<0.5 copies input0 sample-for-sample (Klatt 1980 SW instantaneous
+  # switch), so the default SS=2 path is bit-identical.
+  voiceSwitch:
+    type: signal-switch
+    params:
+      selector: { bind: lfSelect }
 
   voiceGain:
     type: gain
@@ -81,6 +111,39 @@ nodes:
     params:
       frequency: { bind: FNP }
       bandwidth: { bind: BNP }
+
+  # Tracheal (subglottal) pole-zero pair (Klatt & Klatt 1990, "Analysis,
+  # synthesis, and perception of voice quality variations", JASA 87(2), §
+  # "New Features" + Table XII). Models acoustic coupling of the open glottis
+  # to the subglottal/tracheal system, prominent in breathy voice. Mirrors the
+  # nasal RNZ/RNP pair: a zero (antiresonator FTZ/BTZ) then a pole (resonator
+  # FTP/BTP), placed after the nasal pole/zero and before F1. With the default
+  # coincident placement (FTP=FTZ=2150, BTP=BTZ=180) the pair cancels exactly
+  # and is transparent; "enabling" it means separating FTZ from FTP (there is
+  # no on/off or amplitude knob in the cascade).
+  tz:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+      # Same fixed-point-scale rationale as the nasal zero `nz`: the raw
+      # tracheal-zero output can exceed the float-scale debug threshold without
+      # clipping the final 16-bit-normalized output.
+      explosionRmsThreshold: 1000000
+    params:
+      # frequency = trachealZeroFreq (=0 when coincident with the pole -> the
+      # node bypasses to an exact passthrough; = FTZ when separated).
+      frequency: { bind: trachealZeroFreq }
+      bandwidth: { bind: BTZ }
+
+  tp:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      # frequency = trachealPoleFreq (=0 when coincident with the zero -> exact
+      # passthrough; = FTP when separated).
+      frequency: { bind: trachealPoleFreq }
+      bandwidth: { bind: BTP }
 
   cascadePolarityGain:
     type: gain
@@ -153,7 +216,7 @@ nodes:
       dF1: { bind: dF1hz }
       dB1: { bind: dB1hz }
       skew: { bind: Kskew }
-      source: { bind: ss }
+      source: { bind: psmSource }
 
   parallelF1:
     type: resonator
@@ -276,9 +339,17 @@ nodes:
       gain: -1.0
 
 connections:
-  # Glottal source outputs (voice=0, noise=1)
-  - [{ node: glottalSource, port: 0 }, voiceGain]
-  - [{ node: glottalSource, port: 0 }, parVoiceGain]
+  # Voice-source selection (SS=3 -> LF, else oversampled KLGLOTT88).
+  # glottalSource voice (port 0) -> switch input0; LF (scaled) -> switch input1.
+  - [{ node: glottalSource, port: 0 }, { node: voiceSwitch, port: 0 }]
+  - [lfSource, lfScale]
+  - [lfScale, { node: voiceSwitch, port: 1 }]
+
+  # Selected voice -> cascade and parallel voice gains.
+  - [voiceSwitch, voiceGain]
+  - [voiceSwitch, parVoiceGain]
+
+  # Glottal source noise output (port 1) -> aspiration + frication (unchanged).
   - [{ node: glottalSource, port: 1 }, aspGain]
   - [{ node: glottalSource, port: 1 }, fricGain]
 
@@ -297,10 +368,12 @@ connections:
   - [diff, parallelSourceSum]
   - [fricGain, parallelSourceSum]
 
-  # Cascade chain: NZ -> NP -> polarity -> F8 -> F7 -> F6 -> F5 -> F4 -> F3 -> F2 -> F1
+  # Cascade chain: NZ -> NP -> TZ -> TP -> polarity -> F8 -> F7 -> F6 -> F5 -> F4 -> F3 -> F2 -> F1
   - [cascadeMix, nz]
   - [nz, np]
-  - [np, cascadePolarityGain]
+  - [np, tz]
+  - [tz, tp]
+  - [tp, cascadePolarityGain]
   - [cascadePolarityGain, cascadeF8]
   - [cascadeF8, cascadeF7]
   - [cascadeF7, cascadeF6]

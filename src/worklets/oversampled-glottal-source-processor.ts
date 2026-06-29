@@ -31,6 +31,10 @@ interface OversampledGlottalSourceWasmExports {
     sourceLen: number,
     seedPtr: number,
     seedLen: number,
+    flutterPtr: number,
+    flutterLen: number,
+    diplophoniaPtr: number,
+    diplophoniaLen: number,
     voicePtr: number,
     noisePtr: number,
     blockSize: number
@@ -47,7 +51,9 @@ type OversampledParamName =
   | "skew"
   | "asymmetry"
   | "source"
-  | "seed";
+  | "seed"
+  | "flutter"
+  | "diplophonia";
 type OversampledParamBuffers = Record<OversampledParamName, WasmBuffer>;
 
 type OversampledGlottalSourceProcessorOptions = BaseProcessorOptions;
@@ -92,6 +98,10 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
       { name: "asymmetry", defaultValue: 50, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
       { name: "source", defaultValue: 2, minValue: 1, maxValue: 4, automationRate: "k-rate" as const },
       { name: "seed", defaultValue: 1, minValue: 1, maxValue: 2147483647, automationRate: "k-rate" as const },
+      // Klatt & Klatt 1990 eq. 1 F0 flutter (percent). Default 0 = no-op.
+      { name: "flutter", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
+      // Klatt & Klatt 1990 §3 diplophonia (percent). Default 0 = no-op.
+      { name: "diplophonia", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" as const },
     ];
   }
 
@@ -118,6 +128,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
       asymmetry: new WasmBuffer(UNINITIALIZED_ALLOC),
       source: new WasmBuffer(UNINITIALIZED_ALLOC),
       seed: new WasmBuffer(UNINITIALIZED_ALLOC),
+      flutter: new WasmBuffer(UNINITIALIZED_ALLOC),
+      diplophonia: new WasmBuffer(UNINITIALIZED_ALLOC),
     };
 
     this.port.onmessage = (event: MessageEvent<{ type?: string }>) => {
@@ -178,6 +190,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     const asymValues = parameters.asymmetry ?? new Float32Array([50]);
     const sourceValues = parameters.source ?? new Float32Array([2]);
     const seedValues = parameters.seed ?? new Float32Array([1]);
+    const flutterValues = parameters.flutter ?? new Float32Array([0]);
+    const diplophoniaValues = parameters.diplophonia ?? new Float32Array([0]);
 
     const f0Len = fillParamBuffer(this.paramBuffers.f0, f0Values, blockSize);
     const avLen = fillParamBuffer(this.paramBuffers.av, avValues, blockSize);
@@ -188,6 +202,8 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
     const asymLen = fillParamBuffer(this.paramBuffers.asymmetry, asymValues, blockSize);
     const sourceLen = fillParamBuffer(this.paramBuffers.source, sourceValues, blockSize);
     const seedLen = fillParamBuffer(this.paramBuffers.seed, seedValues, blockSize);
+    const flutterLen = fillParamBuffer(this.paramBuffers.flutter, flutterValues, blockSize);
+    const diplophoniaLen = fillParamBuffer(this.paramBuffers.diplophonia, diplophoniaValues, blockSize);
 
     this.voiceBuffer.ensure(blockSize);
     this.noiseBuffer.ensure(blockSize);
@@ -217,6 +233,10 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
       sourceLen,
       this.paramBuffers.seed.ptr,
       seedLen,
+      this.paramBuffers.flutter.ptr,
+      flutterLen,
+      this.paramBuffers.diplophonia.ptr,
+      diplophoniaLen,
       this.voiceBuffer.ptr,
       this.noiseBuffer.ptr,
       blockSize

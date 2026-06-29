@@ -93,6 +93,16 @@ pub struct OversampledGlottalSource {
     nmod: i32,
     skew: i32,
 
+    // Absolute output-sample clock, used to evaluate F0 flutter in seconds.
+    // Reference: Klatt & Klatt 1990, eq. 1 (flutter is a function of absolute time).
+    output_sample_count: i64,
+
+    // Diplophonia (Klatt & Klatt 1990, §3): alternate glottal pulses are delayed and
+    // attenuated. `dipl_phase` toggles each period (0 = normal pulse, 1 = alternate
+    // pulse); `dipl_amp` is the amplitude factor applied to the current period's pulse.
+    dipl_phase: i32,
+    dipl_amp: f32,
+
     // Source selection
     source: i32,
 
@@ -149,6 +159,9 @@ impl OversampledGlottalSource {
             nopen: 0,
             nmod: 0,
             skew: 0,
+            output_sample_count: 0,
+            dipl_phase: 0,
+            dipl_amp: 1.0,
             source: 2,
             rng_state: 1,
             last_seed: 1,
@@ -186,6 +199,9 @@ impl OversampledGlottalSource {
         self.nopen = 0;
         self.nmod = 0;
         self.skew = 0;
+        self.output_sample_count = 0;
+        self.dipl_phase = 0;
+        self.dipl_amp = 1.0;
         self.nlast = 0.0;
         self.vlast = 0.0;
         self.a = 0.0;
@@ -219,6 +235,33 @@ impl OversampledGlottalSource {
         KLSYN_AMPTABLE[index] * 0.001
     }
 
+    /// Compute the flutter-perturbed fundamental frequency.
+    ///
+    /// Reference: Klatt & Klatt 1990, "Analysis, synthesis, and perception of
+    /// voice quality variations among female and male talkers", JASA 87(2),
+    /// eq. 1:
+    ///   Δf0(t) = (FL/50)·(F0/100)·[sin(2π·12.7·t) + sin(2π·7.1·t) + sin(2π·4.7·t)]
+    /// where t is absolute time in seconds since utterance start, F0 is the
+    /// current fundamental (Hz), and FL is the flutter percentage (0–100).
+    /// The three incommensurate frequencies produce a deterministic quasi-random
+    /// wander that models natural pitch instability.
+    ///
+    /// When `flutter <= 0.0` this returns `f0_hz` unchanged with no added term,
+    /// so the no-flutter path is bit-identical to the pre-flutter synthesizer.
+    fn flutter_f0(&self, f0_hz: f32, flutter: f32) -> f32 {
+        if flutter > 0.0 {
+            let t = self.output_sample_count as f64 / self.sample_rate as f64;
+            let two_pi = 2.0 * core::f64::consts::PI;
+            let wander = (two_pi * 12.7 * t).sin()
+                + (two_pi * 7.1 * t).sin()
+                + (two_pi * 4.7 * t).sin();
+            let delta = (flutter as f64 / 50.0) * (f0_hz as f64 / 100.0) * wander;
+            f0_hz + delta as f32
+        } else {
+            f0_hz
+        }
+    }
+
     fn pitch_sync_reset(
         &mut self,
         f0_hz: f32,
@@ -229,11 +272,16 @@ impl OversampledGlottalSource {
         skew_param: f32,
         asymmetry: f32,
         source: i32,
+        flutter: f32,
+        diplophonia: f32,
     ) {
         self.source = source;
         if f0_hz.is_finite() && f0_hz > 0.0 {
             // Reference implementation: klsyn88 parwv.c (pitch_synch_par_reset).
-            let t0 = (4.0 * self.sample_rate / f0_hz).floor() as i32;
+            // F0 is perturbed by flutter (Klatt & Klatt 1990 eq. 1) before the
+            // period length is derived; FL=0 leaves f0 bit-identical.
+            let f0_eff = self.flutter_f0(f0_hz, flutter);
+            let t0 = (4.0 * self.sample_rate / f0_eff).floor() as i32;
             self.t0 = if t0 > 0 { t0 } else { 4 };
 
             self.amp_breth = Self::db_to_linear(aturb_db) * 0.1;
@@ -303,6 +351,48 @@ impl OversampledGlottalSource {
             self.t0 += self.skew;
             self.skew = -self.skew;
 
+            // Diplophonia (Klatt & Klatt 1990, §3). On alternate glottal pulses the
+            // pulse is both DELAYED and ATTENUATED:
+            //   delay      = (DI/100)·(1 − OQ/100)·T0   (fraction of the closed phase;
+            //                DI=50,OQ=50 ⇒ a quarter period, DI=100 ⇒ full closed phase)
+            //   amp_factor = 1 − DI/100                 (linear; DI=50 ⇒ 0.5 ⇒ −6 dB)
+            // The shipped klsyn88 C only delays alternate pulses (via Kskew) and never
+            // attenuates; DI adds both halves as its own term, independent of the skew
+            // control (not reusing the skew variable, so they do not double-apply).
+            //
+            // Mean F0 is preserved by shifting the boundary between a normal/alternate
+            // pulse pair: the period that ENDS at the (delayed) alternate pulse is
+            // lengthened by `delay`, and the alternate pulse's own period is shortened by
+            // the same amount — exactly the ± alternation skew uses. `dipl_phase` tracks
+            // which pulse begins this period (0 = normal, 1 = alternate) and toggles each
+            // period. DI ≤ 0 leaves t0 and amplitude untouched (bit-identical no-op).
+            if diplophonia > 0.0 {
+                // delay in 4x sample units, derived from the current period length.
+                let mut delay = ((diplophonia / 100.0)
+                    * (1.0 - open_quotient / 100.0)
+                    * (self.t0 as f32))
+                    .round() as i32;
+                // Keep the shortened period valid: leave at least one closed sample.
+                let max_delay = (self.t0 - self.nopen - 1).max(0);
+                if delay > max_delay {
+                    delay = max_delay;
+                }
+                if self.dipl_phase == 0 {
+                    // Normal pulse; the following alternate pulse is delayed, so this
+                    // period (ending at that pulse) is lengthened.
+                    self.t0 += delay;
+                    self.dipl_amp = 1.0;
+                } else {
+                    // Alternate (delayed, attenuated) pulse: shorten this period and
+                    // scale its amplitude.
+                    self.t0 -= delay;
+                    self.dipl_amp = 1.0 - diplophonia / 100.0;
+                }
+                self.dipl_phase ^= 1;
+            } else {
+                self.dipl_amp = 1.0;
+            }
+
             // Tilt filter update
             let mut tilt = tl_db.round() as i32;
             if tilt < 0 { tilt = 0; }
@@ -329,6 +419,8 @@ impl OversampledGlottalSource {
         skew_param: f32,
         asymmetry: f32,
         source: i32,
+        flutter: f32,
+        diplophonia: f32,
     ) -> (f32, f32) {
         if self.t0 <= 0 {
             self.pitch_sync_reset(
@@ -340,6 +432,8 @@ impl OversampledGlottalSource {
                 skew_param,
                 asymmetry,
                 source,
+                flutter,
+                diplophonia,
             );
         }
 
@@ -391,6 +485,11 @@ impl OversampledGlottalSource {
                 }
             };
 
+            // Diplophonia amplitude attenuation (Klatt & Klatt 1990, §3): scale the
+            // glottal pulse by the per-period factor. `dipl_amp` is exactly 1.0 when
+            // DI = 0, so this multiply is bit-identical to the pre-diplophonia path.
+            let sample = sample * self.dipl_amp;
+
             if self.nper >= self.t0 {
                 self.nper = 0;
                 self.pitch_sync_reset(
@@ -402,6 +501,8 @@ impl OversampledGlottalSource {
                     skew_param,
                     asymmetry,
                     source,
+                    flutter,
+                    diplophonia,
                 );
             }
 
@@ -423,6 +524,11 @@ impl OversampledGlottalSource {
             voice += self.amp_breth * (nrand as f32);
         }
 
+        // Advance the absolute output-sample clock used for flutter timing
+        // (Klatt & Klatt 1990 eq. 1). One increment per OUTPUT sample, so
+        // t = output_sample_count / sample_rate is in seconds.
+        self.output_sample_count += 1;
+
         (voice, noise)
     }
 
@@ -437,6 +543,8 @@ impl OversampledGlottalSource {
         asymmetry: &[f32],
         source: &[f32],
         seed: &[f32],
+        flutter: &[f32],
+        diplophonia: &[f32],
         voice_out: &mut [f32],
         noise_out: &mut [f32],
     ) {
@@ -450,6 +558,8 @@ impl OversampledGlottalSource {
         let asym_len = asymmetry.len();
         let source_len = source.len();
         let seed_len = seed.len();
+        let flutter_len = flutter.len();
+        let dipl_len = diplophonia.len();
 
         for i in 0..len {
             let f0_val = if f0_len == 0 { 0.0 } else if f0_len > 1 { f0[i % f0_len] } else { f0[0] };
@@ -461,6 +571,8 @@ impl OversampledGlottalSource {
             let asym_val = if asym_len == 0 { 50.0 } else if asym_len > 1 { asymmetry[i % asym_len] } else { asymmetry[0] };
             let source_val = if source_len == 0 { 2.0 } else if source_len > 1 { source[i % source_len] } else { source[0] };
             let seed_val = if seed_len == 0 { 1.0 } else if seed_len > 1 { seed[i % seed_len] } else { seed[0] };
+            let flutter_val = if flutter_len == 0 { 0.0 } else if flutter_len > 1 { flutter[i % flutter_len] } else { flutter[0] };
+            let dipl_val = if dipl_len == 0 { 0.0 } else if dipl_len > 1 { diplophonia[i % dipl_len] } else { diplophonia[0] };
 
             self.set_seed(seed_val.round() as i32);
             let (voice, noise) = self.process_sample(
@@ -472,6 +584,8 @@ impl OversampledGlottalSource {
                 skew_val,
                 asym_val,
                 source_val.round() as i32,
+                flutter_val,
+                dipl_val,
             );
             voice_out[i] = voice;
             noise_out[i] = noise;
@@ -528,6 +642,10 @@ pub unsafe extern "C" fn oversampled_glottal_source_process(
     source_len: usize,
     seed_ptr: *const f32,
     seed_len: usize,
+    flutter_ptr: *const f32,
+    flutter_len: usize,
+    diplophonia_ptr: *const f32,
+    diplophonia_len: usize,
     voice_ptr: *mut f32,
     noise_ptr: *mut f32,
     output_len: usize,
@@ -545,6 +663,8 @@ pub unsafe extern "C" fn oversampled_glottal_source_process(
     let asymmetry = if asymmetry_ptr.is_null() || asymmetry_len == 0 { &[][..] } else { core::slice::from_raw_parts(asymmetry_ptr, asymmetry_len) };
     let source = if source_ptr.is_null() || source_len == 0 { &[][..] } else { core::slice::from_raw_parts(source_ptr, source_len) };
     let seed = if seed_ptr.is_null() || seed_len == 0 { &[][..] } else { core::slice::from_raw_parts(seed_ptr, seed_len) };
+    let flutter = if flutter_ptr.is_null() || flutter_len == 0 { &[][..] } else { core::slice::from_raw_parts(flutter_ptr, flutter_len) };
+    let diplophonia = if diplophonia_ptr.is_null() || diplophonia_len == 0 { &[][..] } else { core::slice::from_raw_parts(diplophonia_ptr, diplophonia_len) };
 
     let voice_out = core::slice::from_raw_parts_mut(voice_ptr, output_len);
     let noise_out = core::slice::from_raw_parts_mut(noise_ptr, output_len);
@@ -560,6 +680,8 @@ pub unsafe extern "C" fn oversampled_glottal_source_process(
             asymmetry,
             source,
             seed,
+            flutter,
+            diplophonia,
             voice_out,
             noise_out,
         );

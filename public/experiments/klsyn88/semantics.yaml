@@ -11,9 +11,11 @@ params:
     default: 0
     unit: Hz
 
+  # Cascade formant frequencies. Defaults/ranges = Klatt 1988 KLSYN88 manual
+  # Table I (neutral schwa-like configuration); F7/F8 fixed at 6500/7500.
   F1:
     type: float
-    range: [200, 1300]
+    range: [180, 1300]   # manual Table I: F1 >= 180 Hz always (cavity-wall mass)
     default: 500
     unit: Hz
   F2:
@@ -23,28 +25,29 @@ params:
     unit: Hz
   F3:
     type: float
-    range: [1200, 4999]
+    range: [1200, 4800]  # manual Table I F3 max 4800
     default: 2500
     unit: Hz
   F4:
     type: float
-    range: [1200, 4999]
-    default: 3500
+    range: [2400, 4990]  # manual Table I F4 2400-4990
+    default: 3250         # manual Table I F4 default 3250
     unit: Hz
   F5:
     type: float
-    range: [1200, 4999]
-    default: 4500
+    range: [3000, 4990]  # manual Table I F5 3000-4990
+    default: 3700         # manual Table I F5 default 3700
     unit: Hz
   F6:
     type: float
-    range: [1200, 4999]
-    default: 5500
+    range: [1200, 4990]  # manual Table I f6 3000-4990; keep wide low bound
+    default: 4990         # manual Table I f6 default 4990 (was 5500, OUTSIDE old range)
     unit: Hz
 
+  # Cascade bandwidths. Defaults/ranges = Klatt 1988 manual Table I (b1..b6).
   B1:
     type: float
-    range: [40, 1000]
+    range: [30, 1000]    # manual Table I b1 min 30
     default: 60
     unit: Hz
   B2:
@@ -54,22 +57,22 @@ params:
     unit: Hz
   B3:
     type: float
-    range: [40, 1000]
+    range: [60, 1000]    # manual Table I b3 min 60
     default: 150
     unit: Hz
   B4:
     type: float
-    range: [40, 1000]
+    range: [100, 1000]   # manual Table I b4 min 100
     default: 200
     unit: Hz
   B5:
     type: float
-    range: [40, 1000]
+    range: [100, 1500]   # manual Table I b5 100-1500
     default: 200
     unit: Hz
   B6:
     type: float
-    range: [40, 2000]
+    range: [100, 4000]   # manual Table I b6 100-4000
     default: 500
     unit: Hz
 
@@ -95,19 +98,21 @@ params:
     unit: Hz
   B5p:
     type: float
-    range: [40, 1000]
+    range: [100, 1500]   # manual Table I p5 100-1500
     default: 600
     unit: Hz
   B6p:
     type: float
-    range: [40, 2000]
+    range: [100, 4000]   # manual Table I p6 100-4000
     default: 800
     unit: Hz
 
+  # Nasal pole/zero pair. Defaults/ranges = Klatt 1988 manual Table I (fz/fp).
+  # fz=fp cancels the pair (non-nasal default).
   FNZ:
     type: float
-    range: [248, 528]
-    default: 270
+    range: [180, 800]    # manual Table I fz 180-800
+    default: 280          # manual Table I fz default 280
     unit: Hz
   BNZ:
     type: float
@@ -116,8 +121,8 @@ params:
     unit: Hz
   FNP:
     type: float
-    range: [248, 528]
-    default: 270
+    range: [180, 500]    # manual Table I fp 180-500
+    default: 280          # manual Table I fp default 280
     unit: Hz
   BNP:
     type: float
@@ -125,26 +130,58 @@ params:
     default: 90
     unit: Hz
 
+  # Tracheal (subglottal) pole-zero pair. Klatt & Klatt 1990, "Analysis,
+  # synthesis, and perception of voice quality variations among female and male
+  # talkers", JASA 87(2), Table XII. Models subglottal coupling for breathy
+  # voice. Defaults place the pole and zero coincident (FTP=FTZ=2150,
+  # BTP=BTZ=180) so the pair cancels and is transparent; separate FTZ from FTP
+  # to enable. Bound directly to the cascade tz/tp nodes (see graph.yaml).
+  FTP:
+    type: float
+    range: [300, 3000]
+    default: 2150
+    unit: Hz
+  BTP:
+    type: float
+    range: [40, 1000]
+    default: 180
+    unit: Hz
+  FTZ:
+    type: float
+    range: [300, 3000]
+    default: 2150
+    unit: Hz
+  BTZ:
+    type: float
+    range: [40, 2000]
+    default: 180
+    unit: Hz
+
+  # Overall gain (Gain0). Klatt 1988 manual Table I g0: default 60, range 0-80.
+  # Effective Gain0 = GO - 3 (parwv.c offset), so default 60 => 57 dB == klsyn88
+  # g0=60 reference level. (Was 57 => 54 dB, ~3 dB below reference.)
   GO:
     type: float
-    range: [0, 60]
-    default: 57
+    range: [0, 80]       # manual Table I g0 0-80
+    default: 60           # manual Table I g0 default 60
     unit: dB
-    description: "Overall gain (Gain0)"
+    description: "Overall gain (Gain0); effective Gain0 = GO - 3 (parwv.c)"
 
+  # Source amplitudes. Manual Table I av/ah/ap ranges 0-80 (defaults track-driven
+  # to 0 here; av neutral default is 60 in the manual but Qlatt drives it per token).
   AV:
     type: float
-    range: [0, 70]
+    range: [0, 80]       # manual Table I av 0-80
     default: 0
     unit: dB
   AVS:
     type: float
-    range: [0, 70]
+    range: [0, 80]       # manual Table I ap (parallel voicing) 0-80
     default: 0
     unit: dB
   AH:
     type: float
-    range: [0, 70]
+    range: [0, 80]       # manual Table I ah 0-80
     default: 0
     unit: dB
   AF:
@@ -240,12 +277,12 @@ params:
 
   dF1hz:
     type: float
-    range: [0, 500]
+    range: [0, 100]      # manual Table I dF 0-100
     default: 0
     unit: Hz
   dB1hz:
     type: float
-    range: [0, 500]
+    range: [0, 400]      # manual Table I db 0-400
     default: 0
     unit: Hz
 
@@ -253,7 +290,18 @@ params:
     type: int
     range: [1, 4]
     default: 2
-    description: "Source select: 1=impulsive, 2=natural, 3=triangular, 4=square"
+    description: "Source select: 1=impulsive, 2=natural (KLGLOTT88, default), 3=LF (modified LF model, Fant 1985), 4=square. Klatt & Klatt 1990 Table XI."
+
+  # Speed quotient (LF source only, SS=3). Klatt & Klatt 1990 Table XII:
+  # SQ = ratio of opening to closing duration of the open phase, in percent,
+  # range 100-500, default 200. Drives the LF return/steepness Rk = 100/SQ
+  # (Fant 1988 normalized R-params). Inert for SS!=3.
+  SQ:
+    type: float
+    range: [100, 500]
+    default: 200
+    unit: "%"
+    description: "Speed quotient percent (LF source SS=3 only). Klatt & Klatt 1990 Table XII."
 
   Kopen:
     type: float
@@ -263,9 +311,9 @@ params:
 
   Kskew:
     type: float
-    range: [0, 200]
+    range: [0, 100]      # manual Table I sk 0-100 (25 us units)
     default: 0
-    description: "Skewness"
+    description: "Skewness (manual Table I sk, 25 us units)"
 
   as:
     type: float
@@ -288,14 +336,38 @@ params:
   NFCASC:
     type: int
     range: [1, 8]
-    default: 6
-    description: "Number of cascade formants"
+    default: 5
+    description: "Number of cascade formants. Klatt&Klatt 1990 Table XI, Klatt 1988 manual Table I (nf), and parwv.c all default to 5 (~17 cm tract at 10 kHz)."
 
   seed:
     type: int
     range: [1, 2147483647]
     default: 1
     description: "Random seed"
+
+  # F0 flutter percent. Klatt & Klatt 1990, eq. 1:
+  #   Δf0(t) = (FL/50)*(F0/100)*[sin(2π·12.7t)+sin(2π·7.1t)+sin(2π·4.7t)] Hz
+  # Default 0 = no flutter (synthesizer output bit-identical). Applied in the
+  # oversampled glottal source per period from absolute utterance time.
+  FL:
+    type: float
+    range: [0, 100]
+    default: 0
+    unit: "%"
+    description: "F0 flutter percent (Klatt & Klatt 1990 eq. 1)"
+
+  # Diplophonia percent. Klatt & Klatt 1990, §3 (alternate-pulse perturbation):
+  #   delay      = (DI/100)*(1 - OQ/100)*T0   (delays every alternate glottal pulse)
+  #   amp_factor = 1 - DI/100                 (attenuates that pulse; DI=50 -> -6 dB)
+  # Default 0 = no diplophonia (synthesizer output bit-identical). Applied per period
+  # in the oversampled glottal source; produces a perceived F0/2 subharmonic without
+  # changing the mean F0.
+  DI:
+    type: float
+    range: [0, 100]
+    default: 0
+    unit: "%"
+    description: "Diplophonia percent (Klatt & Klatt 1990 §3)"
 
 constants:
   F7: 6500
@@ -360,6 +432,82 @@ realize:
   effectiveTiltDb:
     expr: "min(34.0, max(0.0, TLTdb + (TL > 0 ? TL : rdDerivedTiltDb)))"
     deps: [TLTdb, TL, rdDerivedTiltDb]
+
+  # ---------------------------------------------------------------------------
+  # LF glottal source (SS=3) — Fant 1985/1988/1997, Klatt & Klatt 1990 Table XI
+  # ---------------------------------------------------------------------------
+  # The LF crate (crates/lf-source) is Rd-driven with an optional Klatt OQ
+  # override. We drive it from the Klatt controls as follows:
+  #  - OQ override = effectiveKopen  (Klatt 1990 open quotient, %) -> sets the
+  #    glottal-formant Fg/Bg in the crate (honors OQ exactly).
+  #  - SQ -> Rd: the crate ties steepness Rk = (22.4+11.8*Rd)/100 (Fant 1997
+  #    Eq. A1) and the open/close asymmetry alpha_m = 1/(1+Rk) (= speed quotient,
+  #    Doval 2003). Setting Rk = 100/SQ (Fant 1988 normalized R-params) and
+  #    inverting gives Rd = (10000/SQ - 22.4)/11.8, clamped to the crate's
+  #    valid Rd range [0.3, 2.7]. So SQ controls the LF closing steepness /
+  #    spectral slope; OQ controls the glottal-formant frequency.
+  #  - TL override = effectiveTiltDb resolves the ta-vs-TL double-tilt ambiguity
+  #    (spec §6 #10): SS=3 expresses spectral tilt through the crate's TL
+  #    override path, not through ta.
+  # Known approximation (spec §6 #7/#8): the crate's Rd-default Rk covariation
+  # caps fully-independent SQ control near the Rd clamp ends (SQ<~184 saturates
+  # at Rd=2.7, SQ>~386 at Rd=0.3); within ~[184,386] SQ maps cleanly. Accepted:
+  # standard CALM-biquad LF realization (Perrotin 2021), not a literal
+  # time-domain integrator.
+  lfRd:
+    expr: "min(2.7, max(0.3, (10000.0 / SQ - 22.4) / 11.8))"
+    deps: [SQ]
+
+  # Route the LF source onto the voice path only when SS=3 (signal-switch
+  # selector: <0.5 = oversampled KLGLOTT88 voice, >=0.5 = LF). SS!=3 keeps the
+  # default oversampled path bit-identical.
+  lfSelect:
+    expr: "ss == 3 ? 1.0 : 0.0"
+    deps: [ss]
+
+  # LFLM causal mode (1) for the realtime LF crate (Perrotin 2021; LFCALM maps
+  # to LFLM internally for sample-by-sample rendering).
+  lfModeVal:
+    expr: "1.0"
+    deps: []
+
+  # Amplitude makeup gain bringing the LF crate's normalized output (~1.0 scale,
+  # RMS ~0.22 at SQ=200/OQ=50/F0=120) up to the klsyn88 fixed-point voice scale
+  # (oversampled KLGLOTT88 voice RMS ~2069 at the same settings) so the LF voice
+  # feeds voiceGain/parVoiceGain at the same level as the native source.
+  # Engineering estimate (RMS-matched, measured); not a paper constant.
+  lfMakeupGain:
+    expr: "9600.0"
+    deps: []
+
+  # Pitch-synchronous F1 modulation source type. The LF source (SS=3) has no
+  # triangular open-phase shape, so the F1 pitch-sync modulator treats it like
+  # the natural source (2). SS!=3 passes ss through unchanged (SS=2 -> 2, so the
+  # default path is bit-identical).
+  psmSource:
+    expr: "ss == 3 ? 2 : ss"
+    deps: [ss]
+
+  # Tracheal pole-zero coincidence bypass (Klatt & Klatt 1990 Table XII,
+  # "coincident pole+zero => transparent"). When the tracheal pole and zero
+  # share frequency AND bandwidth they cancel exactly in continuous math, so
+  # the pair contributes nothing to the spectrum. Rather than run two extra
+  # f32 IIR biquads (whose finite-precision cancellation leaves a sub-LSB
+  # residual that perturbs the rendered samples), we route both node
+  # frequencies to 0 when coincident, which trips each node's bypassAtZero
+  # passthrough -> the cascade signal is forwarded bit-for-bit. This makes the
+  # default coincident state an EXACT no-op (its mathematically-correct value)
+  # instead of an f32 approximation of it. Separating FTZ from FTP (or BTZ from
+  # BTP) makes the pair non-coincident -> the real zero/pole are inserted.
+  trachealCoincident:
+    expr: "(FTP == FTZ && BTP == BTZ) ? 1.0 : 0.0"
+    deps: [FTP, FTZ, BTP, BTZ]
+  trachealZeroFreq:
+    expr: "trachealCoincident > 0.5 ? 0.0 : FTZ"
+    deps: [trachealCoincident, FTZ]
+  trachealPoleFreq:
+    expr: "trachealCoincident > 0.5 ? 0.0 : FTP"
+    deps: [trachealCoincident, FTP]
 
   Ra:
     expr: "max(-1.0 + 4.8 * effectiveRd, 0.0)"

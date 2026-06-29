@@ -78,7 +78,12 @@ base_params:
   BGZ: 6000
   BGS: 200
   NFC: 5
-  GO: 47
+  # GO is intentionally NOT set here: it is experiment-scoped. Forcing GO=47 in
+  # the frontend clamped klsyn88 ~13 dB below its published reference level (the
+  # "klsyn88 sounds quiet" defect) while klatt80-baseline is calibrated around
+  # its own GO=47 default (ndbScale -47). Omitting GO lets each experiment use
+  # its own semantics default: klatt80-baseline=47 (byte-identical/golden-safe),
+  # klsyn88=60 (published g0; Klatt&Klatt 1990 / KLSYN88 manual Table I).
 phoneme_targets:
   # Core monophthong steady-state targets use Hillenbrand et al. 1995 Table V
   # adult male averages for F1-F3. B1-B3 use Kent & Vorperian (2018) typical

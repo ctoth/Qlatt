@@ -29,6 +29,12 @@
       "name": "DECtalk 4.63 English",
       "extends": "klatt80-baseline",
       "description": "Klatt 80 synthesizer configured for DECtalk 4.63 English frontend (impulse source, DECtalk defaults)"
+    },
+    {
+      "id": "qlatt-beauty",
+      "name": "Qlatt Beauty",
+      "description": "Experimental beauty-first Klatt synthesizer",
+      "path": "qlatt-beauty"
     }
   ]
 }

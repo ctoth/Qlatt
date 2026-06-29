@@ -1,0 +1,757 @@
+bacon: "0.1"
+name: klatt80-synth
+meta:
+  primitives: ./registry.yaml
+  semantics: ./semantics.yaml
+  description: |
+    Klatt 80 formant synthesizer topology per Klatt (1980).
+    Conditional routing (source selection, cascade/parallel switching)
+    is implemented via gain-gated paths with CEL expressions in semantics.yaml.
+
+formantBanks:
+  main:
+    cascade:
+      input: np
+      output: cascadeOutGain
+    parallel:
+      output: parallelSum
+    proximity:
+      - { pair: [1, 2], offset: 0 }
+      - { pair: [2, 3], offset: 50 }
+      - { pair: [3, 4], offset: 150 }
+    formants:
+      - index: 1
+        freqRange: [200, 1000]
+        freqDefault: 500
+        bwRange: [40, 1000]
+        bwDefault: 60
+        ndbScale: -58
+        sign: 1
+        parallelSource: parallelSourceGain
+        bypassAtZero: true
+      - index: 2
+        freqRange: [500, 3000]
+        freqDefault: 1500
+        bwRange: [40, 1000]
+        bwDefault: 90
+        ndbScale: -65
+        sign: -1
+        parallelSource: parallelDiffSum
+      - index: 3
+        freqRange: [1500, 4000]
+        freqDefault: 2500
+        bwRange: [40, 1000]
+        bwDefault: 150
+        ndbScale: -73
+        sign: 1
+        parallelSource: parallelDiffSum
+      - index: 4
+        freqRange: [2500, 5000]
+        freqDefault: 3500
+        bwRange: [100, 1000]
+        bwDefault: 200
+        ndbScale: -78
+        sign: -1
+        parallelSource: parallelDiffSum
+      - index: 5
+        freqRange: [3500, 6000]
+        freqDefault: 4500
+        bwRange: [100, 1000]
+        bwDefault: 200
+        ndbScale: -79
+        sign: 1
+        parallelSource: parallelFricGain
+      - index: 6
+        freqRange: [4000, 7000]
+        freqDefault: 5500
+        bwRange: [100, 1000]
+        bwDefault: 500
+        ndbScale: -80
+        sign: -1
+        parallelSource: parallelFricGain
+      # F7-F10: Higher formants with both cascade and parallel routing.
+      # Cascade: shapes voiced speech spectrum (though contribution is small due to cascade attenuation).
+      # Parallel: shapes fricative/burst spectra above 6 kHz; this requires the
+      # output reconstruction stage below to be bypassed in this experiment.
+      # Shadle et al. (2023) report fricative spectra to 15 kHz; Monson et al.
+      # (2014) covers perceptual significance of high-frequency energy.
+      # A7-A10 default to 0; frontend rules must supply non-zero values for audible parallel output.
+      # Fant neutral model spacing (1000 Hz from F6), Rabiner (1968) Q-factor bandwidths.
+      - index: 7
+        freqRange: [5000, 8000]
+        freqDefault: 6500
+        bwRange: [200, 2000]
+        bwDefault: 722
+        parallelSource: parallelFricGain
+        ndbScale: -81
+        sign: 1
+        # Rabiner (1968) Q=9; parallel source: frication only (same as F5-F6)
+      - index: 8
+        freqRange: [6000, 9000]
+        freqDefault: 7500
+        bwRange: [400, 3000]
+        bwDefault: 1250
+        parallelSource: parallelFricGain
+        ndbScale: -82
+        sign: -1
+        # Rabiner (1968) Q=6; parallel source: frication only (same as F5-F6)
+      - index: 9
+        freqRange: [7000, 10000]
+        freqDefault: 8500
+        bwRange: [500, 5000]
+        bwDefault: 2125
+        parallelSource: parallelFricGain
+        ndbScale: -83
+        sign: 1
+        # Rabiner (1968) Q=4; parallel source: frication only (same as F5-F6)
+      - index: 10
+        freqRange: [8000, 12000]
+        freqDefault: 9500
+        bwRange: [1000, 8000]
+        bwDefault: 4750
+        parallelSource: parallelFricGain
+        ndbScale: -84
+        sign: -1
+        # Rabiner (1968) Q=2; parallel source: frication only (same as F5-F6)
+
+nodes:
+  # ---------------------------------------------------------------------------
+  # SOURCE NODES
+  # ---------------------------------------------------------------------------
+  # Source selection (impulse vs LF vs bypass) is implemented via gain gates.
+  # Semantics.yaml computes lfSourceSwitch/impulseSourceSwitch from sourceMode.
+
+  lfSource:
+    type: lf-source
+    params:
+      f0: { bind: F0 }
+      rd: { bind: Rd }
+      lfMode: { bind: lfMode }
+      oq: { bind: OQ }
+      tl: { bind: TL }
+      flutter: { bind: flutter }
+      jitter: { bind: jitter }
+      di: { bind: DI }
+
+  impulseSource:
+    type: impulse-train
+    params:
+      f0: { bind: F0 }
+      gain: 1.0
+      openPhaseRatio: { bind: openPhaseRatio }
+
+  noiseSource:
+    type: noise-source
+    params:
+      gain: 1.0
+      cutoff: { bind: noiseCutoff }
+
+  fricationSource:
+    type: noise-source
+    params:
+      gain: 1.0
+      cutoff: { bind: fricationCutoff }
+
+  # Glottal modulation - pulsatile sinusoidal envelope shaped by OQ
+  # (Klatt 1980, Gobl 1988, Fant 1997 Table 1)
+  glottalMod:
+    type: glottal-mod
+    params:
+      f0: { bind: F0 }
+      oq: { bind: glottalModOQ }
+
+  # ---------------------------------------------------------------------------
+  # PLSTEP BURST MECHANISM
+  # ---------------------------------------------------------------------------
+  # Klatt 80 PLSTEP: DC step injection triggered by AF rise >= 49 dB
+  # Creates transient rarefaction pulse at stop/fricative onsets
+  #
+  # From PARCOE.FOR:
+  #   IF (NNAF - NAFLAS >= 49) PLSTEP = GETAMP(G0 - 28)
+  # Decay: 0.995 per sample at 10kHz (~92ms time constant)
+
+  # Edge detector for AF (frication amplitude)
+  afEdgeDetector:
+    type: edge-detector
+    params:
+      threshold: { bind: plstepThreshold }  # Klatt 80: 49 dB rise (from semantics constant)
+      input: { bind: AF }  # Monitor frication amplitude
+
+  # Sum triggers into the envelope.
+  plstepTriggerSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Decay envelope - exponential decay starting at -amplitude (rarefaction)
+  plstepEnvelope:
+    type: decay-envelope
+    params:
+      trigger: 0  # Driven by audio connection from trigger sum
+      amplitude: { bind: plstepAmplitude }  # From semantics: dbToLinear(G0 - 75)
+      decay: 0  # Auto-calculate from sample rate
+
+  # ---------------------------------------------------------------------------
+  # SOURCE ROUTING/MIXING
+  # ---------------------------------------------------------------------------
+  # Gain gates implement conditional switching based on sourceMode parameter.
+  # Values computed in semantics.yaml: lfSourceSwitch, impulseSourceSwitch, etc.
+
+  lfSourceGain:
+    type: gain
+    params:
+      gain: { bind: lfSourceSwitch }
+
+  impulseGain:
+    type: gain
+    params:
+      gain: { bind: impulseSourceSwitch }
+
+  sourceSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Source mode switching for cascade path
+  sourceBypassGain:
+    type: gain
+    params:
+      gain: { bind: sourceBypassSwitch }
+
+  sourceDirectGain:
+    type: gain
+    params:
+      gain: { bind: sourceDirectSwitch }
+
+  sourceDiffGain:
+    type: gain
+    params:
+      gain: { bind: sourceDiffSwitch }
+
+  # ---------------------------------------------------------------------------
+  # GLOTTAL SHAPING - CASCADE PATH (RGP/RGZ)
+  # ---------------------------------------------------------------------------
+
+  # Glottal resonator pole (RGP)
+  rgp:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGP }
+      bandwidth: { bind: BGP }
+
+  # Glottal resonator zero (RGZ) - antiresonator
+  rgz:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGZ }
+      bandwidth: { bind: BGZ }
+
+  # Glottal source resonator (RGS) - for AVS path
+  rgs:
+    type: resonator
+    params:
+      frequency: 0
+      bandwidth: { bind: BGS }
+
+  # ---------------------------------------------------------------------------
+  # GLOTTAL SHAPING - PARALLEL PATH (RGP_AVS/RGZ_AVS)
+  # ---------------------------------------------------------------------------
+  # Separate filter instances from cascade path (rgp/rgz) to maintain
+  # independent filter states. Both paths share FGP/BGP parameters.
+
+  rgpAvs:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGP }
+      bandwidth: { bind: BGP }
+
+  rgzAvs:
+    type: antiresonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: FGZ }
+      bandwidth: { bind: BGZ }
+
+  # ---------------------------------------------------------------------------
+  # RADIATION FILTERS
+  # ---------------------------------------------------------------------------
+  # Chalker & Mackerras 1985 two-term radiation impedance approximation.
+  # Replaces simple first-difference with H(z) = c1*(1-z^-1) + c2*(1-2z^-1+z^-2).
+  # Reduces high-frequency error from 13.4 ohms (Flanagan) to 1.22 ohms at 5 kHz.
+
+  radiationDiff:
+    type: chalker-radiation
+
+  radiationDiffAvs:
+    type: chalker-radiation
+
+  # Differentiator for parallel branch (UGLOT1 = first diff of UGLOT)
+  diff:
+    type: differentiator
+
+  # ---------------------------------------------------------------------------
+  # VOICE/ASPIRATION GAIN NODES
+  # ---------------------------------------------------------------------------
+
+  voiceGain:
+    type: gain
+    params:
+      gain: { bind: voiceGain }
+
+  avsGain:
+    type: gain
+    params:
+      gain: { bind: avsGain }
+
+  noiseGain:
+    type: gain
+    params:
+      gain: { bind: aspGain }
+
+  # ---------------------------------------------------------------------------
+  # PARALLEL VOICE PATH GAINS
+  # ---------------------------------------------------------------------------
+
+  # AVS path source mode switching (reuses same switches as cascade)
+  avsBypassGain:
+    type: gain
+    params:
+      gain: { bind: sourceBypassSwitch }
+
+  avsDirectGain:
+    type: gain
+    params:
+      gain: { bind: sourceDirectSwitch }
+
+  avsDiffGain:
+    type: gain
+    params:
+      gain: { bind: sourceDiffSwitch }
+
+  # ---------------------------------------------------------------------------
+  # NASAL RESONATORS
+  # ---------------------------------------------------------------------------
+
+  # Nasal antiresonator (zero) — biquad notch filter
+  # Core oral/nasal cancellation pair. Oral speech keeps this active with
+  # FNZ = FNP rather than bypassing the tract section.
+  nz:
+    type: biquad-notch
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalCoreFnzBound }
+      bandwidth: { bind: nasalCoreBnzBound }
+
+  # Place-specific oral cavity antiformant for nasal murmur.
+  nzPlace:
+    type: biquad-notch
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalPlaceFnz }
+      bandwidth: { bind: nasalPlaceBnz }
+
+  # Nasal resonator (pole)
+  np:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalCoreFnpBound }
+      bandwidth: { bind: nasalCoreBnpBound }
+
+  # Parallel nasal resonator
+  parallelNasal:
+    type: resonator
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: nasalCoreFnpBound }
+      bandwidth: { bind: nasalCoreBnpBound }
+
+  parallelNasalGain:
+    type: gain
+    params:
+      gain: { bind: anLinear }  # was anGainScaled
+
+  parallelBypassGain:
+    type: gain
+    params:
+      gain: { bind: abLinear }  # was abGainScaled
+
+  # ---------------------------------------------------------------------------
+  # PARALLEL MIXING
+  # ---------------------------------------------------------------------------
+
+  mixer:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelMixer:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelSourceGain:
+    type: gain
+    params:
+      gain: { bind: parallelVoiceGain }
+
+  parallelDiffGain:
+    type: gain
+    params:
+      gain: { bind: parallelVoiceGain }
+
+  parallelFricGain:
+    type: gain
+    params:
+      gain: { bind: fricGainScaled }
+
+  parallelDiffSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  parallelSum:
+    type: gain
+    params:
+      # No branch-specific scale needed: parallel-to-cascade balance matches
+      # Klatt 1980 COEWAV.FOR when both branches share the same output path.
+      # The FORTRAN's 170x (line 251) is a global 16-bit DAC scale, not a
+      # parallel correction.
+      gain: 1.0
+
+  # ===========================================================================
+  # BEAUTY DELTAS — high-frequency "air", singer's-formant ring, piriform notch,
+  # controllable spectral tilt. These are the genuinely NEW machinery that makes
+  # qlatt-beauty more than a klatt80 clone. See design/beauty-synthesis/09 + 06.
+  # ===========================================================================
+
+  # --- Controllable spectral tilt on the voiced source -----------------------
+  # Gauffin 1989 / Fant 1985: return-phase tilt = warmth<->brightness. A first-
+  # order low-pass tilt stage inserted on the voiced (cascade) source so the
+  # whole voiced spectrum can be warmed without touching the noise branch.
+  # spectralTilt default 0 = flat (LF source still carries its own Rd-derived TL).
+  voiceTilt:
+    type: tilt-filter
+    params:
+      tilt: { bind: spectralTilt }
+
+  # --- HF "air" branch (the >5 kHz energizer) --------------------------------
+  # PROBLEM (scout): in the cascade, F7-F10 sit AFTER the F1-F6 chain and receive
+  # ~82 dB of skirt attenuation, so no energy ever reaches >5 kHz. FIX: tap the
+  # radiated voiced+aspiration source at `mixer` (pre-cascade, full level) and run
+  # it through a dedicated, UN-attenuated bank of wide HF resonators summed
+  # straight to the output. Their overlapping wide skirts form the steerable
+  # "air" shelf from ~5 kHz to Nyquist (Monson 2014 §HFE; Kreiman 2021 F7-F11).
+  #
+  # Piriform-fossa antiresonance ~5 kHz (Dang & Honda 1997 via Monson 2014): a
+  # real zero that a monotone boost cannot make. Carve it at the low edge of the
+  # air band so the shelf does not sound synthetically flat.
+  piriformNotch:
+    type: biquad-notch
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: piriformNotchFreq }
+      bandwidth: { bind: piriformNotchBw }
+
+  # Optional piriform-SINUS zero ~3.5-4 kHz (Sundberg 1972: sharpens the ring).
+  # Off by default (freq 0 -> bypassAtZero). Available for the singing/ring preset.
+  sinusNotch:
+    type: biquad-notch
+    options:
+      bypassAtZero: true
+    params:
+      frequency: { bind: sinusNotchFreq }
+      bandwidth: { bind: sinusNotchBw }
+
+  # Female-scaled HF cascade ~7/9/11/13/16 kHz (doc 09 table; Kreiman 2021).
+  # Wide (low-Q) bandwidths so the bank reads as a continuous shelf, not 5 tones.
+  hfRes7:
+    type: resonator
+    params:
+      frequency: { bind: hf7Freq }
+      bandwidth: { bind: hf7Bw }
+  hfRes9:
+    type: resonator
+    params:
+      frequency: { bind: hf9Freq }
+      bandwidth: { bind: hf9Bw }
+  hfRes11:
+    type: resonator
+    params:
+      frequency: { bind: hf11Freq }
+      bandwidth: { bind: hf11Bw }
+  hfRes13:
+    type: resonator
+    params:
+      frequency: { bind: hf13Freq }
+      bandwidth: { bind: hf13Bw }
+  hfRes16:
+    type: resonator
+    params:
+      frequency: { bind: hf16Freq }
+      bandwidth: { bind: hf16Bw }
+
+  # Per-band amplitude trims (Monson 2012 Table I octave calibration:
+  # 8-kHz oct -16 dB, 16-kHz oct -24 dB vs overall). Make-up gains lift the
+  # naturally-rolled-off source HF up to the air-shelf target.
+  hf7Gain:
+    type: gain
+    params:
+      gain: { bind: hf7Gain }
+  hf9Gain:
+    type: gain
+    params:
+      gain: { bind: hf9Gain }
+  hf11Gain:
+    type: gain
+    params:
+      gain: { bind: hf11Gain }
+  hf13Gain:
+    type: gain
+    params:
+      gain: { bind: hf13Gain }
+  hf16Gain:
+    type: gain
+    params:
+      gain: { bind: hf16Gain }
+
+  hfAirSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Global "Brilliance / Air" trim on the whole HF shelf (doc 09 §FE headline knob).
+  hfAirOutGain:
+    type: gain
+    params:
+      gain: { bind: hfAirMaster }
+
+  # --- Singer's-formant ring (~2.8-3.2 kHz, Sundberg 1972) --------------------
+  # A narrow-bandwidth resonant BOOST tapped off the cascade output and summed
+  # back: the F3/F4/F5 clustering that gives "ring / presence". Parallel add so
+  # it lifts ~3 kHz rather than band-limiting the whole signal.
+  singerFormant:
+    type: resonator
+    params:
+      frequency: { bind: singerFormantFreq }
+      bandwidth: { bind: singerFormantBw }
+  singerGain:
+    type: gain
+    params:
+      gain: { bind: singerGain }
+
+  # ---------------------------------------------------------------------------
+  # OUTPUT MIXING
+  # ---------------------------------------------------------------------------
+
+  # Cascade output gain - gates cascade branch based on SW
+  # SW=0 (cascade): cascadeGain=1, SW=1 (parallel): cascadeGain=0
+  # NOTE: Both cascade and parallel are SUMMED (per COEWAV.FOR line 251)
+  # Parallel voicing is gated by parallelVoiceGain, frication always flows through
+  cascadeOutGain:
+    type: gain
+    params:
+      gain: { bind: cascadeGain }
+
+  outputSum:
+    type: gain
+    params:
+      gain: 1.0
+
+  # Klatt (1980) Fig. 1 and Appendix A place an external 5 kHz low-pass after
+  # the D/A converter. This experiment bypasses that stage so the A7-A10
+  # fricative bands above 5 kHz are actually rendered; set bypass=false for a
+  # strict Klatt 1980 playback-bandwidth run.
+  outputLp:
+    type: reconstruction-filter
+    options:
+      bypass: true
+
+  masterGain:
+    type: gain
+    params:
+      gain: { bind: masterGain }
+
+  # DynamicsCompressorNode — mimics FORTRAN 16-bit hard clipping.
+  # Klatt 1980 COEWAV.FOR line 251 scales output by 170x then truncates
+  # to [-32767, 32767]; cascade peaks clip while quieter parallel-branch
+  # fricatives (~1870 counts) survive.  In float audio the full 40 dB gap
+  # is preserved, making fricatives inaudible.  The compressor tames
+  # boosted cascade peaks while the raised masterGain lifts the parallel
+  # above the perceptual floor.
+  # Output limiter prevents clipping of the loud F1 cascade peaks. Measurement
+  # showed the limiter ratio does NOT change the HF "air" *relative* level (that
+  # is fixed by how much HF the air branch injects pre-output) — it only controls
+  # loudness/clipping. So we keep a firm anti-clip limiter and set the air level
+  # via hfAirMaster instead.
+  outputCompressor:
+    type: dynamics-compressor
+    params:
+      threshold: -24    # dB — compress above ~0.063 amplitude
+      knee: 12          # dB — soft transition
+      ratio: 12         # firm limiter — prevents cascade-peak clipping
+      attack: 0.003     # 3 ms — fast enough for transients
+      release: 0.1      # 100 ms — faster than default 250 ms for speech
+
+  outputGain:
+    type: gain
+    params:
+      gain: { bind: outputGain }
+
+# =============================================================================
+# CONNECTIONS
+# =============================================================================
+connections:
+  # ---------------------------------------------------------------------------
+  # Source routing
+  # ---------------------------------------------------------------------------
+  - [lfSource, lfSourceGain]
+  - [lfSourceGain, sourceSum]
+  - [impulseSource, impulseGain]
+  - [impulseGain, sourceSum]
+
+  # ---------------------------------------------------------------------------
+  # Glottal shaping - cascade path
+  # ---------------------------------------------------------------------------
+  - [sourceSum, rgp]
+  - [sourceSum, rgs]
+  - [rgs, rgpAvs]
+
+  # Voice cascade path - three parallel routes merged at voiceGain
+  - [sourceSum, sourceBypassGain]
+  - [sourceBypassGain, voiceGain]
+  - [rgp, sourceDirectGain]
+  - [sourceDirectGain, voiceGain]
+  - [rgp, rgz]
+  - [rgz, radiationDiff]
+  - [radiationDiff, sourceDiffGain]
+  - [sourceDiffGain, voiceGain]
+  # Voiced source passes through the controllable spectral-tilt stage before the
+  # cascade mixer (noise branch joins mixer untilted, below).
+  - [voiceGain, voiceTilt]
+  - [voiceTilt, mixer]
+
+  # ---------------------------------------------------------------------------
+  # Glottal shaping - parallel AVS path
+  # ---------------------------------------------------------------------------
+  - [sourceSum, avsBypassGain]
+  - [avsBypassGain, avsGain]
+  - [rgpAvs, avsDirectGain]
+  - [avsDirectGain, avsGain]
+  - [rgpAvs, rgzAvs]
+  - [rgzAvs, radiationDiffAvs]
+  - [radiationDiffAvs, avsDiffGain]
+  - [avsDiffGain, avsGain]
+  - [avsGain, parallelMixer]
+
+  # ---------------------------------------------------------------------------
+  # Aspiration/frication routing
+  # ---------------------------------------------------------------------------
+  - [glottalMod, noiseSource]
+  - [glottalMod, fricationSource]
+  - [noiseSource, noiseGain]
+  - [noiseGain, mixer]
+  - [noiseGain, parallelMixer]
+
+  # ---------------------------------------------------------------------------
+  # Cascade branch: NZ -> NP -> F1 -> F2 -> F3 -> F4 -> F5 -> F6
+  # ---------------------------------------------------------------------------
+  # NOTE: This matches Figure 6's conceptual diagram from Klatt 1980.
+  # COEWAV.FOR processes in reverse order (F6->F5->F4->F3->F2->F1->NZ->NP)
+  # "to minimize transients" (line 175), but the transfer function is
+  # mathematically equivalent since cascaded filters commute.
+  # ---------------------------------------------------------------------------
+  - [mixer, nz]
+  - [nz, nzPlace]
+  - [nzPlace, np]
+  # Cascade formant chain (np -> F1..F6 -> cascadeOutGain) generated by formantBanks
+  - [cascadeOutGain, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # Parallel branch routing
+  # ---------------------------------------------------------------------------
+  - [parallelMixer, parallelSourceGain]
+  - [parallelMixer, diff]
+  - [diff, parallelDiffGain]
+  - [parallelDiffGain, parallelDiffSum]
+  - [fricationSource, parallelFricGain]
+  - [parallelFricGain, parallelDiffSum]
+
+  # Parallel formant channels (source -> F{N} -> F{N}Gain -> parallelSum) generated by formantBanks
+
+  # Parallel nasal uses UGLOT
+  - [parallelSourceGain, parallelNasal]
+  - [parallelNasal, parallelNasalGain]
+  - [parallelNasalGain, parallelSum]
+
+  # Parallel bypass
+  - [parallelFricGain, parallelBypassGain]
+  - [parallelBypassGain, parallelSum]
+
+  # Parallel output - summed with cascade (per COEWAV.FOR line 251: ULIPS=(ULIPSV+ULIPSF+STEP)*(170.))
+  # Parallel voicing gated by parallelVoiceGain, frication always flows through
+  - [parallelSum, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # PLSTEP burst - edge detection triggers decay envelope
+  # ---------------------------------------------------------------------------
+  - [afEdgeDetector, plstepTriggerSum]
+  - [plstepTriggerSum, plstepEnvelope]  # Connect sum output to trigger input
+  - [plstepEnvelope, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # BEAUTY: HF "air" branch + singer's-formant ring
+  # ---------------------------------------------------------------------------
+  # Tap the radiated voiced+aspiration source (pre-cascade) -> piriform notch (5
+  # kHz dip) -> optional sinus notch -> 5 wide HF resonators -> per-band trims ->
+  # air sum -> global brilliance trim -> output. Un-attenuated by F1-F6.
+  - [mixer, piriformNotch]
+  - [piriformNotch, sinusNotch]
+  - [sinusNotch, hfRes7]
+  - [sinusNotch, hfRes9]
+  - [sinusNotch, hfRes11]
+  - [sinusNotch, hfRes13]
+  - [sinusNotch, hfRes16]
+  - [hfRes7, hf7Gain]
+  - [hfRes9, hf9Gain]
+  - [hfRes11, hf11Gain]
+  - [hfRes13, hf13Gain]
+  - [hfRes16, hf16Gain]
+  - [hf7Gain, hfAirSum]
+  - [hf9Gain, hfAirSum]
+  - [hf11Gain, hfAirSum]
+  - [hf13Gain, hfAirSum]
+  - [hf16Gain, hfAirSum]
+  - [hfAirSum, hfAirOutGain]
+  - [hfAirOutGain, outputSum]
+
+  # Singer's-formant ring: parallel resonant boost at ~3 kHz off the cascade out.
+  - [cascadeOutGain, singerFormant]
+  - [singerFormant, singerGain]
+  - [singerGain, outputSum]
+
+  # ---------------------------------------------------------------------------
+  # Output chain
+  # ---------------------------------------------------------------------------
+  - [outputSum, outputLp]
+  - [outputLp, masterGain]
+  - [masterGain, outputCompressor]
+  - [outputCompressor, outputGain]
+
+# =============================================================================
+# OUTPUTS
+# =============================================================================
+outputs:
+  - outputGain

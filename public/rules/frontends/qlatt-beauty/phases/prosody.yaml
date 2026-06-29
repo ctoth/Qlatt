@@ -1,0 +1,448 @@
+version: v2-pierrehumbert
+rules:
+  # ==========================================================================
+  # Pierrehumbert-Style Intonation Model
+  #
+  # Replaces the O'Shaughnessy 1976 exponential-declination F0 model with a
+  # Pierrehumbert 1980 / Ladd 2008 pitch-range model using:
+  #   - Accent-type-specific F0 targets (H*, L*, L+H*, L*+H, H+!H*, H*+L, H+L*, H*+H)
+  #   - Iterative downstep (k^n) instead of global declination
+  #   - ToBI-compatible initial boundary %H plus phrase accents (H-, L-) and boundary tones (L%, H%)
+  #   - Register reset at IP boundaries (breakIndex >= 4)
+  #
+  # Citations:
+  #   - Pierrehumbert 1980 (original pitch accent inventory, downstep formula, boundary tones)
+  #   - Ladd 2008 (pitch range normalization, final lowering, sagging transitions)
+  #   - Silverman et al. 1992 (break-index and edge-tone notation conventions)
+  # ==========================================================================
+
+  # --------------------------------------------------------------------------
+  # Rule 1: Baseline initialization
+  # --------------------------------------------------------------------------
+  tobi_baseline_init:
+    kind: point
+    select:
+      stream: phone
+      where: prev == null
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.base_hz
+      tag: f0_baseline
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008
+
+  # --------------------------------------------------------------------------
+  # Rule 2: Initial %H boundary tone
+  # --------------------------------------------------------------------------
+  tobi_initial_boundary_high:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        has(current.initialBoundaryTone) && current.initialBoundaryTone == '%H'
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      tag: f0_initial_boundary_high
+    citations:
+      - "Ladd 2008"
+      - "Pierrehumbert 1980"
+
+  # --------------------------------------------------------------------------
+  # ToBI pitch accents (collapsed 8 rules -> 1). Each point self-selects via a
+  # per-point when: guard on current.accentType. Inline insertion (no by_point)
+  # lets the leading-H accents (H+!H*, H+L*) read the previous accent's peak via
+  # prev_point('f0').
+  #
+  # Interpretation note (unchanged): Ladd 2008 / Pierrehumbert 1980 treat final
+  # lowering as a separate phrase-final effect; downstep is suppressed on the
+  # nuclear accent only for the H*/H*+L families. The fall is carried by the
+  # trailing tone / phrase accent, not by lowering the H* peak.
+  # --------------------------------------------------------------------------
+  tobi_accent:
+    kind: point
+    select:
+      stream: phone
+      where:
+        all:
+          - &where_voiced_accent_stressed_vowel >-
+              has(current.isAccented) && current.isAccented == true && current.stress == 1
+              && current.params != null
+              && ((has(current.params.AV) && current.params.AV > 0)
+                  || (has(current.params.AVS) && current.params.AVS > 0))
+          - >-
+              has(current.accentType) && current.accentType in
+              ['H*', 'H*+L', 'L+H*', 'H+!H*', 'H*+H', 'H+L*', 'L*', 'L*+H']
+    define:
+      accent_idx: "has(current.accentIndexInPhrase) && current.accentIndexInPhrase >= 0 ? current.accentIndexInPhrase : 0"
+      # Nuclear suppression applies only to the H*/H*+L families; all others
+      # downstep unconditionally (reduces to pow(downstep_k, accent_idx)).
+      downstep_factor: >-
+        ((current.accentType in ['H*', 'H*+L']) && has(current.isNuclearAccent) && current.isNuclearAccent == true)
+        ? 1.0 : pow(params.policy.f0.downstep_k, accent_idx)
+      clamped_height: >-
+        max([params.policy.f0.h_star_height * downstep_factor, params.policy.f0.downstep_floor_fraction])
+      target_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+      low_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+      high_floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      prev_f0: prev_point('f0')
+      lead_hz: >-
+        prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
+    insert_points:
+      - { stream: f0, when: "current.accentType == 'H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
+      - { stream: f0, when: "current.accentType == 'H*+L'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
+      - { stream: f0, when: "current.accentType == 'H*+L'", at: "at_sync(current.sync_right)", value: low_hz, tag: f0_h_star_plus_l_tail }
+      - { stream: f0, when: "current.accentType == 'L+H*'", at: "at_sync(current.sync_left)", value: low_hz, tag: f0_l_leading }
+      - { stream: f0, when: "current.accentType == 'L+H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_l_plus_h_star }
+      - { stream: f0, when: "current.accentType == 'H+!H*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_leading }
+      - { stream: f0, when: "current.accentType == 'H+!H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_plus_downstepped_h_star }
+      - { stream: f0, when: "current.accentType == 'H*+H'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_h_peak }
+      - { stream: f0, when: "current.accentType == 'H*+H'", at: "at_sync(current.sync_right)", value: "max([target_hz, high_floor_hz])", tag: f0_h_star_plus_h_tail }
+      - { stream: f0, when: "current.accentType == 'H+L*'", at: "at_sync(current.sync_left)", value: lead_hz, tag: f0_h_plus_l_star_lead }
+      - { stream: f0, when: "current.accentType == 'H+L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_h_plus_l_star }
+      - { stream: f0, when: "current.accentType == 'L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
+      - { stream: f0, when: "current.accentType == 'L*+H'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
+      - { stream: f0, when: "current.accentType == 'L*+H'", at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+      - "O'Shaughnessy 1976"
+
+  # Rule 15: Unaccented voiced interpolation anchor
+  # --------------------------------------------------------------------------
+  tobi_unaccented_declination:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL'
+        && (has(current.isAccented) ? current.isAccented != true : true)
+        && current.params != null
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
+    define:
+      prev_f0: prev_point('f0')
+      base: params.policy.f0.base_hz
+      fallback: "prev_f0 == null ? base : prev_f0.value"
+      target: >-
+        max([fallback * 0.98, base])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: target
+      tag: f0_unaccented
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+
+  # --------------------------------------------------------------------------
+  # Rule 16: Phrase accent H- at the start of phrase-final silence
+  # --------------------------------------------------------------------------
+  tobi_phrase_accent_high:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.phraseAccent) && current.phraseAccent == 'H-'
+    define:
+      prev_f0: prev_point('f0')
+      floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      target_hz: >-
+        prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: target_hz
+      tag: f0_phrase_high
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+
+  # --------------------------------------------------------------------------
+  # Rule 17: Phrase accent L- at the start of phrase-final silence
+  # --------------------------------------------------------------------------
+  tobi_phrase_accent_low:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.phraseAccent) && current.phraseAccent == 'L-'
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
+      tag: f0_phrase_low
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+
+  # --------------------------------------------------------------------------
+  # Rule 18: L% boundary tone (declarative final fall)
+  # --------------------------------------------------------------------------
+  tobi_boundary_low:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.boundaryTone) && current.boundaryTone != null
+        && current.boundaryTone == 'L%'
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
+      tag: f0_boundary_low
+    citations:
+      - "Pierrehumbert 1980"
+      - Ladd 2008
+
+  # --------------------------------------------------------------------------
+  # Rule 19: H% boundary tone (question rise, continuation rise)
+  # --------------------------------------------------------------------------
+  tobi_boundary_rise:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL'
+        && has(current.boundaryTone) && current.boundaryTone != null
+        && current.boundaryTone == 'H%'
+    define:
+      prev_f0: prev_point('f0')
+      high_floor_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+      ceiling_hz: >-
+        params.policy.f0.base_hz + params.policy.f0.range_hz
+      target_hz: >-
+        prev_f0 == null
+          ? high_floor_hz
+          : max([
+              high_floor_hz,
+              prev_f0.value + params.policy.f0.upstep_factor * (ceiling_hz - prev_f0.value)
+            ])
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_right)
+      value: target_hz
+      tag: f0_boundary_rise
+    citations:
+      - "Pierrehumbert 1980"
+      - "Ladd 2008"
+
+  # --------------------------------------------------------------------------
+  # Rule 20: Register reset at IP boundaries (breakIndex >= 4)
+  # --------------------------------------------------------------------------
+  tobi_register_reset:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL'
+        && (prev != null
+            ? (prev.phoneme == 'SIL'
+                ? (has(prev.breakIndex) && prev.breakIndex != null ? prev.breakIndex >= 4 : false)
+                : false)
+            : false)
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: params.policy.f0.base_hz
+      tag: f0_register_reset
+    citations:
+      - Pierrehumbert 1980
+      - Ladd 2008 (declination reset at intonational phrase boundaries)
+
+  # ==========================================================================
+  # Microprosodic / Segmental F0 Perturbation (Kept Unchanged)
+  #
+  # These are NOT intonational — they are segmental effects caused by the
+  # aerodynamic/mechanical properties of voiceless/voiced consonants.
+  # They are orthogonal to the Pierrehumbert-style intonation model.
+  # ==========================================================================
+
+  # --------------------------------------------------------------------------
+  # Rule 12: Voiceless onset perturbation (+20% F0)
+  # --------------------------------------------------------------------------
+  f0_voiceless_onset_perturbation:
+    kind: point
+    select:
+      stream: phone
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_release', 'stop_aspiration', 'fricative']
+          - { predicate: prev_is_voiceless }
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
+             params.policy.f0.base_hz + params.policy.f0.range_hz])
+      tag: f0_onset_perturbation
+    citations:
+      - "O'Shaughnessy 1976"
+      - "cf. Hombert et al. 1979 (empirical: ~8% perturbation)"
+      - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
+
+  # --------------------------------------------------------------------------
+  # Rule 13: Voiced onset perturbation (-5% F0)
+  # --------------------------------------------------------------------------
+  f0_voiced_onset_perturbation:
+    kind: point
+    select:
+      stream: phone
+      where:
+        all:
+          - current.type == 'vowel'
+          - prev != null && prev.type in ['stop_closure', 'stop_release']
+          - { predicate: prev_is_voiced }
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
+             params.policy.f0.base_hz + params.policy.f0.range_hz])
+      tag: f0_onset_perturbation
+    citations:
+      - "O'Shaughnessy 1976"
+      - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
+
+  # --------------------------------------------------------------------------
+  # Rule 14: Continuation rise at clause boundaries
+  #
+  # Kept from O'Shaughnessy 1976 — applies at intermediate phrase boundaries
+  # (commas, semicolons, colons) that the ToBI boundary tone system did NOT
+  # already handle.  Guarded by boundaryTone == null so it does not produce
+  # a second F0 target on tokens where tobi_boundary_rise already fired.
+  # --------------------------------------------------------------------------
+  f0_continuation_rise:
+    kind: point
+    select:
+      stream: phone
+      where: >-
+        current.phoneme == 'SIL' && (has(current.punctuationSymbol) ? current.punctuationSymbol in [',', ';', ':'] :
+        false)
+        && (!has(current.boundaryTone) || current.boundaryTone == null)
+    define:
+      prev_f0: prev_point('f0')
+    insert_point:
+      stream: f0
+      at: at_sync(current.sync_left)
+      value: >-
+        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
+        + {
+          ',': params.policy.f0.continuation_rise_hz,
+          ';': params.policy.f0.continuation_minor_rise_hz,
+          ':': params.policy.f0.continuation_minor_rise_hz
+        }[current.punctuationSymbol]
+      tag: f0_continuation
+    citations:
+      - O'Shaughnessy 1976
+      - "Engineering estimate: semicolon/colon rise magnitude"
+
+  # --------------------------------------------------------------------------
+  # Rule 25: Connected-speech source contour (Fant 1997)
+  #
+  # Applies phrase-local Ee/Rd source shaping on voiced segments:
+  # - slight onset rise
+  # - slow declination
+  # - stronger final-window fall
+  # - phrase-final Rd softening
+  # --------------------------------------------------------------------------
+  connected_speech_source_contour:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme != 'SIL'
+        && current.params != null
+        && ((has(current.params.AV) && current.params.AV > 0)
+            || (has(current.params.AVS) && current.params.AVS > 0))
+    contour:
+      domain: phrase
+      # Silverman et al. 1992 ToBI: BI=3 marks intermediate phrase boundaries.
+      reset_break_index: 3
+      apply:
+        - field: params.EePhraseDb
+          op: add
+          value: ee_total_db
+          tag: source_contour
+        - field: params.RdPhraseOffset
+          op: add
+          value: "params.policy.source_contour.rd_final_offset * final_progress"
+          tag: source_contour
+    define:
+      onset_rise_db: >-
+        contour.elapsed_sec < params.policy.source_contour.ee_onset_rise_sec
+        ? -params.policy.source_contour.ee_onset_rise_db
+          * (1.0 - contour.elapsed_sec / params.policy.source_contour.ee_onset_rise_sec)
+        : 0.0
+      declination_db: >-
+        -params.policy.source_contour.ee_declination_db_per_sec * contour.elapsed_sec
+      final_window_sec: >-
+        min([
+          params.policy.source_contour.ee_final_window_max_sec,
+          max([
+            params.policy.source_contour.ee_final_window_min_sec,
+            contour.phrase_duration_sec * params.policy.source_contour.ee_final_window_ratio
+          ])
+        ])
+      final_window_start_sec: >-
+        max([
+          params.policy.source_contour.ee_onset_rise_sec,
+          contour.phrase_duration_sec - final_window_sec
+        ])
+      final_fall_db: >-
+        contour.elapsed_sec > final_window_start_sec
+        ? -(params.policy.source_contour.ee_final_fall_db_per_sec
+            - params.policy.source_contour.ee_declination_db_per_sec)
+          * (contour.elapsed_sec - final_window_start_sec)
+        : 0.0
+      final_progress: >-
+        contour.elapsed_sec <= final_window_start_sec
+        ? 0.0
+        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
+      ee_total_db: >-
+        onset_rise_db + declination_db + final_fall_db
+    citations:
+      - Fant 1997
+      - Hanson et al. 2001
+      - Silverman et al. 1992
+      - "Engineering estimate: conservative qlatt contour magnitudes for stable long-phrase loudness"
+
+  # --------------------------------------------------------------------------
+  # Rule 26: Spectral tilt reduction for stressed vowels
+  #
+  # Stressed vowels have flatter spectral tilt (lower TL), reflecting
+  # increased vocal effort. Sluijter & van Heuven 1996 showed spectral
+  # tilt is a primary acoustic correlate of linguistic stress, more
+  # reliable than F0 or intensity alone.
+  # --------------------------------------------------------------------------
+  stress_spectral_tilt:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'vowel' && has(current.stress) && current.stress >= 1"
+    apply:
+      - field: params.TL
+        op: add
+        value: "-6"
+        tag: stress
+    citations:
+      - "Sluijter & van Heuven 1996"

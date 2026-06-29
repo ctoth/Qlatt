@@ -11,6 +11,12 @@
       "name": "DECtalk 4.63 English",
       "description": "DECtalk 4.63 English TTS frontend (extracted from C source)",
       "entryPoint": "frontend.yaml"
+    },
+    {
+      "id": "qlatt-beauty",
+      "name": "Qlatt Beauty",
+      "description": "Beauty-first English TTS frontend",
+      "entryPoint": "frontend.yaml"
     }
   ]
 }

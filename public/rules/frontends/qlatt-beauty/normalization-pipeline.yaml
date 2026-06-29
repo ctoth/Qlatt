@@ -1,0 +1,137 @@
+# Text normalization pipeline for qlatt-english frontend.
+#
+# Defines the ordered sequence of normalization steps applied to input text.
+# Each step has a name, type, and type-specific parameters.
+#
+# Step types:
+#   builtin        — calls a named TypeScript function (algorithmic, not declarative)
+#   regex_replace  — applies a regex pattern with a replacement string or named handler
+#   table_replace  — word-boundary-aware substitution from a lookup table
+#
+# Citations:
+#   - Allen, Hunnicutt & Klatt 1987 Ch.3 (MITalk text analysis pipeline order)
+#   - Ebden & Sproat 2015 (Kestrel TN framework, semiotic class ordering)
+
+steps:
+  - name: lowercase
+    type: builtin
+    handler: lowercase
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: normalize_quotes
+    type: regex_replace
+    description: "Normalize typographic/smart quotes to ASCII equivalents"
+    rules:
+      - pattern: "[\\u2018\\u2019\\u201A\\u2032]"
+        replacement: "'"
+        flags: "g"
+      - pattern: "[\\u201C\\u201D\\u201E]"
+        replacement: "\""
+        flags: "g"
+      - pattern: "\\u2026"
+        replacement: "..."
+        flags: "g"
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: expand_abbreviations
+    type: table_replace
+    table: abbreviations
+    description: "Expand common abbreviations before punctuation stripping"
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: expand_initialisms
+    type: regex_replace
+    description: "Expand dotted initialisms (U.S.A. -> u s a)"
+    rules:
+      - pattern: "\\b(?:[a-z]\\.){2,}[a-z]?\\.?"
+        handler: expandInitialism
+        flags: "gi"
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: expand_dates_slash
+    type: builtin
+    handler: dateToWords
+    pattern: "\\b([0-1]?[0-9])/([0-3]?[0-9])/([0-9]{4})\\b"
+    flags: "g"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_dates_iso
+    type: builtin
+    handler: isoDateToWords
+    pattern: "\\b([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\b"
+    flags: "g"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_time_meridiem
+    type: builtin
+    handler: timeToWords
+    pattern: "\\b([0-2]?[0-9]):([0-5][0-9])\\s*([ap]\\.?m\\.?)\\b"
+    flags: "gi"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_time_24h
+    type: builtin
+    handler: timeToWords
+    pattern: "\\b([0-2]?[0-9]):([0-5][0-9])\\b"
+    flags: "g"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_currency
+    type: builtin
+    handler: currencyToWords
+    pattern: "\\$([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)(?:\\.([0-9]{1,2}))?"
+    flags: "g"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_decimals
+    type: builtin
+    handler: decimalToWords
+    pattern: "\\b([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\\.([0-9]+)\\b"
+    flags: "g"
+    citations:
+      - Ebden & Sproat 2015
+
+  - name: expand_ordinals
+    type: builtin
+    handler: ordinalToWordsInline
+    pattern: "\\b(\\d+)(?:st|nd|rd|th)\\b"
+    flags: "gi"
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: expand_numbers
+    type: builtin
+    handler: numberToWordsInline
+    pattern: "\\b(\\d+)\\b"
+    flags: "g"
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: punctuation_cleanup
+    type: builtin
+    handler: punctuationCleanup
+    description: >
+      Protect lexical apostrophes, separate pause-generating punctuation
+      (, . ? ! ; :) into tokens, strip remaining punctuation.
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3
+
+  - name: collapse_whitespace
+    type: regex_replace
+    description: "Collapse whitespace and trim"
+    rules:
+      - pattern: "\\s+"
+        replacement: " "
+        flags: "g"
+    post: trim
+    citations:
+      - Allen, Hunnicutt & Klatt 1987 Ch.3

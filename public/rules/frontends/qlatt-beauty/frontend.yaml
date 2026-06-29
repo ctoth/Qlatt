@@ -1,0 +1,1110 @@
+# =============================================================================
+# SKELETON -- TRACK FE-SCAFFOLD
+# Beauty content (inventory targets, formant/prosody/voice-quality/affect phases)
+# to be REPLACED by TRACK INV/VQ/PROS. Language infrastructure
+# (g2p/dict/lts/normalize/syllabification/stress) is the legitimately-reused layer.
+# The duration/formant/prosody phases included below are PLACEHOLDERS copied from
+# qlatt-english and WILL BE REPLACED. inventory.yaml is a PLACEHOLDER.
+# =============================================================================
+version: v13-cel
+inventory_path: /rules/frontends/qlatt-beauty/inventory.yaml
+lts_path: /rules/frontends/qlatt-beauty/lts-rules.yaml
+morphology_path: /rules/frontends/qlatt-beauty/morphology.yaml
+speaker_profile_path: /rules/policy/speaker-profile.yaml
+source_contour_path: /rules/policy/source-contour.yaml
+include:
+  - pipeline.yaml
+  - phases/orthography.yaml
+  - phases/normalize.yaml
+  - phases/postlexical.yaml
+  - phases/structural.yaml
+  - phases/annotation.yaml
+  - phases/duration.yaml
+  - phases/formant.yaml
+  - phases/prosody.yaml
+parameters:
+  policy:
+    rate:
+      undershoot_coefficient:
+        value: 0.3
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
+          - "Engineering estimate: 0.3 coefficient maps rate excess to undershoot factor"
+      f0_range_exponent:
+        value: 0.5
+        citations:
+          - Ladd 2008 Ch.9 (F0 range narrows at fast speaking rates; sqrt = exponent 0.5)
+      transition_scale_exponent:
+        value: 1.0
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
+    duration:
+      rate_scale:
+        value: 1.0
+        citations:
+          - Klatt 1976 §III (speech rate scaling)
+      vot_target_ms:
+        initial:
+          p:
+            value: 28
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /p/)
+          t:
+            value: 39
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /t/)
+          k:
+            value: 43
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence-initial /k/)
+        noninitial:
+          p:
+            value: 34
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /p/)
+          t:
+            value: 37
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /t/)
+          k:
+            value: 49
+            citations:
+              - Lisker & Abramson 1964 Table 17 (English sentence non-initial /k/)
+      vot_split_fallback_share:
+        value: 0.5
+        citations:
+          - Allen et al. 1987 Table C-1
+      weak_release_min_ms:
+        # Reverted from 05e057a3 and 7b285e8d: no-rationale tune commits
+        # shipped without updating load-bearing tests; Allen 1987 supports 15 ms.
+        value: 15
+        citations:
+          - Allen et al. 1987 Table C-1
+      weak_release_scale:
+        value: 0.5
+        citations:
+          - Allen et al. 1987 Table C-1
+      stress_primary_multiplier:
+        value: 1.3
+        citations:
+          - Klatt 1976 §III.B
+      stress_unstressed_multiplier:
+        value: 0.8
+        citations:
+          - Klatt 1976 §III.B
+      punctuation_pause_comma_ms:
+        value: 150
+        citations:
+          - Allen et al. 1987 Ch.8
+      punctuation_pause_phrase_break_ms:
+        value: 200
+        citations:
+          - Allen et al. 1987 Ch.8
+          - >-
+            Engineering estimate: semicolon/colon pause is typically stronger than comma and weaker than terminal
+            punctuation
+      punctuation_pause_terminal_ms:
+        value: 300
+        citations:
+          - Allen et al. 1987 Ch.8
+      vowel_shortening_end_multiplier:
+        value: 1.2
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiced_fricative_multiplier:
+        value: 1.6
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiced_fricative_medial_multiplier:
+        value: 1.1
+        citations:
+          - "Klatt 1979 (voicing effect reduced phrase-medially; ~1.1x vs ~1.6x phrase-finally)"
+      vowel_shortening_voiced_stop_multiplier:
+        value: 1.2
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_nasal_multiplier:
+        value: 0.85
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_shortening_voiceless_stop_multiplier:
+        value: 0.7
+        citations:
+          - Allen et al. 1987 Ch.9
+      # Break-index pre-boundary lengthening (replaces old punctuation-based proxy).
+      # Citation: Wightman et al. 1992, Klatt 1976 §III.A, Crystal & House 1988
+      # BI threshold values for categorization (ToBI break index tier is 0-4).
+      pre_boundary_bi4_threshold:
+        value: 4
+        citations:
+          - Silverman et al. 1992 (ToBI break index tier, level 4 = intonational phrase)
+      pre_boundary_bi3_threshold:
+        value: 3
+        citations:
+          - Silverman et al. 1992 (ToBI break index tier, level 3 = intermediate phrase)
+      pre_boundary_bi2_threshold:
+        value: 2
+        citations:
+          - Silverman et al. 1992 (ToBI break index tier, level 2 = weak intermediate phrase)
+      pre_boundary_bi4_multiplier:
+        value: 1.5
+        citations:
+          - Wightman et al. 1992 (intonational phrase boundary, breakIndex=4)
+          - Klatt 1976 §III.A (phrase-final ~2x, conservative 1.5 with other rules stacking)
+      pre_boundary_bi4_obstruent_multiplier:
+        value: 1.2
+        citations:
+          - Crystal & House 1988 (obstruents show weaker phrase-final lengthening)
+          - Wightman et al. 1992
+      pre_boundary_bi3_multiplier:
+        value: 1.3
+        citations:
+          - Wightman et al. 1992 (intermediate phrase boundary, breakIndex=3)
+      pre_boundary_bi3_obstruent_multiplier:
+        value: 1.1
+        citations:
+          - Crystal & House 1988
+          - Wightman et al. 1992
+      pre_boundary_bi2_multiplier:
+        value: 1.15
+        citations:
+          - Wightman et al. 1992 (weak intermediate phrase, breakIndex=2)
+      pre_boundary_bi1_multiplier:
+        value: 1.0
+        citations:
+          - Wightman 1992 (break index 0 and 1 are indistinguishable for duration)
+          - Klatt 1976 §III.A (word boundary, small effect)
+          - White 2014 (word-boundary lengthening is a secondary cue)
+      # Accent-based vowel lengthening
+      accent_nuclear_multiplier:
+        value: 1.25
+        citations:
+          - van Santen 1994 (nuclear accent amplification)
+          - "Engineering estimate: ~25% nuclear accent lengthening on stressed vowel"
+      accent_stressed_multiplier:
+        value: 1.15
+        citations:
+          - van Santen 1994 (prenuclear accent lengthening)
+          - "Engineering estimate: ~15% prenuclear accent lengthening on stressed vowel"
+      accent_unstressed_multiplier:
+        value: 1.05
+        citations:
+          - White 2014 (accent distributes across word, small effect on unstressed)
+          - "Engineering estimate"
+      incompressibility_ratio_vowel:
+        value: 0.42
+        citations:
+          - "Klatt 1976 Eq. 1 (MINDUR = 0.42 * inherent duration as compressibility floor)"
+      incompressibility_ratio_consonant:
+        value: 0.6
+        citations:
+          - "Engineering estimate: consonants have higher incompressibility floor than vowels"
+      # Duration cap — prevents pathological stacking of multiple lengthening rules
+      max_duration_ratio:
+        value: 2.0
+        citations:
+          - Klatt 1976 (phrase-final vowels up to 2x longer)
+          - "Engineering estimate: 2.0x inherent duration as hard cap"
+      s_cluster_aspiration_ms:
+        value: 10
+        citations:
+          - Lisker & Abramson 1964
+          - Zue 1976
+      s_cluster_ah_reduction_db:
+        value: 10
+        citations:
+          - Zue 1976
+      aspiration_frication_t_af_db:
+        value: 18
+        citations:
+          - Hanson & Stevens 2003 (alveolar /t/ often shows frication dominance into aspiration interval)
+          - "Engineering estimate: conservative AF carryover level for /t/ aspiration segment"
+      aspiration_frication_k_af_db:
+        value: 0
+        citations:
+          - Stevens 1998 (voiceless stop aspiration is glottal source, not supraglottal frication)
+          - Klatt 1980 (AF is zero during aspiration interval; only AH is nonzero)
+      aspiration_frication_p_af_db:
+        value: 0
+        citations:
+          - Hanson & Stevens 2003 (labial /p/ follows classical aspiration model in all subjects)
+      aspiration_frication_weak_scale:
+        value: 0.5
+        citations:
+          - "Engineering estimate: weak/final stop releases reduce non-modal noise sources"
+      non_word_initial_consonant_multiplier:
+        value: 0.7
+        citations:
+          - Klatt 1976 Table III
+      unstressed_consonant_multiplier:
+        value: 0.8
+        citations:
+          - Klatt 1976 Table III
+      word_initial_lengthening_multiplier:
+        value: 1.2
+        citations:
+          - White 2014
+      fricative_min_sibilant_ms:
+        value: 30
+        citations:
+          - Jongman 1989
+      fricative_min_labiodental_ms:
+        value: 50
+        citations:
+          - Jongman 1989
+      fricative_min_dental_ms:
+        value: 60
+        citations:
+          - Jongman 1989
+      fricative_min_glottal_ms:
+        value: 40
+        citations:
+          - Engineering estimate (Jongman 1989 does not test glottal /hh/)
+      affricate_frication_min_ms:
+        value: 20
+        citations:
+          - Allen et al. 1987 Table C-1
+          - Stevens 1998 Ch.8
+      word_medial_consonant_multiplier:
+        value: 0.85
+        citations:
+          - Klatt 1976 Table III
+      stop_unreleasing_min_ms:
+        value: 5
+        citations:
+          - Crystal & House 1988
+          - Miller 1998
+      flap_duration_ms:
+        value: 30
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis
+      diphthong_nucleus_share:
+        value: 0.6
+        citations:
+          - Standard diphthong decomposition for formant synthesis
+      rhotic_nucleus_min_share:
+        value: 0.6
+        citations:
+          - Allen et al. 1987 Table C-5 (ER behaves as an r-colored vowel with diphthong-like internal timing)
+          - Stevens 1998 §9.3 (liquid formant movement is transitional rather than a longer independent segment)
+          - Engineering estimate (keep the vocalic nucleus dominant in short coda-rhotic tokens)
+      liquid_rhotic_tail_floor_ms:
+        value: 30
+        citations:
+          - Klatt 1976 Table III (minimum consonant durations; liquids require ~30 ms for perceptible formant transition)
+          - Engineering estimate (prevents duration-rule stacking from collapsing rhotic tails below audibility)
+      weak_release_amplitude_reduction_db:
+        value: 10
+        citations:
+          - Allen et al. 1987 Table C-1
+          - Stevens 1998 Ch.8
+      polysyllabic_shortening_factor:
+        value: 0.78
+        citations:
+          - Klatt 1976 Rule 4 (polysyllabic shortening)
+      cluster_first_shortening:
+        value: 0.88
+        citations:
+          - Klatt 1973 (cluster shortening, first consonant)
+      cluster_subsequent_shortening:
+        value: 0.78
+        citations:
+          - Klatt 1973 (cluster shortening, subsequent consonants)
+    f0:
+      # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
+      base_hz:
+        value: 110
+        citations:
+          - O'Shaughnessy 1976
+          - Pierrehumbert 1980
+      range_hz:
+        value: 80
+        citations:
+          - "Pierrehumbert 1980 (male typical range ~80 Hz: top ~190 Hz, baseline ~110 Hz)"
+          - Ladd 2008 Ch.5
+      # --- Accent targets (fraction of range) ---
+      h_star_height:
+        value: 0.85
+        citations:
+          - "Pierrehumbert 1980 (H* target near top of range)"
+          - Ladd 2008
+      l_star_height:
+        value: 0.15
+        citations:
+          - "Pierrehumbert 1980 (L* target near bottom of range)"
+      # --- Downstep ---
+      downstep_k:
+        value: 0.6
+        citations:
+          - "Pierrehumbert 1980 (k ≈ 0.60)"
+          - "Ladd 2008 (confirmed cross-linguistically)"
+      downstep_floor_fraction:
+        value: 0.25
+        citations:
+          - "Engineering estimate: prevents F0 collapse on long sentences"
+          - "Derived from Pierrehumbert 1980 exponential floor behavior"
+      # --- Boundary tones (fraction of range) ---
+      boundary_l_pct_fraction:
+        value: 0.0
+        citations:
+          - "Pierrehumbert 1980 Rule 6: L% = 0 (on baseline)"
+      boundary_h_pct_fraction:
+        value: 0.8
+        citations:
+          - "Pierrehumbert 1980 (H% near top of range)"
+      upstep_factor:
+        value: 0.2
+        citations:
+          - "Pierrehumbert 1980 Rule 9 / upstep formula (a ≈ 0.2)"
+          - "Ladd 2008 Ch.3 (H% final rise modeled as local upstep)"
+      # --- Final lowering ---
+      final_lowering_factor:
+        value: 0.85
+        citations:
+          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
+          - "Pierrehumbert 1980 (final lowering as separate effect)"
+      # --- Microprosodic (segmental, kept from O'Shaughnessy 1976) ---
+      voiceless_onset_raise:
+        value: 1.08
+        citations:
+          - "Hombert 1979 (~8% measured perturbation after voiceless onset)"
+          - "O'Shaughnessy 1976 (synthesis rule: +20% F0 after voiceless onset)"
+      voiced_onset_lower:
+        value: 0.95
+        citations:
+          - O'Shaughnessy 1976
+      # --- Continuation rise (kept for intermediate phrase boundaries) ---
+      continuation_rise_hz:
+        value: 8
+        citations:
+          - O'Shaughnessy 1976
+      continuation_minor_rise_hz:
+        value: 5
+        citations:
+          - O'Shaughnessy 1976
+          - "Engineering estimate: semicolon/colon continuation rise is milder than comma rise"
+    source_contour:
+      # Fant 1997 Fig. 10 contour shape, with conservative magnitude scaling for qlatt.
+      ee_onset_rise_sec:
+        value: 0.05
+        citations:
+          - Fant 1997 (connected-speech source contour onset rise)
+      ee_onset_rise_db:
+        value: 0.4
+        citations:
+          - Fant 1997 (small early phrase rise in source effort)
+          - "Engineering estimate: conservative rise for qlatt to avoid exaggerated onset contrast"
+      ee_declination_db_per_sec:
+        value: 0.5
+        citations:
+          - Fant 1997 (phrase-level source declination)
+          - "Engineering estimate: reduced declination slope for stable long-utterance level"
+      ee_final_fall_db_per_sec:
+        value: 1.5
+        citations:
+          - Fant 1997 (stronger final phrase fall than mid-phrase declination)
+          - "Engineering estimate: mild final fall for qlatt baseline voice"
+      ee_final_window_min_sec:
+        value: 0.25
+        citations:
+          - Fant 1997 (phrase-final source fall localized to a short terminal window)
+      ee_final_window_max_sec:
+        value: 0.45
+        citations:
+          - Fant 1997 (terminal window upper bound on source-fall region)
+      ee_final_window_ratio:
+        value: 0.3
+        citations:
+          - Fant 1997 (terminal source shaping scales with phrase duration)
+          - "Engineering estimate: conservative fraction for intelligibility-first contouring"
+      rd_final_offset:
+        value: 0.06
+        citations:
+          - Fant 1997 (phrase-final source softening)
+          - Hanson et al. 2001 (phrase-final spectral tilt/breathiness increases in connected speech)
+          - "Engineering estimate: reduced Rd softening magnitude for qlatt"
+    formant:
+      transition_ms_stop:
+        value: 30
+        citations:
+          - "Stevens & House 1956 (stop transitions ~20-40 ms)"
+          - "Hertz 1991 (per-class transition timing)"
+      transition_ms_fricative:
+        value: 40
+        citations:
+          - "Stevens & House 1956 (fricative transitions ~30-50 ms)"
+          - "Hertz 1991 (per-class transition timing)"
+      transition_ms_default:
+        value: 50
+        citations:
+          - "Stevens & House 1956 (sonorant transitions ~40-60 ms)"
+          - "Hertz 1991 (default transition timing)"
+      rate_undershoot_factor:
+        value: 0
+        citations:
+          - Lindblom 1963 (articulatory undershoot at fast rates)
+      place_loci:
+        velar:
+          locus_default:
+            value: 1500
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus default)
+          locus_front:
+            value: 1900
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, front/high vowel context)
+          locus_back:
+            value: 1200
+            citations:
+              - Allen et al. 1987 Ch.11 (velar locus, back vowel context)
+        bilabial:
+          locus_default:
+            value: 1200
+            citations:
+              - Stevens & House 1956 (locus varies 700-1500 Hz by vowel context)
+              - Allen et al. 1987 Ch.11 (1200 Hz midpoint approximation)
+          locus_front:
+            value: 1350
+            citations:
+              - Stevens & House 1956 (bilabial locus, front/high vowel context)
+          locus_back:
+            value: 1100
+            citations:
+              - Stevens & House 1956 (bilabial locus, back vowel context)
+        alveolar:
+          locus_default:
+            value: 1800
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 1900
+            citations:
+              - Stevens & House 1956
+          locus_back:
+            value: 1700
+            citations:
+              - Stevens & House 1956
+        palatal:
+          locus_default:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_front:
+            value: 2600
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+          locus_back:
+            value: 2400
+            citations:
+              - Stevens & House 1956
+              - Allen et al. 1987 Ch.11
+      dark_l_f2:
+        value: 900
+        citations:
+          - Sproat & Fujimura 1993 (dark /l/ F2 ~800-1000 Hz)
+          - Recasens 2012 (American English dark /l/ mean F2 ~860-900 Hz)
+      dark_l_f3:
+        value: 2400
+        citations:
+          - Recasens 2012
+      r_f3_onset:
+        value: 1600
+        citations:
+          - Espy-Wilson 2000
+      r_f3_coda:
+        value: 1400
+        citations:
+          - Espy-Wilson 2000
+      f1_release_labial:
+        value: 250
+        citations:
+          - Stevens 1998 Ch.8
+      f1_release_alveolar:
+        value: 300
+        citations:
+          - Stevens 1998 Ch.8
+      f1_release_velar:
+        value: 280
+        citations:
+          - Stevens 1998 Ch.8
+      vowel_reduction_schwa_f1:
+        value: 500
+        citations:
+          - Peterson & Barney 1952
+      vowel_reduction_schwa_f2:
+        value: 1500
+        citations:
+          - Peterson & Barney 1952
+      vowel_reduction_rate:
+        value: 0.4
+        citations:
+          - Allen et al. 1987 Ch.9
+      vowel_reduction_rate_high_front:
+        value: 0.15
+        citations:
+          - Stevens 1998 Ch.10 (reduced vowels are context-dependent rather than uniformly central)
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (reduced vowels may remain [I]-like rather than schwa-like)
+          - "Engineering estimate: retain more front-vowel identity for unstressed IY/IH than the generic schwa-pull"
+      vcv_coarticulation_rate:
+        value: 0.2
+        citations:
+          - Ohman 1966
+          - "Engineering estimate: conservative DAC weight to avoid over-compressing F2 after explicit consonant locus assignment"
+      nasal_n_f2_default:
+        value: 1400
+        citations:
+          - Allen et al. 1987 Ch.10 (nasal place assimilation F2 fallback)
+      light_l_f2:
+        value: 1300
+        citations:
+          - Sproat & Fujimura 1993 (light/onset /l/ F2 ~1200-1400 Hz)
+          - Recasens 2012 (clear /l/ range includes ~1270-1300 Hz for American English onset contexts)
+      light_l_f3:
+        value: 2900
+        citations:
+          - Sproat & Fujimura 1993 (light/onset /l/ F3 ~2800-3200 Hz)
+          - Recasens 2012 (clear /l/ F3 is higher than dark /l/)
+      f1_release_default:
+        value: 280
+        citations:
+          - Stevens 1998 Ch.8 (stop consonant F1 at release, default fallback)
+      # Chunk 7: nested burst amplitude table consumed by the `for_each_field`
+      # template in `burst_spectral_template` (phases/formant.yaml). Replaces
+      # 27 flat `burst_a<n>_<place>` keys.
+      burst_amplitudes:
+        A2:
+          bilabial:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A3:
+          bilabial:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A4:
+          bilabial:
+            value: 35
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 55
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A5:
+          bilabial:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 45
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 40
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A6:
+          bilabial:
+            value: 30
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          alveolar:
+            value: 50
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+          velar:
+            value: 35
+            citations:
+              - Blumstein & Stevens 1979
+              - Zue 1976
+        A7:
+          bilabial:
+            value: 38
+            citations:
+              - "Monson et al. (2014) — bilabial burst HF diffuse spectrum"
+              - "Shadle et al. (2023) — non-sibilant flat HF spectrum"
+          alveolar:
+            value: 50
+            citations:
+              - "Shadle et al. (2023) — sibilant HF energy extends above 7 kHz"
+          velar:
+            value: 33
+            citations:
+              - "Shadle et al. (2023) — velar bursts compact, lower HF"
+        A8:
+          bilabial:
+            value: 42
+            citations:
+              - "Monson et al. (2014) — /f/ spectral peak ~8-9 kHz maps to F8"
+          alveolar:
+            value: 45
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 26
+            citations:
+              - "Shadle et al. (2023)"
+        A9:
+          bilabial:
+            value: 38
+            citations:
+              - "Monson et al. (2014)"
+          alveolar:
+            value: 38
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 20
+            citations:
+              - "Shadle et al. (2023)"
+        A10:
+          bilabial:
+            value: 30
+            citations:
+              - "Monson et al. (2014)"
+          alveolar:
+            value: 30
+            citations:
+              - "Shadle et al. (2023)"
+          velar:
+            value: 13
+            citations:
+              - "Shadle et al. (2023)"
+      schwa_coronal_f2_target:
+        value: 1600
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (schwa fronts to [ɨ] in coronal contexts)
+          - "Engineering estimate: midpoint between schwa F2 (~1190 Hz) and [ɨ] F2 (~1800 Hz)"
+      schwa_coronal_fronting_rate:
+        value: 0.5
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (67-83% of schwas front in coronal contexts)
+          - "Engineering estimate: moderate blending rate matching observed frequency"
+      uw_coronal_f2_target:
+        value: 1500
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (/u/ fronting in coronal environments)
+          - Harrington et al. 2011 (fronted SSBE /u/ F2 ~2050-2250 Hz; American English less extreme)
+          - "Engineering estimate: conservative target well below SSBE values for General American"
+      uw_coronal_fronting_rate:
+        value: 0.4
+        citations:
+          - Miller 1998, Pronunciation Modeling in Speech Synthesis (86% accuracy with both-side coronals)
+          - "Engineering estimate: moderate blending, less than schwa due to stronger /u/ identity"
+      default_f1_fallback:
+        value: 500
+        citations:
+          - Peterson & Barney 1952 (midrange F1 default)
+      default_f2_fallback:
+        value: 1500
+        citations:
+          - Peterson & Barney 1952 (midrange F2 default)
+      default_f3_fallback:
+        value: 2500
+        citations:
+          - Peterson & Barney 1952 (midrange F3 default)
+    nasal:
+      pole_base_hz:
+        value: 250
+        citations:
+          - Klatt 1980 Table I
+      pole_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      zero_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      place_bw_hz:
+        value: 100
+        citations:
+          - Klatt 1980 Table I
+      vowel_onset_delay_ms:
+        value: 40
+        citations:
+          - Hawkins & Stevens 1985
+      vowel_ramp_ms:
+        value: 40
+        citations:
+          - Hawkins & Stevens 1985
+      vowel_decay_ms:
+        value: 30
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: decay is slightly shorter than the anticipatory rise for cleaner oral release"
+      murmur_fnz_m_hz:
+        value: 1000
+        citations:
+          - Fujimura 1962
+      murmur_fnz_n_hz:
+        value: 1700
+        citations:
+          - Fujimura 1962
+      murmur_fnz_ng_hz:
+        value: 3000
+        citations:
+          - Fujimura 1962
+      murmur_strength:
+        value: 1.0
+        citations:
+          - Fujimura 1962
+          - Stevens 1998 Ch.10
+      anticipatory_peak:
+        value: 0.85
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: strong but not fully closed anticipatory coupling"
+      anticipatory_stage_1_fraction:
+        value: 0.33
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: first anticipatory subwindow ramps toward nasality gently"
+      anticipatory_midpoint_fraction:
+        value: 0.5
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: midpoint used to split the anticipatory nasal ramp into two equal subwindows"
+      anticipatory_stage_2_fraction:
+        value: 0.66
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: second anticipatory subwindow approaches full nasal coupling"
+      carryover_peak:
+        value: 0.55
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: short post-nasal carryover is weaker than nasal murmur"
+      carryover_stage_2_fraction:
+        value: 0.5
+        citations:
+          - Hawkins & Stevens 1985
+          - "Engineering estimate: second carryover subwindow halves the residual nasal coupling"
+      b1_stage_1_fraction:
+        value: 0.33
+        citations:
+          - Chen 1997
+          - "Engineering estimate: early anticipatory B1 cue scales with the first coupling stage"
+      b1_stage_2_fraction:
+        value: 0.66
+        citations:
+          - Chen 1997
+          - "Engineering estimate: later anticipatory B1 cue scales with the second coupling stage"
+      b1_carryover_fraction:
+        value: 0.5
+        citations:
+          - Chen 1997
+          - "Engineering estimate: early carryover B1 cue is half-strength"
+      b1_carryover_tail_fraction:
+        value: 0.25
+        citations:
+          - Chen 1997
+          - "Engineering estimate: final carryover B1 cue decays to one quarter strength"
+      b1_addition_hz:
+        value: 107
+        citations:
+          - Chen 1997
+          - Hawkins & Stevens 1985
+    speaker:
+      base_f0_hz:
+        value: 110
+        citations:
+          - O'Shaughnessy 1976
+      formant_scale:
+        value: 1.0
+        citations:
+          - Kent & Vorperian 2018
+      rd_default:
+        value: 0.7
+        citations:
+          - Fant 1997 Table 1
+      spectral_tilt_offset_db:
+        value: 0
+        citations:
+          - Klatt & Klatt 1990
+      voice_quality_presets:
+        # Each preset maps to parameter overrides applied when voiceQuality is set.
+        # Rd drives OQ/TL derivation in WASM crate (OQ=0 means derive from Rd).
+        # B1/B2 bandwidth adjusts automatically via Fant 1997 realize rules.
+        # AH offset is additive to per-phoneme AH from inventory.
+        # Citations: Fant 1997 Table 1, Gobl 2003, Klatt & Klatt 1990, Burkhardt 2009
+        modal:
+          rd: 0.7          # Fant 1997 Table 1: male connected-speech modal default
+          oq: 0            # derive from Rd
+          tl: 0            # derive from Rd
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        breathy:
+          rd: 2.0           # Fant 1997 Table 1: breathy (OQ~78%)
+          oq: 0             # derive from Rd
+          tl: 0             # derive from Rd
+          ah_offset_db: 20  # Klatt 1990: AH most important cue for breathiness; Gobl 2003: AH=35-50
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        pressed:
+          rd: 0.5           # Fant 1997 Table 1: slightly pressed (OQ~47%)
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 0
+          f0_scale: 1.0
+        creaky:
+          rd: 0.8           # Between pressed and modal; Gobl 2003: OQ similar to modal
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 0
+          jitter: 20         # Gobl 2003: mild jitter co-occurs with creaky voice
+          di: 40             # Gobl & Ni Chasaide 2003 Table 1: diplophonia index for creaky voice
+          f0_scale: 1.0
+        whispery:
+          rd: 2.0           # Fant 1997: breathy Rd range
+          oq: 0
+          tl: 10            # Gobl 2003: whispery TL=22-30; conservative 10 dB explicit override
+          ah_offset_db: 30  # Gobl 2003: whispery AH=45-55; 30 dB additive offset
+          flutter: 0
+          jitter: 5          # Gobl 2003: whispery DI=5%; jitter approximation
+          f0_scale: 1.0
+        falsetto:
+          rd: 2.5           # Fant 1997 Table 1: very breathy (OQ~79%); Childers 1991: OQ=0.99
+          oq: 0
+          tl: 0
+          ah_offset_db: 0
+          flutter: 50        # Burkhardt 2009: FL=rate; high flutter for falsetto instability
+          jitter: 0
+          f0_scale: 1.5      # Burkhardt 2009: F0 increase; conservative 1.5x
+output:
+  lowering:
+    id: qlatt-beauty-track-lowering
+    timeline:
+      initial_silence_ms:
+        value: 30
+        citations:
+          - "Engineering estimate: 30ms initial silence for attack transient settling"
+      final_silence_ms:
+        value: 100
+        citations:
+          - "Engineering estimate: 100ms final silence for release tail"
+      duration_floors:
+        stop_release_ms:
+          value: 5
+          citations:
+            - "Engineering estimate: minimum 5ms for stop release burst visibility"
+        default_ms:
+          value: 20
+          citations:
+            - "Engineering estimate: minimum 20ms segment duration"
+      event_points:
+        include_segment_start: true
+        include_control_boundaries: true
+        include_f0_anchors: true
+        include_transition_steady_time: true
+    transitions:
+      default_transition_ms:
+        value: 30
+        citations:
+          - Broad & Fertig 1970 (formant transition durations scale inversely with rate)
+      blend:
+        factor:
+          value: 0.35
+          citations:
+            - "Engineering estimate: 35% blend factor for formant transition smoothing"
+        keys: [F1, F2, F3, B1, B2, B3]
+        smooth_types: [vowel, nasal, liquid, glide]
+    f0:
+      renderer:
+        type: point_interpolation
+      output_clamp:
+        min_hz:
+          value: 0
+          citations:
+            - "Engineering boundary: point interpolation may intentionally emit 0 Hz for unvoiced frames"
+        max_hz:
+          value: 500
+          citations:
+            - Peterson & Barney 1952 (upper adult F0 corpus extreme)
+    overlays:
+      operation_order: [voice_quality, timed_controls, f0]
+transcription:
+  # Standard English letter-name pronunciations for declarative spelling mode.
+  # Citation anchor: Allen et al. 1987 Ch.2-3 (LETTER-* morphs for symbol strings).
+  letter_names:
+    LETTER_A:
+      - EY1
+    LETTER_B:
+      - B
+      - IY1
+    LETTER_C:
+      - S
+      - IY1
+    LETTER_D:
+      - D
+      - IY1
+    LETTER_E:
+      - IY1
+    LETTER_F:
+      - EH1
+      - F
+    LETTER_G:
+      - JH
+      - IY1
+    LETTER_H:
+      - EY1
+      - CH
+    LETTER_I:
+      - AY1
+    LETTER_J:
+      - JH
+      - EY1
+    LETTER_K:
+      - K
+      - EY1
+    LETTER_L:
+      - EH1
+      - L
+    LETTER_M:
+      - EH1
+      - M
+    LETTER_N:
+      - EH1
+      - N
+    LETTER_O:
+      - OW1
+    LETTER_P:
+      - P
+      - IY1
+    LETTER_Q:
+      - K
+      - Y
+      - UW1
+    LETTER_R:
+      - AA1
+      - R
+    LETTER_S:
+      - EH1
+      - S
+    LETTER_T:
+      - T
+      - IY1
+    LETTER_U:
+      - Y
+      - UW1
+    LETTER_V:
+      - V
+      - IY1
+    LETTER_W:
+      - D
+      - AH1
+      - B
+      - AH0
+      - L
+      - Y
+      - UW0
+    LETTER_X:
+      - EH1
+      - K
+      - S
+    LETTER_Y:
+      - W
+      - AY1
+    LETTER_Z:
+      - Z
+      - IY1
+  diagnostic_symbols:
+    b:
+      - B
+    ch:
+      - CH
+    d:
+      - D
+    dh:
+      - DH
+    f:
+      - F
+    g:
+      - G
+    hh:
+      - HH
+    jh:
+      - JH
+    k:
+      - K
+    l:
+      - L
+    m:
+      - M
+    "n":
+      - "N"
+    ng:
+      - NG
+    p:
+      - P
+    r:
+      - R
+    s:
+      - S
+    sh:
+      - SH
+    t:
+      - T
+    th:
+      - TH
+    v:
+      - V
+    w:
+      - W
+    "y":
+      - "Y"
+    z:
+      - Z
+    zh:
+      - ZH
+  punctuation_tokens:
+    - ","
+    - .
+    - "?"
+    - "!"
+    - ;
+    - ":"

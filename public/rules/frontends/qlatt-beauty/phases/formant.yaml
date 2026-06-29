@@ -1,0 +1,556 @@
+version: v1
+rules:
+  place_f2_locus:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme in sets.place_locus_closures
+    define:
+      place: maps.place_locus_closure_place[current.phoneme]
+      release_phoneme: maps.place_locus_release_for_closure[current.phoneme]
+      cand: "release_phoneme != \"\" && next != null && next.phoneme == release_phoneme ? ahead(current, 2) : next"
+      front_or_high_vowel: >-
+        cand != null && cand.type == 'vowel' && ((has(cand.front) ? cand.front == true : false) || (has(cand.hi) ?
+        cand.hi == true : false))
+      back_vowel: "cand != null && cand.type == 'vowel' && (has(cand.back) ? cand.back == true : false)"
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: "place == 'velar' && back_vowel"
+            value: params.policy.formant.place_loci.velar.locus_back
+          - when: "place == 'velar' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.velar.locus_front
+          - when: "place == 'bilabial' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.bilabial.locus_front
+          - when: "place == 'bilabial' && back_vowel"
+            value: params.policy.formant.place_loci.bilabial.locus_back
+          - when: "place == 'alveolar' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.alveolar.locus_front
+          - when: "place == 'alveolar' && back_vowel"
+            value: params.policy.formant.place_loci.alveolar.locus_back
+          - when: "place == 'palatal' && back_vowel"
+            value: params.policy.formant.place_loci.palatal.locus_back
+          - when: "place == 'palatal' && front_or_high_vowel"
+            value: params.policy.formant.place_loci.palatal.locus_front
+          - default: >-
+              place == 'velar' ? params.policy.formant.place_loci.velar.locus_default :
+              (place == 'bilabial' ? params.policy.formant.place_loci.bilabial.locus_default :
+              (place == 'alveolar' ? params.policy.formant.place_loci.alveolar.locus_default :
+              params.policy.formant.place_loci.palatal.locus_default))
+        tag: place_locus
+    citations:
+      - Stevens & House 1956
+      - Allen et al. 1987 Ch.11 (place-dependent F2 locus transitions)
+  place_rel_copy:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in sets.place_locus_releases && prev != null && prev.phoneme in sets.place_locus_closures &&
+        maps.place_locus_release_for_closure[prev.phoneme] == current.phoneme
+    define:
+      place: maps.place_locus_release_place[current.phoneme]
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: "prev != null && has(prev.?params.F2)"
+            value: prev.params.F2
+          - when: "place == 'velar'"
+            value: params.policy.formant.place_loci.velar.locus_default
+          - when: "place == 'bilabial'"
+            value: params.policy.formant.place_loci.bilabial.locus_default
+          - when: "place == 'alveolar'"
+            value: params.policy.formant.place_loci.alveolar.locus_default
+          - default: params.policy.formant.place_loci.palatal.locus_default
+        tag: place_locus
+    citations:
+      - Stevens & House 1956
+      - Allen et al. 1987 Ch.11 (place locus transitions)
+  nasal_place_assignment:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'nasal'
+    apply:
+      - field: params.nasalPlaceIndex
+        op: set
+        value: target(current.phoneme).nasal_place_index
+        tag: nasal_place
+      - field: params.nasalMurmurStrength
+        op: set
+        value: params.policy.nasal.murmur_strength
+        tag: nasal_murmur
+      - field: params.nasalCoupling
+        op: set
+        value: 1
+        tag: nasal_coupling
+    citations:
+      - Fujimura 1962
+      - Stevens 1998 (nasal consonant oral cavity zeros)
+  nasal_place_assimilation:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'N'
+    define:
+      "n": next
+      next_is_obstruent: "n != null ? (n.type in ['stop_closure', 'stop_release', 'fricative', 'affricate']) : false"
+      next_bilabial: "next_is_obstruent ? (has(n.bilabial) ? n.bilabial == true : false) : false"
+      next_velar: "next_is_obstruent ? (has(n.velar) ? n.velar == true : false) : false"
+    constraint: next_is_obstruent
+    apply:
+      - field: params.nasalPlaceIndex
+        op: set
+        dispatch:
+          - when: next_bilabial
+            value: 1
+          - when: next_velar
+            value: 3
+          - default: 2
+        tag: nasal_place
+      - field: params.F2
+        op: set
+        dispatch:
+          - when: next_bilabial
+            value: params.policy.formant.place_loci.bilabial.locus_default
+          - when: next_velar
+            value: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
+          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.nasal_n_f2_default"
+        tag: nasal_place
+    citations:
+      - Allen et al. 1987
+      - Fujimura 1962
+      - Stevens 1998
+  nasal_windows:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'nasal'
+    define:
+      anticipatory_window_ms: >-
+        params.policy.nasal.vowel_onset_delay_ms + params.policy.nasal.vowel_ramp_ms
+      anticipatory_start_ms: "max((prev != null ? prev.duration : 0) - anticipatory_window_ms, 0)"
+      anticipatory_stage_1_end_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_stage_1_fraction
+      anticipatory_midpoint_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_midpoint_fraction
+      anticipatory_stage_2_end_ms: >-
+        anticipatory_start_ms + anticipatory_window_ms * params.policy.nasal.anticipatory_stage_2_fraction
+      carryover_stage_1_end_ms: >-
+        params.policy.nasal.vowel_decay_ms * params.policy.nasal.carryover_stage_2_fraction
+    apply:
+      - field: control_windows
+        op: set
+        dispatch:
+          - when: "prev != null && prev.type == 'vowel' && next != null && next.type == 'vowel'"
+            value:
+              - target: "'prev'"
+                start_ms: anticipatory_start_ms
+                end_ms: anticipatory_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_stage_1_end_ms
+                end_ms: anticipatory_midpoint_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_midpoint_ms
+                end_ms: "prev != null ? prev.duration : 0"
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: 0
+                end_ms: carryover_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: params.policy.nasal.carryover_peak
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: carryover_stage_1_end_ms
+                end_ms: params.policy.nasal.vowel_decay_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
+                tag: "'nasal_coupling'"
+          - when: "prev != null && prev.type == 'vowel'"
+            value:
+              - target: "'prev'"
+                start_ms: anticipatory_start_ms
+                end_ms: anticipatory_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_1_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_stage_1_end_ms
+                end_ms: anticipatory_midpoint_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_midpoint_fraction"
+                tag: "'nasal_coupling'"
+              - target: "'prev'"
+                start_ms: anticipatory_midpoint_ms
+                end_ms: "prev != null ? prev.duration : 0"
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.anticipatory_peak * params.policy.nasal.anticipatory_stage_2_fraction"
+                tag: "'nasal_coupling'"
+          - when: "next != null && next.type == 'vowel'"
+            value:
+              - target: "'next'"
+                start_ms: 0
+                end_ms: carryover_stage_1_end_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: params.policy.nasal.carryover_peak
+                tag: "'nasal_coupling'"
+              - target: "'next'"
+                start_ms: carryover_stage_1_end_ms
+                end_ms: params.policy.nasal.vowel_decay_ms
+                fields:
+                  nasalCoupling:
+                    op: "'set'"
+                    value: "params.policy.nasal.carryover_peak * params.policy.nasal.carryover_stage_2_fraction"
+                tag: "'nasal_coupling'"
+          - default: []
+        tag: nasal_window
+    citations:
+      - Hawkins & Stevens 1985 (time-varying anticipatory and carryover nasalization)
+      - Chen 1997 (nasalized vowel secondary cues)
+      - Fujimura 1962
+  dark_l_allophony:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'L'
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when:
+              predicate: is_coda
+            value: params.policy.formant.dark_l_f2
+          - default: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.light_l_f2"
+        tag: lateral_allophony
+      - field: params.F3
+        op: set
+        dispatch:
+          - when:
+              predicate: is_coda
+            value: params.policy.formant.dark_l_f3
+          - default: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.light_l_f3"
+        tag: lateral_allophony
+    citations:
+      - Recasens 2012 (lateral allophones)
+      - Sproat & Fujimura 1993 (syllable-final /l/ darkening)
+  r_f3_lowering:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme == 'R'
+    apply:
+      - field: params.F3
+        op: set
+        dispatch:
+          - when:
+              predicate: is_coda
+            value: params.policy.formant.r_f3_coda
+          - default: params.policy.formant.r_f3_onset
+        tag: rhoticity
+    citations:
+      - Espy-Wilson 2000 (acoustic modeling of American /r/)
+      - Stevens 1998
+  f1_stop_onset:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type == 'stop_release'
+    apply:
+      - field: params.F1
+        op: set
+        dispatch:
+          - when:
+              predicate: is_bilabial
+            value: params.policy.formant.f1_release_labial
+          - when:
+              predicate: is_alveolar
+            value: params.policy.formant.f1_release_alveolar
+          - when:
+              predicate: is_velar
+            value: params.policy.formant.f1_release_velar
+          - default: params.policy.formant.f1_release_default
+        tag: stop_release_formant
+    citations:
+      - Stevens 1998 (stop consonant acoustics -- low F1 at release onset)
+  burst_spectral_template:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.type in ['stop_release', 'stop_aspiration']
+    apply:
+      # Chunk 7: one templated effect block expands to 9 concrete blocks
+      # (A2..A10) at rule-load time. Each substituted block writes its
+      # amplitude field from the nested policy table keyed by formant index
+      # and place of articulation.
+      - for_each_field: [A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
+        op: set
+        dispatch:
+          - when:
+              predicate: is_bilabial
+            value: "params.policy.formant.burst_amplitudes.{field}.bilabial"
+          - when:
+              predicate: is_alveolar
+            value: "params.policy.formant.burst_amplitudes.{field}.alveolar"
+          - when:
+              predicate: is_velar
+            value: "params.policy.formant.burst_amplitudes.{field}.velar"
+          - default: "has(current.?params.{field}) ? current.params.{field} : 0"
+        tag: burst_spectrum
+    citations:
+      - Blumstein & Stevens 1979 (burst spectral invariance)
+      - Zue 1976
+      - Klatt 1980
+      - Shadle et al. 2023 (fricative HF spectra above 7 kHz)
+      - Monson et al. 2014 (perceptual significance of HF energy)
+  weak_stop_release_parallel_attenuation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'stop_release' && has(current.weak) && current.weak == true"
+    apply:
+      # Chunk 7: one templated effect block expands to 10 concrete `add -18`
+      # blocks across A1..A10 at rule-load time.
+      - for_each_field: [A1, A2, A3, A4, A5, A6, A7, A8, A9, A10]
+        field: "params.{field}"
+        op: add
+        value: -18
+        tag: weak_release_spectrum
+    citations:
+      - Allen et al. 1987 Table C-1
+      - Stevens 1998 Ch.8
+      - "Engineering estimate: weak coda releases attenuate the parallel burst template as well as AF"
+  weak_final_voiced_stop_closure_attenuation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type == 'stop_closure' && has(current.voiced) && current.voiced == true"
+    define:
+      n: next
+      before_weak_release: "n != null && n.type == 'stop_release' && has(n.weak) && n.weak == true"
+    constraint: before_weak_release
+    apply:
+      - field: params.AV
+        op: add
+        value: -24
+        tag: weak_coda_devoicing
+      - field: params.AVS
+        op: set
+        value: -70
+        tag: weak_coda_devoicing
+    citations:
+      - Crystal & House 1988
+      - Miller 1998
+      - "Engineering estimate: weak final voiced-stop closures carry reduced voicing to avoid a full voiced tract tail"
+  vcv_coarticulation:
+    kind: scalar
+    select:
+      stream: phone
+      where: "current.type in ['stop_closure', 'nasal', 'liquid', 'glide'] && (prev != null ? prev.type == 'vowel' : false)"
+    define:
+      "n": next
+      next_vowel: >-
+        n == null ? null : (n.type == 'vowel' ? n : (has(n.type) ? (n.type in ['stop_release', 'stop_aspiration'] ?
+        ahead(current, 2) : null) : null))
+      has_flanking: "next_vowel != null ? (next_vowel.type == 'vowel' ? true : false) : false"
+      prev_f1: "has(prev.?params.F1) ? prev.params.F1 : params.policy.formant.default_f1_fallback"
+      next_f1: "has_flanking ? (has(next_vowel.?params.F1) ? next_vowel.params.F1 : params.policy.formant.default_f1_fallback) : params.policy.formant.default_f1_fallback"
+      flanking_avg_f1: "has_flanking ? (prev_f1 + next_f1) / 2 : 0"
+      cur_f1: "has(current.?params.F1) ? current.params.F1 : params.policy.formant.default_f1_fallback"
+      prev_f2: "has(prev.?params.F2) ? prev.params.F2 : params.policy.formant.default_f2_fallback"
+      next_f2: "has_flanking ? (has(next_vowel.?params.F2) ? next_vowel.params.F2 : params.policy.formant.default_f2_fallback) : params.policy.formant.default_f2_fallback"
+      flanking_avg_f2: "has_flanking ? (prev_f2 + next_f2) / 2 : 0"
+      cur_f2: "has(current.?params.F2) ? current.params.F2 : params.policy.formant.default_f2_fallback"
+      prev_f3: "has(prev.?params.F3) ? prev.params.F3 : params.policy.formant.default_f3_fallback"
+      next_f3: "has_flanking ? (has(next_vowel.?params.F3) ? next_vowel.params.F3 : params.policy.formant.default_f3_fallback) : params.policy.formant.default_f3_fallback"
+      flanking_avg_f3: "has_flanking ? (prev_f3 + next_f3) / 2 : 0"
+      cur_f3: "has(current.?params.F3) ? current.params.F3 : params.policy.formant.default_f3_fallback"
+      dac_value: "has(current.dac) ? current.dac : 1"
+      resistance: "dac_value / 3.0"
+      dac_weight: "params.policy.formant.vcv_coarticulation_rate * (1.0 - resistance)"
+    constraint: has_flanking
+    apply:
+      - field: params.F1
+        op: set
+        value: "cur_f1 + (flanking_avg_f1 - cur_f1) * dac_weight"
+        tag: coarticulation
+      - field: params.F2
+        op: set
+        value: "cur_f2 + (flanking_avg_f2 - cur_f2) * dac_weight"
+        tag: coarticulation
+      - field: params.F3
+        op: set
+        value: "cur_f3 + (flanking_avg_f3 - cur_f3) * dac_weight"
+        tag: coarticulation
+    citations:
+      - Recasens 1997 (DAC model -- coarticulation resistance inversely proportional to tongue-dorsum constraint)
+      - Ohman 1966 (VCV coarticulation model -- F1 avg 62 Hz, F2 avg 280 Hz, F3 avg 153 Hz by transconsonantal vowel; same weight, magnitude differs by intrinsic formant range)
+      - Allen et al. 1987
+  vowel_reduction:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && has(current.params) && has(current.?params.F1) && (has(current.stress) ?
+        current.stress == 0 : false)
+    define:
+      reduction_rate: >-
+        (current.phoneme in ['IY', 'IY0', 'IY1'] ||
+        ((has(current.front) ? current.front == true : false) && (has(current.hi) ? current.hi == true : false))) ?
+        params.policy.formant.vowel_reduction_rate_high_front :
+        params.policy.formant.vowel_reduction_rate
+    apply:
+      - field: params.F1
+        op: set
+        value: >-
+          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          reduction_rate
+        tag: vowel_reduction
+      - field: params.F2
+        op: set
+        value: >-
+          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          reduction_rate
+        tag: vowel_reduction
+    citations:
+      - Allen et al. 1987
+      - Klatt 1976
+      - Peterson & Barney 1952 (schwa formants)
+      - Stevens 1998 (reduced vowels depend strongly on segmental context)
+      - Miller 1998 (reduced vowels can remain [I]-like instead of fully schwa-like)
+  vowel_rate_undershoot:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.type == 'vowel' && has(current.params) && has(current.?params.F1)
+    constraint: params.policy.formant.rate_undershoot_factor > 0
+    apply:
+      - field: params.F1
+        op: set
+        value: >-
+          current.params.F1 + (params.policy.formant.vowel_reduction_schwa_f1 - current.params.F1) *
+          params.policy.formant.rate_undershoot_factor
+        tag: rate_undershoot
+      - field: params.F2
+        op: set
+        value: >-
+          current.params.F2 + (params.policy.formant.vowel_reduction_schwa_f2 - current.params.F2) *
+          params.policy.formant.rate_undershoot_factor
+        tag: rate_undershoot
+    citations:
+      - Lindblom 1963 (articulatory undershoot — vowels centralize toward schwa at fast rates)
+      - Moon & Lindblom 1994 (rate-dependent formant undershoot)
+  schwa_coronal_fronting:
+    kind: scalar
+    select:
+      stream: phone
+      where: >-
+        current.phoneme in ['AH', 'AH0'] && current.type == 'vowel' &&
+        (has(current.stress) ? current.stress == 0 : true)
+    constraint:
+      predicate: one_coronal
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when:
+              predicate: both_coronal
+            value: >-
+              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              params.policy.formant.schwa_coronal_fronting_rate
+          - default: >-
+              current.params.F2 + (params.policy.formant.schwa_coronal_f2_target - current.params.F2) *
+              params.policy.formant.schwa_coronal_fronting_rate * 0.5
+        tag: coronal_fronting
+    citations:
+      - Miller 1998 (schwa fronting to [ɨ] in coronal environments, 67-83% accuracy, both-side coronal strongest predictor)
+  uw_coronal_fronting:
+    kind: scalar
+    select:
+      stream: phone
+      where: current.phoneme in ['UW1', 'UW0', 'UW'] && current.type == 'vowel'
+    constraint:
+      predicate: one_coronal
+    apply:
+      - field: params.F2
+        op: set
+        dispatch:
+          - when:
+              predicate: both_coronal
+            value: >-
+              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              params.policy.formant.uw_coronal_fronting_rate
+          - default: >-
+              current.params.F2 + (params.policy.formant.uw_coronal_f2_target - current.params.F2) *
+              params.policy.formant.uw_coronal_fronting_rate * 0.5
+        tag: coronal_fronting
+    citations:
+      - Miller 1998 (/u/ fronting in coronal environments, 86% accuracy with coronals on both sides)
+      - Harrington et al. 2011 (tongue advancement, not lip unrounding, drives /u/ fronting)
+  transition_override:
+    kind: scalar
+    select:
+      stream: phone
+      where: "true"
+    apply:
+      - field: transition_ms
+        op: set
+        value: "current.type in ['stop_closure', 'stop_release', 'stop_aspiration'] ? params.policy.formant.transition_ms_stop : current.type == 'fricative' ? params.policy.formant.transition_ms_fricative : params.policy.formant.transition_ms_default"
+        tag: transition
+    citations:
+      - "Stevens & House 1956"
+      - "Hertz 1991 (per-class transition timing in synthesis)"
+  sw_explicit_override:
+    kind: scalar
+    select:
+      stream: phone
+      where: has(current.inventorySW)
+    apply:
+      - field: params.SW
+        op: set
+        value: current.inventorySW
+        tag: branch_switch
+    citations:
+      - Klatt 1980
+      - Allen et al. 1987
+  sw_default_assignment:
+    kind: scalar
+    select:
+      stream: phone
+      where: "!has(current.inventorySW)"
+    apply:
+      - field: params.SW
+        op: set
+        value: "current.type in ['fricative', 'affricate', 'stop_release', 'stop_aspiration'] ? 1 : 0"
+        tag: branch_switch
+    citations:
+      - Klatt 1980

@@ -190,6 +190,34 @@ params:
     default: 0
     unit: dB
 
+  # Master source gains (Klatt & Klatt 1990 Table XI: GV/GH/GF = "Gain for
+  # AV/AH/AF", each min 0 / default 60 / max 80 dB). The shipped parwv.c does
+  # NOT expose these as runtime knobs: it folds them into the fixed per-source
+  # scales (voicing implicit in the source x0.03 return, aspiration x0.05,
+  # frication x0.25 -- signalpath §2.9/§3.3/§3.4) at their nominal 60 dB. We
+  # expose them as the spec's explicit dB gains and apply each as a (GX - 60)
+  # dB offset on its source gain. At the default 60 the offset is +0 dB (unity),
+  # so the folded shipped-C behavior is reproduced as an EXACT no-op. Raising
+  # GV to 66 raises cascade voicing by +6 dB (=x2 in the klsyn amptable), etc.
+  GV:
+    type: float
+    range: [0, 80]       # Klatt & Klatt 1990 Table XI GV 0/60/80
+    default: 60
+    unit: dB
+    description: "Master gain for voicing AV (Klatt & Klatt 1990 Table XI). Applied as (GV-60) dB offset on the cascade voicing gain; default 60 = no-op."
+  GH:
+    type: float
+    range: [0, 80]       # Klatt & Klatt 1990 Table XI GH 0/60/80
+    default: 60
+    unit: dB
+    description: "Master gain for aspiration AH (Klatt & Klatt 1990 Table XI). Applied as (GH-60) dB offset on the aspiration gain; default 60 = no-op."
+  GF:
+    type: float
+    range: [0, 80]       # Klatt & Klatt 1990 Table XI GF 0/60/80
+    default: 60
+    unit: dB
+    description: "Master gain for frication AF (Klatt & Klatt 1990 Table XI). Applied as (GF-60) dB offset on the frication gain; default 60 = no-op."
+
   # Frontend-facing voice-quality controls. klsyn88 itself is not an LF-source
   # synthesizer, so these are implemented as proxies onto its native Kopen/TLTdb
   # and excitation gains rather than passed through directly.
@@ -227,12 +255,19 @@ params:
     default: 0
     description: "Klatt 1990 open quotient override in percent. 0 = derive proxy from Rd"
 
+  # Spectral tilt. THE canonical spectral-tilt control (Klatt & Klatt 1990
+  # Table XII TL, "Glottal spectral tilt", dB attenuation at 3 kHz). The 1990
+  # spec has a SINGLE tilt parameter; klsyn88 implements it through the one-pole
+  # lineartilt[35] table (parwv.c §3.6), whose highest index is 34, so the
+  # effective ceiling is 34 dB (not the paper's nominal 41 -- the C table does
+  # not reach it; audit §3.1). `TLTdb` below is a deprecated back-compat alias
+  # for this same control (see effectiveTiltDb). 0 = derive a proxy from Rd.
   TL:
     type: float
-    range: [0, 34]
+    range: [0, 34]       # ceiling = lineartilt[35] last index (parwv.c §3.6)
     default: 0
     unit: dB
-    description: "Klatt 1990 spectral tilt override in dB at 3 kHz. 0 = derive proxy from Rd"
+    description: "Canonical Klatt 1990 spectral tilt (Table XII TL), dB at 3 kHz. 0 = derive proxy from Rd. Supersedes the TLTdb alias."
 
   A1:
     type: float
@@ -327,11 +362,16 @@ params:
     default: 0
     unit: dB
 
+  # DEPRECATED alias for TL (above). Retained for back-compat with callers that
+  # set the manual symbol `tl` (Klatt 1988 Table I, 0-34 dB). Collapsed into the
+  # single canonical tilt control: effectiveTiltDb now resolves TL first, then
+  # this alias, then the Rd proxy. Prefer TL in new configs. Default 0 -> no-op.
   TLTdb:
     type: float
     range: [0, 34]
     default: 0
     unit: dB
+    description: "DEPRECATED alias for TL (Klatt 1988 manual tl, 0-34 dB). Use TL."
 
   NFCASC:
     type: int
@@ -341,9 +381,9 @@ params:
 
   seed:
     type: int
-    range: [1, 2147483647]
+    range: [1, 8191]     # Klatt & Klatt 1990 Table XI RS range 1-8191
     default: 1
-    description: "Random seed"
+    description: "Random seed. Range 1-8191 per Klatt & Klatt 1990 Table XI (RS). Default kept at 1 (shipped parwv.c ranseed) to preserve the no-op baseline; the paper's nominal default is 8."
 
   # F0 flutter percent. Klatt & Klatt 1990, eq. 1:
   #   Δf0(t) = (FL/50)*(F0/100)*[sin(2π·12.7t)+sin(2π·7.1t)+sin(2π·4.7t)] Hz
@@ -429,9 +469,15 @@ realize:
     expr: "min(34.0, max(0.0, (rdDerivedOpenQuotientPct - 50.0) * 0.6))"
     deps: [rdDerivedOpenQuotientPct]
 
+  # Single canonical spectral-tilt resolution (TL/TLTdb collapse, audit §3.1).
+  # The 1990 spec has ONE tilt control. Resolution order: explicit canonical TL
+  # wins; else the deprecated TLTdb alias; else the Rd-derived proxy. At defaults
+  # (TL=0, TLTdb=0) this is exactly rdDerivedTiltDb -- identical to the previous
+  # `TLTdb + (TL>0?TL:rdDerivedTiltDb)` formula (0 + rdDerivedTiltDb), so the
+  # no-op baseline is preserved byte-for-byte. Ceiling 34 = lineartilt[35].
   effectiveTiltDb:
-    expr: "min(34.0, max(0.0, TLTdb + (TL > 0 ? TL : rdDerivedTiltDb)))"
-    deps: [TLTdb, TL, rdDerivedTiltDb]
+    expr: "min(34.0, max(0.0, TL > 0 ? TL : (TLTdb > 0 ? TLTdb : rdDerivedTiltDb)))"
+    deps: [TL, TLTdb, rdDerivedTiltDb]
 
   # ---------------------------------------------------------------------------
   # LF glottal source (SS=3) — Fant 1985/1988/1997, Klatt & Klatt 1990 Table XI
@@ -545,21 +591,31 @@ realize:
     expr: "max(AV - 7, 0)"
     deps: [AV]
 
+  # Master gain GV (Klatt & Klatt 1990 Table XI) folded as a (GV-60) dB offset.
+  # Default GV=60 -> +0 dB -> argument unchanged -> exact no-op.
   voiceGain:
-    expr: "dbToLinearKlsyn(max(avDb + eeGainDb, 0))"
-    deps: [avDb, eeGainDb]
+    expr: "dbToLinearKlsyn(max(avDb + eeGainDb + (GV - 60.0), 0))"
+    deps: [avDb, eeGainDb, GV]
 
+  # Parallel voicing (AVS = manual `ap`) is a distinct amplitude; the spec's GV
+  # pairs with cascade AV, so GV is not applied here (faithful to parwv.c, which
+  # has no GV on the parallel voicing path either).
   parVoiceGain:
     expr: "dbToLinearKlsyn(max(AVS + eeGainDb, 0))"
     deps: [AVS, eeGainDb]
 
+  # Master gain GH (Table XI) folded as a (GH-60) dB offset on aspiration.
+  # dbToLinearKlsyn returns 0 for negative dB, so no extra clamp is needed.
+  # Default GH=60 -> +0 dB -> exact no-op.
   aspGain:
-    expr: "dbToLinearKlsyn(AH) * 0.05"
-    deps: [AH]
+    expr: "dbToLinearKlsyn(AH + (GH - 60.0)) * 0.05"
+    deps: [AH, GH]
 
+  # Master gain GF (Table XI) folded as a (GF-60) dB offset on frication.
+  # Default GF=60 -> +0 dB -> exact no-op.
   fricGain:
-    expr: "dbToLinearKlsyn(AF) * 0.25"
-    deps: [AF]
+    expr: "dbToLinearKlsyn(AF + (GF - 60.0)) * 0.25"
+    deps: [AF, GF]
 
   a1Gain:
     expr: "dbToLinearKlsyn(A1) * 0.4"

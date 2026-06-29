@@ -38,9 +38,15 @@ Same voice, five affects, each measurably distinct (Praat):
 27 cited affect presets exist (emotion/epistemic/pragmatic/speech-act/clinical); these five
 are the rendered demos. `--affect tender --degree 0.8` etc.
 
-## Known issue being fixed tonight
-- The voice currently **clips even at neutral** (peak ~1.95 > 1.0) — a backend gain-staging
-  problem (audible distortion). The TUNE pass fixes output gain, then re-renders clean demos.
+## CLEAN demos (clipping FIXED — listen to these first)
+The clipping is fixed (gain-staging: neutral peak now **0.80**, 0% clip, ~0.18 headroom):
+| file | phrase | peak | notes |
+|---|---|--:|---|
+| `tuned-moon.wav` | "she sees a calm blue moon" | 0.52 | clean neutral — the reference voice |
+| `tuned-angry.wav` | "I am so angry right now" (angry@0.9) | 0.82 | clean even at the loudest affect |
+The earlier `beauty-*.wav` / `affect-*.wav` files still clip (rendered pre-fix); `tuned-*.wav`
+(and anything rendered now) are clean. HF air is +2-3 dB/octave vs the first render (still
+~12 dB under Monson's ideal — bounded by the limiter; documented future work).
 
 ## In flight as of this commit
 - HF level push toward Monson's ideal; HRG live-pipeline wiring; final tuning.

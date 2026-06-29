@@ -408,11 +408,17 @@ rules:
   # --------------------------------------------------------------------------
   # Rule 25: Connected-speech source contour (Fant 1997)
   #
-  # Applies phrase-local Ee/Rd source shaping on voiced segments:
+  # Applies phrase-local Ee source shaping on voiced segments:
   # - slight onset rise
   # - slow declination
   # - stronger final-window fall
-  # - phrase-final Rd softening
+  #
+  # Owns the EePhraseDb (Ee/loudness) contour only. Phrase-final Rd softening
+  # (breathiness) is owned SOLELY by the voice-quality phase's phrase_rd_contour
+  # rule (RdPhraseOffset) — see voice-quality.yaml. This rule formerly also
+  # op-added a small (<=~0.06) phrase-final term into RdPhraseOffset, which
+  # double-tuned phrase-final breathiness on two axes; that add is removed so the
+  # Rd phrase contour has a single owner (TRACK PROS/VQ reconciliation).
   # --------------------------------------------------------------------------
   connected_speech_source_contour:
     kind: scalar
@@ -431,10 +437,6 @@ rules:
         - field: params.EePhraseDb
           op: add
           value: ee_total_db
-          tag: source_contour
-        - field: params.RdPhraseOffset
-          op: add
-          value: "params.policy.source_contour.rd_final_offset * final_progress"
           tag: source_contour
     define:
       onset_rise_db: >-
@@ -463,10 +465,6 @@ rules:
             - params.policy.source_contour.ee_declination_db_per_sec)
           * (contour.elapsed_sec - final_window_start_sec)
         : 0.0
-      final_progress: >-
-        contour.elapsed_sec <= final_window_start_sec
-        ? 0.0
-        : min([1.0, (contour.elapsed_sec - final_window_start_sec) / final_window_sec])
       ee_total_db: >-
         onset_rise_db + declination_db + final_fall_db
     citations:

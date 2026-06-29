@@ -379,14 +379,14 @@ params:
 
   # Output gain parameters
   masterGain:
-    description: "Master output gain — moderate boost to keep parallel-branch fricatives audible without overdriving the final runtime output; the output DynamicsCompressorNode still tames residual cascade peaks (see graph.yaml outputCompressor)"
+    description: "Master output gain — drives the cascade/parallel/air sum into the output limiter. Lowered from 3.0 to reduce how hard the broadband limiter is over-driven (less pumping); the final clean level is set by outputGain after the limiter."
     type: float
-    default: 3.0 # beauty: below klatt80's 4.5 for HF headroom; firm output limiter keeps peaks below clipping across phrases
+    default: 2.0 # TRACK TUNE: was 3.0; reduced to ease limiter over-drive
 
   outputGain:
-    description: "Final output gain trim after compression/output shaping"
+    description: "Final post-limiter output trim. Sets the clipping ceiling: the broadband limiter caps loud/affect peaks at a fixed pre-trim ceiling (~3.8), so this scalar fixes the final peak. 0.21 keeps neutral worst-case ~0.80 and the loudest affect (angry/happy, intensityBoost on GO) ~0.82 — 0% clip with affect headroom (was 0.5, which let the limiter ceiling reach ~1.96 and clip)."
     type: float
-    default: 0.5 # engineering estimate: keeps offline-rendered final output below full scale while preserving internal branch balance
+    default: 0.21 # TRACK TUNE: was 0.5; anti-clip trim (neutral<=0.9, affect<1.0)
 
   # ===========================================================================
   # BEAUTY params — HF air shelf, singer's-formant ring, piriform notch, tilt.
@@ -405,7 +405,7 @@ params:
     default: 1.0
     range: [0, 3]
   hfAirMaster:
-    description: "Master trim on the summed HF air branch before the output. Default 5.0 pushes the 8-kHz/16-kHz octaves toward the Monson 2012 Table I calibration (-16 dB / -24 dB vs overall)."
+    description: "Master trim on the summed HF air branch before the output limiter. Pushes the 8-kHz/16-kHz octaves toward the Monson 2012 Table I calibration (-16 dB / -24 dB vs overall). NOTE: pre-limiter, this saturates (~5+) because the broadband limiter ducks in lock-step with the loud HF; the effective HF *level* is steered more by the air-resonator bandwidths (lower-Q = lower crest = more energy survives the limiter) than by this trim past the knee."
     type: float
     default: 5.0
     range: [0, 12]
@@ -447,17 +447,27 @@ params:
     type: float
     default: 120
     unit: Hz
-  # Female-scaled HF cascade centres + wide (low-Q) bandwidths (doc 09 table).
+  # Female-scaled HF cascade centres + bandwidths (doc 09 table).
+  # TRACK TUNE: bandwidths narrowed ~3x from the original wide (low-Q) shelf
+  # (900/1300/1900/2600/3600 Hz) to 300/450/650/900/1200 Hz. A higher-Q
+  # resonator rings longer between glottal pulses, so the air branch's
+  # crest factor drops; the same audible HF energy then passes the firm
+  # broadband output limiter without the sharp transients that forced
+  # clipping. Net measured effect: +2 to +3 dB of clean energy in every
+  # >5 kHz octave (toward the Monson 2012 -16/-24 dB calibration) at the
+  # SAME output peak. The bands still overlap into a continuous shelf
+  # (centres 2 kHz apart, BW 300-1200 Hz). Engineering estimate; tune by
+  # `npm run measure` / hf-band-energy against recorded female speech.
   hf7Freq: { description: "HF air formant 7 (~7 kHz, naturalness floor)", type: float, default: 7000, unit: Hz }
-  hf7Bw:   { description: "HF air formant 7 bandwidth", type: float, default: 900, unit: Hz }
+  hf7Bw:   { description: "HF air formant 7 bandwidth", type: float, default: 300, unit: Hz }
   hf9Freq: { description: "HF air formant 8/9 (~9 kHz, female gender onset)", type: float, default: 9000, unit: Hz }
-  hf9Bw:   { description: "HF air formant 9 bandwidth", type: float, default: 1300, unit: Hz }
+  hf9Bw:   { description: "HF air formant 9 bandwidth", type: float, default: 450, unit: Hz }
   hf11Freq: { description: "HF air formant 10 (~11 kHz, singer's 2nd-formant region)", type: float, default: 11000, unit: Hz }
-  hf11Bw:  { description: "HF air formant 11 bandwidth", type: float, default: 1900, unit: Hz }
+  hf11Bw:  { description: "HF air formant 11 bandwidth", type: float, default: 650, unit: Hz }
   hf13Freq: { description: "HF air formant (~13 kHz, non-sibilant rising tail)", type: float, default: 13000, unit: Hz }
-  hf13Bw:  { description: "HF air formant 13 bandwidth", type: float, default: 2600, unit: Hz }
+  hf13Bw:  { description: "HF air formant 13 bandwidth", type: float, default: 900, unit: Hz }
   hf16Freq: { description: "HF air formant (~16 kHz octave, female sparkle cue)", type: float, default: 16000, unit: Hz }
-  hf16Bw:  { description: "HF air formant 16 bandwidth", type: float, default: 3600, unit: Hz }
+  hf16Bw:  { description: "HF air formant 16 bandwidth", type: float, default: 1200, unit: Hz }
 
 # Constants - values that don't change
 constants:

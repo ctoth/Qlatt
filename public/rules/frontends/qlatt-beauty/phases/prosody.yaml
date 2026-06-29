@@ -27,7 +27,7 @@ rules:
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: params.policy.f0.base_hz
+      value: params.policy.f0.female_base_hz
       tag: f0_baseline
     citations:
       - Pierrehumbert 1980
@@ -46,7 +46,7 @@ rules:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       tag: f0_initial_boundary_high
     citations:
       - "Ladd 2008"
@@ -87,14 +87,18 @@ rules:
       clamped_height: >-
         max([params.policy.f0.h_star_height * downstep_factor, params.policy.f0.downstep_floor_fraction])
       target_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * clamped_height
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * clamped_height
       low_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.l_star_height
       high_floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       prev_f0: prev_point('f0')
       lead_hz: >-
         prev_f0 == null ? high_floor_hz : max([prev_f0.value, high_floor_hz])
+      # Yes/no-question final rise, realized on the accented final VOWEL because the
+      # ToBI H-/H% tones live on the acoustically-silent boundary token.
+      q_rise_hz: >-
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.question_rise_fraction
     insert_points:
       - { stream: f0, when: "current.accentType == 'H*'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star }
       - { stream: f0, when: "current.accentType == 'H*+L'", at: "at_ratio(current, 0.45)", value: target_hz, tag: f0_h_star_plus_l_peak }
@@ -110,6 +114,12 @@ rules:
       - { stream: f0, when: "current.accentType == 'L*'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
       - { stream: f0, when: "current.accentType == 'L*+H'", at: "at_ratio(current, 0.45)", value: low_hz, tag: f0_l_star }
       - { stream: f0, when: "current.accentType == 'L*+H'", at: "at_sync(current.sync_right)", value: high_floor_hz, tag: f0_l_star_plus_h }
+      # Question final rise on the accented vowel that precedes an H% IP boundary
+      # (within the last few segments). Last entry => last-wins at sync_right so it
+      # supersedes any lower boundary target on this token. Also stamped mid-vowel
+      # so the rise climbs through the nucleus rather than jumping at the edge.
+      - { stream: f0, when: "(next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')", at: "at_ratio(current, 0.3)", value: low_hz, tag: f0_question_rise_onset }
+      - { stream: f0, when: "(next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%') || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%') || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')", at: "at_ratio(current, 0.65)", value: q_rise_hz, tag: f0_question_final_rise }
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
@@ -129,10 +139,46 @@ rules:
             || (has(current.params.AVS) && current.params.AVS > 0))
     define:
       prev_f0: prev_point('f0')
-      base: params.policy.f0.base_hz
+      base: params.policy.f0.female_base_hz
       fallback: "prev_f0 == null ? base : prev_f0.value"
-      target: >-
+      decl_target: >-
         max([fallback * 0.98, base])
+      # --- Intrinsic vowel pitch (segmental micro-prosody; THE aliveness overlay) ---
+      # High vowels (/iy/,/ih/,/uw/,/uh/) ride higher than low vowels (/aa/,/ae/,/ah/).
+      # O'Shaughnessy 1976; Ladd 1985 (+0.5 st /i/, -1.0 st /a/). A small per-vowel
+      # nudge of the declination anchor — what makes a contour sound spoken not drawn.
+      intrinsic_offset: >-
+        (has(current.hi) && current.hi == true)
+          ? params.policy.f0.intrinsic_pitch_high_hz
+          : ((has(current.low) && current.low == true)
+              ? params.policy.f0.intrinsic_pitch_low_hz
+              : params.policy.f0.intrinsic_pitch_mid_hz)
+      # --- Boundary-tone realization on the final VOICED vowel ---
+      # ToBI boundary tones live on the trailing-silence token, which is acoustically
+      # silent. A deaccented nuclear vowel therefore drops to baseline and the
+      # yes/no-question rise (H%) is never phonated. Detect an upcoming H%/L% IP
+      # boundary within the last few segments and shape THIS vowel's tail so the
+      # rise (question) or final-lowering (statement) is actually heard.
+      pre_h_pct: >-
+        (next != null && next.phoneme == 'SIL' && next.boundaryTone == 'H%')
+        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'H%')
+        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'H%')
+      pre_l_pct: >-
+        (next != null && next.phoneme == 'SIL' && next.boundaryTone == 'L%')
+        || (ahead(current, 2) != null && ahead(current, 2).phoneme == 'SIL' && ahead(current, 2).boundaryTone == 'L%')
+        || (ahead(current, 3) != null && ahead(current, 3).phoneme == 'SIL' && ahead(current, 3).boundaryTone == 'L%')
+      # Yes/no-question final rise, near the top of the range (Pierrehumbert 1980 H-H%).
+      rise_target: >-
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.question_rise_fraction
+      # Statement final lowering: dip below the floor for spoken finality (Ladd 2008).
+      final_low_target: >-
+        max([params.policy.f0.female_base_hz - params.policy.f0.range_hz * params.policy.f0.final_lowering_pull,
+             params.policy.f0.female_base_hz * params.policy.f0.intrinsic_floor_fraction])
+      # Normal unaccented anchor with the intrinsic overlay, clamped to stay voiced.
+      body_target: >-
+        max([decl_target + intrinsic_offset,
+             params.policy.f0.female_base_hz * params.policy.f0.intrinsic_floor_fraction])
+      target: "pre_h_pct ? rise_target : (pre_l_pct ? final_low_target : body_target)"
     insert_point:
       stream: f0
       at: at_sync(current.sync_right)
@@ -141,6 +187,8 @@ rules:
     citations:
       - "Pierrehumbert 1980"
       - "Ladd 2008"
+      - "O'Shaughnessy 1976 (intrinsic vowel pitch; boundary-tone realization on the final sonorant)"
+      - "Ladd 1985 (intrinsic vowel pitch offsets)"
 
   # --------------------------------------------------------------------------
   # Rule 16: Phrase accent H- at the start of phrase-final silence
@@ -155,7 +203,7 @@ rules:
     define:
       prev_f0: prev_point('f0')
       floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       target_hz: >-
         prev_f0 == null ? floor_hz : max([prev_f0.value, floor_hz])
     insert_point:
@@ -181,7 +229,7 @@ rules:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_phrase_low
     citations:
       - "Pierrehumbert 1980"
@@ -202,7 +250,7 @@ rules:
       stream: f0
       at: at_sync(current.sync_right)
       value: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_l_pct_fraction
       tag: f0_boundary_low
     citations:
       - "Pierrehumbert 1980"
@@ -222,9 +270,9 @@ rules:
     define:
       prev_f0: prev_point('f0')
       high_floor_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz * params.policy.f0.boundary_h_pct_fraction
       ceiling_hz: >-
-        params.policy.f0.base_hz + params.policy.f0.range_hz
+        params.policy.f0.female_base_hz + params.policy.f0.range_hz
       target_hz: >-
         prev_f0 == null
           ? high_floor_hz
@@ -258,7 +306,7 @@ rules:
     insert_point:
       stream: f0
       at: at_sync(current.sync_left)
-      value: params.policy.f0.base_hz
+      value: params.policy.f0.female_base_hz
       tag: f0_register_reset
     citations:
       - Pierrehumbert 1980
@@ -290,8 +338,8 @@ rules:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
-             params.policy.f0.base_hz + params.policy.f0.range_hz])
+        min([(prev_f0 == null ? params.policy.f0.female_base_hz : prev_f0.value) * params.policy.f0.voiceless_onset_raise,
+             params.policy.f0.female_base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
       - "O'Shaughnessy 1976"
@@ -316,12 +364,13 @@ rules:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        min([(prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
-             params.policy.f0.base_hz + params.policy.f0.range_hz])
+        min([(prev_f0 == null ? params.policy.f0.female_base_hz : prev_f0.value) * params.policy.f0.voiced_onset_lower,
+             params.policy.f0.female_base_hz + params.policy.f0.range_hz])
       tag: f0_onset_perturbation
     citations:
       - "O'Shaughnessy 1976"
       - "Engineering estimate: clamp to speaker pitch range ceiling to prevent compounding runaway"
+
 
   # --------------------------------------------------------------------------
   # Rule 14: Continuation rise at clause boundaries
@@ -345,7 +394,7 @@ rules:
       stream: f0
       at: at_sync(current.sync_left)
       value: >-
-        (prev_f0 == null ? params.policy.f0.base_hz : prev_f0.value)
+        (prev_f0 == null ? params.policy.f0.female_base_hz : prev_f0.value)
         + {
           ',': params.policy.f0.continuation_rise_hz,
           ';': params.policy.f0.continuation_minor_rise_hz,

@@ -312,16 +312,33 @@ parameters:
           - Klatt 1973 (cluster shortening, subsequent consonants)
     f0:
       # --- Pitch Range Model (Pierrehumbert 1980, Ladd 2008) ---
+      # NOTE: `base_hz` is OVERRIDDEN at runtime by the resolved speaker profile's
+      # base_f0_hz (src/tts-frontend.ts injects policy.f0.base_hz = effectiveBaseF0
+      # into the prosody phase). Editing base_hz here therefore does NOT move the
+      # melody. The shared speaker-profile.yaml is owned elsewhere, so the FEMALE
+      # floor for this frontend's prosody rules is carried by `female_base_hz`
+      # below, which the prosody rules reference directly and which the runtime
+      # does NOT override. (base_hz is kept only as a documented fallback.)
       base_hz:
         value: 110
         citations:
-          - O'Shaughnessy 1976
-          - Pierrehumbert 1980
-      range_hz:
-        value: 80
+          - "O'Shaughnessy 1976"
+          - "Pierrehumbert 1980"
+          - "Engineering note: runtime-overridden by speaker profile; see female_base_hz"
+      # FEMALE floor Fr. Span (range_hz) opens the range UP from this floor (Ladd
+      # 2008: raising the voice expands span up from a ~constant floor). Top of
+      # range (H% ceiling) = female_base + range; H* peak (0.85 frac); L% = floor.
+      female_base_hz:
+        value: 138
         citations:
-          - "Pierrehumbert 1980 (male typical range ~80 Hz: top ~190 Hz, baseline ~110 Hz)"
-          - Ladd 2008 Ch.5
+          - "Pierrehumbert 1980 (female baseline ~150-200 Hz)"
+          - "Ladd 2008 Ch.5 (floor Fr is the speaker anchor; level set by sex/register)"
+          - "O'Shaughnessy 1976 (female floor 150-200 Hz)"
+      range_hz:
+        value: 95
+        citations:
+          - "Pierrehumbert 1980 (female range wider in Hz than male; top ~290 Hz over ~188 Hz floor)"
+          - "Ladd 2008 Ch.5 (span = width of range, independent of level; female span ~1.5x male in Hz)"
       # --- Accent targets (fraction of range) ---
       h_star_height:
         value: 0.85
@@ -373,6 +390,61 @@ parameters:
         value: 0.95
         citations:
           - O'Shaughnessy 1976
+      # --- Intrinsic vowel pitch (segmental micro-prosody, the aliveness overlay) ---
+      # High vowels (/iy/,/ih/,/uw/,/uh/) carry intrinsically higher F0 than low
+      # vowels (/aa/,/ae/,/ah/). Ladd 1985 used +0.5 st for /i/, -1.0 st for /a/.
+      # At a ~210 Hz female center: +0.5 st ~= +6 Hz, -1.0 st ~= -12 Hz. Mid vowels
+      # take a small interpolated value. Applied additively at vowel center.
+      intrinsic_pitch_high_hz:
+        value: 6
+        citations:
+          - "O'Shaughnessy 1976 (high vowels up to ~23 Hz higher F0 than low)"
+          - "Ladd 1985 (+0.5 st for /i/ at a female register)"
+      intrinsic_pitch_mid_hz:
+        value: 0
+        citations:
+          - "O'Shaughnessy 1976 (mid vowels near the neutral intrinsic value)"
+      intrinsic_pitch_low_hz:
+        value: -12
+        citations:
+          - "O'Shaughnessy 1976 (low vowels carry the lowest intrinsic F0)"
+          - "Ladd 1985 (-1.0 st for /a/ at a female register)"
+      # Lower clamp for the micro-prosody overlay: never let a segmental nudge
+      # drive F0 below this fraction of the floor (guards against runaway dips).
+      intrinsic_floor_fraction:
+        value: 0.7
+        citations:
+          - "Engineering estimate: micro-prosody overlay clamps at 0.7*floor to stay voiced"
+      # --- Sagging transition (Ladd 2008 / Pierrehumbert 1980) ---
+      # Between two successive H accents the contour must SAG (dip then rise),
+      # not run as a straight line. We approximate the Fujisaki bend within the
+      # point-interpolation renderer by stamping a mid-valley point between an
+      # accent peak and the next accent. Fraction of the local peak-to-base gap.
+      sag_depth_fraction:
+        value: 0.35
+        citations:
+          - "Ladd 2008 (sagging transition between accents, not linear interp)"
+          - "Pierrehumbert 1980 (interpolation dips between H targets)"
+          - "Fujisaki (damped 2nd-order response curves the inter-accent valley)"
+      # --- Final lowering (Ladd 2008 separate from downstep) ---
+      # The nuclear (final) accent dips below the k-downstep prediction. Applied
+      # as a multiplicative pull of the nuclear peak toward the floor.
+      final_lowering_pull:
+        value: 0.15
+        citations:
+          - "Ladd 2008 pp.79-80 (final accent lower than downstep predicts)"
+          - "Pierrehumbert 1980 (final lowering as a separate utterance-final effect)"
+      # --- Question final rise (H% realized on the last VOICED syllable) ---
+      # ToBI boundary tones live on the trailing-silence token, which is acoustically
+      # silent, so a naive L*+H ... H-H% question never phonates its rise. This pulls
+      # the rise onto the nuclear voiced vowel itself so the listener actually HEARS
+      # the yes/no-question rise. Target = base + range*fraction (near top of range).
+      question_rise_fraction:
+        value: 0.9
+        citations:
+          - "Pierrehumbert 1980 (H%/H- yes-no question rise to near top of range)"
+          - "Ladd 2008 Ch.4 (uptalk/question final rise realized on the final sonorant)"
+          - "O'Shaughnessy 1976 (question endpoint 170-190 Hz male; scales up for female)"
       # --- Continuation rise (kept for intermediate phrase boundaries) ---
       continuation_rise_hz:
         value: 8

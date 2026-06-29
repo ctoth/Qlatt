@@ -1,0 +1,11 @@
+{
+  "cite_key": "klatt1988klsyn",
+  "title": "KLSYN: A Formant Synthesis Program",
+  "authors": ["Dennis H. Klatt", "Keith Johnson"],
+  "year": "1988",
+  "arxiv_id": null,
+  "doi": null,
+  "abstract": "The KLSYN speech synthesis program accepts user commands to create parametric data to control a digital speech synthesizer, and it produces an output waveform file with a user-specified name. The IBM-PC version of KLSYN was first implemented by Keith Johnson & Yingyong Qi at Ohio State University in 1987, with several later minor modifications by Keith Johnson. The synthesizer is the same as the one documented in Klatt (1980) except that the voicing source has been augmented to permit a choice between two glottal waveforms; the new voicing source waveform is intended to be more flexible and capable of producing more natural changes in voice quality over the duration of a sentence. The theory of control and the new control parameters (open quotient, spectral tilt, skew, turbulence, delta-F1/B1 at open glottis) are all described, along with the ~50 synthesizer constants and variable parameters, their defaults and ranges, the cascade/parallel vocal-tract topology, and the command interface.",
+  "url": null,
+  "pdf_url": null
+}

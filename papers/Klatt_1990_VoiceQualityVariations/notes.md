@@ -488,6 +488,7 @@ Ug(t) = at² - bt³   (open phase)
 - [[Titze_2014_BistableVocalFoldAdduction]] — Strong. Klatt 1990 documents voice quality variations including register transitions; Titze 2014 provides the biomechanical explanation (bistable glottal geometry) for why those transitions can be abrupt rather than gradual.
 - [[Stathopoulos_2011_VoiceAcrossLifespan]] — Moderate. Stathopoulos's SNR and F0 lifespan data extend Klatt & Klatt's voice quality observations (particularly female breathiness) across the full age range, showing how the voice quality parameters documented here change with aging.
 - [[Larrouy-Maestri_2024_EmotionalProsody]] — Moderate. 30-year review of emotional prosody identifies voice quality (breathy, tense, harsh) as critical for emotion encoding beyond F0 alone; KLSYN88 parameters (AH, TL, OQ) are the implementation mechanism for these emotion-linked voice qualities.
+- [KLSYN: A Formant Synthesis Program](../Klatt_1988_KLSYNFormantSynthesis/notes.md) — Strong. The KLSYN88 manual documents the augmented voicing source and voice-quality control parameters (open quotient, spectral tilt, turbulence, skew) that this paper's voice-quality analysis studies and exploits; that manual is the synthesizer/parameter substrate for the present work.
 
 ### Now in Collection
 - **Rosenberg (1971)** — [[Rosenberg_1971_EffectGlottalPulseShape]] — Effect of Glottal Pulse Shape on the Quality of Natural Vowels: Establishes that pulse shapes with a single slope discontinuity at closure are preferred; basis for Klatt synthesizer source model.

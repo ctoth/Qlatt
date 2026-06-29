@@ -1,0 +1,4 @@
+---
+tags: [klatt-synthesizer, glottal-source, voice-quality, formant-synthesis, parameter-reference]
+---
+This is the user manual and parameter reference for KLSYN (the "KLSYN88" formant synthesizer), documenting the ~50 control constants and variable parameters with their symbols, defaults, soft ranges, and units. It specifies the two selectable glottal voicing sources (a low-pass-filtered impulse train and a natural cubic-polynomial pulse Ug(t)=a·t²−b·t³), the new voice-quality parameters added beyond Klatt (1980) — open quotient, spectral tilt, skew/fry, turbulence, delta-F1/B1 at open glottis — plus the cascade/parallel vocal-tract topology, the 21 diagnostic output taps, and worked formant/bandwidth tables for English vowels and consonants. It is the primary specification for this project's klsyn88 fidelity reimplementation.

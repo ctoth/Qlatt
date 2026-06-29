@@ -156,6 +156,7 @@ For a default "Rosenberg C" pulse in the synthesizer:
 - `Fant_1985_LFModelGlottalFlow` — LF model supersedes Rosenberg pulse with more parameters
 - `Gobl_2021_LFModelFrequencyDomain` — discusses Rosenberg in context of LF model frequency domain
 - `Cummings_1995_GlottalExcitationEmotionalSpeech` — references Rosenberg source model
+- `Klatt_1988_KLSYNFormantSynthesis` — cites this (misspelled "Rothenberg") as a basis for the KLSYN88 natural glottal pulse shape Ug(t)=a·t²−b·t³
 
 ### New Leads
 - Miller 1959 — Nature of the vocal cord wave (inverse filtering pioneer)

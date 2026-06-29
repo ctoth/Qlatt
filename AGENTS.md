@@ -243,7 +243,7 @@ The `papers/` directory contains ~370 processed research papers with implementat
 - Local reference implementations:
   - `~/src/klatt80/` - Original FORTRAN
   - `~/src/klatt-syn/` - TypeScript implementation (chdh)
-  - `~/src/klsyn/` - klsyn88 Nim implementation
+  - `~/src/klsyn/` - klsyn88: Dennis Klatt's original C synthesizer (`c/parwv.c`, `c/klsyn.c`) with a Python/Cython wrapper (Keith Johnson). The 1982-87 "new voicing source" engine (KLGLOTT88; pre-1990, so no flutter/diplophonia/SQ/LF/tracheal). NOT Nim.
 
 ## Important Patterns
 

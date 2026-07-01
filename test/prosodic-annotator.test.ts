@@ -271,9 +271,9 @@ describe("annotateProsody — unit tests", () => {
 
       const result = annotateProsody(tokens);
 
-      // "store" stressed vowel (index 13) should be nuclear with H*+L (Pierrehumbert 1980)
+      // "store" stressed vowel (index 13) should be nuclear with H*; the fall is carried by L- L%
       expect(result[13].isNuclearAccent).toBe(true);
-      expect(result[13].accentType).toBe("H*+L");
+      expect(result[13].accentType).toBe("H*");
 
       // "went" stressed vowel (index 4) should be prenuclear L+H* (Pierrehumbert 1980)
       expect(result[4].isAccented).toBe(true);

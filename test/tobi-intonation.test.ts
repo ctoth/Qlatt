@@ -163,8 +163,8 @@ describe("accentIndexInPhrase annotation", () => {
     expect(result[10].accentType).toBe("L*+H");
   });
 
-  it("assigns legacy continuation accent families", () => {
-    // "Cat sat," -> sustained high prenuclear head, low-star continuation nucleus
+  it("assigns MAE-ToBI-compatible continuation accent families", () => {
+    // "Cat sat," -> high prenuclear accent, rising continuation nucleus
     const tokens = [
       sil(),
       phone("K", "cat"), phone("AE", "cat", 1), phone("T", "cat"),
@@ -174,11 +174,11 @@ describe("accentIndexInPhrase annotation", () => {
 
     const result = annotateProsody(tokens);
 
-    expect(result[2].accentType).toBe("H*+H");
-    expect(result[5].accentType).toBe("H+L*");
+    expect(result[2].accentType).toBe("H*");
+    expect(result[5].accentType).toBe("L*+H");
   });
 
-  it("marks exclamations with H*+L and no initial %H", () => {
+  it("marks exclamations with H* and no initial %H", () => {
     const tokens = [
       sil(),
       phone("W", "wow"), phone("AW", "wow", 1),
@@ -188,7 +188,7 @@ describe("accentIndexInPhrase annotation", () => {
     const result = annotateProsody(tokens);
 
     expect(result[1].initialBoundaryTone).toBeNull();
-    expect(result[2].accentType).toBe("H*+L");
+    expect(result[2].accentType).toBe("H*");
   });
 });
 

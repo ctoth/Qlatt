@@ -143,10 +143,15 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
         }
         voiceChannel.set(this.voiceBuffer.view);
         noiseChannel.set(this.noiseBuffer.view);
-        this._reportMetrics(voiceChannel, noiseChannel);
+        this._reportMetrics(voiceChannel, noiseChannel, {
+            f0: f0Values[0] ?? 0,
+            av: avValues[0] ?? 0,
+            source: sourceValues[0] ?? 0,
+            tilt: tiltValues[0] ?? 0,
+        });
         return true;
     }
-    _reportMetrics(voice, noise) {
+    _reportMetrics(voice, noise, params) {
         if (!this.debug)
             return;
         this._reportCountdown -= 1;
@@ -162,6 +167,10 @@ class OversampledGlottalSourceProcessor extends AudioWorkletProcessor {
             voicePeak: voiceMetrics.peak,
             noiseRms: noiseMetrics.rms,
             noisePeak: noiseMetrics.peak,
+            f0: params.f0,
+            av: params.av,
+            source: params.source,
+            tilt: params.tilt,
         };
         this.port.postMessage(payload);
     }

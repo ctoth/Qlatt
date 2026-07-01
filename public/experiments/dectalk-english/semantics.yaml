@@ -3,8 +3,8 @@
 # Extends klatt80-baseline with defaults appropriate for the DECtalk 4.63
 # English frontend parameter set.
 #
-# DECtalk 4.63 uses an impulse-train glottal source (not LF model), so
-# sourceMode defaults to 0 (impulse) and lfMode to 0 (disabled).
+# DECtalk 4.63 uses the KLGLOTT88 source (VTM/vtm3.c), but sourceMode
+# defaults to 0 until the mode 3 runtime worklet voice-output bug is fixed.
 # The frontend's inventory.yaml already sets these per-frame, but
 # having the experiment default match avoids silent frames before the
 # first frontend frame arrives.
@@ -12,15 +12,16 @@
 # Source: DECtalk 4.63 dapi/src (ph_vdef.c, phinton.c, COEWAV.FOR)
 
 params:
-  # DECtalk 4.63 uses impulse-train source, not LF model
+  # DECtalk 4.63 uses KLGLOTT88, but the runtime default remains the impulse
+  # fallback while mode 3 emits no voiced waveform.
   sourceMode:
-    description: "Voice source selection (0=impulse [default; browser-verified], 1=LF, 2=bypass, 3=KLGLOTT88 [browser-silent, under investigation])"
+    description: "Voice source selection (0=impulse fallback default, 1=LF, 2=bypass, 3=KLGLOTT88 selectable but currently blocked)"
     type: integer
     default: 0
     range: [0, 3]
 
   lfMode:
-    description: "LF model mode (0=disabled for DECtalk impulse source)"
+    description: "LF model mode (0=disabled for DECtalk impulse/KLGLOTT88 source modes)"
     type: integer
     default: 0
     range: [0, 2]

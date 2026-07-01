@@ -6,7 +6,7 @@ meta:
   description: |
     DECtalk 4.63-oriented cascade/parallel formant topology.
     Derived from the klatt80-baseline graph, but trimmed to the core
-    DECtalk-style path: impulse-first source defaults, eight-formant bank,
+    DECtalk-style path: impulse fallback source default, selectable KLGLOTT88,
     and direct output summing without the baseline reconstruction filter.
     Citations: Klatt 1980; DECtalk 4.63 COEWAV/PARWAV descendants.
 
@@ -120,8 +120,8 @@ nodes:
       gain: 1.0
       openPhaseRatio: { bind: openPhaseRatio }
 
-  # klsyn88 KLGLOTT88 source (oversampled-glottal-source crate). Active when
-  # sourceMode == 3 (selectable; default stays 0=impulse so Paul is byte-identical).
+  # klsyn88 KLGLOTT88 source (oversampled-glottal-source crate). Selectable when
+  # sourceMode == 3; not the default until the worklet voice-output bug is fixed.
   # Emits voice (port 0) and integrated turbulence noise (port 1). We use VOICE
   # (port 0) ONLY; port 1 is intentionally left unconnected so dectalk's seeded
   # noiseSource/fricationSource stay the aspiration/frication path (no double-noise).
@@ -235,10 +235,9 @@ nodes:
     params:
       gain: { bind: impulseSourceSwitch }
 
-  # Source spectral tilt (DECtalk OUT_TLT). One-pole lowpass on the voiced
-  # impulse source ONLY (matches DECtalk, where TILT is a source param and the
-  # LF branch — off at sourceMode=0 — carries its own tl). tilt=0 is a unity
-  # passthrough, so Paul (TL=0) is byte-identical.
+  # Source spectral tilt for the impulse fallback. KLGLOTT88 applies TL inside
+  # the source worklet, so this branch is active only when sourceMode == 0.
+  # tilt=0 is a unity passthrough.
   # Citations: DECtalk 4.63 ph_draw.c OUT_TLT; klsyn88 c/parwv.c 706-711.
   tiltFilter:
     type: tilt-filter

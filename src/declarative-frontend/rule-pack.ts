@@ -54,6 +54,7 @@ export const DEFAULT_FRONTEND_ID = "qlatt-english";
 export const BUNDLED_FRONTEND_RULEPACK_PATHS = Object.freeze({
   [DEFAULT_FRONTEND_ID]: "/rules/frontends/qlatt-english/frontend.yaml",
   "dectalk-english": "/rules/frontends/dectalk-english/frontend.yaml",
+  "qlatt-beauty": "/rules/frontends/qlatt-beauty/frontend.yaml",
 } as const);
 
 export type BundledFrontendId = keyof typeof BUNDLED_FRONTEND_RULEPACK_PATHS;

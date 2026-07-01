@@ -41,9 +41,11 @@ export function handleTelemetry(data) {
   }
   if (!data?.node) return;
   const { relTime, event, inWindow } = getRunContext();
+  const rms = Number.isFinite(data.rms) ? data.rms : data.voiceRms;
+  const peak = Number.isFinite(data.peak) ? data.peak : data.voicePeak;
   state.telemetry.set(data.node, {
-    rms: data.rms,
-    peak: data.peak,
+    rms,
+    peak,
     f0: data.f0,
     rd: data.rd,
     lfMode: data.lfMode,
@@ -62,19 +64,19 @@ export function handleTelemetry(data) {
   const nextMax = { ...prev };
   if (
     inWindow &&
-    Number.isFinite(data.rms) &&
-    data.rms > (prev.rms ?? 0)
+    Number.isFinite(rms) &&
+    rms > (prev.rms ?? 0)
   ) {
-    nextMax.rms = data.rms;
+    nextMax.rms = rms;
     nextMax.rmsTime = relTime;
     nextMax.rmsPhoneme = event?.phoneme ?? "";
   }
   if (
     inWindow &&
-    Number.isFinite(data.peak) &&
-    data.peak > (prev.peak ?? 0)
+    Number.isFinite(peak) &&
+    peak > (prev.peak ?? 0)
   ) {
-    nextMax.peak = data.peak;
+    nextMax.peak = peak;
     nextMax.peakTime = relTime;
     nextMax.peakPhoneme = event?.phoneme ?? "";
   }

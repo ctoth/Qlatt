@@ -6,10 +6,9 @@ lts_path: /rules/frontends/dectalk-english/lts-rules.yaml
 # This 13,272-entry dictionary was converted from DECtalk's Dic_us.txt to the
 # same flat word->ARPABET JSON the CMU loader consumes (see scripts/build-dectalk-dict.ts).
 dictionary_path: /dectalk-dictionary.json
-# DECtalk uses the bright IMPULSE-train glottal source (source_mode: 0), not the
-# shared LF contour (source_mode: 1) which left the output audibly muffled
-# (measured ~2.9x less >3 kHz energy). This per-frontend contour stops the shared
-# policy from overriding the dectalk semantics' intended impulse source.
+# DECtalk uses its own source contour so shared qlatt-english LF policy
+# (source_mode: 1) cannot override it. The default remains the impulse fallback
+# while KLGLOTT88 mode 3 is blocked by silent worklet voice output.
 source_contour_path: /rules/frontends/dectalk-english/source-contour.yaml
 # Per-frontend text-normalization policy (DATA). Selects this frontend's own
 # normalization tables + pipeline instead of the shared qlatt-english defaults.

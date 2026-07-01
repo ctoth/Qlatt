@@ -69,6 +69,8 @@ describe('klsyn88 Primitives', () => {
       const asym = allocF32(exports, 1);
       const source = allocF32(exports, 1);
       const seed = allocF32(exports, 1);
+      const flutter = allocF32(exports, 1);
+      const diplophonia = allocF32(exports, 1);
       const voice = allocF32(exports, blockSize);
       const noise = allocF32(exports, blockSize);
 
@@ -81,11 +83,14 @@ describe('klsyn88 Primitives', () => {
       asym.view[0] = 50;
       source.view[0] = 2;
       seed.view[0] = 1;
+      flutter.view[0] = 0;
+      diplophonia.view[0] = 0;
 
       exports.oversampled_glottal_source_process(
         state,
         f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
         oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
+        flutter.ptr, 1, diplophonia.ptr, 1,
         voice.ptr, noise.ptr, blockSize
       );
 
@@ -142,6 +147,8 @@ describe('klsyn88 Primitives', () => {
       deallocF32(exports, asym.ptr, 1);
       deallocF32(exports, source.ptr, 1);
       deallocF32(exports, seed.ptr, 1);
+      deallocF32(exports, flutter.ptr, 1);
+      deallocF32(exports, diplophonia.ptr, 1);
       deallocF32(exports, voice.ptr, blockSize);
       deallocF32(exports, noise.ptr, blockSize);
       exports.oversampled_glottal_source_free(state);
@@ -163,6 +170,8 @@ describe('klsyn88 Primitives', () => {
       const asym = allocF32(exports, 1);
       const source = allocF32(exports, 1);
       const seed = allocF32(exports, 1);
+      const flutter = allocF32(exports, 1);
+      const diplophonia = allocF32(exports, 1);
       const voice = allocF32(exports, blockSize);
       const noise = allocF32(exports, blockSize);
 
@@ -175,6 +184,8 @@ describe('klsyn88 Primitives', () => {
       asym.view[0] = 50;
       source.view[0] = 2;
       seed.view[0] = 1;
+      flutter.view[0] = 0;
+      diplophonia.view[0] = 0;
 
       exports.oversampled_glottal_source_process(
         state,
@@ -195,6 +206,10 @@ describe('klsyn88 Primitives', () => {
         source.ptr,
         1,
         seed.ptr,
+        1,
+        flutter.ptr,
+        1,
+        diplophonia.ptr,
         1,
         voice.ptr,
         noise.ptr,
@@ -217,12 +232,151 @@ describe('klsyn88 Primitives', () => {
       deallocF32(exports, asym.ptr, 1);
       deallocF32(exports, source.ptr, 1);
       deallocF32(exports, seed.ptr, 1);
+      deallocF32(exports, flutter.ptr, 1);
+      deallocF32(exports, diplophonia.ptr, 1);
       deallocF32(exports, voice.ptr, blockSize);
       deallocF32(exports, noise.ptr, blockSize);
       exports.oversampled_glottal_source_free(state);
 
       expect(voiceNonZero).toBe(true);
       expect(noiseNonZero).toBe(true);
+    });
+
+    it('should resume voice after an initial unvoiced span', () => {
+      const exports = wasm.exports as any;
+      const state = exports.oversampled_glottal_source_new(22050);
+
+      const blockSize = 128;
+      const f0 = allocF32(exports, 1);
+      const av = allocF32(exports, 1);
+      const aturb = allocF32(exports, 1);
+      const tilt = allocF32(exports, 1);
+      const oq = allocF32(exports, 1);
+      const skew = allocF32(exports, 1);
+      const asym = allocF32(exports, 1);
+      const source = allocF32(exports, 1);
+      const seed = allocF32(exports, 1);
+      const flutter = allocF32(exports, 1);
+      const diplophonia = allocF32(exports, 1);
+      const voice = allocF32(exports, blockSize);
+      const noise = allocF32(exports, blockSize);
+
+      av.view[0] = 0;
+      aturb.view[0] = 0;
+      tilt.view[0] = 0;
+      oq.view[0] = 50;
+      skew.view[0] = 0;
+      asym.view[0] = 50;
+      source.view[0] = 2;
+      seed.view[0] = 1;
+      flutter.view[0] = 0;
+      diplophonia.view[0] = 0;
+
+      for (let block = 0; block < 20; block += 1) {
+        f0.view[0] = 0;
+        exports.oversampled_glottal_source_process(
+          state,
+          f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
+          oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
+          flutter.ptr, 1, diplophonia.ptr, 1,
+          voice.ptr, noise.ptr, blockSize
+        );
+      }
+
+      av.view[0] = 61;
+      f0.view[0] = 106;
+      let voicedPeak = 0;
+      for (let block = 0; block < 40; block += 1) {
+        exports.oversampled_glottal_source_process(
+          state,
+          f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
+          oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
+          flutter.ptr, 1, diplophonia.ptr, 1,
+          voice.ptr, noise.ptr, blockSize
+        );
+        for (let i = 0; i < blockSize; i++) {
+          voicedPeak = Math.max(voicedPeak, Math.abs(voice.view[i]));
+        }
+      }
+
+      deallocF32(exports, f0.ptr, 1);
+      deallocF32(exports, av.ptr, 1);
+      deallocF32(exports, aturb.ptr, 1);
+      deallocF32(exports, tilt.ptr, 1);
+      deallocF32(exports, oq.ptr, 1);
+      deallocF32(exports, skew.ptr, 1);
+      deallocF32(exports, asym.ptr, 1);
+      deallocF32(exports, source.ptr, 1);
+      deallocF32(exports, seed.ptr, 1);
+      deallocF32(exports, flutter.ptr, 1);
+      deallocF32(exports, diplophonia.ptr, 1);
+      deallocF32(exports, voice.ptr, blockSize);
+      deallocF32(exports, noise.ptr, blockSize);
+      exports.oversampled_glottal_source_free(state);
+
+      expect(voicedPeak).toBeGreaterThan(100);
+    });
+
+    it('should generate voice with DECtalk KLGLOTT runtime parameters', () => {
+      const exports = wasm.exports as any;
+      const state = exports.oversampled_glottal_source_new(22050);
+
+      const blockSize = 128;
+      const f0 = allocF32(exports, 1);
+      const av = allocF32(exports, 1);
+      const aturb = allocF32(exports, 1);
+      const tilt = allocF32(exports, 1);
+      const oq = allocF32(exports, 1);
+      const skew = allocF32(exports, 1);
+      const asym = allocF32(exports, 1);
+      const source = allocF32(exports, 1);
+      const seed = allocF32(exports, 1);
+      const flutter = allocF32(exports, 1);
+      const diplophonia = allocF32(exports, 1);
+      const voice = allocF32(exports, blockSize);
+      const noise = allocF32(exports, blockSize);
+
+      f0.view[0] = 108.24613952636719;
+      av.view[0] = 65;
+      aturb.view[0] = 0;
+      tilt.view[0] = 3;
+      oq.view[0] = 50;
+      skew.view[0] = 0;
+      asym.view[0] = 50;
+      source.view[0] = 2;
+      seed.view[0] = 305419889;
+      flutter.view[0] = 0;
+      diplophonia.view[0] = 0;
+
+      exports.oversampled_glottal_source_process(
+        state,
+        f0.ptr, 1, av.ptr, 1, aturb.ptr, 1, tilt.ptr, 1,
+        oq.ptr, 1, skew.ptr, 1, asym.ptr, 1, source.ptr, 1, seed.ptr, 1,
+        flutter.ptr, 1, diplophonia.ptr, 1,
+        voice.ptr, noise.ptr, blockSize
+      );
+
+      let voicePeak = 0;
+      for (let i = 0; i < blockSize; i++) {
+        voicePeak = Math.max(voicePeak, Math.abs(voice.view[i]));
+      }
+
+      deallocF32(exports, f0.ptr, 1);
+      deallocF32(exports, av.ptr, 1);
+      deallocF32(exports, aturb.ptr, 1);
+      deallocF32(exports, tilt.ptr, 1);
+      deallocF32(exports, oq.ptr, 1);
+      deallocF32(exports, skew.ptr, 1);
+      deallocF32(exports, asym.ptr, 1);
+      deallocF32(exports, source.ptr, 1);
+      deallocF32(exports, seed.ptr, 1);
+      deallocF32(exports, flutter.ptr, 1);
+      deallocF32(exports, diplophonia.ptr, 1);
+      deallocF32(exports, voice.ptr, blockSize);
+      deallocF32(exports, noise.ptr, blockSize);
+      exports.oversampled_glottal_source_free(state);
+
+      expect(voicePeak).toBeGreaterThan(100);
     });
   });
 

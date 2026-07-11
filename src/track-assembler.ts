@@ -182,6 +182,8 @@ export type TrackLoweringSpec = {
       neighbor_weight: CitedNumberSpec;
       current_type: string;
       neighbor_types: string[];
+      forward: boolean;
+      backward: boolean;
     };
   };
   f0: {

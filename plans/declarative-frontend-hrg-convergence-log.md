@@ -207,7 +207,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 031 | Phase 4 family 3B: midpoint transitions | kept | `0b4b2e01` | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
 | 032 | Phase 4 family 3C: sonorant F2 ramps | kept | `18a9b829` | cited 45 ms/75% policy; qlatt F2 ramp start/interior production cells exact; compiler range validation |
 | 033 | Phase 4 family 3D: universal midpoint fallback | kept | `1df89f04` | DECtalk P-to-release 72.2 ms event and 6 cells exact; selected smooth-all policy only |
-| 034 | Phase 4 family 3E: locus and forward transitions | kept | pending slice commit | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
+| 034 | Phase 4 family 3E: locus and forward transitions | kept | `4bdd79bf` | 5 captured AE locus states + 2 universal T states exact; per-key spans/adjustments/glue policy |
+| 035 | Phase 4 family 3 exit: transition matrix | kept | pending slice commit | every emitted qlatt/beauty transition event and blend cell matches production; direction policy corrected; family gate green |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1665,3 +1666,45 @@ PASS: 2 files, 5 tests
 
 Next source slice stays in family 3: exhaustive transition/control event and
 owned-cell parity against the captured qlatt-English and DECtalk schedules.
+
+## Iteration 035 — Phase 4 family 3 exit: transition matrix
+
+Status: kept. Phase 4 family 3 is complete.
+
+The exhaustive captured-graph matrix reconstructs every qlatt-English and
+qlatt-beauty Segment current value from historical graph input, lowers through
+the selected compiled policy, and checks every emitted non-boundary transition
+event against `oldProduction.sourceFrames`. Every declared blend column matches
+at the same timestamp and phoneme within the production event epsilon.
+
+The matrix exposed and corrected one overgeneralization: the captured qlatt and
+beauty paths enable the 45 ms sonorant F2 rule only backward into a following
+sonorant, while DECtalk enables forward and backward directions. Direction is
+now mandatory selected policy (`forward`/`backward` booleans), compiler-checked,
+and frontend-neutral.
+
+Family 3 evidence now comprises:
+
+- exhaustive qlatt-English and beauty transition-event/blend-cell matrices;
+- DECtalk backward and forward universal midpoint production events;
+- DECtalk forward/backward locus production cells with independent spans;
+- typed current/previous/next control windows and all span/operation forms;
+- window and base-write provenance projection;
+- trajectory-to-window projection; and
+- compiler validation for cited numeric/directional transition policy.
+
+Female locus-table selection remains correctly assigned to family 7's selected
+speaker/source policy; it is not silently defaulted here.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-transition-matrix.test.ts test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-locus-transitions.test.ts test/hrg-lowering-control-windows.test.ts test/trajectory-control-windows.test.ts
+PASS
+
+npm test -- --run test/declarative-frontend-schema.test.ts test/yaml-frontend-config.test.ts test/track-assembler-output-config.test.ts
+PASS
+```
+
+Next Phase 4 family: explicit point and contour realization from Intonation
+graph Items and the selected point-interpolation policy.

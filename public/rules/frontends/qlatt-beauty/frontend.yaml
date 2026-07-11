@@ -1039,6 +1039,8 @@ output:
             - "DECtalk 4.63 p_us_st1.c:442-455,837-849 (sonorant-edge F2 boundary uses a 75/25 neighbor weighting)"
         current_type: vowel
         neighbor_types: [nasal, liquid, glide]
+        forward: false
+        backward: true
     f0:
       renderer:
         type: point_interpolation

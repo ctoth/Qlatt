@@ -53,6 +53,8 @@ const POLICY = {
       neighbor_weight: { value: 0.75 },
       current_type: "vowel",
       neighbor_types: ["nasal", "liquid", "glide"],
+      forward: false,
+      backward: true,
     },
   },
 } as const satisfies LowerOptions;

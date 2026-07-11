@@ -2362,6 +2362,15 @@ function validateLoweringSpec(
           "output.lowering.transitions.sonorant_f2.neighbor_types",
           "output.lowering.transitions.sonorant_f2.neighbor_types",
         );
+        for (const direction of ["forward", "backward"] as const) {
+          if (typeof policy[direction] !== "boolean") {
+            diagnostics.push(makeDiagnostic(
+              "E_LOWERING_SPEC_BOOLEAN",
+              `output.lowering.transitions.sonorant_f2.${direction} must be boolean`,
+              `output.lowering.transitions.sonorant_f2.${direction}`,
+            ));
+          }
+        }
       }
     }
   }

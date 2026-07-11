@@ -34,6 +34,8 @@ const loweringOutput = {
         neighbor_weight: { value: 0.75, citations: ["test"] },
         current_type: "vowel",
         neighbor_types: ["nasal", "liquid", "glide"],
+        forward: false,
+        backward: true,
       },
     },
     f0: {

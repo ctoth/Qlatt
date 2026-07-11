@@ -59,6 +59,8 @@ export interface LowerOptions {
       neighbor_weight: { value: number };
       current_type: string;
       neighbor_types: readonly string[];
+      forward: boolean;
+      backward: boolean;
     };
     loci?: LocusTable;
     vowel_category?: VowelCategoryTable;
@@ -412,7 +414,7 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
       const currentValue = timing.item.get(sonorantF2.key);
       if (typeof currentValue !== "number") return;
       const previous = timings[index - 1];
-      if (previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
+      if (sonorantF2.forward && previous && neighborTypes.has(String(previous.item.get(typeKey)))) {
         const previousValue = previous.item.get(sonorantF2.key);
         const endMs = Math.min(spanMs, timing.durationMs - 20);
         if (typeof previousValue === "number" && endMs > 0) {
@@ -430,7 +432,7 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
         }
       }
       const next = timings[index + 1];
-      if (next && neighborTypes.has(String(next.item.get(typeKey)))) {
+      if (sonorantF2.backward && next && neighborTypes.has(String(next.item.get(typeKey)))) {
         const nextValue = next.item.get(sonorantF2.key);
         const transitionSpanMs = Math.min(spanMs, timing.durationMs);
         const startMs = Math.max(20, timing.durationMs - transitionSpanMs);

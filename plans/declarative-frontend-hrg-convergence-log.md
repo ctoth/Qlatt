@@ -191,7 +191,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 015 | Phase 3 graph engine select/scalar core | kept | `c5dcf35e` | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
 | 016 | Phase 3 graph engine patterns/associations | kept | `7f5b0e03` | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
 | 017 | Phase 3 graph engine replace-range splice | kept | `e9180fb2` | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
-| 018 | Phase 3 graph engine explicit points | kept | pending slice commit | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
+| 018 | Phase 3 graph engine explicit points | kept | `d3c5f467` | midpoint/ratio/sync point replay; 39 HRG tests; core/scripts typecheck pass |
+| 019 | Phase 3 boundary-insertion proof | kept | pending slice commit | relation/temporal adjacency proof; 40 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -969,3 +970,28 @@ PASS: 10 files, 39 tests
 
 Next graph-engine sub-slice: boundary insertion, then contour/F0-layer and
 phase finalization behavior.
+
+## Iteration 019 — Phase 3 boundary-insertion proof
+
+Status: kept as focused coverage of the second splice form.
+
+The graph engine's structural transaction already contained the
+`insert_at_boundary` branch from Iteration 017, but it had no direct static-HRG
+contract. The focused fixture proves an inserted release is placed between the
+selected left Item and its right neighbor in Relation order and receives the
+adjacent right interval from the Utterance axis.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 10 files, 40 tests
+```
+
+Next graph-engine sub-slice: contour/F0-layer actions and phase finalization.

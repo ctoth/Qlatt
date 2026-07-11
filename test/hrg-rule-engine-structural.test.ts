@@ -176,4 +176,57 @@ describe("graph-native structural splice execution", () => {
       }),
     );
   });
+
+  it("inserts at a selected boundary in relation and temporal order", () => {
+    const utterance = new Utterance(SCHEMA);
+    const fixture = utterance.beginTransaction({
+      ruleId: "fixture",
+      phase: "input",
+      tag: "fixture",
+      ...INPUT,
+    });
+    const first = fixture.createItem("segment", "first");
+    const second = fixture.createItem("segment", "second");
+    for (const [item, phoneme] of [[first, "T"], [second, "AA"]] as const) {
+      fixture.set(item, "phoneme", phoneme);
+      fixture.set(item, "duration", 100);
+      fixture.set(item, "active", true);
+      fixture.append("Segment", item);
+    }
+    fixture.partitionAnchors([first, second], utterance.axis.start.id, utterance.axis.end.id);
+    fixture.commit();
+    const spec = compileRuleEngineSpec({
+      relations: {
+        Segment: {
+          type: "base",
+          features: { phoneme: [], active: [true, false] },
+          scalars: { duration: {} },
+        },
+      },
+      rules: {
+        release: {
+          select: { relation: "Segment", where: "current.id == 'first'" },
+          splice: {
+            type: "insert_at_boundary",
+            boundary: "current.sync_right",
+            side: "after",
+            insert: [{ phoneme: "'REL'", duration: "20", active: "true" }],
+          },
+          citations: ["Klatt 1980"],
+        },
+      },
+      phases: [{ name: "structural", rules: ["release"] }],
+    });
+
+    runGraphRuleEngine(utterance, spec);
+
+    const items = utterance.relation("Segment").listItems();
+    expect(items.map((item) => item.id)).toEqual(["first", "first:release:0", "second"]);
+    const insertedAnchor = utterance.intervalAnchor(items[1]);
+    const secondAnchor = utterance.intervalAnchor(second);
+    expect(insertedAnchor).toEqual(expect.objectContaining({
+      leftMarkId: secondAnchor?.leftMarkId,
+      rightMarkId: secondAnchor?.rightMarkId,
+    }));
+  });
 });

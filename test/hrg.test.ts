@@ -19,6 +19,14 @@ const CITE = ["Taylor 2001 HRG"];
 const RELATION_INPUT = { reason: "fixture relation construction", citations: CITE };
 const TEST_LOWERING = {
   columns: ["F0", "F1"],
+  transitions: {
+    default_transition_ms: { value: 0 },
+    blend: {
+      factor: { value: 0 },
+      keys: [],
+      smooth_types: [],
+    },
+  },
   timeline: {
     initial_silence_ms: { value: 0 },
     final_silence_ms: { value: 0 },

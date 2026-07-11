@@ -203,7 +203,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 027 | Phase 4 lowering family 2: scalar histories | invalid evidence; reconciled | `6c920c3f` | used a graph-to-itself scalar comparison; policy columns/history retained, parity claim withdrawn |
 | 028 | Phase 4 production-contract reconciliation | kept | `cd7efe64` | sparse boundary events match captured production schedules; bridge oracles deleted from Phase 4 tests; 20 tests; core/scripts typecheck pass |
 | 029 | Phase 4 lowering family 2: production scalar cells | kept | `5d481234` | 1,443 base-scalar boundary cells exact against production events; latest-write provenance retained |
-| 030 | Phase 4 family 3A: graph control windows | kept | pending slice commit | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
+| 030 | Phase 4 family 3A: graph control windows | kept | `42e2f0a4` | DECtalk next-target production cells exact; all field ops/targets/span forms; window provenance |
+| 031 | Phase 4 family 3B: midpoint transitions | kept | pending slice commit | qlatt EH-to-L production event and 5 ordinary blend cells exact; policy-driven types/keys/factor/span |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1523,3 +1524,35 @@ PASS
 Next source slice stays within family 3: policy-driven midpoint and locus
 transitions from neighboring Segment graph state, followed by full family-3
 production event/cell parity before advancing to explicit F0 points.
+
+## Iteration 031 — Phase 4 family 3B: midpoint transitions
+
+Status: kept. Family 3 remains active for special F2 and locus transitions.
+
+The lowerer now realizes ordinary neighbor midpoint transitions directly from
+current/next Segment Items and the selected lowering policy. Generic code owns
+no frontend or phoneme names: the policy supplies smooth Segment types, affected
+columns, blend factor, default span, and event-class enablement. A stamped
+per-Segment `transition_ms` value may override the selected default.
+
+The direct qlatt-English fixture reproduces the captured EH-to-L steady event at
+535 ms. Expected cells come only from `oldProduction.sourceFrames`:
+
+```text
+F1=485.5, F3=2533.25, B1=63, B2=93.5, B3=154.5 exact
+```
+
+F2 is intentionally excluded from this sub-slice: the captured path applies a
+separate cited 45 ms sonorant rule rather than the ordinary blend factor. That
+rule must become explicit selected policy/graph intent; it will not be hidden in
+generic midpoint math.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-midpoint-transitions.test.ts test/hrg-lowering-control-windows.test.ts test/hrg-lowering-scalars.test.ts test/hrg-lowering-timing.test.ts test/hrg.test.ts
+PASS: 5 files, 27 tests
+```
+
+Next source slice remains family 3: migrate and prove the cited sonorant F2
+edge policy, then DECtalk locus/universal transitions and full family parity.

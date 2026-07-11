@@ -130,6 +130,28 @@ function eventPoints(value: unknown): LowerOptions["timeline"]["event_points"] {
   };
 }
 
+function transitions(value: unknown): LowerOptions["transitions"] {
+  if (
+    !isPlainObject(value)
+    || !isPlainObject(value.blend)
+    || !Array.isArray(value.blend.keys)
+    || value.blend.keys.some((entry) => typeof entry !== "string")
+    || !Array.isArray(value.blend.smooth_types)
+    || value.blend.smooth_types.some((entry) => typeof entry !== "string")
+  ) {
+    throw new Error("compiled lowering transition policy missing");
+  }
+  return {
+    default_transition_ms: citedNumber(value.default_transition_ms, "default_transition_ms"),
+    blend: {
+      factor: citedNumber(value.blend.factor, "blend.factor"),
+      keys: value.blend.keys,
+      smooth_types: value.blend.smooth_types,
+      ...(value.blend.smooth_all_boundaries === true ? { smooth_all_boundaries: true } : {}),
+    },
+  };
+}
+
 function loadTimingPolicy(frontendId: string): LowerOptions {
   const spec: unknown = loadBundledRulepackSpec(frontendId);
   if (!isPlainObject(spec) || !isPlainObject(spec.output) || !isPlainObject(spec.output.lowering)) {
@@ -144,6 +166,7 @@ function loadTimingPolicy(frontendId: string): LowerOptions {
   }
   return {
     columns: lowering.columns,
+    transitions: transitions(lowering.transitions),
     timeline: {
       initial_silence_ms: citedNumber(lowering.timeline.initial_silence_ms, "initial_silence_ms"),
       final_silence_ms: citedNumber(lowering.timeline.final_silence_ms, "final_silence_ms"),

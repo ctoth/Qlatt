@@ -36,6 +36,15 @@ export interface LowerOptions {
       include_transition_steady_time: boolean;
     };
   };
+  transitions: {
+    default_transition_ms: { value: number };
+    blend: {
+      factor: { value: number };
+      keys: readonly string[];
+      smooth_types: readonly string[];
+      smooth_all_boundaries?: boolean;
+    };
+  };
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
   /** Feature key holding each segment's phoneme label (default "phoneme"). */
@@ -74,6 +83,11 @@ type ResolvedControlWindow = {
   endMs: number;
   fields: Readonly<Record<string, ResolvedControlField>>;
   decisionId: string;
+};
+
+type ResolvedSegmentTransition = {
+  startMs: number;
+  fields: Readonly<Record<string, number>>;
 };
 
 function isFeatureObject(value: FeatureValue | undefined): value is { readonly [key: string]: FeatureValue } {
@@ -195,6 +209,14 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
     options.timeline.duration_floors.default_ms.value,
     "timeline.duration_floors.default_ms.value",
   );
+  const defaultTransitionMs = requirePolicyNumber(
+    options.transitions.default_transition_ms.value,
+    "transitions.default_transition_ms.value",
+  );
+  const blendFactor = options.transitions.blend.factor.value;
+  if (!Number.isFinite(blendFactor) || blendFactor < 0 || blendFactor > 1) {
+    throw new Error("E_HRG_LOWER_POLICY_NUMBER: 'transitions.blend.factor.value' must be within [0,1]");
+  }
 
   const segmentItems = utterance.segments.listItems()
     .filter((item) => item.get("active") !== false);
@@ -255,6 +277,31 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
   const segmentTotalMs = previousEndMs ?? 0;
 
   const paramKeys = options.columns.slice();
+  const smoothTypes = new Set(options.transitions.blend.smooth_types);
+  const transitionsByItem = new Map<Item, ResolvedSegmentTransition[]>();
+  timings.forEach((timing, index) => {
+    const nextTiming = timings[index + 1];
+    if (!nextTiming) return;
+    const currentType = timing.item.get(typeKey);
+    const nextType = nextTiming.item.get(typeKey);
+    if (typeof currentType !== "string" || typeof nextType !== "string") return;
+    if (!smoothTypes.has(currentType) || !smoothTypes.has(nextType)) return;
+    const itemTransitionMs = finiteFeatureNumber(timing.item.get("transition_ms"));
+    const transitionMs = itemTransitionMs ?? defaultTransitionMs;
+    if (transitionMs <= 0) return;
+    const startMs = Math.max(20, timing.durationMs - transitionMs);
+    if (startMs <= 0 || startMs >= timing.durationMs) return;
+    const fields: Record<string, number> = {};
+    for (const key of options.transitions.blend.keys) {
+      const currentValue = timing.item.get(key);
+      const nextValue = nextTiming.item.get(key);
+      if (typeof currentValue !== "number" || typeof nextValue !== "number") continue;
+      fields[key] = currentValue + (nextValue - currentValue) * blendFactor;
+    }
+    if (Object.keys(fields).length > 0) {
+      transitionsByItem.set(timing.item, [{ startMs, fields }]);
+    }
+  });
   const controlWindowsByItem = new Map<Item, ResolvedControlWindow[]>();
   segmentItems.forEach((sourceItem, sourceIndex) => {
     const rawWindows = sourceItem.get("control_windows");
@@ -322,6 +369,14 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
           if (write) provenance[key] = write.decisionId;
         }
       }
+      for (const transition of transitionsByItem.get(item) ?? []) {
+        if (segmentOffsetMs < transition.startMs - 1e-6) continue;
+        for (const [key, value] of Object.entries(transition.fields)) {
+          params[key] = value;
+          const write = item.latestWrite(key);
+          if (write) provenance[key] = write.decisionId;
+        }
+      }
       for (const window of controlWindowsByItem.get(item) ?? []) {
         if (segmentOffsetMs < window.startMs - 1e-6 || segmentOffsetMs >= window.endMs - 1e-6) {
           continue;
@@ -365,6 +420,13 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions): Lowe
         }
         if (window.endMs > 1e-6 && window.endMs < timing.durationMs - 1e-6) {
           offsets.add(window.endMs);
+        }
+      }
+    }
+    if (options.timeline.event_points.include_transition_steady_time) {
+      for (const transition of transitionsByItem.get(timing.item) ?? []) {
+        if (transition.startMs > 1e-6 && transition.startMs < timing.durationMs - 1e-6) {
+          offsets.add(transition.startMs);
         }
       }
     }

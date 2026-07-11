@@ -265,17 +265,20 @@ export function materializePhonemeTarget(
  * Every resource path originates in the spec — no hardcoded defaults.
  */
 export function loadFrontendResources(
-  spec: Record<string, unknown>,
+  spec: unknown,
 ): FrontendResources {
-  const inventoryPath = spec.inventory_path as string | undefined;
-  if (!inventoryPath) {
+  if (!isPlainObject(spec)) {
+    throw new Error("E_FRONTEND_SPEC: frontend spec must be an object");
+  }
+  const inventoryPath = spec.inventory_path;
+  if (typeof inventoryPath !== "string" || inventoryPath.length === 0) {
     throw new Error("E_FRONTEND_SPEC: inventory_path is required");
   }
   return {
     inventory: loadInventorySpecFromPath(inventoryPath),
     inventoryPath,
-    ltsPath: (spec.lts_path as string) || undefined,
-    morphologyPath: (spec.morphology_path as string) || undefined,
-    dictionaryPath: (spec.dictionary_path as string) || undefined,
+    ltsPath: typeof spec.lts_path === "string" ? spec.lts_path : undefined,
+    morphologyPath: typeof spec.morphology_path === "string" ? spec.morphology_path : undefined,
+    dictionaryPath: typeof spec.dictionary_path === "string" ? spec.dictionary_path : undefined,
   };
 }

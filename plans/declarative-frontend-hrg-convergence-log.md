@@ -176,7 +176,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 |---:|---|---|---|---|
 | 001 | Phase 0 baseline/oracles | kept | `bf303b2f` | results and fixture paths above |
 | 002 | Phase 1A invalid debug coverage | kept | `80392caf` | 148 owning tests pass; unconditional-pass search zero-hit |
-| 003 | Phase 1B backwards bridge deletion | kept | pending slice commit | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
+| 003 | Phase 1B backwards bridge deletion | kept | `01f4c48c` | bridge search zero-hit; HRG core 14/14; core/scripts typecheck pass |
+| 004 | Phase 2A selected resource ownership | kept | pending slice commit | three inventory identities pass; 87 adjacent tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -254,3 +255,44 @@ PASS
 Next slice: Phase 2A resource ownership. Delete `defaultInventoryResolver`, make
 the selected frontend's compiled resource declaration authoritative, add three
 direct inventory-identity tests first, then commit the kept convergence.
+
+## Iteration 004 — Phase 2A selected resource ownership
+
+Status: kept.
+
+The new direct test was red before implementation: qlatt-English materialized
+its expected K release, qlatt-beauty incorrectly received qlatt-English F2=1990
+instead of 2288, and DECtalk failed because its structural rule received the
+qlatt target shape. This isolated the hardcoded resolver as the cause.
+
+Kept convergence:
+
+- deleted `_defaultResolver` and `defaultInventoryResolver()`;
+- made the existing `loadFrontendResources()` perimeter accept and validate
+  unknown input without type assertions;
+- derive the rule engine's inventory resolver from the selected spec's declared
+  `inventory_path`, while custom test specs without inventory declarations keep
+  no implicit production inventory;
+- added one table-driven direct identity test covering `qlatt-english`,
+  `dectalk-english`, and `qlatt-beauty` through the real structural phase.
+
+Verification:
+
+```text
+npm test -- test/declarative-frontend-resource-identity.test.ts test/inventory-materialization.test.ts test/declarative-frontend-ruleset-override.test.ts test/declarative-frontend-slice.test.ts test/duration-model.test.ts test/dectalk-e2e.test.ts
+PASS: 6 files, 87 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+rg -n "defaultInventoryResolver|/rules/frontends/qlatt-english/inventory.yaml" src/declarative-frontend/index.ts
+ZERO HIT
+```
+
+Next slice: Phase 2B. Specify the compiled rulepack type at the parser boundary,
+write immutability/cache tests first, make include resolution non-mutating,
+freeze before caching, move engine/tooling to compiled-only input, and delete
+the `SPEC_VALIDATED` trust marker and parse-or-trust branch.

@@ -6,6 +6,7 @@ import { validateDslSpec } from "../src/declarative-frontend/validation";
 const loweringOutput = {
   lowering: {
     id: "test-track-lowering",
+    columns: ["F0", "F1", "F2"],
     timeline: {
       initial_silence_ms: { value: 0, citations: ["test"] },
       final_silence_ms: { value: 0, citations: ["test"] },
@@ -95,6 +96,7 @@ describe("declarative frontend schema coverage", () => {
     expect(spec.patterns.cv.sequence).toHaveLength(2);
     expect(spec.interpolation.points.f0.method).toBe("monotone_cubic");
     expect(spec.output.lowering.id).toBe("test-track-lowering");
+    expect(spec.output.lowering.columns).toEqual(["F0", "F1", "F2"]);
   });
 
   it("requires the complete track lowering output spec", () => {

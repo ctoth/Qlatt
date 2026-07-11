@@ -17,23 +17,15 @@ import type { KlattFrame } from "../../tts-frontend-types";
 import type { Utterance } from "./utterance";
 import type { Item } from "./item";
 
-/** Default Klatt parameter columns considered during lowering. */
-export const DEFAULT_KLATT_PARAMS: readonly string[] = [
-  "F0", "F1", "F2", "F3", "F4", "F5",
-  "B1", "B2", "B3", "B4", "B5",
-  "AV", "AVS", "AF", "AH", "AC",
-  "OQ", "TL", "FNZ", "BNZ", "AN",
-];
-
 export interface LowerOptions {
+  /** Required backend parameter columns, in declared output order. */
+  columns: readonly string[];
   /** Frame period in seconds (default 0.005 = 5 ms). */
   framePeriodSec?: number;
   /** Feature key holding each segment's realized duration in ms (default "duration"). */
   durationKey?: string;
   /** Feature key holding each segment's phoneme label (default "phoneme"). */
   phonemeKey?: string;
-  /** Explicit param column set. Defaults to present-valued DEFAULT_KLATT_PARAMS. */
-  paramKeys?: readonly string[];
 }
 
 /** Per-segment realized timing window (ms). */
@@ -69,7 +61,7 @@ function findCovering(timings: SegmentTiming[], tMs: number): SegmentTiming | nu
 }
 
 /** Lower an utterance's Segment relation into a KlattFrame[] track. */
-export function lowerToFrames(utterance: Utterance, options: LowerOptions = {}): LoweredTrack {
+export function lowerToFrames(utterance: Utterance, options: LowerOptions): LoweredTrack {
   const framePeriodSec = options.framePeriodSec ?? 0.005;
   const framePeriodMs = framePeriodSec * 1000;
   const durationKey = options.durationKey ?? "duration";
@@ -124,12 +116,7 @@ export function lowerToFrames(utterance: Utterance, options: LowerOptions = {}):
   }
   const totalMs = previousEndMs ?? 0;
 
-  const paramKeys = (
-    options.paramKeys ??
-    DEFAULT_KLATT_PARAMS.filter((key) =>
-      segmentItems.some((item) => typeof item.get(key) === "number"),
-    )
-  ).slice();
+  const paramKeys = options.columns.slice();
 
   const frames: KlattFrame[] = [];
   const provenanceByFrame: Array<Record<string, string>> = [];

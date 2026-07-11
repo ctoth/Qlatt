@@ -299,7 +299,7 @@ describe("HRG lowering to Klatt frames", () => {
     dh.set("F1", 300, { reason: "DH F1", citations: CITE });
     ae.set("F1", 660, { reason: "AE F1", citations: CITE });
 
-    const track = lowerToFrames(u, { durationKey: "dur_ms" });
+    const track = lowerToFrames(u, { columns: ["F1"], durationKey: "dur_ms" });
     // Total = 60+80+70+120+90 = 420 ms; 5 ms frames => floor(420/5)+1 = 85 frames.
     expect(track.totalMs).toBe(420);
     expect(track.frames.length).toBe(85);
@@ -339,7 +339,7 @@ describe("HRG end-to-end: build -> lower -> trace why", () => {
     // Give the vowel an F1 too, and a baseline F0 on the first segment.
     ae.set("F1", 660, { reason: "AE F1 target", citations: CITE });
 
-    const track = lowerToFrames(u, { durationKey: "dur_ms" });
+    const track = lowerToFrames(u, { columns: ["F0", "F1"], durationKey: "dur_ms" });
 
     // The AE vowel spans [210ms, 330ms): sample F0 at 250 ms.
     const aeIndex = frameIndexAt(track, 0.25);

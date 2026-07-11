@@ -594,6 +594,8 @@ parameters:
 output:
   lowering:
     id: dectalk-english-track-lowering
+    # Stable Klatt backend vocabulary captured by the production-frame oracle.
+    columns: [F1, F2, F3, F4, B4, F5, B5, F6, B6, B1, B2, B3, AV, AF, AH, AVS, F0, sourceMode, lfMode, breathiness, Rd, RdRef, OQ, TL, flutter, jitter, EePhraseDb, RdPhraseOffset, FNZ, FNP, BNP, BNZ, AN, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, AB, SW, FGP, BGP, FGZ, BGZ, BGS, NFC, GO]
     timeline:
       initial_silence_ms:
         value: 19.2

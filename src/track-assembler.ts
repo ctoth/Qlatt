@@ -78,6 +78,8 @@ type VowelCategoryTable = Record<string, { forward?: number; backward?: number }
 
 export type TrackLoweringSpec = {
   id: string;
+  /** Backend parameter columns emitted by final lowering, in stable order. */
+  columns: string[];
   timeline: {
     initial_silence_ms: CitedNumberSpec;
     final_silence_ms: CitedNumberSpec;

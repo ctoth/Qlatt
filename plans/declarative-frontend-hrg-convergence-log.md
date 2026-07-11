@@ -199,7 +199,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 023 | Phase 3 CEL isolation/topology reads | kept | `fd8e6b0e` | nested evaluation isolation and exact navigation parents; 53 focused tests; core/scripts typecheck pass |
 | 024 | Phase 3 graph predicate navigation | kept | `7ca960f2` | tracked inline/named scans; 54 focused tests; core/scripts typecheck pass |
 | 025 | Phase 3 graph path/resource catalog and exit gate | kept | `7fb4fdbc` | shared-tree/resource catalog; guarded/prior points; 72 combined focused tests; core/scripts typecheck pass |
-| 026 | Phase 4 lowering family 1: timing | kept | pending slice commit | exact 2375/2900/2134 ms oracle parity; no duration fallback; 19 tests; core/scripts typecheck pass |
+| 026 | Phase 4 lowering family 1: timing | kept | `a40b6230` | exact 2375/2900/2134 ms oracle parity; no duration fallback; 19 tests; core/scripts typecheck pass |
+| 027 | Phase 4 lowering family 2: scalar histories | kept | pending slice commit | explicit selected-policy columns; 3 exact frame-column proofs; latest-write provenance; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -1298,3 +1299,55 @@ ZERO HIT after the owning historical fallback test was deleted
 Next Phase 4 slice: scalar/current-value resolution from versioned write
 histories, compared field-by-field with the committed qlatt-English and DECtalk
 frame fixtures before commit.
+
+## Iteration 027 — Phase 4 lowering family 2: scalar histories
+
+Status: kept.
+
+The direct scalar fixture was red because `hrg/lowering.ts` ignored the selected
+frontend policy and substituted its own partial `DEFAULT_KLATT_PARAMS` list.
+That list omitted backend columns including F6/B6, source selection, LF controls,
+parallel amplitudes, nasal controls, and frontend-specific GO/DI values.
+
+Kept convergence:
+
+- deletes `DEFAULT_KLATT_PARAMS` and the optional inferred-column path;
+- makes ordered `columns` a required part of the actual `TrackLoweringSpec`;
+- requires every compiled bundled frontend policy to declare a non-empty column
+  list, so the lowerer has no frontend-specific or present-value fallback;
+- makes the lowerer's argument structurally accept the selected lowering policy
+  directly, without an adapter;
+- projects current values through `Item.get()` and each value's current producer
+  through `Item.latestWrite()`; and
+- preserves the declared column order in the lowered track.
+
+Measured immutable-oracle parity on the first production frame:
+
+```text
+qlatt-English:          57/57 declared columns exact
+DECtalk English:        52/52 declared columns exact
+qlatt-beauty structural:59/59 declared columns exact
+```
+
+The history fixture writes F1 twice and proves that lowering emits the second
+value and second decision id in both frame-local and parallel provenance maps.
+
+Verification:
+
+```text
+npm test -- --run test/hrg-lowering-scalars.test.ts test/hrg-lowering-timing.test.ts test/hrg.test.ts test/declarative-frontend-schema.test.ts test/yaml-frontend-config.test.ts test/track-assembler-output-config.test.ts
+PASS: 6 files, 60 tests
+
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+rg -n "DEFAULT_KLATT_PARAMS|paramKeys\\?:|Defaults to present-valued" src test
+ZERO HIT
+```
+
+Next Phase 4 slice: transition/control-window realization from graph relations,
+compared against the committed qlatt-English and DECtalk frame fixtures before
+commit.

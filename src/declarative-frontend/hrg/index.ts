@@ -23,7 +23,6 @@ export type { PathResult } from "./path";
 export {
   lowerToFrames,
   frameIndexAt,
-  DEFAULT_KLATT_PARAMS,
 } from "./lowering";
 export type { LowerOptions, LoweredTrack, SegmentTiming } from "./lowering";
 export {

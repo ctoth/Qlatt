@@ -2235,6 +2235,12 @@ function validateLoweringSpec(
       makeDiagnostic("E_LOWERING_SPEC_REQUIRED", "output.lowering.id is required", "output.lowering.id")
     );
   }
+  validateStringArray(
+    lowering.columns,
+    diagnostics,
+    "output.lowering.columns",
+    "output.lowering.columns",
+  );
 
   const timeline = lowering.timeline;
   if (!isPlainObject(timeline)) {

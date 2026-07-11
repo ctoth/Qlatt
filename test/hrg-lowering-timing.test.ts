@@ -107,7 +107,7 @@ describe("HRG lowering segment timing", () => {
     build.commit();
     resolveTimes(utterance, segments);
 
-    const lowered = lowerToFrames(utterance);
+    const lowered = lowerToFrames(utterance, { columns: [] });
 
     expect(lowered.totalMs).toBe(baseline.totalMs);
     expect(lowered.frames).toHaveLength(baseline.frameCount);
@@ -122,7 +122,7 @@ describe("HRG lowering segment timing", () => {
     segment.set("phoneme", "AA", { reason: "fixture", citations: ["Klatt 1980"] });
     utterance.relation("Segment").append(segment, { reason: "fixture", citations: ["Klatt 1980"] });
 
-    expect(() => lowerToFrames(utterance)).toThrowError(/E_HRG_LOWER_DURATION_REQUIRED/);
+    expect(() => lowerToFrames(utterance, { columns: [] })).toThrowError(/E_HRG_LOWER_DURATION_REQUIRED/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
       code: "HRG_LOWER_DURATION_REQUIRED",
     }));
@@ -135,7 +135,7 @@ describe("HRG lowering segment timing", () => {
     segment.set("duration", 100, { reason: "fixture", citations: ["Klatt 1976"] });
     utterance.relation("Segment").append(segment, { reason: "fixture", citations: ["Klatt 1980"] });
 
-    expect(() => lowerToFrames(utterance)).toThrowError(/E_HRG_LOWER_TIME_REQUIRED/);
+    expect(() => lowerToFrames(utterance, { columns: [] })).toThrowError(/E_HRG_LOWER_TIME_REQUIRED/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
       code: "HRG_LOWER_TIME_REQUIRED",
     }));
@@ -156,7 +156,7 @@ describe("HRG lowering segment timing", () => {
     timing.resolveMarkTime(utterance.axis.end.id, 90);
     timing.commit();
 
-    expect(() => lowerToFrames(utterance)).toThrowError(/E_HRG_LOWER_TIMING_MISMATCH/);
+    expect(() => lowerToFrames(utterance, { columns: [] })).toThrowError(/E_HRG_LOWER_TIMING_MISMATCH/);
     expect(utterance.diagnostics.getEntries()).toContainEqual(expect.objectContaining({
       code: "HRG_LOWER_TIMING_MISMATCH",
     }));

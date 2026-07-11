@@ -1,8 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "include": [
-    "src/declarative-frontend/axis.ts",
-    "src/declarative-frontend/engine.ts",
     "src/declarative-frontend/expressions.ts",
     "src/declarative-frontend/inventory.ts",
     "src/declarative-frontend/model.ts",

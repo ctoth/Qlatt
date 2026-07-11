@@ -52,7 +52,20 @@ function buildEvaluationContext(
     if (!item) return null;
     let result = views.get(item);
     if (!result) {
-      result = transaction.view(item);
+      const featureView = transaction.view(item);
+      result = new Proxy(featureView, {
+        get: (target, property, receiver) => {
+          if (property === "sync_left" || property === "sync_right") {
+            const anchor = utterance.temporalAnchor(item);
+            if (!anchor) return null;
+            transaction.dependOn(anchor.decisionId);
+            return property === "sync_left" ? anchor.leftMarkId : anchor.rightMarkId;
+          }
+          return Reflect.get(target, property, receiver);
+        },
+        has: (target, property) =>
+          property === "sync_left" || property === "sync_right" || Reflect.has(target, property),
+      });
       views.set(item, result);
       itemByView.set(result, item);
     }
@@ -249,6 +262,7 @@ interface Match {
   bindings: Readonly<Record<string, Item>>;
   nodes: Readonly<Record<string, HrgNode>>;
   defaultTarget: string;
+  relationName: string;
 }
 
 function beginRuleTransaction(
@@ -282,6 +296,119 @@ function applyAssociations(
     if (!from || !to) continue;
     if (active) transaction.associate(spec.assoc_name, from, to);
     else transaction.disassociate(spec.assoc_name, from, to);
+  }
+}
+
+function applySplice(
+  utterance: Utterance,
+  match: Match,
+  splice: unknown,
+  context: EvaluationContext,
+): void {
+  if (!isPlainObject(splice) || !Array.isArray(splice.insert) || splice.insert.length === 0) return;
+  const transaction = match.transaction;
+  const resolveTarget = (name: string): Item | undefined =>
+    name === "current" ? match.items[match.index] : match.bindings[name];
+  if (splice.type !== "replace_range" && splice.type !== "insert_at_boundary") {
+    throw new Error(`E_SPLICE_TYPE_UNSUPPORTED: unsupported splice type '${String(splice.type)}'`);
+  }
+  const source = resolveTarget(
+    typeof splice.target === "string" ? splice.target : match.defaultTarget,
+  );
+  if (!source) throw new Error("E_HRG_SPLICE_SOURCE: splice has no source Item");
+  const sourceAnchor = utterance.intervalAnchor(source);
+  const explicitSuppressed = stringArray(splice.suppress)
+    .map(resolveTarget)
+    .filter((item): item is Item => item != null);
+  let leftMarkId = sourceAnchor?.leftMarkId;
+  let rightMarkId = sourceAnchor?.rightMarkId;
+  const rangeSuppressed: Item[] = [];
+  if (splice.type === "replace_range") {
+    const left = evaluate(splice.range_left, context);
+    const right = evaluate(splice.range_right, context);
+    if (typeof left === "string") leftMarkId = left;
+    if (typeof right === "string") rightMarkId = right;
+    if (!leftMarkId || !rightMarkId) {
+      throw new Error("E_SPLICE_RANGE_REQUIRED: replace_range requires an anchored range");
+    }
+    for (const item of match.items) {
+      const anchor = utterance.intervalAnchor(item);
+      if (!anchor) continue;
+      transaction.dependOn(anchor.decisionId);
+      if (
+        utterance.axis.compare(leftMarkId, anchor.leftMarkId) <= 0
+        && utterance.axis.compare(anchor.rightMarkId, rightMarkId) <= 0
+      ) {
+        rangeSuppressed.push(item);
+      }
+    }
+  }
+  const suppressed = [...new Set([...rangeSuppressed, ...explicitSuppressed])];
+  for (const item of new Set(suppressed)) transaction.set(item, "active", false);
+
+  const orderedSuppressed = [...new Set(suppressed)].sort(
+    (left, right) => match.items.indexOf(left) - match.items.indexOf(right),
+  );
+  let previous = orderedSuppressed[orderedSuppressed.length - 1] ?? source;
+  const inserted: Item[] = [];
+  for (let index = 0; index < splice.insert.length; index += 1) {
+    const rawTemplate = splice.insert[index];
+    if (!isPlainObject(rawTemplate)) continue;
+    const segment = isPlainObject(rawTemplate.segment) ? rawTemplate.segment : null;
+    const template = segment ?? rawTemplate;
+    const item = transaction.createItem(
+      source.type,
+      `${source.id}:${transaction.metadata.ruleId}:${index.toString()}`,
+    );
+    const copySourceName = typeof template.copy_from === "string" ? template.copy_from : null;
+    const copySource = copySourceName ? resolveTarget(copySourceName) : undefined;
+    if (copySource && Array.isArray(template.copy_fields)) {
+      for (const field of stringArray(template.copy_fields)) {
+        const value = transaction.read(copySource, field);
+        if (value !== undefined) transaction.set(item, field, value);
+      }
+    }
+    const target = segment && Object.prototype.hasOwnProperty.call(segment, "target")
+      ? evaluate(segment.target, context)
+      : null;
+    if (isPlainObject(target)) {
+      for (const field of ["phoneme", "type", "duration", "inherentDuration", "params", "inventorySW"]) {
+        if (Object.prototype.hasOwnProperty.call(target, field)) transaction.set(item, field, target[field]);
+      }
+    }
+    const templateFields = segment && isPlainObject(segment.fields)
+      ? { ...segment.fields, ...(Object.prototype.hasOwnProperty.call(segment, "phoneme")
+        ? { phoneme: segment.phoneme }
+        : {}) }
+      : template;
+    for (const [field, expression] of Object.entries(templateFields)) {
+      if (field === "copy_from" || field === "copy_fields" || field === "target" || field === "fields") continue;
+      const value = evaluate(expression, context);
+      if (value !== undefined) transaction.set(item, field, value);
+    }
+    transaction.insertAfter(match.relationName, previous, item);
+    inserted.push(item);
+    previous = item;
+  }
+  if (splice.type === "insert_at_boundary") {
+    const boundary = evaluate(splice.boundary, context);
+    if (typeof boundary !== "string") {
+      throw new Error("E_SPLICE_BOUNDARY_REQUIRED: insert_at_boundary requires a boundary mark");
+    }
+    const side = splice.side === "before" ? "before" : "after";
+    const neighbor = match.items.find((item) => {
+      const anchor = utterance.intervalAnchor(item);
+      return side === "after" ? anchor?.leftMarkId === boundary : anchor?.rightMarkId === boundary;
+    });
+    const neighborAnchor = neighbor ? utterance.intervalAnchor(neighbor) : undefined;
+    leftMarkId = side === "after" ? boundary : neighborAnchor?.leftMarkId;
+    rightMarkId = side === "after" ? neighborAnchor?.rightMarkId : boundary;
+    if (!leftMarkId || !rightMarkId) {
+      throw new Error("E_SPLICE_BOUNDARY_ADJACENT_REQUIRED");
+    }
+  }
+  if (inserted.length > 0 && leftMarkId && rightMarkId) {
+    transaction.partitionAnchors(inserted, leftMarkId, rightMarkId);
   }
 }
 
@@ -329,6 +456,7 @@ function executeMatch(
   );
   applyAssociations(match.transaction, rule.associate, true, resolveTarget);
   applyAssociations(match.transaction, rule.disassociate, false, resolveTarget);
+  applySplice(utterance, match, rule.splice, context);
   if (rule.suppress === true || rule.delete === true) {
     for (const item of new Set(Object.values(match.bindings))) {
       match.transaction.set(item, "active", false);
@@ -362,6 +490,7 @@ function selectMatches(
       bindings: Object.freeze({ current: items[index] }),
       nodes: Object.freeze({ current: node }),
       defaultTarget: "current",
+      relationName: rule.select.relation,
     });
   }
   return matches;
@@ -436,6 +565,7 @@ function patternMatches(
       bindings: Object.freeze({ ...bindings }),
       nodes: Object.freeze({ ...nodes }),
       defaultTarget,
+      relationName: pattern.relation,
     });
   }
   return matches;

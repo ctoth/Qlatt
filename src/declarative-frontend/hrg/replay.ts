@@ -31,6 +31,13 @@ export function replayJournal(
         case "append":
           transaction.append(operation.relationName, requireItem(operation.itemId));
           break;
+        case "insert_after":
+          transaction.insertAfter(
+            operation.relationName,
+            requireItem(operation.previousItemId),
+            requireItem(operation.itemId),
+          );
+          break;
         case "add_root":
           transaction.addRoot(operation.relationName, requireItem(operation.itemId));
           break;
@@ -53,6 +60,13 @@ export function replayJournal(
             operation.name,
             requireItem(operation.fromItemId),
             requireItem(operation.toItemId),
+          );
+          break;
+        case "partition_anchors":
+          transaction.partitionAnchors(
+            operation.itemIds.map(requireItem),
+            operation.leftMarkId,
+            operation.rightMarkId,
           );
           break;
       }

@@ -485,6 +485,43 @@ export class Utterance {
     return this.axis.createBetween(leftMarkId, rightMarkId, decision.id);
   }
 
+  _partitionAnchors(
+    items: readonly Item[],
+    leftMarkId: string,
+    rightMarkId: string,
+    input: TemporalWriteInput,
+  ): readonly string[] {
+    if (items.length === 0) throw new Error("E_HRG_TEMPORAL_PARTITION_EMPTY");
+    for (const item of items) this._assertOwnedItem(item);
+    if (this.axis.compare(leftMarkId, rightMarkId) >= 0) {
+      throw new Error("E_HRG_TEMPORAL_ORDER: partition left mark must precede right mark");
+    }
+    const ranges = this.axis.splitMarkRange(leftMarkId, rightMarkId, items.length);
+    const decisionIds: string[] = [];
+    const boundaryIds = new Set(ranges.flatMap((range) => [range.leftId, range.rightId]));
+    for (const markId of boundaryIds) {
+      const mark = this.axis.get(markId);
+      if (!mark || mark.creationDecisionId || mark === this.axis.start || mark === this.axis.end) continue;
+      const decision = this.provenance.add({
+        stage: input.stage ?? "rules",
+        type: "temporal_mark_insert",
+        subject: `axis:${markId}`,
+        reason: input.reason,
+        citations: input.citations ?? [],
+        parents: input.parents,
+        timestampMs: input.timestampMs,
+      });
+      mark.creationDecisionId = decision.id;
+      decisionIds.push(decision.id);
+    }
+    for (let index = 0; index < items.length; index += 1) {
+      const range = ranges[index];
+      if (!range) throw new Error("E_HRG_TEMPORAL_PARTITION_RANGE");
+      decisionIds.push(this.anchorInterval(items[index], range.leftId, range.rightId, input).decisionId);
+    }
+    return Object.freeze(decisionIds);
+  }
+
   private stampAnchor(
     item: Item,
     kind: "interval" | "point",

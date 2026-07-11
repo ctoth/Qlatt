@@ -106,6 +106,26 @@ export class Relation {
     return node;
   }
 
+  /** Insert an item immediately after an existing node in a flat list relation. */
+  insertAfter(previous: HrgNode, item: Item, input: RelationWriteInput): HrgNode {
+    if (this.kind !== "list") {
+      throw new Error(`E_HRG_RELATION_KIND: insertAfter requires a 'list' relation, '${this.name}' is '${this.kind}'`);
+    }
+    if (previous.relation !== this) {
+      throw new Error(`E_HRG_PREVIOUS_RELATION: previous node is not in relation '${this.name}'`);
+    }
+    this._validateAttach(item);
+    const write = this.stamper(this, "insert_after", item, null, previous.item, input);
+    const node = this.attach(item, write);
+    const next = previous.next;
+    previous.next = node;
+    node.prev = previous;
+    node.next = next;
+    if (next) next.prev = node;
+    else this.tail = node;
+    return node;
+  }
+
   /** Add a top-level (root) item to a tree relation. */
   addRoot(item: Item, input: RelationWriteInput): HrgNode {
     if (this.kind !== "tree") {

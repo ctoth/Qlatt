@@ -63,7 +63,7 @@ export interface HrgSchema {
 
 /** Relations are either flat ordered lists or parent/daughter trees. */
 export type RelationKind = "list" | "tree";
-export type RelationWriteOperation = "append" | "add_root" | "add_daughter";
+export type RelationWriteOperation = "append" | "insert_after" | "add_root" | "add_daughter";
 
 /** One version of a named directed association edge between shared Items. */
 export interface AssociationWrite {
@@ -135,6 +135,12 @@ export type JournalOperation =
   | { readonly kind: "create_item"; readonly itemId: string; readonly itemType: string }
   | { readonly kind: "set_feature"; readonly itemId: string; readonly key: string; readonly value: FeatureValue }
   | { readonly kind: "append"; readonly relationName: string; readonly itemId: string }
+  | {
+      readonly kind: "insert_after";
+      readonly relationName: string;
+      readonly previousItemId: string;
+      readonly itemId: string;
+    }
   | { readonly kind: "add_root"; readonly relationName: string; readonly itemId: string }
   | {
       readonly kind: "add_daughter";
@@ -147,6 +153,12 @@ export type JournalOperation =
       readonly name: string;
       readonly fromItemId: string;
       readonly toItemId: string;
+    }
+  | {
+      readonly kind: "partition_anchors";
+      readonly itemIds: readonly string[];
+      readonly leftMarkId: string;
+      readonly rightMarkId: string;
     };
 
 export interface TransactionJournalEntry {

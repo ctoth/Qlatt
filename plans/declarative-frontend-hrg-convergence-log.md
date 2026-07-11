@@ -189,7 +189,8 @@ remains, run its owning targeted tests, reread the plan, and commit.
 | 013 | Phase 3 checkpoints and replay | kept | `725530cc` | digest-equal replay; 29 HRG tests; core/scripts typecheck pass |
 | 014 | Phase 3 Direction Track attachment | kept | `6f41d95c` | 50 input/HRG tests; provenance parent proof; core/scripts typecheck pass |
 | 015 | Phase 3 graph engine select/scalar core | kept | `c5dcf35e` | exact tracked read parents; 31 HRG tests; core/scripts typecheck pass |
-| 016 | Phase 3 graph engine patterns/associations | kept | pending slice commit | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
+| 016 | Phase 3 graph engine patterns/associations | kept | `7f5b0e03` | atomic pattern rewrites; versioned association replay; 36 HRG tests; core/scripts typecheck pass |
+| 017 | Phase 3 graph engine replace-range splice | kept | pending slice commit | typed insertion and anchor partition replay; 38 HRG tests; core/scripts typecheck pass |
 
 ## Iteration 002 — Phase 1A invalid debug coverage
 
@@ -888,3 +889,45 @@ gate; the configured core/scripts TypeScript authorities passed.
 
 Next graph-engine sub-slice: structural splice/insertion, point/contour/F0
 actions, and finalization through this same Match-to-transaction executor.
+
+## Iteration 017 — Phase 3 graph engine replace-range splice
+
+Status: kept as the third target-owner sub-slice of the replacement engine.
+
+The direct structural fixture was red because Match execution had no structural
+mutation path and list Relations only supported append. The retained slice
+extends the existing Relation, Utterance, transaction, temporal-axis, journal,
+replay, and single rewrite owners.
+
+Kept convergence:
+
+- adds stamped `insert_after` list topology writes without rebuilding or
+  copying the relation;
+- evaluates `replace_range` bounds through transaction-tracked synthetic
+  `sync_left`/`sync_right` views backed by Utterance temporal anchors;
+- suppresses every active Item covered by the evaluated range as versioned
+  lifecycle writes;
+- materializes typed replacement Items from both flat templates and the bundled
+  nested `segment` template, including targeted copy fields;
+- partitions replacement Items over the retained outer interval with stamped
+  mark creation and interval-anchor writes;
+- journals and deterministically replays insertion topology and anchor
+  partition operations to an identical graph digest; and
+- keeps all feature, topology, temporal, and suppression writes in the one
+  matched rule transaction.
+
+Verification:
+
+```text
+npm run typecheck:core
+PASS
+
+npm run typecheck:scripts
+PASS
+
+npm test -- --run test/hrg
+PASS: 9 files, 38 tests
+```
+
+Next graph-engine sub-slice: boundary insertion and explicit point actions,
+followed by contour/F0-layer and phase finalization behavior.
